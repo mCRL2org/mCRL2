@@ -606,20 +606,20 @@ data_expression RewriterJitty::rewrite_aux(
     return result;
   }
   assert(is_abstraction(t));
-  const data_expression &binder=atermpp::aterm_cast<const data_expression>(t[0]);
-  if (binder==gsMakeLambda())
+  const abstraction& ta(t);
+  const binder_type& binder(ta.binding_operator()); 
+  if (is_lambda_binder(binder))
   {
     return rewrite_lambda_application(t,term,sigma);
   }
-  if (binder==gsMakeExists())
+  if (is_exists_binder(binder))
   {
     assert(term.size()==1);
     return internal_existential_quantifier_enumeration(t,sigma);
   }
-  assert(binder==gsMakeForall());
+  assert(is_forall_binder(binder));
   assert(term.size()==1);
   return internal_universal_quantifier_enumeration(head,sigma);
-  
 }
 
 data_expression RewriterJitty::rewrite_aux_function_symbol(

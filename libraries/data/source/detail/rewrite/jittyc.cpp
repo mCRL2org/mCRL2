@@ -87,7 +87,7 @@ static void initialise_common()
     afunCRe = atermpp::function_symbol("@@CRe",4); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
     afunMe = atermpp::function_symbol("@@Me",2); // Match term ( match_variable, variable_index )
 
-    dummy = gsMakeNil();
+    dummy = aterm_appl(atermpp::function_symbol("@@Match_tree_dummy",0));   // gsMakeNil();
 
     afunARtrue = atermpp::function_symbol("@@true",0);
     afunARfalse = atermpp::function_symbol("@@false",0);
@@ -1726,36 +1726,7 @@ void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, int sta
 
 static data_expression add_args(const data_expression& a, size_t num)
 {
-  if (num == 0)
-  {
-    return a;
-  }
-  else
-  {
-    // For the time being we add nothing. 
-
-    return a;
-
-    // Code below requires to be revised, but it is unclear how.... JFG
-    assert(0);
-    /* aterm_list l;
-
-    if (a.type_is_list())
-    {
-      l = (aterm_list) a;
-    }
-    else
-    {
-      l = make_list<aterm>(a);
-    }
-
-    while (num > 0)
-    {
-      l = l+make_list<aterm>(gsMakeNil());
-      num--;
-    }
-    return  l; */
-  }
+  return a;
 }
 
 static int get_startarg(const aterm& a, int n)
@@ -2341,61 +2312,6 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
     }
   }
 }
-
-/* static aterm toInner_list_odd(const data_expression& t)
-{
-  if (is_application(t))
-  {
-    aterm_list l;
-    const application& a=atermpp::aterm_cast<application>(t);
-    for (application::const_iterator i=a.begin(); i!=a.end(); ++i )
-    {
-      l.push_front(toInner_list_odd(*i));
-    }
-
-    l = reverse(l);
-
-    aterm arg0 = toInner_list_odd(application(t).head());
-    if (arg0.type_is_list())
-    {
-      l = aterm_cast<const aterm_list>(arg0) + l;
-    }
-    else
-    {
-      l.push_front(arg0);
-    }
-    return  l;
-  }
-  else if (is_function_symbol(t))
-  {
-    return aterm_cast<aterm_int>(OpId2Int(aterm_cast<function_symbol>(t)));
-  }
-  else if (is_variable(t))
-  {
-    // Here the expression is a binder or a where expression.
-    return aterm_cast<aterm_appl>(t);
-  }
-  else if (is_abstraction(t))
-  {
-    const abstraction a=t;
-    return gsMakeBinder(a.binding_operator(),a.variables(),(aterm_appl)toInner_list_odd(a.body()));
-  }
-  else if (is_where_clause(t))
-  {
-    const where_clause& w = core::static_down_cast<const where_clause&>(t);
-    assignment_list assignments=w.assignments();
-    atermpp::term_list <atermpp::aterm_appl > translated_assignments;
-    for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
-    {
-      translated_assignments=push_back(translated_assignments,core::detail::gsMakeDataVarIdInit(i->lhs(),(aterm_appl)toInner_list_odd(i->rhs())));
-    }
-    return gsMakeWhr((aterm_appl)toInner_list_odd(w.body()),
-                     (aterm_list)reverse(translated_assignments));
-  }
-  assert(0);
-  return aterm();
-} */
-
 
 bool RewriterCompilingJitty::addRewriteRule(const data_equation& rule1)
 {
