@@ -301,7 +301,7 @@ void next_state_generator::summand_subset_t::build_pruning_parameters(const acti
 
 bool next_state_generator::summand_subset_t::is_not_false(const next_state_generator::summand_t &summand)
 {
-  return m_generator->m_rewriter(summand.condition, m_pruning_substitution) != m_false;
+  return m_generator->m_rewriter.get_rewriter().rewrite(summand.condition, m_pruning_substitution) != m_false;
 }
 
 atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_generator::summand_subset_t::begin(const internal_state_t &state)
@@ -400,7 +400,7 @@ struct action_argument_converter
 
   data_expression operator()(const data_expression &t) const
   {
-    return atermpp::aterm_cast<data_expression>(m_rewriter(t, *m_substitution));
+    return atermpp::aterm_cast<data_expression>(m_rewriter.get_rewriter().rewrite(t, *m_substitution));
   }
 };
 
@@ -414,10 +414,10 @@ struct state_argument_rewriter
         m_substitution(substitution)
   {}
 
-  next_state_generator::internal_state_argument_t operator()(const atermpp::aterm &t) const
+  next_state_generator::internal_state_argument_t operator()(const atermpp::aterm& t) const
   {
     return atermpp::aterm_cast<next_state_generator::internal_state_argument_t>(
-                m_rewriter(atermpp::aterm_cast<data_expression>(t), *m_substitution));
+                m_rewriter.get_rewriter().rewrite(atermpp::aterm_cast<data_expression>(t), *m_substitution));
   }
 };
 
@@ -534,7 +534,7 @@ void next_state_generator::iterator::increment()
       }
 
       // Reduce condition as much as possible, and give a hint of the original condition in the error message.
-      rewriter_expression_t reduced_condition(m_generator->m_rewriter(m_summand->condition, *m_substitution));
+      rewriter_expression_t reduced_condition(m_generator->m_rewriter.get_rewriter().rewrite(m_summand->condition, *m_substitution));
       std::string printed_condition(data::pp(m_summand->condition).substr(0, 300));
 
       throw mcrl2::runtime_error("Expression " + data::pp(reduced_condition) +
@@ -576,7 +576,7 @@ void next_state_generator::iterator::increment()
     arguments.resize(m_summand->action_label[i].arguments.size());
     for (size_t j = 0; j < m_summand->action_label[i].arguments.size(); j++)
     {
-      arguments[j] = m_generator->m_rewriter(m_summand->action_label[i].arguments[j], *m_substitution);
+      arguments[j] = m_generator->m_rewriter.get_rewriter().rewrite(m_summand->action_label[i].arguments[j], *m_substitution);
     }
     actions[i] = action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
   }
