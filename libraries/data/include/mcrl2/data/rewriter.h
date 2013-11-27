@@ -241,6 +241,26 @@ class rewriter: public basic_rewriter<data_expression>
 #endif
       return result;
     }
+    
+    /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+    /// to data variables.
+    /// \param[in] d A data expression
+    /// \param[in] sigma A substitution function
+    /// \return The normal form of the term.
+    //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
+    //  an arbitrary SubstitionFunction, as this is prohibitively costly. 
+
+    data_expression operator()(const data_expression& d, substitution_type& sigma) 
+    {
+# ifdef MCRL2_PRINT_REWRITE_STEPS
+      mCRL2log(log::debug) << "REWRITE " << d << "\n";
+      data_expression result(m_rewriter->rewrite(d,sigma_with_iterator));
+      mCRL2log(log::debug) << " ------------> " << result << std::endl;
+      return result;
+#else 
+      return m_rewriter->rewrite(d,sigma);
+#endif
+    }
 };
 
 /// \brief Rewriter that operates on data expressions.

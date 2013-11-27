@@ -181,7 +181,7 @@ ProcExpr
   | 'comm' '(' CommExprSet ',' ProcExpr ')'                      // Communication operator
   | '(' ProcExpr ')'                                             // Brackets
   | ProcExpr ('+' $binary_op_left 1) ProcExpr                    // Choice operator
-  | 'sum' VarsDeclList '.' ProcExpr $unary_right  2              // Sum operator
+  | ('sum' VarsDeclList '.' $unary_op_right 2) ProcExpr          // Sum operator
   | ProcExpr ('||' $binary_op_right 3) ProcExpr                  // Parallel operator
   | ProcExpr ('||_' $binary_op_right 4) ProcExpr                 // Leftmerge operator
   | (DataExprUnit '->' $unary_op_right 5) ProcExpr               // If-then operator
@@ -204,7 +204,7 @@ ProcExprNoIf
   | 'comm' '(' CommExprSet ',' ProcExpr ')'                      // Communication operator
   | '(' ProcExpr ')'                                             // Brackets
   | ProcExprNoIf ('+' $binary_op_left 1) ProcExprNoIf            // Choice operator
-  | 'sum' VarsDeclList '.' ProcExprNoIf         $unary_right  2  // Sum operator
+  | ('sum' VarsDeclList '.' $unary_op_right 2) ProcExprNoIf      // Sum operator
   | ProcExprNoIf ('||' $binary_op_right 3) ProcExprNoIf          // Parallel operator
   | ProcExprNoIf ('||_' $binary_op_right 3) ProcExprNoIf         // Leftmerge operator
   | (DataExprUnit IfThen $unary_op_right 4) ProcExprNoIf         // If-then-else operator

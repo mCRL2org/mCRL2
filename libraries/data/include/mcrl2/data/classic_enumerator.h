@@ -102,7 +102,7 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_solution_possible(do_not_throw_exceptions)
         {
-          const data_expression rewritten_condition=e->m_evaluator(condition,sigma);
+          const data_expression rewritten_condition=e->m_evaluator.get_rewriter().rewrite(condition,sigma);
           if ((not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_false) ||
               (!not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_true))
           {
