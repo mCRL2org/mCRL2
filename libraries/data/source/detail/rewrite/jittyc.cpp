@@ -2663,7 +2663,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Set this rewriter, to use its functions.
   fprintf(f,  "mcrl2::data::detail::RewriterCompilingJitty *this_rewriter;\n");
 
-  fprintf(f, "data_expression pass_on(const data_expression& t)\n");
+  fprintf(f, "const data_expression& pass_on(const data_expression& t)\n");
   fprintf(f, "{\n");
   fprintf(f, "  return t;\n");
   fprintf(f, "}\n");
@@ -2680,81 +2680,24 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     }
     fprintf(f, ")\n"
             "{\n");
+    // It could be that the use of a vector below is too expensive.
     fprintf(f,
-      "MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer, data_expression,%ld);\n",i);
+      "  std::vector<const data_expression> buffer;\n"
+      "  buffer.reserve(%ld);\n",i);
 
     for (size_t j=0; j<i; ++j)
     {
-      fprintf(f, "buffer[%zu] = arg%zu;\n",j,j+1);
+      fprintf(f, "  buffer.push_back(arg%zu);\n",j+1);
     }
 
-    fprintf(f, "return application(head,buffer,buffer+%ld);\n",i);
+    fprintf(f, "  return application(head,buffer.begin(),buffer.end());\n");
 
     fprintf(f, "}\n\n");
   }
 
 
-  //
-  // "build" functions
-  //
-/*  for (size_t i=1; i<=max_arity; ++i)
-  {
-    fprintf(f,
-            "static atermpp::aterm_appl build%zu(const atermpp::aterm_appl& a",i);
-    for (size_t j=0; j<i; ++j)
-    {
-      fprintf(f, ", const atermpp::aterm_appl& arg%zu",j);
-    }
-    fprintf(f, ")\n"
-            "{\n");
-    fprintf(f,
-            "  size_t arity = a.size();\n"
-            "  if (arity == 1 )\n"
-            "  {\n"
-            "      return %sa[0]", calc_inner_appl_head(i).c_str());
-
-    for (size_t j=0; j<i; j++)
-    {
-      fprintf(f, ",arg%zu",j);
-    }
-    fprintf(f,
-            ");\n"
-            "  }\n"
-            "  else if (mcrl2::data::is_abstraction(a))\n"
-            "  {\n"
-            "    return %sa", calc_inner_appl_head(i).c_str());
-
-    for (size_t j=0; j<i; j++)
-    {
-      fprintf(f, ",arg%zu",j);
-    }
-    fprintf(f,
-            ");\n"
-            "  }\n"
-            "  else\n"
-            "  {\n"
-            "    //atermpp::aterm args[arity+ld];\n"
-            "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,const atermpp::detail::_aterm*,(arity+%zu));\n"
-            "\n"
-            "    for (size_t i=0; i<arity; i++)\n"
-            "    {\n"
-            "      args[i]=atermpp::detail::address(a[i]);\n"
-            "    }\n",i);
-    for (size_t j=0; j<i; j++)
-    {
-      fprintf(f,
-              "    args[arity+%zu]=atermpp::detail::address(arg%zu);\n",j,j);
-    }
-    fprintf(f,
-            "\n"
-            "    return atermpp::aterm_appl(mcrl2::data::detail::get_appl_afun_value(arity+%zu),&args[0],&args[0]+(arity+%zu));\n"
-            "  }\n"
-            "}\n"
-            "\n",i,i);
-  } */
-
-  //
-  // Implement the equations of every operation.
+  
+  // Implement the equations of every operation. -------------------------------
   //
   for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
               j!=all_function_symbols.end(); ++j) 

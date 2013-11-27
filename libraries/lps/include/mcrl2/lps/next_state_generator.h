@@ -43,7 +43,6 @@ class next_state_generator
 
     typedef data::rewriter::internal_substitution_type substitution_t;
     typedef rewriter_expression_t internal_state_argument_t;
-    // typedef atermpp::term_appl<internal_state_argument_t> internal_state_t;
     typedef std::vector<internal_state_argument_t> internal_state_t;
 
   protected:
@@ -58,7 +57,6 @@ class next_state_generator
       action_summand *summand;
       data::variable_list variables;
       rewriter_expression_t condition;
-      // atermpp::aterm_appl result_state;
       internal_state_t result_state;
       std::vector<action_internal_t> action_label;
 

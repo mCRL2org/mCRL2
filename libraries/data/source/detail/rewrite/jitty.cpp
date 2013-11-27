@@ -229,7 +229,6 @@ void RewriterJitty::rebuild_strategy()
   jitty_strat.clear();
   for(std::map< function_symbol, data_equation_list >::const_iterator l=jitty_eqns.begin(); l!=jitty_eqns.end(); ++l)
   {
-    // const size_t i=OpId2Int(l->first).value();
     const size_t i=core::index_traits<data::function_symbol, function_symbol_key_type>::index(l->first);
     make_jitty_strat_sufficiently_larger(i);
       jitty_strat[i] = create_strategy(reverse(l->second));
@@ -242,8 +241,6 @@ RewriterJitty::RewriterJitty(
            const mcrl2::data::used_data_equation_selector& equation_selector):
         Rewriter(data_spec,equation_selector)
 {
-  // m_data_specification_for_enumeration = data_spec;
-
   MAX_LEN=0;
   max_vars = 0;
   need_rebuild = false;

@@ -45,7 +45,6 @@ next_state_generator::next_state_generator(
     summand.summand = &(*i);
     summand.variables = i->summation_variables();
     summand.condition = i->condition();
-    // summand.result_state = atermpp::aterm_cast<atermpp::aterm_appl>(get_internal_state(i->next_state(m_specification.process().process_parameters())));
     summand.result_state = get_internal_state(i->next_state(m_specification.process().process_parameters()));
 
     for (action_list::iterator j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
