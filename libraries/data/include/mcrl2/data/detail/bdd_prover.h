@@ -85,7 +85,6 @@ class BDD_Prover: public Prover
 {
   public:
     typedef Prover::substitution_type substitution_type;
-    typedef Prover::internal_substitution_type internal_substitution_type;
 
   private:
 
@@ -412,7 +411,7 @@ class BDD_Prover: public Prover
 
     /// \brief A binary decision diagram in the internal representation of the rewriter.
     data_expression f_internal_bdd;
-    internal_substitution_type bdd_sigma;
+    substitution_type bdd_sigma;
 
     /// \brief A binary decision diagram in the internal representation of mCRL2.
     data_expression f_bdd;
@@ -476,7 +475,7 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Set the substitution in internal format to be used to construct the BDD
-    void set_substitution_internal(internal_substitution_type &sigma)
+    void set_substitution_internal(substitution_type &sigma)
     {
       bdd_sigma = sigma;
     }

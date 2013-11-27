@@ -42,8 +42,6 @@ class basic_rewriter
   public:
     /// \brief The type for the substitution that is used internally.
     typedef detail::Rewriter::substitution_type substitution_type;
-    /// \brief The type for the substitution that is used for internal substitution, internally.
-    typedef detail::Rewriter::internal_substitution_type internal_substitution_type;
 
   protected:
     /// \brief The wrapped Rewriter.
@@ -114,7 +112,6 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
 
 
     typedef basic_rewriter< data_expression >::substitution_type substitution_type;
-    typedef basic_rewriter< data_expression >::internal_substitution_type internal_substitution_type;
 
   protected:
 
@@ -167,7 +164,6 @@ class rewriter: public basic_rewriter<data_expression>
 {
   public:
     typedef basic_rewriter<data_expression>::substitution_type substitution_type;
-    typedef basic_rewriter<data_expression>::internal_substitution_type internal_substitution_type;
 
     /// \brief Constructor.
     /// \param[in] r a rewriter.

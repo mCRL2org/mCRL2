@@ -136,7 +136,6 @@ class EnumeratorSolutionsStandard
 {
   public:
     typedef Rewriter::substitution_type substitution_type;
-    typedef Rewriter::internal_substitution_type internal_substitution_type;
 
   protected:
 
@@ -147,7 +146,7 @@ class EnumeratorSolutionsStandard
 
     variable_list enum_vars;                    // The variables over which a solution is searched.
     data_expression enum_expr;              // Condition to be satisfied in internal format.
-    internal_substitution_type& enum_sigma;
+    substitution_type& enum_sigma;
 
     std::deque < fs_expr> fs_stack;
     std::vector< ss_solution > ss_stack;
@@ -156,9 +155,9 @@ class EnumeratorSolutionsStandard
     size_t max_vars;
     size_t m_max_internal_variables;
 
-    internal_substitution_type& default_sigma()
+    substitution_type& default_sigma()
     {
-      static internal_substitution_type default_sigma;
+      static substitution_type default_sigma;
       return default_sigma;
     }
 
@@ -197,7 +196,7 @@ class EnumeratorSolutionsStandard
     EnumeratorSolutionsStandard(
                    const variable_list& vars, 
                    const data_expression& expr, 
-                   internal_substitution_type& sigma,
+                   substitution_type& sigma,
                    const bool not_equal_to_false, 
                    detail::EnumeratorStandard *enclosing_enumerator,
                    const size_t max_internal_variables=0,

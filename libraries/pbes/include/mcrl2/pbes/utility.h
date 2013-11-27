@@ -188,8 +188,7 @@ static pbes_expression make_disjunction(const std::set < pbes_expression> &disju
 // The function below restores a saved substitution.
 static void restore_saved_substitution(const std::map<data::variable,data::data_expression> &saved_substitutions,
                                        data::detail::legacy_rewriter& /* r */,
-                                       data::detail::legacy_rewriter::substitution_type &sigma,
-                                       data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
+                                       data::detail::legacy_rewriter::substitution_type &sigma)
 {
   for (std::map<data::variable,data::data_expression>::const_iterator i=saved_substitutions.begin();
        i!=saved_substitutions.end(); ++i)
@@ -236,9 +235,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   const pbes_expression& p,
   const data::data_specification& data,
   data::detail::legacy_rewriter& r,
-  // const bool use_internal_rewrite_format,
-  data::detail::legacy_rewriter::substitution_type &sigma,
-  data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
+  data::detail::legacy_rewriter::substitution_type &sigma)
 {
   using namespace pbes_system::pbes_expr;
   using namespace pbes_system::accessors;
@@ -249,16 +246,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   {
     // p = and(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
-                        data, r,sigma,sigma_internal);
+    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p), data, r,sigma);
     if (is_pbes_false(l))
     {
       result = pbes_system::pbes_expr::false_();
     }
     else
     {
-      pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),
-                           data, r,sigma,sigma_internal);
+      pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),data,r,sigma);
       //Options for left and right
       if (is_pbes_false(rt))
       {
@@ -283,16 +278,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     // p = or(left, right)
     //Rewrite left and right as far as possible
 
-    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
-                        data, r,sigma,sigma_internal);
+    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p), data, r,sigma);
     if (is_pbes_true(l))
     {
       result = pbes_system::pbes_expr::true_();
     }
     else
     {
-      pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),
-                           data, r,sigma,sigma_internal);
+      pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p), data, r,sigma);
       if (is_pbes_true(rt))
       {
         result = pbes_system::pbes_expr::true_();
@@ -316,8 +309,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     // p = or(left, right)
     //Rewrite left and right as far as possible
 
-    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
-                        data, r,sigma,sigma_internal);
+    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p), data, r,sigma);
     if (is_pbes_false(l))
     {
       result = pbes_system::pbes_expr::true_();
@@ -325,7 +317,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     else
     {
       pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),
-                           data, r,sigma,sigma_internal);
+                           data, r,sigma);
       if (is_pbes_true(rt))
       {
         result = pbes_system::pbes_expr::true_();
@@ -357,7 +349,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   else if (is_pbes_not(p))
   {
     pbes_expression l = pbes_expression_substitute_and_rewrite(arg(p),
-                              data, r,sigma,sigma_internal);
+                              data, r,sigma);
     result = pbes_expr::not_(l);
   }
   else if (is_pbes_forall(p))
@@ -367,7 +359,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     // If no data_vars
     if (data_vars.empty())
     {
-      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma,sigma_internal);
+      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma);
       result = expr;
     }
     else
@@ -383,31 +375,15 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
         data::data_expression d;
-        if (use_internal_rewrite_format)
-        {
-          d=r(*i,sigma_internal);
-        }
-        else
-        {
-          d=r(*i,sigma);
-        }
+        d=r(*i,sigma);
 
         if (*i!=d)
         {
           saved_substitutions[*i]=d;
-          // r.clear_internally_associated_value(*i);
-          if (use_internal_rewrite_format)
-          {
-            sigma_internal[*i]= *i;
-          }
-          else
-          {
-            sigma[*i]= *i;
-          }
-
+          sigma[*i]= *i;
         }
       }
-      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma,sigma_internal);
+      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma);
 
 
       data::set_identifier_generator variable_name_generator;
@@ -484,30 +460,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   const data::data_expression d((!function_arguments.empty())?
                                     static_cast<data::data_expression>(data::application(*rf, reverse(function_arguments))):
                                     static_cast<data::data_expression>(*rf));
-                  // sigma[*i]=d;
-                  // r.set_internally_associated_value(*i,d);
-                  if (use_internal_rewrite_format)
-                  {
-                    sigma_internal[*i]= r(d,sigma_internal);
-                  }
-                  else
-                  {
-                    sigma[*i]= r(d);
-                  }
-                  pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,sigma,sigma_internal));
-                  // sigma[*i] = *i; // erase *i
-                  // r.clear_internally_associated_value(*i);
-                  if (use_internal_rewrite_format)
-                  {
-                    sigma_internal[*i]= *i;
-                  }
-                  else
-                  {
-                    sigma[*i]= *i;
-                  }
+
+                  sigma[*i]= r(d);
+                  pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,sigma));
+                  sigma[*i]= *i;
+
                   if (is_pbes_false(rt)) /* the resulting expression is false, so we can terminate */
                   {
-                    restore_saved_substitution(saved_substitutions,r,sigma,sigma_internal);
+                    restore_saved_substitution(saved_substitutions,r,sigma);
                     return pbes_expr::false_();
                   }
                   else
@@ -538,7 +498,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         throw mcrl2::runtime_error(message);
       }
       result=make_conjunction(conjunction_set);
-      restore_saved_substitution(saved_substitutions,r,sigma,sigma_internal);
+      restore_saved_substitution(saved_substitutions,r,sigma);
     }
   }
   else if (is_pbes_exists(p))
@@ -547,7 +507,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     // If no data_vars
     if (data_vars.empty())
     {
-      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma,sigma_internal);
+      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma);
       result = expr;
     }
     else
@@ -564,31 +524,16 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
         data::data_expression d;
-        if (use_internal_rewrite_format)
-        {
-          d=r(*i,sigma_internal);
-        }
-        else
-        {
-          d=r(*i,sigma);
-        }
+        d=r(*i,sigma);
 
         if (*i!=d)
         {
           saved_substitutions[*i]=d;
-          // r.clear_internally_associated_value(*i);
-          if (use_internal_rewrite_format)
-          {
-            sigma_internal[*i]= *i;
-          }
-          else
-          {
-            sigma[*i]= *i;
-          }
+          sigma[*i]= *i;
         }
       }
 
-      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma,sigma_internal);
+      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma);
 
       data::set_identifier_generator variable_name_generator;
       variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
@@ -661,30 +606,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   const data::data_expression d((!function_arguments.empty())?
                                     static_cast<data::data_expression>(data::application(*rf, reverse(function_arguments))):
                                     static_cast<data::data_expression>(*rf));
-                  //r.set_internally_associated_value(*i,d);
-                  // sigma[*i]=d;
-                  if (use_internal_rewrite_format)
-                  {
-                    sigma_internal[*i]=r(d,sigma_internal);
-                  }
-                  else
-                  {
-                    sigma[*i]=r(d);
-                  }
-                  pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,sigma,sigma_internal));
-                  // sigma[*i] = *i; // erase *i
-                  // r.clear_internally_associated_value(*i);
-                  if (use_internal_rewrite_format)
-                  {
-                    sigma_internal[*i]= *i;
-                  }
-                  else
-                  {
-                    sigma[*i]= *i;
-                  }
+                  sigma[*i]=r(d);
+                  
+                  pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,sigma));
+                  sigma[*i]= *i;
+                  
                   if (is_pbes_true(rt)) /* the resulting expression is true, so we can terminate */
                   {
-                    restore_saved_substitution(saved_substitutions,r,sigma,sigma_internal);
+                    restore_saved_substitution(saved_substitutions,r,sigma);
                     return pbes_expr::true_();
                   }
                   else
@@ -715,7 +644,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         throw mcrl2::runtime_error(message);
       }
       result=make_disjunction(disjunction_set);
-      restore_saved_substitution(saved_substitutions,r,sigma,sigma_internal);
+      restore_saved_substitution(saved_substitutions,r,sigma);
     }
   }
   else if (is_propositional_variable_instantiation(p))
@@ -725,59 +654,32 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     core::identifier_string name = propvar.name();
     data::data_expression_list current_parameters(propvar.parameters());
     data::data_expression_list parameters;
-    /* if (use_internal_rewrite_format)
-    {
-      atermpp::term_list< data::data_expression > expressions(r.rewrite_list(
-            data::data_expression_list(current_parameters.begin(), current_parameters.end()),sigma_internal));
-      parameters=data::data_expression_list(expressions.begin(), expressions.end());
-    }
-    else
-    { */
-      for (data::data_expression_list::const_iterator l=current_parameters.begin();
+    for (data::data_expression_list::const_iterator l=current_parameters.begin();
            l != current_parameters.end(); ++l)
-      {
-        parameters.push_front(atermpp::aterm_cast<data::data_expression>(r(*l,sigma)));
-      }
-      parameters = atermpp::reverse(parameters);
-    // }
+    {
+      parameters.push_front(atermpp::aterm_cast<data::data_expression>(r(*l,sigma)));
+    }
+    parameters = atermpp::reverse(parameters);
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
   }
   else
   {
     // p is a data::data_expression
     const data::data_expression& dp = atermpp::aterm_cast<const data::data_expression>(p);
-    if (use_internal_rewrite_format)
+    data::data_expression d(r(dp, sigma));
+    if (d == data::sort_bool::true_())
     {
-      data::data_expression d = (data::data_expression)r(dp,sigma_internal);
-      if (d==r.get_rewriter().internal_true)
-      {
-        result = pbes_expr::true_();
-      }
-      else if (d==r.get_rewriter().internal_false)
-      {
-        result = pbes_expr::false_();
-      }
-      else
-      {
-        result = d;
-      }
+      result = pbes_expr::true_();
+    }
+    else if (d == data::sort_bool::false_())
+    {
+      result = pbes_expr::false_();
     }
     else
     {
-      data::data_expression d(r(dp, sigma));
-      if (d == data::sort_bool::true_())
-      {
-        result = pbes_expr::true_();
-      }
-      else if (d == data::sort_bool::false_())
-      {
-        result = pbes_expr::false_();
-      }
-      else
-      {
-        result = d;
-      }
+      result = d;
     }
+    
   }
   return result;
 }

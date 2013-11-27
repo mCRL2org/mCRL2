@@ -41,7 +41,7 @@ class next_state_generator
     typedef data::detail::legacy_rewriter rewriter_t;
     typedef data::classic_enumerator<rewriter_t> enumerator_t;
 
-    typedef data::rewriter::internal_substitution_type substitution_t;
+    typedef data::rewriter::substitution_type substitution_t;
     typedef rewriter_expression_t internal_state_argument_t;
     typedef std::vector<internal_state_argument_t> internal_state_t;
 

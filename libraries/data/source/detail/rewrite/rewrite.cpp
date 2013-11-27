@@ -108,7 +108,7 @@ bool Rewriter::removeRewriteRule(const data_equation& /*Rule*/)
 
 data_expression Rewriter::rewrite_where(
                       const where_clause& term,
-                      internal_substitution_type& sigma)
+                      substitution_type& sigma)
 {
   const assignment_list& assignments(term.declarations());
   const data_expression& body=term.body();
@@ -136,7 +136,7 @@ abstraction Rewriter::rewrite_single_lambda(
                       const variable_list& vl,
                       const data_expression& body,
                       const bool body_in_normal_form,
-                      internal_substitution_type& sigma)
+                      substitution_type& sigma)
 {
   assert(vl.size()>0);
   // A lambda term without arguments; Take care that the bound variable is made unique with respect to
@@ -223,7 +223,7 @@ abstraction Rewriter::rewrite_single_lambda(
 
 data_expression Rewriter::rewrite_lambda_application(
                       const data_expression& t,
-                      internal_substitution_type& sigma)
+                      substitution_type& sigma)
 {
   if (is_lambda(t))
   {
@@ -252,7 +252,7 @@ data_expression Rewriter::rewrite_lambda_application(
 data_expression Rewriter::rewrite_lambda_application(
                       const abstraction& lambda_term,
                       const data_expression& t,
-                      internal_substitution_type& sigma)
+                      substitution_type& sigma)
 {
   using namespace atermpp;
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
@@ -300,25 +300,25 @@ data_expression Rewriter::rewrite_lambda_application(
   return rewrite(application(result, args.begin(), args.end()),sigma);
 }
 
-data_expression Rewriter::internal_existential_quantifier_enumeration(
+data_expression Rewriter::existential_quantifier_enumeration(
      const abstraction& t,
-     internal_substitution_type& sigma)
+     substitution_type& sigma)
 {
   // This is a quantifier elimination that works on the existential quantifier as specified
   // in data types, i.e. without applying the implement function anymore.
 
   assert(is_exists(t));
-  return internal_existential_quantifier_enumeration(t.variables(),t.body(),false,sigma);
+  return existential_quantifier_enumeration(t.variables(),t.body(),false,sigma);
 }
 
 // Generate a term equivalent to exists vl.t1.
 // The variable t1_is_normal_form indicates whether t1 is in normal
 // form, but this information is not used as it stands.
-data_expression Rewriter::internal_existential_quantifier_enumeration(
+data_expression Rewriter::existential_quantifier_enumeration(
       const variable_list& vl,
       const data_expression& t1,
       const bool t1_is_normal_form,
-      internal_substitution_type& sigma)
+      substitution_type& sigma)
 {
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
 
@@ -391,22 +391,22 @@ data_expression Rewriter::internal_existential_quantifier_enumeration(
 }
 
 
-data_expression Rewriter::internal_universal_quantifier_enumeration(
+data_expression Rewriter::universal_quantifier_enumeration(
      const abstraction& t,
-     internal_substitution_type& sigma)
+     substitution_type& sigma)
 {
   assert(is_forall(t));
-  return internal_universal_quantifier_enumeration(t.variables(),t.body(),false,sigma);
+  return universal_quantifier_enumeration(t.variables(),t.body(),false,sigma);
 }
 
 // Generate a term equivalent to forall vl.t1.
 // The variable t1_is_normal_form indicates whether t1 is in normal
 // form, but this information is not used as it stands.
-data_expression Rewriter::internal_universal_quantifier_enumeration(
+data_expression Rewriter::universal_quantifier_enumeration(
       const variable_list& vl,
       const data_expression& t1,
       const bool t1_is_normal_form,
-      internal_substitution_type& sigma)
+      substitution_type& sigma)
 {
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
 

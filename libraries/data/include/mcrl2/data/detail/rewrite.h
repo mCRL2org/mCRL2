@@ -47,7 +47,6 @@ class Rewriter
   public:
     data::set_identifier_generator generator;  //name for variables.
 
-    typedef mutable_indexed_substitution<data::variable, std::vector< data_expression > > internal_substitution_type;
     typedef mutable_indexed_substitution<data::variable, std::vector< data::data_expression > > substitution_type;
 
     data_expression internal_true;
@@ -122,35 +121,29 @@ class Rewriter
 
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
-    /* data_expression internal_existential_quantifier_enumeration(
-         const data_expression termInInnerFormat,
-         internal_substitution_type& sigma); */
-    data_expression internal_existential_quantifier_enumeration(
+    data_expression existential_quantifier_enumeration(
          const abstraction& termInInnerFormat,
-         internal_substitution_type& sigma);
-    data_expression internal_existential_quantifier_enumeration(
+         substitution_type& sigma);
+    data_expression existential_quantifier_enumeration(
          const variable_list& vl,
          const data_expression& t1,
          const bool t1_is_normal_form,
-         internal_substitution_type& sigma);
+         substitution_type& sigma);
 
-    /* data_expression internal_universal_quantifier_enumeration(
-         const data_expression termInInnerFormat,
-         internal_substitution_type& sigma); */
-    data_expression internal_universal_quantifier_enumeration(
+    data_expression universal_quantifier_enumeration(
          const abstraction& termInInnerFormat,
-         internal_substitution_type& sigma);
-    data_expression internal_universal_quantifier_enumeration(
+         substitution_type& sigma);
+    data_expression universal_quantifier_enumeration(
          const variable_list& vl,
          const data_expression& t1,
          const bool t1_is_normal_form,
-         internal_substitution_type& sigma);
+         substitution_type& sigma);
 
     // Rewrite a where expression where the subdataexpressions are in internal format.
     // It yields a term without a where expression.
     data_expression rewrite_where(
                       const where_clause& term,
-                      internal_substitution_type& sigma);
+                      substitution_type& sigma);
 
     // Rewrite an expression with a lambda as outermost symbol. The expression is in internal format.
     // Bound variables are replaced by new variables to avoid a clash with variables in the right hand sides
@@ -160,25 +153,25 @@ class Rewriter
                       const variable_list& vl,
                       const data_expression& body,
                       const bool body_in_normal_form,
-                      internal_substitution_type& sigma);
+                      substitution_type& sigma);
 
     /// Rewrite t, assuming that the headsymbol of t, which can be nested, is a lambda term.
     data_expression rewrite_lambda_application(
                       const data_expression& t,
-                      internal_substitution_type& sigma);
+                      substitution_type& sigma);
 
     data_expression rewrite_lambda_application(
                       const abstraction& lambda_term,
                       const data_expression& body,
-                      internal_substitution_type& sigma);
+                      substitution_type& sigma);
 
 
   protected:
 
     const mcrl2::data::data_specification m_data_specification_for_enumeration;
-    data_expression internal_quantifier_enumeration(
+    data_expression quantifier_enumeration(
          const data_expression& termInInnerFormat,
-         internal_substitution_type& sigma);
+         substitution_type& sigma);
 
 };
 

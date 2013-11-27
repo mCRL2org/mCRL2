@@ -31,7 +31,6 @@ struct legacy_rewriter : public mcrl2::data::rewriter
   public:
 
     typedef mcrl2::data::rewriter::substitution_type substitution_type;
-    typedef mcrl2::data::rewriter::internal_substitution_type internal_substitution_type;
 
     template < typename EquationSelector >
     legacy_rewriter(mcrl2::data::data_specification const& d, EquationSelector const& selector, strategy s = jitty) :

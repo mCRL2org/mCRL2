@@ -35,7 +35,6 @@ class RewriterCompilingJitty: public Rewriter
 {
   public:
     typedef Rewriter::substitution_type substitution_type;
-    typedef Rewriter::internal_substitution_type internal_substitution_type;
 
     RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &);
     virtual ~RewriterCompilingJitty();
@@ -46,7 +45,7 @@ class RewriterCompilingJitty: public Rewriter
 
     bool addRewriteRule(const data_equation &rule);
     bool removeRewriteRule(const data_equation &rule);
-    internal_substitution_type *global_sigma;
+    substitution_type *global_sigma;
 
     // The data structures below are used to store the variable lists2
     // that are used in the compiling rewriter in forall, where and exists.

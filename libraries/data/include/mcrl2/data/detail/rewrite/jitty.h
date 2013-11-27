@@ -25,7 +25,6 @@ class RewriterJitty: public Rewriter
 {
   public:
     typedef Rewriter::substitution_type substitution_type;
-    typedef Rewriter::internal_substitution_type internal_substitution_type;
 
     RewriterJitty(const data_specification& DataSpec, const used_data_equation_selector &);
     virtual ~RewriterJitty();
@@ -44,13 +43,13 @@ class RewriterJitty: public Rewriter
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector < atermpp::aterm_list >  jitty_strat;
     size_t MAX_LEN; 
-    data_expression rewrite_aux(const data_expression &term, internal_substitution_type &sigma);
+    data_expression rewrite_aux(const data_expression &term, substitution_type &sigma);
     void build_strategies();
 
     data_expression rewrite_aux_function_symbol(
                       const function_symbol &op,
                       const data_expression &term,
-                      internal_substitution_type &sigma);
+                      substitution_type &sigma);
 
     /* Auxiliary function to take care that the array jitty_strat is sufficiently large
        to access element i */

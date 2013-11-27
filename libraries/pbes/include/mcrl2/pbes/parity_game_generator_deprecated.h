@@ -114,7 +114,6 @@ protected:
     void populate_internal_equations()
     {
       data::detail::legacy_rewriter::substitution_type sigma;
-      data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
       for (std::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
       {
         m_internal_equations.push_back(
@@ -122,7 +121,7 @@ protected:
             pbes_equation(
               i->symbol(),
               i->variable(),
-              rewrite_and_simplify(i->formula(),sigma,sigma_internal)
+              rewrite_and_simplify(i->formula(),sigma)
             )
            )
           );
@@ -133,25 +132,22 @@ public:
     pbes_expression rewrite_and_simplify(
            const pbes_expression& e,
            data::detail::legacy_rewriter::substitution_type &sigma,
-           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal,
            const bool convert_data_to_pbes = true)
     {
-      return ::bes::pbes_expression_rewrite_and_simplify(e, datar_internal,sigma,sigma_internal, convert_data_to_pbes);
+      return ::bes::pbes_expression_rewrite_and_simplify(e, datar_internal,sigma, convert_data_to_pbes);
     }
 
 protected:
     /// \brief Substitute and rewrite e.
     pbes_expression substitute_and_rewrite(
            const pbes_expression& e,
-           data::detail::legacy_rewriter::substitution_type &sigma,
-           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
+           data::detail::legacy_rewriter::substitution_type &sigma)
     {
       pbes_expression result =  detail::pbes_expression_substitute_and_rewrite
           (e,
            m_pbes.data(),
            datar_internal,
-           sigma,
-           sigma_internal
+           sigma
           );
       return result;
     }
@@ -170,8 +166,7 @@ protected:
     void make_substitution_internal(
            const data::variable_list& v,
            const data::data_expression_list& e,
-           data::detail::legacy_rewriter::substitution_type &sigma,
-           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
+           data::detail::legacy_rewriter::substitution_type &sigma)
     {
       data::variable_list::const_iterator i = v.begin();
       for(data::data_expression_list::const_iterator j = e.begin();
@@ -194,9 +189,8 @@ protected:
         pbes_expression result;
 
         data::detail::legacy_rewriter::substitution_type sigma;
-        data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-        make_substitution_internal(pbes_eqn.variable().parameters(), tr::param(psi),sigma,sigma_internal);
-        result = substitute_and_rewrite(pbes_eqn.formula(),sigma,sigma_internal);
+        make_substitution_internal(pbes_eqn.variable().parameters(), tr::param(psi),sigma);
+        result = substitute_and_rewrite(pbes_eqn.formula(),sigma);
 
         mCRL2log(log::debug, "parity_game_generator") << print(result) << std::endl;
 
@@ -230,8 +224,7 @@ protected:
 
         // Add a BES equation for the initial state.
         data::detail::legacy_rewriter::substitution_type sigma;
-        data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-        propositional_variable_instantiation phi = core::static_down_cast<const propositional_variable_instantiation&>(rewrite_and_simplify(m_pbes.initial_state(),sigma,sigma_internal));
+        propositional_variable_instantiation phi = core::static_down_cast<const propositional_variable_instantiation&>(rewrite_and_simplify(m_pbes.initial_state(),sigma));
         add_bes_equation(phi, m_priorities[phi.name()]);
 
         m_initialized = true;

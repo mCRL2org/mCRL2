@@ -1413,7 +1413,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         // A result in normal form is requested.
         pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
-        ss << "this_rewriter->internal_universal_quantifier_enumeration(" <<
+        ss << "this_rewriter->universal_quantifier_enumeration(" <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << "," << r.first << "," << "*(this_rewriter->global_sigma))";
         return pair<bool,string>(true,ss.str());
@@ -1434,7 +1434,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         // A result in normal form is requested.
         pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
-        ss << "this_rewriter->internal_existential_quantifier_enumeration(" <<
+        ss << "this_rewriter->existential_quantifier_enumeration(" <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << "," << r.first << "," << "*(this_rewriter->global_sigma))";
         return pair<bool,string>(true,ss.str());
@@ -2916,10 +2916,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    }\n"
       "    if (is_exists_binder(binder))\n"
       "    {\n"
-      "      return this_rewriter->internal_existential_quantifier_enumeration(head1,*(this_rewriter->global_sigma));\n"
+      "      return this_rewriter->existential_quantifier_enumeration(head1,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    assert(is_forall_binder(binder));\n"
-      "    return this_rewriter->internal_universal_quantifier_enumeration(head1,*(this_rewriter->global_sigma));\n"
+      "    return this_rewriter->universal_quantifier_enumeration(head1,*(this_rewriter->global_sigma));\n"
       "  }\n"
       "  \n"
       "  if (is_variable(head1))\n"
@@ -2967,11 +2967,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    const binder_type& binder(ta.binding_operator());\n"
       "    if (is_exists_binder(binder))\n"
       "    {\n"
-      "      return this_rewriter->internal_existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
+      "      return this_rewriter->existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    if (is_forall_binder(binder))\n"
       "    {\n"
-      "      return this_rewriter->internal_universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
+      "      return this_rewriter->universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    assert(mcrl2::data::is_lambda_binder(binder));\n"
       "    return this_rewriter->rewrite_single_lambda(\n"
@@ -3110,7 +3110,7 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
 
 data_expression RewriterCompilingJitty::rewrite(
      const data_expression& term,
-     internal_substitution_type& sigma)
+     substitution_type& sigma)
 {
   if (need_rebuild)
   {
@@ -3118,7 +3118,7 @@ data_expression RewriterCompilingJitty::rewrite(
   }
   // Save global sigma and restore it afterwards, as rewriting might be recursive with different
   // substitutions, due to the enumerator.
-  internal_substitution_type *saved_sigma=global_sigma;
+  substitution_type *saved_sigma=global_sigma;
   global_sigma=& sigma;
   const data_expression result=so_rewr(term);
   global_sigma=saved_sigma;

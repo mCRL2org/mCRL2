@@ -501,7 +501,7 @@ static bool match_jitty(
 
 data_expression RewriterJitty::rewrite_aux(
                       const data_expression &term,
-                      internal_substitution_type &sigma)
+                      substitution_type &sigma)
 {
   if (is_function_symbol(term))
   {
@@ -521,11 +521,11 @@ data_expression RewriterJitty::rewrite_aux(
     const abstraction& ta(term);
     if (is_exists(ta))
     {
-      return internal_existential_quantifier_enumeration(ta,sigma);
+      return existential_quantifier_enumeration(ta,sigma);
     }
     if (is_forall(ta))
     {
-      return internal_universal_quantifier_enumeration(ta,sigma);
+      return universal_quantifier_enumeration(ta,sigma);
     }
     assert(is_lambda(ta));
     return rewrite_single_lambda(ta.variables(),ta.body(),false,sigma);
@@ -612,17 +612,17 @@ data_expression RewriterJitty::rewrite_aux(
   if (is_exists_binder(binder))
   {
     assert(term.size()==1);
-    return internal_existential_quantifier_enumeration(t,sigma);
+    return existential_quantifier_enumeration(t,sigma);
   }
   assert(is_forall_binder(binder));
   assert(term.size()==1);
-  return internal_universal_quantifier_enumeration(head,sigma);
+  return universal_quantifier_enumeration(head,sigma);
 }
 
 data_expression RewriterJitty::rewrite_aux_function_symbol(
                       const function_symbol &op,
                       const data_expression &term,
-                      internal_substitution_type &sigma)
+                      substitution_type &sigma)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
   const size_t arity=(is_function_symbol(term)?1:detail::recursive_number_of_args(term)+1);
@@ -813,7 +813,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
 data_expression RewriterJitty::rewrite(
      const data_expression& term,
-     internal_substitution_type& sigma)
+     substitution_type& sigma)
 {
   if (need_rebuild)
   {
