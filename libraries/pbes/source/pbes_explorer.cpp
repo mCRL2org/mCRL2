@@ -455,7 +455,7 @@ void lts_info::compute_transition_groups()
 
     for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
             != p.equations().end(); ++eqn) {
-        pbes_expression expr = pgg->from_rewrite_format(pgg->get_pbes_equation((*eqn).variable().name()).formula());
+        pbes_expression expr = pgg->get_pbes_equation((*eqn).variable().name()).formula();
         std::string variable_name = (*eqn).variable().name();
         this->variables[variable_name] = (*eqn).variable();
         type = pgg->get_expression_operation(expr);
