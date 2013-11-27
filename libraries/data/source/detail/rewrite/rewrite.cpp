@@ -658,69 +658,6 @@ bool isValidRewriteRule(const data_equation& data_eqn)
   return false; // compiler warning
 }
 
-std::vector <atermpp::function_symbol> apples;
-
-/*************  Below the functions toInner and fromInner are being defined *********************/
-
-
-// std::map< function_symbol, atermpp::aterm_int > term2int;
-// std::vector < data::function_symbol > int2term;
-
-data_expression toInner(const data_expression& term, const bool /* add_opids */)
-{
-  return term;
-
-/*  if (is_variable(term))
-  {
-    return term;
-  }
-
-  if (is_application(term))
-  {
-    data_expression_vector result;
-    
-    const application& appl=aterm_cast<application>(term); 
-    data_expression arg0 = toInner(appl.head(), add_opids);
-
-    for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
-    {
-      result.push_back(toInner(*i,add_opids));
-    }
-    return application(arg0,result);
-  } 
-
-  if (is_function_symbol(term))
-  {
-    // Create a number for the function symbol. 
-    OpId2Int(atermpp::aterm_cast<function_symbol>(term));
-    return term; 
-  }
-
-  if (is_where_clause(term))
-  {
-    const where_clause& t(term);
-    const assignment_list& lv(t.declarations());
-    assignment_vector l;
-    for(assignment_list::const_iterator it=lv.begin() ; it!=lv.end(); ++it)
-    {
-      l.push_back(assignment(it->lhs(),toInner(it->rhs(),add_opids)));
-    }
-    return where_clause(toInner(t.body(),add_opids),assignment_list(l.begin(),l.end()));
-  }
-
-  assert(is_abstraction(term));
-
-  const abstraction& t=term;
-  return abstraction(t.binding_operator(),t.variables(),toInner(t.body(),add_opids)); */
-}
-
-data_expression fromInner(const data_expression& term)
-{
-// std::cerr << "Frominner: " << term << "  " << atermpp::detail::address(term) << "\n";
-  return term;
-}
-
-
 }
 }
 }

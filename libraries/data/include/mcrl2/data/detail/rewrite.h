@@ -25,8 +25,6 @@ namespace data
 namespace detail
 {
 
-data_expression toInner(const data_expression& term, const bool add_opids);
-
 /**
  * \brief Rewriter interface class.
  *
@@ -66,11 +64,11 @@ class Rewriter
           data_equation_selector(eq_selector),
           m_data_specification_for_enumeration(data_spec)
     {
-      internal_true=toInner(sort_bool::true_(),true);
-      internal_false=toInner(sort_bool::false_(),true);
-      internal_not=toInner(sort_bool::not_(),true);
-      internal_and=toInner(sort_bool::and_(),true);
-      internal_or=toInner(sort_bool::or_(),true);
+      internal_true=sort_bool::true_();
+      internal_false=sort_bool::false_();
+      internal_not=sort_bool::not_();
+      internal_and=sort_bool::and_();
+      internal_or=sort_bool::or_();
     }
 
     /** \brief Destructor. */
@@ -202,8 +200,6 @@ void CheckRewriteRule(const data_equation& dataeqn);
 bool isValidRewriteRule(const data_equation& dataeqn);
 
 
-/** The functions below are used for fromInner and toInner(c). */
-
 inline size_t getArity(const data::function_symbol& op)
 {
   // This function calculates the cumulated length of all
@@ -220,10 +216,6 @@ inline size_t getArity(const data::function_symbol& op)
   }
   return arity;
 } 
-
-data_expression fromInner(const data_expression& term);
-
-data_expression toInner(const data_expression& Term, const bool add_opids);
 
 }
 }

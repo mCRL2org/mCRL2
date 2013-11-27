@@ -246,15 +246,35 @@ class rewriter: public basic_rewriter<data_expression>
     //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
     //  an arbitrary SubstitionFunction, as this is prohibitively costly. 
 
-    data_expression operator()(const data_expression& d, substitution_type& sigma) 
+    data_expression operator()(const data_expression& d, substitution_type& sigma) const
     {
 # ifdef MCRL2_PRINT_REWRITE_STEPS
       mCRL2log(log::debug) << "REWRITE " << d << "\n";
-      data_expression result(m_rewriter->rewrite(d,sigma_with_iterator));
+      data_expression result(m_rewriter->rewrite(d,sigma));
       mCRL2log(log::debug) << " ------------> " << result << std::endl;
       return result;
 #else 
       return m_rewriter->rewrite(d,sigma);
+#endif
+    }
+    /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+    /// to data variables.
+    /// \param[in] d A data expression
+    /// \param[in] sigma A substitution function
+    /// \return The normal form of the term.
+    //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
+    //  an arbitrary SubstitionFunction, as this is prohibitively costly. 
+
+    data_expression operator()(const data_expression& d, const substitution_type& sigma) const
+    {
+      substitution_type sigma1(sigma);
+# ifdef MCRL2_PRINT_REWRITE_STEPS
+      mCRL2log(log::debug) << "REWRITE " << d << "\n";
+      data_expression result(m_rewriter->rewrite(d,sigma1));
+      mCRL2log(log::debug) << " ------------> " << result << std::endl;
+      return result;
+#else 
+      return m_rewriter->rewrite(d,sigma1);
 #endif
     }
 };

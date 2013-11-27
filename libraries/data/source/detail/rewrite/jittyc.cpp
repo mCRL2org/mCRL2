@@ -112,9 +112,6 @@ static void finalise_common()
 #define is_ar_or(x) (x.function()==afunARor)
 #define is_ar_var(x) (x.function()==afunARvar)
 
-// Prototype
-// static aterm toInner_list_odd(const data_expression& t);
-
 static aterm_appl make_ar_true()
 {
   return ar_true;
@@ -295,12 +292,10 @@ static aterm_list get_used_vars(const aterm_appl& t)
 
 static aterm_list create_sequence(const data_equation& rule, size_t* var_cnt, const aterm_appl& true_inner)
 {
-  const aterm_appl lhs_inner = toInner(rule.lhs(),true);
+  const data_expression lhs_inner = rule.lhs();
   size_t lhs_arity = lhs_inner.size();
-  // aterm cond = toInner_list_odd(rule.condition());
-  // aterm rslt = toInner_list_odd(rule.rhs());
-  const aterm_appl cond = toInner(rule.condition(),true);
-  const aterm_appl rslt = toInner(rule.rhs(),true);
+  const data_expression cond = rule.condition();
+  const data_expression rslt = rule.rhs();
   aterm_list rseq;
 
   if (!is_function_symbol(lhs_inner))
@@ -831,58 +826,13 @@ static variable_list get_doubles(const data_expression& t)
   return result;
 }
 
-
-/* static variable_list get_vars(const data_expression& t)
-{
-  std::set < variable > s=find_free_variables(t);
-  variable_list result;
-  for(std::set < variable >::const_iterator i=s.begin(); i!=s.end(); ++i)
-  {
-    result.push_front(*i);
-  }
-  return result;
-}
-
-
-static variable_list get_vars(const aterm_appl& a)
-{
-  if (is_function_symbol(aterm_cast<aterm_appl>(a)))
-  {
-    return aterm_list();
-  }
-  else if (is_variable(a))
-  {
-    return make_list<variable>(a);
-  }
-  else if (a.type_is_list())
-  {
-    assert(0); // Ik verwacht dat dit niet kan bestaan. JFG
-    aterm_list l;
-    for (aterm_list m=(aterm_list) a; !m.empty(); m=m.tail())
-    {
-      l = get_vars(m.front())+l;
-    }
-    return l;
-  }
-  else     // a.type_is_appl()
-  {
-    aterm_list l;
-    size_t arity = a.size();
-    for (size_t i=0; i<arity; ++i)
-    {
-      l = get_vars(aterm_cast<aterm_appl>(a[i]))+l;
-    }
-    return l;
-  }
-} */
-
 static variable_list dep_vars(const data_equation& eqn)
 {
-  size_t rule_arity = toInner(eqn.lhs(),true).function().arity()-1;
+  size_t rule_arity = eqn.lhs().function().arity()-1;
   std::vector < bool > bs(rule_arity);
 
-  aterm_appl lhs_internal = toInner(eqn.lhs(),true); 
-  aterm_list vars = make_list<aterm>( get_doubles(eqn.rhs())+ get_vars(eqn.condition())
+  data_expression lhs_internal = eqn.lhs(); 
+  atermpp::term_list<variable_list> vars = make_list<variable_list>( get_doubles(eqn.rhs())+ get_vars(eqn.condition())
                                ); // List of variables occurring in each argument of the lhs
                                    // (except the first element which contains variables from the
                                    // condition and variables which occur more than once in the result)
@@ -1014,13 +964,13 @@ static aterm_list create_strategy(
   aterm_list dep_list;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
-    size_t rule_arity = (toInner(it->lhs(),true).function().arity())-1;
+    size_t rule_arity = it->lhs().function().arity()-1;
     if (rule_arity > arity)
     {
       continue;
     }
 
-    data_expression lhs_internal = toInner(it->lhs(),true);  
+    data_expression lhs_internal = it->lhs();  
     aterm_list vars = make_list<aterm>( get_doubles(it->rhs())+ get_vars(it->condition())
                                  ); // List of variables occurring in each argument of the lhs
                                      // (except the first element which contains variables from the
@@ -1221,7 +1171,6 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
 
   for (data_equation_list::const_iterator it=l.begin(); it!=l.end(); ++it)
   {
-    // if (toInner(it->lhs(),true).function().arity()-1 <= num_args)
     if (recursive_number_of_args(it->lhs()) <= num_args)
     {
       return false;
@@ -1724,11 +1673,6 @@ void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, int sta
   return;
 }
 
-static data_expression add_args(const data_expression& a, size_t num)
-{
-  return a;
-}
-
 static int get_startarg(const aterm& a, int n)
 {
   if (a.type_is_list())
@@ -1974,7 +1918,7 @@ void RewriterCompilingJitty::implement_tree_aux(
       //cur_arg = peekn_st(level);
       cur_arg = peekn_st(2*level-1);
     }
-    calcTerm(f,add_args(aterm_cast<data_expression>(tree[0]),arity-cur_arg-1),get_startarg(tree[0],cur_arg+1),nnfvars);
+    calcTerm(f,aterm_cast<data_expression>(tree[0]),get_startarg(tree[0],cur_arg+1),nnfvars);
     fprintf(f,"; // R1\n");
     return;
   }
@@ -2017,7 +1961,7 @@ void RewriterCompilingJitty::implement_tree(
            );
 
     assert(isR(aterm_cast<aterm_appl>(tree[1])));
-    calcTerm(f,add_args(aterm_cast<data_expression>((aterm_cast<aterm_appl>(tree[1]))[0]),arity),
+    calcTerm(f,aterm_cast<data_expression>((aterm_cast<aterm_appl>(tree[1]))[0]),
                  get_startarg(aterm_cast<aterm_appl>(tree[1])[0],0),nnfvars);
     fprintf(f,";\n"
             "%s}\n%selse\n%s{\n", whitespace(d*2),whitespace(d*2),whitespace(d*2)
@@ -2031,7 +1975,7 @@ void RewriterCompilingJitty::implement_tree(
     if (arity==0)
     { // return a reference to an aterm_appl
       fprintf(f,"%sstatic aterm_appl static_term(rewrite(",whitespace(d*2));
-      calcTerm(f,add_args(aterm_cast<data_expression>(tree[0]),arity),get_startarg(tree[0],0),nnfvars);
+      calcTerm(f,aterm_cast<data_expression>(tree[0]),get_startarg(tree[0],0),nnfvars);
       fprintf(f,")); \n");
       fprintf(f,"%sreturn static_term",whitespace(d*2));
       fprintf(f,"; // R2a\n");
@@ -2039,7 +1983,7 @@ void RewriterCompilingJitty::implement_tree(
     else
     { // arity>0
       fprintf(f,"%sreturn ",whitespace(d*2));
-      calcTerm(f,add_args(aterm_cast<data_expression>(tree[0]),arity),get_startarg(tree[0],0),nnfvars);
+      calcTerm(f,aterm_cast<data_expression>(tree[0]),get_startarg(tree[0],0),nnfvars);
       fprintf(f,"; // R2b\n");
     }
   }
@@ -2187,7 +2131,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const aterm_appl& expr
 
 aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity)
 {
-  atermpp::aterm_appl lhs = toInner(eqn.lhs(),true); // the lhs in internal format.
+  data_expression lhs = eqn.lhs(); // the lhs in internal format.
 
   size_t eqn_arity = lhs.function().arity()-1;
   if (eqn_arity > arity)
@@ -2196,8 +2140,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, c
   }
   if (eqn_arity <= arg)
   {
-    // aterm rhs = toInner_list_odd(eqn.rhs());  // rhs in special internal list format.
-    const data_expression rhs = toInner(eqn.rhs(),true);  // rhs in special internal list format.
+    const data_expression rhs = eqn.rhs();  // rhs in special internal list format.
     function_symbol head;
     if (is_function_symbol(rhs))
     {
@@ -2232,8 +2175,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, c
     return make_ar_true();
   }
 
-  // return build_ar_expr(toInner_list_odd(eqn.rhs()),arg_term);
-  return build_ar_expr_internal(toInner(eqn.rhs(),true),v);
+  return build_ar_expr_internal(eqn.rhs(),v);
 }
 
 aterm_appl RewriterCompilingJitty::build_ar_expr(const data_equation_list& eqns, const size_t arg, const size_t arity)
@@ -2355,7 +2297,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
 
   need_rebuild = true;
 
-  true_inner = aterm_cast<function_symbol>(toInner(sort_bool::true_(),true));
+  true_inner = aterm_cast<function_symbol>(sort_bool::true_());
 
 /*  for (function_symbol_vector::const_iterator it=DataSpec.mappings().begin(); it!=DataSpec.mappings().end(); ++it)
   {
@@ -2682,7 +2624,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "{\n");
     // It could be that the use of a vector below is too expensive.
     fprintf(f,
-      "  std::vector<const data_expression> buffer;\n"
+      "  std::vector<data_expression> buffer;\n"
       "  buffer.reserve(%ld);\n",i);
 
     for (size_t j=0; j<i; ++j)
