@@ -1827,7 +1827,19 @@ void RewriterCompilingJitty::implement_tree_aux(
   {
     if (level == 0)
     {
-      fprintf(f,"%sif (atermpp::detail::address(\n"
+      if (!is_function_sort(aterm_cast<data::function_symbol>(tree[0]).sort()))  // tree[0] contains a constant, which is represented as a function_symbol.
+      {
+      fprintf(f,"%sif (atermpp::detail::address(arg%lu)==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F1\n"
+              "%s{\n",
+              whitespace(d*2),
+              cur_arg,
+              (void*)atermpp::detail::address(tree[0]),
+              whitespace(d*2)
+             );
+      }
+      else
+      {
+        fprintf(f,"%sif (atermpp::detail::address(\n"
               "             (mcrl2::data::is_function_symbol(arg%lu)?arg%lu:arg%lu[0]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F1\n"
               "%s{\n",
               whitespace(d*2),
@@ -1837,18 +1849,18 @@ void RewriterCompilingJitty::implement_tree_aux(
               (void*)atermpp::detail::address(tree[0]),
               whitespace(d*2)
              );
-//      fprintf(f,"std::cerr << \"SELECT F1 \\n\";\n");
+      }
     }
     else
     {
       if (!is_function_sort(aterm_cast<data::function_symbol>(tree[0]).sort()))  // tree[0] contains a constant, which is represented as a function_symbol.
       {
-
-        fprintf(f,"%sif (is_function_symbol(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
+        // fprintf(f,"%sif (is_function_symbol(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
+        fprintf(f,"%sif (atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
               "%s{\n"
               "%s  const data_expression& t%lu(%s%lu[%lu]);\n",  // Should be a function symbol, not a data expression, but this has consequences elsewhere.
               whitespace(d*2),
-              (level==1)?"arg":"t",parent,cur_arg,
+              // (level==1)?"arg":"t",parent,cur_arg,
               (level==1)?"arg":"t",parent,cur_arg,
               (void*)atermpp::detail::address(aterm_cast<function_symbol>(tree[0])),pp(aterm_cast<data::function_symbol>(tree[0]).name()).c_str(),
               whitespace(d*2),
@@ -2005,7 +2017,6 @@ static void finish_function(FILE* f,
                             const data::function_symbol& opid, 
                             const std::vector<bool>& used)
 {
-  //fprintf(f, "std::cerr << \"Finish function %s\\n\";\n",pp(opid).c_str());
   if (arity == 0)
   {
     fprintf(f,  "  return data_expression((const atermpp::detail::_aterm*)%p", (void*)atermpp::detail::address(opid));
@@ -2649,7 +2660,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
     if (data_equation_selector(fs))
     {
-      fprintf(f,  "// %ld %s\n",core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),to_string(fs).c_str());
+      stringstream ss;
+      ss << fs.sort();
+      fprintf(f,  "// %ld %s %s\n",core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),to_string(fs).c_str(),ss.str().c_str());
 
       for (size_t a=0; a<=arity; a++)
       {
@@ -2929,7 +2942,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "{\n"
   //"std::cerr << \"Internal rewrite \" << t << \"\\n\";"
       "  using namespace mcrl2::data;\n"
-      "  if (is_function_symbol(t))\n"
+ //     "  if (is_function_symbol(t))\n"
+      "  if (atermpp::detail::addressf(aterm_cast<const aterm_appl>(t).function())==%ld) // t is a function_symbol \n"
       "  {\n"
       "    // Term t is a function_symbol\n"
       "    const mcrl2::data::function_symbol& f(t);\n"
@@ -2975,6 +2989,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  return rewrite_aux(t);\n"
       "}\n",
+      atermpp::detail::addressf(aterm_cast<const aterm_appl>(sort_bool::true_()).function()),
       core::index_traits<data::function_symbol,function_symbol_key_type>::max_index()+1, 
       core::index_traits<data::function_symbol,function_symbol_key_type>::max_index()+1, 
       max_arity+1);
