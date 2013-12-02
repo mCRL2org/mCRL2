@@ -75,15 +75,16 @@ std::size_t& variable_map_max_index()
 ///
 /// The class index_traits is used to implement this mapping. A traits class was chosen to
 /// prevent pollution of the public interface of the classes that represent these variables.
-template <typename Variable, typename KeyType>
+///
+/// N is the position of the index in the aterm_appl.
+template <typename Variable, typename KeyType, const int N>
 struct index_traits
 {
   /// \brief Returns the index of the variable.
   static inline
   std::size_t index(const Variable& x)
   {
-    // N.B. We assume that the index is the last element of the aterm_appl x.
-    const atermpp::aterm_int& i = atermpp::aterm_cast<const atermpp::aterm_int>(x[x.size() - 1]);
+    const atermpp::aterm_int& i = atermpp::aterm_cast<const atermpp::aterm_int>(x[N]);
     return i.value();
   }
 

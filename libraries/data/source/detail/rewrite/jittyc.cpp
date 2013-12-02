@@ -1132,15 +1132,15 @@ void RewriterCompilingJitty::add_base_nfs(nfs_array& nfs, const function_symbol&
 
 void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& opid, size_t arity)
 {
-  data_equation_list eqns = (size_t(core::index_traits<data::function_symbol, function_symbol_key_type>::index(opid))<jittyc_eqns.size()
-                                ?jittyc_eqns[core::index_traits<data::function_symbol, function_symbol_key_type>::index(opid)]:data_equation_list());
+  data_equation_list eqns = (size_t(core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(opid))<jittyc_eqns.size()
+                                ?jittyc_eqns[core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(opid)]:data_equation_list());
   if (eqns.empty())
   {
     nfs.fill(arity);
     return;
   }
   // aterm_list strat = create_strategy(eqns,OpId2Int(opid).value(),arity,nfs,true_inner);
-  aterm_list strat = create_strategy(eqns,core::index_traits<data::function_symbol, function_symbol_key_type>::index(opid),arity,nfs,true_inner);
+  aterm_list strat = create_strategy(eqns,core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(opid),arity,nfs,true_inner);
   while (!strat.empty() && strat.front().type_is_int())
   {
     nfs.set(aterm_cast<aterm_int>(strat.front()).value());
@@ -1161,8 +1161,8 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
   } */
 
   // Otherwise check whether there are applicable rewrite rules.
-  data_equation_list l = (size_t(core::index_traits<data::function_symbol,function_symbol_key_type>::index(opid))<jittyc_eqns.size()
-                                        ?jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type>::index(opid)]:data_equation_list());
+  data_equation_list l = (size_t(core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(opid))<jittyc_eqns.size()
+                                        ?jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(opid)]:data_equation_list());
 
   if (l.empty())
   {
@@ -1300,7 +1300,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
     if (rewr && !b)
     {
-      ss << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type>::index(f) << "_0_0()";
+      ss << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(f) << "_0_0()";
     }
     else
     {
@@ -1480,7 +1480,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       }
       else
       {
-        ss << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type>::index(headfs) << "_0_0()";
+        ss << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs) << "_0_0()";
       }
     }
     else
@@ -1506,15 +1506,15 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         }
         else
         {
-          // ss << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type>::index(headfs) << "_0_0()";
-          ss << core::index_traits<data::function_symbol,function_symbol_key_type>::index(headfs);
+          // ss << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs) << "_0_0()";
+          ss << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
         }
       }
       else
       {
         if (b || !rewr)
         {
-          const size_t index=core::index_traits<data::function_symbol,function_symbol_key_type>::index(headfs);
+          const size_t index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
           const data::function_symbol old_head=headfs;
           std::stringstream new_name;
           new_name << "@_rewr" << "_" << index << "_" << ta.size() << "_" << args_nfs.get_value(arity)
@@ -1536,7 +1536,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         {
           // QUE?! Dit stond er vroeger // Sjoerd
           //   ss << (((aterm_int) ((aterm_list) t).front()).value()+((1 << arity)-arity-1)+args_nfs);
-          ss << (core::index_traits<data::function_symbol,function_symbol_key_type>::index(headfs)+((1 << arity)-arity-1)+args_nfs.getraw(0));
+          ss << (core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs)+((1 << arity)-arity-1)+args_nfs.getraw(0));
         }
       }
       nfs_array args_first(arity);
@@ -2239,8 +2239,8 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   for(std::map <data::function_symbol,size_t> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)
   {
     size_t arity = getArity(it->first);
-    data_equation_list eqns = (core::index_traits<data::function_symbol,function_symbol_key_type>::index(it->first)<jittyc_eqns.size()
-                                   ?jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type>::index(it->first)]:data_equation_list());
+    data_equation_list eqns = (core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(it->first)<jittyc_eqns.size()
+                                   ?jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(it->first)]:data_equation_list());
     size_t idx = it->second;
     for (size_t i=1; i<=arity; i++)
     {
@@ -2459,11 +2459,11 @@ void declare_rewr_functions(FILE* f, const data::function_symbol& func, const si
         if (a==0)
         {
           // This is a constant function; result can be derived by reference.
-          fprintf(f,  "static inline const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type>::index(func),a,nfs);
+          fprintf(f,  "static inline const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),a,nfs);
         }
         else
         {
-          fprintf(f,  "static inline data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type>::index(func),a,nfs);
+          fprintf(f,  "static inline data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),a,nfs);
         }
         for (size_t i=0; i<a; i++)
         {
@@ -2479,11 +2479,11 @@ void declare_rewr_functions(FILE* f, const data::function_symbol& func, const si
         fprintf(f,  ");\n");
 
         fprintf(f,  "static inline data_expression rewr_%zu_%zu_%zu_term(const application& %s){ return rewr_%zu_%zu_%zu(", 
-            core::index_traits<data::function_symbol,function_symbol_key_type>::index(func), 
+            core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func), 
             a, 
             nfs,
             (a==0?"":"t"),
-            core::index_traits<data::function_symbol,function_symbol_key_type>::index(func), 
+            core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func), 
             a,
             nfs);
         for(size_t i = 0; i < a; ++i)
@@ -2553,7 +2553,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   for(std::set < data_equation >::const_iterator it=rewrite_rules.begin();
                    it!=rewrite_rules.end(); ++it)
   {
-    size_t main_op_id_index=core::index_traits<data::function_symbol,function_symbol_key_type>::index(get_function_symbol_of_head(it->lhs())); // main symbol of equation.
+    size_t main_op_id_index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(get_function_symbol_of_head(it->lhs())); // main symbol of equation.
     if (main_op_id_index>=jittyc_eqns.size())
     {
       jittyc_eqns.resize(main_op_id_index+1);
@@ -2662,7 +2662,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     {
       stringstream ss;
       ss << fs.sort();
-      fprintf(f,  "// %ld %s %s\n",core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),to_string(fs).c_str(),ss.str().c_str());
+      fprintf(f,  "// %ld %s %s\n",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),to_string(fs).c_str(),ss.str().c_str());
 
       for (size_t a=0; a<=arity; a++)
       {
@@ -2674,11 +2674,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           {
             if (a==0)
             {
-              fprintf(f,  "static const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),a,nfs);
+              fprintf(f,  "static const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),a,nfs);
             }
             else
             {
-              fprintf(f,  "static data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),a,nfs);
+              fprintf(f,  "static data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),a,nfs);
             }
             for (size_t i=0; i<a; i++)
             {
@@ -2705,15 +2705,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 //     fprintf(f, "  std::cerr << \"ARg\%zu \" << arg_not_nf%zu << \"\\n\";\n",i,i);
 //   }
 // }
-            if (core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs)<jittyc_eqns.size() && !jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs)].empty() )
+            if (core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)<jittyc_eqns.size() && !jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)].empty() )
             {
             // Implement strategy
               if (0 < a)
               {
                 nfs_a.set_value(nfs);
               }
-              implement_strategy(f,create_strategy(jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs)],
-                                    core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),
+              implement_strategy(f,create_strategy(jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)],
+                                    core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                                     a,nfs_a,true_inner),a,1,fs,nfs);
             }
             else
@@ -2755,7 +2755,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Generate the entries for int2func.
   for (size_t i=0; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i,core::index_traits<data::function_symbol,function_symbol_key_type>::max_index()+1);
+    fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1);
     for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
                         j!=all_function_symbols.end(); ++j)
     {
@@ -2768,20 +2768,20 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           // We are dealing with a partially rewritten function here. Remove the "@_" at
           // the beginning of the string.
           const string c_function_name=pp(fs.name());
-          fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;\n",i,core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),
+          fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;\n",i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                                          c_function_name.substr(2,c_function_name.size()-2).c_str());
         }
       }
       else if (data_equation_selector(fs) && arity_is_allowed(fs,i))
       {
-        fprintf(f,  "  int2func[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",i,core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),i);
+        fprintf(f,  "  int2func[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),i);
       }
     }
   }
   // Generate the entries for int2func_head_in_nf. Entries for constants (with arity 0) are not required.
   for (size_t i=1; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i,core::index_traits<data::function_symbol,function_symbol_key_type>::max_index()+1);
+    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1);
     for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
                         j!=all_function_symbols.end(); ++j)
     {
@@ -2799,15 +2799,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
         if (i<=NF_MAX_ARITY)
         {
           fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (func_type)rewr_%zu_%zu_1_term;\n",i,
-                        core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),
-                        core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),i);
+                        core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
+                        core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),i);
         }
         else
         {
           // If i>NF_MAX_ARITY no compiled rewrite function where the head is already in nf is available.
           fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",i,
-                                core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),
-                                core::index_traits<data::function_symbol,function_symbol_key_type>::index(fs),i);
+                                core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
+                                core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),i);
         }
       }
     }
@@ -2887,13 +2887,13 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  // Here t1 has the shape application(u0,u1,...,un).\n"
       "  // Moreover, the head symbol of t1, head1, is a function symbol.\n"
       "  const mcrl2::data::function_symbol& f(head1);\n"
-      "  const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type>::index(f);\n"
+      "  const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(f);\n"
       "  assert(function_index < %zu);\n"
       "  const size_t total_arity=recursive_number_of_args(t1);\n"
       "  assert( int2func_head_in_nf[total_arity][function_index] != NULL);\n"
       "  return  int2func_head_in_nf[total_arity][function_index](t);\n"
       "}\n\n",
-      core::index_traits<data::function_symbol,function_symbol_key_type>::max_index()+1
+      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1
       );
 
   fprintf(f,
@@ -2947,7 +2947,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    // Term t is a function_symbol\n"
       "    const mcrl2::data::function_symbol& f(t);\n"
-      "    const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type>::index(f);\n"
+      "    const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(f);\n"
       "    if (function_index < %zu)\n"
       "    {\n"
       "      const size_t arity=0;\n"
@@ -2966,7 +2966,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    mcrl2::data::function_symbol head;\n"
       "    if (mcrl2::data::detail::head_is_function_symbol(t,head))\n"
       "    {\n"
-      "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type>::index(head);\n"
+      "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(head);\n"
       "      const size_t total_arity=recursive_number_of_args(ta);\n"
       "      if (function_index < %zu)\n"
       "      {\n"
@@ -2990,8 +2990,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  return rewrite_aux(t);\n"
       "}\n",
       atermpp::detail::addressf(aterm_cast<const aterm_appl>(sort_bool::true_()).function()),
-      core::index_traits<data::function_symbol,function_symbol_key_type>::max_index()+1, 
-      core::index_traits<data::function_symbol,function_symbol_key_type>::max_index()+1, 
+      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1, 
+      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1, 
       max_arity+1);
 
 

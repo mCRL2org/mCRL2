@@ -23,14 +23,14 @@ inline
 void on_create_process_identifier(const atermpp::aterm& t)
 {
   const process_identifier& p = atermpp::aterm_cast<const process_identifier>(t);
-  core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(p.name(), p.variables()));
+  core::index_traits<process_identifier, process_identifier_key_type, 2>::insert(std::make_pair(p.name(), p.variables()));
 }
 
 inline
 void on_delete_process_identifier(const atermpp::aterm& t)
 {
   const process_identifier& p = atermpp::aterm_cast<const process_identifier>(t);
-  core::index_traits<process_identifier, process_identifier_key_type>::erase(std::make_pair(p.name(), p.variables()));
+  core::index_traits<process_identifier, process_identifier_key_type, 2>::erase(std::make_pair(p.name(), p.variables()));
 }
 
 inline

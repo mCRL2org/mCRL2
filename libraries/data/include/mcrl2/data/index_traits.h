@@ -24,28 +24,28 @@ inline
 void on_create_function_symbol(const atermpp::aterm& t)
 {
   const data::function_symbol& v = atermpp::aterm_cast<const data::function_symbol>(t);
-  core::index_traits<data::function_symbol, function_symbol_key_type>::insert(std::make_pair(v.name(), v.sort()));
+  core::index_traits<data::function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_delete_function_symbol(const atermpp::aterm& t)
 {
   const data::function_symbol& v = atermpp::aterm_cast<const data::function_symbol>(t);
-  core::index_traits<data::function_symbol, function_symbol_key_type>::erase(std::make_pair(v.name(), v.sort()));
+  core::index_traits<data::function_symbol, function_symbol_key_type, 2>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_create_variable(const atermpp::aterm& t)
 {
   const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
-  core::index_traits<data::variable, variable_key_type>::insert(std::make_pair(v.name(), v.sort()));
+  core::index_traits<data::variable, variable_key_type, 2>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_delete_variable(const atermpp::aterm& t)
 {
   const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
-  core::index_traits<data::variable, variable_key_type>::erase(std::make_pair(v.name(), v.sort()));
+  core::index_traits<data::variable, variable_key_type, 2>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline
