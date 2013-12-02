@@ -2844,6 +2844,23 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "data_expression rewrite_appl_aux(const application& t)\n"
       "{\n"
+      "  mcrl2::data::function_symbol thead;\n"
+      "  if (mcrl2::data::detail::head_is_function_symbol(t,thead))\n"
+      "  {\n"
+      "    const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(thead);\n"
+      "    const size_t total_arity=recursive_number_of_args(t);\n"
+      "    if (function_index < %zu)\n"
+      "    {\n"
+      "      assert(total_arity < %zu);\n"
+      "      assert(int2func[total_arity][function_index] != NULL);\n"
+      "      return int2func[total_arity][function_index](t);\n"
+      "    }\n"
+      "    else\n"
+      "    {\n"
+      "      const argument_rewriter_struct argument_rewriter;\n"
+      "      return mcrl2::data::application(rewrite(t.head()),t.begin(),t.end(),argument_rewriter);\n"
+      "    }\n"
+      "  }\n"
       "  // Here the head symbol of, which can be deeply nested, is not a function_symbol. \n"
       "  using namespace mcrl2::data;\n"
       "  using namespace mcrl2::data::detail;\n"
@@ -2893,6 +2910,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  assert( int2func_head_in_nf[total_arity][function_index] != NULL);\n"
       "  return  int2func_head_in_nf[total_arity][function_index](t);\n"
       "}\n\n",
+      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1, 
+      max_arity+1,
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1
       );
 
@@ -2940,9 +2959,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
-  //"std::cerr << \"Internal rewrite \" << t << \"\\n\";"
+//"std::cerr << \"Internal rewrite \" << t << \"\\n\";"
       "  using namespace mcrl2::data;\n"
- //     "  if (is_function_symbol(t))\n"
+//      "  if (is_function_symbol(t))\n"  // Less efficient than the rule below.
       "  if (atermpp::detail::addressf(aterm_cast<const aterm_appl>(t).function())==%ld) // t is a function_symbol \n"
       "  {\n"
       "    // Term t is a function_symbol\n"
@@ -2963,11 +2982,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (is_application(t))\n"
       "  {\n"
       "    const application& ta(t);\n"
-      "    mcrl2::data::function_symbol head;\n"
-      "    if (mcrl2::data::detail::head_is_function_symbol(t,head))\n"
+      "    const mcrl2::data::function_symbol& head(ta.head());\n"
+      "    if (atermpp::detail::addressf(aterm_cast<const aterm_appl>(head).function())==%ld) // head is a function_symbol \n"
       "    {\n"
       "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(head);\n"
-      "      const size_t total_arity=recursive_number_of_args(ta);\n"
+      "      const size_t total_arity=ta.size();\n"
       "      if (function_index < %zu)\n"
       "      {\n"
 //"std::cerr << \"TA \" << total_arity << \" FI \" << function_index << \" HEAD \" << head << \" Point \" << atermpp::detail::address(head) << \"\\n\";\n"
@@ -2991,6 +3010,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "}\n",
       atermpp::detail::addressf(aterm_cast<const aterm_appl>(sort_bool::true_()).function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1, 
+      atermpp::detail::addressf(aterm_cast<const aterm_appl>(sort_bool::true_()).function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1, 
       max_arity+1);
 

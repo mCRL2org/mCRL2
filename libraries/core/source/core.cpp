@@ -16,6 +16,14 @@ namespace mcrl2 {
 
 namespace core {
 
+namespace detail {
+
+atermpp::function_symbol function_symbol_OpId_ = atermpp::function_symbol("OpId", 3);
+atermpp::function_symbol function_symbol_DataVarId_ = atermpp::function_symbol("DataVarId", 3);
+std::vector<atermpp::function_symbol> function_symbols_DataAppl_;
+
+} // namespace detail
+
 //--- start generated core overloads ---//
 std::string pp(const core::identifier_string& x) { return core::pp< core::identifier_string >(x); }
 std::string pp(const core::nil& x) { return core::pp< core::nil >(x); }

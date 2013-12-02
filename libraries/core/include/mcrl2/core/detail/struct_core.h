@@ -39,21 +39,35 @@ bool operator==(const size_t x, const atermpp::function_symbol& y)
 //Global precondition: the aterm library has been initialised
 
 // DataAppl
+extern std::vector<atermpp::function_symbol> function_symbols_DataAppl_;
+
 inline std::vector<atermpp::function_symbol>& function_symbols_DataAppl()
 {
-  static std::vector<atermpp::function_symbol> function_symbols_DataAppl;
-  return function_symbols_DataAppl;
+  // static std::vector<atermpp::function_symbol> function_symbols_DataAppl;
+  return function_symbols_DataAppl_;
+}
+
+inline
+const atermpp::function_symbol& function_symbol_DataAppl_helper(size_t i)
+{
+  std::vector<atermpp::function_symbol>& syms = function_symbols_DataAppl();
+  do 
+  {
+    syms.push_back(atermpp::function_symbol("DataAppl", syms.size()));
+  }
+  while (i >= syms.size());
+  return syms[i];
 }
 
 inline
 const atermpp::function_symbol& function_symbol_DataAppl(size_t i)
 {
   std::vector<atermpp::function_symbol>& syms = function_symbols_DataAppl();
-  while (i >= syms.size())
-  {
-    syms.push_back(atermpp::function_symbol("DataAppl", syms.size()));
+  if (i<syms.size()) 
+  { 
+    return syms[i];
   }
-  return syms[i];
+  return function_symbol_DataAppl_helper(i);
 }
 
 inline
@@ -636,11 +650,13 @@ bool gsIsDataSpec(const atermpp::aterm_appl& Term)
 }
 
 // DataVarId
+extern atermpp::function_symbol function_symbol_DataVarId_;
+
 inline
 const atermpp::function_symbol& function_symbol_DataVarId()
 {
-  static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 3);
-  return function_symbol_DataVarId;
+  // static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 3);
+  return function_symbol_DataVarId_;
 }
 
 inline
@@ -944,11 +960,19 @@ bool gsIsNu(const atermpp::aterm_appl& Term)
 }
 
 // OpId
-inline
+/* inline
 const atermpp::function_symbol& function_symbol_OpId()
 {
   static atermpp::function_symbol function_symbol_OpId = atermpp::function_symbol("OpId", 3);
   return function_symbol_OpId;
+} */
+
+extern atermpp::function_symbol function_symbol_OpId_; // = atermpp::function_symbol("OpId", 3);
+
+inline
+const atermpp::function_symbol& function_symbol_OpId()
+{
+  return function_symbol_OpId_;
 }
 
 inline

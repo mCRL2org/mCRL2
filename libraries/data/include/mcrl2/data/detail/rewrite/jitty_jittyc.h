@@ -193,24 +193,19 @@ inline bool head_is_variable(const data_expression& t)
 
 inline bool head_is_function_symbol(const data_expression& t, function_symbol& head)
 {
-  assert(!is_where_clause(t));
+  if (is_application(t))
+  {
+    const application& ta(t);
+    return head_is_function_symbol(ta.head(),head);
+  }
 
   if (is_function_symbol(t))
   {
     head=atermpp::aterm_cast<function_symbol>(t);
     return true;
   }
-  if (is_variable(t))
-  {
-    return false;
-  }
-  if (is_abstraction(t))
-  {
-    return false;
-  }
-  // shape is application(t1,...,tn)
-  const application& ta(t);
-  return head_is_function_symbol(ta.head(),head);
+
+  return false;
 }
 
 }
