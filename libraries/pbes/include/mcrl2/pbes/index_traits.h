@@ -24,14 +24,14 @@ inline
 void on_create_propositional_variable_instantiation(const atermpp::aterm& t)
 {
   const pbes_system::propositional_variable_instantiation& v = atermpp::aterm_cast<const pbes_system::propositional_variable_instantiation>(t);
-  core::index_traits<pbes_system::propositional_variable_instantiation, propositional_variable_key_type>::insert(std::make_pair(v.name(), v.parameters()));
+  core::index_traits<pbes_system::propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(v.name(), v.parameters()));
 }
 
 inline
 void on_delete_propositional_variable_instantiation(const atermpp::aterm& t)
 {
   const pbes_system::propositional_variable_instantiation& v = atermpp::aterm_cast<const pbes_system::propositional_variable_instantiation>(t);
-  core::index_traits<pbes_system::propositional_variable_instantiation, propositional_variable_key_type>::erase(std::make_pair(v.name(), v.parameters()));
+  core::index_traits<pbes_system::propositional_variable_instantiation, propositional_variable_key_type, 2>::erase(std::make_pair(v.name(), v.parameters()));
 }
 
 inline

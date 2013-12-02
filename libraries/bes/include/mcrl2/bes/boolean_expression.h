@@ -446,7 +446,7 @@ class boolean_variable: public boolean_expression
     boolean_variable(const core::identifier_string& name)
       : boolean_expression(core::detail::gsMakeBooleanVariable(
           name,
-          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type>::insert(name))
+          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type, 1>::insert(name))
         ))
     {}
 
@@ -454,7 +454,7 @@ class boolean_variable: public boolean_expression
     boolean_variable(const std::string& name)
       : boolean_expression(core::detail::gsMakeBooleanVariable(
           core::identifier_string(name),
-          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type>::insert(name))
+          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type, 1>::insert(name))
         ))
     {}
 //--- end user section boolean_variable ---//

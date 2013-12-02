@@ -687,7 +687,7 @@ public:
       mCRL2log(log::debug2, "substitutions") << "Setting " << data::pp(m_variable) << " := " << e << std::endl;
       assert(e.defined());
 
-      size_t i = core::index_traits<data::variable, data::variable_key_type>::index(m_variable);
+      size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(m_variable);
 
       if (e != m_variable)
       {
@@ -749,7 +749,7 @@ public:
   /// \brief Application operator; applies substitution to v.
   const expression_type &operator()(const variable_type& v) const
   {
-    const size_t i = core::index_traits<data::variable, data::variable_key_type>::index(v);
+    const size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(v);
 
     if (i < m_index_table.size())
     {

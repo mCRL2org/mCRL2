@@ -124,7 +124,7 @@ class propositional_variable_instantiation: public pbes_expression
       : pbes_expression(core::detail::gsMakePropVarInst(
           name,
           parameters,
-          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type>::insert(std::make_pair(name, parameters)))
+          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
        ))
     {}
 
@@ -133,7 +133,7 @@ class propositional_variable_instantiation: public pbes_expression
       : pbes_expression(core::detail::gsMakePropVarInst(
           core::identifier_string(name),
           parameters,
-          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type>::insert(std::make_pair(name, parameters)))
+          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
         ))
     {}
 
@@ -150,7 +150,7 @@ class propositional_variable_instantiation: public pbes_expression
       copy_term(core::detail::gsMakePropVarInst(
         name,
         parameters,
-        atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type>::insert(std::make_pair(name, parameters)))
+        atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
       ));
     }
 //--- end user section propositional_variable_instantiation ---//

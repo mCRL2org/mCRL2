@@ -64,7 +64,7 @@ class process_identifier: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeProcVarId(
           name,
           variables,
-          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(name, variables)))
+          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type, 2>::insert(std::make_pair(name, variables)))
         ))
     {}
 
@@ -73,7 +73,7 @@ class process_identifier: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeProcVarId(
           core::identifier_string(name),
           variables,
-          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(name, variables)))
+          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type, 2>::insert(std::make_pair(name, variables)))
         ))
     {}
 //--- end user section process_identifier ---//

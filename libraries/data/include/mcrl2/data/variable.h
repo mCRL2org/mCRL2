@@ -63,7 +63,7 @@ class variable: public data_expression
       : data_expression(core::detail::gsMakeDataVarId(
           name,
           sort,
-          atermpp::aterm_int(core::index_traits<variable, variable_key_type>::insert(std::make_pair(name, sort)))
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort)))
         ))
     {}
 
@@ -72,7 +72,7 @@ class variable: public data_expression
       : data_expression(core::detail::gsMakeDataVarId(
           core::identifier_string(name),
           sort,
-          atermpp::aterm_int(core::index_traits<variable, variable_key_type>::insert(std::make_pair(core::identifier_string(name), sort)))
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort)))
         ))
     {}
 //--- end user section variable ---//
