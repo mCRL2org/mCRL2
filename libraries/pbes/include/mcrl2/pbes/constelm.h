@@ -579,12 +579,10 @@ class pbes_constelm_algorithm
         std::string to_string() const
         {
           std::ostringstream out;
-          out << mcrl2::data::pp(m_variable) << "  assertions = ";
+          out << m_variable << "  assertions = ";
           for (typename constraint_map::const_iterator i = m_constraints.begin(); i != m_constraints.end(); ++i)
           {
-            std::string lhs = mcrl2::data::pp(i->first);
-            std::string rhs = mcrl2::data::pp(i->second);
-            out << "{" << lhs << " := " << rhs << "} ";
+            out << "{" << i->first << " := " << i->second << "} ";
           }
           return out.str();
         }

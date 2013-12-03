@@ -78,7 +78,7 @@ void test_free_variables()
   process_instance pi(P, d);
 
   std::set<data::variable> free_variables = process::find_free_variables(pi);
-  std::cout << "free variables: " << data::detail::print_set(free_variables) << std::endl;
+  std::cout << "free variables: " << core::detail::print_set(free_variables) << std::endl;
   BOOST_CHECK(free_variables.find(b) != free_variables.end());
 }
 

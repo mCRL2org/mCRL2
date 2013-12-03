@@ -249,8 +249,6 @@ std::string pp(const T& x)
 }
 
 /// \brief Prototypes for aterm overloads
-std::string pp(const atermpp::aterm& x);
-std::string pp(const atermpp::aterm_appl& x);
 std::string pp(const nil& x);
 
 } // namespace core

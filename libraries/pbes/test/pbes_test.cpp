@@ -253,7 +253,7 @@ void test_find_sort_expressions()
   pbes p = lps2pbes(spec, formula, timed);
   std::set<sort_expression> s;
   pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
-  std::cout << data::detail::print_set(s) << std::endl;
+  std::cout << core::detail::print_set(s) << std::endl;
 }
 
 #ifdef MCRL2_ENABLE_IO_TEST

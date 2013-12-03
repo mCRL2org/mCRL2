@@ -154,7 +154,7 @@ std::ostream& operator<<(std::ostream& out, const progress_measure& pm)
   }
   else
   {
-    out << core::detail::print_list(pm.v, core::detail::default_printer());
+    out << core::detail::print_list(pm.v);
   }
   return out;
 }
@@ -352,7 +352,7 @@ class small_progress_measures_algorithm
       mCRL2log(log::verbose) << "--- applying small progress measures to ---\n" << bes::pp(m_bes) << "\n\n";
       initialize_vertices();
       mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
-      mCRL2log(log::verbose) << "\nbeta = " << core::detail::print_list(m_beta, core::detail::default_printer()) << "\n";
+      mCRL2log(log::verbose) << "\nbeta = " << core::detail::print_list(m_beta) << "\n";
       for (;;) // forever
       {
         bool changed = false;
@@ -378,9 +378,9 @@ class small_progress_measures_algorithm
           std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m + 1, alpha.begin());
           if (is_odd(m))
           {
-            mCRL2log(log::debug) << "\n    inc(" << core::detail::print_list(alpha, core::detail::default_printer()) << ", " << boost::lexical_cast<std::string>(m) << ") = ";
+            mCRL2log(log::debug) << "\n    inc(" << core::detail::print_list(alpha) << ", " << boost::lexical_cast<std::string>(m) << ") = ";
             inc(alpha, m, m_beta);
-            mCRL2log(log::debug) << (alpha[0] < 0 ? "top" : core::detail::print_list(alpha, core::detail::default_printer()));
+            mCRL2log(log::debug) << (alpha[0] < 0 ? "top" : core::detail::print_list(alpha));
           }
 
           if (!std::equal(alpha.begin(), alpha.end(), v.alpha.v.begin()))

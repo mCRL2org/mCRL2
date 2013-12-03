@@ -225,7 +225,7 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
     }
 
 #ifdef MCRL2_PFNF_VISITOR_DEBUG
-std::cout << "NAME CLASHES: " << core::detail::print_set(name_clashes, data::stream_printer()) << std::endl;
+std::cout << "NAME CLASHES: " << core::detail::print_set(name_clashes) << std::endl;
 #endif
 
     if (!name_clashes.empty())

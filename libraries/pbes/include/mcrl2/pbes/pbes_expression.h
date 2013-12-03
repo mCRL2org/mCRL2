@@ -572,10 +572,6 @@ std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expre
 std::set<data::variable> find_free_variables(const pbes_system::pbes_expression& x);
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v);
 
-// TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x);
-std::string pp(const atermpp::aterm_appl& x);
-
 /// \brief Returns true if the term t is equal to true
 /// \param t A PBES expression
 /// \return True if the term t is equal to true

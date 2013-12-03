@@ -112,9 +112,9 @@ bool is_well_typed_equation(const pbes_equation& eqn,
      )
   {
     mCRL2log(log::error) << "pbes::is_well_typed() failed: some of the sorts of the binding variable "
-              << data::pp(eqn.variable())
+              << eqn.variable()
               << " are not declared in the data specification "
-              << data::pp(data_spec)
+              << data_spec
               << std::endl;
     return false;
   }
@@ -131,7 +131,7 @@ bool is_well_typed_equation(const pbes_equation& eqn,
     mCRL2log(log::error) << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables "
               << data::pp(quantifier_variables)
               << " are not declared in the data specification "
-              << data::pp(data_spec)
+              << data_spec
               << std::endl;
     return false;
   }
@@ -166,7 +166,7 @@ bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
     mCRL2log(log::error) << "pbes::is_well_typed() failed: some of the sorts of the free variables "
               << data::pp(declared_global_variables)
               << " are not declared in the data specification "
-              << data::pp(data_spec)
+              << data_spec
               << std::endl;
     return false;
   }

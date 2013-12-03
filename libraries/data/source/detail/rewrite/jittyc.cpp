@@ -2960,7 +2960,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
         {
           // We are dealing with a partially rewritten function here. Remove the "@_" at
           // the beginning of the string.
-          const string c_function_name=pp(fs.name());
+          const string c_function_name=core::pp(fs.name());
           fprintf(f,  "  int2func[%zu][%zu] = %s;\n",i+1,j,c_function_name.substr(2,c_function_name.size()-2).c_str());
         }
       }

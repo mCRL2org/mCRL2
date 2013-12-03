@@ -66,10 +66,6 @@ std::set<data::sort_expression> find_sort_expressions(const process::process_spe
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x) { return process::find_identifiers< process::process_specification >(x); }
 //--- end generated process overloads ---//
 
-// TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return to_string(x); }
-std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
-
 static bool register_hooks()
 {
   register_process_identifier_hooks();

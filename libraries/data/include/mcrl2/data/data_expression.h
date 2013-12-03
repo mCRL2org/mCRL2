@@ -291,10 +291,6 @@ std::set<data::variable> find_free_variables(const data::data_expression& x);
 std::set<data::variable> find_free_variables(const data::data_expression_list& x);
 bool search_variable(const data::data_expression& x, const data::variable& v);
 
-// TODO: we have to put it somewhere...
-std::string pp(const atermpp::aterm& x);
-std::string pp(const atermpp::aterm_appl& x);
-
 } // namespace data
 
 } // namespace mcrl2

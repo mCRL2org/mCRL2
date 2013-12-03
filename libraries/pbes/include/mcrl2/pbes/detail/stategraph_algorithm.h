@@ -1083,7 +1083,7 @@ class stategraph_algorithm
       for (auto i = m_connected_components.begin(); i != m_connected_components.end(); ++i)
       {
         std::set<data::data_expression> values = compute_values(*i);
-        mCRL2log(log::debug, "stategraph") << print_connected_component(*i) << " values = " << data::detail::print_set(values) << std::endl;
+        mCRL2log(log::debug, "stategraph") << print_connected_component(*i) << " values = " << core::detail::print_set(values) << std::endl;
       }
     }
 
@@ -1124,7 +1124,7 @@ class stategraph_algorithm
 
     void compute_value_graph(const std::set<std::size_t>& component)
     {
-      mCRL2log(log::debug, "stategraph") << "Compute local control flow graph for component " << pbes_system::detail::print_set(component) << std::endl;
+      mCRL2log(log::debug, "stategraph") << "Compute local control flow graph for component " << core::detail::print_set(component) << std::endl;
       std::vector<value_graph_vertex> V;
       std::set<std::size_t> todo;
 

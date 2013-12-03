@@ -17,12 +17,11 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/tuple/tuple.hpp>
-#include "mcrl2/process/detail/print_utility.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/parse.h"
-#include "mcrl2/process/detail/print_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/test_utilities.h"
 
@@ -175,7 +174,7 @@ std::string print(const multi_action_name_set& A, bool A_includes_subsets = fals
   {
     V.insert(print(*i));
   }
-  return core::detail::print_set(V, core::detail::default_printer(), "", false, false) + (A_includes_subsets ? "@" : "");
+  return core::detail::print_set(V, "", false, false) + (A_includes_subsets ? "@" : "");
 }
 
 std::string print(const allow_set& x)

@@ -1493,10 +1493,6 @@ std::string pp(const process_expression_list& x);
 std::string pp(const process_expression_vector& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 
-// TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x);
-std::string pp(const atermpp::aterm_appl& x);
-
 } // namespace process
 
 } // namespace mcrl2

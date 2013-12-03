@@ -322,7 +322,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     if (!VarsUnique(VarList))
     {
       throw mcrl2::runtime_error("the variables " + pp(VarList) + " in action rename rule " + pp(Rule.condition()) + " -> " +
-                               pp(Rule.lhs()) + " => " + (Rule.rhs().is_tau()?"tau":(Rule.rhs().is_delta()?"delta":pp(Rule.rhs().act()))) + " are not unique");
+                               data::pp(Rule.lhs()) + " => " + (Rule.rhs().is_tau()?"tau":(Rule.rhs().is_delta()?"delta":pp(Rule.rhs().act()))) + " are not unique");
     }
 
     std::map<core::identifier_string,sort_expression> NewDeclaredVars;

@@ -181,7 +181,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         const std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
         for (std::map<core::identifier_string, std::set<data::variable> >::const_iterator i = Bk.begin(); i != Bk.end(); ++i)
         {
-          out << core::pp(i->first) << " -> " << data::detail::print_set(i->second) << std::endl;
+          out << core::pp(i->first) << " -> " << core::detail::print_set(i->second) << std::endl;
         }
       }
       mCRL2log(log::debug, "stategraph") << out.str() << std::endl;
@@ -224,7 +224,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     {
       std::ostringstream out;
       out << pbes_system::pp(u.X)
-          << " marking = " << data::detail::print_set(u.marking)
+          << " marking = " << core::detail::print_set(u.marking)
           << " marking indices = " << print_set(u.marking_variable_indices(m_pbes));
       return out.str();
     }
@@ -297,7 +297,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
                 std::set<data::variable> M = set_intersection(set_difference(FV(g_j), u.marking), m_belongs[k][Y]);
                 if (!M.empty())
                 {
-                  mCRL2log(log::debug, "stategraph") << "update marking u with M = " << data::detail::print_set(M) << std::endl;
+                  mCRL2log(log::debug, "stategraph") << "update marking u with M = " << core::detail::print_set(M) << std::endl;
                   u.marking = set_union(u.marking, M);
                   todo.insert(&u);
                   stable = false;
@@ -332,7 +332,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
                   if (is_marked_in_other_graph(Y, d_Y[l], k))
                   {
                     u.marking = set_union(u.marking, M);
-                    mCRL2log(log::debug, "stategraph") << "update marking u with M = " << data::detail::print_set(M) << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "update marking u with M = " << core::detail::print_set(M) << std::endl;
                     stable = false;
                   }
                 }

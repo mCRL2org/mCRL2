@@ -86,18 +86,6 @@ class parser
     }
 };
 
-// PBES expression printer (pretty print + ascii representation)
-template <typename Term>
-std::string printer(const Term& x)
-{
-  std::ostringstream out;
-  out << pbes_system::pp(x);
-#ifdef PBES_REWRITE_TEST_DEBUG
-  out << " " << x;
-#endif
-  return out.str();
-}
-
 void test_one_point_rule_rewriter(const std::string& expr1, const std::string& expr2)
 {
   one_point_rule_rewriter R;
@@ -105,7 +93,6 @@ void test_one_point_rule_rewriter(const std::string& expr1, const std::string& e
     expr1,
     expr2,
     parser(),
-    printer<pbes_expression>,
     std::equal_to<pbes_expression>(),
     R,
     "R1",

@@ -13,10 +13,10 @@
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H
 
 #include <map>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/utility.h"
-#include "mcrl2/process/detail/print_utility.h"
 
 namespace mcrl2 {
 
@@ -73,14 +73,14 @@ namespace detail {
 struct push_block_printer
 {
   const std::set<core::identifier_string>& B;
-  
+
   push_block_printer(const std::set<core::identifier_string>& B_)
     : B(B_)
   {}
 
   std::string print(const std::set<core::identifier_string>& x) const
   {
-    return detail::print_set(x);
+    return core::detail::print_set(x);
   }
 
   template <typename T>

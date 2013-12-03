@@ -62,11 +62,6 @@ std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expre
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v) { return pbes_system::search_variable< pbes_system::pbes_expression >(x, v); }
 //--- end generated pbes_system overloads ---//
 
-// TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return to_string(x); }
-std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
-std::string pp(const core::identifier_string& x) { return core::pp(x); }
-
 namespace algorithms {
 
 void instantiate_global_variables(pbes& p)

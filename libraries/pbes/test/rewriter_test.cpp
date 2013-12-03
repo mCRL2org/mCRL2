@@ -157,18 +157,6 @@ class parser
     }
 };
 
-// PBES expression printer (pretty print + ascii representation)
-template <typename Term>
-std::string printer(const Term& x)
-{
-  std::ostringstream out;
-  out << pbes_system::pp(x);
-#ifdef PBES_REWRITE_TEST_DEBUG
-  out << " " << x;
-#endif
-  return out.str();
-}
-
 template <typename Rewriter1, typename Rewriter2>
 void test_simplify(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string expr2)
 {
@@ -176,7 +164,6 @@ void test_simplify(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string ex
     expr1,
     expr2,
     parser(),
-    printer<pbes_expression>,
     std::equal_to<pbes_expression>(),
     R1,
     "simplify",
@@ -192,7 +179,6 @@ void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string e
     expr1,
     expr2,
     parser(var_decl, data_spec),
-    printer<pbes_expression>,
     std::equal_to<pbes_expression>(),
     R1,
     "R1",

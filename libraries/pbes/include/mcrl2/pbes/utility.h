@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_UTILITY_H
 #define MCRL2_PBES_UTILITY_H
 
+#include <sstream>
 #include "mcrl2/atermpp/algorithm.h"
 
 #include "mcrl2/data/data_expression.h"
@@ -542,16 +543,17 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
       if (!new_data_vars.empty())
       {
-        std::string message("Cannot eliminate universal quantifiers of variables ");
+        std::ostringstream out;
+        out << "Cannot eliminate universal quantifiers of variables ";
 
-        message.append(data::pp(new_data_vars));
+        out << data::pp(new_data_vars);
 
         if (!use_internal_rewrite_format)
         {
-          message.append(" in ").append(mcrl2::data::pp(p));
+          out << " in " << p;
         }
 
-        throw mcrl2::runtime_error(message);
+        throw mcrl2::runtime_error(out.str());
       }
       result=make_conjunction(conjunction_set);
       restore_saved_substitution(saved_substitutions,r,use_internal_rewrite_format,sigma,sigma_internal);

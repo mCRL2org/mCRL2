@@ -18,6 +18,7 @@
 #include <set>
 #include <sstream>
 #include <vector>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard.h"
@@ -27,7 +28,6 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
-#include "mcrl2/pbes/detail/print_utility.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/detail/stategraph_influence.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
@@ -96,7 +96,7 @@ struct stategraph_vertex
     {
       out << " " << pbes_system::pp(i->target->X);
     }
-    out << " sig: " << data::detail::print_set(sig);
+    out << " sig: " << core::detail::print_set(sig);
     return out.str();
   }
 
@@ -113,7 +113,7 @@ struct stategraph_vertex
     {
       out << " " << i->print();
     }
-    out << " sig: " << data::detail::print_set(sig);
+    out << " sig: " << core::detail::print_set(sig);
     return out.str();
   }
 
@@ -146,7 +146,7 @@ struct stategraph_vertex
   std::string print_marking() const
   {
     std::ostringstream out;
-    out << "vertex " << pbes_system::pp(X) << " = " << data::detail::print_set(marking);
+    out << "vertex " << pbes_system::pp(X) << " = " << core::detail::print_set(marking);
     return out.str();
   }
 
