@@ -134,14 +134,12 @@ std::set<propositional_variable_instantiation> pbes::occurring_variable_instanti
   return result;
 }
 
-#ifdef MCRL2_USE_INDEX_TRAITS
 static bool register_hooks()
 {
   register_propositional_variable_instantiation_hooks();
   return true;
 }
 static bool mcrl2_register_pbes(register_hooks());
-#endif
 
 } // namespace pbes_system
 
