@@ -1758,8 +1758,6 @@ struct term_traits<pbes_system::pbes_expression>
 
 } // namespace mcrl2
 
-#ifdef MCRL2_USE_INDEX_TRAITS
 #include "mcrl2/pbes/index_traits.h"
-#endif // MCRL2_USE_INDEX_TRAITS
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_H

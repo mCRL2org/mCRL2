@@ -10,6 +10,7 @@
 /// \brief
 
 #include "mcrl2/bes/print.h"
+#include "mcrl2/bes/index_traits.h"
 
 namespace mcrl2
 {
@@ -30,14 +31,12 @@ std::string pp(const bes::or_& x) { return bes::pp< bes::or_ >(x); }
 std::string pp(const bes::true_& x) { return bes::pp< bes::true_ >(x); }
 //--- end generated bes overloads ---//
 
-#ifdef MCRL2_USE_INDEX_TRAITS
 static bool register_hooks()
 {
   register_boolean_variable_hooks();
   return true;
 }
 static bool mcrl2_register_bes(register_hooks());
-#endif
 
 } // namespace bes
 

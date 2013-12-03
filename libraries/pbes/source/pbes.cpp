@@ -18,10 +18,7 @@
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/is_well_typed.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
-
-#ifdef MCRL2_USE_INDEX_TRAITS
 #include "mcrl2/pbes/index_traits.h"
-#endif
 
 namespace mcrl2
 {

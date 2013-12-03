@@ -70,14 +70,12 @@ std::set<core::identifier_string> find_identifiers(const process::process_specif
 std::string pp(const atermpp::aterm& x) { return to_string(x); }
 std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 
-#ifdef MCRL2_USE_INDEX_TRAITS
 static bool register_hooks()
 {
   register_process_identifier_hooks();
   return true;
 }
 static bool mcrl2_register_process(register_hooks());
-#endif
 
 } // namespace process
 

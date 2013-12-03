@@ -107,7 +107,6 @@ std::string pp(const std::set<variable>& x) { return data::pp< std::set<variable
 std::string pp(const atermpp::aterm& x) { return to_string(x); }
 std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 
-#ifdef MCRL2_USE_INDEX_TRAITS
 static bool register_hooks()
 {
   register_function_symbol_hooks();
@@ -115,7 +114,6 @@ static bool register_hooks()
   return true;
 }
 static bool mcrl2_register_data(register_hooks());
-#endif
 
 } // namespace data
 
