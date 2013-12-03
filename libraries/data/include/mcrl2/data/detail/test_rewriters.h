@@ -221,7 +221,6 @@ void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string e
     expr1,
     expr2,
     parser(var_decl, data_spec),
-    data::detail::data_printer(),
     std::equal_to<data_expression>(),
     R1,
     "R1",

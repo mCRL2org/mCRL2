@@ -207,8 +207,6 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
                                 negated);
 }
 
-static core::identifier_string equality_string("==");
-
 bool EnumeratorSolutionsStandard::find_equality(
                         const data_expression &t,
                         const mcrl2::data::variable_list &vars,
@@ -242,7 +240,7 @@ bool EnumeratorSolutionsStandard::find_equality(
       assert(ta.size()==2);
       return find_equality(ta[0],vars,v,e) || find_equality(ta[1],vars,v,e);
     }
-    else if (f.name() == equality_string)
+    else if (static_cast<const std::string&>(f.name()) == "==")
     {
       const data_expression& a1 = ta[0];
       const data_expression& a2 = ta[1];

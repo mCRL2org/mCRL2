@@ -760,7 +760,7 @@ class pins
             << " bounded = " << std::boolalpha << type.is_bounded() << "\n";
         if (type.is_bounded())
         {
-          out << " possible values: " << core::detail::print_set(type.generate_values(10), core::detail::default_printer()) << std::endl;
+          out << " possible values: " << core::detail::print_set(type.generate_values(10)) << std::endl;
         }
         out << std::endl;
       }

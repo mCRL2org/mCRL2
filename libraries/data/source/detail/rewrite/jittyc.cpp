@@ -1862,7 +1862,8 @@ void RewriterCompilingJitty::implement_tree_aux(
               whitespace(d*2),
               // (level==1)?"arg":"t",parent,cur_arg,
               (level==1)?"arg":"t",parent,cur_arg,
-              (void*)atermpp::detail::address(aterm_cast<function_symbol>(tree[0])),pp(aterm_cast<data::function_symbol>(tree[0]).name()).c_str(),
+              (void*)atermpp::detail::address(aterm_cast<function_symbol>(tree[0])),
+                      static_cast<const std::string&>(aterm_cast<data::function_symbol>(tree[0]).name()).c_str(),
               whitespace(d*2),
               whitespace(d*2),cnt,(level==1)?"arg":"t",parent,cur_arg
              );
@@ -1874,7 +1875,8 @@ void RewriterCompilingJitty::implement_tree_aux(
               whitespace(d*2),
               (level==1)?"arg":"t",parent,cur_arg,
               (level==1)?"arg":"t",parent,cur_arg,
-              (void*)atermpp::detail::address(aterm_cast<function_symbol>(tree[0])),pp(aterm_cast<data::function_symbol>(tree[0]).name()).c_str(),
+              (void*)atermpp::detail::address(aterm_cast<function_symbol>(tree[0])),
+                      static_cast<const std::string&>(aterm_cast<data::function_symbol>(tree[0]).name()).c_str(),
               whitespace(d*2),
               whitespace(d*2),cnt,(level==1)?"arg":"t",parent,cur_arg
              );
@@ -2767,7 +2769,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
         {
           // We are dealing with a partially rewritten function here. Remove the "@_" at
           // the beginning of the string.
-          const string c_function_name=pp(fs.name());
+          const string c_function_name=core::pp(fs.name());
           fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;\n",i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                                          c_function_name.substr(2,c_function_name.size()-2).c_str());
         }

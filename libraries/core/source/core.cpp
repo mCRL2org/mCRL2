@@ -29,9 +29,6 @@ std::string pp(const core::identifier_string& x) { return core::pp< core::identi
 std::string pp(const core::nil& x) { return core::pp< core::nil >(x); }
 //--- end generated core overloads ---//
 
-std::string pp(const atermpp::aterm& x) { return to_string(x); }
-std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
-
 } // namespace core
 
 } // namespace mcrl2

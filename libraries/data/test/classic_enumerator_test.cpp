@@ -281,7 +281,7 @@ void generate_values_test()
     data::sort_expression s = normalize_sorts(*i,dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data::data_expression_vector v = generate_values(dataspec, s, 10);
-    std::clog << " possible values: " << data::detail::print_set(v) << std::endl;
+    std::clog << " possible values: " << core::detail::print_set(v) << std::endl;
     BOOST_CHECK(v.size() <= 10);
     BOOST_CHECK(no_duplicates(v));
   }
@@ -293,7 +293,7 @@ void generate_values_test()
     data::sort_expression s = normalize_sorts(i->reference(),dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data::data_expression_vector v = generate_values(dataspec, s, 10);
-    std::clog << " possible values: " << data::detail::print_set(v) << std::endl;
+    std::clog << " possible values: " << core::detail::print_set(v) << std::endl;
     BOOST_CHECK(v.size() <= 10);
     BOOST_CHECK(no_duplicates(v));
   }

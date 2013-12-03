@@ -35,6 +35,8 @@ class function_symbol: public data_expression
 {
   public:
 
+    static const atermpp::function_symbol function_symbol_OpId_; 
+    static const function_symbol constructOpId; //=atermpp::aterm_appl(function_symbol_OpId(), constructString(), constructSortExpr(), constructNumber());
 
     const core::identifier_string& name() const
     {
@@ -48,7 +50,8 @@ class function_symbol: public data_expression
 //--- start user section function_symbol ---//
     /// \brief Default constructor.
     function_symbol()
-      : data_expression(core::detail::constructOpId())
+      // : data_expression(core::detail::constructOpId())
+       : data_expression(constructOpId)
     {}
 
     /// \brief Constructor.
@@ -61,15 +64,23 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     function_symbol(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(name, sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(name, sort)))))
+      : data_expression(atermpp::aterm_appl(function_symbol_OpId_,name, sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(name, sort)))))
     {}
 
     /// \brief Constructor.
     function_symbol(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort)))))
+      : data_expression(atermpp::aterm_appl(function_symbol_OpId_,core::identifier_string(name), sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort)))))
     {}
 //--- end user section function_symbol ---//
 };
+
+// \brief Returns true if the term t is a function symbol
+inline bool is_function_symbol(const atermpp::aterm_appl &p)
+{
+  // return core::detail::gsIsOpId(p);
+  return p.function()==mcrl2::data::function_symbol::function_symbol_OpId_;
+}
+
 
 /// \brief list of function_symbols
 typedef atermpp::term_list<function_symbol> function_symbol_list;

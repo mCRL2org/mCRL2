@@ -202,7 +202,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
   /// \return The result of visiting the node
   pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, Substitution& sigma)
   {
-    mCRL2log(log::debug1) << "visit " << data::pp(x) << "\n";
+    mCRL2log(log::debug1) << "visit " << x << "\n";
 
     // TODO: this code contains too much conversion between vectors and aterm lists
     std::vector<data::data_expression> finite_parameters;

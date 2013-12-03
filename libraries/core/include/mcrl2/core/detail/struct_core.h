@@ -979,7 +979,7 @@ inline
 bool gsIsOpId(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_OpId();
-}
+} 
 
 // PBES
 inline
@@ -2377,11 +2377,11 @@ aterm_appl gsMakeNu()
   return aterm_appl(function_symbol_Nu());
 }
 
-inline
+/* inline
 aterm_appl gsMakeOpId(const aterm& String_0, const aterm& SortExpr_1, const aterm& Number_2)
 {
   return aterm_appl(function_symbol_OpId(), String_0, SortExpr_1, Number_2);
-}
+} */
 
 inline
 aterm_appl gsMakePBES(const aterm& DataSpec_0, const aterm& GlobVarSpec_1, const aterm& PBEqnSpec_2, const aterm& PBInit_3)

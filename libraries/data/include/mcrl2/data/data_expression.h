@@ -81,10 +81,11 @@ inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm_appl &p)
 }
 
 /// \brief Returns true if the term t is a function symbol
-inline bool is_function_symbol(const atermpp::aterm_appl &p)
-{
-  return core::detail::gsIsOpId(p);
-}
+// inline bool is_function_symbol(const atermpp::aterm_appl &p)
+//{
+//  // return core::detail::gsIsOpId(p);
+//  return p==mcrl2::data::function_symbol::function_symbol_OpId_;
+//}
 
 /// \brief Returns true if the term t is a variable
 inline bool is_variable(const atermpp::aterm &p)
@@ -156,9 +157,9 @@ class data_expression: public atermpp::aterm_appl
                            const data_expression& e4) const;
 
     /// \brief Returns the sort of the data expression
-    inline
-    sort_expression sort() const
-    {
+    
+    sort_expression sort() const;
+    /* {
       using namespace atermpp;
       // This implementation is currently done in this class, because there
       // is no elegant solution of distributing the implementation of the
@@ -225,7 +226,7 @@ class data_expression: public atermpp::aterm_appl
       assert(is_untyped_identifier(*this)); // All cases have been deal with here, except this one.
       return untyped_sort();
 
-    }
+    } */
 //--- end user section data_expression ---//
 };
 
@@ -290,10 +291,6 @@ std::set<data::variable> find_all_variables(const data::data_expression_list& x)
 std::set<data::variable> find_free_variables(const data::data_expression& x);
 std::set<data::variable> find_free_variables(const data::data_expression_list& x);
 bool search_variable(const data::data_expression& x, const data::variable& v);
-
-// TODO: we have to put it somewhere...
-std::string pp(const atermpp::aterm& x);
-std::string pp(const atermpp::aterm_appl& x);
 
 } // namespace data
 

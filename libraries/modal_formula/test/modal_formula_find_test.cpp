@@ -79,7 +79,7 @@ void test_free_variables()
   data::variable_list v = atermpp::make_list(b);
   state_formula f = forall(v, phi);
   std::set<data::variable> free_variables = state_formulas::find_free_variables(f);
-  std::cout << "free variables: " << data::detail::print_set(free_variables) << std::endl;
+  std::cout << "free variables: " << core::detail::print_set(free_variables) << std::endl;
   BOOST_CHECK(free_variables.find(b) == free_variables.end());
   BOOST_CHECK(free_variables.find(c) != free_variables.end());
 }

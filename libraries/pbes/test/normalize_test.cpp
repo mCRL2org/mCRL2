@@ -179,12 +179,6 @@ pbes_expression parse(const std::string& expr)
 }
 
 inline
-std::string printer(const pbes_expression& x)
-{
-  return pbes_system::pp(x);
-}
-
-inline
 pbes_expression norm(const pbes_expression& x)
 {
   return pbes_system::detail::normalize_and_or(x);
@@ -196,7 +190,6 @@ void test_normalize_and_or_equality(std::string expr1, std::string expr2)
     expr1,
     expr2,
     parse,
-    printer,
     std::equal_to<pbes_expression>(),
     norm,
     "normalize_and_or",

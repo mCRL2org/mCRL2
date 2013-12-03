@@ -86,10 +86,6 @@ bool is_well_typed(const specification& x)
   return lps::detail::is_well_typed(x);
 }
 
-// TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return to_string(x); }
-std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
-
 } // namespace lps
 
 } // namespace mcrl2

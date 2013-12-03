@@ -58,7 +58,7 @@ bool pbes2_bool_test(pbes &pbes_spec, data::rewriter::strategy rewrite_strategy 
 std::clog << "--- rewrite rule selection specification ---\n";
 std::clog << pbes_system::pp(pbes_spec) << std::endl;
 std::clog << "--- rewrite rule selection function symbols ---\n";
-std::clog << core::detail::print_set(pbes_system::find_function_symbols(pbes_spec), data::stream_printer()) << std::endl;
+std::clog << core::detail::print_set(pbes_system::find_function_symbols(pbes_spec)) << std::endl;
 #endif
 
   // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());

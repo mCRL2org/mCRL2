@@ -18,10 +18,7 @@
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/is_well_typed.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
-
-#ifdef MCRL2_USE_INDEX_TRAITS
 #include "mcrl2/pbes/index_traits.h"
-#endif
 
 namespace mcrl2
 {
@@ -64,11 +61,6 @@ std::set<pbes_system::propositional_variable_instantiation> find_propositional_v
 std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expression& x) { return pbes_system::find_identifiers< pbes_system::pbes_expression >(x); }
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v) { return pbes_system::search_variable< pbes_system::pbes_expression >(x, v); }
 //--- end generated pbes_system overloads ---//
-
-// TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return to_string(x); }
-std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
-std::string pp(const core::identifier_string& x) { return core::pp(x); }
 
 namespace algorithms {
 
@@ -137,14 +129,12 @@ std::set<propositional_variable_instantiation> pbes::occurring_variable_instanti
   return result;
 }
 
-#ifdef MCRL2_USE_INDEX_TRAITS
 static bool register_hooks()
 {
   register_propositional_variable_instantiation_hooks();
   return true;
 }
 static bool mcrl2_register_pbes(register_hooks());
-#endif
 
 } // namespace pbes_system
 

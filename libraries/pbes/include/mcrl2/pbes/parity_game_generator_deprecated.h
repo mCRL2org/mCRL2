@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <map>
 #include <set>
+#include <sstream>
 #include <utility>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/utilities/logger.h"
@@ -59,13 +60,17 @@ public:
     virtual
     std::string print(const pbes_expression& e)
     {
-      return pbes_system::pp(e);
+      std::ostringstream out;
+      out << e;
+      return out.str();
     }
 public:
     virtual
     std::string data_to_string(const data::data_expression& e)
     {
-      return data::pp(e);
+      std::ostringstream out;
+      out << e;
+      return out.str();
     }
 public:
     /// \brief Check whether e corresponds to true

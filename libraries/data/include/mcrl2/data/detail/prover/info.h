@@ -376,7 +376,7 @@ class InternalFormatInfo
       }
 
       const data::function_symbol& f(a.head());
-      if (pp(f.name())=="==")
+      if (static_cast<const std::string&>(f.name())=="==")
       {
         return true;
       }

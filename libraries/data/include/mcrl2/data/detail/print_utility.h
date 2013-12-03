@@ -217,35 +217,6 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
   return x;
 }
 
-struct data_printer
-{
-  template <typename T>
-  std::string operator()(const T& x) const
-  {
-    return data::pp(x);
-  }
-};
-
-/// \brief Creates a string representation of a container.
-/// \param v A container
-/// \param message A string
-/// \param print_index If true, an index is written in front of each term
-template <typename Container>
-std::string print_list(const Container& v, std::string message = "", bool print_index = false)
-{
-  return core::detail::print_list(v, data::detail::data_printer(), message, print_index);
-}
-
-/// \brief Creates a string representation of a container.
-/// \param v A container
-/// \param message A string
-/// \param print_index If true, an index is written in front of each term
-template <typename Container>
-std::string print_set(const Container& v, std::string message = "", bool print_index = false)
-{
-  return core::detail::print_set(v, data::detail::data_printer(), message, print_index);
-}
-
 } // namespace detail
 
 } // namespace data
