@@ -210,7 +210,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 
   if (number_of_renamed_variables==0)
   {
-    atermpp::aterm_appl a=gsMakeBinder(gsMakeLambda(),vl,(body_in_normal_form?body:rewrite_internal(body,sigma)));
+    atermpp::aterm_appl a=atermpp::aterm_appl(core::detail::function_symbol_Binder(), atermpp::aterm_appl(core::detail::function_symbol_Lambda()),vl,(body_in_normal_form?body:rewrite_internal(body,sigma)));
     return a;
   }
 
@@ -257,7 +257,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   }
 
   variable_list new_variable_list(new_variables.rbegin(), new_variables.rend());
-  return gsMakeBinder(gsMakeLambda(),new_variable_list,result);
+  return atermpp::aterm_appl(core::detail::function_symbol_Binder(), atermpp::aterm_appl(core::detail::function_symbol_Lambda()),new_variable_list,result);
 }
 
 
@@ -273,7 +273,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
                       internal_substitution_type &sigma)
 {
   using namespace atermpp;
-  assert(lambda_term[0]==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
+  assert(lambda_term[0]==atermpp::aterm_appl(core::detail::function_symbol_Lambda()));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list vl=static_cast<variable_list>(lambda_term[1]);
   const atermpp::aterm_appl lambda_body=rewrite_internal(atermpp::aterm_appl(lambda_term[2]),sigma);
   size_t arity=t.size();
@@ -326,7 +326,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   // This is a quantifier elimination that works on the existential quantifier as specified
   // in data types, i.e. without applying the implement function anymore.
 
-  assert(is_abstraction(t) && t[0]==gsMakeExists());
+  assert(is_abstraction(t) && t[0]==atermpp::aterm_appl(core::detail::function_symbol_Exists()));
   /* Get Body of Exists */
   const atermpp::aterm_appl t1 = atermpp::aterm_appl(t[2]);
 
@@ -411,7 +411,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
     return partial_result;
   }
 
-  return gsMakeBinder(gsMakeExists(),vl,rewrite_internal(t1,sigma));
+  return atermpp::aterm_appl(core::detail::function_symbol_Binder(), atermpp::aterm_appl(core::detail::function_symbol_Exists()),vl,rewrite_internal(t1,sigma));
 }
 
 
@@ -419,7 +419,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
      const atermpp::aterm_appl &t,
      internal_substitution_type &sigma)
 {
-  assert(is_abstraction(t) && t[0]==gsMakeForall());
+  assert(is_abstraction(t) && t[0]==atermpp::aterm_appl(core::detail::function_symbol_Forall()));
   /* Get Body of forall */
   const atermpp::aterm_appl t1 = atermpp::aterm_appl(t[2]);
   const variable_list vl=static_cast<variable_list>(t[1]);
@@ -524,7 +524,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
     return partial_result;
   }
 
-  return gsMakeBinder(gsMakeForall(),vl,rewrite_internal(t1,sigma));
+  return atermpp::aterm_appl(core::detail::function_symbol_Binder(), atermpp::aterm_appl(core::detail::function_symbol_Forall()),vl,rewrite_internal(t1,sigma));
 }
 
 
@@ -557,7 +557,7 @@ static void check_vars(const data_expression &expr, const std::set <variable> &v
 
 static void check_vars(application::const_iterator begin,
                        const application::const_iterator& end,
-                       const std::set <variable> &vars, 
+                       const std::set <variable> &vars,
                        std::set <variable> &used_vars)
 {
   while (begin != end)
@@ -581,7 +581,7 @@ static void check_vars(const data_expression &expr, const std::set <variable> &v
 
     if (vars.count(v)==0)
     {
-      throw v; 
+      throw v;
     }
   }
 }
@@ -704,8 +704,8 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
   {
     boost::signals2::detail::auto_buffer<atermpp::aterm, boost::signals2::detail::store_n_objects<16> > result;
     result.reserve(16);
-    
-    const application& appl=aterm_cast<application>(term); 
+
+    const application& appl=aterm_cast<application>(term);
     atermpp::aterm_appl arg0 = toInner(appl.head(), add_opids);
     // Reflect the way of encoding the other arguments!
     if (is_variable(arg0) || is_abstraction(arg0) || is_where_clause(arg0))
@@ -726,7 +726,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
       result.push_back(toInner(*i,add_opids));
     }
     return atermpp::aterm_appl(get_appl_afun_value(result.size()),result.begin(),result.end());
-  } 
+  }
 
   if (is_function_symbol(term))
   {
@@ -740,15 +740,15 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
     const std::vector < assignment > lv=atermpp::convert < std::vector < assignment > >(t.assignments());
     for(std::vector < assignment > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)
     {
-      l.push_front(core::detail::gsMakeDataVarIdInit(it->lhs(),toInner(it->rhs(),add_opids)));
+      l.push_front(atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), it->lhs(),toInner(it->rhs(),add_opids)));
     }
-    return gsMakeWhr(toInner(t.body(),add_opids),l);
+    return atermpp::aterm_appl(core::detail::function_symbol_Whr(), toInner(t.body(),add_opids),l);
   }
 
   assert(is_abstraction(term));
 
   const abstraction &t=term;
-  return gsMakeBinder(t.binding_operator(),t.variables(),toInner(t.body(),add_opids));
+  return atermpp::aterm_appl(core::detail::function_symbol_Binder(), t.binding_operator(),t.variables(),toInner(t.body(),add_opids));
 }
 
 data_expression fromInner(const atermpp::aterm_appl &term)

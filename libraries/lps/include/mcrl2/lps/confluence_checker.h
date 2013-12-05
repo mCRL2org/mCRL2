@@ -140,7 +140,7 @@ namespace detail
  **/
 inline action_label make_ctau_act_id()
 {
-  static atermpp::aterm_appl ctau_act_id = mcrl2::core::detail::gsMakeActId(atermpp::aterm_appl(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
+  static atermpp::aterm_appl ctau_act_id = atermpp::aterm_appl(core::detail::function_symbol_ActId(), atermpp::aterm_appl(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
 
   assert(atermpp::detail::address(ctau_act_id));
 
@@ -152,7 +152,7 @@ inline action_label make_ctau_act_id()
  **/
 inline action make_ctau_action()
 {
-  static atermpp::aterm_appl ctau_action = mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), atermpp::aterm_list());
+  static atermpp::aterm_appl ctau_action = atermpp::aterm_appl(core::detail::function_symbol_Action(), make_ctau_act_id(), atermpp::aterm_list());
 
   assert(atermpp::detail::address(ctau_action));
 

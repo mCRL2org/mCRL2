@@ -447,7 +447,7 @@ static atermpp::aterm subst_values(
       }
     }
 #endif
-    return gsMakeBinder(binder,bound_variables,body);
+    return atermpp::aterm_appl(core::detail::function_symbol_Binder(), binder,bound_variables,body);
 
   }
   else if (is_where_clause(atermpp::aterm_cast<const atermpp::aterm_appl>(t)))
@@ -472,7 +472,7 @@ static atermpp::aterm subst_values(
     for(atermpp::term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it)
     {
       const atermpp::aterm_appl &assignment= *it;
-      new_assignments.push_back(core::detail::gsMakeDataVarIdInit(variable(assignment[0]),
+      new_assignments.push_back(atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), variable(assignment[0]),
     		atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(subst,atermpp::aterm_cast<const atermpp::aterm_appl>(assignment[1])))));
     }
     atermpp::term_list < atermpp::aterm_appl > new_assignment_list;
@@ -480,7 +480,7 @@ static atermpp::aterm subst_values(
     {
       new_assignment_list.push_front(*it);
     }
-    return gsMakeWhr(body,new_assignment_list);
+    return atermpp::aterm_appl(core::detail::function_symbol_Whr(), body,new_assignment_list);
   }
   else
   {
@@ -572,15 +572,15 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
   else if (is_abstraction(term))
   {
     const atermpp::aterm_appl &binder=atermpp::aterm_cast<const atermpp::aterm_appl>(term[0]);
-    if (binder==gsMakeExists())
+    if (binder==atermpp::aterm_appl(core::detail::function_symbol_Exists()))
     {
       return internal_existential_quantifier_enumeration(term,sigma);
     }
-    if (binder==gsMakeForall())
+    if (binder==atermpp::aterm_appl(core::detail::function_symbol_Forall()))
     {
       return internal_universal_quantifier_enumeration(term,sigma);
     }
-    if (binder==gsMakeLambda())
+    if (binder==atermpp::aterm_appl(core::detail::function_symbol_Lambda()))
     {
       return rewrite_single_lambda(aterm_cast<const variable_list>(term[1]),atermpp::aterm_cast<const atermpp::aterm_appl>(term[2]),false,sigma);
     }
@@ -620,15 +620,15 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     if (is_abstraction(head))
     {
       const atermpp::aterm_appl &binder=atermpp::aterm_cast<const atermpp::aterm_appl>(head[0]);
-      if (binder==gsMakeLambda())
+      if (binder==atermpp::aterm_appl(core::detail::function_symbol_Lambda()))
       {
         return rewrite_lambda_application(head,term,sigma);
       }
-      if (binder==gsMakeExists())
+      if (binder==atermpp::aterm_appl(core::detail::function_symbol_Exists()))
       {
         return internal_existential_quantifier_enumeration(head,sigma);
       }
-      if (binder==gsMakeForall())
+      if (binder==atermpp::aterm_appl(core::detail::function_symbol_Forall()))
       {
         return internal_universal_quantifier_enumeration(head,sigma);
       }

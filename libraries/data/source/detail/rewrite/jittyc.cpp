@@ -86,7 +86,7 @@ static void initialise_common()
     afunCRe = atermpp::function_symbol("@@CRe",4); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
     afunMe = atermpp::function_symbol("@@Me",2); // Match term ( match_variable, variable_index )
 
-    dummy = gsMakeNil();
+    dummy = atermpp::aterm_appl(core::detail::function_symbol_Nil());
 
     afunARtrue = atermpp::function_symbol("@@true",0);
     afunARfalse = atermpp::function_symbol("@@false",0);
@@ -1553,7 +1553,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       if (is_abstraction(atermpp::aterm_appl(((aterm_list) t).front())))
       {
         atermpp::aterm_appl lambda_term(((aterm_list) t).front());
-        assert(lambda_term[0]==gsMakeLambda());
+        assert(lambda_term[0]==atermpp::aterm_appl(core::detail::function_symbol_Lambda()));
 
         b = rewr;
         nfs_array args_nfs(arity);
@@ -1715,7 +1715,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   else if (is_abstraction(atermpp::aterm_appl(t)))
   {
     stringstream ss;
-    if (((aterm_appl)t)[0]==gsMakeLambda())
+    if (((aterm_appl)t)[0]==atermpp::aterm_appl(core::detail::function_symbol_Lambda()))
     {
       if (rewr)
       {
@@ -1729,13 +1729,13 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       else
       {
         pair<bool,string> r=calc_inner_term(((aterm_appl)t)[2],startarg,nnfvars,false,total_arity);
-        ss << "mcrl2::core::detail::gsMakeBinder(mcrl2::core::detail::gsMakeLambda()," <<
+        ss << "atermpp::aterm_appl(core::detail::function_symbol_Binder(), atermpp::aterm_appl(core::detail::function_symbol_Lambda())," <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(variable_list(((aterm_appl)t)[1])) << ")," <<
                r.second << ")";
         return pair<bool,string>(false,ss.str());
       }
     }
-    else if (((aterm_appl)t)[0]==gsMakeForall())
+    else if (((aterm_appl)t)[0]==atermpp::aterm_appl(core::detail::function_symbol_Forall()))
     {
       if (rewr)
       {
@@ -1750,13 +1750,13 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         // A result which is not a normal form is requested.
         pair<bool,string> r=calc_inner_term(((aterm_appl)t)[2],startarg,nnfvars,false,total_arity);
-        ss << "mcrl2::core::detail::gsMakeBinder(mcrl2::core::detail::gsMakeForall()," <<
+        ss << "atermpp::aterm_appl(core::detail::function_symbol_Binder(), atermpp::aterm_appl(core::detail::function_symbol_Forall())," <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(variable_list(((aterm_appl)t)[1])) << ")," <<
                r.second << ")";
         return pair<bool,string>(false,ss.str());
       }
     }
-    else if (((aterm_appl)t)[0]==gsMakeExists())
+    else if (((aterm_appl)t)[0]==atermpp::aterm_appl(core::detail::function_symbol_Exists()))
     {
       if (rewr)
       {
@@ -1771,7 +1771,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         // A result which is not a normal form is requested.
         pair<bool,string> r=calc_inner_term(((aterm_appl)t)[2],startarg,nnfvars,false,total_arity);
-        ss << "mcrl2::core::detail::gsMakeBinder(mcrl2::core::detail::gsMakeExists()," <<
+        ss << "atermpp::aterm_appl(core::detail::function_symbol_Binder(), atermpp::aterm_appl(core::detail::function_symbol_Exists())," <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(variable_list(((aterm_appl)t)[1])) << ")," <<
                r.second << ")";
         return pair<bool,string>(false,ss.str());
@@ -1790,7 +1790,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       pair<bool,string> r=calc_inner_term(w[0],startarg,nnfvars,true,total_arity);
 
       // TODO REMOVE gsMakeWhr.
-      ss << "this_rewriter->rewrite_where(mcrl2::core::detail::gsMakeWhr(" << r.second << ",";
+      ss << "this_rewriter->rewrite_where(atermpp::aterm_appl(core::detail::function_symbol_Whr(), " << r.second << ",";
 
       aterm_list assignments=aterm_cast<aterm_list>(w[1]);
       for( size_t no_opening_brackets=assignments.size(); no_opening_brackets>0 ; no_opening_brackets--)
@@ -1802,7 +1802,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         aterm_appl assignment=aterm_cast<aterm_appl>(assignments.front());
         pair<bool,string> r=calc_inner_term(assignment[1],startarg,nnfvars,true,total_arity);
-        ss << ",mcrl2::core::detail::gsMakeDataVarIdInit(" <<
+        ss << ",atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), " <<
                  "this_rewriter->bound_variable_get(" << bound_variable_index(variable(assignment[0])) << ")," <<
                  r.second << "))";
       }
@@ -1815,7 +1815,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       // The result does not need to be rewritten.
       pair<bool,string> r=calc_inner_term(w[0],startarg,nnfvars,false,total_arity);
-      ss << "mcrl2::core::detail::gsMakeWhr(" << r.second << ",";
+      ss << "atermpp::aterm_appl(core::detail::function_symbol_Whr(), " << r.second << ",";
 
       aterm_list assignments=aterm_cast<aterm_list>(w[1]);
       for( size_t no_opening_brackets=assignments.size(); no_opening_brackets>0 ; no_opening_brackets--)
@@ -1827,7 +1827,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         aterm_appl assignment=aterm_cast<aterm_appl>(assignments.front());
         pair<bool,string> r=calc_inner_term(assignment[1],startarg,nnfvars,true,total_arity);
-        ss << ",mcrl2::core::detail::gsMakeDataVarIdInit(" <<
+        ss << ",atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), " <<
                  "this_rewriter->bound_variable_get(" << bound_variable_index(variable(assignment[0])) << ")," <<
                  r.second << "))";
       }
@@ -1869,7 +1869,7 @@ static aterm add_args(aterm a, size_t num)
 
     while (num > 0)
     {
-      l = l+make_list<aterm>(gsMakeNil());
+      l = l+make_list<aterm>(atermpp::aterm_appl(core::detail::function_symbol_Nil()));
       num--;
     }
     return  l;
@@ -2449,7 +2449,7 @@ static aterm toInner_list_odd(const data_expression &t)
   else if (is_abstraction(t))
   {
     const abstraction a=t;
-    return gsMakeBinder(a.binding_operator(),a.variables(),(aterm_appl)toInner_list_odd(a.body()));
+    return atermpp::aterm_appl(core::detail::function_symbol_Binder(), a.binding_operator(),a.variables(),(aterm_appl)toInner_list_odd(a.body()));
   }
   else if (is_where_clause(t))
   {
@@ -2458,9 +2458,9 @@ static aterm toInner_list_odd(const data_expression &t)
     atermpp::term_list <atermpp::aterm_appl > translated_assignments;
     for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
     {
-      translated_assignments=push_back(translated_assignments,core::detail::gsMakeDataVarIdInit(i->lhs(),(aterm_appl)toInner_list_odd(i->rhs())));
+      translated_assignments=push_back(translated_assignments,atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), i->lhs(),(aterm_appl)toInner_list_odd(i->rhs())));
     }
-    return gsMakeWhr((aterm_appl)toInner_list_odd(w.body()),
+    return atermpp::aterm_appl(core::detail::function_symbol_Whr(), (aterm_appl)toInner_list_odd(w.body()),
                      (aterm_list)reverse(translated_assignments));
   }
   assert(0);
@@ -3054,15 +3054,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (mcrl2::data::is_abstraction(head))\n"
       "  {\n"
       "    const aterm_appl binder(head[0]);\n"
-      "    if (binder==gsMakeLambda())\n"
+      "    if (binder==atermpp::aterm_appl(core::detail::function_symbol_Lambda()))\n"
       "    {\n"
       "      return this_rewriter->rewrite_lambda_application(head,t,*(this_rewriter->global_sigma));\n"
       "    }\n"
-      "    if (binder==gsMakeExists())\n"
+      "    if (binder==atermpp::aterm_appl(core::detail::function_symbol_Exists()))\n"
       "    {\n"
       "      return this_rewriter->internal_existential_quantifier_enumeration(head,*(this_rewriter->global_sigma));\n"
       "    }\n"
-      "    if (binder==gsMakeForall())\n"
+      "    if (binder==atermpp::aterm_appl(core::detail::function_symbol_Forall()))\n"
       "    {\n"
       "      return this_rewriter->internal_universal_quantifier_enumeration(head,*(this_rewriter->global_sigma));\n"
       "    }\n"
@@ -3161,15 +3161,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (mcrl2::data::is_abstraction(t))\n"
       "  {\n"
       "    atermpp::aterm_appl binder(t[0]);\n"
-      "    if (binder==gsMakeExists())\n"
+      "    if (binder==atermpp::aterm_appl(core::detail::function_symbol_Exists()))\n"
       "    {\n"
       "      return this_rewriter->internal_existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
       "    }\n"
-      "    if (binder==gsMakeForall())\n"
+      "    if (binder==atermpp::aterm_appl(core::detail::function_symbol_Forall()))\n"
       "    {\n"
       "      return this_rewriter->internal_universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
       "    }\n"
-      "    if (binder==gsMakeLambda())\n"
+      "    if (binder==atermpp::aterm_appl(core::detail::function_symbol_Lambda()))\n"
       "    {\n"
       "      return this_rewriter->rewrite_single_lambda(\n"
       "               atermpp::aterm_cast<const mcrl2::data::variable_list>(t[1]),\n"

@@ -27,14 +27,6 @@ bool gsIs%(name)s(const atermpp::aterm_appl& Term)
 
 '''
 
-LIBSTRUCT_MAKE_FUNCTION = '''inline
-aterm_appl gsMake%(name)s(%(parameters)s)
-{
-  return aterm_appl(function_symbol_%(name)s()%(arguments)s);
-}
-
-'''
-
 #---------------------------------------------------------------#
 #                      generate_libstruct_functions
 #---------------------------------------------------------------#
@@ -54,7 +46,6 @@ def generate_libstruct_functions(rules, filename, skip_list):
         decls[name] = f.default_declaration()
 
     text = ''
-    mtext = '' # gsMake functions
 
     name_keys = names.keys()
     name_keys.sort()
@@ -78,14 +69,7 @@ def generate_libstruct_functions(rules, filename, skip_list):
         comma = ''
         if calls[name] != "":
             comma = ', '
-        mtext = mtext + LIBSTRUCT_MAKE_FUNCTION % {
-            'name'       : name,
-            'arity'      : arity,
-            'parameters' : decls[name],
-            'arguments'  : comma + calls[name]
-        }
-    text = string.strip(text + mtext)
-    text = text + '\n'
+    text = text.strip() + '\n'
     return insert_text_in_file(filename, text, 'generated code')
 
 CHECK_RULE = '''template <typename Term>

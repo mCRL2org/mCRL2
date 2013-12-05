@@ -255,15 +255,7 @@ class action_rename_specification
       m_data(data),
       m_action_labels(action_labels),
       m_rules(rules)
-    {
-      /* m_term = reinterpret_cast<atermpp::aterm>(
-      core::detail::gsMakeActionRenameSpec(
-        data::detail::data_specification_to_aterm_data_spec(data),
-        core::detail::gsMakeActSpec(action_labels),
-        core::detail::gsMakeActionRenameRules(rules)
-      )
-      ); */
-    }
+    { }
 
     /// \brief Returns the data action_rename_specification.
     /// \return The data action_rename_specification.
@@ -316,7 +308,7 @@ class action_rename_specification
 inline
 atermpp::aterm_appl action_rename_rule_to_aterm(const action_rename_rule& rule)
 {
-  return core::detail::gsMakeActionRenameRule(rule.variables(), rule.condition(), rule.lhs_aterm(), rule.rhs());
+  return atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRule(), rule.variables(), rule.condition(), rule.lhs_aterm(), rule.rhs());
 }
 
 inline
@@ -327,10 +319,10 @@ atermpp::aterm_appl action_rename_specification_to_aterm(const action_rename_spe
   {
     rules.push_back(action_rename_rule_to_aterm(*i));
   }
-  return core::detail::gsMakeActionRenameSpec(
+  return atermpp::aterm_appl(core::detail::function_symbol_ActionRenameSpec(),
     data::detail::data_specification_to_aterm_data_spec(spec.data()),
-    core::detail::gsMakeActSpec(spec.action_labels()),
-    core::detail::gsMakeActionRenameRules(atermpp::aterm_list(rules.begin(), rules.end()))
+    atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
+    atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRules(), atermpp::aterm_list(rules.begin(), rules.end()))
   );
 }
 

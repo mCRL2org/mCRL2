@@ -328,7 +328,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
     const atermpp::aterm_appl &binder=aterm_cast<const atermpp::aterm_appl>(t1[0]);
     const variable_list &bound_variables=aterm_cast<const variable_list>(t1[1]);
     const atermpp::aterm_appl &body=build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t1[2]),substituted_vars,exprs);
-    return gsMakeBinder(binder,bound_variables,body);
+    return atermpp::aterm_appl(core::detail::function_symbol_Binder(), binder,bound_variables,body);
   }
   else
   {
@@ -350,8 +350,8 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
     typedef boost::signals2::detail::auto_buffer<atermpp::aterm, boost::signals2::detail::store_n_objects<64> > args_vector_t;
     args_vector_t args;
     args.reserve(arity+extra_arity);
-    
-    
+
+
     size_t k = 1;
 
     args.push_back(aterm()); // First put a dummy element. Replace it later.
@@ -595,12 +595,12 @@ bool EnumeratorSolutionsStandard::next(
                                     atermpp::term_list < atermpp::aterm_appl > (),
                                     false);
           }
-          else 
+          else
           {
             // is_function_sort(it->sort()) does not hold.
             // Construct the domain and target sort for the constructor.
             assert(it->sort()==sort);
-          
+
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.

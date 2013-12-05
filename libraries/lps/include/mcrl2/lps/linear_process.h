@@ -198,7 +198,7 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
     summands.push_front(s);
   }
 
-  return core::detail::gsMakeLinearProcess(
+  return atermpp::aterm_appl(core::detail::function_symbol_LinearProcess(),
            p.process_parameters(),
            summands
          );
