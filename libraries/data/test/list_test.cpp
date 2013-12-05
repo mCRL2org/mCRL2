@@ -43,6 +43,7 @@ void list_expression_test()
 
   specification.add_context_sort(sort_list::list(sort_pos::pos()));
 
+
   data::rewriter normaliser(specification);
 
   variable_vector v;
@@ -61,6 +62,7 @@ void list_expression_test()
 
   data_expression e = parse_data_expression("[10]", v.begin(), v.end());
   BOOST_CHECK(is_cons_application(normaliser(e))); 
+
 
 }
 

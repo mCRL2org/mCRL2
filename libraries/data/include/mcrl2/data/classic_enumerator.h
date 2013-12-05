@@ -52,7 +52,6 @@ class classic_enumerator
   public:
     /// \brief The type of objects that represent substitutions
     typedef typename Evaluator::substitution_type  substitution_type;
-    typedef typename Evaluator::internal_substitution_type  internal_substitution_type;
 
     /// \brief The type of objects that represent variables
     typedef typename substitution_type::variable_type                     variable_type;
@@ -74,14 +73,14 @@ class classic_enumerator
     class iterator_internal :
         public boost::iterator_facade<
                  iterator_internal,
-                 const atermpp::term_list<atermpp::aterm_appl>,
+                 const data_expression_list,
                  boost::forward_traversal_tag >
     {
       protected:
 
         typedef classic_enumerator < evaluator_type > enclosing_classic_enumerator;
         enclosing_classic_enumerator *m_enclosing_enumerator;
-        atermpp::term_list<atermpp::aterm_appl> m_assignments; // m_assignments are only protected if it does contain something else than the empty list.
+        data_expression_list m_assignments; // m_assignments are only protected if it does contain something else than the empty list.
         bool m_enumerator_iterator_valid;
         bool m_solution_is_exact;
         bool m_solution_possible;
@@ -93,8 +92,8 @@ class classic_enumerator
         /// \brief Constructor. Use it via the begin_internal function of the classic enumerator class.
         iterator_internal(enclosing_classic_enumerator *e,
                           const variable_list &variables,
-                          const atermpp::aterm_appl &condition,
-                          internal_substitution_type &sigma,
+                          const data_expression &condition,
+                          substitution_type &sigma,
                           const bool not_equal_to_false=true,
                           const size_t max_internal_variables=0,
                           const bool do_not_throw_exceptions=false):
@@ -102,7 +101,7 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_solution_possible(do_not_throw_exceptions)
         {
-          const atermpp::aterm_appl rewritten_condition=e->m_evaluator.rewrite_internal(condition,sigma);
+          const data_expression rewritten_condition=e->m_evaluator.get_rewriter().rewrite(condition,sigma);
           if ((not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_false) ||
               (!not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_true))
           {
@@ -217,7 +216,7 @@ class classic_enumerator
           }
           else
           {
-            atermpp::aterm_appl instantiated_solution;
+            data_expression instantiated_solution;
             m_enumerator_iterator_valid=m_generator->next(instantiated_solution,m_assignments,m_solution_possible);
             if (m_enumerator_iterator_valid)
             {
@@ -232,7 +231,7 @@ class classic_enumerator
           return m_enumerator_iterator_valid==other.m_enumerator_iterator_valid;
         }
 
-        const atermpp::term_list<atermpp::aterm_appl> & dereference() const
+        const data_expression_list& dereference() const
         {
           assert(m_enumerator_iterator_valid);
           return m_assignments;
@@ -256,8 +255,8 @@ class classic_enumerator
     ///            if not, the function solution_is_possible can be used to indicate whether
     ///            valid solutions are being generated.
     iterator_internal begin_internal(const variable_list variables,
-                                     const atermpp::aterm_appl condition_in_internal_format,
-                                     internal_substitution_type &sigma,
+                                     const data_expression condition_in_internal_format,
+                                     substitution_type &sigma,
                                      const size_t max_internal_variables=0,
                                      const bool not_equal_to_false=true,
                                      const bool do_not_throw_exceptions=false)
@@ -292,7 +291,7 @@ class classic_enumerator
         variable_list m_vars;
         bool m_solution_is_exact;
         bool m_solution_possible;
-        internal_substitution_type internal_sigma;
+        substitution_type internal_sigma;
         detail::EnumeratorSolutionsStandard m_generator;
 
       public:
@@ -311,9 +310,9 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_vars(atermpp::convert<variable_list,Container>(variables)),
           m_solution_possible(do_not_throw_exceptions),
-          internal_sigma(m_enclosing_enumerator->m_evaluator.convert_to(sigma)),
+          internal_sigma(sigma),
           m_generator(m_vars,
-                      m_enclosing_enumerator->m_evaluator.convert_to(condition),
+                      condition,
                       internal_sigma,
                       not_equal_to_false,
                       &(m_enclosing_enumerator->m_enumerator),
@@ -356,10 +355,10 @@ class classic_enumerator
 
         void increment()
         {
-          atermpp::term_list <atermpp::aterm_appl> assignment_list;
+          data_expression_list assignment_list;
 
           const bool b=m_solution_possible;
-          atermpp::aterm_appl instantiated_solution;
+          data_expression instantiated_solution;
           if (m_generator.next(instantiated_solution,assignment_list,m_solution_possible) && b==m_solution_possible)
           {
             if (m_solution_possible)
@@ -368,14 +367,12 @@ class classic_enumerator
             }
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();
-            for (atermpp::term_list_iterator< atermpp::aterm_appl > i=assignment_list.begin();
+            for (data_expression_list::const_iterator i=assignment_list.begin();
                  i != assignment_list.end(); ++i,++j)
             {
-              assert(static_cast< variable_type >(*j).sort() ==
-                              m_enclosing_enumerator->m_evaluator.convert_from(*i).sort());
+              assert(static_cast< variable_type >(*j).sort() == i->sort());
 
-              m_substitution[static_cast< variable_type >(*j)] =
-                              data_expression(m_enclosing_enumerator->m_evaluator.convert_from(*i));
+              m_substitution[static_cast< variable_type >(*j)] = *i;
             }
 
           }

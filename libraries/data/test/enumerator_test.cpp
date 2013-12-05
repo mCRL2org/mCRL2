@@ -22,6 +22,7 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/print.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;

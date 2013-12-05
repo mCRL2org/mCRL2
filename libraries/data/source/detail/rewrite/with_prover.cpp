@@ -28,10 +28,12 @@ namespace data
 namespace detail
 {
 
-RewriterProver::RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector):
-  Rewriter()
+RewriterProver::RewriterProver(const data_specification& data_spec, 
+                               mcrl2::data::rewriter::strategy strat, 
+                               const used_data_equation_selector& equations_selector):
+  Rewriter(data_spec, equations_selector)
 {
-  prover_obj = new BDD_Prover(DataSpec, equations_selector, strat);
+  prover_obj = new BDD_Prover(data_spec, equations_selector, strat);
   rewr_obj = prover_obj->get_rewriter();
 }
 
@@ -40,19 +42,19 @@ RewriterProver::~RewriterProver()
   delete prover_obj;
 }
 
-bool RewriterProver::addRewriteRule(const data_equation &Rule)
+bool RewriterProver::addRewriteRule(const data_equation& Rule)
 {
   return rewr_obj->addRewriteRule(Rule);
 }
 
-bool RewriterProver::removeRewriteRule(const data_equation &Rule)
+bool RewriterProver::removeRewriteRule(const data_equation& Rule)
 {
   return rewr_obj->removeRewriteRule(Rule);
 }
 
 data_expression RewriterProver::rewrite(
-            const data_expression &Term,
-            substitution_type &sigma)
+            const data_expression& Term,
+            substitution_type& sigma)
 {
   if (mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_())
   {
@@ -65,35 +67,6 @@ data_expression RewriterProver::rewrite(
     return rewr_obj->rewrite(Term,sigma);
   }
 }
-
-atermpp::aterm_appl RewriterProver::rewrite_internal(
-            const atermpp::aterm_appl &Term,
-            internal_substitution_type &sigma)
-{
-  // Code below is not very efficient, due to the translation to and from internal
-  // rewrite format. This requires further investigation...
-  const data_expression t=rewr_obj->fromRewriteFormat(Term);
-  if (t.sort() == mcrl2::data::sort_bool::bool_())
-  {
-    prover_obj->set_substitution_internal(sigma);
-    prover_obj->set_formula(t);
-    return rewr_obj->toRewriteFormat(prover_obj->get_bdd());
-  }
-  else
-  {
-    return rewr_obj->rewrite_internal(Term,sigma);
-  }
-}
-
-atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression &Term)
-{
-  return rewr_obj->toRewriteFormat(Term);
-}
-
-/* data_expression RewriterProver::fromRewriteFormat(const atermpp::aterm_appl Term)
-{
-  return rewr_obj->fromRewriteFormat(Term);
-} */
 
 rewrite_strategy RewriterProver::getStrategy()
 {

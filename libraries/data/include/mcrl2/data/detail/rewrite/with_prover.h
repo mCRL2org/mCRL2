@@ -29,7 +29,6 @@ class RewriterProver: public Rewriter
     boost::shared_ptr<detail::Rewriter> rewr_obj;
 
     typedef Rewriter::substitution_type substitution_type;
-    typedef Rewriter::internal_substitution_type internal_substitution_type;
 
   public:
     RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector);
@@ -40,12 +39,6 @@ class RewriterProver: public Rewriter
     data_expression rewrite(
          const data_expression &term,
          substitution_type &sigma);
-
-    atermpp::aterm_appl rewrite_internal(
-         const atermpp::aterm_appl &term,
-         internal_substitution_type &sigma);
-
-    atermpp::aterm_appl toRewriteFormat(const data_expression &term);
 
     bool addRewriteRule(const data_equation &rule);
     bool removeRewriteRule(const data_equation &rule);

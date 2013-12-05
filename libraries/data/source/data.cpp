@@ -109,7 +109,81 @@ static bool register_hooks()
   register_variable_hooks();
   return true;
 }
-static bool mcrl2_register_data(register_hooks());
+
+static bool initialised=register_hooks();
+
+
+sort_expression data_expression::sort() const
+{
+  using namespace atermpp;
+  // This implementation is currently done in this class, because there
+  // is no elegant solution of distributing the implementation of the
+  // derived classes (as we need to support requesting the sort of a
+  // data_expression we do need to provide an implementation here).
+  if (is_variable(*this))
+  {
+    const variable& v(*this);
+    return v.sort();
+  }
+  else if (is_function_symbol(*this))
+  {
+    const function_symbol f(*this);
+    return f.sort();
+  }
+  else if (is_abstraction(*this))
+  {
+    if (is_forall(*this) || is_exists(*this))
+    {
+      // Workaround for the unavailability of sort_bool::bool_()
+      // (because of cyclic dependencies).
+      return aterm_cast<data_expression>((*this)[2]).sort();
+    }
+    else if (is_lambda(*this))
+    {
+      const atermpp::term_list<aterm_appl> &v_variables = atermpp::aterm_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
+      sort_expression_vector s;
+      for (atermpp::term_list<aterm_appl>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
+      {
+        s.push_back(aterm_cast<sort_expression>((*i)[1])); // Push the sort.
+      }
+      return function_sort(sort_expression_list(s.begin(),s.end()), aterm_cast<data_expression>((*this)[2]).sort());
+    }
+    else
+    {
+      assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_untyped_set_or_bag_comprehension(*this));
+      const atermpp::term_list<aterm_appl> &v_variables  = atermpp::aterm_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
+      assert(v_variables.size() == 1);
+
+      if (is_bag_comprehension(*this))
+      {
+        return container_sort(bag_container(), aterm_cast<const sort_expression>(v_variables.front()[1]));
+      }
+      else // If it is not known whether the term is a set or a bag, it returns the type of a set, as there is
+           // no setbag type. This can only occur for terms that are not propertly type checked.
+      {
+        return container_sort(set_container(), aterm_cast<sort_expression>(v_variables.front()[1]));
+      }
+    }
+  }
+  else if (is_application(*this))
+  {
+    const data_expression &head = atermpp::aterm_cast<const data_expression>((*this)[0]);
+    sort_expression s(head.sort());
+    if (is_function_sort(s))
+    {
+      const function_sort& fs = core::static_down_cast<const function_sort&>(s);
+      return (fs.codomain());
+    }
+    return s;
+  }
+  else if (is_where_clause(*this))
+  {
+    return aterm_cast<data_expression>((*this)[0]).sort();
+  }
+  assert(is_untyped_identifier(*this)); // All cases have been deal with here, except this one.
+  return untyped_sort();
+
+}
 
 } // namespace data
 

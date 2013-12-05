@@ -273,7 +273,10 @@ class data_specification
     void add_system_defined_constructor(const function_symbol& f) const
     {
       function_symbol g(normalize_sorts(f, *this));
-      m_normalised_constructors.push_back(g);
+      if (std::find(m_normalised_constructors.begin(),m_normalised_constructors.end(),g)==m_normalised_constructors.end()) // not found
+      {
+        m_normalised_constructors.push_back(g);
+      }
     }
 
     /// \brief Adds a mapping to this specification, and marks it as system
@@ -286,7 +289,10 @@ class data_specification
     void add_system_defined_mapping(const function_symbol& f) const
     {
       function_symbol g(normalize_sorts(f, *this));
-      m_normalised_mappings.push_back(g);
+      if (std::find(m_normalised_mappings.begin(),m_normalised_mappings.end(),g)==m_normalised_mappings.end()) // not found
+      {
+        m_normalised_mappings.push_back(g);
+      }
     }
 
     /// \brief Adds an equation to this specification, and marks it as system
@@ -335,7 +341,10 @@ class data_specification
 
       for (function_symbol_vector::const_iterator i = symbols.begin(); i != symbols.end(); ++i)
       {
-        m_normalised_mappings.push_back(*i);
+        if (std::find(m_normalised_mappings.begin(),m_normalised_mappings.end(),*i)==m_normalised_mappings.end()) // not found
+        {
+          m_normalised_mappings.push_back(*i);
+        }
       }
 
       data_equation_vector equations(standard_generate_equations_code(sort));
@@ -565,8 +574,11 @@ class data_specification
     void add_constructor(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      m_constructors.push_back(f);
-      data_is_not_necessarily_normalised_anymore();
+      if (std::find(m_constructors.begin(),m_constructors.end(),f)==m_constructors.end())
+      {
+        m_constructors.push_back(f);
+        data_is_not_necessarily_normalised_anymore();
+      }
     }
 
     /// \brief Adds a mapping to this specification
@@ -577,8 +589,11 @@ class data_specification
     void add_mapping(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      m_mappings.push_back(f);
-      data_is_not_necessarily_normalised_anymore();
+      if (std::find(m_mappings.begin(),m_mappings.end(),f)==m_mappings.end())
+      { 
+        m_mappings.push_back(f);
+        data_is_not_necessarily_normalised_anymore();
+      }
     }
 
     /// \brief Adds an equation to this specification
@@ -705,7 +720,10 @@ class data_specification
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
         function_symbol normalised_constructor(normalize_sorts(*i, *this));
 
-        m_normalised_constructors.push_back(normalised_constructor);
+        if (std::find(m_normalised_constructors.begin(),m_normalised_constructors.end(),*i)==m_normalised_constructors.end()) // not found
+        {
+          m_normalised_constructors.push_back(*i);
+        }
         add_system_defined_sort(normalised_sort);
       }
 
@@ -716,7 +734,10 @@ class data_specification
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
         function_symbol normalised_mapping(normalize_sorts(*i, *this));
 
-        m_normalised_mappings.push_back(normalised_mapping);
+        if (std::find(m_normalised_mappings.begin(),m_normalised_mappings.end(),normalised_mapping)==m_normalised_mappings.end())
+        {
+          m_normalised_mappings.push_back(normalised_mapping);
+        }
 
         add_system_defined_sort(normalised_sort);
       }

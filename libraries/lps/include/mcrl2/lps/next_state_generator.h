@@ -33,7 +33,7 @@ class next_state_generator
 {
   public:
     // A rewriter_expression_t is a data expression in rewriter-internal format.
-    typedef atermpp::aterm_appl rewriter_expression_t;
+    typedef data::data_expression rewriter_expression_t;
     typedef atermpp::term_list<rewriter_expression_t> valuation_t;
     typedef std::list<valuation_t> summand_enumeration_t;
     typedef atermpp::term_appl<rewriter_expression_t> condition_arguments_t;
@@ -41,9 +41,8 @@ class next_state_generator
     typedef data::detail::legacy_rewriter rewriter_t;
     typedef data::classic_enumerator<rewriter_t> enumerator_t;
 
-    typedef data::rewriter::internal_substitution_type substitution_t;
+    typedef data::rewriter::substitution_type substitution_t;
     typedef rewriter_expression_t internal_state_argument_t;
-    // typedef atermpp::term_appl<internal_state_argument_t> internal_state_t;
     typedef std::vector<internal_state_argument_t> internal_state_t;
 
   protected:
@@ -58,7 +57,6 @@ class next_state_generator
       action_summand *summand;
       data::variable_list variables;
       rewriter_expression_t condition;
-      // atermpp::aterm_appl result_state;
       internal_state_t result_state;
       std::vector<action_internal_t> action_label;
 
@@ -283,13 +281,13 @@ class next_state_generator
     /// \brief Converts a state arguments to internal state arguments.
     internal_state_argument_t get_internal_state_argument(const data::data_expression &argument) const
     {
-      return m_rewriter.convert_to(argument);
+      return argument;
     }
 
     /// \brief Converts a internal state arguments to state arguments.
     data::data_expression get_state_argument(const internal_state_argument_t &internal_argument) const
     {
-      return m_rewriter.convert_from(internal_argument);
+      return internal_argument;
     }
 
     /// \brief Constructs internal states out of internal state arguments.

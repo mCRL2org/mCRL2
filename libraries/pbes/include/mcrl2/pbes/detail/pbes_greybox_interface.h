@@ -61,8 +61,7 @@ namespace detail {
     pbes_expression rewrite_and_simplify_expression(const pbes_expression& e, const bool convert_data_to_pbes = true)
     {
       data::detail::legacy_rewriter::substitution_type sigma;
-      data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-      pbes_expression phi = rewrite_and_simplify(e,sigma,sigma_internal, convert_data_to_pbes);
+      pbes_expression phi = rewrite_and_simplify(e,sigma, convert_data_to_pbes);
       return phi;
     }
 
@@ -155,9 +154,8 @@ namespace detail {
         pbes_expression result;
 
         data::detail::legacy_rewriter::substitution_type sigma;
-        data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-        make_substitution_internal(pbes_eqn.variable().parameters(), tr::param(psi),sigma,sigma_internal);
-        result = substitute_and_rewrite(expr,sigma,sigma_internal);
+        make_substitution_internal(pbes_eqn.variable().parameters(), tr::param(psi),sigma);
+        result = substitute_and_rewrite(expr,sigma);
 
         mCRL2log(log::debug2, "pbes_greybox_interface") << print(result) << std::endl;
         return result;

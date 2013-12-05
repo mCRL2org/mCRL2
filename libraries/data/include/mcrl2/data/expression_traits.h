@@ -366,7 +366,7 @@ struct expression_traits : public core::term_traits< Expression >
   }
 
   template < typename Container >
-  static application make_application(const data_expression& e, const Container& arguments)
+  static application application(const data_expression& e, const Container& arguments)
   {
     return application(e, arguments);
   }

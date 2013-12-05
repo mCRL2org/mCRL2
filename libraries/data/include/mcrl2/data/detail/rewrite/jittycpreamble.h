@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 #include "mcrl2/atermpp/detail/function_symbol_constants.h"
+#include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
@@ -18,7 +19,7 @@ using namespace atermpp;
 
 void rewrite_init(RewriterCompilingJitty*);
 void rewrite_cleanup();
-atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl&);
+mcrl2::data::data_expression rewrite_external(const mcrl2::data::data_expression&);
 
 extern "C" {
   DLLEXPORT bool init(rewriter_interface* i);
@@ -38,12 +39,7 @@ bool init(rewriter_interface* i)
   return true;
 }
 
-static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl &t);
+static inline mcrl2::data::data_expression rewrite(const mcrl2::data::data_expression& t);
 
-static inline atermpp::aterm_appl makeAppl1(const atermpp::function_symbol &a, const atermpp::aterm &h, const atermpp::aterm_appl &t1) 
-              { return atermpp::aterm_appl(a,h,reinterpret_cast<const atermpp::aterm &>(t1)); } 
-static inline atermpp::aterm_appl makeAppl2(const atermpp::function_symbol &a, const atermpp::aterm &h, const atermpp::aterm_appl &t1, 
-                            const atermpp::aterm_appl &t2) 
-              { return atermpp::aterm_appl(a,h,t1, t2); }
 
 

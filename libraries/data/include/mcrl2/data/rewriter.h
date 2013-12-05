@@ -42,32 +42,10 @@ class basic_rewriter
   public:
     /// \brief The type for the substitution that is used internally.
     typedef detail::Rewriter::substitution_type substitution_type;
-    /// \brief The type for the substitution that is used for internal substitution, internally.
-    typedef detail::Rewriter::internal_substitution_type internal_substitution_type;
 
   protected:
     /// \brief The wrapped Rewriter.
     boost::shared_ptr<detail::Rewriter> m_rewriter;
-
-    /// \brief Convert a data expression to an expression in internal format
-    /// \details This function is needed to allow the conversion of substitutions
-    ///          to the internal format.
-    /// \deprecated
-    atermpp::aterm_appl convert_expression_to(const data_expression &t) const
-    {
-      return m_rewriter->toRewriteFormat(t);
-    }
-
-    /// \brief Convert a substitution to a substitution with right hand sides
-    ///        in internal format.
-    /// \details This function is needed to convert substitutions to the internal
-    ///          format if the internal details of the legacy rewriters are used.
-    ///          This function should be removed.
-    /// \deprecated
-    internal_substitution_type convert_substitution_to(const substitution_type &sigma) const
-    {
-      return apply(sigma, boost::bind(&basic_rewriter<Term>::convert_expression_to, this, _1));
-    }
 
   public:
 
@@ -133,15 +111,14 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     typedef core::term_traits< expression_type >::variable_type variable_type;
 
 
-    typedef basic_rewriter< atermpp::aterm >::substitution_type substitution_type;
-    typedef basic_rewriter< atermpp::aterm >::internal_substitution_type internal_substitution_type;
+    typedef basic_rewriter< data_expression >::substitution_type substitution_type;
 
   protected:
 
     /// \brief Copy constructor for conversion between derived types
     template < typename CompatibleExpression >
     basic_rewriter(const basic_rewriter< CompatibleExpression > & other) :
-      basic_rewriter< atermpp::aterm >(other)
+      basic_rewriter< data_expression >(other)
     { }
 
   public:
@@ -175,7 +152,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     {
       return m_rewriter->addRewriteRule(equation);
     }
-};
+}; 
 
 /// \brief Rewriter that operates on data expressions.
 //
@@ -187,7 +164,6 @@ class rewriter: public basic_rewriter<data_expression>
 {
   public:
     typedef basic_rewriter<data_expression>::substitution_type substitution_type;
-    typedef basic_rewriter<data_expression>::internal_substitution_type internal_substitution_type;
 
     /// \brief Constructor.
     /// \param[in] r a rewriter.
@@ -260,6 +236,46 @@ class rewriter: public basic_rewriter<data_expression>
       mCRL2log(log::debug) << " ------------> " << result << std::endl;
 #endif
       return result;
+    }
+    
+    /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+    /// to data variables.
+    /// \param[in] d A data expression
+    /// \param[in] sigma A substitution function
+    /// \return The normal form of the term.
+    //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
+    //  an arbitrary SubstitionFunction, as this is prohibitively costly. 
+
+    data_expression operator()(const data_expression& d, substitution_type& sigma) const
+    {
+# ifdef MCRL2_PRINT_REWRITE_STEPS
+      mCRL2log(log::debug) << "REWRITE " << d << "\n";
+      data_expression result(m_rewriter->rewrite(d,sigma));
+      mCRL2log(log::debug) << " ------------> " << result << std::endl;
+      return result;
+#else 
+      return m_rewriter->rewrite(d,sigma);
+#endif
+    }
+    /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+    /// to data variables.
+    /// \param[in] d A data expression
+    /// \param[in] sigma A substitution function
+    /// \return The normal form of the term.
+    //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
+    //  an arbitrary SubstitionFunction, as this is prohibitively costly. 
+
+    data_expression operator()(const data_expression& d, const substitution_type& sigma) const
+    {
+      substitution_type sigma1(sigma);
+# ifdef MCRL2_PRINT_REWRITE_STEPS
+      mCRL2log(log::debug) << "REWRITE " << d << "\n";
+      data_expression result(m_rewriter->rewrite(d,sigma1));
+      mCRL2log(log::debug) << " ------------> " << result << std::endl;
+      return result;
+#else 
+      return m_rewriter->rewrite(d,sigma1);
+#endif
     }
 };
 

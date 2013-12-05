@@ -24,6 +24,7 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/print.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -243,7 +244,7 @@ void test_constructors()
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), h) != constructors.end());
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
-  BOOST_CHECK(spec.constructors() != spec1.constructors());
+  BOOST_CHECK(spec.constructors() == spec1.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl);
   BOOST_CHECK(spec.constructors(s0) == hl);
   BOOST_CHECK(spec1.constructors(s) == fgl);

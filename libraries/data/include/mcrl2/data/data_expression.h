@@ -90,7 +90,7 @@ inline bool is_function_symbol(const atermpp::aterm_appl &p)
 inline bool is_variable(const atermpp::aterm &p)
 {
   return core::detail::gsIsDataVarId(atermpp::aterm_cast<const atermpp::aterm_appl>(p));
-}
+} 
 
 /// \brief Returns true if the term t is an application
 inline bool is_application(const atermpp::aterm_appl &p)
@@ -156,9 +156,9 @@ class data_expression: public atermpp::aterm_appl
                            const data_expression& e4) const;
 
     /// \brief Returns the sort of the data expression
-    inline
-    sort_expression sort() const
-    {
+    
+    sort_expression sort() const;
+    /* {
       using namespace atermpp;
       // This implementation is currently done in this class, because there
       // is no elegant solution of distributing the implementation of the
@@ -225,7 +225,7 @@ class data_expression: public atermpp::aterm_appl
       assert(is_untyped_identifier(*this)); // All cases have been deal with here, except this one.
       return untyped_sort();
 
-    }
+    } */
 //--- end user section data_expression ---//
 };
 

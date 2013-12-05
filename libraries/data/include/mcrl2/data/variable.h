@@ -103,6 +103,7 @@ inline void swap(variable& t1, variable& t2)
 }
 //--- end generated class variable ---//
 
+
 // template function overloads
 std::string pp(const variable_list& x);
 std::string pp(const variable_vector& x);
