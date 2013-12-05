@@ -48,14 +48,14 @@ class fixpoint_symbol: public atermpp::aterm_appl
     /// \return The mu symbol.
     static fixpoint_symbol mu()
     {
-      return fixpoint_symbol(core::detail::gsMakeMu());
+      return fixpoint_symbol(atermpp::aterm_appl(core::detail::function_symbol_Mu()));
     }
 
     /// \brief Returns the nu symbol.
     /// \return The nu symbol.
     static fixpoint_symbol nu()
     {
-      return fixpoint_symbol(core::detail::gsMakeNu());
+      return fixpoint_symbol(atermpp::aterm_appl(core::detail::function_symbol_Nu()));
     }
 
     /// \brief Returns true if the symbol is mu.

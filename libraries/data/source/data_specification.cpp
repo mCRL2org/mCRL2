@@ -38,16 +38,14 @@ namespace detail
  **/
 atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
 {
-  using namespace core::detail;
-
   if (s.m_data_specification_is_type_checked)
   {
-    return gsMakeDataSpec(
-             gsMakeSortSpec(atermpp::aterm_list(s.m_sorts.begin(),s.m_sorts.end()) +
+    return atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
+             atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.m_sorts.begin(),s.m_sorts.end()) +
                             atermpp::aterm_list(s.m_aliases.begin(),s.m_aliases.end())),
-             gsMakeConsSpec(atermpp::aterm_list(s.m_constructors.begin(),s.m_constructors.end())),
-             gsMakeMapSpec(atermpp::aterm_list(s.m_mappings.begin(),s.m_mappings.end())),
-             gsMakeDataEqnSpec(atermpp::aterm_list(s.m_equations.begin(),s.m_equations.end())));
+             atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), atermpp::aterm_list(s.m_constructors.begin(),s.m_constructors.end())),
+             atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), atermpp::aterm_list(s.m_mappings.begin(),s.m_mappings.end())),
+             atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), atermpp::aterm_list(s.m_equations.begin(),s.m_equations.end())));
   }
   else
   {

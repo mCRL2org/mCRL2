@@ -38,12 +38,12 @@ class untyped_identifier: public data_expression
 
     /// \brief Constructor.
     untyped_identifier(const core::identifier_string& name)
-      : data_expression(core::detail::gsMakeUntypedIdentifier(name))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), name))
     {}
 
     /// \brief Constructor.
     untyped_identifier(const std::string& name)
-      : data_expression(core::detail::gsMakeUntypedIdentifier(core::identifier_string(name)))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), core::identifier_string(name)))
     {}
 
     const core::identifier_string& name() const

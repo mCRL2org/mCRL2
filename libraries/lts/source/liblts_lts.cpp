@@ -104,7 +104,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
   ifstream g;
   g.open(filename.c_str(), std::ios::binary);
   g.seekg(-(12+8),ios_base::end);
-  if (g.fail())  
+  if (g.fail())
   {
     throw mcrl2::runtime_error(error_message + " (cannot reopen file)");
   }
@@ -186,9 +186,9 @@ static void add_extra_mcrl2_lts_data(
     return;
   }
 
-  aterm arg1 = (aterm)(has_data_spec?data_spec:gsMakeNil());
-  aterm arg2 = (aterm)(has_params?aterm_appl(function_symbol("ParamSpec",1),(aterm) params):gsMakeNil());
-  aterm arg3 = (aterm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
+  aterm arg1 = (aterm)(has_data_spec?data_spec:atermpp::aterm_appl(core::detail::function_symbol_Nil()));
+  aterm arg2 = (aterm)(has_params?aterm_appl(function_symbol("ParamSpec",1),(aterm) params):atermpp::aterm_appl(core::detail::function_symbol_Nil()));
+  aterm arg3 = (aterm)(has_act_labels?atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), act_labels):atermpp::aterm_appl(core::detail::function_symbol_Nil()));
   aterm data = (aterm) aterm_appl(function_symbol("mCRL2LTS1",3),arg1,arg2,arg3);
   data = mcrl2::data::detail::remove_index(data);
 
@@ -226,7 +226,7 @@ static void add_extra_mcrl2_lts_data(
     buf[i] = position % 0x100;
     position >>= 8;
   }
- 
+
   f.write((char *)buf,8+12);
   if (f.fail())
   {

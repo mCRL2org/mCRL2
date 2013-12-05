@@ -181,7 +181,7 @@ const atermpp::aterm_appl& constructProcEqn();
 const atermpp::aterm_appl& constructStructProj();
 const atermpp::aterm_appl& constructPBEqn();
 const atermpp::aterm_appl& constructWhr();
-// const atermpp::aterm_appl& constructOpId();
+const atermpp::aterm_appl& constructOpId();
 const atermpp::aterm_appl& constructSortSet();
 const atermpp::aterm_appl& constructActFalse();
 const atermpp::aterm_appl& constructActId();
@@ -1162,12 +1162,12 @@ const atermpp::aterm_appl& constructWhr()
 }
 
 // OpId
-/* inline
+inline
 const atermpp::aterm_appl& constructOpId()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_OpId(), constructString(), constructSortExpr(), constructNumber());
   return t;
-} */
+}
 
 // SortSet
 inline

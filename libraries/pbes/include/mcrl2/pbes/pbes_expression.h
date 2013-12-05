@@ -121,7 +121,7 @@ class propositional_variable_instantiation: public pbes_expression
 
     /// \brief Constructor.
     propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
-      : pbes_expression(core::detail::gsMakePropVarInst(
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
           name,
           parameters,
           atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
@@ -130,7 +130,7 @@ class propositional_variable_instantiation: public pbes_expression
 
     /// \brief Constructor.
     propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
-      : pbes_expression(core::detail::gsMakePropVarInst(
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
           core::identifier_string(name),
           parameters,
           atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
@@ -147,7 +147,7 @@ class propositional_variable_instantiation: public pbes_expression
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       core::identifier_string name(p.first);
       data::data_expression_list parameters = atermpp::convert<data::data_expression_list>(p.second);
-      copy_term(core::detail::gsMakePropVarInst(
+      copy_term(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
         name,
         parameters,
         atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
@@ -274,7 +274,7 @@ class not_: public pbes_expression
 
     /// \brief Constructor.
     not_(const pbes_expression& operand)
-      : pbes_expression(core::detail::gsMakePBESNot(operand))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), operand))
     {}
 
     const pbes_expression& operand() const
@@ -321,7 +321,7 @@ class and_: public pbes_expression
 
     /// \brief Constructor.
     and_(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(core::detail::gsMakePBESAnd(left, right))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), left, right))
     {}
 
     const pbes_expression& left() const
@@ -373,7 +373,7 @@ class or_: public pbes_expression
 
     /// \brief Constructor.
     or_(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(core::detail::gsMakePBESOr(left, right))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), left, right))
     {}
 
     const pbes_expression& left() const
@@ -425,7 +425,7 @@ class imp: public pbes_expression
 
     /// \brief Constructor.
     imp(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(core::detail::gsMakePBESImp(left, right))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), left, right))
     {}
 
     const pbes_expression& left() const
@@ -477,7 +477,7 @@ class forall: public pbes_expression
 
     /// \brief Constructor.
     forall(const data::variable_list& variables, const pbes_expression& body)
-      : pbes_expression(core::detail::gsMakePBESForall(variables, body))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), variables, body))
     {}
 
     const data::variable_list& variables() const
@@ -529,7 +529,7 @@ class exists: public pbes_expression
 
     /// \brief Constructor.
     exists(const data::variable_list& variables, const pbes_expression& body)
-      : pbes_expression(core::detail::gsMakePBESExists(variables, body))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), variables, body))
     {}
 
     const data::variable_list& variables() const
@@ -944,7 +944,7 @@ namespace pbes_expr
 inline
 pbes_expression true_()
 {
-  return pbes_expression(core::detail::gsMakePBESTrue());
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESTrue()));
 }
 
 /// \brief Make the value false
@@ -952,7 +952,7 @@ pbes_expression true_()
 inline
 pbes_expression false_()
 {
-  return pbes_expression(core::detail::gsMakePBESFalse());
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESFalse()));
 }
 
 /// \brief Make a negation
@@ -961,7 +961,7 @@ pbes_expression false_()
 inline
 pbes_expression not_(const pbes_expression& p)
 {
-  return pbes_expression(core::detail::gsMakePBESNot(p));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), p));
 }
 
 /// \brief Make a conjunction
@@ -971,7 +971,7 @@ pbes_expression not_(const pbes_expression& p)
 inline
 pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 {
-  return pbes_expression(core::detail::gsMakePBESAnd(p,q));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q));
 }
 
 /// \brief Make a disjunction
@@ -981,7 +981,7 @@ pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 {
-  return pbes_expression(core::detail::gsMakePBESOr(p,q));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p,q));
 }
 
 /// \brief Make an implication
@@ -991,7 +991,7 @@ pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression imp(const pbes_expression& p, const pbes_expression& q)
 {
-  return pbes_expression(core::detail::gsMakePBESImp(p,q));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), p,q));
 }
 
 /// \brief Make a universal quantification
@@ -1005,7 +1005,7 @@ pbes_expression forall(const data::variable_list& l, const pbes_expression& p)
   {
     return p;
   }
-  return pbes_expression(core::detail::gsMakePBESForall(l, p));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), l, p));
 }
 
 /// \brief Make an existential quantification
@@ -1019,7 +1019,7 @@ pbes_expression exists(const data::variable_list& l, const pbes_expression& p)
   {
     return p;
   }
-  return pbes_expression(core::detail::gsMakePBESExists(l, p));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), l, p));
 }
 
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)
@@ -1350,7 +1350,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type true_()
   {
-    return term_type(core::detail::gsMakePBESTrue());
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESTrue()));
   }
 
   /// \brief Make the value false
@@ -1358,7 +1358,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type false_()
   {
-    return term_type(core::detail::gsMakePBESFalse());
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESFalse()));
   }
 
   /// \brief Make a negation
@@ -1367,7 +1367,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type not_(const term_type& p)
   {
-    return term_type(core::detail::gsMakePBESNot(p));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), p));
   }
 
   static inline
@@ -1399,7 +1399,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type and_(const term_type& p, const term_type& q)
   {
-    return term_type(core::detail::gsMakePBESAnd(p,q));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q));
   }
 
   /// \brief Make a disjunction
@@ -1409,7 +1409,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type or_(const term_type& p, const term_type& q)
   {
-    return term_type(core::detail::gsMakePBESOr(p,q));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p,q));
   }
 
   template <typename FwdIt>
@@ -1438,7 +1438,7 @@ struct term_traits<pbes_system::pbes_expression>
 #else
     bool sorted = p < q;
 #endif
-    return sorted ? term_type(core::detail::gsMakePBESAnd(p,q)) : term_type(core::detail::gsMakePBESAnd(q,p));
+    return sorted ? term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q)) : term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), q, p));
   }
 
   /// \brief Make a sorted disjunction
@@ -1453,7 +1453,7 @@ struct term_traits<pbes_system::pbes_expression>
 #else
     bool sorted = p < q;
 #endif
-    return sorted ? term_type(core::detail::gsMakePBESOr(p,q)) : term_type(core::detail::gsMakePBESOr(q,p));
+    return sorted ? term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p, q)) : term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), q, p));
   }
 
   /// \brief Make an implication
@@ -1463,7 +1463,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type imp(const term_type& p, const term_type& q)
   {
-    return term_type(core::detail::gsMakePBESImp(p,q));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), p, q));
   }
 
   /// \brief Make a universal quantification
@@ -1477,7 +1477,7 @@ struct term_traits<pbes_system::pbes_expression>
     {
       return p;
     }
-    return term_type(core::detail::gsMakePBESForall(l, p));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), l, p));
   }
 
   /// \brief Make an existential quantification
@@ -1491,7 +1491,7 @@ struct term_traits<pbes_system::pbes_expression>
     {
       return p;
     }
-    return term_type(core::detail::gsMakePBESExists(l, p));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), l, p));
   }
 
   /// \brief Propositional variable instantiation

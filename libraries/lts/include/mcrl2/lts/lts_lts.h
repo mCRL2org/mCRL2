@@ -179,7 +179,7 @@ class action_label_lts:public mcrl2::lps::multi_action
         throw mcrl2::runtime_error("Cannot transform multi action " +
                                    lps::detail::multi_action_print(*this) + " to an atermpp::aterm as it contains time.");
       }
-      return mcrl2::core::detail::gsMakeMultAct(this->actions());
+      return atermpp::aterm_appl(core::detail::function_symbol_MultAct(), this->actions());
     }
 
     /** \brief Hide the actions with labels in tau_actions.
@@ -230,7 +230,7 @@ inline action_label_lts parse_lts_action(
   const lps::action_list& act_decls)
 {
   lps::multi_action ma = lps::parse_multi_action(multi_action_string, atermpp::aterm_cast<lps::action_label_list>(act_decls), data_spec);
-  return action_label_lts(mcrl2::core::detail::gsMakeMultAct(ma.actions()));
+  return action_label_lts(atermpp::aterm_appl(core::detail::function_symbol_MultAct(), ma.actions()));
 }
 
 

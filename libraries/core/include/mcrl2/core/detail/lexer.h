@@ -80,11 +80,11 @@ aterm_appl gsDataSpecEltsToSpec(aterm_list SpecElts)
       DataEqnDecls = ATconcat(DataEqnDecls, SpecEltArg0);
     }
   }
-  Result = gsMakeDataSpec(
-             gsMakeSortSpec(SortDecls),
-             gsMakeConsSpec(ConsDecls),
-             gsMakeMapSpec(MapDecls),
-             gsMakeDataEqnSpec(DataEqnDecls)
+  Result = atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
+             atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), SortDecls),
+             atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), ConsDecls),
+             atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), MapDecls),
+             atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), DataEqnDecls)
            );
   //Uncomment the lines below to check if the parser stack size isn't too big
   //mCRL2log(debug) << "SIZE_MAX:              " << SIZE_MAX << std::endl;
@@ -162,16 +162,16 @@ aterm_appl gsProcSpecEltsToSpec(aterm_list SpecElts)
     mCRL2log(log::error) << "parse error: missing initialisation" << std::endl;
     return NULL;
   }
-  Result = gsMakeProcSpec(
-             gsMakeDataSpec(
-               gsMakeSortSpec(SortDecls),
-               gsMakeConsSpec(ConsDecls),
-               gsMakeMapSpec(MapDecls),
-               gsMakeDataEqnSpec(DataEqnDecls)
+  Result = atermpp::aterm_appl(core::detail::function_symbol_ProcSpec(),
+             atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
+               atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), SortDecls),
+               atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), ConsDecls),
+               atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), MapDecls),
+               atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), DataEqnDecls)
              ),
-             gsMakeActSpec(ActDecls),
-             gsMakeGlobVarSpec(GlobVars),
-             gsMakeProcEqnSpec(ProcEqnDecls),
+             atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), ActDecls),
+             atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), GlobVars),
+             atermpp::aterm_appl(core::detail::function_symbol_ProcEqnSpec(), ProcEqnDecls),
              ProcInit
            );
   //Uncomment the lines below to check if the parser stack size isn't too big
@@ -260,14 +260,14 @@ aterm_appl gsPBESSpecEltsToSpec(aterm_list SpecElts)
     mCRL2log(log::error) << "parse error: missing initialisation" << std::endl;
     return NULL;
   }
-  Result = gsMakePBES(
-             gsMakeDataSpec(
-               gsMakeSortSpec(SortDecls),
-               gsMakeConsSpec(ConsDecls),
-               gsMakeMapSpec(MapDecls),
-               gsMakeDataEqnSpec(DataEqnDecls)
+  Result = atermpp::aterm_appl(core::detail::function_symbol_PBES(),
+             atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
+               atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), SortDecls),
+               atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), ConsDecls),
+               atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), MapDecls),
+               atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), DataEqnDecls)
              ),
-             gsMakeGlobVarSpec(GlobVars),
+             atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), GlobVars),
              PBEqnSpec,
              PBInit
            );
@@ -319,15 +319,15 @@ aterm_appl gsActionRenameEltsToActionRename(aterm_list ActionRenameElts)
     }
   }
 
-  Result = gsMakeActionRenameSpec(
-             gsMakeDataSpec(
-               gsMakeSortSpec(SortDecls),
-               gsMakeConsSpec(ConsDecls),
-               gsMakeMapSpec(MapDecls),
-               gsMakeDataEqnSpec(DataEqnDecls)
+  Result = atermpp::aterm_appl(core::detail::function_symbol_ActionRenameSpec(),
+             atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
+               atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), SortDecls),
+               atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), ConsDecls),
+               atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), MapDecls),
+               atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), DataEqnDecls)
              ),
-             gsMakeActSpec(ActDecls),
-             gsMakeActionRenameRules(ActionRenameRules)
+             atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), ActDecls),
+             atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRules(), ActionRenameRules)
            );
   return Result;
 }

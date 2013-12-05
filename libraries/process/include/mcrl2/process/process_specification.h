@@ -218,12 +218,12 @@ void complete_data_specification(process_specification& spec)
 inline
 atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec)
 {
-  return core::detail::gsMakeProcSpec(
+  return atermpp::aterm_appl(core::detail::function_symbol_ProcSpec(),
            data::detail::data_specification_to_aterm_data_spec(spec.data()),
-           core::detail::gsMakeActSpec(spec.action_labels()),
-           core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(spec.global_variables())),
-           core::detail::gsMakeProcEqnSpec(process_equation_list(spec.equations().begin(), spec.equations().end())),
-           core::detail::gsMakeProcessInit(spec.init())
+           atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
+           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), atermpp::convert<data::variable_list>(spec.global_variables())),
+           atermpp::aterm_appl(core::detail::function_symbol_ProcEqnSpec(), process_equation_list(spec.equations().begin(), spec.equations().end())),
+           atermpp::aterm_appl(core::detail::function_symbol_ProcessInit(), spec.init())
          );
 }
 

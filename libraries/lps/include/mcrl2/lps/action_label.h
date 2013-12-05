@@ -46,12 +46,12 @@ class action_label: public atermpp::aterm_appl
 
     /// \brief Constructor.
     action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)
-      : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts))
+      : atermpp::aterm_appl(core::detail::function_symbol_ActId(), name, sorts)
     {}
 
     /// \brief Constructor.
     action_label(const std::string& name, const data::sort_expression_list& sorts)
-      : atermpp::aterm_appl(core::detail::gsMakeActId(core::identifier_string(name), sorts))
+      : atermpp::aterm_appl(core::detail::function_symbol_ActId(), core::identifier_string(name), sorts)
     {}
 
     const core::identifier_string& name() const

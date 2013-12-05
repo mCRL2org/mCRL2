@@ -196,7 +196,7 @@ operator<(const boolean_equation& x, const boolean_equation& y)
 inline
 atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
 {
-  return core::detail::gsMakeBooleanEquation(eqn.symbol(), eqn.variable(), eqn.formula());
+  return atermpp::aterm_appl(core::detail::function_symbol_BooleanEquation(), eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
 } // namespace bes

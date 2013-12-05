@@ -208,7 +208,7 @@ namespace detail
 inline
 atermpp::aterm_appl multi_action_to_aterm(const multi_action& m)
 {
-  return core::detail::gsMakeMultAct(m.actions());
+  return atermpp::aterm_appl(core::detail::function_symbol_MultAct(), m.actions());
 }
 
 /// \brief Visits all permutations of the arrays, and calls f for each instance.

@@ -34,7 +34,6 @@ class variable: public data_expression
 {
   public:
 
-    static atermpp::function_symbol function_symbol_DataVarId_;
 
     const core::identifier_string& name() const
     {
@@ -61,20 +60,20 @@ class variable: public data_expression
 
     /// \brief Constructor.
     variable(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarId(),
           name,
           sort,
-          atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort)))
-        ))
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort))
+        )))
     {}
 
     /// \brief Constructor.
     variable(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarId(),
           core::identifier_string(name),
           sort,
-          atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort)))
-        ))
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort))
+        )))
     {}
 //--- end user section variable ---//
 };
@@ -104,10 +103,6 @@ inline void swap(variable& t1, variable& t2)
 }
 //--- end generated class variable ---//
 
-inline bool is_variable(const atermpp::aterm &p)
-{
-  return atermpp::aterm_cast<const atermpp::aterm_appl>(p).function()==variable::function_symbol_DataVarId_;
-}
 
 // template function overloads
 std::string pp(const variable_list& x);

@@ -81,17 +81,16 @@ inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm_appl &p)
 }
 
 /// \brief Returns true if the term t is a function symbol
-// inline bool is_function_symbol(const atermpp::aterm_appl &p)
-//{
-//  // return core::detail::gsIsOpId(p);
-//  return p==mcrl2::data::function_symbol::function_symbol_OpId_;
-//}
+inline bool is_function_symbol(const atermpp::aterm_appl &p)
+{
+  return core::detail::gsIsOpId(p);
+}
 
 /// \brief Returns true if the term t is a variable
-/* inline bool is_variable(const atermpp::aterm &p)
+inline bool is_variable(const atermpp::aterm &p)
 {
   return core::detail::gsIsDataVarId(atermpp::aterm_cast<const atermpp::aterm_appl>(p));
-} */
+} 
 
 /// \brief Returns true if the term t is an application
 inline bool is_application(const atermpp::aterm_appl &p)

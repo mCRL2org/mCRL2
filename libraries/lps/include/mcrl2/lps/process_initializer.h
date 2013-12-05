@@ -50,7 +50,7 @@ class process_initializer: public atermpp::aterm_appl
 
     /// \brief Constructor.
     process_initializer(const data::assignment_list& assignments)
-      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(assignments))
+      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments)
     {}
 
     const data::assignment_list& assignments() const

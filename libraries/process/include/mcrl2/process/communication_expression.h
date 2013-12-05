@@ -44,12 +44,12 @@ class communication_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)
-      : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
+      : atermpp::aterm_appl(core::detail::function_symbol_CommExpr(), action_name, name)
     {}
 
     /// \brief Constructor.
     communication_expression(const action_name_multiset& action_name, const std::string& name)
-      : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, core::identifier_string(name)))
+      : atermpp::aterm_appl(core::detail::function_symbol_CommExpr(), action_name, core::identifier_string(name))
     {}
 
     const action_name_multiset& action_name() const

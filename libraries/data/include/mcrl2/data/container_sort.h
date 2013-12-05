@@ -45,7 +45,7 @@ class container_sort: public sort_expression
 
     /// \brief Constructor.
     container_sort(const container_type& container_name, const sort_expression& element_sort)
-      : sort_expression(core::detail::gsMakeSortCons(container_name, element_sort))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortCons(), container_name, element_sort))
     {}
 
     const container_type& container_name() const

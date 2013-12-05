@@ -38,8 +38,8 @@ struct action_rename_actions: public lps::action_actions
   lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return action_rename_rule_rhs(parse_Action(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return action_rename_rule_rhs(core::detail::gsMakeTau()); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return action_rename_rule_rhs(core::detail::gsMakeDelta()); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Tau())); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Delta())); }
     report_unexpected_node(node);
     return lps::action_rename_rule_rhs();
   }
@@ -51,7 +51,7 @@ struct action_rename_actions: public lps::action_actions
     {
       condition = parse_DataExpr(node.child(0).child(0).child(0));
     }
-    return action_rename_rule(core::detail::gsMakeActionRenameRule(data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
+    return action_rename_rule(atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRule(), data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
   }
 
   std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)

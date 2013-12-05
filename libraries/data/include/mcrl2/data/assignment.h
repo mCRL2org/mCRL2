@@ -105,7 +105,7 @@ class assignment: public assignment_expression
 
     /// \brief Constructor.
     assignment(const variable& lhs, const data_expression& rhs)
-      : assignment_expression(core::detail::gsMakeDataVarIdInit(lhs, rhs))
+      : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), lhs, rhs))
     {}
 
     const variable& lhs() const
@@ -190,12 +190,12 @@ class untyped_identifier_assignment: public assignment_expression
 
     /// \brief Constructor.
     untyped_identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs)
-      : assignment_expression(core::detail::gsMakeUntypedIdentifierAssignment(lhs, rhs))
+      : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), lhs, rhs))
     {}
 
     /// \brief Constructor.
     untyped_identifier_assignment(const std::string& lhs, const data_expression& rhs)
-      : assignment_expression(core::detail::gsMakeUntypedIdentifierAssignment(core::identifier_string(lhs), rhs))
+      : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), core::identifier_string(lhs), rhs))
     {}
 
     const core::identifier_string& lhs() const

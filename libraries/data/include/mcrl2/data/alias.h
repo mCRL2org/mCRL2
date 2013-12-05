@@ -42,7 +42,7 @@ class alias: public atermpp::aterm_appl
 
     /// \brief Constructor.
     alias(const basic_sort& name, const sort_expression& reference)
-      : atermpp::aterm_appl(core::detail::gsMakeSortRef(name, reference))
+      : atermpp::aterm_appl(core::detail::function_symbol_SortRef(), name, reference)
     {}
 
     const basic_sort& name() const
