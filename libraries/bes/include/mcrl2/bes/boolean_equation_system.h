@@ -226,7 +226,7 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
     atermpp::aterm a = boolean_equation_to_aterm(*i);
     eqn_list.push_front(a);
   }
-  return core::detail::gsMakeBES(eqn_list, p.initial_state());
+  return atermpp::aterm_appl(core::detail::function_symbol_BES(), eqn_list, p.initial_state());
 }
 
 } // namespace bes

@@ -100,10 +100,10 @@ inline void swap(deadlock_summand& t1, deadlock_summand& t2)
 inline
 atermpp::aterm_appl deadlock_summand_to_aterm(const deadlock_summand& s)
 {
-  atermpp::aterm_appl result = core::detail::gsMakeLinearProcessSummand(
+  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
                        s.summation_variables(),
                        s.condition(),
-                       core::detail::gsMakeDelta(),
+                       atermpp::aterm_appl(core::detail::function_symbol_Delta()),
                        s.deadlock().time(),
                        data::assignment_list()
                      );

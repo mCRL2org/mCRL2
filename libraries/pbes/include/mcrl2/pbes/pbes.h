@@ -407,7 +407,7 @@ std::ostream& operator<<(std::ostream& out, const pbes& x)
 inline
 atermpp::aterm_appl pbes_to_aterm(const pbes& p)
 {
-  atermpp::aterm_appl global_variables = core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(p.global_variables()));
+  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), atermpp::convert<data::variable_list>(p.global_variables()));
 
   atermpp::aterm_list eqn_list;
   const std::vector<pbes_equation>& eqn = p.equations();
@@ -416,11 +416,11 @@ atermpp::aterm_appl pbes_to_aterm(const pbes& p)
     atermpp::aterm a = pbes_equation_to_aterm(*i);
     eqn_list.push_front(a);
   }
-  atermpp::aterm_appl equations = core::detail::gsMakePBEqnSpec(eqn_list);
-  atermpp::aterm_appl initial_state = core::detail::gsMakePBInit(p.initial_state());
+  atermpp::aterm_appl equations = atermpp::aterm_appl(core::detail::function_symbol_PBEqnSpec(), eqn_list);
+  atermpp::aterm_appl initial_state = atermpp::aterm_appl(core::detail::function_symbol_PBInit(), p.initial_state());
   atermpp::aterm_appl result;
 
-  result = core::detail::gsMakePBES(
+  result = atermpp::aterm_appl(core::detail::function_symbol_PBES(),
              data::detail::data_specification_to_aterm_data_spec(p.data()),
              global_variables,
              equations,

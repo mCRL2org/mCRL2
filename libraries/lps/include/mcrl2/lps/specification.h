@@ -287,10 +287,10 @@ void complete_data_specification(lps::specification& spec)
 inline
 atermpp::aterm_appl specification_to_aterm(const specification& spec)
 {
-  return core::detail::gsMakeLinProcSpec(
+  return atermpp::aterm_appl(core::detail::function_symbol_LinProcSpec(),
            data::detail::data_specification_to_aterm_data_spec(spec.data()),
-           core::detail::gsMakeActSpec(spec.action_labels()),
-           core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(spec.global_variables())),
+           atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
+           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), atermpp::convert<data::variable_list>(spec.global_variables())),
            linear_process_to_aterm(spec.process()),
            spec.initial_process()
          );

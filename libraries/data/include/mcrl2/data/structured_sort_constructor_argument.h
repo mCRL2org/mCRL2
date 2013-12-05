@@ -69,7 +69,7 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
     ///
     /// \param[in] sort The sort of the argument.
     structured_sort_constructor_argument(const sort_expression& sort)
-      : atermpp::aterm_appl(core::detail::gsMakeStructProj(core::empty_identifier_string(), sort))
+      : atermpp::aterm_appl(core::detail::function_symbol_StructProj(), core::empty_identifier_string(), sort)
     {}
 
     /// \brief Constructor.
@@ -77,7 +77,7 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
     /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
     template < size_t S >
     structured_sort_constructor_argument(const char(&name)[S], const sort_expression& sort)
-      : atermpp::aterm_appl(core::detail::gsMakeStructProj(core::identifier_string(name), sort))
+      : atermpp::aterm_appl(core::detail::function_symbol_StructProj(), core::identifier_string(name), sort)
     {}
 //--- end user section structured_sort_constructor_argument ---//
 };

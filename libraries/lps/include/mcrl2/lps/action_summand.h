@@ -163,7 +163,7 @@ bool operator==(const action_summand& x, const action_summand& y)
 inline
 atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
 {
-  atermpp::aterm_appl result = core::detail::gsMakeLinearProcessSummand(
+  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
                        s.summation_variables(),
                        s.condition(),
                        lps::detail::multi_action_to_aterm(s.multi_action()),

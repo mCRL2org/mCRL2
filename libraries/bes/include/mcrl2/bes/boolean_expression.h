@@ -444,18 +444,18 @@ class boolean_variable: public boolean_expression
 
     /// \brief Constructor.
     boolean_variable(const core::identifier_string& name)
-      : boolean_expression(core::detail::gsMakeBooleanVariable(
+      : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanVariable(),
           name,
-          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type, 1>::insert(name))
-        ))
+          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type, 1>::insert(name)
+        )))
     {}
 
     /// \brief Constructor.
     boolean_variable(const std::string& name)
-      : boolean_expression(core::detail::gsMakeBooleanVariable(
+      : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanVariable(),
           core::identifier_string(name),
-          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type, 1>::insert(name))
-        ))
+          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type, 1>::insert(name)
+        )))
     {}
 //--- end user section boolean_variable ---//
 };
@@ -608,7 +608,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type true_()
   {
-    return term_type(core::detail::gsMakeBooleanTrue());
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanTrue()));
   }
 
   /// \brief The value false
@@ -616,7 +616,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type false_()
   {
-    return term_type(core::detail::gsMakeBooleanFalse());
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanFalse()));
   }
 
   /// \brief Operator not
@@ -625,7 +625,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type not_(const term_type& p)
   {
-    return term_type(core::detail::gsMakeBooleanNot(p));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanNot(), p));
   }
 
   /// \brief Operator and
@@ -635,7 +635,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type and_(term_type p, term_type q)
   {
-    return term_type(core::detail::gsMakeBooleanAnd(p, q));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanAnd(), p, q));
   }
 
   /// \brief Operator or
@@ -645,7 +645,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type or_(term_type p, term_type q)
   {
-    return term_type(core::detail::gsMakeBooleanOr(p, q));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanOr(), p, q));
   }
 
   /// \brief Implication
@@ -655,7 +655,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type imp(term_type p, term_type q)
   {
-    return term_type(core::detail::gsMakeBooleanImp(p, q));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanImp(), p, q));
   }
 
   /// \brief Test for value true

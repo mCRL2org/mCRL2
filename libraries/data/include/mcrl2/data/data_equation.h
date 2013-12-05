@@ -94,8 +94,7 @@ class data_equation: public atermpp::aterm_appl
                   const data_expression& lhs,
                   const data_expression& rhs,
                   typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                              variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs))
+      : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs)
     {}
 
     /// \brief Constructor
@@ -106,8 +105,7 @@ class data_equation: public atermpp::aterm_appl
     ///       variables, and condition true
     data_equation(const data_expression& lhs,
                   const data_expression& rhs)
-      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                              variable_list(), sort_bool::true_(), lhs, rhs))
+      : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(), sort_bool::true_(), lhs, rhs)
     {}
 //--- end user section data_equation ---//
 };

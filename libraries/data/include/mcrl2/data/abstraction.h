@@ -44,13 +44,13 @@ class abstraction: public data_expression
 
     /// \brief Constructor.
     abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body)
-      : data_expression(core::detail::gsMakeBinder(binding_operator, variables, body))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Binder(), binding_operator, variables, body))
     {}
 
     /// \brief Constructor.
     template <typename Container>
     abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
-      : data_expression(core::detail::gsMakeBinder(binding_operator, variable_list(variables.begin(), variables.end()), body))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Binder(), binding_operator, variable_list(variables.begin(), variables.end()), body))
     {}
 
     const binder_type& binding_operator() const

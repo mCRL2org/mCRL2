@@ -60,12 +60,12 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     function_symbol(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(name, sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(name, sort)))))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_OpId(), name, sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(name, sort)))))
     {}
 
     /// \brief Constructor.
     function_symbol(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort)))))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_OpId(), core::identifier_string(name), sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort)))))
     {}
 //--- end user section function_symbol ---//
 };

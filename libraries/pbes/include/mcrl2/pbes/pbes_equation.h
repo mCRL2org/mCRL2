@@ -232,7 +232,7 @@ operator!=(const pbes_equation& x, const pbes_equation& y)
 inline
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 {
-  return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
+  return atermpp::aterm_appl(core::detail::function_symbol_PBEqn(), eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
 // template function overloads
