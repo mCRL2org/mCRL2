@@ -34,6 +34,7 @@ class variable: public data_expression
 {
   public:
 
+    static atermpp::function_symbol function_symbol_DataVarId_;
 
     const core::identifier_string& name() const
     {
@@ -102,6 +103,11 @@ inline void swap(variable& t1, variable& t2)
   t1.swap(t2);
 }
 //--- end generated class variable ---//
+
+inline bool is_variable(const atermpp::aterm &p)
+{
+  return atermpp::aterm_cast<const atermpp::aterm_appl>(p).function()==variable::function_symbol_DataVarId_;
+}
 
 // template function overloads
 std::string pp(const variable_list& x);

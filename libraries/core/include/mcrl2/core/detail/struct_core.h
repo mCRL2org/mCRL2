@@ -650,13 +650,13 @@ bool gsIsDataSpec(const atermpp::aterm_appl& Term)
 }
 
 // DataVarId
-extern atermpp::function_symbol function_symbol_DataVarId_;
+// extern atermpp::function_symbol function_symbol_DataVarId_;
 
 inline
 const atermpp::function_symbol& function_symbol_DataVarId()
 {
-  // static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 3);
-  return function_symbol_DataVarId_;
+  static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 3);
+  return function_symbol_DataVarId;
 }
 
 inline
@@ -960,20 +960,12 @@ bool gsIsNu(const atermpp::aterm_appl& Term)
 }
 
 // OpId
-/* inline
+inline
 const atermpp::function_symbol& function_symbol_OpId()
 {
   static atermpp::function_symbol function_symbol_OpId = atermpp::function_symbol("OpId", 3);
   return function_symbol_OpId;
-} */
-
-extern atermpp::function_symbol function_symbol_OpId_; // = atermpp::function_symbol("OpId", 3);
-
-inline
-const atermpp::function_symbol& function_symbol_OpId()
-{
-  return function_symbol_OpId_;
-}
+} 
 
 inline
 bool gsIsOpId(const atermpp::aterm_appl& Term)

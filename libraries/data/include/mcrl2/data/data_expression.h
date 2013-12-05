@@ -88,10 +88,10 @@ inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm_appl &p)
 //}
 
 /// \brief Returns true if the term t is a variable
-inline bool is_variable(const atermpp::aterm &p)
+/* inline bool is_variable(const atermpp::aterm &p)
 {
   return core::detail::gsIsDataVarId(atermpp::aterm_cast<const atermpp::aterm_appl>(p));
-}
+} */
 
 /// \brief Returns true if the term t is an application
 inline bool is_application(const atermpp::aterm_appl &p)

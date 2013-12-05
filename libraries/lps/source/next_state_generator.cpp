@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <set>
-#include <boost/signals2/detail/auto_buffer.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -275,8 +274,7 @@ static bool parameter_score_compare(const parameter_score &left, const parameter
 
 void next_state_generator::summand_subset_t::build_pruning_parameters(const action_summand_vector &summands)
 {
-  typedef boost::signals2::detail::auto_buffer<parameter_score, boost::signals2::detail::store_n_objects<64> > vector_t;
-  vector_t parameters;
+  std::vector < parameter_score> parameters;
 
   for (size_t i = 0; i < m_generator->m_process_parameters.size(); i++)
   {

@@ -35,8 +35,8 @@ class function_symbol: public data_expression
 {
   public:
 
-    static const atermpp::function_symbol function_symbol_OpId_; 
-    static const function_symbol constructOpId; //=atermpp::aterm_appl(function_symbol_OpId(), constructString(), constructSortExpr(), constructNumber());
+    static atermpp::function_symbol function_symbol_OpId_; 
+    static function_symbol constructOpId; //=atermpp::aterm_appl(function_symbol_OpId(), constructString(), constructSortExpr(), constructNumber());
 
     const core::identifier_string& name() const
     {

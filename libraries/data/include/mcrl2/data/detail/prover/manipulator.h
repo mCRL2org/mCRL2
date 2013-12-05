@@ -12,7 +12,6 @@
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
 
-#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/data/detail/prover/info.h"
 
 namespace mcrl2

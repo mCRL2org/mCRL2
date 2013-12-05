@@ -8,7 +8,6 @@
 
 #include <cstdlib>
 #include <sstream>
-#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"

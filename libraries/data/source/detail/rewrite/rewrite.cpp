@@ -13,7 +13,6 @@
 #include <cstring>
 #include <limits>
 #include <algorithm>
-#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/struct_core.h"

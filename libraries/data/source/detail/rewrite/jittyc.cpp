@@ -2625,7 +2625,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
 
   // Make functions that construct applications with arity n where 5< n <= max_arity.
-  for (size_t i=5; i<=max_arity; ++i)
+  for (size_t i=6; i<=max_arity; ++i)
   {
     fprintf(f,
             "static application make_term_with_many_arguments(const data_expression& head");
@@ -2635,18 +2635,25 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     }
     fprintf(f, ")\n"
             "{\n");
-    // It could be that the use of a vector below is too expensive.
+
+    // Currently data_expressions are stored in this array. If reference or pointers are stored,
+    // no explicit destroy is needed anymore.
     fprintf(f,
-      "  std::vector<data_expression> buffer;\n"
-      "  buffer.reserve(%ld);\n",i);
+      "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,data_expression, %ld);\n ",i);
 
     for (size_t j=0; j<i; ++j)
     {
-      fprintf(f, "  buffer.push_back(arg%zu);\n",j+1);
+      fprintf(f, "  new (&buffer[%ld]) data_expression(arg%zu);\n",j,j+1);
     }
 
-    fprintf(f, "  return application(head,buffer.begin(),buffer.end());\n");
+    fprintf(f, "  const application result(head,&buffer[0],&buffer[%ld]);\n",i);
 
+    for (size_t j=0; j<i; ++j)
+    {
+      fprintf(f, "  buffer[%ld].~data_expression();\n",j);
+    }
+
+    fprintf(f, "  return result;");
     fprintf(f, "}\n\n");
   }
 

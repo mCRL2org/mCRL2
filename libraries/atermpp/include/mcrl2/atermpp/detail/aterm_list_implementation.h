@@ -1,8 +1,8 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
 
-#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -24,25 +24,26 @@ term_list<Term> push_back(const term_list<Term> &l, const Term &el)
 {
   typedef typename term_list<Term>::const_iterator const_iterator;
   
-  typedef boost::signals2::detail::auto_buffer<const_iterator, boost::signals2::detail::store_n_objects<64> > vector_t;
-  vector_t buffer;
   const size_t len = l.size();
-  buffer.reserve(len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const_iterator, len);
 
   /* Collect all elements of list in buffer */
   
-  for (const_iterator i = l.begin(); i != l.end(); ++i)
+  size_t j=0;
+  for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
   {
-    buffer.push_back(i);  
+    buffer[j]=i;
+    // buffer.push_back(i);  
   }
 
   term_list<Term> result;
   result.push_front(el);
 
   /* Insert elements at the front of the list */
-  for (auto i = buffer.rbegin(); i != buffer.rend(); ++i)
+  while (j>0)
   {
-    result.push_front(**i);
+    j=j-1;
+    result.push_front(*buffer[j]);
   }
   return result;
 }
@@ -83,23 +84,23 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
     return list;
   }
 
-  typedef boost::signals2::detail::auto_buffer<const_iterator, boost::signals2::detail::store_n_objects<64> > vector_t;
-  vector_t buffer;
-  buffer.reserve(len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const_iterator, len);
 
   term_list<Term> result = list; 
-  for(const_iterator j = list.begin(); j != i; ++j)
+  size_t k=0;
+  for(const_iterator j = list.begin(); j != i; ++j, ++k)
   {
-    buffer.push_back(j);
+    buffer[k]=j;
     result.pop_front();
   }
-  assert(len==buffer.size());
+  assert(len==k);
   assert(result.front()==t);
   result.pop_front(); // skip the element.
 
-  for (auto i = buffer.rbegin(); i != buffer.rend(); ++i)
+  while (k>0) 
   {
-    result.push_front(**i);
+    k=k-1;
+    result.push_front(*buffer[k]);
   }
 
   return result;
@@ -125,20 +126,20 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
 
   term_list<Term> result = m;
 
-  typedef boost::signals2::detail::auto_buffer<const_iterator, boost::signals2::detail::store_n_objects<64> > vector_t;
-  vector_t buffer;
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const_iterator, len);
 
-  buffer.reserve(len);
-
-  for (const_iterator i = l.begin(); i != l.end(); ++i)
+  size_t j=0;
+  for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
   {
-    buffer.push_back(i); 
+    buffer[j]=i;
   }
+  assert(j=len);
 
   // Insert elements at the front of the list
-  for (auto j = buffer.rbegin(); j != buffer.rend(); ++j)
+  while (j>0)
   {
-    result.push_front(**j);
+    j=j-1;
+    result.push_front(*buffer[j]);
   }
 
   return result;
@@ -167,8 +168,7 @@ namespace detail
   {
     BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
     BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-    typedef boost::signals2::detail::auto_buffer<Term, boost::signals2::detail::store_n_objects<64> > vector_type;
-    vector_type temporary_store;  
+    std::vector<Term> temporary_store;  
     temporary_store.reserve(64);
     for(; first != last; ++first)
     {

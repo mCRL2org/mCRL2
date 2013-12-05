@@ -231,7 +231,7 @@ void RewriterJitty::rebuild_strategy()
   {
     const size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(l->first);
     make_jitty_strat_sufficiently_larger(i);
-      jitty_strat[i] = create_strategy(reverse(l->second));
+    jitty_strat[i] = create_strategy(reverse(l->second));
   }
 
 }

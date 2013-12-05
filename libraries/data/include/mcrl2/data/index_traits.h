@@ -51,15 +51,17 @@ void on_delete_variable(const atermpp::aterm& t)
 inline
 void register_function_symbol_hooks()
 {
-  add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
-  add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
+  // add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
+  // add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
+  add_creation_hook(mcrl2::data::function_symbol::function_symbol_OpId_, on_create_function_symbol);
+  add_deletion_hook(mcrl2::data::function_symbol::function_symbol_OpId_, on_delete_function_symbol);
 }
 
 inline
 void register_variable_hooks()
 {
-  add_creation_hook(core::detail::function_symbol_DataVarId(), on_create_variable);
-  add_deletion_hook(core::detail::function_symbol_DataVarId(), on_delete_variable);
+  add_creation_hook(mcrl2::data::variable::function_symbol_DataVarId_, on_create_variable);
+  add_deletion_hook(mcrl2::data::variable::function_symbol_DataVarId_, on_delete_variable);
 }
 
 } // namespace data

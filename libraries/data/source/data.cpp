@@ -109,15 +109,34 @@ static bool register_hooks()
   register_variable_hooks();
   return true;
 }
-static bool mcrl2_register_data(register_hooks());
 
-const atermpp::function_symbol mcrl2::data::function_symbol::function_symbol_OpId_("OpId", 3);
-const function_symbol mcrl2::data::function_symbol::constructOpId
+static bool initialised=false;
+
+static void initialisation_wrapper()
+{
+  if (initialised)
+  {
+    return;
+  }
+  initialised=true;
+  new (&mcrl2::data::variable::function_symbol_DataVarId_) atermpp::function_symbol("DataVarId", 3);
+  new (&mcrl2::data::function_symbol::function_symbol_OpId_) atermpp::function_symbol("OpId", 3);
+
+  new (&mcrl2::data::function_symbol::constructOpId) mcrl2::data::function_symbol::function_symbol
                    (atermpp::aterm_appl(
-                            function_symbol::function_symbol_OpId_, 
-                            core::detail::constructString(), 
-                            core::detail::constructSortExpr(), 
+                            function_symbol::function_symbol_OpId_,
+                            core::detail::constructString(),
+                            core::detail::constructSortExpr(),
                             core::detail::constructNumber()));
+  register_hooks();
+}
+
+
+atermpp::function_symbol mcrl2::data::function_symbol::function_symbol_OpId_=(initialisation_wrapper(),mcrl2::data::function_symbol::function_symbol_OpId_);
+atermpp::function_symbol mcrl2::data::variable::function_symbol_DataVarId_=(initialisation_wrapper(),mcrl2::data::variable::function_symbol_DataVarId_);
+
+function_symbol mcrl2::data::function_symbol::constructOpId=(initialisation_wrapper(),mcrl2::data::function_symbol::constructOpId);
+
 
 
 sort_expression data_expression::sort() const
