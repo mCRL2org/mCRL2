@@ -240,7 +240,7 @@ class not_: public state_formula
 
     /// \brief Constructor.
     not_(const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateNot(operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNot(), operand))
     {}
 
     const state_formula& operand() const
@@ -296,7 +296,7 @@ class and_: public state_formula
 
     /// \brief Constructor.
     and_(const state_formula& left, const state_formula& right)
-      : state_formula(core::detail::gsMakeStateAnd(left, right))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateAnd(), left, right))
     {}
 
     const state_formula& left() const
@@ -357,7 +357,7 @@ class or_: public state_formula
 
     /// \brief Constructor.
     or_(const state_formula& left, const state_formula& right)
-      : state_formula(core::detail::gsMakeStateOr(left, right))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateOr(), left, right))
     {}
 
     const state_formula& left() const
@@ -418,7 +418,7 @@ class imp: public state_formula
 
     /// \brief Constructor.
     imp(const state_formula& left, const state_formula& right)
-      : state_formula(core::detail::gsMakeStateImp(left, right))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateImp(), left, right))
     {}
 
     const state_formula& left() const
@@ -479,7 +479,7 @@ class forall: public state_formula
 
     /// \brief Constructor.
     forall(const data::variable_list& variables, const state_formula& body)
-      : state_formula(core::detail::gsMakeStateForall(variables, body))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateForall(), variables, body))
     {}
 
     const data::variable_list& variables() const
@@ -540,7 +540,7 @@ class exists: public state_formula
 
     /// \brief Constructor.
     exists(const data::variable_list& variables, const state_formula& body)
-      : state_formula(core::detail::gsMakeStateExists(variables, body))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateExists(), variables, body))
     {}
 
     const data::variable_list& variables() const
@@ -601,7 +601,7 @@ class must: public state_formula
 
     /// \brief Constructor.
     must(const regular_formulas::regular_formula& formula, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateMust(formula, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMust(), formula, operand))
     {}
 
     const regular_formulas::regular_formula& formula() const
@@ -662,7 +662,7 @@ class may: public state_formula
 
     /// \brief Constructor.
     may(const regular_formulas::regular_formula& formula, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateMay(formula, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMay(), formula, operand))
     {}
 
     const regular_formulas::regular_formula& formula() const
@@ -769,7 +769,7 @@ class yaled_timed: public state_formula
 
     /// \brief Constructor.
     yaled_timed(const data::data_expression& time_stamp)
-      : state_formula(core::detail::gsMakeStateYaledTimed(time_stamp))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateYaledTimed(), time_stamp))
     {}
 
     const data::data_expression& time_stamp() const
@@ -871,7 +871,7 @@ class delay_timed: public state_formula
 
     /// \brief Constructor.
     delay_timed(const data::data_expression& time_stamp)
-      : state_formula(core::detail::gsMakeStateDelayTimed(time_stamp))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateDelayTimed(), time_stamp))
     {}
 
     const data::data_expression& time_stamp() const
@@ -927,12 +927,12 @@ class variable: public state_formula
 
     /// \brief Constructor.
     variable(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : state_formula(core::detail::gsMakeStateVar(name, arguments))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), name, arguments))
     {}
 
     /// \brief Constructor.
     variable(const std::string& name, const data::data_expression_list& arguments)
-      : state_formula(core::detail::gsMakeStateVar(core::identifier_string(name), arguments))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), core::identifier_string(name), arguments))
     {}
 
     const core::identifier_string& name() const
@@ -993,12 +993,12 @@ class nu: public state_formula
 
     /// \brief Constructor.
     nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateNu(name, assignments, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), name, assignments, operand))
     {}
 
     /// \brief Constructor.
     nu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateNu(core::identifier_string(name), assignments, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), core::identifier_string(name), assignments, operand))
     {}
 
     const core::identifier_string& name() const
@@ -1064,12 +1064,12 @@ class mu: public state_formula
 
     /// \brief Constructor.
     mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateMu(name, assignments, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), name, assignments, operand))
     {}
 
     /// \brief Constructor.
     mu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateMu(core::identifier_string(name), assignments, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), core::identifier_string(name), assignments, operand))
     {}
 
     const core::identifier_string& name() const

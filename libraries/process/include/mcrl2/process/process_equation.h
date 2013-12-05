@@ -46,7 +46,7 @@ class process_equation: public atermpp::aterm_appl
 
     /// \brief Constructor.
     process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)
-      : atermpp::aterm_appl(core::detail::gsMakeProcEqn(identifier, formal_parameters, expression))
+      : atermpp::aterm_appl(core::detail::function_symbol_ProcEqn(), identifier, formal_parameters, expression)
     {}
 
     const process_identifier& identifier() const

@@ -164,7 +164,7 @@ class seq: public regular_formula
 
     /// \brief Constructor.
     seq(const regular_formula& left, const regular_formula& right)
-      : regular_formula(core::detail::gsMakeRegSeq(left, right))
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegSeq(), left, right))
     {}
 
     const regular_formula& left() const
@@ -225,7 +225,7 @@ class alt: public regular_formula
 
     /// \brief Constructor.
     alt(const regular_formula& left, const regular_formula& right)
-      : regular_formula(core::detail::gsMakeRegAlt(left, right))
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegAlt(), left, right))
     {}
 
     const regular_formula& left() const
@@ -286,7 +286,7 @@ class trans: public regular_formula
 
     /// \brief Constructor.
     trans(const regular_formula& operand)
-      : regular_formula(core::detail::gsMakeRegTrans(operand))
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTrans(), operand))
     {}
 
     const regular_formula& operand() const
@@ -342,7 +342,7 @@ class trans_or_nil: public regular_formula
 
     /// \brief Constructor.
     trans_or_nil(const regular_formula& operand)
-      : regular_formula(core::detail::gsMakeRegTransOrNil(operand))
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTransOrNil(), operand))
     {}
 
     const regular_formula& operand() const

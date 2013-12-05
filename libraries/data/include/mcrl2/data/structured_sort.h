@@ -85,13 +85,13 @@ class structured_sort: public sort_expression
 
     /// \brief Constructor.
     structured_sort(const structured_sort_constructor_list& constructors)
-      : sort_expression(core::detail::gsMakeSortStruct(constructors))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), constructors))
     {}
 
     /// \brief Constructor.
     template <typename Container>
     structured_sort(const Container& constructors, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor>::type* = 0)
-      : sort_expression(core::detail::gsMakeSortStruct(structured_sort_constructor_list(constructors.begin(), constructors.end())))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
     {}
 
     const structured_sort_constructor_list& constructors() const

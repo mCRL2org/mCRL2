@@ -47,13 +47,13 @@ class structured_sort_constructor: public atermpp::aterm_appl
 
     /// \brief Constructor.
     structured_sort_constructor(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser)
-      : atermpp::aterm_appl(core::detail::gsMakeStructCons(name, arguments, recogniser))
+      : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), name, arguments, recogniser)
     {}
 
     /// \brief Constructor.
     template <typename Container>
     structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
-      : atermpp::aterm_appl(core::detail::gsMakeStructCons(core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser)))
+      : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
     {}
 
     const core::identifier_string& name() const

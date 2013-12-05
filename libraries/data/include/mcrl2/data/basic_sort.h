@@ -46,12 +46,12 @@ class basic_sort: public sort_expression
 
     /// \brief Constructor.
     basic_sort(const core::identifier_string& name)
-      : sort_expression(core::detail::gsMakeSortId(name))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), name))
     {}
 
     /// \brief Constructor.
     basic_sort(const std::string& name)
-      : sort_expression(core::detail::gsMakeSortId(core::identifier_string(name)))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), core::identifier_string(name)))
     {}
 
     const core::identifier_string& name() const

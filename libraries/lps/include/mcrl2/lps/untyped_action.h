@@ -38,12 +38,12 @@ class untyped_action: public atermpp::aterm_appl
 
     /// \brief Constructor.
     untyped_action(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : atermpp::aterm_appl(core::detail::gsMakeUntypedAction(name, arguments))
+      : atermpp::aterm_appl(core::detail::function_symbol_UntypedAction(), name, arguments)
     {}
 
     /// \brief Constructor.
     untyped_action(const std::string& name, const data::data_expression_list& arguments)
-      : atermpp::aterm_appl(core::detail::gsMakeUntypedAction(core::identifier_string(name), arguments))
+      : atermpp::aterm_appl(core::detail::function_symbol_UntypedAction(), core::identifier_string(name), arguments)
     {}
 
     const core::identifier_string& name() const

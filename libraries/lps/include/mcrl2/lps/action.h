@@ -44,7 +44,7 @@ class action: public atermpp::aterm_appl
 
     /// \brief Constructor.
     action(const action_label& label, const data::data_expression_list& arguments)
-      : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments))
+      : atermpp::aterm_appl(core::detail::function_symbol_Action(), label, arguments)
     {}
 
     const action_label& label() const

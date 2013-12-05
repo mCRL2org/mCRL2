@@ -44,12 +44,12 @@ class rename_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     rename_expression(core::identifier_string& source, core::identifier_string& target)
-      : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
+      : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), source, target)
     {}
 
     /// \brief Constructor.
     rename_expression(const std::string& source, const std::string& target)
-      : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(core::identifier_string(source), core::identifier_string(target)))
+      : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), core::identifier_string(source), core::identifier_string(target))
     {}
 
     const core::identifier_string& source() const

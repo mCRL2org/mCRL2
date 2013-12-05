@@ -47,12 +47,12 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
 
     /// \brief Constructor.
     structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)
-      : atermpp::aterm_appl(core::detail::gsMakeStructProj(name, sort))
+      : atermpp::aterm_appl(core::detail::function_symbol_StructProj(), name, sort)
     {}
 
     /// \brief Constructor.
     structured_sort_constructor_argument(const std::string& name, const sort_expression& sort)
-      : atermpp::aterm_appl(core::detail::gsMakeStructProj(core::identifier_string(name), sort))
+      : atermpp::aterm_appl(core::detail::function_symbol_StructProj(), core::identifier_string(name), sort)
     {}
 
     const core::identifier_string& name() const

@@ -222,7 +222,7 @@ class not_: public action_formula
 
     /// \brief Constructor.
     not_(const action_formula& operand)
-      : action_formula(core::detail::gsMakeActNot(operand))
+      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActNot(), operand))
     {}
 
     const action_formula& operand() const
@@ -278,7 +278,7 @@ class and_: public action_formula
 
     /// \brief Constructor.
     and_(const action_formula& left, const action_formula& right)
-      : action_formula(core::detail::gsMakeActAnd(left, right))
+      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActAnd(), left, right))
     {}
 
     const action_formula& left() const
@@ -339,7 +339,7 @@ class or_: public action_formula
 
     /// \brief Constructor.
     or_(const action_formula& left, const action_formula& right)
-      : action_formula(core::detail::gsMakeActOr(left, right))
+      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActOr(), left, right))
     {}
 
     const action_formula& left() const
@@ -400,7 +400,7 @@ class imp: public action_formula
 
     /// \brief Constructor.
     imp(const action_formula& left, const action_formula& right)
-      : action_formula(core::detail::gsMakeActImp(left, right))
+      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActImp(), left, right))
     {}
 
     const action_formula& left() const
@@ -461,7 +461,7 @@ class forall: public action_formula
 
     /// \brief Constructor.
     forall(const data::variable_list& variables, const action_formula& body)
-      : action_formula(core::detail::gsMakeActForall(variables, body))
+      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActForall(), variables, body))
     {}
 
     const data::variable_list& variables() const
@@ -522,7 +522,7 @@ class exists: public action_formula
 
     /// \brief Constructor.
     exists(const data::variable_list& variables, const action_formula& body)
-      : action_formula(core::detail::gsMakeActExists(variables, body))
+      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActExists(), variables, body))
     {}
 
     const data::variable_list& variables() const
@@ -583,7 +583,7 @@ class at: public action_formula
 
     /// \brief Constructor.
     at(const action_formula& operand, const data::data_expression& time_stamp)
-      : action_formula(core::detail::gsMakeActAt(operand, time_stamp))
+      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActAt(), operand, time_stamp))
     {}
 
     const action_formula& operand() const
@@ -644,7 +644,7 @@ class multi_action: public action_formula
 
     /// \brief Constructor.
     multi_action(const lps::action_list& actions)
-      : action_formula(core::detail::gsMakeActMultAct(actions))
+      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActMultAct(), actions))
     {}
 
     const lps::action_list& actions() const
@@ -700,7 +700,7 @@ class untyped_multi_action: public action_formula
 
     /// \brief Constructor.
     untyped_multi_action(const lps::untyped_action_list& arguments)
-      : action_formula(core::detail::gsMakeUntypedActMultAct(arguments))
+      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedActMultAct(), arguments))
     {}
 
     const lps::untyped_action_list& arguments() const

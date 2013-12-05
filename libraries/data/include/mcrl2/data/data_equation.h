@@ -53,13 +53,13 @@ class data_equation: public atermpp::aterm_appl
 
     /// \brief Constructor.
     data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs)
-      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(variables, condition, lhs, rhs))
+      : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variables, condition, lhs, rhs)
     {}
 
     /// \brief Constructor.
     template <typename Container>
     data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
-      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(variable_list(variables.begin(), variables.end()), condition, lhs, rhs))
+      : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
     {}
 
     const variable_list& variables() const

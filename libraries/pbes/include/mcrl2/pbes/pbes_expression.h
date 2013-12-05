@@ -274,7 +274,7 @@ class not_: public pbes_expression
 
     /// \brief Constructor.
     not_(const pbes_expression& operand)
-      : pbes_expression(core::detail::gsMakePBESNot(operand))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), operand))
     {}
 
     const pbes_expression& operand() const
@@ -321,7 +321,7 @@ class and_: public pbes_expression
 
     /// \brief Constructor.
     and_(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(core::detail::gsMakePBESAnd(left, right))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), left, right))
     {}
 
     const pbes_expression& left() const
@@ -373,7 +373,7 @@ class or_: public pbes_expression
 
     /// \brief Constructor.
     or_(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(core::detail::gsMakePBESOr(left, right))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), left, right))
     {}
 
     const pbes_expression& left() const
@@ -425,7 +425,7 @@ class imp: public pbes_expression
 
     /// \brief Constructor.
     imp(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(core::detail::gsMakePBESImp(left, right))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), left, right))
     {}
 
     const pbes_expression& left() const
@@ -477,7 +477,7 @@ class forall: public pbes_expression
 
     /// \brief Constructor.
     forall(const data::variable_list& variables, const pbes_expression& body)
-      : pbes_expression(core::detail::gsMakePBESForall(variables, body))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), variables, body))
     {}
 
     const data::variable_list& variables() const
@@ -529,7 +529,7 @@ class exists: public pbes_expression
 
     /// \brief Constructor.
     exists(const data::variable_list& variables, const pbes_expression& body)
-      : pbes_expression(core::detail::gsMakePBESExists(variables, body))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), variables, body))
     {}
 
     const data::variable_list& variables() const

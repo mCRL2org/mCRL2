@@ -198,7 +198,7 @@ class not_: public boolean_expression
 
     /// \brief Constructor.
     not_(const boolean_expression& operand)
-      : boolean_expression(core::detail::gsMakeBooleanNot(operand))
+      : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanNot(), operand))
     {}
 
     const boolean_expression& operand() const
@@ -254,7 +254,7 @@ class and_: public boolean_expression
 
     /// \brief Constructor.
     and_(const boolean_expression& left, const boolean_expression& right)
-      : boolean_expression(core::detail::gsMakeBooleanAnd(left, right))
+      : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanAnd(), left, right))
     {}
 
     const boolean_expression& left() const
@@ -315,7 +315,7 @@ class or_: public boolean_expression
 
     /// \brief Constructor.
     or_(const boolean_expression& left, const boolean_expression& right)
-      : boolean_expression(core::detail::gsMakeBooleanOr(left, right))
+      : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanOr(), left, right))
     {}
 
     const boolean_expression& left() const
@@ -376,7 +376,7 @@ class imp: public boolean_expression
 
     /// \brief Constructor.
     imp(const boolean_expression& left, const boolean_expression& right)
-      : boolean_expression(core::detail::gsMakeBooleanImp(left, right))
+      : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanImp(), left, right))
     {}
 
     const boolean_expression& left() const

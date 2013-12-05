@@ -51,12 +51,12 @@ class propositional_variable: public atermpp::aterm_appl
 
     /// \brief Constructor.
     propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)
-      : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, parameters))
+      : atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), name, parameters)
     {}
 
     /// \brief Constructor.
     propositional_variable(const std::string& name, const data::variable_list& parameters)
-      : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(core::identifier_string(name), parameters))
+      : atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), core::identifier_string(name), parameters)
     {}
 
     const core::identifier_string& name() const

@@ -45,7 +45,7 @@ class action_name_multiset: public atermpp::aterm_appl
 
     /// \brief Constructor.
     action_name_multiset(const core::identifier_string_list& names)
-      : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
+      : atermpp::aterm_appl(core::detail::function_symbol_MultActName(), names)
     {}
 
     const core::identifier_string_list& names() const

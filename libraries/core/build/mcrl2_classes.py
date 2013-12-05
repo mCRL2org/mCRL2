@@ -460,9 +460,15 @@ class Constructor:
         return text
 
     def inline_definition(self):
-        text = r'''    /// \\\\brief Constructor.
+        if self.superclass == 'atermpp::aterm_appl':
+            text = r'''    /// \\\\brief Constructor.
     <CLASSNAME>(<ARGUMENTS>)
-      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+      : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
+    {}'''
+        else:
+            text = r'''    /// \\\\brief Constructor.
+    <CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         return self.expand_text(text)
 
@@ -472,9 +478,15 @@ class Constructor:
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = r'''    /// \\\\brief Constructor.
+        if self.superclass == 'atermpp::aterm_appl':
+            text = r'''    /// \\\\brief Constructor.
     <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
-      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+      : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
+    {}'''
+        else:
+            text = r'''    /// \\\\brief Constructor.
+    <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)
@@ -530,9 +542,15 @@ class OverloadedConstructor(Constructor):
         self.template_parameters = template_parameters
 
     def inline_definition(self):
-        text = r'''    /// \\\\brief Constructor.
+        if self.superclass == 'atermpp::aterm_appl':
+            text = r'''    /// \\\\brief Constructor.
     <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>)
-      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+      : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
+    {}'''
+        else:
+            text = r'''    /// \\\\brief Constructor.
+    <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         return self.expand_text(text)
 
@@ -542,9 +560,15 @@ class OverloadedConstructor(Constructor):
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = r'''    /// \\\\brief Constructor.
+        if self.superclass == 'atermpp::aterm_appl':
+            text = r'''    /// \\\\brief Constructor.
     <TEMPLATE_PARAMETERS><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
-      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+      : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
+    {}'''
+        else:
+            text = r'''    /// \\\\brief Constructor.
+    <TEMPLATE_PARAMETERS><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         if inline and len(self.template_parameters) == 0:
             text = re.sub('<INLINE>', 'inline', text)

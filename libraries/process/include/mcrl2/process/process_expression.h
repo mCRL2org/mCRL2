@@ -163,7 +163,7 @@ class process_instance: public process_expression
 
     /// \brief Constructor.
     process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)
-      : process_expression(core::detail::gsMakeProcess(identifier, actual_parameters))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Process(), identifier, actual_parameters))
     {}
 
     const process_identifier& identifier() const
@@ -224,7 +224,7 @@ class process_instance_assignment: public process_expression
 
     /// \brief Constructor.
     process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)
-      : process_expression(core::detail::gsMakeProcessAssignment(identifier, assignments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_ProcessAssignment(), identifier, assignments))
     {}
 
     const process_identifier& identifier() const
@@ -377,7 +377,7 @@ class sum: public process_expression
 
     /// \brief Constructor.
     sum(const data::variable_list& bound_variables, const process_expression& operand)
-      : process_expression(core::detail::gsMakeSum(bound_variables, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), bound_variables, operand))
     {}
 
     const data::variable_list& bound_variables() const
@@ -438,7 +438,7 @@ class block: public process_expression
 
     /// \brief Constructor.
     block(const core::identifier_string_list& block_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeBlock(block_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Block(), block_set, operand))
     {}
 
     const core::identifier_string_list& block_set() const
@@ -499,7 +499,7 @@ class hide: public process_expression
 
     /// \brief Constructor.
     hide(const core::identifier_string_list& hide_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeHide(hide_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Hide(), hide_set, operand))
     {}
 
     const core::identifier_string_list& hide_set() const
@@ -560,7 +560,7 @@ class rename: public process_expression
 
     /// \brief Constructor.
     rename(const rename_expression_list& rename_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeRename(rename_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Rename(), rename_set, operand))
     {}
 
     const rename_expression_list& rename_set() const
@@ -621,7 +621,7 @@ class comm: public process_expression
 
     /// \brief Constructor.
     comm(const communication_expression_list& comm_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeComm(comm_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Comm(), comm_set, operand))
     {}
 
     const communication_expression_list& comm_set() const
@@ -682,7 +682,7 @@ class allow: public process_expression
 
     /// \brief Constructor.
     allow(const action_name_multiset_list& allow_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeAllow(allow_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Allow(), allow_set, operand))
     {}
 
     const action_name_multiset_list& allow_set() const
@@ -743,7 +743,7 @@ class sync: public process_expression
 
     /// \brief Constructor.
     sync(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeSync(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sync(), left, right))
     {}
 
     const process_expression& left() const
@@ -804,7 +804,7 @@ class at: public process_expression
 
     /// \brief Constructor.
     at(const process_expression& operand, const data::data_expression& time_stamp)
-      : process_expression(core::detail::gsMakeAtTime(operand, time_stamp))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_AtTime(), operand, time_stamp))
     {}
 
     const process_expression& operand() const
@@ -865,7 +865,7 @@ class seq: public process_expression
 
     /// \brief Constructor.
     seq(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeSeq(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Seq(), left, right))
     {}
 
     const process_expression& left() const
@@ -926,7 +926,7 @@ class if_then: public process_expression
 
     /// \brief Constructor.
     if_then(const data::data_expression& condition, const process_expression& then_case)
-      : process_expression(core::detail::gsMakeIfThen(condition, then_case))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThen(), condition, then_case))
     {}
 
     const data::data_expression& condition() const
@@ -987,7 +987,7 @@ class if_then_else: public process_expression
 
     /// \brief Constructor.
     if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case)
-      : process_expression(core::detail::gsMakeIfThenElse(condition, then_case, else_case))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThenElse(), condition, then_case, else_case))
     {}
 
     const data::data_expression& condition() const
@@ -1053,7 +1053,7 @@ class bounded_init: public process_expression
 
     /// \brief Constructor.
     bounded_init(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeBInit(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_BInit(), left, right))
     {}
 
     const process_expression& left() const
@@ -1114,7 +1114,7 @@ class merge: public process_expression
 
     /// \brief Constructor.
     merge(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeMerge(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Merge(), left, right))
     {}
 
     const process_expression& left() const
@@ -1175,7 +1175,7 @@ class left_merge: public process_expression
 
     /// \brief Constructor.
     left_merge(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeLMerge(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_LMerge(), left, right))
     {}
 
     const process_expression& left() const
@@ -1236,7 +1236,7 @@ class choice: public process_expression
 
     /// \brief Constructor.
     choice(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeChoice(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Choice(), left, right))
     {}
 
     const process_expression& left() const
@@ -1297,12 +1297,12 @@ class untyped_parameter_identifier: public process_expression
 
     /// \brief Constructor.
     untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : process_expression(core::detail::gsMakeUntypedParamId(name, arguments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedParamId(), name, arguments))
     {}
 
     /// \brief Constructor.
     untyped_parameter_identifier(const std::string& name, const data::data_expression_list& arguments)
-      : process_expression(core::detail::gsMakeUntypedParamId(core::identifier_string(name), arguments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedParamId(), core::identifier_string(name), arguments))
     {}
 
     const core::identifier_string& name() const
@@ -1363,12 +1363,12 @@ class untyped_process_assignment: public process_expression
 
     /// \brief Constructor.
     untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)
-      : process_expression(core::detail::gsMakeUntypedProcessAssignment(name, assignments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), name, assignments))
     {}
 
     /// \brief Constructor.
     untyped_process_assignment(const std::string& name, const data::untyped_identifier_assignment_list& assignments)
-      : process_expression(core::detail::gsMakeUntypedProcessAssignment(core::identifier_string(name), assignments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), core::identifier_string(name), assignments))
     {}
 
     const core::identifier_string& name() const

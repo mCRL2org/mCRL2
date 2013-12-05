@@ -51,13 +51,13 @@ class function_sort: public sort_expression
 
     /// \brief Constructor.
     function_sort(const sort_expression_list& domain, const sort_expression& codomain)
-      : sort_expression(core::detail::gsMakeSortArrow(domain, codomain))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), domain, codomain))
     {}
 
     /// \brief Constructor.
     template <typename Container>
     function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
-      : sort_expression(core::detail::gsMakeSortArrow(sort_expression_list(domain.begin(), domain.end()), codomain))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))
     {}
 
     const sort_expression_list& domain() const
