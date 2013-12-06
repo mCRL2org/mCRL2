@@ -1858,7 +1858,7 @@ void RewriterCompilingJitty::implement_tree_aux(
         // fprintf(f,"%sif (is_function_symbol(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
         fprintf(f,"%sif (atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
               "%s{\n"
-              "%s  const data_expression& t%lu(%s%lu[%lu]);\n",  // Should be a function symbol, not a data expression, but this has consequences elsewhere.
+              "%s  const data_expression& t%lu=atermpp::aterm_cast<const data_expression>(%s%lu[%lu]);\n",  // Should be a function symbol, not a data expression, but this has consequences elsewhere.
               whitespace(d*2),
               // (level==1)?"arg":"t",parent,cur_arg,
               (level==1)?"arg":"t",parent,cur_arg,
@@ -1871,7 +1871,7 @@ void RewriterCompilingJitty::implement_tree_aux(
       else
       { fprintf(f,"%sif (is_application(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2b %s\n"
               "%s{\n"
-              "%s  const data_expression& t%lu(%s%lu[%lu]);\n",  // Should be an application, not a data expression, but this has consequences elsewhere.
+              "%s  const data_expression& t%lu=atermpp::aterm_cast<const data_expression>(%s%lu[%lu]);\n",  // Should be an application, not a data expression, but this has consequences elsewhere.
               whitespace(d*2),
               (level==1)?"arg":"t",parent,cur_arg,
               (level==1)?"arg":"t",parent,cur_arg,
