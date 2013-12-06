@@ -1881,7 +1881,6 @@ void RewriterCompilingJitty::implement_tree_aux(
               whitespace(d*2),cnt,(level==1)?"arg":"t",parent,cur_arg
              );
       }
-      //fprintf(f,"std::cerr  << \"HIER %s\\n\";\n",pp(aterm_cast<data::function_symbol>(tree[0]).name()).c_str());
     }
     push_st(cur_arg);
     push_st(parent);
@@ -2075,7 +2074,6 @@ void RewriterCompilingJitty::implement_strategy(
         used[arg] = true;
       }
       fprintf(f,"// Considering argument  %ld\n",arg);
-      //fprintf(f,"std::cerr << \"ARG \" << arg%lu << \"\\n\";",arg);
     }
     else
     {
@@ -2703,17 +2701,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             fprintf(f,  ")\n"
                     "{\n"
                    );
-// for (size_t i=0; i<a; i++)
-// {
-//   if (((nfs >> i) & 1) ==1) // nfs indicates in binary form which arguments are in normal form.
-//   {
-//     fprintf(f, "  std::cerr << \"ARG\%zu \"  << arg%zu << \"\\n\";\n",i,i);
-//   }
-//   else
-//   {
-//     fprintf(f, "  std::cerr << \"ARg\%zu \" << arg_not_nf%zu << \"\\n\";\n",i,i);
-//   }
-// }
             if (core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)<jittyc_eqns.size() && !jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)].empty() )
             {
             // Implement strategy
@@ -2912,7 +2899,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  // Here t1 has the shape application(u0,u1,...,un).\n"
       "  // Moreover, the head symbol of t1, head1, is a function symbol.\n"
-      "  const mcrl2::data::function_symbol& f(head1);\n"
+      "  const mcrl2::data::function_symbol& f=atermpp::aterm_cast<const mcrl2::data::function_symbol>(head1);\n"
       "  const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(f);\n"
       "  assert(function_index < %zu);\n"
       "  const size_t total_arity=recursive_number_of_args(t1);\n"
@@ -2936,12 +2923,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "data_expression rewrite_aux(const data_expression& t)\n"
       "{\n"
-// "std::cerr << \"Internal rewrite AUX \" << t << \"\\n\";"
       "  using namespace mcrl2::data;\n"
       "  // Term t does not have the shape application(t1,...,tn)\n"
       "  if (is_variable(t))\n"
       "  {\n"
-      "    const variable& v(t);\n"
+      "    const variable& v=atermpp::aterm_cast<const variable>(t);\n"
       "    return (*(this_rewriter->global_sigma))(v);\n"
       "  }\n"
       "  if (mcrl2::data::is_abstraction(t))\n"
@@ -2961,20 +2947,19 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "               ta.variables(),ta.body(),false,*(this_rewriter->global_sigma));\n"
       "  }\n"
       "  assert(mcrl2::data::is_where_clause(t));\n"
-      "  const where_clause& tw(t);\n"
+      "  const where_clause& tw=atermpp::aterm_cast<const where_clause>(t);\n"
       "  return this_rewriter->rewrite_where(tw,*(this_rewriter->global_sigma));\n"
       "}\n\n");
 
   fprintf(f,
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
-//"std::cerr << \"Internal rewrite \" << t << \"\\n\";"
       "  using namespace mcrl2::data;\n"
-//      "  if (is_function_symbol(t))\n"  // Less efficient than the rule below.
+//    "  if (is_function_symbol(t))\n"  // Less efficient than the rule below.
       "  if (atermpp::detail::addressf(aterm_cast<const aterm_appl>(t).function())==%ld) // t is a function_symbol \n"
       "  {\n"
       "    // Term t is a function_symbol\n"
-      "    const mcrl2::data::function_symbol& f(t);\n"
+      "    const mcrl2::data::function_symbol& f=atermpp::aterm_cast<const mcrl2::data::function_symbol>(t);\n"
       "    const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(f);\n"
       "    if (function_index < %zu)\n"
       "    {\n"
@@ -2990,15 +2975,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  if (is_application(t))\n"
       "  {\n"
-      "    const application& ta(t);\n"
-      "    const mcrl2::data::function_symbol& head(ta.head());\n"
+      "    const application& ta=atermpp::aterm_cast<const application>(t);\n"
+      "    const mcrl2::data::function_symbol& head=atermpp::aterm_cast<const mcrl2::data::function_symbol>(ta.head());\n"
       "    if (atermpp::detail::addressf(aterm_cast<const aterm_appl>(head).function())==%ld) // head is a function_symbol \n"
       "    {\n"
       "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(head);\n"
       "      const size_t total_arity=ta.size();\n"
       "      if (function_index < %zu)\n"
       "      {\n"
-//"std::cerr << \"TA \" << total_arity << \" FI \" << function_index << \" HEAD \" << head << \" Point \" << atermpp::detail::address(head) << \"\\n\";\n"
       "        assert(total_arity < %zu);\n"
       "        assert(int2func[total_arity][function_index] != NULL);\n"
       "        return int2func[total_arity][function_index](t);\n"
