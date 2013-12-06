@@ -14,7 +14,9 @@
 
 #include <algorithm>
 #include <set>
+#include <sstream>
 #include "mcrl2/atermpp/set_operations.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -460,7 +462,9 @@ struct term_traits<pbes_system::pbes_expression_with_variables>
   static inline
   std::string pp(const term_type& t)
   {
-    return pbes_system::pp(t) + " variables: " + data::pp(t.variables());
+    std::ostringstream out;
+    out << t << " variables: " << data::pp(t.variables());
+    return out.str();
   }
 };
 
