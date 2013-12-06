@@ -122,12 +122,12 @@ sort_expression data_expression::sort() const
   // data_expression we do need to provide an implementation here).
   if (is_variable(*this))
   {
-    const variable& v(*this);
+    const variable& v = core::down_cast<variable>(*this);
     return v.sort();
   }
   else if (is_function_symbol(*this))
   {
-    const function_symbol f(*this);
+    const function_symbol f = core::down_cast<function_symbol>(*this);
     return f.sort();
   }
   else if (is_abstraction(*this))

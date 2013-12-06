@@ -66,7 +66,7 @@ data_expression EnumeratorSolutionsStandard::add_negations(
       }
       else if (is_application(condition))
       {
-        const application& ca(condition);
+        const application& ca = core::down_cast<application>(condition);
         if (ca.head() == m_enclosing_enumerator->rewr_obj->internal_not)
         {
           return ca[0];
@@ -149,7 +149,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
      more equalities and therefore be more effective. */
   if (is_application(condition))
   {
-    const application& ca(condition);
+    const application& ca = core::down_cast<application>(condition);
     if (ca.head() == m_enclosing_enumerator->rewr_obj->internal_not)
     {
       push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[0],negate(negated_term_list),!negated);
@@ -166,7 +166,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
       return;
     }
   }
-  
+
   const data_expression new_expr = add_negations(condition,negated_term_list,negated);
 
   if (new_expr!=m_enclosing_enumerator->rewr_obj->internal_false)
@@ -228,12 +228,12 @@ bool EnumeratorSolutionsStandard::find_equality(
     assert(data::function_symbol(t).sort()==sort_bool::bool_());
     return false;
   }
-  
-  const application& ta(t);
-  
+
+  const application& ta = core::down_cast<application>(t);
+
   if (is_function_symbol(ta.head()))
   {
-    const function_symbol& f(ta.head());
+    const function_symbol& f = core::down_cast<function_symbol>(ta.head());
     if (f == m_enclosing_enumerator->rewr_obj->internal_and)
     {
       assert(ta.size()==2);
@@ -354,9 +354,9 @@ data_expression EnumeratorSolutionsStandard::build_solution_aux(
   else
   {
     // t has the shape application(u1,...,un)
-    const application t_appl(t); 
-    data_expression head = t_appl.head(); 
-   
+    const application t_appl(t);
+    data_expression head = t_appl.head();
+
     if (!is_function_symbol(head))
     {
       head = build_solution_single(head,substituted_vars,exprs);
@@ -589,12 +589,12 @@ bool EnumeratorSolutionsStandard::next(
                                     data_expression_list(),
                                     false);
           }
-          else 
+          else
           {
             // is_function_sort(it->sort()) does not hold.
             // Construct the domain and target sort for the constructor.
             assert(it->sort()==sort);
-          
+
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.

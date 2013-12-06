@@ -47,7 +47,7 @@ class InternalFormatManipulator
     /// \brief on the righthand side of the guard is encountered in \c a_formula, it is replaced by the variable
     /// \brief on the lefthand side.
     data_expression set_true_auxiliary(
-                const data_expression& a_formula, 
+                const data_expression& a_formula,
                 const data_expression& a_guard,
                 std::map < data_expression, data_expression >& f_set_true)
     {
@@ -68,9 +68,9 @@ class InternalFormatManipulator
 
       if (f_info.is_equality(a_guard))
       {
-        const application& a(a_guard);
+        const application& a = core::down_cast<application>(a_guard);
         if (a[1]==a_formula)
-        { 
+        {
            return a[0];
         }
       }
@@ -100,7 +100,7 @@ class InternalFormatManipulator
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c false.
     data_expression set_false_auxiliary(
-              const data_expression& a_formula, 
+              const data_expression& a_formula,
               const data_expression& a_guard,
               std::map < data_expression, data_expression >& f_set_false)
     {
@@ -145,8 +145,8 @@ class InternalFormatManipulator
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low.
     data_expression make_if_then_else(
-               const data_expression& a_expr, 
-               const data_expression& a_high, 
+               const data_expression& a_expr,
+               const data_expression& a_high,
                const data_expression& a_low)
     {
       return application(f_if_then_else, a_expr, a_high, a_low);
@@ -170,8 +170,8 @@ class InternalFormatManipulator
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low. If \c a_high equals \c a_low, the
     /// \brief method returns \c a_high instead.
-    data_expression make_reduced_if_then_else(const data_expression& a_expr, 
-                                                  const data_expression& a_high, 
+    data_expression make_reduced_if_then_else(const data_expression& a_expr,
+                                                  const data_expression& a_high,
                                                   const data_expression& a_low)
     {
       if (a_high == a_low)
@@ -191,15 +191,15 @@ class InternalFormatManipulator
       if (is_variable(a_term) || is_function_symbol(a_term) || is_abstraction(a_term) || is_where_clause(a_term))
       {
         return a_term;
-      } 
+      }
 
-      std::map < data_expression, data_expression> :: const_iterator it=f_orient.find(a_term); 
+      std::map < data_expression, data_expression> :: const_iterator it=f_orient.find(a_term);
       if (it!=f_orient.end())   // found
       {
         return it->second;
       }
 
-      const application& a(a_term);
+      const application& a = core::down_cast<application>(a_term);
       /*const atermpp::function_symbol& v_symbol = a_term.function();
       const data::function_symbol& v_function = atermpp::aterm_cast<data::function_symbol>(a_term[0]);
       size_t v_arity = v_symbol.arity(); */
@@ -228,7 +228,7 @@ class InternalFormatManipulator
     /// \brief Initializes the table InternalFormatManipulator::f_set_true and calls the method
     /// \brief AM_Jitty::f_set_true_auxiliary.
     data_expression set_true(
-                 const data_expression& a_formula, 
+                 const data_expression& a_formula,
                  const data_expression& a_guard)
     {
       std::map < data_expression, data_expression > f_set_true;
@@ -238,13 +238,13 @@ class InternalFormatManipulator
     /// \brief Initializes the table InternalFormatManipulator::f_set_false and calls the method
     /// \brief AM_Jitty::f_set_false_auxiliary.
     data_expression set_false(
-                 const data_expression& a_formula, 
+                 const data_expression& a_formula,
                  const data_expression& a_guard)
     {
       std::map < data_expression, data_expression > f_set_false;
       return set_false_auxiliary(a_formula, a_guard,f_set_false);
     }
-};  
+};
 
 }
 }

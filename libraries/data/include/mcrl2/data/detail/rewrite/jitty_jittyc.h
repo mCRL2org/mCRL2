@@ -35,7 +35,7 @@ inline sort_expression residual_sort(const sort_expression &s, size_t no_of_init
   for( ;  no_of_initial_arguments>0 ; )
   {
     assert(is_function_sort(result));
-    const function_sort& sf(result);
+    const function_sort& sf = core::down_cast<function_sort>(result);
     result=sf.codomain();
     assert(sf.domain().size()<=no_of_initial_arguments);
     no_of_initial_arguments=no_of_initial_arguments-sf.domain().size();
@@ -76,11 +76,11 @@ inline bool get_argument_of_higher_order_term_helper(const data_expression& t, s
 
 inline data_expression get_argument_of_higher_order_term(const data_expression& t, size_t i)
 {
-  // t is a aterm of the shape application(application(...application(f,t1,...tn),tn+1....),tm...). 
+  // t is a aterm of the shape application(application(...application(f,t1,...tn),tn+1....),tm...).
   // Return the i-th argument t_i. NOTE: The first argument has index 1.
-  
+
   assert(!is_function_symbol(t));
-  data_expression result; 
+  data_expression result;
 #ifndef NDEBUG // avoid a warning.
   bool b=
 #endif
@@ -101,7 +101,7 @@ inline size_t recursive_number_of_args(const data_expression &t)
     return 0;
   }
 
-  const application& ta(t);
+  const application& ta = core::down_cast<application>(t);
   const size_t result=ta.size()+recursive_number_of_args(ta.head());
   return result;
 }
@@ -115,7 +115,7 @@ inline const function_symbol& get_function_symbol_of_head(const data_expression 
   }
   assert(t.type_is_appl());
 
-  const application& ta(t);
+  const application& ta = core::down_cast<application>(t);
   return get_function_symbol_of_head(ta.head());
 }
 
@@ -124,10 +124,10 @@ inline const data_expression& get_nested_head(const data_expression &t)
 {
   if (is_application(t))
   {
-    const application& ta(t);
+    const application& ta = core::down_cast<application>(t);
     return get_nested_head(ta.head());
   }
-  
+
   return t;
 }
 
@@ -136,10 +136,10 @@ inline const data_expression replace_nested_head(const data_expression &t, const
 {
   if (is_application(t))
   {
-    const application& ta(t);
+    const application& ta = core::down_cast<application>(t);
     return application(replace_nested_head(ta.head(),head),ta.begin(),ta.end());
   }
-  
+
   return head;
 }
 
@@ -149,10 +149,10 @@ inline const data_expression rewrite_all_arguments(const data_expression &t, con
 {
   if (is_application(t))
   {
-    const application& ta(t);
+    const application& ta = core::down_cast<application>(t);
     return application(ta.head(),ta.begin(),ta.end(),rewriter);
   }
-  
+
   return t;
 }
 
@@ -186,7 +186,7 @@ inline bool head_is_variable(const data_expression& t)
     return false;
   }
   // shape is application(t1,...,tn)
-  const application& ta(t);
+  const application& ta = core::down_cast<application>(t);
   return head_is_variable(ta.head());
 }
 
@@ -195,13 +195,13 @@ inline bool head_is_function_symbol(const data_expression& t, function_symbol& h
 {
   if (is_application(t))
   {
-    const application& ta(t);
+    const application& ta = core::down_cast<application>(t);
     return head_is_function_symbol(ta.head(),head);
   }
 
   if (is_function_symbol(t))
   {
-    head=atermpp::aterm_cast<function_symbol>(t);
+    head=core::down_cast<function_symbol>(t);
     return true;
   }
 

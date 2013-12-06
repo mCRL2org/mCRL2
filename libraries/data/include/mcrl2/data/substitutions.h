@@ -14,6 +14,7 @@
 
 #include <functional>
 #include <iterator>
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_expression.h"
@@ -66,7 +67,7 @@ inline void get_free_variables(const data_expression& t, std::set < variable >& 
     std::set < variable > free_variables_in_body;
     const abstraction& ta(t);
     get_free_variables(ta.body(),free_variables_in_body);
-    const variable_list bound_vars=ta.variables(); 
+    const variable_list bound_vars=ta.variables();
 
     for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
     {
@@ -77,9 +78,9 @@ inline void get_free_variables(const data_expression& t, std::set < variable >& 
     }
     return;
   }
-  
-  // Here t must be an application. 
-  const application& ta(t);
+
+  // Here t must be an application.
+  const application& ta = core::down_cast<application>(t);
   get_free_variables(ta.head(),result);
   for(application::const_iterator i=ta.begin(); i!=ta.end(); ++i)
   {

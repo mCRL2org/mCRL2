@@ -16,6 +16,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite.h"
@@ -109,7 +110,7 @@ data_expression Rewriter::rewrite_where(
                       const where_clause& term,
                       substitution_type& sigma)
 {
-  const assignment_list& assignments(term.declarations());
+  const assignment_list& assignments = term.assignments();
   const data_expression& body=term.body();
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
@@ -529,7 +530,7 @@ static void check_vars(const data_expression& expr, const std::set <variable>& v
 
 static void check_vars(application::const_iterator begin,
                        const application::const_iterator& end,
-                       const std::set <variable>& vars, 
+                       const std::set <variable>& vars,
                        std::set <variable>& used_vars)
 {
   while (begin != end)
@@ -553,7 +554,7 @@ static void check_vars(const data_expression& expr, const std::set <variable>& v
 
     if (vars.count(v)==0)
     {
-      throw v; 
+      throw v;
     }
   }
 }

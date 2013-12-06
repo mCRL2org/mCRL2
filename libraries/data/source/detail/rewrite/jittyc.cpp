@@ -831,7 +831,7 @@ static variable_list dep_vars(const data_equation& eqn)
   size_t rule_arity = eqn.lhs().function().arity()-1;
   std::vector < bool > bs(rule_arity);
 
-  data_expression lhs_internal = eqn.lhs(); 
+  data_expression lhs_internal = eqn.lhs();
   atermpp::term_list<variable_list> vars = make_list<variable_list>( get_doubles(eqn.rhs())+ get_vars(eqn.condition())
                                ); // List of variables occurring in each argument of the lhs
                                    // (except the first element which contains variables from the
@@ -970,7 +970,7 @@ static aterm_list create_strategy(
       continue;
     }
 
-    data_expression lhs_internal = it->lhs();  
+    data_expression lhs_internal = it->lhs();
     aterm_list vars = make_list<aterm>( get_doubles(it->rhs())+ get_vars(it->condition())
                                  ); // List of variables occurring in each argument of the lhs
                                      // (except the first element which contains variables from the
@@ -1217,9 +1217,9 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, int startarg, at
     return false; // I assume that a where clause is not in normal form by default.
                   // This might be too weak, and may require to be reinvestigated later.
   }
-  
+
   // t has the shape #REWR#(head,t1,...,tn)
-  const application& ta(t);
+  const application& ta = core::down_cast<application>(t);
   int arity = ta.size();
   const data_expression& head=ta.head();
   if (is_function_symbol(head))    // XXXXXX This function symbol can also be burried deeper in the term
@@ -1295,7 +1295,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   stringstream ss;
   if (is_function_symbol(t))
   {
-    const function_symbol& f(t);
+    const function_symbol& f = core::down_cast<function_symbol>(t);
     bool b = opid_is_nf(f,0);
 
     if (rewr && !b)
@@ -1312,7 +1312,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   else if (is_variable(t))
   {
     const bool b = (nnfvars!=aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(),t) != nnfvars.end());
-    const variable& v(t);
+    const variable& v = core::down_cast<variable>(t);
     const string variable_name=v.name();
     // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
     // by this rewriter.
@@ -1401,7 +1401,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else if (is_where_clause(t))
   {
-    const where_clause& w(t); // w is the where clause
+    const where_clause& w = core::down_cast<where_clause>(t);
 
     if (rewr)
     {
@@ -1455,13 +1455,13 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
 
   // t has the shape application(head,t1,...,tn)
-  const application& ta(t);
+  const application& ta = core::down_cast<application>(t);
   bool b;
   size_t arity = ta.size();
 
   if (is_function_symbol(ta.head()))  // Determine whether the topmost symbol is a function symbol.
   {
-    const function_symbol& headfs(ta.head());
+    const function_symbol& headfs = core::down_cast<function_symbol>(ta.head());
     size_t cumulative_arity = ta.size();
     b = opid_is_nf(headfs,cumulative_arity+1); // b indicates that headfs is in normal form.
 
@@ -1474,7 +1474,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       if (b || !rewr)
       {
-        // TODO: This expression might be costly with two increase/decreases of reference counting. 
+        // TODO: This expression might be costly with two increase/decreases of reference counting.
         // Should probably be resolved by a table of function symbols.
         ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(headfs) << "))";
       }
@@ -1742,13 +1742,13 @@ static int peekn_st(int n)
 #define IT_DEBUG_FILE stderr,
 #endif
 void RewriterCompilingJitty::implement_tree_aux(
-      FILE* f, 
-      aterm_appl tree, 
-      size_t cur_arg, 
-      size_t parent, 
-      size_t level, 
-      size_t cnt, 
-      size_t d, 
+      FILE* f,
+      aterm_appl tree,
+      size_t cur_arg,
+      size_t parent,
+      size_t level,
+      size_t cnt,
+      size_t d,
       const size_t arity,
       const std::vector<bool>& used, aterm_list nnfvars)
 // Print code representing tree to f.
@@ -1868,7 +1868,7 @@ void RewriterCompilingJitty::implement_tree_aux(
               whitespace(d*2),cnt,(level==1)?"arg":"t",parent,cur_arg
              );
       }
-      else 
+      else
       { fprintf(f,"%sif (is_application(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2b %s\n"
               "%s{\n"
               "%s  const data_expression& t%lu(%s%lu[%lu]);\n",  // Should be an application, not a data expression, but this has consequences elsewhere.
@@ -2014,9 +2014,9 @@ void RewriterCompilingJitty::implement_tree(
   }
 }
 
-static void finish_function(FILE* f, 
-                            size_t arity, 
-                            const data::function_symbol& opid, 
+static void finish_function(FILE* f,
+                            size_t arity,
+                            const data::function_symbol& opid,
                             const std::vector<bool>& used)
 {
   if (arity == 0)
@@ -2054,7 +2054,7 @@ static void finish_function(FILE* f,
 }
 
 void RewriterCompilingJitty::implement_strategy(
-               FILE* f, aterm_list strat, size_t arity, size_t d, 
+               FILE* f, aterm_list strat, size_t arity, size_t d,
                const function_symbol& opid, size_t nf_args)
 {
   std::vector<bool> used;
@@ -2115,7 +2115,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const aterm_appl& expr
   }
 
   // expr has shape #REWR#(t,t1,...,tn);
-  const application& expra(expr);
+  const application& expra = core::down_cast<application>(expr);
   function_symbol head;
   if (!head_is_function_symbol(expra,head))
   {
@@ -2432,12 +2432,12 @@ static std::string get_heads(const sort_expression& s, const std::string& base_s
 static std::string get_recursive_argument(const sort_expression& s, const size_t index, const std::string& base_string)
 {
   /* This function provides the index-th argument of an expression provided in base_string, given that its head
-     symbol has type s. Example: if f:D->E->F and index is 0, base_string is "t", base_string is set to 
+     symbol has type s. Example: if f:D->E->F and index is 0, base_string is "t", base_string is set to
      "atermpp::aterm_cast<application>(t[0])[0] */
   assert(is_function_sort(s));
 
   std::stringstream ss;
-  const function_sort& fs(s);
+  const function_sort& fs = core::down_cast<function_sort>(s);
   const sort_expression_list& source_type=fs.domain();
   const sort_expression& target_type=fs.codomain();
   if (index>=source_type.size())
@@ -2446,7 +2446,7 @@ static std::string get_recursive_argument(const sort_expression& s, const size_t
   }
   ss << "atermpp::aterm_cast<const application>(" << get_heads(target_type,base_string) << ")[" << index << "]";
   return ss.str();
-} 
+}
 
 inline
 void declare_rewr_functions(FILE* f, const data::function_symbol& func, const size_t arity)
@@ -2480,12 +2480,12 @@ void declare_rewr_functions(FILE* f, const data::function_symbol& func, const si
         }
         fprintf(f,  ");\n");
 
-        fprintf(f,  "static inline data_expression rewr_%zu_%zu_%zu_term(const application& %s){ return rewr_%zu_%zu_%zu(", 
-            core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func), 
-            a, 
+        fprintf(f,  "static inline data_expression rewr_%zu_%zu_%zu_term(const application& %s){ return rewr_%zu_%zu_%zu(",
+            core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),
+            a,
             nfs,
             (a==0?"":"t"),
-            core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func), 
+            core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),
             a,
             nfs);
         for(size_t i = 0; i < a; ++i)
@@ -2551,7 +2551,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       ar_size += (arity*(arity+1))/2;
     }
   }
-  
+
   for(std::set < data_equation >::const_iterator it=rewrite_rules.begin();
                    it!=rewrite_rules.end(); ++it)
   {
@@ -2605,7 +2605,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       declare_rewr_functions(f, fs, arity);
     }
   }
-  
+
   fprintf(f,  "\n\n");
 
   //
@@ -2658,11 +2658,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
 
 
-  
+
   // Implement the equations of every operation. -------------------------------
   //
   for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
-              j!=all_function_symbols.end(); ++j) 
+              j!=all_function_symbols.end(); ++j)
   {
     const data::function_symbol fs=*j;
     const size_t arity = getArity(fs);
@@ -2883,7 +2883,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  // Reconstruct term t.\n"
       "  const application t1((head0==head)?t:replace_nested_head(t,head));\n"
-                                    
+
       "  const data_expression head1(get_nested_head(t1));\n"
       "  // Here head1 has the shape\n"
       "  // variable, function_symbol, lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,\n"
@@ -2919,7 +2919,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  assert( int2func_head_in_nf[total_arity][function_index] != NULL);\n"
       "  return  int2func_head_in_nf[total_arity][function_index](t);\n"
       "}\n\n",
-      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1, 
+      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
       max_arity+1,
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1
       );
@@ -3018,9 +3018,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  return rewrite_aux(t);\n"
       "}\n",
       atermpp::detail::addressf(aterm_cast<const aterm_appl>(sort_bool::true_()).function()),
-      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1, 
+      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
       atermpp::detail::addressf(aterm_cast<const aterm_appl>(sort_bool::true_()).function()),
-      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1, 
+      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
       max_arity+1);
 
 
@@ -3076,7 +3076,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 }
 
 RewriterCompilingJitty::RewriterCompilingJitty(
-                          const data_specification& data_spec, 
+                          const data_specification& data_spec,
                           const used_data_equation_selector& equation_selector):
    Rewriter(data_spec,equation_selector)
 {

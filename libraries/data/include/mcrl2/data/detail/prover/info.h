@@ -51,14 +51,14 @@ class InternalFormatInfo
     bool f_reverse;
 
     Compare_Result lexico(
-              const Compare_Result& a_result1, 
+              const Compare_Result& a_result1,
               const Compare_Result& a_result2)
     {
       return (a_result1 != compare_result_equal) ? a_result1 : a_result2;
     }
 
     Compare_Result compare_address(
-              const atermpp::aterm& a_term1, 
+              const atermpp::aterm& a_term1,
               const atermpp::aterm& a_term2)
     {
       // The code below does not seem to need to use explicit adresses. Code can
@@ -100,7 +100,7 @@ class InternalFormatInfo
     class equals // A simple class containing an equality predicate.
     {
       private:
-        const atermpp::aterm_appl m_t; 
+        const atermpp::aterm_appl m_t;
 
       public:
         // constructor
@@ -340,13 +340,13 @@ class InternalFormatInfo
     }
 
     /// \brief Returns the main operator of the term \c a_term;
-    data_expression get_operator(const data_expression& a_term) 
+    data_expression get_operator(const data_expression& a_term)
     {
       if (is_function_symbol(a_term))
-      { 
+      {
          return a_term;
       }
-      const application& a(a_term);
+      const application& a = core::down_cast<application>(a_term);
       return get_operator(a.head());
     }
 
@@ -354,7 +354,7 @@ class InternalFormatInfo
     data_expression get_argument(const data_expression& a_term, const size_t a_number)
     {
       return data_expression(a_term[a_number + 1]);
-    } 
+    }
 
     /// \brief Indicates whether or not a term is an equality.
     virtual bool is_equality(const data_expression& a_term)
@@ -364,18 +364,18 @@ class InternalFormatInfo
          return false;
       }
 
-      const application& a(a_term);
+      const application& a = core::down_cast<application>(a_term);
       if (a.size() != 2)
       {
         return false;
       }
-      
+
       if (!is_function_symbol(a.head()))
       {
         return false;
       }
 
-      const data::function_symbol& f(a.head());
+      const data::function_symbol& f = core::down_cast<function_symbol>(a.head());
       if (static_cast<const std::string&>(f.name())=="==")
       {
         return true;

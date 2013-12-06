@@ -76,12 +76,12 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
 
     for (; !rules.empty(); rules.pop_front())
     {
-      const aterm_list& this_rule(rules.front());
-      const data_expression& this_rule_lhs(element_at(this_rule,2));
+      const aterm_list& this_rule = core::down_cast<aterm_list>(rules.front());
+      const data_expression& this_rule_lhs = core::down_cast<data_expression>(element_at(this_rule,2));
 //     if (aterm_cast<data_expression>(element_at(this_rule,2)).function().arity() == arity + 1)
       if ((is_function_symbol(this_rule_lhs)?1:detail::recursive_number_of_args(this_rule_lhs)+1) == arity + 1)
       {
-        const data_expression& cond(element_at(this_rule,1));
+        const data_expression& cond = core::down_cast<data_expression>(element_at(this_rule,1));
         atermpp::term_list <variable_list> vars = make_list<variable_list>(get_vars(cond));
 
         std::vector < bool> bs(arity,false);
@@ -409,7 +409,7 @@ static data_expression subst_values(
   }
   else if (is_where_clause(atermpp::aterm_cast<atermpp::aterm_appl>(t)))
   {
-    const where_clause& t1(t);
+    const where_clause& t1 = core::down_cast<where_clause>(t);
     const assignment_expression_list& assignments=t1.declarations();
     const data_expression& body=t1.body();
 
@@ -428,7 +428,7 @@ static data_expression subst_values(
 
     for(assignment_expression_list::const_iterator it=assignments.begin(); it!=assignments.end(); ++it)
     {
-      const assignment& assignment_expr(*it);
+      const assignment& assignment_expr = core::down_cast<assignment>(*it);
       new_assignments.push_back(assignment(assignment_expr.lhs(),
     		atermpp::aterm_cast<const data_expression>(subst_values(subst,assignment_expr.rhs()))));
     }
@@ -436,7 +436,7 @@ static data_expression subst_values(
   }
   else
   {
-    const application& t1(t);
+    const application& t1 = core::down_cast<application>(t);
     const subst_values_argument<T> substitute_values_in_arguments(subst);
     return application(subst_values(subst,t1.head()),t1.begin(),t1.end(),substitute_values_in_arguments);
   }
@@ -513,7 +513,7 @@ data_expression RewriterJitty::rewrite_aux(
   }
   if (is_where_clause(term))
   {
-    const where_clause& w(term);
+    const where_clause& w = core::down_cast<where_clause>(term);
     return rewrite_where(w,sigma);
   }
   if (is_abstraction(term))
@@ -530,10 +530,10 @@ data_expression RewriterJitty::rewrite_aux(
     assert(is_lambda(ta));
     return rewrite_single_lambda(ta.variables(),ta.body(),false,sigma);
   }
-  
+
   // The variable term has the shape #REWR#(t,t1,...,tn);
 
-  // First check whether t has the shape #REWR#(#REWR#...#REWR#(f,u1,...,un)(...)(...) where f is a function symbol. 
+  // First check whether t has the shape #REWR#(#REWR#...#REWR#(f,u1,...,un)(...)(...) where f is a function symbol.
   // In this case rewrite that function symbol. This is an optimisation. If this does not apply t is rewritten,
   // including all its subterms. But this is costly, as not all subterms will be rewritten again
   // in rewrite_aux_function_symbol.
@@ -559,12 +559,12 @@ data_expression RewriterJitty::rewrite_aux(
 
     return rewrite_aux_function_symbol(head,result,sigma);
   }
-  
+
   t = rewrite_aux(aterm_cast<data_expression>(term[0]),sigma);
   // Here t has the shape f(u1,....,un)(u1',...,um')....: f applied several times to arguments,
   // x(u1,....,un)(u1',...,um')....: x applied several times to arguments, or
   // binder x1,...,xn.t' where the binder is a lambda, exists or forall.
-  
+
   if (head_is_function_symbol(t,head))
   {
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
@@ -604,7 +604,7 @@ data_expression RewriterJitty::rewrite_aux(
   }
   assert(is_abstraction(t));
   const abstraction& ta(t);
-  const binder_type& binder(ta.binding_operator()); 
+  const binder_type& binder(ta.binding_operator());
   if (is_lambda_binder(binder))
   {
     return rewrite_lambda_application(t,term,sigma);
@@ -715,8 +715,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
             assert(arity>rule_arity);
             // There are more arguments than those that have been rewritten.
-            // Get those, put them in rewritten. 
-            
+            // Get those, put them in rewritten.
+
             if (rewritten_defined[rule_arity-1])
             {
               rewritten[rule_arity-1]=aterm_cast<data_expression>(subst_values(subst,rhs));
@@ -781,7 +781,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     }
   }
 
-  //Construct this potential higher order term. 
+  //Construct this potential higher order term.
   data_expression result;
   if (is_function_symbol(term))
   {
@@ -823,7 +823,7 @@ data_expression RewriterJitty::rewrite(
 
   const data_expression result=rewrite_aux(term, sigma);
   return result;
-  
+
 }
 
 rewrite_strategy RewriterJitty::getStrategy()

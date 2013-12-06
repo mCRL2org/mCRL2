@@ -131,7 +131,7 @@ void test2()
   variable n("n", sort_pos::pos());
   A a = n;
   f(a);
-  std::cout << "a = " << data::pp(a) << std::endl;
+  std::cout << "a = " << a << std::endl;
 }
 
 void test3()
