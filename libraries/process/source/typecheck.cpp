@@ -611,7 +611,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
       }
       if (!Acts.insert(*a).second)  // The action was already in the set.
       {
-        mCRL2log(warning) << "Hiding action " << core::pp(*a) << " twice (typechecking " << core::pp(t) << ")" << std::endl;
+        mCRL2log(warning) << "Hiding action " << *a << " twice (typechecking " << t << ")" << std::endl;
       }
     }
     return hide(act_list, TraverseActProcVarConstP(Vars,t.operand()));
@@ -636,7 +636,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
       }
       if (!Acts.insert(*a).second)  // The action was already in the set.
       {
-        mCRL2log(warning) << "Blocking action " << core::pp(*a) << " twice (typechecking " << core::pp(t) << ")" << std::endl;
+        mCRL2log(warning) << "Blocking action " << *a << " twice (typechecking " << t << ")" << std::endl;
       }
     }
     return block(act_list,TraverseActProcVarConstP(Vars,t.operand()));

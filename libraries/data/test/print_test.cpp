@@ -182,7 +182,7 @@ bool print_check(ExpressionType const& left, std::string const& right)
   std::clog << "Checking printing of " << data::pp(left) << " with " << right << std::endl;
   if (pp(left) != right)
   {
-    std::clog << "pp(" << data::pp(left) << ") != " << right << std::endl;
+    std::clog << "pp(" << left << ") != " << right << std::endl;
     std::clog << left << " != " << right << std::endl;
 
     return false;

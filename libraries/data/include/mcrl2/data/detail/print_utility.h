@@ -49,7 +49,6 @@ data::data_expression bool_to_numeric(data::data_expression const& e, data::sort
 inline
 data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>& result)
 {
-  //std::cout << "\n<reconstruct_pos_mult>" << data::pp(x) << " " << x << std::endl;
   data_expression reconstruction_result;
   if (data::sort_pos::is_c1_function_symbol(x))
   {
@@ -100,14 +99,12 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
       reconstruction_result = data::sort_real::times(data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos()), x);
     }
   }
-  //std::cout << "\n<reconstruct_pos_mult-result>" << data::pp(reconstruction_result) << " " << reconstruction_result << std::endl;
   return reconstruction_result;
 }
 
 inline
 data::data_expression reconstruct_numeric_expression(data::data_expression x)
 {
-  //std::cout << "\n<reconstruct_numeric_expression>" << data::pp(x) << " " << x << std::endl;
   if (data::sort_pos::is_c1_function_symbol(x) || data::sort_pos::is_cdub_application(x))
   {
     if (data::sort_pos::is_positive_constant(x))
@@ -213,7 +210,6 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
                               sort_real::arg1(x))
                              );
   }
-  //std::cout << "\n<reconstruct_numeric_expression-result>" << data::pp(x) << " " << x << std::endl;
   return x;
 }
 

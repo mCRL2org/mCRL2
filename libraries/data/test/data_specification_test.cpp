@@ -904,7 +904,7 @@ void test_bke()
   const alias_vector& aliases = data_spec.user_defined_aliases();
   for (alias_vector::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
   {
-    std::cout << "alias " << data::pp(*i) << std::endl;
+    std::cout << "alias " << *i << std::endl;
     sort_expression s = i->reference();
     if (is_structured_sort(s))
     {
@@ -914,7 +914,7 @@ void test_bke()
         structured_sort_constructor_argument_list arguments = j->arguments();
         for (structured_sort_constructor_argument_list::const_iterator k = arguments.begin(); k != arguments.end(); ++k)
         {
-          std::cout << "argument: " << data::pp(*k) << " " << *k << std::endl;
+          std::cout << "argument: " << *k << " " << *k << std::endl;
           atermpp::aterm_appl name = k->name();
           if (name != core::empty_identifier_string())
           {
@@ -929,7 +929,7 @@ void test_bke()
 void test_abuse_of_tail()
 {
   std::cout << "Test abuse of tail\n";
-  const std::string spec_string = 
+  const std::string spec_string =
     "map tail:Nat#List(Bool) -> List(Bool);\n"
     "var vs: List(Bool);\n"
     "n: Nat;\n"
@@ -973,7 +973,7 @@ int test_main(int argc, char** argv)
   test_specification();
 
   test_abuse_of_tail();
-    
+
   return EXIT_SUCCESS;
 }
 

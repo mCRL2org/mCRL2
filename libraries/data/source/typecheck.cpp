@@ -86,7 +86,7 @@ inline atermpp::term_list<S> insert_sort_unique(const atermpp::term_list<S> &lis
 
 bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
 {
-  mCRL2log(debug) << "Strict type check: " << data::pp(d) << "\n" << d << "\n";
+  mCRL2log(debug) << "Strict type check: " << d << "\n" << d << "\n";
 
   if (is_abstraction(d))
   {
@@ -3475,7 +3475,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     }
 
     mCRL2log(debug) << "Arguments once more: Arguments " << data::pp(Arguments) << ", ArgumentTypes: " <<
-                data::pp(ArgumentTypes) << ", NewType: " << data::pp(NewType) << "" << std::endl;
+                data::pp(ArgumentTypes) << ", NewType: " << NewType << "" << std::endl;
 
     //and the arguments once more
     if (is_function_sort(UnwindType(NewType)))

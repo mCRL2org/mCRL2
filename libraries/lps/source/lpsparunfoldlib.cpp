@@ -204,10 +204,10 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
 }
 
 void lpsparunfold::create_data_equations(
-                function_symbol_vector pi, 
-                data::function_symbol case_function, 
-                function_symbol_vector elements_of_new_sorts, 
-                function_symbol_vector k, 
+                function_symbol_vector pi,
+                data::function_symbol case_function,
+                function_symbol_vector elements_of_new_sorts,
+                function_symbol_vector k,
                 data::function_symbol determine_function)
 {
   variable_vector vars;        /* Equation variables  */
@@ -489,7 +489,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
           {
             mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name, process_parameter_names);
             process_parameters_injection.push_back(mcrl2::data::variable(idstr ,  *k));
-            mCRL2log(verbose) << "- Injecting process parameter: " <<  data::pp(idstr) << "::" <<  data::pp(*k) << std::endl;
+            mCRL2log(verbose) << "- Injecting process parameter: " <<  idstr << "::" <<  *k << std::endl;
           }
           processed = true;
         }
@@ -511,7 +511,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
         }
         if (!processed)
         {
-          mCRL2log(mcrl2::log::debug) << data::pp(*j) << " is not processed" << endl;
+          mCRL2log(mcrl2::log::debug) << *j << " is not processed" << endl;
           mCRL2log(mcrl2::log::debug) << *j << endl;
           abort();
         }
@@ -803,7 +803,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
     }
   }
 
-  mcrl2::data::function_symbol new_case_function = data::function_symbol(case_function.name(), 
+  mcrl2::data::function_symbol new_case_function = data::function_symbol(case_function.name(),
                          function_sort(rw_sort_expressions,function_sort(function_for_distribution.sort()).codomain()));
   if (add_case_function_to_data_type)
   {

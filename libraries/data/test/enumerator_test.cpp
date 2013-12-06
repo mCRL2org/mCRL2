@@ -59,7 +59,7 @@ void test_data_enumerator()
     std::vector<data_expression_with_variables> values = e.enumerate(x);
     for (std::vector<data_expression_with_variables>::const_iterator i = values.begin(); i != values.end(); ++i)
     {
-      std::cout << data::pp(*i) << " " << data::pp(i->variables()) << std::endl;
+      std::cout << *i << " " << data::pp(i->variables()) << std::endl;
     }
 
     data_expression_with_variables expr(x, atermpp::make_vector(x));
@@ -69,7 +69,7 @@ void test_data_enumerator()
       std::vector<data_expression_with_variables> z = e.enumerate(*i);
       for (std::vector<data_expression_with_variables>::const_iterator j = z.begin(); j != z.end(); ++j)
       {
-        std::cout << data::pp(*j) << " " << data::pp(j->variables()) << std::endl;
+        std::cout << *j << " " << data::pp(j->variables()) << std::endl;
       }
     }
   }
@@ -181,12 +181,12 @@ void test5()
       data_expression b = datar(greater(*i, three));
       if (b == sort_bool::false_())
       {
-        std::clog << "found solution " << data::pp(*i) << std::endl;
+        std::clog << "found solution " << *i << std::endl;
         result.push_back(*i);
       }
       else if (b == sort_bool::true_())
       {
-        std::clog << "found non-solution " << data::pp(*i) << std::endl;
+        std::clog << "found non-solution " << *i << std::endl;
       }
       else
       {
@@ -224,7 +224,7 @@ void test6()
   std::vector<data_expression> values = value_range(sort_bool::bool_(), data_spec, rewr);
   for (std::vector<data_expression>::const_iterator i = values.begin(); i != values.end(); ++i)
   {
-    std::cout << data::pp(*i) << std::endl;
+    std::cout << *i << std::endl;
   }
 }
 

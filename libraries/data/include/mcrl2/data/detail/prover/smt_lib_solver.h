@@ -642,7 +642,7 @@ class SMT_LIB_Solver: public SMT_Solver
     void translate_unknown_operator(const data_expression &a_clause)
     {
       data_expression h = application(a_clause).head();
-      const function_symbol& v_operator = atermpp::aterm_cast<function_symbol>(h); 
+      const function_symbol& v_operator = atermpp::aterm_cast<function_symbol>(h);
       std::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
 
       size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
@@ -735,7 +735,7 @@ class SMT_LIB_Solver: public SMT_Solver
     void translate_constant(const data_expression &a_clause)
     {
       data_expression h = application(a_clause).head();
-      const function_symbol& v_operator = atermpp::aterm_cast<function_symbol>(h); 
+      const function_symbol& v_operator = atermpp::aterm_cast<function_symbol>(h);
       std::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
 
       size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
@@ -787,7 +787,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_bool2pred = false;
 
       f_formula = "  :formula (and";
-      mCRL2log(log::verbose) << "Formula to be solved: " << data::pp(a_formula) << std::endl;
+      mCRL2log(log::verbose) << "Formula to be solved: " << a_formula << std::endl;
       while (!a_formula.empty())
       {
         v_clause = a_formula.front();

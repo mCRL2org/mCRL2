@@ -528,7 +528,7 @@ bool EnumeratorSolutionsStandard::next(
               {
                 if (solution_possible && max_vars != 0)
                 {
-                  mCRL2log(log::debug)   << "Enumerating expression: "<< data::pp(enum_expr) << std::endl;
+                  mCRL2log(log::debug)   << "Enumerating expression: "<< enum_expr << std::endl;
                   mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used.\n";
                   solution_possible=false;
                   return false;
@@ -544,7 +544,7 @@ bool EnumeratorSolutionsStandard::next(
                     {
                       exception_message << ", ";
                     }
-                    exception_message << data::pp(*k) << ":" << data::pp(k->sort());
+                    exception_message << *k << ":" << k->sort();
                   }
                   exception_message << " that satisfy " << data::pp(enum_expr);
                   throw mcrl2::runtime_error(exception_message.str());

@@ -96,7 +96,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(log::info) << "  Witness: " << data::pp(v_witness) << std::endl;
+          mCRL2log(log::info) << "  Witness: " << v_witness << std::endl;
         }
       }
     }
@@ -116,7 +116,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(log::info) << "  Counter-example: " << data::pp(v_counter_example) << std::endl;
+          mCRL2log(log::info) << "  Counter-example: " << v_counter_example << std::endl;
         }
       }
     }
@@ -168,7 +168,7 @@ class Formula_Checker
       for(data_expression_list::const_iterator i = a_formulas.begin(); i != a_formulas.end(); ++i)
       {
         const data_expression& v_formula = *i;
-        mCRL2log(log::info) << "'" << data::pp(v_formula) << "'";
+        mCRL2log(log::info) << "'" << v_formula << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();
         Answer v_is_contradiction = f_bdd_prover.is_contradiction();

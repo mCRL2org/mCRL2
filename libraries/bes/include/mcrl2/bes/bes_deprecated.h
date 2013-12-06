@@ -1356,7 +1356,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     // p is a data::data_expression
     const data::data_expression& dp = atermpp::aterm_cast<const data::data_expression>(p);
 
-    
+
     data::data_expression d(R(dp,sigma));
     result = d;
 
@@ -1371,7 +1371,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
         result = pbes_expr::false_();
       }
     }
-    
+
   }
 
   return result;
@@ -2582,7 +2582,7 @@ class boolean_equation_system
         for (     ; t!=tl.end(); ++t)
         {
           f << ((t==tl.begin())?"(":",");
-          f << mcrl2::data::pp(*t);
+          f << *t;
         }
         f << ((t==tl.begin())?"":")"); // No closing bracket if there are tl.begin()==tl.end()
       }

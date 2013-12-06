@@ -217,7 +217,7 @@ std::string print_rename_inverse_map(const rename_inverse_map& m)
       {
         out << ", ";
       }
-      out << core::pp(*j);
+      out << *j;
     }
     out << "]";
   }

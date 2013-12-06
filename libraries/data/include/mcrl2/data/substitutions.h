@@ -243,7 +243,7 @@ struct sequence_sequence_substitution: public std::unary_function<typename Varia
     typename ExpressionContainer::const_iterator j = expressions.begin();
     for (; i != variables.end(); ++i, ++j)
     {
-      out << (i == variables.begin() ? "" : "; ") << data::pp(*i) << " := " << data::pp(*j);
+      out << (i == variables.begin() ? "" : "; ") << *i << " := " << *j;
     }
     out << "]";
     return out.str();
@@ -373,7 +373,7 @@ struct map_substitution : public std::unary_function<typename AssociativeContain
     out << "[";
     for (typename AssociativeContainer::const_iterator i = m_map.begin(); i != m_map.end(); ++i)
     {
-      out << (i == m_map.begin() ? "" : "; ") << data::pp(i->first) << ":" << data::pp(i->first.sort()) << " := " << data::pp(i->second);
+      out << (i == m_map.begin() ? "" : "; ") << i->first << ":" << i->first.sort() << " := " << i->second;
     }
     out << "]";
     return out.str();
@@ -558,7 +558,7 @@ public:
     result << "[";
     for (const_iterator i = begin(); i != end(); ++i)
     {
-      result << (i == begin() ? "" : "; ") << data::pp(i->first) << ":" << data::pp(i->first.sort()) << " := " << data::pp(i->second);
+      result << (i == begin() ? "" : "; ") << i->first << ":" << i->first.sort() << " := " << i->second;
     }
     result << "]";
     return result.str();
@@ -690,7 +690,7 @@ public:
     template <typename AssignableToExpression>
     void operator=(AssignableToExpression const& e)
     {
-      mCRL2log(log::debug2, "substitutions") << "Setting " << data::pp(m_variable) << " := " << e << std::endl;
+      mCRL2log(log::debug2, "substitutions") << "Setting " << m_variable << " := " << e << std::endl;
       assert(e.defined());
 
       size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(m_variable);
@@ -868,7 +868,7 @@ public:
         {
           result << "; ";
         }
-        result << core::identifier_string(static_cast<atermpp::function_symbol>(m_index_table[i]).name()) << " := " << data::pp(get(i));
+        result << core::identifier_string(static_cast<atermpp::function_symbol>(m_index_table[i]).name()) << " := " << get(i);
       }
     }
     result << "]";

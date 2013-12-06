@@ -142,7 +142,7 @@ std::string print_B(const std::set<core::identifier_string>& B)
     {
       out << ", ";
     }
-    out << core::pp(*i);
+    out << *i;
   }
   out << "}";
   return out.str();

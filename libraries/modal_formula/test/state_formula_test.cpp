@@ -300,7 +300,7 @@ std::cerr << "FORMULA " << f << "\n";
   v = maximal_closed_subformulas(g);
   for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
-    std::cout << "element " << state_formulas::pp(*i) << std::endl;
+    std::cout << "element " << *i << std::endl;
   }
   BOOST_CHECK(v.size() == 2);
   BOOST_CHECK(contains(v, "true"));
@@ -311,7 +311,7 @@ std::cerr << "FORMULA " << f << "\n";
   std::cout << "h = " << state_formulas::pp(h) << std::endl;
   for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
-    std::cout << "element " << state_formulas::pp(*i) << std::endl;
+    std::cout << "element " << *i << std::endl;
   }
   BOOST_CHECK(v.size() == 2);
   BOOST_CHECK(contains(v, "true"));

@@ -850,7 +850,7 @@ struct absinthe_algorithm
     std::ostringstream out;
     for (typename Map::const_iterator i = m.begin(); i != m.end(); ++i)
     {
-      out << data::pp(i->first) << " -> " << data::pp(i->second) << std::endl;
+      out << i->first << " -> " << i->second << std::endl;
     }
     return out.str();
   }
@@ -934,25 +934,24 @@ struct absinthe_algorithm
         data::function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
-mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) << " to sigmaF" << std::endl;
+mCRL2log(log::debug, "absinthe") << "adding list constructor " << f1 << " to sigmaF" << std::endl;
       }
     }
 
     for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
     {
-      mCRL2log(log::debug, "absinthe") << "lifting function symbol: " << data::pp(*i) << std::endl;
+      mCRL2log(log::debug, "absinthe") << "lifting function symbol: " << *i << std::endl;
       data::function_symbol f1 = *i;
       if (sigmaF.find(f1) == sigmaF.end())
       {
         data::function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
-        mCRL2log(log::debug, "absinthe") << "lifted function symbol: " << data::pp(f1) << " to " << data::pp(f2) << std::endl;
+        mCRL2log(log::debug, "absinthe") << "lifted function symbol: " << f1 << " to " << f2 << std::endl;
         check_consistency(f1, f2, sigmaS_consistency);
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
 
         data::data_equation eq = lift_equation_1_2()(f1, f2, sigma, sigmaH);
         mCRL2log(log::debug, "absinthe") << "adding equation: " << eq << std::endl;
-        mCRL2log(log::debug, "absinthe") << "adding equation: " << data::pp(eq) << std::endl;
         dataspec.add_equation(eq);
       }
     }
@@ -963,7 +962,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
       data::function_symbol f2 = i->second;
       data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 
-      mCRL2log(log::debug, "absinthe") << "adding mapping: " << data::pp(f3) << " " << data::pp(f3.sort()) << std::endl;
+      mCRL2log(log::debug, "absinthe") << "adding mapping: " << f3 << " " << f3.sort() << std::endl;
       dataspec.add_mapping(f3);
 
       // update sigmaF
@@ -971,7 +970,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
 
       // make an equation for the lifted function symbol f
       data::data_equation eq = lift_equation_2_3()(f2, f3, sigma);
-      mCRL2log(log::debug, "absinthe") << "adding equation: " << data::pp(eq) << std::endl;
+      mCRL2log(log::debug, "absinthe") << "adding equation: " << eq << std::endl;
       dataspec.add_equation(eq);
     }
   }
@@ -1052,15 +1051,15 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
 
     // 1) create the data specification dataspec, which consists of user_sorts_text, abstract_mapping_text and p.data()
     data::data_specification dataspec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_sorts_text + "\n" + abstraction_mapping_text.substr(3));
-    mCRL2log(log::debug, "absinthe") << "--- data specification 1) ---\n" << data::pp(dataspec) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- data specification 1) ---\n" << dataspec << std::endl;
 
     // 2) parse the right hand sides of the function symbol mapping, and add them to dataspec
     parse_right_hand_sides(function_symbol_mapping_text, dataspec);
-    mCRL2log(log::debug, "absinthe") << "--- data specification 2) ---\n" << data::pp(dataspec) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- data specification 2) ---\n" << dataspec << std::endl;
 
     // 3) add user_equations_text to dataspec
     dataspec = data::parse_data_specification(data::pp(dataspec) + "\n" + user_equations_text);
-    mCRL2log(log::debug, "absinthe") << "--- data specification 3) ---\n" << data::pp(dataspec) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- data specification 3) ---\n" << dataspec << std::endl;
 
     // abstraction functions (specified by the user)
     abstraction_map sigmaH = parse_abstraction_map(pbes_sorts_text + "\n" + user_sorts_text + "\n" + abstraction_mapping_text.substr(3));
@@ -1086,7 +1085,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
     // after: equations for f3 have been added to dataspec
     // generate mapping f1 -> f2 for missing function symbols
     lift_data_specification(p, sigmaH, sigmaS, sigmaF, dataspec);
-    mCRL2log(log::debug, "absinthe") << "--- data specification 4) ---\n" << data::pp(dataspec) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- data specification 4) ---\n" << dataspec << std::endl;
 
     mCRL2log(log::debug, "absinthe") << "\n--- function symbol mapping after lifting ---\n" << print_mapping(sigmaF) << std::endl;
 

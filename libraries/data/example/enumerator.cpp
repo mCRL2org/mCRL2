@@ -17,7 +17,7 @@ void enumerate(const std::set<variable>& variables, const data_expression& condi
 
   for (classic_enumerator<>::iterator i = enumerator.begin(variables, condition); i!= enumerator.end(); ++i)
   {
-    std::cout << data::pp(data::replace_free_variables(condition, *i)) << std::endl;
+    std::cout << data::replace_free_variables(condition, *i) << std::endl;
   }
 }
 

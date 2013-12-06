@@ -44,7 +44,7 @@ void run_linearisation_test_case(const std::string& spec, const bool expect_succ
 
   for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {
-    std::clog << std::endl << "Testing with rewrite strategy " << data::pp(*i) << std::endl;
+    std::clog << std::endl << "Testing with rewrite strategy " << *i << std::endl;
 
     t_lin_options options;
     options.rewrite_strategy=*i;
@@ -839,7 +839,7 @@ BOOST_AUTO_TEST_CASE(bug_978)
      "        rd(a) . R() +\n"
      "        rd(b) . R() + \n"
      "        sum b:Bool. wr(b) . R(a=b);\n"
-     "init R(true,true);\n"; 
+     "init R(true,true);\n";
   run_linearisation_test_case(spec);
 }
 
@@ -849,7 +849,7 @@ BOOST_AUTO_TEST_CASE(not_properly_ordered_assignments)
      "proc R(a,b : Bool) = \n"
      "        tau . R(a=true,b=false) +\n"
      "        tau . R(b=false,a=false); \n"
-     "init R(true,true);\n"; 
+     "init R(true,true);\n";
   run_linearisation_test_case(spec);
 }
 
@@ -925,7 +925,7 @@ BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
 
 // Arguments argc and argv must not be removed, despite compiler warnings,
 // as this will cause this test to fail.
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[]) 
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;
 }
