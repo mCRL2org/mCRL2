@@ -36,8 +36,7 @@ set(mcrl2_utilities_src
 
 set(mcrl2_utilities_src ${mcrl2_utilities_src}  PARENT_SCOPE)
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include
-                    ${PROJECT_BINARY_DIR}/include)
+include_directories(BEFORE ${PROJECT_BINARY_DIR}/include)
 
 
 add_library(${PROJECT_NAME}
@@ -90,15 +89,7 @@ set(mcrl2_utilities_qt_src
 
 # Don't forget to include output directory, otherwise
 # the UI file won't be wrapped!
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${QT_INCLUDES})
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(${PROJECT_NAME}
   ${mcrl2_utilities_qt_src}

@@ -23,10 +23,6 @@ add_custom_command(
   DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
 )
 
-include_directories(
-  ${CMAKE_SOURCE_DIR}/3rd-party/dparser
-)
-
 add_library(mcrl2_syntax
   ${CMAKE_BINARY_DIR}/libraries/core/source/mcrl2_syntax.c
 )
@@ -38,22 +34,6 @@ target_link_libraries(mcrl2_syntax
 # add install target:
 install(TARGETS mcrl2_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
-# ######### Set policies ############
-
-# ###################################
-# "core" links to some transitive
-# libraries for which the linker must
-# search:
-#   wxWidgets
-# Therefore CMP0003 is set to NEW
-# If not set, a BUILD_SHARED_LIB=TRUE
-# combined with a wxWidgets build
-# raises a warning
-# ###################################
-
-if(COMMAND cmake_policy)
-  cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
 
 # ######### General setup ##########
 
@@ -63,14 +43,6 @@ set(mcrl2_core_src
 )
 
 set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 
 # actual target:
 add_library(${PROJECT_NAME}

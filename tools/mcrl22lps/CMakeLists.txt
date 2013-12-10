@@ -16,15 +16,6 @@ add_executable(${PROJECT_NAME}
   mcrl22lps.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
-
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_process

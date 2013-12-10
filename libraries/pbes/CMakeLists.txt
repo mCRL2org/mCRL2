@@ -17,18 +17,6 @@ add_custom_target(${PROJECT_NAME}_headers
 
 # ######### General setup ##########
 
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/modal_formula/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
-
 set(mcrl2_pbes_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/algorithms.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/pbes.cpp

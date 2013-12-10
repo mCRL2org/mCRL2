@@ -13,12 +13,6 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 set(PREFIX "example_data")
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/ )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
-
 ##---------------------------------------------------
 ## Example ABC 
 ##--------------------------------------------------- 

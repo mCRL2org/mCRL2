@@ -17,14 +17,6 @@ add_custom_target(${PROJECT_NAME}_headers
 
 # ######### General setup ##########
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-
 set(mcrl2_lps_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/lps.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tools.cpp

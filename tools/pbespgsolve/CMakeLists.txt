@@ -46,14 +46,7 @@ add_executable(${PROJECT_NAME}
   pbespgsolve.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include/mcrl2/atermpp/)
-include_directories(${CMAKE_SOURCE_DIR}/tools/pbespgsolve)
+include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(mcrl2_${PROJECT_NAME}
   mcrl2_data
