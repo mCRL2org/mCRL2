@@ -20,7 +20,6 @@
 #include <stdexcept>
 #include <iostream>
 #include "boost/config.hpp"
-#include <boost/signals2/detail/auto_buffer.hpp>
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/exception.h"
@@ -642,8 +641,9 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   if (!strat.empty())
   {
     typedef std::pair<variable, data_expression> variable_aterm_pair;
-    boost::signals2::detail::auto_buffer<variable_aterm_pair, boost::signals2::detail::store_n_objects<16> > subst;
+    std::vector < variable_aterm_pair > subst;
     subst.reserve(16);
+
     for (aterm_list::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
     {
       const aterm &rule = *strategy_it;

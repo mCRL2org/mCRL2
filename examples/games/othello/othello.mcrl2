@@ -50,8 +50,8 @@ map N, M, R, C: Pos;
     B: Board;
     alldirections: List(Direction);
     outcome: Board -> Outcome;
-    count: Board # Player -> Nat;
-    count: Row # Player -> Nat;
+    ccount: Board # Player -> Nat;
+    ccount: Row # Player -> Nat;
     canplay: Board # Nat # Nat # Player -> Bool;
     at: Board # Int # Int -> Square;
     updated: Board # Nat # Nat # Player # Direction -> Board;
@@ -80,12 +80,12 @@ eqn % Directions to search in, as (n,m) vectors
 
     % Calculate outcome of board
     outcome(b) = if(i == j, draw, if(i > j, win(red), win(white)))
-                 whr i = count(b, red), j = count(b, white) end;
-    count(r |> b, P) = count(r, P) + count(b, P);
-    b == [] -> count(b, P) = 0;
-    s == piece(P) -> count(s |> r, P) = count(r, P) + 1;
-    s != piece(P) -> count(s |> r, P) = count(r, P);
-    r == [] -> count(r, P) = 0;
+                 whr i = ccount(b, red), j = ccount(b, white) end;
+    ccount(r |> b, P) = ccount(r, P) + ccount(b, P);
+    b == [] -> ccount(b, P) = 0;
+    s == piece(P) -> ccount(s |> r, P) = ccount(r, P) + 1;
+    s != piece(P) -> ccount(s |> r, P) = ccount(r, P);
+    r == [] -> ccount(r, P) = 0;
 
     % Calculate whether player p may place a piece on (n,m)
     canplay(b, n, m, P) = at(b, n, m) == empty && update(b, n, m, P) != b;
