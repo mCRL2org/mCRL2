@@ -298,6 +298,7 @@ static void check_that_all_objects_are_free()
           // data structures (vectors, maps, etc.) have not been destroyed when this
           // function is called.
 
+
   collect_terms_with_reference_count_0();
 
   bool result=true;
@@ -345,10 +346,10 @@ static void check_that_all_objects_are_free()
                     function_symbol_index_table[i][j].number << ", ref.count " << function_symbol_index_table[i][j].reference_count << ").\n";
         result=false;
       }
-      if (function_symbol_index_table[i][j].number!=i+j*FUNCTION_SYMBOL_BLOCK_SIZE)
+      if (function_symbol_index_table[i][j].number!=j+i*FUNCTION_SYMBOL_BLOCK_SIZE)
       {
-        std::cerr << "Symbol " << function_symbol_index_table[i][j].name << " has incorrect index " << i <<
-                          ". This should be " << i+j*FUNCTION_SYMBOL_BLOCK_SIZE << ".\n";
+        std::cerr << "Symbol " << function_symbol_index_table[i][j].name << " has incorrect index " << function_symbol_index_table[i][j].number <<
+                          ". This should be " << j+i*FUNCTION_SYMBOL_BLOCK_SIZE << ".\n";
         result=false;
       }
     }

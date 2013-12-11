@@ -134,9 +134,7 @@ sort_expression data_expression::sort() const
   {
     if (is_forall(*this) || is_exists(*this))
     {
-      // Workaround for the unavailability of sort_bool::bool_()
-      // (because of cyclic dependencies).
-      return aterm_cast<data_expression>((*this)[2]).sort();
+      return sort_bool::bool_();
     }
     else if (is_lambda(*this))
     {

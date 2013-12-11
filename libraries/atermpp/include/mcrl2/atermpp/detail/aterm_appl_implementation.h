@@ -46,6 +46,7 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
   const detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
   new_term->increase_reference_count();  // Protect against premature garbage collection.
   
+
   size_t j=0;
   for (InputIterator i=begin; i!=end; ++i, ++j)
   {
@@ -93,19 +94,6 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
   return new_term;
 }
 
-// The functions below are used to obtain an address of objects that due to
-// template arguments can have different types.
-
-inline const _aterm* ADDRESS(const _aterm* a)
-{
-  return a;
-}
-
-inline const _aterm* ADDRESS(const aterm &a)
-{
-  return address(a);
-}
-
 template <class Term, class ForwardIterator>
 const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
 {
@@ -122,7 +110,6 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(new_term))->arg[j])) Term(*i); //Note that the * can represent a complex computation.
     const aterm &arg = reinterpret_cast<const detail::_aterm_appl<Term>*>(new_term)->arg[j];
     CHECK_TERM(arg);
-    // hnr = COMBINE(hnr, reinterpret_cast<size_t>(ADDRESS(*i)));
     hnr = COMBINE(hnr, arg);
   }
   assert(j==arity);
@@ -138,7 +125,6 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
       {
         if (reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[i] !=
                   reinterpret_cast<const detail::_aterm_appl<Term>*>(new_term)->arg[i])
-//if (address(reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[j]) != detail::ADDRESS(*i)) 
         {
           found = false;
           break;
@@ -157,6 +143,7 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
   new (&const_cast<detail::_aterm*>(const_cast<detail::_aterm*>(new_term))->function()) function_symbol(sym);
   new_term->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = new_term;
+  new_term->reset_reference_count(false); // Remove temporary protection of this term.
 
   call_creation_hook(new_term);
   
