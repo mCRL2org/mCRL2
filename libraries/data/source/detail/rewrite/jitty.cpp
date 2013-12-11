@@ -39,17 +39,6 @@ namespace detail
 
 aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
 {
-  size_t max_arity = 0;
-  for (data_equation_list::const_iterator l=rules1.begin(); l!=rules1.end(); ++l)
-  {
-    const size_t current_arity=l->lhs().size();
-    if (current_arity > max_arity + 1)
-    {
-      max_arity = current_arity-1;
-    }
-  }
-
-
   aterm_list rules;
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
@@ -64,7 +53,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
 
   aterm_list strat;
 
-  std::vector <bool> used(max_arity,false);
+  std::vector <bool> used;
 
   size_t arity = 0;
   while (!rules.empty())
@@ -78,7 +67,6 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
     {
       const aterm_list& this_rule = core::down_cast<aterm_list>(rules.front());
       const data_expression& this_rule_lhs = core::down_cast<data_expression>(element_at(this_rule,2));
-//     if (aterm_cast<data_expression>(element_at(this_rule,2)).function().arity() == arity + 1)
       if ((is_function_symbol(this_rule_lhs)?1:detail::recursive_number_of_args(this_rule_lhs)+1) == arity + 1)
       {
         const data_expression& cond = core::down_cast<data_expression>(element_at(this_rule,1));
@@ -135,6 +123,10 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
         aterm_list deps;
         for (size_t i = 0; i < arity; i++)
         {
+          if (i>=used.size())
+          {
+            used.resize(i+1,false);
+          }
           if (bs[i] && !used[i])
           {
             deps.push_front(aterm_int(i));
@@ -179,24 +171,28 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
       }
 
       int max = -1;
-      int maxidx = -1;
+      size_t maxidx = 0;
 
       for (size_t i = 0; i < arity; i++)
       {
         assert(i<((size_t)1)<<(8*sizeof(int)-1));
         if (args[i] > max)
         {
-          maxidx = (int)i;
+          maxidx = i+1;
           max = args[i];
         }
       }
 
-      if (maxidx >= 0)
+      if (maxidx > 0)
       {
-        args[maxidx] = -1;
-        used[maxidx] = true;
+        args[maxidx-1] = -1;
+        if (maxidx>used.size())
+        {
+          used.resize(maxidx,false);
+        }
+        used[maxidx-1] = true;
 
-        aterm_int k(static_cast<size_t>(maxidx));
+        aterm_int k(maxidx-1);
         strat.push_front(k);
         m2 = aterm_list();
         for (; !m.empty(); m.pop_front())
