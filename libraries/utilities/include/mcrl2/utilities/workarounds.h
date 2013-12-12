@@ -104,6 +104,42 @@ the -include flag on the command line.
 #endif
 #endif // defined(HAVE_NULLPTR)
 
+/*
+Workaround for older standard libraries that do not yet support
+std::is_sorted. File is included by passing the -include flag on
+the command line.
+*/
+#ifndef MCRL2_HAVE_IS_SORTED
+namespace std
+{
+template <class ForwardIterator>
+bool is_sorted (ForwardIterator first, ForwardIterator last)
+{
+  if (first==last) return true;
+  ForwardIterator next = first;
+  while (++next!=last) {
+    if (*next<*first)     // or, if (comp(*next,*first)) for version (2)
+      return false;
+    ++first;
+  }
+  return true;
+}
+
+template <class ForwardIterator, class Compare>
+bool is_sorted (ForwardIterator first, ForwardIterator last, Compare comp)
+{
+  if (first==last) return true;
+  ForwardIterator next = first;
+  while (++next!=last) {
+    if (comp(*next,*first))
+      return false;
+    ++first;
+  }
+  return true;
+}
+} // namespace std
+#endif // MCRL2_HAVE_IS_SORTED
+
 // Code used for all platforms
 #include <limits.h>
 

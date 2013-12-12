@@ -9,6 +9,8 @@
 
 // Don't include this directly; include Graph.h instead!
 
+#include "mcrl2/utilities/workarounds.h" // for is_sorted on some platforms
+
 #include "DenseMap.h"
 #include <algorithm>
 #include <iterator>
@@ -123,7 +125,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
                 if (it != vertex_map.end()) successors_[e++] = (*it).second;
             }
             verti *end = &successors_[e];
-            if (!is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<verti>()))
             {
                 std::sort(begin, end);
             }
@@ -150,7 +152,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
                 if (it != vertex_map.end()) predecessors_[e++] = it->second;
             }
             verti *end = &predecessors_[e];
-            if (!is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<verti>()))
             {
                 std::sort(begin, end);
             }

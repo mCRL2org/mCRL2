@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/workarounds.h"
 #include "Graph.h"
 #include "SCC.h"
 #include "shuffle.h"
@@ -331,7 +332,7 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
         /* Sort edges by predecessor first, successor second */
-        if (!is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
+        if (!std::is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
         {
             std::sort(edges.begin(), edges.end(), edge_cmp_forward);
         }
@@ -376,7 +377,7 @@ void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
         // Sort edges by predecessor first, successor second
-        if (!is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
+        if (!std::is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
         {
             std::sort(edges.begin(), edges.end(), edge_cmp_forward);
         }
@@ -569,7 +570,7 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
                 if (w != NO_VERTEX) successors_[e++] = w;
             }
             verti *end = &successors_[e];
-            if (!is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<verti>()))
             {
                 std::sort(begin, end);
             }
@@ -597,7 +598,7 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
                 if (w != NO_VERTEX) predecessors_[e++] = w;
             }
             verti *end = &predecessors_[e];
-            if (!is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<verti>()))
             {
                 std::sort(begin, end);
             }
