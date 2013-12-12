@@ -102,7 +102,7 @@ CHECK_TERM_TYPE = '''  // check the type of the term
     return false;
   }
   const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
-  if (!gsIs%(name)s(a))
+  if (a.function() != core::function_symbols::%(name)s)
   {
     return false;
   }
