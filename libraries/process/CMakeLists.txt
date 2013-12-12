@@ -18,7 +18,6 @@ add_custom_target(${PROJECT_NAME}_headers
 # ######### General setup ##########
 
 set(mcrl2_process_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/alphabet_reduction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/process.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
 )
