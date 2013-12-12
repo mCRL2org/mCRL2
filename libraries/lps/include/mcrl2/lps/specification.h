@@ -45,6 +45,15 @@ atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
 bool is_well_typed(const specification& spec);
 
+/// \brief Test for a specification expression
+/// \param x A term
+/// \return True if \a x is a specification expression
+inline
+bool is_specification(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::LinProcSpec;
+}
+
 /// \brief Linear process specification.
 // sort ...;
 //
@@ -145,7 +154,7 @@ class specification
       using namespace atermpp;
       atermpp::aterm t = core::detail::load_aterm(filename);
       t = data::detail::add_index(t);
-      if (!t.type_is_appl() || !is_linear_process(atermpp::aterm_cast<const atermpp::aterm_appl>(t)))
+      if (!t.type_is_appl() || !is_specification(atermpp::aterm_cast<const atermpp::aterm_appl>(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
       }
