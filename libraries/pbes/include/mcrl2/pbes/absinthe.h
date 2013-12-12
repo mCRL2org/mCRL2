@@ -82,19 +82,11 @@ namespace pbes_system {
 
 namespace detail {
 
-  template <class T> // note, T is only a dummy
-  struct absinthe_globals
-  {
-    static data::data_specification m_dataspec;
-  };
-
-  template <class T>
-  data::data_specification absinthe_globals<T>::m_dataspec = data::data_specification();
-
   inline
   data::data_specification& absinthe_data_specification()
   {
-    return absinthe_globals<size_t>::m_dataspec;
+    static data::data_specification dataspec;
+    return dataspec;
   }
 
 #ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS

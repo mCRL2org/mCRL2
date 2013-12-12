@@ -19,6 +19,7 @@
 #include <assert.h>
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/core/detail/function_symbols.h"
 
 namespace mcrl2
 {
@@ -112,9 +113,9 @@ const atermpp::function_symbol& function_symbol_ActAnd()
 }
 
 inline
-bool gsIsActAnd(const atermpp::aterm_appl& Term)
+bool gsIsActAnd(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActAnd();
+  return t.function() == core::function_symbols::ActAnd;
 }
 
 // ActAt
@@ -126,9 +127,9 @@ const atermpp::function_symbol& function_symbol_ActAt()
 }
 
 inline
-bool gsIsActAt(const atermpp::aterm_appl& Term)
+bool gsIsActAt(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActAt();
+  return t.function() == core::function_symbols::ActAt;
 }
 
 // ActExists
@@ -140,9 +141,9 @@ const atermpp::function_symbol& function_symbol_ActExists()
 }
 
 inline
-bool gsIsActExists(const atermpp::aterm_appl& Term)
+bool gsIsActExists(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActExists();
+  return t.function() == core::function_symbols::ActExists;
 }
 
 // ActFalse
@@ -154,9 +155,9 @@ const atermpp::function_symbol& function_symbol_ActFalse()
 }
 
 inline
-bool gsIsActFalse(const atermpp::aterm_appl& Term)
+bool gsIsActFalse(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActFalse();
+  return t.function() == core::function_symbols::ActFalse;
 }
 
 // ActForall
@@ -168,9 +169,9 @@ const atermpp::function_symbol& function_symbol_ActForall()
 }
 
 inline
-bool gsIsActForall(const atermpp::aterm_appl& Term)
+bool gsIsActForall(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActForall();
+  return t.function() == core::function_symbols::ActForall;
 }
 
 // ActId
@@ -182,9 +183,9 @@ const atermpp::function_symbol& function_symbol_ActId()
 }
 
 inline
-bool gsIsActId(const atermpp::aterm_appl& Term)
+bool gsIsActId(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActId();
+  return t.function() == core::function_symbols::ActId;
 }
 
 // ActImp
@@ -196,9 +197,9 @@ const atermpp::function_symbol& function_symbol_ActImp()
 }
 
 inline
-bool gsIsActImp(const atermpp::aterm_appl& Term)
+bool gsIsActImp(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActImp();
+  return t.function() == core::function_symbols::ActImp;
 }
 
 // ActMultAct
@@ -210,9 +211,9 @@ const atermpp::function_symbol& function_symbol_ActMultAct()
 }
 
 inline
-bool gsIsActMultAct(const atermpp::aterm_appl& Term)
+bool gsIsActMultAct(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActMultAct();
+  return t.function() == core::function_symbols::ActMultAct;
 }
 
 // ActNot
@@ -224,9 +225,9 @@ const atermpp::function_symbol& function_symbol_ActNot()
 }
 
 inline
-bool gsIsActNot(const atermpp::aterm_appl& Term)
+bool gsIsActNot(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActNot();
+  return t.function() == core::function_symbols::ActNot;
 }
 
 // ActOr
@@ -238,9 +239,9 @@ const atermpp::function_symbol& function_symbol_ActOr()
 }
 
 inline
-bool gsIsActOr(const atermpp::aterm_appl& Term)
+bool gsIsActOr(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActOr();
+  return t.function() == core::function_symbols::ActOr;
 }
 
 // ActSpec
@@ -252,9 +253,9 @@ const atermpp::function_symbol& function_symbol_ActSpec()
 }
 
 inline
-bool gsIsActSpec(const atermpp::aterm_appl& Term)
+bool gsIsActSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActSpec();
+  return t.function() == core::function_symbols::ActSpec;
 }
 
 // ActTrue
@@ -266,9 +267,9 @@ const atermpp::function_symbol& function_symbol_ActTrue()
 }
 
 inline
-bool gsIsActTrue(const atermpp::aterm_appl& Term)
+bool gsIsActTrue(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActTrue();
+  return t.function() == core::function_symbols::ActTrue;
 }
 
 // Action
@@ -280,9 +281,9 @@ const atermpp::function_symbol& function_symbol_Action()
 }
 
 inline
-bool gsIsAction(const atermpp::aterm_appl& Term)
+bool gsIsAction(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Action();
+  return t.function() == core::function_symbols::Action;
 }
 
 // ActionRenameRule
@@ -294,9 +295,9 @@ const atermpp::function_symbol& function_symbol_ActionRenameRule()
 }
 
 inline
-bool gsIsActionRenameRule(const atermpp::aterm_appl& Term)
+bool gsIsActionRenameRule(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActionRenameRule();
+  return t.function() == core::function_symbols::ActionRenameRule;
 }
 
 // ActionRenameRules
@@ -308,9 +309,9 @@ const atermpp::function_symbol& function_symbol_ActionRenameRules()
 }
 
 inline
-bool gsIsActionRenameRules(const atermpp::aterm_appl& Term)
+bool gsIsActionRenameRules(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActionRenameRules();
+  return t.function() == core::function_symbols::ActionRenameRules;
 }
 
 // ActionRenameSpec
@@ -322,9 +323,9 @@ const atermpp::function_symbol& function_symbol_ActionRenameSpec()
 }
 
 inline
-bool gsIsActionRenameSpec(const atermpp::aterm_appl& Term)
+bool gsIsActionRenameSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ActionRenameSpec();
+  return t.function() == core::function_symbols::ActionRenameSpec;
 }
 
 // Allow
@@ -336,9 +337,9 @@ const atermpp::function_symbol& function_symbol_Allow()
 }
 
 inline
-bool gsIsAllow(const atermpp::aterm_appl& Term)
+bool gsIsAllow(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Allow();
+  return t.function() == core::function_symbols::Allow;
 }
 
 // AtTime
@@ -350,9 +351,9 @@ const atermpp::function_symbol& function_symbol_AtTime()
 }
 
 inline
-bool gsIsAtTime(const atermpp::aterm_appl& Term)
+bool gsIsAtTime(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_AtTime();
+  return t.function() == core::function_symbols::AtTime;
 }
 
 // BES
@@ -364,9 +365,9 @@ const atermpp::function_symbol& function_symbol_BES()
 }
 
 inline
-bool gsIsBES(const atermpp::aterm_appl& Term)
+bool gsIsBES(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BES();
+  return t.function() == core::function_symbols::BES;
 }
 
 // BInit
@@ -378,9 +379,9 @@ const atermpp::function_symbol& function_symbol_BInit()
 }
 
 inline
-bool gsIsBInit(const atermpp::aterm_appl& Term)
+bool gsIsBInit(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BInit();
+  return t.function() == core::function_symbols::BInit;
 }
 
 // BagComp
@@ -392,9 +393,9 @@ const atermpp::function_symbol& function_symbol_BagComp()
 }
 
 inline
-bool gsIsBagComp(const atermpp::aterm_appl& Term)
+bool gsIsBagComp(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BagComp();
+  return t.function() == core::function_symbols::BagComp;
 }
 
 // Binder
@@ -406,9 +407,9 @@ const atermpp::function_symbol& function_symbol_Binder()
 }
 
 inline
-bool gsIsBinder(const atermpp::aterm_appl& Term)
+bool gsIsBinder(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Binder();
+  return t.function() == core::function_symbols::Binder;
 }
 
 // Block
@@ -420,9 +421,9 @@ const atermpp::function_symbol& function_symbol_Block()
 }
 
 inline
-bool gsIsBlock(const atermpp::aterm_appl& Term)
+bool gsIsBlock(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Block();
+  return t.function() == core::function_symbols::Block;
 }
 
 // BooleanAnd
@@ -434,9 +435,9 @@ const atermpp::function_symbol& function_symbol_BooleanAnd()
 }
 
 inline
-bool gsIsBooleanAnd(const atermpp::aterm_appl& Term)
+bool gsIsBooleanAnd(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BooleanAnd();
+  return t.function() == core::function_symbols::BooleanAnd;
 }
 
 // BooleanEquation
@@ -448,9 +449,9 @@ const atermpp::function_symbol& function_symbol_BooleanEquation()
 }
 
 inline
-bool gsIsBooleanEquation(const atermpp::aterm_appl& Term)
+bool gsIsBooleanEquation(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BooleanEquation();
+  return t.function() == core::function_symbols::BooleanEquation;
 }
 
 // BooleanFalse
@@ -462,9 +463,9 @@ const atermpp::function_symbol& function_symbol_BooleanFalse()
 }
 
 inline
-bool gsIsBooleanFalse(const atermpp::aterm_appl& Term)
+bool gsIsBooleanFalse(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BooleanFalse();
+  return t.function() == core::function_symbols::BooleanFalse;
 }
 
 // BooleanImp
@@ -476,9 +477,9 @@ const atermpp::function_symbol& function_symbol_BooleanImp()
 }
 
 inline
-bool gsIsBooleanImp(const atermpp::aterm_appl& Term)
+bool gsIsBooleanImp(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BooleanImp();
+  return t.function() == core::function_symbols::BooleanImp;
 }
 
 // BooleanNot
@@ -490,9 +491,9 @@ const atermpp::function_symbol& function_symbol_BooleanNot()
 }
 
 inline
-bool gsIsBooleanNot(const atermpp::aterm_appl& Term)
+bool gsIsBooleanNot(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BooleanNot();
+  return t.function() == core::function_symbols::BooleanNot;
 }
 
 // BooleanOr
@@ -504,9 +505,9 @@ const atermpp::function_symbol& function_symbol_BooleanOr()
 }
 
 inline
-bool gsIsBooleanOr(const atermpp::aterm_appl& Term)
+bool gsIsBooleanOr(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BooleanOr();
+  return t.function() == core::function_symbols::BooleanOr;
 }
 
 // BooleanTrue
@@ -518,9 +519,9 @@ const atermpp::function_symbol& function_symbol_BooleanTrue()
 }
 
 inline
-bool gsIsBooleanTrue(const atermpp::aterm_appl& Term)
+bool gsIsBooleanTrue(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BooleanTrue();
+  return t.function() == core::function_symbols::BooleanTrue;
 }
 
 // BooleanVariable
@@ -532,9 +533,9 @@ const atermpp::function_symbol& function_symbol_BooleanVariable()
 }
 
 inline
-bool gsIsBooleanVariable(const atermpp::aterm_appl& Term)
+bool gsIsBooleanVariable(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_BooleanVariable();
+  return t.function() == core::function_symbols::BooleanVariable;
 }
 
 // Choice
@@ -546,9 +547,9 @@ const atermpp::function_symbol& function_symbol_Choice()
 }
 
 inline
-bool gsIsChoice(const atermpp::aterm_appl& Term)
+bool gsIsChoice(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Choice();
+  return t.function() == core::function_symbols::Choice;
 }
 
 // Comm
@@ -560,9 +561,9 @@ const atermpp::function_symbol& function_symbol_Comm()
 }
 
 inline
-bool gsIsComm(const atermpp::aterm_appl& Term)
+bool gsIsComm(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Comm();
+  return t.function() == core::function_symbols::Comm;
 }
 
 // CommExpr
@@ -574,9 +575,9 @@ const atermpp::function_symbol& function_symbol_CommExpr()
 }
 
 inline
-bool gsIsCommExpr(const atermpp::aterm_appl& Term)
+bool gsIsCommExpr(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_CommExpr();
+  return t.function() == core::function_symbols::CommExpr;
 }
 
 // ConsSpec
@@ -588,9 +589,9 @@ const atermpp::function_symbol& function_symbol_ConsSpec()
 }
 
 inline
-bool gsIsConsSpec(const atermpp::aterm_appl& Term)
+bool gsIsConsSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ConsSpec();
+  return t.function() == core::function_symbols::ConsSpec;
 }
 
 // DataEqn
@@ -602,9 +603,9 @@ const atermpp::function_symbol& function_symbol_DataEqn()
 }
 
 inline
-bool gsIsDataEqn(const atermpp::aterm_appl& Term)
+bool gsIsDataEqn(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_DataEqn();
+  return t.function() == core::function_symbols::DataEqn;
 }
 
 // DataEqnSpec
@@ -616,9 +617,9 @@ const atermpp::function_symbol& function_symbol_DataEqnSpec()
 }
 
 inline
-bool gsIsDataEqnSpec(const atermpp::aterm_appl& Term)
+bool gsIsDataEqnSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_DataEqnSpec();
+  return t.function() == core::function_symbols::DataEqnSpec;
 }
 
 // DataSpec
@@ -630,9 +631,9 @@ const atermpp::function_symbol& function_symbol_DataSpec()
 }
 
 inline
-bool gsIsDataSpec(const atermpp::aterm_appl& Term)
+bool gsIsDataSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_DataSpec();
+  return t.function() == core::function_symbols::DataSpec;
 }
 
 // DataVarId
@@ -644,9 +645,9 @@ const atermpp::function_symbol& function_symbol_DataVarId()
 }
 
 inline
-bool gsIsDataVarId(const atermpp::aterm_appl& Term)
+bool gsIsDataVarId(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_DataVarId();
+  return t.function() == core::function_symbols::DataVarId;
 }
 
 // DataVarIdInit
@@ -658,9 +659,9 @@ const atermpp::function_symbol& function_symbol_DataVarIdInit()
 }
 
 inline
-bool gsIsDataVarIdInit(const atermpp::aterm_appl& Term)
+bool gsIsDataVarIdInit(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_DataVarIdInit();
+  return t.function() == core::function_symbols::DataVarIdInit;
 }
 
 // Delta
@@ -672,9 +673,9 @@ const atermpp::function_symbol& function_symbol_Delta()
 }
 
 inline
-bool gsIsDelta(const atermpp::aterm_appl& Term)
+bool gsIsDelta(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Delta();
+  return t.function() == core::function_symbols::Delta;
 }
 
 // Exists
@@ -686,9 +687,9 @@ const atermpp::function_symbol& function_symbol_Exists()
 }
 
 inline
-bool gsIsExists(const atermpp::aterm_appl& Term)
+bool gsIsExists(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Exists();
+  return t.function() == core::function_symbols::Exists;
 }
 
 // Forall
@@ -700,9 +701,9 @@ const atermpp::function_symbol& function_symbol_Forall()
 }
 
 inline
-bool gsIsForall(const atermpp::aterm_appl& Term)
+bool gsIsForall(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Forall();
+  return t.function() == core::function_symbols::Forall;
 }
 
 // GlobVarSpec
@@ -714,9 +715,9 @@ const atermpp::function_symbol& function_symbol_GlobVarSpec()
 }
 
 inline
-bool gsIsGlobVarSpec(const atermpp::aterm_appl& Term)
+bool gsIsGlobVarSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_GlobVarSpec();
+  return t.function() == core::function_symbols::GlobVarSpec;
 }
 
 // Hide
@@ -728,9 +729,9 @@ const atermpp::function_symbol& function_symbol_Hide()
 }
 
 inline
-bool gsIsHide(const atermpp::aterm_appl& Term)
+bool gsIsHide(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Hide();
+  return t.function() == core::function_symbols::Hide;
 }
 
 // IfThen
@@ -742,9 +743,9 @@ const atermpp::function_symbol& function_symbol_IfThen()
 }
 
 inline
-bool gsIsIfThen(const atermpp::aterm_appl& Term)
+bool gsIsIfThen(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_IfThen();
+  return t.function() == core::function_symbols::IfThen;
 }
 
 // IfThenElse
@@ -756,9 +757,9 @@ const atermpp::function_symbol& function_symbol_IfThenElse()
 }
 
 inline
-bool gsIsIfThenElse(const atermpp::aterm_appl& Term)
+bool gsIsIfThenElse(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_IfThenElse();
+  return t.function() == core::function_symbols::IfThenElse;
 }
 
 // LMerge
@@ -770,9 +771,9 @@ const atermpp::function_symbol& function_symbol_LMerge()
 }
 
 inline
-bool gsIsLMerge(const atermpp::aterm_appl& Term)
+bool gsIsLMerge(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_LMerge();
+  return t.function() == core::function_symbols::LMerge;
 }
 
 // Lambda
@@ -784,9 +785,9 @@ const atermpp::function_symbol& function_symbol_Lambda()
 }
 
 inline
-bool gsIsLambda(const atermpp::aterm_appl& Term)
+bool gsIsLambda(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Lambda();
+  return t.function() == core::function_symbols::Lambda;
 }
 
 // LinProcSpec
@@ -798,9 +799,9 @@ const atermpp::function_symbol& function_symbol_LinProcSpec()
 }
 
 inline
-bool gsIsLinProcSpec(const atermpp::aterm_appl& Term)
+bool gsIsLinProcSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_LinProcSpec();
+  return t.function() == core::function_symbols::LinProcSpec;
 }
 
 // LinearProcess
@@ -812,9 +813,9 @@ const atermpp::function_symbol& function_symbol_LinearProcess()
 }
 
 inline
-bool gsIsLinearProcess(const atermpp::aterm_appl& Term)
+bool gsIsLinearProcess(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_LinearProcess();
+  return t.function() == core::function_symbols::LinearProcess;
 }
 
 // LinearProcessInit
@@ -826,9 +827,9 @@ const atermpp::function_symbol& function_symbol_LinearProcessInit()
 }
 
 inline
-bool gsIsLinearProcessInit(const atermpp::aterm_appl& Term)
+bool gsIsLinearProcessInit(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_LinearProcessInit();
+  return t.function() == core::function_symbols::LinearProcessInit;
 }
 
 // LinearProcessSummand
@@ -840,9 +841,9 @@ const atermpp::function_symbol& function_symbol_LinearProcessSummand()
 }
 
 inline
-bool gsIsLinearProcessSummand(const atermpp::aterm_appl& Term)
+bool gsIsLinearProcessSummand(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_LinearProcessSummand();
+  return t.function() == core::function_symbols::LinearProcessSummand;
 }
 
 // MapSpec
@@ -854,9 +855,9 @@ const atermpp::function_symbol& function_symbol_MapSpec()
 }
 
 inline
-bool gsIsMapSpec(const atermpp::aterm_appl& Term)
+bool gsIsMapSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_MapSpec();
+  return t.function() == core::function_symbols::MapSpec;
 }
 
 // Merge
@@ -868,9 +869,9 @@ const atermpp::function_symbol& function_symbol_Merge()
 }
 
 inline
-bool gsIsMerge(const atermpp::aterm_appl& Term)
+bool gsIsMerge(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Merge();
+  return t.function() == core::function_symbols::Merge;
 }
 
 // Mu
@@ -882,9 +883,9 @@ const atermpp::function_symbol& function_symbol_Mu()
 }
 
 inline
-bool gsIsMu(const atermpp::aterm_appl& Term)
+bool gsIsMu(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Mu();
+  return t.function() == core::function_symbols::Mu;
 }
 
 // MultAct
@@ -896,9 +897,9 @@ const atermpp::function_symbol& function_symbol_MultAct()
 }
 
 inline
-bool gsIsMultAct(const atermpp::aterm_appl& Term)
+bool gsIsMultAct(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_MultAct();
+  return t.function() == core::function_symbols::MultAct;
 }
 
 // MultActName
@@ -910,9 +911,9 @@ const atermpp::function_symbol& function_symbol_MultActName()
 }
 
 inline
-bool gsIsMultActName(const atermpp::aterm_appl& Term)
+bool gsIsMultActName(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_MultActName();
+  return t.function() == core::function_symbols::MultActName;
 }
 
 // Nil
@@ -924,9 +925,9 @@ const atermpp::function_symbol& function_symbol_Nil()
 }
 
 inline
-bool gsIsNil(const atermpp::aterm_appl& Term)
+bool gsIsNil(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Nil();
+  return t.function() == core::function_symbols::Nil;
 }
 
 // Nu
@@ -938,9 +939,9 @@ const atermpp::function_symbol& function_symbol_Nu()
 }
 
 inline
-bool gsIsNu(const atermpp::aterm_appl& Term)
+bool gsIsNu(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Nu();
+  return t.function() == core::function_symbols::Nu;
 }
 
 // OpId
@@ -952,9 +953,9 @@ const atermpp::function_symbol& function_symbol_OpId()
 }
 
 inline
-bool gsIsOpId(const atermpp::aterm_appl& Term)
+bool gsIsOpId(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_OpId();
+  return t.function() == core::function_symbols::OpId;
 }
 
 // PBES
@@ -966,9 +967,9 @@ const atermpp::function_symbol& function_symbol_PBES()
 }
 
 inline
-bool gsIsPBES(const atermpp::aterm_appl& Term)
+bool gsIsPBES(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBES();
+  return t.function() == core::function_symbols::PBES;
 }
 
 // PBESAnd
@@ -980,9 +981,9 @@ const atermpp::function_symbol& function_symbol_PBESAnd()
 }
 
 inline
-bool gsIsPBESAnd(const atermpp::aterm_appl& Term)
+bool gsIsPBESAnd(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBESAnd();
+  return t.function() == core::function_symbols::PBESAnd;
 }
 
 // PBESExists
@@ -994,9 +995,9 @@ const atermpp::function_symbol& function_symbol_PBESExists()
 }
 
 inline
-bool gsIsPBESExists(const atermpp::aterm_appl& Term)
+bool gsIsPBESExists(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBESExists();
+  return t.function() == core::function_symbols::PBESExists;
 }
 
 // PBESFalse
@@ -1008,9 +1009,9 @@ const atermpp::function_symbol& function_symbol_PBESFalse()
 }
 
 inline
-bool gsIsPBESFalse(const atermpp::aterm_appl& Term)
+bool gsIsPBESFalse(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBESFalse();
+  return t.function() == core::function_symbols::PBESFalse;
 }
 
 // PBESForall
@@ -1022,9 +1023,9 @@ const atermpp::function_symbol& function_symbol_PBESForall()
 }
 
 inline
-bool gsIsPBESForall(const atermpp::aterm_appl& Term)
+bool gsIsPBESForall(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBESForall();
+  return t.function() == core::function_symbols::PBESForall;
 }
 
 // PBESImp
@@ -1036,9 +1037,9 @@ const atermpp::function_symbol& function_symbol_PBESImp()
 }
 
 inline
-bool gsIsPBESImp(const atermpp::aterm_appl& Term)
+bool gsIsPBESImp(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBESImp();
+  return t.function() == core::function_symbols::PBESImp;
 }
 
 // PBESNot
@@ -1050,9 +1051,9 @@ const atermpp::function_symbol& function_symbol_PBESNot()
 }
 
 inline
-bool gsIsPBESNot(const atermpp::aterm_appl& Term)
+bool gsIsPBESNot(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBESNot();
+  return t.function() == core::function_symbols::PBESNot;
 }
 
 // PBESOr
@@ -1064,9 +1065,9 @@ const atermpp::function_symbol& function_symbol_PBESOr()
 }
 
 inline
-bool gsIsPBESOr(const atermpp::aterm_appl& Term)
+bool gsIsPBESOr(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBESOr();
+  return t.function() == core::function_symbols::PBESOr;
 }
 
 // PBESTrue
@@ -1078,9 +1079,9 @@ const atermpp::function_symbol& function_symbol_PBESTrue()
 }
 
 inline
-bool gsIsPBESTrue(const atermpp::aterm_appl& Term)
+bool gsIsPBESTrue(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBESTrue();
+  return t.function() == core::function_symbols::PBESTrue;
 }
 
 // PBEqn
@@ -1092,9 +1093,9 @@ const atermpp::function_symbol& function_symbol_PBEqn()
 }
 
 inline
-bool gsIsPBEqn(const atermpp::aterm_appl& Term)
+bool gsIsPBEqn(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBEqn();
+  return t.function() == core::function_symbols::PBEqn;
 }
 
 // PBEqnSpec
@@ -1106,9 +1107,9 @@ const atermpp::function_symbol& function_symbol_PBEqnSpec()
 }
 
 inline
-bool gsIsPBEqnSpec(const atermpp::aterm_appl& Term)
+bool gsIsPBEqnSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBEqnSpec();
+  return t.function() == core::function_symbols::PBEqnSpec;
 }
 
 // PBInit
@@ -1120,9 +1121,9 @@ const atermpp::function_symbol& function_symbol_PBInit()
 }
 
 inline
-bool gsIsPBInit(const atermpp::aterm_appl& Term)
+bool gsIsPBInit(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PBInit();
+  return t.function() == core::function_symbols::PBInit;
 }
 
 // ProcEqn
@@ -1134,9 +1135,9 @@ const atermpp::function_symbol& function_symbol_ProcEqn()
 }
 
 inline
-bool gsIsProcEqn(const atermpp::aterm_appl& Term)
+bool gsIsProcEqn(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ProcEqn();
+  return t.function() == core::function_symbols::ProcEqn;
 }
 
 // ProcEqnSpec
@@ -1148,9 +1149,9 @@ const atermpp::function_symbol& function_symbol_ProcEqnSpec()
 }
 
 inline
-bool gsIsProcEqnSpec(const atermpp::aterm_appl& Term)
+bool gsIsProcEqnSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ProcEqnSpec();
+  return t.function() == core::function_symbols::ProcEqnSpec;
 }
 
 // ProcSpec
@@ -1162,9 +1163,9 @@ const atermpp::function_symbol& function_symbol_ProcSpec()
 }
 
 inline
-bool gsIsProcSpec(const atermpp::aterm_appl& Term)
+bool gsIsProcSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ProcSpec();
+  return t.function() == core::function_symbols::ProcSpec;
 }
 
 // ProcVarId
@@ -1176,9 +1177,9 @@ const atermpp::function_symbol& function_symbol_ProcVarId()
 }
 
 inline
-bool gsIsProcVarId(const atermpp::aterm_appl& Term)
+bool gsIsProcVarId(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ProcVarId();
+  return t.function() == core::function_symbols::ProcVarId;
 }
 
 // Process
@@ -1190,9 +1191,9 @@ const atermpp::function_symbol& function_symbol_Process()
 }
 
 inline
-bool gsIsProcess(const atermpp::aterm_appl& Term)
+bool gsIsProcess(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Process();
+  return t.function() == core::function_symbols::Process;
 }
 
 // ProcessAssignment
@@ -1204,9 +1205,9 @@ const atermpp::function_symbol& function_symbol_ProcessAssignment()
 }
 
 inline
-bool gsIsProcessAssignment(const atermpp::aterm_appl& Term)
+bool gsIsProcessAssignment(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ProcessAssignment();
+  return t.function() == core::function_symbols::ProcessAssignment;
 }
 
 // ProcessInit
@@ -1218,9 +1219,9 @@ const atermpp::function_symbol& function_symbol_ProcessInit()
 }
 
 inline
-bool gsIsProcessInit(const atermpp::aterm_appl& Term)
+bool gsIsProcessInit(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_ProcessInit();
+  return t.function() == core::function_symbols::ProcessInit;
 }
 
 // PropVarDecl
@@ -1232,9 +1233,9 @@ const atermpp::function_symbol& function_symbol_PropVarDecl()
 }
 
 inline
-bool gsIsPropVarDecl(const atermpp::aterm_appl& Term)
+bool gsIsPropVarDecl(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PropVarDecl();
+  return t.function() == core::function_symbols::PropVarDecl;
 }
 
 // PropVarInst
@@ -1246,9 +1247,9 @@ const atermpp::function_symbol& function_symbol_PropVarInst()
 }
 
 inline
-bool gsIsPropVarInst(const atermpp::aterm_appl& Term)
+bool gsIsPropVarInst(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_PropVarInst();
+  return t.function() == core::function_symbols::PropVarInst;
 }
 
 // RegAlt
@@ -1260,9 +1261,9 @@ const atermpp::function_symbol& function_symbol_RegAlt()
 }
 
 inline
-bool gsIsRegAlt(const atermpp::aterm_appl& Term)
+bool gsIsRegAlt(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_RegAlt();
+  return t.function() == core::function_symbols::RegAlt;
 }
 
 // RegNil
@@ -1274,9 +1275,9 @@ const atermpp::function_symbol& function_symbol_RegNil()
 }
 
 inline
-bool gsIsRegNil(const atermpp::aterm_appl& Term)
+bool gsIsRegNil(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_RegNil();
+  return t.function() == core::function_symbols::RegNil;
 }
 
 // RegSeq
@@ -1288,9 +1289,9 @@ const atermpp::function_symbol& function_symbol_RegSeq()
 }
 
 inline
-bool gsIsRegSeq(const atermpp::aterm_appl& Term)
+bool gsIsRegSeq(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_RegSeq();
+  return t.function() == core::function_symbols::RegSeq;
 }
 
 // RegTrans
@@ -1302,9 +1303,9 @@ const atermpp::function_symbol& function_symbol_RegTrans()
 }
 
 inline
-bool gsIsRegTrans(const atermpp::aterm_appl& Term)
+bool gsIsRegTrans(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_RegTrans();
+  return t.function() == core::function_symbols::RegTrans;
 }
 
 // RegTransOrNil
@@ -1316,9 +1317,9 @@ const atermpp::function_symbol& function_symbol_RegTransOrNil()
 }
 
 inline
-bool gsIsRegTransOrNil(const atermpp::aterm_appl& Term)
+bool gsIsRegTransOrNil(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_RegTransOrNil();
+  return t.function() == core::function_symbols::RegTransOrNil;
 }
 
 // Rename
@@ -1330,9 +1331,9 @@ const atermpp::function_symbol& function_symbol_Rename()
 }
 
 inline
-bool gsIsRename(const atermpp::aterm_appl& Term)
+bool gsIsRename(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Rename();
+  return t.function() == core::function_symbols::Rename;
 }
 
 // RenameExpr
@@ -1344,9 +1345,9 @@ const atermpp::function_symbol& function_symbol_RenameExpr()
 }
 
 inline
-bool gsIsRenameExpr(const atermpp::aterm_appl& Term)
+bool gsIsRenameExpr(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_RenameExpr();
+  return t.function() == core::function_symbols::RenameExpr;
 }
 
 // Seq
@@ -1358,9 +1359,9 @@ const atermpp::function_symbol& function_symbol_Seq()
 }
 
 inline
-bool gsIsSeq(const atermpp::aterm_appl& Term)
+bool gsIsSeq(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Seq();
+  return t.function() == core::function_symbols::Seq;
 }
 
 // SetComp
@@ -1372,9 +1373,9 @@ const atermpp::function_symbol& function_symbol_SetComp()
 }
 
 inline
-bool gsIsSetComp(const atermpp::aterm_appl& Term)
+bool gsIsSetComp(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SetComp();
+  return t.function() == core::function_symbols::SetComp;
 }
 
 // SortArrow
@@ -1386,9 +1387,9 @@ const atermpp::function_symbol& function_symbol_SortArrow()
 }
 
 inline
-bool gsIsSortArrow(const atermpp::aterm_appl& Term)
+bool gsIsSortArrow(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortArrow();
+  return t.function() == core::function_symbols::SortArrow;
 }
 
 // SortBag
@@ -1400,9 +1401,9 @@ const atermpp::function_symbol& function_symbol_SortBag()
 }
 
 inline
-bool gsIsSortBag(const atermpp::aterm_appl& Term)
+bool gsIsSortBag(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortBag();
+  return t.function() == core::function_symbols::SortBag;
 }
 
 // SortCons
@@ -1414,9 +1415,9 @@ const atermpp::function_symbol& function_symbol_SortCons()
 }
 
 inline
-bool gsIsSortCons(const atermpp::aterm_appl& Term)
+bool gsIsSortCons(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortCons();
+  return t.function() == core::function_symbols::SortCons;
 }
 
 // SortFBag
@@ -1428,9 +1429,9 @@ const atermpp::function_symbol& function_symbol_SortFBag()
 }
 
 inline
-bool gsIsSortFBag(const atermpp::aterm_appl& Term)
+bool gsIsSortFBag(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortFBag();
+  return t.function() == core::function_symbols::SortFBag;
 }
 
 // SortFSet
@@ -1442,9 +1443,9 @@ const atermpp::function_symbol& function_symbol_SortFSet()
 }
 
 inline
-bool gsIsSortFSet(const atermpp::aterm_appl& Term)
+bool gsIsSortFSet(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortFSet();
+  return t.function() == core::function_symbols::SortFSet;
 }
 
 // SortId
@@ -1456,9 +1457,9 @@ const atermpp::function_symbol& function_symbol_SortId()
 }
 
 inline
-bool gsIsSortId(const atermpp::aterm_appl& Term)
+bool gsIsSortId(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortId();
+  return t.function() == core::function_symbols::SortId;
 }
 
 // SortList
@@ -1470,9 +1471,9 @@ const atermpp::function_symbol& function_symbol_SortList()
 }
 
 inline
-bool gsIsSortList(const atermpp::aterm_appl& Term)
+bool gsIsSortList(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortList();
+  return t.function() == core::function_symbols::SortList;
 }
 
 // SortRef
@@ -1484,9 +1485,9 @@ const atermpp::function_symbol& function_symbol_SortRef()
 }
 
 inline
-bool gsIsSortRef(const atermpp::aterm_appl& Term)
+bool gsIsSortRef(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortRef();
+  return t.function() == core::function_symbols::SortRef;
 }
 
 // SortSet
@@ -1498,9 +1499,9 @@ const atermpp::function_symbol& function_symbol_SortSet()
 }
 
 inline
-bool gsIsSortSet(const atermpp::aterm_appl& Term)
+bool gsIsSortSet(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortSet();
+  return t.function() == core::function_symbols::SortSet;
 }
 
 // SortSpec
@@ -1512,9 +1513,9 @@ const atermpp::function_symbol& function_symbol_SortSpec()
 }
 
 inline
-bool gsIsSortSpec(const atermpp::aterm_appl& Term)
+bool gsIsSortSpec(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortSpec();
+  return t.function() == core::function_symbols::SortSpec;
 }
 
 // SortStruct
@@ -1526,9 +1527,9 @@ const atermpp::function_symbol& function_symbol_SortStruct()
 }
 
 inline
-bool gsIsSortStruct(const atermpp::aterm_appl& Term)
+bool gsIsSortStruct(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_SortStruct();
+  return t.function() == core::function_symbols::SortStruct;
 }
 
 // StateAnd
@@ -1540,9 +1541,9 @@ const atermpp::function_symbol& function_symbol_StateAnd()
 }
 
 inline
-bool gsIsStateAnd(const atermpp::aterm_appl& Term)
+bool gsIsStateAnd(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateAnd();
+  return t.function() == core::function_symbols::StateAnd;
 }
 
 // StateDelay
@@ -1554,9 +1555,9 @@ const atermpp::function_symbol& function_symbol_StateDelay()
 }
 
 inline
-bool gsIsStateDelay(const atermpp::aterm_appl& Term)
+bool gsIsStateDelay(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateDelay();
+  return t.function() == core::function_symbols::StateDelay;
 }
 
 // StateDelayTimed
@@ -1568,9 +1569,9 @@ const atermpp::function_symbol& function_symbol_StateDelayTimed()
 }
 
 inline
-bool gsIsStateDelayTimed(const atermpp::aterm_appl& Term)
+bool gsIsStateDelayTimed(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateDelayTimed();
+  return t.function() == core::function_symbols::StateDelayTimed;
 }
 
 // StateExists
@@ -1582,9 +1583,9 @@ const atermpp::function_symbol& function_symbol_StateExists()
 }
 
 inline
-bool gsIsStateExists(const atermpp::aterm_appl& Term)
+bool gsIsStateExists(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateExists();
+  return t.function() == core::function_symbols::StateExists;
 }
 
 // StateFalse
@@ -1596,9 +1597,9 @@ const atermpp::function_symbol& function_symbol_StateFalse()
 }
 
 inline
-bool gsIsStateFalse(const atermpp::aterm_appl& Term)
+bool gsIsStateFalse(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateFalse();
+  return t.function() == core::function_symbols::StateFalse;
 }
 
 // StateForall
@@ -1610,9 +1611,9 @@ const atermpp::function_symbol& function_symbol_StateForall()
 }
 
 inline
-bool gsIsStateForall(const atermpp::aterm_appl& Term)
+bool gsIsStateForall(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateForall();
+  return t.function() == core::function_symbols::StateForall;
 }
 
 // StateImp
@@ -1624,9 +1625,9 @@ const atermpp::function_symbol& function_symbol_StateImp()
 }
 
 inline
-bool gsIsStateImp(const atermpp::aterm_appl& Term)
+bool gsIsStateImp(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateImp();
+  return t.function() == core::function_symbols::StateImp;
 }
 
 // StateMay
@@ -1638,9 +1639,9 @@ const atermpp::function_symbol& function_symbol_StateMay()
 }
 
 inline
-bool gsIsStateMay(const atermpp::aterm_appl& Term)
+bool gsIsStateMay(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateMay();
+  return t.function() == core::function_symbols::StateMay;
 }
 
 // StateMu
@@ -1652,9 +1653,9 @@ const atermpp::function_symbol& function_symbol_StateMu()
 }
 
 inline
-bool gsIsStateMu(const atermpp::aterm_appl& Term)
+bool gsIsStateMu(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateMu();
+  return t.function() == core::function_symbols::StateMu;
 }
 
 // StateMust
@@ -1666,9 +1667,9 @@ const atermpp::function_symbol& function_symbol_StateMust()
 }
 
 inline
-bool gsIsStateMust(const atermpp::aterm_appl& Term)
+bool gsIsStateMust(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateMust();
+  return t.function() == core::function_symbols::StateMust;
 }
 
 // StateNot
@@ -1680,9 +1681,9 @@ const atermpp::function_symbol& function_symbol_StateNot()
 }
 
 inline
-bool gsIsStateNot(const atermpp::aterm_appl& Term)
+bool gsIsStateNot(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateNot();
+  return t.function() == core::function_symbols::StateNot;
 }
 
 // StateNu
@@ -1694,9 +1695,9 @@ const atermpp::function_symbol& function_symbol_StateNu()
 }
 
 inline
-bool gsIsStateNu(const atermpp::aterm_appl& Term)
+bool gsIsStateNu(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateNu();
+  return t.function() == core::function_symbols::StateNu;
 }
 
 // StateOr
@@ -1708,9 +1709,9 @@ const atermpp::function_symbol& function_symbol_StateOr()
 }
 
 inline
-bool gsIsStateOr(const atermpp::aterm_appl& Term)
+bool gsIsStateOr(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateOr();
+  return t.function() == core::function_symbols::StateOr;
 }
 
 // StateTrue
@@ -1722,9 +1723,9 @@ const atermpp::function_symbol& function_symbol_StateTrue()
 }
 
 inline
-bool gsIsStateTrue(const atermpp::aterm_appl& Term)
+bool gsIsStateTrue(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateTrue();
+  return t.function() == core::function_symbols::StateTrue;
 }
 
 // StateVar
@@ -1736,9 +1737,9 @@ const atermpp::function_symbol& function_symbol_StateVar()
 }
 
 inline
-bool gsIsStateVar(const atermpp::aterm_appl& Term)
+bool gsIsStateVar(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateVar();
+  return t.function() == core::function_symbols::StateVar;
 }
 
 // StateYaled
@@ -1750,9 +1751,9 @@ const atermpp::function_symbol& function_symbol_StateYaled()
 }
 
 inline
-bool gsIsStateYaled(const atermpp::aterm_appl& Term)
+bool gsIsStateYaled(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateYaled();
+  return t.function() == core::function_symbols::StateYaled;
 }
 
 // StateYaledTimed
@@ -1764,9 +1765,9 @@ const atermpp::function_symbol& function_symbol_StateYaledTimed()
 }
 
 inline
-bool gsIsStateYaledTimed(const atermpp::aterm_appl& Term)
+bool gsIsStateYaledTimed(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StateYaledTimed();
+  return t.function() == core::function_symbols::StateYaledTimed;
 }
 
 // StructCons
@@ -1778,9 +1779,9 @@ const atermpp::function_symbol& function_symbol_StructCons()
 }
 
 inline
-bool gsIsStructCons(const atermpp::aterm_appl& Term)
+bool gsIsStructCons(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StructCons();
+  return t.function() == core::function_symbols::StructCons;
 }
 
 // StructProj
@@ -1792,9 +1793,9 @@ const atermpp::function_symbol& function_symbol_StructProj()
 }
 
 inline
-bool gsIsStructProj(const atermpp::aterm_appl& Term)
+bool gsIsStructProj(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_StructProj();
+  return t.function() == core::function_symbols::StructProj;
 }
 
 // Sum
@@ -1806,9 +1807,9 @@ const atermpp::function_symbol& function_symbol_Sum()
 }
 
 inline
-bool gsIsSum(const atermpp::aterm_appl& Term)
+bool gsIsSum(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Sum();
+  return t.function() == core::function_symbols::Sum;
 }
 
 // Sync
@@ -1820,9 +1821,9 @@ const atermpp::function_symbol& function_symbol_Sync()
 }
 
 inline
-bool gsIsSync(const atermpp::aterm_appl& Term)
+bool gsIsSync(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Sync();
+  return t.function() == core::function_symbols::Sync;
 }
 
 // Tau
@@ -1834,9 +1835,9 @@ const atermpp::function_symbol& function_symbol_Tau()
 }
 
 inline
-bool gsIsTau(const atermpp::aterm_appl& Term)
+bool gsIsTau(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Tau();
+  return t.function() == core::function_symbols::Tau;
 }
 
 // UntypedActMultAct
@@ -1848,9 +1849,9 @@ const atermpp::function_symbol& function_symbol_UntypedActMultAct()
 }
 
 inline
-bool gsIsUntypedActMultAct(const atermpp::aterm_appl& Term)
+bool gsIsUntypedActMultAct(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedActMultAct();
+  return t.function() == core::function_symbols::UntypedActMultAct;
 }
 
 // UntypedAction
@@ -1862,9 +1863,9 @@ const atermpp::function_symbol& function_symbol_UntypedAction()
 }
 
 inline
-bool gsIsUntypedAction(const atermpp::aterm_appl& Term)
+bool gsIsUntypedAction(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedAction();
+  return t.function() == core::function_symbols::UntypedAction;
 }
 
 // UntypedIdentifier
@@ -1876,9 +1877,9 @@ const atermpp::function_symbol& function_symbol_UntypedIdentifier()
 }
 
 inline
-bool gsIsUntypedIdentifier(const atermpp::aterm_appl& Term)
+bool gsIsUntypedIdentifier(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedIdentifier();
+  return t.function() == core::function_symbols::UntypedIdentifier;
 }
 
 // UntypedIdentifierAssignment
@@ -1890,9 +1891,9 @@ const atermpp::function_symbol& function_symbol_UntypedIdentifierAssignment()
 }
 
 inline
-bool gsIsUntypedIdentifierAssignment(const atermpp::aterm_appl& Term)
+bool gsIsUntypedIdentifierAssignment(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedIdentifierAssignment();
+  return t.function() == core::function_symbols::UntypedIdentifierAssignment;
 }
 
 // UntypedMultAct
@@ -1904,9 +1905,9 @@ const atermpp::function_symbol& function_symbol_UntypedMultAct()
 }
 
 inline
-bool gsIsUntypedMultAct(const atermpp::aterm_appl& Term)
+bool gsIsUntypedMultAct(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedMultAct();
+  return t.function() == core::function_symbols::UntypedMultAct;
 }
 
 // UntypedParamId
@@ -1918,9 +1919,9 @@ const atermpp::function_symbol& function_symbol_UntypedParamId()
 }
 
 inline
-bool gsIsUntypedParamId(const atermpp::aterm_appl& Term)
+bool gsIsUntypedParamId(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedParamId();
+  return t.function() == core::function_symbols::UntypedParamId;
 }
 
 // UntypedProcessAssignment
@@ -1932,9 +1933,9 @@ const atermpp::function_symbol& function_symbol_UntypedProcessAssignment()
 }
 
 inline
-bool gsIsUntypedProcessAssignment(const atermpp::aterm_appl& Term)
+bool gsIsUntypedProcessAssignment(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedProcessAssignment();
+  return t.function() == core::function_symbols::UntypedProcessAssignment;
 }
 
 // UntypedSetBagComp
@@ -1946,9 +1947,9 @@ const atermpp::function_symbol& function_symbol_UntypedSetBagComp()
 }
 
 inline
-bool gsIsUntypedSetBagComp(const atermpp::aterm_appl& Term)
+bool gsIsUntypedSetBagComp(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedSetBagComp();
+  return t.function() == core::function_symbols::UntypedSetBagComp;
 }
 
 // UntypedSortUnknown
@@ -1960,9 +1961,9 @@ const atermpp::function_symbol& function_symbol_UntypedSortUnknown()
 }
 
 inline
-bool gsIsUntypedSortUnknown(const atermpp::aterm_appl& Term)
+bool gsIsUntypedSortUnknown(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedSortUnknown();
+  return t.function() == core::function_symbols::UntypedSortUnknown;
 }
 
 // UntypedSortsPossible
@@ -1974,9 +1975,9 @@ const atermpp::function_symbol& function_symbol_UntypedSortsPossible()
 }
 
 inline
-bool gsIsUntypedSortsPossible(const atermpp::aterm_appl& Term)
+bool gsIsUntypedSortsPossible(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_UntypedSortsPossible();
+  return t.function() == core::function_symbols::UntypedSortsPossible;
 }
 
 // Whr
@@ -1988,9 +1989,9 @@ const atermpp::function_symbol& function_symbol_Whr()
 }
 
 inline
-bool gsIsWhr(const atermpp::aterm_appl& Term)
+bool gsIsWhr(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_Whr();
+  return t.function() == core::function_symbols::Whr;
 }
 //--- end generated code ---//
 

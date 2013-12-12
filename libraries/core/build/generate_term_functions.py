@@ -20,9 +20,9 @@ const atermpp::function_symbol& function_symbol_%(name)s()
 }
 
 inline
-bool gsIs%(name)s(const atermpp::aterm_appl& Term)
+bool gsIs%(name)s(const atermpp::aterm_appl& t)
 {
-  return Term.function() == function_symbol_%(name)s();
+  return t.function() == core::function_symbols::%(name)s;
 }
 
 '''
@@ -204,9 +204,11 @@ const atermpp::aterm_appl& construct%(name)s()
 #---------------------------------------------------------------#
 # generates C++ code for constructor functions
 #
-def generate_constructor_functions(rules, filename, skip_list):
+def generate_constructor_functions(rules, filename, function_symbol_declaration_filename, function_symbol_definition_filename, skip_list):
     text  = ''
     ptext = '' # function declarations (prototypes)
+    ftext = '' # function symbol declarations
+    dtext = '' # function symbol definitions
 
     functions = find_functions(rules)
 
@@ -239,6 +241,9 @@ def generate_constructor_functions(rules, filename, skip_list):
             'name'       : name
         }
 
+        ftext = ftext + '  static atermpp::function_symbol %s;\n' % name
+        dtext = dtext + '  atermpp::function_symbol core::function_symbols::%s = core::detail::function_symbol_%s();\n' % (name, name)
+
     function_names = map(lambda x: x.name(), functions)
     for rule in rules:
         if not rule.name() in function_names:
@@ -257,7 +262,10 @@ def generate_constructor_functions(rules, filename, skip_list):
             }
 
     text = ptext + '\n' + text
-    return insert_text_in_file(filename, text, 'generated code')
+    result = insert_text_in_file(filename, text, 'generated code')
+    result = result and insert_text_in_file(function_symbol_declaration_filename, ftext, 'generated function symbol declarations')
+    result = result and insert_text_in_file(function_symbol_definition_filename, dtext, 'generated function symbol definitions')
+    return result
 
 #---------------------------------------------------------------#
 #                          find_functions
@@ -381,7 +389,9 @@ def main():
 
     if options.constructors:
         filename = '../include/mcrl2/core/detail/constructors.h'
-        result = generate_constructor_functions(rules, filename, skip_list) and result
+        function_symbol_declaration_filename = '../include/mcrl2/core/detail/function_symbols.h'
+        function_symbol_definition_filename = '../source/core.cpp'
+        result = generate_constructor_functions(rules, filename, function_symbol_declaration_filename, function_symbol_definition_filename, skip_list) and result
 
     return result
 
