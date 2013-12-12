@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -57,9 +57,6 @@ ParityGame::Strategy DeloopSolver::solve()
 
         verti num_solved = (verti)solved.size() - old_solved;
         mCRL2log(mcrl2::log::verbose, "DeloopSolver") << "Found " << num_solved << " vertices won by " << (player == 0 ? "Even" : "Odd" ) << std::endl;
-
-        update_memory_use( sizeof(strategy[0])*strategy.capacity() +
-            solved.memory_use() + sizeof(winning[0])*winning.size()*2  );
     }
 
     std::vector<verti> unsolved;
@@ -89,7 +86,7 @@ ParityGame::Strategy DeloopSolver::solve()
         }
         assert(!unsolved.empty() && unsolved.size() == num_unsolved);
 
-        subgame.make_subgame(game_, unsolved.begin(), unsolved.end());
+        subgame.make_subgame(game_, unsolved.begin(), unsolved.end(), true);
 
         // Construct solver:
         if (vmap_size_ > 0)
@@ -112,13 +109,6 @@ ParityGame::Strategy DeloopSolver::solve()
             merge_strategies(strategy, substrat, unsolved);
         }
     }
-
-    update_memory_use(
-        sizeof(strategy[0])*strategy.capacity() + solved.memory_use() +
-        sizeof(unsolved[0])*unsolved.capacity() + subgame.memory_use() +
-        sizeof(submap[0])*submap.capacity() +
-        (subsolver.get() ? subsolver->memory_use() : 0) +
-        sizeof(substrat[0])*substrat.capacity() );
 
     return strategy;
 }

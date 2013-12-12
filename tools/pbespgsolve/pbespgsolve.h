@@ -12,10 +12,6 @@
 #ifndef MCRL2_TOOLS_PBESPGSOLVE_H
 #define MCRL2_TOOLS_PBESPGSOLVE_H
 
-#ifndef WITH_MCRL2
-#define WITH_MCRL2
-#endif
-
 #include <iostream>
 #include "mcrl2/utilities/execution_timer.h"
 #include "ParityGame.h"
@@ -168,7 +164,7 @@ class pbespgsolve_algorithm
         // Create a SPM solver factory:
         solver_factory.reset(
           new SmallProgressMeasuresSolverFactory
-                (new PredecessorLiftingStrategyFactory, alternative_solver)
+                (new PredecessorLiftingStrategyFactory, 2, alternative_solver)
         );
       }
       else if (options.solver_type == recursive_solver)
@@ -186,11 +182,6 @@ class pbespgsolve_algorithm
         // Wrap solver factory into a component solver factory:
         solver_factory.reset(
           new ComponentSolverFactory(*solver_factory.release()));
-      }
-
-      if (options.use_decycle_solver && options.use_deloop_solver)
-      {
-        throw mcrl2::runtime_error("pbespgsolve: cannot use self-loop removal and cycle removal simultaneously");
       }
 
       if (options.use_decycle_solver)
@@ -233,7 +224,7 @@ class pbespgsolve_algorithm
           throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
         }
 
-        return pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN;
+        return pg.winner(solution, goal_v) == PLAYER_EVEN;
       }
       return true;
     }
@@ -246,7 +237,7 @@ class pbespgsolve_algorithm
       verti goal_v;
       ParityGame pg;
 
-      pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, m_options.rewrite_strategy); // N.B. mCRL2 could raise an exception here
+      pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, pp(m_options.rewrite_strategy)); // N.B. mCRL2 could raise an exception here
       mCRL2log(log::verbose) << "Game: " << pg.graph().V() << " vertices, " << pg.graph().E() << " edges." << std::endl;
       m_timer.finish("initialization");
 

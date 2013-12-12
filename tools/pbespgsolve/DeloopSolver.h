@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,21 +10,26 @@
 #ifndef DELOOP_SOLVER_H_INCLUDED
 #define DELOOP_SOLVER_H_INCLUDED
 
-#include "SmallProgressMeasures.h"
-#include "DenseSet.h"
-#include "mcrl2/utilities/logger.h"
-#include "SCC.h"
 #include <deque>
 #include <string>
 #include <vector>
+#include "mcrl2/utilities/logger.h"
+#include "SmallProgressMeasures.h"
+#include "DenseSet.h"
+#include "SCC.h"
 
-/*! A solver that takes a game preprocessed with SmallProgressMeasures::pre-
-    process_game(), identifies vertices with loops (which are won by the player
-    corresponding with the parity of their priority) and removes their attractor
-    sets from the game to obtain a loop-less reduced game that is then solved
-    with a new solver.
+/*! A solver that identifies vertices with loops which are won by their owner
+    (i.e. when the owner corresponds with the parity of the vertex priority)
+    and removes their attractor sets from the game to obtain a loop-less reduced
+    game that is then solved with a new solver.
 
-    Similar to the DecycleSolver, except being less general yet faster. */
+    This REQUIRES that the game graph has been preprocessed with
+    SmallProgressMeasures::preprocess_game()!
+
+    Compared to the DecycleSolver, this preprocessor is faster but weaker.
+
+    \see DecycleSolver
+*/
 class DeloopSolver : public ParityGameSolver
 {
 public:
@@ -39,14 +44,13 @@ private:
     int operator()(const verti *vertices, size_t num_vertices);
     friend class SCC<DeloopSolver>;
 
-    size_t my_memory_use();
-
 protected:
     ParityGameSolverFactory &pgsf_;       //!< Solver factory to use
     const verti             *vmap_;       //!< Current vertex map
     const verti             vmap_size_;   //!< Size of vertex map
 };
 
+//! A factory class for DeloopSolver instances.
 class DeloopSolverFactory : public ParityGameSolverFactory
 {
 public:
@@ -54,6 +58,7 @@ public:
         : pgsf_(pgsf) { pgsf_.ref(); }
     ~DeloopSolverFactory() { pgsf_.deref(); }
 
+    //! Create a new DeloopSolver instance.
     ParityGameSolver *create( const ParityGame &game,
         const verti *vertex_map, verti vertex_map_size );
 

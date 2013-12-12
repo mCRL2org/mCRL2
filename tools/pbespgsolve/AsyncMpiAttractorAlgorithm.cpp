@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -11,7 +11,7 @@
 #include "attractor.h"  // for is_subset_of()
 
 AsyncMpiAttractorImpl::AsyncMpiAttractorImpl( const VertexPartition &vpart,
-        const GamePartition &part, ParityGame::Player player,
+        const GamePart &part, ParityGame::Player player,
         DenseSet<verti> &attr, std::deque<verti> &queue,
         ParityGame::Strategy &strategy )
     : MpiTermination(1, MPI_INT, &vertex_val), vpart_(vpart), part(part),

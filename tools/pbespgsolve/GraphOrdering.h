@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,6 +12,7 @@
 
 /*! \file GraphOrdering.h
     \brief Functions to analyze vertex order in a static graph.
+    \ingroup ParityGameData
 
     This file declares functions that are useful to determine the ordering of
     vertices in a graph, and find ways to reorder them (for example, to obtain
@@ -23,11 +24,11 @@
 #include "Graph.h"
 
 /*! Traverses the graph in breadth-first search order, and returns the result
-    in `perm', such that perm[v] = i if v is the i-th visited vertex. */
+    in `perm`, such that perm[v] = i if v is the i-th visited vertex. */
 void get_bfs_order(const StaticGraph &graph, std::vector<verti> &perm);
 
 /*! Traverses the graph in depth-first search order, and returns the result
-    in `perm', such that perm[v] = i if v is the i-th visited vertex. */
+    in `perm`, such that perm[v] = i if v is the i-th visited vertex. */
 void get_dfs_order(const StaticGraph &graph, std::vector<verti> &perm);
 
 /*! Count the number of edges with a specific ordering of vertices.

@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,20 +10,29 @@
 #ifndef MPI_UTILS_INCLUDED
 #define MPI_UTILS_INCLUDED
 
-/* This file includes some common routines which are useful for implemented
-   distributed algorithms using MPI. They are used by the MpiRecursiveSolver,
-   MpiSpmSolver and the MpiAttractorAlgorithm classes. */
+/*! \file MpiUtils.h
+
+    Common routines which are useful for implementing distributed algorithms
+    using MPI.  They are used by the MpiRecursiveSolver, MpiSpmSolver and the
+    MpiAttractorAlgorithm classes.
+*/
 
 #include <mpi.h>
 
-/* MPI process rank and size. (mpi_size == 0 if MPI is not to be used; in that
-   case, none of the routines defined here may be called!) */
-extern int mpi_rank, mpi_size;
+/*! MPI process rank. */
+extern int mpi_rank;
 
-//! Returns whether `local_value' is true in all of the MPI processes:
+/*! Number of MPI processes.
+
+    This is zero if MPI is not initialized; in that case, none of the routines
+    defined here may be called!
+*/
+extern int mpi_size;
+
+//! Returns whether `local_value` is true in all of the MPI processes:
 bool mpi_and(bool local_value);
 
-//! Returns whether `local_value' is true in any of the MPI processes:
+//! Returns whether `local_value` is true in any of the MPI processes:
 bool mpi_or(bool local_value);
 
 //! Returns the sum of local values of all MPI processes:
@@ -31,8 +40,7 @@ int mpi_sum(int local_value);
 
 
 
-/*! Wraps MPI send and receive calls to provided Friedemann Mattern's
-    four-counter method for termination detection.
+/*! Termination detection using Friedemann Mattern's four-counter method.
 
     All processes keep track of the number of sent and received messages. When
     idle, the first process sends a probe that is circulated to other processes
@@ -77,16 +85,16 @@ public:
         a call to recv() to wait for new data or conformation of termination. */
     void idle();
 
-    /*! Blocks while waiting for more data to arrive. Returns `true' if a data
+    /*! Blocks while waiting for more data to arrive. Returns `true` if a data
         message has been received, which must be handled by the application.
         The data buffer is valid until the next call to recv() or test().
         Returns false if global termination has been dected. */
     bool recv();
 
-    /*! Tests whether more data is available yet. Returns `true' if a data
+    /*! Tests whether more data is available yet. Returns `true` if a data
         message has been received, which must be handled by the application.
         The data buffer is valid until the next call to recv() or test().
-        Returns `false' if no data is available yet. In either case, the method
+        Returns `false` if no data is available yet. In either case, the method
         does not block. */
     bool test();
 

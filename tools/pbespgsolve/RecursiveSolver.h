@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,8 +10,8 @@
 #ifndef RECURSIVE_SOLVER_H_INCLUDED
 #define RECURSIVE_SOLVER_H_INCLUDED
 
-#include "ParityGameSolver.h"
 #include "mcrl2/utilities/logger.h"
+#include "ParityGameSolver.h"
 
 /*! Provides a view of a strategy corresponding to a subset of the vertex set.
     Note that elements of the substrategy can be written to, and the underlying
@@ -64,13 +64,13 @@ public:
         global_.swap(other.global_);
     }
 
-    //! Returns a write-only reference to the strategy for vertex `v'.
+    //! Returns a write-only reference to the strategy for vertex `v`.
     Reference operator[](verti v)
     {
         return Reference(*this, v);
     }
 
-    //! Returns the winner for vertex `v' assuming it is controlled by `p'.
+    //! Returns the winner for vertex `v` assuming it is controlled by `p`.
     ParityGame::Player winner(verti v, ParityGame::Player p)
     {
         if (strategy_[global(v)] == NO_VERTEX) p = ParityGame::Player(1 - p);
@@ -91,21 +91,10 @@ private:
     std::vector<verti> global_;
 };
 
-
-/*! Returns the complement of a vertex set; i.e. an ordered list of all vertex
-    indices under V, from which the contents of the range delineated by `begin'
-    and `end' have been removed.
-
-    N.B. [begin..end) must produce a strictly increasing sequence!
-*/
-template<class ForwardIterator>
-static std::vector<verti> get_complement( verti V, ForwardIterator begin,
-                                                   ForwardIterator end );
-
-/*! Returns the first inversion of parity, i.e. the least priority `p' such that
+/*! Returns the first inversion of parity, i.e. the least priority `p` such that
     some vertices exist with priorities p and q, where q < p and q%2 != p%2.
     If there are no inversions, game.d() is returned instead. */
-size_t first_inversion(const ParityGame &game);
+int first_inversion(const ParityGame &game);
 
 
 /*! Parity game solver implementing Zielonka's recursive algorithm. */
@@ -122,36 +111,12 @@ private:
     bool solve(ParityGame &game, Substrategy &strat);
 };
 
+//! Factory object for RecursiveSolver instances.
 class RecursiveSolverFactory : public ParityGameSolverFactory
 {
+    //! Returns a new ResuriveSolver instance.
     ParityGameSolver *create( const ParityGame &game,
         const verti *vertex_map, verti vertex_map_size );
 };
-
-
-// Implementation of inline functions follows.
-
-template<class ForwardIterator>
-static std::vector<verti> get_complement( verti V, ForwardIterator begin,
-                                                   ForwardIterator end )
-{
-    std::vector<verti> res;
-    res.reserve(V - (verti)std::distance(begin, end));
-    ForwardIterator it = begin;
-    for (verti v = 0; v < V; ++v)
-    {
-        if (it == end || v < *it)
-        {
-            res.push_back(v);
-        }
-        else
-        {
-            assert(*it == v);
-            ++it;
-        }
-    }
-    assert(it == end);
-    return res;
-}
 
 #endif /* ndef RECURSIVE_SOLVER_H_INCLUDED */

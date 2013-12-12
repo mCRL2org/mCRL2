@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -134,7 +134,7 @@ bool ConcurrentRecursiveSolver::solve(ParityGame &game, Substrategy &strat)
         // Solve vertices not in the minimum priority attractor set:
         {
             ParityGame subgame;
-            subgame.make_subgame(game, unsolved.begin(), unsolved.end());
+            subgame.make_subgame_threads(game, &unsolved[0], (verti)unsolved.size(), true);
             Substrategy substrat(strat, unsolved);
             if (!solve(subgame, substrat)) return false;
 
@@ -160,7 +160,7 @@ bool ConcurrentRecursiveSolver::solve(ParityGame &game, Substrategy &strat)
         // Repeat with subgame of which vertices won by odd have been removed:
         {
             ParityGame subgame;
-            subgame.make_subgame(game, unsolved.begin(), unsolved.end());
+            subgame.make_subgame_threads(game, &unsolved[0], (verti)unsolved.size(), true);
             Substrategy substrat(strat, unsolved);
             strat.swap(substrat);
             game.swap(subgame);

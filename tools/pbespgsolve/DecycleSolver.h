@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,17 +10,28 @@
 #ifndef DECYCLE_SOLVER_H_INCLUDED
 #define DECYCLE_SOLVER_H_INCLUDED
 
-#include "SmallProgressMeasures.h"
-#include "DenseSet.h"
-#include "mcrl2/utilities/logger.h"
-#include "SCC.h"
 #include <deque>
 #include <string>
 #include <vector>
+#include "mcrl2/utilities/logger.h"
+#include "SmallProgressMeasures.h"
+#include "DenseSet.h"
+#include "SCC.h"
 
-/*! A solver that first removes i-dominated cycles controlled by player p
-    for all values of i and p where i%2 == p, then calls another, general
-    solver to solve the remaining subgame. */
+/*! A partial solver that efficiently solves cycles controlled by a single
+    player.
+
+    Specifically, it removes all i-dominated cycles controlled by player p for
+    all values of i and p where i%2 == p, including the vertices in their
+    attractor sets, and then calls a general solver to solve the remaining
+    subgame.
+
+    This is a generalization of the DeloopSolver, which is limited to detecting
+    cycles of length 1. The only downside to using the DecycleSolver is that it
+    is slower.
+
+    \see DeloopSolver
+*/
 class DecycleSolver : public ParityGameSolver
 {
 public:
@@ -36,6 +47,7 @@ protected:
     const verti             vmap_size_;   //!< Size of vertex map
 };
 
+//! A factory class for DecycleSolver instances.
 class DecycleSolverFactory : public ParityGameSolverFactory
 {
 public:
@@ -43,6 +55,7 @@ public:
         : pgsf_(pgsf) { pgsf_.ref(); }
     ~DecycleSolverFactory() { pgsf_.deref(); }
 
+    //! Return a new DecycleSolver instance.
     ParityGameSolver *create( const ParityGame &game,
         const verti *vertex_map, verti vertex_map_size );
 

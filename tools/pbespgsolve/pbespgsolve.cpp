@@ -27,6 +27,7 @@
 
 #include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/pg_parse.h"

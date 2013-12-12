@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -14,7 +14,9 @@
 #include <algorithm>
 #include <vector>
 
-/*! A lifting strategy that combines the linear and predecessor lifting
+/*! \ingroup LiftingStrategies
+
+    A lifting strategy that combines the linear and predecessor lifting
     strategies: vertices are lifted in sequential order (like with the linear
     lifting strategy) but after a single pass over all vertices, only those
     vertices which had a successor lifted are (like with the predecessor lifting
@@ -22,13 +24,14 @@
 
     Intended for debugging, as it shouldn't really offer any benefits over
     predecessor lifting using a queue. Its main advantage is that the order in
-    which vertices are lifted is more predictable. */
+    which vertices are lifted is more predictable.
+*/
 class LinPredLiftingStrategy : public LiftingStrategy
 {
 public:
     LinPredLiftingStrategy( const ParityGame &game,
                             const SmallProgressMeasures &spm )
-        : LiftingStrategy(game)
+        : LiftingStrategy(), graph_(game.graph())
     {
         (void)spm;  // unused
         cur_queue.reserve(graph_.V());
@@ -57,20 +60,29 @@ public:
         return *pos++;
     }
 
-    size_t memory_use() const
-    {
-        return sizeof(*this) + sizeof(cur_queue[0])*cur_queue.capacity() +
-                               sizeof(next_queue[0])*next_queue.capacity();
-    }
-
 private:
-    std::vector<verti> cur_queue, next_queue;
-    std::vector<verti>::const_iterator pos;
+    //! Graph for the game being solved.
+    const StaticGraph &graph_;
+
+    //! List of vertices to be lifted in the current pass.
+    std::vector<verti> cur_queue;
+
+    /*! List of vertices to be lifted in the next next pass.
+        These are the predecessors of the vertices that have been successfully
+        lifted during the current pass. */
+    std::vector<verti> next_queue;
+
+    /*! Iterator over `cur_queue` that points to the next vertex to be lifted
+        in the current pass. */     
+    std::vector<verti>::const_iterator pos; 
 };
 
+/*! \ingroup LiftingStrategies
+    A factory class for LinPredLiftingStrategy instances. */
 class LinPredLiftingStrategyFactory : public LiftingStrategyFactory
 {
 public:
+    //! Return a new LinPredLiftingStrategy instance.
     LiftingStrategy *create( const ParityGame &game,
                              const SmallProgressMeasures &spm )
     {
