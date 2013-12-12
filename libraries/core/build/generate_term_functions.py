@@ -19,12 +19,6 @@ const atermpp::function_symbol& function_symbol_%(name)s()
   return function_symbol_%(name)s;
 }
 
-inline
-bool gsIs%(name)s(const atermpp::aterm_appl& t)
-{
-  return t.function() == core::function_symbols::%(name)s;
-}
-
 '''
 
 #---------------------------------------------------------------#

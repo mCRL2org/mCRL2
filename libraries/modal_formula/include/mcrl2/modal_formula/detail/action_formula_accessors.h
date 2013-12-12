@@ -31,7 +31,7 @@ namespace accessors
 inline
 const lps::action_list& mult_params(const action_formula& t)
 {
-  assert(core::detail::gsIsMultAct(t));
+  assert(action_formulas::is_multi_action(t));
   return atermpp::aterm_cast<const lps::action_list>(t[0]);
 }
 
@@ -41,11 +41,11 @@ const lps::action_list& mult_params(const action_formula& t)
 inline
 const action_formula& arg(const action_formula& t)
 {
-  if (core::detail::gsIsActNot(t) || core::detail::gsIsActAt(t))
+  if (action_formulas::is_not(t) || action_formulas::is_at(t))
   {
     return core::static_down_cast<const action_formula&>(t[0]);
   }
-  assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
+  assert(action_formulas::is_exists(t) || action_formulas::is_forall(t));
   return core::static_down_cast<const action_formula&>(t[1]);
 }
 
@@ -55,7 +55,7 @@ const action_formula& arg(const action_formula& t)
 inline
 const action_formula& left(const action_formula& t)
 {
-  assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
+  assert(action_formulas::is_and(t) || action_formulas::is_or(t) || action_formulas::is_imp(t));
   return core::static_down_cast<const action_formula&>(t[0]);
 }
 
@@ -65,7 +65,7 @@ const action_formula& left(const action_formula& t)
 inline
 const action_formula& right(const action_formula& t)
 {
-  assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
+  assert(action_formulas::is_and(t) || action_formulas::is_or(t) || action_formulas::is_imp(t));
   return core::static_down_cast<const action_formula&>(t[1]);
 }
 
@@ -75,7 +75,7 @@ const action_formula& right(const action_formula& t)
 inline
 const data::variable_list& var(const action_formula& t)
 {
-  assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
+  assert(action_formulas::is_exists(t) || action_formulas::is_forall(t));
   return atermpp::aterm_cast<const data::variable_list>(t[0]);
 }
 
@@ -85,7 +85,7 @@ const data::variable_list& var(const action_formula& t)
 inline
 const data::data_expression& time(const action_formula& t)
 {
-  assert(core::detail::gsIsActAt(t));
+  assert(action_formulas::is_at(t));
   return core::static_down_cast<const data::data_expression&>(t[1]);
 }
 

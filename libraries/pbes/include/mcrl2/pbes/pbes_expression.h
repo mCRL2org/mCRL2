@@ -687,7 +687,7 @@ bool search_variable(const pbes_system::pbes_expression& x, const data::variable
 /// \return True if the term t is equal to true
 inline bool is_pbes_true(const pbes_expression& t)
 {
-  return core::detail::gsIsPBESTrue(t);
+  return pbes_system::is_true(t);
 }
 
 /// \brief Returns true if the term t is equal to false
@@ -695,7 +695,7 @@ inline bool is_pbes_true(const pbes_expression& t)
 /// \return True if the term t is equal to false
 inline bool is_pbes_false(const pbes_expression& t)
 {
-  return core::detail::gsIsPBESFalse(t);
+  return pbes_system::is_false(t);
 }
 
 /// \brief Returns true if the term t is a not expression
@@ -703,7 +703,7 @@ inline bool is_pbes_false(const pbes_expression& t)
 /// \return True if the term t is a not expression
 inline bool is_pbes_not(const pbes_expression& t)
 {
-  return core::detail::gsIsPBESNot(t);
+  return pbes_system::is_not(t);
 }
 
 
@@ -712,7 +712,7 @@ inline bool is_pbes_not(const pbes_expression& t)
 /// \return True if the term t is an and expression
 inline bool is_pbes_and(const pbes_expression& t)
 {
-  return core::detail::gsIsPBESAnd(t);
+  return pbes_system::is_and(t);
 }
 
 /// \brief Returns true if the term t is an or expression
@@ -720,7 +720,7 @@ inline bool is_pbes_and(const pbes_expression& t)
 /// \return True if the term t is an or expression
 inline bool is_pbes_or(const pbes_expression& t)
 {
-  return core::detail::gsIsPBESOr(t);
+  return pbes_system::is_or(t);
 }
 
 /// \brief Returns true if the term t is an imp expression
@@ -728,7 +728,7 @@ inline bool is_pbes_or(const pbes_expression& t)
 /// \return True if the term t is an imp expression
 inline bool is_pbes_imp(const pbes_expression& t)
 {
-  return core::detail::gsIsPBESImp(t);
+  return pbes_system::is_imp(t);
 }
 
 /// \brief Returns true if the term t is a universal quantification
@@ -736,7 +736,7 @@ inline bool is_pbes_imp(const pbes_expression& t)
 /// \return True if the term t is a universal quantification
 inline bool is_pbes_forall(const pbes_expression& t)
 {
-  return core::detail::gsIsPBESForall(t);
+  return pbes_system::is_forall(t);
 }
 
 /// \brief Returns true if the term t is an existential quantification
@@ -744,88 +744,41 @@ inline bool is_pbes_forall(const pbes_expression& t)
 /// \return True if the term t is an existential quantification
 inline bool is_pbes_exists(const pbes_expression& t)
 {
-  return core::detail::gsIsPBESExists(t);
+  return pbes_system::is_exists(t);
 }
 
-/// \brief Test for the value true
-/// \param t A PBES expression
-/// \return True if it is the value \p true
-inline bool is_true(const pbes_expression& t)
+/// \brief Test for a true expression (either PBES or data)
+/// \param x A term
+/// \return True if \a x is a true expression
+inline
+bool is_universal_true(const atermpp::aterm_appl& x)
 {
-  return is_pbes_true(t) || data::sort_bool::is_true_function_symbol(t);
+  return is_true(x) || data::sort_bool::is_true_function_symbol(x);
 }
 
-/// \brief Test for the value false
-/// \param t A PBES expression
-/// \return True if it is the value \p false
-inline bool is_false(const pbes_expression& t)
+/// \brief Test for a false expression (either PBES or data)
+/// \param x A term
+/// \return True if \a x is a false expression
+inline
+bool is_universal_false(const atermpp::aterm_appl& x)
 {
-  return is_pbes_false(t) || data::sort_bool::is_false_function_symbol(t);
+  return is_false(x) || data::sort_bool::is_false_function_symbol(x);
 }
-
-/// \brief Test for a negation
-/// \param t A PBES expression
-/// \return True if it is a negation
-inline bool is_not(const pbes_expression& t)
-{
-  return is_pbes_not(t);
-}
-
-// /// \brief Test for a conjunction
-// /// \param t A PBES expression
-// /// \return True if it is a conjunction
-// inline bool is_and(const pbes_expression& t)
-// {
-//   return is_pbes_and(t);
-// }
-
 
 /// \brief Test for a conjunction
 /// \param t A PBES expression or a data expression
 /// \return True if it is a conjunction
-inline bool data_is_and(const pbes_expression& t)
+inline bool is_universal_and(const pbes_expression& t)
 {
   return is_pbes_and(t) || data::sort_bool::is_and_application(t);
 }
 
-// /// \brief Test for a disjunction
-// /// \param t A PBES expression
-// /// \return True if it is a disjunction
-// inline bool is_or(const pbes_expression& t)
-// {
-//   return is_pbes_or(t);
-// }
-
 /// \brief Test for a disjunction
 /// \param t A PBES expression or a data expression
 /// \return True if it is a disjunction
-inline bool data_is_or(const pbes_expression& t)
+inline bool is_universal_or(const pbes_expression& t)
 {
   return is_pbes_or(t) || data::sort_bool::is_or_application(t);
-}
-
-/// \brief Test for an implication
-/// \param t A PBES expression
-/// \return True if it is an implication
-inline bool is_imp(const pbes_expression& t)
-{
-  return is_pbes_imp(t);
-}
-
-/// \brief Test for an universal quantification
-/// \param t A PBES expression
-/// \return True if it is a universal quantification
-inline bool is_forall(const pbes_expression& t)
-{
-  return is_pbes_forall(t);
-}
-
-/// \brief Test for an existential quantification
-/// \param t A PBES expression
-/// \return True if it is an existential quantification
-inline bool is_exists(const pbes_expression& t)
-{
-  return is_pbes_exists(t);
 }
 
 /// \brief Returns true if the term t is a data expression
@@ -834,14 +787,6 @@ inline bool is_exists(const pbes_expression& t)
 inline bool is_data(const pbes_expression& t)
 {
   return data::is_data_expression(t);
-}
-
-/// \brief Returns true if the term t is a propositional variable expression
-/// \param t A PBES expression
-/// \return True if the term t is a propositional variable expression
-inline bool is_propositional_variable_instantiation(const pbes_expression& t)
-{
-  return core::detail::gsIsPropVarInst(t);
 }
 
 // From the documentation:
@@ -1168,7 +1113,7 @@ std::set<pbes_expression> split_or(const pbes_expression& expr, bool split_data_
 
   if (split_data_expressions)
   {
-    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), data_is_or, data_left, data_right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_universal_or, data_left, data_right);
   }
   else
   {
@@ -1194,7 +1139,7 @@ std::set<pbes_expression> split_and(const pbes_expression& expr, bool split_data
 
   if (split_data_expressions)
   {
-    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), data_is_and, data_left, data_right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_universal_and, data_left, data_right);
   }
   else
   {
@@ -1394,7 +1339,7 @@ inline bool is_exists(const pbes_expression& t)
 /// \return True if the term t is a propositional variable expression
 inline bool is_propositional_variable_instantiation(const pbes_expression& t)
 {
-  return core::detail::gsIsPropVarInst(t);
+  return pbes_system::is_propositional_variable_instantiation(t);
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -1622,7 +1567,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_true(const term_type& t)
   {
-    return core::detail::gsIsPBESTrue(t) || data::sort_bool::is_true_function_symbol(t);
+    return pbes_system::is_pbes_true(t) || data::sort_bool::is_true_function_symbol(t);
   }
 
   /// \brief Test for the value false
@@ -1631,7 +1576,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_false(const term_type& t)
   {
-    return core::detail::gsIsPBESFalse(t) || data::sort_bool::is_false_function_symbol(t);
+    return pbes_system::is_pbes_false(t) || data::sort_bool::is_false_function_symbol(t);
   }
 
   /// \brief Test for a negation
@@ -1640,7 +1585,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_not(const term_type& t)
   {
-    return core::detail::gsIsPBESNot(t);
+    return pbes_system::is_not(t);
   }
 
   /// \brief Test for a conjunction
@@ -1703,7 +1648,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_prop_var(const term_type& t)
   {
-    return core::detail::gsIsPropVarInst(t);
+    return pbes_system::is_propositional_variable_instantiation(t);
   }
 
   /// \brief Returns the argument of a term of type not, exists or forall

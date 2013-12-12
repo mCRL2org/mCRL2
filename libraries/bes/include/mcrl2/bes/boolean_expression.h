@@ -697,7 +697,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   bool is_and(const term_type& t)
   {
-    return core::detail::gsIsBooleanAnd(t);
+    return bes::is_and(t);
   }
 
   /// \brief Test for operator or
@@ -706,7 +706,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   bool is_or(const term_type& t)
   {
-    return core::detail::gsIsBooleanOr(t);
+    return bes::is_or(t);
   }
 
   /// \brief Test for implication
@@ -715,7 +715,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   bool is_imp(const term_type& t)
   {
-    return core::detail::gsIsBooleanImp(t);
+    return bes::is_imp(t);
   }
 
   /// \brief Test for boolean variable
@@ -724,7 +724,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   bool is_variable(const term_type& t)
   {
-    return core::detail::gsIsBooleanVariable(t);
+    return bes::is_boolean_variable(t);
   }
 
   /// \brief Test for propositional variable
