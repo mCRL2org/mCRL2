@@ -71,6 +71,35 @@ typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 /// \brief vector of pbes_expressions
 typedef std::vector<pbes_expression>    pbes_expression_vector;
 
+// prototypes
+inline bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x);
+inline bool is_true(const atermpp::aterm_appl& x);
+inline bool is_false(const atermpp::aterm_appl& x);
+inline bool is_not(const atermpp::aterm_appl& x);
+inline bool is_and(const atermpp::aterm_appl& x);
+inline bool is_or(const atermpp::aterm_appl& x);
+inline bool is_imp(const atermpp::aterm_appl& x);
+inline bool is_forall(const atermpp::aterm_appl& x);
+inline bool is_exists(const atermpp::aterm_appl& x);
+
+/// \brief Test for a pbes_expression expression
+/// \param x A term
+/// \return True if \a x is a pbes_expression expression
+inline
+bool is_pbes_expression(const atermpp::aterm_appl& x)
+{
+  return data::is_data_expression(x) ||
+         pbes_system::is_propositional_variable_instantiation(x) ||
+         pbes_system::is_true(x) ||
+         pbes_system::is_false(x) ||
+         pbes_system::is_not(x) ||
+         pbes_system::is_and(x) ||
+         pbes_system::is_or(x) ||
+         pbes_system::is_imp(x) ||
+         pbes_system::is_forall(x) ||
+         pbes_system::is_exists(x);
+}
+
 // prototype declaration
 std::string pp(const pbes_expression& x);
 
@@ -162,6 +191,15 @@ typedef atermpp::term_list<propositional_variable_instantiation> propositional_v
 /// \brief vector of propositional_variable_instantiations
 typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
 
+/// \brief Test for a propositional_variable_instantiation expression
+/// \param x A term
+/// \return True if \a x is a propositional_variable_instantiation expression
+inline
+bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::PropVarInst;
+}
+
 // prototype declaration
 std::string pp(const propositional_variable_instantiation& x);
 
@@ -199,6 +237,15 @@ class true_: public pbes_expression
     }
 };
 
+/// \brief Test for a true expression
+/// \param x A term
+/// \return True if \a x is a true expression
+inline
+bool is_true(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::PBESTrue;
+}
+
 // prototype declaration
 std::string pp(const true_& x);
 
@@ -235,6 +282,15 @@ class false_: public pbes_expression
       assert(core::detail::check_term_PBESFalse(*this));
     }
 };
+
+/// \brief Test for a false expression
+/// \param x A term
+/// \return True if \a x is a false expression
+inline
+bool is_false(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::PBESFalse;
+}
 
 // prototype declaration
 std::string pp(const false_& x);
@@ -282,6 +338,15 @@ class not_: public pbes_expression
       return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
     }
 };
+
+/// \brief Test for a not expression
+/// \param x A term
+/// \return True if \a x is a not expression
+inline
+bool is_not(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::PBESNot;
+}
 
 // prototype declaration
 std::string pp(const not_& x);
@@ -335,6 +400,15 @@ class and_: public pbes_expression
     }
 };
 
+/// \brief Test for a and expression
+/// \param x A term
+/// \return True if \a x is a and expression
+inline
+bool is_and(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::PBESAnd;
+}
+
 // prototype declaration
 std::string pp(const and_& x);
 
@@ -386,6 +460,15 @@ class or_: public pbes_expression
       return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Test for a or expression
+/// \param x A term
+/// \return True if \a x is a or expression
+inline
+bool is_or(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::PBESOr;
+}
 
 // prototype declaration
 std::string pp(const or_& x);
@@ -439,6 +522,15 @@ class imp: public pbes_expression
     }
 };
 
+/// \brief Test for a imp expression
+/// \param x A term
+/// \return True if \a x is a imp expression
+inline
+bool is_imp(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::PBESImp;
+}
+
 // prototype declaration
 std::string pp(const imp& x);
 
@@ -491,6 +583,15 @@ class forall: public pbes_expression
     }
 };
 
+/// \brief Test for a forall expression
+/// \param x A term
+/// \return True if \a x is a forall expression
+inline
+bool is_forall(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::PBESForall;
+}
+
 // prototype declaration
 std::string pp(const forall& x);
 
@@ -542,6 +643,15 @@ class exists: public pbes_expression
       return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Test for a exists expression
+/// \param x A term
+/// \return True if \a x is a exists expression
+inline
+bool is_exists(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::function_symbols::PBESExists;
+}
 
 // prototype declaration
 std::string pp(const exists& x);
@@ -661,13 +771,13 @@ inline bool is_not(const pbes_expression& t)
   return is_pbes_not(t);
 }
 
-/// \brief Test for a conjunction
-/// \param t A PBES expression
-/// \return True if it is a conjunction
-inline bool is_and(const pbes_expression& t)
-{
-  return is_pbes_and(t);
-}
+// /// \brief Test for a conjunction
+// /// \param t A PBES expression
+// /// \return True if it is a conjunction
+// inline bool is_and(const pbes_expression& t)
+// {
+//   return is_pbes_and(t);
+// }
 
 
 /// \brief Test for a conjunction
@@ -678,13 +788,13 @@ inline bool data_is_and(const pbes_expression& t)
   return is_pbes_and(t) || data::sort_bool::is_and_application(t);
 }
 
-/// \brief Test for a disjunction
-/// \param t A PBES expression
-/// \return True if it is a disjunction
-inline bool is_or(const pbes_expression& t)
-{
-  return is_pbes_or(t);
-}
+// /// \brief Test for a disjunction
+// /// \param t A PBES expression
+// /// \return True if it is a disjunction
+// inline bool is_or(const pbes_expression& t)
+// {
+//   return is_pbes_or(t);
+// }
 
 /// \brief Test for a disjunction
 /// \param t A PBES expression or a data expression
@@ -1062,7 +1172,7 @@ std::set<pbes_expression> split_or(const pbes_expression& expr, bool split_data_
   }
   else
   {
-    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_or, left, right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_pbes_or, left, right);
   }
 
   return result;
@@ -1088,7 +1198,7 @@ std::set<pbes_expression> split_and(const pbes_expression& expr, bool split_data
   }
   else
   {
-    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_and, left, right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_pbes_and, left, right);
   }
 
   return result;

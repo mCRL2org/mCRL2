@@ -62,14 +62,14 @@ class fixpoint_symbol: public atermpp::aterm_appl
     /// \return True if the symbol is mu.
     bool is_mu() const
     {
-      return core::detail::gsIsMu(*this);
+      return function() == core::function_symbols::Mu;
     }
 
     /// \brief Returns true if the symbol is nu.
     /// \return True if the symbol is nu.
     bool is_nu() const
     {
-      return core::detail::gsIsNu(*this);
+      return function() == core::function_symbols::Nu;
     }
 //--- end user section fixpoint_symbol ---//
 };

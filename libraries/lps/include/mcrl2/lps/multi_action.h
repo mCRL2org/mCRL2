@@ -28,6 +28,9 @@ namespace mcrl2
 namespace lps
 {
 
+// prototype declaration
+bool is_multi_action(const atermpp::aterm_appl& x);
+
 /// \brief Represents a multi action
 /// \details Multi actions consist of a list of actions together with an optional time tag.
 class multi_action
@@ -50,24 +53,13 @@ class multi_action
       assert(data::sort_real::is_real(m_time.sort()));
     }
 
-/*
-    /// \brief Constructor
-    multi_action(const atermpp::aterm_appl& t)
-      : m_time(data::undefined_real())
-    {
-      assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
-      assert(data::sort_real::is_real(m_time));
-      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]);
-    }
-*/
-
     /// \brief Constructor
     explicit multi_action(const atermpp::aterm& t1)
       : m_time(data::undefined_real())
     {
       const atermpp::aterm_appl t(t1);
-      assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
-      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]);
+      assert(lps::is_action(t) || lps::is_multi_action(t));
+      m_actions = (lps::is_action(t) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]));
     }
 
     /// \brief Constructor
@@ -188,9 +180,9 @@ inline void swap(multi_action& t1, multi_action& t2)
 
 /// \brief Returns true if the term t is a multi action
 inline
-bool is_multi_action(const atermpp::aterm_appl& t)
+bool is_multi_action(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsMultAct(t);
+  return x.function() == core::function_symbols::MultAct;
 }
 
 // template function overloads

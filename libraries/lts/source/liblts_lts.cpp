@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include "svc/svc.h"
+#include "mcrl2/core/nil.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -138,12 +139,12 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
           data::data_specification data_spec(atermpp::aterm_appl(((aterm_appl)data)[0]));
           data_spec.declare_data_specification_to_be_type_checked(); // We can assume that this data spec is well typed.
           l.set_data(data::data_specification(data_spec));
-          if (!gsIsNil((aterm_appl)((aterm_appl)data)[1]))
+          if (!core::is_nil((aterm_appl)((aterm_appl)data)[1]))
           {
             // The parameters below have the structure "ParamSpec(variable list);
             l.set_process_parameters(data::variable_list((aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(data)[1]))[0]));
           }
-          if (!gsIsNil((aterm_appl)((aterm_appl)data)[2]))
+          if (!core::is_nil((aterm_appl)((aterm_appl)data)[2]))
           {
             // The parameters below have the structure "ActSpec(variable list);
             l.set_action_labels(lps::action_label_list((aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(data)[2]))[0]));

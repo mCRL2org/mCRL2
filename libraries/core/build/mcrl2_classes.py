@@ -198,16 +198,16 @@ pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_e
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
-pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XC   | PBExpr            | A pbes expression
-propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECUs | PropVarInst       | A propositional variable instantiation
-true_()                                                                                                                 : public pbes_system::pbes_expression | E    | PBESTrue          | The value true for pbes expressions
-false_()                                                                                                                : public pbes_system::pbes_expression | E    | PBESFalse         | The value false for pbes expressions
-not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | E    | PBESNot           | The not operator for pbes expressions
-and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | E    | PBESAnd           | The and operator for pbes expressions
-or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | E    | PBESOr            | The or operator for pbes expressions
-imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | E    | PBESImp           | The implication operator for pbes expressions
-forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | E    | PBESForall        | The universal quantification operator for pbes expressions
-exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | E    | PBESExists        | The existential quantification operator for pbes expressions
+pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PBExpr            | A pbes expression
+propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECUIs | PropVarInst       | A propositional variable instantiation
+true_()                                                                                                                 : public pbes_system::pbes_expression | EI    | PBESTrue          | The value true for pbes expressions
+false_()                                                                                                                : public pbes_system::pbes_expression | EI    | PBESFalse         | The value false for pbes expressions
+not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | EI    | PBESNot           | The not operator for pbes expressions
+and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | EI    | PBESAnd           | The and operator for pbes expressions
+or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESOr            | The or operator for pbes expressions
+imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESImp           | The implication operator for pbes expressions
+forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESForall        | The universal quantification operator for pbes expressions
+exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESExists        | The existential quantification operator for pbes expressions
 '''
 
 BOOLEAN_CLASSES = r'''
@@ -216,7 +216,7 @@ boolean_equation_system(const std::vector<bes::boolean_equation>& equations, con
 '''
 
 BOOLEAN_EXPRESSION_CLASSES = r'''
-boolean_expression()                                                  : public atermpp::aterm_appl     | XC   | BooleanExpression    | A boolean expression
+boolean_expression()                                                  : public atermpp::aterm_appl     | XCI  | BooleanExpression    | A boolean expression
 true_()                                                               : public bes::boolean_expression | EI   | BooleanTrue          | The value true for boolean expressions
 false_()                                                              : public bes::boolean_expression | EI   | BooleanFalse         | The value false for boolean expressions
 not_(const boolean_expression& operand)                               : public bes::boolean_expression | EI   | BooleanNot           | The not operator for boolean expressions

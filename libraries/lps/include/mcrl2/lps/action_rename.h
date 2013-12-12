@@ -65,14 +65,14 @@ class action_rename_rule_rhs: public atermpp::aterm_appl
     /// \return True if the right hand side is equal to delta.
     bool is_delta() const
     {
-      return core::detail::gsIsDelta(*this);
+      return function() == core::function_symbols::Delta;
     }
 
     /// \brief Returns true if the right hand side is equal to tau.
     /// \return True if the right hand side is equal to tau.
     bool is_tau() const
     {
-      return core::detail::gsIsTau(*this);
+      return function() == core::function_symbols::Tau;
     }
 
     /// \brief Constructor.

@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"

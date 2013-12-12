@@ -48,7 +48,7 @@ struct is_a_variable
 {
   bool operator()(const atermpp::aterm& t) const
   {
-    return is_variable(t);
+    return is_variable(atermpp::aterm_cast<atermpp::aterm_appl>(t));
   }
 };
 

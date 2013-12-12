@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -27,39 +28,39 @@ namespace data
 {
 
 /// \brief Returns true if the term t is a basic sort
-inline bool is_basic_sort(const atermpp::aterm_appl& p)
+inline bool is_basic_sort(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortId(p);
+  return x.function() == core::function_symbols::SortId;
 }
 
 /// \brief Returns true if the term t is a function sort
-inline bool is_function_sort(const atermpp::aterm_appl& p)
+inline bool is_function_sort(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortArrow(p);
+  return x.function() == core::function_symbols::SortArrow;
 }
 
 /// \brief Returns true if the term t is a container sort
-inline bool is_container_sort(const atermpp::aterm_appl& p)
+inline bool is_container_sort(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortCons(p);
+  return x.function() == core::function_symbols::SortCons;
 }
 
 /// \brief Returns true if the term t is a structured sort
-inline bool is_structured_sort(const atermpp::aterm_appl& p)
+inline bool is_structured_sort(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortStruct(p);
+  return x.function() == core::function_symbols::SortStruct;
 }
 
 /// \brief Returns true if the term t is the unknown sort
-inline bool is_untyped_sort(const atermpp::aterm_appl& p)
+inline bool is_untyped_sort(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedSortUnknown(p);
+  return x.function() == core::function_symbols::UntypedSortUnknown;
 }
 
 /// \brief Returns true if the term t is an expression for multiple possible sorts
-inline bool is_untyped_possible_sorts(const atermpp::aterm_appl& p)
+inline bool is_untyped_possible_sorts(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedSortsPossible(p);
+  return x.function() == core::function_symbols::UntypedSortsPossible;
 }
 
 //--- start generated class sort_expression ---//
@@ -128,12 +129,12 @@ inline void swap(sort_expression& t1, sort_expression& t2)
 inline
 bool is_sort_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortId(x) ||
-         core::detail::gsIsSortCons(x) ||
-         core::detail::gsIsSortStruct(x) ||
-         core::detail::gsIsSortArrow(x) ||
-         core::detail::gsIsUntypedSortUnknown(x) ||
-         core::detail::gsIsUntypedSortsPossible(x);
+  return is_basic_sort(x)             ||
+         is_function_sort(x)          ||
+         is_container_sort(x)         ||
+         is_structured_sort(x)        ||
+         is_untyped_sort(x)           ||
+         is_untyped_possible_sorts(x);
 }
 
 // template function overloads

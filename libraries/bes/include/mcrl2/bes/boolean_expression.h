@@ -68,6 +68,30 @@ typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 /// \brief vector of boolean_expressions
 typedef std::vector<boolean_expression>    boolean_expression_vector;
 
+// prototypes
+inline bool is_true(const atermpp::aterm_appl& x);
+inline bool is_false(const atermpp::aterm_appl& x);
+inline bool is_not(const atermpp::aterm_appl& x);
+inline bool is_and(const atermpp::aterm_appl& x);
+inline bool is_or(const atermpp::aterm_appl& x);
+inline bool is_imp(const atermpp::aterm_appl& x);
+inline bool is_boolean_variable(const atermpp::aterm_appl& x);
+
+/// \brief Test for a boolean_expression expression
+/// \param x A term
+/// \return True if \a x is a boolean_expression expression
+inline
+bool is_boolean_expression(const atermpp::aterm_appl& x)
+{
+  return bes::is_true(x) ||
+         bes::is_false(x) ||
+         bes::is_not(x) ||
+         bes::is_and(x) ||
+         bes::is_or(x) ||
+         bes::is_imp(x) ||
+         bes::is_boolean_variable(x);
+}
+
 // prototype declaration
 std::string pp(const boolean_expression& x);
 
@@ -562,24 +586,6 @@ const boolean_expression &right(boolean_expression const& e)
 
 } // namespace accessors
 
-/// \brief Returns true if the term t is a boolean expression
-/// \param t A boolean expression
-/// \return True if the term t is a boolean expression
-inline
-bool is_boolean_expression(atermpp::aterm_appl t)
-{
-  // TODO: this code should be generated
-  return
-    core::detail::gsIsBooleanTrue(t) ||
-    core::detail::gsIsBooleanFalse(t) ||
-    core::detail::gsIsBooleanVariable(t) ||
-    core::detail::gsIsBooleanNot(t) ||
-    core::detail::gsIsBooleanAnd(t) ||
-    core::detail::gsIsBooleanOr(t) ||
-    core::detail::gsIsBooleanImp(t)
-    ;
-}
-
 } // namespace bes
 
 } // namespace mcrl2
@@ -664,7 +670,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   bool is_true(const term_type& t)
   {
-    return core::detail::gsIsBooleanTrue(t);
+    return bes::is_true(t);
   }
 
   /// \brief Test for value false
@@ -673,7 +679,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   bool is_false(const term_type& t)
   {
-    return core::detail::gsIsBooleanFalse(t);
+    return bes::is_false(t);
   }
 
   /// \brief Test for operator not
@@ -682,7 +688,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   bool is_not(const term_type& t)
   {
-    return core::detail::gsIsBooleanNot(t);
+    return bes::is_not(t);
   }
 
   /// \brief Test for operator and
