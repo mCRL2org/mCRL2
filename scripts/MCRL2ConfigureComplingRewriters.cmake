@@ -32,6 +32,13 @@ else()
   set(R_CXXFLAGS "${R_CXXFLAGS} -DMCRL2_BUILD_TYPE=\"\\\"${CMAKE_CFG_INTDIR}\\\"\"")
 endif()
 
+# Add the other definitions that were added using add_definitions to build flags
+# It seems that, in good old CMake style, there is no nice way to do this...
+get_directory_property( R_COMPILER_DEFINITIONS COMPILE_DEFINITIONS )
+foreach( d ${R_COMPILER_DEFINITIONS} )
+    set(R_CXXFLAGS "${R_CXXFLAGS} -D${d}")
+endforeach()
+
 # Make sure the shared library for the rewriter is build using position
 # independent code, if we were configured as static build ourselves, otherwise
 # use the defaults.
