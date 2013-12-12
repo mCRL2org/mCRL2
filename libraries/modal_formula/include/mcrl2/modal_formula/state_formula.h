@@ -153,7 +153,7 @@ class true_: public state_formula
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateTrue(x);
+  return x.function() == core::function_symbols::StateTrue;
 }
 
 // prototype declaration
@@ -199,7 +199,7 @@ class false_: public state_formula
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateFalse(x);
+  return x.function() == core::function_symbols::StateFalse;
 }
 
 // prototype declaration
@@ -255,7 +255,7 @@ class not_: public state_formula
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateNot(x);
+  return x.function() == core::function_symbols::StateNot;
 }
 
 // prototype declaration
@@ -316,7 +316,7 @@ class and_: public state_formula
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateAnd(x);
+  return x.function() == core::function_symbols::StateAnd;
 }
 
 // prototype declaration
@@ -377,7 +377,7 @@ class or_: public state_formula
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateOr(x);
+  return x.function() == core::function_symbols::StateOr;
 }
 
 // prototype declaration
@@ -438,7 +438,7 @@ class imp: public state_formula
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateImp(x);
+  return x.function() == core::function_symbols::StateImp;
 }
 
 // prototype declaration
@@ -499,7 +499,7 @@ class forall: public state_formula
 inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateForall(x);
+  return x.function() == core::function_symbols::StateForall;
 }
 
 // prototype declaration
@@ -560,7 +560,7 @@ class exists: public state_formula
 inline
 bool is_exists(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateExists(x);
+  return x.function() == core::function_symbols::StateExists;
 }
 
 // prototype declaration
@@ -621,7 +621,7 @@ class must: public state_formula
 inline
 bool is_must(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateMust(x);
+  return x.function() == core::function_symbols::StateMust;
 }
 
 // prototype declaration
@@ -682,7 +682,7 @@ class may: public state_formula
 inline
 bool is_may(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateMay(x);
+  return x.function() == core::function_symbols::StateMay;
 }
 
 // prototype declaration
@@ -728,7 +728,7 @@ class yaled: public state_formula
 inline
 bool is_yaled(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateYaled(x);
+  return x.function() == core::function_symbols::StateYaled;
 }
 
 // prototype declaration
@@ -784,7 +784,7 @@ class yaled_timed: public state_formula
 inline
 bool is_yaled_timed(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateYaledTimed(x);
+  return x.function() == core::function_symbols::StateYaledTimed;
 }
 
 // prototype declaration
@@ -830,7 +830,7 @@ class delay: public state_formula
 inline
 bool is_delay(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateDelay(x);
+  return x.function() == core::function_symbols::StateDelay;
 }
 
 // prototype declaration
@@ -886,7 +886,7 @@ class delay_timed: public state_formula
 inline
 bool is_delay_timed(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateDelayTimed(x);
+  return x.function() == core::function_symbols::StateDelayTimed;
 }
 
 // prototype declaration
@@ -952,7 +952,7 @@ class variable: public state_formula
 inline
 bool is_variable(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateVar(x);
+  return x.function() == core::function_symbols::StateVar;
 }
 
 // prototype declaration
@@ -1023,7 +1023,7 @@ class nu: public state_formula
 inline
 bool is_nu(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateNu(x);
+  return x.function() == core::function_symbols::StateNu;
 }
 
 // prototype declaration
@@ -1094,7 +1094,7 @@ class mu: public state_formula
 inline
 bool is_mu(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateMu(x);
+  return x.function() == core::function_symbols::StateMu;
 }
 
 // prototype declaration

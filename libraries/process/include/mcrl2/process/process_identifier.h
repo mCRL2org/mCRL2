@@ -91,7 +91,7 @@ typedef std::vector<process_identifier>    process_identifier_vector;
 inline
 bool is_process_identifier(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcVarId(x);
+  return x.function() == core::function_symbols::ProcVarId;
 }
 
 // prototype declaration

@@ -111,7 +111,7 @@ class true_: public boolean_expression
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanTrue(x);
+  return x.function() == core::function_symbols::BooleanTrue;
 }
 
 // prototype declaration
@@ -157,7 +157,7 @@ class false_: public boolean_expression
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanFalse(x);
+  return x.function() == core::function_symbols::BooleanFalse;
 }
 
 // prototype declaration
@@ -213,7 +213,7 @@ class not_: public boolean_expression
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanNot(x);
+  return x.function() == core::function_symbols::BooleanNot;
 }
 
 // prototype declaration
@@ -274,7 +274,7 @@ class and_: public boolean_expression
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanAnd(x);
+  return x.function() == core::function_symbols::BooleanAnd;
 }
 
 // prototype declaration
@@ -335,7 +335,7 @@ class or_: public boolean_expression
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanOr(x);
+  return x.function() == core::function_symbols::BooleanOr;
 }
 
 // prototype declaration
@@ -396,7 +396,7 @@ class imp: public boolean_expression
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanImp(x);
+  return x.function() == core::function_symbols::BooleanImp;
 }
 
 // prototype declaration
@@ -466,7 +466,7 @@ class boolean_variable: public boolean_expression
 inline
 bool is_boolean_variable(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanVariable(x);
+  return x.function() == core::function_symbols::BooleanVariable;
 }
 
 // prototype declaration

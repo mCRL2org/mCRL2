@@ -69,7 +69,7 @@ typedef std::vector<untyped_action>    untyped_action_vector;
 inline
 bool is_untyped_action(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedAction(x);
+  return x.function() == core::function_symbols::UntypedAction;
 }
 
 // prototype declaration

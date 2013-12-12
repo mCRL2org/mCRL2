@@ -52,7 +52,7 @@ typedef std::vector<nil>    nil_vector;
 inline
 bool is_nil(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsNil(x);
+  return x.function() == core::function_symbols::Nil;
 }
 
 // prototype declaration

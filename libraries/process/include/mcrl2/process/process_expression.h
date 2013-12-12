@@ -183,7 +183,7 @@ class process_instance: public process_expression
 inline
 bool is_process_instance(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcess(x);
+  return x.function() == core::function_symbols::Process;
 }
 
 // prototype declaration
@@ -244,7 +244,7 @@ class process_instance_assignment: public process_expression
 inline
 bool is_process_instance_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcessAssignment(x);
+  return x.function() == core::function_symbols::ProcessAssignment;
 }
 
 // prototype declaration
@@ -290,7 +290,7 @@ class delta: public process_expression
 inline
 bool is_delta(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsDelta(x);
+  return x.function() == core::function_symbols::Delta;
 }
 
 // prototype declaration
@@ -336,7 +336,7 @@ class tau: public process_expression
 inline
 bool is_tau(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsTau(x);
+  return x.function() == core::function_symbols::Tau;
 }
 
 // prototype declaration
@@ -397,7 +397,7 @@ class sum: public process_expression
 inline
 bool is_sum(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSum(x);
+  return x.function() == core::function_symbols::Sum;
 }
 
 // prototype declaration
@@ -458,7 +458,7 @@ class block: public process_expression
 inline
 bool is_block(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBlock(x);
+  return x.function() == core::function_symbols::Block;
 }
 
 // prototype declaration
@@ -519,7 +519,7 @@ class hide: public process_expression
 inline
 bool is_hide(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsHide(x);
+  return x.function() == core::function_symbols::Hide;
 }
 
 // prototype declaration
@@ -580,7 +580,7 @@ class rename: public process_expression
 inline
 bool is_rename(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRename(x);
+  return x.function() == core::function_symbols::Rename;
 }
 
 // prototype declaration
@@ -641,7 +641,7 @@ class comm: public process_expression
 inline
 bool is_comm(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsComm(x);
+  return x.function() == core::function_symbols::Comm;
 }
 
 // prototype declaration
@@ -702,7 +702,7 @@ class allow: public process_expression
 inline
 bool is_allow(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAllow(x);
+  return x.function() == core::function_symbols::Allow;
 }
 
 // prototype declaration
@@ -763,7 +763,7 @@ class sync: public process_expression
 inline
 bool is_sync(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSync(x);
+  return x.function() == core::function_symbols::Sync;
 }
 
 // prototype declaration
@@ -824,7 +824,7 @@ class at: public process_expression
 inline
 bool is_at(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAtTime(x);
+  return x.function() == core::function_symbols::AtTime;
 }
 
 // prototype declaration
@@ -885,7 +885,7 @@ class seq: public process_expression
 inline
 bool is_seq(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSeq(x);
+  return x.function() == core::function_symbols::Seq;
 }
 
 // prototype declaration
@@ -946,7 +946,7 @@ class if_then: public process_expression
 inline
 bool is_if_then(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIfThen(x);
+  return x.function() == core::function_symbols::IfThen;
 }
 
 // prototype declaration
@@ -1012,7 +1012,7 @@ class if_then_else: public process_expression
 inline
 bool is_if_then_else(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIfThenElse(x);
+  return x.function() == core::function_symbols::IfThenElse;
 }
 
 // prototype declaration
@@ -1073,7 +1073,7 @@ class bounded_init: public process_expression
 inline
 bool is_bounded_init(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBInit(x);
+  return x.function() == core::function_symbols::BInit;
 }
 
 // prototype declaration
@@ -1134,7 +1134,7 @@ class merge: public process_expression
 inline
 bool is_merge(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsMerge(x);
+  return x.function() == core::function_symbols::Merge;
 }
 
 // prototype declaration
@@ -1195,7 +1195,7 @@ class left_merge: public process_expression
 inline
 bool is_left_merge(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsLMerge(x);
+  return x.function() == core::function_symbols::LMerge;
 }
 
 // prototype declaration
@@ -1256,7 +1256,7 @@ class choice: public process_expression
 inline
 bool is_choice(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsChoice(x);
+  return x.function() == core::function_symbols::Choice;
 }
 
 // prototype declaration
@@ -1322,7 +1322,7 @@ class untyped_parameter_identifier: public process_expression
 inline
 bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedParamId(x);
+  return x.function() == core::function_symbols::UntypedParamId;
 }
 
 // prototype declaration
@@ -1388,7 +1388,7 @@ class untyped_process_assignment: public process_expression
 inline
 bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedProcessAssignment(x);
+  return x.function() == core::function_symbols::UntypedProcessAssignment;
 }
 
 // prototype declaration

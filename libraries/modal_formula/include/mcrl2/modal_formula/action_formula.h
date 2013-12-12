@@ -135,7 +135,7 @@ class true_: public action_formula
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActTrue(x);
+  return x.function() == core::function_symbols::ActTrue;
 }
 
 // prototype declaration
@@ -181,7 +181,7 @@ class false_: public action_formula
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActFalse(x);
+  return x.function() == core::function_symbols::ActFalse;
 }
 
 // prototype declaration
@@ -237,7 +237,7 @@ class not_: public action_formula
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActNot(x);
+  return x.function() == core::function_symbols::ActNot;
 }
 
 // prototype declaration
@@ -298,7 +298,7 @@ class and_: public action_formula
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActAnd(x);
+  return x.function() == core::function_symbols::ActAnd;
 }
 
 // prototype declaration
@@ -359,7 +359,7 @@ class or_: public action_formula
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActOr(x);
+  return x.function() == core::function_symbols::ActOr;
 }
 
 // prototype declaration
@@ -420,7 +420,7 @@ class imp: public action_formula
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActImp(x);
+  return x.function() == core::function_symbols::ActImp;
 }
 
 // prototype declaration
@@ -481,7 +481,7 @@ class forall: public action_formula
 inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActForall(x);
+  return x.function() == core::function_symbols::ActForall;
 }
 
 // prototype declaration
@@ -542,7 +542,7 @@ class exists: public action_formula
 inline
 bool is_exists(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActExists(x);
+  return x.function() == core::function_symbols::ActExists;
 }
 
 // prototype declaration
@@ -603,7 +603,7 @@ class at: public action_formula
 inline
 bool is_at(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActAt(x);
+  return x.function() == core::function_symbols::ActAt;
 }
 
 // prototype declaration
@@ -659,7 +659,7 @@ class multi_action: public action_formula
 inline
 bool is_multi_action(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActMultAct(x);
+  return x.function() == core::function_symbols::ActMultAct;
 }
 
 // prototype declaration
@@ -715,7 +715,7 @@ class untyped_multi_action: public action_formula
 inline
 bool is_untyped_multi_action(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedActMultAct(x);
+  return x.function() == core::function_symbols::UntypedActMultAct;
 }
 
 // prototype declaration

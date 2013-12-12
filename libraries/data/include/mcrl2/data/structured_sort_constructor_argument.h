@@ -94,7 +94,7 @@ typedef std::vector<structured_sort_constructor_argument>    structured_sort_con
 inline
 bool is_structured_sort_constructor_argument(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStructProj(x);
+  return x.function() == core::function_symbols::StructProj;
 }
 
 // prototype declaration

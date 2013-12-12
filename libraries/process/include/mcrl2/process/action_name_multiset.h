@@ -66,7 +66,7 @@ typedef std::vector<action_name_multiset>    action_name_multiset_vector;
 inline
 bool is_action_name_multiset(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsMultActName(x);
+  return x.function() == core::function_symbols::MultActName;
 }
 
 // prototype declaration

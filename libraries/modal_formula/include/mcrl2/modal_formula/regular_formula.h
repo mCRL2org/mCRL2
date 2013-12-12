@@ -123,7 +123,7 @@ class nil: public regular_formula
 inline
 bool is_nil(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegNil(x);
+  return x.function() == core::function_symbols::RegNil;
 }
 
 // prototype declaration
@@ -184,7 +184,7 @@ class seq: public regular_formula
 inline
 bool is_seq(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegSeq(x);
+  return x.function() == core::function_symbols::RegSeq;
 }
 
 // prototype declaration
@@ -245,7 +245,7 @@ class alt: public regular_formula
 inline
 bool is_alt(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegAlt(x);
+  return x.function() == core::function_symbols::RegAlt;
 }
 
 // prototype declaration
@@ -301,7 +301,7 @@ class trans: public regular_formula
 inline
 bool is_trans(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegTrans(x);
+  return x.function() == core::function_symbols::RegTrans;
 }
 
 // prototype declaration
@@ -357,7 +357,7 @@ class trans_or_nil: public regular_formula
 inline
 bool is_trans_or_nil(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegTransOrNil(x);
+  return x.function() == core::function_symbols::RegTransOrNil;
 }
 
 // prototype declaration

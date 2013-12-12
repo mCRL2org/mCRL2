@@ -90,7 +90,7 @@ class list_container: public container_type
 inline
 bool is_list_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortList(x);
+  return x.function() == core::function_symbols::SortList;
 }
 
 // prototype declaration
@@ -136,7 +136,7 @@ class set_container: public container_type
 inline
 bool is_set_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortSet(x);
+  return x.function() == core::function_symbols::SortSet;
 }
 
 // prototype declaration
@@ -182,7 +182,7 @@ class bag_container: public container_type
 inline
 bool is_bag_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortBag(x);
+  return x.function() == core::function_symbols::SortBag;
 }
 
 // prototype declaration
@@ -228,7 +228,7 @@ class fset_container: public container_type
 inline
 bool is_fset_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortFSet(x);
+  return x.function() == core::function_symbols::SortFSet;
 }
 
 // prototype declaration
@@ -274,7 +274,7 @@ class fbag_container: public container_type
 inline
 bool is_fbag_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortFBag(x);
+  return x.function() == core::function_symbols::SortFBag;
 }
 
 // prototype declaration

@@ -149,7 +149,7 @@ typedef std::vector<assignment>    assignment_vector;
 inline
 bool is_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsDataVarIdInit(x);
+  return x.function() == core::function_symbols::DataVarIdInit;
 }
 
 // prototype declaration
@@ -230,7 +230,7 @@ typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignm
 inline
 bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedIdentifierAssignment(x);
+  return x.function() == core::function_symbols::UntypedIdentifierAssignment;
 }
 
 // prototype declaration
