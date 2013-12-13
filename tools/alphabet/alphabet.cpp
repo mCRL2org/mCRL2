@@ -27,36 +27,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
 inline
-void complete_process_specification_old(process_specification& x, bool alpha_reduce = false)
-{
-  type_check(x);
-  if (alpha_reduce)
-  {
-    alphabet_reduction reduce;
-    reduce(x);
-  }
-  process::translate_user_notation(x);
-  process::normalize_sorts(x, x.data());
-}
-
-inline
-process_specification parse_process_specification_old(std::istream& in, bool alpha_reduce = false)
-{
-  std::string text = utilities::read_text(in);
-  process_specification result = parse_process_specification_new(text);
-  complete_process_specification_old(result, alpha_reduce);
-  return result;
-}
-
-inline
-process_specification parse_process_specification_old(const std::string& spec_string, const bool alpha_reduce=false)
-{
-  std::istringstream in(spec_string);
-  return parse_process_specification_old(in, alpha_reduce);
-}
-
-inline
-void alphabet(const std::string& input_filename, const std::string& output_filename, bool use_new_implementation)
+void alphabet(const std::string& input_filename, const std::string& output_filename)
 {
   std::string text;
   if (input_filename.empty())
@@ -69,16 +40,8 @@ void alphabet(const std::string& input_filename, const std::string& output_filen
   }
 
   process::process_specification result;
-
-  if (use_new_implementation)
-  {
-    result = process::parse_process_specification(text, false);
-    process::alphabet_reduce(result);
-  }
-  else
-  {
-    result = parse_process_specification_old(text, true);
-  }
+  result = process::parse_process_specification(text, false);
+  process::alphabet_reduce(result);
 
   std::ofstream out(output_filename.c_str());
   out << process::pp(result);
@@ -89,18 +52,14 @@ class alphabet_tool : public input_output_tool
   typedef input_output_tool super;
 
   protected:
-    bool m_use_new_implementation;
-
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_use_new_implementation = parser.options.count("use-new-implementation") > 0;
     }
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("use-new-implementation", "use the new implementation", 'n');
     }
 
   public:
@@ -114,7 +73,7 @@ class alphabet_tool : public input_output_tool
 
     bool run()
     {
-      alphabet(input_filename(), output_filename(), m_use_new_implementation);
+      alphabet(input_filename(), output_filename());
       return true;
     }
 };
