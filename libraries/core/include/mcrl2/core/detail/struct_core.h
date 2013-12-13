@@ -47,12 +47,26 @@ inline std::vector<atermpp::function_symbol>& function_symbols_DataAppl()
 }
 
 inline
-const atermpp::function_symbol& function_symbol_DataAppl(size_t i)
+const atermpp::function_symbol& function_symbol_DataAppl_helper(size_t i)
 {
   std::vector<atermpp::function_symbol>& syms = function_symbols_DataAppl();
-  while (i >= syms.size())
+  do
   {
     syms.push_back(atermpp::function_symbol("DataAppl", syms.size()));
+  }
+  while (i >= syms.size());
+  return syms[i];
+}
+
+inline
+const atermpp::function_symbol& function_symbol_DataAppl(size_t i)
+{
+  const std::vector<atermpp::function_symbol>& syms = function_symbols_DataAppl();
+  if (i >= syms.size())
+  {
+    // This helper is introduced such the function function_symbol_DataAppl, which is called very often,
+    // will be inlined. 
+    return function_symbol_DataAppl_helper(i); 
   }
   return syms[i];
 }
