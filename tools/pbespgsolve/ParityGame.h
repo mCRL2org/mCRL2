@@ -10,9 +10,11 @@
 #ifndef PARITY_GAME_H_INCLUDED
 #define PARITY_GAME_H_INCLUDED
 
-#include "Graph.h"
 #include <iostream>
 #include <vector>
+#include "mcrl2/utilities/exception.h"
+#include "Graph.h"
+
 
 // Forward declaration of mcrl2::pbes_system::pbes, which may or may not be
 // defined later depending on whether mCRL2 support is compiled in.
@@ -37,7 +39,8 @@ enum player_t { PLAYER_EVEN =  0,  //!< Even (0)
                 PLAYER_ODD  =  1   //!< Odd (1)
               } ATTR_PACKED;
 
-inline player_t opponent(const player_t p)
+inline
+player_t opponent(const player_t p)
 {
     switch(p)
     {
@@ -45,6 +48,8 @@ inline player_t opponent(const player_t p)
         return PLAYER_ODD;
       case PLAYER_ODD:
         return PLAYER_EVEN;
+      default:
+        throw mcrl2::runtime_error("unknown player");
     }
 }
 

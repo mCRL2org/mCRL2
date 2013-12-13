@@ -108,7 +108,7 @@ function(cxx11_check_feature FEATURE_NAME RESULT_VAR REQUIRED)
 endfunction(cxx11_check_feature)
 
 cxx11_check_feature("__func__" HAS_CXX11_FUNC False)
-cxx11_check_feature("auto" HAS_CXX11_AUTO True)
+cxx11_check_feature("auto" HAS_CXX11_AUTO True) # Auto is assumed to be supported
 cxx11_check_feature("auto_ret_type" HAS_CXX11_AUTO_RET_TYPE False)
 cxx11_check_feature("class_override_final" HAS_CXX11_CLASS_OVERRIDE False)
 cxx11_check_feature("constexpr" HAS_CXX11_CONSTEXPR False)
@@ -125,6 +125,7 @@ cxx11_check_feature("static_assert" HAS_CXX11_STATIC_ASSERT False)
 cxx11_check_feature("variadic_templates" HAS_CXX11_VARIADIC_TEMPLATES False)
 cxx11_check_feature("unique_ptr" HAS_CXX11_UNIQUE_PTR False)
 cxx11_check_feature("is_sorted" HAS_CXX11_IS_SORTED False)
+cxx11_check_feature("unordered_set" HAS_CXX11_UNORDERED_SET False)
 
 if(HAS_CXX11_NULLPTR)
   add_definitions(-DMCRL2_HAVE_NULLPTR)
