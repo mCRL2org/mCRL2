@@ -199,7 +199,7 @@ typedef std::vector<structured_sort_constructor>    structured_sort_constructor_
 inline
 bool is_structured_sort_constructor(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StructCons;
+  return x.function() == core::detail::function_symbols::StructCons;
 }
 
 // prototype declaration

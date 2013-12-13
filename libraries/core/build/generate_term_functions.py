@@ -96,7 +96,7 @@ CHECK_TERM_TYPE = '''  // check the type of the term
     return false;
   }
   const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
-  if (a.function() != core::function_symbols::%(name)s)
+  if (a.function() != core::detail::function_symbols::%(name)s)
   {
     return false;
   }
@@ -236,7 +236,7 @@ def generate_constructor_functions(rules, filename, function_symbol_declaration_
         }
 
         ftext = ftext + '  static atermpp::function_symbol %s;\n' % name
-        dtext = dtext + '  atermpp::function_symbol core::function_symbols::%s = core::detail::function_symbol_%s();\n' % (name, name)
+        dtext = dtext + '  atermpp::function_symbol core::detail::function_symbols::%s = core::detail::function_symbol_%s();\n' % (name, name)
 
     function_names = map(lambda x: x.name(), functions)
     for rule in rules:

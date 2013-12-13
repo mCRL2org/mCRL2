@@ -77,7 +77,7 @@ typedef std::vector<process_equation>    process_equation_vector;
 inline
 bool is_process_equation(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::ProcEqn;
+  return x.function() == core::detail::function_symbols::ProcEqn;
 }
 
 // prototype declaration

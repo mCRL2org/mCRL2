@@ -92,7 +92,7 @@ class linear_process
         data::data_expression condition         = data::data_expression(t[1]);
         data::data_expression time              = data::data_expression(t[3]);
         data::assignment_list assignments(atermpp::aterm_cast<atermpp::aterm_list>(t[4]));
-        if (atermpp::aterm_cast<atermpp::aterm_appl>(t[2]).function() == core::function_symbols::Delta)
+        if (atermpp::aterm_cast<atermpp::aterm_appl>(t[2]).function() == core::detail::function_symbols::Delta)
         {
           m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));
         }
@@ -224,7 +224,7 @@ std::ostream& operator<<(std::ostream& out, const linear_process& x)
 inline
 bool is_linear_process(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::LinearProcess;
+  return x.function() == core::detail::function_symbols::LinearProcess;
 }
 
 // template function overloads

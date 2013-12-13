@@ -30,37 +30,37 @@ namespace data
 /// \brief Returns true if the term t is a basic sort
 inline bool is_basic_sort(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::SortId;
+  return x.function() == core::detail::function_symbols::SortId;
 }
 
 /// \brief Returns true if the term t is a function sort
 inline bool is_function_sort(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::SortArrow;
+  return x.function() == core::detail::function_symbols::SortArrow;
 }
 
 /// \brief Returns true if the term t is a container sort
 inline bool is_container_sort(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::SortCons;
+  return x.function() == core::detail::function_symbols::SortCons;
 }
 
 /// \brief Returns true if the term t is a structured sort
 inline bool is_structured_sort(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::SortStruct;
+  return x.function() == core::detail::function_symbols::SortStruct;
 }
 
 /// \brief Returns true if the term t is the unknown sort
 inline bool is_untyped_sort(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::UntypedSortUnknown;
+  return x.function() == core::detail::function_symbols::UntypedSortUnknown;
 }
 
 /// \brief Returns true if the term t is an expression for multiple possible sorts
 inline bool is_untyped_possible_sorts(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::UntypedSortsPossible;
+  return x.function() == core::detail::function_symbols::UntypedSortsPossible;
 }
 
 //--- start generated class sort_expression ---//

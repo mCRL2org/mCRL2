@@ -182,7 +182,7 @@ inline void swap(multi_action& t1, multi_action& t2)
 inline
 bool is_multi_action(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::MultAct;
+  return x.function() == core::detail::function_symbols::MultAct;
 }
 
 // template function overloads

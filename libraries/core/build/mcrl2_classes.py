@@ -879,7 +879,7 @@ bool is_%s(const %s& x)
             return_value = ' ||\n         '.join(['%s::is_%s(x)' % (c.namespace(), re.sub('_$', '', c.classname())) for c in self.derived_classes(all_classes)])
         else:
             prototypes = ''
-            return_value = 'x.function() == core::function_symbols::%s' % self.aterm
+            return_value = 'x.function() == core::detail::function_symbols::%s' % self.aterm
         text = text % (prototypes, name, name, name, 'atermpp::aterm_appl', return_value)
         return text
 

@@ -68,7 +68,7 @@ typedef std::vector<alias>    alias_vector;
 inline
 bool is_alias(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::SortRef;
+  return x.function() == core::detail::function_symbols::SortRef;
 }
 
 // prototype declaration

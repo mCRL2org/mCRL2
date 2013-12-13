@@ -77,7 +77,7 @@ typedef std::vector<action_label>    action_label_vector;
 inline
 bool is_action_label(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::ActId;
+  return x.function() == core::detail::function_symbols::ActId;
 }
 
 // prototype declaration

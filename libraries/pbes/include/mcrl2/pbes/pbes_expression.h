@@ -197,7 +197,7 @@ typedef std::vector<propositional_variable_instantiation>    propositional_varia
 inline
 bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PropVarInst;
+  return x.function() == core::detail::function_symbols::PropVarInst;
 }
 
 // prototype declaration
@@ -243,7 +243,7 @@ class true_: public pbes_expression
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PBESTrue;
+  return x.function() == core::detail::function_symbols::PBESTrue;
 }
 
 // prototype declaration
@@ -289,7 +289,7 @@ class false_: public pbes_expression
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PBESFalse;
+  return x.function() == core::detail::function_symbols::PBESFalse;
 }
 
 // prototype declaration
@@ -345,7 +345,7 @@ class not_: public pbes_expression
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PBESNot;
+  return x.function() == core::detail::function_symbols::PBESNot;
 }
 
 // prototype declaration
@@ -406,7 +406,7 @@ class and_: public pbes_expression
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PBESAnd;
+  return x.function() == core::detail::function_symbols::PBESAnd;
 }
 
 // prototype declaration
@@ -467,7 +467,7 @@ class or_: public pbes_expression
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PBESOr;
+  return x.function() == core::detail::function_symbols::PBESOr;
 }
 
 // prototype declaration
@@ -528,7 +528,7 @@ class imp: public pbes_expression
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PBESImp;
+  return x.function() == core::detail::function_symbols::PBESImp;
 }
 
 // prototype declaration
@@ -589,7 +589,7 @@ class forall: public pbes_expression
 inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PBESForall;
+  return x.function() == core::detail::function_symbols::PBESForall;
 }
 
 // prototype declaration
@@ -650,7 +650,7 @@ class exists: public pbes_expression
 inline
 bool is_exists(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PBESExists;
+  return x.function() == core::detail::function_symbols::PBESExists;
 }
 
 // prototype declaration

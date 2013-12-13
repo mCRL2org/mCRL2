@@ -153,7 +153,7 @@ class true_: public state_formula
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateTrue;
+  return x.function() == core::detail::function_symbols::StateTrue;
 }
 
 // prototype declaration
@@ -199,7 +199,7 @@ class false_: public state_formula
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateFalse;
+  return x.function() == core::detail::function_symbols::StateFalse;
 }
 
 // prototype declaration
@@ -255,7 +255,7 @@ class not_: public state_formula
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateNot;
+  return x.function() == core::detail::function_symbols::StateNot;
 }
 
 // prototype declaration
@@ -316,7 +316,7 @@ class and_: public state_formula
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateAnd;
+  return x.function() == core::detail::function_symbols::StateAnd;
 }
 
 // prototype declaration
@@ -377,7 +377,7 @@ class or_: public state_formula
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateOr;
+  return x.function() == core::detail::function_symbols::StateOr;
 }
 
 // prototype declaration
@@ -438,7 +438,7 @@ class imp: public state_formula
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateImp;
+  return x.function() == core::detail::function_symbols::StateImp;
 }
 
 // prototype declaration
@@ -499,7 +499,7 @@ class forall: public state_formula
 inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateForall;
+  return x.function() == core::detail::function_symbols::StateForall;
 }
 
 // prototype declaration
@@ -560,7 +560,7 @@ class exists: public state_formula
 inline
 bool is_exists(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateExists;
+  return x.function() == core::detail::function_symbols::StateExists;
 }
 
 // prototype declaration
@@ -621,7 +621,7 @@ class must: public state_formula
 inline
 bool is_must(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateMust;
+  return x.function() == core::detail::function_symbols::StateMust;
 }
 
 // prototype declaration
@@ -682,7 +682,7 @@ class may: public state_formula
 inline
 bool is_may(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateMay;
+  return x.function() == core::detail::function_symbols::StateMay;
 }
 
 // prototype declaration
@@ -728,7 +728,7 @@ class yaled: public state_formula
 inline
 bool is_yaled(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateYaled;
+  return x.function() == core::detail::function_symbols::StateYaled;
 }
 
 // prototype declaration
@@ -784,7 +784,7 @@ class yaled_timed: public state_formula
 inline
 bool is_yaled_timed(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateYaledTimed;
+  return x.function() == core::detail::function_symbols::StateYaledTimed;
 }
 
 // prototype declaration
@@ -830,7 +830,7 @@ class delay: public state_formula
 inline
 bool is_delay(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateDelay;
+  return x.function() == core::detail::function_symbols::StateDelay;
 }
 
 // prototype declaration
@@ -886,7 +886,7 @@ class delay_timed: public state_formula
 inline
 bool is_delay_timed(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateDelayTimed;
+  return x.function() == core::detail::function_symbols::StateDelayTimed;
 }
 
 // prototype declaration
@@ -952,7 +952,7 @@ class variable: public state_formula
 inline
 bool is_variable(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateVar;
+  return x.function() == core::detail::function_symbols::StateVar;
 }
 
 // prototype declaration
@@ -1023,7 +1023,7 @@ class nu: public state_formula
 inline
 bool is_nu(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateNu;
+  return x.function() == core::detail::function_symbols::StateNu;
 }
 
 // prototype declaration
@@ -1094,7 +1094,7 @@ class mu: public state_formula
 inline
 bool is_mu(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::StateMu;
+  return x.function() == core::detail::function_symbols::StateMu;
 }
 
 // prototype declaration

@@ -80,7 +80,7 @@ typedef std::vector<process_initializer>    process_initializer_vector;
 inline
 bool is_process_initializer(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::LinearProcessInit;
+  return x.function() == core::detail::function_symbols::LinearProcessInit;
 }
 
 // prototype declaration

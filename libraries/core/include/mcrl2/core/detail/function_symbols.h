@@ -18,6 +18,8 @@ namespace mcrl2 {
 
 namespace core {
 
+namespace detail {
+
 struct function_symbols
 {
 //--- start generated function symbol declarations ---//
@@ -158,6 +160,8 @@ static atermpp::function_symbol BooleanOr;
   static atermpp::function_symbol UntypedIdentifierAssignment;
 //--- end generated function symbol declarations ---//
 };
+
+} // namespace detail
 
 } // namespace core
 

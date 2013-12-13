@@ -90,7 +90,7 @@ class untyped_set_or_bag_comprehension_binder: public binder_type
 inline
 bool is_untyped_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::UntypedSetBagComp;
+  return x.function() == core::detail::function_symbols::UntypedSetBagComp;
 }
 
 // prototype declaration
@@ -136,7 +136,7 @@ class set_comprehension_binder: public binder_type
 inline
 bool is_set_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::SetComp;
+  return x.function() == core::detail::function_symbols::SetComp;
 }
 
 // prototype declaration
@@ -182,7 +182,7 @@ class bag_comprehension_binder: public binder_type
 inline
 bool is_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::BagComp;
+  return x.function() == core::detail::function_symbols::BagComp;
 }
 
 // prototype declaration
@@ -228,7 +228,7 @@ class forall_binder: public binder_type
 inline
 bool is_forall_binder(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::Forall;
+  return x.function() == core::detail::function_symbols::Forall;
 }
 
 // prototype declaration
@@ -274,7 +274,7 @@ class exists_binder: public binder_type
 inline
 bool is_exists_binder(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::Exists;
+  return x.function() == core::detail::function_symbols::Exists;
 }
 
 // prototype declaration
@@ -320,7 +320,7 @@ class lambda_binder: public binder_type
 inline
 bool is_lambda_binder(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::Lambda;
+  return x.function() == core::detail::function_symbols::Lambda;
 }
 
 // prototype declaration

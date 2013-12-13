@@ -70,7 +70,7 @@ typedef std::vector<action>    action_vector;
 inline
 bool is_action(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::Action;
+  return x.function() == core::detail::function_symbols::Action;
 }
 
 // prototype declaration

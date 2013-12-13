@@ -51,7 +51,7 @@ bool is_well_typed(const specification& spec);
 inline
 bool is_specification(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::LinProcSpec;
+  return x.function() == core::detail::function_symbols::LinProcSpec;
 }
 
 /// \brief Linear process specification.

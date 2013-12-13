@@ -35,55 +35,55 @@ namespace data
 /// \brief Returns true if the term t is an abstraction
 inline bool is_abstraction(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::Binder;
+  return x.function() == core::detail::function_symbols::Binder;
 }
 
 /// \brief Returns true if the term t is a lambda abstraction
 inline bool is_lambda(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::function_symbols::Lambda;
+  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Lambda;
 }
 
 /// \brief Returns true if the term t is a universal quantification
 inline bool is_forall(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::function_symbols::Forall;
+  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Forall;
 }
 
 /// \brief Returns true if the term t is an existential quantification
 inline bool is_exists(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::function_symbols::Exists;
+  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Exists;
 }
 
 /// \brief Returns true if the term t is a set comprehension
 inline bool is_set_comprehension(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::function_symbols::SetComp;
+  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::SetComp;
 }
 
 /// \brief Returns true if the term t is a bag comprehension
 inline bool is_bag_comprehension(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::function_symbols::BagComp;
+  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::BagComp;
 }
 
 /// \brief Returns true if the term t is a set/bag comprehension.
 inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::function_symbols::UntypedSetBagComp;
+  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::UntypedSetBagComp;
 }
 
 /// \brief Returns true if the term t is a function symbol
 inline bool is_function_symbol(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::OpId;
+  return x.function() == core::detail::function_symbols::OpId;
 }
 
 /// \brief Returns true if the term t is a variable
 inline bool is_variable(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::DataVarId;
+  return x.function() == core::detail::function_symbols::DataVarId;
 }
 
 /// \brief Returns true if the term t is an application
@@ -95,13 +95,13 @@ inline bool is_application(const atermpp::aterm_appl& x)
 /// \brief Returns true if the term t is a where clause
 inline bool is_where_clause(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::Whr;
+  return x.function() == core::detail::function_symbols::Whr;
 }
 
 /// \brief Returns true if the term t is an identifier
 inline bool is_untyped_identifier(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::UntypedIdentifier;
+  return x.function() == core::detail::function_symbols::UntypedIdentifier;
 }
 
 class application; // prototype

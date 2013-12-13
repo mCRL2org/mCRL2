@@ -94,7 +94,7 @@ typedef std::vector<propositional_variable>    propositional_variable_vector;
 inline
 bool is_propositional_variable(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::function_symbols::PropVarDecl;
+  return x.function() == core::detail::function_symbols::PropVarDecl;
 }
 
 // prototype declaration
