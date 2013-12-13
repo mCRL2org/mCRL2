@@ -13,7 +13,7 @@
 #define MCRL2_CORE_NIL_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -28,7 +28,7 @@ class nil: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     nil()
-      : atermpp::aterm_appl(core::detail::constructNil())
+      : atermpp::aterm_appl(core::detail::default_value_Nil())
     {}
 
     /// \brief Constructor.

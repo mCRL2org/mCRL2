@@ -13,7 +13,7 @@
 #define MCRL2_DATA_BINDER_TYPE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2
@@ -29,7 +29,7 @@ class binder_type: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     binder_type()
-      : atermpp::aterm_appl(core::detail::constructBindingOperator())
+      : atermpp::aterm_appl(core::detail::default_value_BindingOperator())
     {}
 
     /// \brief Constructor.
@@ -72,7 +72,7 @@ class untyped_set_or_bag_comprehension_binder: public binder_type
   public:
     /// \brief Default constructor.
     untyped_set_or_bag_comprehension_binder()
-      : binder_type(core::detail::constructUntypedSetBagComp())
+      : binder_type(core::detail::default_value_UntypedSetBagComp())
     {}
 
     /// \brief Constructor.
@@ -118,7 +118,7 @@ class set_comprehension_binder: public binder_type
   public:
     /// \brief Default constructor.
     set_comprehension_binder()
-      : binder_type(core::detail::constructSetComp())
+      : binder_type(core::detail::default_value_SetComp())
     {}
 
     /// \brief Constructor.
@@ -164,7 +164,7 @@ class bag_comprehension_binder: public binder_type
   public:
     /// \brief Default constructor.
     bag_comprehension_binder()
-      : binder_type(core::detail::constructBagComp())
+      : binder_type(core::detail::default_value_BagComp())
     {}
 
     /// \brief Constructor.
@@ -210,7 +210,7 @@ class forall_binder: public binder_type
   public:
     /// \brief Default constructor.
     forall_binder()
-      : binder_type(core::detail::constructForall())
+      : binder_type(core::detail::default_value_Forall())
     {}
 
     /// \brief Constructor.
@@ -256,7 +256,7 @@ class exists_binder: public binder_type
   public:
     /// \brief Default constructor.
     exists_binder()
-      : binder_type(core::detail::constructExists())
+      : binder_type(core::detail::default_value_Exists())
     {}
 
     /// \brief Constructor.
@@ -302,7 +302,7 @@ class lambda_binder: public binder_type
   public:
     /// \brief Default constructor.
     lambda_binder()
-      : binder_type(core::detail::constructLambda())
+      : binder_type(core::detail::default_value_Lambda())
     {}
 
     /// \brief Constructor.

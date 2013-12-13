@@ -27,7 +27,7 @@ class untyped_possible_sorts: public sort_expression
   public:
     /// \brief Default constructor.
     untyped_possible_sorts()
-      : sort_expression(core::detail::constructUntypedSortsPossible())
+      : sort_expression(core::detail::default_value_UntypedSortsPossible())
     {}
 
     /// \brief Constructor.

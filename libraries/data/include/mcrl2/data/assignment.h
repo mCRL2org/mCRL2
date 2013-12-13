@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/undefined.h"
@@ -35,7 +35,7 @@ class assignment_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     assignment_expression()
-      : atermpp::aterm_appl(core::detail::constructWhrDecl())
+      : atermpp::aterm_appl(core::detail::default_value_WhrDecl())
     {}
 
     /// \brief Constructor.
@@ -92,7 +92,7 @@ class assignment: public assignment_expression
   public:
     /// \brief Default constructor.
     assignment()
-      : assignment_expression(core::detail::constructDataVarIdInit())
+      : assignment_expression(core::detail::default_value_DataVarIdInit())
     {}
 
     /// \brief Constructor.
@@ -177,7 +177,7 @@ class untyped_identifier_assignment: public assignment_expression
   public:
     /// \brief Default constructor.
     untyped_identifier_assignment()
-      : assignment_expression(core::detail::constructUntypedIdentifierAssignment())
+      : assignment_expression(core::detail::default_value_UntypedIdentifierAssignment())
     {}
 
     /// \brief Constructor.

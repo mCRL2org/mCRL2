@@ -31,7 +31,7 @@ class action: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action()
-      : atermpp::aterm_appl(core::detail::constructAction())
+      : atermpp::aterm_appl(core::detail::default_value_Action())
     {}
 
     /// \brief Constructor.

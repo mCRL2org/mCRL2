@@ -17,7 +17,7 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
@@ -36,7 +36,7 @@ class regular_formula: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     regular_formula()
-      : atermpp::aterm_appl(core::detail::constructRegFrm())
+      : atermpp::aterm_appl(core::detail::default_value_RegFrm())
     {}
 
     /// \brief Constructor.
@@ -105,7 +105,7 @@ class nil: public regular_formula
   public:
     /// \brief Default constructor.
     nil()
-      : regular_formula(core::detail::constructRegNil())
+      : regular_formula(core::detail::default_value_RegNil())
     {}
 
     /// \brief Constructor.
@@ -151,7 +151,7 @@ class seq: public regular_formula
   public:
     /// \brief Default constructor.
     seq()
-      : regular_formula(core::detail::constructRegSeq())
+      : regular_formula(core::detail::default_value_RegSeq())
     {}
 
     /// \brief Constructor.
@@ -212,7 +212,7 @@ class alt: public regular_formula
   public:
     /// \brief Default constructor.
     alt()
-      : regular_formula(core::detail::constructRegAlt())
+      : regular_formula(core::detail::default_value_RegAlt())
     {}
 
     /// \brief Constructor.
@@ -273,7 +273,7 @@ class trans: public regular_formula
   public:
     /// \brief Default constructor.
     trans()
-      : regular_formula(core::detail::constructRegTrans())
+      : regular_formula(core::detail::default_value_RegTrans())
     {}
 
     /// \brief Constructor.
@@ -329,7 +329,7 @@ class trans_or_nil: public regular_formula
   public:
     /// \brief Default constructor.
     trans_or_nil()
-      : regular_formula(core::detail::constructRegTransOrNil())
+      : regular_formula(core::detail::default_value_RegTransOrNil())
     {}
 
     /// \brief Constructor.

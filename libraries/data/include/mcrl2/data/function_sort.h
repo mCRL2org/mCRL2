@@ -19,7 +19,7 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/atermpp/convert.h"
@@ -38,7 +38,7 @@ class function_sort: public sort_expression
   public:
     /// \brief Default constructor.
     function_sort()
-      : sort_expression(core::detail::constructSortArrow())
+      : sort_expression(core::detail::default_value_SortArrow())
     {}
 
     /// \brief Constructor.

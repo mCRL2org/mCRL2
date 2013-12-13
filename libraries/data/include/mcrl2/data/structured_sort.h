@@ -72,7 +72,7 @@ class structured_sort: public sort_expression
   public:
     /// \brief Default constructor.
     structured_sort()
-      : sort_expression(core::detail::constructSortStruct())
+      : sort_expression(core::detail::default_value_SortStruct())
     {}
 
     /// \brief Constructor.

@@ -25,7 +25,7 @@ class untyped_identifier: public data_expression
   public:
     /// \brief Default constructor.
     untyped_identifier()
-      : data_expression(core::detail::constructUntypedIdentifier())
+      : data_expression(core::detail::default_value_UntypedIdentifier())
     {}
 
     /// \brief Constructor.

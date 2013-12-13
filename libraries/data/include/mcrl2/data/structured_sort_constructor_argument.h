@@ -34,7 +34,7 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     structured_sort_constructor_argument()
-      : atermpp::aterm_appl(core::detail::constructStructProj())
+      : atermpp::aterm_appl(core::detail::default_value_StructProj())
     {}
 
     /// \brief Constructor.

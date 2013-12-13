@@ -37,7 +37,7 @@ class state_formula: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     state_formula()
-      : atermpp::aterm_appl(core::detail::constructStateFrm())
+      : atermpp::aterm_appl(core::detail::default_value_StateFrm())
     {}
 
     /// \brief Constructor.
@@ -135,7 +135,7 @@ class true_: public state_formula
   public:
     /// \brief Default constructor.
     true_()
-      : state_formula(core::detail::constructStateTrue())
+      : state_formula(core::detail::default_value_StateTrue())
     {}
 
     /// \brief Constructor.
@@ -181,7 +181,7 @@ class false_: public state_formula
   public:
     /// \brief Default constructor.
     false_()
-      : state_formula(core::detail::constructStateFalse())
+      : state_formula(core::detail::default_value_StateFalse())
     {}
 
     /// \brief Constructor.
@@ -227,7 +227,7 @@ class not_: public state_formula
   public:
     /// \brief Default constructor.
     not_()
-      : state_formula(core::detail::constructStateNot())
+      : state_formula(core::detail::default_value_StateNot())
     {}
 
     /// \brief Constructor.
@@ -283,7 +283,7 @@ class and_: public state_formula
   public:
     /// \brief Default constructor.
     and_()
-      : state_formula(core::detail::constructStateAnd())
+      : state_formula(core::detail::default_value_StateAnd())
     {}
 
     /// \brief Constructor.
@@ -344,7 +344,7 @@ class or_: public state_formula
   public:
     /// \brief Default constructor.
     or_()
-      : state_formula(core::detail::constructStateOr())
+      : state_formula(core::detail::default_value_StateOr())
     {}
 
     /// \brief Constructor.
@@ -405,7 +405,7 @@ class imp: public state_formula
   public:
     /// \brief Default constructor.
     imp()
-      : state_formula(core::detail::constructStateImp())
+      : state_formula(core::detail::default_value_StateImp())
     {}
 
     /// \brief Constructor.
@@ -466,7 +466,7 @@ class forall: public state_formula
   public:
     /// \brief Default constructor.
     forall()
-      : state_formula(core::detail::constructStateForall())
+      : state_formula(core::detail::default_value_StateForall())
     {}
 
     /// \brief Constructor.
@@ -527,7 +527,7 @@ class exists: public state_formula
   public:
     /// \brief Default constructor.
     exists()
-      : state_formula(core::detail::constructStateExists())
+      : state_formula(core::detail::default_value_StateExists())
     {}
 
     /// \brief Constructor.
@@ -588,7 +588,7 @@ class must: public state_formula
   public:
     /// \brief Default constructor.
     must()
-      : state_formula(core::detail::constructStateMust())
+      : state_formula(core::detail::default_value_StateMust())
     {}
 
     /// \brief Constructor.
@@ -649,7 +649,7 @@ class may: public state_formula
   public:
     /// \brief Default constructor.
     may()
-      : state_formula(core::detail::constructStateMay())
+      : state_formula(core::detail::default_value_StateMay())
     {}
 
     /// \brief Constructor.
@@ -710,7 +710,7 @@ class yaled: public state_formula
   public:
     /// \brief Default constructor.
     yaled()
-      : state_formula(core::detail::constructStateYaled())
+      : state_formula(core::detail::default_value_StateYaled())
     {}
 
     /// \brief Constructor.
@@ -756,7 +756,7 @@ class yaled_timed: public state_formula
   public:
     /// \brief Default constructor.
     yaled_timed()
-      : state_formula(core::detail::constructStateYaledTimed())
+      : state_formula(core::detail::default_value_StateYaledTimed())
     {}
 
     /// \brief Constructor.
@@ -812,7 +812,7 @@ class delay: public state_formula
   public:
     /// \brief Default constructor.
     delay()
-      : state_formula(core::detail::constructStateDelay())
+      : state_formula(core::detail::default_value_StateDelay())
     {}
 
     /// \brief Constructor.
@@ -858,7 +858,7 @@ class delay_timed: public state_formula
   public:
     /// \brief Default constructor.
     delay_timed()
-      : state_formula(core::detail::constructStateDelayTimed())
+      : state_formula(core::detail::default_value_StateDelayTimed())
     {}
 
     /// \brief Constructor.
@@ -914,7 +914,7 @@ class variable: public state_formula
   public:
     /// \brief Default constructor.
     variable()
-      : state_formula(core::detail::constructStateVar())
+      : state_formula(core::detail::default_value_StateVar())
     {}
 
     /// \brief Constructor.
@@ -980,7 +980,7 @@ class nu: public state_formula
   public:
     /// \brief Default constructor.
     nu()
-      : state_formula(core::detail::constructStateNu())
+      : state_formula(core::detail::default_value_StateNu())
     {}
 
     /// \brief Constructor.
@@ -1051,7 +1051,7 @@ class mu: public state_formula
   public:
     /// \brief Default constructor.
     mu()
-      : state_formula(core::detail::constructStateMu())
+      : state_formula(core::detail::default_value_StateMu())
     {}
 
     /// \brief Constructor.

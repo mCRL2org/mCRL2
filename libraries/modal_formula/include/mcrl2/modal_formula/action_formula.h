@@ -36,7 +36,7 @@ class action_formula: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action_formula()
-      : atermpp::aterm_appl(core::detail::constructActFrm())
+      : atermpp::aterm_appl(core::detail::default_value_ActFrm())
     {}
 
     /// \brief Constructor.
@@ -117,7 +117,7 @@ class true_: public action_formula
   public:
     /// \brief Default constructor.
     true_()
-      : action_formula(core::detail::constructActTrue())
+      : action_formula(core::detail::default_value_ActTrue())
     {}
 
     /// \brief Constructor.
@@ -163,7 +163,7 @@ class false_: public action_formula
   public:
     /// \brief Default constructor.
     false_()
-      : action_formula(core::detail::constructActFalse())
+      : action_formula(core::detail::default_value_ActFalse())
     {}
 
     /// \brief Constructor.
@@ -209,7 +209,7 @@ class not_: public action_formula
   public:
     /// \brief Default constructor.
     not_()
-      : action_formula(core::detail::constructActNot())
+      : action_formula(core::detail::default_value_ActNot())
     {}
 
     /// \brief Constructor.
@@ -265,7 +265,7 @@ class and_: public action_formula
   public:
     /// \brief Default constructor.
     and_()
-      : action_formula(core::detail::constructActAnd())
+      : action_formula(core::detail::default_value_ActAnd())
     {}
 
     /// \brief Constructor.
@@ -326,7 +326,7 @@ class or_: public action_formula
   public:
     /// \brief Default constructor.
     or_()
-      : action_formula(core::detail::constructActOr())
+      : action_formula(core::detail::default_value_ActOr())
     {}
 
     /// \brief Constructor.
@@ -387,7 +387,7 @@ class imp: public action_formula
   public:
     /// \brief Default constructor.
     imp()
-      : action_formula(core::detail::constructActImp())
+      : action_formula(core::detail::default_value_ActImp())
     {}
 
     /// \brief Constructor.
@@ -448,7 +448,7 @@ class forall: public action_formula
   public:
     /// \brief Default constructor.
     forall()
-      : action_formula(core::detail::constructActForall())
+      : action_formula(core::detail::default_value_ActForall())
     {}
 
     /// \brief Constructor.
@@ -509,7 +509,7 @@ class exists: public action_formula
   public:
     /// \brief Default constructor.
     exists()
-      : action_formula(core::detail::constructActExists())
+      : action_formula(core::detail::default_value_ActExists())
     {}
 
     /// \brief Constructor.
@@ -570,7 +570,7 @@ class at: public action_formula
   public:
     /// \brief Default constructor.
     at()
-      : action_formula(core::detail::constructActAt())
+      : action_formula(core::detail::default_value_ActAt())
     {}
 
     /// \brief Constructor.
@@ -631,7 +631,7 @@ class multi_action: public action_formula
   public:
     /// \brief Default constructor.
     multi_action()
-      : action_formula(core::detail::constructActMultAct())
+      : action_formula(core::detail::default_value_ActMultAct())
     {}
 
     /// \brief Constructor.
@@ -687,7 +687,7 @@ class untyped_multi_action: public action_formula
   public:
     /// \brief Default constructor.
     untyped_multi_action()
-      : action_formula(core::detail::constructUntypedActMultAct())
+      : action_formula(core::detail::default_value_UntypedActMultAct())
     {}
 
     /// \brief Constructor.

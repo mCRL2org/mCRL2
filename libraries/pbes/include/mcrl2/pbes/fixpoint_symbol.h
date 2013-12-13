@@ -15,7 +15,7 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/data_specification.h"
@@ -33,7 +33,7 @@ class fixpoint_symbol: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     fixpoint_symbol()
-      : atermpp::aterm_appl(core::detail::constructFixPoint())
+      : atermpp::aterm_appl(core::detail::default_value_FixPoint())
     {}
 
     /// \brief Constructor.

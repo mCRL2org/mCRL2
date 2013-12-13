@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/hash.h"
 #include "mcrl2/core/index_traits.h"
@@ -47,7 +47,7 @@ class variable: public data_expression
 //--- start user section variable ---//
     /// \brief Default constructor.
     variable()
-      : data_expression(core::detail::constructDataVarId())
+      : data_expression(core::detail::default_value_DataVarId())
     {}
 
     /// \brief Constructor.

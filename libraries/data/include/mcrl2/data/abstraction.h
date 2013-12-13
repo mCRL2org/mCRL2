@@ -16,7 +16,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/binder_type.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2
@@ -31,7 +31,7 @@ class abstraction: public data_expression
   public:
     /// \brief Default constructor.
     abstraction()
-      : data_expression(core::detail::constructBinder())
+      : data_expression(core::detail::default_value_Binder())
     {}
 
     /// \brief Constructor.

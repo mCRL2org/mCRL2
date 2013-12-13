@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_WHERE_CLAUSE_H
 #define MCRL2_DATA_WHERE_CLAUSE_H
 
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
 
@@ -29,7 +29,7 @@ class where_clause: public data_expression
   public:
     /// \brief Default constructor.
     where_clause()
-      : data_expression(core::detail::constructWhr())
+      : data_expression(core::detail::default_value_Whr())
     {}
 
     /// \brief Constructor.

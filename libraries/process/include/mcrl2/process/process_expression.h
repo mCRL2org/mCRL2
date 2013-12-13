@@ -16,7 +16,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/precedence.h"
@@ -49,7 +49,7 @@ class process_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     process_expression()
-      : atermpp::aterm_appl(core::detail::constructProcExpr())
+      : atermpp::aterm_appl(core::detail::default_value_ProcExpr())
     {}
 
     /// \brief Constructor.
@@ -150,7 +150,7 @@ class process_instance: public process_expression
   public:
     /// \brief Default constructor.
     process_instance()
-      : process_expression(core::detail::constructProcess())
+      : process_expression(core::detail::default_value_Process())
     {}
 
     /// \brief Constructor.
@@ -211,7 +211,7 @@ class process_instance_assignment: public process_expression
   public:
     /// \brief Default constructor.
     process_instance_assignment()
-      : process_expression(core::detail::constructProcessAssignment())
+      : process_expression(core::detail::default_value_ProcessAssignment())
     {}
 
     /// \brief Constructor.
@@ -272,7 +272,7 @@ class delta: public process_expression
   public:
     /// \brief Default constructor.
     delta()
-      : process_expression(core::detail::constructDelta())
+      : process_expression(core::detail::default_value_Delta())
     {}
 
     /// \brief Constructor.
@@ -318,7 +318,7 @@ class tau: public process_expression
   public:
     /// \brief Default constructor.
     tau()
-      : process_expression(core::detail::constructTau())
+      : process_expression(core::detail::default_value_Tau())
     {}
 
     /// \brief Constructor.
@@ -364,7 +364,7 @@ class sum: public process_expression
   public:
     /// \brief Default constructor.
     sum()
-      : process_expression(core::detail::constructSum())
+      : process_expression(core::detail::default_value_Sum())
     {}
 
     /// \brief Constructor.
@@ -425,7 +425,7 @@ class block: public process_expression
   public:
     /// \brief Default constructor.
     block()
-      : process_expression(core::detail::constructBlock())
+      : process_expression(core::detail::default_value_Block())
     {}
 
     /// \brief Constructor.
@@ -486,7 +486,7 @@ class hide: public process_expression
   public:
     /// \brief Default constructor.
     hide()
-      : process_expression(core::detail::constructHide())
+      : process_expression(core::detail::default_value_Hide())
     {}
 
     /// \brief Constructor.
@@ -547,7 +547,7 @@ class rename: public process_expression
   public:
     /// \brief Default constructor.
     rename()
-      : process_expression(core::detail::constructRename())
+      : process_expression(core::detail::default_value_Rename())
     {}
 
     /// \brief Constructor.
@@ -608,7 +608,7 @@ class comm: public process_expression
   public:
     /// \brief Default constructor.
     comm()
-      : process_expression(core::detail::constructComm())
+      : process_expression(core::detail::default_value_Comm())
     {}
 
     /// \brief Constructor.
@@ -669,7 +669,7 @@ class allow: public process_expression
   public:
     /// \brief Default constructor.
     allow()
-      : process_expression(core::detail::constructAllow())
+      : process_expression(core::detail::default_value_Allow())
     {}
 
     /// \brief Constructor.
@@ -730,7 +730,7 @@ class sync: public process_expression
   public:
     /// \brief Default constructor.
     sync()
-      : process_expression(core::detail::constructSync())
+      : process_expression(core::detail::default_value_Sync())
     {}
 
     /// \brief Constructor.
@@ -791,7 +791,7 @@ class at: public process_expression
   public:
     /// \brief Default constructor.
     at()
-      : process_expression(core::detail::constructAtTime())
+      : process_expression(core::detail::default_value_AtTime())
     {}
 
     /// \brief Constructor.
@@ -852,7 +852,7 @@ class seq: public process_expression
   public:
     /// \brief Default constructor.
     seq()
-      : process_expression(core::detail::constructSeq())
+      : process_expression(core::detail::default_value_Seq())
     {}
 
     /// \brief Constructor.
@@ -913,7 +913,7 @@ class if_then: public process_expression
   public:
     /// \brief Default constructor.
     if_then()
-      : process_expression(core::detail::constructIfThen())
+      : process_expression(core::detail::default_value_IfThen())
     {}
 
     /// \brief Constructor.
@@ -974,7 +974,7 @@ class if_then_else: public process_expression
   public:
     /// \brief Default constructor.
     if_then_else()
-      : process_expression(core::detail::constructIfThenElse())
+      : process_expression(core::detail::default_value_IfThenElse())
     {}
 
     /// \brief Constructor.
@@ -1040,7 +1040,7 @@ class bounded_init: public process_expression
   public:
     /// \brief Default constructor.
     bounded_init()
-      : process_expression(core::detail::constructBInit())
+      : process_expression(core::detail::default_value_BInit())
     {}
 
     /// \brief Constructor.
@@ -1101,7 +1101,7 @@ class merge: public process_expression
   public:
     /// \brief Default constructor.
     merge()
-      : process_expression(core::detail::constructMerge())
+      : process_expression(core::detail::default_value_Merge())
     {}
 
     /// \brief Constructor.
@@ -1162,7 +1162,7 @@ class left_merge: public process_expression
   public:
     /// \brief Default constructor.
     left_merge()
-      : process_expression(core::detail::constructLMerge())
+      : process_expression(core::detail::default_value_LMerge())
     {}
 
     /// \brief Constructor.
@@ -1223,7 +1223,7 @@ class choice: public process_expression
   public:
     /// \brief Default constructor.
     choice()
-      : process_expression(core::detail::constructChoice())
+      : process_expression(core::detail::default_value_Choice())
     {}
 
     /// \brief Constructor.
@@ -1284,7 +1284,7 @@ class untyped_parameter_identifier: public process_expression
   public:
     /// \brief Default constructor.
     untyped_parameter_identifier()
-      : process_expression(core::detail::constructUntypedParamId())
+      : process_expression(core::detail::default_value_UntypedParamId())
     {}
 
     /// \brief Constructor.
@@ -1350,7 +1350,7 @@ class untyped_process_assignment: public process_expression
   public:
     /// \brief Default constructor.
     untyped_process_assignment()
-      : process_expression(core::detail::constructUntypedProcessAssignment())
+      : process_expression(core::detail::default_value_UntypedProcessAssignment())
     {}
 
     /// \brief Constructor.

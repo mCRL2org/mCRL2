@@ -13,7 +13,7 @@
 #define MCRL2_DATA_CONTAINER_TYPE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2
@@ -29,7 +29,7 @@ class container_type: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     container_type()
-      : atermpp::aterm_appl(core::detail::constructSortConsType())
+      : atermpp::aterm_appl(core::detail::default_value_SortConsType())
     {}
 
     /// \brief Constructor.
@@ -72,7 +72,7 @@ class list_container: public container_type
   public:
     /// \brief Default constructor.
     list_container()
-      : container_type(core::detail::constructSortList())
+      : container_type(core::detail::default_value_SortList())
     {}
 
     /// \brief Constructor.
@@ -118,7 +118,7 @@ class set_container: public container_type
   public:
     /// \brief Default constructor.
     set_container()
-      : container_type(core::detail::constructSortSet())
+      : container_type(core::detail::default_value_SortSet())
     {}
 
     /// \brief Constructor.
@@ -164,7 +164,7 @@ class bag_container: public container_type
   public:
     /// \brief Default constructor.
     bag_container()
-      : container_type(core::detail::constructSortBag())
+      : container_type(core::detail::default_value_SortBag())
     {}
 
     /// \brief Constructor.
@@ -210,7 +210,7 @@ class fset_container: public container_type
   public:
     /// \brief Default constructor.
     fset_container()
-      : container_type(core::detail::constructSortFSet())
+      : container_type(core::detail::default_value_SortFSet())
     {}
 
     /// \brief Constructor.
@@ -256,7 +256,7 @@ class fbag_container: public container_type
   public:
     /// \brief Default constructor.
     fbag_container()
-      : container_type(core::detail::constructSortFBag())
+      : container_type(core::detail::default_value_SortFBag())
     {}
 
     /// \brief Constructor.

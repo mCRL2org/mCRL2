@@ -14,7 +14,7 @@
 
 #include <string>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/function_symbols.h"
@@ -33,7 +33,7 @@ class basic_sort: public sort_expression
   public:
     /// \brief Default constructor.
     basic_sort()
-      : sort_expression(core::detail::constructSortId())
+      : sort_expression(core::detail::default_value_SortId())
     {}
 
     /// \brief Constructor.

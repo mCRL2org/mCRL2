@@ -14,7 +14,6 @@
 #include <iostream>
 #include <fstream>
 #include <cassert>
-#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/exception.h"

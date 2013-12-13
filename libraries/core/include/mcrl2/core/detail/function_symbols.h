@@ -25,6 +25,10 @@ namespace core {
 
 namespace detail {
 
+//----------------------------------------------------------------------------------------------//
+// Part 1: functions for creating function symbols.
+//----------------------------------------------------------------------------------------------//
+
 inline
 bool operator==(const size_t x, const atermpp::function_symbol& y)
 {
@@ -110,6 +114,141 @@ const atermpp::function_symbol& function_symbol_PropVarInstNoIndex()
 }
 
 //--- start generated constructors ---//
+template <typename Term> bool check_term_BooleanOr(Term t);
+template <typename Term> bool check_term_StateOr(Term t);
+template <typename Term> bool check_term_Hide(Term t);
+template <typename Term> bool check_term_SortArrow(Term t);
+template <typename Term> bool check_term_ProcessAssignment(Term t);
+template <typename Term> bool check_term_Forall(Term t);
+template <typename Term> bool check_term_CommExpr(Term t);
+template <typename Term> bool check_term_StateNot(Term t);
+template <typename Term> bool check_term_UntypedSetBagComp(Term t);
+template <typename Term> bool check_term_SortFSet(Term t);
+template <typename Term> bool check_term_StateImp(Term t);
+template <typename Term> bool check_term_PBESExists(Term t);
+template <typename Term> bool check_term_PBESImp(Term t);
+template <typename Term> bool check_term_Binder(Term t);
+template <typename Term> bool check_term_SortRef(Term t);
+template <typename Term> bool check_term_ProcEqnSpec(Term t);
+template <typename Term> bool check_term_StateForall(Term t);
+template <typename Term> bool check_term_BooleanImp(Term t);
+template <typename Term> bool check_term_SortId(Term t);
+template <typename Term> bool check_term_UntypedAction(Term t);
+template <typename Term> bool check_term_StateNu(Term t);
+template <typename Term> bool check_term_RegNil(Term t);
+template <typename Term> bool check_term_DataSpec(Term t);
+template <typename Term> bool check_term_UntypedActMultAct(Term t);
+template <typename Term> bool check_term_Tau(Term t);
+template <typename Term> bool check_term_StateYaledTimed(Term t);
+template <typename Term> bool check_term_SortCons(Term t);
+template <typename Term> bool check_term_DataEqnSpec(Term t);
+template <typename Term> bool check_term_LinearProcessSummand(Term t);
+template <typename Term> bool check_term_SortSpec(Term t);
+template <typename Term> bool check_term_ActionRenameRules(Term t);
+template <typename Term> bool check_term_UntypedParamId(Term t);
+template <typename Term> bool check_term_BooleanEquation(Term t);
+template <typename Term> bool check_term_ConsSpec(Term t);
+template <typename Term> bool check_term_SortList(Term t);
+template <typename Term> bool check_term_Sum(Term t);
+template <typename Term> bool check_term_DataVarId(Term t);
+template <typename Term> bool check_term_ProcVarId(Term t);
+template <typename Term> bool check_term_ProcessInit(Term t);
+template <typename Term> bool check_term_UntypedIdentifier(Term t);
+template <typename Term> bool check_term_BooleanFalse(Term t);
+template <typename Term> bool check_term_BES(Term t);
+template <typename Term> bool check_term_MapSpec(Term t);
+template <typename Term> bool check_term_IfThen(Term t);
+template <typename Term> bool check_term_BooleanAnd(Term t);
+template <typename Term> bool check_term_LinProcSpec(Term t);
+template <typename Term> bool check_term_Choice(Term t);
+template <typename Term> bool check_term_LinearProcessInit(Term t);
+template <typename Term> bool check_term_MultAct(Term t);
+template <typename Term> bool check_term_PropVarInst(Term t);
+template <typename Term> bool check_term_BagComp(Term t);
+template <typename Term> bool check_term_StateDelay(Term t);
+template <typename Term> bool check_term_RegAlt(Term t);
+template <typename Term> bool check_term_UntypedMultAct(Term t);
+template <typename Term> bool check_term_StructCons(Term t);
+template <typename Term> bool check_term_Mu(Term t);
+template <typename Term> bool check_term_PBEqnSpec(Term t);
+template <typename Term> bool check_term_ActNot(Term t);
+template <typename Term> bool check_term_BooleanTrue(Term t);
+template <typename Term> bool check_term_Block(Term t);
+template <typename Term> bool check_term_Rename(Term t);
+template <typename Term> bool check_term_Exists(Term t);
+template <typename Term> bool check_term_Sync(Term t);
+template <typename Term> bool check_term_ActExists(Term t);
+template <typename Term> bool check_term_ProcSpec(Term t);
+template <typename Term> bool check_term_UntypedSortsPossible(Term t);
+template <typename Term> bool check_term_StateMu(Term t);
+template <typename Term> bool check_term_StateFalse(Term t);
+template <typename Term> bool check_term_PBESFalse(Term t);
+template <typename Term> bool check_term_PBESForall(Term t);
+template <typename Term> bool check_term_StateTrue(Term t);
+template <typename Term> bool check_term_BInit(Term t);
+template <typename Term> bool check_term_UntypedSortUnknown(Term t);
+template <typename Term> bool check_term_RegTrans(Term t);
+template <typename Term> bool check_term_StateDelayTimed(Term t);
+template <typename Term> bool check_term_Nu(Term t);
+template <typename Term> bool check_term_SortStruct(Term t);
+template <typename Term> bool check_term_AtTime(Term t);
+template <typename Term> bool check_term_ActOr(Term t);
+template <typename Term> bool check_term_Comm(Term t);
+template <typename Term> bool check_term_BooleanNot(Term t);
+template <typename Term> bool check_term_Delta(Term t);
+template <typename Term> bool check_term_ActMultAct(Term t);
+template <typename Term> bool check_term_StateAnd(Term t);
+template <typename Term> bool check_term_LMerge(Term t);
+template <typename Term> bool check_term_SetComp(Term t);
+template <typename Term> bool check_term_ActForall(Term t);
+template <typename Term> bool check_term_RenameExpr(Term t);
+template <typename Term> bool check_term_Merge(Term t);
+template <typename Term> bool check_term_ActSpec(Term t);
+template <typename Term> bool check_term_BooleanVariable(Term t);
+template <typename Term> bool check_term_Action(Term t);
+template <typename Term> bool check_term_PBESAnd(Term t);
+template <typename Term> bool check_term_Lambda(Term t);
+template <typename Term> bool check_term_StateMust(Term t);
+template <typename Term> bool check_term_Seq(Term t);
+template <typename Term> bool check_term_DataVarIdInit(Term t);
+template <typename Term> bool check_term_Process(Term t);
+template <typename Term> bool check_term_ActAnd(Term t);
+template <typename Term> bool check_term_ActionRenameSpec(Term t);
+template <typename Term> bool check_term_PBES(Term t);
+template <typename Term> bool check_term_StateVar(Term t);
+template <typename Term> bool check_term_ActionRenameRule(Term t);
+template <typename Term> bool check_term_RegSeq(Term t);
+template <typename Term> bool check_term_LinearProcess(Term t);
+template <typename Term> bool check_term_ActAt(Term t);
+template <typename Term> bool check_term_DataEqn(Term t);
+template <typename Term> bool check_term_PBESNot(Term t);
+template <typename Term> bool check_term_StateExists(Term t);
+template <typename Term> bool check_term_StateMay(Term t);
+template <typename Term> bool check_term_PBESTrue(Term t);
+template <typename Term> bool check_term_MultActName(Term t);
+template <typename Term> bool check_term_IfThenElse(Term t);
+template <typename Term> bool check_term_Nil(Term t);
+template <typename Term> bool check_term_ProcEqn(Term t);
+template <typename Term> bool check_term_StructProj(Term t);
+template <typename Term> bool check_term_PBEqn(Term t);
+template <typename Term> bool check_term_Whr(Term t);
+template <typename Term> bool check_term_OpId(Term t);
+template <typename Term> bool check_term_SortSet(Term t);
+template <typename Term> bool check_term_ActFalse(Term t);
+template <typename Term> bool check_term_ActId(Term t);
+template <typename Term> bool check_term_StateYaled(Term t);
+template <typename Term> bool check_term_PBESOr(Term t);
+template <typename Term> bool check_term_UntypedProcessAssignment(Term t);
+template <typename Term> bool check_term_SortFBag(Term t);
+template <typename Term> bool check_term_Allow(Term t);
+template <typename Term> bool check_term_PropVarDecl(Term t);
+template <typename Term> bool check_term_ActImp(Term t);
+template <typename Term> bool check_term_SortBag(Term t);
+template <typename Term> bool check_term_PBInit(Term t);
+template <typename Term> bool check_term_ActTrue(Term t);
+template <typename Term> bool check_term_RegTransOrNil(Term t);
+template <typename Term> bool check_term_GlobVarSpec(Term t);
+template <typename Term> bool check_term_UntypedIdentifierAssignment(Term t);
 // ActAnd
 inline
 const atermpp::function_symbol& function_symbol_ActAnd()
@@ -1191,9 +1330,13 @@ const atermpp::function_symbol& function_symbol_Whr()
 }
 //--- end generated constructors ---//
 
+//----------------------------------------------------------------------------------------------//
+// Part 2: static variables containing function symbols.
+//----------------------------------------------------------------------------------------------//
+
 struct function_symbols
 {
-//--- start generated function symbol declarations ---//
+//--- start generated variables ---//
 static atermpp::function_symbol BooleanOr;
   static atermpp::function_symbol StateOr;
   static atermpp::function_symbol Hide;
@@ -1329,7 +1472,7 @@ static atermpp::function_symbol BooleanOr;
   static atermpp::function_symbol RegTransOrNil;
   static atermpp::function_symbol GlobVarSpec;
   static atermpp::function_symbol UntypedIdentifierAssignment;
-//--- end generated function symbol declarations ---//
+//--- end generated variables ---//
 };
 
 } // namespace detail
@@ -1339,4 +1482,3 @@ static atermpp::function_symbol BooleanOr;
 } // namespace mcrl2
 
 #endif // MCRL2_CORE_DETAIL_FUNCTION_SYMBOLS_H
-

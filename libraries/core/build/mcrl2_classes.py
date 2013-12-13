@@ -509,7 +509,7 @@ class DefaultConstructor(Constructor):
     def inline_definition(self):
         text = r'''    /// \\\\brief Default constructor.
     <CLASSNAME>()
-      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::construct<ATERM>())
+      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::default_value_<ATERM>())
     {}'''
         return self.expand_text(text)
 
@@ -521,7 +521,7 @@ class DefaultConstructor(Constructor):
     def definition(self, inline = False):
         text = r'''    /// \\\\brief Default constructor.
     <INLINE><CLASSNAME>::<CLASSNAME>()
-      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::construct<ATERM>())
+      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::default_value_<ATERM>())
     {}'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)

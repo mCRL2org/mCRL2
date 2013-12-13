@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/hash.h"
@@ -124,7 +124,7 @@ class data_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     data_expression()
-      : atermpp::aterm_appl(core::detail::constructDataExpr())
+      : atermpp::aterm_appl(core::detail::default_value_DataExpr())
     {}
 
     /// \brief Constructor.

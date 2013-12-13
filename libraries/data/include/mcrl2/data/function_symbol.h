@@ -13,7 +13,7 @@
 #define MCRL2_DATA_FUNCTION_SYMBOL_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/index_traits.h"
 #include "mcrl2/core/hash.h"
 #include "mcrl2/data/data_expression.h"
@@ -47,7 +47,7 @@ class function_symbol: public data_expression
 //--- start user section function_symbol ---//
     /// \brief Default constructor.
     function_symbol()
-      : data_expression(core::detail::constructOpId())
+      : data_expression(core::detail::default_value_OpId())
     {}
 
     /// \brief Constructor.

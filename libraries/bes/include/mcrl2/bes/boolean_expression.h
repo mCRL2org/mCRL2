@@ -20,7 +20,7 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/utilities/detail/join.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/precedence.h"
@@ -50,7 +50,7 @@ class boolean_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     boolean_expression()
-      : atermpp::aterm_appl(core::detail::constructBooleanExpression())
+      : atermpp::aterm_appl(core::detail::default_value_BooleanExpression())
     {}
 
     /// \brief Constructor.
@@ -117,7 +117,7 @@ class true_: public boolean_expression
   public:
     /// \brief Default constructor.
     true_()
-      : boolean_expression(core::detail::constructBooleanTrue())
+      : boolean_expression(core::detail::default_value_BooleanTrue())
     {}
 
     /// \brief Constructor.
@@ -163,7 +163,7 @@ class false_: public boolean_expression
   public:
     /// \brief Default constructor.
     false_()
-      : boolean_expression(core::detail::constructBooleanFalse())
+      : boolean_expression(core::detail::default_value_BooleanFalse())
     {}
 
     /// \brief Constructor.
@@ -209,7 +209,7 @@ class not_: public boolean_expression
   public:
     /// \brief Default constructor.
     not_()
-      : boolean_expression(core::detail::constructBooleanNot())
+      : boolean_expression(core::detail::default_value_BooleanNot())
     {}
 
     /// \brief Constructor.
@@ -265,7 +265,7 @@ class and_: public boolean_expression
   public:
     /// \brief Default constructor.
     and_()
-      : boolean_expression(core::detail::constructBooleanAnd())
+      : boolean_expression(core::detail::default_value_BooleanAnd())
     {}
 
     /// \brief Constructor.
@@ -326,7 +326,7 @@ class or_: public boolean_expression
   public:
     /// \brief Default constructor.
     or_()
-      : boolean_expression(core::detail::constructBooleanOr())
+      : boolean_expression(core::detail::default_value_BooleanOr())
     {}
 
     /// \brief Constructor.
@@ -387,7 +387,7 @@ class imp: public boolean_expression
   public:
     /// \brief Default constructor.
     imp()
-      : boolean_expression(core::detail::constructBooleanImp())
+      : boolean_expression(core::detail::default_value_BooleanImp())
     {}
 
     /// \brief Constructor.
@@ -455,7 +455,7 @@ class boolean_variable: public boolean_expression
 //--- start user section boolean_variable ---//
     /// \brief Default constructor.
     boolean_variable()
-      : boolean_expression(core::detail::constructBooleanVariable())
+      : boolean_expression(core::detail::default_value_BooleanVariable())
     {}
 
     /// \brief Constructor.

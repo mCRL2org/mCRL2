@@ -38,7 +38,7 @@ class propositional_variable: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     propositional_variable()
-      : atermpp::aterm_appl(core::detail::constructPropVarDecl())
+      : atermpp::aterm_appl(core::detail::default_value_PropVarDecl())
     {}
 
     /// \brief Constructor.

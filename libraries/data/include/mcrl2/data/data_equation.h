@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/basic_sort.h"
@@ -40,7 +40,7 @@ class data_equation: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     data_equation()
-      : atermpp::aterm_appl(core::detail::constructDataEqn())
+      : atermpp::aterm_appl(core::detail::default_value_DataEqn())
     {}
 
     /// \brief Constructor.

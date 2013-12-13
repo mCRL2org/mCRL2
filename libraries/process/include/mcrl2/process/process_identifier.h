@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/hash.h"
@@ -48,7 +48,7 @@ class process_identifier: public atermpp::aterm_appl
 //--- start user section process_identifier ---//
     /// \brief Default constructor.
     process_identifier()
-      : atermpp::aterm_appl(core::detail::constructProcVarId())
+      : atermpp::aterm_appl(core::detail::default_value_ProcVarId())
     {}
 
     /// \brief Constructor.
