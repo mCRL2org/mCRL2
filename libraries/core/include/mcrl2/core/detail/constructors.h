@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/struct_core.h" // gsString2ATermAppl
+#include "mcrl2/core/detail/function_symbols.h"
 
 namespace mcrl2
 {

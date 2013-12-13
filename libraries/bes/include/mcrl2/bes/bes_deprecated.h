@@ -25,7 +25,6 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/utilities/logger.h"
@@ -189,7 +188,7 @@ static
 inline bool is_pair(const atermpp::aterm &t)
 {
   using namespace atermpp;
-  return aterm_cast<aterm_appl>(t).function()==PAIR();
+  return atermpp::aterm_cast<aterm_appl>(t).function()==PAIR();
 }
 
 static size_t largest_power_of_2_smaller_than(size_t i)
@@ -641,19 +640,19 @@ inline bool is_dummy(const bes_expression& b)
 inline bool is_and(const bes_expression& b)
 {
   using namespace atermpp;
-  return aterm_cast<const aterm_appl>(b).function()==AFunBESAnd();
+  return atermpp::aterm_cast<const aterm_appl>(b).function()==AFunBESAnd();
 }
 
 inline bool is_or(const bes_expression& b)
 {
   using namespace atermpp;
-  return aterm_cast<const aterm_appl>(b).function()==AFunBESOr();
+  return atermpp::aterm_cast<const aterm_appl>(b).function()==AFunBESOr();
 }
 
 inline bool is_if(const bes_expression& b)
 {
   using namespace atermpp;
-  return aterm_cast<const aterm_appl>(b).function()==AFunBESIf();
+  return atermpp::aterm_cast<const aterm_appl>(b).function()==AFunBESIf();
 }
 
 inline const bes_expression &lhs(const bes_expression& b)
@@ -2562,11 +2561,11 @@ class boolean_equation_system
         atermpp::aterm t=variable_index.get(current_var);
         if (!is_pair(t))
         {
-          f << aterm_cast<aterm_appl>(t).function().name();
+          f << atermpp::aterm_cast<aterm_appl>(t).function().name();
         }
         else
         {
-          f << aterm_cast<aterm_appl>(aterm_cast<atermpp::aterm_appl>(t)[0]).function().name();
+          f << atermpp::aterm_cast<aterm_appl>(aterm_cast<atermpp::aterm_appl>(t)[0]).function().name();
           print_tree_rec('(',aterm_cast<atermpp::aterm_appl>(t)[1],f);
           f << ")";
         }

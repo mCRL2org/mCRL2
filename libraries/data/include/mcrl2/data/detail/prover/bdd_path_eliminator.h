@@ -18,7 +18,7 @@
 #include <cstring>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
@@ -121,7 +121,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// \param a_bdd A binary decision diagram.
     /// \param a_path A list of guards and negated guards, representing a path in a BDD.
     data_expression aux_simplify(
-                        const data_expression &a_bdd, 
+                        const data_expression &a_bdd,
                         const data_expression_list &a_path)
     {
       if (f_deadline != 0 && (f_deadline - time(0)) < 0)
@@ -174,7 +174,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// \param a_expression_1 An arbitrary expression.
     /// \param a_expression_2 An arbitrary expression.
     bool variables_overlap(
-                    const data_expression &a_expression_1, 
+                    const data_expression &a_expression_1,
                     const data_expression &a_expression_2)
     {
       std::set < variable > set1=find_all_variables(a_expression_1);

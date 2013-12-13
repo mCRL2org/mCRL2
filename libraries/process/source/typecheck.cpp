@@ -354,7 +354,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
 
   //possible types for the arguments of the action. (not inferred if ambiguous action).
   sort_expression_list PosTypeList=is_action(Result)?
-                aterm_cast<const process::action>(Result).label().sorts():
+                atermpp::aterm_cast<const process::action>(Result).label().sorts():
                 get_sorts(aterm_cast<const process_instance>(Result).identifier().variables());
   data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
@@ -385,7 +385,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
   if (!p.first)
   {
     PosTypeList=is_action(Result)?
-                     aterm_cast<const process::action>(Result).label().sorts():
+                     atermpp::aterm_cast<const process::action>(Result).label().sorts():
                      get_sorts(aterm_cast<const process_instance>(Result).identifier().variables());
     data_expression_list Pars=NewPars;
     NewPars=data_expression_list();

@@ -50,8 +50,8 @@ class term_appl_prepend_iterator: public boost::iterator_facade<
 
     /// \brief Constructor.
     /// \param t A term
-    term_appl_prepend_iterator(ForwardIterator it, 
-                               const data_expression* prepend=nullptr, 
+    term_appl_prepend_iterator(ForwardIterator it,
+                               const data_expression* prepend=nullptr,
                                const ArgumentConverter arg_convert=default_converter())
       : m_it(it), m_prepend(prepend), m_argument_converter(arg_convert)
     {}
@@ -69,13 +69,13 @@ class term_appl_prepend_iterator: public boost::iterator_facade<
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
-    const data_expression &dereference() const  
+    const data_expression &dereference() const
     {
       if (m_prepend)
       {
         return *m_prepend;
       }
-      
+
       m_stable_store=m_argument_converter(*m_it);
       return m_stable_store;
     }
@@ -163,13 +163,13 @@ class application: public data_expression
 
     /// \brief Constructor.
     template <typename Container>
-    application(const data_expression& head, 
-                const Container& arguments, 
+    application(const data_expression& head,
+                const Container& arguments,
                 typename atermpp::detail::enable_if_container<Container, data_expression>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
                                          term_appl_prepend_iterator<typename Container::const_iterator>(arguments.begin(), &head),
                                          term_appl_prepend_iterator<typename Container::const_iterator>(arguments.end())))
-    { 
+    {
       assert(arguments.size()>0);
     }
 
@@ -222,7 +222,7 @@ class application: public data_expression
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arity + 1),
                                          term_appl_prepend_iterator<FwdIter>(first, &head),
                                          term_appl_prepend_iterator<FwdIter>(last)))
-    { 
+    {
       assert(arity>0);
       assert(std::distance(first, last)==arity);
     }
@@ -285,7 +285,7 @@ class application: public data_expression
     size_t size() const
     {
       using namespace atermpp;
-      return aterm_cast<aterm_appl>(*this).size()-1; 
+      return atermpp::aterm_cast<atermpp::aterm_appl>(*this).size()-1;
     }
 };
 

@@ -23,7 +23,7 @@
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::core;
@@ -36,13 +36,13 @@ namespace data
 namespace detail
 {
 
-aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
+atermpp::aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
 {
-  aterm_list rules;
+  atermpp::aterm_list rules;
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
-    const aterm list_representing_rewrite_rule=make_list<aterm>(
-                                         aterm_cast<const aterm_list>(j->variables()),
+    const atermpp::aterm list_representing_rewrite_rule=atermpp::make_list<atermpp::aterm>(
+                                         atermpp::aterm_cast<const atermpp::aterm_list>(j->variables()),
                                          j->condition(),
                                          j->lhs(),
                                          j->rhs());
@@ -50,26 +50,26 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
   }
   rules = reverse(rules);
 
-  aterm_list strat;
+  atermpp::aterm_list strat;
 
   std::vector <bool> used;
 
   size_t arity = 0;
   while (!rules.empty())
   {
-    aterm_list l;
-    aterm_list m;
+    atermpp::aterm_list l;
+    atermpp::aterm_list m;
 
     std::vector<int> args(arity,-1);
 
     for (; !rules.empty(); rules.pop_front())
     {
-      const aterm_list& this_rule = core::down_cast<aterm_list>(rules.front());
+      const atermpp::aterm_list& this_rule = core::down_cast<atermpp::aterm_list>(rules.front());
       const data_expression& this_rule_lhs = core::down_cast<data_expression>(element_at(this_rule,2));
       if ((is_function_symbol(this_rule_lhs)?1:detail::recursive_number_of_args(this_rule_lhs)+1) == arity + 1)
       {
         const data_expression& cond = core::down_cast<data_expression>(element_at(this_rule,1));
-        atermpp::term_list <variable_list> vars = make_list<variable_list>(get_vars(cond));
+        atermpp::term_list <variable_list> vars = atermpp::make_list<variable_list>(get_vars(cond));
 
         std::vector < bool> bs(arity,false);
 
@@ -119,7 +119,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
           }
         }
 
-        aterm_list deps;
+        atermpp::aterm_list deps;
         for (size_t i = 0; i < arity; i++)
         {
           if (i>=used.size())
@@ -128,13 +128,13 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
           }
           if (bs[i] && !used[i])
           {
-            deps.push_front(aterm_int(i));
+            deps.push_front(atermpp::aterm_int(i));
             args[i] += 1;
           }
         }
         deps = reverse(deps);
 
-        m.push_front(make_list<aterm>(deps,rules.front()));
+        m.push_front(atermpp::make_list<atermpp::aterm>(deps,rules.front()));
       }
       else
       {
@@ -144,14 +144,14 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
 
     while (!m.empty())
     {
-      aterm_list m2;
+      atermpp::aterm_list m2;
       for (; !m.empty(); m.pop_front())
       {
-        if (aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()).empty())
+        if (atermpp::aterm_cast<const atermpp::aterm_list>((atermpp::aterm_cast<const atermpp::aterm_list>(m.front())).front()).empty())
         {
-          aterm rule = aterm_cast<const aterm_list>(m.front()).tail().front();
+          atermpp::aterm rule = atermpp::aterm_cast<const atermpp::aterm_list>(m.front()).tail().front();
           strat.push_front(rule);
-          size_t len = aterm_cast<const aterm_list>(aterm_cast<const aterm_list>(rule).front()).size();
+          size_t len = atermpp::aterm_cast<const atermpp::aterm_list>(atermpp::aterm_cast<const atermpp::aterm_list>(rule).front()).size();
           if (len>MAX_LEN)
           {
             MAX_LEN=len;
@@ -191,13 +191,13 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
         }
         used[maxidx-1] = true;
 
-        aterm_int k(maxidx-1);
+        atermpp::aterm_int k(maxidx-1);
         strat.push_front(k);
-        m2 = aterm_list();
+        m2 = atermpp::aterm_list();
         for (; !m.empty(); m.pop_front())
         {
-          aterm_list temp=aterm_cast<const aterm_list>(m.front()).tail();
-          temp.push_front(remove_one_element<aterm>(aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()), k));
+          atermpp::aterm_list temp=atermpp::aterm_cast<const atermpp::aterm_list>(m.front()).tail();
+          temp.push_front(atermpp::remove_one_element<atermpp::aterm>(atermpp::aterm_cast<const atermpp::aterm_list>((atermpp::aterm_cast<const atermpp::aterm_list>(m.front())).front()), k));
           m2.push_front(temp);
         }
         m = reverse(m2);
@@ -307,7 +307,7 @@ bool RewriterJitty::addRewriteRule(const data_equation &rule)
   n.push_front(rule);
   jitty_eqns[f] = n;
   // make_jitty_strat_sufficiently_larger(lhs_head_index.value());
-  // jitty_strat[lhs_head_index.value()] = aterm_list(aterm()); //create_strategy(n);
+  // jitty_strat[lhs_head_index.value()] = atermpp::aterm_list(atermpp::aterm()); //create_strategy(n);
   need_rebuild = true;
 
   return true;
@@ -368,7 +368,7 @@ static data_expression subst_values(
             const T& subst,
             const data_expression &t)
 {
-  if (is_function_symbol(aterm_cast<data_expression>(t)))
+  if (is_function_symbol(atermpp::aterm_cast<data_expression>(t)))
   {
     return t;
   }
@@ -464,7 +464,7 @@ static bool match_jitty(
         }
       }
     }
-    subst.push_back(std::pair<variable,data_expression>(aterm_cast<const variable>(p),t));
+    subst.push_back(std::pair<variable,data_expression>(atermpp::aterm_cast<const variable>(p),t));
     return true;
   }
   else
@@ -483,8 +483,8 @@ static bool match_jitty(
 
     for (size_t i=0; i<arity; i++)
     {
-      if (!match_jitty(aterm_cast<const data_expression>(t[i]),
-                       aterm_cast<const data_expression>(p[i]),subst))
+      if (!match_jitty(atermpp::aterm_cast<const data_expression>(t[i]),
+                       atermpp::aterm_cast<const data_expression>(p[i]),subst))
       {
         return false;
       }
@@ -500,7 +500,7 @@ data_expression RewriterJitty::rewrite_aux(
 {
   if (is_function_symbol(term))
   {
-    return rewrite_aux_function_symbol(aterm_cast<const function_symbol>(term),term,sigma);
+    return rewrite_aux_function_symbol(atermpp::aterm_cast<const function_symbol>(term),term,sigma);
   }
   if (is_variable(term))
   {
@@ -544,7 +544,7 @@ data_expression RewriterJitty::rewrite_aux(
     // new (&args[0]) data_expression(t);
     for(size_t i=0; i<arity; ++i)
     {
-      new (&args[i]) data_expression(aterm_cast<data_expression>(term[i+1]));
+      new (&args[i]) data_expression(atermpp::aterm_cast<data_expression>(term[i+1]));
     }
     const data_expression result=application(t,&args[0],&args[0]+arity);
     for(size_t i=0; i<arity; ++i)
@@ -555,7 +555,7 @@ data_expression RewriterJitty::rewrite_aux(
     return rewrite_aux_function_symbol(head,result,sigma);
   }
 
-  t = rewrite_aux(aterm_cast<data_expression>(term[0]),sigma);
+  t = rewrite_aux(atermpp::aterm_cast<data_expression>(term[0]),sigma);
   // Here t has the shape f(u1,....,un)(u1',...,um')....: f applied several times to arguments,
   // x(u1,....,un)(u1',...,um')....: x applied several times to arguments, or
   // binder x1,...,xn.t' where the binder is a lambda, exists or forall.
@@ -570,7 +570,7 @@ data_expression RewriterJitty::rewrite_aux(
     // new (&args[0]) data_expression(t);
     for(size_t i=0; i<arity; ++i)
     {
-      new (&args[i]) data_expression(aterm_cast<data_expression>(term[i+1]));
+      new (&args[i]) data_expression(atermpp::aterm_cast<data_expression>(term[i+1]));
     }
     const data_expression result=application(t,&args[0],&args[0]+arity);
     for(size_t i=0; i<arity; ++i)
@@ -588,7 +588,7 @@ data_expression RewriterJitty::rewrite_aux(
     // new (&args[0]) data_expression(t);
     for(size_t i=0; i<arity; ++i)
     {
-      new (&args[i]) data_expression(rewrite_aux(aterm_cast<data_expression>(term[i+1]),sigma));
+      new (&args[i]) data_expression(rewrite_aux(atermpp::aterm_cast<data_expression>(term[i+1]),sigma));
     }
     const data_expression result=application(t,&args[0],&args[0]+arity);
     for(size_t i=0; i<arity; ++i)
@@ -637,19 +637,19 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     make_jitty_strat_sufficiently_larger(op_value);
   }
 
-  const aterm_list &strat=jitty_strat[op_value];
+  const atermpp::aterm_list &strat=jitty_strat[op_value];
   if (!strat.empty())
   {
     typedef std::pair<variable, data_expression> variable_aterm_pair;
     std::vector < variable_aterm_pair > subst;
     subst.reserve(16);
 
-    for (aterm_list::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
+    for (atermpp::aterm_list::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
     {
-      const aterm &rule = *strategy_it;
+      const atermpp::aterm &rule = *strategy_it;
       if (rule.type_is_int())
       {
-        const size_t i = (aterm_cast<const aterm_int>(rule)).value()+1;
+        const size_t i = (atermpp::aterm_cast<const atermpp::aterm_int>(rule)).value()+1;
         if (i < arity)
         {
           assert(!rewritten_defined[i]);
@@ -664,8 +664,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       }
       else
       {
-        const aterm_list& rule1=aterm_cast<const aterm_list>(rule);
-        const data_expression& lhs = aterm_cast<const data_expression>(element_at(rule1,2));
+        const atermpp::aterm_list& rule1=atermpp::aterm_cast<const atermpp::aterm_list>(rule);
+        const data_expression& lhs = atermpp::aterm_cast<const data_expression>(element_at(rule1,2));
         size_t rule_arity = (is_function_symbol(lhs)?1:detail::recursive_number_of_args(lhs)+1);
 
         if (rule_arity > arity)
@@ -689,14 +689,14 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         }
         // assert(number_of_vars<=max_len);
         if (matches && (element_at(rule1,1)==internal_true ||
-                        rewrite_aux(aterm_cast<const data_expression>(aterm_cast<const data_expression>(
-                   subst_values(subst,aterm_cast<data_expression>(element_at(rule1,1))))),sigma)==internal_true))
+                        rewrite_aux(atermpp::aterm_cast<const data_expression>(atermpp::aterm_cast<const data_expression>(
+                   subst_values(subst,atermpp::aterm_cast<data_expression>(element_at(rule1,1))))),sigma)==internal_true))
         {
-          const data_expression &rhs = aterm_cast<const data_expression>(element_at(rule1,3));
+          const data_expression &rhs = atermpp::aterm_cast<const data_expression>(element_at(rule1,3));
 
           if (arity == rule_arity)
           {
-            const data_expression result=rewrite_aux(aterm_cast<const data_expression>(subst_values(subst,rhs)),sigma);
+            const data_expression result=rewrite_aux(atermpp::aterm_cast<const data_expression>(subst_values(subst,rhs)),sigma);
             for (size_t i=0; i<arity; i++)
             {
               if (rewritten_defined[i])
@@ -715,7 +715,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
             if (rewritten_defined[rule_arity-1])
             {
-              rewritten[rule_arity-1]=aterm_cast<data_expression>(subst_values(subst,rhs));
+              rewritten[rule_arity-1]=atermpp::aterm_cast<data_expression>(subst_values(subst,rhs));
             }
             else
             {
@@ -739,13 +739,13 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
             sort_expression sort = detail::residual_sort(op.sort(),i);
             while (is_function_sort(sort) && (i < arity))
             {
-              const sort_expression_list& sort_dom = aterm_cast<function_sort>(sort).domain();
+              const sort_expression_list& sort_dom = atermpp::aterm_cast<function_sort>(sort).domain();
               size_t a=sort_dom.size()+1;
               const size_t end=i+a;
               assert(end-1<arity);
               rewritten[end-1] = application(rewritten[i],&rewritten[0]+i+1,&rewritten[0]+end);
               i=end-1;
-              sort = aterm_cast<function_sort>(sort).codomain();
+              sort = atermpp::aterm_cast<function_sort>(sort).codomain();
             }
             const data_expression result=rewritten[i];
 
@@ -789,13 +789,13 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     sort_expression sort = op.sort();
     while (is_function_sort(sort) && (i+1 < arity))
     {
-      const sort_expression_list& sort_dom = aterm_cast<function_sort>(sort).domain();
+      const sort_expression_list& sort_dom = atermpp::aterm_cast<function_sort>(sort).domain();
       const size_t a=sort_dom.size()+1;
       const size_t end=i+a;
       assert(end-1<arity);
       rewritten[end-1] = application(rewritten[i],&rewritten[0]+i+1,&rewritten[0]+end);
       i=end-1;
-      sort = aterm_cast<function_sort>(sort).codomain();
+      sort = atermpp::aterm_cast<function_sort>(sort).codomain();
     }
     result=rewritten[i];
   }

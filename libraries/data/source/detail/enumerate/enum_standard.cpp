@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <sstream>
 #include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/alias.h"
@@ -31,13 +31,13 @@ namespace detail
 // Ugly add hoc class. Ought to be replaced when lambda notation can be used.
 class test_equal
 {
-  const aterm_appl &m_term;
+  const atermpp::aterm_appl &m_term;
 
   public:
     test_equal(const data_expression &t) : m_term(t)
     {}
 
-    bool operator ()(const aterm_appl &other) const
+    bool operator ()(const atermpp::aterm_appl &other) const
     {
       return m_term==other;
     }
@@ -89,9 +89,9 @@ data_expression EnumeratorSolutionsStandard::add_negations(
     {
       return m_enclosing_enumerator->rewr_obj->internal_true;
     }
-    else if (is_application(second_argument) && aterm_cast<const application>(second_argument).head()== m_enclosing_enumerator->rewr_obj->internal_not)
+    else if (is_application(second_argument) && atermpp::aterm_cast<const application>(second_argument).head()== m_enclosing_enumerator->rewr_obj->internal_not)
     {
-      second_argument=aterm_cast<const application>(second_argument)[0];
+      second_argument=atermpp::aterm_cast<const application>(second_argument)[0];
     }
     else
     {
@@ -246,16 +246,16 @@ bool EnumeratorSolutionsStandard::find_equality(
       if (a1!=a2)
       {
         if (is_variable(a1) && (find(vars.begin(),vars.end(),variable(a1))!=vars.end()) &&
-                          (atermpp::find_if(static_cast<const aterm_appl&>(a2),test_equal(a1))==aterm_appl()))        // true if a1 does not occur in a2.
+                          (atermpp::find_if(static_cast<const atermpp::aterm_appl&>(a2),test_equal(a1))==atermpp::aterm_appl()))        // true if a1 does not occur in a2.
         {
-          v = aterm_cast<variable>(a1);
+          v = atermpp::aterm_cast<variable>(a1);
           e = a2;
           return true;
         }
         if (is_variable(a2) && (find(vars.begin(),vars.end(),variable(a2))!=vars.end()) &&
-                                 (atermpp::find_if(a1,test_equal(a2))==aterm_appl()))        // true if a2 does not occur in a1.
+                                 (atermpp::find_if(a1,test_equal(a2))==atermpp::aterm_appl()))        // true if a2 does not occur in a1.
         {
-          v = aterm_cast<variable>(a2);
+          v = atermpp::aterm_cast<variable>(a2);
           e = a1;
           return true;
         }
@@ -342,9 +342,9 @@ data_expression EnumeratorSolutionsStandard::build_solution_aux(
   else if (is_abstraction(t))
   {
     const data_expression &t1=t;
-    const binder_type &binder=aterm_cast<const binder_type>(t1[0]);
-    const variable_list &bound_variables=aterm_cast<const variable_list>(t1[1]);
-    const data_expression &body=build_solution_aux(aterm_cast<const data_expression>(t1[2]),substituted_vars,exprs);
+    const binder_type &binder=atermpp::aterm_cast<const binder_type>(t1[0]);
+    const variable_list &bound_variables=atermpp::aterm_cast<const variable_list>(t1[1]);
+    const data_expression &body=build_solution_aux(atermpp::aterm_cast<const data_expression>(t1[2]),substituted_vars,exprs);
     return abstraction(binder,bound_variables,body);
   }
   else if (is_function_symbol(t))
@@ -509,7 +509,7 @@ bool EnumeratorSolutionsStandard::next(
           const sort_expression &it_sort=it->sort();
           if (is_function_sort(it_sort))
           {
-            const sort_expression_list& domain_sorts=aterm_cast<function_sort>(it_sort).domain();
+            const sort_expression_list& domain_sorts=atermpp::aterm_cast<function_sort>(it_sort).domain();
             assert(function_sort(it_sort).codomain()==sort);
 
             variable_list var_list;
@@ -598,7 +598,7 @@ bool EnumeratorSolutionsStandard::next(
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
-            // const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(aterm_appl(get_appl_afun_value(1),OpId2Int(*it)),enum_sigma);
+            // const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(atermpp::aterm_appl(get_appl_afun_value(1),OpId2Int(*it)),enum_sigma);
             const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(*it,enum_sigma);
 
             const data_expression old_substituted_value=enum_sigma(var);

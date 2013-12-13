@@ -144,7 +144,7 @@ sort_expression data_expression::sort() const
       {
         s.push_back(aterm_cast<sort_expression>((*i)[1])); // Push the sort.
       }
-      return function_sort(sort_expression_list(s.begin(),s.end()), aterm_cast<data_expression>((*this)[2]).sort());
+      return function_sort(sort_expression_list(s.begin(),s.end()), atermpp::aterm_cast<data_expression>((*this)[2]).sort());
     }
     else
     {
@@ -154,12 +154,12 @@ sort_expression data_expression::sort() const
 
       if (is_bag_comprehension(*this))
       {
-        return container_sort(bag_container(), aterm_cast<const sort_expression>(v_variables.front()[1]));
+        return container_sort(bag_container(), atermpp::aterm_cast<const sort_expression>(v_variables.front()[1]));
       }
       else // If it is not known whether the term is a set or a bag, it returns the type of a set, as there is
            // no setbag type. This can only occur for terms that are not propertly type checked.
       {
-        return container_sort(set_container(), aterm_cast<sort_expression>(v_variables.front()[1]));
+        return container_sort(set_container(), atermpp::aterm_cast<sort_expression>(v_variables.front()[1]));
       }
     }
   }
@@ -176,7 +176,7 @@ sort_expression data_expression::sort() const
   }
   else if (is_where_clause(*this))
   {
-    return aterm_cast<data_expression>((*this)[0]).sort();
+    return atermpp::aterm_cast<data_expression>((*this)[0]).sort();
   }
   assert(is_untyped_identifier(*this)); // All cases have been deal with here, except this one.
   return untyped_sort();

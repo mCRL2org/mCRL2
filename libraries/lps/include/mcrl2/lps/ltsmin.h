@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/indexed_set.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/find.h"

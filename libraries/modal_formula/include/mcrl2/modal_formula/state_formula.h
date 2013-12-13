@@ -20,7 +20,7 @@
 #include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/precedence.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
 

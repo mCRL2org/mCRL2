@@ -2255,7 +2255,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
   sort_expression Type=proposed_type;
   // If d is not a variable it is an untyped name, or a function symbol.
   const core::identifier_string& data_term_name=data::is_untyped_identifier(d)?
-                      aterm_cast<const untyped_identifier>(d).name():
+                      atermpp::aterm_cast<const untyped_identifier>(d).name():
                             (aterm_cast<const data::function_symbol>(d).name());
 
   if (data::detail::if_symbol()==data_term_name)
@@ -2527,7 +2527,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
   if (data::is_untyped_identifier(DataTerm)||data::is_function_symbol(DataTerm))
   {
     core::identifier_string Name=data::is_untyped_identifier(DataTerm)?aterm_cast<const untyped_identifier>(DataTerm).name():
-                                                         aterm_cast<const function_symbol>(DataTerm).name();
+                                                         atermpp::aterm_cast<const function_symbol>(DataTerm).name();
 
     bool variable_=false;
     bool TypeADefined=false;
@@ -3110,7 +3110,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     if (data::is_function_symbol(Arg0) || data::is_untyped_identifier(Arg0))
     {
       core::identifier_string Name = is_function_symbol(Arg0)?aterm_cast<function_symbol>(Arg0).name():
-                                                              aterm_cast<untyped_identifier>(Arg0).name();
+                                                              atermpp::aterm_cast<untyped_identifier>(Arg0).name();
       if (Name == sort_list::list_enumeration_name())
       {
         sort_expression Type;
@@ -3537,7 +3537,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
     if (is_function_sort(UnwindType(NewType)))
     {
-      return aterm_cast<function_sort>(UnwindType(NewType)).codomain();
+      return atermpp::aterm_cast<function_sort>(UnwindType(NewType)).codomain();
     }
 
     sort_expression temp_type;
@@ -3557,7 +3557,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     core::identifier_string Name=
               data::is_untyped_identifier(DataTerm)?aterm_cast<untyped_identifier>(DataTerm).name():
               is_function_symbol(DataTerm)?aterm_cast<function_symbol>(DataTerm).name():
-                                           aterm_cast<variable>(DataTerm).name();
+                                           atermpp::aterm_cast<variable>(DataTerm).name();
     if (utilities::is_numeric_string(Name.function().name()))
     {
       sort_expression Sort=sort_int::int_();
@@ -5079,7 +5079,7 @@ static sort_expression replace_possible_sorts(const sort_expression &Type)
 {
   if (is_untyped_possible_sorts(data::sort_expression(Type)))
   {
-    return aterm_cast<untyped_possible_sorts>(Type).sorts().front(); // get the first element of the possible sorts.
+    return atermpp::aterm_cast<untyped_possible_sorts>(Type).sorts().front(); // get the first element of the possible sorts.
   }
   if (data::is_untyped_sort(data::sort_expression(Type)))
   {

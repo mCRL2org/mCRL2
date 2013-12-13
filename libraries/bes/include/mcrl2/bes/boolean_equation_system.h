@@ -22,7 +22,7 @@
 #include "mcrl2/bes/boolean_equation.h"
 #include "mcrl2/bes/detail/io.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/term_traits.h"

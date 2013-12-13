@@ -12,7 +12,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/struct_core.h"
 
 namespace mcrl2 {
 

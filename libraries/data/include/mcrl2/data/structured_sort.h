@@ -17,7 +17,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"

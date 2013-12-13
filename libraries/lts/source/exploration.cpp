@@ -271,7 +271,7 @@ bool lps2lts_algorithm::generate_lts()
     // is an awkward solution.
     unsigned t=time(NULL);
     for( ; t==time(NULL) ; ); // Wait until time changes.
-    srand((unsigned)time(NULL)); 
+    srand((unsigned)time(NULL));
 
     generate_lts_random(initial_state);
 
@@ -347,8 +347,7 @@ lps2lts_algorithm::generator_state_t lps2lts_algorithm::generator_state(const lp
 {
   if (m_options.stateformat == lps::GS_STATE_VECTOR)
   {
-    // return aterm_cast<generator_state_t>(storage_state);
-    return generator_state_t(aterm_cast<aterm_appl>(storage_state).begin(),aterm_cast<aterm_appl>(storage_state).end());
+    return generator_state_t(aterm_cast<atermpp::aterm_appl>(storage_state).begin(),aterm_cast<atermpp::aterm_appl>(storage_state).end());
   }
   else
   {
@@ -364,8 +363,8 @@ lps2lts_algorithm::storage_state_t lps2lts_algorithm::storage_state(const lps2lt
   if (m_options.stateformat == lps::GS_STATE_VECTOR)
   {
     // return generator_state;
-    // return aterm_appl(function_symbol("STATE",generator_state.size()),generator_state.begin(),generator_state.end());
-    return aterm_appl(m_generator->internal_state_function(),generator_state.begin(),generator_state.end());
+    // return atermpp::aterm_appl(function_symbol("STATE",generator_state.size()),generator_state.begin(),generator_state.end());
+    return atermpp::aterm_appl(m_generator->internal_state_function(),generator_state.begin(),generator_state.end());
   }
   else
   {
@@ -804,7 +803,7 @@ void lps2lts_algorithm::generate_lts_breadth()
   size_t start_level_transitions = 0;
   time_t last_log_time = time(NULL) - 1, new_log_time;
 
-  while (!m_must_abort && (current_state < m_state_numbers.size()) && 
+  while (!m_must_abort && (current_state < m_state_numbers.size()) &&
          (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
     generator_state_t state = generator_state(m_state_numbers.get(current_state));
@@ -967,7 +966,7 @@ void lps2lts_algorithm::generate_lts_random(const generator_state_t &initial_sta
       break;
     }
 
-    size_t index = rand() % transitions.size(); 
+    size_t index = rand() % transitions.size();
     generator_state_t new_state;
 
     for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)

@@ -13,7 +13,7 @@
 #define MCRL2_LPS_ACTION_RENAME_H
 
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/specification.h"

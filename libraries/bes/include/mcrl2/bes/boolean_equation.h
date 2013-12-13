@@ -16,7 +16,7 @@
 #include <string>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"

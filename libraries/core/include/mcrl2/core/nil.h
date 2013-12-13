@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2 {

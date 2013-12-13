@@ -32,7 +32,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/traverser.h"
@@ -53,7 +53,7 @@ namespace detail
 static atermpp::function_symbol afunS, afunM, afunF, afunN, afunD, afunR, afunCR, afunC, afunX, afunRe, afunCRe, afunMe;
 static aterm dummy;
 static atermpp::function_symbol afunARtrue, afunARfalse, afunARand, afunARor, afunARvar;
-static aterm_appl ar_true, ar_false;
+static atermpp::aterm_appl ar_true, ar_false;
 
 #define isS(x) x.function()==afunS
 #define isM(x) x.function()==afunM
@@ -87,7 +87,7 @@ static void initialise_common()
     afunCRe = atermpp::function_symbol("@@CRe",4); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
     afunMe = atermpp::function_symbol("@@Me",2); // Match term ( match_variable, variable_index )
 
-    dummy = aterm_appl(atermpp::function_symbol("@@Match_tree_dummy",0));   // gsMakeNil();
+    dummy = atermpp::aterm_appl(atermpp::function_symbol("@@Match_tree_dummy",0));   // gsMakeNil();
 
     afunARtrue = atermpp::function_symbol("@@true",0);
     afunARfalse = atermpp::function_symbol("@@false",0);
@@ -112,17 +112,17 @@ static void finalise_common()
 #define is_ar_or(x) (x.function()==afunARor)
 #define is_ar_var(x) (x.function()==afunARvar)
 
-static aterm_appl make_ar_true()
+static atermpp::aterm_appl make_ar_true()
 {
   return ar_true;
 }
 
-static aterm_appl make_ar_false()
+static atermpp::aterm_appl make_ar_false()
 {
   return ar_false;
 }
 
-static aterm_appl make_ar_and(const aterm_appl& x, const aterm_appl& y)
+static atermpp::aterm_appl make_ar_and(const atermpp::aterm_appl& x, const atermpp::aterm_appl& y)
 {
   if (is_ar_true(x))
   {
@@ -137,10 +137,10 @@ static aterm_appl make_ar_and(const aterm_appl& x, const aterm_appl& y)
     return make_ar_false();
   }
 
-  return aterm_appl(afunARand,x,y);
+  return atermpp::aterm_appl(afunARand,x,y);
 }
 
-static aterm_appl make_ar_or(aterm_appl x, aterm_appl y)
+static atermpp::aterm_appl make_ar_or(atermpp::aterm_appl x, atermpp::aterm_appl y)
 {
   if (is_ar_false(x))
   {
@@ -155,10 +155,10 @@ static aterm_appl make_ar_or(aterm_appl x, aterm_appl y)
     return make_ar_true();
   }
 
-  return aterm_appl(afunARor,x,y);
+  return atermpp::aterm_appl(afunARor,x,y);
 }
 
-static aterm_appl make_ar_var(size_t var)
+static atermpp::aterm_appl make_ar_var(size_t var)
 {
   return atermpp::aterm_appl(afunARvar,atermpp::aterm_int(var));
 }
@@ -200,7 +200,7 @@ static char* whitespace(size_t len)
 }
 
 
-static void term2seq(const aterm_appl& t, aterm_list* s, size_t *var_cnt)
+static void term2seq(const atermpp::aterm_appl& t, atermpp::aterm_list* s, size_t *var_cnt)
 {
   if (is_function_symbol(t))
   {
@@ -226,13 +226,13 @@ static void term2seq(const aterm_appl& t, aterm_list* s, size_t *var_cnt)
     }
     else
     {
-      size_t arity = aterm_cast<aterm_appl>(t).function().arity();
+      size_t arity = atermpp::aterm_cast<atermpp::aterm_appl>(t).function().arity();
 
-      s->push_front(atermpp::aterm_appl(afunF,atermpp::aterm_cast<const aterm_appl>(t)[0],dummy,dummy));
+      s->push_front(atermpp::aterm_appl(afunF,atermpp::aterm_cast<const atermpp::aterm_appl>(t)[0],dummy,dummy));
 
       for (size_t i=1; i<arity; ++i)
       {
-        term2seq(atermpp::aterm_cast<const aterm_appl>(t[i]),s,var_cnt);
+        term2seq(atermpp::aterm_cast<const atermpp::aterm_appl>(t[i]),s,var_cnt);
         if (i<arity-1)
         {
           s->push_front(atermpp::aterm_appl(afunN,dummy));
@@ -248,13 +248,13 @@ static void term2seq(const aterm_appl& t, aterm_list* s, size_t *var_cnt)
 
 }
 
-static void get_used_vars_aux(const aterm_appl& t, aterm_list& vars)
+static void get_used_vars_aux(const atermpp::aterm_appl& t, atermpp::aterm_list& vars)
 {
   using namespace atermpp;
   /* if (t.type_is_list())
   {
-    const atermpp::aterm_list& l=atermpp::aterm_cast<const aterm_list>(t);
-    for (aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    const atermpp::aterm_list& l=atermpp::aterm_cast<const atermpp::aterm_list>(t);
+    for (atermpp::aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
     {
       get_used_vars_aux(*i,vars);
     }
@@ -274,35 +274,35 @@ static void get_used_vars_aux(const aterm_appl& t, aterm_list& vars)
     }
     else
     {
-      size_t a = aterm_cast<aterm_appl>(t).function().arity();
+      size_t a = atermpp::aterm_cast<atermpp::aterm_appl>(t).function().arity();
       for (size_t i=0; i<a; i++)
       {
-        get_used_vars_aux(aterm_cast<const aterm_appl>(t[i]),vars);
+        get_used_vars_aux(aterm_cast<const atermpp::aterm_appl>(t[i]),vars);
       }
     }
   }
 }
 
-static aterm_list get_used_vars(const aterm_appl& t)
+static atermpp::aterm_list get_used_vars(const atermpp::aterm_appl& t)
 {
-  aterm_list l;
+  atermpp::aterm_list l;
   get_used_vars_aux(t,l);
   return l;
 }
 
-static aterm_list create_sequence(const data_equation& rule, size_t* var_cnt, const aterm_appl& true_inner)
+static atermpp::aterm_list create_sequence(const data_equation& rule, size_t* var_cnt, const atermpp::aterm_appl& true_inner)
 {
   const data_expression lhs_inner = rule.lhs();
   size_t lhs_arity = lhs_inner.size();
   const data_expression cond = rule.condition();
   const data_expression rslt = rule.rhs();
-  aterm_list rseq;
+  atermpp::aterm_list rseq;
 
   if (!is_function_symbol(lhs_inner))
   {
     for (size_t i=1; i<lhs_arity; ++i)
     {
-      term2seq(aterm_cast<aterm_appl>(lhs_inner[i]),&rseq,var_cnt);
+      term2seq(aterm_cast<atermpp::aterm_appl>(lhs_inner[i]),&rseq,var_cnt);
       if (i<lhs_arity-1)
       {
         rseq.push_front(atermpp::aterm_appl(afunN,dummy));
@@ -326,49 +326,49 @@ static aterm_list create_sequence(const data_equation& rule, size_t* var_cnt, co
 // Structure for build_tree paramters
 typedef struct
 {
-  aterm_list Flist;   // List of sequences of which the first action is an F
-  aterm_list Slist;   // List of sequences of which the first action is an S
-  aterm_list Mlist;   // List of sequences of which the first action is an M
-  aterm_list stack;   // Stack to maintain the sequences that do not have to
+  atermpp::aterm_list Flist;   // List of sequences of which the first action is an F
+  atermpp::aterm_list Slist;   // List of sequences of which the first action is an S
+  atermpp::aterm_list Mlist;   // List of sequences of which the first action is an M
+  atermpp::aterm_list stack;   // Stack to maintain the sequences that do not have to
   // do anything in the current term
-  aterm_list upstack; // List of sequences that have done an F at the current
+  atermpp::aterm_list upstack; // List of sequences that have done an F at the current
   // level
 } build_pars;
 
 static void initialise_build_pars(build_pars* p)
 {
-  p->Flist = aterm_list();
-  p->Slist = aterm_list();
-  p->Mlist = aterm_list();
-  p->stack = make_list<aterm>(aterm_list());
-  p->upstack = aterm_list();
+  p->Flist = atermpp::aterm_list();
+  p->Slist = atermpp::aterm_list();
+  p->Mlist = atermpp::aterm_list();
+  p->stack = make_list<aterm>(atermpp::aterm_list());
+  p->upstack = atermpp::aterm_list();
 }
 
-static aterm_list add_to_stack(const aterm_list& stack, aterm_list seqs, aterm_appl* r, aterm_list* cr)
+static atermpp::aterm_list add_to_stack(const atermpp::aterm_list& stack, atermpp::aterm_list seqs, atermpp::aterm_appl* r, atermpp::aterm_list* cr)
 {
   if (stack.empty())
   {
     return stack;
   }
 
-  aterm_list l;
-  aterm_list h = aterm_cast<aterm_list>(stack.front());
+  atermpp::aterm_list l;
+  atermpp::aterm_list h = atermpp::aterm_cast<atermpp::aterm_list>(stack.front());
 
   for (; !seqs.empty(); seqs=seqs.tail())
   {
-    aterm_list e = aterm_cast<aterm_list>(seqs.front());
+    atermpp::aterm_list e = atermpp::aterm_cast<atermpp::aterm_list>(seqs.front());
 
-    if (isD(aterm_cast<aterm_appl>(e.front())))
+    if (isD(aterm_cast<atermpp::aterm_appl>(e.front())))
     {
       l.push_front(e.tail());
     }
-    else if (isN(aterm_cast<aterm_appl>(e.front())))
+    else if (isN(aterm_cast<atermpp::aterm_appl>(e.front())))
     {
       h.push_front(e.tail());
     }
-    else if (isRe(aterm_cast<aterm_appl>(e.front())))
+    else if (isRe(aterm_cast<atermpp::aterm_appl>(e.front())))
     {
-      *r = aterm_cast<aterm_appl>(e.front());
+      *r = atermpp::aterm_cast<atermpp::aterm_appl>(e.front());
     }
     else
     {
@@ -376,38 +376,38 @@ static aterm_list add_to_stack(const aterm_list& stack, aterm_list seqs, aterm_a
     }
   }
 
-  aterm_list result=add_to_stack(stack.tail(),l,r,cr);
+  atermpp::aterm_list result=add_to_stack(stack.tail(),l,r,cr);
   result.push_front(h);
   return result;
 }
 
-static void add_to_build_pars(build_pars* pars, aterm_list seqs, aterm_appl* r, aterm_list* cr)
+static void add_to_build_pars(build_pars* pars, atermpp::aterm_list seqs, atermpp::aterm_appl* r, atermpp::aterm_list* cr)
 {
-  aterm_list l;
+  atermpp::aterm_list l;
 
   for (; !seqs.empty(); seqs=seqs.tail())
   {
-    aterm_list e = aterm_cast<aterm_list>(seqs.front());
+    atermpp::aterm_list e = atermpp::aterm_cast<atermpp::aterm_list>(seqs.front());
 
-    if (isD(aterm_cast<aterm_appl>(e.front())) || isN(aterm_cast<aterm_appl>(e.front())))
+    if (isD(aterm_cast<atermpp::aterm_appl>(e.front())) || isN(aterm_cast<atermpp::aterm_appl>(e.front())))
     {
       l.push_front(e);
     }
-    else if (isS(aterm_cast<aterm_appl>(e.front())))
+    else if (isS(aterm_cast<atermpp::aterm_appl>(e.front())))
     {
       pars->Slist.push_front(e);
     }
-    else if (isMe(aterm_cast<aterm_appl>(e.front())))     // M should not appear at the head of a seq
+    else if (isMe(aterm_cast<atermpp::aterm_appl>(e.front())))     // M should not appear at the head of a seq
     {
       pars->Mlist.push_front(e);
     }
-    else if (isF(aterm_cast<aterm_appl>(e.front())))
+    else if (isF(aterm_cast<atermpp::aterm_appl>(e.front())))
     {
       pars->Flist.push_front(e);
     }
-    else if (isRe(aterm_cast<aterm_appl>(e.front())))
+    else if (isRe(aterm_cast<atermpp::aterm_appl>(e.front())))
     {
-      *r = aterm_cast<aterm_appl>(e.front());
+      *r = atermpp::aterm_cast<atermpp::aterm_appl>(e.front());
     }
     else
     {
@@ -419,21 +419,21 @@ static void add_to_build_pars(build_pars* pars, aterm_list seqs, aterm_appl* r, 
 }
 
 static char tree_var_str[20];
-static aterm_appl createFreshVar(const aterm_appl& sort, size_t* i)
+static atermpp::aterm_appl createFreshVar(const atermpp::aterm_appl& sort, size_t* i)
 {
   sprintf(tree_var_str,"@var_%lu",(*i)++);
   return data::variable(tree_var_str, atermpp::aterm_cast<const sort_expression>(sort));
 }
 
-// static aterm_list subst_var(aterm_list l, const aterm_appl& old, const aterm& new_val, const aterm& num, const aterm_list& substs)
-static aterm_list subst_var(aterm_list l, const aterm_appl& old, const aterm& new_val, const aterm& num, const substitution& substs)
+// static atermpp::aterm_list subst_var(atermpp::aterm_list l, const atermpp::aterm_appl& old, const aterm& new_val, const aterm& num, const atermpp::aterm_list& substs)
+static atermpp::aterm_list subst_var(atermpp::aterm_list l, const atermpp::aterm_appl& old, const aterm& new_val, const aterm& num, const substitution& substs)
 {
   if (l.empty())
   {
     return l;
   }
 
-  aterm_appl head(l.front());
+  atermpp::aterm_appl head(l.front());
   l = l.tail();
 
   if (isM(head))
@@ -445,8 +445,8 @@ static aterm_list subst_var(aterm_list l, const aterm_appl& old, const aterm& ne
   }
   else if (isCRe(head))
   {
-    aterm_list l = (aterm_list) head[2];
-    aterm_list m ;
+    atermpp::aterm_list l = (atermpp::aterm_list) head[2];
+    atermpp::aterm_list m ;
     for (; !l.empty(); l=l.tail())
     {
       if (l.front()==old)
@@ -458,8 +458,8 @@ static aterm_list subst_var(aterm_list l, const aterm_appl& old, const aterm& ne
         m.push_front(l.front());
       }
     }
-    l = (aterm_list) head[3];
-    aterm_list n;
+    l = (atermpp::aterm_list) head[3];
+    atermpp::aterm_list n;
     for (; !l.empty(); l=l.tail())
     {
       if (l.front()==old)
@@ -475,8 +475,8 @@ static aterm_list subst_var(aterm_list l, const aterm_appl& old, const aterm& ne
   }
   else if (isRe(head))
   {
-    aterm_list l = (aterm_list) head[1];
-    aterm_list m ;
+    atermpp::aterm_list l = (atermpp::aterm_list) head[1];
+    atermpp::aterm_list m ;
     for (; !l.empty(); l=l.tail())
     {
       if (l.front()==old)
@@ -490,74 +490,74 @@ static aterm_list subst_var(aterm_list l, const aterm_appl& old, const aterm& ne
     }
     head = atermpp::aterm_appl(afunRe,substs(head[0]),m);
   }
-  aterm_list result=subst_var(l,old,new_val,num,substs);
+  atermpp::aterm_list result=subst_var(l,old,new_val,num,substs);
   result.push_front(head);
   return result;
 }
 
 static std::vector < size_t> treevars_usedcnt;
 
-static void inc_usedcnt(aterm_list l)
+static void inc_usedcnt(atermpp::aterm_list l)
 {
   for (; !l.empty(); l=l.tail())
   {
     aterm first=l.front();
     if (first.type_is_int())
     {
-      treevars_usedcnt[aterm_cast<aterm_int>(first).value()]++;
+      treevars_usedcnt[aterm_cast<atermpp::aterm_int>(first).value()]++;
     }
   }
 }
 
-static aterm_appl build_tree(build_pars pars, size_t i)
+static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
 {
   if (!pars.Slist.empty())
   {
-    aterm_list l,m;
+    atermpp::aterm_list l,m;
 
     size_t k = i;
-    aterm_appl v = createFreshVar(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(aterm_cast<aterm_list>(pars.Slist.front()).front())[0])[1]),&i);
+    atermpp::aterm_appl v = createFreshVar(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_list>(pars.Slist.front()).front())[0])[1]),&i);
     treevars_usedcnt[k] = 0;
 
-    l = aterm_list();
-    m = aterm_list();
+    l = atermpp::aterm_list();
+    m = atermpp::aterm_list();
     for (; !pars.Slist.empty(); pars.Slist=pars.Slist.tail())
     {
-      aterm_list e = aterm_cast<aterm_list>(pars.Slist.front());
+      atermpp::aterm_list e = atermpp::aterm_cast<atermpp::aterm_list>(pars.Slist.front());
 
-      e = subst_var(e,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(e.front())[0]), v,aterm_int(k),substitution(aterm_cast<aterm_appl>(e.front())[0],v));
+      e = subst_var(e,aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(e.front())[0]), v,atermpp::aterm_int(k),substitution(aterm_cast<atermpp::aterm_appl>(e.front())[0],v));
 
       l.push_front(e.front());
       m.push_front(e.tail());
     }
 
-    aterm_appl r;
-    aterm_list readies;
+    atermpp::aterm_appl r;
+    atermpp::aterm_list readies;
 
     pars.stack = add_to_stack(pars.stack,m,&r,&readies);
 
-    if (r==aterm_appl())
+    if (r==atermpp::aterm_appl())
     {
-      aterm_appl tree;
+      atermpp::aterm_appl tree;
 
       tree = build_tree(pars,i);
       for (; !readies.empty(); readies=readies.tail())
       {
-        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())[2]);
-        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())[3]);
-        tree = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())[1]),tree);
+        inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[2]);
+        inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[3]);
+        tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),tree);
       }
       r = tree;
     }
     else
     {
-      inc_usedcnt((aterm_list) r[1]);
+      inc_usedcnt((atermpp::aterm_list) r[1]);
       r = atermpp::aterm_appl(afunR,r[0]);
     }
 
     if ((treevars_usedcnt[k] > 0) || ((k == 0) && isR(r)))
     {
-       return aterm_appl(afunS,v,r);
+       return atermpp::aterm_appl(afunS,v,r);
     }
     else
     {
@@ -566,15 +566,15 @@ static aterm_appl build_tree(build_pars pars, size_t i)
   }
   else if (!pars.Mlist.empty())
   {
-    aterm M = aterm_cast<aterm_list>(pars.Mlist.front()).front();
+    aterm M = atermpp::aterm_cast<atermpp::aterm_list>(pars.Mlist.front()).front();
 
-    aterm_list l;
-    aterm_list m;
+    atermpp::aterm_list l;
+    atermpp::aterm_list m;
     for (; !pars.Mlist.empty(); pars.Mlist=pars.Mlist.tail())
     {
-      if (M==aterm_cast<aterm_list>(pars.Mlist.front()).front())
+      if (M==aterm_cast<atermpp::aterm_list>(pars.Mlist.front()).front())
       {
-        l.push_front(aterm_cast<aterm_list>(pars.Mlist.front()).tail());
+        l.push_front(aterm_cast<atermpp::aterm_list>(pars.Mlist.front()).tail());
       }
       else
       {
@@ -583,28 +583,28 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     }
     pars.Mlist = m;
 
-    aterm_appl true_tree,false_tree;
-    aterm_appl r ;
-    aterm_list readies;
+    atermpp::aterm_appl true_tree,false_tree;
+    atermpp::aterm_appl r ;
+    atermpp::aterm_list readies;
 
-    aterm_list newstack = add_to_stack(pars.stack,l,&r,&readies);
+    atermpp::aterm_list newstack = add_to_stack(pars.stack,l,&r,&readies);
 
     false_tree = build_tree(pars,i);
 
-    if (r==aterm_appl())
+    if (r==atermpp::aterm_appl())
     {
       pars.stack = newstack;
       true_tree = build_tree(pars,i);
       for (; !readies.empty(); readies=readies.tail())
       {
-        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())[2]);
-        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())[3]);
-        true_tree = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())[1]),true_tree);
+        inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[2]);
+        inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[3]);
+        true_tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),true_tree);
       }
     }
     else
     {
-      inc_usedcnt((aterm_list) r[1]);
+      inc_usedcnt((atermpp::aterm_list) r[1]);
       true_tree = atermpp::aterm_appl(afunR,r[0]);
     }
 
@@ -614,23 +614,23 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     }
     else
     {
-      treevars_usedcnt[aterm_cast<aterm_int>(((aterm_appl) M)[1]).value()]++;
-      return atermpp::aterm_appl(afunM,((aterm_appl) M)[0],true_tree,false_tree);
+      treevars_usedcnt[aterm_cast<atermpp::aterm_int>(((atermpp::aterm_appl) M)[1]).value()]++;
+      return atermpp::aterm_appl(afunM,((atermpp::aterm_appl) M)[0],true_tree,false_tree);
     }
   }
   else if (!pars.Flist.empty())
   {
-    aterm_list F = aterm_cast<aterm_list>(pars.Flist.front());
-    aterm_appl true_tree,false_tree;
+    atermpp::aterm_list F = atermpp::aterm_cast<atermpp::aterm_list>(pars.Flist.front());
+    atermpp::aterm_appl true_tree,false_tree;
 
-    aterm_list newupstack = pars.upstack;
-    aterm_list l;
+    atermpp::aterm_list newupstack = pars.upstack;
+    atermpp::aterm_list l;
 
     for (; !pars.Flist.empty(); pars.Flist=pars.Flist.tail())
     {
-      if (aterm_cast<aterm_list>(pars.Flist.front()).front()==F.front())
+      if (aterm_cast<atermpp::aterm_list>(pars.Flist.front()).front()==F.front())
       {
-        newupstack.push_front(aterm_cast<aterm_list>(pars.Flist.front()).tail());
+        newupstack.push_front(aterm_cast<atermpp::aterm_list>(pars.Flist.front()).tail());
       }
       else
       {
@@ -640,7 +640,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
 
     pars.Flist = l;
     false_tree = build_tree(pars,i);
-    pars.Flist = aterm_list();
+    pars.Flist = atermpp::aterm_list();
     pars.upstack = newupstack;
     true_tree = build_tree(pars,i);
 
@@ -650,44 +650,44 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     }
     else
     {
-      return atermpp::aterm_appl(afunF,aterm_cast<aterm_appl>(F.front())[0],true_tree,false_tree);
+      return atermpp::aterm_appl(afunF,aterm_cast<atermpp::aterm_appl>(F.front())[0],true_tree,false_tree);
     }
   }
   else if (!pars.upstack.empty())
   {
-    aterm_list l;
+    atermpp::aterm_list l;
 
-    aterm_appl r;
-    aterm_list readies;
+    atermpp::aterm_appl r;
+    atermpp::aterm_list readies;
 
-    pars.stack.push_front(aterm_list());
+    pars.stack.push_front(atermpp::aterm_list());
     l = pars.upstack;
-    pars.upstack = aterm_list();
+    pars.upstack = atermpp::aterm_list();
     add_to_build_pars(&pars,l,&r,&readies);
 
 
-    if (r==aterm_appl())
+    if (r==atermpp::aterm_appl())
     {
-      aterm_appl t = build_tree(pars,i);
+      atermpp::aterm_appl t = build_tree(pars,i);
 
       for (; !readies.empty(); readies=readies.tail())
       {
-        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())[2]);
-        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())[3]);
-        t = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())[1]),t);
+        inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[2]);
+        inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[3]);
+        t = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),t);
       }
 
       return t;
     }
     else
     {
-      inc_usedcnt((aterm_list) r[1]);
+      inc_usedcnt((atermpp::aterm_list) r[1]);
       return atermpp::aterm_appl(afunR,r[0]);
     }
   }
   else
   {
-    if (aterm_cast<aterm_list>(pars.stack.front()).empty())
+    if (aterm_cast<atermpp::aterm_list>(pars.stack.front()).empty())
     {
       if (pars.stack.tail().empty())
       {
@@ -701,28 +701,28 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     }
     else
     {
-      aterm_list l = aterm_cast<aterm_list>(pars.stack.front());
-      aterm_appl r ;
-      aterm_list readies;
+      atermpp::aterm_list l = atermpp::aterm_cast<atermpp::aterm_list>(pars.stack.front());
+      atermpp::aterm_appl r ;
+      atermpp::aterm_list readies;
 
       pars.stack = pars.stack.tail();
-      pars.stack.push_front(aterm_list());
+      pars.stack.push_front(atermpp::aterm_list());
       add_to_build_pars(&pars,l,&r,&readies);
 
-      aterm_appl tree;
-      if (r==aterm_appl())
+      atermpp::aterm_appl tree;
+      if (r==atermpp::aterm_appl())
       {
         tree = build_tree(pars,i);
         for (; !readies.empty(); readies=readies.tail())
         {
-          inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())[2]);
-          inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())[3]);
-          tree = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())[1]),tree);
+          inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[2]);
+          inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[3]);
+          tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),tree);
         }
       }
       else
       {
-        inc_usedcnt((aterm_list) r[1]);
+        inc_usedcnt((atermpp::aterm_list) r[1]);
         tree = atermpp::aterm_appl(afunR,r[0]);
       }
 
@@ -731,7 +731,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
   }
 }
 
-static aterm_appl create_tree(const data_equation_list& rules, size_t /*opid*/, size_t /*arity*/, const aterm_appl& true_inner)
+static atermpp::aterm_appl create_tree(const data_equation_list& rules, size_t /*opid*/, size_t /*arity*/, const atermpp::aterm_appl& true_inner)
 // Create a match tree for OpId int2term[opid] and update the value of
 // *max_vars accordingly.
 //
@@ -747,7 +747,7 @@ static aterm_appl create_tree(const data_equation_list& rules, size_t /*opid*/, 
   // store the total number of variables used in these sequences.
   // (The total number of variables in all sequences should be an upper
   // bound for the number of variable in the final tree.)
-  aterm_list rule_seqs;
+  atermpp::aterm_list rule_seqs;
   size_t total_rule_vars = 0;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
@@ -756,20 +756,20 @@ static aterm_appl create_tree(const data_equation_list& rules, size_t /*opid*/, 
 
   // Generate initial parameters for built_tree
   build_pars init_pars;
-  aterm_appl r;
-  aterm_list readies;
+  atermpp::aterm_appl r;
+  atermpp::aterm_list readies;
 
   initialise_build_pars(&init_pars);
   add_to_build_pars(&init_pars,rule_seqs,&r,&readies);
 
-  aterm_appl tree;
+  atermpp::aterm_appl tree;
   if (!r.defined())
   {
     treevars_usedcnt=std::vector < size_t> (total_rule_vars);
     tree = build_tree(init_pars,0);
     for (; !readies.empty(); readies=readies.tail())
     {
-      tree = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())[1]), tree);
+      tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]), tree);
     }
   }
   else
@@ -846,17 +846,17 @@ static variable_list dep_vars(const data_equation& eqn)
   // Check all arguments
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (!is_variable(aterm_cast<aterm_appl>(lhs_internal[i+1])))
+    if (!is_variable(aterm_cast<atermpp::aterm_appl>(lhs_internal[i+1])))
     {
       // Argument is not a variable, so it needs to be rewritten
       bs[i] = true;
-      aterm_list evars = get_vars(aterm_cast<data_expression>(lhs_internal[i+1]));
+      atermpp::aterm_list evars = get_vars(aterm_cast<data_expression>(lhs_internal[i+1]));
       for (; !evars.empty(); evars=evars.tail())
       {
         int j=i-1; // vars.tail().size()-1
-        for (aterm_list o=vars.tail(); !o.empty(); o=o.tail())
+        for (atermpp::aterm_list o=vars.tail(); !o.empty(); o=o.tail())
         {
-          const aterm_list l=aterm_cast<aterm_list>(o.front());
+          const atermpp::aterm_list l=aterm_cast<atermpp::aterm_list>(o.front());
           if (std::find(l.begin(),l.end(),evars.front()) != l.end())
           {
             bs[j] = true;
@@ -870,9 +870,9 @@ static variable_list dep_vars(const data_equation& eqn)
       // Argument is a variable; check whether it occurred before
       int j = i-1; // vars.size()-1-1
       bool b = false;
-      for (aterm_list o=vars; !o.empty(); o=o.tail())
+      for (atermpp::aterm_list o=vars; !o.empty(); o=o.tail())
       {
-        const aterm_list l=aterm_cast<aterm_list>(o.front());
+        const atermpp::aterm_list l=aterm_cast<atermpp::aterm_list>(o.front());
         if (std::find(o.begin(),o.end(),lhs_internal[i+1]) != o.end())
         {
           // Same variable, mark it
@@ -942,14 +942,14 @@ size_t RewriterCompilingJitty::binding_variable_list_index(const variable_list& 
   return index_for_vl;
 }
 
-static aterm_list create_strategy(
+static atermpp::aterm_list create_strategy(
         const data_equation_list& rules,
         const size_t opid,
         const size_t arity,
         nfs_array& nfs,
         const data_expression& true_inner)
 {
-  aterm_list strat;
+  atermpp::aterm_list strat;
   // Array to keep note of the used parameters
   std::vector <bool> used;
   for (size_t i = 0; i < arity; i++)
@@ -961,7 +961,7 @@ static aterm_list create_strategy(
   std::vector<int> args(arity,-1);
   // Process all (applicable) rules
   std::vector<bool> bs(arity);
-  aterm_list dep_list;
+  atermpp::aterm_list dep_list;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
     size_t rule_arity = it->lhs().function().arity()-1;
@@ -971,7 +971,7 @@ static aterm_list create_strategy(
     }
 
     data_expression lhs_internal = it->lhs();
-    aterm_list vars = make_list<aterm>( get_doubles(it->rhs())+ get_vars(it->condition())
+    atermpp::aterm_list vars = make_list<aterm>( get_doubles(it->rhs())+ get_vars(it->condition())
                                  ); // List of variables occurring in each argument of the lhs
                                      // (except the first element which contains variables from the
                                      // condition and variables which occur more than once in the result)
@@ -989,13 +989,13 @@ static aterm_list create_strategy(
       {
         // Argument is not a variable, so it needs to be rewritten
         bs[i] = true;
-        aterm_list evars = get_vars(aterm_cast<data_expression>(lhs_internal[i+1]));
+        atermpp::aterm_list evars = get_vars(aterm_cast<data_expression>(lhs_internal[i+1]));
         for (; !evars.empty(); evars=evars.tail())
         {
           int j=i-1;
-          for (aterm_list o=vars; !o.tail().empty(); o=o.tail())
+          for (atermpp::aterm_list o=vars; !o.tail().empty(); o=o.tail())
           {
-            const aterm_list l=aterm_cast<aterm_list>(o.front());
+            const atermpp::aterm_list l=aterm_cast<atermpp::aterm_list>(o.front());
             if (std::find(l.begin(),l.end(),evars.front()) != l.end())
             {
               bs[j] = true;
@@ -1009,9 +1009,9 @@ static aterm_list create_strategy(
         // Argument is a variable; check whether it occurred before
         int j = i-1; // vars.size()-1-1
         bool b = false;
-        for (aterm_list o=vars; !o.empty(); o=o.tail())
+        for (atermpp::aterm_list o=vars; !o.empty(); o=o.tail())
         {
-          const aterm_list l=aterm_cast<aterm_list>(o.front());
+          const atermpp::aterm_list l=aterm_cast<atermpp::aterm_list>(o.front());
           if (std::find(l.begin(),l.end(),lhs_internal[i+1]) != l.end())
           {
             // Same variable, mark it
@@ -1034,13 +1034,13 @@ static aterm_list create_strategy(
     }
 
     // Create dependency list for this rule
-    aterm_list deps;
+    atermpp::aterm_list deps;
     for (size_t i = 0; i < rule_arity; i++)
     {
       // Only if needed and not already rewritten
       if (bs[i] && !used[i])
       {
-        deps.push_front(aterm_int(i));
+        deps.push_front(atermpp::aterm_int(i));
         // Increase dependency count
         args[i] += 1;
         //fprintf(stderr,"dep of arg %i\n",i);
@@ -1049,7 +1049,7 @@ static aterm_list create_strategy(
     deps = reverse(deps);
 
     // Add rule with its dependencies
-    dep_list.push_front(make_list<aterm>( deps, (aterm_appl)*it));
+    dep_list.push_front(make_list<aterm>( deps, (atermpp::aterm_appl)*it));
   }
 
   // Process all rules with their dependencies
@@ -1057,12 +1057,12 @@ static aterm_list create_strategy(
   {
     // First collect rules without dependencies to the strategy
     data_equation_list no_deps;
-    aterm_list has_deps;
+    atermpp::aterm_list has_deps;
     for (; !dep_list.empty(); dep_list=dep_list.tail())
     {
-      if (aterm_cast<aterm_list>(aterm_cast<aterm_list>(dep_list.front()).front()).empty())
+      if (aterm_cast<atermpp::aterm_list>(aterm_cast<atermpp::aterm_list>(dep_list.front()).front()).empty())
       {
-        no_deps.push_front(data_equation(aterm_cast<aterm_list>(dep_list.front()).tail().front()));
+        no_deps.push_front(data_equation(aterm_cast<atermpp::aterm_list>(dep_list.front()).tail().front()));
       }
       else
       {
@@ -1101,15 +1101,15 @@ static aterm_list create_strategy(
     {
       args[maxidx] = -1;
       used[maxidx] = true;
-      aterm_int rewr_arg = aterm_int(maxidx);
+      atermpp::aterm_int rewr_arg = atermpp::aterm_int(maxidx);
 
       strat.push_front(rewr_arg);
 
-      aterm_list l;
+      atermpp::aterm_list l;
       for (; !dep_list.empty(); dep_list=dep_list.tail())
       {
-        aterm_list temp= aterm_cast<aterm_list>(dep_list.front()).tail();
-        temp.push_front(remove_one_element<aterm>(aterm_cast<aterm_list>(aterm_cast<aterm_list>(dep_list.front()).front()), rewr_arg));
+        atermpp::aterm_list temp= atermpp::aterm_cast<atermpp::aterm_list>(dep_list.front()).tail();
+        temp.push_front(remove_one_element<aterm>(aterm_cast<atermpp::aterm_list>(aterm_cast<atermpp::aterm_list>(dep_list.front()).front()), rewr_arg));
         l.push_front(temp);
       }
       dep_list = reverse(l);
@@ -1139,11 +1139,11 @@ void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& o
     nfs.fill(arity);
     return;
   }
-  // aterm_list strat = create_strategy(eqns,OpId2Int(opid).value(),arity,nfs,true_inner);
-  aterm_list strat = create_strategy(eqns,core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(opid),arity,nfs,true_inner);
+  // atermpp::aterm_list strat = create_strategy(eqns,OpId2Int(opid).value(),arity,nfs,true_inner);
+  atermpp::aterm_list strat = create_strategy(eqns,core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(opid),arity,nfs,true_inner);
   while (!strat.empty() && strat.front().type_is_int())
   {
-    nfs.set(aterm_cast<aterm_int>(strat.front()).value());
+    nfs.set(aterm_cast<atermpp::aterm_int>(strat.front()).value());
     strat = strat.tail();
   }
 }
@@ -1180,7 +1180,7 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
   return true;
 }
 
-void RewriterCompilingJitty::calc_nfs_list(nfs_array& nfs, size_t arity, data_expression_list args, int startarg, aterm_list nnfvars)
+void RewriterCompilingJitty::calc_nfs_list(nfs_array& nfs, size_t arity, data_expression_list args, int startarg, atermpp::aterm_list nnfvars)
 {
   if (args.empty())
   {
@@ -1191,21 +1191,21 @@ void RewriterCompilingJitty::calc_nfs_list(nfs_array& nfs, size_t arity, data_ex
   calc_nfs_list(nfs,arity,args.tail(),startarg+1,nnfvars);
 }
 
-bool RewriterCompilingJitty::calc_nfs(const data_expression& t, int startarg, aterm_list nnfvars)
+bool RewriterCompilingJitty::calc_nfs(const data_expression& t, int startarg, atermpp::aterm_list nnfvars)
 {
   if (is_function_symbol(t))
   {
     return opid_is_nf(aterm_cast<function_symbol>(t),0);
   }
-  else if (is_nil((aterm_appl) t))
+  else if (is_nil((atermpp::aterm_appl) t))
   {
     assert(0);
     // assert(startarg>=0); This value may be negative.
-    return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) == nnfvars.end());
+    return (nnfvars==atermpp::aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(), atermpp::aterm_int(startarg)) == nnfvars.end());
   }
-  else if (is_variable((aterm_appl) t))
+  else if (is_variable((atermpp::aterm_appl) t))
   {
-    return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(),t) == nnfvars.end());
+    return (nnfvars==atermpp::aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(),t) == nnfvars.end());
   }
   else if (is_abstraction(t))
   {
@@ -1248,7 +1248,7 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, int startarg, at
   }
 }
 
-string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, size_t arity, data_expression_list args, int startarg, aterm_list nnfvars, nfs_array *rewr)
+string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, size_t arity, data_expression_list args, int startarg, atermpp::aterm_list nnfvars, nfs_array *rewr)
 {
   if (args.empty())
   {
@@ -1284,11 +1284,11 @@ static string calc_inner_appl_head(size_t arity) // arity is one if there is a s
   return ss.str();
 }
 
-// if total_arity<=5 a term of type atermpp::aterm is generated, otherwise a term of type aterm_appl is generated.
+// if total_arity<=5 a term of type atermpp::aterm is generated, otherwise a term of type atermpp::aterm_appl is generated.
 pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const data_expression& t,
                   int startarg,
-                  aterm_list nnfvars,
+                  atermpp::aterm_list nnfvars,
                   const bool rewr,
                   const size_t total_arity)
 {
@@ -1311,7 +1311,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else if (is_variable(t))
   {
-    const bool b = (nnfvars!=aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(),t) != nnfvars.end());
+    const bool b = (nnfvars!=atermpp::aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(),t) != nnfvars.end());
     const variable& v = core::down_cast<variable>(t);
     const string variable_name=v.name();
     // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
@@ -1415,7 +1415,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         ss << "jittyc_local_push_front(";
       }
-      ss << "aterm_list()";
+      ss << "atermpp::aterm_list()";
       for(assignment_list::const_iterator i=assignments.begin() ; i!=assignments.end(); ++i)
       {
         pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true,total_arity);
@@ -1439,7 +1439,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         ss << "jittyc_local_push_front(";
       }
-      ss << "aterm_list()";
+      ss << "atermpp::aterm_list()";
       for(assignment_list::const_iterator i=assignments.begin() ; i!=assignments.end(); ++i)
       {
         pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true,total_arity);
@@ -1528,14 +1528,14 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
              The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
              which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
              to recalculate the normal form. TODO: this needs to be reconstructed. */
-          /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(((aterm_int) ((aterm_list) t).front()).value()
+          /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(((atermpp::aterm_int) ((atermpp::aterm_list) t).front()).value()
                              + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ")"; */
           ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
         }
         else
         {
           // QUE?! Dit stond er vroeger // Sjoerd
-          //   ss << (((aterm_int) ((aterm_list) t).front()).value()+((1 << arity)-arity-1)+args_nfs);
+          //   ss << (((atermpp::aterm_int) ((atermpp::aterm_list) t).front()).value()+((1 << arity)-arity-1)+args_nfs);
           ss << (core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs)+((1 << arity)-arity-1)+args_nfs.getraw(0));
         }
       }
@@ -1641,7 +1641,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       ss << ":";
       bool c = rewr;
       // assert(startarg>=0); For unclear reasons, this may be negative.
-      if (rewr && (nnfvars!=aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) != nnfvars.end()))
+      if (rewr && (nnfvars!=atermpp::aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(), atermpp::aterm_int(startarg)) != nnfvars.end()))
       {
         ss << "rewrite(";
         c = false;
@@ -1666,7 +1666,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   return pair<bool,string>(b,ss.str());
 }
 
-void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, int startarg, aterm_list nnfvars, bool rewr)
+void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, int startarg, atermpp::aterm_list nnfvars, bool rewr)
 {
   pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr,0);
   fprintf(f,"%s",p.second.c_str());
@@ -1677,7 +1677,7 @@ static int get_startarg(const aterm& a, int n)
 {
   if (a.type_is_list())
   {
-    return n-((aterm_list) a).size()+1;
+    return n-((atermpp::aterm_list) a).size()+1;
   }
   else
   {
@@ -1743,14 +1743,14 @@ static int peekn_st(int n)
 #endif
 void RewriterCompilingJitty::implement_tree_aux(
       FILE* f,
-      aterm_appl tree,
+      atermpp::aterm_appl tree,
       size_t cur_arg,
       size_t parent,
       size_t level,
       size_t cnt,
       size_t d,
       const size_t arity,
-      const std::vector<bool>& used, aterm_list nnfvars)
+      const std::vector<bool>& used, atermpp::aterm_list nnfvars)
 // Print code representing tree to f.
 //
 // cur_arg   Indices refering to the variable that contains the current
@@ -1779,12 +1779,12 @@ void RewriterCompilingJitty::implement_tree_aux(
       if (used[cur_arg])
       {
         fprintf(f,"%sconst data_expression& %s = arg%lu; // S1\n",whitespace(d*2),
-                aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree[0])[0]).function().name().c_str()+1,cur_arg);
+                atermpp::aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(tree[0])[0]).function().name().c_str()+1,cur_arg);
       }
       else
       {
         fprintf(f,"%sconst data_expression& %s = arg_not_nf%lu; // S1\n",whitespace(d*2),
-                aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree[0])[0]).function().name().c_str()+1,cur_arg);
+                atermpp::aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(tree[0])[0]).function().name().c_str()+1,cur_arg);
         nnfvars.push_front(tree[0]);
       }
     }
@@ -1792,11 +1792,11 @@ void RewriterCompilingJitty::implement_tree_aux(
     {
       fprintf(f,"%sconst data_expression& %s = atermpp::aterm_cast<const data_expression>(%s%lu[%lu]); // S2\n",
               whitespace(d*2),
-              aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree[0])[0]).function().name().c_str()+1,
+              atermpp::aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(tree[0])[0]).function().name().c_str()+1,
               (level==1)?"arg":"t",
               parent,cur_arg);
     }
-    implement_tree_aux(f,aterm_cast<aterm_appl>(tree[1]),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<atermpp::aterm_appl>(tree[1]),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
     return;
   }
   else if (isM(tree))
@@ -1805,7 +1805,7 @@ void RewriterCompilingJitty::implement_tree_aux(
     {
       fprintf(f,"%sif (%s==arg%lu) // M\n"
               "%s{\n",
-              whitespace(d*2),aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree[0])[0]).function().name().c_str()+1,cur_arg,
+              whitespace(d*2),aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(tree[0])[0]).function().name().c_str()+1,cur_arg,
               whitespace(d*2)
              );
     }
@@ -1813,13 +1813,13 @@ void RewriterCompilingJitty::implement_tree_aux(
     {
       fprintf(f,"%sif (%s==static_cast<atermpp::aterm_appl>(%s%lu[%lu])) // M\n"
               "%s{\n",
-              whitespace(d*2),aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree[0])[0]).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg,
+              whitespace(d*2),aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(tree[0])[0]).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg,
               whitespace(d*2)
              );
     }
-    implement_tree_aux(f,aterm_cast<aterm_appl>(tree[1]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<atermpp::aterm_appl>(tree[1]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
-    implement_tree_aux(f,aterm_cast<aterm_appl>(tree[2]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<atermpp::aterm_appl>(tree[2]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n",whitespace(d*2));
     return;
   }
@@ -1884,11 +1884,11 @@ void RewriterCompilingJitty::implement_tree_aux(
     }
     push_st(cur_arg);
     push_st(parent);
-    implement_tree_aux(f,aterm_cast<aterm_appl>(tree[1]),1,(level==0)?cur_arg:cnt,level+1,cnt+1,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<atermpp::aterm_appl>(tree[1]),1,(level==0)?cur_arg:cnt,level+1,cnt+1,d+1,arity,used,nnfvars);
     pop_st();
     pop_st();
     fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
-    implement_tree_aux(f,aterm_cast<aterm_appl>(tree[2]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<atermpp::aterm_appl>(tree[2]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n",whitespace(d*2));
     return;
   }
@@ -1896,14 +1896,14 @@ void RewriterCompilingJitty::implement_tree_aux(
   {
     int i = pop_st();
     int j = pop_st();
-    implement_tree_aux(f,aterm_cast<aterm_appl>(tree[0]),j,i,level-1,cnt,d,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<atermpp::aterm_appl>(tree[0]),j,i,level-1,cnt,d,arity,used,nnfvars);
     push_st(j);
     push_st(i);
     return;
   }
   else if (isN(tree))
   {
-    implement_tree_aux(f,aterm_cast<aterm_appl>(tree[0]),cur_arg+1,parent,level,cnt,d,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<atermpp::aterm_appl>(tree[0]),cur_arg+1,parent,level,cnt,d,arity,used,nnfvars);
     return;
   }
   else if (isC(tree))
@@ -1917,9 +1917,9 @@ void RewriterCompilingJitty::implement_tree_aux(
             whitespace(d*2)
            );
 
-    implement_tree_aux(f,aterm_cast<aterm_appl>(tree[1]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<atermpp::aterm_appl>(tree[1]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
-    implement_tree_aux(f,aterm_cast<aterm_appl>(tree[2]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<atermpp::aterm_appl>(tree[2]),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n",whitespace(d*2));
     return;
   }
@@ -1943,7 +1943,7 @@ void RewriterCompilingJitty::implement_tree_aux(
 
 void RewriterCompilingJitty::implement_tree(
             FILE* f,
-            aterm_appl tree,
+            atermpp::aterm_appl tree,
             const size_t arity,
             size_t d,
             const mcrl2::data::function_symbol& /* opid */,
@@ -1951,19 +1951,19 @@ void RewriterCompilingJitty::implement_tree(
 {
   size_t l = 0;
 
-  aterm_list nnfvars;
+  atermpp::aterm_list nnfvars;
   for (size_t i=0; i<arity; i++)
   {
     if (!used[i])
     {
-      nnfvars.push_front(aterm_int(i));
+      nnfvars.push_front(atermpp::aterm_int(i));
     }
   }
 
   while (isC(tree))
   {
     fprintf(f,"%sif (",whitespace(d*2));
-    calcTerm(f,aterm_cast<data_expression>(tree[0]),0,aterm_list());
+    calcTerm(f,aterm_cast<data_expression>(tree[0]),0,atermpp::aterm_list());
 
     fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n"
@@ -1973,21 +1973,21 @@ void RewriterCompilingJitty::implement_tree(
             whitespace(d*2)
            );
 
-    assert(isR(aterm_cast<aterm_appl>(tree[1])));
-    calcTerm(f,aterm_cast<data_expression>((aterm_cast<aterm_appl>(tree[1]))[0]),
-                 get_startarg(aterm_cast<aterm_appl>(tree[1])[0],0),nnfvars);
+    assert(isR(aterm_cast<atermpp::aterm_appl>(tree[1])));
+    calcTerm(f,aterm_cast<data_expression>((aterm_cast<atermpp::aterm_appl>(tree[1]))[0]),
+                 get_startarg(aterm_cast<atermpp::aterm_appl>(tree[1])[0],0),nnfvars);
     fprintf(f,";\n"
             "%s}\n%selse\n%s{\n", whitespace(d*2),whitespace(d*2),whitespace(d*2)
            );
-    tree = aterm_cast<aterm_appl>(tree[2]);
+    tree = atermpp::aterm_cast<atermpp::aterm_appl>(tree[2]);
     d++;
     l++;
   }
   if (isR(tree))
   {
     if (arity==0)
-    { // return a reference to an aterm_appl
-      fprintf(f,"%sstatic aterm_appl static_term(rewrite(",whitespace(d*2));
+    { // return a reference to an atermpp::aterm_appl
+      fprintf(f,"%sstatic atermpp::aterm_appl static_term(rewrite(",whitespace(d*2));
       calcTerm(f,aterm_cast<data_expression>(tree[0]),get_startarg(tree[0],0),nnfvars);
       fprintf(f,")); \n");
       fprintf(f,"%sreturn static_term",whitespace(d*2));
@@ -2053,7 +2053,7 @@ static void finish_function(FILE* f,
 }
 
 void RewriterCompilingJitty::implement_strategy(
-               FILE* f, aterm_list strat, size_t arity, size_t d,
+               FILE* f, atermpp::aterm_list strat, size_t arity, size_t d,
                const function_symbol& opid, size_t nf_args)
 {
   std::vector<bool> used;
@@ -2065,7 +2065,7 @@ void RewriterCompilingJitty::implement_strategy(
   {
     if (strat.front().type_is_int())
     {
-      size_t arg = static_cast<aterm_int>(strat.front()).value();
+      size_t arg = static_cast<atermpp::aterm_int>(strat.front()).value();
 
       if (!used[arg])
       {
@@ -2078,7 +2078,7 @@ void RewriterCompilingJitty::implement_strategy(
     else
     {
       fprintf(f,"%s{\n",whitespace(2*d));
-      implement_tree(f,(aterm_appl) strat.front(),arity,d+1,opid,used);
+      implement_tree(f,(atermpp::aterm_appl) strat.front(),arity,d+1,opid,used);
       fprintf(f,"%s}\n",whitespace(2*d));
     }
 
@@ -2088,7 +2088,7 @@ void RewriterCompilingJitty::implement_strategy(
   finish_function(f,arity,opid,used);
 }
 
-aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const aterm_appl& expr, const variable& var)
+atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const atermpp::aterm_appl& expr, const variable& var)
 {
   if (is_function_symbol(expr))
   {
@@ -2127,20 +2127,20 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const aterm_appl& expr
     return make_ar_false();
   }
 
-  aterm_appl result = make_ar_false();
+  atermpp::aterm_appl result = make_ar_false();
 
   size_t arity = recursive_number_of_args(expra);
   for (size_t i=0; i<arity; i++)
   {
     const size_t idx = int2ar_idx[head] + ((arity-1)*arity)/2 + i;
-    aterm_appl t = build_ar_expr_internal(get_argument_of_higher_order_term(expra,i),var);
+    atermpp::aterm_appl t = build_ar_expr_internal(get_argument_of_higher_order_term(expra,i),var);
     result = make_ar_or(result,make_ar_and(make_ar_var(idx),t));
   }
 
   return result;
 }
 
-aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity)
+atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity)
 {
   data_expression lhs = eqn.lhs(); // the lhs in internal format.
 
@@ -2173,7 +2173,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, c
     }
   }
 
-  aterm_appl arg_term = aterm_cast<aterm_appl>(lhs[arg+1]);
+  atermpp::aterm_appl arg_term = atermpp::aterm_cast<atermpp::aterm_appl>(lhs[arg+1]);
   if (!is_variable(arg_term))
   {
     return make_ar_true();
@@ -2189,7 +2189,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, c
   return build_ar_expr_internal(eqn.rhs(),v);
 }
 
-aterm_appl RewriterCompilingJitty::build_ar_expr(const data_equation_list& eqns, const size_t arg, const size_t arity)
+atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr(const data_equation_list& eqns, const size_t arg, const size_t arity)
 {
   if (eqns.empty())
   {
@@ -2209,7 +2209,7 @@ bool RewriterCompilingJitty::always_rewrite_argument(
   return !is_ar_false(ar[int2ar_idx[opid]+((arity-1)*arity)/2+arg]);
 }
 
-bool RewriterCompilingJitty::calc_ar(const aterm_appl& expr)
+bool RewriterCompilingJitty::calc_ar(const atermpp::aterm_appl& expr)
 {
   if (is_ar_true(expr))
   {
@@ -2221,21 +2221,21 @@ bool RewriterCompilingJitty::calc_ar(const aterm_appl& expr)
   }
   else if (is_ar_and(expr))
   {
-    return calc_ar(aterm_cast<aterm_appl>(expr[0])) && calc_ar(aterm_cast<aterm_appl>(expr[1]));
+    return calc_ar(aterm_cast<atermpp::aterm_appl>(expr[0])) && calc_ar(aterm_cast<atermpp::aterm_appl>(expr[1]));
   }
   else if (is_ar_or(expr))
   {
-    return calc_ar(aterm_cast<aterm_appl>(expr[0])) || calc_ar(aterm_cast<aterm_appl>(expr[1]));
+    return calc_ar(aterm_cast<atermpp::aterm_appl>(expr[0])) || calc_ar(aterm_cast<atermpp::aterm_appl>(expr[1]));
   }
   else     // is_ar_var(expr)
   {
-    return !is_ar_false(ar[static_cast<aterm_int>(expr[0]).value()]);
+    return !is_ar_false(ar[static_cast<atermpp::aterm_int>(expr[0]).value()]);
   }
 }
 
 void RewriterCompilingJitty::fill_always_rewrite_array()
 {
-  ar=std::vector <aterm_appl> (ar_size);
+  ar=std::vector <atermpp::aterm_appl> (ar_size);
   for(std::map <data::function_symbol,size_t> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)
   {
     size_t arity = getArity(it->first);
@@ -2308,7 +2308,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
 
   need_rebuild = true;
 
-  true_inner = aterm_cast<function_symbol>(sort_bool::true_());
+  true_inner = atermpp::aterm_cast<function_symbol>(sort_bool::true_());
 
 /*  for (function_symbol_vector::const_iterator it=DataSpec.mappings().begin(); it!=DataSpec.mappings().end(); ++it)
   {
@@ -2331,7 +2331,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   }
 
   int2ar_idx.clear();
-  ar=std::vector<aterm_appl>();
+  ar=std::vector<atermpp::aterm_appl>();
 }
 
 void RewriterCompilingJitty::CleanupRewriteSystem()
@@ -2578,7 +2578,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
          );
 
   // Make a functional push_front to be used in the where clause.
-  fprintf(f,"static aterm_list jittyc_local_push_front(aterm_list l, const aterm& e)\n"
+  fprintf(f,"static atermpp::aterm_list jittyc_local_push_front(atermpp::aterm_list l, const aterm& e)\n"
             "{\n"
             "  l.push_front(e);\n"
             "  return l;\n"
@@ -2956,7 +2956,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "{\n"
       "  using namespace mcrl2::data;\n"
 //    "  if (is_function_symbol(t))\n"  // Less efficient than the rule below.
-      "  if (atermpp::detail::addressf(aterm_cast<const aterm_appl>(t).function())==%ld) // t is a function_symbol \n"
+      "  if (atermpp::detail::addressf(aterm_cast<const atermpp::aterm_appl>(t).function())==%ld) // t is a function_symbol \n"
       "  {\n"
       "    // Term t is a function_symbol\n"
       "    const mcrl2::data::function_symbol& f=atermpp::aterm_cast<const mcrl2::data::function_symbol>(t);\n"
@@ -2977,7 +2977,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    const application& ta=atermpp::aterm_cast<const application>(t);\n"
       "    const mcrl2::data::function_symbol& head=atermpp::aterm_cast<const mcrl2::data::function_symbol>(ta.head());\n"
-      "    if (atermpp::detail::addressf(aterm_cast<const aterm_appl>(head).function())==%ld) // head is a function_symbol \n"
+      "    if (atermpp::detail::addressf(aterm_cast<const atermpp::aterm_appl>(head).function())==%ld) // head is a function_symbol \n"
       "    {\n"
       "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(head);\n"
       "      const size_t total_arity=ta.size();\n"
@@ -3001,9 +3001,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  return rewrite_aux(t);\n"
       "}\n",
-      atermpp::detail::addressf(aterm_cast<const aterm_appl>(sort_bool::true_()).function()),
+      atermpp::detail::addressf(aterm_cast<const atermpp::aterm_appl>(sort_bool::true_()).function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
-      atermpp::detail::addressf(aterm_cast<const aterm_appl>(sort_bool::true_()).function()),
+      atermpp::detail::addressf(aterm_cast<const atermpp::aterm_appl>(sort_bool::true_()).function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
       max_arity+1);
 

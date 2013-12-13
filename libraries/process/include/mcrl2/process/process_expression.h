@@ -15,7 +15,7 @@
 #include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/down_cast.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"

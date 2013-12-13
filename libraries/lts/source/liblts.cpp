@@ -18,7 +18,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <algorithm>
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
@@ -56,7 +56,7 @@ lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
 
     if (ext == "aut")
     {
-      if (be_verbose) 
+      if (be_verbose)
       {
         mCRL2log(verbose) << "Detected Aldebaran extension.\n";
       }
@@ -64,7 +64,7 @@ lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
     }
     else if (ext == "lts")
     {
-      if (be_verbose) 
+      if (be_verbose)
       {
         mCRL2log(verbose) << "Detected mCRL2 extension.\n";
       }
@@ -72,7 +72,7 @@ lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
     }
     else if (ext == "fsm")
     {
-      if (be_verbose) 
+      if (be_verbose)
       {
         mCRL2log(verbose) << "Detected Finite State Machine extension.\n";
       }
@@ -80,7 +80,7 @@ lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
     }
     else if (ext == "dot")
     {
-      if (be_verbose) 
+      if (be_verbose)
       {
         mCRL2log(verbose) << "Detected GraphViz extension.\n";
       }
@@ -89,7 +89,7 @@ lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
     }
     else if (ext == "bcg")
     {
-      if (be_verbose) 
+      if (be_verbose)
       {
         mCRL2log(verbose) << "Detected Binary Coded Graph extension.\n";
       }

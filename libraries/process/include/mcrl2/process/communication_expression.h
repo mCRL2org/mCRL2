@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/process/action_name_multiset.h"
 

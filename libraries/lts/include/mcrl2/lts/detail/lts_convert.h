@@ -21,7 +21,7 @@
 
 #include <sstream>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -919,7 +919,7 @@ class bcg_aut_convertor
     {
       if (l.find('"')!=std::string::npos)
       {
-        throw mcrl2::runtime_error(std::string("The action label \"") + l + 
+        throw mcrl2::runtime_error(std::string("The action label \"") + l +
                      "\" constains a double quote. The resulting aut label will be invalid.");
       }
 

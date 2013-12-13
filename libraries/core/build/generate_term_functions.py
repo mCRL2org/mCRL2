@@ -11,7 +11,12 @@ from mcrl2_parser import *
 from mcrl2_utility import *
 from path import *
 
-LIBSTRUCT_SYMBOL_FUNCTIONS = '''// %(name)s
+#---------------------------------------------------------------#
+#            generate_function_symbol_constructors
+#---------------------------------------------------------------#
+#
+def generate_function_symbol_constructors(rules, filename, skip_list):
+    CODE = '''// %(name)s
 inline
 const atermpp::function_symbol& function_symbol_%(name)s()
 {
@@ -21,12 +26,6 @@ const atermpp::function_symbol& function_symbol_%(name)s()
 
 '''
 
-#---------------------------------------------------------------#
-#                      generate_libstruct_functions
-#---------------------------------------------------------------#
-# generates C++ code for libstruct functions
-#
-def generate_libstruct_functions(rules, filename, skip_list):
     names = {}
     calls = {}
     decls = {}
@@ -47,7 +46,7 @@ def generate_libstruct_functions(rules, filename, skip_list):
         if name in skip_list:
             continue
         arity = names[name]
-        text = text + LIBSTRUCT_SYMBOL_FUNCTIONS % {
+        text = text + CODE % {
             'name'  : name,
             'name'  : name,
             'name'  : name,
@@ -64,7 +63,7 @@ def generate_libstruct_functions(rules, filename, skip_list):
         if calls[name] != "":
             comma = ', '
     text = text.strip() + '\n'
-    return insert_text_in_file(filename, text, 'generated code')
+    return insert_text_in_file(filename, text, 'generated constructors')
 
 CHECK_RULE = '''template <typename Term>
 bool check_rule_%(name)s(Term t)
@@ -95,7 +94,7 @@ CHECK_TERM_TYPE = '''  // check the type of the term
   {
     return false;
   }
-  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
+  const atermpp::aterm_appl& a = atermpp::aterm_cast<atermpp::aterm_appl>(term);
   if (a.function() != core::detail::function_symbols::%(name)s)
   {
     return false;
@@ -377,9 +376,8 @@ def main():
         result = generate_soundness_check_functions(rules, filename, skip_list) and result
 
     if options.libstruct:
-        filename = '../include/mcrl2/core/detail/struct_core.h'
-        result = generate_libstruct_functions(rules, filename, skip_list) and result
-        postprocess_libstruct(filename)
+        filename = '../include/mcrl2/core/detail/function_symbols.h'
+        result = generate_function_symbol_constructors(rules, filename, skip_list) and result
 
     if options.constructors:
         filename = '../include/mcrl2/core/detail/constructors.h'

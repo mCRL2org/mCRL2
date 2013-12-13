@@ -15,7 +15,7 @@
 #include <algorithm>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"

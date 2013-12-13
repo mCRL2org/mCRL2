@@ -19,7 +19,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/parse.h"
