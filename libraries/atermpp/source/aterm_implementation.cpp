@@ -88,7 +88,7 @@ size_t terminfo_size=INITIAL_MAX_TERM_SIZE;
 size_t garbage_collect_count_down=0;
 TermInfo *terminfo;
 
-size_t total_nodes = 0;
+size_t total_nodes_in_hashtable = 0;
 
 void call_creation_hook(const detail::_aterm* term)
 {
@@ -292,13 +292,8 @@ void collect_terms_with_reference_count_0()
 #ifndef NDEBUG
 static void check_that_all_objects_are_free()
 {
-
-  return; // Remove this return to check whether all data terms and function symbols
-          // have been removed. On some platforms this does not work, as some global
-          // data structures (vectors, maps, etc.) have not been destroyed when this
-          // function is called.
-
-
+// The check below does not necessarily succeed on other systems due to different initialisations.
+#ifdef __APPLE__  
   collect_terms_with_reference_count_0();
 
   bool result=true;
@@ -337,7 +332,7 @@ static void check_that_all_objects_are_free()
     for(size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; ++j)
     {
       if (!(function_symbol_index_table[i][j].reference_count==0 ||
-            (i==0 && function_symbol_index_table[i][j].reference_count<=2) || //AS_DEFAULT
+            (i==0 && function_symbol_index_table[i][j].reference_count<=13) || //AS_DEFAULT
             (i==1 && function_symbol_index_table[i][j].reference_count<=1) || //AS_INT
             (i==2 && function_symbol_index_table[i][j].reference_count<=1) || //AS_LIST
             (i==3 && function_symbol_index_table[i][j].reference_count<=2)))  //AS_EMPTY_LIST
@@ -355,7 +350,14 @@ static void check_that_all_objects_are_free()
     }
   }
   assert(result);
+#else
+  return; // Remove this return to check whether all data terms and function symbols
+          // have been removed. On some platforms this does not work, as some global
+          // data structures (vectors, maps, etc.) have not been destroyed when this
+          // function is called.
+#endif // __APPLE__
 }
+
 #endif
 
 

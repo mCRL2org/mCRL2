@@ -58,7 +58,7 @@ extern aterm static_undefined_aterm;  // detail/aterm_implementation.h
 extern aterm static_empty_aterm_list;
 
 extern size_t terminfo_size;
-extern size_t total_nodes;
+extern size_t total_nodes_in_hashtable;
 extern TermInfo *terminfo;
 
 extern size_t garbage_collect_count_down;
@@ -141,7 +141,7 @@ inline const _aterm* allocate_term(const size_t size)
     assert(size<terminfo_size);
   }
 
-  if (total_nodes>=(aterm_table_size))
+  if (total_nodes_in_hashtable>=(aterm_table_size))
   {
     // The hashtable is not big enough to hold nr_of_nodes_for_the_next_garbage_collect. So, resizing
     // is wise (although not necessary, due to the structure of the hastable, which allows is to contain
@@ -149,7 +149,6 @@ inline const _aterm* allocate_term(const size_t size)
     resize_aterm_hashtable();
   }
 
-  total_nodes++;
   TermInfo &ti = terminfo[size];
   if (garbage_collect_count_down>0)
   {
@@ -197,12 +196,20 @@ inline void remove_from_hashtable(const _aterm *t)
         aterm_hashtable[hnr] = cur->next();
       }
       /* Put the node in the appropriate free list */
-      total_nodes--;
+      total_nodes_in_hashtable--;
       return;
     }
   }
   while (((prev=cur), (cur=cur->next())));
   assert(0);
+}
+
+inline void insert_in_hashtable(const _aterm *t, const size_t hnr)
+{
+
+  t->set_next(detail::aterm_hashtable[hnr]);
+  detail::aterm_hashtable[hnr] = t;
+  total_nodes_in_hashtable++;
 }
 
 inline const _aterm* address(const aterm &t)

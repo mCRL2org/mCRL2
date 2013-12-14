@@ -21,6 +21,8 @@ inline void simple_free_term(const _aterm *t, const size_t arity)
   }
 
   assert(t->reference_count()==1); // This term has a temporary protection.
+  garbage_collect_count_down++;    // Reset the garbage count down as the term was not used and
+                                   // is neatly returned to the free_list.
   TermInfo &ti = terminfo[TERM_SIZE_APPL(arity)];
   t->set_next(ti.at_freelist);
   ti.at_freelist = t;
@@ -85,11 +87,9 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
   assert(cur==NULL);
   new (&const_cast<detail::_aterm*>(const_cast<detail::_aterm*>(new_term))->function()) function_symbol(sym);
     
-  new_term->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = new_term;
-  new_term->reset_reference_count(false); // Remove temporary protection of this term.
-
+  insert_in_hashtable(new_term,hnr);
   call_creation_hook(new_term);
+  new_term->reset_reference_count(false); // Remove temporary protection of this term.
 
   return new_term;
 }
@@ -141,11 +141,9 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
 
   assert(cur==NULL);
   new (&const_cast<detail::_aterm*>(const_cast<detail::_aterm*>(new_term))->function()) function_symbol(sym);
-  new_term->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = new_term;
-  new_term->reset_reference_count(false); // Remove temporary protection of this term.
-
+  insert_in_hashtable(new_term,hnr);
   call_creation_hook(new_term);
+  new_term->reset_reference_count(false); // Remove temporary protection of this term.
   
   return new_term;
 }
@@ -172,8 +170,7 @@ inline const _aterm* term_appl0(const function_symbol &sym)
   hnr &= detail::aterm_table_mask;
   new (&const_cast<detail::_aterm*>(cur)->function()) function_symbol(sym);
 
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
+  insert_in_hashtable(cur,hnr);
 
   call_creation_hook(cur);
 
@@ -205,8 +202,7 @@ const _aterm* term_appl1(const function_symbol &sym, const Term &arg0)
 
   new (&const_cast<detail::_aterm*>(cur)->function()) function_symbol(sym);
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[0])) Term(arg0);
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
+  insert_in_hashtable(cur,hnr);
 
   call_creation_hook(cur);
 
@@ -241,8 +237,7 @@ const _aterm* term_appl2(const function_symbol &sym, const Term &arg0, const Ter
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[0])) Term(arg0);
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[1])) Term(arg1);
 
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
+  insert_in_hashtable(cur,hnr);
 
   call_creation_hook(cur);
 
@@ -281,8 +276,7 @@ const _aterm* term_appl3(const function_symbol &sym, const Term &arg0, const Ter
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[1])) Term(arg1);
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[2])) Term(arg2);
 
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
+  insert_in_hashtable(cur,hnr);
 
   call_creation_hook(cur);
 
@@ -325,8 +319,7 @@ const _aterm *term_appl4(const function_symbol &sym, const Term &arg0, const Ter
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[2])) Term(arg2);
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[3])) Term(arg3);
 
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
+  insert_in_hashtable(cur,hnr);
 
   call_creation_hook(cur);
 
@@ -374,8 +367,7 @@ const _aterm* term_appl5(const function_symbol &sym, const Term &arg0, const Ter
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[3])) Term(arg3);
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[4])) Term(arg4);
 
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
+  insert_in_hashtable(cur,hnr);
 
   call_creation_hook(cur);
 
@@ -426,8 +418,7 @@ const _aterm *term_appl6(const function_symbol &sym, const Term &arg0, const Ter
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[4])) Term(arg4);
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[5])) Term(arg5);
 
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
+  insert_in_hashtable(cur,hnr);
 
   call_creation_hook(cur);
 

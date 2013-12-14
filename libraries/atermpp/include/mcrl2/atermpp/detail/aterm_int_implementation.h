@@ -33,8 +33,7 @@ inline const _aterm* aterm_int(size_t val)
   new (&const_cast<_aterm *>(cur)->function()) function_symbol(function_adm.AS_INT);
   reinterpret_cast<_aterm_int*>(const_cast<_aterm *>(cur))->value = val;
 
-  cur->set_next(aterm_hashtable[hnr]);
-  aterm_hashtable[hnr] = cur;
+  insert_in_hashtable(cur,hnr);
 
   assert((hnr & aterm_table_mask) == (hash_number(cur) & aterm_table_mask));
   return cur;
