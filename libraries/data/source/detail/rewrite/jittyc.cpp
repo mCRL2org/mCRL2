@@ -2623,7 +2623,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
 
   // Make functions that construct applications with arity n where 5< n <= max_arity.
-  for (size_t i=6; i<=max_arity; ++i)
+  for (size_t i=5; i<=max_arity; ++i)
   {
     fprintf(f,
             "static application make_term_with_many_arguments(const data_expression& head");
