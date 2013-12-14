@@ -28,22 +28,13 @@ namespace mcrl2
 namespace data
 {
 
-class default_converter
-{
-  public:
-    const data_expression& operator()(const data_expression& t) const
-    {
-      return t;
-    }
-};
-
 /// \brief Iterator for term_appl which prepends a single term to the list.
-template <typename ForwardIterator, class ArgumentConverter=default_converter >
+template <typename ForwardIterator >
 class term_appl_prepend_iterator: public boost::iterator_facade<
-  term_appl_prepend_iterator<ForwardIterator, ArgumentConverter>, // Derived
-  data_expression,                                                // Value
-  boost::forward_traversal_tag,                                   // CategoryOrTraversal
-  const data_expression&                                          // Reference
+  term_appl_prepend_iterator<ForwardIterator>,    // Derived
+  data_expression,                                // Value
+  boost::forward_traversal_tag,                   // CategoryOrTraversal
+  const data_expression&                          // Reference
   >
 {
   public:
@@ -51,9 +42,8 @@ class term_appl_prepend_iterator: public boost::iterator_facade<
     /// \brief Constructor.
     /// \param t A term
     term_appl_prepend_iterator(ForwardIterator it,
-                               const data_expression* prepend=nullptr,
-                               const ArgumentConverter arg_convert=default_converter())
-      : m_it(it), m_prepend(prepend), m_argument_converter(arg_convert)
+                               const data_expression* prepend=nullptr)
+      : m_it(it), m_prepend(prepend)
     {}
 
   private:
@@ -63,6 +53,65 @@ class term_appl_prepend_iterator: public boost::iterator_facade<
     /// \param other An iterator
     /// \return True if the iterators are equal
     bool equal(term_appl_prepend_iterator const& other) const
+    {
+      return this->m_prepend == other.m_prepend && this->m_it == other.m_it;
+    }
+
+    /// \brief Dereference operator
+    /// \return The value that the iterator references
+    const data_expression &dereference() const
+    {
+      if (m_prepend)
+      {
+        return *m_prepend;
+      }
+
+      return *m_it;
+    }
+
+    /// \brief Increments the iterator
+    void increment()
+    {
+      if (m_prepend)
+      {
+        m_prepend = nullptr;
+      }
+      else
+      {
+        ++m_it;
+      }
+    }
+
+    ForwardIterator m_it;
+    const data_expression *m_prepend;
+};
+
+/// \brief Iterator for term_appl which prepends a single term to the list.
+template <typename ForwardIterator, class ArgumentConverter>
+class transforming_term_appl_prepend_iterator: public boost::iterator_facade<
+  transforming_term_appl_prepend_iterator<ForwardIterator, ArgumentConverter>, // Derived
+  data_expression,                                                // Value
+  boost::forward_traversal_tag,                                   // CategoryOrTraversal
+  const data_expression&                                          // Reference
+  >
+{
+  public:
+
+    /// \brief Constructor.
+    /// \param t A term
+    transforming_term_appl_prepend_iterator(ForwardIterator it,
+                                            const data_expression* prepend,
+                                            const ArgumentConverter arg_convert)
+      : m_it(it), m_prepend(prepend), m_argument_converter(arg_convert)
+    {}
+
+  private:
+    friend class boost::iterator_core_access;
+
+    /// \brief Equality check
+    /// \param other An iterator
+    /// \return True if the iterators are equal
+    bool equal(transforming_term_appl_prepend_iterator const& other) const
     {
       return this->m_prepend == other.m_prepend && this->m_it == other.m_it;
     }
@@ -237,8 +286,8 @@ class application: public data_expression
                 typename boost::disable_if<typename boost::is_base_of<data_expression, FwdIter>::type>::type* = 0,
                 typename boost::disable_if<typename boost::is_base_of<data_expression, ArgumentConverter>::type>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
-                                         term_appl_prepend_iterator<FwdIter, ArgumentConverter>(first, &head, convert_arguments),
-                                         term_appl_prepend_iterator<FwdIter, ArgumentConverter>(last,NULL,convert_arguments)))
+                                         transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(first, &head, convert_arguments),
+                                         transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(last,nullptr,convert_arguments)))
     {
       assert(first!=last);
     }

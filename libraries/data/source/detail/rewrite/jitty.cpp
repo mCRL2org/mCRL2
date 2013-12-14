@@ -341,61 +341,64 @@ bool RewriterJitty::removeRewriteRule(const data_equation &rule)
   return true;
 }
 
-template <class T>
 static data_expression subst_values(
-            const T& subst,
-            const data_expression &t); //Prototype.
+            atermpp::detail::_aterm** vars,
+            atermpp::detail::_aterm** terms,
+            const size_t assignment_size,
+            const data_expression &t); // prototype;
 
-template <class T>
 class subst_values_argument
 {
   private:
-    const T& m_subst;
+    atermpp::detail::_aterm** m_vars;
+    atermpp::detail::_aterm** m_terms;
+    const size_t m_assignment_size;
 
   public:
-    subst_values_argument( const T& subst)
-      : m_subst(subst)
+    subst_values_argument(atermpp::detail::_aterm** vars, atermpp::detail::_aterm** terms, const size_t assignment_size)
+      : m_vars(vars), m_terms(terms), m_assignment_size(assignment_size)
     {}
 
     data_expression operator()(const data_expression& t) const
     {
-      return subst_values(m_subst,t);
+      return subst_values(m_vars,m_terms,m_assignment_size,t);
     }
 };
 
-template <class T>
 static data_expression subst_values(
-            const T& subst,
+            atermpp::detail::_aterm** vars,
+            atermpp::detail::_aterm** terms,
+            const size_t assignment_size,
             const data_expression &t)
 {
-  if (is_function_symbol(atermpp::aterm_cast<data_expression>(t)))
+  if (is_function_symbol(t))
   {
     return t;
   }
   else if (is_variable(t))
   {
-    for (size_t i=0; i<subst.size(); i++)
+    for (size_t i=0; i<assignment_size; i++)
     {
-      if (t==subst[i].first)
+      if (atermpp::detail::address(t)==vars[i])
       {
-        return subst[i].second;
+        return atermpp::aterm_cast<data_expression>(atermpp::aterm(terms[i]));
       }
     }
     return t;
   }
-  else if (is_abstraction(atermpp::aterm_cast<const data_expression>(t)))
+  else if (is_abstraction(t))
   {
     const data_expression &t1=atermpp::aterm_cast<const data_expression>(t);
     const binder_type &binder=atermpp::aterm_cast<const binder_type>(t1[0]);
     const variable_list &bound_variables=atermpp::aterm_cast<const variable_list>(t1[1]);
-    const data_expression body=atermpp::aterm_cast<const data_expression>(subst_values(subst,atermpp::aterm_cast<const data_expression>(t1[2])));
+    const data_expression body=atermpp::aterm_cast<const data_expression>(subst_values(vars,terms,assignment_size,atermpp::aterm_cast<const data_expression>(t1[2])));
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
-    for(size_t i=0; i<subst.size(); ++i)
+    for(size_t i=0; i<assignment_size; ++i)
     {
       for(variable_list::const_iterator it=bound_variables.begin(); it!=bound_variables.end(); ++it)
       {
-        assert(*it!= subst[i].first);
+        assert(*it!= vars[i]);
       }
     }
 #endif
@@ -410,11 +413,11 @@ static data_expression subst_values(
 
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
-    for(size_t i=0; i<subst.size(); ++i)
+    for(size_t i=0; i<assignment_size; ++i)
     {
       for(assignment_expression_list::const_iterator it=assignments.begin(); it!=assignments.end(); ++it)
       {
-        assert(atermpp::aterm_cast<const data_expression>(*it)[0]!= subst[i].first);
+        assert(atermpp::aterm_cast<const data_expression>(*it)[0]!= vars[i]);
       }
     }
 #endif
@@ -425,24 +428,26 @@ static data_expression subst_values(
     {
       const assignment& assignment_expr = core::down_cast<assignment>(*it);
       new_assignments.push_back(assignment(assignment_expr.lhs(),
-    		atermpp::aterm_cast<const data_expression>(subst_values(subst,assignment_expr.rhs()))));
+    		atermpp::aterm_cast<const data_expression>(subst_values(vars,terms,assignment_size,assignment_expr.rhs()))));
     }
     return where_clause(body,assignment_list(new_assignments.begin(),new_assignments.end()));
   }
   else
   {
     const application& t1 = core::down_cast<application>(t);
-    const subst_values_argument<T> substitute_values_in_arguments(subst);
-    return application(subst_values(subst,t1.head()),t1.begin(),t1.end(),substitute_values_in_arguments);
+    const subst_values_argument substitute_values_in_arguments(vars,terms,assignment_size);
+    return application(subst_values(vars,terms,assignment_size,t1.head()),t1.begin(),t1.end(),substitute_values_in_arguments);
   }
 }
 
 // Match term t with the lhs p of an equation in internal format.
-template <class T>
+
 static bool match_jitty(
-                    const data_expression &t,
-                    const data_expression &p,
-                    T& subst)
+                    const data_expression& t,
+                    const data_expression& p,
+                    atermpp::detail::_aterm** vars,
+                    atermpp::detail::_aterm** terms,
+                    size_t& assignment_size)
 {
   if (is_function_symbol(p))
   {
@@ -450,11 +455,11 @@ static bool match_jitty(
   }
   else if (is_variable(p))
   {
-    for (size_t i=0; i<subst.size(); i++)
+    for (size_t i=0; i<assignment_size; i++)
     {
-      if (p== subst[i].first)
+      if (p== vars[i])
       {
-        if (t== subst[i].second)
+        if (t== terms[i])
         {
           return true;
         }
@@ -464,7 +469,10 @@ static bool match_jitty(
         }
       }
     }
-    subst.push_back(std::pair<variable,data_expression>(atermpp::aterm_cast<const variable>(p),t));
+    // subst.push_back(std::pair<variable,data_expression>(atermpp::aterm_cast<const variable>(p),t));
+    vars[assignment_size]=const_cast<atermpp::detail::_aterm*>(atermpp::detail::address(p));
+    terms[assignment_size]=const_cast<atermpp::detail::_aterm*>(atermpp::detail::address(t));
+    assignment_size++;
     return true;
   }
   else
@@ -484,7 +492,7 @@ static bool match_jitty(
     for (size_t i=0; i<arity; i++)
     {
       if (!match_jitty(atermpp::aterm_cast<const data_expression>(t[i]),
-                       atermpp::aterm_cast<const data_expression>(p[i]),subst))
+                       atermpp::aterm_cast<const data_expression>(p[i]),vars,terms,assignment_size))
       {
         return false;
       }
@@ -640,9 +648,12 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   const atermpp::aterm_list &strat=jitty_strat[op_value];
   if (!strat.empty())
   {
-    typedef std::pair<variable, data_expression> variable_aterm_pair;
+    /* typedef std::pair<variable, data_expression> variable_aterm_pair;
     std::vector < variable_aterm_pair > subst;
-    subst.reserve(16);
+    subst.reserve(max_vars); */
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,atermpp::detail::_aterm*,max_vars);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::detail::_aterm*,max_vars);
+    size_t no_assignments=0;
 
     for (atermpp::aterm_list::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
     {
@@ -673,7 +684,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
 
-        subst.clear();
+        no_assignments=0; //subst.clear();
 
         bool matches = true;
 
@@ -681,7 +692,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         {
           assert(i<arity);
           if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(term,i),
-                                                             detail::get_argument_of_higher_order_term(lhs,i),subst))
+                                                             detail::get_argument_of_higher_order_term(lhs,i),vars,terms,no_assignments))
           {
             matches = false;
             break;
@@ -690,13 +701,13 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         // assert(number_of_vars<=max_len);
         if (matches && (element_at(rule1,1)==internal_true ||
                         rewrite_aux(atermpp::aterm_cast<const data_expression>(atermpp::aterm_cast<const data_expression>(
-                   subst_values(subst,atermpp::aterm_cast<data_expression>(element_at(rule1,1))))),sigma)==internal_true))
+                   subst_values(vars,terms,no_assignments,atermpp::aterm_cast<data_expression>(element_at(rule1,1))))),sigma)==internal_true))
         {
           const data_expression &rhs = atermpp::aterm_cast<const data_expression>(element_at(rule1,3));
 
           if (arity == rule_arity)
           {
-            const data_expression result=rewrite_aux(atermpp::aterm_cast<const data_expression>(subst_values(subst,rhs)),sigma);
+            const data_expression result=rewrite_aux(atermpp::aterm_cast<const data_expression>(subst_values(vars,terms,no_assignments,rhs)),sigma);
             for (size_t i=0; i<arity; i++)
             {
               if (rewritten_defined[i])
@@ -715,11 +726,11 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
             if (rewritten_defined[rule_arity-1])
             {
-              rewritten[rule_arity-1]=atermpp::aterm_cast<data_expression>(subst_values(subst,rhs));
+              rewritten[rule_arity-1]=atermpp::aterm_cast<data_expression>(subst_values(vars,terms,no_assignments,rhs));
             }
             else
             {
-              new (&rewritten[rule_arity-1]) data_expression(subst_values(subst,rhs));
+              new (&rewritten[rule_arity-1]) data_expression(subst_values(vars,terms,no_assignments,rhs));
               rewritten_defined[rule_arity-1]=true;
             }
 
