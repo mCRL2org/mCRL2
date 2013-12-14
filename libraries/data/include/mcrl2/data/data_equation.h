@@ -40,7 +40,7 @@ class data_equation: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     data_equation()
-      : atermpp::aterm_appl(core::detail::default_value_DataEqn())
+      : atermpp::aterm_appl(core::detail::default_values::DataEqn)
     {}
 
     /// \brief Constructor.

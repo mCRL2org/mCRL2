@@ -151,6 +151,8 @@ const atermpp::aterm_appl& default_value_%(name)s()
                 'name'       : name,
                 'fname'      : fname
             }
+            dtext = dtext + '  atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
+            vtext = vtext + '  static atermpp::aterm_appl %s;\n' % name
 
     ctext = ptext + '\n' + ctext
     result = insert_text_in_file(declaration_filename, ctext, 'generated constructors')

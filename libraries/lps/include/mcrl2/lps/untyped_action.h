@@ -25,7 +25,7 @@ class untyped_action: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     untyped_action()
-      : atermpp::aterm_appl(core::detail::default_value_UntypedAction())
+      : atermpp::aterm_appl(core::detail::default_values::UntypedAction)
     {}
 
     /// \brief Constructor.

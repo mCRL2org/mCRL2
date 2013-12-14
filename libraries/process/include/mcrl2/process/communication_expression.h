@@ -31,7 +31,7 @@ class communication_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     communication_expression()
-      : atermpp::aterm_appl(core::detail::default_value_CommExpr())
+      : atermpp::aterm_appl(core::detail::default_values::CommExpr)
     {}
 
     /// \brief Constructor.

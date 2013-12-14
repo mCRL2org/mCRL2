@@ -29,7 +29,7 @@ class binder_type: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     binder_type()
-      : atermpp::aterm_appl(core::detail::default_value_BindingOperator())
+      : atermpp::aterm_appl(core::detail::default_values::BindingOperator)
     {}
 
     /// \brief Constructor.
@@ -72,7 +72,7 @@ class untyped_set_or_bag_comprehension_binder: public binder_type
   public:
     /// \brief Default constructor.
     untyped_set_or_bag_comprehension_binder()
-      : binder_type(core::detail::default_value_UntypedSetBagComp())
+      : binder_type(core::detail::default_values::UntypedSetBagComp)
     {}
 
     /// \brief Constructor.
@@ -118,7 +118,7 @@ class set_comprehension_binder: public binder_type
   public:
     /// \brief Default constructor.
     set_comprehension_binder()
-      : binder_type(core::detail::default_value_SetComp())
+      : binder_type(core::detail::default_values::SetComp)
     {}
 
     /// \brief Constructor.
@@ -164,7 +164,7 @@ class bag_comprehension_binder: public binder_type
   public:
     /// \brief Default constructor.
     bag_comprehension_binder()
-      : binder_type(core::detail::default_value_BagComp())
+      : binder_type(core::detail::default_values::BagComp)
     {}
 
     /// \brief Constructor.
@@ -210,7 +210,7 @@ class forall_binder: public binder_type
   public:
     /// \brief Default constructor.
     forall_binder()
-      : binder_type(core::detail::default_value_Forall())
+      : binder_type(core::detail::default_values::Forall)
     {}
 
     /// \brief Constructor.
@@ -256,7 +256,7 @@ class exists_binder: public binder_type
   public:
     /// \brief Default constructor.
     exists_binder()
-      : binder_type(core::detail::default_value_Exists())
+      : binder_type(core::detail::default_values::Exists)
     {}
 
     /// \brief Constructor.
@@ -302,7 +302,7 @@ class lambda_binder: public binder_type
   public:
     /// \brief Default constructor.
     lambda_binder()
-      : binder_type(core::detail::default_value_Lambda())
+      : binder_type(core::detail::default_values::Lambda)
     {}
 
     /// \brief Constructor.

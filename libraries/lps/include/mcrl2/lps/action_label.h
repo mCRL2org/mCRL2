@@ -33,7 +33,7 @@ class action_label: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action_label()
-      : atermpp::aterm_appl(core::detail::default_value_ActId())
+      : atermpp::aterm_appl(core::detail::default_values::ActId)
     {}
 
     /// \brief Constructor.

@@ -33,7 +33,7 @@ class basic_sort: public sort_expression
   public:
     /// \brief Default constructor.
     basic_sort()
-      : sort_expression(core::detail::default_value_SortId())
+      : sort_expression(core::detail::default_values::SortId)
     {}
 
     /// \brief Constructor.

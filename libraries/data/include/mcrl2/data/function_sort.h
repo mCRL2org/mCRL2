@@ -38,7 +38,7 @@ class function_sort: public sort_expression
   public:
     /// \brief Default constructor.
     function_sort()
-      : sort_expression(core::detail::default_value_SortArrow())
+      : sort_expression(core::detail::default_values::SortArrow)
     {}
 
     /// \brief Constructor.

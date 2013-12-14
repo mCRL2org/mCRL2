@@ -47,7 +47,7 @@ class variable: public data_expression
 //--- start user section variable ---//
     /// \brief Default constructor.
     variable()
-      : data_expression(core::detail::default_value_DataVarId())
+      : data_expression(core::detail::default_values::DataVarId)
     {}
 
     /// \brief Constructor.

@@ -26,7 +26,7 @@ class untyped_sort: public sort_expression
   public:
     /// \brief Default constructor.
     untyped_sort()
-      : sort_expression(core::detail::default_value_UntypedSortUnknown())
+      : sort_expression(core::detail::default_values::UntypedSortUnknown)
     {}
 
     /// \brief Constructor.

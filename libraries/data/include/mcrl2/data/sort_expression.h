@@ -70,7 +70,7 @@ class sort_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     sort_expression()
-      : atermpp::aterm_appl(core::detail::default_value_SortExpr())
+      : atermpp::aterm_appl(core::detail::default_values::SortExpr)
     {}
 
     /// \brief Constructor.

@@ -32,7 +32,7 @@ class action_name_multiset: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action_name_multiset()
-      : atermpp::aterm_appl(core::detail::default_value_MultActName())
+      : atermpp::aterm_appl(core::detail::default_values::MultActName)
     {}
 
     /// \brief Constructor.

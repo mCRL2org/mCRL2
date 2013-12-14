@@ -47,7 +47,7 @@ class function_symbol: public data_expression
 //--- start user section function_symbol ---//
     /// \brief Default constructor.
     function_symbol()
-      : data_expression(core::detail::default_value_OpId())
+      : data_expression(core::detail::default_values::OpId)
     {}
 
     /// \brief Constructor.

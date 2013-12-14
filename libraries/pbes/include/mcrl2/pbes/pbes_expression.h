@@ -48,7 +48,7 @@ class pbes_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     pbes_expression()
-      : atermpp::aterm_appl(core::detail::default_value_PBExpr())
+      : atermpp::aterm_appl(core::detail::default_values::PBExpr)
     {}
 
     /// \brief Constructor.
@@ -137,7 +137,7 @@ class propositional_variable_instantiation: public pbes_expression
 //--- start user section propositional_variable_instantiation ---//
     /// \brief Default constructor.
     propositional_variable_instantiation()
-      : pbes_expression(core::detail::default_value_PropVarInst())
+      : pbes_expression(core::detail::default_values::PropVarInst)
     {}
 
     /// \brief Constructor.
@@ -225,7 +225,7 @@ class true_: public pbes_expression
   public:
     /// \brief Default constructor.
     true_()
-      : pbes_expression(core::detail::default_value_PBESTrue())
+      : pbes_expression(core::detail::default_values::PBESTrue)
     {}
 
     /// \brief Constructor.
@@ -271,7 +271,7 @@ class false_: public pbes_expression
   public:
     /// \brief Default constructor.
     false_()
-      : pbes_expression(core::detail::default_value_PBESFalse())
+      : pbes_expression(core::detail::default_values::PBESFalse)
     {}
 
     /// \brief Constructor.
@@ -317,7 +317,7 @@ class not_: public pbes_expression
   public:
     /// \brief Default constructor.
     not_()
-      : pbes_expression(core::detail::default_value_PBESNot())
+      : pbes_expression(core::detail::default_values::PBESNot)
     {}
 
     /// \brief Constructor.
@@ -373,7 +373,7 @@ class and_: public pbes_expression
   public:
     /// \brief Default constructor.
     and_()
-      : pbes_expression(core::detail::default_value_PBESAnd())
+      : pbes_expression(core::detail::default_values::PBESAnd)
     {}
 
     /// \brief Constructor.
@@ -434,7 +434,7 @@ class or_: public pbes_expression
   public:
     /// \brief Default constructor.
     or_()
-      : pbes_expression(core::detail::default_value_PBESOr())
+      : pbes_expression(core::detail::default_values::PBESOr)
     {}
 
     /// \brief Constructor.
@@ -495,7 +495,7 @@ class imp: public pbes_expression
   public:
     /// \brief Default constructor.
     imp()
-      : pbes_expression(core::detail::default_value_PBESImp())
+      : pbes_expression(core::detail::default_values::PBESImp)
     {}
 
     /// \brief Constructor.
@@ -556,7 +556,7 @@ class forall: public pbes_expression
   public:
     /// \brief Default constructor.
     forall()
-      : pbes_expression(core::detail::default_value_PBESForall())
+      : pbes_expression(core::detail::default_values::PBESForall)
     {}
 
     /// \brief Constructor.
@@ -617,7 +617,7 @@ class exists: public pbes_expression
   public:
     /// \brief Default constructor.
     exists()
-      : pbes_expression(core::detail::default_value_PBESExists())
+      : pbes_expression(core::detail::default_values::PBESExists)
     {}
 
     /// \brief Constructor.

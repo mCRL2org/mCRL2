@@ -31,7 +31,7 @@ class abstraction: public data_expression
   public:
     /// \brief Default constructor.
     abstraction()
-      : data_expression(core::detail::default_value_Binder())
+      : data_expression(core::detail::default_values::Binder)
     {}
 
     /// \brief Constructor.

@@ -33,7 +33,7 @@ class fixpoint_symbol: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     fixpoint_symbol()
-      : atermpp::aterm_appl(core::detail::default_value_FixPoint())
+      : atermpp::aterm_appl(core::detail::default_values::FixPoint)
     {}
 
     /// \brief Constructor.

@@ -25,7 +25,7 @@ class untyped_multi_action: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     untyped_multi_action()
-      : atermpp::aterm_appl(core::detail::default_value_UntypedMultAct())
+      : atermpp::aterm_appl(core::detail::default_values::UntypedMultAct)
     {}
 
     /// \brief Constructor.

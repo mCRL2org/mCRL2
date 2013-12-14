@@ -305,6 +305,24 @@ atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail::defa
   atermpp::aterm_appl core::detail::default_values::RegTransOrNil = core::detail::default_value_RegTransOrNil();
   atermpp::aterm_appl core::detail::default_values::GlobVarSpec = core::detail::default_value_GlobVarSpec();
   atermpp::aterm_appl core::detail::default_values::UntypedIdentifierAssignment = core::detail::default_value_UntypedIdentifierAssignment();
+  atermpp::aterm_appl core::detail::default_values::SortExpr = core::detail::default_value_SortExpr();
+  atermpp::aterm_appl core::detail::default_values::SortConsType = core::detail::default_value_SortConsType();
+  atermpp::aterm_appl core::detail::default_values::DataExpr = core::detail::default_value_DataExpr();
+  atermpp::aterm_appl core::detail::default_values::BindingOperator = core::detail::default_value_BindingOperator();
+  atermpp::aterm_appl core::detail::default_values::WhrDecl = core::detail::default_value_WhrDecl();
+  atermpp::aterm_appl core::detail::default_values::SortDecl = core::detail::default_value_SortDecl();
+  atermpp::aterm_appl core::detail::default_values::DataExprOrNil = core::detail::default_value_DataExprOrNil();
+  atermpp::aterm_appl core::detail::default_values::ProcExpr = core::detail::default_value_ProcExpr();
+  atermpp::aterm_appl core::detail::default_values::MultActOrDelta = core::detail::default_value_MultActOrDelta();
+  atermpp::aterm_appl core::detail::default_values::ProcInit = core::detail::default_value_ProcInit();
+  atermpp::aterm_appl core::detail::default_values::StateFrm = core::detail::default_value_StateFrm();
+  atermpp::aterm_appl core::detail::default_values::RegFrm = core::detail::default_value_RegFrm();
+  atermpp::aterm_appl core::detail::default_values::ActFrm = core::detail::default_value_ActFrm();
+  atermpp::aterm_appl core::detail::default_values::ParamIdOrAction = core::detail::default_value_ParamIdOrAction();
+  atermpp::aterm_appl core::detail::default_values::ActionRenameRuleRHS = core::detail::default_value_ActionRenameRuleRHS();
+  atermpp::aterm_appl core::detail::default_values::FixPoint = core::detail::default_value_FixPoint();
+  atermpp::aterm_appl core::detail::default_values::PBExpr = core::detail::default_value_PBExpr();
+  atermpp::aterm_appl core::detail::default_values::BooleanExpression = core::detail::default_value_BooleanExpression();
 //--- end generated default value definitions ---//
 
 } // namespace core

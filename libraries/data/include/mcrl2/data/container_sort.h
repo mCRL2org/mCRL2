@@ -32,7 +32,7 @@ class container_sort: public sort_expression
   public:
     /// \brief Default constructor.
     container_sort()
-      : sort_expression(core::detail::default_value_SortCons())
+      : sort_expression(core::detail::default_values::SortCons)
     {}
 
     /// \brief Constructor.

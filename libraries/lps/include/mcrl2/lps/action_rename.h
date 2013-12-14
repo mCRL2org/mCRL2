@@ -58,7 +58,7 @@ class action_rename_rule_rhs: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action_rename_rule_rhs()
-      : atermpp::aterm_appl(core::detail::default_value_ActionRenameRuleRHS())
+      : atermpp::aterm_appl(core::detail::default_values::ActionRenameRuleRHS)
     {}
 
     /// \brief Returns true if the right hand side is equal to delta.

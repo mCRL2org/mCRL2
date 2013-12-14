@@ -1567,6 +1567,24 @@ static atermpp::aterm_appl BooleanOr;
   static atermpp::aterm_appl RegTransOrNil;
   static atermpp::aterm_appl GlobVarSpec;
   static atermpp::aterm_appl UntypedIdentifierAssignment;
+  static atermpp::aterm_appl SortExpr;
+  static atermpp::aterm_appl SortConsType;
+  static atermpp::aterm_appl DataExpr;
+  static atermpp::aterm_appl BindingOperator;
+  static atermpp::aterm_appl WhrDecl;
+  static atermpp::aterm_appl SortDecl;
+  static atermpp::aterm_appl DataExprOrNil;
+  static atermpp::aterm_appl ProcExpr;
+  static atermpp::aterm_appl MultActOrDelta;
+  static atermpp::aterm_appl ProcInit;
+  static atermpp::aterm_appl StateFrm;
+  static atermpp::aterm_appl RegFrm;
+  static atermpp::aterm_appl ActFrm;
+  static atermpp::aterm_appl ParamIdOrAction;
+  static atermpp::aterm_appl ActionRenameRuleRHS;
+  static atermpp::aterm_appl FixPoint;
+  static atermpp::aterm_appl PBExpr;
+  static atermpp::aterm_appl BooleanExpression;
 //--- end generated variables ---//
 };
 

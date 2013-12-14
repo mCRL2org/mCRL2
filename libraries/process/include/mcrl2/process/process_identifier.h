@@ -48,7 +48,7 @@ class process_identifier: public atermpp::aterm_appl
 //--- start user section process_identifier ---//
     /// \brief Default constructor.
     process_identifier()
-      : atermpp::aterm_appl(core::detail::default_value_ProcVarId())
+      : atermpp::aterm_appl(core::detail::default_values::ProcVarId)
     {}
 
     /// \brief Constructor.

@@ -28,7 +28,7 @@ class nil: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     nil()
-      : atermpp::aterm_appl(core::detail::default_value_Nil())
+      : atermpp::aterm_appl(core::detail::default_values::Nil)
     {}
 
     /// \brief Constructor.

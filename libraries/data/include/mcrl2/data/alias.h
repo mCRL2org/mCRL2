@@ -29,7 +29,7 @@ class alias: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     alias()
-      : atermpp::aterm_appl(core::detail::default_value_SortRef())
+      : atermpp::aterm_appl(core::detail::default_values::SortRef)
     {}
 
     /// \brief Constructor.

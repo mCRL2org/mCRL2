@@ -33,7 +33,7 @@ class process_equation: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     process_equation()
-      : atermpp::aterm_appl(core::detail::default_value_ProcEqn())
+      : atermpp::aterm_appl(core::detail::default_values::ProcEqn)
     {}
 
     /// \brief Constructor.

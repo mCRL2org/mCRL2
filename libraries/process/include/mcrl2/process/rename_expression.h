@@ -31,7 +31,7 @@ class rename_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     rename_expression()
-      : atermpp::aterm_appl(core::detail::default_value_RenameExpr())
+      : atermpp::aterm_appl(core::detail::default_values::RenameExpr)
     {}
 
     /// \brief Constructor.

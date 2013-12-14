@@ -35,7 +35,7 @@ class assignment_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     assignment_expression()
-      : atermpp::aterm_appl(core::detail::default_value_WhrDecl())
+      : atermpp::aterm_appl(core::detail::default_values::WhrDecl)
     {}
 
     /// \brief Constructor.
@@ -92,7 +92,7 @@ class assignment: public assignment_expression
   public:
     /// \brief Default constructor.
     assignment()
-      : assignment_expression(core::detail::default_value_DataVarIdInit())
+      : assignment_expression(core::detail::default_values::DataVarIdInit)
     {}
 
     /// \brief Constructor.
@@ -177,7 +177,7 @@ class untyped_identifier_assignment: public assignment_expression
   public:
     /// \brief Default constructor.
     untyped_identifier_assignment()
-      : assignment_expression(core::detail::default_value_UntypedIdentifierAssignment())
+      : assignment_expression(core::detail::default_values::UntypedIdentifierAssignment)
     {}
 
     /// \brief Constructor.

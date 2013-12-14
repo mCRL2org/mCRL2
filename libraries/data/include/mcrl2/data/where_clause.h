@@ -29,7 +29,7 @@ class where_clause: public data_expression
   public:
     /// \brief Default constructor.
     where_clause()
-      : data_expression(core::detail::default_value_Whr())
+      : data_expression(core::detail::default_values::Whr)
     {}
 
     /// \brief Constructor.

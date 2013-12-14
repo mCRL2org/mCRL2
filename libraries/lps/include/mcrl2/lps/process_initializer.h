@@ -37,7 +37,7 @@ class process_initializer: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     process_initializer()
-      : atermpp::aterm_appl(core::detail::default_value_LinearProcessInit())
+      : atermpp::aterm_appl(core::detail::default_values::LinearProcessInit)
     {}
 
     /// \brief Constructor.
