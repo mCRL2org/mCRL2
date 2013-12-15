@@ -731,7 +731,7 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
   }
 }
 
-static atermpp::aterm_appl create_tree(const data_equation_list& rules, size_t /*opid*/, size_t /*arity*/, const atermpp::aterm_appl& true_inner)
+static atermpp::aterm_appl create_tree(const data_equation_list& rules, const atermpp::aterm_appl& true_inner)
 // Create a match tree for OpId int2term[opid] and update the value of
 // *max_vars accordingly.
 //
@@ -944,7 +944,6 @@ size_t RewriterCompilingJitty::binding_variable_list_index(const variable_list& 
 
 static atermpp::aterm_list create_strategy(
         const data_equation_list& rules,
-        const size_t opid,
         const size_t arity,
         nfs_array& nfs,
         const data_expression& true_inner)
@@ -964,7 +963,9 @@ static atermpp::aterm_list create_strategy(
   atermpp::aterm_list dep_list;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
-    size_t rule_arity = it->lhs().function().arity()-1;
+    const data::function_symbol& f= get_function_symbol_of_head(it->lhs());
+    const sort_expression& s = f.sort();
+    size_t rule_arity = (is_function_sort(s)?function_sort(s).domain().size():0);
     if (rule_arity > arity)
     {
       continue;
@@ -1074,7 +1075,7 @@ static atermpp::aterm_list create_strategy(
     // Create and add tree of collected rules
     if (!no_deps.empty())
     {
-      strat.push_front(create_tree(no_deps,opid,arity,true_inner));
+      strat.push_front(create_tree(no_deps,true_inner));
     }
 
     // Stop if there are no more rules left
@@ -1115,7 +1116,6 @@ static atermpp::aterm_list create_strategy(
       dep_list = reverse(l);
     }
   }
-
   return reverse(strat);
 }
 
@@ -1140,7 +1140,7 @@ void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& o
     return;
   }
   // atermpp::aterm_list strat = create_strategy(eqns,OpId2Int(opid).value(),arity,nfs,true_inner);
-  atermpp::aterm_list strat = create_strategy(eqns,core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(opid),arity,nfs,true_inner);
+  atermpp::aterm_list strat = create_strategy(eqns,arity,nfs,true_inner);
   while (!strat.empty() && strat.front().type_is_int())
   {
     nfs.set(aterm_cast<atermpp::aterm_int>(strat.front()).value());
@@ -1987,7 +1987,7 @@ void RewriterCompilingJitty::implement_tree(
   {
     if (arity==0)
     { // return a reference to an atermpp::aterm_appl
-      fprintf(f,"%sstatic atermpp::aterm_appl static_term(rewrite(",whitespace(d*2));
+      fprintf(f,"%sstatic data_expression static_term(rewrite(",whitespace(d*2));
       calcTerm(f,aterm_cast<data_expression>(tree[0]),get_startarg(tree[0],0),nnfvars);
       fprintf(f,")); \n");
       fprintf(f,"%sreturn static_term",whitespace(d*2));
@@ -2013,14 +2013,16 @@ void RewriterCompilingJitty::implement_tree(
   }
 }
 
-static void finish_function(FILE* f,
-                            size_t arity,
-                            const data::function_symbol& opid,
-                            const std::vector<bool>& used)
+void RewriterCompilingJitty::finish_function(FILE* f,
+                                             size_t arity,
+                                             const data::function_symbol& opid,
+                                             const std::vector<bool>& used)
 {
   if (arity == 0)
   {
-    fprintf(f,  "  return data_expression((const atermpp::detail::_aterm*)%p", (void*)atermpp::detail::address(opid));
+    precalculated_data_expressions.push_back(opid);
+    // fprintf(f,  "  return data_expression((const atermpp::detail::_aterm*)%p", (void*)atermpp::detail::address(opid));
+    fprintf(f,  "  return (precalculated_data_expressions[%ld]", precalculated_data_expressions.size()-1);
   }
   else
   {
@@ -2053,8 +2055,12 @@ static void finish_function(FILE* f,
 }
 
 void RewriterCompilingJitty::implement_strategy(
-               FILE* f, atermpp::aterm_list strat, size_t arity, size_t d,
-               const function_symbol& opid, size_t nf_args)
+               FILE* f, 
+               atermpp::aterm_list strat, 
+               size_t arity, 
+               size_t d,
+               const function_symbol& opid, 
+               size_t nf_args)
 {
   std::vector<bool> used;
   for (size_t i=0; i<arity; i++)
@@ -2266,6 +2272,9 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   }
 }
 
+
+std::vector<data_expression> precalculated_data_expressions;
+
 bool RewriterCompilingJitty::addRewriteRule(const data_equation& rule1)
 {
   // const data_equation rule=m_conversion_helper.implement(rule1);
@@ -2336,6 +2345,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
 
 void RewriterCompilingJitty::CleanupRewriteSystem()
 {
+  precalculated_data_expressions.clear();
   if (so_rewr_cleanup != NULL)
   {
     so_rewr_cleanup();
@@ -2459,7 +2469,7 @@ void declare_rewr_functions(FILE* f, const data::function_symbol& func, const si
         if (a==0)
         {
           // This is a constant function; result can be derived by reference.
-          fprintf(f,  "static inline const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),a,nfs);
+          fprintf(f,  "static inline const data_expression& rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),a,nfs);
         }
         else
         {
@@ -2681,7 +2691,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           {
             if (a==0)
             {
-              fprintf(f,  "static const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),a,nfs);
+              fprintf(f,  "static const data_expression& rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),a,nfs);
             }
             else
             {
@@ -2709,7 +2719,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
                 nfs_a.set_value(nfs);
               }
               implement_strategy(f,create_strategy(jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)],
-                                    core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                                     a,nfs_a,true_inner),a,1,fs,nfs);
             }
             else

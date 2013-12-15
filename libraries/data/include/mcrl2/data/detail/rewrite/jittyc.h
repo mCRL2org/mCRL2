@@ -122,6 +122,7 @@ class RewriterCompilingJitty: public Rewriter
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
     FILE* MakeTempFiles();
+    void finish_function(FILE* f, size_t arity, const data::function_symbol& opid, const std::vector<bool>& used);
 
 };
 
@@ -133,6 +134,10 @@ struct rewriter_interface
   data_expression (*rewrite_external)(const data_expression &t);
   void (*rewrite_cleanup)();
 };
+
+// Declare as a global array. Should be moved into the jittyc rewriter class,
+// along with all the functions in the compiling rewriter.
+extern std::vector<data_expression> precalculated_data_expressions;
 
 }
 }
