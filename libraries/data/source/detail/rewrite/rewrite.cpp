@@ -127,7 +127,7 @@ data_expression Rewriter::rewrite_where(
   for(mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
       it!=variable_renaming.end(); ++it)
   {
-    sigma[atermpp::aterm_cast<variable>(it->second)]=it->second;
+    sigma[core::down_cast<variable>(it->second)]=it->second;
   }
   return result;
 }
@@ -282,7 +282,7 @@ data_expression Rewriter::rewrite_lambda_application(
   for(mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
                  it!=variable_renaming.end(); ++it)
   {
-    sigma[atermpp::aterm_cast<variable>(it->second)]=it->second;
+    sigma[core::down_cast<variable>(it->second)]=it->second;
   }
   if (vl.size()+1==arity)
   {
@@ -543,13 +543,13 @@ static void check_vars(const data_expression& expr, const std::set <variable>& v
 {
   if (is_application(expr))
   {
-    const application& a=atermpp::aterm_cast<const application>(expr);
+    const application& a=core::down_cast<const application>(expr);
     check_vars(a.head(),vars,used_vars);
     check_vars(a.begin(),a.end(),vars,used_vars);
   }
   else if (is_variable(expr))
   {
-    const variable& v=atermpp::aterm_cast<const variable>(expr);
+    const variable& v=core::down_cast<const variable>(expr);
     used_vars.insert(v);
 
     if (vars.count(v)==0)
@@ -575,12 +575,12 @@ static void checkPattern(const data_expression& p)
 {
   if (is_application(p))
   {
-    if (is_variable(atermpp::aterm_cast<application>(p).head()))
+    if (is_variable(core::down_cast<application>(p).head()))
     {
       throw mcrl2::runtime_error(std::string("variable ") + data::pp(application(p).head()) +
                " is used as head symbol in an application, which is not supported");
     }
-    const application& a=atermpp::aterm_cast<const application>(p);
+    const application& a=core::down_cast<const application>(p);
     checkPattern(a.head());
     checkPattern(a.begin(),a.end());
   }

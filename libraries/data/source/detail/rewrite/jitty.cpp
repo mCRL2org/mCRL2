@@ -698,15 +698,14 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           }
         }
         // assert(number_of_vars<=max_len);
-        if (matches && (element_at(rule1,1)==internal_true ||
-                        rewrite_aux(atermpp::aterm_cast<const data_expression>(atermpp::aterm_cast<const data_expression>(
-                   subst_values(vars,terms,no_assignments,atermpp::aterm_cast<data_expression>(element_at(rule1,1))))),sigma)==internal_true))
+        if (matches && (element_at(rule1,1)==internal_true || rewrite_aux(
+                   subst_values(vars,terms,no_assignments,atermpp::aterm_cast<data_expression>(element_at(rule1,1))),sigma)==internal_true))
         {
           const data_expression &rhs = atermpp::aterm_cast<const data_expression>(element_at(rule1,3));
 
           if (arity == rule_arity)
           {
-            const data_expression result=rewrite_aux(atermpp::aterm_cast<const data_expression>(subst_values(vars,terms,no_assignments,rhs)),sigma);
+            const data_expression result=rewrite_aux(subst_values(vars,terms,no_assignments,rhs),sigma);
             for (size_t i=0; i<arity; i++)
             {
               if (rewritten_defined[i])
@@ -725,7 +724,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
             if (rewritten_defined[rule_arity-1])
             {
-              rewritten[rule_arity-1]=atermpp::aterm_cast<data_expression>(subst_values(vars,terms,no_assignments,rhs));
+              rewritten[rule_arity-1]=subst_values(vars,terms,no_assignments,rhs);
             }
             else
             {
@@ -749,13 +748,13 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
             sort_expression sort = detail::residual_sort(op.sort(),i);
             while (is_function_sort(sort) && (i < arity))
             {
-              const sort_expression_list& sort_dom = atermpp::aterm_cast<function_sort>(sort).domain();
+              const sort_expression_list& sort_dom = core::down_cast<function_sort>(sort).domain();
               size_t a=sort_dom.size()+1;
               const size_t end=i+a;
               assert(end-1<arity);
               rewritten[end-1] = application(rewritten[i],&rewritten[0]+i+1,&rewritten[0]+end);
               i=end-1;
-              sort = atermpp::aterm_cast<function_sort>(sort).codomain();
+              sort = core::down_cast<function_sort>(sort).codomain();
             }
             const data_expression result=rewritten[i];
 
@@ -799,13 +798,13 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     sort_expression sort = op.sort();
     while (is_function_sort(sort) && (i+1 < arity))
     {
-      const sort_expression_list& sort_dom = atermpp::aterm_cast<function_sort>(sort).domain();
+      const sort_expression_list& sort_dom = core::down_cast<function_sort>(sort).domain();
       const size_t a=sort_dom.size()+1;
       const size_t end=i+a;
       assert(end-1<arity);
       rewritten[end-1] = application(rewritten[i],&rewritten[0]+i+1,&rewritten[0]+end);
       i=end-1;
-      sort = atermpp::aterm_cast<function_sort>(sort).codomain();
+      sort = core::down_cast<function_sort>(sort).codomain();
     }
     result=rewritten[i];
   }

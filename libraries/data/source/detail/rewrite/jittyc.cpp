@@ -828,10 +828,11 @@ static variable_list get_doubles(const data_expression& t)
 
 static variable_list dep_vars(const data_equation& eqn)
 {
-  size_t rule_arity = eqn.lhs().function().arity()-1;
+  size_t rule_arity=recursive_number_of_args(eqn.lhs());
+  
   std::vector < bool > bs(rule_arity);
 
-  data_expression lhs_internal = eqn.lhs();
+  const data_expression& lhs_internal = eqn.lhs();
   atermpp::term_list<variable_list> vars = make_list<variable_list>( get_doubles(eqn.rhs())+ get_vars(eqn.condition())
                                ); // List of variables occurring in each argument of the lhs
                                    // (except the first element which contains variables from the
@@ -846,11 +847,11 @@ static variable_list dep_vars(const data_equation& eqn)
   // Check all arguments
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (!is_variable(aterm_cast<atermpp::aterm_appl>(lhs_internal[i+1])))
+    if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i+1)))
     {
       // Argument is not a variable, so it needs to be rewritten
       bs[i] = true;
-      atermpp::aterm_list evars = get_vars(aterm_cast<data_expression>(lhs_internal[i+1]));
+      atermpp::aterm_list evars = get_vars(get_argument_of_higher_order_term(lhs_internal,i+1));
       for (; !evars.empty(); evars=evars.tail())
       {
         int j=i-1; // vars.tail().size()-1
@@ -873,7 +874,7 @@ static variable_list dep_vars(const data_equation& eqn)
       for (atermpp::aterm_list o=vars; !o.empty(); o=o.tail())
       {
         const atermpp::aterm_list l=aterm_cast<atermpp::aterm_list>(o.front());
-        if (std::find(o.begin(),o.end(),lhs_internal[i+1]) != o.end())
+        if (std::find(o.begin(),o.end(),get_argument_of_higher_order_term(lhs_internal,i+1)) != o.end())
         {
           // Same variable, mark it
           if (j >= 0)
@@ -891,15 +892,15 @@ static variable_list dep_vars(const data_equation& eqn)
       }
     }
     // Add vars used in expression
-    vars.push_front(get_vars(aterm_cast<data_expression>(lhs_internal[i+1])));
+    vars.push_front(get_vars(get_argument_of_higher_order_term(lhs_internal,i+1)));
   }
 
   variable_list deps;
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (bs[i] && is_variable(aterm_cast<data_expression>(lhs_internal[i+1])))
+    if (bs[i] && is_variable(get_argument_of_higher_order_term(lhs_internal,i+1)))
     {
-      deps.push_front(aterm_cast<variable>(lhs_internal[i+1]));
+      deps.push_front(down_cast<variable>(get_argument_of_higher_order_term(lhs_internal,i+1)));
     }
   }
 
@@ -963,15 +964,13 @@ static atermpp::aterm_list create_strategy(
   atermpp::aterm_list dep_list;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
-    const data::function_symbol& f= get_function_symbol_of_head(it->lhs());
-    const sort_expression& s = f.sort();
-    size_t rule_arity = (is_function_sort(s)?function_sort(s).domain().size():0);
+    size_t rule_arity = recursive_number_of_args(it->lhs());
     if (rule_arity > arity)
     {
       continue;
     }
 
-    data_expression lhs_internal = it->lhs();
+    const data_expression& lhs_internal = it->lhs();
     atermpp::aterm_list vars = make_list<aterm>( get_doubles(it->rhs())+ get_vars(it->condition())
                                  ); // List of variables occurring in each argument of the lhs
                                      // (except the first element which contains variables from the
@@ -986,11 +985,11 @@ static atermpp::aterm_list create_strategy(
     // Check all arguments
     for (size_t i = 0; i < rule_arity; i++)
     {
-      if (!is_variable(aterm_cast<data_expression>(lhs_internal[i+1])))
+      if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i+1)))  
       {
         // Argument is not a variable, so it needs to be rewritten
         bs[i] = true;
-        atermpp::aterm_list evars = get_vars(aterm_cast<data_expression>(lhs_internal[i+1]));
+        atermpp::aterm_list evars = get_vars(get_argument_of_higher_order_term(lhs_internal,i+1));
         for (; !evars.empty(); evars=evars.tail())
         {
           int j=i-1;
@@ -1013,7 +1012,7 @@ static atermpp::aterm_list create_strategy(
         for (atermpp::aterm_list o=vars; !o.empty(); o=o.tail())
         {
           const atermpp::aterm_list l=aterm_cast<atermpp::aterm_list>(o.front());
-          if (std::find(l.begin(),l.end(),lhs_internal[i+1]) != l.end())
+          if (std::find(l.begin(),l.end(),get_argument_of_higher_order_term(lhs_internal,i+1)) != l.end())
           {
             // Same variable, mark it
             if (j >= 0)
@@ -1031,7 +1030,7 @@ static atermpp::aterm_list create_strategy(
         }
       }
       // Add vars used in expression
-      vars.push_front(get_vars(aterm_cast<data_expression>(lhs_internal[i+1])));
+      vars.push_front(get_vars(get_argument_of_higher_order_term(lhs_internal,i+1)));
     }
 
     // Create dependency list for this rule
@@ -2964,8 +2963,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
       "  using namespace mcrl2::data;\n"
-//    "  if (is_function_symbol(t))\n"  // Less efficient than the rule below.
-      "  if (atermpp::detail::addressf(aterm_cast<const atermpp::aterm_appl>(t).function())==%ld) // t is a function_symbol \n"
+      "  if (is_function_symbol(t))\n"  
       "  {\n"
       "    // Term t is a function_symbol\n"
       "    const mcrl2::data::function_symbol& f=atermpp::aterm_cast<const mcrl2::data::function_symbol>(t);\n"
@@ -2982,11 +2980,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    }\n"
       "  }\n"
       "  \n"
-      "  if (is_application(t))\n"
+      "  else if (is_application(t))\n"
       "  {\n"
       "    const application& ta=atermpp::aterm_cast<const application>(t);\n"
       "    const mcrl2::data::function_symbol& head=atermpp::aterm_cast<const mcrl2::data::function_symbol>(ta.head());\n"
-      "    if (atermpp::detail::addressf(aterm_cast<const atermpp::aterm_appl>(head).function())==%ld) // head is a function_symbol \n"
+      "    if (is_function_symbol(head))\n"
       "    {\n"
       "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(head);\n"
       "      const size_t total_arity=ta.size();\n"
@@ -3000,19 +2998,17 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "      {\n"
       "        const argument_rewriter_struct argument_rewriter;\n"
       "        return mcrl2::data::application(rewrite(ta.head()),ta.begin(),ta.end(),argument_rewriter);\n"
-      "      }\n"
+      "      }\n" 
       "    }\n"
       "    else\n"
-      "    {\n"
+      "    {\n"   
       "      return rewrite_appl_aux(ta);\n"
       "    }\n"
       "  }\n"
       "  \n"
       "  return rewrite_aux(t);\n"
       "}\n",
-      atermpp::detail::addressf(aterm_cast<const atermpp::aterm_appl>(sort_bool::true_()).function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
-      atermpp::detail::addressf(aterm_cast<const atermpp::aterm_appl>(sort_bool::true_()).function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
       max_arity+1);
 
