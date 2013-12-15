@@ -1415,7 +1415,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         ss << "jittyc_local_push_front(";
       }
-      ss << "atermpp::aterm_list()";
+      ss << "mcrl2::data::assignment_expression_list()";
       for(assignment_list::const_iterator i=assignments.begin() ; i!=assignments.end(); ++i)
       {
         pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true,total_arity);
@@ -1439,7 +1439,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         ss << "jittyc_local_push_front(";
       }
-      ss << "atermpp::aterm_list()";
+      ss << "mcrl2::data::assignment_expression_list()";
       for(assignment_list::const_iterator i=assignments.begin() ; i!=assignments.end(); ++i)
       {
         pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true,total_arity);
@@ -2578,9 +2578,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
          );
 
   // Make a functional push_front to be used in the where clause.
-  fprintf(f,"static atermpp::aterm_list jittyc_local_push_front(atermpp::aterm_list l, const aterm& e)\n"
+  fprintf(f,"static mcrl2::data::assignment_expression_list jittyc_local_push_front(mcrl2::data::assignment_expression_list l, const mcrl2::data::assignment& e)\n"
             "{\n"
-            "  l.push_front(e);\n"
+            "  l.push_front(atermpp::aterm_cast<assignment_expression>(e));\n"
             "  return l;\n"
             "}\n");
 

@@ -369,7 +369,7 @@ static data_expression subst_values(
             atermpp::detail::_aterm** vars,
             atermpp::detail::_aterm** terms,
             const size_t assignment_size,
-            const data_expression &t)
+            const data_expression& t)
 {
   if (is_function_symbol(t))
   {
@@ -388,10 +388,10 @@ static data_expression subst_values(
   }
   else if (is_abstraction(t))
   {
-    const data_expression &t1=atermpp::aterm_cast<const data_expression>(t);
-    const binder_type &binder=atermpp::aterm_cast<const binder_type>(t1[0]);
-    const variable_list &bound_variables=atermpp::aterm_cast<const variable_list>(t1[1]);
-    const data_expression body=atermpp::aterm_cast<const data_expression>(subst_values(vars,terms,assignment_size,atermpp::aterm_cast<const data_expression>(t1[2])));
+    const abstraction& t1=core::down_cast<abstraction>(t);
+    const binder_type& binder=t1.binding_operator();
+    const variable_list& bound_variables=t1.variables();
+    const data_expression body=subst_values(vars,terms,assignment_size,t1.body());
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
     for(size_t i=0; i<assignment_size; ++i)
@@ -407,7 +407,7 @@ static data_expression subst_values(
   }
   else if (is_where_clause(atermpp::aterm_cast<atermpp::aterm_appl>(t)))
   {
-    const where_clause& t1 = core::down_cast<where_clause>(t);
+    const where_clause& t1=core::down_cast<where_clause>(t);
     const assignment_expression_list& assignments=t1.declarations();
     const data_expression& body=t1.body();
 
@@ -427,10 +427,9 @@ static data_expression subst_values(
     for(assignment_expression_list::const_iterator it=assignments.begin(); it!=assignments.end(); ++it)
     {
       const assignment& assignment_expr = core::down_cast<assignment>(*it);
-      new_assignments.push_back(assignment(assignment_expr.lhs(),
-    		atermpp::aterm_cast<const data_expression>(subst_values(vars,terms,assignment_size,assignment_expr.rhs()))));
+      new_assignments.push_back(assignment(assignment_expr.lhs(), subst_values(vars,terms,assignment_size,assignment_expr.rhs())));
     }
-    return where_clause(body,assignment_list(new_assignments.begin(),new_assignments.end()));
+    return where_clause(subst_values(vars,terms,assignment_size,body),assignment_list(new_assignments.begin(),new_assignments.end()));
   }
   else
   {
