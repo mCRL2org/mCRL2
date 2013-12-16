@@ -19,7 +19,7 @@ def generate_function_symbol_constructors(rules, declaration_filename, definitio
 inline
 const atermpp::function_symbol& function_symbol_%(name)s()
 {
-  static atermpp::function_symbol function_symbol_%(name)s = atermpp::function_symbol("%(name)s", %(arity)d);
+  static const atermpp::function_symbol function_symbol_%(name)s = atermpp::function_symbol("%(name)s", %(arity)d);
   return function_symbol_%(name)s;
 }
 
@@ -43,8 +43,8 @@ const atermpp::function_symbol& function_symbol_%(name)s()
         decls[name] = f.default_declaration()
 
         ctext = ctext + 'template <typename Term> bool %s(Term t);\n' % f.check_name()
-        dtext = dtext + '  atermpp::function_symbol core::detail::function_symbols::%s = core::detail::function_symbol_%s();\n' % (name, name)
-        vtext = vtext + '  static atermpp::function_symbol %s;\n' % name
+        dtext = dtext + '  const atermpp::function_symbol core::detail::function_symbols::%s = core::detail::function_symbol_%s();\n' % (name, name)
+        vtext = vtext + '  static const atermpp::function_symbol %s;\n' % name
 
     name_keys = names.keys()
     name_keys.sort()
@@ -83,7 +83,7 @@ def generate_default_values(rules, declaration_filename, definition_filename, sk
 inline
 const atermpp::aterm_appl& default_value_%(name)s()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_%(name)s()%(arguments)s);
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_%(name)s()%(arguments)s);
   return t;
 }
 
@@ -132,8 +132,8 @@ const atermpp::aterm_appl& default_value_%(name)s()
             'name'       : name,
             'name'       : name
         }
-        dtext = dtext + '  atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
-        vtext = vtext + '  static atermpp::aterm_appl %s;\n' % name
+        dtext = dtext + '  const atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
+        vtext = vtext + '  static const atermpp::aterm_appl %s;\n' % name
 
     function_names = map(lambda x: x.name(), functions)
     for rule in rules:
@@ -151,8 +151,8 @@ const atermpp::aterm_appl& default_value_%(name)s()
                 'name'       : name,
                 'fname'      : fname
             }
-            dtext = dtext + '  atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
-            vtext = vtext + '  static atermpp::aterm_appl %s;\n' % name
+            dtext = dtext + '  const atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
+            vtext = vtext + '  static const atermpp::aterm_appl %s;\n' % name
 
     ctext = ptext + '\n' + ctext
     result = insert_text_in_file(declaration_filename, ctext, 'generated constructors')
