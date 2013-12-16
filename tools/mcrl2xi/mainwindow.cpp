@@ -54,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.actionDelete, SIGNAL(triggered()), this, SLOT(onDelete()));
   connect(m_ui.actionSelect_All, SIGNAL(triggered()), this, SLOT(onSelectAll()));
   connect(m_ui.actionFind, SIGNAL(triggered()), this, SLOT(onFind()));
+  connect(m_ui.actionZoom_in, SIGNAL(triggered()), this, SLOT(onZoomIn()));
+  connect(m_ui.actionZoom_out, SIGNAL(triggered()), this, SLOT(onZoomOut()));
 
   connect(m_ui.actionWrap_mode, SIGNAL(triggered()), this, SLOT(onWrapMode()));
   connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
@@ -299,6 +301,18 @@ void MainWindow::onFind()
 {
   m_findReplaceDialog->setTextEdit(m_ui.documentManager->currentDocument());
   m_findReplaceDialog->show();
+}
+
+void MainWindow::onZoomIn()
+{
+  DocumentWidget *editor = m_ui.documentManager->currentDocument();
+  editor->zoomIn();
+}
+
+void MainWindow::onZoomOut()
+{
+  DocumentWidget *editor = m_ui.documentManager->currentDocument();
+  editor->zoomOut();
 }
 
 void MainWindow::onWrapMode()
