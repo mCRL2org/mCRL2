@@ -259,7 +259,7 @@ the natural transition length may provide better results.
 
    Each of the properties can be expressed as a µ-calculus formula. Possible
    solutions are given as :download:`vm02a.mcf <files/vm02a.mcf>`, 
-   :download:`vm02b.mcf <files/vm02c.mcf>`, and
+   :download:`vm02b.mcf <files/vm02b.mcf>`, and
    :download:`vm02c.mcf <files/vm02c.mcf>`.
    
    Each of the properties can be checked using a combination of :ref:`tool-mcrl22lps`,
