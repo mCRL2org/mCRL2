@@ -23,7 +23,7 @@
 */
 
 /* Figure out which hashtable implementation to use: */
-#if (__clang_major__ >= 5 && __apple_build_version__ >= 5000279)
+#ifdef MCRL2_HAVE_UNORDERED_SET // Preferably use this one.
 #include <unordered_set>
 #include <unordered_map>
 #define HASH_SET(k) std::unordered_set<k>
@@ -33,21 +33,11 @@
 #include <tr1/unordered_map>
 #define HASH_SET(k) std::tr1::unordered_set<k>
 #define HASH_MAP(k,v) std::tr1::unordered_map<k, v>
-#elif (__GNUC__ >= 3)  /* GCC 3 hash tables (untested) */
-#include <ext/hash_set>
-#include <ext/hash_map>
-#define HASH_SET(k) __gnu_cxx::hash_set<k>
-#define HASH_MAP(k,v) __gnu_cxx::hash_map<k, v>
-#elif defined(_MSC_VER) /* Microsoft Visual C/C++ compiler */
-#include <hash_set>
-#include <hash_map>
-#define HASH_SET(k) stdext::hash_set<k>
-#define HASH_MAP(k,v) stdext::hash_map<k, v>
 #else  /* generic/old C++ compiler */
 #include <map>
 #include <set>
 #define HASH_SET(k) std::set<k>
 #define HASH_MAP(k,v) std::map<k, v>
-#endif
+#endif // MCRL2_HAVE_UNORDERED_SET
 
 #endif /* ndef COMPATIBILITY_H_INCLUDED */
