@@ -10,6 +10,8 @@
 #ifndef COMPATIBILITY_H_INCLUDED
 #define COMPATIBILITY_H_INCLUDED
 
+#include <stdint.h>
+
 /*! \file compatibility.h
     \brief Cross-platform compatibility functions.
 

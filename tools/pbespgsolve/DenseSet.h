@@ -46,7 +46,7 @@ public:
         Key key_;
 
     public:
-        typedef ssize_t                    difference_type;
+        typedef ptrdiff_t                  difference_type;
         typedef std::forward_iterator_tag  iterator_category;
         typedef Key                        value_type;
         typedef Key*                       pointer;
