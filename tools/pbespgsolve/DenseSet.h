@@ -10,6 +10,7 @@
 #ifndef DENSE_SET_H_INCLUDED
 #define DENSE_SET_H_INCLUDED
 
+#include <cstddef>
 #include <cstdlib>
 #include <memory>
 #include <utility>
