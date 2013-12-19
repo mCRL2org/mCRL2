@@ -28,7 +28,7 @@
 
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
-#include "mcrl2/data/detail/enum/standard.h"
+#include "mcrl2/data/detail/enum/standard.h" // To be removed.
 
 #include "mcrl2/data/data_expression.h"
 
@@ -350,11 +350,8 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   const data_expression t3=replace_variables(t2,variable_renaming);
 
-  /* Create Enumerator */
-  EnumeratorStandard ES(m_data_specification_for_enumeration, this);
-
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,true,&ES,data::detail::get_enumerator_variable_limit(),true);
+  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,true,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
 
   /* Create a list to store solutions */
   atermpp::term_list<data_expression> x;
@@ -438,11 +435,9 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   const data_expression t3=replace_variables(t2,variable_renaming);
 
-  /* Create Enumerator */
-  EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,false,&ES,data::detail::get_enumerator_variable_limit(),true);
+  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,false,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
 
   /* Create lists to store solutions */
   atermpp::term_list<data_expression> x;

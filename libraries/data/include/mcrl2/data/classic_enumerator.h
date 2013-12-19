@@ -60,9 +60,8 @@ class classic_enumerator
     typedef Evaluator                                                     evaluator_type;
 
   protected:
-    const detail::legacy_rewriter                                m_evaluator;     // Only here for conversion trick
-    detail::EnumeratorStandard                                   m_enumerator;    // The real enumeration is done in an EnumeratorStandard
-                                                                                  // class.
+    const detail::legacy_rewriter m_evaluator;     // Only here for conversion trick
+    const mcrl2::data::data_specification& m_data_spec;
 
   public:
 
@@ -100,7 +99,8 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_solution_possible(do_not_throw_exceptions)
         {
-          const data_expression rewritten_condition=e->m_evaluator.get_rewriter().rewrite(condition,sigma);
+          // const data_expression rewritten_condition=e->m_evaluator.get_rewriter().rewrite(condition,sigma);
+          const data_expression rewritten_condition=e->m_evaluator(condition,sigma);
           if ((not_equal_to_false && rewritten_condition==sort_bool::false_()) ||
               (!not_equal_to_false && rewritten_condition==sort_bool::true_()))
           {
@@ -118,11 +118,13 @@ class classic_enumerator
           else
           {
             // we must calculate the solutions.
-            m_generator=m_generator_type(new detail::EnumeratorSolutionsStandard(variables,
+            m_generator=m_generator_type(new detail::EnumeratorSolutionsStandard(
+                                                              variables,
                                                               condition,
                                                               sigma,
                                                               not_equal_to_false,
-                                                              &(m_enclosing_enumerator->m_enumerator),
+                                                              m_enclosing_enumerator->m_data_spec,
+                                                              &m_enclosing_enumerator->m_evaluator.get_rewriter(),
                                                               max_internal_variables));
             increment();
           }
@@ -265,7 +267,7 @@ class classic_enumerator
     classic_enumerator(const data_specification &specification,
                        const evaluator_type &evaluator):
       m_evaluator(evaluator),
-      m_enumerator(detail::EnumeratorStandard(specification, &m_evaluator.get_rewriter()))
+      m_data_spec(specification)
     {
     }
 
@@ -277,7 +279,7 @@ class classic_enumerator
     /// \brief Copy constructor
     classic_enumerator(classic_enumerator const& other):
       m_evaluator(other.m_evaluator),
-      m_enumerator(other.m_enumerator)
+      m_data_spec(other.m_data_spec)
     {
     }
 
@@ -286,7 +288,7 @@ class classic_enumerator
     classic_enumerator& operator=(const classic_enumerator & other)
     {
       m_evaluator=other.m_evaluator;
-      m_enumerator=other.m_enumerator;
+      m_data_spec=other.m_data_spec;
       return *this;
     }
 };

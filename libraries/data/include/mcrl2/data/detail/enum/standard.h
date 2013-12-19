@@ -100,34 +100,6 @@ class fs_expr
     }
 };
 
-class EnumeratorSolutionsStandard;
-
-
-/**
- * \brief Class for finding solutions to boolean expressions.
- * \deprecated
- * Finding concrete solutions can be done by using the 
- * EnumeratorSolutionsStandard class. For each instance of an EnumeratorStandard class
- * at most one active instance of an EnumeratorSolutionsStandard class can be used.
- *
- * Use of these classes is discouraged. Use the classic_enumerator class instead.
- **/
-
-class EnumeratorStandard 
-{
-  public:
-    const mcrl2::data::data_specification& m_data_spec;
-    Rewriter* rewr_obj;
-  
-    EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 
-    ~EnumeratorStandard();
-
-    Rewriter* getRewriter() const
-    {
-      return rewr_obj;
-    }
-};
-
 /**
  * \brief Class for enumerating solutions to boolean expressions.
  **/
@@ -139,7 +111,10 @@ class EnumeratorSolutionsStandard
 
   protected:
 
-    detail::EnumeratorStandard *m_enclosing_enumerator;
+    const mcrl2::data::data_specification& m_data_spec;
+    Rewriter* m_rewr_obj;
+
+//    detail::EnumeratorStandard *m_enclosing_enumerator;
 /*    data_expression desired_truth_value;    // We search for solutions for the condition enum_expr that are not
     data_expression forbidden_truth_value;  // equal to the forbidden truth value, and if the output matches the
                                                 // desired truth value, then the variable solution_is_exact is set. */
@@ -165,6 +140,7 @@ class EnumeratorSolutionsStandard
 
     /// \brief Default constructor
     EnumeratorSolutionsStandard():
+       m_data_spec(data_specification()),
        enum_sigma(default_sigma()),
        m_max_internal_variables(0)
     {
@@ -198,10 +174,12 @@ class EnumeratorSolutionsStandard
                    const data_expression& expr, 
                    substitution_type& sigma,
                    const bool not_equal_to_false, 
-                   detail::EnumeratorStandard *enclosing_enumerator,
+                   const mcrl2::data::data_specification& data_spec,
+                   Rewriter* rewr_obj,
                    const size_t max_internal_variables=0,
                    const bool expr_is_normal_form=false) :
-      m_enclosing_enumerator(enclosing_enumerator),
+      m_data_spec(data_spec),
+      m_rewr_obj(rewr_obj),
       enum_vars(vars),
       enum_expr(expr),
       enum_sigma(sigma),
@@ -209,6 +187,7 @@ class EnumeratorSolutionsStandard
       max_vars(MAX_VARS_INIT),
       m_max_internal_variables(max_internal_variables)
     { 
+      
       reset(not_equal_to_false,expr_is_normal_form);
     }
 

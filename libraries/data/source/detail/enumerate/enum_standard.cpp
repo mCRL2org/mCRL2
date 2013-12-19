@@ -199,7 +199,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
                                 var_list,
                                 substituted_vars,
                                 substitution_terms,
-                                m_enclosing_enumerator->rewr_obj->rewrite(condition,enum_sigma),
+                                m_rewr_obj->rewrite(condition,enum_sigma),
                                 negated_term_list,
                                 negated);
 }
@@ -284,7 +284,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr& e)
     // replacing in x==t the variable x by t.
     const data_expression old_val=enum_sigma(var);
     enum_sigma[var]=val;
-    expr = m_enclosing_enumerator->rewr_obj->rewrite(expr,enum_sigma);
+    expr = m_rewr_obj->rewrite(expr,enum_sigma);
     enum_sigma[var]=old_val;
   }
 
@@ -382,7 +382,7 @@ data_expression_list EnumeratorSolutionsStandard::build_solution2(
   else
   {
     data_expression_list result=build_solution2(vars.tail(),substituted_vars,exprs);
-    result.push_front(m_enclosing_enumerator->rewr_obj->rewrite(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
+    result.push_front(m_rewr_obj->rewrite(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
     return result;
   }
 }
@@ -481,7 +481,7 @@ bool EnumeratorSolutionsStandard::next(
       }
       else
       {
-        const function_symbol_vector& constructors_for_sort = m_enclosing_enumerator->m_data_spec.constructors(sort);
+        const function_symbol_vector& constructors_for_sort = m_data_spec.constructors(sort);
         function_symbol_vector::const_iterator it=constructors_for_sort.begin();
 
         if ( it == constructors_for_sort.end() )
@@ -517,7 +517,7 @@ bool EnumeratorSolutionsStandard::next(
 
             for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
             {
-              const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
+              const variable fv(m_rewr_obj->generator("@x@",false),*i);
               var_list.push_front(fv);
               var_array.push_back(fv);
 
@@ -567,13 +567,13 @@ bool EnumeratorSolutionsStandard::next(
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
 
-            const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(
+            const data_expression term_rf = m_rewr_obj->rewrite(
                        application(*it,var_array),enum_sigma);
             var_array.clear();
 
             const data_expression old_substituted_value=enum_sigma(var);
             enum_sigma[var]=term_rf;
-            const data_expression rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite(e.expr(),enum_sigma);
+            const data_expression rewritten_expr=m_rewr_obj->rewrite(e.expr(),enum_sigma);
             enum_sigma[var]=old_substituted_value;
             variable_list templist1=e.substituted_vars();
             templist1.push_front(var);
@@ -597,12 +597,12 @@ bool EnumeratorSolutionsStandard::next(
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
-            // const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(atermpp::aterm_appl(get_appl_afun_value(1),OpId2Int(*it)),enum_sigma);
-            const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(*it,enum_sigma);
+            // const data_expression term_rf = m_rewr_obj->rewrite(atermpp::aterm_appl(get_appl_afun_value(1),OpId2Int(*it)),enum_sigma);
+            const data_expression term_rf = m_rewr_obj->rewrite(*it,enum_sigma);
 
             const data_expression old_substituted_value=enum_sigma(var);
             enum_sigma[var]=term_rf;
-            const data_expression rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite(e.expr(),enum_sigma);
+            const data_expression rewritten_expr=m_rewr_obj->rewrite(e.expr(),enum_sigma);
             enum_sigma[var]=old_substituted_value;
             variable_list templist1=e.substituted_vars();
             templist1.push_front(var);
@@ -679,16 +679,6 @@ void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false,const bool
                                   data_expression_list(),
                                   !not_equal_to_false);
   }
-}
-
-EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification& data_spec, Rewriter* r):
-  m_data_spec(data_spec)
-{
-  rewr_obj = r;
-}
-
-EnumeratorStandard::~EnumeratorStandard()
-{
 }
 
 } // namespace detail
