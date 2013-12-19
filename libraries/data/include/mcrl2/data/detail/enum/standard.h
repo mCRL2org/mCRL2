@@ -31,7 +31,7 @@ namespace detail
 class ss_solution
 {
   protected:
-    data_expression_list m_solution;  // A list containing the solution of a condition in internal format.
+    data_expression_list m_solution;                   // A list containing the solution of a condition in internal format.
     data_expression m_evaluated_condition;             // The condition after substituting the solution, in internal format.
 
   public:

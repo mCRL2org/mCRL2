@@ -109,11 +109,6 @@ class InternalFormatManipulator
         return a_formula;
       }
 
-      /* if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
-      {
-        return a_formula;
-      } */
-
       if (a_formula == a_guard)
       {
         return sort_bool::false_();

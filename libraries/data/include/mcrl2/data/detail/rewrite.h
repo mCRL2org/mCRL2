@@ -47,13 +47,6 @@ class Rewriter
 
     typedef mutable_indexed_substitution<data::variable, std::vector< data::data_expression > > substitution_type;
 
-    data_expression internal_true;
-    data_expression internal_false;
-    data_expression internal_not;
-    data_expression internal_and;
-    data_expression internal_or;
-
-
     used_data_equation_selector data_equation_selector;
     /**
      * \brief Constructor. Do not use directly; use createRewriter()
@@ -64,11 +57,6 @@ class Rewriter
           data_equation_selector(eq_selector),
           m_data_specification_for_enumeration(data_spec)
     {
-      internal_true=sort_bool::true_();
-      internal_false=sort_bool::false_();
-      internal_not=sort_bool::not_();
-      internal_and=sort_bool::and_();
-      internal_or=sort_bool::or_();
     }
 
     /** \brief Destructor. */

@@ -698,8 +698,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           }
         }
         // assert(number_of_vars<=max_len);
-        if (matches && (element_at(rule1,1)==internal_true || rewrite_aux(
-                   subst_values(vars,terms,no_assignments,atermpp::aterm_cast<data_expression>(element_at(rule1,1))),sigma)==internal_true))
+        if (matches && (element_at(rule1,1)==sort_bool::true_() || rewrite_aux(
+                   subst_values(vars,terms,no_assignments,atermpp::aterm_cast<data_expression>(element_at(rule1,1))),sigma)==sort_bool::true_()))
         {
           const data_expression& rhs=atermpp::aterm_cast<const data_expression>(element_at(rule1,3));
 

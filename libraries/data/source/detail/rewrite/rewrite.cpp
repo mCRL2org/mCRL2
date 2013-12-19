@@ -358,31 +358,31 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   /* Create a list to store solutions */
   atermpp::term_list<data_expression> x;
-  data_expression evaluated_condition=internal_false;
-  data_expression partial_result=internal_false;
+  data_expression evaluated_condition=sort_bool::false_();
+  data_expression partial_result=sort_bool::false_();
   bool solution_possible=true;
 
   size_t loop_upperbound=5;
   while (loop_upperbound>0 &&
-         partial_result!=internal_true &&
+         partial_result!=sort_bool::true_() &&
          sol.next(evaluated_condition,x,solution_possible))
   {
-    if (partial_result==internal_false)
+    if (partial_result==sort_bool::false_())
     {
       partial_result=evaluated_condition;
     }
-    else if (partial_result==internal_true)
+    else if (partial_result==sort_bool::true_())
     {
-      partial_result=internal_true;
+      partial_result=sort_bool::true_();
     }
     else
     {
-      partial_result=application(internal_or, partial_result,evaluated_condition);
+      partial_result=application(sort_bool::or_(), partial_result,evaluated_condition);
     }
     loop_upperbound--;
   }
 
-  if (solution_possible && (loop_upperbound>0 || partial_result==internal_true))
+  if (solution_possible && (loop_upperbound>0 || partial_result==sort_bool::true_()))
   {
     return partial_result;
   }
@@ -446,53 +446,53 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   /* Create lists to store solutions */
   atermpp::term_list<data_expression> x;
-  data_expression evaluated_condition=internal_true;
-  data_expression partial_result=internal_true;
+  data_expression evaluated_condition=sort_bool::true_();
+  data_expression partial_result=sort_bool::true_();
   bool solution_possible=true;
 
   size_t loop_upperbound=5;
   while (loop_upperbound>0 &&
-         partial_result!=internal_false &&
+         partial_result!=sort_bool::false_() &&
          sol.next(evaluated_condition,x,solution_possible))
   {
     // The returned evaluated condition is the negation of the entered condition,
     // as is not_equal_to_true_or_false is set to false in sol. So, we must first
     // negate it.
 
-    if (evaluated_condition == internal_true)
+    if (evaluated_condition == sort_bool::true_())
     {
-      evaluated_condition=internal_false;
+      evaluated_condition=sort_bool::false_();
     }
-    else if (evaluated_condition == internal_false)
+    else if (evaluated_condition == sort_bool::false_())
     {
-      evaluated_condition=internal_true;
+      evaluated_condition=sort_bool::true_();
     }
-    else if (evaluated_condition[0] == internal_not)
+    else if (evaluated_condition[0] == sort_bool::not_())
     {
       evaluated_condition=static_cast<data_expression>(evaluated_condition[1]);
     }
     else
     {
-      evaluated_condition=application(internal_not, evaluated_condition);
+      evaluated_condition=application(sort_bool::not_(), evaluated_condition);
     }
 
 
-    if (partial_result==internal_true)
+    if (partial_result==sort_bool::true_())
     {
       partial_result=evaluated_condition;
     }
-    else if (partial_result==internal_false)
+    else if (partial_result==sort_bool::false_())
     {
-      partial_result=internal_false;
+      partial_result=sort_bool::false_();
     }
     else
     {
-      partial_result=application(internal_and, partial_result, evaluated_condition);
+      partial_result=application(sort_bool::and_(), partial_result, evaluated_condition);
     }
     loop_upperbound--;
   }
 
-  if (solution_possible && (loop_upperbound>0 || partial_result==internal_false))
+  if (solution_possible && (loop_upperbound>0 || partial_result==sort_bool::false_()))
   {
     return partial_result;
   }
