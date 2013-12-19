@@ -300,20 +300,24 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             typedef classic_enumerator< rewriter > enumerator_type;
             enumerator_type enumerator(spec,rewr);
 
+            data::mutable_indexed_substitution<> sigma;
             for (enumerator_type::iterator
-                      i=enumerator.begin(vars,term,10000); // Stop when more than 10000 internal variables are required
+                      i=enumerator.begin(variable_list(vars.begin(),vars.end()),term,sigma, 10000); // Stop when more than 10000 internal variables are required
                       i != enumerator.end() ; ++i)
             {
               cout << "[";
-              for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
+              data::data_expression_list::const_iterator j=i->begin();
+              data::mutable_indexed_substitution<> sigma_i;
+              for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v, ++j)
               {
-                cout << data::pp(*v) << " := " << data::pp((*i)(*v));
+                cout << data::pp(*v) << " := " << data::pp(*j);
+                sigma_i[*v]=*j;
                 if (boost::next(v)!=vars.end())
                 {
                   cout << ", ";
                 }
               }
-              cout << "] evaluates to "<< data::pp(rewr(term,*i)) << "\n";
+              cout << "] evaluates to "<< data::pp(rewr(term,sigma_i)) << "\n";
             }
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))

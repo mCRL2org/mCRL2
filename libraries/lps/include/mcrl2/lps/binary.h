@@ -152,13 +152,14 @@ class binary_algorithm: public lps::detail::lps_algorithm
           //Get all constructors for par
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
-          // for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
+          mcrl2::data::mutable_indexed_substitution<> local_sigma;
           for (enumerator_type::iterator j=enumerator.begin(
                            atermpp::make_list<data::variable>(par),
-                           data::data_expression(data::sort_bool::true_()));
+                           data::sort_bool::true_(),
+                           local_sigma);
                 j != enumerator.end() ; ++j)
           {
-            enumerated_elements.push_back((*j)(par));
+            enumerated_elements.push_back(j->front());
           }
 
           m_enumerated_elements[par] = enumerated_elements;

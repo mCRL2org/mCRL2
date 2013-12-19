@@ -40,11 +40,10 @@ namespace data
 ///        be replaced by false. If a finite number of expressions t1,...,tn can be found
 ///        that neither makes cond(t_i) false nor true, forall x:Nat.cond(x) can
 ///        be replaced by cond(t1) && cond(t2) && ... && cond(tn).
-///        By default the solutions are represented as substitutions.
-///        The classic enumerator can also work with expressions
-///        in internal rewrite format. In that case solutions are
-///        aterm_list < aterm_appl >'s of the same length as the
-///        list of variables.
+///        By default the solutions are represented as data_expression_lists of the same
+///        length as a variable list. For a variable list [v1,...,vn] and data_expression_list
+///        [t1,...,tn] the data_expression ti is the solution for variable vi.
+
 template < typename Evaluator = rewriter >
 class classic_enumerator
 {
@@ -67,12 +66,12 @@ class classic_enumerator
 
   public:
 
-    /// \brief A class to enumerate solutions for terms in internal format.
-    /// \details Solutions are presented as aterm lists in internal format of the same length as
+    /// \brief A class to enumerate solutions for terms.
+    /// \details Solutions are presented as data_expression_lists of the same length as
     ///          the list of variables for which a solution is sought.
-    class iterator_internal :
+    class iterator :
         public boost::iterator_facade<
-                 iterator_internal,
+                 iterator,
                  const data_expression_list,
                  boost::forward_traversal_tag >
     {
@@ -89,11 +88,11 @@ class classic_enumerator
 
       public:
 
-        /// \brief Constructor. Use it via the begin_internal function of the classic enumerator class.
-        iterator_internal(enclosing_classic_enumerator *e,
-                          const variable_list &variables,
-                          const data_expression &condition,
-                          substitution_type &sigma,
+        /// \brief Constructor. Use it via the begin function of the classic enumerator class.
+        iterator(enclosing_classic_enumerator *e,
+                          const variable_list& variables,
+                          const data_expression& condition,
+                          substitution_type& sigma,
                           const bool not_equal_to_false=true,
                           const size_t max_internal_variables=0,
                           const bool do_not_throw_exceptions=false):
@@ -102,8 +101,8 @@ class classic_enumerator
           m_solution_possible(do_not_throw_exceptions)
         {
           const data_expression rewritten_condition=e->m_evaluator.get_rewriter().rewrite(condition,sigma);
-          if ((not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_false) ||
-              (!not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_true))
+          if ((not_equal_to_false && rewritten_condition==sort_bool::false_()) ||
+              (!not_equal_to_false && rewritten_condition==sort_bool::true_()))
           {
             // no solutions are found.
             m_solution_possible=true;
@@ -113,8 +112,8 @@ class classic_enumerator
             // in this case we generate exactly one solution.
             m_enumerator_iterator_valid=true;
             m_solution_possible=true;
-            m_solution_is_exact=((not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_true) ||
-                                 (!not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_false));
+            m_solution_is_exact=((not_equal_to_false && rewritten_condition==sort_bool::true_()) ||
+                                 (!not_equal_to_false && rewritten_condition==sort_bool::false_()));
           }
           else
           {
@@ -129,16 +128,16 @@ class classic_enumerator
           }
         }
 
-        /// \brief Constructor representing the end of an internal_iterator.
-        //  \details It is advisable to avoid its use, and use end_internal instead.
-        iterator_internal():
+        /// \brief Constructor representing the end of an iterator.
+        //  \details It is advisable to avoid its use, and use end instead.
+        iterator():
            m_enumerator_iterator_valid(false),
            m_solution_possible(false)
         {
         }
 
         /// \brief Destructor.
-        ~iterator_internal()
+        ~iterator()
         {
           if (m_generator!=nullptr)
           {
@@ -147,40 +146,25 @@ class classic_enumerator
         }
 
         /// \brief Standard assignment operator.
-        iterator_internal& operator=(const iterator_internal &other)
+        iterator& operator=(const iterator &other)
         {
           m_enclosing_enumerator=other.m_enclosing_enumerator;
           m_assignments=other.m_assignments;
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
           m_solution_is_exact=other.m_solution_is_exact;
           m_solution_possible=other.m_solution_possible;
-          /* Code below appears to be without effect.
-          if (m_generator==NULL && other.m_generator!=NULL)
-          {
-          }
-          if (m_generator!=NULL && other.m_generator==NULL)
-          {
-          } */
           m_generator=other.m_generator;
           return *this;
         }
 
         /// \brief Standard copy constructor
-        iterator_internal(const iterator_internal &other)
+        iterator(const iterator &other)
         {
           m_enclosing_enumerator=other.m_enclosing_enumerator;
           m_assignments=other.m_assignments;
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
           m_solution_is_exact=other.m_solution_is_exact;
           m_solution_possible=other.m_solution_possible;
-          /* Code below appears to be without effect.
-          if (m_generator==NULL && other.m_generator!=NULL)
-          {
-          }
-          if (m_generator!=NULL && other.m_generator==NULL)
-          {
-          }
-          */
           m_generator=other.m_generator;
         }
 
@@ -220,12 +204,12 @@ class classic_enumerator
             m_enumerator_iterator_valid=m_generator->next(instantiated_solution,m_assignments,m_solution_possible);
             if (m_enumerator_iterator_valid)
             {
-              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.get_rewriter().internal_true;
+              m_solution_is_exact=instantiated_solution==sort_bool::true_();
             }
           }
         }
 
-        bool equal(iterator_internal const& other) const
+        bool equal(iterator const& other) const
         {
           /* Only check whether end of enumerator has been reached */
           return m_enumerator_iterator_valid==other.m_enumerator_iterator_valid;
@@ -238,199 +222,36 @@ class classic_enumerator
         }
     };
 
-    /// \brief An iterator that delivers values for variables to make a condition true.
-    /// \details The condition and the solutions are in internal rewrite format.
-    ///          Dereferencing a valid iterator yields a list of solutions of the
+    /// \brief An iterator that delivers solutions for variables to satisfy a condition. 
+    /// \details The solutions that are sought are those that do not make the condition false, or
+    ///           if not_equal_to_false is set to false, make the solution not equal to true.
+    ///           The method solution_is_exact can be used to find out whether the solution is
+    ///           exactly true or false.
+    ///           Dereferencing a valid iterator yields a list of data_expressions solutions of the
     ///          same length as variables.
     /// \param[in] variables The variables for which a solution is sought.
-    /// \param[in] condition_in_internal_format The condition in internal format.
-    /// \param[in] sigma A substitution in the internal format.
-    /// \param[in] max_internal_variables The maximal number of internally generatable variables.
-    ///            If zero, then there is no bound. If the bound is reached, generating
-    ///            new solutions stops with or without an exception as desired.
+    /// \param[in] condition The condition.
+    /// \param[in] sigma A substitution.
     /// \param[in] not_equal_to_false Indicates whether solutions are generated that make
     ///            the condition not equal to false, or not equal to true. This last option is
     ///            for instance useful to generate the solutions for the universal quantifier.
+    /// \param[in] max_internal_variables The maximal number of internally generatable variables.
+    ///            If zero, then there is no bound. If the bound is reached, generating
+    ///            new solutions stops with or without an exception as desired.
     /// \param[in] do_not_throw_exceptions A boolean indicating whether an exception can be thrown.
     ///            if not, the function solution_is_possible can be used to indicate whether
     ///            valid solutions are being generated.
-    iterator_internal begin_internal(const variable_list variables,
-                                     const data_expression condition_in_internal_format,
-                                     substitution_type &sigma,
-                                     const size_t max_internal_variables=0,
-                                     const bool not_equal_to_false=true,
-                                     const bool do_not_throw_exceptions=false)
-
+    iterator begin(const variable_list& variables,
+                   const data_expression& condition,
+                   substitution_type& sigma,
+                   const bool not_equal_to_false=true,
+                   const size_t max_internal_variables=0,
+                   const bool do_not_throw_exceptions=false)
     {
-      return iterator_internal(this, variables, condition_in_internal_format,sigma,not_equal_to_false,max_internal_variables,do_not_throw_exceptions);
+      return iterator(this, variables, condition,sigma,not_equal_to_false,max_internal_variables,do_not_throw_exceptions);
     }
 
     /// \brief The standard end iterator to indicate the end of an iteration.
-    iterator_internal end_internal() const
-    {
-      return iterator_internal();
-    }
-
-  public:
-    /// \brief An iterator class to iterate over values of variables satisfying a condition.
-    /// \details The dereference operator of this iterator class yields a substitution that
-    ///          contains a mapping from variables to values representing a solution.
-    class iterator :
-        public boost::iterator_facade<
-                 iterator,
-                 const substitution_type,
-                 boost::forward_traversal_tag >
-    {
-      protected:
-
-        typedef classic_enumerator < evaluator_type > enclosing_classic_enumerator;
-
-        enclosing_classic_enumerator *m_enclosing_enumerator;
-        bool m_enumerator_iterator_valid;
-        substitution_type m_substitution;
-        variable_list m_vars;
-        bool m_solution_is_exact;
-        bool m_solution_possible;
-        substitution_type internal_sigma;
-        detail::EnumeratorSolutionsStandard m_generator;
-
-      public:
-
-        /// \brief Constructor. Use it via the begin function of the classic enumerator class.
-        template < typename Container >
-        iterator(enclosing_classic_enumerator *e,
-                 const Container &variables,
-                 const expression_type &condition,
-                 const substitution_type &sigma=substitution_type(),
-                 const bool not_equal_to_false=true,
-                 const size_t max_internal_variables=0,
-                 const bool do_not_throw_exceptions=false,
-                 typename atermpp::detail::enable_if_container< Container, variable >::type* = 0):
-          m_enclosing_enumerator(e),
-          m_enumerator_iterator_valid(false),
-          m_vars(atermpp::convert<variable_list,Container>(variables)),
-          m_solution_possible(do_not_throw_exceptions),
-          internal_sigma(sigma),
-          m_generator(m_vars,
-                      condition,
-                      internal_sigma,
-                      not_equal_to_false,
-                      &(m_enclosing_enumerator->m_enumerator),
-                      max_internal_variables)
-        {
-          increment();
-        }
-
-        /// \brief Constructor representing the end of an internal_iterator.
-        //  \details It is advisable to avoid its use, and use method end of the classic enumerator instead.
-        iterator():
-          m_enumerator_iterator_valid(false),
-          m_solution_possible(false)
-        {
-        }
-
-        /// \brief Indicate whether this enumerated value for the variables makes the
-        //         condition exactly true if not_equal_to_false is true, or exactly false if not_equal_to_false
-        //         is false.
-        bool solution_is_exact() const
-        {
-          assert(m_enumerator_iterator_valid);
-          return m_solution_is_exact;
-        }
-
-        /// \brief Indicate whether an solution was attempted to be generated (true) or whether
-        //         an error occurred (false).
-        //  \details This indicator only works if the variable do_not_throw_exceptions was true.
-        //           Otherwise an exception is thrown. If do_not_throw_exceptions was true, and
-        //           this function returns false, then the iterator is equal to end().
-        bool solution_is_possible() const
-        {
-          assert(!m_enumerator_iterator_valid);
-          return m_solution_possible;
-        }
-
-      protected:
-
-        friend class boost::iterator_core_access;
-
-        void increment()
-        {
-          data_expression_list assignment_list;
-
-          const bool b=m_solution_possible;
-          data_expression instantiated_solution;
-          if (m_generator.next(instantiated_solution,assignment_list,m_solution_possible) && b==m_solution_possible)
-          {
-            if (m_solution_possible)
-            {
-              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.get_rewriter().internal_true;
-            }
-            m_enumerator_iterator_valid=true;
-            variable_list::const_iterator j=m_vars.begin();
-            for (data_expression_list::const_iterator i=assignment_list.begin();
-                 i != assignment_list.end(); ++i,++j)
-            {
-              assert(static_cast< variable_type >(*j).sort() == i->sort());
-
-              m_substitution[static_cast< variable_type >(*j)] = *i;
-            }
-
-          }
-          else
-          {
-            m_enumerator_iterator_valid=false;
-          }
-        }
-
-        bool equal(iterator const& other) const
-        {
-          // Only check whether end of enumerator has been reached
-          return m_enumerator_iterator_valid==other.m_enumerator_iterator_valid;
-        }
-
-        substitution_type const& dereference() const
-        {
-          assert(m_enumerator_iterator_valid);
-          return m_substitution;
-        }
-    };
-
-    /** \brief The standard begin function of an enumerating iterator
-        \details The iterator enumerates solutions for the variables that make the
-                 condition not false (by default) or if not_equal_to_false is false, solutions
-                 are enumerated that does not make the condition true.
-        \param[in] variables The variables for which solutions are sought
-        \param[in] condition The condition which must or must not be satisfied
-        \param[in] max_internal_variables The maximum number of internal variables to be generated.
-                     If set to 0, there is no limit and enumerator may not terminate. Otherwise
-                     the enumerator will terminate, provided the evaluator that is used terminates
-                     always.
-        \param[in] not_equal_to_false This variable indicates whether it is attempted to make
-                     the condition not equal to false, or -- if false -- not equal to true. This
-                     last option is useful to expand the universal quantifier. The default option
-                     is useful for the sum operator or the existential quantifier.
-        \param[in] do_not_throw_exceptions If set, exceptions are surpressed, but the function
-                        solution_is_possible of the iterator can be used to find out whether
-                        valid solutions are being generated, or whether a problem has occurred.
-                        Basically, there are two possible problems, namely, there are no constructor
-                        functions or the number of internally generated variables reached the limit.
-        \param[in] substitution A substitution.
-
-    **/
-    template < typename Container >
-    iterator begin(const Container &variables,
-                   const expression_type &condition,
-                   const size_t max_internal_variables=0,
-                   const bool not_equal_to_false=true,
-                   const bool do_not_throw_exceptions=false,
-                   const substitution_type &substitution=substitution_type(),
-                   typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-    {
-      return iterator(this, variables, condition, substitution, not_equal_to_false, max_internal_variables, do_not_throw_exceptions);
-    }
-
-    /** \brief The standard end function of an enumerating iterator
-    **/
     iterator end() const
     {
       return iterator();

@@ -87,25 +87,30 @@ void Solver::solve(QString specification, QString dataExpression)
 
       enumerator_type enumerator(m_data_spec,rewr);
 
-      for (enumerator_type::iterator i = enumerator.begin(m_vars,term,10000); // Stop when more than 10000 internal variables are required.
+      mcrl2::data::mutable_indexed_substitution<> sigma;
+      // Stop when more than 10000 internal variables are required.
+      for (enumerator_type::iterator i = enumerator.begin(mcrl2::data::variable_list(m_vars.begin(),m_vars.end()),term,sigma,10000); 
            i != enumerator.end() && !m_abort; ++i)
       {
         mCRL2log(info) << "Solution found" << std::endl;
 
         QString s('[');
 
-        for (std::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v)
+        mcrl2::data::data_expression_list::const_iterator j=i->begin();
+        mcrl2::data::mutable_indexed_substitution<> sigma_i;
+        for (std::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v, ++j)
         {
+          sigma_i[*v]=*j;
           if( v != m_vars.begin() )
           {
             s.append(", ");
           }
           s.append(mcrl2::data::pp(*v).c_str());
           s.append(" := ");
-          s.append(mcrl2::data::pp((*i)(*v)).c_str());
+          s.append(mcrl2::data::pp(*j).c_str());
         }
         s.append("] evaluates to ");
-        s.append(mcrl2::data::pp(rewr(term,*i)).c_str());
+        s.append(mcrl2::data::pp(rewr(term,sigma_i)).c_str());
 
         emit solvedPart(s);
 

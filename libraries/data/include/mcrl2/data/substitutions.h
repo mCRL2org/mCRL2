@@ -657,7 +657,8 @@ public:
   /// \brief Default constructor
   mutable_indexed_substitution()
     : m_variables_in_rhs_set_is_defined(false)
-  {}
+  {
+  }
 
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment
@@ -763,6 +764,7 @@ public:
       if (j!=size_t(-1))
       {
         // the variable has an assigned value.
+        assert(j<m_container.size());
         return m_container[j];
       }
     }

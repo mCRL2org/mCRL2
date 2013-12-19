@@ -345,7 +345,7 @@ static data_expression subst_values(
             atermpp::detail::_aterm** vars,
             atermpp::detail::_aterm** terms,
             const size_t assignment_size,
-            const data_expression &t); // prototype;
+            const data_expression& t); // prototype;
 
 class subst_values_argument
 {
@@ -456,9 +456,9 @@ static bool match_jitty(
   {
     for (size_t i=0; i<assignment_size; i++)
     {
-      if (p== vars[i])
+      if (p==vars[i])
       {
-        if (t== terms[i])
+        if (t==terms[i])
         {
           return true;
         }
@@ -480,12 +480,15 @@ static bool match_jitty(
     {
       return false;
     }
-    // p and t must be data_expression's.
-    if (p.function()!=t.function())
+    // p and t must be applications.
+    assert(is_application(p));
+    assert(is_application(t));
+    if (p.function()!=t.function()) // are p and t applications of the same arity?
     {
       return false;
     }
 
+   
     size_t arity = p.size();
 
     for (size_t i=0; i<arity; i++)
@@ -511,7 +514,7 @@ data_expression RewriterJitty::rewrite_aux(
   }
   if (is_variable(term))
   {
-    return sigma(atermpp::aterm_cast<variable>(term));
+    return sigma(core::down_cast<variable>(term));
   }
   if (is_where_clause(term))
   {
@@ -644,19 +647,16 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     make_jitty_strat_sufficiently_larger(op_value);
   }
 
-  const atermpp::aterm_list &strat=jitty_strat[op_value];
+  const atermpp::aterm_list& strat=jitty_strat[op_value];
   if (!strat.empty())
   {
-    /* typedef std::pair<variable, data_expression> variable_aterm_pair;
-    std::vector < variable_aterm_pair > subst;
-    subst.reserve(max_vars); */
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,atermpp::detail::_aterm*,max_vars);
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::detail::_aterm*,max_vars);
     size_t no_assignments=0;
 
     for (atermpp::aterm_list::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
     {
-      const atermpp::aterm &rule = *strategy_it;
+      const atermpp::aterm& rule = *strategy_it;
       if (rule.type_is_int())
       {
         const size_t i = (atermpp::aterm_cast<const atermpp::aterm_int>(rule)).value()+1;
@@ -675,7 +675,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       else
       {
         const atermpp::aterm_list& rule1=atermpp::aterm_cast<const atermpp::aterm_list>(rule);
-        const data_expression& lhs = atermpp::aterm_cast<const data_expression>(element_at(rule1,2));
+        const data_expression& lhs=atermpp::aterm_cast<const data_expression>(element_at(rule1,2));
         size_t rule_arity = (is_function_symbol(lhs)?1:detail::recursive_number_of_args(lhs)+1);
 
         if (rule_arity > arity)
@@ -701,7 +701,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         if (matches && (element_at(rule1,1)==internal_true || rewrite_aux(
                    subst_values(vars,terms,no_assignments,atermpp::aterm_cast<data_expression>(element_at(rule1,1))),sigma)==internal_true))
         {
-          const data_expression &rhs = atermpp::aterm_cast<const data_expression>(element_at(rule1,3));
+          const data_expression& rhs=atermpp::aterm_cast<const data_expression>(element_at(rule1,3));
 
           if (arity == rule_arity)
           {
@@ -825,9 +825,7 @@ data_expression RewriterJitty::rewrite(
     rebuild_strategy();
     need_rebuild = false;
   }
-
-  const data_expression result=rewrite_aux(term, sigma);
-  return result;
+  return rewrite_aux(term, sigma);
 
 }
 

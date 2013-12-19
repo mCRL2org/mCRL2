@@ -223,18 +223,25 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
 
     std::set<pbes_expression> result;
     data::classic_enumerator<> enumerator(m_data_spec, super::m_data_rewriter);
-    for (data::classic_enumerator<>::iterator i=enumerator.begin(di, data::sort_bool::true_());
+    mcrl2::data::mutable_indexed_substitution<> local_sigma;
+    for (data::classic_enumerator<>::iterator i=enumerator.begin(data::variable_list(di.begin(),di.end()), data::sort_bool::true_(),local_sigma);
               i != enumerator.end(); ++i)
     {
       mCRL2log(log::debug1) << "sigma = " << data::print_substitution(sigma) << "\n";
-      mCRL2log(log::debug1) << "*i    = " << data::print_substitution(*i) << "\n";
+      data::mutable_indexed_substitution<> sigma_i;
+      data::data_expression_list::const_iterator k=i->begin();
+      for(auto j=di.begin(); j!=di.end(); ++j, ++k)
+      {
+        sigma_i[*j]=*k;
+      }
+      mCRL2log(log::debug1) << "*i    = " << data::print_substitution(sigma_i) << "\n";
       data::data_expression_list d_copy = d;
       data::detail::rewrite_container(d_copy, super::m_data_rewriter, sigma);
       data::data_expression_list e_copy = e;
       data::detail::rewrite_container(e_copy, super::m_data_rewriter, sigma);
 
       data::data_expression_list di_copy = atermpp::convert<data::data_expression_list>(di);
-      di_copy = data::replace_free_variables(di_copy, *i);
+      di_copy = data::replace_free_variables(di_copy, sigma_i);
 
       data::data_expression c = make_condition(di_copy, d_copy);
       mCRL2log(log::debug1) << "c = " << data::pp(c) << "\n";
@@ -360,22 +367,30 @@ class pbesinst_finite_algorithm
         data::variable_list infinite = atermpp::convert<data::variable_list>(infinite_parameters);
 
         data::classic_enumerator<> enumerator(p.data(),rewr);
-        for (data::classic_enumerator<>::iterator j=enumerator.begin(finite_parameters, data::sort_bool::true_());
-                     j != enumerator.end(); ++j)
+        mcrl2::data::mutable_indexed_substitution<> local_sigma;
+        for (data::classic_enumerator<>::iterator j=enumerator.begin(data::variable_list(finite_parameters.begin(),finite_parameters.end()), 
+                    data::sort_bool::true_(),local_sigma); j != enumerator.end(); ++j)
         {
           // apply the substitution *j
           // TODO: use a generic substitution routine (does that already exist in the data library?)
+          data::mutable_indexed_substitution<> sigma_j;
+          data::data_expression_list::const_iterator kk=j->begin();
+          for(auto jj=finite_parameters.begin(); jj!=finite_parameters.end(); ++jj, ++kk)
+          {
+            sigma_j[*jj]=*kk;
+          }
+
           std::vector<data::data_expression> finite;
           for (std::vector<data::variable>::iterator k = finite_parameters.begin(); k != finite_parameters.end(); ++k)
           {
-            mCRL2log(log::debug1) << "sigma(" << data::pp(*k) << ") = " << data::pp((*j)(*k)) << "\n";
-            finite.push_back((*j)(*k));
+            mCRL2log(log::debug1) << "sigma(" << data::pp(*k) << ") = " << data::pp(sigma_j(*k)) << "\n";
+            finite.push_back(sigma_j(*k));
           }
           core::identifier_string name = pbesinst_finite_rename()(i->variable().name(), finite);
           propositional_variable X(name, infinite);
           mCRL2log(log::debug1) << "formula before = " << pbes_system::pp(i->formula()) << "\n";
-          mCRL2log(log::debug1) << "sigma = " << data::print_substitution(*j) << "\n";
-          pbes_expression formula = visitor(i->formula(), *j);
+          mCRL2log(log::debug1) << "sigma = " << data::print_substitution(sigma_j) << "\n";
+          pbes_expression formula = visitor(i->formula(), sigma_j);
           mCRL2log(log::debug1) << "formula after  = " << pbes_system::pp(formula) << "\n";
           pbes_equation eqn(i->symbol(), X, formula);
           equations.push_back(eqn);

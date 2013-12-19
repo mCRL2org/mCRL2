@@ -148,7 +148,7 @@ class next_state_generator
         bool m_cached;
         summand_enumeration_t::iterator m_enumeration_cache_iterator;
         summand_enumeration_t::iterator m_enumeration_cache_end;
-        enumerator_t::iterator_internal m_enumeration_iterator;
+        enumerator_t::iterator m_enumeration_iterator;
         bool m_caching;
         condition_arguments_t m_enumeration_cache_key;
         summand_enumeration_t m_enumeration_log;

@@ -437,7 +437,7 @@ void next_state_generator::iterator::increment()
   std::vector < rewriter_expression_t > condition_arguments;
   while (!m_summand ||
     (m_cached && m_enumeration_cache_iterator == m_enumeration_cache_end) ||
-    (!m_cached && m_enumeration_iterator == enumerator_t::iterator_internal()))
+    (!m_cached && m_enumeration_iterator == enumerator_t::iterator()))
   {
     if (m_caching)
     {
@@ -507,7 +507,7 @@ void next_state_generator::iterator::increment()
       {
         (*m_substitution)[*i] = *i;  // Reset the variable.
       }
-      m_enumeration_iterator = m_generator->m_enumerator.begin_internal(m_summand->variables, m_summand->condition, *m_substitution);
+      m_enumeration_iterator = m_generator->m_enumerator.begin(m_summand->variables, m_summand->condition, *m_substitution);
     }
   }
 

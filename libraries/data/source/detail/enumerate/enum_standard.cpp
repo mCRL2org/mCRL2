@@ -31,13 +31,13 @@ namespace detail
 // Ugly add hoc class. Ought to be replaced when lambda notation can be used.
 class test_equal
 {
-  const atermpp::aterm_appl &m_term;
+  const atermpp::aterm_appl& m_term;
 
   public:
-    test_equal(const data_expression &t) : m_term(t)
+    test_equal(const data_expression& t) : m_term(t)
     {}
 
-    bool operator ()(const atermpp::aterm_appl &other) const
+    bool operator ()(const atermpp::aterm_appl& other) const
     {
       return m_term==other;
     }
@@ -48,7 +48,7 @@ data_expression EnumeratorSolutionsStandard::add_negations(
                                 const data_expression_list& negation_term_list,
                                 const bool negated) const
 { /* If negation_term_list is [t1,...,tn], generate an expression of the form
-     condition /\ !t1 /\ !t2 /\ ... /\ !tn in internal format. Using ad hoc
+     condition /\ !t1 /\ !t2 /\ ... /\ !tn. Using ad hoc
      rewriting is cheaper than using a full fledged rewriter, that will
      again normalise all subterms.
   */
@@ -56,23 +56,23 @@ data_expression EnumeratorSolutionsStandard::add_negations(
   {
     if (negated)
     {
-      if (condition == m_enclosing_enumerator->rewr_obj->internal_true)
+      if (condition == sort_bool::true_())
       {
-        return m_enclosing_enumerator->rewr_obj->internal_false;
+        return sort_bool::false_(); 
       }
-      else if (condition == m_enclosing_enumerator->rewr_obj->internal_false)
+      else if (condition == sort_bool::false_())
       {
-        return m_enclosing_enumerator->rewr_obj->internal_true;
+        return sort_bool::true_();
       }
       else if (is_application(condition))
       {
         const application& ca = core::down_cast<application>(condition);
-        if (ca.head() == m_enclosing_enumerator->rewr_obj->internal_not)
+        if (ca.head() == sort_bool::not_())
         {
           return ca[0];
         }
       }
-      return application(m_enclosing_enumerator->rewr_obj->internal_not, condition);
+      return application(sort_bool::not_(), condition);
     }
     return condition;
   }
@@ -81,45 +81,43 @@ data_expression EnumeratorSolutionsStandard::add_negations(
   data_expression second_argument= negation_term_list.front();
   if (!negated)
   {
-    if (second_argument == m_enclosing_enumerator->rewr_obj->internal_true)
+    if (second_argument == sort_bool::true_()) 
     {
-      return m_enclosing_enumerator->rewr_obj->internal_false;
+      return sort_bool::false_();
     }
-    else if (second_argument == m_enclosing_enumerator->rewr_obj->internal_false)
+    else if (second_argument == sort_bool::false_())
     {
-      return m_enclosing_enumerator->rewr_obj->internal_true;
+      return sort_bool::true_(); 
     }
-    else if (is_application(second_argument) && atermpp::aterm_cast<const application>(second_argument).head()== m_enclosing_enumerator->rewr_obj->internal_not)
+    else if (is_application(second_argument) && core::down_cast<application>(second_argument).head()== sort_bool::not_())
     {
-      second_argument=atermpp::aterm_cast<const application>(second_argument)[0];
+      second_argument=core::down_cast<application>(second_argument)[0];
     }
     else
     {
-      second_argument=application(m_enclosing_enumerator->rewr_obj->internal_not,second_argument);
+      second_argument=application(sort_bool::not_(),second_argument);
     }
   }
 
-  if (first_argument==m_enclosing_enumerator->rewr_obj->internal_true)
+  if (first_argument==sort_bool::true_())
   {
     return second_argument;
   }
-  else if (first_argument==m_enclosing_enumerator->rewr_obj->internal_false)
+  else if (first_argument==sort_bool::false_())
   {
-    return m_enclosing_enumerator->rewr_obj->internal_false;
+    return sort_bool::false_();
   }
-  if (second_argument==m_enclosing_enumerator->rewr_obj->internal_true)
+  if (second_argument==sort_bool::true_())
   {
     return first_argument;
   }
-  else if (second_argument==m_enclosing_enumerator->rewr_obj->internal_false)
+  else if (second_argument==sort_bool::false_())
   {
-    return m_enclosing_enumerator->rewr_obj->internal_false;
+    return sort_bool::false_();
   }
   else
   {
-    return application(m_enclosing_enumerator->rewr_obj->internal_and,
-                first_argument,
-                second_argument);
+    return application(sort_bool::and_(), first_argument, second_argument);
   }
 }
 
@@ -130,17 +128,17 @@ data_expression_list EnumeratorSolutionsStandard::negate(const data_expression_l
     return l;
   }
   data_expression_list result=negate(l.tail());
-  result.push_front(application(m_enclosing_enumerator->rewr_obj->internal_not,l.front()));
+  result.push_front(application(sort_bool::not_(),l.front()));
   return result;
 }
 
 void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewriting(
-                                std::deque < fs_expr> &fs_stack,
-                                const variable_list &var_list,
-                                const variable_list &substituted_vars,
-                                const data_expression_list &substitution_terms,
-                                const data_expression &condition,
-                                const data_expression_list &negated_term_list,
+                                std::deque < fs_expr>& fs_stack,
+                                const variable_list& var_list,
+                                const variable_list& substituted_vars,
+                                const data_expression_list& substitution_terms,
+                                const data_expression& condition,
+                                const data_expression_list& negated_term_list,
                                 const bool negated) const
 {
   /* If the negated_term_list equals t1,...,tn, store condition /\ !t1 /\ !t2 /\ ... /\ !tn
@@ -150,13 +148,13 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
   if (is_application(condition))
   {
     const application& ca = core::down_cast<application>(condition);
-    if (ca.head() == m_enclosing_enumerator->rewr_obj->internal_not)
+    if (ca.head() == sort_bool::not_())
     {
       push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[0],negate(negated_term_list),!negated);
       return;
     }
-    if ((negated && ca.head() == m_enclosing_enumerator->rewr_obj->internal_and) ||
-             (!negated && ca.head() == m_enclosing_enumerator->rewr_obj->internal_or))
+    if ((negated && ca.head() == sort_bool::and_()) ||
+             (!negated && ca.head() == sort_bool::or_()))
     {
       assert(condition.size()==3);
       push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[0],negated_term_list,negated);
@@ -169,7 +167,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
 
   const data_expression new_expr = add_negations(condition,negated_term_list,negated);
 
-  if (new_expr!=m_enclosing_enumerator->rewr_obj->internal_false)
+  if (new_expr!=sort_bool::false_())
   {
 #ifndef NDEBUG
     // Check that substituted variables do not occur in the expression expr.
@@ -188,12 +186,12 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
 }
 
 void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
-                                std::deque < fs_expr> &fs_stack,
-                                const variable_list &var_list,
-                                const variable_list &substituted_vars,
-                                const data_expression_list &substitution_terms,
-                                const data_expression &condition,
-                                const data_expression_list &negated_term_list,
+                                std::deque < fs_expr>& fs_stack,
+                                const variable_list& var_list,
+                                const variable_list& substituted_vars,
+                                const data_expression_list& substitution_terms,
+                                const data_expression& condition,
+                                const data_expression_list& negated_term_list,
                                 const bool negated) const
 {
   EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewriting(
@@ -207,10 +205,10 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
 }
 
 bool EnumeratorSolutionsStandard::find_equality(
-                        const data_expression &t,
-                        const mcrl2::data::variable_list &vars,
-                        mcrl2::data::variable &v,
-                        data_expression &e)
+                        const data_expression& t,
+                        const mcrl2::data::variable_list& vars,
+                        mcrl2::data::variable& v,
+                        data_expression& e)
 {
   if (is_variable(t))
   {
@@ -234,7 +232,7 @@ bool EnumeratorSolutionsStandard::find_equality(
   if (is_function_symbol(ta.head()))
   {
     const function_symbol& f = core::down_cast<function_symbol>(ta.head());
-    if (f == m_enclosing_enumerator->rewr_obj->internal_and)
+    if (f == sort_bool::and_())
     {
       assert(ta.size()==2);
       return find_equality(ta[0],vars,v,e) || find_equality(ta[1],vars,v,e);
@@ -248,14 +246,14 @@ bool EnumeratorSolutionsStandard::find_equality(
         if (is_variable(a1) && (find(vars.begin(),vars.end(),variable(a1))!=vars.end()) &&
                           (atermpp::find_if(static_cast<const atermpp::aterm_appl&>(a2),test_equal(a1))==atermpp::aterm_appl()))        // true if a1 does not occur in a2.
         {
-          v = atermpp::aterm_cast<variable>(a1);
+          v = core::down_cast<variable>(a1);
           e = a2;
           return true;
         }
         if (is_variable(a2) && (find(vars.begin(),vars.end(),variable(a2))!=vars.end()) &&
                                  (atermpp::find_if(a1,test_equal(a2))==atermpp::aterm_appl()))        // true if a2 does not occur in a1.
         {
-          v = atermpp::aterm_cast<variable>(a2);
+          v = core::down_cast<variable>(a2);
           e = a1;
           return true;
         }
@@ -266,7 +264,7 @@ bool EnumeratorSolutionsStandard::find_equality(
   return false;
 }
 
-void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
+void EnumeratorSolutionsStandard::EliminateVars(fs_expr& e)
 {
   variable_list vars = e.vars();
   variable_list substituted_vars = e.substituted_vars();
@@ -304,7 +302,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
 }
 
 data_expression EnumeratorSolutionsStandard::build_solution_single(
-                 const data_expression &t,
+                 const data_expression& t,
                  variable_list substituted_vars,
                  data_expression_list exprs) const
 {
@@ -326,9 +324,9 @@ data_expression EnumeratorSolutionsStandard::build_solution_single(
 }
 
 data_expression EnumeratorSolutionsStandard::build_solution_aux(
-                 const data_expression &t,
-                 const variable_list &substituted_vars,
-                 const data_expression_list &exprs) const
+                 const data_expression& t,
+                 const variable_list& substituted_vars,
+                 const data_expression_list& exprs) const
 {
   if (is_variable(t))
   {
@@ -341,10 +339,10 @@ data_expression EnumeratorSolutionsStandard::build_solution_aux(
   }
   else if (is_abstraction(t))
   {
-    const data_expression &t1=t;
-    const binder_type &binder=atermpp::aterm_cast<const binder_type>(t1[0]);
-    const variable_list &bound_variables=atermpp::aterm_cast<const variable_list>(t1[1]);
-    const data_expression &body=build_solution_aux(atermpp::aterm_cast<const data_expression>(t1[2]),substituted_vars,exprs);
+    const abstraction& t1=core::down_cast<abstraction>(t);
+    const binder_type& binder=t1.binding_operator();
+    const variable_list& bound_variables=t1.variables();
+    const data_expression& body=build_solution_aux(t1.body(),substituted_vars,exprs);
     return abstraction(binder,bound_variables,body);
   }
   else if (is_function_symbol(t))
@@ -373,9 +371,9 @@ data_expression EnumeratorSolutionsStandard::build_solution_aux(
 }
 
 data_expression_list EnumeratorSolutionsStandard::build_solution2(
-                 const variable_list &vars,
-                 const variable_list &substituted_vars,
-                 const data_expression_list &exprs) const
+                 const variable_list& vars,
+                 const variable_list& substituted_vars,
+                 const data_expression_list& exprs) const
 {
   if (vars.empty())
   {
@@ -390,17 +388,17 @@ data_expression_list EnumeratorSolutionsStandard::build_solution2(
 }
 
 data_expression_list EnumeratorSolutionsStandard::build_solution(
-                 const variable_list &vars,
-                 const variable_list &substituted_vars,
-                 const data_expression_list &exprs) const
+                 const variable_list& vars,
+                 const variable_list& substituted_vars,
+                 const data_expression_list& exprs) const
 {
   return build_solution2(vars,reverse(substituted_vars),reverse(exprs));
 }
 
 bool EnumeratorSolutionsStandard::next(
-              data_expression &evaluated_condition,
-              data_expression_list &solution,
-              bool &solution_possible)
+              data_expression& evaluated_condition,
+              data_expression_list& solution,
+              bool& solution_possible)
 {
   data_expression_vector var_array; // TODO: locating var_array on stack is most likely more efficient.
 
@@ -409,9 +407,9 @@ bool EnumeratorSolutionsStandard::next(
     fs_expr e=fs_stack.front();
     EliminateVars(e);
     fs_stack.pop_front();
-    if (e.vars().empty() || e.expr()==m_enclosing_enumerator->rewr_obj->internal_false)
+    if (e.vars().empty() || e.expr()==sort_bool::false_())
     {
-      if (e.expr()!=m_enclosing_enumerator->rewr_obj->internal_false) // So e.vars() is empty.
+      if (e.expr()!=sort_bool::false_()) // So e.vars() is empty.
       {
         ss_stack.push_back(
                        ss_solution(build_solution(
@@ -423,10 +421,10 @@ bool EnumeratorSolutionsStandard::next(
     else
     {
       assert(!e.vars().empty());
-      assert(e.expr()!=m_enclosing_enumerator->rewr_obj->internal_false);
-      const variable &var = e.vars().front();
-      const sort_expression &sort = var.sort();
-      const variable_list &uvars = e.vars().tail();
+      assert(e.expr()!=sort_bool::false_());
+      const variable& var = e.vars().front();
+      const sort_expression& sort = var.sort();
+      const variable_list& uvars = e.vars().tail();
 
 
       if (is_function_sort(sort))
@@ -483,7 +481,7 @@ bool EnumeratorSolutionsStandard::next(
       }
       else
       {
-        const function_symbol_vector &constructors_for_sort = m_enclosing_enumerator->m_data_spec.constructors(sort);
+        const function_symbol_vector& constructors_for_sort = m_enclosing_enumerator->m_data_spec.constructors(sort);
         function_symbol_vector::const_iterator it=constructors_for_sort.begin();
 
         if ( it == constructors_for_sort.end() )
@@ -506,10 +504,10 @@ bool EnumeratorSolutionsStandard::next(
           // Construct the domain and target sort for the constructor.
           // sort_expression target_sort=it->sort();
           // sort_expression_list domain_sorts;
-          const sort_expression &it_sort=it->sort();
+          const sort_expression& it_sort=it->sort();
           if (is_function_sort(it_sort))
           {
-            const sort_expression_list& domain_sorts=atermpp::aterm_cast<function_sort>(it_sort).domain();
+            const sort_expression_list& domain_sorts=core::down_cast<function_sort>(it_sort).domain();
             assert(function_sort(it_sort).codomain()==sort);
 
             variable_list var_list;
@@ -568,6 +566,7 @@ bool EnumeratorSolutionsStandard::next(
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
+
             const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(
                        application(*it,var_array),enum_sigma);
             var_array.clear();
@@ -635,15 +634,15 @@ bool EnumeratorSolutionsStandard::next(
   }
 }
 
-bool EnumeratorSolutionsStandard::next(data_expression_list &solution)
+bool EnumeratorSolutionsStandard::next(data_expression_list& solution)
 {
   data_expression dummy_evaluated_condition;
   return next(dummy_evaluated_condition,solution);
 }
 
 bool EnumeratorSolutionsStandard::next(
-          data_expression &evaluated_condition,
-          data_expression_list &solution)
+          data_expression& evaluated_condition,
+          data_expression_list& solution)
 {
   bool dummy_solution_possible=false;
   return next(evaluated_condition,solution,dummy_solution_possible);
@@ -651,8 +650,8 @@ bool EnumeratorSolutionsStandard::next(
 }
 
 bool EnumeratorSolutionsStandard::next(
-          data_expression_list &solution,
-          bool &solution_possible)
+          data_expression_list& solution,
+          bool& solution_possible)
 {
   data_expression dummy_evaluated_condition;
   return next(dummy_evaluated_condition,solution,solution_possible);
@@ -682,7 +681,7 @@ void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false,const bool
   }
 }
 
-EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &data_spec, Rewriter* r):
+EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification& data_spec, Rewriter* r):
   m_data_spec(data_spec)
 {
   rewr_obj = r;

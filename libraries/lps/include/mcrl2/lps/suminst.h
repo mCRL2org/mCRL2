@@ -94,20 +94,28 @@ class suminst_algorithm: public lps::detail::lps_algorithm
       {
         // List of variables with the instantiated variables removed (can be done upfront, which is more efficient,
         // because we only need to calculate it once.
-        variable_list new_summation_variables = term_list_difference(s.summation_variables(), atermpp::convert< variable_list >(variables));
+        const variable_list vl(variables.begin(),variables.end());
+        variable_list new_summation_variables = term_list_difference(s.summation_variables(), vl);
 
         try
         {
           mCRL2log(log::debug, "suminst") << "enumerating condition: " << data::pp(s.condition()) << std::endl;
 
-          for (enumerator_type::iterator i=m_enumerator.begin(boost::make_iterator_range(variables), s.condition());
+          mcrl2::data::mutable_indexed_substitution<> local_sigma;
+          for (enumerator_type::iterator i=m_enumerator.begin(vl, s.condition(), local_sigma);
                   i != m_enumerator.end(); ++i)
           {
-            mCRL2log(log::debug, "suminst") << "substitutions: " << data::print_substitution(*i) << std::endl;
+            mutable_indexed_substitution<> sigma;
+            data_expression_list::const_iterator k=i->begin();
+            for(auto j=vl.begin(); j!=vl.end(); ++j, ++k)
+            {
+              sigma[*j]=*k;
+            }
+            mCRL2log(log::debug, "suminst") << "substitutions: " << data::print_substitution(sigma) << std::endl;
 
             SummandType t(s);
             t.summation_variables() = new_summation_variables;
-            lps::rewrite(t, m_rewriter, *i);
+            lps::rewrite(t, m_rewriter, sigma);
             result.push_back(t);
             ++nr_summands;
           }
