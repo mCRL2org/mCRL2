@@ -4,31 +4,13 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 
 namespace atermpp
 {
 
 namespace detail
 {
-
-/* Free a term, without removing it from the
- *    hashtable, and destroying its function symbol */
-inline void simple_free_term(const _aterm *t, const size_t arity)
-{
-  for(size_t i=0; i<arity; ++i)
-  {
-    reinterpret_cast<const _aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
-  }
-
-  assert(t->reference_count()==1); // This term has a temporary protection.
-  garbage_collect_count_down++;    // Reset the garbage count down as the term was not used and
-                                   // is neatly returned to the free_list.
-  TermInfo &ti = terminfo[TERM_SIZE_APPL(arity)];
-  t->set_next(ti.at_freelist);
-  ti.at_freelist = t;
-  t->set_reference_count_indicates_in_freelist();
-}
-
 
 template <class Term, class InputIterator, class ATermConverter>
 const _aterm* local_term_appl_with_converter(const function_symbol &sym, 
@@ -40,24 +22,16 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
 
   HashNumber hnr = SHIFT(addressf(sym));
   
-  /* The term is already partly constructed initially. If
-     it turns out that the term already exists, this skeleton is freed
-     using simple_free_term. Otherwise, the new_term is finished
-     and a it is returned. */ 
-
-  const detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
-  new_term->increase_reference_count();  // Protect against premature garbage collection.
-  
-
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(temporary_args,aterm, arity);
   size_t j=0;
   for (InputIterator i=begin; i!=end; ++i, ++j)
   {
-    new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(new_term))->arg[j])) Term(convert_to_aterm(*i));
-    const aterm &arg = reinterpret_cast<const detail::_aterm_appl<Term>*>(new_term)->arg[j];
-    CHECK_TERM(arg);
-    hnr = COMBINE(hnr, arg);
+    new (&(temporary_args[j])) Term(convert_to_aterm(*i));
+    CHECK_TERM(temporary_args[j]);
+    hnr = COMBINE(hnr, temporary_args[j]);
   }
-  assert(j==arity);
+  assert(j==arity); 
+
 
   hnr &= detail::aterm_table_mask;
   const detail::_aterm* cur = detail::aterm_hashtable[hnr];
@@ -68,8 +42,7 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
       bool found = true;
       for (size_t i=0; i<arity; i++)
       {
-        if (reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[i] != 
-                  reinterpret_cast<const detail::_aterm_appl<Term>*>(new_term)->arg[i])
+        if (reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[i] != temporary_args[i])
         {
           found = false;
           break;
@@ -77,7 +50,10 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
       }
       if (found)
       {
-        simple_free_term(new_term,arity);
+        for(size_t i=0; i<arity; ++i)
+        {
+          temporary_args[i].~aterm();
+        }
         return cur;
       }
     }
@@ -85,11 +61,17 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
   }
 
   assert(cur==NULL);
+  const detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
+
+  // We copy the content of the temporary_args, without destruction/construction and adapting the reference counts.
+  for(size_t i=0; i<arity; ++i)
+  {
+    new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(new_term))->arg[i])) const detail::_aterm*(detail::address(temporary_args[i]));
+  }
   new (&const_cast<detail::_aterm*>(const_cast<detail::_aterm*>(new_term))->function()) function_symbol(sym);
-    
+
   insert_in_hashtable(new_term,hnr);
   call_creation_hook(new_term);
-  new_term->reset_reference_count(false); // Remove temporary protection of this term.
 
   return new_term;
 }
@@ -100,17 +82,13 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
   const size_t arity = sym.arity();
   HashNumber hnr = SHIFT(addressf(sym)); 
   
-  const detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
-  new_term->increase_reference_count();  // Protect against premature garbage collection.
-
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(temporary_args,aterm, arity);
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {
-    assert(j<arity);
-    new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(new_term))->arg[j])) Term(*i); //Note that the * can represent a complex computation.
-    const aterm &arg = reinterpret_cast<const detail::_aterm_appl<Term>*>(new_term)->arg[j];
-    CHECK_TERM(arg);
-    hnr = COMBINE(hnr, arg);
+    new (&(temporary_args[j])) Term(*i);
+    CHECK_TERM(temporary_args[j]);
+    hnr = COMBINE(hnr, temporary_args[j]);
   }
   assert(j==arity);
 
@@ -123,8 +101,7 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
       bool found = true;
       for (size_t i=0; i<arity; ++i)
       {
-        if (reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[i] !=
-                  reinterpret_cast<const detail::_aterm_appl<Term>*>(new_term)->arg[i])
+        if (reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[i] != temporary_args[i])
         {
           found = false;
           break;
@@ -132,7 +109,10 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
       }
       if (found)
       {
-        simple_free_term(new_term,arity);
+        for(size_t i=0; i<arity; ++i)
+        {
+          temporary_args[i].~aterm();
+        }
         return cur;
       }
     }
@@ -140,10 +120,17 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
   }
 
   assert(cur==NULL);
+  const detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
+
+  // We copy the content of the temporary_args, without destruction/construction and adapting the reference counts.
+  for(size_t i=0; i<arity; ++i)
+  {
+    new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(new_term))->arg[i])) const detail::_aterm*(detail::address(temporary_args[i]));
+  }
+
   new (&const_cast<detail::_aterm*>(const_cast<detail::_aterm*>(new_term))->function()) function_symbol(sym);
   insert_in_hashtable(new_term,hnr);
   call_creation_hook(new_term);
-  new_term->reset_reference_count(false); // Remove temporary protection of this term.
   
   return new_term;
 }

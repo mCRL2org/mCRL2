@@ -136,11 +136,17 @@ class EnumeratorSolutionsStandard
       return default_sigma;
     }
 
+    data_specification& default_data_spec()
+    {
+      static data_specification default_data_spec;
+      return default_data_spec;
+    }
+
   public:
 
     /// \brief Default constructor
     EnumeratorSolutionsStandard():
-       m_data_spec(data_specification()),
+       m_data_spec(default_data_spec()),
        enum_sigma(default_sigma()),
        m_max_internal_variables(0)
     {
