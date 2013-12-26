@@ -89,7 +89,6 @@ static const size_t TERM_SIZE=sizeof(_aterm)/sizeof(size_t);
 
 const detail::_aterm* allocate_term(const size_t size);
 void remove_from_hashtable(const _aterm *t);
-void simple_free_term(const _aterm *t, const size_t arity);
 void free_term(const detail::_aterm* t);
 void free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed);
 void initialise_aterm_administration();

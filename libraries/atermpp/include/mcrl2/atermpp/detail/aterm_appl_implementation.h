@@ -33,8 +33,7 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
   assert(j==arity); 
 
 
-  hnr &= detail::aterm_table_mask;
-  const detail::_aterm* cur = detail::aterm_hashtable[hnr];
+  const detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
   {
     if (cur->function()==sym)
@@ -70,7 +69,8 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
   }
   new (&const_cast<detail::_aterm*>(const_cast<detail::_aterm*>(new_term))->function()) function_symbol(sym);
 
-  insert_in_hashtable(new_term,hnr);
+  // Apply the table mask after allocate_term, which may resize the table.
+  insert_in_hashtable(new_term,hnr & detail::aterm_table_mask);
   call_creation_hook(new_term);
 
   return new_term;
@@ -92,8 +92,7 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
   }
   assert(j==arity);
 
-  hnr &= detail::aterm_table_mask;
-  const detail::_aterm* cur = detail::aterm_hashtable[hnr];
+  const detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
   {
     if (cur->function()==sym)
@@ -129,7 +128,9 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
   }
 
   new (&const_cast<detail::_aterm*>(const_cast<detail::_aterm*>(new_term))->function()) function_symbol(sym);
-  insert_in_hashtable(new_term,hnr);
+
+  // Apply the table_mask after applying allocate_term, which may resize the hash_table.
+  insert_in_hashtable(new_term,hnr & detail::aterm_table_mask);
   call_creation_hook(new_term);
   
   return new_term;
