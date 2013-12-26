@@ -71,7 +71,6 @@ void allocate_block(const size_t size);
 void collect_terms_with_reference_count_0();
 
 void call_creation_hook(const _aterm*);
-void call_deletion_hook(const _aterm*);
 
 inline size_t SHIFT(const size_t w)
 {

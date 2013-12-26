@@ -31,14 +31,14 @@ typedef std::vector<std::pair<const function_symbol*,term_callback> > hook_table
 
 hook_table& creation_hooks()
 {
-	static hook_table creation_hooks;
-	return creation_hooks;
+  static hook_table creation_hooks;
+  return creation_hooks;
 }
 
 hook_table& deletion_hooks()
 {
-	static hook_table deletion_hooks;
-	return deletion_hooks;
+  static hook_table deletion_hooks;
+  return deletion_hooks;
 }
 
 void add_creation_hook(const function_symbol& sym, term_callback callback)
@@ -102,7 +102,7 @@ void call_creation_hook(const detail::_aterm* term)
   }
 }
 
-void call_deletion_hook(const detail::_aterm* term)
+static void call_deletion_hook(const detail::_aterm* term)
 {
   const function_symbol& sym = term->function();
   for (hook_table::const_iterator it = deletion_hooks().begin(); it != deletion_hooks().end(); ++it)

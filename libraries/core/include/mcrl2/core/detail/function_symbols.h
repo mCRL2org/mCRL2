@@ -35,36 +35,29 @@ bool operator==(const size_t x, const atermpp::function_symbol& y)
   return x == y.number();
 }
 
-// DataAppl
-inline std::vector<atermpp::function_symbol>& function_symbols_DataAppl()
-{
-  static std::vector<atermpp::function_symbol> function_symbols_DataAppl;
-  return function_symbols_DataAppl;
-}
+extern std::vector<atermpp::function_symbol> function_symbols_DataAppl;
 
 inline
 const atermpp::function_symbol& function_symbol_DataAppl_helper(size_t i)
 {
-  std::vector<atermpp::function_symbol>& syms = function_symbols_DataAppl();
   do
   {
-    syms.push_back(atermpp::function_symbol("DataAppl", syms.size()));
+    function_symbols_DataAppl.push_back(atermpp::function_symbol("DataAppl", function_symbols_DataAppl.size()));
   }
-  while (i >= syms.size());
-  return syms[i];
+  while (i >= function_symbols_DataAppl.size());
+  return function_symbols_DataAppl[i];
 }
 
 inline
 const atermpp::function_symbol& function_symbol_DataAppl(size_t i)
 {
-  const std::vector<atermpp::function_symbol>& syms = function_symbols_DataAppl();
-  if (i >= syms.size())
+  if (i >= function_symbols_DataAppl.size())
   {
     // This helper is introduced such the function function_symbol_DataAppl, which is called very often,
     // will be inlined.
     return function_symbol_DataAppl_helper(i);
   }
-  return syms[i];
+  return function_symbols_DataAppl[i];
 }
 
 inline

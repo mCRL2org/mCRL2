@@ -3,8 +3,6 @@
 
 #include <cstddef>
 
-#define MCRL2_USE_INDEX_TRAITS
-
 // PRAGMAS BELOW ARE NOT USED IN THE TOOLSET ANYMORE.
 // #if !defined(AT_64BIT) && !defined(AT_32BIT)
 // #pragma message ( "Missing architecture: Guessing architecture..." )

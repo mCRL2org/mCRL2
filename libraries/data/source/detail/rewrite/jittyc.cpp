@@ -2963,7 +2963,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
       "  using namespace mcrl2::data;\n"
-      "  if (is_function_symbol(t))\n"  
+//      "  if (is_function_symbol(t))\n"  
+      " if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(t).function())==%ld)\n"
       "  {\n"
       "    // Term t is a function_symbol\n"
       "    const mcrl2::data::function_symbol& f=atermpp::aterm_cast<const mcrl2::data::function_symbol>(t);\n"
@@ -2984,7 +2985,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    const application& ta=atermpp::aterm_cast<const application>(t);\n"
       "    const mcrl2::data::function_symbol& head=atermpp::aterm_cast<const mcrl2::data::function_symbol>(ta.head());\n"
-      "    if (is_function_symbol(head))\n"
+//      "    if (is_function_symbol(head))\n"
+      " if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(head).function())==%ld)\n"
       "    {\n"
       "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(head);\n"
       "      const size_t total_arity=ta.size();\n"
@@ -3008,7 +3010,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  return rewrite_aux(t);\n"
       "}\n",
+      atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(sort_bool::true_()).function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
+      atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(sort_bool::true_()).function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
       max_arity+1);
 
