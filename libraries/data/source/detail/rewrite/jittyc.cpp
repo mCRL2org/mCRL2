@@ -2646,21 +2646,23 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     // Currently data_expressions are stored in this array. If reference or pointers are stored,
     // no explicit destroy is needed anymore.
     fprintf(f,
-      "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,data_expression, %ld);\n ",i);
+      "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const atermpp::detail::_aterm*, %ld);\n ",i);
 
     for (size_t j=0; j<i; ++j)
     {
-      fprintf(f, "  new (&buffer[%ld]) data_expression(arg%zu);\n",j,j+1);
+      // fprintf(f, "  new (&buffer[%ld]) data_expression(arg%zu);\n",j,j+1);
+      fprintf(f, "  buffer[%ld]=atermpp::detail::address(arg%ld);\n",j,j+1);
     }
 
-    fprintf(f, "  const application result(head,&buffer[0],&buffer[%ld]);\n",i);
+    /* fprintf(f, "  const application result(head,&buffer[0],&buffer[%ld]);\n",i);
 
     for (size_t j=0; j<i; ++j)
     {
       fprintf(f, "  buffer[%ld].~data_expression();\n",j);
     }
 
-    fprintf(f, "  return result;");
+    fprintf(f, "  return result;"); */
+    fprintf(f, "  return application(head,(mcrl2::data::data_expression*)&buffer[0],(mcrl2::data::data_expression*)&buffer[%ld]);\n",i);
     fprintf(f, "}\n\n");
   }
 

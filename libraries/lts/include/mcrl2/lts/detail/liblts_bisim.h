@@ -393,7 +393,11 @@ class bisim_partitioner
     } // end create_initial_partition
 
 // Refine the partition until the partition has become stable
+#ifndef NDEBUG
     void refine_partition_until_it_becomes_stable(const bool branching, const bool preserve_divergence)
+#else
+    void refine_partition_until_it_becomes_stable(const bool, const bool)
+#endif
     {
 #ifndef NDEBUG
       size_t consistency_check_counter=1;

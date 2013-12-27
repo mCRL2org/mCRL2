@@ -24,6 +24,7 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
+  mcrl2_core
   mcrl2_utilities
 )
 
