@@ -35,34 +35,6 @@ namespace pbes_system
 namespace detail
 {
 
-struct compare_variableL
-{
-  atermpp::aterm v;
-
-  compare_variableL(data::variable v_)
-    : v(atermpp::aterm_appl(v_))
-  {}
-
-  bool operator()(atermpp::aterm t) const
-  {
-    return v == t;
-  }
-};
-
-//  variable v occurs in l.
-
-static bool occurs_in_varL(
-                  const pbes_system::pbes_expression& l,
-                  const data::variable &v)
-{
-  // In the internal format, the pbes_expression l contains data expressions
-  // in internal rewrite format. Therefore the function find_if defined on
-  // aterms must be used, instead of the function search variable which works
-  // on a pbes_expression, and which will not recognize (and therefore skip)
-  // expressions in internal format. So, it will not search the whole expression.
-  return pbes_system::search_variable(l, v);
-}
-
 /// \brief gives the rank of a propositional_variable_instantiation. It is assumed that the variable
 /// occurs in the pbes_specification.
 
@@ -229,7 +201,6 @@ static void restore_saved_substitution(const std::map<data::variable,data::data_
                    const pbes_expression &p,
                    const data::data_specification &data,
                    const data::rewriter& r,
-                   const bool use_internal_rewrite_format,
                    data::mutable_map_substitution< > &sigma) */
 
 inline pbes_expression pbes_expression_substitute_and_rewrite(
@@ -241,7 +212,6 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   using namespace pbes_system::pbes_expr;
   using namespace pbes_system::accessors;
   pbes_expression result;
-  const bool use_internal_rewrite_format=false;
 
   if (is_pbes_and(p))
   {
@@ -387,8 +357,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma);
 
 
-      data::set_identifier_generator variable_name_generator;
-      variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
+      // data::set_identifier_generator variable_name_generator;
+      // variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
       std::set < pbes_expression > conjunction_set;
@@ -411,7 +381,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
             for (std::set <pbes_expression >::iterator t=conjunction_set.begin() ;
                  t!=conjunction_set.end() ; t++)
             {
-              if (!occurs_in_varL(*t,*i))
+              if (!pbes_system::search_variable(*t,*i))
               {
                 new_conjunction_set.insert(*t);
               }
@@ -444,15 +414,13 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                        s!=dsorts.end() ; ++s)
                   {
                     constructor_sorts_found=constructor_sorts_found || data.is_constructor_sort(*s);
-                    data::variable new_variable(variable_name_generator("internally_generated_variable_for_forall"), *s);
+                    //data::variable new_variable(variable_name_generator("internally_generated_variable_for_forall"), *s);
+                    data::variable new_variable(r.get_rewriter().generator("@internal_variable_for_forall@"), *s);
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     {
                       mCRL2log(log::verbose) << "Used " << no_variables << " variables when eliminating universal quantifier\n";
-                      if (!use_internal_rewrite_format)
-                      {
-                        mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
-                      }
+                      mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                     }
                     new_data_vars.push_front(new_variable);
                     function_arguments.push_front(new_variable);
@@ -491,11 +459,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         out << "Cannot eliminate universal quantifiers of variables ";
 
         out << data::pp(new_data_vars);
-
-        if (!use_internal_rewrite_format)
-        {
-          out << " in " << p;
-        }
+        out << " in " << p;
 
         throw mcrl2::runtime_error(out.str());
       }
@@ -537,8 +501,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
       pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,sigma);
 
-      data::set_identifier_generator variable_name_generator;
-      variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
+      // data::set_identifier_generator variable_name_generator;
+      // variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
       std::set < pbes_expression > disjunction_set;
@@ -560,7 +524,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
             for (std::set <pbes_expression >::iterator t=disjunction_set.begin() ;
                  t!=disjunction_set.end() ; t++)
             {
-              if (!occurs_in_varL(*t,*i))
+              if (!pbes_system::search_variable(*t,*i))
               {
                 new_disjunction_set.insert(*t);
               }
@@ -592,15 +556,13 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                        s!=dsorts.end() ; ++s)
                   {
                     constructor_sorts_found=constructor_sorts_found || data.is_constructor_sort(*s);
-                    data::variable new_variable(variable_name_generator("internally_generated_variable_for_forall"), *s);
+                    // data::variable new_variable(variable_name_generator("internally_generated_variable_for_exists"), *s);
+                    data::variable new_variable(r.get_rewriter().generator("@internal_variable_for_exists@"), *s);
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     {
                       mCRL2log(log::verbose) << "Used " << no_variables << " variables when eliminating existential quantifier\n";
-                      if (!use_internal_rewrite_format)
-                      {
-                        mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
-                      }
+                      mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                     }
                     new_data_vars.push_front(new_variable);
                     function_arguments.push_front(new_variable);
@@ -637,11 +599,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         std::string message("Cannot eliminate existential quantifiers of variables ");
 
         message.append(data::pp(new_data_vars));
-
-        if (!use_internal_rewrite_format)
-        {
-          message.append(" in ").append(mcrl2::pbes_system::pp(p));
-        }
+        message.append(" in ").append(mcrl2::pbes_system::pp(p));
 
         throw mcrl2::runtime_error(message);
       }
