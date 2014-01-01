@@ -376,7 +376,7 @@ static void add_to_build_pars(build_pars* pars, atermpp::aterm_list seqs, atermp
 }
 
 static char tree_var_str[20];
-static atermpp::aterm_appl createFreshVar(const atermpp::aterm_appl& sort, size_t* i)
+static variable createFreshVar(const atermpp::aterm_appl& sort, size_t* i)
 {
   sprintf(tree_var_str,"@var_%lu",(*i)++);
   return data::variable(tree_var_str, atermpp::aterm_cast<const sort_expression>(sort));
@@ -476,7 +476,7 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
     atermpp::aterm_list l,m;
 
     size_t k = i;
-    atermpp::aterm_appl v = createFreshVar(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_list>(pars.Slist.front()).front())[0])[1]),&i);
+    const variable v = createFreshVar(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_list>(pars.Slist.front()).front())[0])[1]),&i);
     treevars_usedcnt[k] = 0;
 
     l = atermpp::aterm_list();
