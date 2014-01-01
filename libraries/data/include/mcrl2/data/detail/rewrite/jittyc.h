@@ -83,10 +83,7 @@ class RewriterCompilingJitty: public Rewriter
     bool need_rebuild;
     bool made_files;
 
-    function_symbol true_inner;
-    // size_t true_num;
-
-    std::vector < data_equation_list >  jittyc_eqns;
+    std::map < function_symbol, data_equation_list >  jittyc_eqns;
 
     std::map <mcrl2::data::function_symbol,size_t> int2ar_idx;
     size_t ar_size;

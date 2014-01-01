@@ -290,7 +290,7 @@ static atermpp::aterm_list get_used_vars(const atermpp::aterm_appl& t)
   return l;
 }
 
-static atermpp::aterm_list create_sequence(const data_equation& rule, size_t* var_cnt, const atermpp::aterm_appl& true_inner)
+static atermpp::aterm_list create_sequence(const data_equation& rule, size_t* var_cnt)
 {
   const data_expression lhs_inner = rule.lhs();
   size_t lhs_arity = lhs_inner.size();
@@ -310,7 +310,7 @@ static atermpp::aterm_list create_sequence(const data_equation& rule, size_t* va
     }
   }
 
-  if (cond==true_inner)
+  if (cond==sort_bool::true_())
   {
     rseq.push_front(atermpp::aterm_appl(afunRe,rslt,get_used_vars(rslt)));
   }
@@ -731,7 +731,7 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
   }
 }
 
-static atermpp::aterm_appl create_tree(const data_equation_list& rules, const atermpp::aterm_appl& true_inner)
+static atermpp::aterm_appl create_tree(const data_equation_list& rules)
 // Create a match tree for OpId int2term[opid] and update the value of
 // *max_vars accordingly.
 //
@@ -751,7 +751,7 @@ static atermpp::aterm_appl create_tree(const data_equation_list& rules, const at
   size_t total_rule_vars = 0;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
-    rule_seqs.push_front(create_sequence(*it,&total_rule_vars, true_inner));
+    rule_seqs.push_front(create_sequence(*it,&total_rule_vars));
   }
 
   // Generate initial parameters for built_tree
@@ -946,8 +946,7 @@ size_t RewriterCompilingJitty::binding_variable_list_index(const variable_list& 
 static atermpp::aterm_list create_strategy(
         const data_equation_list& rules,
         const size_t arity,
-        nfs_array& nfs,
-        const data_expression& true_inner)
+        nfs_array& nfs)
 {
   atermpp::aterm_list strat;
   // Array to keep note of the used parameters
@@ -1074,7 +1073,7 @@ static atermpp::aterm_list create_strategy(
     // Create and add tree of collected rules
     if (!no_deps.empty())
     {
-      strat.push_front(create_tree(no_deps,true_inner));
+      strat.push_front(create_tree(no_deps));
     }
 
     // Stop if there are no more rules left
@@ -1131,15 +1130,13 @@ void RewriterCompilingJitty::add_base_nfs(nfs_array& nfs, const function_symbol&
 
 void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& opid, size_t arity)
 {
-  data_equation_list eqns = (size_t(core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(opid))<jittyc_eqns.size()
-                                ?jittyc_eqns[core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(opid)]:data_equation_list());
+  data_equation_list eqns = jittyc_eqns[opid];
   if (eqns.empty())
   {
     nfs.fill(arity);
     return;
   }
-  // atermpp::aterm_list strat = create_strategy(eqns,OpId2Int(opid).value(),arity,nfs,true_inner);
-  atermpp::aterm_list strat = create_strategy(eqns,arity,nfs,true_inner);
+  atermpp::aterm_list strat = create_strategy(eqns,arity,nfs);
   while (!strat.empty() && strat.front().type_is_int())
   {
     nfs.set(aterm_cast<atermpp::aterm_int>(strat.front()).value());
@@ -1150,18 +1147,8 @@ void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& o
 // Determine whether the opid is a normal form, with the given number of arguments.
 bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_args)
 {
-  // First check whether the opid is a forall or an exists with one argument.
-  // Then the routines for exists/forall quantifier enumeration must be applied.
-  /* if (num_args==1 &&
-        (get_int2term(opid.value()).name() == exists_function_symbol() ||
-         get_int2term(opid.value()).name() == forall_function_symbol()))
-  {
-    return false;
-  } */
-
-  // Otherwise check whether there are applicable rewrite rules.
-  data_equation_list l = (size_t(core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(opid))<jittyc_eqns.size()
-                                        ?jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(opid)]:data_equation_list());
+  // Check whether there are applicable rewrite rules.
+  data_equation_list l = jittyc_eqns[opid];
 
   if (l.empty())
   {
@@ -1733,13 +1720,6 @@ static int peekn_st(int n)
   }
 }
 
-// #define IT_DEBUG
-#define IT_DEBUG_INLINE
-#ifdef IT_DEBUG_INLINE
-#define IT_DEBUG_FILE f,"//"
-#else
-#define IT_DEBUG_FILE stderr,
-#endif
 void RewriterCompilingJitty::implement_tree_aux(
       FILE* f,
       atermpp::aterm_appl tree,
@@ -1854,7 +1834,6 @@ void RewriterCompilingJitty::implement_tree_aux(
     {
       if (!is_function_sort(aterm_cast<data::function_symbol>(tree[0]).sort()))  // tree[0] contains a constant, which is represented as a function_symbol.
       {
-        // fprintf(f,"%sif (is_function_symbol(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
         fprintf(f,"%sif (atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
               "%s{\n"
               "%s  const data_expression& t%lu=atermpp::aterm_cast<const data_expression>(%s%lu[%lu]);\n",  // Should be a function symbol, not a data expression, but this has consequences elsewhere.
@@ -1912,7 +1891,7 @@ void RewriterCompilingJitty::implement_tree_aux(
 
     fprintf(f,"==data_expression((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n",
-            (void*)atermpp::detail::address(true_inner),
+            (void*)atermpp::detail::address(sort_bool::true_()),
             whitespace(d*2)
            );
 
@@ -1927,7 +1906,6 @@ void RewriterCompilingJitty::implement_tree_aux(
     fprintf(f,"%sreturn ",whitespace(d*2));
     if (level > 0)
     {
-      //cur_arg = peekn_st(level);
       cur_arg = peekn_st(2*level-1);
     }
     calcTerm(f,aterm_cast<data_expression>(tree[0]),get_startarg(tree[0],cur_arg+1),nnfvars);
@@ -1967,7 +1945,7 @@ void RewriterCompilingJitty::implement_tree(
     fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n"
             "%sreturn ",
-            (void*)atermpp::detail::address(true_inner),
+            (void*)atermpp::detail::address(sort_bool::true_()),
             whitespace(d*2),
             whitespace(d*2)
            );
@@ -2117,7 +2095,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const atermpp
     return make_ar_false();
   }
 
-  // expr has shape #REWR#(t,t1,...,tn);
+  // expr has shape application(t,t1,...,tn);
   const application& expra = core::down_cast<application>(expr);
   function_symbol head;
   if (!head_is_function_symbol(expra,head))
@@ -2147,7 +2125,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const atermpp
 
 atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity)
 {
-  data_expression lhs = eqn.lhs(); // the lhs in internal format.
+  const data_expression& lhs = eqn.lhs(); // the lhs in internal format.
 
   size_t eqn_arity = lhs.function().arity()-1;
   if (eqn_arity > arity)
@@ -2156,7 +2134,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equatio
   }
   if (eqn_arity <= arg)
   {
-    const data_expression rhs = eqn.rhs();  // rhs in special internal list format.
+    const data_expression& rhs = eqn.rhs();  
     function_symbol head;
     if (is_function_symbol(rhs))
     {
@@ -2244,14 +2222,15 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   for(std::map <data::function_symbol,size_t> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)
   {
     size_t arity = getArity(it->first);
-    data_equation_list eqns = (core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(it->first)<jittyc_eqns.size()
-                                   ?jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(it->first)]:data_equation_list());
+    const data_equation_list& eqns = jittyc_eqns[it->first];
     size_t idx = it->second;
     for (size_t i=1; i<=arity; i++)
     {
       for (size_t j=0; j<i; j++)
       {
         ar[idx+((i-1)*i)/2+j] = build_ar_expr(eqns,j,i);
+std::cerr << "ar_expression " << it->first << "  -- " << ar[idx+((i-1)*i)/2+j] << "\n";
+std::cerr << "i " << i << " j: " << j << " -- " << eqns << "\n";
       }
     }
   }
@@ -2315,19 +2294,6 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   made_files = false;
 
   need_rebuild = true;
-
-  true_inner = atermpp::aterm_cast<function_symbol>(sort_bool::true_());
-
-/*  for (function_symbol_vector::const_iterator it=DataSpec.mappings().begin(); it!=DataSpec.mappings().end(); ++it)
-  {
-    OpId2Int(*it);
-  }
-
-  for (function_symbol_vector::const_iterator it=DataSpec.constructors().begin(); it!=DataSpec.constructors().end(); ++it)
-  {
-    OpId2Int(*it);
-  }
-*/
 
   const data_equation_vector l=DataSpec.equations();
   for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
@@ -2562,12 +2528,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   for(std::set < data_equation >::const_iterator it=rewrite_rules.begin();
                    it!=rewrite_rules.end(); ++it)
   {
-    size_t main_op_id_index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(get_function_symbol_of_head(it->lhs())); // main symbol of equation.
-    if (main_op_id_index>=jittyc_eqns.size())
-    {
-      jittyc_eqns.resize(main_op_id_index+1);
-    }
-    jittyc_eqns[main_op_id_index].push_front(*it);
+    jittyc_eqns[get_function_symbol_of_head(it->lhs())].push_front(*it);
   }
   fill_always_rewrite_array();
 
@@ -2650,18 +2611,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
     for (size_t j=0; j<i; ++j)
     {
-      // fprintf(f, "  new (&buffer[%ld]) data_expression(arg%zu);\n",j,j+1);
       fprintf(f, "  buffer[%ld]=atermpp::detail::address(arg%ld);\n",j,j+1);
     }
 
-    /* fprintf(f, "  const application result(head,&buffer[0],&buffer[%ld]);\n",i);
-
-    for (size_t j=0; j<i; ++j)
-    {
-      fprintf(f, "  buffer[%ld].~data_expression();\n",j);
-    }
-
-    fprintf(f, "  return result;"); */
     fprintf(f, "  return application(head,(mcrl2::data::data_expression*)&buffer[0],(mcrl2::data::data_expression*)&buffer[%ld]);\n",i);
     fprintf(f, "}\n\n");
   }
@@ -2712,15 +2664,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             fprintf(f,  ")\n"
                     "{\n"
                    );
-            if (core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)<jittyc_eqns.size() && !jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)].empty() )
+            if (!jittyc_eqns[fs].empty() )
             {
             // Implement strategy
               if (0 < a)
               {
                 nfs_a.set_value(nfs);
               }
-              implement_strategy(f,create_strategy(jittyc_eqns[core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)],
-                                    a,nfs_a,true_inner),a,1,fs,nfs);
+              implement_strategy(f,create_strategy(jittyc_eqns[fs], a,nfs_a),a,1,fs,nfs);
             }
             else
             {
