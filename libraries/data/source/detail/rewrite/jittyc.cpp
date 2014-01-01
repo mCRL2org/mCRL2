@@ -50,7 +50,7 @@ namespace data
 namespace detail
 {
 
-static atermpp::function_symbol afunS, afunM, afunF, afunN, afunD, afunR, afunCR, afunC, afunX, afunRe, afunCRe, afunMe;
+static atermpp::function_symbol afunS, afunM, afunF, afunN, afunD, afunR, afunC, afunX, afunRe, afunCRe, afunMe;
 static aterm dummy;
 static atermpp::function_symbol afunARtrue, afunARfalse, afunARand, afunARor, afunARvar;
 static atermpp::aterm_appl ar_true, ar_false;
@@ -61,26 +61,26 @@ static atermpp::aterm_appl ar_true, ar_false;
 #define isN(x) x.function()==afunN
 #define isD(x) x.function()==afunD
 #define isR(x) x.function()==afunR
-#define isCR(x) x.function()==afunCR
 #define isC(x) x.function()==afunC
 #define isX(x) x.function()==afunX
 #define isRe(x) x.function()==afunRe
 #define isCRe(x) x.function()==afunCRe
 #define isMe(x) x.function()==afunMe
 
-static size_t is_initialised = 0;
+static bool is_initialised = false;
 
 static void initialise_common()
 {
-  if (is_initialised == 0)
+  if (!is_initialised)
   {
+    is_initialised=true;
+
     afunS = atermpp::function_symbol("@@S",2); // Store term ( target_variable, result_tree )
     afunM = atermpp::function_symbol("@@M",3); // Match term ( match_variable, true_tree , false_tree )
     afunF = atermpp::function_symbol("@@F",3); // Match function ( match_function, true_tree, false_tree )
     afunN = atermpp::function_symbol("@@N",1); // Go to next parameter ( result_tree )
     afunD = atermpp::function_symbol("@@D",1); // Go down a level ( result_tree )
     afunR = atermpp::function_symbol("@@R",1); // End of tree ( matching_rule )
-    afunCR = atermpp::function_symbol("@@CR",2); // End of tree ( condition, matching_rule )
     afunC = atermpp::function_symbol("@@C",3); // Check condition ( condition, true_tree, false_tree )
     afunX = atermpp::function_symbol("@@X",0); // End of tree
     afunRe = atermpp::function_symbol("@@Re",2); // End of tree ( matching_rule , vars_of_rule)
@@ -97,13 +97,6 @@ static void initialise_common()
     ar_true = atermpp::aterm_appl(afunARtrue);
     ar_false = atermpp::aterm_appl(afunARfalse);
   }
-
-  is_initialised++;
-}
-
-static void finalise_common()
-{
-  is_initialised--;
 }
 
 #define is_ar_true(x) (x==ar_true)
@@ -248,46 +241,10 @@ static void term2seq(const atermpp::aterm_appl& t, atermpp::aterm_list* s, size_
 
 }
 
-static void get_used_vars_aux(const atermpp::aterm_appl& t, atermpp::aterm_list& vars)
+static atermpp::aterm_list get_used_vars(const data_expression& t)
 {
-  using namespace atermpp;
-  /* if (t.type_is_list())
-  {
-    const atermpp::aterm_list& l=atermpp::aterm_cast<const atermpp::aterm_list>(t);
-    for (atermpp::aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
-    {
-      get_used_vars_aux(*i,vars);
-    }
-  } */
-  if (is_function_symbol(t))
-  {
-    return;
-  }
-  else if (t.type_is_appl())
-  {
-    if (is_variable(t))
-    {
-      if (find(vars.begin(),vars.end(),t) == vars.end())
-      {
-        vars.push_front(t);
-      }
-    }
-    else
-    {
-      size_t a = atermpp::aterm_cast<atermpp::aterm_appl>(t).function().arity();
-      for (size_t i=0; i<a; i++)
-      {
-        get_used_vars_aux(aterm_cast<const atermpp::aterm_appl>(t[i]),vars);
-      }
-    }
-  }
-}
-
-static atermpp::aterm_list get_used_vars(const atermpp::aterm_appl& t)
-{
-  atermpp::aterm_list l;
-  get_used_vars_aux(t,l);
-  return l;
+  std::set <variable> vars = find_free_variables(t);
+  return variable_list(vars.begin(),vars.end());
 }
 
 static atermpp::aterm_list create_sequence(const data_equation& rule, size_t* var_cnt)
@@ -323,7 +280,7 @@ static atermpp::aterm_list create_sequence(const data_equation& rule, size_t* va
 }
 
 
-// Structure for build_tree paramters
+// Structure for build_tree parameters
 typedef struct
 {
   atermpp::aterm_list Flist;   // List of sequences of which the first action is an F
@@ -425,8 +382,11 @@ static atermpp::aterm_appl createFreshVar(const atermpp::aterm_appl& sort, size_
   return data::variable(tree_var_str, atermpp::aterm_cast<const sort_expression>(sort));
 }
 
-// static atermpp::aterm_list subst_var(atermpp::aterm_list l, const atermpp::aterm_appl& old, const aterm& new_val, const aterm& num, const atermpp::aterm_list& substs)
-static atermpp::aterm_list subst_var(atermpp::aterm_list l, const atermpp::aterm_appl& old, const aterm& new_val, const aterm& num, const substitution& substs)
+static atermpp::aterm_list subst_var(atermpp::aterm_list l, 
+                                     const atermpp::aterm_appl& old, 
+                                     const aterm& new_val, 
+                                     const aterm& num, 
+                                     const substitution& substs)
 {
   if (l.empty())
   {
@@ -525,7 +485,9 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
     {
       atermpp::aterm_list e = atermpp::aterm_cast<atermpp::aterm_list>(pars.Slist.front());
 
-      e = subst_var(e,aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(e.front())[0]), v,atermpp::aterm_int(k),substitution(aterm_cast<atermpp::aterm_appl>(e.front())[0],v));
+      e = subst_var(e,aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(e.front())[0]), 
+                    v,atermpp::aterm_int(k),
+                    substitution(aterm_cast<atermpp::aterm_appl>(e.front())[0],v));
 
       l.push_front(e.front());
       m.push_front(e.tail());
@@ -2229,8 +2191,6 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
       for (size_t j=0; j<i; j++)
       {
         ar[idx+((i-1)*i)/2+j] = build_ar_expr(eqns,j,i);
-std::cerr << "ar_expression " << it->first << "  -- " << ar[idx+((i-1)*i)/2+j] << "\n";
-std::cerr << "i " << i << " j: " << j << " -- " << eqns << "\n";
       }
     }
   }
@@ -3037,7 +2997,6 @@ RewriterCompilingJitty::RewriterCompilingJitty(
 RewriterCompilingJitty::~RewriterCompilingJitty()
 {
   CleanupRewriteSystem();
-  finalise_common();
 }
 
 data_expression RewriterCompilingJitty::rewrite(

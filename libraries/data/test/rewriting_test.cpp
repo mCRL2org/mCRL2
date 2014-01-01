@@ -61,7 +61,7 @@ void data_rewrite_test(Rewriter& R, data_expression const& input, data_expressio
   }
 }
 
-/* BOOST_AUTO_TEST_CASE(bool_rewrite_test)
+BOOST_AUTO_TEST_CASE(bool_rewrite_test)
 {
   using namespace mcrl2::data::sort_bool;
 
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
     data_rewrite_test(R, e3, true_());
     data_rewrite_test(R, e4, false_());
   }
-} */
+} 
 
 
 BOOST_AUTO_TEST_CASE(set_rewrite_test)

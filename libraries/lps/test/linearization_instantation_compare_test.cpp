@@ -122,6 +122,35 @@ BOOST_AUTO_TEST_CASE(bad_renaming_non_bisimilar)
   run_linearisation_test_case(spec,statespace);
 }
 
+
+BOOST_AUTO_TEST_CASE(where_clauses_in_conditions_of_rewrite_rules)
+{
+  const std::string spec =
+      "act a:Bool;\n"
+      "\n"
+      "map is_null:List(Bool) -> Bool;\n"
+      "\n"
+      "var  L:List(Bool);\n"
+      "eqn  (n>0 whr n=#L end) -> is_null(L)=false;\n"
+      "     (n==0 whr n=#L end) -> is_null(L)= true;\n"
+      "\n"
+      "proc X(L:List(Bool))=a(is_null(L)).X([true]);\n"
+      "init X([]);\n";
+
+  const std::string expected_statespace =
+      "des (0,2,2)\n"
+      "(0,\"a(true)\",1)\n"
+      "(1,\"a(false)\",1)\n";
+
+  std::stringstream is(expected_statespace);
+
+  lts::lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec,statespace);
+}
+
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;
