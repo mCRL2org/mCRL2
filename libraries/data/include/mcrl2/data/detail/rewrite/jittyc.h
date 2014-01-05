@@ -13,6 +13,7 @@
 
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/utilities/uncompiledlibrary.h"
 #include "mcrl2/utilities/toolset_version.h"
 #include "nfs_array.h"
@@ -78,8 +79,8 @@ class RewriterCompilingJitty: public Rewriter
     }
 
   private:
+    RewriterJitty jitty_rewriter;
     std::set < data_equation > rewrite_rules;
-    // used_data_equation_selector data_equation_selector;
     bool need_rebuild;
     bool made_files;
 
@@ -134,7 +135,7 @@ struct rewriter_interface
 
 // Declare as a global array. Should be moved into the jittyc rewriter class,
 // along with all the functions in the compiling rewriter.
-extern std::vector<data_expression> precalculated_data_expressions;
+extern std::set<data_expression> protected_data_expressions;
 
 }
 }

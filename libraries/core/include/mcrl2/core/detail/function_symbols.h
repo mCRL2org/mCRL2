@@ -66,6 +66,12 @@ bool gsIsDataAppl(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_DataAppl(Term.function().arity());
 }
 
+inline
+bool gsIsDataAppl_no_check(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbols_DataAppl[Term.function().arity()];
+}
+
 // DataVarIdNoIndex
 inline
 const atermpp::function_symbol& function_symbol_DataVarIdNoIndex()

@@ -1210,17 +1210,14 @@ string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, size_t arity, da
   return head.second+(args.tail().empty()?"":",")+tail;
 }
 
-static string calc_inner_appl_head(size_t arity) // arity is one if there is a single head. Arity is two is there is a head and one argument, etc.
+// arity is one if there is a single head. Arity is two is there is a head and one argument, etc.
+static string calc_inner_appl_head(size_t arity) 
 {
   stringstream ss;
   if (arity == 1)
   {
     ss << "pass_on(";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
   }
-  /* else if (arity == 2)
-  {
-    ss << "makeAppl2";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
-  } */
   else if (arity <= 5)
   {
     ss << "application(";
@@ -1232,6 +1229,8 @@ static string calc_inner_appl_head(size_t arity) // arity is one if there is a s
   return ss.str();
 }
 
+// This function generates C++ code to calculate the data_expression t. 
+// If the result is a normal form the resulting boolean is true, otherwise it is false. 
 // if total_arity<=5 a term of type atermpp::aterm is generated, otherwise a term of type atermpp::aterm_appl is generated.
 pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const data_expression& t,
@@ -1241,6 +1240,22 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const size_t total_arity)
 {
   stringstream ss;
+  
+  // Experiment: if the term has no free variables, deliver the normal form directly.
+  // This code can be removed, when it does not turn out to be useful.
+  // This requires the use of the jitty rewriter to calculate normal forms.
+  
+  if (find_free_variables(t).empty())
+  {
+    // Returning a value is better than an index in an array.
+    substitution_type sigma;
+    const data_expression t_normal_form=jitty_rewriter.rewrite(t,sigma);
+    protected_data_expressions.insert(t_normal_form);
+    ss << "atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << 
+                        (void*)atermpp::detail::address(t_normal_form) << ")))";
+    return pair<bool,string>(true,ss.str());
+  } 
+
   if (is_function_symbol(t))
   {
     const function_symbol& f = core::down_cast<function_symbol>(t);
@@ -1454,7 +1469,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         }
         else
         {
-          // ss << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs) << "_0_0()";
           ss << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
         }
       }
@@ -1476,8 +1490,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
              The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
              which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
              to recalculate the normal form. TODO: this needs to be reconstructed. */
-          /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(((atermpp::aterm_int) ((atermpp::aterm_list) t).front()).value()
-                             + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ")"; */
           ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
         }
         else
@@ -1576,7 +1588,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false,arity);
       nfs_array tail_first(arity);
       string tail_second = calc_inner_terms(tail_first,arity,ta.arguments(),startarg,nnfvars,NULL);
-      ss << "is_application(atermpp::aterm_cast<atermpp::aterm_appl>(" << head.second << "))?";
+      ss << "is_application_no_check(atermpp::aterm_cast<atermpp::aterm_appl>(" << head.second << "))?";
       if (rewr)
       {
           ss << "rewrite(";
@@ -1809,7 +1821,7 @@ void RewriterCompilingJitty::implement_tree_aux(
              );
       }
       else
-      { fprintf(f,"%sif (is_application(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2b %s\n"
+      { fprintf(f,"%sif (is_application_no_check(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2b %s\n"
               "%s{\n"
               "%s  const data_expression& t%lu=atermpp::aterm_cast<const data_expression>(%s%lu[%lu]);\n",  // Should be an application, not a data expression, but this has consequences elsewhere.
               whitespace(d*2),
@@ -1959,9 +1971,11 @@ void RewriterCompilingJitty::finish_function(FILE* f,
 {
   if (arity == 0)
   {
-    precalculated_data_expressions.push_back(opid);
-    // fprintf(f,  "  return data_expression((const atermpp::detail::_aterm*)%p", (void*)atermpp::detail::address(opid));
-    fprintf(f,  "  return (precalculated_data_expressions[%ld]", precalculated_data_expressions.size()-1);
+    substitution_type sigma;
+    const data_expression t_normal_form=jitty_rewriter.rewrite(opid,sigma);
+    protected_data_expressions.insert(t_normal_form);
+    fprintf(f,"return atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(%p))",
+                       (void*)atermpp::detail::address(t_normal_form));
   }
   else
   {
@@ -2211,7 +2225,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
 }
 
 
-std::vector<data_expression> precalculated_data_expressions;
+std::set<data_expression> protected_data_expressions;
 
 bool RewriterCompilingJitty::addRewriteRule(const data_equation& rule1)
 {
@@ -2238,7 +2252,6 @@ bool RewriterCompilingJitty::addRewriteRule(const data_equation& rule1)
 
 bool RewriterCompilingJitty::removeRewriteRule(const data_equation& rule1)
 {
-  // const data_equation rule=m_conversion_helper.implement(rule1);
   const data_equation rule=rule1;
   if (rewrite_rules.erase(rule)>0) // An equation is erased
   {
@@ -2270,7 +2283,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
 
 void RewriterCompilingJitty::CleanupRewriteSystem()
 {
-  precalculated_data_expressions.clear();
+  protected_data_expressions.clear();
   if (so_rewr_cleanup != NULL)
   {
     so_rewr_cleanup();
@@ -2394,7 +2407,7 @@ void declare_rewr_functions(FILE* f, const data::function_symbol& func, const si
         if (a==0)
         {
           // This is a constant function; result can be derived by reference.
-          fprintf(f,  "static inline const data_expression& rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),a,nfs);
+          fprintf(f,  "static inline const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),a,nfs);
         }
         else
         {
@@ -2604,7 +2617,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           {
             if (a==0)
             {
-              fprintf(f,  "static const data_expression& rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),a,nfs);
+              fprintf(f,  "static const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),a,nfs);
             }
             else
             {
@@ -2894,7 +2907,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    }\n"
       "  }\n"
       "  \n"
-      "  else if (is_application(t))\n"
+      "  else if (is_application_no_check(t))\n"
       "  {\n"
       "    const application& ta=atermpp::aterm_cast<const application>(t);\n"
       "    const mcrl2::data::function_symbol& head=atermpp::aterm_cast<const mcrl2::data::function_symbol>(ta.head());\n"
@@ -2984,7 +2997,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 RewriterCompilingJitty::RewriterCompilingJitty(
                           const data_specification& data_spec,
                           const used_data_equation_selector& equation_selector):
-   Rewriter(data_spec,equation_selector)
+   Rewriter(data_spec,equation_selector),
+   jitty_rewriter(data_spec,equation_selector)
 {
   // data_equation_selector=equations_selector;
   so_rewr_cleanup = NULL;

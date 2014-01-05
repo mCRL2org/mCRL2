@@ -92,6 +92,14 @@ inline bool is_application(const atermpp::aterm_appl& x)
   return core::detail::gsIsDataAppl(x);
 }
 
+/// \brief Returns true if the term t is an application, but it does not check
+///        whether an application symbol of sufficient arity exists, assuming
+///        this is ok.
+inline bool is_application_no_check(const atermpp::aterm_appl& x)
+{
+  return core::detail::gsIsDataAppl_no_check(x);
+}
+
 /// \brief Returns true if the term t is a where clause
 inline bool is_where_clause(const atermpp::aterm_appl& x)
 {
