@@ -177,14 +177,14 @@ class linear_inequality
       bool negate=false,
       const data_expression factor=real_one())
     {
-      if (sort_real::is_minus_application(e) && application(e).arguments().size()==2)
+      if (sort_real::is_minus_application(e) && application(e).size()==2)
       {
         parse_and_store_expression(data::binary_left(application(e)),r,negate,factor);
         parse_and_store_expression(data::binary_right(application(e)),r,!negate,factor);
       }
-      else if (sort_real::is_negate_application(e) && application(e).arguments().size()==1)
+      else if (sort_real::is_negate_application(e) && application(e).size()==1)
       {
-        parse_and_store_expression(*(application(e).arguments().begin()),r,!negate,factor);
+        parse_and_store_expression(*(application(e).begin()),r,!negate,factor);
       }
       else if (sort_real::is_plus_application(e))
       {

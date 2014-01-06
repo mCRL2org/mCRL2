@@ -183,9 +183,8 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
     assert(is_function_sort(s));
     assert(d.sort()==function_sort(s).codomain());
     sort_expression_list argument_sorts=function_sort(s).domain();
-    data_expression_list arguments=appl.arguments();
-    assert(arguments.size()==argument_sorts.size());
-    data_expression_list::const_iterator j=arguments.begin();
+    assert(appl.size()==argument_sorts.size());
+    application::const_iterator j=appl.begin();
     for(sort_expression_list::const_iterator i=argument_sorts.begin(); i!=argument_sorts.end(); ++i,++j)
     {
       assert(UnwindType(j->sort())==UnwindType(*i));
