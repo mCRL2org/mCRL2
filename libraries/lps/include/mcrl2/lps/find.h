@@ -192,16 +192,16 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 }
 //--- end generated lps find code ---//
 
-/// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] container an expression or container with expressions
-/// \param d A data variable
-/// \return True if the term has a given variable as subterm.
-template <typename Container>
-bool search_free_variable(const Container& container, const data::variable& d)
+/// \brief Returns true if the term has a given free variable as subterm.
+/// \param[in] x an expression
+/// \param[in] v a variable
+/// \return True if v occurs free in x.
+template <typename T>
+bool search_free_variable(const T& x, const data::variable& v)
 {
-  // TODO: replace this by a more efficient implementation
-  std::set<data::variable> variables = lps::find_free_variables(container);
-  return variables.find(d) != variables.end();
+  data::detail::search_free_variable_traverser<lps::data_expression_traverser, lps::add_data_variable_binding> f(v);
+  f(x);
+  return f.found;
 }
 
 /// \brief Returns all action labels that occur in an object

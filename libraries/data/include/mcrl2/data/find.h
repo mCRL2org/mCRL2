@@ -191,7 +191,6 @@ make_find_all_variables_traverser(OutputIterator out)
 {
   return find_all_variables_traverser<Traverser, OutputIterator>(out);
 }
-
 template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator>
 struct find_free_variables_traverser: public Binder<Traverser, find_free_variables_traverser<Traverser, Binder, OutputIterator> >
 {
@@ -236,11 +235,85 @@ make_find_free_variables_traverser(OutputIterator out)
   return find_free_variables_traverser<Traverser, Binder, OutputIterator>(out);
 }
 
+
 template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator, class VariableContainer>
 find_free_variables_traverser<Traverser, Binder, OutputIterator>
 make_find_free_variables_traverser(OutputIterator out, const VariableContainer& v)
 {
   return find_free_variables_traverser<Traverser, Binder, OutputIterator>(out, v);
+}
+
+template <template <class> class Traverser>
+struct search_variable_traverser: public Traverser<search_variable_traverser<Traverser> >
+{
+  typedef Traverser<search_variable_traverser<Traverser> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  bool found;
+  const variable& v;
+
+  search_variable_traverser(const variable& v_)
+    : found(false), v(v_)
+  {}
+
+  void operator()(const variable& x)
+  {
+    if (x == v)
+    {
+      found = true;
+    }
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Traverser>
+search_variable_traverser<Traverser>
+make_search_variable_traverser(const data::variable& v)
+{
+  return search_variable_traverser<Traverser>(v);
+}
+
+template <template <class> class Traverser, template <template <class> class, class> class Binder>
+struct search_free_variable_traverser: public Binder<Traverser, search_free_variable_traverser<Traverser, Binder> >
+{
+  typedef Binder<Traverser, search_free_variable_traverser<Traverser, Binder> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::is_bound;
+  using super::bound_variables;
+  using super::increase_bind_count;
+
+  bool found;
+  const data::variable& v;
+
+  search_free_variable_traverser(const data::variable& v_)
+    : found(false), v(v_)
+  {}
+
+  void operator()(const variable& x)
+  {
+    if (!is_bound(x))
+    {
+      found = true;
+    }
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Traverser, template <template <class> class, class> class Binder>
+search_free_variable_traverser<Traverser, Binder>
+make_search_free_variable_traverser(const data::variable& v)
+{
+  return search_free_variable_traverser<Traverser, Binder>(v);
 }
 /// \endcond
 
@@ -398,25 +471,27 @@ std::set<data::data_expression> find_data_expressions(const T& x)
 }
 
 /// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] container an expression or container with expressions
+/// \param[in] x an expression
 /// \param[in] v a variable
-/// \return True if v occurs in any of the terms in \a container.
-template <typename Container>
-bool search_variable(Container const& container, const variable& v)
+/// \return True if v occurs in x.
+template <typename T>
+bool search_variable(const T& x, const variable& v)
 {
-  std::set<data::variable> variables = data::find_all_variables(container);
-  return variables.find(v) != variables.end();
+  data::detail::search_variable_traverser<data::variable_traverser> f(v);
+  f(x);
+  return f.found;
 }
 
-/// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] container an expression or container with expressions
-/// \param v A data variable
-/// \return True if the term has a given variable as subterm.
-template <typename Container>
-bool search_free_variable(Container container, const variable& v)
+/// \brief Returns true if the term has a given free variable as subterm.
+/// \param[in] x an expression
+/// \param[in] v a variable
+/// \return True if v occurs free in x.
+template <typename T>
+bool search_free_variable(const T& x, const variable& v)
 {
-  std::set<data::variable> variables = data::find_free_variables(container);
-  return variables.find(v) != variables.end();
+  data::detail::search_free_variable_traverser<data::data_expression_traverser, data::add_data_variable_binding> f(v);
+  f(x);
+  return f.found;
 }
 
 /// \brief Returns true if the term has a given sort expression as subterm.

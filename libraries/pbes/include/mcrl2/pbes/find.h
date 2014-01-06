@@ -223,14 +223,15 @@ std::set<propositional_variable_instantiation> find_propositional_variable_insta
 }
 
 /// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] x an expression in which to search
-/// \param[in] v the variable to search for
-/// \return True if the term has a given variable as subterm.
+/// \param[in] x an expression
+/// \param[in] v a variable
+/// \return True if v occurs in x.
 template <typename T>
 bool search_variable(const T& x, const data::variable& v)
 {
-  std::set<data::variable> variables = pbes_system::find_all_variables(x);
-  return variables.find(v) != variables.end();
+  data::detail::search_variable_traverser<pbes_system::variable_traverser> f(v);
+  f(x);
+  return f.found;
 }
 
 } // namespace pbes_system
