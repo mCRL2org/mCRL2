@@ -445,14 +445,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_list_enumeration(const application& x)
   {
     derived().print("[");
-    print_container(x.arguments(), precedence(x));
+    print_container(x, precedence(x));
     derived().print("]");
   }
 
   void print_set_enumeration(const application& x)
   {
     derived().print("{ ");
-    print_container(x.arguments(), precedence(x));
+    print_container(x, precedence(x));
     derived().print(" }");
   }
 
@@ -865,7 +865,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     if (is_infix_operation(x))
     {
-      data_expression_list::const_iterator i = x.arguments().begin();
+      auto i = x.begin();
       data_expression left = *i++;
       data_expression right = *i;
       print_expression(left, infix_precedence_left(left));
@@ -889,20 +889,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
 
     // print the arguments
-    print_parentheses = x.arguments().size() > 0;
-    if (is_function_symbol(x.head()) && x.arguments().size() == 1)
+    print_parentheses = x.size() > 0;
+    if (is_function_symbol(x.head()) && x.size() == 1)
     {
       std::string name(function_symbol(x.head()).name());
       if (name == "!" || name == "#")
       {
-        print_parentheses = precedence(x.arguments().front()) < max_precedence;
+        print_parentheses = precedence(*x.begin()) < max_precedence;
       }
     }
     if (print_parentheses)
     {
       derived().print("(");
     }
-    print_container(x.arguments());
+    print_container(x);
     if (print_parentheses)
     {
       derived().print(")");
@@ -1725,16 +1725,16 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (is_abstraction_application(x))
     {
-      if (x.arguments().size() > 0) {
+      if (x.size() > 0) {
         derived().print("(");
       }
       derived()(x.head());
-      if (x.arguments().size() > 0)
+      if (x.size() > 0)
       {
         derived().print(")(");
       }
-      print_container(x.arguments());
-      if (x.arguments().size() > 0)
+      print_container(x);
+      if (x.size() > 0)
       {
         derived().print(")");
       }

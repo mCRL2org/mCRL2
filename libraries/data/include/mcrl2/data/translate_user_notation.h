@@ -98,7 +98,15 @@ class translate_user_notation_builder: public data_expression_builder<Derived>
           return sort_fbag::fbag(element_sort, static_cast<Derived&>(*this)(x.arguments()));
         }
       }
-      data_expression result = application(static_cast<Derived&>(*this)(x.head()), static_cast<Derived&>(*this)(x.arguments()));
+
+      typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
+      function_pointer fp = &Derived::operator();
+      data_expression result = application(
+         static_cast<Derived&>(*this)(x.head()),
+         x.begin(),
+         x.end(),
+         boost::bind(fp, static_cast<Derived*>(this), _1)
+      );
       static_cast<Derived&>(*this).leave(x);
       return result;
     }

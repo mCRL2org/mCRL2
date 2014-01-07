@@ -81,7 +81,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       derived().enter(x);
       if (is_not(x)) // x = !y
       {
-        data_expression y = derived()(x.arguments().front());
+        data_expression y = derived()(*x.begin());
         result = utilities::optimized_not(y);
       }
       else if (is_and(x)) // x = y && z
