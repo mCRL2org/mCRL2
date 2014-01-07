@@ -726,8 +726,7 @@ static void add_summand(summand_information& summand_info,
   {
     new_actions=reinterpret_cast<const action_summand&>(s).multi_action().actions();
     action_list resulting_actions;
-    for (action_list::const_iterator i=new_actions.begin();
-         i!=new_actions.end(); i++)
+    for (action_list::const_iterator i=new_actions.begin(); i!=new_actions.end(); i++)
     {
       // put "_MAY" behind each action, and add its declaration to the action declarations.
       data_expression_list args=i->arguments();
