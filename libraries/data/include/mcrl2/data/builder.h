@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_BUILDER_H
 #define MCRL2_DATA_BUILDER_H
 
+#include <boost/bind.hpp>
 #include "mcrl2/core/builder.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
@@ -74,7 +75,14 @@ struct add_sort_expressions: public Builder<Derived>
   data::data_expression operator()(const data::application& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::application(static_cast<Derived&>(*this)(x.head()), static_cast<Derived&>(*this)(x.arguments()));
+    typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
+    function_pointer fp = &Derived::operator();
+    data::data_expression result = data::application(
+       static_cast<Derived&>(*this)(x.head()),
+       x.begin(),
+       x.end(),
+       boost::bind(fp, static_cast<Derived*>(this), _1)
+    );
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -393,7 +401,14 @@ struct add_data_expressions: public Builder<Derived>
   data::data_expression operator()(const data::application& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::application(static_cast<Derived&>(*this)(x.head()), static_cast<Derived&>(*this)(x.arguments()));
+    typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
+    function_pointer fp = &Derived::operator();
+    data::data_expression result = data::application(
+       static_cast<Derived&>(*this)(x.head()),
+       x.begin(),
+       x.end(),
+       boost::bind(fp, static_cast<Derived*>(this), _1)
+    );
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -607,7 +622,14 @@ struct add_variables: public Builder<Derived>
   data::data_expression operator()(const data::application& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::application(static_cast<Derived&>(*this)(x.head()), static_cast<Derived&>(*this)(x.arguments()));
+    typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
+    function_pointer fp = &Derived::operator();
+    data::data_expression result = data::application(
+       static_cast<Derived&>(*this)(x.head()),
+       x.begin(),
+       x.end(),
+       boost::bind(fp, static_cast<Derived*>(this), _1)
+    );
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

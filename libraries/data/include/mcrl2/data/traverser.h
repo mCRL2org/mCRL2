@@ -66,7 +66,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.head());
-    static_cast<Derived&>(*this)(x.arguments());
+    for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -370,7 +370,7 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.head());
-    static_cast<Derived&>(*this)(x.arguments());
+    for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -571,7 +571,7 @@ struct add_traverser_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.head());
-    static_cast<Derived&>(*this)(x.arguments());
+    for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -782,7 +782,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.head());
-    static_cast<Derived&>(*this)(x.arguments());
+    for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }
     static_cast<Derived&>(*this).leave(x);
   }
 

@@ -1025,7 +1025,11 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 ptype = p.type(include_modifiers = False, include_namespace = True)
                 if is_dependent_type(dependencies, ptype):
                     dependent = True
-                    updates.append('static_cast<Derived&>(*this)(x.%s());' % p.name())
+                    # special case for arguments of a data application
+                    if self.classname(True) == 'data::application' and p.name() == 'arguments':
+                        updates.append('for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }')
+                    else:
+                        updates.append('static_cast<Derived&>(*this)(x.%s());' % p.name())
             if dependent:
                 visit_text = '\n'.join(updates)
             else:
@@ -1131,7 +1135,18 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     else:
                         updates.append('x.%s()' % p.name())
                 if dependent:
-                    visit_text = '%s result = %s(%s);' % (return_type, classname, ', '.join(updates))
+                    # special case for arguments of a data application
+                    if self.classname(True) == 'data::application' and p.name() == 'arguments':
+                        visit_text = '''typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
+function_pointer fp = &Derived::operator();
+data::data_expression result = data::application(
+   static_cast<Derived&>(*this)(x.head()),
+   x.begin(),
+   x.end(),
+   boost::bind(fp, static_cast<Derived*>(this), _1)
+);'''
+                    else:
+                        visit_text = '%s result = %s(%s);' % (return_type, classname, ', '.join(updates))
                     return_statement = 'return result;'
                 else:
                     visit_text = '// skip'
