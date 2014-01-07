@@ -119,7 +119,7 @@ struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simpl
   // returns the argument of a data not
   data::data_expression not_arg(const data::data_expression& x)
   {
-    return data::application(x).arguments().front();
+    return *data::application(x).begin();
   }
 
   // replace !(y || z) by !y && !z

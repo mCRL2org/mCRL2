@@ -235,7 +235,7 @@ struct absinthe_algorithm
       {
         data::variable v = core::static_down_cast<const data::variable&>(x.head());
         v = data::variable(v.name(), super::operator()(v.sort()));
-        return data::detail::create_finite_set(data::application(v, x.arguments()));
+        return data::detail::create_finite_set(data::application(v, x.begin(), x.end()));
       }
       else if (data::is_function_symbol(x.head()))
       {

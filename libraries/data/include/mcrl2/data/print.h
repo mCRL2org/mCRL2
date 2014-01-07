@@ -70,7 +70,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   bool is_infix_operation(const application& x)
   {
-    if (x.arguments().size() != 2)
+    if (x.size() != 2)
     {
       return false;
     }
@@ -1195,7 +1195,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     if (is_numeric_cast(x))
     {
       // ignore numeric casts like Pos2Nat
-      derived()(x.arguments().front());
+      derived()(*x.begin());
     }
 
     //-------------------------------------------------------------------//
@@ -1369,7 +1369,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       if (sort_int::is_negate_application(x))
       {
         derived().print("-");
-        derived()(x.arguments().front());
+        derived()(*x.begin());
       }
       else if (sort_int::is_plus_application(x))
       {
@@ -1408,7 +1408,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       if (sort_real::is_negate_application(x))
       {
         derived().print("-");
-        derived()(x.arguments().front());
+        derived()(*x.begin());
       }
       else if (sort_real::is_plus_application(x))
       {
@@ -1485,7 +1485,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       if (sort_set::is_complement_application(x))
       {
         derived().print("!");
-        derived()(x.arguments().front());
+        derived()(*x.begin());
       }
       else if (sort_set::is_union_application(x))
       {

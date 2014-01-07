@@ -298,16 +298,6 @@ class application: public data_expression
       return atermpp::aterm_cast<const data_expression>(static_cast<atermpp::aterm_appl>(*this)[0]);
     }
 
-    /// \brief Get the arguments of this expression.
-    /// \deprecated
-    /// \details This function is quite inefficient. It is
-    ///          linear in the number of arguments, and requires
-    ///          the relatively expensive construction of an data_expression_list.
-    data_expression_list arguments() const
-    {
-      return data_expression_list(begin(), end());
-    }
-
     /// \brief Get the i-th argument of this expression.
     const data_expression& operator[](size_t index) const
     {
