@@ -111,12 +111,6 @@ if not buildthreads:
   buildthreads = multiprocessing.cpu_count()
 
 #
-# If we're only building documentation, then this is all we need to do here.
-#
-if package == 'official-release-doc':
-  sys.exit(0)
-
-#
 # Build
 #
 
@@ -127,6 +121,12 @@ make_command = ['cmake', '--build', builddir, '--'] + extraoptions
 if call('CMake --build', make_command):
   log('Build failed.')
   sys.exit(1)
+
+#
+# If we're only building documentation, then this is all we need to do here.
+#
+if package == 'official-release-doc':
+  sys.exit(0)
 
 #
 # Test
