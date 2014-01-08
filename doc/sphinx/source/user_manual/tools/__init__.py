@@ -20,12 +20,16 @@ def xsltproc(xml, transform, dst):
   open(dst, 'w+').write(rst)
 
 def generate_manpage(tool, rstfile, binpath):
+  exe = tool
+  if binpath:
+    exe = os.path.join(binpath, tool) # If this is a stage bin dir, it can be found in binpath directly
+    if not os.path.exists(exe): # Otherwise, assume binpath is the root of the CMAKE binary dir
+      exe = os.path.join(binpath, 'tools', tool, tool)
   try:
-    exe = os.path.join(binpath, tool) if binpath else tool
     xml = call(tool, [exe, '--generate-xml'])
     xsltproc(xml, os.path.join(_PWD, 'manual.xsl'), rstfile)
   except Exception as inst:
-    _LOG.error('Could not generate man page for {0} in reStructuredText. Caught exception {1} with arguments {2}'.format(tool, type(inst), inst))
+    _LOG.error('Could not generate man page for {0} in reStructuredText. Caught exception {1} with arguments {2}'.format(exe, type(inst), inst))
 
 def generate_rst(temppath, outpath, binpath):
   setvars(temppath, outpath)
