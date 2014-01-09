@@ -298,7 +298,7 @@ struct search_free_variable_traverser: public Binder<Traverser, search_free_vari
 
   void operator()(const variable& x)
   {
-    if (!is_bound(x))
+    if (v == x && !is_bound(x))
     {
       found = true;
     }
