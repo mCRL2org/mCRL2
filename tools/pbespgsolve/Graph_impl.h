@@ -9,8 +9,6 @@
 
 // Don't include this directly; include Graph.h instead!
 
-#include "mcrl2/utilities/workarounds.h" // for is_sorted on some platforms
-
 #include "DenseMap.h"
 #include <algorithm>
 #include <iterator>
