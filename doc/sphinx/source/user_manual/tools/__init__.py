@@ -40,16 +40,16 @@ def generate_rst(temppath, outpath, binpath):
       if tool.startswith('.'):
         continue
       _LOG.warning(tool)
-      usr_rst = tool + '.rst'
-      man_rst = os.path.join('man', tool + '.txt')
-      usr_rst = os.path.join(_TOOLS, usr_rst)
-      man_rst = os.path.join(_TOOLS, man_rst)
+      usr_rst = os.path.join(_TOOLS, tool + '.rst')
+      man_rst = os.path.join(_TOOLS, 'man', tool + '.txt')
       # Writing RST fails if the target path does not exist
       if not os.path.exists(os.path.join(_TOOLS, 'man')):
         os.makedirs(os.path.join(_TOOLS, 'man'))
       generate_manpage(tool, man_rst, binpath)
-      if os.path.exists(os.path.join(_PWD, tool + '.rst')):
+      if os.path.exists(usr_rst):
         open(usr_rst, 'a').write('\n\n.. include:: man/{0}.txt'.format(tool))
-      else:
+      elif os.path.exists(man_rst):
         _LOG.warning('No help available for {0}. Only man page will be available.'.format(tool))
         open(usr_rst, 'w+').write('.. index:: {0}\n\n.. _tool-{0}:\n\n{0}\n{1}\n\n.. include:: man/{0}.txt'.format(tool, '='*len(tool)))
+      else:
+        _LOG.warning('No documentation generated for {0}'.format(tool))
