@@ -93,7 +93,7 @@ bool contains_tau(const multi_action_name_set& A)
 inline
 process_expression make_sync(const process_expression x, const process_expression& y)
 {
-  if (is_delta(x) && is_delta(y))
+  if (is_delta(x) || is_delta(y))
   {
     return delta();
   }
@@ -113,7 +113,7 @@ process_expression make_merge(const process_expression x, const process_expressi
 inline
 process_expression make_left_merge(const process_expression x, const process_expression& y)
 {
-  if (is_delta(x) && is_delta(y))
+  if (is_delta(y))
   {
     return delta();
   }
