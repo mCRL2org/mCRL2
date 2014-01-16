@@ -1236,6 +1236,9 @@ static string calc_inner_appl_head(size_t arity)
   return ss.str();
 }
 
+static std::map<data_expression,size_t> protected_data_expressions;
+std::vector <data_expression> prepared_normal_forms;
+
 // This function generates C++ code to calculate the data_expression t. 
 // If the result is a normal form the resulting boolean is true, otherwise it is false. 
 // if total_arity<=5 a term of type atermpp::aterm is generated, otherwise a term of type atermpp::aterm_appl is generated.
@@ -1257,9 +1260,24 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     // Returning a value is better than an index in an array.
     substitution_type sigma;
     const data_expression t_normal_form=jitty_rewriter.rewrite(t,sigma);
-    protected_data_expressions.insert(t_normal_form);
-    ss << "atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << 
-                        (void*)atermpp::detail::address(t_normal_form) << ")))";
+    
+    size_t index;
+    if (protected_data_expressions.count(t_normal_form)>0)
+    {
+      index=protected_data_expressions[t_normal_form];
+    }
+    else
+    {
+      protected_data_expressions[t_normal_form]=protected_data_expressions.size();
+      index=prepared_normal_forms.size();
+      assert(index==protected_data_expressions[t_normal_form]);
+      prepared_normal_forms.push_back(t_normal_form);
+    }
+
+    // protected_data_expressions.insert(t_normal_form);
+    // ss << "atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << 
+    //                    (void*)atermpp::detail::address(t_normal_form) << ")))";
+    ss << "prepared_normal_forms[" << index << "]";
     return pair<bool,string>(true,ss.str());
   } 
 
@@ -1980,9 +1998,21 @@ void RewriterCompilingJitty::finish_function(FILE* f,
   {
     substitution_type sigma;
     const data_expression t_normal_form=jitty_rewriter.rewrite(opid,sigma);
-    protected_data_expressions.insert(t_normal_form);
-    fprintf(f,"return atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(%p))",
-                       (void*)atermpp::detail::address(t_normal_form));
+    size_t index;
+    if (protected_data_expressions.count(t_normal_form)>0)
+    {
+      index=protected_data_expressions[t_normal_form];
+    }
+    else
+    {
+      protected_data_expressions[t_normal_form]=protected_data_expressions.size();
+      index=prepared_normal_forms.size();
+      assert(index==protected_data_expressions[t_normal_form]);
+      prepared_normal_forms.push_back(t_normal_form);
+    }
+    // fprintf(f,"return atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(%p))",
+    //                   (void*)atermpp::detail::address(t_normal_form));
+    fprintf(f,"return (prepared_normal_forms[%ld]",index);
   }
   else
   {
@@ -2232,8 +2262,6 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
 }
 
 
-std::set<data_expression> protected_data_expressions;
-
 bool RewriterCompilingJitty::addRewriteRule(const data_equation& rule1)
 {
   // const data_equation rule=m_conversion_helper.implement(rule1);
@@ -2291,6 +2319,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
 void RewriterCompilingJitty::CleanupRewriteSystem()
 {
   protected_data_expressions.clear();
+  prepared_normal_forms.clear();
   if (so_rewr_cleanup != NULL)
   {
     so_rewr_cleanup();
@@ -2414,7 +2443,7 @@ void declare_rewr_functions(FILE* f, const data::function_symbol& func, const si
         if (a==0)
         {
           // This is a constant function; result can be derived by reference.
-          fprintf(f,  "static inline const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),a,nfs);
+          fprintf(f,  "static inline const data_expression& rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(func),a,nfs);
         }
         else
         {
@@ -2624,7 +2653,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           {
             if (a==0)
             {
-              fprintf(f,  "static const data_expression rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),a,nfs);
+              fprintf(f,  "static const data_expression& rewr_%zu_%zu_%zu(",core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),a,nfs);
             }
             else
             {

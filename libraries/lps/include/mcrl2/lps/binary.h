@@ -229,7 +229,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
             while (k != elements.end())
             {
               // Elements that get boolean value false
-              size_t count(1 << j );
+              ssize_t count(1 << j);
               if (std::distance(k, elements.end()) < count)
               {
                 k = elements.end();
@@ -240,7 +240,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
               }
 
               // Elements that get value true
-              for (size_t l = 0; l < count && k != elements.end(); ++l)
+              for (ssize_t l = 0; l < count && k != elements.end(); ++l)
               {
                 disjuncts.push_back(data::equal_to(i->rhs(), *k++));
               }

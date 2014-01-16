@@ -135,7 +135,7 @@ struct rewriter_interface
 
 // Declare as a global array. Should be moved into the jittyc rewriter class,
 // along with all the functions in the compiling rewriter.
-extern std::set<data_expression> protected_data_expressions;
+extern std::vector <data_expression> prepared_normal_forms;
 
 }
 }
