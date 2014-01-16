@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_BINARY_H
 #define MCRL2_LPS_BINARY_H
 
-#include <cmath>
+// #include <cmath>
 #include <iterator>
 
 #include "mcrl2/utilities/logger.h"
@@ -96,9 +96,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
       else
       {
         size_t n = enumerated_elements.size();
-        size_t m = static_cast< size_t >(pow(static_cast< double >(2), static_cast< int >(new_parameters.size()) - 1));
-
-        //m == 2^(new_parameters.size() - 1)
+        size_t m = 1 << (new_parameters.size() - 1);  //m == 2^(new_parameters.size() - 1)
 
         if (m > n)
         {
@@ -116,8 +114,8 @@ class binary_algorithm: public lps::detail::lps_algorithm
           right_list = data::data_expression_vector(enumerated_elements.begin() + m, enumerated_elements.end());
         }
 
-        data::data_expression condition = new_parameters.front();
-        new_parameters.erase(new_parameters.begin());
+        data::data_expression condition = new_parameters.back();
+        new_parameters.pop_back();
         result = if_(condition,
                      make_if_tree(new_parameters, right_list),
                      make_if_tree(new_parameters, left_list));
@@ -165,8 +163,6 @@ class binary_algorithm: public lps::detail::lps_algorithm
           m_enumerated_elements[par] = enumerated_elements;
 
           //Calculate the number of booleans needed to encode par
-          //The first variation is not accurate!
-          //int n = static_cast< int >(ceil(::log(static_cast< double >(enumerated_elements.size())) / ::log(static_cast< double >(2))));
           size_t n = nr_of_booleans_for_elements(enumerated_elements.size());
 
           //Set hint for fresh variable names
@@ -233,10 +229,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
             while (k != elements.end())
             {
               // Elements that get boolean value false
-              int count(static_cast< int >(pow(static_cast< double >(2), static_cast< int >(j))));
-              // TODO: Why doesn't just std::advance(k,count) work?, i.e. if
-              // distance(k, elements.end()) > count, advance(k, count)
-              // entails k != elements.end().
+              size_t count(1 << j );
               if (std::distance(k, elements.end()) < count)
               {
                 k = elements.end();
@@ -247,7 +240,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
               }
 
               // Elements that get value true
-              for (int l = 0; l < count && k != elements.end(); ++l)
+              for (size_t l = 0; l < count && k != elements.end(); ++l)
               {
                 disjuncts.push_back(data::equal_to(i->rhs(), *k++));
               }
