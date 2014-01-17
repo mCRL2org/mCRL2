@@ -1268,8 +1268,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else
     {
-      protected_data_expressions[t_normal_form]=protected_data_expressions.size();
       index=prepared_normal_forms.size();
+      protected_data_expressions[t_normal_form]=index;
       assert(index==protected_data_expressions[t_normal_form]);
       prepared_normal_forms.push_back(t_normal_form);
     }
@@ -2005,8 +2005,8 @@ void RewriterCompilingJitty::finish_function(FILE* f,
     }
     else
     {
-      protected_data_expressions[t_normal_form]=protected_data_expressions.size();
       index=prepared_normal_forms.size();
+      protected_data_expressions[t_normal_form]=index;
       assert(index==protected_data_expressions[t_normal_form]);
       prepared_normal_forms.push_back(t_normal_form);
     }
