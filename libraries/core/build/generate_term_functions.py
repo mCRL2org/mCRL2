@@ -42,7 +42,6 @@ const atermpp::function_symbol& function_symbol_%(name)s()
         calls[name] = f.default_call()
         decls[name] = f.default_declaration()
 
-        ctext = ctext + 'template <typename Term> bool %s(Term t);\n' % f.check_name()
         dtext = dtext + '  const atermpp::function_symbol core::detail::function_symbols::%s = core::detail::function_symbol_%s();\n' % (name, name)
         vtext = vtext + '  static const atermpp::function_symbol %s;\n' % name
 
