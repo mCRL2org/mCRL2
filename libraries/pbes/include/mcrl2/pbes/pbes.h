@@ -282,8 +282,6 @@ class pbes
     void save(const std::string& filename, bool binary = true, bool = false) const
 #endif
     {
-      // The well typedness check is only done in debug mode, since for large
-      // PBESs it takes too much time
       assert(no_well_typedness_check || is_well_typed());
 
       pbes tmp(*this);
