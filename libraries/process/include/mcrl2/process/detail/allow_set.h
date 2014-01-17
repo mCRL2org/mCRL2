@@ -41,7 +41,8 @@ bool contains(const multi_action_name& alpha, const core::identifier_string& a)
 inline
 bool contains(const multi_action_name_set& A, const multi_action_name& a)
 {
-  return A.find(a) != A.end();
+  // note that A implicitly contains the empty multi_action_name
+  return a.empty() || A.find(a) != A.end();
 }
 
 // Hides (or: removes) elements in I from C
@@ -252,7 +253,7 @@ inline
 allow_set allow(const action_name_multiset_list& V, const allow_set& x)
 {
   multi_action_name_set result;
-  for (action_name_multiset_list::const_iterator i = V.begin(); i != V.end(); ++i)
+  for (auto i = V.begin(); i != V.end(); ++i)
   {
     core::identifier_string_list names = i->names();
     multi_action_name beta(names.begin(), names.end());
