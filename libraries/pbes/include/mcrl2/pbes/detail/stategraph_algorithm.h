@@ -219,9 +219,6 @@ class stategraph_algorithm
     // en de tweede als "detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)".
     bool m_use_alternative_gcfp_consistency;
 
-    // the control flow parameters
-    std::map<core::identifier_string, std::vector<bool> > m_is_control_flow;
-
     // the local control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_LCFP;
 
@@ -264,8 +261,21 @@ class stategraph_algorithm
       return propositional_variable();
     }
 
+    template <typename Map>
+    typename Map::mapped_type map_element(const Map& m, const typename Map::key_type& key) const
+    {
+      auto i = m.find(key);
+      if (i == m.end())
+      {
+        std::ostringstream out;
+        out << "map_element: key " << key << " not found!";
+        throw mcrl2::runtime_error(out.str());
+      }
+      return i->second;
+    }
+    
   public:
-    std::string print_control_flow_parameters()
+    std::string print_control_flow_parameters() const
     {
       std::ostringstream out;
       out << "--- control flow parameters ---" << std::endl;
@@ -274,7 +284,7 @@ class stategraph_algorithm
       {
         propositional_variable X = k->variable();
         const std::vector<data::variable>& dX = k->parameters();
-        const std::vector<bool>& cf = m_is_control_flow[X.name()];
+        const std::vector<bool>& cf = map_element(m_is_GCFP, X.name());
 
         out << core::pp(X.name()) << " ";
         for (std::size_t i = 0; i < cf.size(); ++i)
@@ -433,7 +443,7 @@ class stategraph_algorithm
                   // copy(X,i,n) is undefined
                   if (is_undefined(PVI_X_i.source, n) || is_undefined(PVI_X_i.dest, n))
                   {
-                    mCRL2log(log::debug, "stategraph") << "(" << X << ", " << n << ") is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << "in equation " << X << " (copy and source/dest undefined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "(" << X << ", " << n << ") is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << " (copy and source/dest undefined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
@@ -442,7 +452,7 @@ class stategraph_algorithm
                   // copy(X,i,n) is defined
                   if (!is_undefined(PVI_X_i.source, n) || !is_undefined(PVI_X_i.dest, n))
                   {
-                    mCRL2log(log::debug, "stategraph") << "(" << X << ", " << n << ") is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << "in equation " << X << " (copy defined and source/dest defined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "(" << X << ", " << n << ") is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << " (copy defined and source/dest defined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
@@ -572,8 +582,8 @@ class stategraph_algorithm
 
     bool is_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
     {
-      std::map<core::identifier_string, std::vector<bool> >::const_iterator j = m_is_control_flow.find(X);
-      assert(j != m_is_control_flow.end());
+      std::map<core::identifier_string, std::vector<bool> >::const_iterator j = m_is_GCFP.find(X);
+      assert(j != m_is_GCFP.end());
       const std::vector<bool>& cf = j->second;
       assert(i < cf.size());
       return cf[i];
@@ -840,8 +850,8 @@ class stategraph_algorithm
 
     const std::vector<bool>& stategraph_values(const core::identifier_string& X) const
     {
-      std::map<core::identifier_string, std::vector<bool> >::const_iterator i = m_is_control_flow.find(X);
-      assert (i != m_is_control_flow.end());
+      std::map<core::identifier_string, std::vector<bool> >::const_iterator i = m_is_GCFP.find(X);
+      assert (i != m_is_GCFP.end());
       return i->second;
     }
 
@@ -1124,7 +1134,7 @@ class stategraph_algorithm
 
     void compute_value_graph(const std::set<std::size_t>& component)
     {
-      mCRL2log(log::debug, "stategraph") << "Compute local control flow graph for component " << core::detail::print_set(component) << std::endl;
+      mCRL2log(log::debug, "stategraph") << "Compute local control flow graph for component " << print_connected_component(component) << std::endl;
       std::vector<value_graph_vertex> V;
       std::set<std::size_t> todo;
 
