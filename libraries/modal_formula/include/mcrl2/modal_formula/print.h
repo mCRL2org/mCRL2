@@ -259,7 +259,6 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   using super::print_unary_operation;
   using super::print_binary_operation;
   using super::print_abstraction;
-  using super::print_assignments;
   using super::print_variables;
   using super::print_expression;
 
@@ -380,8 +379,31 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   {
     derived().enter(x);
     derived()(x.name());
-    print_variables(x.arguments());
+    print_variables(x.arguments(), false);
     derived().leave(x);
+  }
+
+  // TODO: merge this function with the version in data/print.h (?)
+  void print_assignments(const data::assignment_list& assignments)
+  {
+    if (assignments.empty())
+    {
+      return;
+    }
+    derived().print("(");
+    for (auto i = assignments.begin(); i != assignments.end(); ++i)
+    {
+      if (i != assignments.begin())
+      {
+        derived().print(", ");
+      }
+      derived()(i->lhs());
+      derived().print(": ");
+      derived()(i->lhs().sort());
+      derived().print(" = ");
+      derived()(i->rhs());
+    }
+    derived().print(")");
   }
 
   void operator()(const state_formulas::nu& x)
@@ -389,7 +411,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().enter(x);
     derived().print("nu ");
     derived()(x.name());
-    print_assignments(x.assignments(), false);
+    print_assignments(x.assignments());
     derived().print(". ");
     derived()(x.operand());
     derived().leave(x);
@@ -400,7 +422,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().enter(x);
     derived().print("mu ");
     derived()(x.name());
-    print_assignments(x.assignments(), false);
+    print_assignments(x.assignments());
     derived().print(". ");
     derived()(x.operand());
     derived().leave(x);
