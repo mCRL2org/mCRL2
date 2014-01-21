@@ -45,7 +45,6 @@ class lts2pbes_algorithm
   protected:
     const lts::lts_lts_t& lts0;
     pbes_system::detail::lts2pbes_lts lts1;
-    state_formulas::state_formula f0;
     utilities::progress_meter m_progress_meter;
 
   public:
@@ -59,44 +58,38 @@ class lts2pbes_algorithm
     /// \return The result of the translation
     pbes run(const state_formulas::state_formula& formula)
     {
-      namespace sf = state_formulas;
-      namespace af = state_formulas::detail::accessors;
-
       if (!state_formulas::algorithms::is_monotonous(formula))
       {
         throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
       }
 
-      f0 = formula;
+      // resolve name conflicts and wrap the formula in a mu or nu if needed
+      mCRL2log(log::debug) << "formula before preprocessing: " << state_formulas::pp(formula) << std::endl;
+      lps::specification spec;
+      state_formulas::state_formula f = state_formulas::algorithms::preprocess_state_formula(formula, spec);
+      mCRL2log(log::debug) << "formula after preprocessing:  " << state_formulas::pp(f) << std::endl;
 
       // remove occurrences of ! and =>
-      if (!state_formulas::algorithms::is_normalized(f0))
+      if (!state_formulas::algorithms::is_normalized(f))
       {
-        f0 = state_formulas::algorithms::normalize(f0);
+        f = state_formulas::algorithms::normalize(f);
       }
-
-      // wrap the formula inside a 'nu' if needed
-      if (!sf::is_mu(f0) && !sf::is_nu(f0))
-      {
-        data::set_identifier_generator generator;
-        generator.add_identifiers(state_formulas::find_identifiers(f0));
-        core::identifier_string X = generator("X");
-        f0 = sf::nu(X, data::assignment_list(), f0);
-      }
+      mCRL2log(log::debug) << "formula after normalization:  " << state_formulas::pp(f) << std::endl;
+      assert(state_formulas::algorithms::is_normalized(f));
 
       // initialize progress meter
-      std::size_t num_fixpoints = state_formulas::count_fixpoints(f0);
+      std::size_t num_fixpoints = state_formulas::count_fixpoints(f);
       std::size_t num_steps = num_fixpoints * lts1.state_count();
       m_progress_meter.set_size(num_steps);
       mCRL2log(log::verbose) << "Generating " << num_steps << " equations." << std::endl;
 
       // compute the equations
-      std::vector<pbes_equation> eqn = detail::E(f0, f0, lts0, lts1, m_progress_meter, core::term_traits_optimized<pbes_expression>());
+      std::vector<pbes_equation> eqn = detail::E(f, f, lts0, lts1, m_progress_meter, core::term_traits_optimized<pbes_expression>());
 
       // compute the initial state
       state_type s0 = lts0.initial_state();
-      core::identifier_string Xs0 = detail::make_identifier(af::name(f0), s0);
-      data::data_expression_list e = detail::mu_expressions(f0);
+      core::identifier_string Xs0 = detail::make_identifier(state_formulas::detail::accessors::name(f), s0);
+      data::data_expression_list e = detail::mu_expressions(f);
       propositional_variable_instantiation init(Xs0, e);
 
       return pbes(lts0.data(), eqn, std::set<data::variable>(), init);
