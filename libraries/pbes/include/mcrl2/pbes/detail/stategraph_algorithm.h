@@ -20,6 +20,7 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
+#include "mcrl2/utilities/detail/map_utility.h"
 #include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
@@ -261,19 +262,6 @@ class stategraph_algorithm
       return propositional_variable();
     }
 
-    template <typename Map>
-    typename Map::mapped_type map_element(const Map& m, const typename Map::key_type& key) const
-    {
-      auto i = m.find(key);
-      if (i == m.end())
-      {
-        std::ostringstream out;
-        out << "map_element: key " << key << " not found!";
-        throw mcrl2::runtime_error(out.str());
-      }
-      return i->second;
-    }
-    
   public:
     std::string print_control_flow_parameters() const
     {
@@ -284,7 +272,7 @@ class stategraph_algorithm
       {
         propositional_variable X = k->variable();
         const std::vector<data::variable>& dX = k->parameters();
-        const std::vector<bool>& cf = map_element(m_is_GCFP, X.name());
+        const std::vector<bool>& cf = utilities::detail::map_element(m_is_GCFP, X.name());
 
         out << core::pp(X.name()) << " ";
         for (std::size_t i = 0; i < cf.size(); ++i)
