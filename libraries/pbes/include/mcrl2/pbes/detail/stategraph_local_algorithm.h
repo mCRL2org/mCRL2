@@ -200,7 +200,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         {
           continue;
         }
-        if (!contains(m_belongs[k][X], d))
+        if (!utilities::detail::contains(m_belongs[k][X], d))
         {
           continue;
         }
@@ -209,7 +209,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         for (std::set<stategraph_vertex*>::const_iterator i = inst.begin(); i != inst.end(); ++i)
         {
           const stategraph_vertex& u = **i;
-          if (contains(u.marking, d))
+          if (utilities::detail::contains(u.marking, d))
           {
             mCRL2log(log::debug, "stategraph") << "is_marked_in_other_graph(" << core::pp(X) << ", " << data::pp(d) << ") = true" << std::endl;
             mCRL2log(log::debug, "stategraph") << "witness: u = " << pbes_system::pp(u.X) << " in graph " << k << std::endl;
@@ -322,7 +322,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               for (std::size_t l = 0; l < d_Y.size(); ++l)
               {
                 std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
-                if (!contains(Bk[Y], d_Y[l]))
+                if (!utilities::detail::contains(Bk[Y], d_Y[l]))
                 {
                   std::set<data::variable> M = set_difference(set_intersection(m_belongs[k][X], FV(nth_element(f, l))), u.marking);
                   if (M.empty())

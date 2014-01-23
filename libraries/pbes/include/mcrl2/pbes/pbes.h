@@ -65,6 +65,9 @@ atermpp::aterm_appl pbes_to_aterm(const pbes& p);
 // <PBEqnSpec>    ::= PBEqnSpec(<PBEqn>*)
 class pbes
 {
+  public:
+    typedef pbes_equation equation_type;
+
   protected:
     /// \brief The data specification
     data::data_specification m_data;

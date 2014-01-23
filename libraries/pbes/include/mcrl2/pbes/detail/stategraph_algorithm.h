@@ -20,7 +20,7 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
-#include "mcrl2/utilities/detail/map_utility.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
@@ -133,6 +133,16 @@ class value_graph_vertex: public control_flow_graph_vertex_base
     {
       return m_name == other.m_name && m_index == other.m_index && m_value == other.m_value;
     }
+
+    std::string print_neighbors() const
+    {
+      std::ostringstream out;
+      for (auto i = m_neighbors.begin(); i != m_neighbors.end(); ++i)
+      {
+        out << **i << " ";
+      }
+      return out.str();
+    }
 };
 
 inline
@@ -239,13 +249,6 @@ class stategraph_algorithm
     std::set<data::variable> FV(const data::data_expression& x) const
     {
       return data::find_free_variables(x);
-    }
-
-    // for readability
-    template <typename Set>
-    bool contains(const Set& S, const typename Set::value_type& s) const
-    {
-      return S.find(s) != S.end();
     }
 
     propositional_variable find_propvar(const pbes& p, const core::identifier_string& X) const
@@ -1093,6 +1096,7 @@ class stategraph_algorithm
                                  const data::data_expression& e1
                                 )
     {
+      mCRL2log(log::debug1, "stategraph") << " insert edge e1 = " << e1 << std::endl;
       if (e1 != data::undefined_data_expression())
       {
         const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
@@ -1103,6 +1107,7 @@ class stategraph_algorithm
         std::vector<value_graph_vertex>::iterator j = std::find(V.begin(), V.end(), v_);
         if (j == V.end())
         {
+          mCRL2log(log::debug1, "stategraph") << " add vertex v = " << v_ << std::endl;
           V.push_back(v_);
           std::size_t index = V.size() - 1;
           todo.insert(index);
@@ -1110,13 +1115,19 @@ class stategraph_algorithm
         }
         value_graph_vertex& v = *j; // v == v_, and v is an element of the array V
 
+        mCRL2log(log::debug1, "stategraph") << " u.neighbors() = " << u.print_neighbors() << std::endl;
+
         // add edge (u, v)
-        if (u.neighbors().find(&v) != u.neighbors().end())
+        if (!utilities::detail::contains(u.neighbors(), &v))
         {
           mCRL2log(log::debug, "stategraph") << " edge " << u << " -> " << v << std::endl;
+          u.neighbors().insert(&v);
+          v.neighbors().insert(&u);
         }
-        u.neighbors().insert(&v);
-        v.neighbors().insert(&u);
+        else
+        {
+          mCRL2log(log::debug1, "stategraph") << " edge already exists!" << std::endl;
+        }
       }
     }
 
@@ -1139,7 +1150,9 @@ class stategraph_algorithm
 
       for (auto p = component.begin(); p != component.end(); ++p)
       {
+        mCRL2log(log::debug1, "stategraph") << "component: p = " << *p << std::endl;
         const control_flow_graph_vertex& w = m_control_flow_graph_vertices[*p];
+        mCRL2log(log::debug1, "stategraph") << "component: w = " << w << std::endl;
         const core::identifier_string& X = w.name();
         if (X == Xinit)
         {
@@ -1158,6 +1171,7 @@ class stategraph_algorithm
         const core::identifier_string& X = u.name();
         const data::variable& d = u.variable();
         const data::data_expression& e = u.value();
+        mCRL2log(log::debug1, "stategraph") << "choose todo element (X, d, e) = (" << X << ", " << d << ", " << e << ")" << std::endl;
         std::size_t k = u.index();
         const stategraph_equation& eq_X = *find_equation(m_pbes, X);
         const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
@@ -1170,15 +1184,18 @@ class stategraph_algorithm
           if (d == data::undefined_variable())
           {
             // case 1: (X, e) -> (Y, d1, e)
+            mCRL2log(log::debug1, "stategraph") << "case 1" << std::endl;
             if (q != component_index.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
+              mCRL2log(log::debug1, "stategraph") << "case 1 k1 = " << k1 << std::endl;
               insert_value_graph_edge(V, todo, Y, u, k1, e);
             }
             // case 2: (X, e) -> (Y, e)
             else
             {
               std::size_t k1 = data::undefined_index();
+              mCRL2log(log::debug1, "stategraph") << "case 2 k1 = " << k1 << std::endl;
               insert_value_graph_edge(V, todo, Y, u, k1, e);
             }
           }
@@ -1193,6 +1210,7 @@ class stategraph_algorithm
               {
                 // source(X, i, k) = e && dest(X, i, k1) = e1
                 e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
+                mCRL2log(log::debug1, "stategraph") << "case 3a k1 = " << k1 << std::endl;
                 insert_value_graph_edge(V, todo, Y, u, k1, e1);
               }
               else if (Y != X && is_undefined(i->source, k))

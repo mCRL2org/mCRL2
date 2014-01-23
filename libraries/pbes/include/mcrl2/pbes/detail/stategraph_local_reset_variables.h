@@ -133,7 +133,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           continue;
         }
         const std::set<data::variable>& V = i->second;
-        if (contains(V, d))
+        if (utilities::detail::contains(V, d))
         {
           mCRL2log(log::debug1) << "    " << data::pp(d) << " belongs to graph " << k << std::endl;
           // determine m such that m_control_flow_index[X][m] == k
@@ -166,7 +166,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           const stategraph_vertex& u = vi->second;
           mCRL2log(log::debug1) << "      found vertex " << pp(u.X) << " with marking " << print_vector(u.marking, ", ") << std::endl;
 
-          result = result && contains(u.marking, d);
+          result = result && utilities::detail::contains(u.marking, d);
           if(!result)
           {
             mCRL2log(log::debug1) << "    " << data::pp(d) << " is not contained in the marking for " << pp(u.X) << " so it is not relevant" << std::endl;

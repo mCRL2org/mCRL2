@@ -46,6 +46,9 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
 // <BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
 class boolean_equation_system
 {
+  public:
+    typedef boolean_equation equation_type;
+
   protected:
     /// \brief The equations
     std::vector<boolean_equation> m_equations;
