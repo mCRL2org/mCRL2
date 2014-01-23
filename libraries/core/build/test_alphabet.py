@@ -19,8 +19,8 @@ def test_alphabet(p, filename):
     run_mcrl22lps(txtfile, lpsfile2, '--no-alpha')
     run_lps2lts(lpsfile1, ltsfile1)
     run_lps2lts(lpsfile2, ltsfile2)
-    answer_text = run_ltscompare(ltsfile1, ltsfile2, '-ebranching-bisim')
-    answer = answer_text.find('LTSs are branching bisimilar') != -1
+    answer_text = run_ltscompare(ltsfile1, ltsfile2, '-ebisim')
+    answer = answer_text.find('LTSs are strongly bisimilar') != -1
     return answer
 
 def main():
