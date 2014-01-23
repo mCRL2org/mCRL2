@@ -17,10 +17,10 @@ To build the documentation, the following is needed:
 .. |python| replace:: *Python 2.5.1*
 .. _python: http://www.python.org
 
-.. |cmake| replace:: *CMake 2.8*
+.. |cmake| replace:: *CMake 2.8.6*
 .. _cmake: http://www.cmake.org/cmake/resources/software.html
 
-.. |cmakeosx| replace:: *CMake 2.8.7*
+.. |cmakeosx| replace:: *CMake 2.8.12*
 .. _cmakeosx: http://www.cmake.org/cmake/resources/software.html
 
 .. |doxygen| replace:: *Doxygen 1.7.4*
