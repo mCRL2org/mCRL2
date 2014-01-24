@@ -39,6 +39,21 @@ typename Container::value_type pick_element(Container& v)
   return result;
 }
 
+inline
+std::string print_index(std::size_t index)
+{
+  std::ostringstream out;
+  if (index == data::undefined_index())
+  {
+    out << "undefined";
+  }
+  else
+  {
+    out << index;
+  }
+  return out.str();
+}
+
 // Base class for local and global control flow graph vertex
 class control_flow_graph_vertex
 {
@@ -137,15 +152,7 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
       return m_name == other.m_name && m_index == other.m_index && m_value == other.m_value;
     }
 
-    std::string print_neighbors() const
-    {
-      std::ostringstream out;
-      for (auto i = m_neighbors.begin(); i != m_neighbors.end(); ++i)
-      {
-        out << **i << " ";
-      }
-      return out.str();
-    }
+    std::string print_neighbors() const;
 };
 
 inline
@@ -157,6 +164,18 @@ std::ostream& operator<<(std::ostream& out, const local_control_flow_graph_verte
     assert(u.value() == data::undefined_data_expression());
   }
   return out << '(' << u.name() << ", " << u.index() << ", " << data::pp(u.variable()) << "=" << data::pp(u.value()) << ')';
+}
+
+// The implementation is pulled outside the class, since the stream operator for local_control_flow_graph_vertex is needed.
+inline
+std::string local_control_flow_graph_vertex::print_neighbors() const
+{
+  std::ostringstream out;
+  for (auto i = m_neighbors.begin(); i != m_neighbors.end(); ++i)
+  {
+    out << **i << " ";
+  }
+  return out.str();
 }
 
 /// \brief Algorithm class for the computation of the local and global control flow graphs
@@ -695,7 +714,7 @@ class stategraph_algorithm
     std::string print_connected_component(const std::set<std::size_t>& component) const
     {
       std::ostringstream out;
-      out << "component {";
+      out << "{";
       for (auto i = component.begin(); i != component.end(); ++i)
       {
         if (i != component.begin())
@@ -1125,15 +1144,14 @@ class stategraph_algorithm
 
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        mCRL2log(log::debug1, "stategraph") << "component: p = " << *p << std::endl;
         const global_control_flow_graph_vertex& w = m_control_flow_graph_vertices[*p];
-        mCRL2log(log::debug1, "stategraph") << "component: w = " << w << std::endl;
         const core::identifier_string& X = w.name();
         if (X == Xinit)
         {
           std::size_t j = w.index();
           data::data_expression e_j = nth_element(init.parameters(), j);
           local_control_flow_graph_vertex u(X, j, w.variable(), e_j);
+          mCRL2log(log::debug1, "stategraph") << "insert todo element " << u << std::endl;
           V.push_back(u);
           todo.insert(V.size() - 1);
         }
@@ -1163,14 +1181,14 @@ class stategraph_algorithm
             if (q != component_index.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
-              mCRL2log(log::debug1, "stategraph") << "case 1 k1 = " << k1 << std::endl;
+              mCRL2log(log::debug1, "stategraph") << "case 1 k1 = " << print_index(k1) << std::endl;
               insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e);
             }
             // case 2: (X, e) -> (Y, e)
             else
             {
               std::size_t k1 = data::undefined_index();
-              mCRL2log(log::debug1, "stategraph") << "case 2 k1 = " << k1 << std::endl;
+              mCRL2log(log::debug1, "stategraph") << "case 2 k1 = " << print_index(k1) << std::endl;
               insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e);
             }
           }
@@ -1185,17 +1203,19 @@ class stategraph_algorithm
               {
                 // source(X, i, k) = e && dest(X, i, k1) = e1
                 e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
-                mCRL2log(log::debug1, "stategraph") << "case 3a k1 = " << k1 << std::endl;
+                mCRL2log(log::debug1, "stategraph") << "case 3a k1 = " << print_index(k1) << std::endl;
                 insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e1);
               }
               else if (Y != X && is_undefined(i->source, k))
               {
                 // Y != X && undefined(source(X, i, k)) && dest(X, i, k1) = e1
                 e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
+                mCRL2log(log::debug1, "stategraph") << "case 3b k1 = " << print_index(k1) << std::endl;
                 insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e1);
 
                 // Y != X && undefined(source(X, i, k)) && copy(X, i, k1) = e1
                 e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
+                mCRL2log(log::debug1, "stategraph") << "case 3c k1 = " << print_index(k1) << std::endl;
                 insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e1);
               }
             }
@@ -1203,6 +1223,7 @@ class stategraph_algorithm
             else
             {
               std::size_t k1 = data::undefined_index();
+              mCRL2log(log::debug1, "stategraph") << "case 4" << std::endl;
               insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e);
             }
           }
