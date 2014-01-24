@@ -297,7 +297,7 @@ void test_local_stategraph()
 inline
 std::string print_connected_component(const std::set<std::size_t>& component, const pbes_system::detail::stategraph_algorithm& algorithm)
 {
-  const std::vector<pbes_system::detail::control_flow_graph_vertex>& V = algorithm.control_flow_graph_vertices();
+  auto const& V = algorithm.control_flow_graph_vertices();
   std::ostringstream out;
   out << "{";
   for (auto i = component.begin(); i != component.end(); ++i)
@@ -310,7 +310,7 @@ std::string print_connected_component(const std::set<std::size_t>& component, co
     {
       out << ", ";
     }
-    out << algorithm.print(V[*i]);
+    out << V[*i];
   }
   out << "}";
   return out.str();
