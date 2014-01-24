@@ -109,7 +109,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       std::size_t idx = 0;
       for (std::size_t j = 0; j < X_i.X.parameters().size(); ++j)
       {
-        if(is_control_flow_parameter(X, j))
+        if (is_global_control_flow_parameter(X, j))
         {
           index_to_cfp_index.push_back(idx);
           idx++;
@@ -219,7 +219,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       // in the next loop!
       for (std::size_t j = 0; j < d_Y.size(); j++)
       {
-        if (is_control_flow_parameter(Y, j))
+        if (is_global_control_flow_parameter(Y, j))
         {
           if (X_i.dest.find(j) != X_i.dest.end())
           {
@@ -242,7 +242,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       k = 0;
       for (std::size_t j = 0; j < d_Y.size(); j++)
       {
-        if (is_control_flow_parameter(Y, j))
+        if (is_global_control_flow_parameter(Y, j))
         {
           if (X_i.dest.find(j) != X_i.dest.end())
           {
@@ -508,7 +508,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
   std::vector<std::size_t> I;
   for (std::size_t j = 0; j < d_Y.size(); j++)
   {
-    if (is_control_flow_parameter(X_i.X.name(), j) && X_i.dest.find(j) == X_i.dest.end())
+    if (is_global_control_flow_parameter(X_i.X.name(), j) && X_i.dest.find(j) == X_i.dest.end())
     {
       if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
       {

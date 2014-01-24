@@ -120,7 +120,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       data::data_expression_list::const_iterator k = u.X.parameters().begin();
       for (std::size_t j = 0; j < N; ++j)
       {
-        if (is_control_flow_parameter(Y, j))
+        if (is_global_control_flow_parameter(Y, j))
         {
           const predicate_variable& X_i = eq_X.predicate_variables()[i];
           std::map<std::size_t, data::data_expression>::const_iterator dest_j = X_i.dest.find(j);
@@ -172,7 +172,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         for (std::size_t j = 0; j < N; ++j)
         {
           mCRL2log(log::debug, "stategraph") << "    j = " << j;
-          if (is_control_flow_parameter(Y, j))
+          if (is_global_control_flow_parameter(Y, j))
           {
             mCRL2log(log::debug, "stategraph") << " CFP(Y, j) = true";
             data::data_expression f_k = *k++;
