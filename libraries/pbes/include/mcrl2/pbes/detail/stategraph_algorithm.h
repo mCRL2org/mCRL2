@@ -1142,6 +1142,7 @@ class stategraph_algorithm
         component_index[w.name()] = w.index();
       }
 
+      // fill todo list
       for (auto p = component.begin(); p != component.end(); ++p)
       {
         const global_control_flow_graph_vertex& w = m_control_flow_graph_vertices[*p];
@@ -1154,6 +1155,27 @@ class stategraph_algorithm
           mCRL2log(log::debug1, "stategraph") << "insert todo element " << u << std::endl;
           V.push_back(u);
           todo.insert(V.size() - 1);
+          break;
+        }
+      }
+
+      // if no vertex was found corresponding to the initial state, then create todo entries for all
+      // combinations of vertices and values
+      if (todo.empty())
+      {
+        mCRL2log(log::debug1, "stategraph") << "no vertex found that corresponds to the initial state" << std::endl;
+        std::set<data::data_expression> values = compute_local_control_flow_graph_values(component);
+        for (auto p = component.begin(); p != component.end(); ++p)
+        {
+          const global_control_flow_graph_vertex& w = m_control_flow_graph_vertices[*p];
+          const core::identifier_string& X = w.name();
+          for (auto q = values.begin(); q != values.end(); ++q)
+          {
+            local_control_flow_graph_vertex u(X, data::undefined_index(), data::undefined_variable(), *q);
+            mCRL2log(log::debug1, "stategraph") << "insert todo element " << u << std::endl;
+            V.push_back(u);
+            todo.insert(V.size() - 1);
+          }
         }
       }
 
