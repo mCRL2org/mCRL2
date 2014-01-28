@@ -22,6 +22,33 @@ namespace mcrl2 {
 
 namespace bes {
 
+namespace detail {
+
+template <typename SortedSequence1, typename SortedSequence2>
+bool empty_intersection(const SortedSequence1& x, const SortedSequence2& y)
+{
+  auto i = x.begin();
+  auto j = y.begin();
+  while (i != x.end() && j != y.end())
+  {
+    if (*i == *j)
+    {
+      return false;
+    }
+    else if (*i < *j)
+    {
+      ++i;
+    }
+    else
+    {
+      ++j;
+    }
+  }
+  return true;
+}
+
+} // namespace detail
+
 // Pseudo code supplied by Tim Willemse
 //
 // Notatie:
@@ -97,6 +124,7 @@ struct consistent_correlation_checker
 
   std::set<std::set<boolean_variable> > P;
 
+  // preconditions:
   consistent_correlation_checker(const boolean_equation_system& E_, const boolean_equation_system& F_)
   : E(E_),
     bndE(E_.binding_variables()),
@@ -106,7 +134,11 @@ struct consistent_correlation_checker
     bndF(F_.binding_variables()),
     rankF(F_),
     indexF(F_)
-  {}
+  {
+    assert(!E.equations().empty());
+    assert(!F.equations().empty());
+    assert(detail::empty_intersection(bndE, bndF));
+  }
 
   const boolean_expression& rhsE(const boolean_variable& x) const
   {
@@ -130,19 +162,16 @@ struct consistent_correlation_checker
 
   void run()
   {
-    // compute the initial partition P
     auto const& eqnE = E.equations();
     auto const& eqnF = F.equations();
 
+    // compute the initial partition P
     auto e = eqnE.begin();
     auto f = eqnF.begin();
 
-
-
-    for (auto i = equations.begin(); i != equations.end(); ++i)
+    for (auto i = eqnE.begin(); i != eqnE.end(); ++i)
     {
       auto const& X = i->variable();
-      auto& P_X = P[X];
       auto r = rankE(X);
     }
   }

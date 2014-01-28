@@ -177,6 +177,9 @@ if __name__ == "__main__":
     result = make_builder('../../modal_formula/include/mcrl2/modal_formula/builder.h', 'variable_builder', 'add_variables', 'action_formulas::data_expression_builder' , class_map, all_classes, 'regular_formulas', 'data::data_expression', variable_dependencies, modifiability_map) and result
     result = make_builder('../../modal_formula/include/mcrl2/modal_formula/builder.h', 'variable_builder', 'add_variables', 'regular_formulas::data_expression_builder', class_map, all_classes, 'state_formulas'  , 'data::data_expression', variable_dependencies, modifiability_map) and result
 
+    # boolean variable_builder
+    result = make_builder('../../bes/include/mcrl2/bes/builder.h', 'boolean_variable_builder', 'add_boolean_variables', 'core::builder', class_map, all_classes, 'bes', 'bes::boolean_expression', boolean_variable_dependencies, modifiability_map) and result
+
     # pbes_expression_builder
     result = make_builder('../../pbes/include/mcrl2/pbes/builder.h', 'pbes_expression_builder', 'add_pbes_expressions', 'pbes_system::pbes_expression_builder_base', class_map, all_classes, 'pbes_system', 'pbes_system::pbes_expression', pbes_expression_dependencies, modifiability_map) and result
 

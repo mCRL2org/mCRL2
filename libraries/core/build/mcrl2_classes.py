@@ -211,7 +211,7 @@ exists(const data::variable_list& variables, const pbes_expression& body)       
 '''
 
 BOOLEAN_CLASSES = r'''
-boolean_equation(const fixpoint_symbol& symbol, const boolean_variable& variable, const boolean_expression& formula) : public atermpp::aterm_appl | S   | BooleanEquation | A boolean equation
+boolean_equation(const fixpoint_symbol& symbol, const boolean_variable& variable, const boolean_expression& formula) : public atermpp::aterm_appl | MS  | BooleanEquation | A boolean equation
 boolean_equation_system(const std::vector<bes::boolean_equation>& equations, const boolean_expression& initial_state)                             | MSW | BES             | A boolean equation system
 '''
 
