@@ -1235,10 +1235,12 @@ class stategraph_algorithm
                 mCRL2log(log::debug1, "stategraph") << "case 3b k1 = " << print_index(k1) << std::endl;
                 insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e1);
 
-                // Y != X && undefined(source(X, i, k)) && copy(X, i, k1) = e1
-                e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
-                mCRL2log(log::debug1, "stategraph") << "case 3c k1 = " << print_index(k1) << std::endl;
-                insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e1);
+                // Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k1
+                if (mapped_value(i->copy, k, data::undefined_index()) == k1)
+                {
+                  mCRL2log(log::debug1, "stategraph") << "case 3c k1 = " << print_index(k1) << std::endl;
+                  insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e);
+                }
               }
             }
             // case 4: (X, d, e) -> (Y, e)
