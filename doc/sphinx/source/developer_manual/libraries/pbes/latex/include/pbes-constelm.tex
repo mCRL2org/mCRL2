@@ -15,7 +15,7 @@ as follows:$\qquad \qquad $%
 \text{\textsc{PbesConstelm(}}\mathcal{E}\text{, }\kappa \text{, }\mathsf{eval%
 }\text{\textsc{)}} \\ 
 \text{\textbf{for }}X\in \mathsf{occ}(\mathcal{E)}\text{ \textbf{do }}%
-c_{X}:=\emptyset \\ 
+c_{X}:=\emptyset  \\ 
 \text{\textbf{for }}X(e)\in \mathsf{iocc}(\kappa \mathcal{)}\text{ \textbf{%
 do }}c_{X}:=update(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
 todo:=\mathsf{occ}(\kappa \mathcal{)} \\ 
@@ -32,6 +32,9 @@ _{X})[d_{X}:=c_{X}])\neq false\text{ \textbf{then}} \\
 \textbf{then}} \\ 
 \qquad \qquad \qquad \qquad c_{Y}:=c_{Y}^{\prime } \\ 
 \qquad \qquad \qquad \qquad todo:=todo\cup \{Y\} \\ 
+\qquad \text{\textbf{for }}Y()\in \mathsf{iocc}(\varphi _{X}\mathcal{)}\text{
+\textbf{do}} \\ 
+\qquad \qquad todo:=todo\cup \{Y\} \\ 
 \qquad \text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\varphi
 _{X_{i}}:=\varphi _{X_{i}}[d_{X_{i}}:=c_{X_{i}}] \\ 
 constant\_parameters:=\{(X,i)\ |\ c_{X}[i]=d_{X}[i]\} \\ 
@@ -123,5 +126,5 @@ needs\_update(X(e),\varphi )=\dbigwedge\limits_{c\in cond_{T}(X(e),\varphi
 
 \begin{remark}
 Note that a direct implementation of this function is extremely inefficient.
-It is expected that a more suitable representation can be found.\newpage 
+It is expected that a more suitable representation can be found.\newpage
 \end{remark}

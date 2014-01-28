@@ -594,7 +594,7 @@ class pbes_constelm_algorithm
         {
           if (e.empty())
           {
-            return false;
+            return true;
           }
 
           bool changed = false;
