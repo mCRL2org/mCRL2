@@ -32,9 +32,6 @@ _{X})[d_{X}:=c_{X}])\neq false\text{ \textbf{then}} \\
 \textbf{then}} \\ 
 \qquad \qquad \qquad \qquad c_{Y}:=c_{Y}^{\prime } \\ 
 \qquad \qquad \qquad \qquad todo:=todo\cup \{Y\} \\ 
-\qquad \text{\textbf{for }}Y()\in \mathsf{iocc}(\varphi _{X}\mathcal{)}\text{
-\textbf{do}} \\ 
-\qquad \qquad todo:=todo\cup \{Y\} \\ 
 \qquad \text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\varphi
 _{X_{i}}:=\varphi _{X_{i}}[d_{X_{i}}:=c_{X_{i}}] \\ 
 constant\_parameters:=\{(X,i)\ |\ c_{X}[i]=d_{X}[i]\} \\ 
@@ -46,11 +43,12 @@ where $update_{X}$ is defined as follows:%
 \begin{equation*}
 update(c,e)=_{def}c^{\prime },\text{ with }c^{\prime }[i]=\left\{ 
 \begin{array}{ll}
+\bot  & \text{if }c=\emptyset \text{ and }e=[] \\ 
 e[i] & \text{if }c=\emptyset \text{ and }e[i]\text{ is constant} \\ 
 c[i] & \text{if }e[i]=c[i] \\ 
 d_{X}[i] & \text{otherwise}%
 \end{array}%
-\right.
+\right. 
 \end{equation*}
 
 and where $needs\_update$ is a boolean function that determines whether an

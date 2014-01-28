@@ -20,6 +20,7 @@
 #include <algorithm>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
@@ -536,10 +537,18 @@ class pbes_constelm_algorithm
         /// \brief Returns true if the data variable v has been assigned a constant expression.
         /// \param v A variable
         /// \return True if the data variable v has been assigned a constant expression.
-        bool is_constant(variable_type v) const
+        bool is_constant(const variable_type& v) const
         {
-          typename constraint_map::const_iterator i = m_constraints.find(v);
+          auto i = m_constraints.find(v);
           return i != m_constraints.end() && !core::term_traits<data_term_type>::is_variable(i->second);
+        }
+
+        /// \brief Returns true if the expression x has the value undefined_data_expression or if x is a constant data expression.
+        /// \param x A
+        /// \return True if the data variable v has been assigned a constant expression.
+        bool is_constant_expression(const data_term_type& x) const
+        {
+          return x == data::undefined_data_expression() || core::term_traits<data_term_type>::is_constant(x);
         }
 
         /// \brief Returns the constant parameters of this vertex.
@@ -592,45 +601,46 @@ class pbes_constelm_algorithm
         /// The new values have a number of constraints.
         bool update(data_term_sequence_type e, const constraint_map& e_constraints, DataRewriter datar)
         {
-          if (e.empty())
-          {
-            return true;
-          }
-
           bool changed = false;
 
           variable_sequence_type params = m_variable.parameters();
 
           if (m_constraints.empty())
           {
-            typename variable_sequence_type::iterator j = params.begin();
-            for (typename data_term_sequence_type::iterator i = e.begin(); i != e.end(); ++i, ++j)
+            if (e.empty())
             {
-              data_term_type e1 = datar(*i, data::make_map_substitution(e_constraints));
-              if (core::term_traits<data_term_type>::is_constant(e1))
+              m_constraints[data::undefined_variable()] = data::undefined_data_expression();
+            }
+            else
+            {
+              auto j = params.begin();
+              for (auto i = e.begin(); i != e.end(); ++i, ++j)
               {
-                m_constraints[*j] = e1;
-              }
-              else
-              {
-                m_constraints[*j] = *j;
+                data_term_type e1 = datar(*i, data::make_map_substitution(e_constraints));
+                if (is_constant_expression(e1))
+                {
+                  m_constraints[*j] = e1;
+                }
+                else
+                {
+                  m_constraints[*j] = *j;
+                }
               }
             }
             changed = true;
           }
           else
           {
-            typename variable_sequence_type::iterator j = params.begin();
-            for (typename data_term_sequence_type::iterator i = e.begin(); i != e.end(); ++i, ++j)
+            auto j = params.begin();
+            for (auto i = e.begin(); i != e.end(); ++i, ++j)
             {
-              typename constraint_map::iterator k = m_constraints.find(*j);
+              auto k = m_constraints.find(*j);
               assert(k != m_constraints.end());
               data_term_type& ci = k->second;
               if (ci == *j)
               {
                 continue;
               }
-              // TODO: why not use R(t, sigma) interface here?
               data_term_type ei = datar(*i, data::make_map_substitution(e_constraints));
               if (ci != ei)
               {
@@ -640,6 +650,16 @@ class pbes_constelm_algorithm
             }
           }
           return changed;
+        }
+
+        // Removes assignments to undefined_variable() from constraints()
+        void remove_undefined_values()
+        {
+          auto i = m_constraints.find(data::undefined_variable());
+          if (i != m_constraints.end())
+          {
+            m_constraints.erase(i);
+          }
         }
     };
 
@@ -851,6 +871,12 @@ class pbes_constelm_algorithm
           }
           mCRL2log(log::debug) << "  <target vertex after >" << v.to_string() << "\n";
         }
+      }
+
+      // remove undefined values from constraints
+      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      {
+        i->second.remove_undefined_values();
       }
 
       mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
