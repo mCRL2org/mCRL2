@@ -290,7 +290,7 @@ void test_functions()
   std::for_each(fghl.begin(), fghl.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
 
 std::cerr << "#mappings " << boost::distance(spec.mappings()) << "\n";
-  BOOST_CHECK(boost::distance(spec.mappings()) == 50);
+  BOOST_CHECK(boost::distance(spec.mappings()) == 51);
 
   function_symbol_vector mappings(spec.mappings());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) != mappings.end());

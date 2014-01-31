@@ -2400,22 +2400,23 @@ static bool arity_is_allowed(
   return arity_is_allowed(func.sort(),a);
 }
 
-static std::string get_heads(const sort_expression& s, const std::string& base_string)
+static std::string get_heads(const sort_expression& s, const std::string& base_string, const size_t number_of_arguments)
 {
   std::stringstream ss;
-  if (is_function_sort(s))
+  if (is_function_sort(s) && number_of_arguments>0)
   {
-    ss << "atermpp::aterm_cast<const application>(" << get_heads(function_sort(s).codomain(),base_string) << ").head()";
+    const function_sort fs(s);
+    ss << "atermpp::aterm_cast<const application>(" << get_heads(fs.codomain(),base_string,number_of_arguments-fs.domain().size()) << ").head()";
     return ss.str();
   }
   return base_string;
 }
 
-static std::string get_recursive_argument(const sort_expression& s, const size_t index, const std::string& base_string)
+static std::string get_recursive_argument(const sort_expression& s, const size_t index, const std::string& base_string, const size_t number_of_arguments)
 {
   /* This function provides the index-th argument of an expression provided in base_string, given that its head
-     symbol has type s. Example: if f:D->E->F and index is 0, base_string is "t", base_string is set to
-     "atermpp::aterm_cast<application>(t[0])[0] */
+     symbol has type s and there are number_of_arguments arguments. Example: if f:D->E->F and index is 0, base_string 
+     is "t", base_string is set to "atermpp::aterm_cast<application>(t[0])[0] */
   assert(is_function_sort(s));
 
   std::stringstream ss;
@@ -2424,11 +2425,12 @@ static std::string get_recursive_argument(const sort_expression& s, const size_t
   const sort_expression& target_type=fs.codomain();
   if (index>=source_type.size())
   {
-    return get_recursive_argument(target_type, index-source_type.size(), base_string);
+    return get_recursive_argument(target_type, index-source_type.size(), base_string,number_of_arguments-source_type.size());
   }
-  ss << "atermpp::aterm_cast<const application>(" << get_heads(target_type,base_string) << ")[" << index << "]";
+  ss << "atermpp::aterm_cast<const application>(" << get_heads(target_type,base_string,number_of_arguments-source_type.size()) << ")[" << index << "]";
   return ss.str();
 }
+
 
 inline
 void declare_rewr_functions(FILE* f, const data::function_symbol& func, const size_t arity)
@@ -2473,7 +2475,7 @@ void declare_rewr_functions(FILE* f, const data::function_symbol& func, const si
         for(size_t i = 0; i < a; ++i)
         {
           // fprintf(f,  "%st[%zu]", (i == 0?"":", "), i);
-          fprintf(f,  "%s%s", (i == 0?"":", "), get_recursive_argument(func.sort(),i,"t").c_str());
+          fprintf(f,  "%s%s", (i == 0?"":", "), get_recursive_argument(func.sort(),i,"t",a).c_str());
         }
         fprintf(f,  "); }\n");
       }

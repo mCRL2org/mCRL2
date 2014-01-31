@@ -865,6 +865,9 @@ class data_specification
         }
         if (l.size()==1)
         {
+          const function_symbol_vector f = function_update_generate_functions_code(l.front(),t);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+ 
           data_equation_vector e(function_update_generate_equations_code(l.front(),t));
           std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
         }

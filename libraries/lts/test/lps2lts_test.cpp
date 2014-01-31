@@ -498,6 +498,21 @@ BOOST_AUTO_TEST_CASE(test_interaction_sum_and_assignment_notation2)
   check_lps2lts_specification(spec, 2, 4, 1);
 }
 
+BOOST_AUTO_TEST_CASE(test_whether_function_update_is_declared)
+{
+  std::string spec(
+    "sort  T = struct a|b;\n"
+    "act int;\n"
+    "map g: Bool -> T;\n"
+    "var y: Bool;\n"
+    "eqn g(y) = a;\n"
+    "act d: Bool -> T;\n"
+    "proc P(f: Bool -> T) = int . P(f[true->b]);\n"
+    "init P(g) ;\n"
+  );
+  check_lps2lts_specification(spec, 2, 2, 1);
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
