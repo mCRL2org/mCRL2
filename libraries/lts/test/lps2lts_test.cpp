@@ -513,6 +513,18 @@ BOOST_AUTO_TEST_CASE(test_whether_function_update_is_declared)
   check_lps2lts_specification(spec, 2, 2, 1);
 }
 
+BOOST_AUTO_TEST_CASE(test_whether_bag_enumeration_with_similar_elements_is_allowed)
+{
+  std::string spec(
+    "sort S = struct s1 | s2;\n"
+    "act int;\n"
+    "proc P(b: Bag(S)) = (count(s1, b) < 3) -> int.P();\n"
+    "init P({s1: 1, s1: 1});\n"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+  
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

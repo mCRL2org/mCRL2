@@ -1073,7 +1073,7 @@ namespace mcrl2 {
         fbag_equations = detail::fbag_struct(s).comparison_equations(fbag(s));
         result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
         result.push_back(data_equation(atermpp::make_vector(vd, vp), insert(s, vd, vp, empty(s)), cons_(s, vd, vp, empty(s))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp, vq), insert(s, vd, vp, cons_(s, vd, vq, vb)), cons_(s, vd, union_(s, vp, vq), vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp, vq), insert(s, vd, vp, cons_(s, vd, vq, vb)), cons_(s, vd, sort_pos::add_with_carry(sort_bool::false_(), vp, vq), vb)));
         result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp, vq), less(vd, ve), insert(s, vd, vp, cons_(s, ve, vq, vb)), cons_(s, vd, vp, cons_(s, ve, vq, vb))));
         result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp, vq), less(ve, vd), insert(s, vd, vp, cons_(s, ve, vq, vb)), cons_(s, ve, vq, insert(s, vd, vp, vb))));
         result.push_back(data_equation(atermpp::make_vector(vb, vd), cinsert(s, vd, sort_nat::c0(), vb), vb));

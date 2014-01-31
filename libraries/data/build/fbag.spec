@@ -41,7 +41,7 @@ var d: S;
     f: S -> Nat;
     g: S -> Nat;
 eqn @fbag_insert(d, p, {:})  =  @fbag_cons(d, p, {:});
-     @fbag_insert(d, p, @fbag_cons(d, q, b))  =  @fbag_cons(d, +(p, q), b);
+     @fbag_insert(d, p, @fbag_cons(d, q, b))  =  @fbag_cons(d, @addc(false,p,q), b);
      <(d, e)  ->  @fbag_insert(d, p, @fbag_cons(e, q, b))  =  @fbag_cons(d, p, @fbag_cons(e, q, b));
      <(e, d)  ->  @fbag_insert(d, p, @fbag_cons(e, q, b))  =  @fbag_cons(e, q, @fbag_insert(d, p, b));
      @fbag_cinsert(d, @c0, b)  =  b;
