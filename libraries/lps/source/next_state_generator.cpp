@@ -31,7 +31,6 @@ next_state_generator::next_state_generator(
   declare_constructors();
 
   m_process_parameters = data::variable_vector(m_specification.process().process_parameters().begin(), m_specification.process().process_parameters().end());
-  m_state_function = atermpp::function_symbol("STATE", m_process_parameters.size());
 
   if(m_specification.process().has_time())
   {

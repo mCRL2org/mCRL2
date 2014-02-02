@@ -26,7 +26,7 @@
 % mcrl22lps -vD four_in_a_row.mcrl2 temp.lps &&
 % lpssuminst -v temp.lps | lpsparunfold -l -sBoard -v -n5 | lpsparunfold -l -sRow -v -n7 | lpsrewr -v > temp1.lps &&
 % lpsconstelm -v -c -rjittyc temp1.lps temp2.lps &&
-% lps2lts -v -ftree -rjittyc temp2.lps 
+% lps2lts -v -rjittyc temp2.lps 
 %
 % Jan Friso Groote, April 6, 2010
 

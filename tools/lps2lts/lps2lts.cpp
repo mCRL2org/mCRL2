@@ -163,10 +163,6 @@ class lps2lts_tool : public lps2lts_base
                  "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
       add_option("unused-data",
                  "do not remove unused parts of the data specification", 'u').
-      add_option("state-format", make_enum_argument<NextStateFormat>("NAME")
-                 .add_value(GS_STATE_TREE, true)
-                 .add_value(GS_STATE_VECTOR),
-                 "store state internally in format NAME:", 'f').
       add_option("bit-hash", make_optional_argument("NUM", STRINGIFY(DEFAULT_BITHASHSIZE)),
                  "use bit hashing to store states and store at most NUM states. "
                  "This means that instead of keeping a full record of all states "
@@ -275,8 +271,6 @@ class lps2lts_tool : public lps2lts_base
           parser.error("option -y/--dummy has illegal argument '" + dummy_str + "'");
         }
       }
-
-      m_options.stateformat = parser.option_argument_as<NextStateFormat>("state-format");
 
       if (parser.options.count("bit-hash"))
       {

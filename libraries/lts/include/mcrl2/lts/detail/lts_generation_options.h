@@ -41,7 +41,6 @@ struct lts_generation_options
     max_states(DEFAULT_MAX_STATES),
     initial_table_size(DEFAULT_INIT_TSIZE),
     suppress_progress_messages(false),
-    stateformat(lps::GS_STATE_TREE),
     bithashing(false),
     bithashsize(DEFAULT_BITHASHSIZE),
     outformat(mcrl2::lts::lts_none),
@@ -112,7 +111,6 @@ struct lts_generation_options
   size_t initial_table_size;
   bool suppress_progress_messages;
 
-  int stateformat;
   bool bithashing;
   size_t bithashsize;
 

@@ -94,7 +94,6 @@ class next_state_generator
         pruning_tree_node_t m_pruning_tree;
         std::vector<size_t> m_pruning_parameters;
         substitution_t m_pruning_substitution;
-        // data::data_expression m_false;
 
         static bool summand_set_contains(const std::set<action_summand>& summand_set, const summand_t& summand);
         void build_pruning_parameters(const action_summand_vector& summands);
@@ -188,7 +187,6 @@ class next_state_generator
     bool m_use_enumeration_caching;
 
     data::variable_vector m_process_parameters;
-    atermpp::function_symbol m_state_function;
     std::vector<summand_t> m_summands;
     data::data_expression_vector m_initial_state;
 
@@ -278,12 +276,6 @@ class next_state_generator
 
     /// \brief Converts internal states to states.
     state get_state(const data::data_expression_vector& internal_state) const;
-
-    /// \brief Returns the function symbol used to construct internal states.
-    atermpp::function_symbol internal_state_function() const
-    {
-      return m_state_function;
-    }
 
     /// \brief Returns a reference to the summand subset containing all summands.
     summand_subset_t& full_subset()
