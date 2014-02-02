@@ -218,12 +218,12 @@ class state_data_type: public pins_data_type
 
     std::size_t expression2index(const data::data_expression& x)
     {
-      return m_indexed_set[m_generator.get_internal_state_argument(x)];
+      return m_indexed_set[x];
     }
 
     data::data_expression index2expression(std::size_t i) const
     {
-      return m_generator.get_state_argument(static_cast<lps::next_state_generator::internal_state_argument_t>(m_indexed_set.get(i)));
+      return static_cast<data::data_expression>(m_indexed_set.get(i));
     }
 
   public:
@@ -616,7 +616,7 @@ class pins
     /// \brief Assigns the initial state to s.
     void get_initial_state(ltsmin_state_type& s)
     {
-      lps::next_state_generator::internal_state_t initial_state = m_generator.internal_initial_state();
+      data::data_expression_vector initial_state = m_generator.internal_initial_state();
       for (size_t i = 0; i < m_state_length; i++)
       {
         s[i] = state_type_map(i)[initial_state[i]];
@@ -653,16 +653,16 @@ class pins
     void next_state_all(ltsmin_state_type const& src, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      std::vector<lps::next_state_generator::internal_state_argument_t> state_arguments(nparams);
+      data::data_expression_vector state_arguments(nparams);
       for (size_t i = 0; i < nparams; i++)
       {
-        state_arguments[i] = static_cast<lps::next_state_generator::internal_state_argument_t>(state_type_map(i).get(src[i]));
+        state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
-      lps::next_state_generator::internal_state_t source = m_generator.get_internal_state(state_arguments);
+      data::data_expression_vector source = state_arguments;
 
       for (next_state_generator::iterator i = m_generator.begin(source, &m_substitution); i; i++)
       {
-        lps::next_state_generator::internal_state_t destination = i->internal_state();
+        data::data_expression_vector destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
@@ -693,16 +693,16 @@ class pins
     void next_state_long(ltsmin_state_type const& src, std::size_t group, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      std::vector<lps::next_state_generator::internal_state_argument_t> state_arguments(nparams);
+      data::data_expression_vector state_arguments(nparams);
       for (size_t i = 0; i < nparams; i++)
       {
-        state_arguments[i] = static_cast<lps::next_state_generator::internal_state_argument_t>(state_type_map(i).get(src[i]));
+        state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
-      lps::next_state_generator::internal_state_t source = m_generator.get_internal_state(state_arguments);
+      data::data_expression_vector source = state_arguments;
 
       for (next_state_generator::iterator i = m_generator.begin(source, &m_substitution, group); i; i++)
       {
-        lps::next_state_generator::internal_state_t destination = i->internal_state();
+        data::data_expression_vector destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];

@@ -35,7 +35,7 @@ class lps2lts_algorithm
 {
   private:
   typedef lps::next_state_generator next_state_generator;
-  typedef next_state_generator::internal_state_t generator_state_t;
+  typedef data::data_expression_vector generator_state_t;
   typedef atermpp::aterm storage_state_t;
 
   private:
