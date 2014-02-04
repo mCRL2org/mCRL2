@@ -1170,7 +1170,7 @@ class stategraph_algorithm
             if (q != component_index.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
-              data::data_expression e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
+              auto e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
               if (e1 != data::undefined_data_expression())
               {
                 // dest(X, i, k1) = e1
@@ -1195,18 +1195,17 @@ class stategraph_algorithm
             if (q != component_index.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
-              data::data_expression e1;
               if (is_mapped_to(i->source, k, e))
               {
                 // source(X, i, k) = e && dest(X, i, k1) = e1
-                e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
+                auto e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
                 mCRL2log(log::debug1, "stategraph") << "case 3a k1 = " << print_index(k1) << std::endl;
                 insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e1);
               }
               else if (Y != X && is_undefined(i->source, k))
               {
                 // Y != X && undefined(source(X, i, k)) && dest(X, i, k1) = e1
-                e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
+                auto e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
                 mCRL2log(log::debug1, "stategraph") << "case 3b k1 = " << print_index(k1) << std::endl;
                 insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e1);
 
@@ -1221,9 +1220,13 @@ class stategraph_algorithm
             // case 4: (X, d, e) -> (Y, e)
             else
             {
-              std::size_t k1 = data::undefined_index();
-              mCRL2log(log::debug1, "stategraph") << "case 4" << std::endl;
-              insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e);
+              auto e1 = mapped_value(i->source, k, data::undefined_data_expression());
+              if (e1 == e || e1 == data::undefined_data_expression())
+              {
+                std::size_t k1 = data::undefined_index();
+                mCRL2log(log::debug1, "stategraph") << "case 4" << std::endl;
+                insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e);
+              }
             }
           }
         }
