@@ -41,7 +41,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         const std::set<std::size_t>& component = m_connected_components[k];
         for (auto i = component.begin(); i != component.end(); ++i)
         {
-          const control_flow_graph_vertex& u = m_control_flow_graph_vertices[*i];
+          const control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*i];
           m_control_flow_index[u.name()][u.index()] = k;
         }
       }

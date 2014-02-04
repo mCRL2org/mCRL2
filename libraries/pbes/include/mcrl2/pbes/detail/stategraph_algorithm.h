@@ -116,7 +116,7 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
 {
   protected:
     data::data_expression m_value;
-    std::set<local_control_flow_graph_vertex*> m_neighbors;
+    mutable std::set<const local_control_flow_graph_vertex*> m_neighbors;
 
   public:
     local_control_flow_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable, const data::data_expression& value)
@@ -137,14 +137,14 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
       return m_value;
     }
 
-    const std::set<local_control_flow_graph_vertex*>& neighbors() const
+    const std::set<const local_control_flow_graph_vertex*>& neighbors() const
     {
       return m_neighbors;
     }
 
-    std::set<local_control_flow_graph_vertex*>& neighbors()
+    void insert_neighbor(const local_control_flow_graph_vertex* u) const
     {
-      return m_neighbors;
+      m_neighbors.insert(u);
     }
 
     bool operator==(const local_control_flow_graph_vertex& other) const
@@ -176,6 +176,20 @@ std::string local_control_flow_graph_vertex::print_neighbors() const
     out << **i << " ";
   }
   return out.str();
+}
+
+inline
+bool operator<(const local_control_flow_graph_vertex& u, const local_control_flow_graph_vertex& v)
+{
+  if (u.name() != v.name())
+  {
+    return u.name() < v.name();
+  }
+  if (u.index() != v.index())
+  {
+    return u.index() < v.index();
+  }
+  return u.value() < v.value();
 }
 
 /// \brief Algorithm class for the computation of the local and global control flow graphs
@@ -259,13 +273,16 @@ class stategraph_algorithm
     std::map<core::identifier_string, std::vector<bool> > m_is_GCFP;
 
     // the vertices of the control flow graph
-    std::vector<global_control_flow_graph_vertex> m_control_flow_graph_vertices;
+    std::vector<global_control_flow_graph_vertex> m_global_control_flow_graph_vertices;
 
-    // the connected components in the control flow graph; a component contains the indices in the vector m_control_flow_graph_vertices
+    // the connected components in the control flow graph; a component contains the indices in the vector m_global_control_flow_graph_vertices
     std::vector<std::set<std::size_t> > m_connected_components;
 
     // the control flow graph(s)
     std::vector<control_flow_graph> m_control_flow_graphs;
+
+    // maintain a vector of used local control flow graph vertices
+    std::vector<local_control_flow_graph_vertex> m_used_local_vertices;
 
     // for readability
     std::set<data::variable> FV(const data::data_expression& x) const
@@ -611,10 +628,10 @@ class stategraph_algorithm
       return cf[i];
     }
 
-    // returns an iterator to an element of m_control_flow_graph_vertices
+    // returns an iterator to an element of m_global_control_flow_graph_vertices
     std::vector<global_control_flow_graph_vertex>::iterator find_vertex(const core::identifier_string& X, std::size_t n)
     {
-      for (auto i = m_control_flow_graph_vertices.begin(); i != m_control_flow_graph_vertices.end(); ++i)
+      for (auto i = m_global_control_flow_graph_vertices.begin(); i != m_global_control_flow_graph_vertices.end(); ++i)
       {
         if (i->name() == X && i->index() == n)
         {
@@ -622,7 +639,7 @@ class stategraph_algorithm
         }
       }
       throw mcrl2::runtime_error("vertex not found in dependency graph");
-      return m_control_flow_graph_vertices.end();
+      return m_global_control_flow_graph_vertices.end();
     }
 
     // relate (X, n) and (Y, m) in the dependency graph
@@ -636,13 +653,13 @@ class stategraph_algorithm
     }
 
     // Determines which control flow parameters are related. This is done by assigning neighbors to the
-    // vertices in m_control_flow_graph_vertices.
+    // vertices in m_global_control_flow_graph_vertices.
     void compute_related_global_control_flow_parameters()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute related global control flow parameters ===" << std::endl;
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
 
-      // step 1: create vertices in m_control_flow_graph_vertices
+      // step 1: create vertices in m_global_control_flow_graph_vertices
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         const core::identifier_string& X = k->variable().name();
@@ -651,12 +668,12 @@ class stategraph_algorithm
         {
           if (is_global_control_flow_parameter(X, n))
           {
-            m_control_flow_graph_vertices.push_back(global_control_flow_graph_vertex(X, n, dX[n]));
+            m_global_control_flow_graph_vertices.push_back(global_control_flow_graph_vertex(X, n, dX[n]));
           }
         }
       }
 
-      // step 2: create edges between related vertices in m_control_flow_graph_vertices
+      // step 2: create edges between related vertices in m_global_control_flow_graph_vertices
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         const core::identifier_string& X = k->variable().name();
@@ -701,7 +718,7 @@ class stategraph_algorithm
       std::set<core::identifier_string> V;
       for (auto i = component.begin(); i != component.end(); ++i)
       {
-        const core::identifier_string& X = m_control_flow_graph_vertices[*i].name();
+        const core::identifier_string& X = m_global_control_flow_graph_vertices[*i].name();
         if (V.find(X) != V.end())
         {
           return false;
@@ -721,7 +738,7 @@ class stategraph_algorithm
         {
           out << ", ";
         }
-        out << m_control_flow_graph_vertices[*i];
+        out << m_global_control_flow_graph_vertices[*i];
       }
       out << "}";
       if (!is_valid_connected_component(component))
@@ -739,7 +756,7 @@ class stategraph_algorithm
       }
     }
 
-    // compute the connected component belonging to the vertex m_control_flow_graph_vertices[i]
+    // compute the connected component belonging to the vertex m_global_control_flow_graph_vertices[i]
     std::set<std::size_t> compute_connected_component(std::size_t i, std::vector<bool>& done) const
     {
       std::set<std::size_t> todo;
@@ -749,14 +766,14 @@ class stategraph_algorithm
       while (!todo.empty())
       {
         std::size_t u_index = pick_element(todo);
-        const global_control_flow_graph_vertex& u = m_control_flow_graph_vertices[u_index];
+        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[u_index];
         done[u_index] = true;
         component.insert(u_index);
 
         for (auto k = u.neighbors().begin(); k != u.neighbors().end(); ++k)
         {
           const global_control_flow_graph_vertex* w = *k;
-          std::size_t w_index = w - &(m_control_flow_graph_vertices.front());
+          std::size_t w_index = w - &(m_global_control_flow_graph_vertices.front());
           if (!done[w_index])
           {
             todo.insert(w_index);
@@ -770,8 +787,8 @@ class stategraph_algorithm
     {
       mCRL2log(log::debug, "stategraph") << "=== compute connected components ===" << std::endl;
 
-      // done[i] means that m_control_flow_graph_vertices[i] has been processed
-      std::vector<bool> done(m_control_flow_graph_vertices.size(), false);
+      // done[i] means that m_global_control_flow_graph_vertices[i] has been processed
+      std::vector<bool> done(m_global_control_flow_graph_vertices.size(), false);
 
       for (std::size_t i = 0; i < done.size(); i++)
       {
@@ -833,7 +850,7 @@ class stategraph_algorithm
     {
       for (auto i = component.begin(); i != component.end(); ++i)
       {
-        const global_control_flow_graph_vertex& u = m_control_flow_graph_vertices[*i];
+        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*i];
         auto X = u.name();
         auto m = u.index();
         if (is_not_only_copied(X, m))
@@ -953,22 +970,6 @@ class stategraph_algorithm
       return propositional_variable(X, data::variable_list(d.begin(), d.end()));
     }
 
-    void print_control_flow_graphs()
-    {
-      mCRL2log(log::debug, "stategraph") << "\n=== local control flow graphs ===" << std::endl;
-      propositional_variable_instantiation X_init = m_pbes.initial_state();
-      const core::identifier_string& X = X_init.name();
-      const stategraph_equation& eq_X = *find_equation(m_pbes, X);
-      const std::vector<data::variable>& dX = eq_X.parameters();
-      std::vector<std::size_t> CFP = control_flow_parameter_indices(X);
-      for (std::size_t i = 0; i < CFP.size(); i++)
-      {
-        std::size_t p = CFP[i];
-        mCRL2log(log::debug, "stategraph") << "--- graph for control flow parameter " << data::pp(dX[p]) << " ---" << std::endl;
-        // mCRL2log(log::debug, "stategraph") << m_control_flow_graphs[i].print(print_map(X, p)) << std::endl;
-      }
-    }
-
     template <typename Substitution>
     propositional_variable_instantiation apply_substitution(const propositional_variable_instantiation& X, Substitution sigma) const
     {
@@ -991,7 +992,7 @@ class stategraph_algorithm
     /// \brief Returns the vertices of the global control flow graph
     const std::vector<global_control_flow_graph_vertex>& control_flow_graph_vertices() const
     {
-      return m_control_flow_graph_vertices;
+      return m_global_control_flow_graph_vertices;
     }
 
     /// \brief Returns the connected components of the global control flow graph.
@@ -1018,7 +1019,7 @@ class stategraph_algorithm
 
       for (auto j = component.begin(); j != component.end(); ++j)
       {
-        const global_control_flow_graph_vertex& u = m_control_flow_graph_vertices[*j];
+        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
         if (u.name() == Xinit)
         {
           data::data_expression d = nth_element(init.parameters(), u.index());
@@ -1028,7 +1029,7 @@ class stategraph_algorithm
       // source(X, i, k) = v
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& u = m_control_flow_graph_vertices[*p];
+        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
         const core::identifier_string& X = u.name();
         std::size_t k = u.index();
         const stategraph_equation& eq_X = *find_equation(m_pbes, X);
@@ -1047,7 +1048,7 @@ class stategraph_algorithm
       // dest(X, i, k) = v
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& u = m_control_flow_graph_vertices[*p];
+        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
         const core::identifier_string& Y = u.name();
         std::size_t k = u.index();
         const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
@@ -1081,9 +1082,9 @@ class stategraph_algorithm
     }
 
     // Inserts an edge between the vertex u and the vertex v = (Y, k1, e1).
-    void insert_local_control_flow_graph_edge(std::vector<local_control_flow_graph_vertex>& V,
-                                 std::set<std::size_t>& todo,
-                                 local_control_flow_graph_vertex& u,
+    void insert_local_control_flow_graph_edge(std::set<local_control_flow_graph_vertex>& V,
+                                 std::set<const local_control_flow_graph_vertex*>& todo,
+                                 const local_control_flow_graph_vertex& u,
                                  const core::identifier_string& Y,
                                  std::size_t k1,
                                  const data::data_expression& e1
@@ -1097,16 +1098,21 @@ class stategraph_algorithm
         local_control_flow_graph_vertex v_(Y, k1, d1, e1);
 
         // check if v_ already exists in V; if not it is added
-        std::vector<local_control_flow_graph_vertex>::iterator j = std::find(V.begin(), V.end(), v_);
+        auto j = std::find(V.begin(), V.end(), v_);
         if (j == V.end())
         {
+          if (std::find(m_used_local_vertices.begin(), m_used_local_vertices.end(), v_) != m_used_local_vertices.end())
+          {
+            mCRL2log(log::debug1, "stategraph") << " vertex " << v_ << " is already used in another graph!" << std::endl;
+            return;
+          }
           mCRL2log(log::debug1, "stategraph") << " add vertex v = " << v_ << std::endl;
-          V.push_back(v_);
-          std::size_t index = V.size() - 1;
-          todo.insert(index);
-          j = V.begin() + index;
+          auto k = V.insert(v_);
+          m_used_local_vertices.push_back(v_);
+          todo.insert(&(*k.first));
+          j = k.first;
         }
-        local_control_flow_graph_vertex& v = *j; // v == v_, and v is an element of the array V
+        const local_control_flow_graph_vertex& v = *j; // v == v_, and v is an element of the set V
 
         mCRL2log(log::debug1, "stategraph") << " u.neighbors() = " << u.print_neighbors() << std::endl;
 
@@ -1114,8 +1120,8 @@ class stategraph_algorithm
         if (!utilities::detail::contains(u.neighbors(), &v))
         {
           mCRL2log(log::debug, "stategraph") << " edge " << u << " -> " << v << std::endl;
-          u.neighbors().insert(&v);
-          v.neighbors().insert(&u);
+          u.insert_neighbor(&v);
+          v.insert_neighbor(&u);
         }
         else
         {
@@ -1124,65 +1130,26 @@ class stategraph_algorithm
       }
     }
 
-    // Computes a local control flow graph that corresponds to the given component in m_control_flow_graph_vertices.
-    void compute_local_control_flow_graph(const std::set<std::size_t>& component)
+    void compute_local_control_flow_graph(const local_control_flow_graph_vertex& u0, const std::map<core::identifier_string, std::size_t>& component_index)
     {
-      mCRL2log(log::debug, "stategraph") << "Compute local control flow graph for component " << print_connected_component(component) << std::endl;
-      std::vector<local_control_flow_graph_vertex> V;
-      std::set<std::size_t> todo;
-
-      const propositional_variable_instantiation& init = m_pbes.initial_state();
-      const core::identifier_string& Xinit = init.name();
-
-      // preprocessing
-      std::map<core::identifier_string, std::size_t> component_index;
-      for (auto p = component.begin(); p != component.end(); ++p)
+      mCRL2log(log::debug, "stategraph") << "--- compute_local_control_flow_graph for vertex " << u0 << std::endl;
+      if (std::find(m_used_local_vertices.begin(), m_used_local_vertices.end(), u0) != m_used_local_vertices.end())
       {
-        const global_control_flow_graph_vertex& w = m_control_flow_graph_vertices[*p];
-        component_index[w.name()] = w.index();
+        mCRL2log(log::debug1, "stategraph") << " vertex " << u0 << " is already used in another graph!" << std::endl;
+        return;
       }
 
-      // fill todo list
-      for (auto p = component.begin(); p != component.end(); ++p)
-      {
-        const global_control_flow_graph_vertex& w = m_control_flow_graph_vertices[*p];
-        const core::identifier_string& X = w.name();
-        if (X == Xinit)
-        {
-          std::size_t j = w.index();
-          data::data_expression e_j = nth_element(init.parameters(), j);
-          local_control_flow_graph_vertex u(X, j, w.variable(), e_j);
-          mCRL2log(log::debug1, "stategraph") << "insert todo element " << u << std::endl;
-          V.push_back(u);
-          todo.insert(V.size() - 1);
-          break;
-        }
-      }
+      std::set<local_control_flow_graph_vertex> V;
+      std::set<const local_control_flow_graph_vertex*> todo;
 
-      // if no vertex was found corresponding to the initial state, then create todo entries for all
-      // combinations of vertices and values
-      if (todo.empty())
-      {
-        mCRL2log(log::debug1, "stategraph") << "no vertex found that corresponds to the initial state" << std::endl;
-        std::set<data::data_expression> values = compute_local_control_flow_graph_values(component);
-        for (auto p = component.begin(); p != component.end(); ++p)
-        {
-          const global_control_flow_graph_vertex& w = m_control_flow_graph_vertices[*p];
-          const core::identifier_string& X = w.name();
-          for (auto q = values.begin(); q != values.end(); ++q)
-          {
-            local_control_flow_graph_vertex u(X, data::undefined_index(), data::undefined_variable(), *q);
-            mCRL2log(log::debug1, "stategraph") << "insert todo element " << u << std::endl;
-            V.push_back(u);
-            todo.insert(V.size() - 1);
-          }
-        }
-      }
+      auto k = V.insert(u0);
+      m_used_local_vertices.push_back(u0);
+      todo.insert(&(*k.first));
 
       while (!todo.empty())
       {
         // u = (X, d, e)
-        local_control_flow_graph_vertex u = V[pick_element(todo)];
+        auto const& u = *pick_element(todo);
         const core::identifier_string& X = u.name();
         const data::variable& d = u.variable();
         const data::data_expression& e = u.value();
@@ -1258,6 +1225,57 @@ class stategraph_algorithm
               mCRL2log(log::debug1, "stategraph") << "case 4" << std::endl;
               insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e);
             }
+          }
+        }
+      }
+    }
+
+    // Computes a local control flow graph that corresponds to the given component in m_global_control_flow_graph_vertices.
+    void compute_local_control_flow_graph(const std::set<std::size_t>& component)
+    {
+      mCRL2log(log::debug, "stategraph") << "Compute local control flow graph for component " << print_connected_component(component) << std::endl;
+
+      const propositional_variable_instantiation& init = m_pbes.initial_state();
+      const core::identifier_string& Xinit = init.name();
+
+      // preprocessing
+      std::map<core::identifier_string, std::size_t> component_index;
+      for (auto p = component.begin(); p != component.end(); ++p)
+      {
+        const global_control_flow_graph_vertex& w = m_global_control_flow_graph_vertices[*p];
+        component_index[w.name()] = w.index();
+      }
+
+      bool found = false;
+      for (auto p = component.begin(); p != component.end(); ++p)
+      {
+        const global_control_flow_graph_vertex& w = m_global_control_flow_graph_vertices[*p];
+        const core::identifier_string& X = w.name();
+        if (X == Xinit)
+        {
+          std::size_t j = w.index();
+          data::data_expression e_j = nth_element(init.parameters(), j);
+          local_control_flow_graph_vertex u(X, j, w.variable(), e_j);
+          compute_local_control_flow_graph(u, component_index);
+          found = true;
+          break;
+        }
+      }
+
+      // if no vertex was found corresponding to the initial state, then create todo entries for all
+      // combinations of vertices and values
+      if (!found)
+      {
+        mCRL2log(log::debug1, "stategraph") << "no vertex found that corresponds to the initial state" << std::endl;
+        std::set<data::data_expression> values = compute_local_control_flow_graph_values(component);
+        for (auto p = component.begin(); p != component.end(); ++p)
+        {
+          const global_control_flow_graph_vertex& w = m_global_control_flow_graph_vertices[*p];
+          const core::identifier_string& X = w.name();
+          for (auto q = values.begin(); q != values.end(); ++q)
+          {
+            local_control_flow_graph_vertex u(X, data::undefined_index(), data::undefined_variable(), *q);
+            compute_local_control_flow_graph(u, component_index);
           }
         }
       }
