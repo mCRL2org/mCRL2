@@ -1214,9 +1214,12 @@ class stategraph_algorithm
             // case 2: (X, e) -> (Y, e)
             else
             {
-              std::size_t k1 = data::undefined_index();
-              mCRL2log(log::debug1, "stategraph") << "case 2 k1 = " << print_index(k1) << std::endl;
-              insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e);
+              if (X != Y)
+              {
+                std::size_t k1 = data::undefined_index();
+                mCRL2log(log::debug1, "stategraph") << "case 2 k1 = " << print_index(k1) << std::endl;
+                insert_local_control_flow_graph_edge(V, todo, u, Y, k1, e);
+              }
             }
           }
           else
