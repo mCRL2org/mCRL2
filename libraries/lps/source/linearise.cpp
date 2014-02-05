@@ -7748,6 +7748,9 @@ class specification_basic_type:public boost::noncopyable
       const variable_list &par1,
       const variable_list &par3,
       const variable_list &parametersOfsumlist2,
+      const action_name_multiset_list &allowlist1,  // This is a list of list of identifierstring.
+      const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
+      const bool is_block,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands)
 
@@ -7759,6 +7762,16 @@ class specification_basic_type:public boost::noncopyable
 
       allpars=par1 + par3;
 
+      bool inline_allow = is_allow || is_block;
+      if (inline_allow)
+      {
+        // Inline allow is only supported for add_delta,
+        // for in other cases generation of delta summands cannot be inlined in any simple way.
+        assert(!options.nodeltaelimination && options.add_delta);
+        deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
+      }
+      action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
+
       /* first we enumerate the summands of t1 */
 
       variable timevar=get_fresh_variable("timevar",sort_real::real_());
@@ -7767,45 +7780,48 @@ class specification_basic_type:public boost::noncopyable
         (options.add_delta?data_expression(sort_bool::true_()):
            getUltimateDelayCondition(action_summands2,deadlock_summands2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
 
-      for (deadlock_summand_vector::const_iterator walker1=deadlock_summands1.begin();
-           walker1!=deadlock_summands1.end(); ++walker1)
+      if (!inline_allow)
       {
-        const deadlock_summand summand1= *walker1;
-        variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
-        // action_list multiaction1=summand1.actions();
-        data_expression actiontime1=summand1.deadlock().time();
-        data_expression condition1=summand1.condition();
-        // assignment_list nextstate1=summand1.assignments();
-        bool has_time=summand1.deadlock().has_time();
-
-        if (!has_time)
+        for (deadlock_summand_vector::const_iterator walker1=deadlock_summands1.begin();
+             walker1!=deadlock_summands1.end(); ++walker1)
         {
-          if (ultimatedelaycondition!=sort_bool::true_())
+          const deadlock_summand summand1= *walker1;
+          variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
+          // action_list multiaction1=summand1.actions();
+          data_expression actiontime1=summand1.deadlock().time();
+          data_expression condition1=summand1.condition();
+          // assignment_list nextstate1=summand1.assignments();
+          bool has_time=summand1.deadlock().has_time();
+
+          if (!has_time)
           {
-            actiontime1=timevar;
-            sumvars1.push_front(timevar);
-            condition1=lazy::and_(ultimatedelaycondition,condition1);
-            has_time=true;
+            if (ultimatedelaycondition!=sort_bool::true_())
+            {
+              actiontime1=timevar;
+              sumvars1.push_front(timevar);
+              condition1=lazy::and_(ultimatedelaycondition,condition1);
+              has_time=true;
+            }
           }
-        }
-        else
-        {
-          /* Summand1 has time. Substitute the time expression for
-             timevar in ultimatedelaycondition, and extend the condition */
-          mutable_map_substitution<> sigma;
-          const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime1);
-          sigma[timevar]=actiontime1;
-          const data_expression intermediateultimatedelaycondition=
-                      data::replace_variables_capture_avoiding(ultimatedelaycondition, sigma, variables_in_rhs_sigma);
-          condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
-        }
+          else
+          {
+            /* Summand1 has time. Substitute the time expression for
+               timevar in ultimatedelaycondition, and extend the condition */
+            mutable_map_substitution<> sigma;
+            const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime1);
+            sigma[timevar]=actiontime1;
+            const data_expression intermediateultimatedelaycondition=
+                        data::replace_variables_capture_avoiding(ultimatedelaycondition, sigma, variables_in_rhs_sigma);
+            condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
+          }
 
-        condition1=RewriteTerm(condition1);
-        if (condition1!=sort_bool::false_())
-        {
-          deadlock_summands.push_back(deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
-        }
+          condition1=RewriteTerm(condition1);
+          if (condition1!=sort_bool::false_())
+          {
+            deadlock_summands.push_back(deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
+          }
 
+        }
       }
 
       for (action_summand_vector::const_iterator walker1=action_summands1.begin();
@@ -7821,6 +7837,15 @@ class specification_basic_type:public boost::noncopyable
 
         if (multiaction1!=make_list(terminationAction))
         {
+          if (is_allow && !allow_(allowlist,multiaction1))
+          {
+            continue;
+          }
+          if (is_block && encap(aterm_cast<identifier_string_list>(allowlist),multiaction1))
+          {
+            continue;
+          }
+
           if (!has_time)
           {
             if (ultimatedelaycondition!=sort_bool::true_())
@@ -7859,46 +7884,49 @@ class specification_basic_type:public boost::noncopyable
       ultimatedelaycondition=(options.add_delta?data_expression(sort_bool::true_()):
                   getUltimateDelayCondition(action_summands1,deadlock_summands1,par1, timevar,ultimate_delay_sumvars2));
 
-      for (deadlock_summand_vector::const_iterator walker2=deadlock_summands2.begin();
-           walker2!=deadlock_summands2.end(); ++walker2)
+      if (!inline_allow)
       {
-        const deadlock_summand summand2= *walker2;
-        variable_list sumvars2=summand2.summation_variables() + ultimate_delay_sumvars2;
-        data_expression actiontime2=summand2.deadlock().time();
-        data_expression condition2=summand2.condition();
-        bool has_time=summand2.deadlock().has_time();
-
-        if (!has_time)
+        for (deadlock_summand_vector::const_iterator walker2=deadlock_summands2.begin();
+             walker2!=deadlock_summands2.end(); ++walker2)
         {
-          if (ultimatedelaycondition!=sort_bool::true_())
+          const deadlock_summand summand2= *walker2;
+          variable_list sumvars2=summand2.summation_variables() + ultimate_delay_sumvars2;
+          data_expression actiontime2=summand2.deadlock().time();
+          data_expression condition2=summand2.condition();
+          bool has_time=summand2.deadlock().has_time();
+
+          if (!has_time)
           {
-            actiontime2=data_expression(timevar);
-            sumvars2.push_front(timevar);
-            condition2=lazy::and_(ultimatedelaycondition,condition2);
-            has_time=true;
+            if (ultimatedelaycondition!=sort_bool::true_())
+            {
+              actiontime2=data_expression(timevar);
+              sumvars2.push_front(timevar);
+              condition2=lazy::and_(ultimatedelaycondition,condition2);
+              has_time=true;
+            }
           }
-        }
-        else
-        {
-          /* Summand2 has time. Substitute the time expression for
-             timevar in ultimatedelaycondition, and extend the condition */
-          mutable_map_substitution<> sigma;
-          const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime2);
-          sigma[timevar]=actiontime2;
+          else
+          {
+            /* Summand2 has time. Substitute the time expression for
+               timevar in ultimatedelaycondition, and extend the condition */
+            mutable_map_substitution<> sigma;
+            const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime2);
+            sigma[timevar]=actiontime2;
 
-          const data_expression intermediateultimatedelaycondition=
-                        data::replace_variables_capture_avoiding(ultimatedelaycondition,sigma,variables_in_rhs_sigma);
-          condition2=lazy::and_(intermediateultimatedelaycondition,condition2);
-        }
+            const data_expression intermediateultimatedelaycondition=
+                          data::replace_variables_capture_avoiding(ultimatedelaycondition,sigma,variables_in_rhs_sigma);
+            condition2=lazy::and_(intermediateultimatedelaycondition,condition2);
+          }
 
-        condition2=RewriteTerm(condition2);
-        if (condition2!=sort_bool::false_())
-        {
-          deadlock_summands.push_back(deadlock_summand(sumvars2,
-                                                       condition2,
-                                                       has_time?deadlock(actiontime2):deadlock()));
-        }
+          condition2=RewriteTerm(condition2);
+          if (condition2!=sort_bool::false_())
+          {
+            deadlock_summands.push_back(deadlock_summand(sumvars2,
+                                                         condition2,
+                                                         has_time?deadlock(actiontime2):deadlock()));
+          }
 
+        }
       }
 
       for (action_summand_vector::const_iterator walker2=action_summands2.begin();
@@ -7914,6 +7942,15 @@ class specification_basic_type:public boost::noncopyable
 
         if (multiaction2!=make_list(terminationAction))
         {
+          if (is_allow && !allow_(allowlist,multiaction2))
+          {
+            continue;
+          }
+          if (is_block && encap(aterm_cast<identifier_string_list>(allowlist),multiaction2))
+          {
+            continue;
+          }
+
           if (!has_time)
           {
             if (ultimatedelaycondition!=sort_bool::true_())
@@ -7983,6 +8020,16 @@ class specification_basic_type:public boost::noncopyable
               multiaction3=linMergeMultiActionList(multiaction1,multiaction2);
 
             }
+
+            if (is_allow && !allow_(allowlist,multiaction3))
+            {
+              continue;
+            }
+            if (is_block && encap(aterm_cast<identifier_string_list>(allowlist),multiaction3))
+            {
+              continue;
+            }
+
             const variable_list allsums=sumvars1+sumvars2;
             data_expression condition3= lazy::and_(condition1,condition2);
             data_expression action_time3;
@@ -8045,12 +8092,19 @@ class specification_basic_type:public boost::noncopyable
       const deadlock_summand_vector &deadlock_summands2,
       const variable_list &pars2,
       const assignment_list &init2,
+      const action_name_multiset_list &allowlist1,  // This is a list of list of identifierstring.
+      const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
+      const bool is_block,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
       variable_list& pars_result,
       assignment_list& init_result)
     {
-      mCRL2log(mcrl2::log::verbose) << "- calculating parallel composition: " << action_summands1.size() <<
+      mCRL2log(mcrl2::log::verbose) <<
+            (is_allow ? "- calculating parallel composition modulo the allow operator: " :
+             is_block ? "- calculating parallel composition modulo the block operator: " :
+                        "- calculating parallel composition: ") <<
+            action_summands1.size() <<
             " actions + " << deadlock_summands1.size() <<
             " deadlocks || " << action_summands2.size() <<
             " actions + " << deadlock_summands2.size() << " deadlocks = ";
@@ -8071,7 +8125,7 @@ class specification_basic_type:public boost::noncopyable
       pars3=reverse(pars3);
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
-      combine_summand_lists(action_summands1,deadlock_summands1,action_summands2,deadlock_summands2,pars1,pars3,pars2,action_summands,deadlock_summands);
+      combine_summand_lists(action_summands1,deadlock_summands1,action_summands2,deadlock_summands2,pars1,pars3,pars2,allowlist1,is_allow,is_block,action_summands,deadlock_summands);
 
       mCRL2log(mcrl2::log::verbose) << action_summands.size() << " actions and " << deadlock_summands.size() << " delta summands.\n";
       pars_result=pars1+pars3;
@@ -8186,6 +8240,7 @@ class specification_basic_type:public boost::noncopyable
                               regular,true,pars2,init2);
         parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
                               action_summands2,deadlock_summands2,pars2,init2,
+                              action_name_multiset_list(),false,false,
                               action_summands,deadlock_summands,pars,init);
         return;
       }
@@ -8200,14 +8255,52 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_allow(t))
       {
-        generateLPEmCRLterm(action_summands,deadlock_summands,allow(t).operand(), regular,rename_variables,pars,init);
+        process_expression par = allow(t).operand();
+        if (!options.nodeltaelimination && options.add_delta && is_merge(par))
+        {
+          // Perform parallel composition with inline allow.
+          variable_list pars1,pars2;
+          assignment_list init1,init2;
+          action_summand_vector action_summands1, action_summands2;
+          deadlock_summand_vector deadlock_summands1, deadlock_summands2;
+          generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
+                                regular,rename_variables,pars1,init1);
+          generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
+                                regular,true,pars2,init2);
+          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
+                                action_summands2,deadlock_summands2,pars2,init2,
+                                allow(t).allow_set(),true,false,
+                                action_summands,deadlock_summands,pars,init);
+          return;
+        }
+
+        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init);
         allowblockcomposition(allow(t).allow_set(),true,action_summands,deadlock_summands);
         return;
       }
 
       if (is_block(t))
       {
-        generateLPEmCRLterm(action_summands,deadlock_summands,block(t).operand(), regular,rename_variables,pars,init);
+        process_expression par = block(t).operand();
+        if (!options.nodeltaelimination && options.add_delta && is_merge(par))
+        {
+          // Perform parallel composition with inline block.
+          variable_list pars1,pars2;
+          assignment_list init1,init2;
+          action_summand_vector action_summands1, action_summands2;
+          deadlock_summand_vector deadlock_summands1, deadlock_summands2;
+          generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
+                                regular,rename_variables,pars1,init1);
+          generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
+                                regular,true,pars2,init2);
+          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
+                                action_summands2,deadlock_summands2,pars2,init2,
+                                action_name_multiset_list(block(t).block_set()),false,true,
+                                action_summands,deadlock_summands,pars,init);
+          return;
+        }
+
+        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init);
         allowblockcomposition(action_name_multiset_list(block(t).block_set()),false,action_summands,deadlock_summands);
         return;
       }
