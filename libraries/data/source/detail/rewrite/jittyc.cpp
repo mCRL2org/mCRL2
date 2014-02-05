@@ -2876,7 +2876,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  assert(function_index < %zu);\n"
       "  const size_t total_arity=recursive_number_of_args(t1);\n"
       "  assert( int2func_head_in_nf[total_arity][function_index] != NULL);\n"
-      "  return  int2func_head_in_nf[total_arity][function_index](t);\n"
+      "  return  int2func_head_in_nf[total_arity][function_index](t1);\n"
       "}\n\n",
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
       max_arity+1,
