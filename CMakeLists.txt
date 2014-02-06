@@ -6,6 +6,7 @@ project(mCRL2)
 # TODO: check RPATH settings
 # TODO: remove the build/workarounds include (contains only FlexLexer.h) when we finally stop using the old FSM parser
 # TODO: Check why ltsgraph/glscene.cpp is including GLUT in MacOS
+# TODO: See if we can get rid of the __STDC_VERSION__ define in ltsgraph/ltsview/diagraphica (currently included to prevent qopenglext.h from redefining int32_t etc.)
 include_directories(build/workarounds)
 
 set(MCRL2_MIN_QT_VERSION 5.0.2)

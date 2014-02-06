@@ -19,7 +19,6 @@
 # include <GLUT/glut.h>
 #else
 # ifdef WIN32
-#  define NOMINMAX
 #  include <windows.h>
 # endif
 # include <GL/glu.h>

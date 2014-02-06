@@ -12,9 +12,7 @@
 # include <GLUT/glut.h>
 #else
 # ifdef WIN32
-#  define NOMINMAX
 #  include <windows.h>
-#  undef __in_range // for STLport on Windows
 # endif
 # include <GL/glu.h>
 #endif
