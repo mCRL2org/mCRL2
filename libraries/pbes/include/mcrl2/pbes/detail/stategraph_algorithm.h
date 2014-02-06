@@ -233,7 +233,6 @@ struct local_control_flow_graph
     {
       mCRL2log(log::debug1, "stategraph") << " edge " << u << " -> " << v << std::endl;
       u.insert_neighbor(&v);
-      v.insert_neighbor(&u);
     }
     else
     {
