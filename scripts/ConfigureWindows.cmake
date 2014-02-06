@@ -14,7 +14,7 @@ endif()
 ## Set Shared Build  
 ##---------------------------------------------------
 
-option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF) 
+set(BUILD_SHARED_LIBS OFF) 
 
 ##---------------------------------------------------
 ## Set run-time destination  

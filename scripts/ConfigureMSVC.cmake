@@ -11,7 +11,6 @@ if(NOT MSVC)
 endif()
 
 include_directories( build/workarounds/msvc )
-set(BUILD_SHARED_LIBS OFF)
 
 ##---------------------------------------------------
 ## Set MSVC specific compiler flags
@@ -31,3 +30,4 @@ try_add_c_flag(/bigobj)
 try_add_c_flag(/MP)
 try_add_c_flag(/W3          MAINTAINER)
 
+add_definitions(-D_USE_MATH_DEFINES)

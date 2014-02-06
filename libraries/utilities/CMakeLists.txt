@@ -25,6 +25,7 @@ add_mcrl2_library(utilities_qt
     numberedtextedit.cpp
     persistentfiledialog.cpp
   DEPENDS
+    mcrl2_utilities
     QtWidgets
     QtCore
 )

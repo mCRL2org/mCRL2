@@ -1,4 +1,4 @@
-if(NOT WINDOWS)
+if(NOT WIN32)
   set(COMPILING_REWRITER_SRC detail/rewrite/jittyc.cpp)
   set(COMPILING_REWRITER_DEPS dl)
 endif()

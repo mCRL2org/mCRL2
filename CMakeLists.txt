@@ -4,6 +4,9 @@ project(mCRL2)
 # TODO: Clean up utilities/workarounds.h
 # TODO: See if -fPIC can be replaced by CMAKE_POSITION_INDEPENDENT_CODE
 # TODO: check RPATH settings
+# TODO: remove the build/workarounds include (contains only FlexLexer.h) when we finally stop using the old FSM parser
+# TODO: Check why ltsgraph/glscene.cpp is including GLUT in MacOS
+include_directories(build/workarounds)
 
 set(MCRL2_MIN_QT_VERSION 5.0.2)
 set(MCRL2_MIN_BOOST_VERSION 1.44.0)

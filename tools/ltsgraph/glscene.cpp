@@ -21,7 +21,8 @@
 #ifdef _WINDOWS
 #include <windows.h>
 #endif
-#include <GL/glu.h> // Needed for compilation on Ubuntu 12.04
+#include <QtOpenGL>
+#include <GL/glu.h>
 #endif
 
 #include "mcrl2/utilities/workarounds.h"

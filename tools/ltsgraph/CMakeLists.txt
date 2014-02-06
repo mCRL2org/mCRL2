@@ -1,3 +1,7 @@
+if(WIN32)
+  add_definitions(-D__STDC_VERSION__=199901L)
+endif()
+
 add_mcrl2_tool(ltsgraph
   SOURCES
     mainwindow.ui
