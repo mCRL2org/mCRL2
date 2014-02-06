@@ -84,7 +84,7 @@ void ColorChooser::handleMouseEvent(QMouseEvent* e)
       {
         if (m_dragIdx == NON_EXISTING)
         {
-          QPointF pos = worldCoordinate(e->posF());
+          QPointF pos = worldCoordinate(e->localPos());
 
           double xCur = pos.x() / (0.5 * worldSize().width());
           double yCur = pos.y() / (0.5 * worldSize().height());
@@ -376,7 +376,7 @@ void ColorChooser::handleDrag()
   if (m_dragIdx != NON_EXISTING && m_dragIdx < (size_t)m_yCoordinates->size())
   {
     QSizeF size = worldSize();
-    QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+    QPointF pos = worldCoordinate(m_lastMouseEvent.localPos());
 
     double xCur = pos.x()/(0.5*size.width());
     double yCur = pos.y()/(0.5*size.height());

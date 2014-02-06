@@ -451,7 +451,7 @@ void ToolInstance::onSave()
 
     if (file.open(QFile::WriteOnly | QFile::Text))
     {
-      file.write((const char *)m_ui.edtOutput->toPlainText().toAscii().data());
+      file.write((const char *)m_ui.edtOutput->toPlainText().toLatin1().data());
       file.close();
     }
   }

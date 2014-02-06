@@ -10,6 +10,7 @@
 #include "movabletablewidget.h"
 #include <QPainter>
 #include <QHeaderView>
+#include <QMimeData>
 
 MovableTableWidget::MovableTableWidget(QWidget *parent) :
   QTableWidget(parent), m_lineRow(-1)

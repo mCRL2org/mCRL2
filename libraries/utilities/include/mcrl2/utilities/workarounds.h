@@ -1,10 +1,11 @@
 #ifndef WORKAROUNDS_H__
 #define WORKAROUNDS_H__
 
-#include <boost/config.hpp>
+//#include <boost/config.hpp>
 
 // Windows specific workarounds
 #if defined(BOOST_MSVC) || defined(BOOST_INTEL_WIN) || defined(_MSC_VER)
+/*
 # include <cassert>
 # include <cmath>
 # include <cstdio>
@@ -68,9 +69,11 @@ inline double round(double d)
 # ifndef GL_FRAGMENT_DEPTH
 #  define GL_FRAGMENT_DEPTH 0x8452
 # endif
+*/
 
 // CYGWIN and MINGW specific
 #elif defined(__CYGWIN__) || defined(__MINGW32__)
+/*
 # include <cassert>
 # include <cerrno>
 # include <unistd.h>
@@ -78,13 +81,12 @@ inline double round(double d)
 # if defined(__MINGW32__)
 #  define getpid _getpid
 # endif
-#endif
+*/
 
 // Apple specific
-// #if defined(__APPLE) // This test does not work to determine a 32bit apple gcc compiler.
-#if defined(__APPLE_CPP__) || defined(__APPLE_CC__)
+#elif defined(__APPLE_CPP__) || defined(__APPLE_CC__)
 // Workaround for OS X with Apples patched gcc 4.0.1
-#undef nil
+//#undef nil
 #endif
 
 /*
@@ -105,13 +107,6 @@ the -include flag on the command line.
 #endif // defined(HAVE_NULLPTR)
 
 // Code used for all platforms
-#include <limits.h>
-
-// Part of C99 but not C++98
-#if !defined(LLONG_MIN)
-# define LLONG_MIN -9223372036854775807LL
-# define LLONG_MAX +9223372036854775807LL
-# define ULLONG_MAX 18446744073709551615ULL
-#endif
+//#include <limits.h>
 
 #endif // WORKAROUNDS_H__

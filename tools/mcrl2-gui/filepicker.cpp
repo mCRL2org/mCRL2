@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QMimeData>
 #include <QList>
 #include <QUrl>
 

@@ -18,10 +18,10 @@ add_custom_target(${PROJECT_NAME}_headers
   SOURCES ${HEADERS} ${DETAIL_HEADERS}
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
+include_directories(include)
 
 # actual target:
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} STATIC
   source/gl2ps.c  
 )
 
@@ -36,4 +36,4 @@ if( mlib_FOUND )
 endif( mlib_FOUND )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
+#install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

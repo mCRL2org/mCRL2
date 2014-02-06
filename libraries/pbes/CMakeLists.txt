@@ -1,51 +1,25 @@
-# Authors: Wieger Wesselink
-# Copyright: see the accompanying file COPYING or copy at
-# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-#
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
-
-# ########## Project setup ##########
-project(mcrl2_pbes)
-cmake_minimum_required(VERSION 2.6)
-
-# Trick to add header files to projects in IDEs like Visual Studio and XCode
-FILE(GLOB_RECURSE HEADERS "include" "*.h")
-add_custom_target(${PROJECT_NAME}_headers
-  SOURCES ${HEADERS})
-
-# ######### General setup ##########
-
-set(mcrl2_pbes_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/algorithms.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/pbes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/tools.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/tools2.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/pbes_explorer.cpp
-)
-
 if(MCRL2_ENABLE_EXPERIMENTAL)
-  set(mcrl2_pbes_src
-    ${mcrl2_pbes_src}
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/experimental_tools.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/experimental_tools2.cpp
-  )
-endif(MCRL2_ENABLE_EXPERIMENTAL)
-set(mcrl2_pbes_src ${mcrl2_pbes_src} PARENT_SCOPE)
+  set(EXPERIMENTAL_TOOLS
+  source/experimental_tools.cpp
+  source/experimental_tools2.cpp)
+endif()
 
-# actual target:
-add_library(${PROJECT_NAME}
-  ${mcrl2_pbes_src}
+add_mcrl2_library(pbes
+  INSTALL_HEADERS TRUE
+  SOURCES
+    algorithms.cpp
+    pbes.cpp
+    tools.cpp
+    tools2.cpp
+    pbes_explorer.cpp
+    ${EXPERIMENTAL_TOOLS}
+  DEPENDS
+    mcrl2_atermpp        HEADER_ONLY
+    mcrl2_bes
+    mcrl2_core
+    mcrl2_data
+    mcrl2_lps
+    mcrl2_modal_formula
+    mcrl2_process        HEADER_ONLY
+    mcrl2_utilities      HEADER_ONLY
 )
-
-target_link_libraries(${PROJECT_NAME}
-  mcrl2_bes
-  mcrl2_core
-  mcrl2_data
-  mcrl2_lps
-  mcrl2_modal_formula
-)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

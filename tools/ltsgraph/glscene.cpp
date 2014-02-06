@@ -7,18 +7,27 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <QtOpenGL>
+//#include <QtOpenGL>
 #include <assert.h>
 #include <cstdio>
-#include "glscene.h"
+
+#include <QFontMetrics>
+#include <QPainter>
+#include <QFile>
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
+#ifdef _WINDOWS
+#include <windows.h>
+#endif
 #include <GL/glu.h> // Needed for compilation on Ubuntu 12.04
 #endif
+
 #include "mcrl2/utilities/workarounds.h"
 #include "mcrl2/utilities/logger.h"
+
+#include "glscene.h"
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc
@@ -47,7 +56,7 @@ struct Color3f
     operator const GLfloat*() const { return &r; }
 };
 
-struct TextureData
+struct TextureData 
 {
     size_t* transition_widths;
     size_t* transition_heights;
@@ -113,7 +122,7 @@ struct TextureData
       while (w < label.width()) w <<= 1;
       while (h < label.height()) h <<= 1;
       // ... and also wants the alpha component to be the 4th component
-      label = QGLWidget::convertToGLFormat(label.scaled(w, h));
+      label = convertToGLFormat(label.scaled(w, h));
 
       glBindTexture(GL_TEXTURE_2D, texture);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -916,7 +925,9 @@ void GLScene::init(const QColor& clear)
   glFogf(GL_FOG_MODE, GL_LINEAR);
   glFogf(GL_FOG_DENSITY, 1);
   glFogfv(GL_FOG_COLOR, fog_color);
-  if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
+  const GLubyte* version = glGetString(GL_VERSION);
+  if (version && ((version[0] == '1' && version[2] >= '4') || version[0] > '1'))
+  // if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
     glFogf(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
   updateFog();
 
@@ -1197,7 +1208,7 @@ void GLScene::renderLatexGraphics(QString filename, float aspectRatio)
 
   if (file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
   {
-    file.write(tikz_code.toAscii());
+    file.write(tikz_code.toLatin1());
     file.close();
   }
 }

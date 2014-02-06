@@ -21,12 +21,13 @@ if label in ["fedora-amd64"]:
   cpack_options = ["-G", "RPM"]
 elif label in ["ubuntu-x86", "ubuntu-amd64"]:
   cpack_options = ["-G", "DEB"]
-elif label in ["windows-x86", "windows-amd64"]:
+elif label in ["windows-x86"]:
   # On Windows, a path can be a maximum of 256 characters. Due to the structure
   # of the Jenkins paths, we outrun this limit when generating a package.
   # As a workaround, we generate the package to C:\Temp\pkg.
-  cpack_temp_path = "C:\Temp\pkg"
-  cpack_options = ["-G", "NSIS", "-B", cpack_temp_path]
+  cpack_options = ["-G", "NSIS", "-B", "C:\Temp\pkg"]
+elif label in ["windows-amd64"]:
+  cpack_options = ["-G", "NSIS64", "-B", "C:\Temp\pkg"]
 elif label in ["macosx-x86", "macosx-amd64"]:
   cpack_options = ["-G", "PackageMaker"] 
 

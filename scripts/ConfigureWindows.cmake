@@ -34,8 +34,5 @@ add_definitions(-DWIN32)
 # TODO: Should be prefixed with MCRL2_
 add_definitions(-DNO_DYNLOAD)
 
-##---------------------------------------------------
-## Disable Man page generation for Windows 
-##---------------------------------------------------
-set(MCRL2_MAN_PAGES Off)
-
+# Prevent windows.h from defining min and max.
+add_definitions(-DNOMINMAX)

@@ -45,7 +45,7 @@ void DocumentWidget::saveFile(QString fileName)
 
   if (file.open(QFile::WriteOnly | QFile::Text))
   {
-    file.write((const char *)toPlainText().toAscii().data());
+    file.write((const char *)toPlainText().toLatin1().data());
     file.close();
     m_filename = fileName;
     document()->setModified(false);

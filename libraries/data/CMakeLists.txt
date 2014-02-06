@@ -1,52 +1,23 @@
-# Authors: Frank Stappers and Aad Mathijssen
-# Copyright: see the accompanying file COPYING or copy at
-# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-#
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+if(NOT WINDOWS)
+  set(COMPILING_REWRITER_SRC detail/rewrite/jittyc.cpp)
+  set(COMPILING_REWRITER_DEPS dl)
+endif()
 
-# ########## Project setup ##########
-project(mcrl2_data)
-cmake_minimum_required(VERSION 2.6)
-
-# Trick to add header files to projects in IDEs like Visual Studio and XCode
-FILE(GLOB_RECURSE HEADERS "include" "*.h")
-add_custom_target(${PROJECT_NAME}_headers SOURCES ${HEADERS})
-
-# ######### General setup ##########
-
-#jitty.c requires DL_LIBS
-if(UNIX)
-  LINK_LIBRARIES(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
-  set(COMP_REWRITERS
-   ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jittyc.cpp
-  )
-endif(UNIX)
-
-set(mcrl2_data_src
- ${CMAKE_CURRENT_SOURCE_DIR}/source/data.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/data_specification.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/enumerate/enum_standard.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/prover/smt_lib_solver.cpp
-
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/with_prover.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jitty.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/rewrite.cpp
- ${COMP_REWRITERS}
+add_mcrl2_library(data
+  INSTALL_HEADERS TRUE
+  SOURCES
+    data.cpp
+    data_specification.cpp
+    typecheck.cpp
+    detail/enumerate/enum_standard.cpp
+    detail/prover/smt_lib_solver.cpp
+    detail/rewrite/with_prover.cpp
+    detail/rewrite/jitty.cpp
+    detail/rewrite/rewrite.cpp
+    ${COMPILING_REWRITER_SRC}
+  DEPENDS
+    mcrl2_atermpp    HEADER_ONLY
+    mcrl2_core
+    mcrl2_utilities
+    ${COMPILING_REWRITER_DEPS}
 )
-
-set(mcrl2_data_src ${mcrl2_data_src} PARENT_SCOPE)
-
-add_library(${PROJECT_NAME}
-  ${mcrl2_data_src}
-)
-
-target_link_libraries(${PROJECT_NAME}
-  mcrl2_core
-  mcrl2_utilities
-)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

@@ -30,7 +30,7 @@ endif()
 
 # Warning: this seems to only make sense on Windows and MacOSX!
 if(APPLE OR WIN32)
-    include(DeployQt4)
+    include(DeployQt5)
     if(APPLE)
         set(EXECUTABLE "${MCRL2_BIN_DIR}/${PROJECT_NAME}.app")
     elseif(WIN32)
@@ -39,5 +39,5 @@ if(APPLE OR WIN32)
 
     # Synopsis:
     # INSTALL_QT4_EXECUTABLE(<executable> [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf> <component>])
-    install_qt4_executable(${EXECUTABLE} "" "" "" "" "" Applications)
+    install_qt5_executable(${EXECUTABLE} "" "" ${CMAKE_PREFIX_PATH} "" "" Applications)
 endif()

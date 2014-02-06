@@ -1809,7 +1809,7 @@ void ArcDiagram::handleDragDiagram()
 
 void ArcDiagram::handleDragDiagram(const int& dgrmIdx)
 {
-  QPointF delta = worldCoordinate(m_lastMouseEvent.posF()) - worldCoordinate(m_lastMousePos);
+  QPointF delta = worldCoordinate(m_lastMouseEvent.localPos()) - worldCoordinate(m_lastMousePos);
 
   posDgrm[dgrmIdx].x += delta.x();
   posDgrm[dgrmIdx].y += delta.y();

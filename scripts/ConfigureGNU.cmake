@@ -38,13 +38,11 @@ if(NOT MCRL2_CLANG)
 endif()
 
 # The following is only implemented in clang, but not on Apple.
-if (NOT APPLE)    
-  if (MCRL2_CLANG)
-    # We need to add the proper flag to the linker before we try:
-     set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
-     try_add_c_flag(-fsanitize=address       MAINTAINER)
-     try_add_c_flag(-fno-omit-frame-pointer  MAINTAINER)
-  endif()
+if(MCRL2_CLANG AND NOT APPLE)
+  # We need to add the proper flag to the linker before we try:
+  set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
+  try_add_c_flag(-fsanitize=address       MAINTAINER)
+  try_add_c_flag(-fno-omit-frame-pointer  MAINTAINER)
 endif()
 
 ##---------------------------------------------------
@@ -116,28 +114,14 @@ endif()
 ## Set linker flags
 ##---------------------------------------------------
 
-if(APPLE)
-  # On the Mac, do never, ever, strip the executables, since this is bound to break the
-  # compiling rewriter.
-  # The symptoms when stripping, are that the rewriter cannot find some of the symbols
-  # that should be included in the executable.
-  ## set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-dead_strip")
-  ## set(CMAKE_EXE_LINKER_FLAGS "-Wl,-dead_strip")
-else()
-  set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
+if(NOT APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
 endif()
 
 if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER ""
-      CACHE STRING "Flags used for linking binaries during maintainer builds.")
-  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER ""
-      CACHE STRING "Flags used by the shared libraries linker during maintainer builds.")
+  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "")
 else()
-  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
-      CACHE STRING "Flags used for linking binaries during maintainer builds.")
-  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
-      CACHE STRING "Flags used by the shared libraries linker during maintainer builds.")
+  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once")
 endif()
 
 if(CXX_ACCEPTS_FPROFILE_ARCS)

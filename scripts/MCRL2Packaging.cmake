@@ -217,16 +217,6 @@ endif()
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
 SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
-
-
-# Workaround
-# Fix issue where mCRL2 gets installed into "Program Files (x86)" in Win64.
-if(CMAKE_CL_64)
-  set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
-endif(CMAKE_CL_64)
-
-#Extend PATH variable with mCRL2_INSTALL_DIR/bin if CPACK_NSIS_MODIFY_PATH = ON
-SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}/${MCRL2_BIN_DIR}")
 SET(CPACK_NSIS_MODIFY_PATH ON)
 
 # Include CPack specific stuff

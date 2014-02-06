@@ -20,6 +20,7 @@
 #define GRAPHINFORMATION_H
 
 #include <QDockWidget>
+#include <QtOpenGL>
 #include "ui_information.h"
 
 #include "graph.h"

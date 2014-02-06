@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id$ */
+   $Id: lz.cpp 11587 2013-02-23 15:44:02Z jkeiren $ */
 
 /* Bert Lisser: scratch buffer changed from fixed data array into reallocable
    array on the heap. Added function "int add2scratch(int last, char *c)" */

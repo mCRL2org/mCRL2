@@ -123,7 +123,7 @@ void Parser::writeFSMFile(
 
     line.append("\n");
 
-    file.write(line.toAscii());
+    file.write(line.toLatin1());
     emit progressed(++lineCnt);
   }
 
@@ -146,7 +146,7 @@ void Parser::writeFSMFile(
 
     line.append("\n");
 
-    file.write(line.toAscii());
+    file.write(line.toLatin1());
 
     emit progressed(++lineCnt);
   }
@@ -161,7 +161,7 @@ void Parser::writeFSMFile(
     QString label = QString::fromStdString(graph->getEdge(i)->getLabel());
 
     line = QString("%1 %2 \"%3\"\n").arg(inNode, outNode, label);
-    file.write(line.toAscii());
+    file.write(line.toLatin1());
 
     emit progressed(++lineCnt);
   }

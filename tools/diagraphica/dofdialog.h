@@ -13,6 +13,7 @@
 #include "ui_dofdialog.h"
 
 #include <QDialog>
+#include <QComboBox>
 #include "graph.h"
 #include "shape.h"
 #include "dof.h"
