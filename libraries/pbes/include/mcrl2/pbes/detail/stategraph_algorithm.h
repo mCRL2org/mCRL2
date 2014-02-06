@@ -211,36 +211,33 @@ struct local_control_flow_graph
                   )
   {
     mCRL2log(log::debug1, "stategraph") << " insert edge e1 = " << e1 << std::endl;
-    if (e1 != data::undefined_data_expression())
+    const stategraph_equation& eq_Y = *find_equation(p, Y);
+    const data::variable& d1 = (k1 == data::undefined_index() ? data::undefined_variable() : eq_Y.parameters()[k1]);
+    local_control_flow_graph_vertex v_(Y, k1, d1, e1);
+
+    // check if v_ already exists in vertices; if not it is added
+    auto j = std::find(vertices.begin(), vertices.end(), v_);
+    if (j == vertices.end())
     {
-      const stategraph_equation& eq_Y = *find_equation(p, Y);
-      const data::variable& d1 = (k1 == data::undefined_index() ? data::undefined_variable() : eq_Y.parameters()[k1]);
-      local_control_flow_graph_vertex v_(Y, k1, d1, e1);
+      mCRL2log(log::debug1, "stategraph") << " add vertex v = " << v_ << std::endl;
+      auto k = vertices.insert(v_);
+      todo.insert(&(*k.first));
+      j = k.first;
+    }
+    const local_control_flow_graph_vertex& v = *j; // v == v_, and v is an element of the set vertices
 
-      // check if v_ already exists in vertices; if not it is added
-      auto j = std::find(vertices.begin(), vertices.end(), v_);
-      if (j == vertices.end())
-      {
-        mCRL2log(log::debug1, "stategraph") << " add vertex v = " << v_ << std::endl;
-        auto k = vertices.insert(v_);
-        todo.insert(&(*k.first));
-        j = k.first;
-      }
-      const local_control_flow_graph_vertex& v = *j; // v == v_, and v is an element of the set vertices
+    mCRL2log(log::debug1, "stategraph") << " u.neighbors() = " << u.print_neighbors() << std::endl;
 
-      mCRL2log(log::debug1, "stategraph") << " u.neighbors() = " << u.print_neighbors() << std::endl;
-
-      // add edge (u, v)
-      if (!utilities::detail::contains(u.neighbors(), &v))
-      {
-        mCRL2log(log::debug1, "stategraph") << " edge " << u << " -> " << v << std::endl;
-        u.insert_neighbor(&v);
-        v.insert_neighbor(&u);
-      }
-      else
-      {
-        mCRL2log(log::debug1, "stategraph") << " edge already exists!" << std::endl;
-      }
+    // add edge (u, v)
+    if (!utilities::detail::contains(u.neighbors(), &v))
+    {
+      mCRL2log(log::debug1, "stategraph") << " edge " << u << " -> " << v << std::endl;
+      u.insert_neighbor(&v);
+      v.insert_neighbor(&u);
+    }
+    else
+    {
+      mCRL2log(log::debug1, "stategraph") << " edge already exists!" << std::endl;
     }
   }
 };
@@ -1204,14 +1201,20 @@ class stategraph_algorithm
                 // source(X, i, k) = e && dest(X, i, k1) = e1
                 auto e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
                 mCRL2log(log::debug1, "stategraph") << "case 3a k1 = " << print_index(k1) << std::endl;
-                V.insert_edge(todo, m_pbes, u, Y, k1, e1);
+                if (e1 != data::undefined_data_expression())
+                {
+                  V.insert_edge(todo, m_pbes, u, Y, k1, e1);
+                }
               }
               else if (Y != X && is_undefined(i->source, k))
               {
                 // Y != X && undefined(source(X, i, k)) && dest(X, i, k1) = e1
                 auto e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
-                mCRL2log(log::debug1, "stategraph") << "case 3b k1 = " << print_index(k1) << std::endl;
-                V.insert_edge(todo, m_pbes, u, Y, k1, e1);
+                if (e1 != data::undefined_data_expression())
+                {
+                  mCRL2log(log::debug1, "stategraph") << "case 3b k1 = " << print_index(k1) << std::endl;
+                  V.insert_edge(todo, m_pbes, u, Y, k1, e1);
+                }
 
                 // Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k1
                 if (mapped_value(i->copy, k, data::undefined_index()) == k1)
