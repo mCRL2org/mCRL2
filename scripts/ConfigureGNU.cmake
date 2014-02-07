@@ -11,6 +11,18 @@ if(NOT MCRL2_GNU)
 endif()
 
 ##---------------------------------------------------
+## Add option for profiling support
+##---------------------------------------------------
+
+option(MCRL2_ENABLE_PROFILING "Enable/disable profiling support" OFF)
+if( MCRL2_ENABLE_PROFILING )
+  add_definitions( -pg )
+  set(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
+  set(CMAKE_SHARED_LINKER_FLAGS "-pg ${CMAKE_SHARED_LINKER_FLAGS}")
+  set(CMAKE_MODULE_LINKER_FLAGS "-pg ${CMAKE_SHARED_LINKER_FLAGS}")
+endif(MCRL2_ENABLE_PROFILING)
+
+##---------------------------------------------------
 ## Set GCC compiler flags
 ##---------------------------------------------------
 

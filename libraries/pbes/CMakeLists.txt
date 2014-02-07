@@ -1,7 +1,7 @@
 if(MCRL2_ENABLE_EXPERIMENTAL)
   set(EXPERIMENTAL_TOOLS
-  source/experimental_tools.cpp
-  source/experimental_tools2.cpp)
+  experimental_tools.cpp
+  experimental_tools2.cpp)
 endif()
 
 add_mcrl2_library(pbes

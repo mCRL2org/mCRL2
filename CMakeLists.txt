@@ -12,14 +12,11 @@ include_directories(build/workarounds)
 set(MCRL2_MIN_QT_VERSION 5.0.2)
 set(MCRL2_MIN_BOOST_VERSION 1.44.0)
 
-set(MCRL2_ENABLE_GUI_TOOLS ON
-    CACHE BOOL "Enable compilation of tools with a graphical user interface.")
-set(MCRL2_ENABLE_EXPERIMENTAL OFF
-    CACHE BOOL "Enable compilation of experimental tools.")
-set(MCRL2_ENABLE_DEPRECATED OFF
-    CACHE BOOL "Enable compilation of deprecated tools.")
-set(MCRL2_ENABLE_DEVELOPER OFF
-    CACHE BOOL "Enable compilation of developer tools.")
+option(MCRL2_ENABLE_STABLE       "Enable compilation of stable tools." ON)
+option(MCRL2_ENABLE_GUI_TOOLS    "Enable compilation of tools with a graphical user interface." ON)
+option(MCRL2_ENABLE_EXPERIMENTAL "Enable compilation of experimental tools." OFF)
+option(MCRL2_ENABLE_DEPRECATED   "Enable compilation of deprecated tools." OFF)
+option(MCRL2_ENABLE_DEVELOPER    "Enable compilation of developer tools." OFF)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

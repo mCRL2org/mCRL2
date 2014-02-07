@@ -6,7 +6,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-if (NOT APPLE)
+if(NOT APPLE)
   return()
 endif()
 
@@ -22,19 +22,6 @@ set(CMAKE_MODULE_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
 ## Set Shared Build  
 ##---------------------------------------------------
 option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF) 
-
-##---------------------------------------------------
-## Toggle profile build
-##---------------------------------------------------
-
-option(MCRL2_ENABLE_PROFILING "Enable/disable profiling support" OFF)
-message(STATUS "MCRL2_ENABLE_PROFILING: ${MCRL2_ENABLE_PROFILING}")
-if( MCRL2_ENABLE_PROFILING )
-  add_definitions( -pg )
-  set(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
-  set(CMAKE_SHARED_LINKER_FLAGS "-pg ${CMAKE_SHARED_LINKER_FLAGS}")
-  set(CMAKE_MODULE_LINKER_FLAGS "-pg ${CMAKE_SHARED_LINKER_FLAGS}")
-endif(MCRL2_ENABLE_PROFILING)
 
 ##---------------------------------------------------
 ## Toggle Man page generation 

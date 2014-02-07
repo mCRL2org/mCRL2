@@ -14,18 +14,20 @@ add_mcrl2_library(utilities
     toolset_version.cpp
 )
 
-add_mcrl2_library(utilities_qt
-  INSTALL_HEADERS TRUE
-  SOURCES
-    logwidget.ui
-    qt_tool.cpp
-    atermthread.cpp
-    logwidget.cpp
-    extendedtabwidget.cpp
-    numberedtextedit.cpp
-    persistentfiledialog.cpp
-  DEPENDS
-    mcrl2_utilities
-    QtWidgets
-    QtCore
-)
+if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
+  add_mcrl2_library(utilities_qt
+    INSTALL_HEADERS TRUE
+    SOURCES
+      logwidget.ui
+      qt_tool.cpp
+      atermthread.cpp
+      logwidget.cpp
+      extendedtabwidget.cpp
+      numberedtextedit.cpp
+      persistentfiledialog.cpp
+    DEPENDS
+      mcrl2_utilities
+      QtWidgets
+      QtCore
+  )
+endif()
