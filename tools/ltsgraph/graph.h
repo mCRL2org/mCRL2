@@ -21,6 +21,8 @@
 
 #include "mcrl2/lts/lts.h"
 
+#include <cmath>
+
 namespace Graph
 {
 

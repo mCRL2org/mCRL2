@@ -4,6 +4,17 @@ if(WINDOWS)
   set(MCRL2_ARCHIVE_PATH ${CMAKE_INSTALL_PREFIX}/lib)
   set(MCRL2_INCLUDE_PATH ${CMAKE_INSTALL_PREFIX}/include)
 elseif(APPLE)
+  set(MCRL2_RUNTIME_PATH ${CMAKE_INSTALL_PREFIX}/bin/mcrl2-gui.app/Content/MacOS)
+  set(MCRL2_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib)
+  set(MCRL2_ARCHIVE_PATH ${CMAKE_INSTALL_PREFIX}/lib)
+  set(MCRL2_INCLUDE_PATH ${CMAKE_INSTALL_PREFIX}/include)
+  set(MCRL2_BUNDLE_PATH ${CMAKE_INSTALL_PREFIX}/bin)
+
+  set(CMAKE_MACOSX_RPATH ON)
+  set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks")
+  set(CMAKE_SKIP_BUILD_RPATH FALSE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 else() # Assume *NIX
   set(MCRL2_RUNTIME_PATH ${CMAKE_INSTALL_PREFIX}/bin)
   set(MCRL2_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib)
@@ -11,14 +22,20 @@ else() # Assume *NIX
   set(MCRL2_INCLUDE_PATH ${CMAKE_INSTALL_PREFIX}/include)
 endif()
 
-function(add_icon_resource TARGET_NAME ICON SOURCE_FILES)
+macro(add_icon_resource TARGET_NAME ICON SOURCE_FILES)
   if(MSVC)
     set(RC_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_icon.rc)
     set(ICOFILE ${CMAKE_SOURCE_DIR}/build/packaging/icons/${ICON}.ico ABSOLUTE)
     configure_file(${CMAKE_SOURCE_DIR}/build/packaging/icon.rc.in ${RC_FILE} @ONLY NEWLINE_STYLE WIN32)
     set(${SOURCE_FILES} ${${SOURCE_FILES}} ${RC_FILE} PARENT_SCOPE)
   endif()
-endfunction()
+  if(APPLE)
+    set(ICNS_FILE ${CMAKE_SOURCE_DIR}/build/packaging/icons/${ICON}.icns)
+    #message(STATUS "Setting bundle icon to ${ICNS_FILE}")
+    set_source_files_properties(${ICNS_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    set(${SOURCE_FILES} ${${SOURCE_FILES}} ${ICNS_FILE})
+  endif()
+endmacro()
 
 macro(add_desktop_file TARGET_NAME TOOLNAME DESCRIPTION ICON)
   if(UNIX AND NOT APPLE)
@@ -26,6 +43,10 @@ macro(add_desktop_file TARGET_NAME TOOLNAME DESCRIPTION ICON)
     set(COMMANDLINE ${TARGET_NAME})
     configure_file(${CMAKE_SOURCE_DIR}/build/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
     install(FILES ${DESKTOP_FILE} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
+  elseif(APPLE)
+    set_target_properties(${TARGET_NAME} PROPERTIES
+      MACOSX_BUNDLE_BUNDLE_NAME ${TOOLNAME}
+      MACOSX_BUNDLE_ICON_FILE ${ICON}.icns)
   endif()
 endmacro()
 
@@ -135,10 +156,6 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
     add_icon_resource(${TARGET_NAME} ${ICON} SOURCES)
   endif()
 
-  if(MENUNAME)
-    add_desktop_file(${TARGET_NAME} "${MENUNAME}" "${DESCRIPTION}" "${ICON}")
-  endif()
-
   if((NOT IS_GUI_BINARY OR MCRL2_ENABLE_GUI_TOOLS) AND INSTALL_COMPONENT)
 
   if(SOURCES)
@@ -153,11 +170,13 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       install(TARGETS ${TARGET_NAME}
               LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
               ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
+              FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH}
               COMPONENT ${INSTALL_COMPONENT})
       if(INSTALL_HEADERS)
         if(APPLE)
-          foreach(${HEADER} ${TARGET_HEADER_FILES})
-            file(RELATIVE_PATH RELPATH ${CMAKE_CURRENT_SOURCE_DIR} ${HEADER})
+          foreach(HEADER ${TARGET_INCLUDE_FILES})
+            get_filename_component(HEADER_ABS "${HEADER}" ABSOLUTE)
+            file(RELATIVE_PATH RELPATH "${CMAKE_CURRENT_SOURCE_DIR}" "${HEADER_ABS}")
             set_source_files_properties(${HEADER} PROPERTIES MACOSX_PACKAGE_LOCATION Headers/${RELPATH})
           endforeach()
         else()
@@ -166,11 +185,13 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       endif()
     elseif(${TARGET_TYPE} STREQUAL "EXECUTABLE")
       add_executable(${TARGET_NAME} ${SOURCES})
+      set(INSTALL_PATH ${MCRL2_RUNTIME_PATH})
       if(IS_GUI_BINARY)
         set_target_properties(${TARGET_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
       endif()
       install(TARGETS ${TARGET_NAME}
               RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
+              BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH}
               COMPONENT ${INSTALL_COMPONENT})
     endif()
     if(DEPENDS)
@@ -183,6 +204,10 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       qt5_use_modules(${TARGET_NAME} ${QT_LIBS})
       set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
     endif()
+  endif()
+
+  if(MENUNAME)
+    add_desktop_file(${TARGET_NAME} "${MENUNAME}" "${DESCRIPTION}" "${ICON}")
   endif()
 
   if(TARGET_INCLUDE_FILES)

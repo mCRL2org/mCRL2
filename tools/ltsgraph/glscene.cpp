@@ -7,21 +7,21 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-//#include <QtOpenGL>
 #include <assert.h>
 #include <cstdio>
+#include <cmath>
 
 #include <QFontMetrics>
 #include <QPainter>
 #include <QFile>
 
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
 #ifdef _WINDOWS
 #include <windows.h>
 #endif
 #include <QtOpenGL>
+#ifdef __APPLE__
+#include <OpenGL/glu.h>
+#else
 #include <GL/glu.h>
 #endif
 

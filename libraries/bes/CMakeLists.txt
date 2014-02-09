@@ -5,7 +5,7 @@ add_mcrl2_library(bes
     pg_syntax.g
   DEPENDS
     mcrl2_atermpp    HEADER_ONLY
-    mcrl2_core       HEADER_ONLY
+    mcrl2_core 
     mcrl2_data       HEADER_ONLY
     mcrl2_utilities  HEADER_ONLY
   INCLUDE

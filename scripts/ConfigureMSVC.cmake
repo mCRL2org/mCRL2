@@ -1,11 +1,3 @@
-# Authors: Frank Stappers
-# Copyright: see the accompanying file COPYING or copy at
-# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-#
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
-
 if(NOT MSVC)
   return()
 endif()
@@ -30,4 +22,21 @@ try_add_c_flag(/bigobj)
 try_add_c_flag(/MP)
 try_add_c_flag(/W3          MAINTAINER)
 
-add_definitions(-D_USE_MATH_DEFINES)
+add_definitions(-DNOMINMAX)                 # Don't let <windows.h> (re)define min and max
+add_definitions(-D_USE_MATH_DEFINES)        # Make <cmath> define M_PI, M_PI_2 etc.
+
+# TODO: check if _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES works instead of _CRT_SECURE_NO_WARNINGS
+# TODO: check if the _NO_DEPRECATE defines do anything (no documentation on MSDN)
+# TODO: check if _SCL_SECURE_NO_WARNINGS is still needed
+add_definitions(-D_CRT_SECURE_NO_DEPRECATE) 
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
+add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+
+# TODO: check if the following are still needed.
+add_definitions(-DBOOST_ALL_NO_LIB=1)
+add_definitions(-DWIN32)
+
+# The following flag prevents compiling rewriter code from being compiled.
+# TODO: rename NO_DYNLOAD to MCRL2_NO_DYNLOAD
+add_definitions(-DNO_DYNLOAD)
