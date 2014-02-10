@@ -1,0 +1,9 @@
+sort D = struct d1 | d2;
+
+act a:D;
+
+proc X(f:D) = a(f).X(f);
+
+
+init X(d1);
+

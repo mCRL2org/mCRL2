@@ -1,0 +1,9 @@
+proc A = tau.B;
+     B = tau.C + tau.D;
+     C = tau.E;
+     D = tau.F;
+     E = tau.F + tau.G;
+     F = tau.A;
+     G = delta;
+
+init A;

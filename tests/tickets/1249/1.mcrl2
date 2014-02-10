@@ -1,0 +1,5 @@
+act a, V, W;
+
+proc P = a | V . P + a. P;
+
+init allow({a | W, a}, P);

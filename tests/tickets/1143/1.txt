@@ -1,0 +1,10 @@
+pbes nu X =
+       forall p: Bool, q: Bool.
+               val(!(
+                     p == q &&
+                     q &&
+                     p == true
+               ))
+    ;
+
+init X;

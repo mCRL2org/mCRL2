@@ -1,0 +1,42 @@
+
+sort Method  = struct method1 | method2;
+act method_var_begin,method_var_end:Nat#Method;
+
+act method_call_begin,method_call_end:Nat#Method;
+act method_begin,method_end:Nat#Method;
+
+proc method1(id:Nat) = 
+		      method_var_begin(id,method1).
+			  method_call_begin(id,method2).
+			  method_call_end(id,method2).
+			method_var_end(id,method1) ;
+
+proc method2(id:Nat) = method_var_begin(id,method2).
+		       method_var_end(id,method2);
+
+
+proc P(id:Nat) =  method_call_begin(id,method1).
+		 method_call_end(id,method1);
+
+proc ProcP(id:Nat) = P(id) || method1(id) ||  method2(id); 
+
+init 
+%   allow({method_begin,method_end,method_begin|method_end,method_begin|method_begin,method_end|method_end
+%   ,method_begin|method_begin|method_begin,method_begin|method_end|method_begin, method_end|method_end|method_begin,
+%   method_end|method_end|method_end
+% 
+%   ,method_begin|method_begin|method_begin|method_begin,method_begin|method_begin|method_begin|method_end,
+%   method_begin|method_begin|method_end|method_end,
+%   method_begin|method_end|method_end|method_end,
+%   method_end|method_end|method_end|method_end
+
+  block({method_var_begin,method_var_end,method_call_begin,method_call_end % <-- cannot linearize
+},
+comm({
+method_call_begin|method_var_begin->
+method_begin,
+method_call_end|method_var_end->
+method_end
+}, 
+	ProcP(1) ||  ProcP(2)  || ProcP(3) 
+));

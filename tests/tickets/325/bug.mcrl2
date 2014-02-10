@@ -1,0 +1,23 @@
+sort Z = struct B;
+ 
+sort I = List( Z );
+
+act S, S': I;
+
+proc Y = tau .  Y;
+
+proc X(b: Bool)=
+       S( [ B ] ). X( true )
+     + tau 
+     ;
+    
+init
+    comm( { 
+           S | S -> S' 
+          },
+            Y  
+         || X(false) 
+       )
+;
+
+
