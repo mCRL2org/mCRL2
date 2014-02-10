@@ -1,6 +1,6 @@
 options:
   grammar:
-    - bnf-grammars\pbes-bnf.g
+    - grammars\pbes.g
   constraints:
     - constraints\pbes-attrs.yml
   #path: C:\Program Files\mCRL2\bin

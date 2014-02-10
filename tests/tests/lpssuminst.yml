@@ -1,7 +1,7 @@
 options:
   grammar:
-    - bnf-grammars\mcrl2-bnf.g
-    - bnf-grammars\data-bnf.g
+    - grammars\mcrl2.g
+    - grammars\data.g
   constraints:
     - constraints\mcrl2-attrs.yml
     - constraints\data-attrs.yml

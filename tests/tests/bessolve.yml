@@ -1,6 +1,6 @@
 options:
   grammar:
-    - bnf-grammars\bes-bnf.g
+    - grammars\bes.g
   constraints:
     - constraints\bes-attrs.yml
   #path: C:\Program Files\mCRL2\bin
