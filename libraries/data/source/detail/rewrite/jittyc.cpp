@@ -1336,7 +1336,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else
     {
-assert(0);
       ss << "this_rewriter->bound_variable_get(" << bound_variable_index(v) << ")";
     }
     return pair<bool,string>(rewr || !b, ss.str());
