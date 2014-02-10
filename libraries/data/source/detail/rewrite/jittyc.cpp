@@ -471,6 +471,11 @@ static void inc_usedcnt(atermpp::aterm_list l)
 
 static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
 {
+/* std::cerr << "BUILD TREE PARS " << pars.Flist << "\n"
+                                << pars.Mlist << "\n"
+                                << pars.Slist << "\n"
+                                << pars.stack << "\n"
+                                << pars.upstack << "\n\n"; */
   if (!pars.Slist.empty())
   {
     atermpp::aterm_list l,m;
@@ -479,8 +484,8 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
     const variable v = createFreshVar(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_appl>(aterm_cast<atermpp::aterm_list>(pars.Slist.front()).front())[0])[1]),&i);
     treevars_usedcnt[k] = 0;
 
-    l = atermpp::aterm_list();
-    m = atermpp::aterm_list();
+    // l = atermpp::aterm_list();
+    // m = atermpp::aterm_list();
     for (; !pars.Slist.empty(); pars.Slist=pars.Slist.tail())
     {
       atermpp::aterm_list e = atermpp::aterm_cast<atermpp::aterm_list>(pars.Slist.front());
@@ -500,20 +505,21 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
 
     if (r==atermpp::aterm_appl())
     {
-      atermpp::aterm_appl tree;
-
-      tree = build_tree(pars,i);
+      atermpp::aterm_appl tree = build_tree(pars,i);
       for (; !readies.empty(); readies=readies.tail())
       {
         inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[2]);
         inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[3]);
-        tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),tree);
+// std::cerr << "AFUNR1 " << aterm_cast<atermpp::aterm_appl>(readies.front())[1] << "\n";
+        tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],
+                         atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),tree);
       }
       r = tree;
     }
     else
     {
       inc_usedcnt((atermpp::aterm_list) r[1]);
+// std::cerr << "AFUNR2 " << r[0] << "\n";
       r = atermpp::aterm_appl(afunR,r[0]);
     }
 
@@ -561,12 +567,15 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
       {
         inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[2]);
         inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[3]);
-        true_tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),true_tree);
+// std::cerr << "AFUNR3 " << aterm_cast<atermpp::aterm_appl>(readies.front())[1] << "\n";
+        true_tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],
+                          atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),true_tree);
       }
     }
     else
     {
       inc_usedcnt((atermpp::aterm_list) r[1]);
+// std::cerr << "AFUNR4 " << r[0] << "\n";
       true_tree = atermpp::aterm_appl(afunR,r[0]);
     }
 
@@ -636,7 +645,9 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
       {
         inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[2]);
         inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[3]);
-        t = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),t);
+// std::cerr << "AFUNR5 " << aterm_cast<atermpp::aterm_appl>(readies.front())[1] << "\n";
+        t = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],
+                           atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),t);
       }
 
       return t;
@@ -644,6 +655,7 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
     else
     {
       inc_usedcnt((atermpp::aterm_list) r[1]);
+// std::cerr << "AFUNR6 " << r[0] << "\n";
       return atermpp::aterm_appl(afunR,r[0]);
     }
   }
@@ -679,12 +691,15 @@ static atermpp::aterm_appl build_tree(build_pars pars, size_t i)
         {
           inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[2]);
           inc_usedcnt((atermpp::aterm_list) atermpp::aterm_cast<atermpp::aterm_appl>(readies.front())[3]);
-          tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),tree);
+// std::cerr << "AFUNR7 " << aterm_cast<atermpp::aterm_appl>(readies.front())[1] << "\n";
+          tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],
+                            atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]),tree);
         }
       }
       else
       {
         inc_usedcnt((atermpp::aterm_list) r[1]);
+// std::cerr << "AFUNR8 " << r[0] << "\n";
         tree = atermpp::aterm_appl(afunR,r[0]);
       }
 
@@ -731,11 +746,14 @@ static atermpp::aterm_appl create_tree(const data_equation_list& rules)
     tree = build_tree(init_pars,0);
     for (; !readies.empty(); readies=readies.tail())
     {
-      tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]), tree);
+// std::cerr << "AFUNR9 " << aterm_cast<atermpp::aterm_appl>(readies.front())[1] << "\n";
+      tree = atermpp::aterm_appl(afunC,aterm_cast<atermpp::aterm_appl>(readies.front())[0],
+                    atermpp::aterm_appl(afunR,aterm_cast<atermpp::aterm_appl>(readies.front())[1]), tree);
     }
   }
   else
   {
+// std::cerr << "AFUNRA " << r[0] << "\n";
     tree = atermpp::aterm_appl(afunR,r[0]);
   }
 
@@ -1299,6 +1317,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else if (is_variable(t))
   {
+// std::cerr << "VARIABELE " << t << "\n";
     const bool b = (nnfvars!=atermpp::aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(),t) != nnfvars.end());
     const variable& v = core::down_cast<variable>(t);
     const string variable_name=v.name();
@@ -1317,6 +1336,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else
     {
+assert(0);
       ss << "this_rewriter->bound_variable_get(" << bound_variable_index(v) << ")";
     }
     return pair<bool,string>(rewr || !b, ss.str());
@@ -1653,6 +1673,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
 void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, int startarg, atermpp::aterm_list nnfvars, bool rewr)
 {
+// std::cerr << "CALCTERM " << t << "\n";
   pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr,0);
   fprintf(f,"%s",p.second.c_str());
   return;
@@ -1989,11 +2010,56 @@ void RewriterCompilingJitty::implement_tree(
   }
 }
 
+
+std::string finish_function_return_term(const size_t arity,
+                                        const std::string& head,
+                                        const sort_expression& s,
+                                        const std::vector<bool>& used,
+                                        size_t& used_arguments)
+{
+  stringstream ss;
+  if (!is_function_sort(s) || arity==0)
+  {
+    return head;
+  }
+
+  // There is no nested argument. The head is a single function symbol.
+  assert(arity>0);
+  const sort_expression_list arg_sorts=function_sort(s).domain();
+  const sort_expression& target_sort=function_sort(s).codomain();
+  
+  if (arg_sorts.size() > 5)
+  {
+    ss << "make_term_with_many_arguments(" << head;
+  }
+  else
+  {
+    ss << "application(" << head;
+  }
+  
+  for (size_t i=0; i<arg_sorts.size(); i++)
+  {
+    if (used[i+used_arguments])
+    {
+      ss << ", arg" << i+used_arguments;
+    }
+    else
+    {
+      ss << ", rewrite(arg_not_nf" << i+used_arguments << ")";
+    }
+  }
+  ss << ")";
+  used_arguments=used_arguments+arg_sorts.size();
+  
+  return finish_function_return_term(arity-arg_sorts.size(),ss.str(),target_sort,used,used_arguments);
+}
+
 void RewriterCompilingJitty::finish_function(FILE* f,
                                              size_t arity,
                                              const data::function_symbol& opid,
                                              const std::vector<bool>& used)
 {
+  // Note that arity is the total arity, of all function symbols.
   if (arity == 0)
   {
     substitution_type sigma;
@@ -2010,38 +2076,21 @@ void RewriterCompilingJitty::finish_function(FILE* f,
       assert(index==protected_data_expressions[t_normal_form]);
       prepared_normal_forms.push_back(t_normal_form);
     }
-    // fprintf(f,"return atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(%p))",
-    //                   (void*)atermpp::detail::address(t_normal_form));
-    fprintf(f,"return (prepared_normal_forms[%ld]",index);
+    fprintf(f,"return prepared_normal_forms[%ld]",index);
   }
   else
   {
-    if (arity > 5)
-    {
-      fprintf(f,  "  return make_term_with_many_arguments("
-              "atermpp::aterm_cast<const data_expression>(aterm((const atermpp::detail::_aterm*)%p))",
-              (void*)atermpp::detail::address(opid)
-             );
-    }
-    else
-    {
-      fprintf(f,  "  return application(atermpp::aterm_cast<const data_expression>(aterm((const atermpp::detail::_aterm*)%p))",
-              (void*)atermpp::detail::address(opid)
-             );
-    }
+    fprintf(f,"return ");
+    size_t used_arguments=0;
+    stringstream ss;
+    ss << "atermpp::aterm_cast<const data_expression>(aterm((const atermpp::detail::_aterm*)"
+       << (void*)atermpp::detail::address(opid)
+       << "))";
+
+    fprintf(f,"%s",finish_function_return_term(arity,ss.str(),function_sort(opid.sort()),used,used_arguments).c_str());
+    assert(used_arguments==arity);
   }
-  for (size_t i=0; i<arity; i++)
-  {
-    if (used[i])
-    {
-      fprintf(f,                 ", arg%zu",i);
-    }
-    else
-    {
-      fprintf(f,                 ", rewrite(arg_not_nf%zu)",i);
-    }
-  }
-  fprintf(f,                 ");\n");
+  fprintf(f, ";\n");
 }
 
 void RewriterCompilingJitty::implement_strategy(

@@ -499,6 +499,21 @@ BOOST_AUTO_TEST_CASE(test_whether_bag_enumeration_with_similar_elements_is_allow
   check_lps2lts_specification(spec, 1, 1, 1);
 }
   
+BOOST_AUTO_TEST_CASE(test_whether_functions_to_functions_are_causing_problems)
+{
+  std::string spec(
+    "map f:Nat->Nat->Nat->Nat;\n"
+    "    g:Nat->Nat;\n"
+    "var x,y,z:Nat;"
+    "eqn f(x)(y)(z)=x+y+z;\n"
+    "    f(x)(y)=g;\n"
+    "act int:Nat;\n"
+    "proc P = int(f(1)(2)(3)).P();\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+  
 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
