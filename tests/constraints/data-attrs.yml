@@ -1,0 +1,306 @@
+dalinst:
+  attrs: [E, A]
+  guard: |
+    len(A) == 1
+  rules:
+    - DataExpr.T = [A[0]['type']]
+    - DataExpr.W = E['var']
+    - DataExpr.P = 0
+  post:
+    - A = []
+
+dallinst:
+  attrs: [E, A]
+  guard: |
+    len(A) > 1
+  rules:
+    - DataExpr.T = [A[0]['type']] 
+    - DataExpr.W = E['var']
+    - DataExpr.P = 0
+    - DataExprListInst.E = E
+    - |
+      DataExprListInst.A = A[1:]
+
+# DataExpr
+
+da_forall:
+  attrs: [W, T, P]
+  guard: |
+    P <= 1 and 'bool' in T
+  rules:
+    - VarsDeclList.U = []
+    - VarsDeclList.L = len(W)
+    - VarsDeclList.Prefix = 'u'
+    - |
+      VarsDeclList.E = {'sort': []}
+    - DataExpr.W = W + VarsDeclList.U
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 1
+  post:
+    - T = ['bool']
+    
+da_exists:
+  attrs: [W, T, P]
+  guard: |
+    P <= 1 and 'bool' in T
+  rules:
+    - VarsDeclList.U = []
+    - VarsDeclList.L = len(W)
+    - VarsDeclList.Prefix = 'u'
+    - |
+      VarsDeclList.E = {'sort': []}
+    - DataExpr.W = W + VarsDeclList.U
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 1
+  post:
+    - T = ['bool']
+
+da_impl:
+  attrs: [W, T, P]
+  guard: |
+    P <= 2 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 3
+    - DataExpr2.W = W
+    - DataExpr2.T = ['bool']
+    - DataExpr2.P = 2
+  post:
+    - T = ['bool']
+
+da_conj:
+  attrs: [W, T, P]
+  guard: |
+    P <= 4 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 5
+    - DataExpr2.W = W
+    - DataExpr2.T = ['bool']
+    - DataExpr2.P = 4
+  post:
+    - T = ['bool']
+ 
+da_disj:
+  attrs: [W, T, P]
+  guard: |
+    P <= 3 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 4
+    - DataExpr2.W = W
+    - DataExpr2.T = ['bool']
+    - DataExpr2.P = 3
+  post:
+    - T = ['bool']
+ 
+da_eq:
+  attrs: [W, T, P]
+  guard: |
+    P <= 5 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool', 'int', 'real', 'pos', 'nat']
+    - DataExpr.P = 5
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 6   
+  post:
+    - T = ['bool']
+
+da_neq:
+  attrs: [W, T, P]
+  guard: |
+    P <= 5 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool', 'int', 'real', 'pos', 'nat']
+    - DataExpr.P = 5
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 6   
+  post:
+    - T = ['bool']
+ 
+da_lt:
+  attrs: [W, T, P]
+  guard: |
+    P <= 6 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - "DataExpr.T = ['int', 'real', 'pos', 'nat']"
+    - DataExpr.P = 6
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 7   
+  post:
+    - T = ['bool']
+
+da_gt:
+  attrs: [W, T, P]
+  guard: |
+    P <= 6 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['int', 'real', 'pos', 'nat']
+    - DataExpr.P = 6
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 7   
+  post:
+    - T = ['bool']
+ 
+da_leq:
+  attrs: [W, T, P]
+  guard: |
+    P <= 6 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['int', 'real', 'pos', 'nat']
+    - DataExpr.P = 6
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 7   
+  post:
+    - T = ['bool']
+
+da_geq:
+  attrs: [W, T, P]
+  guard: |
+    P <= 6 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['int', 'real', 'pos', 'nat']
+    - DataExpr.P = 6
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 7   
+  post:
+    - T = ['bool']
+
+da_plus:
+  attrs: [W, T, P]
+  guard: |
+    P <= 10 and any(x for x in ['int', 'real', 'pos', 'nat'] if x in T)
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['pos', 'nat'] if 'pos' in T else T
+    - DataExpr.P = 10
+    - DataExpr2.W = W
+    - DataExpr2.T = ['pos', 'nat'] if 'pos' in T else T
+    - DataExpr2.P = 11
+  post:
+    - T = ['pos'] if 'pos' in T else DataExpr2.T
+ 
+da_min:
+  attrs: [W, T, P]
+  guard: |
+    P <= 10 and any(x for x in ['int', 'real'] if x in T)
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr.P = 10
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 11
+  post:
+    - T = DataExpr2.T
+ 
+da_times:
+  attrs: [W, T, P]
+  guard: |
+    P <= 12 and any(x for x in ['int', 'real', 'pos', 'nat'] if x in T)
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr.P = 12
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 13
+  post:
+    - T = DataExpr2.T
+    
+da_divides:
+  attrs: [W, T, P]
+  guard: |
+    P <= 11 and 'real' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr.P = 12
+    - DataExpr2.W = W
+    - DataExpr2.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr2.P = 13
+  post:
+    - T = ['real']
+
+da_numb:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and any(x for x in ['int', 'real', 'pos', 'nat'] if x in T)
+  rules:
+    - Number = str(choice(range(1,100)))
+  post:
+    - T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+
+da_true:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and ('bool' in T)
+  post:
+    - T = ['bool'] 
+ 
+da_false:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and ('bool' in T)
+  post:
+    - T = ['bool']
+ 
+da_neg:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and ('bool' in T)
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 14
+  post:
+    - T = ['bool']
+ 
+da_inv:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and any(x for x in T if x in ['int', 'real'])
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr.P = 14
+  post:
+    - T = DataExpr.T 
+
+da_brk:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = T
+    - DataExpr.P = 0
+  post:
+    - T = DataExpr.T
+ 
+da_id:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and any(x for x in W if x['type'] in T)
+  pre:
+    - | 
+     V = choice([x for x in W if x['type'] in T])
+  rules:
+    - Id = V['name']
+  post:
+    - T = [V['type']]

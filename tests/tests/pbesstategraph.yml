@@ -1,0 +1,29 @@
+options:
+  grammar:
+    - bnf-grammars\pbes-bnf.g
+  constraints:
+    - constraints\pbes-attrs.yml
+  #path: C:\Program Files\mCRL2\bin
+  path: D:\mcrl2okt2012\mCRL2\bin
+  platform: windows
+nodes: {l1: PbesSpec, l2: PBES, l3: PBES, l4: Bool, l5: Bool}
+tools:
+  - input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  - input: [l2]
+    output: [l3]
+    args: []
+    name: pbesstategraph
+  - input: [l2]
+    output: [l4]
+    args: []
+    name: pbes2bool
+  - input: [l3]
+    output: [l5]
+    args: []
+    name: pbes2bool
+result: |
+  result =  value(l4) == value(l5)
+

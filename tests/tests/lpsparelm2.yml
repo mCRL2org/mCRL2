@@ -1,0 +1,39 @@
+options: 
+  grammar: 
+    - bnf-grammars\mcrl2-bnf.g
+    - bnf-grammars\data-bnf.g
+  constraints: 
+    - constraints\mcrl2-attrs.yml
+    - constraints\data-attrs.yml
+  path: C:\Program Files\mCRL2\bin
+  platform: windows
+nodes: {l1: mCRL2Spec, l2: LPS, l3: PBES, l4: LPS, l5: PBES, l6: Bool, l7: Bool}
+tools: 
+  - input: [l1]
+    output: [l2]
+    args: []
+    name: mcrl22lps
+  - input: [l2]
+    output: [l3]
+    args: []
+    name: lps2pbes    
+  - input: [l2]
+    output: [l4]
+    args: []
+    name: lpsparelm
+  - input: [l4]
+    output: [l5]
+    args: [--formula=nodeadlock.mcf]
+    name: lps2pbes
+  - input: [l3]
+    output: [l6]
+    args: []
+    name: pbes2bool
+  - input: [l5]
+    output: [l7]
+    args: []
+    name: pbes2bool    
+
+    
+result: |
+  result = 'error' in value(l3)

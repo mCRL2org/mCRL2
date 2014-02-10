@@ -1,0 +1,107 @@
+bes:
+  rules:
+    - BesEqnSpec.V = []
+    - BesInit.V = BesEqnSpec.V
+
+eqndecls:
+  attrs: V
+  rules:
+    - BesEqnDecls.V = V
+  
+eq:
+  attrs: V
+  rules:
+    - BesEqnDecl.V = V
+  
+eqs:
+  attrs: V
+  rules:
+    - BesEqnDecl.V = V
+    - BesEqnDecls.V = BesEqnDecl.V
+  post:
+    - V = BesEqnDecls.V
+
+eqdecl:
+  attrs: V
+  pre:
+    - K = 'X' + str(len(V)+1)
+    - V.append(K)
+  rules:
+    - BesVar = K
+    - BesExpr.V = V
+    - BesExpr.M = True
+    - BesExpr.P = 0
+
+be_impl:
+  attrs: [V, M, P]
+  guard: P == 0
+  rules:
+    - BesExpr.P = 1
+    - BesExpr.V = V
+    - BesExpr.M = not M
+    - BesExpr2.P = 0
+    - BesExpr2.V = V
+    - BesExpr2.M = M
+
+be_disj:
+  attrs: [V, M, P]
+  guard: P <= 1
+  rules:
+    - BesExpr.P = 1
+    - BesExpr.V = V
+    - BesExpr.M = M
+    - BesExpr2.P = 2
+    - BesExpr2.V = V
+    - BesExpr2.M = M
+
+be_conj:
+  attrs: [V, M, P]
+  guard: P <= 1
+  rules:
+    - BesExpr.P = 1
+    - BesExpr.V = V
+    - BesExpr.M = M
+    - BesExpr2.P = 2
+    - BesExpr2.V = V
+    - BesExpr2.M = M
+
+be_true:
+  attrs: [V, M, P]
+  guard: P <= 2
+
+be_false:
+  attrs: [V, M, P]
+  guard: P <= 2
+
+be_neg:
+  attrs: [V, M, P]
+  guard: P <= 2
+  rules:
+    - BesExpr.P = 2
+    - BesExpr.V = V
+    - BesExpr.M = not M
+  
+be_brk:
+  attrs: [V, M, P]
+  guard: P <= 2
+  rules:
+    - BesExpr.P = 0
+    - BesExpr.V = V
+    - BesExpr.M = M
+  
+be_var:
+  secondpass: bes
+  attrs: [V, M, P]
+  guard: P <= 2
+  pre:
+    - K = '!' if not M else ''
+  rules:
+    - BesVar = K + choice(V)
+
+init:
+  order: left
+  attrs: V
+  rules:
+    - BesVar = choice(V)
+  
+  
