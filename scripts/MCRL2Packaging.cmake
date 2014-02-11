@@ -221,4 +221,5 @@ SET(CPACK_NSIS_MODIFY_PATH ON)
 
 # Include CPack specific stuff
 # ----------------------------
+set(CPACK_BINARY_DRAGNDROP ON)
 include(CPack)
