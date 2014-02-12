@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(mCRL2)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 # TODO: Clean up utilities/workarounds.h
 # TODO: See if -fPIC can be replaced by CMAKE_POSITION_INDEPENDENT_CODE
 # TODO: check RPATH settings
@@ -8,7 +11,7 @@ project(mCRL2)
 # TODO: See if we can get rid of the __STDC_VERSION__ define in ltsgraph/ltsview/diagraphica (currently included to prevent qopenglext.h from redefining int32_t etc.)
 include_directories(build/workarounds)
 
-set(MCRL2_MIN_QT_VERSION 5.0.2)
+set(MCRL2_MIN_QT_VERSION 5.2.0)
 set(MCRL2_MIN_BOOST_VERSION 1.44.0)
 
 option(MCRL2_ENABLE_STABLE       "Enable compilation of stable tools." ON)
@@ -17,38 +20,30 @@ option(MCRL2_ENABLE_EXPERIMENTAL "Enable compilation of experimental tools." OFF
 option(MCRL2_ENABLE_DEPRECATED   "Enable compilation of deprecated tools." OFF)
 option(MCRL2_ENABLE_DEVELOPER    "Enable compilation of developer tools." OFF)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts")
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-include(GetCompilerVersion)
+include(ConfigurePlatform)
 include(ConfigureCompiler)
-include(AddMCRL2Binary)
 include(MCRL2Version)
+include(AddMCRL2Binary)
 
 if(MCRL2_ENABLE_GUI_TOOLS)
-  find_package(OpenGL REQUIRED)
-  find_package(GL2PS  REQUIRED)
-  find_package(TR     REQUIRED)
-  find_package(Qt5Widgets ${MCRL2_MIN_QT_VERSION} REQUIRED)
-  find_package(Qt5Xml     ${MCRL2_MIN_QT_VERSION} REQUIRED)
-  find_package(Qt5Core    ${MCRL2_MIN_QT_VERSION} REQUIRED)
-  find_package(Qt5OpenGL  ${MCRL2_MIN_QT_VERSION} REQUIRED)
-  if(APPLE)
-    get_target_property(LOC ${Qt5Widgets_LIBRARIES} IMPORTED_LOCATION_RELEASE)
-    message(STATUS "Qt5Widgets: ${Qt5Widgets_LIBRARIES} (${LOC})")
-    set_target_properties(Qt5::Widgets PROPERTIES INSTALL_NAME_DIR ""
-      IMPORTED_SONAM "QtWidgets") # "@rpath/QtWidgets.framework/Versions/5/QtWidgets")
-  endif()
+  find_package(OpenGL QUIET REQUIRED)
+  find_package(GL2PS  QUIET REQUIRED)
+  find_package(TR     QUIET REQUIRED)
+  find_package(Qt5Widgets ${MCRL2_MIN_QT_VERSION} QUIET REQUIRED)
+  find_package(Qt5Xml     ${MCRL2_MIN_QT_VERSION} QUIET REQUIRED)
+  find_package(Qt5Core    ${MCRL2_MIN_QT_VERSION} QUIET REQUIRED)
+  find_package(Qt5OpenGL  ${MCRL2_MIN_QT_VERSION} QUIET REQUIRED)
 endif()
-find_package(Boost ${MCRL2_MIN_BOOST_VERSION} REQUIRED)
+find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
-find_package(BCG)
-
-include(PrintBuildInfo)
+find_package(BCG QUIET)
 
 add_subdirectory(3rd-party/dparser)
 
 add_subdirectory(libraries)
 add_subdirectory(tools)
+add_subdirectory(doc)
 
+include(MCRL2CompilingRewriter)
 include(MCRL2Packaging)
+include(PrintBuildInfo)

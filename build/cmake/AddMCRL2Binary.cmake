@@ -1,28 +1,4 @@
-if(WINDOWS)
-  set(MCRL2_RUNTIME_PATH )
-  set(MCRL2_LIBRARY_PATH )
-  set(MCRL2_ARCHIVE_PATH lib)
-  set(MCRL2_INCLUDE_PATH include)
-elseif(APPLE)
-  set(MCRL2_LIBRARY_PATH Frameworks)
-  set(MCRL2_ARCHIVE_PATH lib)
-  set(MCRL2_INCLUDE_PATH include)
-  set(MCRL2_BUNDLE_PATH Applications)
-  set(MCRL2_RUNTIME_PATH ${MCRL2_BUNDLE_PATH}/mcrl2-gui.app/Content/MacOS)
-
-  set(CMAKE_MACOSX_RPATH ON)
-  set(CMAKE_INSTALL_RPATH "@loader_path/../../../../Frameworks")
-  set(CMAKE_SKIP_BUILD_RPATH FALSE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-else() # Assume *NIX
-  set(MCRL2_RUNTIME_PATH bin)
-  set(MCRL2_LIBRARY_PATH lib)
-  set(MCRL2_ARCHIVE_PATH share/mcrl2/lib)
-  set(MCRL2_INCLUDE_PATH include)
-endif()
-
-macro(install_qt_libs TARGET_NAME COMPONENT QT_LIBS)
+macro(_install_qt_libs TARGET_NAME COMPONENT QT_LIBS)
   if(APPLE AND QT_LIBS)
     set(INSTALL_NAME_TOOL "install_name_tool")
     foreach(LIB ${QT_LIBS})
@@ -39,15 +15,21 @@ macro(install_qt_libs TARGET_NAME COMPONENT QT_LIBS)
       execute_process(COMMAND ${INSTALL_NAME_TOOL})
       "
       COMPONENT ${COMPONENT})
+  elseif(WIN32 AND QT_LIBS)
+    foreach(LIB ${QT_LIBS})
+      get_target_property(UNRESOLVED_PATH Qt5::${LIB} LOCATION)
+      get_filename_component(ABS_PATH ${UNRESOLVED_PATH} REALPATH)
+      install(FILES ${ABS_PATH} DESTINATION ${MCRL2_LIBRARY_PATH})
+    endforeach()
   endif()
 endmacro()
 
-macro(add_icon_resource TARGET_NAME ICON SOURCE_FILES)
+macro(_add_icon_resource TARGET_NAME ICON SOURCE_FILES)
   if(MSVC)
     set(RC_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_icon.rc)
     set(ICOFILE ${CMAKE_SOURCE_DIR}/build/packaging/icons/${ICON}.ico ABSOLUTE)
     configure_file(${CMAKE_SOURCE_DIR}/build/packaging/icon.rc.in ${RC_FILE} @ONLY NEWLINE_STYLE WIN32)
-    set(${SOURCE_FILES} ${${SOURCE_FILES}} ${RC_FILE} PARENT_SCOPE)
+    set(${SOURCE_FILES} ${${SOURCE_FILES}} ${RC_FILE})
   endif()
   if(APPLE)
     set(ICNS_FILE ${CMAKE_SOURCE_DIR}/build/packaging/icons/${ICON}.icns)
@@ -56,12 +38,12 @@ macro(add_icon_resource TARGET_NAME ICON SOURCE_FILES)
   endif()
 endmacro()
 
-macro(add_desktop_file TARGET_NAME TOOLNAME DESCRIPTION ICON)
+function(_prepare_desktop_application TARGET_NAME TOOLNAME DESCRIPTION ICON)
   if(UNIX AND NOT APPLE)
     set(DESKTOP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.desktop)
     set(COMMANDLINE ${TARGET_NAME})
     configure_file(${CMAKE_SOURCE_DIR}/build/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
-    install(FILES ${DESKTOP_FILE} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
+    install(FILES ${DESKTOP_FILE} DESTINATION share/applications)
   elseif(APPLE)
     set_target_properties(${TARGET_NAME} PROPERTIES
       MACOSX_BUNDLE_BUNDLE_NAME ${TOOLNAME}
@@ -71,9 +53,20 @@ macro(add_desktop_file TARGET_NAME TOOLNAME DESCRIPTION ICON)
       MACOSX_BUNDLE_BUNDLE_VERSION ${MCRL2_VERSION}
       MACOSX_BUNDLE_GUI_IDENTIFIER org.mcrl2.${TARGET_NAME})
   endif()
+endfunction()
+
+macro(_add_man_page TARGET_NAME)
+  if(MCRL2_MAN_PAGES)
+    add_custom_target(${TARGET_NAME}_man_page ALL
+      COMMAND ${TARGET_NAME} --generate-man-page | gzip --best > ${TARGET_NAME}.1.gz
+      DEPENDS ${TARGET_NAME}
+      COMMENT "Generating man page for ${TARGET_NAME}"
+    )
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.1.gz DESTINATION share/man/man1 COMPONENT Documentation)
+  endif(MCRL2_MAN_PAGES)
 endmacro()
 
-function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
+function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   set(KW_LIST "SOURCEDIR" "INCLUDEDIR" "COMPONENT" "DESCRIPTION" "MENUNAME" "ICON" "SOURCES" "DEPENDS" "INCLUDE" "INSTALL_HEADERS")
   set(LIST_KW "SOURCES" "DEPENDS" "INCLUDE")
   set(FILEVAR "SOURCES")
@@ -181,9 +174,9 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   endif()
 
   if(ICON)
-    add_icon_resource(${TARGET_NAME} ${ICON} SOURCES)
+    _add_icon_resource(${TARGET_NAME} ${ICON} SOURCES)
   elseif(${TARGET_TYPE} STREQUAL "LIBRARY")
-    add_icon_resource(${TARGET_NAME} mcrl2-orange SOURCES)
+    _add_icon_resource(${TARGET_NAME} mcrl2-orange SOURCES)
   endif()
 
   if((NOT IS_GUI_BINARY OR MCRL2_ENABLE_GUI_TOOLS) AND INSTALL_COMPONENT)
@@ -198,19 +191,21 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       add_library(${TARGET_NAME} ${SOURCES} ${TARGET_INCLUDE_FILES})
       set_target_properties(${TARGET_NAME} PROPERTIES FRAMEWORK TRUE)
       if(APPLE)
-        foreach(HEADER ${TARGET_INCLUDE_FILES})
-          get_filename_component(HEADER_ABS "${HEADER}" ABSOLUTE)
-          file(RELATIVE_PATH RELPATH "${CMAKE_CURRENT_SOURCE_DIR}/include" "${HEADER_ABS}")
-          get_filename_component(RELPATH ${RELPATH} PATH)
-          set_property(SOURCE ${HEADER} PROPERTY MACOSX_PACKAGE_LOCATION Headers/${RELPATH})
-        endforeach()
         set_target_properties(${TARGET_NAME} PROPERTIES
           MACOSX_FRAMEWORK_IDENTIFIER org.mcrl2.${TARGET_NAME}
           MACOSX_FRAMEWORK_BUNDLE_VERSION ${MCRL2_VERSION}
           MACOSX_FRAMEWORK_ICON_FILE mcrl2-orange.icns)
-      else()
-        install(DIRECTORY ${INCLUDEDIR}/mcrl2 DESTINATION ${CMAKE_INSTALL_PREFIX}/include COMPONENT Headers)
       endif()
+      foreach(HEADER ${TARGET_INCLUDE_FILES})
+        get_filename_component(HEADER_ABS "${HEADER}" ABSOLUTE)
+        file(RELATIVE_PATH RELPATH "${CMAKE_CURRENT_SOURCE_DIR}/include" "${HEADER_ABS}")
+        get_filename_component(RELPATH ${RELPATH} PATH)
+        if(APPLE)
+          set_property(SOURCE ${HEADER} PROPERTY MACOSX_PACKAGE_LOCATION Headers/${RELPATH})
+        else()
+          install(FILES ${HEADER} DESTINATION ${MCRL2_INCLUDE_PATH}/${RELPATH} COMPONENT Headers)
+        endif()
+      endforeach()
       install(TARGETS ${TARGET_NAME}
               LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
               ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
@@ -218,6 +213,7 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
               COMPONENT ${INSTALL_COMPONENT})
     elseif(${TARGET_TYPE} STREQUAL "EXECUTABLE")
       add_executable(${TARGET_NAME} ${SOURCES})
+      _add_man_page(${TARGET_NAME})
       if(IS_GUI_BINARY AND APPLE)
         set_target_properties(${TARGET_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
       endif()
@@ -225,7 +221,7 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
               RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
               BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH}
               COMPONENT ${INSTALL_COMPONENT})
-      install_qt_libs(${TARGET_NAME} ${INSTALL_COMPONENT} "${QT_LIBS}")
+      _install_qt_libs(${TARGET_NAME} ${INSTALL_COMPONENT} "${QT_LIBS}")
     endif()
     if(DEPENDS)
       target_link_libraries(${TARGET_NAME} ${DEPENDS})
@@ -240,7 +236,7 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   endif()
 
   if(MENUNAME)
-    add_desktop_file(${TARGET_NAME} "${MENUNAME}" "${DESCRIPTION}" "${ICON}")
+    _prepare_desktop_application(${TARGET_NAME} "${MENUNAME}" "${DESCRIPTION}" "${ICON}")
   endif()
 
   if(TARGET_INCLUDE_FILES)
@@ -256,7 +252,7 @@ function(add_mcrl2_binary TARGET_NAME TARGET_TYPE)
 endfunction()
 
 function(add_mcrl2_library LIBNAME)
-  add_mcrl2_binary(mcrl2_${LIBNAME} LIBRARY
+  _add_mcrl2_binary(mcrl2_${LIBNAME} LIBRARY
     SOURCEDIR "source"
     INCLUDEDIR "include"
     ${ARGN}
@@ -264,7 +260,7 @@ function(add_mcrl2_library LIBNAME)
 endfunction()
 
 function(add_mcrl2_tool TOOLNAME)
-  add_mcrl2_binary(${TOOLNAME} EXECUTABLE
+  _add_mcrl2_binary(${TOOLNAME} EXECUTABLE
     SOURCEDIR "."
     INCLUDEDIR "."
     ${ARGN})

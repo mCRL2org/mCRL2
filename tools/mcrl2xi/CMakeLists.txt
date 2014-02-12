@@ -1,4 +1,7 @@
 add_mcrl2_tool(mcrl2xi
+  MENUNAME "mCRL2 XI"
+  DESCRIPTION "Graphical editor/interpreter for mCRL2 files"
+  ICON "mcrl2-orange"
   SOURCES
     mainwindow.ui
     findreplacedialog.ui

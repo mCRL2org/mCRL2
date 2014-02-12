@@ -320,38 +320,52 @@ data_expression Rewriter::existential_quantifier_enumeration(
       const bool t1_is_normal_form,
       substitution_type& sigma)
 {
-  mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
 
-  variable_list vl_new;
-
-  const data_expression t2=(t1_is_normal_form?t1:rewrite(t1,sigma));
-  std::set < variable > free_variables;
-  // find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
-  get_free_variables(t2,free_variables);
 
   // Rename the bound variables to unique
   // variables, to avoid naming conflicts.
 
+  mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
+  variable_vector vl_new_v;
   for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  {
+    const variable v= *i;
+    if (sigma(v)!=v)
+    {
+      const variable v_fresh(generator("ex_"), v.sort());
+      variable_renaming[v]=v_fresh;
+      vl_new_v.push_back(v_fresh);
+    }
+    else
+    {
+      vl_new_v.push_back(v);
+    }
+  }
+
+  const data_expression t2=replace_variables(t1,variable_renaming);
+  const data_expression t3=(t1_is_normal_form?t2:rewrite(t2,sigma));
+
+  // Check whether the bound variables occur free in the rewritten body
+  std::set < variable > free_variables;
+  get_free_variables(t3,free_variables);
+  variable_list vl_new_l;
+
+  for(variable_vector::const_reverse_iterator i=vl_new_v.rbegin(); i!=vl_new_v.rend(); ++i)
   {
     const variable v= *i;
     if (free_variables.count(v)>0)
     {
-      const variable v_fresh(generator("ex_"), v.sort());
-      variable_renaming[v]=v_fresh;
-      vl_new.push_front(v_fresh);
+      vl_new_l.push_front(v);
     }
   }
 
-  if (vl_new.empty())
+  if (vl_new_l.empty())
   {
-    return t2; // No quantified variables are bound.
+    return t3; // No quantified variables are bound.
   }
 
-  const data_expression t3=replace_variables(t2,variable_renaming);
-
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,true,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
+  EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,true,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
 
   /* Create a list to store solutions */
   atermpp::term_list<data_expression> x;
@@ -384,7 +398,9 @@ data_expression Rewriter::existential_quantifier_enumeration(
     return partial_result;
   }
 
-  return abstraction(exists_binder(),vl,rewrite(t1,sigma));
+  // One can consider to replace the variables by their original, in order to not show 
+  // internally generated variables in the output.
+  return abstraction(exists_binder(),vl_new_l,rewrite(t3,sigma));
 }
 
 
@@ -405,39 +421,57 @@ data_expression Rewriter::universal_quantifier_enumeration(
       const bool t1_is_normal_form,
       substitution_type& sigma)
 {
-  mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
-
-  variable_list vl_new;
-
-  const data_expression t2=(t1_is_normal_form?t1:rewrite(t1,sigma));
-  std::set < variable > free_variables;
-  // find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
-  get_free_variables(t2,free_variables);
-
+// std::cerr << "FORALL " << vl << "   " << t1 << "\n";
   // Rename the bound variables to unique
   // variables, to avoid naming conflicts.
 
+  mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
+  variable_vector vl_new_v;
   for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  {
+    const variable v= *i;
+    if (sigma(v)!=v)  // Check whether sigma is defined on v. If not, renaming is not necessary.
+    {
+      const variable v_fresh(generator("all_"), v.sort());
+      variable_renaming[v]=v_fresh;
+      vl_new_v.push_back(v_fresh);
+    }
+    else
+    {
+      vl_new_v.push_back(v);
+    }
+  }
+
+  const data_expression t2=replace_variables(t1,variable_renaming);
+// std::cerr << "REWRITTEN " << t2 << "\n";
+  const data_expression t3=(t1_is_normal_form?t2:rewrite(t2,sigma));
+
+  // Check whether the bound variables occur free in the rewritten body.
+  std::set < variable > free_variables;
+  get_free_variables(t3,free_variables);
+  variable_list vl_new_l;
+
+  for(variable_vector::const_reverse_iterator i=vl_new_v.rbegin(); i!=vl_new_v.rend(); ++i)
   {
     const variable v= *i;
     if (free_variables.count(v)>0)
     {
-      const variable v_fresh(generator("all_"), v.sort());
-      variable_renaming[v]=v_fresh;
-      vl_new.push_front(v_fresh);
+      vl_new_l.push_front(v);
     }
   }
 
-  if (vl_new.empty())
+  if (vl_new_l.empty())
   {
-    return t2; // No quantified variables occur in the body.
+// std::cerr << "RETURN1 " << t3 << "\n";
+    return t3; // No quantified variables occur in the rewritten body.
   }
 
-  const data_expression t3=replace_variables(t2,variable_renaming);
+
+
 
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new, t3, sigma,false,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
+  EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,false,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
 
   /* Create lists to store solutions */
   atermpp::term_list<data_expression> x;
@@ -489,10 +523,15 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   if (solution_possible && (loop_upperbound>0 || partial_result==sort_bool::false_()))
   {
+// std::cerr << "RETURN2 " << partial_result << "\n";
     return partial_result;
   }
 
-  return abstraction(forall_binder(),vl,rewrite(t1,sigma));
+  // One can consider to replace the variables by their original, in order to not show 
+  // internally generated variables in the output.
+  const data_expression t=abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
+// std::cerr << "RETURN3 " << t << "\n";
+  return t; 
 }
 
 

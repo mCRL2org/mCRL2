@@ -1,8 +1,3 @@
-if(CMAKE_CFG_INTDIR STREQUAL ".")
-  set(MCRL2_VERSION_STRING "${MCRL2_VERSION} (${CMAKE_BUILD_TYPE})")
-else()
-  set(MCRL2_VERSION_STRING "${MCRL2_VERSION} (${CMAKE_CFG_INTDIR})")
-endif()
 configure_file(include/mcrl2/utilities/toolset_version_const.h.in mcrl2/utilities/toolset_version_const.h)
 
 add_mcrl2_library(utilities

@@ -4,20 +4,20 @@ set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER ${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${CMAKE
 set(CMAKE_C_FLAGS_MAINTAINER ${CMAKE_C_FLAGS_DEBUG} ${CMAKE_C_FLAGS_MAINTAINER})
 set(CMAKE_CXX_FLAGS_MAINTAINER ${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_MAINTAINER})
 
-# Perform platform-specific compiler configuration
-include(ConfigureWindows)
-include(ConfigureApple)
-include(ConfigureUnix)
-
 # Perform compiler-specific compiler configuration
-include(ConfigureGNU)
-include(ConfigureMSVC)
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+  include(ConfigureMSVC)
+elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+  include(ConfigureGNU)
+else()
+  message(FATAL_ERROR "Unsupported compiler setup (C: ${CMAKE_C_COMPILER_ID} / C++: ${CMAKE_CXX_COMPILER_ID}).")
+endif()
 
 # Check supported C++11 features
 include(CheckCXX11Features)
 
 # Add Maintainer mode to multi-configuration builds
-if (CMAKE_CONFIGURATION_TYPES)
+if(CMAKE_CONFIGURATION_TYPES)
   list(APPEND CMAKE_CONFIGURATION_TYPES Maintainer)
   list(REMOVE_DUPLICATES CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING

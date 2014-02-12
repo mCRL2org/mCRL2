@@ -1,14 +1,10 @@
-if(NOT MSVC)
-  return()
-endif()
+include(AddFlag)
 
 include_directories( build/workarounds/msvc )
 
 ##---------------------------------------------------
 ## Set MSVC specific compiler flags
 ##---------------------------------------------------
-
-include(AddFlag)
 
 try_add_cxx_flag(/MD)                   # Creates multithreaded DLLs using MSVCRT.lib
 try_add_cxx_flag(/EHs)                  # Synchronous exception handling (TODO: check why)

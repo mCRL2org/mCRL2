@@ -7,7 +7,9 @@ namespace mcrl2
 namespace utilities
 {
 
-const std::string MCRL2_VERSION = "@MCRL2_VERSION_STRING@";
+#define ___MCRL2_UTILITIES_BUILD_TYPE(s) #s
+#define __MCRL2_UTILITIES_BUILD_TYPE ___MCRL2_UTILITIES_BUILD_TYPE(MCRL2_BUILD_TYPE)
+const std::string MCRL2_VERSION = "@MCRL2_VERSION@ (" __MCRL2_UTILITIES_BUILD_TYPE ")";
 
 }
 }

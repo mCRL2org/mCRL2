@@ -1,4 +1,7 @@
 add_mcrl2_tool(mcrl2-gui
+  MENUNAME "mCRL2 GUI"
+  DESCRIPTION "Graphical interface for the mCRL2 toolset"
+  ICON "mcrl2-orange"
   SOURCES
     mainwindow.ui
     toolinstance.ui

@@ -1,4 +1,7 @@
 add_mcrl2_tool(lpsxsim
+  MENUNAME "LPSXSim"
+  DESCRIPTION "Linear process simulator (mCRL2 toolset)"
+  ICON "mcrl2-blue"
   SOURCES
     mainwindow.ui
     main.cpp

@@ -21,14 +21,18 @@
 # treated as the compiler library, and must be a valid
 # executable. All files listed in the output are deleted
 # once the rewriter library is no longer needed.
-
-(echo $1 &&
-@CXX@ -c @R_CXXFLAGS@ -o $1.o $1 > $1.log 2>&1 &&
-echo $1.o &&
-@CXX@ @R_LDFLAGS@ -o $1.bin $1.o >> $1.log 2>&1 &&
-echo $1.log &&
-echo $1.bin) || (
-echo "Compile script was:" &&
-cat $0 &&
-echo "Compilation log:" &&
-cat $1.log)
+echo $1
+if [ -z "$CXX" ]; then
+  CXX=`which xclang++`
+  if [ $? -ne 0 ]; then
+    CXX=`which xg++`
+  fi
+  if [ $? -ne 0 ]; then
+    echo "Could not find suitable compiler (g++ or clang++ required)!"
+    return 1
+  fi
+fi
+($CXX -c @R_CXXFLAGS@ @R_INCLUDE_DIRS@ -o $1.o $1 > $1.log 2>&1 && echo $1.o && echo $1.log &&
+$CXX @R_LDFLAGS@ @R_INCLUDE_DIRS@ -o $1.bin $1.o >> $1.log 2>&1 && echo $1.bin) ||
+(echo "Compile script was:" && cat $0 &&
+echo "Compilation log:" && cat $1.log)

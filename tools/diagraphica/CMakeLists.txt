@@ -3,8 +3,8 @@ if(WIN32)
 endif()
 
 add_mcrl2_tool(diagraphica
-  MENUNAME "Diagraphica"
-  DESCRIPTION "Advanced state space visualisation tool from the mCRL2 toolset."
+  MENUNAME "DiaGraphica"
+  DESCRIPTION "Advanced state space visualisation tool (mCRL2 toolset)"
   ICON "mcrl2-green"
   SOURCES
     icons.qrc

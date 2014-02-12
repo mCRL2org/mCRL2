@@ -3,6 +3,9 @@ if(WIN32)
 endif()
 
 add_mcrl2_tool(ltsgraph
+  MENUNAME "LTSGraph"
+  DESCRIPTION "Visualisation tool for small state spaces (mCRL2 toolset)"
+  ICON "mcrl2-green"
   SOURCES
     mainwindow.ui
     glwidget.ui

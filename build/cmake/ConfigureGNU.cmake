@@ -5,9 +5,13 @@
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
+include(AddFlag)
 
-if(NOT MCRL2_GNU)
-  return()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(MCRL2_CLANGPP ON)
+endif()
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+  set(MCRL2_CLANG ON)
 endif()
 
 ##---------------------------------------------------
@@ -23,15 +27,8 @@ if( MCRL2_ENABLE_PROFILING )
 endif(MCRL2_ENABLE_PROFILING)
 
 ##---------------------------------------------------
-## Set GCC compiler flags
-##---------------------------------------------------
-
-message( STATUS "Loading GCC specific configuration" )
-
-##---------------------------------------------------
 ## Set C compile flags
 ##---------------------------------------------------
-include(AddFlag)
 
 try_add_c_flag(-std=c99)
 try_add_c_flag(-Wall)
@@ -66,11 +63,11 @@ if(NOT CXX_ACCEPTS_STD_CPP11)
   try_add_cxx_flag(-std=c++0x)
 endif()
 
-if (APPLE)
+if(APPLE)
   try_add_cxx_flag(-stdlib=libc++)
 endif()
 
-if((NOT CXX_ACCEPTS_STD_CPP11) AND (NOT CXX_ACCEPTS_STD_CPP0X))
+if(NOT (CXX_ACCEPTS_STD_CPP11 OR CXX_ACCEPTS_STD_CPP0X))
   message(FATAL_ERROR "Your compiler does not support -std=c++11 or -std=c++0x. You should upgrade to a newer compiler version to build mCRL2")
 endif()
 
@@ -98,18 +95,16 @@ try_add_cxx_flag(-Wmissing-declarations  MAINTAINER)
 #endif()
 
 # The following flags are not implemented in clang and therefore cause warnings.
-if(NOT MCRL2_CLANG)
+if(NOT MCRL2_CLANGPP)
   try_add_cxx_flag(-fprofile-arcs            MAINTAINER)
   try_add_cxx_flag(-ftest-coverage           MAINTAINER)
 endif()
 
 # The following is only implemented in clang
-if (NOT APPLE)
-  if(MCRL2_CLANG)
-    # We need to add the proper flag to the linker before we try:
-    set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
-    try_add_cxx_flag(-fsanitize=address       MAINTAINER)
-  endif()
+if(MCRL2_CLANGPP AND NOT APPLE)
+  # We need to add the proper flag to the linker before we try:
+  set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
+  try_add_cxx_flag(-fsanitize=address       MAINTAINER)
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -126,13 +121,10 @@ endif()
 ## Set linker flags
 ##---------------------------------------------------
 
-if(NOT APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
-endif()
-
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "")
 else()
+  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
   set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once")
 endif()
 
