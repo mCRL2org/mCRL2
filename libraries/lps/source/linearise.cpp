@@ -7281,6 +7281,9 @@ class specification_basic_type:public boost::noncopyable
 
     void communicationcomposition(
       const communication_expression_list &communications,
+      const action_name_multiset_list &allowlist1,  // This is a list of list of identifierstring.
+      const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
+      const bool is_block,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands)
 
@@ -7288,7 +7291,10 @@ class specification_basic_type:public boost::noncopyable
       /* We follow the implementation of Muck van Weerdenburg, described in
          a note: Calculation of communication with open terms. */
 
-      mCRL2log(mcrl2::log::verbose) << "- calculating the communication operator on " << action_summands.size() << " action summands";
+      mCRL2log(mcrl2::log::verbose) << 
+            (is_allow ? "- calculating the communication operator modulo the allow operator on " :
+             is_block ? "- calculating the communication operator modulo the block operator on " :
+                        "- calculating the communication operator on ") << action_summands.size() << " action summands";
 
       /* first we sort the multiactions in communications */
       communication_expression_list resultingCommunications;
@@ -7310,6 +7316,16 @@ class specification_basic_type:public boost::noncopyable
       deadlock_summand_vector resultingDeltaSummands;
       deadlock_summands.swap(resultingDeltaSummands);
 
+      bool inline_allow = is_allow || is_block;
+      if (inline_allow)
+      {
+        // Inline allow is only supported for add_delta,
+        // for in other cases generation of delta summands cannot be inlined in any simple way.
+        assert(!options.nodeltaelimination && options.add_delta);
+        deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
+      }
+      action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
+
       for (action_summand_vector::const_iterator sourcesumlist=action_summands.begin();
            sourcesumlist!=action_summands.end(); ++sourcesumlist)
       {
@@ -7319,33 +7335,36 @@ class specification_basic_type:public boost::noncopyable
         const data_expression condition=smmnd.condition();
         const assignment_list nextstate=smmnd.assignments();
 
-        /* Recall a delta summand for every non delta summand.
-         * The reason for this is that with communication, the
-         * conditions for summands can become much more complex.
-         * Many of the actions in these summands are replaced by
-         * delta's later on. Due to the more complex conditions it
-         * will be hard to remove them. By adding a default delta
-         * with a simple condition, makes this job much easier
-         * later on, and will in general reduce the number of delta
-         * summands in the whole system */
-
-        /* But first remove free variables from sumvars */
-
-        variable_list newsumvars;
-        for (variable_list::const_iterator i=sumvars.begin(); i!=sumvars.end(); ++i)
+        if (!inline_allow)
         {
-          const variable sumvar=*i;
-          if (occursinterm(sumvar,condition) ||
-              (smmnd.has_time() && occursinterm(sumvar,smmnd.multi_action().time())))
-          {
-            newsumvars.push_front(sumvar);
-          }
-        }
-        newsumvars=reverse(newsumvars);
+          /* Recall a delta summand for every non delta summand.
+           * The reason for this is that with communication, the
+           * conditions for summands can become much more complex.
+           * Many of the actions in these summands are replaced by
+           * delta's later on. Due to the more complex conditions it
+           * will be hard to remove them. By adding a default delta
+           * with a simple condition, makes this job much easier
+           * later on, and will in general reduce the number of delta
+           * summands in the whole system */
 
-        resultingDeltaSummands.push_back(deadlock_summand(newsumvars,
-                                                          condition,
-                                                          smmnd.multi_action().has_time()?deadlock(smmnd.multi_action().time()):deadlock()));
+          /* But first remove free variables from sumvars */
+
+          variable_list newsumvars;
+          for (variable_list::const_iterator i=sumvars.begin(); i!=sumvars.end(); ++i)
+          {
+            const variable sumvar=*i;
+            if (occursinterm(sumvar,condition) ||
+                (smmnd.has_time() && occursinterm(sumvar,smmnd.multi_action().time())))
+            {
+              newsumvars.push_front(sumvar);
+            }
+          }
+          newsumvars=reverse(newsumvars);
+
+          resultingDeltaSummands.push_back(deadlock_summand(newsumvars,
+                                                            condition,
+                                                            smmnd.multi_action().has_time()?deadlock(smmnd.multi_action().time()):deadlock()));
+        }
 
         /* the multiactionconditionlist is a list containing
            tuples, with a multiaction and the condition,
@@ -7363,10 +7382,20 @@ class specification_basic_type:public boost::noncopyable
                multiactionconditionlist.conditions.size());
         for (size_t i=0 ; i<multiactionconditionlist.actions.size(); ++i)
         {
+          const action_list multiaction=multiactionconditionlist.actions[i];
+
+          if (is_allow && !allow_(allowlist,multiaction))
+          {
+            continue;
+          }
+          if (is_block && encap(aterm_cast<identifier_string_list>(allowlist),multiaction))
+          {
+            continue;
+          }
+
           const data_expression communicationcondition=
             RewriteTerm(multiactionconditionlist.conditions[i]);
 
-          const action_list multiaction=multiactionconditionlist.actions[i];
           const data_expression newcondition=RewriteTerm(
                                                lazy::and_(condition,communicationcondition));
           action_summand new_summand(sumvars,
@@ -7389,7 +7418,8 @@ class specification_basic_type:public boost::noncopyable
       /* Now the resulting delta summands must be added again */
 
       action_summands.swap(resultsumlist);
-      if (!options.nodeltaelimination)
+
+      if (!inline_allow && !options.nodeltaelimination)
       {
         for (deadlock_summand_vector::const_iterator w=resultingDeltaSummands.begin();
              w!=resultingDeltaSummands.end(); ++w)
@@ -8273,6 +8303,13 @@ class specification_basic_type:public boost::noncopyable
                                 action_summands,deadlock_summands,pars,init);
           return;
         }
+        else if (!options.nodeltaelimination && options.add_delta && is_comm(par))
+        {
+          generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
+                                regular,rename_variables,pars,init);
+          communicationcomposition(comm(par).comm_set(),allow(t).allow_set(),true,false,action_summands,deadlock_summands);
+          return;
+        }
 
         generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init);
         allowblockcomposition(allow(t).allow_set(),true,action_summands,deadlock_summands);
@@ -8299,6 +8336,13 @@ class specification_basic_type:public boost::noncopyable
                                 action_summands,deadlock_summands,pars,init);
           return;
         }
+        else if (!options.nodeltaelimination && options.add_delta && is_comm(par))
+        {
+          generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
+                                regular,rename_variables,pars,init);
+          communicationcomposition(comm(par).comm_set(),action_name_multiset_list(block(t).block_set()),false,true,action_summands,deadlock_summands);
+          return;
+        }
 
         generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init);
         allowblockcomposition(action_name_multiset_list(block(t).block_set()),false,action_summands,deadlock_summands);
@@ -8317,7 +8361,7 @@ class specification_basic_type:public boost::noncopyable
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,comm(t).operand(),
                               regular,rename_variables,pars,init);
-        communicationcomposition(comm(t).comm_set(),action_summands,deadlock_summands);
+        communicationcomposition(comm(t).comm_set(),action_name_multiset_list(),false,false,action_summands,deadlock_summands);
         return;
       }
 
