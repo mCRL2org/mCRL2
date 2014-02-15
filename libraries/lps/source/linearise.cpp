@@ -7404,10 +7404,13 @@ class specification_basic_type:public boost::noncopyable
                                      nextstate);
           if (!options.nosumelm)
           {
-            sumelm(new_summand);
+            if (sumelm(new_summand))
+            {
+              new_summand.condition() = RewriteTerm(new_summand.condition());
+            }
           }
 
-          if (newcondition!=sort_bool::false_())
+          if (new_summand.condition()!=sort_bool::false_())
           {
             resultsumlist.push_back(new_summand);
           }
