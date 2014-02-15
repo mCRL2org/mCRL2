@@ -6,33 +6,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-##---------------------------------------------------
-## CPack configuration
-##---------------------------------------------------
-
-INCLUDE(InstallRequiredSystemLibraries)
-
-
-if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-  set(CXX_COMPILER_ARCHITECTURE "x86_64")
-else ()
-  if (CMAKE_SIZEOF_VOID_P MATCHES "4")
-    set(CXX_COMPILER_ARCHITECTURE "x86")
-  else ()
-    message(FATAL_ERROR "Could not determine architecture.")
-  endif()
-endif()
-
-# Configure some files
-# --------------------
-
-# Record the version in the package, for proper version reporting of the tools
-# and documentation
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion.in" "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion" @ONLY )
-
-# README and COPYING require a .txt extention when be used with MacOSX's PackageMaker
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/COPYING" "${CMAKE_CURRENT_BINARY_DIR}/COPYING.txt" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/README"  "${CMAKE_CURRENT_BINARY_DIR}/README.txt" COPYONLY)
+include(InstallRequiredSystemLibraries)
 
 # ----------------------------------------
 # Variables common to all CPack generators
@@ -42,7 +16,7 @@ set(CPACK_PACKAGE_NAME "mcrl2")
 set(CPACK_PACKAGE_VENDOR "TUe")
 set(CPACK_PACKAGE_VERSION "${MCRL2_VERSION}")
 set(CPACK_TOPLEVEL_TAG "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}") # Directory for the installed files
-set(CPACK_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG}_${CXX_COMPILER_ARCHITECTURE})
+set(CPACK_PACKAGE_FILE_NAME ${CPACK_TOPLEVEL_TAG}_${CMAKE_SYSTEM_PROCESSOR})
 set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "Tools for modelling, validation and verification of concurrent systems")
@@ -55,9 +29,6 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2)
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_BINARY_DIR}/COPYING.txt )
 set(CPACK_RESOURCE_FILE_README  ${CMAKE_CURRENT_BINARY_DIR}/README.txt )
 set(CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION True)
-
-# Text file used to describe project
-#set(CPACK_PACKAGE_DESCRIPTION_FILE XXX)
 
 # Branding image displayed inside the installer
 if(WIN32)
@@ -156,6 +127,7 @@ set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
  analysed.")
 
 if(EXISTS /etc/debian_version)
+  # Debian requires applications to install their copyright information in a specific location:
   install(FILES ${CMAKE_SOURCE_DIR}/COPYING DESTINATION share/doc/mcrl2 RENAME copyright)
 endif()
 

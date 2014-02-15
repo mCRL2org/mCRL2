@@ -1,0 +1,35 @@
+options:
+  grammar:
+    - grammars\mcrl2.g
+    - grammars\data.g
+  constraints:
+    - constraints\mcrl2-attrs.yml
+    - constraints\data-attrs.yml
+  #path: C:\Program Files\mCRL2\bin
+  path: D:\mcrl2okt2012\mCRL2\bin
+  platform: windows
+nodes: {l1: mCRL2Spec, l2: LPS, l3.aut: LTS, l4.fsm: LTS, l5.aut: LTS, l6: Bool}
+tools:
+  - input: [l1]
+    output: [l2]
+    args: []
+    name: mcrl22lps
+  - input: [l2]
+    output: [l3.aut]
+    args: [-oaut]
+    name: lps2lts
+  - input: [l3.aut]
+    output: [l4.fsm]
+    args: [-iaut, -ofsm]
+    name: ltsconvert
+  - input: [l4.fsm]
+    output: [l5.aut]
+    args: [-ifsm, -oaut]
+    name: ltsconvert
+  - input: [l3.aut, l5.aut]
+    output: [l6]
+    args: [-ebisim]
+    name: ltscompare
+
+result: |
+  result = 'not' not in value(l6)

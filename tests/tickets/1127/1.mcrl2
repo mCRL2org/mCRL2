@@ -1,0 +1,3 @@
+map f: Bool # Bool # Bool -> Bool -> Bool;
+
+init delta;

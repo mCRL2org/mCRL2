@@ -234,28 +234,36 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
       remove_unused_summand_variables(s);
       m_removed += var_count - s.summation_variables().size();
     }
+
+    /// \brief Returns the amount of removed summation variables.
+    size_t removed() const
+    {
+      return m_removed;
+    }
 };
 
 /// \brief Apply the sum elimination lemma to summand s.
 /// \param s an action summand
-/// \return s to which the sum elimination lemma has been applied.
+/// \return \c true if any summation variables have been removed, or \c false otherwise.
 inline
-void sumelm(action_summand& s)
+bool sumelm(action_summand& s)
 {
   specification spec;
   sumelm_algorithm algorithm(spec);
   algorithm(s);
+  return algorithm.removed() > 0;
 }
 
 /// \brief Apply the sum elimination lemma to summand s.
 /// \param s a deadlock summand
-/// \return s to which the sum elimination lemma has been applied.
+/// \return \c true if any summation variables have been removed, or \c false otherwise.
 inline
-void sumelm(deadlock_summand& s)
+bool sumelm(deadlock_summand& s)
 {
   specification spec;
   sumelm_algorithm algorithm(spec);
   algorithm(s);
+  return algorithm.removed() > 0;
 }
 
 } // namespace lps

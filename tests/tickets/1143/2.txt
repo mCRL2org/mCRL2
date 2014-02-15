@@ -1,0 +1,34 @@
+sort Policy = struct FIFO | LIFO;
+     Floor = Pos;
+     Requests = List(Pos);
+
+map  policy: Policy;
+     storeys: Pos;
+     addRequest,addRequestFIFO,addRequestLIFO,remove: Requests # Pos -> Requests;
+     newPosition: Pos # Pos -> Pos;
+
+var  r: Requests;
+     f,g,f1,f2: Pos;
+eqn  policy  =  LIFO;
+     storeys  =  4;
+     policy == FIFO  ->  addRequest(r, f)  =  addRequestFIFO(r, f);
+     policy == LIFO  ->  addRequest(r, f)  =  addRequestLIFO(r, f);
+     addRequestFIFO([], f)  =  [f];
+     addRequestFIFO(g |> r, f)  =  g |> r;
+     addRequestFIFO(g |> r, f)  =  g |> addRequest(r, f);
+     addRequestLIFO(r, f)  =  f |> remove(r, f);
+     remove([], f)  =  [];
+     f == g  ->  remove(g |> r, f)  =  remove(r, f);
+     f != g  ->  remove(g |> r, f)  =  g |> remove(r, f);
+     f1 < f2  ->  newPosition(f1, f2)  =  f1 + 1;
+     f1 > f2  ->  newPosition(f1, f2)  =  Int2Pos(f1 - 1);
+     f1 == f2  ->  newPosition(f1, f2)  =  f1;
+
+pbes nu X(p: Pos, d: Bool, r: List(Pos)) =
+       Y(p, d, r);
+     mu Y(p: Pos, d: Bool, r: List(Pos)) =
+       Z(p, d, r);
+     nu Z(p: Pos, d: Bool, r: List(Pos)) =
+       (forall b2: Bool, f3,newp2: Pos, r2: List(Pos). val(!false) && val(!true) || val(!(d && !(newp2 == newPosition(p, head(r2)) && !(r2 == []) && !d) && f3 <= 4 && r2 == if(b2, f3 |> remove(r, f3), r) && newp2 <= 4)) || X(p, false, r)) && (forall b3: Bool, f4,newp3: Pos, r3: List(Pos). val(!true) && val(!false) || val(!(newp3 == newPosition(p, head(r3)) && !(r3 == []) && !d && f4 <= 4 && r3 == if(b3, f4 |> remove(r, f4), r) && newp3 <= 4)) || X(newp3, newp3 == head(r3), if(newp3 == head(r3), tail(r3), r3))) && (forall f5: Pos. val(!false) && val(!false) || val(!(f5 <= 4 && f5 in r)) || X(p, d, r)) && (val(!false) && val(!false) || X(p, d, r)) && (false || false || false || val(p == storeys) || (forall b6: Bool, f9,newp6: Pos, r6: List(Pos). val(!false) && val(!true) || val(!(d && !(newp6 == newPosition(p, head(r6)) && !(r6 == []) && !d) && f9 <= 4 && r6 == if(b6, f9 |> remove(r, f9), r) && newp6 <= 4)) || Z(p, false, r)) && (forall b7: Bool, f10,newp7: Pos, r7: List(Pos). val(!true) && val(!false) || val(!(newp7 == newPosition(p, head(r7)) && !(r7 == []) && !d && f10 <= 4 && r7 == if(b7, f10 |> remove(r, f10), r) && newp7 <= 4)) || Z(newp7, newp7 == head(r7), if(newp7 == head(r7), tail(r7), r7))) && (forall f11: Pos. val(!false) && val(!false) || val(!(f11 <= 4 && f11 in r)) || Z(p, d, r)) && (val(!false) && val(!false) || Z(p, d, r)) && (false || false || false || false || (forall b10: Bool, f15,newp10: Pos, r10: List(Pos). val(!false) && val(!true) || val(!(d && !(newp10 == newPosition(p, head(r10)) && !(r10 == []) && !d) && f15 <= 4 && r10 == if(b10, f15 |> remove(r, f15), r) && newp10 <= 4)) || Y(p, false, r)) && (forall b11: Bool, f16,newp11: Pos, r11: List(Pos). val(!true) && val(!false) || val(!(newp11 == newPosition(p, head(r11)) && !(r11 == []) && !d && f16 <= 4 && r11 == if(b11, f16 |> remove(r, f16), r) && newp11 <= 4)) || Y(newp11, newp11 == head(r11), if(newp11 == head(r11), tail(r11), r11))) && (forall f17: Pos. val(!false) && val(!false) || val(!(f17 <= 4 && f17 in r)) || Y(p, d, r)) && (val(!false) && val(!false) || Y(p, d, r))));
+
+init X(1, true, []);

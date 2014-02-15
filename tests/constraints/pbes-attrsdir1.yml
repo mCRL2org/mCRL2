@@ -1,0 +1,645 @@
+# V prop variable list with arguments
+# W list of global datavariables that can be used
+
+pbes:
+  order: left
+  rules:
+    - PbesEqnSpec.V = [] 
+    - PbesEqnSpec.W = []
+    - PbesInit.V = PbesEqnSpec.V
+    - PbesInit.W = PbesEqnSpec.W
+
+pbeseqnspec:
+  order: left
+  attrs: [V, W] 
+  rules:
+    - PbesEqnDecls.V = V
+    - PbesEqnDecls.W = W
+    - PbesEqnDecls.Iterations = 1
+
+pbeseq:
+  order: left
+  attrs: [V, W, Iterations]
+  guard: Iterations == 1
+  rules:
+    - PbesEqnDecl.V = V
+    - PbesEqnDecl.W = W
+
+pbeseqs:
+  attrs: [V, W, Iterations]
+  guard: Iterations > 1
+  rules:
+    - PbesEqnDecl.V = V
+    - PbesEqnDecl.W = W
+    - PbesEqnDecls.V = PbesEqnDecl.V
+    - PbesEqnDecls.W = PbesEqnDecl.W
+    - PbesEqnDecls.Iterations = Iterations - 1
+
+# todo: pass W down to UniquePropVarDecl to avoid duplicate datavariable names being declared
+pbeseqdecl:
+  order: left
+  attrs: [V, W]
+  rules:
+    - UniquePropVarDecl.V = V
+    - UniquePropVarDecl.U = []
+    - UniquePropVarDecl.Iterations = 1
+    - UniquePropVarDecl.Prefix = 'u'
+    - Guard.W = UniquePropVarDecl.U
+    - PbesExpr.V = UniquePropVarDecl.V
+    - PbesExpr.W = UniquePropVarDecl.U + W
+    - PbesExpr.M = True
+    - PbesExpr.P = 0
+
+vardecl:
+  order: left
+  attrs: [V, U, Prefix, Iterations]
+  guard: Iterations == 0
+  pre:
+    - K = 'X' + str(len(V)+1)
+    - V.append((K, []))
+  rules:
+    - Id = K
+
+vardecllist:
+  order: left
+  attrs: [V, U, Prefix]
+  guard: Iterations > 0
+  pre:
+    - K = 'X' + str(len(V)+1)
+  rules:
+    - Id = K
+    - VarsDeclList.U = U
+    - VarsDeclList.Prefix = Prefix
+  post:
+    - U = VarsDeclList.U
+    - V.append((K, U))
+
+vdcl:
+  order: left
+  attrs: [U, Prefix]
+  rules:
+    - VarsDecls.U = U
+    - VarsDecls.L = len(U)
+    - VarsDecls.Prefix = Prefix
+  post:
+    - U = VarsDecls.U
+
+vsdecl:
+  order: left
+  attrs: [U, L, Prefix]
+  rules:
+    - VarDecl.U = U
+    - VarDecl.L = L
+    - VarDecl.Prefix = Prefix
+  post:
+    - U = VarDecl.U
+    - L = L + len(VarDecl.U) 
+
+vsdecls:
+  order: left
+  attrs: [U, L, Prefix]
+  rules:
+    - VarDecl.U = U
+    - VarDecl.L = L
+    - VarDecl.Prefix = Prefix
+    - VarsDecls.U = VarDecl.U
+    - VarsDecls.L = L + len(VarDecl.U)
+    - VarsDecls.Prefix = Prefix
+  post:
+    - U = VarsDecls.U
+    - L = L + len(VarsDecls.U) 
+    
+vdecl:
+  attrs: [U, L, Prefix]
+  rules:
+    - IdList.U = []
+    - IdList.L = L
+    - IdList.Prefix = Prefix
+    - SortExpr.T = None
+  post:
+    - |
+     U = U + [{'name': u, 'type': SortExpr.T} for u in IdList.U]
+    - L = L + len(U) 
+init:
+  attrs: [V, W]
+  rules:
+    - PropVarInst.V = V
+    - PropVarInst.W = W
+    - PropVarInst.M = True
+
+propvarinst:
+  attrs: [V, W, M]
+  rules:
+    - VarInst.K = choice(V)
+    - VarInst.W = W
+    - VarInst.M = M
+
+varinst:
+  attrs: [K, W, M]
+  guard: not K[1]
+  rules:
+    - Id = '!' + K[0] if not M else K[0]
+
+varinstlist:
+  attrs: [K, W, M]
+  guard: K[1]
+  rules:
+    - Id = '!' + K[0] if not M else K[0]
+    - DataExprListInst.W = W
+    - DataExprListInst.A = K[1]
+
+dalinst:
+  attrs: [W, A]
+  guard: |
+    len(A) == 1
+  rules:
+    - DataExpr.T = [A[0]['type']]
+    - DataExpr.W = W
+    - DataExpr.P = 0
+  post:
+    - A = []
+
+dallinst:
+  attrs: [W, A]
+  guard: |
+    len(A) > 1
+  rules:
+    - DataExpr.T = [A[0]['type']] 
+    - DataExpr.W = W
+    - DataExpr.P = 0
+    - DataExprListInst.W = W
+    - |
+      DataExprListInst.A = A[1:]
+
+dvale:
+  order: left
+  attrs: W
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 0
+
+se:
+  attrs: T
+  rules:
+    - SimpleSortExpr.T = T
+  post:
+    - T = SimpleSortExpr.T
+
+# SortExpr
+
+se_bool:
+  attrs: T
+  post:
+    - T = 'bool'
+
+se_pos:
+  attrs: T
+  post:
+    - T = 'pos'
+
+se_nat:
+  attrs: T
+  post:
+    - T = 'nat'
+
+se_int:
+  attrs: T
+  post:
+    - T = 'int'
+
+se_real:
+  attrs: T
+  post:
+    - T = 'real'
+
+# DataExpr
+
+da_forall:
+  attrs: [W, T, P]
+  weight: 1
+  guard: |
+    P <= 1 and 'bool' in T
+  rules:
+    - VarsDeclList.U = W
+    - VarsDeclList.Prefix = 'd'
+    - DataExpr.W = VarsDeclList.U
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 1
+  post:
+    - T = ['bool']
+    
+da_exists:
+  attrs: [W, T, P]
+  weight: 1
+  guard: |
+    P <= 1 and 'bool' in T
+  rules:
+    - VarsDeclList.U = W
+    - VarsDeclList.Prefix = 'd'
+    - DataExpr.W = VarsDeclList.U
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 1
+  post:
+    - T = ['bool']
+
+da_impl:
+  attrs: [W, T, P]
+  guard: |
+    P <= 2 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 3
+    - DataExpr2.W = W
+    - DataExpr2.T = ['bool']
+    - DataExpr2.P = 2
+  post:
+    - T = ['bool']
+
+da_conj:
+  attrs: [W, T, P]
+  guard: |
+    P <= 4 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 5
+    - DataExpr2.W = W
+    - DataExpr2.T = ['bool']
+    - DataExpr2.P = 4
+  post:
+    - T = ['bool']
+ 
+da_disj:
+  attrs: [W, T, P]
+  guard: |
+    P <= 3 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 4
+    - DataExpr2.W = W
+    - DataExpr2.T = ['bool']
+    - DataExpr2.P = 3
+  post:
+    - T = ['bool']
+ 
+da_eq:
+  attrs: [W, T, P]
+  guard: |
+    P <= 5 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool', 'int', 'real', 'pos', 'nat']
+    - DataExpr.P = 5
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 6   
+  post:
+    - T = ['bool']
+
+da_neq:
+  attrs: [W, T, P]
+  guard: |
+    P <= 5 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool', 'int', 'real', 'pos', 'nat']
+    - DataExpr.P = 5
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 6   
+  post:
+    - T = ['bool']
+ 
+da_lt:
+  attrs: [W, T, P]
+  guard: |
+    P <= 6 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - "DataExpr.T = ['int', 'real', 'pos', 'nat']"
+    - DataExpr.P = 6
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 7   
+  post:
+    - T = ['bool']
+
+da_gt:
+  attrs: [W, T, P]
+  guard: |
+    P <= 6 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['int', 'real', 'pos', 'nat']
+    - DataExpr.P = 6
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 7   
+  post:
+    - T = ['bool']
+ 
+da_leq:
+  attrs: [W, T, P]
+  guard: |
+    P <= 6 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['int', 'real', 'pos', 'nat']
+    - DataExpr.P = 6
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 7   
+  post:
+    - T = ['bool']
+
+da_geq:
+  attrs: [W, T, P]
+  guard: |
+    P <= 6 and 'bool' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['int', 'real', 'pos', 'nat']
+    - DataExpr.P = 6
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 7   
+  post:
+    - T = ['bool']
+
+da_plus:
+  attrs: [W, T, P]
+  guard: |
+    P <= 10 and any(x for x in ['int', 'real', 'pos', 'nat'] if x in T)
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['pos', 'nat'] if 'pos' in T else T
+    - DataExpr.P = 10
+    - DataExpr2.W = W
+    - DataExpr2.T = ['pos', 'nat'] if 'pos' in T else T
+    - DataExpr2.P = 11
+  post:
+    - T = ['pos'] if 'pos' in T else DataExpr2.T
+ 
+da_min:
+  attrs: [W, T, P]
+  guard: |
+    P <= 10 and any(x for x in ['int', 'real'] if x in T)
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr.P = 10
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 11
+  post:
+    - T = DataExpr2.T
+ 
+da_times:
+  attrs: [W, T, P]
+  guard: |
+    P <= 12 and any(x for x in ['int', 'real', 'pos', 'nat'] if x in T)
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr.P = 12
+    - DataExpr2.W = W
+    - DataExpr2.T = DataExpr.T
+    - DataExpr2.P = 13
+  post:
+    - T = DataExpr2.T
+    
+da_divides:
+  attrs: [W, T, P]
+  guard: |
+    P <= 11 and 'real' in T
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr.P = 12
+    - DataExpr2.W = W
+    - DataExpr2.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr2.P = 13
+  post:
+    - T = ['real']
+
+da_numb:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and any(x for x in ['int', 'real', 'pos', 'nat'] if x in T)
+  rules:
+    - Number = str(choice(range(1,100)))
+  post:
+    - T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+
+da_true:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and ('bool' in T)
+  post:
+    - T = ['bool'] 
+ 
+da_false:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and ('bool' in T)
+  post:
+    - T = ['bool']
+ 
+da_neg:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and ('bool' in T)
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = ['bool']
+    - DataExpr.P = 14
+  post:
+    - T = ['bool']
+ 
+da_inv:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and any(x for x in T if x in ['int', 'real'])
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = [x for x in T if x in ['int', 'real', 'pos', 'nat']]
+    - DataExpr.P = 14
+  post:
+    - T = DataExpr.T 
+
+da_brk:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 
+  rules:
+    - DataExpr.W = W
+    - DataExpr.T = T
+    - DataExpr.P = 0
+  post:
+    - T = DataExpr.T
+ 
+da_id:
+  attrs: [W, T, P]
+  guard: |
+    P <= 14 and any(x for x in W if x['type'] in T)
+  pre:
+    - | 
+     V = choice([x for x in W if x['type'] in T])
+  rules:
+    - Id = V['name']
+  post:
+    - T = [V['type']]
+  
+ 
+# PbesExpr
+
+pe_impl:
+  attrs: [V, W, M, P]
+  guard: P <= 1
+  rules:
+    - PbesExpr.V = V
+    - PbesExpr.W = W
+    - PbesExpr.M = not M
+    - PbesExpr.P = 2
+    - PbesExpr2.V = V
+    - PbesExpr2.W = W
+    - PbesExpr2.M = M
+    - PbesExpr2.P = 1
+
+pe_disj:
+  attrs: [V, W, M, P]
+  guard: P <= 2
+  rules:
+    - PbesExpr.V = V
+    - PbesExpr.W = W
+    - PbesExpr.M = M
+    - PbesExpr.P = 2
+    - PbesExpr2.V = V
+    - PbesExpr2.W = W
+    - PbesExpr2.M = M
+    - PbesExpr2.P = 3
+
+pe_conj:
+  attrs: [V, W, M, P]
+  guard: P <= 2
+  rules:
+    - PbesExpr.V = V
+    - PbesExpr.W = W
+    - PbesExpr.M = M
+    - PbesExpr.P = 2
+    - PbesExpr2.V = V
+    - PbesExpr2.W = W
+    - PbesExpr2.M = M
+    - PbesExpr2.P = 3
+
+pe_forall:
+  attrs: [V, W, M, P]
+  weight: 10
+  guard: P == 0
+  rules:
+    - VarsDeclList.U = []
+    - VarsDeclList.Prefix = 'd'
+    - Guard.W = W + VarsDeclList.U
+    - PbesExpr.V = V
+    - PbesExpr.W = VarsDeclList.U
+    - PbesExpr.M = M
+    - PbesExpr.P = 0
+  
+pe_exists:
+  attrs: [V, W, M, P]
+  weight: 10
+  guard: P == 0
+  rules:
+    - VarsDeclList.U = []
+    - VarsDeclList.Prefix = 'd'
+    - Guard.W = VarsDeclList.U
+    - PbesExpr.V = V  
+    - PbesExpr.W = W + VarsDeclList.U
+    - PbesExpr.M = M
+    - PbesExpr.P = 0
+
+pe_dv:
+  attrs: [V, W, M, P]
+  guard: P <= 3
+  rules:
+    - DataValExpr.W = W
+
+pe_true:
+  attrs: [V, W, M, P]
+  guard: P <= 3
+
+pe_false:
+  attrs: [V, W, M, P]
+  guard: P <= 3
+
+pe_neg:
+  attrs: [V, W, M, P]
+  guard: P <= 3
+  rules:
+    - PbesExpr.V = V
+    - PbesExpr.W = W
+    - PbesExpr.M = not M
+    - PbesExpr.P = 3
+
+pe_brk:
+  attrs: [V, W, M, P]
+  guard: P <= 3
+  rules:
+    - PbesExpr.V = V
+    - PbesExpr.W = W
+    - PbesExpr.M = M
+    - PbesExpr.P = 0
+
+pe_pv:
+  secondpass: pbes
+  attrs: [V, W, M, P]
+  guard: P <= 3
+  rules:
+    - PropVarInst.V = V
+    - PropVarInst.W = W
+    - PropVarInst.M = M
+
+# IdList
+
+idlid:
+  order: left
+  attrs: [U, L, Prefix]
+  pre:
+  #  - K = Prefix + str(L + 1)
+    - K = choice(['u', 'v', 'w'])
+    - U.append(K)
+  rules:
+    - Id = K
+
+idlids:
+  order: left
+  attrs: [U, L, Prefix]
+  pre:
+  #  - K = Prefix + str(L + 1)
+    - K = choice(['u', 'v', 'w'])
+    - U.append(K)
+  rules:
+    - Id = K
+    - IdList.U = U
+    - IdList.L = L + 1
+    - IdList.Prefix = Prefix
+  post:
+    - U = IdList.U
+    
+# Guard
+
+no_guard:
+  attrs: [W]
+  guard: not any(x for x in W if x['type'] in ['int', 'real', 'pos', 'nat'])
+  
+guard:
+  attrs: [W]
+  guard: any(x for x in W if x['type'] in ['int', 'real', 'pos', 'nat'])
+  pre:
+    - K = next(x for x in W if x['type'] in ['int', 'real', 'pos', 'nat'])
+  rules:
+    - G = ' '.join([K['name'], '<', str(choice(range(1,100)))])
+    - Guard.W = [x for x in W if x['name'] != K['name']]

@@ -1,0 +1,9 @@
+act a: Bool;
+
+proc X(v: Bool, s:Bool) = 
+   sum v:Bool. s -> a(v) . X(v = v, s = false)
+  + (!s && v) -> a(v). X(s = true);
+
+glob b:Bool;
+
+init X(b, true);

@@ -1,0 +1,1 @@
+(nu X(b: Bool = true) . X(b)) && (nu X(b: Bool = false) . X(!b))
