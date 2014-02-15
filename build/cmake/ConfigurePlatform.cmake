@@ -1,9 +1,13 @@
 if(WIN32)
 
   # Platform is Windows
+  #
+  # Shared libraries are currently not supported, because none of our library exports are marked
+  # with __declspec(dllexport).
   set(BUILD_SHARED_LIBS OFF)
-  set(MCRL2_RUNTIME_PATH )
-  set(MCRL2_LIBRARY_PATH )
+  set(MCRL2_MAN_PAGES OFF)
+  set(MCRL2_RUNTIME_PATH .)
+  set(MCRL2_LIBRARY_PATH .)
   set(MCRL2_ARCHIVE_PATH lib)
   set(MCRL2_INCLUDE_PATH include)
 
