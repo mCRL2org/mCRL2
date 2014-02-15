@@ -1,3 +1,6 @@
+set(MCRL2_STAGE_PATH ${CMAKE_BINARY_DIR}/stage)
+set(MCRL2_BUNDLE_PATH Applications)
+
 if(WIN32)
 
   # Platform is Windows
@@ -10,6 +13,7 @@ if(WIN32)
   set(MCRL2_LIBRARY_PATH .)
   set(MCRL2_ARCHIVE_PATH lib)
   set(MCRL2_INCLUDE_PATH include)
+  set(MCRL2_RESOURCE_PATH .)
 
 elseif(UNIX)
 
@@ -23,8 +27,8 @@ elseif(UNIX)
     set(MCRL2_LIBRARY_PATH Frameworks)
     set(MCRL2_ARCHIVE_PATH lib)
     set(MCRL2_INCLUDE_PATH include)
-    set(MCRL2_BUNDLE_PATH Applications)
     set(MCRL2_RUNTIME_PATH ${MCRL2_BUNDLE_PATH}/mcrl2-gui.app/Content/MacOS)
+    set(MCRL2_RESOURCE_PATH share/mcrl2)
 
     set(CMAKE_MACOSX_RPATH ON)
     set(CMAKE_INSTALL_RPATH "@loader_path/../../../../Frameworks")
@@ -41,6 +45,7 @@ elseif(UNIX)
     set(MCRL2_LIBRARY_PATH lib)
     set(MCRL2_ARCHIVE_PATH share/mcrl2/lib)
     set(MCRL2_INCLUDE_PATH share/mcrl2/include)
+    set(MCRL2_RESOURCE_PATH share/mcrl2)
 
     set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib")
     set(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -57,6 +62,7 @@ else()
   message(FATAL_ERROR "Could not recognize platform (not Windows, Apple or Unix)!")
 endif()
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/stage/${MCRL2_RUNTIME_PATH})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/stage/${MCRL2_LIBRARY_PATH})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/stage/${MCRL2_ARCHIVE_PATH})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MCRL2_STAGE_PATH}/${MCRL2_RUNTIME_PATH})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MCRL2_STAGE_PATH}/${MCRL2_LIBRARY_PATH})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${MCRL2_STAGE_PATH}/${MCRL2_ARCHIVE_PATH})
+

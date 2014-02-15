@@ -19,13 +19,9 @@ add_mcrl2_library(lts
     exploration.cpp
     fsm_syntax.g
   DEPENDS
-    mcrl2_atermpp    HEADER_ONLY
-    mcrl2_core       HEADER_ONLY
     mcrl2_data
     mcrl2_lps
     mcrl2_svc
-    mcrl2_trace      HEADER_ONLY
-    mcrl2_utilities  HEADER_ONLY
     ${EXTERNAL_LIBS}
   INCLUDE
     ${EXTERNAL_INCL}

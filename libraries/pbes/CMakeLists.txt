@@ -14,12 +14,11 @@ add_mcrl2_library(pbes
     pbes_explorer.cpp
     ${EXPERIMENTAL_TOOLS}
   DEPENDS
-    mcrl2_atermpp        HEADER_ONLY
-    mcrl2_bes
     mcrl2_core
     mcrl2_data
     mcrl2_lps
     mcrl2_modal_formula
-    mcrl2_process        HEADER_ONLY
-    mcrl2_utilities      HEADER_ONLY
+  INCLUDE
+    # TODO: Get rid of dependency on BES library
+    ${CMAKE_SOURCE_DIR}/libraries/bes/include
 )

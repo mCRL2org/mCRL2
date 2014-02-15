@@ -44,14 +44,8 @@ add_mcrl2_tool(ltsview
     visobjectfactory.cpp
     visualizer.cpp
   DEPENDS
-    mcrl2_atermpp      HEADER_ONLY
-    mcrl2_core         HEADER_ONLY
-    mcrl2_data         HEADER_ONLY
-    mcrl2_lps          HEADER_ONLY
     mcrl2_lts
-    mcrl2_utilities    HEADER_ONLY
     mcrl2_utilities_qt
-    mcrl2_trace        HEADER_ONLY
     QtCore
     QtOpenGL
     QtWidgets

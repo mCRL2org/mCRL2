@@ -23,9 +23,9 @@
 # once the rewriter library is no longer needed.
 echo $1
 if [ -z "$CXX" ]; then
-  CXX=`which xclang++`
+  CXX=`which clang++`
   if [ $? -ne 0 ]; then
-    CXX=`which xg++`
+    CXX=`which g++`
   fi
   if [ $? -ne 0 ]; then
     echo "Could not find suitable compiler (g++ or clang++ required)!"

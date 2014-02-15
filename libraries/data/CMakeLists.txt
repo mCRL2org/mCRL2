@@ -16,7 +16,6 @@ add_mcrl2_library(data
     detail/rewrite/rewrite.cpp
     ${COMPILING_REWRITER_SRC}
   DEPENDS
-    mcrl2_atermpp    HEADER_ONLY
     mcrl2_core
     mcrl2_utilities
     ${COMPILING_REWRITER_DEPS}

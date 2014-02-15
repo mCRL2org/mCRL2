@@ -39,9 +39,6 @@ add_mcrl2_tool(diagraphica
     visualizer.cpp
     visutils.cpp
   DEPENDS
-    mcrl2_atermpp      HEADER_ONLY
-    mcrl2_core         HEADER_ONLY
-    mcrl2_data         HEADER_ONLY
     mcrl2_lps
     mcrl2_lts
     mcrl2_utilities

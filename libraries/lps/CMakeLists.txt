@@ -12,10 +12,8 @@ add_mcrl2_library(lps
     simulation.cpp
     typecheck.cpp
   DEPENDS
-    mcrl2_atermpp   HEADER_ONLY
     mcrl2_core
     mcrl2_data
     mcrl2_process
-    mcrl2_trace     HEADER_ONLY
-    mcrl2_utilities HEADER_ONLY
+    mcrl2_trace
 )

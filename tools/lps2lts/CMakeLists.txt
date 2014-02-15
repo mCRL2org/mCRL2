@@ -2,11 +2,6 @@ add_mcrl2_tool(lps2lts
   SOURCES
     lps2lts.cpp
   DEPENDS
-    mcrl2_atermpp   HEADER_ONLY
-    mcrl2_core      HEADER_ONLY
-    mcrl2_data      HEADER_ONLY
-    mcrl2_process   HEADER_ONLY
     mcrl2_lps
     mcrl2_lts
-    mcrl2_utilities HEADER_ONLY
 )

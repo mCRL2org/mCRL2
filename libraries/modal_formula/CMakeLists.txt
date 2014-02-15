@@ -5,10 +5,8 @@ add_mcrl2_library(modal_formula
     regfrmtrans.cpp
     typecheck.cpp
   DEPENDS
-    mcrl2_atermpp    HEADER_ONLY
     mcrl2_core
     mcrl2_data
     mcrl2_lps
     mcrl2_process
-    mcrl2_utilities  HEADER_ONLY
 )

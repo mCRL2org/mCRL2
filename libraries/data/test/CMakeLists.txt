@@ -13,15 +13,11 @@ cmake_minimum_required(VERSION 2.6)
 
 set(PREFIX "data")
 
-file(GLOB TERM_OBJS "*.cpp")
+file(GLOB TESTS "*.cpp")
 
-#set(FAILING_TESTS
-# data_typecheck_test
-#)
-
-foreach( OBJ ${TERM_OBJS} )
-  get_filename_component(result "${OBJ}" NAME_WE)
-  add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL  "${OBJ}" )
+foreach(test ${TESTS})
+  get_filename_component(result "${test}" NAME_WE)
+  add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${test}")
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_data
      mcrl2_utilities
@@ -29,12 +25,5 @@ foreach( OBJ ${TERM_OBJS} )
   )
   # MACRO is defined in CMakeLists.txt in root of source tree
   build_and_run_test_target( ${PREFIX}_${result} )
-
-  list(FIND FAILING_TESTS "${PREFIX}_${result}" FIND_ELM )
-  if( -1 EQUAL FIND_ELM )
-    set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}" )
-  else( -1 EQUAL FIND_ELM )
-    set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}" WILL_FAIL true )
-  endif( -1 EQUAL FIND_ELM )
-
-endforeach( OBJ )
+  set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}" )
+endforeach()
