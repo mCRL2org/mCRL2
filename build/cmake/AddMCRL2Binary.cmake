@@ -1,24 +1,35 @@
 include(CMakeParseArguments)
 
-function(_add_library_tests TARGET_NAME)
-  file(GLOB TESTS "test/*.cpp")
-  foreach(test ${TESTS})
-    get_filename_component(base ${test} NAME_WE)
-    set(testname ${TARGET_NAME}_${base})
-    add_executable(${testname} EXCLUDE_FROM_ALL ${test})
-    set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test)
-    target_link_libraries(${testname} ${TARGET_NAME})
-    add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
-       --build-and-test
-       "${CMAKE_CURRENT_SOURCE_DIR}"
-       "${CMAKE_CURRENT_BINARY_DIR}"
-       --build-noclean
-       --build-nocmake
-       --build-generator "${CMAKE_GENERATOR}"
-       --build-target "${testname}"
-       --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
-       --test-command "${CMAKE_CURRENT_BINARY_DIR}/test/${testname}"
-      )
+function(_add_tests TARGET_NAME)
+  if(MCRL2_ENABLE_TEST_LIBRARIES)
+    file(GLOB test "test/*.cpp")
+  endif()
+  if(MCRL2_ENABLE_TEST_EXAMPLES)
+    file(GLOB example "example/*.cpp")
+  endif()
+  foreach(category "test" "example")
+    foreach(test IN ITEMS ${${category}})
+      get_filename_component(base ${test} NAME_WE)
+      set(testname ${category}_${TARGET_NAME}_${base})
+      add_executable(${testname} EXCLUDE_FROM_ALL ${test})
+      set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${category})
+      target_link_libraries(${testname} ${TARGET_NAME})
+      # TODO: remove the following once we get rid of the PBES/BES dependency issue
+      if(TARGET_NAME STREQUAL "mcrl2_bes")
+        target_link_libraries(${testname} mcrl2_bes)
+      endif()
+      add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
+         --build-and-test
+         "${CMAKE_CURRENT_SOURCE_DIR}"
+         "${CMAKE_CURRENT_BINARY_DIR}"
+         --build-noclean
+         --build-nocmake
+         --build-generator "${CMAKE_GENERATOR}"
+         --build-target "${testname}"
+         --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
+         --test-command "${CMAKE_CURRENT_BINARY_DIR}/${category}/${testname}"
+        )
+    endforeach()
   endforeach()
 endfunction()
 
@@ -227,7 +238,6 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
               FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH}
               COMPONENT ${ARG_COMPONENT})
       _install_header_files(${TARGET_INCLUDE_FILES})
-      _add_library_tests(${TARGET_NAME})
     elseif(${TARGET_TYPE} STREQUAL "EXECUTABLE")
       _add_resource_file(${TARGET_NAME} "${ARG_MENUNAME}" "${ARG_DESCRIPTION}" "${ARG_ICON}" SOURCES)
       add_executable(${TARGET_NAME} ${WIN32} ${SOURCES} ${TARGET_INCLUDE_FILES})
@@ -248,6 +258,8 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       qt5_use_modules(${TARGET_NAME} ${QT_LIBS})
       set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
     endif()
+    _add_tests(${TARGET_NAME})
+
   endif()
 endfunction()
 
