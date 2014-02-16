@@ -180,7 +180,7 @@ static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_c
 
   if (is_variable(t))
   {
-    const variable& v(t);
+    const variable v(t);
     match_tree store = match_tree_S(v,dummy);
 
     if (std::find(s.begin(),s.end(),store) != s.end())
@@ -196,7 +196,7 @@ static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_c
   }
 
   assert(is_application(t));
-  const application& ta(t);
+  const application ta(t);
   size_t arity = ta.size(); 
 
   if (!ommit_head)
@@ -235,7 +235,7 @@ static match_tree_list create_sequence(const data_equation& rule, size_t* var_cn
 
   if (!is_function_symbol(lhs_inner))
   {
-    const application& lhs_innera(lhs_inner);
+    const application lhs_innera(lhs_inner);
     size_t lhs_arity = lhs_innera.size();
 
     if (is_application(lhs_innera.head()))
@@ -1178,7 +1178,7 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, int startarg, va
   }
 
   // t has the shape #REWR#(head,t1,...,tn)
-  const application& ta(t);
+  const application ta(t);
   const size_t arity = ta.size();       // XXX TODO HIGHER ORDER FUNCTION.
   const data_expression& head=ta.head();
   if (is_function_symbol(head))    // XXXXXX This function symbol can also be burried deeper in the term
@@ -1303,7 +1303,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else if (is_variable(t))
   {
-    const variable& v(t);
+    const variable v(t);
     const bool b = (nnfvars!=atermpp::aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(),v) != nnfvars.end());
     const string variable_name=v.name();
     // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
@@ -2004,11 +2004,11 @@ void RewriterCompilingJitty::implement_tree(
 }
 
 
-std::string finish_function_return_term(const size_t arity,
-                                        const std::string& head,
-                                        const sort_expression& s,
-                                        const std::vector<bool>& used,
-                                        size_t& used_arguments)
+static std::string finish_function_return_term(const size_t arity,
+                                               const std::string& head,
+                                               const sort_expression& s,
+                                               const std::vector<bool>& used,
+                                               size_t& used_arguments)
 {
   stringstream ss;
   if (!is_function_sort(s) || arity==0)
