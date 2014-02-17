@@ -23,7 +23,13 @@ namespace precedences {
 const int max_precedence = 10000;
 
 template <typename T>
-int precedence(const T&)
+int left_precedence(const T&)
+{
+  return max_precedence;
+}
+
+template <typename T>
+int right_precedence(const T&)
 {
   return max_precedence;
 }

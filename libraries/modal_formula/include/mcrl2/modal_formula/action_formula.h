@@ -737,44 +737,43 @@ inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
 }
 //--- end generated classes ---//
 
-inline
-int precedence(const action_formula& x)
+//template <typename T>
+//int left_precedence(const T&)
+//{
+//  return core::detail::precedences::max_precedence;
+//}
+inline int left_precedence(const forall& x) { return 0; }
+inline int left_precedence(const exists& x) { return 0; }
+inline int left_precedence(const imp& x)    { return 2; }
+inline int left_precedence(const or_& x)    { return 3; }
+inline int left_precedence(const and_& x)   { return 4; }
+inline int left_precedence(const at& x)     { return 5; }
+inline int left_precedence(const not_& x)   { return 6; }
+inline int left_precedence(const action_formula& x)
 {
-  if (is_forall(x) || is_exists(x))
-  {
-    return 0;
-  }
-  else if (is_imp(x))
-  {
-    return 2;
-  }
-  else if (is_or(x))
-  {
-    return 3;
-  }
-  else if (is_and(x))
-  {
-    return 4;
-  }
-  else if (is_at(x))
-  {
-    return 5;
-  }
-  else if (is_not(x))
-  {
-    return 6;
-  }
+  if      (is_forall(x)) { return left_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return left_precedence(static_cast<const exists&>(x)); }
+  else if (is_imp(x))    { return left_precedence(static_cast<const imp&>(x)); }
+  else if (is_or(x))     { return left_precedence(static_cast<const or_&>(x)); }
+  else if (is_and(x))    { return left_precedence(static_cast<const and_&>(x)); }
+  else if (is_at(x))     { return left_precedence(static_cast<const at&>(x)); }
+  else if (is_not(x))    { return left_precedence(static_cast<const not_&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
-// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
-inline int precedence(const forall& x) { return precedence(static_cast<const action_formula&>(x)); }
-inline int precedence(const exists& x) { return precedence(static_cast<const action_formula&>(x)); }
-inline int precedence(const imp& x) { return precedence(static_cast<const action_formula&>(x)); }
-inline int precedence(const and_& x) { return precedence(static_cast<const action_formula&>(x)); }
-inline int precedence(const or_& x) { return precedence(static_cast<const action_formula&>(x)); }
-inline int precedence(const at& x) { return precedence(static_cast<const action_formula&>(x)); }
-inline int precedence(const not_& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int right_precedence(const forall& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const forall&>(x).body())); }
+inline int right_precedence(const exists& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const exists&>(x).body())); }
+inline int right_precedence(const action_formula& x)
+{
+  if      (is_forall(x)) { return right_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return right_precedence(static_cast<const exists&>(x)); }
+  else if (is_imp(x))    { return right_precedence(static_cast<const imp&>(x)); }
+  else if (is_or(x))     { return right_precedence(static_cast<const or_&>(x)); }
+  else if (is_and(x))    { return right_precedence(static_cast<const and_&>(x)); }
+  else if (is_at(x))     { return right_precedence(static_cast<const at&>(x)); }
+  else if (is_not(x))    { return right_precedence(static_cast<const not_&>(x)); }
+  return core::detail::precedences::max_precedence;
+}
 
 inline const action_formula& unary_operand(const not_& x) { return x.operand(); }
 inline const action_formula& unary_operand(const at& x)   { return x.operand(); }

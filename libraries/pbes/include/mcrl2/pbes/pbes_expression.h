@@ -789,53 +789,31 @@ inline bool is_data(const pbes_expression& t)
   return data::is_data_expression(t);
 }
 
-// From the documentation:
-// The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>", followed by "forall" and "exists".
-// The infix operators "&&", "||" and "=>" associate to the right.
-/// \brief Returns the precedence of pbes expressions
-inline
-int precedence(const pbes_expression& x)
+inline int left_precedence(const forall& x) { return 0; }
+inline int left_precedence(const exists& x) { return 0; }
+inline int left_precedence(const imp& x)    { return 2; }
+inline int left_precedence(const or_& x)    { return 3; }
+inline int left_precedence(const and_& x)   { return 4; }
+inline int left_precedence(const not_& x)   { return 5; }
+inline int left_precedence(const pbes_expression& x)
 {
-  if (is_forall(x) || is_exists(x))
-  {
-    return 0;
-  }
-  else if (is_imp(x))
-  {
-    return 2;
-  }
-  else if (is_or(x))
-  {
-    return 3;
-  }
-  else if (is_and(x))
-  {
-    return 4;
-  }
-  else if (is_not(x))
-  {
-    return 5;
-  }
+  if      (is_forall(x)) { return left_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return left_precedence(static_cast<const exists&>(x)); }
+  else if (is_imp(x))    { return left_precedence(static_cast<const imp&>(x)); }
+  else if (is_or(x))     { return left_precedence(static_cast<const or_&>(x)); }
+  else if (is_and(x))    { return left_precedence(static_cast<const and_&>(x)); }
+  else if (is_not(x))    { return left_precedence(static_cast<const not_&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
-// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
-inline int precedence(const forall & x)  { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const exists & x)  { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const imp& x)      { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const and_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const or_& x)      { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const not_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const data::data_expression & x)               { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const propositional_variable_instantiation& x) { return precedence(static_cast<const pbes_expression&>(x)); }
-
-inline const pbes_expression& unary_operand(const not_& x) { return x.operand(); }
-inline const pbes_expression& binary_left(const and_& x)   { return x.left(); }
-inline const pbes_expression& binary_right(const and_& x)  { return x.right(); }
-inline const pbes_expression& binary_left(const or_& x)    { return x.left(); }
-inline const pbes_expression& binary_right(const or_& x)   { return x.right(); }
-inline const pbes_expression& binary_left(const imp& x)    { return x.left(); }
-inline const pbes_expression& binary_right(const imp& x)   { return x.right(); }
+inline int right_precedence(const forall& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const forall&>(x).body())); }
+inline int right_precedence(const exists& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const exists&>(x).body())); }
+inline int right_precedence(const pbes_expression& x)
+{
+  if      (is_forall(x)) { return right_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return right_precedence(static_cast<const exists&>(x)); }
+  else return left_precedence(x);
+}
 
 /// \brief Returns true if the operations have the same precedence, but are different
 template <typename T1, typename T2>

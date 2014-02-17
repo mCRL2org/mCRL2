@@ -206,7 +206,7 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
   void operator()(const regular_formulas::trans& x)
   {
     derived().enter(x);
-    print_expression(x.operand(), precedence(x));
+    print_expression(x.operand(), left_precedence(x));
     derived().print("+");
     derived().leave(x);
   }
@@ -214,7 +214,7 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
   void operator()(const regular_formulas::trans_or_nil& x)
   {
     derived().enter(x);
-    print_expression(x.operand(), precedence(x));
+    print_expression(x.operand(), left_precedence(x));
     derived().print("*");
     derived().leave(x);
   }

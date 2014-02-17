@@ -379,29 +379,27 @@ inline void swap(trans_or_nil& t1, trans_or_nil& t2)
 }
 //--- end generated classes ---//
 
-inline
-int precedence(const regular_formula& x)
+inline int left_precedence(const seq& x)            { return 1; }
+inline int left_precedence(const alt& x)            { return 2; }
+inline int left_precedence(const trans& x)          { return 3; }
+inline int left_precedence(const trans_or_nil& x)   { return 3; }
+inline int left_precedence(const regular_formula& x)
 {
-  if (is_seq(x))
-  {
-    return 1;
-  }
-  else if (is_alt(x))
-  {
-    return 2;
-  }
-  else if (is_trans(x) || is_trans_or_nil(x))
-  {
-    return 3;
-  }
+  if      (is_seq(x))          { return left_precedence(static_cast<const seq&>(x)); }
+  else if (is_alt(x))          { return left_precedence(static_cast<const alt&>(x)); }
+  else if (is_trans(x))        { return left_precedence(static_cast<const trans&>(x)); }
+  else if (is_trans_or_nil(x)) { return left_precedence(static_cast<const trans_or_nil&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
-// TODO: is there a cleaner way to make the precedence function work for derived classes?
-inline int precedence(const seq& x) { return precedence(static_cast<const regular_formula&>(x)); }
-inline int precedence(const alt& x) { return precedence(static_cast<const regular_formula&>(x)); }
-inline int precedence(const trans& x) { return precedence(static_cast<const regular_formula&>(x)); }
-inline int precedence(const trans_or_nil& x) { return precedence(static_cast<const regular_formula&>(x)); }
+inline int right_precedence(const regular_formula& x)
+{
+  if      (is_seq(x))          { return right_precedence(static_cast<const seq&>(x)); }
+  else if (is_alt(x))          { return right_precedence(static_cast<const alt&>(x)); }
+  else if (is_trans(x))        { return right_precedence(static_cast<const trans&>(x)); }
+  else if (is_trans_or_nil(x)) { return right_precedence(static_cast<const trans_or_nil&>(x)); }
+  return core::detail::precedences::max_precedence;
+}
 
 inline const regular_formula& unary_operand(const trans& x)        { return x.operand(); }
 inline const regular_formula& unary_operand(const trans_or_nil& x) { return x.operand(); }

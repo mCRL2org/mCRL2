@@ -245,12 +245,12 @@ namespace detail {
 } // namespace detail
 
 inline
-int precedence(const application& x)
+int left_precedence(const application& x)
 {
   // TODO: this is unexpected, what to do???
   if (sort_real::is_creal_application(x))
   {
-    return precedence(sort_real::left(x));
+    return left_precedence(sort_real::left(x));
   }
   else if (detail::is_implies(x))
   {
@@ -318,6 +318,12 @@ int precedence(const application& x)
     return 12;
   }
   return max_precedence;
+}
+
+inline
+int right_precedence(const application& x)
+{
+  return left_precedence(x);
 }
 
 inline
@@ -471,17 +477,23 @@ int infix_precedence_right(const application& x)
 }
 
 inline
-int precedence(const data_expression& x)
+int left_precedence(const data_expression& x)
 {
   if (is_application(x))
   {
-    return precedence(application(x));
+    return left_precedence(application(x));
   }
   else if (is_abstraction(x))
   {
     return 1;
   }
   return max_precedence;
+}
+
+inline
+int right_precedence(const data_expression& x)
+{
+  return left_precedence(x);
 }
 
 inline
@@ -494,7 +506,7 @@ int infix_precedence_left(const data_expression& x)
   else if (is_abstraction(x))
   {
     return 2;
-  } 
+  }
   return max_precedence;
 }
 

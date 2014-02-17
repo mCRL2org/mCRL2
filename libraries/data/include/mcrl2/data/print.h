@@ -203,7 +203,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         derived().print(separator);
       }
-      bool print_brackets = (container.size() > 1) && (precedence(*i) < container_precedence);
+      bool print_brackets = (container.size() > 1) && (left_precedence(*i) < container_precedence);
       if (print_brackets)
       {
         derived().print(open_bracket);
@@ -220,7 +220,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   inline
   bool is_same_different_precedence(const application& x, const application& y)
   {
-    return precedence(x) == precedence(y) && x.head() != y.head();
+    return left_precedence(x) == left_precedence(y) && x.head() != y.head();
   }
 
   template <typename Variable>
@@ -445,14 +445,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_list_enumeration(const application& x)
   {
     derived().print("[");
-    print_container(x, precedence(x));
+    print_container(x, left_precedence(x));
     derived().print("]");
   }
 
   void print_set_enumeration(const application& x)
   {
     derived().print("{ ");
-    print_container(x, precedence(x));
+    print_container(x, left_precedence(x));
     derived().print(" }");
   }
 
@@ -895,7 +895,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       std::string name(function_symbol(x.head()).name());
       if (name == "!" || name == "#")
       {
-        print_parentheses = precedence(*x.begin()) < max_precedence;
+        print_parentheses = left_precedence(*x.begin()) < max_precedence;
       }
     }
     if (print_parentheses)
@@ -1298,23 +1298,23 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (sort_nat::is_div_application(x))
       {
         // TODO: make a proper binary operation of div
-        print_expression(sort_nat::left(x), precedence(x));
+        print_expression(sort_nat::left(x), left_precedence(x));
         derived().print(" div ");
-        print_expression(sort_nat::right(x), precedence(x));
+        print_expression(sort_nat::right(x), right_precedence(x));
       }
       else if (sort_nat::is_mod_application(x))
       {
         // TODO: make a proper binary operation of mod
-        print_expression(sort_nat::left(x), precedence(x));
+        print_expression(sort_nat::left(x), left_precedence(x));
         derived().print(" mod ");
-        print_expression(sort_nat::right(x), precedence(x));
+        print_expression(sort_nat::right(x), right_precedence(x));
       }
       else if (sort_int::is_mod_application(x))
       {
         // TODO: make a proper binary operation of mod
-        print_expression(sort_int::left(x), precedence(x));
+        print_expression(sort_int::left(x), left_precedence(x));
         derived().print(" mod ");
-        print_expression(sort_int::right(x), precedence(x));
+        print_expression(sort_int::right(x), right_precedence(x));
       }
       else if (sort_nat::is_first_application(x))
       {
@@ -1326,9 +1326,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         }
         else
         {
-          print_expression(sort_nat::left(y), precedence(y));
+          print_expression(sort_nat::left(y), left_precedence(y));
           derived().print(" div ");
-          print_expression(sort_nat::right(y), precedence(y));
+          print_expression(sort_nat::right(y), right_precedence(y));
         }
       }
       else if (sort_nat::is_last_application(x))
@@ -1341,9 +1341,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         }
         else
         {
-          print_expression(sort_nat::left(y), precedence(y));
+          print_expression(sort_nat::left(y), left_precedence(y));
           derived().print(" mod ");
-          print_expression(sort_nat::right(y), precedence(y));
+          print_expression(sort_nat::right(y), right_precedence(y));
         }
       }
       else if (sort_nat::is_exp_application(x))
@@ -1386,9 +1386,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (sort_int::is_div_application(x))
       {
         // TODO: make a proper binary operation of div
-        print_expression(sort_int::left(x), precedence(x));
+        print_expression(sort_int::left(x), left_precedence(x));
         derived().print(" div ");
-        print_expression(sort_int::right(x), precedence(x));
+        print_expression(sort_int::right(x), right_precedence(x));
       }
       else if (sort_int::is_cint_application(x))
       {
