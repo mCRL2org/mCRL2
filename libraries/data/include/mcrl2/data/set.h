@@ -949,7 +949,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vs), set_fset(s, vs), constructor(s, false_function(s), vs)));
         result.push_back(data_equation(atermpp::make_vector(vf), sort_set::set_comprehension(s, vf), constructor(s, vf, sort_fset::empty(s))));
         result.push_back(data_equation(atermpp::make_vector(ve, vf, vs), in(s, ve, constructor(s, vf, vs)), not_equal_to(vf(ve), in(s, ve, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), equal_to(constructor(s, vf, vs), constructor(s, vg, vt)), forall(atermpp::make_vector(vc), not_equal_to(equal_to(vf(vc), vg(vc)), in(s, vc, difference(s, vs, vt))))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), equal_to(constructor(s, vf, vs), constructor(s, vg, vt)), forall(atermpp::make_vector(vc), equal_to(equal_to(vf(vc), vg(vc)), equal_to(in(s, vc, vs), in(s, vc, vt))))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
         result.push_back(data_equation(atermpp::make_vector(vf, vs), complement(s, constructor(s, vf, vs)), constructor(s, not_function(s, vf), vs)));

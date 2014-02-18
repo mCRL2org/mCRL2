@@ -49,6 +49,7 @@ void set_expression_test()
 
   specification.add_context_sort(sort_pos::pos());
   specification.add_context_sort(sort_set::set_(sort_pos::pos()));
+  specification.add_context_sort(sort_set::set_(sort_bool::bool_()));
 
   data::rewriter normaliser(specification);
 
@@ -101,6 +102,16 @@ void set_expression_test()
 
   e = parse_data_expression("{20, 30, 40}", v.begin(), v.end());
   BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));   
+
+  data_expression t6d1 = parse_data_expression("{} == { b: Bool | true } - { true, false }");
+  data_expression t6d2 = parse_data_expression("true");
+
+  BOOST_CHECK(normaliser(t6d1) == normaliser(t6d2));
+
+  data_expression t7d1 = parse_data_expression("{ b: Bool | true } - { true, false } == {}");
+  data_expression t7d2 = parse_data_expression("true");
+  BOOST_CHECK(normaliser(t7d1) == normaliser(t7d2));
+
 }
 
 int test_main(int argc, char** argv)
