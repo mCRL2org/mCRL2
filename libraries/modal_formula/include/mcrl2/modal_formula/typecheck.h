@@ -67,8 +67,8 @@ void type_check(state_formula& formula, const lps::specification& lps_spec, bool
   }
   catch (mcrl2::runtime_error &e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula TEMPORARILY IN ATERM FORMAT" +  
-                             mcrl2::utilities::to_string(formula) /* pp(formula)*/);
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula " +  
+                             mcrl2::utilities::to_string(formula));
   }
 }
 

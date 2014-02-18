@@ -3687,9 +3687,11 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
             DataTerm=data::function_symbol(Name,Type);
           }
           Type=UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
-          if (EqTypesA(Type,PosType))
+          // if (EqTypesA(Type,PosType))
+          sort_expression result;
+          if (TypeMatchA(Type,PosType,result))
           {
-            NewParList.push_front(Type);
+            NewParList.push_front(result);
           }
         }
         ParList=reverse(NewParList);
@@ -3711,7 +3713,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         }
         try
         {
-           sort_expression r= UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          sort_expression r= UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
           return r;
         }
         catch (mcrl2::runtime_error &e)
@@ -4185,7 +4187,11 @@ bool mcrl2::data::data_type_checker::TypeMatchA(
         NewPosType=new_type;
         mCRL2log(debug) << "Match TypeMatchA Type: " << Type << ";    PosType: " << PosType <<
                     " New Type: " << NewPosType << "" << std::endl;
-        NewTypeList.push_front(NewPosType);
+        // Avoid double insertions.
+        if (std::find(NewTypeList.begin(),NewTypeList.end(),NewPosType)==NewTypeList.end())
+        {
+          NewTypeList.push_front(NewPosType);
+        }
       }
     }
     if (NewTypeList.empty())
@@ -4193,7 +4199,6 @@ bool mcrl2::data::data_type_checker::TypeMatchA(
       mCRL2log(debug) << "No match TypeMatchA Type: " << Type << ";    PosType: " << PosType << " " << std::endl;
       return false;
     }
-
     if (NewTypeList.tail().empty())
     {
       result=NewTypeList.front();
