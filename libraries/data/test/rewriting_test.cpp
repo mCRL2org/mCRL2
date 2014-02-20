@@ -1184,6 +1184,28 @@ BOOST_AUTO_TEST_CASE(rewrite_using_the_where_construct)
   }
 }
 
+BOOST_AUTO_TEST_CASE(rewrite_rule_for_higher_order_functions)
+{
+  std::string s(
+  "map f:Nat->Nat->Bool;\n"
+  "    c:Nat->Bool;\n"
+  "var x:Nat;\n"
+  "eqn c(x) = f(x)(0);\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("c(0)", specification));
+    data::data_expression f(parse_data_expression("f(0)(0)", specification));
+    data_rewrite_test(R, e, f);
+  }
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

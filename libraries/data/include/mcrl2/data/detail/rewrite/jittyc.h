@@ -106,12 +106,12 @@ class RewriterCompilingJitty: public Rewriter
     void add_base_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
     void extend_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
     bool opid_is_nf(const function_symbol &opid, size_t num_args);
-    void calc_nfs_list(nfs_array &a, const application& args, int startarg, variable_or_number_list nnfvars);
-    bool calc_nfs(const data_expression& t, int startarg, variable_or_number_list nnfvars);
-    std::string calc_inner_terms(nfs_array &nfs, const application& args, int startarg, variable_or_number_list nnfvars, nfs_array *rewr);
+    void calc_nfs_list(nfs_array &a, const application& args, const size_t startarg, variable_or_number_list nnfvars);
+    bool calc_nfs(const data_expression& t, const size_t startarg, variable_or_number_list nnfvars);
+    std::string calc_inner_terms(nfs_array &nfs, const application& args, const size_t startarg, variable_or_number_list nnfvars, nfs_array *rewr);
     std::pair<bool,std::string> calc_inner_term(const data_expression &t, 
-                int startarg, variable_or_number_list nnfvars, const bool rewr, const size_t total_arity);
-    void calcTerm(FILE* f, const data_expression& t, int startarg, variable_or_number_list nnfvars, bool rewr = true);
+                const size_t startarg, variable_or_number_list nnfvars, const bool rewr, const size_t total_arity);
+    void calcTerm(FILE* f, const data_expression& t, const size_t startarg, variable_or_number_list nnfvars, bool rewr = true);
     void implement_tree_aux(FILE* f, const match_tree& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt, size_t d, const size_t arity, 
                const std::vector<bool> &used, variable_or_number_list nnfvars);
     void implement_tree(FILE* f, const match_tree& tree, const size_t arity, size_t d, 

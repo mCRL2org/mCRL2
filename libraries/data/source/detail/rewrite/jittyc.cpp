@@ -1141,7 +1141,7 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
   return true;
 }
 
-void RewriterCompilingJitty::calc_nfs_list(nfs_array& nfs, const application& appl, int startarg, variable_or_number_list nnfvars)
+void RewriterCompilingJitty::calc_nfs_list(nfs_array& nfs, const application& appl, const size_t startarg, variable_or_number_list nnfvars)
 {
   size_t j=0;
   for(application::const_iterator i=appl.begin(); i!=appl.end(); ++i, ++j)  // XXXX TODO MOET DIT NIET VOOR ALLE ARGUMENTEN, INCLUSIEF GENESTE
@@ -1150,7 +1150,7 @@ void RewriterCompilingJitty::calc_nfs_list(nfs_array& nfs, const application& ap
   }
 }
 
-bool RewriterCompilingJitty::calc_nfs(const data_expression& t, int startarg, variable_or_number_list nnfvars)
+bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t startarg, variable_or_number_list nnfvars)
 {
   if (is_function_symbol(t))
   {
@@ -1207,7 +1207,7 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, int startarg, va
   }
 }
 
-string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, const application& appl, int startarg, variable_or_number_list nnfvars, nfs_array *rewr)
+string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, const application& appl, const size_t startarg, variable_or_number_list nnfvars, nfs_array *rewr)
 {
   size_t j=0;
   string result="";
@@ -1248,7 +1248,7 @@ std::vector <data_expression> prepared_normal_forms;
 // if total_arity<=5 a term of type atermpp::aterm is generated, otherwise a term of type atermpp::aterm_appl is generated.
 pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const data_expression& t,
-                  int startarg,
+                  const size_t startarg,
                   variable_or_number_list nnfvars,
                   const bool rewr,
                   const size_t total_arity)
@@ -1321,7 +1321,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else
     {
-// assert(0); //XXXXX THIS GOES WRONG WITH FUNCTION UPDATE
       ss << "this_rewriter->bound_variable_get(" << bound_variable_index(v) << ")";
     }
     return pair<bool,string>(rewr || !b, ss.str());
@@ -1605,7 +1604,17 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else if (is_application(ta.head()))
     {
-      ss << "TODO: " << pp(ta) << "\n";
+      const size_t arity=ta.size();
+      b = rewr;
+      pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false,arity);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
+      nfs_array tail_first(arity);
+      string tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,NULL);
+      if (rewr)
+      {
+          ss << "rewrite(";
+      }
+      ss << calc_inner_appl_head(arity+1) << head.second << "," << tail_second << ")";
+      ss << ")";
     }
     else // headfs is a single variable.
     {
@@ -1654,26 +1663,12 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   return pair<bool,string>(b,ss.str());
 }
 
-void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, int startarg, variable_or_number_list nnfvars, bool rewr)
+void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, const size_t startarg, variable_or_number_list nnfvars, bool rewr)
 {
   pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr,0);
   fprintf(f,"%s",p.second.c_str());
   return;
 }
-
-static int get_startarg(const data_expression& a, int n)
-{
-  if (a.type_is_list())
-  {
-    assert(0);
-    return n-((atermpp::aterm_list) a).size()+1;
-  }
-  else
-  {
-    return n;
-  }
-}
-
 
 static int* i_t_st = NULL;
 static int i_t_st_s = 0;
@@ -1923,7 +1918,7 @@ void RewriterCompilingJitty::implement_tree_aux(
     {
       cur_arg = peekn_st(2*level-1);
     }
-    calcTerm(f,treeR.result(),get_startarg(treeR.result(),cur_arg+1),nnfvars);
+    calcTerm(f,treeR.result(),cur_arg+1,nnfvars);
     fprintf(f,"; // R1\n");
     return;
   }
@@ -1963,8 +1958,7 @@ void RewriterCompilingJitty::implement_tree(
            );
 
     assert(treeC.true_tree().isR());
-    calcTerm(f,match_tree_R(treeC.true_tree()).result(),
-                 get_startarg(match_tree_R(treeC.true_tree()).result(),0),nnfvars);
+    calcTerm(f,match_tree_R(treeC.true_tree()).result(),0,nnfvars);
     fprintf(f,";\n"
             "%s}\n%selse\n%s{\n", whitespace(d*2),whitespace(d*2),whitespace(d*2)
            );
@@ -1978,7 +1972,7 @@ void RewriterCompilingJitty::implement_tree(
     if (arity==0)
     { // return a reference to an atermpp::aterm_appl
       fprintf(f,"%sstatic data_expression static_term(rewrite(",whitespace(d*2));
-      calcTerm(f,treeR.result(),get_startarg(treeR.result(),0),nnfvars);
+      calcTerm(f,treeR.result(),0,nnfvars);
       fprintf(f,")); \n");
       fprintf(f,"%sreturn static_term",whitespace(d*2));
       fprintf(f,"; // R2a\n");
@@ -1986,7 +1980,7 @@ void RewriterCompilingJitty::implement_tree(
     else
     { // arity>0
       fprintf(f,"%sreturn ",whitespace(d*2));
-      calcTerm(f,treeR.result(),get_startarg(treeR.result(),0),nnfvars);
+      calcTerm(f,treeR.result(),0,nnfvars);
       fprintf(f,"; // R2b\n");
     }
   }
