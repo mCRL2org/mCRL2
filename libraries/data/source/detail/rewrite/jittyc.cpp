@@ -1156,12 +1156,6 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t sta
   {
     return opid_is_nf(aterm_cast<function_symbol>(t),0);
   }
-  else if (is_nil((atermpp::aterm_appl) t))
-  {
-    assert(0);
-    // assert(startarg>=0); This value may be negative.
-    // return (nnfvars==atermpp::aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(), atermpp::aterm_int(startarg)) == nnfvars.end());
-  }
   else if (is_variable(t))
   {
     return (nnfvars==atermpp::aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(),variable(t)) == nnfvars.end());
@@ -1188,7 +1182,7 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t sta
     {
       nfs_array args(arity);
       calc_nfs_list(args,ta,startarg,nnfvars);
-      bool b = args.is_filled(arity);
+      bool b = args.is_filled();
       return b;
     }
     else
@@ -1198,11 +1192,6 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t sta
   }
   else
   {
-    if (arity == 0)
-    {
-      assert(false);
-      return calc_nfs(head, startarg, nnfvars);
-    }
     return false;
   }
 }
@@ -1488,9 +1477,9 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       }
       if (arity > NF_MAX_ARITY)
       {
-        args_nfs.clear(arity);
+        args_nfs.fill(false);
       }
-      if (args_nfs.is_clear(arity) || b || rewr || (arity > NF_MAX_ARITY))
+      if (args_nfs.is_clear() || b || rewr || (arity > NF_MAX_ARITY))
       {
         if (b || !rewr)
         {
@@ -1508,7 +1497,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           const size_t index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
           const data::function_symbol old_head=headfs;
           std::stringstream new_name;
-          new_name << "@_rewr" << "_" << index << "_" << ta.size() << "_" << args_nfs.get_value(arity)
+          new_name << "@_rewr" << "_" << index << "_" << ta.size() << "_" << args_nfs.get_encoded_number()
                                << "_term";
           const data::function_symbol f(new_name.str(),old_head.sort());
           if (partially_rewritten_functions.count(f)==0)
@@ -1523,7 +1512,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         }
         else
         {
-          ss << (core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs)+((1 << arity)-arity-1)+args_nfs.getraw(0));
+          ss << (core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs)+((1 << arity)-arity-1)+args_nfs.get_encoded_number());
         }
       }
       nfs_array args_first(arity);
@@ -1534,13 +1523,13 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       string args_second = calc_inner_terms(args_first,ta,startarg,nnfvars,&args_nfs);
       // The assert is not valid anymore, because lambdas are sometimes returned in normal form, although not strictly
       // asked for...
-      assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first.equals(args_nfs,arity));
+      assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first==args_nfs);
       if (rewr && !b)
       {
         ss << "_" << arity << "_";
         if (arity <= NF_MAX_ARITY)
         {
-          ss << args_first.get_value(arity);
+          ss << args_first.get_encoded_number();
         }
         else
         {
@@ -1553,7 +1542,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         ss << ",";
       }
       ss << args_second << ")";
-      if (!args_first.is_filled(arity))
+      if (!args_first.is_filled())
       {
         b = false;
       }
@@ -1578,13 +1567,13 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       calc_nfs_list(args_nfs,ta,startarg,nnfvars);
       if (arity > NF_MAX_ARITY)
       {
-        args_nfs.clear(arity);
+        args_nfs.fill(false);
       }
 
       nfs_array args_first(arity);
       if (rewr && b)
       {
-        args_nfs.fill(arity);
+        args_nfs.fill();
       }
 
       pair<bool,string> head = calc_inner_term(ta1,startarg,nnfvars,false,arity);
@@ -1650,9 +1639,9 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       ss << calc_inner_appl_head(arity+1) << head.second << ",";
       if (c)
       {
-        tail_first.clear(arity);
+        tail_first.fill(false);
         nfs_array rewrall(arity);
-        rewrall.fill(arity);
+        rewrall.fill();
         tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,&rewrall);
       }
       ss << tail_second << ")";
@@ -2715,7 +2704,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             // Implement strategy
               if (0 < a)
               {
-                nfs_a.set_value(nfs);
+                nfs_a.set_encoded_number(nfs);
               }
               implement_strategy(f,create_strategy(jittyc_eqns[fs], a,nfs_a),a,1,fs,nfs);
             }

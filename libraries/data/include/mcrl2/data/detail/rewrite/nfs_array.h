@@ -1,4 +1,4 @@
-// Author(s): Sjoerd Cranen 
+// Author(s): Sjoerd Cranen, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -7,7 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/detail/rewrite/nfs_array.h
-/// \brief ?
+/// \brief This is an array in which it is recorded which arguments 
+///        are normal forms and which are not.
 
 #ifndef MCRL2_DATA_NFS_ARRAY_H
 #define MCRL2_DATA_NFS_ARRAY_H
@@ -28,117 +29,80 @@ namespace data
 namespace detail
 {
 
-class nfs_array
+class nfs_array:public std::vector<bool>
 {
 public:
-  nfs_array(size_t size) : m_array(new size_t[size])
+  nfs_array(size_t size): 
+       std::vector<bool>(size,false)
   {
-    /* Explicitly initialise this array, as this is not done 
-       automatically when it is constructed */
-
-    for(size_t i=0; i<size; ++i)
-    {
-      m_array[i]=0;
-    }
-  }
-  ~nfs_array()
-  {
-    delete[] m_array;
-  }
-  void clear(size_t arity)
-  {
-    if (arity > 0)
-    {
-      memset(m_array, 0, ((arity-1)/(sizeof(size_t)*8)+1)*sizeof(size_t));
-    }
-  }
-  void fill(size_t arity, bool val = true)
-  {
-    size_t newval = val ? (~((size_t)0)) : 0;
-    for(size_t i = 0; i * sizeof(size_t) * 8 < arity; ++i)
-    {
-      m_array[i] = newval;
-    }
   }
 
-  size_t get_value(size_t arity)
+  void fill(bool val = true)
   {
-    assert(arity <= NF_MAX_ARITY);
-    return m_array[0] & (((size_t)1 << arity) - 1);
+    assign(size(),val);
   }
 
-  void set_value(size_t val)
+  // Return the values of this vector as if it encodes a number in bits..
+  size_t get_encoded_number()   
   {
-    m_array[0] = val;
-  } 
-
-  bool equals(nfs_array& other, size_t arity)
-  {
-    size_t i = 0;
-    while (arity >= sizeof(size_t)*8)
+    assert(size() <= NF_MAX_ARITY);
+    size_t result=0;
+    for(size_t i=0; i<size(); ++i)
     {
-      if (m_array[i] != other.m_array[i])
-      {
-        return false;
+      if ((*this)[i])
+      { 
+        result=result+(1<<i);
       }
-      arity -= sizeof(size_t)*8;
-      ++i;
     }
-    return (m_array[i] & ((1 << arity)-1)) == (other.m_array[i] & ((1 << arity)-1));
+    return result;
+  }
+
+  // Set the values of this vector by viewing val as a binary number.
+  // Position 0 contains the least significant bit.
+  void set_encoded_number(size_t val)
+  {
+    for(size_t i=0; i<size(); ++i)
+    {
+      (*this)[i]=((val & 1)==1);
+      val=val>>1;
+    }
   } 
 
   bool get(size_t i)
   {
-    return (m_array[i/(sizeof(size_t)*8)] & (((size_t) 1) << (i%(sizeof(size_t)*8))))>0;
+    return (*this)[i];
   }
 
   void set(size_t i, bool val = true)
   {
-    if (val)
-    {
-      m_array[i/(sizeof(size_t)*8)] |= ((size_t) 1) << (i%(sizeof(size_t)*8));
-    }
-    else
-    {
-      m_array[i/(sizeof(size_t)*8)] &= ~(((size_t) 1) << (i%(sizeof(size_t)*8)));
-    }
+    assert(i<size());
+    (*this)[i]=val;
   }
 
-  bool is_clear(size_t arity)
+  bool is_clear()
   {
-    size_t i = 0;
-    while (arity >= sizeof(size_t)*8)
+    for(auto i=begin(); i!=end(); ++i)
     {
-      if (m_array[i++] != ((size_t) 0))
+      if (*i)
       {
         return false;
       }
-      arity -= sizeof(size_t)*8;
     }
-    return (m_array[i] & ((1 << arity)-1)) == 0;
+    return true;
   }
 
-  bool is_filled(size_t arity)
+  bool is_filled()
   {
-    size_t i = 0;
-    while (arity >= sizeof(size_t)*8)
+    for(auto i=begin(); i!=end(); ++i)
     {
-      if (m_array[i++] != ~((size_t) 0))
+      if (!*i)
       {
         return false;
       }
-      arity -= sizeof(size_t)*8;
     }
-    return (m_array[i] & ((1 << arity)-1)) == (size_t)((1 << arity)-1);
+    return true;
   }
 
-  size_t getraw(size_t i)
-  {
-    return m_array[i];
-  } 
-
-private:
-  size_t *m_array;
 };
 
 }
