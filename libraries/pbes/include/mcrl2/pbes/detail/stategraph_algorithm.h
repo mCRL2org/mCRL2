@@ -196,6 +196,11 @@ struct local_control_flow_graph
 {
   std::set<local_control_flow_graph_vertex> vertices;
 
+//  /// \brief Copy constructor
+//  local_control_flow_graph(const local_control_flow_graph& other)
+//  {
+//  }
+
   std::pair<std::set<local_control_flow_graph_vertex>::iterator, bool> insert(const local_control_flow_graph_vertex& u)
   {
     return vertices.insert(u);
@@ -545,7 +550,7 @@ class stategraph_algorithm
               }
               else
               {
-                if (is_undefined(PVI_X_i.source, n) && is_undefined(PVI_X_i.dest, n) && !is_mapped_to(PVI_X_i.copy, n, n))
+                if ((is_undefined(PVI_X_i.source, n) || is_undefined(PVI_X_i.dest, n)) && !is_mapped_to(PVI_X_i.copy, n, n))
                 {
                   mCRL2log(log::debug, "stategraph") << "parameter (" << X << ", " << n << ") is not an LCFP due to " << pbes_system::pp(PVI_X_i.X) << "(source and dest undefined, and no copy to self)" << std::endl;
                   m_is_LCFP[X][n] = false;
