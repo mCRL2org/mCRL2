@@ -196,14 +196,56 @@ struct local_control_flow_graph
 {
   std::set<local_control_flow_graph_vertex> vertices;
 
-//  /// \brief Copy constructor
-//  local_control_flow_graph(const local_control_flow_graph& other)
-//  {
-//  }
+  const local_control_flow_graph_vertex& find_vertex(const local_control_flow_graph_vertex& u) const;
+
+  /// \brief Default constructor
+  local_control_flow_graph()
+  {}
+
+  /// \brief Copy constructor N.B. The implementation is rather inefficient!
+  local_control_flow_graph(const local_control_flow_graph& other)
+  {
+    // copy the vertices, but not the neighbors
+    for (auto i = other.vertices.begin(); i != other.vertices.end(); ++i)
+    {
+      auto const& u = *i;
+      vertices.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), u.value()));
+    }
+
+    // reconstruct the neighbors
+    for (auto i = other.vertices.begin(); i != other.vertices.end(); ++i)
+    {
+      const local_control_flow_graph_vertex& u = find_vertex(*i);
+      auto const& neighbors = i->neighbors();
+      for (auto j = neighbors.begin(); j != neighbors.end(); ++j)
+      {
+        const local_control_flow_graph_vertex& v = find_vertex(*(j->first));
+        std::size_t label = j->second;
+        u.insert_neighbor(&v, label);
+      }
+    }
+  }
+
+  // throws a runtime_error if an error is found in the internal representation
+  void self_check() const
+  {
+    // check if all neighbors are part of the graph
+    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    {
+      auto neighbors = i->neighbors();
+      for (auto j = neighbors.begin(); j != neighbors.end(); ++j)
+      {
+        const local_control_flow_graph_vertex& v = *(j->first);
+        find_vertex(v);
+      }
+    }
+  }
 
   std::pair<std::set<local_control_flow_graph_vertex>::iterator, bool> insert(const local_control_flow_graph_vertex& u)
   {
-    return vertices.insert(u);
+    auto result = vertices.insert(u);
+    // self_check();
+    return result;
   }
 
   // Inserts an edge between the vertex u and the vertex v = (Y, k1, e1).
@@ -244,6 +286,7 @@ struct local_control_flow_graph
     {
       mCRL2log(log::debug1, "stategraph") << " edge already exists!" << std::endl;
     }
+    // self_check();
   }
 };
 
@@ -255,6 +298,18 @@ std::ostream& operator<<(std::ostream& out, const local_control_flow_graph& G)
     out << "vertex " << *i << " neighbors: " << i->print_neighbors() << std::endl;
   }
   return out;
+}
+
+inline
+const local_control_flow_graph_vertex& local_control_flow_graph::find_vertex(const local_control_flow_graph_vertex& u) const
+{
+  auto i = vertices.find(u);
+  if (i == vertices.end())
+  {
+    std::cout << "could not find vertex " << u << " in the graph\n" << *this << std::endl;
+    throw mcrl2::runtime_error("local_control_flow_graph::find_vertex: vertex not found!");
+  }
+  return *i;
 }
 
 /// \brief Algorithm class for the computation of the local and global control flow graphs
@@ -345,6 +400,9 @@ class stategraph_algorithm
 
     // the control flow graph(s)
     std::vector<control_flow_graph> m_control_flow_graphs;
+
+    // the local control flow graph(s)
+    std::vector<local_control_flow_graph> m_local_control_flow_graphs;
 
     // for readability
     std::set<data::variable> FV(const data::data_expression& x) const
@@ -1244,7 +1302,7 @@ class stategraph_algorithm
           }
         }
       }
-      mCRL2log(log::debug, "stategraph") << V << std::endl;
+      m_local_control_flow_graphs.push_back(V);
     }
 
     // Computes a local control flow graph that corresponds to the given component in m_global_control_flow_graph_vertices.
@@ -1294,6 +1352,14 @@ class stategraph_algorithm
       }
     }
 
+    void print_local_control_flow_graphs() const
+    {
+      for (auto i = m_local_control_flow_graphs.begin(); i != m_local_control_flow_graphs.end(); ++i)
+      {
+        mCRL2log(log::debug, "stategraph") << *i << std::endl;
+      }
+    }
+
     void compute_local_control_flow_graphs()
     {
       compute_local_control_flow_graph_values();
@@ -1313,6 +1379,7 @@ class stategraph_algorithm
       remove_invalid_connected_components();
       remove_only_copy_components();
       compute_local_control_flow_graphs();
+      print_local_control_flow_graphs();
     }
 
     const stategraph_pbes& get_pbes() const
