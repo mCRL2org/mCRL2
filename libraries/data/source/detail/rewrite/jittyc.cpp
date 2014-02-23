@@ -446,7 +446,7 @@ static match_tree_list subst_var(const match_tree_list& l,
 
 static std::vector < size_t> treevars_usedcnt;
 
-static void inc_usedcnt(variable_or_number_list l)
+static void inc_usedcnt(const variable_or_number_list& l)
 {
   for (variable_or_number_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
@@ -1190,13 +1190,15 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_numb
   }
 }
 
-string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, const application& appl, const size_t startarg, variable_or_number_list nnfvars, nfs_array *rewr)
+string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, const application& appl, const size_t startarg, variable_or_number_list nnfvars, const nfs_array& rewr)
 {
+std::cerr << "APPL " << appl << "   " << startarg << "\n";
   size_t j=0;
   string result="";
   for(application::const_iterator i=appl.begin(); i!=appl.end(); ++i, ++j)
   {
-    pair<bool,string> head = calc_inner_term(*i, startarg+j,nnfvars,rewr?(rewr->get(j)):false);
+std::cerr << "APPL1 " << *i << "   " << startarg+j << "\n";
+    pair<bool,string> head = calc_inner_term(*i, startarg+j,nnfvars,rewr.get(j)); 
     nfs.set(j,head.first);
 
     result=result + (j==0?"":",") + head.second;
@@ -1229,8 +1231,9 @@ std::vector <data_expression> prepared_normal_forms;
 /// This function generates a string of C++ code to calculate the data_expression t. 
 /// If the result is a normal form the resulting boolean is true, otherwise it is false. 
 /// The data expression t is the term for which C code is generated.
-/// The size_t start_arg ?????
-/// The variable_or_number_list nnfvars 
+/// The size_t start_arg gives the index of the position of the current term in the surrounding application.
+//                 The head has index 0. The first argument has index 1, etc.
+/// The variable_or_number_list nnfvars contains variables that are in normal form, and indices that are not in normal form.
 /// The bool rewr indicates whether a normal form is requested. If rewr is valid, then yes.
 
 pair<bool,string> RewriterCompilingJitty::calc_inner_term(
@@ -1515,7 +1518,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         args_nfs.fill(arity);
       }
-      string args_second = calc_inner_terms(args_first,ta,startarg,nnfvars,&args_nfs);
+      string args_second = calc_inner_terms(args_first,ta,startarg,nnfvars,args_nfs);
       // The assert is not valid anymore, because lambdas are sometimes returned in normal form, although not strictly
       // asked for...
 
@@ -1580,7 +1583,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       }
 
       ss << calc_inner_appl_head(arity) << head.second << "," <<
-               calc_inner_terms(args_first,ta,startarg,nnfvars,&args_nfs) << ")";
+               calc_inner_terms(args_first,ta,startarg,nnfvars,args_nfs) << ")";
       if (rewr)
       {
         ss << ")";
@@ -1594,7 +1597,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       b = rewr;
       pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
       nfs_array tail_first(arity);
-      string tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,NULL);
+      const nfs_array dummy(arity);
+      string tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,dummy);
       if (rewr)
       {
           ss << "rewrite(";
@@ -1610,8 +1614,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       b = rewr;
       pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false);
       nfs_array tail_first(arity);
-      string tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,NULL);
-      // ss << "is_application_no_check(atermpp::aterm_cast<atermpp::aterm_appl>(" << head.second << "))?";
+      const nfs_array dummy(arity);
+      string tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,dummy);
       ss << "!is_variable(atermpp::aterm_cast<atermpp::aterm_appl>(" << head.second << "))?";
       if (rewr)
       {
@@ -1639,7 +1643,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         tail_first.fill(false);
         nfs_array rewrall(arity);
         rewrall.fill();
-        tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,&rewrall);
+        tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,rewrall);
       }
       ss << tail_second << ")";
       ss << ")";

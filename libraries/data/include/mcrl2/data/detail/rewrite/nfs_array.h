@@ -43,7 +43,7 @@ public:
   }
 
   // Return the values of this vector as if it encodes a number in bits..
-  size_t get_encoded_number()   
+  size_t get_encoded_number() const
   {
     assert(size() <= NF_MAX_ARITY);
     size_t result=0;
@@ -68,7 +68,7 @@ public:
     }
   } 
 
-  bool get(size_t i)
+  bool get(size_t i) const
   {
     assert(i<size());
     return (*this)[i];
@@ -80,7 +80,7 @@ public:
     (*this)[i]=val;
   }
 
-  bool is_clear()
+  bool is_clear() const
   {
     for(auto i=begin(); i!=end(); ++i)
     {
@@ -92,7 +92,7 @@ public:
     return true;
   }
 
-  bool is_filled()
+  bool is_filled() const
   {
     for(auto i=begin(); i!=end(); ++i)
     {
