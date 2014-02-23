@@ -437,7 +437,6 @@ static match_tree_list subst_var(const match_tree_list& l,
           m.push_front(l.front());
         }
       }
-// assert(!is_variable(aterm_appl(head[0])) || variable(head[0]).name()!=aterm_string("v"));
       head = match_tree_Re(replace_free_variables(headRe.result(),substs),m);
     }
     result.push_back(head);
@@ -449,13 +448,11 @@ static std::vector < size_t> treevars_usedcnt;
 
 static void inc_usedcnt(variable_or_number_list l)
 {
-  for (; !l.empty(); l=l.tail())
+  for (variable_or_number_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
-    aterm first=l.front();
-    assert(is_variable(aterm_appl(first)) || first.type_is_int());
-    if (first.type_is_int())
+    if (i->type_is_int())
     {
-      treevars_usedcnt[aterm_cast<atermpp::aterm_int>(first).value()]++;
+      treevars_usedcnt[aterm_cast<atermpp::aterm_int>(*i).value()]++;
     }
   }
 }
@@ -507,18 +504,6 @@ static match_tree build_tree(build_pars pars, size_t i)
           inc_usedcnt(t.variables_result()); 
           tree = match_tree_C(t.condition(),match_tree_R(t.result()),tree);
         }
-        /* else if (i->isMe())
-        {
-          // Originally this could only be CRe. I have no idea what to do with this...
-          match_tree_Me t(readies.front());
-          inc_usedcnt(make_list<variable_or_number>(aterm_int(t.variable_index()))); 
-          // tree = match_tree_M(t.match_variable(),match_tree_R(t.result()),tree); // Is this a good alternative???
-          tree = t;
-        } 
-        else
-        {
-          assert(0); // If there is another case we should investigate that.
-        } */
       }
       ret = tree;
     }
@@ -1146,34 +1131,33 @@ void RewriterCompilingJitty::calc_nfs_list(
                 const size_t startarg, 
                 variable_or_number_list nnfvars)
 {
-// std::cerr << "CALC NFS LIST " << appl << "  " << startarg << "\n";
   for(size_t i=0; i<recursive_number_of_args(appl); ++i)
   {
     nfs.set(i,calc_nfs(get_argument_of_higher_order_term(appl,i+1),startarg+i,nnfvars));
-// std::cerr << "CALC NFS LIST1 " << i << "  " << nfs.get(i) << "\n";
   }
-  /* size_t j=0;
-  for(application::const_iterator i=appl.begin(); i!=appl.end(); ++i, ++j)  // XXXX TODO MOET DIT NIET VOOR ALLE ARGUMENTEN, INCLUSIEF GENESTE
-  {
-    nfs.set(j,calc_nfs(*i,startarg+j,nnfvars));
-  } */
 }
 
+/// This function returns true if it knows for sure that the data_expresson t is in normal form.
 bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t startarg, variable_or_number_list nnfvars)
 {
-// std::cerr << "CALC NFS " << t << "  " << startarg << "\n";
   if (is_function_symbol(t))
   {
     return opid_is_nf(aterm_cast<function_symbol>(t),0);
   }
   else if (is_variable(t))
   {
-    return (nnfvars==atermpp::aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(),variable(t)) == nnfvars.end());
+    return (std::find(nnfvars.begin(),nnfvars.end(),variable(t)) == nnfvars.end());
   }
   else if (is_abstraction(t))
   {
-    return false; // I assume that lambda, forall and exists are not in normal form by default.
-                  // This might be too weak, and may require to be reinvestigated later.
+    // It the term has the shape lambda x:D.t and t is a normal form, then the whole
+    // term is a normal form. An expression with an exists/forall is never a normal form.
+    const abstraction& ta(t);
+    if (is_lambda_binder(ta.binding_operator()))
+    {  
+      return calc_nfs(ta.body(),nnfvars);
+    }
+    return false; 
   }
   else if (is_where_clause(t))
   {
@@ -1181,16 +1165,15 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t sta
                   // This might be too weak, and may require to be reinvestigated later.
   }
 
-  // t has the shape #REWR#(head,t1,...,tn)
+  // t has the shape application(head,t1,...,tn)
   const application ta(t);
-  // const size_t arity = ta.size();       // XXX TODO HIGHER ORDER FUNCTION.
-  const size_t arity = recursive_number_of_args(ta);       // XXX TODO HIGHER ORDER FUNCTION.
+  const size_t arity = recursive_number_of_args(ta);       
   const data_expression& head=ta.head();
   function_symbol dummy;
-  if (head_is_function_symbol(head,dummy))    // XXXXXX This function symbol can also be burried deeper in the term
-                                   // for higher order functions.
+  if (head_is_function_symbol(head,dummy))    
   {
-    if (opid_is_nf(aterm_cast<function_symbol>(head),arity) && arity != 0)
+    assert(arity!=0);
+    if (opid_is_nf(aterm_cast<function_symbol>(head),arity))
     {
       nfs_array args(arity);
       calc_nfs_list(args,ta,startarg,nnfvars);
@@ -1210,14 +1193,12 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t sta
 
 string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, const application& appl, const size_t startarg, variable_or_number_list nnfvars, nfs_array *rewr)
 {
-// std::cerr << "CACL INNER TERMS " << appl << "  " << startarg << "\n";
   size_t j=0;
   string result="";
   for(application::const_iterator i=appl.begin(); i!=appl.end(); ++i, ++j)
   {
-    pair<bool,string> head = calc_inner_term(*i, startarg+j,nnfvars,rewr?(rewr->get(j)):false,appl.size());
+    pair<bool,string> head = calc_inner_term(*i, startarg+j,nnfvars,rewr?(rewr->get(j)):false);
     nfs.set(j,head.first);
-// std::cerr << "CACL SET " << j << "  " << head.first << "\n";
 
     result=result + (j==0?"":",") + head.second;
   }
@@ -1246,15 +1227,18 @@ static string calc_inner_appl_head(size_t arity)
 static std::map<data_expression,size_t> protected_data_expressions;
 std::vector <data_expression> prepared_normal_forms;
 
-// This function generates C++ code to calculate the data_expression t. 
-// If the result is a normal form the resulting boolean is true, otherwise it is false. 
-// if total_arity<=5 a term of type atermpp::aterm is generated, otherwise a term of type atermpp::aterm_appl is generated.
+/// This function generates a string of C++ code to calculate the data_expression t. 
+/// If the result is a normal form the resulting boolean is true, otherwise it is false. 
+/// The data expression t is the term for which C code is generated.
+/// The size_t start_arg ?????
+/// The variable_or_number_list nnfvars 
+/// The bool rewr indicates whether a normal form is requested. If rewr is valid, then yes.
+
 pair<bool,string> RewriterCompilingJitty::calc_inner_term(
-                  const data_expression& t,
-                  const size_t startarg,
-                  variable_or_number_list nnfvars,
-                  const bool rewr,
-                  const size_t total_arity)
+                             const data_expression& t,
+                             const size_t startarg,
+                             variable_or_number_list nnfvars,
+                             const bool rewr)
 {
   stringstream ss;
   
@@ -1281,9 +1265,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       prepared_normal_forms.push_back(t_normal_form);
     }
 
-    // protected_data_expressions.insert(t_normal_form);
-    // ss << "atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << 
-    //                    (void*)atermpp::detail::address(t_normal_form) << ")))";
     ss << "prepared_normal_forms[" << index << "]";
     return pair<bool,string>(true,ss.str());
   } 
@@ -1307,7 +1288,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   else if (is_variable(t))
   {
     const variable v(t);
-    const bool b = (nnfvars!=atermpp::aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(),v) != nnfvars.end());
+    const bool b = (std::find(nnfvars.begin(),nnfvars.end(),v) != nnfvars.end());
     const string variable_name=v.name();
     // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
     // by this rewriter.
@@ -1336,7 +1317,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       if (rewr)
       {
         // The resulting term must be rewritten.
-        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,true,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,true);
         ss << "this_rewriter->rewrite_single_lambda(" <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << "," << r.first << ",*(this_rewriter->global_sigma))";
@@ -1344,7 +1325,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       }
       else
       {
-        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false);
         ss << "abstraction(lambda_binder()," <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << ")";
@@ -1356,7 +1337,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       if (rewr)
       {
         // A result in normal form is requested.
-        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false);
         ss << "this_rewriter->universal_quantifier_enumeration(" <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << "," << r.first << "," << "*(this_rewriter->global_sigma))";
@@ -1365,7 +1346,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       else
       {
         // A result which is not a normal form is requested.
-        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false);
         ss << "abstraction(forall_binder()," <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << ")";
@@ -1377,7 +1358,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       if (rewr)
       {
         // A result in normal form is requested.
-        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false);
         ss << "this_rewriter->existential_quantifier_enumeration(" <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << "," << r.first << "," << "*(this_rewriter->global_sigma))";
@@ -1386,7 +1367,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       else
       {
         // A result which is not a normal form is requested.
-        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false);
         ss << "abstraction(exists_binder()," <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << ")";
@@ -1401,7 +1382,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     if (rewr)
     {
       // A rewritten result is expected.
-      pair<bool,string> r=calc_inner_term(w.body(),startarg,nnfvars,true,total_arity);
+      pair<bool,string> r=calc_inner_term(w.body(),startarg,nnfvars,true);
 
       ss << "this_rewriter->rewrite_where(mcrl2::data::where_clause(" << r.second << ",";
 
@@ -1413,7 +1394,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       ss << "mcrl2::data::assignment_expression_list()";
       for(assignment_list::const_iterator i=assignments.begin() ; i!=assignments.end(); ++i)
       {
-        pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true,total_arity);
+        pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true);
         ss << ",mcrl2::data::assignment(" <<
                  "this_rewriter->bound_variable_get(" << bound_variable_index(i->lhs()) << ")," <<
                  r.second << "))";
@@ -1426,7 +1407,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     else
     {
       // The result does not need to be rewritten.
-      pair<bool,string> r=calc_inner_term(w.body(),startarg,nnfvars,false,total_arity);
+      pair<bool,string> r=calc_inner_term(w.body(),startarg,nnfvars,false);
       ss << "mcrl2::data::where_clause(" << r.second << ",";
 
       const assignment_list& assignments(w.assignments());
@@ -1437,7 +1418,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       ss << "mcrl2::data::assignment_expression_list()";
       for(assignment_list::const_iterator i=assignments.begin() ; i!=assignments.end(); ++i)
       {
-        pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true,total_arity);
+        pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true);
         ss << ",mcrl2::data::assignment(" <<
                  "this_rewriter->bound_variable_get(" << bound_variable_index(i->lhs()) << ")," <<
                  r.second << "))";
@@ -1453,7 +1434,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   const application& ta = core::down_cast<application>(t);
   bool b;
   size_t arity = ta.size();
-// std::cerr << "AAA " << ta << "  " << arity << "\n";
 
   if (is_function_symbol(ta.head()))  // Determine whether the topmost symbol is a function symbol.
   {
@@ -1484,11 +1464,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       // arity != 0
       nfs_array args_nfs(arity);
       calc_nfs_list(args_nfs,ta,startarg,nnfvars);
-// if (args_nfs.size()==2)
-// {
-  // std::cerr << "BBB1 "; 
-//   std::cerr << args_nfs[0] << "  " << args_nfs[1] <<"\n";
-// }
 
       if (!(b || !rewr))
       {
@@ -1544,12 +1519,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       string args_second = calc_inner_terms(args_first,ta,startarg,nnfvars,&args_nfs);
       // The assert is not valid anymore, because lambdas are sometimes returned in normal form, although not strictly
       // asked for...
-// if (args_nfs.size()==2)
-// {
-  // std::cerr << "BBB " << rewr << "  " << b << "   " << (arity > NF_MAX_ARITY) << "   " << args_first.size() << "  " << args_nfs.size() << "\n";
-//   std::cerr << args_nfs[0] << "  " << args_nfs[1] <<"\n";
-//   std::cerr << args_first[0] << "  " << args_first[1] <<"\n";
-// }
+
       assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first==args_nfs);
       if (rewr && !b)
       {
@@ -1603,7 +1573,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         args_nfs.fill();
       }
 
-      pair<bool,string> head = calc_inner_term(ta1,startarg,nnfvars,false,arity);
+      pair<bool,string> head = calc_inner_term(ta1,startarg,nnfvars,false);
 
       if (rewr)
       {
@@ -1620,9 +1590,10 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else if (is_application(ta.head()))
     {
-      const size_t arity=ta.size();
+      // const size_t arity=ta.size();
+      const size_t arity=recursive_number_of_args(ta);
       b = rewr;
-      pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false,arity);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
+      pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
       nfs_array tail_first(arity);
       string tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,NULL);
       if (rewr)
@@ -1638,10 +1609,11 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       assert(is_variable(ta.head()));
       const size_t arity=ta.size();
       b = rewr;
-      pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false,arity);
+      pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false);
       nfs_array tail_first(arity);
       string tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,NULL);
-      ss << "is_application_no_check(atermpp::aterm_cast<atermpp::aterm_appl>(" << head.second << "))?";
+      // ss << "is_application_no_check(atermpp::aterm_cast<atermpp::aterm_appl>(" << head.second << "))?";
+      ss << "!is_variable(atermpp::aterm_cast<atermpp::aterm_appl>(" << head.second << "))?";
       if (rewr)
       {
           ss << "rewrite(";
@@ -1653,8 +1625,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       }
       ss << ":";
       bool c = rewr;
-      // assert(startarg>=0); For unclear reasons, this may be negative.
-      if (rewr && (nnfvars!=atermpp::aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(), atermpp::aterm_int(startarg)) != nnfvars.end()))
+      if (rewr && std::find(nnfvars.begin(),nnfvars.end(), atermpp::aterm_int(startarg)) != nnfvars.end())
       {
         ss << "rewrite(";
         c = false;
@@ -1681,7 +1652,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
 void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, const size_t startarg, variable_or_number_list nnfvars, bool rewr)
 {
-  pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr,0);
+  pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr);
   fprintf(f,"%s",p.second.c_str());
   return;
 }
@@ -2102,16 +2073,11 @@ void RewriterCompilingJitty::implement_strategy(
                size_t arity, 
                size_t d,
                const function_symbol& opid, 
-               size_t nf_args)
+               const nfs_array& nf_args)
 {
-  std::vector<bool> used;
-  for (size_t i=0; i<arity; i++)
-  {
-    used.push_back((nf_args & (1 << i)) != 0);
-  }
+  std::vector<bool> used=nf_args; // This vector maintains which arguments are in normal form. Initially only those in nf_args are in normal form.
   while (!strat.empty())
   {
-    // if (strat.front().type_is_int())
     if (strat.front().isA())
     {
       size_t arg = match_tree_A(strat.front()).variable_index();
@@ -2700,7 +2666,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       {
         if (arity_is_allowed(fs,a))
         {
-          nfs_array nfs_a(a);
           int b = (a<=NF_MAX_ARITY)?a:0;
           for (size_t nfs=0; (nfs >> b) == 0; nfs++)
           {
@@ -2728,12 +2693,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
                    );
             if (!jittyc_eqns[fs].empty() )
             {
-            // Implement strategy
-              if (0 < a)
-              {
-                nfs_a.set_encoded_number(nfs);
-              }
-              implement_strategy(f,create_strategy(jittyc_eqns[fs], a,nfs_a),a,1,fs,nfs);
+              // Implement strategy
+              nfs_array nfs_a(a);
+              nfs_a.set_encoded_number(nfs);
+              implement_strategy(f,create_strategy(jittyc_eqns[fs], a,nfs_a),a,1,fs,nfs_a);
             }
             else
             {
@@ -2978,8 +2941,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
       "  using namespace mcrl2::data;\n"
-//      "  if (is_function_symbol(t))\n"  
-      " if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(t).function())==%ld)\n"
+      " if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(t).function())==%ld)\n" // if (is_function_symbol(t))
       "  {\n"
       "    // Term t is a function_symbol\n"
       "    const mcrl2::data::function_symbol& f=atermpp::aterm_cast<const mcrl2::data::function_symbol>(t);\n"
@@ -3000,8 +2962,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    const application& ta=atermpp::aterm_cast<const application>(t);\n"
       "    const mcrl2::data::function_symbol& head=atermpp::aterm_cast<const mcrl2::data::function_symbol>(ta.head());\n"
-//      "    if (is_function_symbol(head))\n"
-      " if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(head).function())==%ld)\n"
+      " if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(head).function())==%ld)\n" // if (is_function_symbol(head))
       "    {\n"
       "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(head);\n"
       "      const size_t total_arity=ta.size();\n"
