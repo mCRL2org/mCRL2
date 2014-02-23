@@ -201,7 +201,7 @@ static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_c
 
   if (!ommit_head)
   {
-    s.push_front(match_tree_F(function_symbol(ta.head()),dummy,dummy)); // XXXXXXXXXXXXXXXXXXX
+    s.push_front(match_tree_F(function_symbol(ta.head()),dummy,dummy)); 
   }
 
   size_t j=1;
@@ -257,7 +257,6 @@ static match_tree_list create_sequence(const data_equation& rule, size_t* var_cn
 
   if (cond==sort_bool::true_())
   {
-// assert(!is_variable(aterm_appl(rslt)) || variable(rslt).name()!=aterm_string("v"));   XXXXX TEST BECAUSE THIS GOES WRONG WITH A FUNCTION UPDATE.
     rseq.push_front(match_tree_Re(rslt,get_used_vars(rslt)));
   }
   else
@@ -272,13 +271,13 @@ static match_tree_list create_sequence(const data_equation& rule, size_t* var_cn
 // Structure for build_tree parameters
 typedef struct
 {
-  match_tree_list_list Flist;   // List of sequences of which the first action is an F
-  match_tree_list_list Slist; // List of sequences of which the first action is an S
-  match_tree_list_list Mlist;   // List of sequences of which the first action is an M
-  match_tree_list_list_list stack;   // Stack to maintain the sequences that do not have to
-  // do anything in the current term
-  match_tree_list_list upstack; // List of sequences that have done an F at the current
-  // level
+  match_tree_list_list Flist;       // List of sequences of which the first action is an F
+  match_tree_list_list Slist;       // List of sequences of which the first action is an S
+  match_tree_list_list Mlist;       // List of sequences of which the first action is an M
+  match_tree_list_list_list stack;  // Stack to maintain the sequences that do not have to
+                                    // do anything in the current term
+  match_tree_list_list upstack;     // List of sequences that have done an F at the current
+                                    // level
 } build_pars;
 
 static void initialise_build_pars(build_pars* p)
@@ -1141,17 +1140,28 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
   return true;
 }
 
-void RewriterCompilingJitty::calc_nfs_list(nfs_array& nfs, const application& appl, const size_t startarg, variable_or_number_list nnfvars)
+void RewriterCompilingJitty::calc_nfs_list(
+                nfs_array& nfs, 
+                const application& appl, 
+                const size_t startarg, 
+                variable_or_number_list nnfvars)
 {
-  size_t j=0;
+// std::cerr << "CALC NFS LIST " << appl << "  " << startarg << "\n";
+  for(size_t i=0; i<recursive_number_of_args(appl); ++i)
+  {
+    nfs.set(i,calc_nfs(get_argument_of_higher_order_term(appl,i+1),startarg+i,nnfvars));
+// std::cerr << "CALC NFS LIST1 " << i << "  " << nfs.get(i) << "\n";
+  }
+  /* size_t j=0;
   for(application::const_iterator i=appl.begin(); i!=appl.end(); ++i, ++j)  // XXXX TODO MOET DIT NIET VOOR ALLE ARGUMENTEN, INCLUSIEF GENESTE
   {
     nfs.set(j,calc_nfs(*i,startarg+j,nnfvars));
-  }
+  } */
 }
 
 bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t startarg, variable_or_number_list nnfvars)
 {
+// std::cerr << "CALC NFS " << t << "  " << startarg << "\n";
   if (is_function_symbol(t))
   {
     return opid_is_nf(aterm_cast<function_symbol>(t),0);
@@ -1173,9 +1183,11 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t sta
 
   // t has the shape #REWR#(head,t1,...,tn)
   const application ta(t);
-  const size_t arity = ta.size();       // XXX TODO HIGHER ORDER FUNCTION.
+  // const size_t arity = ta.size();       // XXX TODO HIGHER ORDER FUNCTION.
+  const size_t arity = recursive_number_of_args(ta);       // XXX TODO HIGHER ORDER FUNCTION.
   const data_expression& head=ta.head();
-  if (is_function_symbol(head))    // XXXXXX This function symbol can also be burried deeper in the term
+  function_symbol dummy;
+  if (head_is_function_symbol(head,dummy))    // XXXXXX This function symbol can also be burried deeper in the term
                                    // for higher order functions.
   {
     if (opid_is_nf(aterm_cast<function_symbol>(head),arity) && arity != 0)
@@ -1198,12 +1210,14 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t sta
 
 string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, const application& appl, const size_t startarg, variable_or_number_list nnfvars, nfs_array *rewr)
 {
+// std::cerr << "CACL INNER TERMS " << appl << "  " << startarg << "\n";
   size_t j=0;
   string result="";
   for(application::const_iterator i=appl.begin(); i!=appl.end(); ++i, ++j)
   {
     pair<bool,string> head = calc_inner_term(*i, startarg+j,nnfvars,rewr?(rewr->get(j)):false,appl.size());
     nfs.set(j,head.first);
+// std::cerr << "CACL SET " << j << "  " << head.first << "\n";
 
     result=result + (j==0?"":",") + head.second;
   }
@@ -1439,6 +1453,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   const application& ta = core::down_cast<application>(t);
   bool b;
   size_t arity = ta.size();
+// std::cerr << "AAA " << ta << "  " << arity << "\n";
 
   if (is_function_symbol(ta.head()))  // Determine whether the topmost symbol is a function symbol.
   {
@@ -1469,6 +1484,12 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       // arity != 0
       nfs_array args_nfs(arity);
       calc_nfs_list(args_nfs,ta,startarg,nnfvars);
+// if (args_nfs.size()==2)
+// {
+  // std::cerr << "BBB1 "; 
+//   std::cerr << args_nfs[0] << "  " << args_nfs[1] <<"\n";
+// }
+
       if (!(b || !rewr))
       {
         ss << "rewr_";
@@ -1523,6 +1544,12 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       string args_second = calc_inner_terms(args_first,ta,startarg,nnfvars,&args_nfs);
       // The assert is not valid anymore, because lambdas are sometimes returned in normal form, although not strictly
       // asked for...
+// if (args_nfs.size()==2)
+// {
+  // std::cerr << "BBB " << rewr << "  " << b << "   " << (arity > NF_MAX_ARITY) << "   " << args_first.size() << "  " << args_nfs.size() << "\n";
+//   std::cerr << args_nfs[0] << "  " << args_nfs[1] <<"\n";
+//   std::cerr << args_first[0] << "  " << args_first[1] <<"\n";
+// }
       assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first==args_nfs);
       if (rewr && !b)
       {

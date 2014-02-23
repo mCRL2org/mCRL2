@@ -70,6 +70,7 @@ public:
 
   bool get(size_t i)
   {
+    assert(i<size());
     return (*this)[i];
   }
 
