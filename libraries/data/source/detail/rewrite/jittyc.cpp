@@ -1128,17 +1128,16 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
 void RewriterCompilingJitty::calc_nfs_list(
                 nfs_array& nfs, 
                 const application& appl, 
-                const size_t startarg, 
                 variable_or_number_list nnfvars)
 {
   for(size_t i=0; i<recursive_number_of_args(appl); ++i)
   {
-    nfs.set(i,calc_nfs(get_argument_of_higher_order_term(appl,i+1),startarg+i,nnfvars));
+    nfs.set(i,calc_nfs(get_argument_of_higher_order_term(appl,i+1),nnfvars));
   }
 }
 
 /// This function returns true if it knows for sure that the data_expresson t is in normal form.
-bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t startarg, variable_or_number_list nnfvars)
+bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_number_list nnfvars)
 {
   if (is_function_symbol(t))
   {
@@ -1176,7 +1175,7 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, const size_t sta
     if (opid_is_nf(aterm_cast<function_symbol>(head),arity))
     {
       nfs_array args(arity);
-      calc_nfs_list(args,ta,startarg,nnfvars);
+      calc_nfs_list(args,ta,nnfvars);
       bool b = args.is_filled();
       return b;
     }
@@ -1463,7 +1462,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       // arity != 0
       nfs_array args_nfs(arity);
-      calc_nfs_list(args_nfs,ta,startarg,nnfvars);
+      calc_nfs_list(args_nfs,ta,nnfvars);
 
       if (!(b || !rewr))
       {
@@ -1561,7 +1560,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
       b = rewr;
       nfs_array args_nfs(arity);
-      calc_nfs_list(args_nfs,ta,startarg,nnfvars);
+      calc_nfs_list(args_nfs,ta,nnfvars);
       if (arity > NF_MAX_ARITY)
       {
         args_nfs.fill(false);

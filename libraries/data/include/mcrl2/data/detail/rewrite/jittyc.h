@@ -106,8 +106,8 @@ class RewriterCompilingJitty: public Rewriter
     void add_base_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
     void extend_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
     bool opid_is_nf(const function_symbol &opid, size_t num_args);
-    void calc_nfs_list(nfs_array &a, const application& args, const size_t startarg, variable_or_number_list nnfvars);
-    bool calc_nfs(const data_expression& t, const size_t startarg, variable_or_number_list nnfvars);
+    void calc_nfs_list(nfs_array &a, const application& args, variable_or_number_list nnfvars);
+    bool calc_nfs(const data_expression& t, variable_or_number_list nnfvars);
     std::string calc_inner_terms(nfs_array &nfs, const application& args, const size_t startarg, variable_or_number_list nnfvars, nfs_array *rewr);
     std::pair<bool,std::string> calc_inner_term(const data_expression &t, 
                 const size_t startarg, variable_or_number_list nnfvars, const bool rewr);
