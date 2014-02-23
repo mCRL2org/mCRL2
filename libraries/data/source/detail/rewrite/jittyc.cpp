@@ -1192,12 +1192,10 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_numb
 
 string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, const application& appl, const size_t startarg, variable_or_number_list nnfvars, const nfs_array& rewr)
 {
-std::cerr << "APPL " << appl << "   " << startarg << "\n";
   size_t j=0;
   string result="";
   for(application::const_iterator i=appl.begin(); i!=appl.end(); ++i, ++j)
   {
-std::cerr << "APPL1 " << *i << "   " << startarg+j << "\n";
     pair<bool,string> head = calc_inner_term(*i, startarg+j,nnfvars,rewr.get(j)); 
     nfs.set(j,head.first);
 
