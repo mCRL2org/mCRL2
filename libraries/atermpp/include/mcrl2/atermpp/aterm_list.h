@@ -309,6 +309,20 @@ inline void swap(atermpp::term_list<T> &t1, atermpp::term_list<T> &t2)
   t1.swap(t2);
 }
 
+template <class T>
+std::ostream& operator<<(std::ostream& out, const term_list<T>& l)
+{
+  for (auto i = l.begin(); i != l.end(); ++i)
+  {
+    if (i != l.begin())
+    {
+      out << ", ";
+    }
+    out << *i;
+  }
+  return out;
+}
+
 } // namespace atermpp
 
 #include "mcrl2/atermpp/detail/aterm_list_implementation.h"
