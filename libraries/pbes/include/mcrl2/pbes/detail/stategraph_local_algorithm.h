@@ -81,33 +81,31 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
     // @pre: (X0, p0) is in must_graph
-    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const core::identifier_string& X0, std::size_t p0, const control_flow_graph& /* Vk unused. */ )
+    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const core::identifier_string& X0, std::size_t p0, const local_control_flow_graph& Vk)
     {
       mCRL2log(log::debug, "stategraph") << "--- compute belongs (" << core::pp(X0) << ", " << p0 << ")" << std::endl;
 
       std::map<core::identifier_string, std::set<data::variable> > result;
 
-/* TODO: remove the dependency on the must graph.
-      std::set<const control_flow_graph_vertex*> todo;
-      std::set<const control_flow_graph_vertex*> visited;
+      std::set<const local_control_flow_graph_vertex*> todo;
+      std::set<const local_control_flow_graph_vertex*> visited;
 
-      const control_flow_graph_vertex& y0 = *find_vertex(X0, p0);
+      const local_control_flow_graph_vertex& y0 = Vk.find_vertex(X0, p0);
       todo.insert(&y0);
-      mCRL2log(log::debug, "stategraph") << " insert todo element (" << core::pp(X0) << ", " << p0 << ")" << std::endl;
+      mCRL2log(log::debug, "stategraph") << " insert todo element " << y0 << std::endl;
       while (!todo.empty())
       {
-        std::set<const control_flow_graph_vertex*>::iterator ti = todo.begin();
+        std::set<const local_control_flow_graph_vertex*>::iterator ti = todo.begin();
 
         // y = (X, p)
-        const control_flow_graph_vertex& y = **ti;
+        const local_control_flow_graph_vertex& y = **ti;
         const core::identifier_string& X = y.name();
-        std::size_t p = y.index();
+        // std::size_t p = y.index();
         todo.erase(ti);
         visited.insert(*ti);
 
-        mCRL2log(log::debug, "stategraph") << " choose todo element (" << core::pp(X) << ", " << p << ")" << std::endl;
-
-        if (y.outgoing_edges.empty())
+        mCRL2log(log::debug, "stategraph") << " choose todo element " << y << std::endl;
+        if (y.neighbors().empty())
         {
           continue;
         }
@@ -116,14 +114,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
         std::vector<std::size_t> dp = data_parameter_indices(X);
         std::set<std::size_t> belongs(dp.begin(), dp.end());
 
-        const std::set<control_flow_graph_vertex*>& E = y.outgoing_edges;
-        for (std::set<control_flow_graph_vertex*>::const_iterator ei = E.begin(); ei != E.end(); ++ei)
+        const auto& E = y.neighbors();
+        for (auto ei = E.begin(); ei != E.end(); ++ei)
         {
           // z = (Y, q)
-          const control_flow_graph_vertex& z = **ei;
-          const core::identifier_string& Y = z.X;
-          std::size_t q = z.p;
-
+          const local_control_flow_graph_vertex& z = *(ei->first);
+          const core::identifier_string& Y = z.name();
+          // std::size_t q = z.index();
           for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
           {
             const predicate_variable& X_i = eq_X.predicate_variables()[i];
@@ -134,11 +131,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
             if (visited.find(&z) == visited.end())
             {
               todo.insert(&z);
-              mCRL2log(log::debug, "stategraph") << " insert todo element (" << core::pp(Y) << ", " << q << ")" << std::endl;
+              mCRL2log(log::debug, "stategraph") << " insert todo element " << z << std::endl;
             }
             for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
             {
-              if ((X_i.used.find(*j) != X_i.used.end() || X_i.changed.find(*j) != X_i.changed.end()) && !Vk.has_label(X, i))
+              if ((X_i.used.find(*j) != X_i.used.end() || X_i.changed.find(*j) != X_i.changed.end()) /* && !Vk.has_label(X, i) */)
               {
                 belongs.erase(j++);
               }
@@ -154,19 +151,36 @@ class stategraph_local_algorithm: public stategraph_algorithm
           result[X].insert(eq_X.parameters()[*j]);
         }
       }
-*/
       return result;
+    }
+
+    const local_control_flow_graph_vertex& find_belongs_vertex(const local_control_flow_graph& G) const
+    {
+      for (auto i = G.vertices.begin(); i != G.vertices.end(); ++i)
+      {
+        auto const& u = *i;
+        if (u.has_variable())
+        {
+          return u;
+        }
+      }
+      auto const& u = *(G.vertices.begin());
+      return u;
     }
 
     void compute_belongs()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing belongs relation ===" << std::endl;
       const propositional_variable_instantiation& X_init = m_pbes.initial_state();
-      const core::identifier_string& X = X_init.name();
-      std::vector<std::size_t> CFP = control_flow_parameter_indices(X);
-      for (std::size_t k = 0; k < m_control_flow_graphs.size(); k++)
+      // const core::identifier_string& X = X_init.name();
+      // std::vector<std::size_t> CFP = control_flow_parameter_indices(X);
+      // std::cout << "CFP " << core::detail::print_container(CFP) << std::endl;
+      for (std::size_t k = 0; k < m_local_control_flow_graphs.size(); k++)
       {
-        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(X, CFP[k], m_control_flow_graphs[k]);
+        auto const& Vk = m_local_control_flow_graphs[k];
+        auto const& u = find_belongs_vertex(Vk);
+        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(u.name(), u.index(), Vk);
+        // std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(X, CFP[k], m_local_control_flow_graphs[k]);
         m_belongs.push_back(Bk);
       }
     }
@@ -369,8 +383,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       super::run();
       compute_control_flow_index();
       print_control_flow_index();
-//      compute_belongs();
-//      print_belongs();
+      compute_belongs();
+      print_belongs();
 //      compute_control_flow_marking();
 //      print_control_flow_marking();
     }

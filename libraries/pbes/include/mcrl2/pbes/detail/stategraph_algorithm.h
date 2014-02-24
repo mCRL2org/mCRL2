@@ -127,7 +127,7 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
       : control_flow_graph_vertex(name, data::undefined_index(), data::undefined_variable()), m_value(value)
     {}
 
-    bool has_variable()
+    bool has_variable() const
     {
       return m_index != data::undefined_index();
     }
@@ -197,6 +197,8 @@ struct local_control_flow_graph
   std::set<local_control_flow_graph_vertex> vertices;
 
   const local_control_flow_graph_vertex& find_vertex(const local_control_flow_graph_vertex& u) const;
+
+  const local_control_flow_graph_vertex& find_vertex(const core::identifier_string& X, std::size_t p) const;
 
   /// \brief Default constructor
   local_control_flow_graph()
@@ -298,6 +300,19 @@ std::ostream& operator<<(std::ostream& out, const local_control_flow_graph& G)
     out << "vertex " << *i << " neighbors: " << i->print_neighbors() << std::endl;
   }
   return out;
+}
+
+inline
+const local_control_flow_graph_vertex& local_control_flow_graph::find_vertex(const core::identifier_string& X, std::size_t p) const
+{
+  for (auto i = vertices.begin(); i != vertices.end(); ++i)
+  {
+    if (i->name() == X && i->index() == p)
+    {
+      return *i;
+    }
+  }
+  throw mcrl2::runtime_error("local_control_flow_graph::find_vertex: vertex not found!");
 }
 
 inline
