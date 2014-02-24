@@ -335,10 +335,10 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     pbes run(bool simplify = true, bool use_marking_optimization = false)
     {
       super::run();
-//      m_simplify = simplify;
-//      m_use_marking_optimization = use_marking_optimization;
+      m_simplify = simplify;
+      m_use_marking_optimization = use_marking_optimization;
       pbes result = m_original_pbes;
-//      reset_variables_to_original(result);
+      reset_variables_to_original(result);
       return result;
     }
 };

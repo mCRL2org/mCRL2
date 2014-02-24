@@ -171,7 +171,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     void compute_belongs()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing belongs relation ===" << std::endl;
-      const propositional_variable_instantiation& X_init = m_pbes.initial_state();
+      // const propositional_variable_instantiation& X_init = m_pbes.initial_state();
       // const core::identifier_string& X = X_init.name();
       // std::vector<std::size_t> CFP = control_flow_parameter_indices(X);
       // std::cout << "CFP " << core::detail::print_container(CFP) << std::endl;
@@ -385,8 +385,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       print_control_flow_index();
       compute_belongs();
       print_belongs();
-//      compute_control_flow_marking();
-//      print_control_flow_marking();
+      compute_control_flow_marking();
+      print_control_flow_marking();
     }
 };
 
