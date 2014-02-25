@@ -68,7 +68,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       std::vector<data::data_expression> result;
 
       std::size_t k = control_flow_index(X, j);
-      if (k != (std::numeric_limits<std::size_t>::max)())
+      if (k != data::undefined_index())
       {
         // find vertices X(e) in Gk
         control_flow_graph& Gk = m_control_flow_graphs[k];
@@ -79,20 +79,8 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           result.push_back(u.X.parameters().front());
         }
       }
+      mCRL2log(log::debug1, "stategraph") << "Possible values of " << X << "," << j << " are: " << core::detail::print_container(result) << std::endl;
 
-      if(mCRL2logEnabled(log::debug1, "stategraph"))
-      {
-        mCRL2log(log::debug1, "stategraph") << "Possible values of " << X << "," << j << " are: ";
-        for(std::vector<data::data_expression>::const_iterator it = result.begin() ; it != result.end(); ++it)
-        {
-          if(it != result.begin())
-          {
-            mCRL2log(log::debug1, "stategraph") << ", ";
-          }
-          mCRL2log(log::debug1, "stategraph") << data::pp(*it);
-        }
-        mCRL2log(log::debug1, "stategraph") << std::endl;
-      }
       return result;
     }
 
@@ -116,7 +104,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         }
         else
         {
-          index_to_cfp_index.push_back((std::numeric_limits<std::size_t>::max)());
+          index_to_cfp_index.push_back(data::undefined_index());
         }
       }
 
@@ -143,7 +131,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 #ifndef NDEBUG
           bool found = false;
 #endif
-          std::size_t m = (std::numeric_limits<std::size_t>::max)();
+          std::size_t m = data::undefined_index();
           const std::map<std::size_t, std::size_t>& M = ci->second;
           for (std::map<std::size_t, std::size_t>::const_iterator mi = M.begin(); mi != M.end(); ++mi)
           {
@@ -158,7 +146,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           }
           mCRL2log(log::debug1) << "    with parameter index " << m << " (CFP index " << index_to_cfp_index[m] << ")" << std::endl;
           assert(found);
-          assert(m != (std::numeric_limits<std::size_t>::max)());
+          assert(m != data::undefined_index());
           assert(index_to_cfp_index[m] < v.size());
 
           control_flow_graph::vertex_const_iterator vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[index_to_cfp_index[m]])));
@@ -185,7 +173,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     bool has_non_empty_marking(const core::identifier_string& X, std::size_t j) const
     {
       std::size_t k = control_flow_index(X, j);
-      if (k == (std::numeric_limits<std::size_t>::max)())
+      if (k == data::undefined_index())
       {
         return false;
       }
@@ -518,14 +506,19 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
   }
 
   std::vector<std::vector<data::data_expression> > values;
-  for (std::vector<std::size_t>::const_iterator ii = I.begin(); ii != I.end(); ++ii)
+  for (auto ii = I.begin(); ii != I.end(); ++ii)
   {
     values.push_back(compute_values(Y, *ii));
   }
   std::vector<data::data_expression> v_prime;
-  for (std::vector<std::vector<data::data_expression> >::const_iterator vi = values.begin(); vi != values.end(); ++vi)
+  for (auto vi = values.begin(); vi != values.end(); ++vi)
   {
-    assert(!vi->empty());
+    // assert(!vi->empty());
+    if (vi->empty())
+    {
+      mCRL2log(log::debug, "stategraph") << "--- WARNING: empty values array in local_reset_variables_algorithm" << std::endl;
+      return pbes_expr::true_();
+    }
     v_prime.push_back(vi->front());
   }
   utilities::foreach_sequence(values, v_prime.begin(),
@@ -536,6 +529,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
     // }
     reset_variable_helper(*this, phi, v_prime, Y, X_i, I, d_Y)
   );
+
   return pbes_expr::join_and(phi.begin(), phi.end());
 }
 

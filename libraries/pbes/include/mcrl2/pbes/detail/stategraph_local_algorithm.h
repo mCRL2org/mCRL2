@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H
 
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 
@@ -63,19 +64,19 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
     // returns an index k such that d_X[j] corresponds to m_control_flow_graphs[k],
-    // or std::numeric_limits<std::size_t>::max() if no such index was found
+    // or data::undefined_index() if no such index was found
     std::size_t control_flow_index(const core::identifier_string& X, std::size_t j) const
     {
       std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator k = m_control_flow_index.find(X);
       if (k == m_control_flow_index.end())
       {
-        return (std::numeric_limits<std::size_t>::max)();
+        return data::undefined_index();
       }
       const std::map<std::size_t, std::size_t>& m = k->second;
       std::map<std::size_t, std::size_t>::const_iterator i = m.find(j);
       if (i == m.end())
       {
-        return (std::numeric_limits<std::size_t>::max)();
+        return data::undefined_index();
       }
       return i->second;
     }
@@ -154,8 +155,16 @@ class stategraph_local_algorithm: public stategraph_algorithm
       return result;
     }
 
-    const local_control_flow_graph_vertex& find_belongs_vertex(const local_control_flow_graph& G) const
+    const local_control_flow_graph_vertex& find_belongs_vertex(const local_control_flow_graph& G, const core::identifier_string& Xinit) const
     {
+      for (auto i = G.vertices.begin(); i != G.vertices.end(); ++i)
+      {
+        auto const& u = *i;
+        if (u.has_variable() && u.name() == Xinit)
+        {
+          return u;
+        }
+      }
       for (auto i = G.vertices.begin(); i != G.vertices.end(); ++i)
       {
         auto const& u = *i;
@@ -171,16 +180,12 @@ class stategraph_local_algorithm: public stategraph_algorithm
     void compute_belongs()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing belongs relation ===" << std::endl;
-      // const propositional_variable_instantiation& X_init = m_pbes.initial_state();
-      // const core::identifier_string& X = X_init.name();
-      // std::vector<std::size_t> CFP = control_flow_parameter_indices(X);
-      // std::cout << "CFP " << core::detail::print_container(CFP) << std::endl;
+      const propositional_variable_instantiation& Xinit = m_pbes.initial_state();
       for (std::size_t k = 0; k < m_local_control_flow_graphs.size(); k++)
       {
         auto const& Vk = m_local_control_flow_graphs[k];
-        auto const& u = find_belongs_vertex(Vk);
+        auto const& u = find_belongs_vertex(Vk, Xinit.name());
         std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(u.name(), u.index(), Vk);
-        // std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(X, CFP[k], m_local_control_flow_graphs[k]);
         m_belongs.push_back(Bk);
       }
     }
