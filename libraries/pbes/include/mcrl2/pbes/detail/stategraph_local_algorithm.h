@@ -136,7 +136,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             }
             for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
             {
-              if ((X_i.used.find(*j) != X_i.used.end() || X_i.changed.find(*j) != X_i.changed.end()) /* && !Vk.has_label(X, i) */)
+              if ((X_i.used.find(*j) != X_i.used.end() || X_i.changed.find(*j) != X_i.changed.end()) && !Vk.has_label(X, i))
               {
                 belongs.erase(j++);
               }

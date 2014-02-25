@@ -290,6 +290,27 @@ struct local_control_flow_graph
     }
     // self_check();
   }
+
+  // Returns true if there is an edge X(e) -- label --> Y(f) in the graph, for some e, f, Y.
+  bool has_label(const core::identifier_string& X, std::size_t label) const
+  {
+    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    {
+      if (i->name() != X)
+      {
+        continue;
+      }
+      auto const& neighbors = i->neighbors();
+      for (auto j = neighbors.begin(); j != neighbors.end(); ++j)
+      {
+        if (j->second == label)
+        {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 };
 
 inline
