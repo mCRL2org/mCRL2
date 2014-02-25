@@ -1602,7 +1602,10 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           ss << "rewrite(";
       }
       ss << calc_inner_appl_head(arity+1) << head.second << "," << tail_second << ")";
-      ss << ")";
+      if (rewr)
+      {
+        ss << ")";
+      }
     }
     else // headfs is a single variable.
     {
