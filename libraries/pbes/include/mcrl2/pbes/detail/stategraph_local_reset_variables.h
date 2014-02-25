@@ -504,11 +504,14 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
       }
     }
   }
+  mCRL2log(log::debug1, "stategraph") << "--- I = " << core::detail::print_container(I) << std::endl;
 
   std::vector<std::vector<data::data_expression> > values;
   for (auto ii = I.begin(); ii != I.end(); ++ii)
   {
-    values.push_back(compute_values(Y, *ii));
+    auto v = compute_values(Y, *ii);
+    mCRL2log(log::debug1, "stategraph") << " values(" << *ii << ") = " << core::detail::print_container(v) << std::endl;
+    values.push_back(v);
   }
   std::vector<data::data_expression> v_prime;
   for (auto vi = values.begin(); vi != values.end(); ++vi)
