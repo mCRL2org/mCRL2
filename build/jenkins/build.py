@@ -76,9 +76,9 @@ else:
 #
 generator = []
 if label == 'windows-amd64':
-  generator += ['-G"Visual Studio 10 Win64"']
+  generator += ['-GVisual Studio 10 Win64']
 elif label == 'windows-amd64':
-  generator += ['-G"Visual Studio 10"']
+  generator += ['-GVisual Studio 10']
 
 #
 # If we are building the mCRL2-release job, run all tests
