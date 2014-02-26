@@ -1493,7 +1493,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           const size_t index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
           const data::function_symbol old_head=headfs;
           std::stringstream new_name;
-          new_name << "@_rewr" << "_" << index << "_" << ta.size() << "_" << args_nfs.get_encoded_number()
+          new_name << "@_rewr" << "_" << index << "_" << recursive_number_of_args(ta) << "_" << args_nfs.get_encoded_number()
                                << "_term";
           const data::function_symbol f(new_name.str(),old_head.sort());
           if (partially_rewritten_functions.count(f)==0)
@@ -2428,7 +2428,7 @@ static std::string get_heads(const sort_expression& s, const std::string& base_s
   if (is_function_sort(s) && number_of_arguments>0)
   {
     const function_sort fs(s);
-    ss << "atermpp::aterm_cast<const application>(" << get_heads(fs.codomain(),base_string,number_of_arguments-fs.domain().size()) << ").head()";
+    ss << "atermpp::aterm_cast<const application>(" << get_heads(fs.codomain(),base_string,number_of_arguments-fs.domain().size()) << ".head())";
     return ss.str();
   }
   return base_string;
@@ -2449,7 +2449,8 @@ static std::string get_recursive_argument(const sort_expression& s, const size_t
   {
     return get_recursive_argument(target_type, index-source_type.size(), base_string,number_of_arguments-source_type.size());
   }
-  ss << "atermpp::aterm_cast<const application>(" << get_heads(target_type,base_string,number_of_arguments-source_type.size()) << ")[" << index << "]";
+  // ss << "atermpp::aterm_cast<const application>(" << get_heads(target_type,base_string,number_of_arguments-source_type.size()) << ")[" << index << "]";
+  ss << get_heads(target_type,base_string,number_of_arguments-source_type.size()) << "[" << index << "]";
   return ss.str();
 }
 
@@ -2754,13 +2755,19 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           // We are dealing with a partially rewritten function here. Remove the "@_" at
           // the beginning of the string.
           const string c_function_name=core::pp(fs.name());
-          fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;\n",i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
+          fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;\n",
+                                         i,
+                                         core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                                          c_function_name.substr(2,c_function_name.size()-2).c_str());
         }
       }
       else if (data_equation_selector(fs) && arity_is_allowed(fs,i))
       {
-        fprintf(f,  "  int2func[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),i);
+        fprintf(f,  "  int2func[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",
+                        i,
+                        core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
+                        core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
+                        i);
       }
     }
   }
