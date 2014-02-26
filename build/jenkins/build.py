@@ -71,6 +71,16 @@ else:
   testflags += ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
 
 #
+# For Windows, explicitly tell CMake which generator to use to avoid trouble
+# with x86/x64 incompatibilities
+#
+generator = []
+if label == 'windows-amd64':
+  generator += ['-G"Visual Studio 10 Win64"']
+elif label == 'windows-amd64':
+  generator += ['-G"Visual Studio 10"']
+
+#
 # If we are building the mCRL2-release job, run all tests
 # Note that jobname is something like, i.e. including buildtype etc.
 # mCRL2-release/buildtype=Maintainer,compiler=default,label=ubuntu-amd64
@@ -97,7 +107,8 @@ cmake_command = ['cmake',
                 + targetflags \
                 + compilerflags \
                 + testflags \
-                + packageflags 
+                + packageflags \
+                + generator
 if call('CMake', cmake_command):
   log('CMake failed.')
   sys.exit(1)
