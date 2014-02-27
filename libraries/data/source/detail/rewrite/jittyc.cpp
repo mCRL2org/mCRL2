@@ -1125,6 +1125,32 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
   return true;
 }
 
+// The function below yields true if the function indicated by the
+// function index can legitemately be used with a arguments.
+// Typically a function f:D1x...xDn->D can be used with 0 and n arguments.
+// A function f:(D1x...xDn)->(E1x...Em)->F can be used with 0, n, and n+m
+// arguments.
+static bool arity_is_allowed(
+                     const sort_expression s,
+                     const size_t a)
+{
+  if (a==0)
+  {
+    return true;
+  }
+  if (is_function_sort(s))
+  {
+    const function_sort fs(s);
+    size_t n=fs.domain().size();
+    if (n>a)
+    {
+      return false;
+    }
+    return arity_is_allowed(fs.codomain(),a-n);
+  }
+  return false;
+}
+
 void RewriterCompilingJitty::calc_nfs_list(
                 nfs_array& nfs, 
                 const application& appl, 
@@ -1492,19 +1518,32 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         {
           const size_t index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
           const data::function_symbol old_head=headfs;
-          std::stringstream new_name;
-          new_name << "@_rewr" << "_" << index << "_" << recursive_number_of_args(ta) << "_" << args_nfs.get_encoded_number()
-                               << "_term";
-          const data::function_symbol f(new_name.str(),old_head.sort());
-          if (partially_rewritten_functions.count(f)==0)
-          {
-            partially_rewritten_functions.insert(f);
-          }
-          /* Exclude adding an extra increase of the OpId index, which refers to an OpId that is not available.
-             The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
-             which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
-             to recalculate the normal form. TODO: this needs to be reconstructed. */
-          ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
+          const size_t total_arity=recursive_number_of_args(ta);
+          // for(size_t i=total_arity; i<=getArity(old_head); ++i)
+          // {
+            // Generate a new function symbol for the required total_arity, and all allowed higher arities,
+            // because this function symbol can be put in a context with more arguments.
+            // if (arity_is_allowed(old_head.sort(),i))
+            // {
+              std::stringstream new_name;
+              new_name << "@_rewr" << "_" << index << "_@@@_" << args_nfs.get_encoded_number()
+                                   << "_term";
+              const data::function_symbol f(new_name.str(),old_head.sort());
+              if (partially_rewritten_functions.count(f)==0)
+              {
+                partially_rewritten_functions.insert(f);
+              //   total_arity_of_partially_rewritten_functions[f]=i;
+              }
+              /* Exclude adding an extra increase of the OpId index, which refers to an OpId that is not available.
+                 The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
+                 which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
+                 to recalculate the normal form. TODO: this needs to be reconstructed. */
+              // if (i==total_arity)
+              { 
+                ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
+              }
+            //}
+          //}
         }
         else
         {
@@ -2389,32 +2428,6 @@ FILE* RewriterCompilingJitty::MakeTempFiles()
 	return result;
 }
 
-// The function below yields true if the function indicated by the
-// function index can legitemately be used with a arguments.
-// Typically a function f:D1x...xDn->D can be used with 0 and n arguments.
-// A function f:(D1x...xDn)->(E1x...Em)->F can be used with 0, n, and n+m
-// arguments.
-static bool arity_is_allowed(
-                     const sort_expression s,
-                     const size_t a)
-{
-  if (a==0)
-  {
-    return true;
-  }
-  if (is_function_sort(s))
-  {
-    const function_sort fs(s);
-    size_t n=fs.domain().size();
-    if (n>a)
-    {
-      return false;
-    }
-    return arity_is_allowed(fs.codomain(),a-n);
-  }
-  return false;
-}
-
 static bool arity_is_allowed(
                      const data::function_symbol& func,
                      const size_t a)
@@ -2750,15 +2763,21 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
       if (partially_rewritten_functions.count(fs)>0)
       {
-        if (arity_is_allowed(fs,i))
+        if (arity_is_allowed(fs,i) && i>0)
+        // if (i==total_arity_of_partially_rewritten_functions[fs])
         {
           // We are dealing with a partially rewritten function here. Remove the "@_" at
           // the beginning of the string.
-          const string c_function_name=core::pp(fs.name());
-          fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;\n",
+          const string function_name=core::pp(fs.name());
+          const size_t aaa_position=function_name.find("@@@");
+          std::stringstream ss;
+          ss << function_name.substr(2,aaa_position-2) << i << function_name.substr(aaa_position+3);
+          fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;   //Part.rewritten %s\n",
                                          i,
                                          core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
-                                         c_function_name.substr(2,c_function_name.size()-2).c_str());
+                                         // c_function_name.substr(2,c_function_name.size()-2).c_str(),
+                                         ss.str().c_str(),
+                                         function_name.c_str());
         }
       }
       else if (data_equation_selector(fs) && arity_is_allowed(fs,i))
@@ -2781,7 +2800,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       const data::function_symbol fs=*j;
       if (partially_rewritten_functions.count(fs)>0)
       {
-        if (arity_is_allowed(fs,i))
+        if (arity_is_allowed(fs,i) && i>0)
+        // if (i==total_arity_of_partially_rewritten_functions[fs])
         {
           // We are dealing with a partially rewritten function here.
           // This cannot be invoked for any normal function.

@@ -64,7 +64,12 @@ class RewriterCompilingJitty: public Rewriter
     // known that some of the arguments are in normal form. These are
     // used inside the compiling rewriter, but should never be returned
     // and show up in any normal form being returned from the rewriter.
+    // The arity is given by a separate map, and represents
+    // the total number of arguments that the function has,
+    // after currying. So, f(x,y)(z) typically has three arguments.
+    
     std::set < function_symbol > partially_rewritten_functions;
+    std::map < function_symbol, size_t > total_arity_of_partially_rewritten_functions;
 
     // The data structures below are used to store single variables
     // that are bound in lambda, forall and exist operators. When required
