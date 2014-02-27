@@ -77,7 +77,7 @@ else:
 generator = []
 if label == 'windows-amd64':
   generator += ['-GVisual Studio 10 Win64']
-elif label == 'windows-amd64':
+elif label == 'windows-x86':
   generator += ['-GVisual Studio 10']
 
 #
@@ -126,9 +126,11 @@ if not buildthreads:
 #
 
 extraoptions = []
-if label not in ["windows-x86", "windows-amd64"]:
-  extraoptions =  ['-j{0}'.format(buildthreads)]
-make_command = ['cmake', '--build', builddir, '--'] + extraoptions
+if label in ["windows-x86", "windows-amd64"]:
+  extraoptions = ['--config', buildtype]
+else:
+  extraoptions =  ['--', '-j{0}'.format(buildthreads)]
+make_command = ['cmake', '--build', builddir] + extraoptions
 if call('CMake --build', make_command):
   log('Build failed.')
   sys.exit(1)
@@ -148,6 +150,8 @@ ctest_command = ['ctest', \
                  '--output-on-failure', \
                  '--no-compress-output', \
                  '-j{0}'.format(buildthreads)]
+if label in ["windows-x86", "windows-amd64"]:
+  ctest_command += ['--build-config', buildtype]
 env = {}
 env.update(os.environ)
 env['MCRL2_COMPILEREWRITER'] = os.path.abspath(os.path.join('.', 'mcrl2compilerewriter_ctest'))
