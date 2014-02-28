@@ -116,7 +116,9 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
 {
   protected:
     data::data_expression m_value;
-    mutable std::map<const local_control_flow_graph_vertex*, std::size_t> m_neighbors; // the mapped value is the edge label
+
+    mutable std::map<const local_control_flow_graph_vertex*, std::set<std::size_t> > m_neighbors;
+    // the mapped values are the edge labels; note that there can be multiple edges with different labels
 
   public:
     local_control_flow_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable, const data::data_expression& value)
@@ -137,14 +139,14 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
       return m_value;
     }
 
-    const std::map<const local_control_flow_graph_vertex*, std::size_t>& neighbors() const
+    const std::map<const local_control_flow_graph_vertex*, std::set<std::size_t> >& neighbors() const
     {
       return m_neighbors;
     }
 
     void insert_neighbor(const local_control_flow_graph_vertex* u, std::size_t label) const
     {
-      m_neighbors[u] = label;
+      m_neighbors[u].insert(label);
     }
 
     bool operator==(const local_control_flow_graph_vertex& other) const
@@ -173,7 +175,11 @@ std::string local_control_flow_graph_vertex::print_neighbors() const
   std::ostringstream out;
   for (auto i = m_neighbors.begin(); i != m_neighbors.end(); ++i)
   {
-    out << *i->first << " (label = " << i->second << ")";
+    if (i != m_neighbors.begin())
+    {
+      out << "; ";
+    }
+    out << *i->first << " (labels = " << core::detail::print_set(i->second) << ")";
   }
   return out.str();
 }
@@ -222,8 +228,11 @@ struct local_control_flow_graph
       for (auto j = neighbors.begin(); j != neighbors.end(); ++j)
       {
         const local_control_flow_graph_vertex& v = find_vertex(*(j->first));
-        std::size_t label = j->second;
-        u.insert_neighbor(&v, label);
+        std::set<std::size_t> labels = j->second;
+        for (auto k = labels.begin(); k != labels.end(); ++k)
+        {
+          u.insert_neighbor(&v, *k);
+        }
       }
     }
   }
@@ -279,7 +288,8 @@ struct local_control_flow_graph
     mCRL2log(log::debug1, "stategraph") << " u.neighbors() = " << u.print_neighbors() << std::endl;
 
     // add edge (u, v)
-    if (u.neighbors().find(&v) == u.neighbors().end())
+    auto q = u.neighbors().find(&v);
+    if (u.neighbors().find(&v) == u.neighbors().end() || q->second.find(edge_label) == q->second.end())
     {
       mCRL2log(log::debug1, "stategraph") << " add edge " << u << " -> " << v << std::endl;
       u.insert_neighbor(&v, edge_label);
@@ -303,7 +313,7 @@ struct local_control_flow_graph
       auto const& neighbors = i->neighbors();
       for (auto j = neighbors.begin(); j != neighbors.end(); ++j)
       {
-        if (j->second == label)
+        if (j->second.find(label) != j->second.end())
         {
           return true;
         }
