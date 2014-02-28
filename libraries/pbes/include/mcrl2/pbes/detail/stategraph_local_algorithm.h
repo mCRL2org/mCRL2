@@ -82,7 +82,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
     // @pre: (X0, p0) is in must_graph
-    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const core::identifier_string& X0, std::size_t p0, const local_control_flow_graph& Vk)
+    std::map<core::identifier_string, std::set<data::variable> > compute_belongs_old(const core::identifier_string& X0, std::size_t p0, const local_control_flow_graph& Vk)
     {
       mCRL2log(log::debug, "stategraph") << "--- compute belongs (" << core::pp(X0) << ", " << p0 << ")" << std::endl;
 
@@ -177,7 +177,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       return u;
     }
 
-    void compute_belongs()
+    void compute_belongs_old()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing belongs relation ===" << std::endl;
       const propositional_variable_instantiation& Xinit = m_pbes.initial_state();
@@ -185,7 +185,58 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         auto const& Vk = m_local_control_flow_graphs[k];
         auto const& u = find_belongs_vertex(Vk, Xinit.name());
-        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(u.name(), u.index(), Vk);
+        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs_old(u.name(), u.index(), Vk);
+        m_belongs.push_back(Bk);
+      }
+    }
+
+    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k)
+    {
+      mCRL2log(log::debug, "stategraph") << "--- compute belongs ---" << std::endl;
+
+      std::map<core::identifier_string, std::set<data::variable> > Bk;
+      for (auto p = Vk.vertices.begin(); p != Vk.vertices.end(); ++p)
+      {
+        auto const& X = p->name();
+        auto const& eq_X = *find_equation(m_pbes, X);
+        std::vector<std::size_t> tmp = data_parameter_indices(X);
+        std::set<std::size_t> belongs(tmp.begin(), tmp.end());
+
+        auto const& predvars = eq_X.predicate_variables();
+        for (std::size_t i = 0; i < predvars.size(); i++)
+        {
+          const predicate_variable& X_i = predvars[i];
+          for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
+          {
+            std::size_t m = *j;
+            if ((X_i.used.find(m) != X_i.used.end() || X_i.changed.find(m) != X_i.changed.end()) && !Vk.has_label(X, i))
+            {
+              belongs.erase(j++);
+            }
+            else
+            {
+              ++j;
+            }
+          }
+        }
+        for (std::set<std::size_t>::const_iterator j = belongs.begin(); j != belongs.end(); ++j)
+        {
+          Bk[X].insert(eq_X.parameters()[*j]);
+        }
+      }
+
+      return Bk;
+    }
+
+    void compute_belongs()
+    {
+      assert(m_local_control_flow_graphs.size() == m_connected_components_values.size());
+      mCRL2log(log::debug, "stategraph") << "=== computing belongs relation ===" << std::endl;
+      for (std::size_t k = 0; k < m_local_control_flow_graphs.size(); k++)
+      {
+        auto const& Vk = m_local_control_flow_graphs[k];
+        auto const& values_k = m_connected_components_values[k];
+        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(Vk, values_k);
         m_belongs.push_back(Bk);
       }
     }
