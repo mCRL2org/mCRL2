@@ -250,6 +250,26 @@ struct local_control_flow_graph
         find_vertex(v);
       }
     }
+
+    // check if no two vertices (X, i, v) and (X, i', v') are in the graph with i != i'
+    std::map<core::identifier_string, std::set<std::size_t> > m;
+    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    {
+      auto& m_i = m[i->name()];
+      m_i.insert(i->index());
+      if (m_i.size() > 1)
+      {
+        auto const& X = i->name();
+        std::ostringstream out;
+        out << "Illegal state in local control flow graph: vertices";
+        for (auto k = m_i.begin(); k != m_i.end(); ++k)
+        {
+          out <<  " (" << X << ", " << *k << ")";
+        }
+        out << " encountered";
+        throw mcrl2::runtime_error(out.str());
+      }
+    }
   }
 
   std::pair<std::set<local_control_flow_graph_vertex>::iterator, bool> insert(const local_control_flow_graph_vertex& u)
@@ -1355,6 +1375,7 @@ class stategraph_algorithm
           }
         }
       }
+      V.self_check();
       m_local_control_flow_graphs.push_back(V);
       mCRL2log(log::debug, "stategraph") << m_local_control_flow_graphs.back() << std::endl;
     }
