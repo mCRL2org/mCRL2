@@ -434,6 +434,9 @@ class stategraph_algorithm
     // the connected components in the control flow graph; a component contains the indices in the vector m_global_control_flow_graph_vertices
     std::vector<std::set<std::size_t> > m_connected_components;
 
+    // the possible values of the connected components in the control flow graph
+    std::vector<std::set<data::data_expression> > m_connected_components_values;
+
     // the control flow graph(s)
     std::vector<control_flow_graph> m_control_flow_graphs;
 
@@ -1165,7 +1168,7 @@ class stategraph_algorithm
     }
 
     /// \brief Computes the values that the CFPs in component can attain.
-    std::set<data::data_expression> compute_local_control_flow_graph_values(const std::set<std::size_t>& component)
+    std::set<data::data_expression> compute_connected_component_values(const std::set<std::size_t>& component)
     {
       std::set<data::data_expression> result;
 
@@ -1227,12 +1230,13 @@ class stategraph_algorithm
       return result;
     }
 
-    void compute_local_control_flow_graph_values()
+    void compute_connected_component_values()
     {
       mCRL2log(log::debug, "stategraph") << "Computing values for the components" << std::endl;
       for (auto i = m_connected_components.begin(); i != m_connected_components.end(); ++i)
       {
-        std::set<data::data_expression> values = compute_local_control_flow_graph_values(*i);
+        std::set<data::data_expression> values = compute_connected_component_values(*i);
+        m_connected_components_values.push_back(values);
         mCRL2log(log::debug, "stategraph") << print_connected_component(*i) << " values = " << core::detail::print_set(values) << std::endl;
       }
     }
@@ -1353,7 +1357,7 @@ class stategraph_algorithm
     }
 
     // Computes a local control flow graph that corresponds to the given component in m_global_control_flow_graph_vertices.
-    void compute_local_control_flow_graph(const std::set<std::size_t>& component)
+    void compute_local_control_flow_graph(const std::set<std::size_t>& component, const std::set<data::data_expression>& component_values)
     {
       mCRL2log(log::debug, "stategraph") << "Compute local control flow graphs for component " << print_connected_component(component) << std::endl;
 
@@ -1384,18 +1388,21 @@ class stategraph_algorithm
         }
       }
 
-      // if no vertex was found corresponding to the initial state, then create todo entries for all
+      // if no vertex was found corresponding to the initial state, then create a graph from all
       // combinations of vertices and values
       if (!found)
       {
         mCRL2log(log::debug1, "stategraph") << "no vertex found that corresponds to the initial state" << std::endl;
+        std::set<local_control_flow_graph_vertex> U;
         for (auto p = component.begin(); p != component.end(); ++p)
         {
-          const global_control_flow_graph_vertex& w = m_global_control_flow_graph_vertices[*p];
-          const core::identifier_string& X = w.name();
-          local_control_flow_graph_vertex u(X, data::undefined_index(), data::undefined_variable(), data::undefined_data_expression());
-          compute_local_control_flow_graph(u, component_index);
+          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
+          for (auto q = component_values.begin(); q != component_values.end(); ++q)
+          {
+            U.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), *q));
+          }
         }
+        compute_local_control_flow_graph(U, component_index);
       }
     }
 
@@ -1409,10 +1416,9 @@ class stategraph_algorithm
 
     void compute_local_control_flow_graphs()
     {
-      compute_local_control_flow_graph_values();
-      for (auto i = m_connected_components.begin(); i != m_connected_components.end(); ++i)
+      for (std::size_t i = 0; i < m_connected_components.size(); i++)
       {
-        compute_local_control_flow_graph(*i);
+        compute_local_control_flow_graph(m_connected_components[i], m_connected_components_values[i]);
       }
     }
 
@@ -1425,8 +1431,8 @@ class stategraph_algorithm
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
+      compute_connected_component_values();
       compute_local_control_flow_graphs();
-      // print_local_control_flow_graphs();
     }
 
     const stategraph_pbes& get_pbes() const
