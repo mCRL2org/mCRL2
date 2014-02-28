@@ -76,23 +76,6 @@ class basic_rewriter
       m_rewriter(detail::createRewriter(d, equation_selector, static_cast< rewrite_strategy >(s)))
     {}
 
-  public:
-
-    /// \brief Adds an equation to the rewrite rules.
-    /// \param[in] eq The equation that is added.
-    /// \return Returns true if the operation succeeded.
-    bool add_rule(const data_equation& eq)
-    {
-      return m_rewriter->addRewriteRule(eq);
-    }
-
-    /// \brief Removes an equation from the rewrite rules.
-    /// \param[in] eq The equation that is removed.
-    void remove_rule(const data_equation& eq)
-    {
-      m_rewriter->removeRewriteRule(eq);
-    }
-
 };
 
 /// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
@@ -144,14 +127,6 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     basic_rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
       basic_rewriter< atermpp::aterm >(d,selector,s)
     { }
-
-    /// \brief Adds an equation to the rewrite rules.
-    /// \param[in] equation The equation that is added.
-    /// \return Returns true if the operation succeeded.
-    bool add_rule(const data_equation& equation)
-    {
-      return m_rewriter->addRewriteRule(equation);
-    }
 }; 
 
 /// \brief Rewriter that operates on data expressions.

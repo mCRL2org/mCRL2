@@ -94,18 +94,6 @@ data_expression_list Rewriter::rewrite_list(
   return data_expression_list(terms.begin(),terms.end(),r);
 }
 
-bool Rewriter::addRewriteRule(const data_equation& /*Rule*/)
-{
-  assert(0);
-  return false;
-}
-
-bool Rewriter::removeRewriteRule(const data_equation& /*Rule*/)
-{
-  assert(0);
-  return false;
-}
-
 data_expression Rewriter::rewrite_where(
                       const where_clause& term,
                       substitution_type& sigma)

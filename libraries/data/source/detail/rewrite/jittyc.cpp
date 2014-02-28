@@ -2324,58 +2324,6 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
 }
 
 
-bool RewriterCompilingJitty::addRewriteRule(const data_equation& rule1)
-{
-  const data_equation rule=rule1;
-  try
-  {
-    CheckRewriteRule(rule);
-  }
-  catch (std::runtime_error& e)
-  {
-    mCRL2log(warning) << e.what() << std::endl;
-    return false;
-  }
-
-  if (rewrite_rules.insert(rule).second)
-  {
-    // The equation has been added as a rewrite rule, otherwise the equation was already present.
-    data_equation_selector.add_function_symbols(rule.lhs());
-    need_rebuild = true;
-  }
-  return true;
-}
-
-bool RewriterCompilingJitty::removeRewriteRule(const data_equation& rule1)
-{
-  const data_equation rule=rule1;
-  if (rewrite_rules.erase(rule)>0) // An equation is erased
-  {
-    // The equation has been added as a rewrite rule, otherwise the equation was already present.
-    need_rebuild = true;
-    return true;
-  }
-  return false;
-}
-
-void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec)
-{
-  made_files = false;
-
-  need_rebuild = true;
-
-  const data_equation_vector l=DataSpec.equations();
-  for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
-  {
-    if (data_equation_selector(*j))
-    {
-      addRewriteRule(*j);
-    }
-  }
-
-  int2ar_idx.clear();
-  ar=std::vector<atermpp::aterm_appl>();
-}
 
 void RewriterCompilingJitty::CleanupRewriteSystem()
 {
@@ -2581,15 +2529,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   f = MakeTempFiles();
 
-  //
   //  Print includes
-  //
   fprintf(f, "#include \"mcrl2/data/detail/rewrite/jittycpreamble.h\"\n");
 
-  //
   // Print defs
-  //
-
   fprintf(f,
           "using namespace mcrl2::data;\n"
          );
@@ -2603,7 +2546,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   // - Calculate maximum occurring arity
   // - Forward declarations of rewr_* functions
-  //
   size_t max_arity = 0;
   for(function_symbol_vector::const_iterator l = all_function_symbols.begin()
         ; l != all_function_symbols.end()
@@ -2623,20 +2565,24 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   fprintf(f,  "\n\n");
 
-  //
+  fprintf(f, "const data_expression& pass_on(const data_expression& t)\n");
+  fprintf(f, "{\n");
+  fprintf(f, "  return t;\n");
+  fprintf(f, "}\n");
+
+  fprintf(f, "data_expression do_nothing(const data_expression& t)\n");
+  fprintf(f, "{\n");
+  fprintf(f, "  return t;\n");
+  fprintf(f, "}\n");
+
+  
   // Declare function types
-  //
   fprintf(f,  "typedef data_expression (*func_type)(const data_expression& );\n");
   fprintf(f,  "func_type* int2func[%zu];\n", max_arity+1);
   fprintf(f,  "func_type* int2func_head_in_nf[%zu];\n", max_arity+1);
 
   // Set this rewriter, to use its functions.
   fprintf(f,  "mcrl2::data::detail::RewriterCompilingJitty *this_rewriter;\n");
-
-  fprintf(f, "const data_expression& pass_on(const data_expression& t)\n");
-  fprintf(f, "{\n");
-  fprintf(f, "  return t;\n");
-  fprintf(f, "}\n");
 
 
   // Make functions that construct applications with arity n where 5< n <= max_arity.
@@ -2755,7 +2701,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Generate the entries for int2func.
   for (size_t i=0; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1);
+    fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",
+                          i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1);
+    fprintf(f,  "for(size_t j=0; j<%zu; ++j){ int2func[%zu][j]=do_nothing; };\n",
+                          core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,i);
     for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
                         j!=all_function_symbols.end(); ++j)
     {
@@ -2793,7 +2742,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Generate the entries for int2func_head_in_nf. Entries for constants (with arity 0) are not required.
   for (size_t i=1; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1);
+    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",
+                               i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1);
+    fprintf(f,  "for(size_t j=0; j<%zu; ++j){ int2func_head_in_nf[%zu][j]=do_nothing; };\n",
+                               core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,i);
     for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
                         j!=all_function_symbols.end(); ++j)
     {
@@ -3071,8 +3023,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   so_rewr = interface.rewrite_external;
 
   mCRL2log(verbose) << interface.status << std::endl;
-
-  need_rebuild = false;
 }
 
 RewriterCompilingJitty::RewriterCompilingJitty(
@@ -3084,9 +3034,36 @@ RewriterCompilingJitty::RewriterCompilingJitty(
   // data_equation_selector=equations_selector;
   so_rewr_cleanup = NULL;
   rewriter_so = NULL;
-  // m_data_specification_for_enumeration = DataSpec;
   initialise_common();
-  CompileRewriteSystem(data_spec);
+
+  made_files = false;
+  rewrite_rules.clear();
+
+  const data_equation_vector l=data_spec.equations();
+  for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
+  {
+    if (data_equation_selector(*j))
+    {
+      const data_equation rule=*j;
+      try
+      {
+        CheckRewriteRule(rule);
+        if (rewrite_rules.insert(rule).second)
+        {
+          // The equation has been added as a rewrite rule, otherwise the equation was already present.
+          data_equation_selector.add_function_symbols(rule.lhs());
+        }
+      }
+      catch (std::runtime_error& e)
+      {
+        mCRL2log(warning) << e.what() << std::endl;
+      }
+    }
+  }
+
+  int2ar_idx.clear();
+  ar=std::vector<atermpp::aterm_appl>();
+  BuildRewriteSystem();
 }
 
 RewriterCompilingJitty::~RewriterCompilingJitty()
@@ -3098,10 +3075,6 @@ data_expression RewriterCompilingJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
-  if (need_rebuild)
-  {
-    BuildRewriteSystem();
-  }
   // Save global sigma and restore it afterwards, as rewriting might be recursive with different
   // substitutions, due to the enumerator.
   substitution_type *saved_sigma=global_sigma;

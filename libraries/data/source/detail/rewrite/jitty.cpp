@@ -238,7 +238,6 @@ RewriterJitty::RewriterJitty(
 {
   MAX_LEN=0;
   max_vars = 0;
-  need_rebuild = false;
 
   const std::vector< data_equation > &l = data_spec.equations();
   for (std::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
@@ -279,7 +278,7 @@ RewriterJitty::~RewriterJitty()
 {
 }
 
-bool RewriterJitty::addRewriteRule(const data_equation &rule)
+/* bool RewriterJitty::addRewriteRule(const data_equation &rule)
 {
   try
   {
@@ -311,9 +310,9 @@ bool RewriterJitty::addRewriteRule(const data_equation &rule)
   need_rebuild = true;
 
   return true;
-}
+} */
 
-bool RewriterJitty::removeRewriteRule(const data_equation &rule)
+/* bool RewriterJitty::removeRewriteRule(const data_equation &rule)
 {
   const function_symbol &f=get_function_symbol_of_head(rule.lhs());
   size_t lhs_head_index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(get_function_symbol_of_head(rule.lhs()));
@@ -339,7 +338,7 @@ bool RewriterJitty::removeRewriteRule(const data_equation &rule)
   }
 
   return true;
-}
+} */
 
 static data_expression subst_values(
             atermpp::detail::_aterm** vars,
@@ -820,13 +819,7 @@ data_expression RewriterJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
-  if (need_rebuild)
-  {
-    rebuild_strategy();
-    need_rebuild = false;
-  }
   return rewrite_aux(term, sigma);
-
 }
 
 rewrite_strategy RewriterJitty::getStrategy()

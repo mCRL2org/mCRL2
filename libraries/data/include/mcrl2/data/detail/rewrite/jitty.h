@@ -33,12 +33,8 @@ class RewriterJitty: public Rewriter
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
-    bool addRewriteRule(const data_equation &Rule);
-    bool removeRewriteRule(const data_equation &Rule);
-
   private:
     size_t max_vars;
-    bool need_rebuild;
 
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector < atermpp::aterm_list >  jitty_strat;

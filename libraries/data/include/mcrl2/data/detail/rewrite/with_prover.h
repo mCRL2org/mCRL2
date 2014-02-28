@@ -40,9 +40,6 @@ class RewriterProver: public Rewriter
          const data_expression &term,
          substitution_type &sigma);
 
-    bool addRewriteRule(const data_equation &rule);
-    bool removeRewriteRule(const data_equation &rule);
-
 };
 
 }

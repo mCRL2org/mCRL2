@@ -45,8 +45,6 @@ class RewriterCompilingJitty: public Rewriter
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
-    bool addRewriteRule(const data_equation &rule);
-    bool removeRewriteRule(const data_equation &rule);
     substitution_type *global_sigma;
 
     // The data structures below are used to store the variable lists2
@@ -87,7 +85,6 @@ class RewriterCompilingJitty: public Rewriter
   private:
     RewriterJitty jitty_rewriter;
     std::set < data_equation > rewrite_rules;
-    bool need_rebuild;
     bool made_files;
 
     std::map < function_symbol, data_equation_list >  jittyc_eqns;
@@ -122,7 +119,6 @@ class RewriterCompilingJitty: public Rewriter
     void implement_tree(FILE* f, const match_tree& tree, const size_t arity, size_t d, 
                         const std::vector<bool> &used);
     void implement_strategy(FILE* f, match_tree_list strat, size_t arity, size_t d, const mcrl2::data::function_symbol& opid, const nfs_array& nf_args);
-    void CompileRewriteSystem(const data_specification& DataSpec);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
     FILE* MakeTempFiles();

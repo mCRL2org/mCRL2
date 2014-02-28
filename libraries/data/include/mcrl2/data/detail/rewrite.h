@@ -87,24 +87,6 @@ class Rewriter
      **/
     virtual data_expression_list rewrite_list(const data_expression_list& Terms, substitution_type& sigma);
 
-    /**
-     * \brief Add a rewrite rule to this rewriter.
-     * \param Rule A mCRL2 rewrite rule (DataEqn).
-     * \return Whether or not the rule was succesfully added. Note
-     *         that some rewriters do not support adding of rewrite
-     *         rules altogether and will always return false.
-     **/
-    virtual bool addRewriteRule(const data_equation& rule);
-    /**
-     * \brief Remove a rewrite rule from this rewriter (if present).
-     * \param Rule A mCRL2 rewrite rule (DataEqn).
-     * \return Whether or not the rule was succesfully removed. Note
-     *         that some rewriters do not support removing of
-     *         rewrite rules altogether and will always return
-     *         false.
-     **/
-    virtual bool removeRewriteRule(const data_equation& rule);
-
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
     data_expression existential_quantifier_enumeration(
