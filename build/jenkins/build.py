@@ -76,9 +76,9 @@ else:
 #
 generator = []
 if label == 'windows-amd64':
-  generator += ['-GVisual Studio 10 Win64']
+  generator += ['-GNMake Makefiles']
 elif label == 'windows-x86':
-  generator += ['-GVisual Studio 10']
+  generator += ['-GNMake Makefiles']
 
 #
 # If we are building the mCRL2-release job, run all tests
