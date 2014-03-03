@@ -36,7 +36,7 @@ namespace data
 namespace detail
 {
 
-atermpp::aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
+atermpp::aterm_list RewriterJitty::create_strategy(const data_equation_list& rules1)
 {
   atermpp::aterm_list rules;
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
@@ -239,7 +239,7 @@ RewriterJitty::RewriterJitty(
   MAX_LEN=0;
   max_vars = 0;
 
-  const std::vector< data_equation > &l = data_spec.equations();
+  const std::vector< data_equation >& l = data_spec.equations();
   for (std::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
   {
     if (equation_selector(*j))
@@ -278,7 +278,7 @@ RewriterJitty::~RewriterJitty()
 {
 }
 
-/* bool RewriterJitty::addRewriteRule(const data_equation &rule)
+/* bool RewriterJitty::addRewriteRule(const data_equation& rule)
 {
   try
   {
@@ -312,9 +312,9 @@ RewriterJitty::~RewriterJitty()
   return true;
 } */
 
-/* bool RewriterJitty::removeRewriteRule(const data_equation &rule)
+/* bool RewriterJitty::removeRewriteRule(const data_equation& rule)
 {
-  const function_symbol &f=get_function_symbol_of_head(rule.lhs());
+  const function_symbol& f=get_function_symbol_of_head(rule.lhs());
   size_t lhs_head_index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(get_function_symbol_of_head(rule.lhs()));
 
   data_equation_list n;
@@ -504,9 +504,10 @@ static bool match_jitty(
 }
 
 data_expression RewriterJitty::rewrite_aux(
-                      const data_expression &term,
-                      substitution_type &sigma)
+                      const data_expression& term,
+                      substitution_type& sigma)
 {
+// std::cerr << "REWRITE AUX " << term << "\n";
   if (is_function_symbol(term))
   {
     return rewrite_aux_function_symbol(atermpp::aterm_cast<const function_symbol>(term),term,sigma);
@@ -541,14 +542,17 @@ data_expression RewriterJitty::rewrite_aux(
   // In this case rewrite that function symbol. This is an optimisation. If this does not apply t is rewritten,
   // including all its subterms. But this is costly, as not all subterms will be rewritten again
   // in rewrite_aux_function_symbol.
+  
   function_symbol head;
-  data_expression t(term[0]);
-  if (detail::head_is_function_symbol(t,head))
+  const application& tapp(term);
+  data_expression t=tapp.head(); 
+  if (detail::head_is_function_symbol(term,head))
   {
+// std::cerr << "AUX1 " << term << "\n";
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
     // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
 
-    const size_t arity=term.size()-1;
+/*    const size_t arity=term.size()-1;
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,data_expression, arity);
     // new (&args[0]) data_expression(t);
     for(size_t i=0; i<arity; ++i)
@@ -559,9 +563,9 @@ data_expression RewriterJitty::rewrite_aux(
     for(size_t i=0; i<arity; ++i)
     {
       args[i].~data_expression();
-    }
+    } */
 
-    return rewrite_aux_function_symbol(head,result,sigma);
+    return rewrite_aux_function_symbol(head,term,sigma);
   }
 
   t = rewrite_aux(atermpp::aterm_cast<data_expression>(term[0]),sigma);
@@ -571,6 +575,7 @@ data_expression RewriterJitty::rewrite_aux(
 
   if (head_is_function_symbol(t,head))
   {
+// std::cerr << "AUX1a " << t << "\n";
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
     // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
 
@@ -591,6 +596,7 @@ data_expression RewriterJitty::rewrite_aux(
   }
   else if (head_is_variable(t))
   {
+// std::cerr << "AUX2 " << t << "\n";
     // return #REWR#(t,t1,...,tn) where t1,...,tn still need to be rewritten.
     const size_t arity=term.size()-1;
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,data_expression, arity);
@@ -624,11 +630,12 @@ data_expression RewriterJitty::rewrite_aux(
 }
 
 data_expression RewriterJitty::rewrite_aux_function_symbol(
-                      const function_symbol &op,
-                      const data_expression &term,
-                      substitution_type &sigma)
+                      const function_symbol& op,
+                      const data_expression& term,
+                      substitution_type& sigma)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
+// std::cerr << "REWRITE AUX FUNCTION SYMBOL " << op << "   " << term << "\n";
   const size_t arity=(is_function_symbol(term)?1:detail::recursive_number_of_args(term)+1);
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,data_expression, arity);
@@ -649,6 +656,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   const atermpp::aterm_list& strat=jitty_strat[op_value];
   if (!strat.empty())
   {
+// std::cerr << "AUX FUN1 "<< strat << "\n";
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,atermpp::detail::_aterm*,max_vars);
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::detail::_aterm*,max_vars);
     size_t no_assignments=0;
@@ -658,6 +666,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       const atermpp::aterm& rule = *strategy_it;
       if (rule.type_is_int())
       {
+// std::cerr << "AUX FUN2 "<< rule << "\n";
         const size_t i = (atermpp::aterm_cast<const atermpp::aterm_int>(rule)).value()+1;
         if (i < arity)
         {
@@ -673,6 +682,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       }
       else
       {
+// std::cerr << "AUX FUN3 "<< rule << "\n";
         const atermpp::aterm_list& rule1=atermpp::aterm_cast<const atermpp::aterm_list>(rule);
         const data_expression& lhs=atermpp::aterm_cast<const data_expression>(element_at(rule1,2));
         size_t rule_arity = (is_function_symbol(lhs)?1:detail::recursive_number_of_args(lhs)+1);
@@ -712,6 +722,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                 rewritten[i].~data_expression();
               }
             }
+// std::cerr << "AUX FUNC4 RESULT " << result << "\n";
             return result;
           }
           else
@@ -755,7 +766,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
               i=end-1;
               sort = core::down_cast<function_sort>(sort).codomain();
             }
-            const data_expression result=rewritten[i];
+            const data_expression result=rewrite_aux(rewritten[i],sigma);
 
             for (size_t i=0; i<arity; ++i)
             {
@@ -764,6 +775,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                 rewritten[i].~data_expression();
               }
             }
+// std::cerr << "AUX FUNC5 RESULT " << result << "\n";
             return result;
           }
         }

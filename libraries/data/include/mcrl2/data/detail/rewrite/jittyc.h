@@ -123,7 +123,6 @@ class RewriterCompilingJitty: public Rewriter
     void BuildRewriteSystem();
     FILE* MakeTempFiles();
     void finish_function(FILE* f, size_t arity, const data::function_symbol& opid, const std::vector<bool>& used);
-
 };
 
 struct rewriter_interface

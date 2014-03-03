@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <stdlib.h>
 
+#include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
@@ -29,6 +30,8 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::log;
+using namespace mcrl2::utilities;
+
 
 
 static data_expression negate_inequality(const data_expression &e)
@@ -822,7 +825,7 @@ assignment_list determine_process_initialization(
 /// \param max_iterations The maximal number of iterations the algorithm should
 ///        perform
 /// \param strategy The rewrite strategy that should be used.
-specification realelm(specification s, int max_iterations, const rewriter& r)
+specification realelm(specification s, int max_iterations, const rewrite_strategy strat)
 {
   if (s.process().has_time())
   {
@@ -859,15 +862,14 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
                     v));
 
   s.data() = ds;
+  rewriter r(s.data(),strat);
   set_identifier_generator variable_generator;
   variable_generator.add_identifiers(lps::find_identifiers((s)));
   linear_process lps=s.process();
   const variable_list real_parameters = get_real_variables(lps.process_parameters());
   const variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
   std::vector < summand_information > summand_info;
-  // mCRL2log(debug) << "Normalize specification in\n";
   normalize_specification(s, real_parameters, r, summand_info);
-  // mCRL2log(debug) << "Normalize specification out\n";
 
   context_type context; // Contains introduced variables
 
