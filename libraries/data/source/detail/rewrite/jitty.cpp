@@ -544,7 +544,7 @@ data_expression RewriterJitty::rewrite_aux(
   // in rewrite_aux_function_symbol.
   
   function_symbol head;
-  const application& tapp(term);
+  const application& tapp=core::down_cast<application>(term);
   data_expression t=tapp.head(); 
   if (detail::head_is_function_symbol(term,head))
   {
