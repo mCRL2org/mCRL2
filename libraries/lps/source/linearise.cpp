@@ -198,6 +198,7 @@ class specification_basic_type:public boost::noncopyable
                                                          instances that are represented by the variables in seq_varnames */
     t_lin_options options;
     bool timeIsBeingUsed;
+    bool fresh_equation_added;
     std::deque < objectdatatype > objectdata; // This is a double ended queue to guarantee that the objects will not
                                               // be moved to another place when the object data structure grows. This
                                               // is because objects in this datatype  are passed around by reference.
@@ -220,7 +221,8 @@ class specification_basic_type:public boost::noncopyable
       data(ds),
       rewr(data,opt.rewrite_strategy),
       options(opt),
-      timeIsBeingUsed(false)
+      timeIsBeingUsed(false),
+      fresh_equation_added(false)
     {
       objectIndexTable=indexed_set(1024,75);
 
@@ -238,10 +240,6 @@ class specification_basic_type:public boost::noncopyable
       procs=ps;
       storeprocs(procs);
       initdatavars=idvs;
-      /* if (!opt.norewrite)
-      {
-        rewr=mcrl2::data::rewriter(data,opt.rewrite_strategy);
-      } */
       // The terminationAction and the terminatedProcId must be defined after initialisation of
       // data as otherwise fresh name does not work properly.
       terminationAction=action(action_label(fresh_identifier_generator("Terminate"),sort_expression_list()),data_expression_list());
@@ -535,6 +533,11 @@ class specification_basic_type:public boost::noncopyable
     {
       if (!options.norewrite)
       {
+        if (fresh_equation_added)
+        {
+          rewr=rewriter(data,options.rewrite_strategy);
+          fresh_equation_added=false;
+        }
         return rewr(t);
       }
       return t;
@@ -4907,6 +4910,7 @@ class specification_basic_type:public boost::noncopyable
           make_list(v1,v),
           application(functionname,tempxxxterm),
           data_expression(v1)));
+      fresh_equation_added=true;
 
       variable_list auxvars=vars;
 
@@ -4921,6 +4925,7 @@ class specification_basic_type:public boost::noncopyable
                           vars,
                           application(functionname,tempargs),
                           auxvars.front()));
+        fresh_equation_added=true;
 
         auxvars.pop_front();
       }
