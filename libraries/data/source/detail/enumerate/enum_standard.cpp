@@ -159,7 +159,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
       assert(condition.size()==3);
       push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[0],negated_term_list,negated);
       data_expression_list temp=negated_term_list;
-      temp.push_front(ca[1]);
+      temp.push_front(ca[0]);
       push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[1], temp,negated);
       return;
     }

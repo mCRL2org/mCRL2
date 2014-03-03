@@ -310,9 +310,6 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
     template <typename SubstitutionFunction>
     data_expression_with_variables operator()(const data_expression_with_variables& d, const SubstitutionFunction& sigma) const
     {
-      // Substitution of sigma in d a priori is not very efficient.
-      // data_expression t = this->operator()(replace_free_variables(static_cast< const data_expression& >(d), sigma));
-
       substitution_type sigma_with_iterator;
       std::set < variable > free_variables=data::find_free_variables(d);
       for(std::set < variable >::const_iterator it=free_variables.begin(); it!=free_variables.end(); ++it)
