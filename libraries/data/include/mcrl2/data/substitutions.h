@@ -757,7 +757,6 @@ public:
   const expression_type& operator()(const variable_type& v) const
   {
     const size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(v);
-
     if (i < m_index_table.size())
     {
       const size_t j = m_index_table[i];

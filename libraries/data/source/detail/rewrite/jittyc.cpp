@@ -168,6 +168,32 @@ static char* whitespace(size_t len)
 }
 
 
+// The function below yields true if the function indicated by the
+// function index can legitemately be used with a arguments.
+// Typically a function f:D1x...xDn->D can be used with 0 and n arguments.
+// A function f:(D1x...xDn)->(E1x...Em)->F can be used with 0, n, and n+m
+// arguments.
+static bool arity_is_allowed(
+                     const sort_expression s,
+                     const size_t a)
+{
+  if (a==0)
+  {
+    return true;
+  }
+  if (is_function_sort(s))
+  {
+    const function_sort fs(s);
+    size_t n=fs.domain().size();
+    if (n>a)
+    {
+      return false;
+    }
+    return arity_is_allowed(fs.codomain(),a-n);
+  }
+  return false;
+}
+
 static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_cnt, const bool ommit_head)
 {
   if (is_function_symbol(t))
@@ -806,11 +832,11 @@ static variable_list dep_vars(const data_equation& eqn)
   // Check all arguments
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i+1)))
+    if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i)))
     {
       // Argument is not a variable, so it needs to be rewritten
       bs[i] = true;
-      variable_list evars = get_vars(get_argument_of_higher_order_term(lhs_internal,i+1));
+      variable_list evars = get_vars(get_argument_of_higher_order_term(lhs_internal,i));
       for (; !evars.empty(); evars=evars.tail())
       {
         int j=i-1; // vars.tail().size()-1
@@ -833,7 +859,7 @@ static variable_list dep_vars(const data_equation& eqn)
       for (variable_list_list o=vars; !o.empty(); o=o.tail())
       {
         const variable_list l=o.front();
-        if (std::find(o.begin(),o.end(),get_argument_of_higher_order_term(lhs_internal,i+1)) != o.end())
+        if (std::find(o.begin(),o.end(),get_argument_of_higher_order_term(lhs_internal,i)) != o.end())
         {
           // Same variable, mark it
           if (j >= 0)
@@ -851,15 +877,15 @@ static variable_list dep_vars(const data_equation& eqn)
       }
     }
     // Add vars used in expression
-    vars.push_front(get_vars(get_argument_of_higher_order_term(lhs_internal,i+1)));
+    vars.push_front(get_vars(get_argument_of_higher_order_term(lhs_internal,i)));
   }
 
   variable_list deps;
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (bs[i] && is_variable(get_argument_of_higher_order_term(lhs_internal,i+1)))
+    if (bs[i] && is_variable(get_argument_of_higher_order_term(lhs_internal,i)))
     {
-      deps.push_front(down_cast<variable>(get_argument_of_higher_order_term(lhs_internal,i+1)));
+      deps.push_front(down_cast<variable>(get_argument_of_higher_order_term(lhs_internal,i)));
     }
   }
 
@@ -902,7 +928,93 @@ size_t RewriterCompilingJitty::binding_variable_list_index(const variable_list& 
   return index_for_vl;
 }
 
-static match_tree_list create_strategy(
+// Put the sorts with indices between actual arity and requested arity in a vector.
+sort_list_vector RewriterCompilingJitty::get_residual_sorts(const sort_expression& s1, size_t actual_arity, size_t requested_arity)
+{
+  sort_expression s=s1;
+  sort_list_vector result;
+  while (requested_arity>0)
+  {
+    const function_sort fs(s);
+    if (actual_arity==0)
+    {
+      result.push_back(fs.domain());
+      assert(fs.domain().size()<=requested_arity);
+      requested_arity=requested_arity-fs.domain().size();
+    }
+    else
+    {
+      assert(fs.domain().size()<=actual_arity);
+      actual_arity=actual_arity-fs.domain().size();
+      requested_arity=requested_arity-fs.domain().size();
+    }
+    s=fs.codomain();
+  }
+  return result;
+}
+
+/// Rewrite the equation e such that it has exactly a arguments.
+/// If the rewrite rule has too many arguments, false is returned, otherwise
+/// additional arguments are added.
+
+bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, const size_t requested_arity)
+{
+  data_expression lhs=e.lhs();
+  data_expression rhs=e.rhs();
+  variable_list vars=e.variables();
+
+  function_symbol f;
+  if (!head_is_function_symbol(lhs,f))
+  {
+    throw mcrl2::runtime_error("Equation " + pp(e) + " does not start with a function symbol in its left hand side.");
+  }
+
+  size_t actual_arity=recursive_number_of_args(lhs);
+  if (arity_is_allowed(f.sort(),requested_arity) && actual_arity<=requested_arity)
+  {
+    if (actual_arity<requested_arity)
+    {
+      // Supplement the lhs and rhs with requested_arity-actual_arity extra variables.
+      sort_list_vector requested_sorts=get_residual_sorts(f.sort(),actual_arity,requested_arity);
+      for(sort_list_vector::const_iterator sl=requested_sorts.begin(); sl!=requested_sorts.end(); ++sl)
+      {
+        variable_vector var_vec;
+        for(sort_expression_list::const_iterator s=sl->begin(); s!=sl->end(); ++s)
+        {
+          variable v=variable(jitty_rewriter.generator("v@r"),*s); // Find a new name for a variable that is temporarily in use.
+          var_vec.push_back(v);
+          vars.push_front(v);
+        }
+        lhs=application(lhs,var_vec.begin(),var_vec.end());
+        rhs=application(rhs,var_vec.begin(),var_vec.end());
+      }
+    }
+  }
+  else
+  {
+    return false; // This is not an allowed arity, or the actual number of arguments is larger than the requested number.
+  }
+  
+  e=data_equation(vars,e.condition(),lhs,rhs);
+  return true;
+}
+
+/// Adapt the equation in eqns such that they have exactly arity arguments.
+data_equation_list RewriterCompilingJitty::lift_rewrite_rules_to_right_arity(const data_equation_list& eqns,const size_t arity)
+{
+  data_equation_vector result;
+  for(data_equation_list::const_iterator i=eqns.begin(); i!=eqns.end(); ++i)
+  {
+    data_equation e=*i;
+    if (lift_rewrite_rule_to_right_arity(e,arity))
+    { 
+      result.push_back(e);
+    }
+  }
+  return data_equation_list(result.begin(),result.end());
+}
+
+match_tree_list RewriterCompilingJitty::create_strategy(
         const data_equation_list& rules,
         const size_t arity,
         nfs_array& nfs)
@@ -943,11 +1055,11 @@ static match_tree_list create_strategy(
     // Check all arguments
     for (size_t i = 0; i < rule_arity; i++)
     {
-      if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i+1)))  
+      if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i)))  
       {
         // Argument is not a variable, so it needs to be rewritten
         bs[i] = true;
-        variable_list evars = get_vars(get_argument_of_higher_order_term(lhs_internal,i+1));
+        variable_list evars = get_vars(get_argument_of_higher_order_term(lhs_internal,i));
         for (; !evars.empty(); evars=evars.tail())
         {
           int j=i-1;
@@ -970,7 +1082,7 @@ static match_tree_list create_strategy(
         for (variable_list_list o=vars; !o.empty(); o=o.tail())
         {
           const variable_list l=o.front();
-          if (std::find(l.begin(),l.end(),get_argument_of_higher_order_term(lhs_internal,i+1)) != l.end())
+          if (std::find(l.begin(),l.end(),get_argument_of_higher_order_term(lhs_internal,i)) != l.end())
           {
             // Same variable, mark it
             if (j >= 0)
@@ -988,7 +1100,7 @@ static match_tree_list create_strategy(
         }
       }
       // Add vars used in expression
-      vars.push_front(get_vars(get_argument_of_higher_order_term(lhs_internal,i+1)));
+      vars.push_front(get_vars(get_argument_of_higher_order_term(lhs_internal,i)));
     }
 
     // Create dependency list for this rule
@@ -1032,7 +1144,7 @@ static match_tree_list create_strategy(
     // Create and add tree of collected rules
     if (!no_deps.empty())
     {
-      strat.push_front(create_tree(no_deps));
+      strat.push_front(create_tree(lift_rewrite_rules_to_right_arity(no_deps,arity)));
     }
 
     // Stop if there are no more rules left
@@ -1125,32 +1237,6 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
   return true;
 }
 
-// The function below yields true if the function indicated by the
-// function index can legitemately be used with a arguments.
-// Typically a function f:D1x...xDn->D can be used with 0 and n arguments.
-// A function f:(D1x...xDn)->(E1x...Em)->F can be used with 0, n, and n+m
-// arguments.
-static bool arity_is_allowed(
-                     const sort_expression s,
-                     const size_t a)
-{
-  if (a==0)
-  {
-    return true;
-  }
-  if (is_function_sort(s))
-  {
-    const function_sort fs(s);
-    size_t n=fs.domain().size();
-    if (n>a)
-    {
-      return false;
-    }
-    return arity_is_allowed(fs.codomain(),a-n);
-  }
-  return false;
-}
-
 void RewriterCompilingJitty::calc_nfs_list(
                 nfs_array& nfs, 
                 const application& appl, 
@@ -1158,7 +1244,7 @@ void RewriterCompilingJitty::calc_nfs_list(
 {
   for(size_t i=0; i<recursive_number_of_args(appl); ++i)
   {
-    nfs.set(i,calc_nfs(get_argument_of_higher_order_term(appl,i+1),nnfvars));
+    nfs.set(i,calc_nfs(get_argument_of_higher_order_term(appl,i),nnfvars));
   }
 }
 
@@ -1267,7 +1353,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                              const bool rewr)
 {
   stringstream ss;
-  
   // Experiment: if the term has no free variables, deliver the normal form directly.
   // This code can be removed, when it does not turn out to be useful.
   // This requires the use of the jitty rewriter to calculate normal forms.
@@ -1619,7 +1704,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         ss << "rewrite(";
       }
 
-      ss << calc_inner_appl_head(arity) << head.second << "," <<
+      ss << calc_inner_appl_head(arity+1) << head.second << "," <<
                calc_inner_terms(args_first,ta,startarg,nnfvars,args_nfs) << ")";
       if (rewr)
       {
@@ -1629,12 +1714,12 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else if (is_application(ta.head()))
     {
-      // const size_t arity=ta.size();
-      const size_t arity=recursive_number_of_args(ta);
+      const size_t arity=ta.size();
+      const size_t total_arity=recursive_number_of_args(ta);
       b = rewr;
       pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
-      nfs_array tail_first(arity);
-      const nfs_array dummy(arity);
+      nfs_array tail_first(total_arity);
+      const nfs_array dummy(total_arity);
       string tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,dummy);
       if (rewr)
       {
@@ -2672,11 +2757,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
               finish_function(f,a,fs,used);
             }
 
-            fprintf(f,                 "}\n");
+            fprintf(f,"}\n\n");
           }
         }
       }
-      fprintf(f,  "\n");
     }
   }
 
@@ -2924,7 +3008,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
       "  using namespace mcrl2::data;\n"
-      " if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(t).function())==%ld)\n" // if (is_function_symbol(t))
+      "  if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(t).function())==%ld)\n" // if (is_function_symbol(t))
       "  {\n"
       "    // Term t is a function_symbol\n"
       "    const mcrl2::data::function_symbol& f=atermpp::aterm_cast<const mcrl2::data::function_symbol>(t);\n"
@@ -3078,7 +3162,7 @@ data_expression RewriterCompilingJitty::rewrite(
   // Save global sigma and restore it afterwards, as rewriting might be recursive with different
   // substitutions, due to the enumerator.
   substitution_type *saved_sigma=global_sigma;
-  global_sigma=& sigma;
+  global_sigma=&sigma;
   const data_expression result=so_rewr(term);
   global_sigma=saved_sigma;
   return result;

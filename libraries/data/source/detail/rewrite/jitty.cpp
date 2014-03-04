@@ -75,7 +75,7 @@ atermpp::aterm_list RewriterJitty::create_strategy(const data_equation_list& rul
 
         for (size_t i = 0; i < arity; i++)
         {
-          const data_expression this_rule_lhs_iplus1_arg=detail::get_argument_of_higher_order_term(this_rule_lhs,i+1);
+          const data_expression this_rule_lhs_iplus1_arg=detail::get_argument_of_higher_order_term(this_rule_lhs,i);
           if (!is_variable(this_rule_lhs_iplus1_arg))
           {
             bs[i] = true;
@@ -507,7 +507,6 @@ data_expression RewriterJitty::rewrite_aux(
                       const data_expression& term,
                       substitution_type& sigma)
 {
-// std::cerr << "REWRITE AUX " << term << "\n";
   if (is_function_symbol(term))
   {
     return rewrite_aux_function_symbol(atermpp::aterm_cast<const function_symbol>(term),term,sigma);
@@ -548,7 +547,6 @@ data_expression RewriterJitty::rewrite_aux(
   data_expression t=tapp.head(); 
   if (detail::head_is_function_symbol(term,head))
   {
-// std::cerr << "AUX1 " << term << "\n";
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
     // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
 
@@ -575,7 +573,6 @@ data_expression RewriterJitty::rewrite_aux(
 
   if (head_is_function_symbol(t,head))
   {
-// std::cerr << "AUX1a " << t << "\n";
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
     // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
 
@@ -596,7 +593,6 @@ data_expression RewriterJitty::rewrite_aux(
   }
   else if (head_is_variable(t))
   {
-// std::cerr << "AUX2 " << t << "\n";
     // return #REWR#(t,t1,...,tn) where t1,...,tn still need to be rewritten.
     const size_t arity=term.size()-1;
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,data_expression, arity);
@@ -635,7 +631,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                       substitution_type& sigma)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
-// std::cerr << "REWRITE AUX FUNCTION SYMBOL " << op << "   " << term << "\n";
   const size_t arity=(is_function_symbol(term)?1:detail::recursive_number_of_args(term)+1);
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,data_expression, arity);
@@ -656,7 +651,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   const atermpp::aterm_list& strat=jitty_strat[op_value];
   if (!strat.empty())
   {
-// std::cerr << "AUX FUN1 "<< strat << "\n";
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,atermpp::detail::_aterm*,max_vars);
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::detail::_aterm*,max_vars);
     size_t no_assignments=0;
@@ -666,13 +660,12 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       const atermpp::aterm& rule = *strategy_it;
       if (rule.type_is_int())
       {
-// std::cerr << "AUX FUN2 "<< rule << "\n";
         const size_t i = (atermpp::aterm_cast<const atermpp::aterm_int>(rule)).value()+1;
         if (i < arity)
         {
           assert(!rewritten_defined[i]);
           rewritten_defined[i]=true;
-          new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
+          new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i-1),sigma));
           assert(rewritten[i].defined());
         }
         else
@@ -682,7 +675,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       }
       else
       {
-// std::cerr << "AUX FUN3 "<< rule << "\n";
         const atermpp::aterm_list& rule1=atermpp::aterm_cast<const atermpp::aterm_list>(rule);
         const data_expression& lhs=atermpp::aterm_cast<const data_expression>(element_at(rule1,2));
         size_t rule_arity = (is_function_symbol(lhs)?1:detail::recursive_number_of_args(lhs)+1);
@@ -699,8 +691,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         for (size_t i=1; i<rule_arity; i++)
         {
           assert(i<arity);
-          if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(term,i),
-                                                             detail::get_argument_of_higher_order_term(lhs,i),vars,terms,no_assignments))
+          if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(term,i-1),
+                                                             detail::get_argument_of_higher_order_term(lhs,i-1),vars,terms,no_assignments))
           {
             matches = false;
             break;
@@ -722,7 +714,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                 rewritten[i].~data_expression();
               }
             }
-// std::cerr << "AUX FUNC4 RESULT " << result << "\n";
             return result;
           }
           else
@@ -746,11 +737,11 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
             {
               if (rewritten_defined[i])
               {
-                rewritten[i]=detail::get_argument_of_higher_order_term(term,i);
+                rewritten[i]=detail::get_argument_of_higher_order_term(term,i-1);
               }
               else
               {
-                new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(term,i));
+                new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(term,i-1));
                 rewritten_defined[i]=true;
               }
             }
@@ -775,7 +766,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                 rewritten[i].~data_expression();
               }
             }
-// std::cerr << "AUX FUNC5 RESULT " << result << "\n";
             return result;
           }
         }
@@ -793,7 +783,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     if (!rewritten_defined[i])
     {
       // rewritten_defined[i]=true;
-      new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
+      new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i-1),sigma));
     }
   }
 

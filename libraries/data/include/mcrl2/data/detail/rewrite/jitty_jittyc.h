@@ -44,33 +44,33 @@ inline sort_expression residual_sort(const sort_expression& s, size_t no_of_init
   return result;
 }
 
-inline bool get_argument_of_higher_order_term_helper(const data_expression& t, size_t& i, data_expression& result)
+inline bool get_argument_of_higher_order_term_helper(const application& t, size_t& i, data_expression& result)
 {
   // t has the shape t application(....)
-  if (is_function_symbol(atermpp::aterm_cast<const data_expression>(t[0])))
+  if (!is_application(t.head()))
   {
-    const size_t arity = t.function().arity();
+    const size_t arity = t.size();
     if (arity>i)
     {
       result=atermpp::aterm_cast<data_expression>(t[i]);
       return true;
     }
     // arity <=i
-    i=i-arity+1;
+    i=i-arity;
     return false;
   }
-  if (get_argument_of_higher_order_term_helper(atermpp::aterm_cast<data_expression>(t[0]),i,result))
+  if (get_argument_of_higher_order_term_helper(core::down_cast<application>(t.head()),i,result))
   {
     return true;
   }
-  const size_t arity = t.function().arity();
+  const size_t arity = t.size();
   if (arity>i)
   {
-    result=atermpp::aterm_cast<data_expression>(t[i]);
+    result=t[i];
     return true;
   }
   // arity <=i
-  i=i-arity+1;
+  i=i-arity;
   return false;
 }
 
@@ -79,12 +79,11 @@ inline data_expression get_argument_of_higher_order_term(const data_expression& 
   // t is a aterm of the shape application(application(...application(f,t1,...tn),tn+1....),tm...).
   // Return the i-th argument t_i. NOTE: The first argument has index 1.
 
-  assert(!is_function_symbol(t));
   data_expression result;
 #ifndef NDEBUG // avoid a warning.
   bool b=
 #endif
-          get_argument_of_higher_order_term_helper(t,i,result);
+          get_argument_of_higher_order_term_helper(core::down_cast<application>(t),i,result);
   assert(b);
   return result;
 }
@@ -97,6 +96,16 @@ inline size_t recursive_number_of_args(const data_expression& t)
   }
 
   if (is_variable(t))
+  {
+    return 0;
+  }
+ 
+  if (is_where_clause(t))
+  {
+    return 0;
+  }
+
+  if (is_abstraction(t))
   {
     return 0;
   }

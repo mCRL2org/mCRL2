@@ -361,7 +361,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   data_expression partial_result=sort_bool::false_();
   bool solution_possible=true;
 
-  size_t loop_upperbound=5;
+  size_t loop_upperbound=100;
   while (loop_upperbound>0 &&
          partial_result!=sort_bool::true_() &&
          sol.next(evaluated_condition,x,solution_possible))
@@ -451,10 +451,6 @@ data_expression Rewriter::universal_quantifier_enumeration(
     return t3; // No quantified variables occur in the rewritten body.
   }
 
-
-
-
-
   /* Find A solution*/
   EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,false,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
 
@@ -464,7 +460,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   data_expression partial_result=sort_bool::true_();
   bool solution_possible=true;
 
-  size_t loop_upperbound=5;
+  size_t loop_upperbound=100;
   while (loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
          sol.next(evaluated_condition,x,solution_possible))
