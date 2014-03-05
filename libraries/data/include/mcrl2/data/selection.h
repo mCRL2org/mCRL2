@@ -54,6 +54,10 @@ class used_data_equation_selector
     {
       // Always add if:Bool#Bool#Bool->Bool; This symbol is used in the prover.
       m_used_symbols.insert(if_(sort_bool::bool_()));
+      // Always add and,or:Bool#Bool->Bool and not:Bool->Bool; This symbol is generated when eliminating quantifiers
+      m_used_symbols.insert(sort_bool::and_());
+      m_used_symbols.insert(sort_bool::or_());
+      m_used_symbols.insert(sort_bool::not_());
 
       // Add all constructors of all sorts as they may be used when enumerating over these sorts
       std::set< sort_expression > sorts(boost::copy_range< std::set< sort_expression > >(specification.sorts()));

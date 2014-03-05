@@ -57,6 +57,11 @@ class Rewriter
           data_equation_selector(eq_selector),
           m_data_specification_for_enumeration(data_spec)
     {
+      generator.add_identifiers(data::find_identifiers(data_spec.equations()));
+      generator.add_identifiers(data::find_identifiers(data_spec.sorts()));
+      generator.add_identifiers(data::find_identifiers(data_spec.constructors()));
+      generator.add_identifiers(data::find_identifiers(data_spec.mappings()));
+
     }
 
     /** \brief Destructor. */

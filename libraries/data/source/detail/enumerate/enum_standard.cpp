@@ -52,6 +52,7 @@ data_expression EnumeratorSolutionsStandard::add_negations(
      rewriting is cheaper than using a full fledged rewriter, that will
      again normalise all subterms.
   */
+
   if (negation_term_list.empty())
   {
     if (negated)
@@ -603,6 +604,7 @@ bool EnumeratorSolutionsStandard::next(
             const data_expression old_substituted_value=enum_sigma(var);
             enum_sigma[var]=term_rf;
             const data_expression rewritten_expr=m_rewr_obj->rewrite(e.expr(),enum_sigma);
+
             enum_sigma[var]=old_substituted_value;
             variable_list templist1=e.substituted_vars();
             templist1.push_front(var);

@@ -455,7 +455,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,false,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
 
   /* Create lists to store solutions */
-  atermpp::term_list<data_expression> x;
+  data_expression_list x;
   data_expression evaluated_condition=sort_bool::true_();
   data_expression partial_result=sort_bool::true_();
   bool solution_possible=true;
@@ -509,8 +509,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   // One can consider to replace the variables by their original, in order to not show 
   // internally generated variables in the output.
-  const data_expression t=abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
-  return t; 
+  return abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
 }
 
 
