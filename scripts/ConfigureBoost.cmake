@@ -27,7 +27,7 @@ endif()
 # From this point on we assume that Boost_FOUND!
 ##----------------------------------------------
 # Boost libraries are available for inclusion globally
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 # We only use header-only libraries, so no need to add the link directories
 #link_directories(${Boost_LIBRARY_DIRS})
