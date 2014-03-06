@@ -102,6 +102,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             std::size_t m = *j;
             if ((X_i.used.find(m) != X_i.used.end() || X_i.changed.find(m) != X_i.changed.end()) && !Vk.has_label(X, i))
             {
+              mCRL2log(log::debug1, "stategraph") << "vertex " << *p << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs " << std::endl;
               belongs.erase(j++);
             }
             else

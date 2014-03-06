@@ -298,6 +298,8 @@ class stategraph_equation: public pbes_equation
         {
           out << "        copy(" << X << ", " << i << ", " << j->first << ") = " << j->second << std::endl;
         }
+        out <<   "        used    = " << core::detail::print_set(m_predvars[i].used) << std::endl;
+        out <<   "        changed = " << core::detail::print_set(m_predvars[i].changed) << std::endl;
       }
       return out.str();
     }
