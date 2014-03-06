@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H
 
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 
@@ -63,110 +64,71 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
     // returns an index k such that d_X[j] corresponds to m_control_flow_graphs[k],
-    // or std::numeric_limits<std::size_t>::max() if no such index was found
+    // or data::undefined_index() if no such index was found
     std::size_t control_flow_index(const core::identifier_string& X, std::size_t j) const
     {
       std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator k = m_control_flow_index.find(X);
       if (k == m_control_flow_index.end())
       {
-        return (std::numeric_limits<std::size_t>::max)();
+        return data::undefined_index();
       }
       const std::map<std::size_t, std::size_t>& m = k->second;
       std::map<std::size_t, std::size_t>::const_iterator i = m.find(j);
       if (i == m.end())
       {
-        return (std::numeric_limits<std::size_t>::max)();
+        return data::undefined_index();
       }
       return i->second;
     }
 
-    // @pre: (X0, p0) is in must_graph
-    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const core::identifier_string& X0, std::size_t p0, const control_flow_graph& /* Vk unused. */ )
+    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k)
     {
-      mCRL2log(log::debug, "stategraph") << "--- compute belongs (" << core::pp(X0) << ", " << p0 << ")" << std::endl;
+      mCRL2log(log::debug, "stategraph") << "--- compute belongs ---" << std::endl;
 
-      std::map<core::identifier_string, std::set<data::variable> > result;
-
-/* TODO: remove the dependency on the must graph.
-      std::set<const control_flow_graph_vertex*> todo;
-      std::set<const control_flow_graph_vertex*> visited;
-
-      const control_flow_graph_vertex& y0 = *find_vertex(X0, p0);
-      todo.insert(&y0);
-      mCRL2log(log::debug, "stategraph") << " insert todo element (" << core::pp(X0) << ", " << p0 << ")" << std::endl;
-      while (!todo.empty())
+      std::map<core::identifier_string, std::set<data::variable> > Bk;
+      for (auto p = Vk.vertices.begin(); p != Vk.vertices.end(); ++p)
       {
-        std::set<const control_flow_graph_vertex*>::iterator ti = todo.begin();
+        auto const& X = p->name();
+        auto const& eq_X = *find_equation(m_pbes, X);
+        std::vector<std::size_t> tmp = data_parameter_indices(X);
+        std::set<std::size_t> belongs(tmp.begin(), tmp.end());
 
-        // y = (X, p)
-        const control_flow_graph_vertex& y = **ti;
-        const core::identifier_string& X = y.name();
-        std::size_t p = y.index();
-        todo.erase(ti);
-        visited.insert(*ti);
-
-        mCRL2log(log::debug, "stategraph") << " choose todo element (" << core::pp(X) << ", " << p << ")" << std::endl;
-
-        if (y.outgoing_edges.empty())
+        auto const& predvars = eq_X.predicate_variables();
+        for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          continue;
-        }
-
-        const stategraph_equation& eq_X = *find_equation(m_pbes, X);
-        std::vector<std::size_t> dp = data_parameter_indices(X);
-        std::set<std::size_t> belongs(dp.begin(), dp.end());
-
-        const std::set<control_flow_graph_vertex*>& E = y.outgoing_edges;
-        for (std::set<control_flow_graph_vertex*>::const_iterator ei = E.begin(); ei != E.end(); ++ei)
-        {
-          // z = (Y, q)
-          const control_flow_graph_vertex& z = **ei;
-          const core::identifier_string& Y = z.X;
-          std::size_t q = z.p;
-
-          for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
+          const predicate_variable& X_i = predvars[i];
+          for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
           {
-            const predicate_variable& X_i = eq_X.predicate_variables()[i];
-            if (X_i.X.name() != Y)
+            std::size_t m = *j;
+            if ((X_i.used.find(m) != X_i.used.end() || X_i.changed.find(m) != X_i.changed.end()) && !Vk.has_label(X, i))
             {
-              continue;
+              mCRL2log(log::debug1, "stategraph") << "vertex " << *p << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs " << std::endl;
+              belongs.erase(j++);
             }
-            if (visited.find(&z) == visited.end())
+            else
             {
-              todo.insert(&z);
-              mCRL2log(log::debug, "stategraph") << " insert todo element (" << core::pp(Y) << ", " << q << ")" << std::endl;
-            }
-            for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
-            {
-              if ((X_i.used.find(*j) != X_i.used.end() || X_i.changed.find(*j) != X_i.changed.end()) && !Vk.has_label(X, i))
-              {
-                belongs.erase(j++);
-              }
-              else
-              {
-                ++j;
-              }
+              ++j;
             }
           }
         }
         for (std::set<std::size_t>::const_iterator j = belongs.begin(); j != belongs.end(); ++j)
         {
-          result[X].insert(eq_X.parameters()[*j]);
+          Bk[X].insert(eq_X.parameters()[*j]);
         }
       }
-*/
-      return result;
+
+      return Bk;
     }
 
     void compute_belongs()
     {
+      assert(m_local_control_flow_graphs.size() == m_connected_components_values.size());
       mCRL2log(log::debug, "stategraph") << "=== computing belongs relation ===" << std::endl;
-      const propositional_variable_instantiation& X_init = m_pbes.initial_state();
-      const core::identifier_string& X = X_init.name();
-      std::vector<std::size_t> CFP = control_flow_parameter_indices(X);
-      for (std::size_t k = 0; k < m_control_flow_graphs.size(); k++)
+      for (std::size_t k = 0; k < m_local_control_flow_graphs.size(); k++)
       {
-        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(X, CFP[k], m_control_flow_graphs[k]);
+        auto const& Vk = m_local_control_flow_graphs[k];
+        auto const& values_k = m_connected_components_values[k];
+        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(Vk, values_k);
         m_belongs.push_back(Bk);
       }
     }
@@ -369,10 +331,10 @@ class stategraph_local_algorithm: public stategraph_algorithm
       super::run();
       compute_control_flow_index();
       print_control_flow_index();
-//      compute_belongs();
-//      print_belongs();
-//      compute_control_flow_marking();
-//      print_control_flow_marking();
+      compute_belongs();
+      print_belongs();
+      compute_control_flow_marking();
+      print_control_flow_marking();
     }
 };
 

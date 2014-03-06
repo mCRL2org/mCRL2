@@ -129,7 +129,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().print("sum ");
     print_variables(x.bound_variables(), true, true, false, "", "");
     derived().print(". ");
-    print_expression(x.operand(), precedence(x));
+    print_expression(x.operand(), left_precedence(x));
     derived().leave(x);
   }
 
@@ -250,7 +250,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     print_if_then_condition(x.condition(), " -> ", max_precedence);
     // N.B. the then case is printed with a higher precedence, since we want the expression a -> b -> c <> d <> e
     // to be printed as a -> (b -> c <> d) <> e
-    print_expression(x.then_case(), precedence(x) + 1);
+    print_expression(x.then_case(), left_precedence(x) + 1);
     derived().print(" <> ");
     print_expression(x.else_case());
     derived().leave(x);

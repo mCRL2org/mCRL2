@@ -14,7 +14,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Friday, June 07, 2013 10:30:49}
+%TCIDATA{LastRevised=Monday, March 03, 2014 15:02:30}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -463,7 +463,7 @@ expressions $e$.%
 $push_{\nabla }\left( A,\overline{a}\right) $ & $=$ & $\left\{ 
 \begin{array}{ll}
 \overline{a} & \text{if }N(\overline{a})\in A \\ 
-\delta  & \text{otherwise}%
+\delta & \text{otherwise}%
 \end{array}%
 \right. $ \\ 
 $push_{\nabla }\left( A,P\left( e\right) \right) $ & $=$ & $%
@@ -531,7 +531,7 @@ where%
 p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
 \nabla _{A\cap \alpha (p)}(p) & \text{otherwise}%
 \end{array}%
-\right. 
+\right.%
 \end{array}%
 \]%
 Note that the alphabet $\alpha (p)$ is computed on the fly during the
@@ -723,5 +723,83 @@ instead of equality. This is done to stay within the format $A^{\subseteq
 }I^{\ast }$. As a consequence the implementation uses an over-approximation
 of $C^{-1}\left( A^{\subseteq }I^{\ast }\right) $ and $C^{-1}\left( AI^{\ast
 }\right) $.
+
+\newpage
+
+\subsection{Optimization for $push_{\protect\nabla }$}
+
+In some cases the $push_{\nabla }$ operator produces expressions that are
+too large. This section proposes an optimization for the case $push_{\nabla
+}(A,\Gamma _{C}(p))$ that can help to prevent this problem for certain
+practical cases.
+
+\[
+\begin{tabular}[t]{lll}
+$push_{\nabla }(A,\Gamma _{C}(p))$ & $=$ & $\left\{ 
+\begin{array}{ll}
+\mathsf{allow}(A,\Gamma _{C\setminus C^{\prime }}(push_{\nabla \Gamma
+}(A^{\prime },C^{\prime },p))) & \text{if }C\neq C^{\prime } \\ 
+push_{\nabla \Gamma }(A,C,p)) & \text{otherwise,}%
+\end{array}%
+\right. $%
+\end{tabular}%
+\]%
+with $C^{\prime }=\{\beta \rightarrow b\in C\mid b\notin
+\bigcup\limits_{\beta ^{\prime }\rightarrow b^{\prime }\in C}\beta ^{\prime
+}\}$ and $A^{\prime }=((C\setminus C^{\prime })(A))^{\subseteq }$ and%
+\[
+\begin{tabular}[t]{lll}
+$push_{\nabla \Gamma }(A,C,p\parallel q)$ & $=$ & $\mathsf{allow}\left(
+A,\Gamma _{C}\left( \mathsf{allow}\left( C^{-1}(A),p^{\prime }\parallel
+q^{\prime }\right) \right) \right) \text{ where}\left\{ \text{ }%
+\begin{array}{lll}
+p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\ 
+q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\ 
+A^{\prime } & = & C^{-1}(A)^{\subseteq }\setminus \left( C^{-1}(A)\setminus
+A\right)  \\ 
+A^{\prime \prime } & = & \left( C^{-1}(A)\leftarrowtail \alpha (p^{\prime
+})\right) \setminus \left( C^{-1}(A)\setminus A\right) 
+\end{array}%
+\right. $ \\ 
+$push_{\nabla \Gamma }(A,C,p\leftmerge q)$ & $=$ & $\mathsf{allow}\left(
+A,\Gamma _{C}\left( \mathsf{allow}\left( C^{-1}(A),p^{\prime }\leftmerge %
+q^{\prime }\right) \right) \right) \text{ where}\left\{ \text{ }%
+\begin{array}{lll}
+p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\ 
+q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\ 
+A^{\prime } & = & C^{-1}(A)^{\subseteq }\setminus \left( C^{-1}(A)\setminus
+A\right)  \\ 
+A^{\prime \prime } & = & \left( C^{-1}(A)\leftarrowtail \alpha (p^{\prime
+})\right) \setminus \left( C^{-1}(A)\setminus A\right) 
+\end{array}%
+\right. $ \\ 
+$push_{\nabla \Gamma }(A,C,p\mid q)$ & $=$ & $\mathsf{allow}\left( A,\Gamma
+_{C}\left( \mathsf{allow}\left( C^{-1}(A),p^{\prime }\mid q^{\prime }\right)
+\right) \right) \text{ where}\left\{ \text{ }%
+\begin{array}{lll}
+p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\ 
+q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\ 
+A^{\prime } & = & C^{-1}(A)^{\subseteq }\setminus \left( C^{-1}(A)\setminus
+A\right)  \\ 
+A^{\prime \prime } & = & \left( C^{-1}(A)\leftarrowtail \alpha (p^{\prime
+})\right) \setminus \left( C^{-1}(A)\setminus A\right) 
+\end{array}%
+\right. $ \\ 
+$push_{\nabla \Gamma }(A,C,\partial _{B}(p))$ & $=$ & $push_{\nabla \Gamma
+}(\partial _{B}(A),C,p)$ \\ 
+$push_{\nabla \Gamma }(A,C,\nabla _{V}(p))$ & $=$ & $push_{\nabla \Gamma
+}(A\cap V,C,p)$ \\ 
+$push_{\nabla \Gamma }(A,C,p)$ & $=$ & $\mathsf{allow}(A,\Gamma
+_{C}(p^{\prime }))$ where $p^{\prime }=push_{\nabla }(C^{-1}(A),p)$ for all
+other cases of $p$%
+\end{tabular}%
+\]%
+Note that in this case the allow set $A$ has the general shape $\left(
+A_{1}^{\subseteq }\setminus A_{2}^{\subseteq }\right) I^{\ast }$ (?), with
+the subset operator $\subseteq $ optional, and with $I$ possibly empty. To
+implement this optimization, it needs to be investigated if such a set $A$
+is closed under the operations $\partial _{B}(A)$, $\tau _{I_{1}}^{-1}(A)$, $%
+A\cap V$, $R^{-1}(A)$, $C^{-1}(A)$, $A\leftarrowtail A_{1}$, $A^{\subseteq }$
+and $C(A)$.
 
 \end{document}

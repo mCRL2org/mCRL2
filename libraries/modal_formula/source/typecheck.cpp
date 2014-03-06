@@ -422,7 +422,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
     }
     catch (mcrl2::runtime_error &e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking TEMPORARILY PRINT AN ATERM " + to_string(f));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + to_string(f));
     }
   }
 
@@ -499,7 +499,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
     }
     catch (mcrl2::runtime_error &e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking TEMPORARILY PRINT AN ATERM " + to_string(f));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + to_string(f)); 
     }
   }
 

@@ -234,6 +234,28 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   BOOST_CHECK(r(t19d) == r(t19false));
 }
 
+static void quantifier_in_rewrite_rules_test(mcrl2::data::rewrite_strategy s)
+{
+  // The test below checks whether bound variables in rewrite rules are properly renamed
+  // when substituting variables. In concreto, if the y in the eqn for f is substituted in
+  // the body of g(x), then if y is substituted for x, the rhs of g(x) reduces to y!=y, or false.
+  // The correct answer however is true, as f states taht for every boolean y there is an y' that
+  // is not equal to it.
+  data_specification specification = parse_data_specification(
+                    "map f:Bool;\n"
+                    "    g:Bool->Bool;\n"
+                    "var x:Bool;\n"
+                    "eqn f=forall y:Bool.g(y);\n"
+                    "    g(x)=exists y:Bool.x!=y;\n");
+
+  rewriter r(specification, s);
+
+  data_expression t0a=parse_data_expression("f",specification);
+  data_expression t0true=parse_data_expression("true",specification);
+  BOOST_CHECK(r(t0a) == r(t0true));
+}
+
+
 int test_main(int argc, char** argv)
 {
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
@@ -241,6 +263,7 @@ int test_main(int argc, char** argv)
   {
     std::clog << "  Strategy: " << *strat << std::endl;
     quantifier_expression_test(*strat);
+    quantifier_in_rewrite_rules_test(*strat);
   }
 
   return EXIT_SUCCESS;

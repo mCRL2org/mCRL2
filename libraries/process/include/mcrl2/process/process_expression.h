@@ -1414,58 +1414,32 @@ inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
 // The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
 
 /// \brief Defines a precedence relation on process expressions
-inline
-int precedence(const process_expression& x)
+inline int left_precedence(const choice& x)       { return 1; }
+inline int left_precedence(const sum& x)          { return 2; }
+inline int left_precedence(const merge& x)        { return 3; }
+inline int left_precedence(const left_merge& x)   { return 4; }
+inline int left_precedence(const if_then& x)      { return 5; }
+inline int left_precedence(const if_then_else& x) { return 5; }
+inline int left_precedence(const bounded_init& x) { return 6; }
+inline int left_precedence(const seq& x)          { return 7; }
+inline int left_precedence(const at& x)           { return 8; }
+inline int left_precedence(const sync& x)         { return 9; }
+inline int left_precedence(const process_expression& x)
 {
-  if (is_choice(x))
-  {
-    return 1;
-  }
-  else if (is_sum(x))
-  {
-    return 2;
-  }
-  else if (is_merge(x))
-  {
-    return 3;
-  }
-  else if (is_left_merge(x))
-  {
-    return 4;
-  }
-  else if (is_if_then(x) || is_if_then_else(x))
-  {
-    return 5;
-  }
-  else if (is_bounded_init(x))
-  {
-    return 6;
-  }
-  else if (is_seq(x))
-  {
-    return 7;
-  }
-  else if (is_at(x))
-  {
-    return 8;
-  }
-  else if (is_sync(x))
-  {
-    return 9;
-  }
-  return max_precedence;
+       if (is_choice(x))       { return left_precedence(static_cast<const choice&>(x)); }
+  else if (is_sum(x))          { return left_precedence(static_cast<const sum&>(x)); }
+  else if (is_merge(x))        { return left_precedence(static_cast<const merge&>(x)); }
+  else if (is_left_merge(x))   { return left_precedence(static_cast<const left_merge>(x)); }
+  else if (is_if_then(x))      { return left_precedence(static_cast<const if_then&>(x)); }
+  else if (is_if_then_else(x)) { return left_precedence(static_cast<const if_then_else&>(x)); }
+  else if (is_bounded_init(x)) { return left_precedence(static_cast<const bounded_init&>(x)); }
+  else if (is_seq(x))          { return left_precedence(static_cast<const seq&>(x)); }
+  else if (is_at(x))           { return left_precedence(static_cast<const at&>(x)); }
+  else if (is_sync(x))         { return left_precedence(static_cast<const sync&>(x)); }
+  return core::detail::precedences::max_precedence;
 }
 
-inline int precedence(const choice& x)       { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const sum& x)          { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const merge& x)        { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const left_merge& x)   { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const if_then& x)      { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const if_then_else& x) { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const bounded_init& x) { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const seq& x)          { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const at& x)           { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const sync& x)         { return precedence(static_cast<const process_expression&>(x)); }
+inline int right_precedence(const process_expression& x) { return left_precedence(x); }
 
 inline const process_expression& unary_operand(const sum& x)         { return x.operand(); }
 inline const process_expression& unary_operand(const block& x)       { return x.operand(); }

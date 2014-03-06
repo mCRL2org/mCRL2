@@ -12,641 +12,252 @@
 #  set(files "PATH2FILE_1; ... ; PATH2FILE_X"  )
 #  run_release_tests( ${files} )
 
-#####################
-## Macro mcrl22lps ##
-#####################
-
-macro( add_mcrl22lps_release_test ARGS SAVE)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-	if( NOT ${SAVE} )
-    ADD_TEST(NAME "mcrl22lps_${POST_FIX_TEST}" COMMAND mcrl22lps ${ARGS} ${testdir}/${BASENAME_TEST}.mcrl2 ${testdir}/${BASENAME_TEST}.lps)
-	else( NOT ${SAVE} )
-    ADD_TEST(NAME "mcrl22lps_${POST_FIX_TEST}" COMMAND mcrl22lps ${ARGS} ${testdir}/${BASENAME_TEST}.mcrl2 ${testdir}/dummy.lps)
-  endif( NOT ${SAVE} )
-
-	set_tests_properties("mcrl22lps_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-endmacro( )
-
-macro( gen_mcrl22lps_release_tests )
-  add_mcrl22lps_release_test( "-a" "")
-  add_mcrl22lps_release_test( "-b" "")
-  add_mcrl22lps_release_test( "-c" "")
-  add_mcrl22lps_release_test( "-D" "SAVE")
-  add_mcrl22lps_release_test( "-e" "")
-  add_mcrl22lps_release_test( "-f" "")
-  add_mcrl22lps_release_test( "-g" "")
-  add_mcrl22lps_release_test( "-lregular" "")
-  add_mcrl22lps_release_test( "-lregular2" "")
-  add_mcrl22lps_release_test( "-lstack" "")
-  add_mcrl22lps_release_test( "-m" "")
-  add_mcrl22lps_release_test( "-n" "")
-  add_mcrl22lps_release_test( "--no-constelm" "")
-  add_mcrl22lps_release_test( "-o" "")
-  add_mcrl22lps_release_test( "-rjitty" "")
-  add_mcrl22lps_release_test( "-rjittyp" "")
-	if( NOT WIN32 )
-    add_mcrl22lps_release_test(  "-rjittyc" "")
-	endif( NOT WIN32 )
-  add_mcrl22lps_release_test( "--timings" "")
-  add_mcrl22lps_release_test( "-w" "")
-  add_mcrl22lps_release_test( "-z" "")
-endmacro( gen_mcrl22lps_release_tests )
-
-####################
-## Macro lpsinfo  ##
-####################
-
-macro( add_lpsinfo_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-	set( POST_FIX_TEST ${BASENAME_TEST}  )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${POST_FIX_TEST}-ARGS${TRIMMED_ARGS}" )
-
-  ADD_TEST(NAME "lpsinfo_${POST_FIX_TEST}" COMMAND lpsinfo ${ARGS} ${testdir}/${BASENAME_TEST}.lps )
-	set_tests_properties("lpsinfo_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
- 	set_tests_properties("lpsinfo_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsinfo_release_test ARGS)
-
-macro( gen_lpsinfo_release_tests )
-	add_lpsinfo_release_test( "" )
-endmacro( gen_lpsinfo_release_tests )
-
-##################
-## Macro lpspp  ##
-##################
-
-macro( add_lpspp_release_test ARGS SAVE)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-	if( NOT ${SAVE} )
-    ADD_TEST(NAME "lpspp_${POST_FIX_TEST}" COMMAND lpspp ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}_lps.txt )
-	else( NOT ${SAVE} )
-    ADD_TEST(NAME "lpspp_${POST_FIX_TEST}" COMMAND lpspp ${ARGS} ${testdir}/${BASENAME_TEST}.lps )
-	endif( NOT ${SAVE} )
-
-	set_tests_properties("lpspp_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpspp_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-
-endmacro( )
-
-macro( gen_lpspp_release_tests )
-	add_lpspp_release_test( "-fdefault" "SAVE")
-	add_lpspp_release_test( "-finternal" "")
-endmacro( gen_lpspp_release_tests )
-
-###################
-## Macro lps2lts ##
-###################
-
-macro( add_lps2lts_release_test ARGS SAVE)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-	foreach(EXT ${LTS_EXTS} )
-		if( NOT ${SAVE} )
-      ADD_TEST(NAME "lps2lts_${POST_FIX_TEST}_${EXT}" COMMAND lps2lts ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}.${EXT} )
-		else( NOT ${SAVE} )
-      ADD_TEST(NAME "lps2lts_${POST_FIX_TEST}_${EXT}" COMMAND lps2lts ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/dummy.aut )
-		endif( NOT ${SAVE} )
-
-		set_tests_properties("lps2lts_${POST_FIX_TEST}_${EXT}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-    set_tests_properties("lps2lts_${POST_FIX_TEST}_${EXT}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-
-	endforeach(EXT ${LTS_EXTS})
-endmacro( add_lps2lts_release_test ARGS SAVE)
-
-macro( gen_lps2lts_release_tests )
-
-		SET( act "")
-		SET( fst_act "")
-		if( EXISTS ${testdir}/${BASENAME_TEST}_hide_action.txt )
-		  file(STRINGS ${testdir}/${BASENAME_TEST}_hide_action.txt act)
-		  set( fst_act "" )
-		  string(REGEX MATCH "[^,]+" fst_act "${act}" )
-		endif( EXISTS ${testdir}/${BASENAME_TEST}_hide_action.txt )
-
-		add_lps2lts_release_test( "" "SAVE" )
-		if( NOT "${act}" STREQUAL "" )
-	    add_lps2lts_release_test( "-a${act}" "")
-    endif( )
-		add_lps2lts_release_test( "-b10" "")
-		add_lps2lts_release_test( "-ctau" "")
-		if( NOT "${fst_act}" STREQUAL "" )
-		  add_lps2lts_release_test( "-c${fst_act}" "")
-    endif( )
-		add_lps2lts_release_test( "-D" "")
-		add_lps2lts_release_test( "--error-trace" "")
-		add_lps2lts_release_test( "--init-tsize=10" "")
-		add_lps2lts_release_test( "-l10" "")
-		add_lps2lts_release_test( "--no-info" "")
-		add_lps2lts_release_test( "-rjitty" "")
-		add_lps2lts_release_test( "-rjittyp" "")
-		if( NOT WIN32)
-			add_lps2lts_release_test( "-rjittyc" "")
-		endif( NOT WIN32)
-		add_lps2lts_release_test( "-sd" "")
-		add_lps2lts_release_test( "-sb" "")
-		add_lps2lts_release_test( "-sp" "")
-		add_lps2lts_release_test( "-sq;-l100" "" )
-		add_lps2lts_release_test( "-sr;-l100" "")
-		add_lps2lts_release_test( "--verbose;--suppress" "")
-		add_lps2lts_release_test( "--todo-max=10" "")
-		add_lps2lts_release_test( "-u" "")
-		add_lps2lts_release_test( "-yno" "")
-endmacro( gen_lps2lts_release_tests )
-
-########################
-## Macro lpsconstelm  ##
-########################
-
-macro( add_lpsconstelm_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-  ADD_TEST(NAME "lpsconstelm_${POST_FIX_TEST}" COMMAND lpsconstelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("lpsconstelm_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsconstelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsconstelm_release_test ARGS)
-
-macro( gen_lpsconstelm_release_tests )
-	add_lpsconstelm_release_test( "" )
-	add_lpsconstelm_release_test( "-c" )
-	add_lpsconstelm_release_test( "-f" )
-	add_lpsconstelm_release_test( "-s" )
-	add_lpsconstelm_release_test( "-t" )
-	add_lpsconstelm_release_test( "-rjitty" )
-	add_lpsconstelm_release_test( "-rjittyp" )
-	if( NOT WIN32 )
-	  add_lpsconstelm_release_test( "-rjittyc" )
-	endif( NOT WIN32 )
-endmacro( gen_lpsconstelm_release_tests )
-
-####################
-## Macro lpsrewr  ##
-####################
-
-macro( add_lpsrewr_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-  ADD_TEST(NAME "lpsrewr_${POST_FIX_TEST}" COMMAND lpsrewr ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("lpsrewr_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsrewr_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsrewr_release_test ARGS)
-
-macro( gen_lpsrewr_release_tests )
-	add_lpsrewr_release_test( "-rjitty" )
-	add_lpsrewr_release_test( "-rjittyp" )
-	if( NOT WIN32 )
-		add_lpsrewr_release_test( "-rjittyc" )
-	endif( NOT WIN32)
-endmacro( gen_lpsrewr_release_tests )
-
-########################
-## Macro lpsparelm  ##
-########################
-
-macro( add_lpsparelm_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-  ADD_TEST(NAME "lpsparelm_${POST_FIX_TEST}" COMMAND lpsparelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("lpsparelm_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsparelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsparelm_release_test ARGS)
-
-macro( gen_lpsparelm_release_tests )
-	add_lpsparelm_release_test( "" )
-endmacro( gen_lpsparelm_release_tests )
-
-######################
-## Macro lpssumelm  ##
-######################
-
-macro( add_lpssumelm_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-  ADD_TEST(NAME "lpssumelm_${POST_FIX_TEST}" COMMAND lpssumelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("lpssumelm_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpssumelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpssumelm_release_test ARGS)
-
-macro( gen_lpssumelm_release_tests )
-	add_lpssumelm_release_test( "" )
-	add_lpssumelm_release_test( "-c" )
-endmacro( gen_lpssumelm_release_tests )
-
-############################
-## Macro lpsactionrename  ##
-############################
-
-macro( add_lpsactionrename_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-	FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-  string(REGEX REPLACE " " "_" TESTNAME "lpsactionrename_${POST_FIX_TEST}")
-
-  ADD_TEST(NAME "${TESTNAME}" COMMAND lpsactionrename ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("${TESTNAME}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsactionrename_release_test ARGS)
-
-macro( gen_lpsactionrename_release_tests )
-	if( EXISTS ${testdir}/${BASENAME_TEST}_rename.txt )
-		add_lpsactionrename_release_test( "-f${testdir}/${BASENAME_TEST}_rename.txt" )
-		add_lpsactionrename_release_test( "-f${testdir}/${BASENAME_TEST}_rename.txt;-m" )
-		add_lpsactionrename_release_test( "-f${testdir}/${BASENAME_TEST}_rename.txt;-o" )
-		add_lpsactionrename_release_test( "-f${testdir}/${BASENAME_TEST}_rename.txt;-ppa" )
-		add_lpsactionrename_release_test( "-f${testdir}/${BASENAME_TEST}_rename.txt;-ptc" )
-		add_lpsactionrename_release_test( "-f${testdir}/${BASENAME_TEST}_rename.txt;-P" )
-		add_lpsactionrename_release_test( "-f${testdir}/${BASENAME_TEST}_rename.txt;-rjitty" )
-		add_lpsactionrename_release_test( "-f${testdir}/${BASENAME_TEST}_rename.txt;-rjittyp" )
-		if( NOT WIN32)
-		  add_lpsactionrename_release_test( "-f${testdir}/${BASENAME_TEST}_rename.txt;-rjittyc" )
-		endif( NOT WIN32)
-	endif( EXISTS ${testdir}/${BASENAME_TEST}_rename.txt )
-endmacro( gen_lpsactionrename_release_tests )
-
-######################
-## Macro lpsuntime  ##
-######################
-
-macro( add_lpsuntime_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-  ADD_TEST(NAME "lpsuntime_${POST_FIX_TEST}" COMMAND lpsuntime ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("lpsuntime_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsuntime_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsuntime_release_test ARGS)
-
-macro( gen_lpsuntime_release_tests )
-	add_lpsuntime_release_test( "" )
-endmacro( gen_lpsuntime_release_tests )
-
-######################
-## Macro lpsinvelm  ##
-######################
-
-macro( add_lpsinvelm_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-  string(REGEX REPLACE " " "_" TESTNAME "lpsinvelm_${POST_FIX_TEST}")
-
-  ADD_TEST(NAME "${TESTNAME}" COMMAND lpsinvelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("${TESTNAME}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsinvelm_release_test ARGS)
-
-macro( gen_lpsinvelm_release_tests )
-		add_lpsinvelm_release_test( "-i${testdir}/true.txt" )
-		add_lpsinvelm_release_test( "-c;-i${testdir}/true.txt" )
-		add_lpsinvelm_release_test( "-e;-i${testdir}/true.txt" )
-		add_lpsinvelm_release_test( "-l;-i${testdir}/true.txt" )
-		add_lpsinvelm_release_test( "-n;-i${testdir}/true.txt" )
-		add_lpsinvelm_release_test( "-p${testdir}/DOTFILE.dot;-i${testdir}/true.txt" )
-		add_lpsinvelm_release_test( "-rjitty;-i${testdir}/true.txt" )
-		add_lpsinvelm_release_test( "-t10;-i${testdir}/true.txt" )
-		add_lpsinvelm_release_test( "-y;-i${testdir}/false.txt" )
-		if( cvc3_FOUND )
-		  add_lpsinvelm_release_test( "-zcvc;-i\"${testdir}/true.txt\"" )
-		endif( cvc3_FOUND )
-endmacro( gen_lpsinvelm_release_tests )
-
-#########################
-## Macro lpsconfcheck  ##
-#########################
-
-macro( add_lpsconfcheck_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-  string(REGEX REPLACE " " "_" TESTNAME "lpsconfcheck_${POST_FIX_TEST}")
-
-  ADD_TEST(NAME "${TESTNAME}" COMMAND lpsconfcheck ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("${TESTNAME}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsconfcheck_release_test ARGS)
-
-macro( gen_lpsconfcheck_release_tests )
-	add_lpsconfcheck_release_test( "" )
-	add_lpsconfcheck_release_test( "-a" )
-	add_lpsconfcheck_release_test( "-c" )
-	add_lpsconfcheck_release_test( "-g" )
-	add_lpsconfcheck_release_test( "-i${testdir}/true.txt" )
-	add_lpsconfcheck_release_test( "-i${testdir}/false.txt" )
-	add_lpsconfcheck_release_test( "-p${testdir}/DOTFILE.dot;-i${testdir}/true.txt" )
-	add_lpsconfcheck_release_test( "-m" )
-	add_lpsconfcheck_release_test( "-n" )
-	add_lpsconfcheck_release_test( "-o" )
-	add_lpsconfcheck_release_test( "-rjitty" )
-	add_lpsconfcheck_release_test( "-s10;-i${testdir}/true.txt" )
-	add_lpsconfcheck_release_test( "-t10;-i${testdir}/true.txt" )
-	if( cvc3_FOUND )
-	  add_lpsconfcheck_release_test( "-zcvc;-i${testdir}/true.txt" )
-	endif( cvc3_FOUND )
-endmacro( gen_lpsconfcheck_release_tests )
-
-#########################
-## Macro lpsbinary  ##
-#########################
-
-macro( add_lpsbinary_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-  ADD_TEST(NAME "lpsbinary_${POST_FIX_TEST}" COMMAND lpsbinary ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("lpsbinary_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsbinary_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsbinary_release_test ARGS)
-
-macro( gen_lpsbinary_release_tests )
-					add_lpsbinary_release_test( "" )
-					add_lpsbinary_release_test( "-rjitty" )
-					add_lpsbinary_release_test( "-rjittyp" )
-          if( NOT WIN32)
-         		add_lpsbinary_release_test( "-rjittyc" )
-					endif( NOT WIN32)
-endmacro( gen_lpsbinary_release_tests )
-
-#########################
-## Macro lpsparunfold  ##
-#########################
-
-macro( add_lpsparunfold_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-  ADD_TEST(NAME "lpsparunfold_${POST_FIX_TEST}" COMMAND lpsparunfold ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("lpsparunfold_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsparunfold_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpsparunfold_release_test ARGS)
-
-macro( gen_lpsparunfold_release_tests )
-	add_lpsparunfold_release_test( "-i0" )
-	add_lpsparunfold_release_test( "-sNat;-l" )
-	add_lpsparunfold_release_test( "-sNat;-n10" )
-	add_lpsparunfold_release_test( "-sNat;-rjitty" )
-	add_lpsparunfold_release_test( "-sNat;-rjittyp" )
-	if( NOT WIN32)
-  	add_lpsparunfold_release_test( "-sNat;-rjittyc" )
-	endif( NOT WIN32)
-endmacro( gen_lpsparunfold_release_tests )
-
-#########################
-## Macro lpssuminst  ##
-#########################
-
-macro( add_lpssuminst_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-  ADD_TEST(NAME "lpssuminst_${POST_FIX_TEST}" COMMAND lpssuminst ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
-	set_tests_properties("lpssuminst_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpssuminst_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
-endmacro( add_lpssuminst_release_test ARGS)
-
-macro( gen_lpssuminst_release_tests )
-		add_lpssuminst_release_test( "-f" )
-		add_lpssuminst_release_test( "-f;-rjitty" )
-		add_lpssuminst_release_test( "-f;-rjittyp" )
-		if( NOT WIN32)
-		  add_lpssuminst_release_test( "-f;-rjittyc" )
-		endif( NOT WIN32)
-		add_lpssuminst_release_test( "-f;-t" )
-endmacro( gen_lpssuminst_release_tests )
-
-####################
-## Macro ltsinfo  ##
-####################
-
-macro( add_ltsinfo_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-	foreach(EXT ${LTS_EXTS} )
-    ADD_TEST(NAME "ltsinfo_${POST_FIX_TEST}_${EXT}" COMMAND ltsinfo ${ARGS} ${testdir}/${BASENAME_TEST}.${EXT}  )
-  	set_tests_properties("ltsinfo_${POST_FIX_TEST}_${EXT}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-    set_tests_properties("ltsinfo_${POST_FIX_TEST}_${EXT}" PROPERTIES DEPENDS "lps2lts_${BASENAME_TEST}-ARGS_${EXT}" )
-	endforeach()
-
-endmacro( add_ltsinfo_release_test ARGS)
-
-macro( gen_ltsinfo_release_tests )
-	add_ltsinfo_release_test( "" )
-endmacro( gen_ltsinfo_release_tests )
-
-####################
-## Macro lts2lps  ##
-####################
-
-macro( add_lts2lps_release_test EXT ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-  string(REGEX REPLACE " " "_" TESTNAME "lts2lps_${POST_FIX_TEST}_${EXT}")
-
-  ADD_TEST(NAME "${TESTNAME}" COMMAND lts2lps ${ARGS} ${testdir}/${BASENAME_TEST}.${EXT} ${testdir}/dummy.lps )
-	set_tests_properties("${TESTNAME}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "lps2lts_${BASENAME_TEST}-ARGS_${EXT}" )
-
-endmacro( add_lts2lps_release_test ARGS)
-
-macro( gen_lts2lps_release_tests )
-	foreach(EXT ${LTS_EXTS} )
-		if( "${EXT}" STREQUAL "lts" )
-	    add_lts2lps_release_test( "${EXT}" "" )
-		endif()
-	  add_lts2lps_release_test( "${EXT}" "-m${testdir}/${BASENAME_TEST}.mcrl2" )
-	endforeach()
-endmacro( gen_lts2lps_release_tests )
-
-#######################
-## Macro ltsconvert  ##
-#######################
-
-macro( add_ltsconvert_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-	foreach(EXT ${LTS_EXTS} )
-    ADD_TEST(NAME "ltsconvert_${POST_FIX_TEST}_${EXT}" COMMAND ltsconvert ${ARGS} ${testdir}/${BASENAME_TEST}.${EXT} ${testdir}/${POST_FIX_TEST}.${EXT})
-    set_tests_properties("ltsconvert_${POST_FIX_TEST}_${EXT}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-    set_tests_properties("ltsconvert_${POST_FIX_TEST}_${EXT}" PROPERTIES DEPENDS "lps2lts_${BASENAME_TEST}-ARGS_${EXT}" )
-	endforeach()
-
-
-endmacro( add_ltsconvert_release_test ARGS)
-
-macro( gen_ltsconvert_release_tests )
-	  add_ltsconvert_release_test( "" )
-	  add_ltsconvert_release_test( "-D" )
-	  add_ltsconvert_release_test( "-ebisim" )
-	  add_ltsconvert_release_test( "-ebranching-bisim" )
-	  add_ltsconvert_release_test( "-edpbranching-bisim" )
-	  add_ltsconvert_release_test( "-esim" )
-	  add_ltsconvert_release_test( "-etau-star" )
-	  add_ltsconvert_release_test( "-etrace" )
-	  add_ltsconvert_release_test( "-eweak-trace" )
-	  add_ltsconvert_release_test( "-n" )
-	  add_ltsconvert_release_test( "--no-reach" )
-		if( EXISTS ${testdir}/${BASENAME_TEST}_hide_action.txt )
-		  file(STRINGS ${testdir}/${BASENAME_TEST}_hide_action.txt act)
-	    add_ltsconvert_release_test( "--tau=${act}" )
-		endif( EXISTS ${testdir}/${BASENAME_TEST}_hide_action.txt )
-
-endmacro( gen_ltsconvert_release_tests )
-
-#######################
-## Macro ltscompare  ##
-#######################
-
-macro( add_ltscompare_release_test ARGS)
-	set( TRIMMED_ARGS "" )
-
-  FOREACH( i ${ARGS} )
-    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
-
-	foreach(EXT ${LTS_EXTS} )
-
-    ADD_TEST(NAME "ltscompare_${POST_FIX_TEST}_${EXT}" COMMAND ltscompare ${ARGS} ${testdir}/${BASENAME_TEST}.${EXT} ${testdir}/${BASENAME_TEST}-ARGS.${EXT})
-    set_tests_properties("ltscompare_${POST_FIX_TEST}_${EXT}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-    set_tests_properties("ltscompare_${POST_FIX_TEST}_${EXT}" PROPERTIES DEPENDS "ltsconvert_${BASENAME_TEST}-ARGS_${EXT}")
+if(NOT WIN32)
+  set(_JITTYC "-rjittyc")
+endif()
+
+set(tagIN "!IN")
+set(tagOUT "!OUT")
+set(_test_file_dependencies "")
+
+function(add_tool_test TOOL)
+  set(test_name "tooltest_${TOOL}_")
+  set(test_args "")
+  set(test_IN "")
+  set(test_OUT "")
+  foreach(arg ${ARGN})
+    if(arg STREQ ${tagSAVE})
+      set(test_SAVE TRUE)
+      set(save_next "SAVE")
+    elseif(arg STREQ ${tagIN} OR arg STREQ ${tagOUT})
+      set(save_next test_{arg})
+    else()
+      set(test_name ${test_name}_${arg})
+      list(APPEND test_args ${arg})
+      if(save_next)
+        list(APPEND ${save_next} ${arg})
+      endif()
+    endif()
   endforeach()
 
-endmacro( add_ltscompare_release_test ARGS)
+  add_test(${test_name} COMMAND ${TOOL} ${test_args})
 
-macro( gen_ltscompare_release_tests )
+  set(test_deps "")
+  foreach(in_file ${test_IN})
+    if(NOT EXISTS ${in_file})
+      set(even TRUE)
+      set(found FALSE)
+      foreach(item ${_test_file_dependencies})
+        if(even)
+          if(item STREQ in_file)
+            set(found TRUE)
+          endif()
+          set(even FALSE)
+        else()
+          if(found)
+            list(APPEND test_deps ${item})
+            break()
+          endif()
+          set(even TRUE)
+        endif()
+      endforeach()
+      if(NOT found)
+        message(FATAL_ERROR "Tool test ${test_name} is using an invalid input file: ${in_file}.")
+      endif()
+    endif()
+  endforeach()
 
-	  add_ltscompare_release_test( "-c;-ebranching-bisim" )
-	  add_ltscompare_release_test( "-c;-edpbranching-bisim" )
-	  add_ltscompare_release_test( "-c;-esim" )
-	  add_ltscompare_release_test( "-c;-etrace" )
-	  add_ltscompare_release_test( "-c;-eweak-trace" )
-	  add_ltscompare_release_test( "-psim" )
-	  add_ltscompare_release_test( "-pweak-trace" )
-		if( EXISTS ${testdir}/${BASENAME_TEST}_hide_action.txt )
-		  file(STRINGS ${testdir}/${BASENAME_TEST}_hide_action.txt act)
-	    add_ltscompare_release_test( "-ebisim;--tau=${act}" )
-		endif( EXISTS ${testdir}/${BASENAME_TEST}_hide_action.txt )
+  if(test_deps)
+    set_tests_properties(${test_name} PROPERTIES DEPENDS ${test_deps})
+  endif()
 
-endmacro( gen_ltscompare_release_tests )
+  if(test_OUT)
+    foreach(out_file ${test_OUT})
+      list(APPEND _test_file_dependencies "${out_file}" "${test_name}")
+    endforeach()
+    set(_test_file_dependencies ${_test_file_dependencies} PARENT_SCOPE)
+  endif()
+endfunction()
 
-###################
-## Macro lps2pbes ##
-###################
+# mcrl22lps
+function(gen_mcrl22lps_release_tests MCRL2FILE LPSFILE)
+  set(ARGUMENTS "-a" "-b" "-c" "-e" "-f" "-g" "-lregular" "-lregular2" "-lstack" "-m" 
+                "-n" "--no-constelm" "-o" "-rjitty" "-rjittyp" ${_JITTYC}
+                "--timings" "-w" "-z")
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(mcrl22lps ${arglist} ${tagIN} ${MCRL2FILE})
+  endforeach()
+  add_tool_test(mcrl22lps -D ${tagIN} ${MCRL2FILE} ${tagOUT} ${LPSFILE})
+endfunction()
 
-macro( add_lps2pbes_release_test INPUT ARGS SAVE)
-	set( TRIMMED_ARGS "" )
+# lpsinfo
+function(gen_lpsinfo_release_tests LPSFILE)
+	add_tool_test(lpsinfo ${tagIN} ${LPSFILE})
+endfunction()
 
-  FOREACH( i ${ARGS} )
+# lpspp
+function(gen_lpspp_release_tests LPSFILE TXTFILE)
+	add_tool_test(lpspp -fdefault ${tagIN} ${LPSFILE} ${tagOUT} ${TXTFILE})
+	add_tool_test(lpspp -finternal ${tagIN} ${LPSFILE})
+endfunction()
 
-		if( ${i} MATCHES "^-f")
-      set(TRIMMED_ARGS "${TRIMMED_ARGS}-f${INPUT}" )
-		else( ${i} MATCHES "^-f")
-      set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
-		endif( ${i} MATCHES "^-f")
-	ENDFOREACH( )
-	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+# lps2lts
+function(gen_lps2lts_release_tests LPSFILE LTSFILE AUTFILE SVCFILE FSMFILE DOTFILE ACTIONS)
+  set(ARGUMENTS "-b10" "-ctau" "-D" "--error-trace" "--init-tsize=10" "-l10" "--no-info"
+                "-rjitty" "-rjittyp" ${_JITTYC} "-sd" "-sb" "-sp" "-sq;-l100" "-sr;-l100"; 
+                "--verbose;--suppress" "--todo-max=10" "-u" "-yno")
+  if(ACTIONS)
+    list(GET ACTIONS 0 ACTION)
+    list(APPEND ARGUMENTS "-a${ACTIONS}" "-c${ACTION}")
+  endif()
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(lps2lts ${arglist} ${tagIN} ${LPSFILE})
+  endforeach()
+  add_tool_test(lps2lts ${tagIN} ${LPSFILE} ${tagOUT} ${LTSFILE})
+  add_tool_test(lps2lts ${tagIN} ${LPSFILE} ${tagOUT} ${AUTFILE})
+  add_tool_test(lps2lts ${tagIN} ${LPSFILE} ${tagOUT} ${SVCFILE})
+  add_tool_test(lps2lts ${tagIN} ${LPSFILE} ${tagOUT} ${FSMFILE})
+  add_tool_test(lps2lts ${tagIN} ${LPSFILE} ${tagOUT} ${DOTFILE})
+endfunction()
 
+# lpsconstelm
+function(gen_lpsconstelm_release_tests LPSFILE)
+  set(ARGUMENTS "" "-c" "-f" "-s" "-t" "-rjitty" "-rjittyp" ${_JITTYC})
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(lpsconstelm ${arglist} ${tagIN} ${LPSFILE})
+  endforeach()
+endfunction()
 
-		if( NOT ${SAVE} )
-      ADD_TEST(NAME "lps2pbes_${POST_FIX_TEST}" COMMAND lps2pbes ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}_${INPUT}.pbes )
-		else( NOT ${SAVE} )
-      ADD_TEST(NAME "lps2pbes_${POST_FIX_TEST}" COMMAND lps2pbes ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/dummy.pbes )
-		endif( NOT ${SAVE} )
-		set_tests_properties("lps2pbes_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-    set_tests_properties("lps2pbes_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+# lpsrewr
+function(gen_lpsrewr_release_tests LPSFILE)
+  set(ARGUMENTS "-rjitty" "-rjittyp" ${_JITTYC})
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(lpsrewr ${arglist} ${tagIN} ${LPSFILE})
+  endforeach()
+endfunction()
 
+# lpsparelm
+function(gen_lpsparelm_release_tests LPSFILE)
+	add_tool_test(lpsparelm ${tagIN} ${LPSFILE})
+endfunction()
 
-endmacro( add_lps2pbes_release_test INPUT ARGS SAVE)
+# lpssumelm
+function(gen_lpssumelm_release_tests LPSFILE)
+	add_tool_test(lpssumelm ${tagIN} ${LPSFILE})
+	add_tool_test(lpssumelm -c ${LPSFILE})
+endfunction()
 
-macro( gen_lps2pbes_release_tests )
-	  foreach(MCF ${SET_OF_MCF} )
-	        get_filename_component( mcf_name ${MCF} NAME_WE)
-					add_lps2pbes_release_test( "${mcf_name}" "-f${MCF}" "${save}_${mcf_name}" )
-					add_lps2pbes_release_test( "${mcf_name}" "-t;-f${MCF}" "" )
-	  endforeach(MCF ${SET_OF_MCF})
-endmacro( gen_lps2pbes_release_tests )
+# lpsactionrename
+function(gen_lpsactionrename_release_tests LPSFILE RENFILE)
+  set(ARGUMENTS "" "-m" "-o" "-ppa" "-ptc" "-P" "-rjitty" "-rjittyp" ${_JITTYC})
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(lpsactionrename -f${RENFILE} ${arglist} ${tagIN} ${LPSFILE})
+  endforeach()
+endfunction()
 
-###################
-## Macro lts2pbes ##
-###################
+# lpsuntime
+function(gen_lpsuntime_release_tests LPSFILE)
+	add_tool_test(lpsuntime ${tagIN} ${LPSFILE})
+endfunction()
 
+# lpsinvelm
+function(gen_lpsinvelm_release_tests LPSFILE TESTDIR)
+  set(ARGUMENTS "-c" "-e" "-l" "-n" "-p" "-rjitty" "-t10" ${_JITTYC})
+  if(cvc3_FOUND)
+    list(APPEND ARGUMENTS "-zcvc")
+  endif()
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(lpsinvelm -i${TESTDIR}/true.txt ${arglist} ${tagIN} ${LPSFILE})
+  endforeach()
+  add_tool_test(lpsinvelm -i${TESTDIR}/false.txt -y ${tagIN} ${LPSFILE})
+endfunction()
+
+# lpsconfcheck
+function(gen_lpsconfcheck_release_tests LPSFILE TESTDIR)
+  set(TRUEFILE ${TESTDIR}/true.txt)
+  set(FALSEFILE ${TESTDIR}/true.txt)
+  set(DOTFILE ${TESTDIR}/DOTFILE.dot)
+  set(ARGUMENTS "" "-a" "-c" "-g" "-i${TRUEFILE}" "-i${FALSEFILE}"
+                "-p${DOTFILE};-i${TRUEFILE}" "-m" "-n" "-o"
+                "-rjitty" ${_JITTYC} "-s10;-i${TRUEFILE}" "-t10;-i${TRUEFILE}")
+  if(cvc3_FOUND)
+    list(APPEND ARGUMENTS "-zcvc;-i${TRUEFILE}")
+  endif()
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(lpsconfcheck ${arglist} ${tagIN} ${LPSFILE})
+  endforeach()
+endfunction()
+
+# lpsbinary
+function(gen_lpsbinary_release_tests LPSFILE)
+  set(ARGUMENTS "" "-rjitty" "-rjittyp" ${_JITTYC})
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(lpsbinary ${arglist} ${tagIN} ${LPSFILE})
+  endforeach()
+endfunction()
+
+# lpsparunfold
+function(gen_lpsparunfold_release_tests LPSFILE)
+  set(ARGUMENTS "-l" "-n10" "-rjitty" "-rjittyp" ${_JITTYC})
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(lpsparunfold -sNat ${arglist} ${tagIN} ${LPSFILE})
+  endforeach()
+  add_tool_test(lpsparunfold -i0 ${tagIN} ${LPSFILE})
+endfunction()
+
+# lpssuminst
+function(gen_lpssuminst_release_tests LPSFILE)
+  set(ARGUMENTS "" "-rjitty" "-rjittyp" ${_JITTYC} "-t")
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(lpsparunfold -f ${arglist} ${tagIN} ${LPSFILE})
+  endforeach()
+endfunction()
+
+# ltsinfo
+function(gen_ltsinfo_release_tests LTSFILE)
+	add_tool_test(ltsinfo ${tagIN} ${LTSFILE})
+endfunction()
+
+# lts2lps
+function(gen_lts2lps_release_tests MCRL2FILE LTSFILE)
+  add_tool_test(lts2lps -m ${tagIN} "${MCRL2FILE}" ${tagIN} ${LTSFILE})
+endfunction()
+
+# ltsconvert
+function(gen_ltsconvert_release_tests LTSFILE ACTIONS)
+  set(ARGUMENTS "" "-D" "-ebsisim" "-ebranching-bisim" "-edpbranching-bisim" "-esim" "-etau-star"
+                "-etrace" "-eweak-trace" "-n" "--no-reach")
+  if(ACTIONS)
+    list(APPEND ARGUMENTS "--tau=${ACTIONS}")
+  endif()
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(ltsconvert -oaut ${arglist} ${tagIN} ${LTSFILE})
+  endforeach()
+endfunction()
+
+# ltscompare
+function(gen_ltscompare_release_tests LTSFILE ACTIONS)
+  set(ARGUMENTS "-c;-ebranching-bisim" "-c;-edpbranching-bisim"  "-c;-esim" "-c;-etrace" "-c;-eweak-trace"
+                "-psim" "-pweak-trace")
+  if(ACTIONS)
+    list(APPEND ARGUMENTS "-ebisim;--tau=${ACTIONS}")
+  endif()
+  foreach(arglist ${ARGUMENTS})
+    add_tool_test(ltscompare ${arglist} ${tagIN} ${LTSFILE} ${tagIN} ${LTSFILE})
+  endforeach()
+endfunction()
+
+# lps2pbes
+function(gen_lps2pbes_release_tests LPSFILE MCFFILES)
+  get_filename_component(LPS_BASE ${LPSFILE} NAME_WE)
+  foreach(MCF ${MCFFILES})
+	  get_filename_component(MCF_BASE ${MCF} NAME_WE)
+    add_tool_test(lps2pbes -f ${tagIN} ${MCF} ${LPSFILE} ${tagOUT} ${LPS_BASE}_${MCF_BASE}.pbes)
+    add_tool_test(lps2pbes -tf ${tagIN} ${MCF} ${LPSFILE})
+  endforeach(MCF)
+endfunction()
+
+# lts2pbes
 macro( add_lts2pbes_release_test INPUT ARGS EXT)
   set( TRIMMED_ARGS "" )
 

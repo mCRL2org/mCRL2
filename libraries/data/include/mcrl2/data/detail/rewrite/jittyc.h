@@ -14,6 +14,7 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite/jitty.h"
+#include "mcrl2/data/detail/rewrite/match_tree.h"
 #include "mcrl2/utilities/uncompiledlibrary.h"
 #include "mcrl2/utilities/toolset_version.h"
 #include "nfs_array.h"
@@ -32,6 +33,8 @@ namespace detail
 
 struct rewriter_interface;
 
+typedef std::vector < sort_expression_list> sort_list_vector;
+
 class RewriterCompilingJitty: public Rewriter
 {
   public:
@@ -44,8 +47,6 @@ class RewriterCompilingJitty: public Rewriter
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
-    bool addRewriteRule(const data_equation &rule);
-    bool removeRewriteRule(const data_equation &rule);
     substitution_type *global_sigma;
 
     // The data structures below are used to store the variable lists2
@@ -63,7 +64,12 @@ class RewriterCompilingJitty: public Rewriter
     // known that some of the arguments are in normal form. These are
     // used inside the compiling rewriter, but should never be returned
     // and show up in any normal form being returned from the rewriter.
+    // The arity is given by a separate map, and represents
+    // the total number of arguments that the function has,
+    // after currying. So, f(x,y)(z) typically has three arguments.
+    
     std::set < function_symbol > partially_rewritten_functions;
+    std::map < function_symbol, size_t > total_arity_of_partially_rewritten_functions;
 
     // The data structures below are used to store single variables
     // that are bound in lambda, forall and exist operators. When required
@@ -81,7 +87,6 @@ class RewriterCompilingJitty: public Rewriter
   private:
     RewriterJitty jitty_rewriter;
     std::set < data_equation > rewrite_rules;
-    bool need_rebuild;
     bool made_files;
 
     std::map < function_symbol, data_equation_list >  jittyc_eqns;
@@ -105,23 +110,25 @@ class RewriterCompilingJitty: public Rewriter
     void add_base_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
     void extend_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
     bool opid_is_nf(const function_symbol &opid, size_t num_args);
-    void calc_nfs_list(nfs_array &a, const application& args, int startarg, atermpp::aterm_list nnfvars);
-    bool calc_nfs(const data_expression& t, int startarg, atermpp::aterm_list nnfvars);
-    std::string calc_inner_terms(nfs_array &nfs, const application& args, int startarg, atermpp::aterm_list nnfvars, nfs_array *rewr);
+    void calc_nfs_list(nfs_array &a, const application& args, variable_or_number_list nnfvars);
+    bool calc_nfs(const data_expression& t, variable_or_number_list nnfvars);
+    std::string calc_inner_terms(nfs_array &nfs, const application& args, const size_t startarg, variable_or_number_list nnfvars, const nfs_array& rewr);
     std::pair<bool,std::string> calc_inner_term(const data_expression &t, 
-                int startarg, atermpp::aterm_list nnfvars, const bool rewr, const size_t total_arity);
-    void calcTerm(FILE* f, const data_expression& t, int startarg, atermpp::aterm_list nnfvars, bool rewr = true);
-    void implement_tree_aux(FILE* f, atermpp::aterm_appl tree, size_t cur_arg, size_t parent, size_t level, size_t cnt, size_t d, const size_t arity, 
-               const std::vector<bool> &used, atermpp::aterm_list nnfvars);
-    void implement_tree(FILE* f, atermpp::aterm_appl tree, const size_t arity, size_t d, 
-                        const mcrl2::data::function_symbol& opid, const std::vector<bool> &used);
-    void implement_strategy(FILE* f, atermpp::aterm_list strat, size_t arity, size_t d, const mcrl2::data::function_symbol& opid, size_t nf_args);
-    void CompileRewriteSystem(const data_specification& DataSpec);
+                const size_t startarg, variable_or_number_list nnfvars, const bool rewr);
+    void calcTerm(FILE* f, const data_expression& t, const size_t startarg, variable_or_number_list nnfvars, bool rewr = true);
+    void implement_tree_aux(FILE* f, const match_tree& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt, size_t d, const size_t arity, 
+               const std::vector<bool> &used, variable_or_number_list nnfvars);
+    void implement_tree(FILE* f, const match_tree& tree, const size_t arity, size_t d, 
+                        const std::vector<bool> &used);
+    void implement_strategy(FILE* f, match_tree_list strat, size_t arity, size_t d, const mcrl2::data::function_symbol& opid, const nfs_array& nf_args);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
     FILE* MakeTempFiles();
     void finish_function(FILE* f, size_t arity, const data::function_symbol& opid, const std::vector<bool>& used);
-
+    bool lift_rewrite_rule_to_right_arity(data_equation& e, const size_t requested_arity);
+    sort_list_vector get_residual_sorts(const sort_expression& s, const size_t actual_arity, const size_t requested_arity);
+    data_equation_list lift_rewrite_rules_to_right_arity(const data_equation_list& eqns,const size_t arity);
+    match_tree_list create_strategy(const data_equation_list& rules, const size_t arity, nfs_array& nfs);
 };
 
 struct rewriter_interface

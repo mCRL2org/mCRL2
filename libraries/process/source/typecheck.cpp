@@ -964,7 +964,7 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
 
     if (actions.count(ProcName)>0)
     {
-      throw mcrl2::runtime_error("declaration of both process and action " + process::pp(ProcName));
+      throw mcrl2::runtime_error("declaration of both process and action " + std::string(ProcName));
     }
 
     const sort_expression_list &ProcType=get_sorts(Proc.identifier().variables());
@@ -984,7 +984,7 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
       // in the list. If so -- error, otherwise -- add
       if (InTypesL(ProcType, Types))
       {
-        throw mcrl2::runtime_error("double declaration of process " + process::pp(ProcName));
+        throw mcrl2::runtime_error("double declaration of process " + std::string(ProcName));
       }
       else
       {

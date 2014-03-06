@@ -94,18 +94,6 @@ data_expression_list Rewriter::rewrite_list(
   return data_expression_list(terms.begin(),terms.end(),r);
 }
 
-bool Rewriter::addRewriteRule(const data_equation& /*Rule*/)
-{
-  assert(0);
-  return false;
-}
-
-bool Rewriter::removeRewriteRule(const data_equation& /*Rule*/)
-{
-  assert(0);
-  return false;
-}
-
 data_expression Rewriter::rewrite_where(
                       const where_clause& term,
                       substitution_type& sigma)
@@ -373,7 +361,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   data_expression partial_result=sort_bool::false_();
   bool solution_possible=true;
 
-  size_t loop_upperbound=5;
+  size_t loop_upperbound=100;
   while (loop_upperbound>0 &&
          partial_result!=sort_bool::true_() &&
          sol.next(evaluated_condition,x,solution_possible))
@@ -421,7 +409,6 @@ data_expression Rewriter::universal_quantifier_enumeration(
       const bool t1_is_normal_form,
       substitution_type& sigma)
 {
-// std::cerr << "FORALL " << vl << "   " << t1 << "\n";
   // Rename the bound variables to unique
   // variables, to avoid naming conflicts.
 
@@ -443,7 +430,6 @@ data_expression Rewriter::universal_quantifier_enumeration(
   }
 
   const data_expression t2=replace_variables(t1,variable_renaming);
-// std::cerr << "REWRITTEN " << t2 << "\n";
   const data_expression t3=(t1_is_normal_form?t2:rewrite(t2,sigma));
 
   // Check whether the bound variables occur free in the rewritten body.
@@ -462,24 +448,19 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   if (vl_new_l.empty())
   {
-// std::cerr << "RETURN1 " << t3 << "\n";
     return t3; // No quantified variables occur in the rewritten body.
   }
-
-
-
-
 
   /* Find A solution*/
   EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,false,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
 
   /* Create lists to store solutions */
-  atermpp::term_list<data_expression> x;
+  data_expression_list x;
   data_expression evaluated_condition=sort_bool::true_();
   data_expression partial_result=sort_bool::true_();
   bool solution_possible=true;
 
-  size_t loop_upperbound=5;
+  size_t loop_upperbound=100;
   while (loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
          sol.next(evaluated_condition,x,solution_possible))
@@ -523,15 +504,12 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   if (solution_possible && (loop_upperbound>0 || partial_result==sort_bool::false_()))
   {
-// std::cerr << "RETURN2 " << partial_result << "\n";
     return partial_result;
   }
 
   // One can consider to replace the variables by their original, in order to not show 
   // internally generated variables in the output.
-  const data_expression t=abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
-// std::cerr << "RETURN3 " << t << "\n";
-  return t; 
+  return abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
 }
 
 

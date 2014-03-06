@@ -90,8 +90,8 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
       lps_specification.load(m_input_filename);
 
       // Untime lps_specification and save the output to a binary file
-      rewriter r=create_rewriter(lps_specification.data());
-      specification new_spec = realelm(lps_specification, max_iterations, r);
+      // rewriter r=create_rewriter(lps_specification.data());
+      specification new_spec = realelm(lps_specification, max_iterations, rewrite_strategy());
 
       mCRL2log(verbose) << "Real time abstraction completed, saving to " << m_output_filename << "\n";
       new_spec.save(m_output_filename);

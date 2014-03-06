@@ -71,6 +71,16 @@ else:
   testflags += ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
 
 #
+# For Windows, explicitly tell CMake which generator to use to avoid trouble
+# with x86/x64 incompatibilities
+#
+generator = []
+if label == 'windows-amd64':
+  generator += ['-GNMake Makefiles']
+elif label == 'windows-x86':
+  generator += ['-GNMake Makefiles']
+
+#
 # If we are building the mCRL2-release job, run all tests
 # Note that jobname is something like, i.e. including buildtype etc.
 # mCRL2-release/buildtype=Maintainer,compiler=default,label=ubuntu-amd64
@@ -97,7 +107,8 @@ cmake_command = ['cmake',
                 + targetflags \
                 + compilerflags \
                 + testflags \
-                + packageflags 
+                + packageflags \
+                + generator
 if call('CMake', cmake_command):
   log('CMake failed.')
   sys.exit(1)
@@ -115,9 +126,11 @@ if not buildthreads:
 #
 
 extraoptions = []
-if label not in ["windows-x86", "windows-amd64"]:
-  extraoptions =  ['-j{0}'.format(buildthreads)]
-make_command = ['cmake', '--build', builddir, '--'] + extraoptions
+if label in ["windows-x86", "windows-amd64"]:
+  extraoptions = ['--config', buildtype]
+else:
+  extraoptions =  ['--', '-j{0}'.format(buildthreads)]
+make_command = ['cmake', '--build', builddir] + extraoptions
 if call('CMake --build', make_command):
   log('Build failed.')
   sys.exit(1)
@@ -137,6 +150,8 @@ ctest_command = ['ctest', \
                  '--output-on-failure', \
                  '--no-compress-output', \
                  '-j{0}'.format(buildthreads)]
+if label in ["windows-x86", "windows-amd64"]:
+  ctest_command += ['--build-config', buildtype]
 env = {}
 env.update(os.environ)
 env['MCRL2_COMPILEREWRITER'] = os.path.abspath(os.path.join('.', 'mcrl2compilerewriter_ctest'))

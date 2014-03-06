@@ -37,6 +37,25 @@ void test_comm()
   BOOST_CHECK(text == text1);
 }
 
+void test_procinst()
+{
+  std::string text =
+    "act  a,b;\n"
+    "\n"
+    "proc P = delta;\n"
+    "\n"
+    "init a . P + b . P;\n"
+    ;
+
+  process_specification p = parse_process_specification(text);
+  std::string text1 = process::pp(p);
+  std::cout << text << std::endl;
+  std::cout << "---" << std::endl;
+  std::cout << text1 << std::endl;
+  std::cout << "---" << std::endl;
+  BOOST_CHECK(text == text1);
+}
+
 void test_action_name_multiset()
 {
   std::vector<core::identifier_string> v;
@@ -89,6 +108,7 @@ void test_process_expressions()
 int test_main(int argc, char** argv)
 {
   test_comm();
+  test_procinst();
   test_action_name_multiset();
   test_process_expressions();
 

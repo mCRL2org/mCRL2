@@ -1116,51 +1116,39 @@ inline void swap(mu& t1, mu& t2)
 }
 //--- end generated classes ---//
 
-inline
-int precedence(const state_formula& x)
+inline int left_precedence(const mu& x)     { return 1; }
+inline int left_precedence(const nu& x)     { return 1; }
+inline int left_precedence(const forall& x) { return 2; }
+inline int left_precedence(const exists& x) { return 2; }
+inline int left_precedence(const imp& x)    { return 3; }
+inline int left_precedence(const or_& x)    { return 4; }
+inline int left_precedence(const and_& x)   { return 5; }
+inline int left_precedence(const must& x)   { return 6; }
+inline int left_precedence(const may& x)    { return 6; }
+inline int left_precedence(const not_& x)   { return 7; }
+inline int left_precedence(const state_formula& x)
 {
-  if (is_mu(x) || is_nu(x))
-  {
-    return 1;
-  }
-  else if (is_forall(x) || is_exists(x))
-  {
-    return 2;
-  }
-  else if (is_imp(x))
-  {
-    return 3;
-  }
-  else if (is_or(x))
-  {
-    return 4;
-  }
-  else if (is_and(x))
-  {
-    return 5;
-  }
-  else if (is_must(x) || is_may(x))
-  {
-    return 6;
-  }
-  else if (is_not(x))
-  {
-    return 7;
-  }
+  if      (is_mu(x))     { return left_precedence(static_cast<const mu&>(x)); }
+  else if (is_nu(x))     { return left_precedence(static_cast<const nu&>(x)); }
+  else if (is_forall(x)) { return left_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return left_precedence(static_cast<const exists&>(x)); }
+  else if (is_imp(x))    { return left_precedence(static_cast<const imp&>(x)); }
+  else if (is_or(x))     { return left_precedence(static_cast<const or_&>(x)); }
+  else if (is_and(x))    { return left_precedence(static_cast<const and_&>(x)); }
+  else if (is_must(x))   { return left_precedence(static_cast<const must&>(x)); }
+  else if (is_may(x))    { return left_precedence(static_cast<const may&>(x)); }
+  else if (is_not(x))    { return left_precedence(static_cast<const not_&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
-// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
-inline int precedence(const mu& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const nu& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const forall& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const exists& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const imp& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const and_& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const or_& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const must& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const may& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const not_& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int right_precedence(const forall& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const forall&>(x).body())); }
+inline int right_precedence(const exists& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const exists&>(x).body())); }
+inline int right_precedence(const state_formula& x)
+{
+       if (is_forall(x)) { return right_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return right_precedence(static_cast<const exists&>(x)); }
+  return left_precedence(x);
+}
 
 inline const state_formula& unary_operand(const not_& x) { return x.operand(); }
 inline const state_formula& unary_operand(const must& x) { return x.operand(); }
@@ -1223,7 +1211,12 @@ struct is_timed_traverser: public state_formula_traverser<is_timed_traverser>
   {
     result = true;
   }
-};
+};//
+//
+//
+//
+//
+
 /// \endcond
 
 /// \brief Checks if a state formula is timed

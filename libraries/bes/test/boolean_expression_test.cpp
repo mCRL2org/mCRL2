@@ -84,7 +84,7 @@ void test_precedence()
   boolean_variable X1("X1");
   boolean_variable X2("X2");
   boolean_expression t = tr::and_(X1, X2);
-  BOOST_CHECK(precedence(t) == 4);
+  BOOST_CHECK(left_precedence(t) == 4);
 
   std::string s = bes::pp(t);
   BOOST_CHECK(s == "X1 && X2");

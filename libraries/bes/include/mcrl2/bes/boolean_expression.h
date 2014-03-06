@@ -518,33 +518,23 @@ inline void swap(boolean_variable& t1, boolean_variable& t2)
 /// \brief Returns the precedence of boolean expressions
 // N.B. The is_base_of construction is needed to make sure that the precedence also works on
 // classes of type 'and_', 'or_' and 'imp'.
-inline
-int precedence(const boolean_expression& x)
+inline int left_precedence(const imp& x)    { return 2; }
+inline int left_precedence(const or_& x)    { return 3; }
+inline int left_precedence(const and_& x)   { return 4; }
+inline int left_precedence(const not_& x)   { return 5; }
+inline int left_precedence(const boolean_expression& x)
 {
-  if (is_imp(x))
-  {
-    return 2;
-  }
-  else if (is_or(x))
-  {
-    return 3;
-  }
-  else if (is_and(x))
-  {
-    return 4;
-  }
-  else if (is_not(x))
-  {
-    return 5;
-  }
+       if (is_imp(x)) { return left_precedence(static_cast<const imp&>(x)); }
+  else if (is_or(x))  { return left_precedence(static_cast<const or_&>(x)); }
+  else if (is_and(x)) { return left_precedence(static_cast<const and_&>(x)); }
+  else if (is_not(x)) { return left_precedence(static_cast<const not_&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
-// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
-inline int precedence(const imp& x) { return precedence(static_cast<const boolean_expression&>(x)); }
-inline int precedence(const and_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
-inline int precedence(const or_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
-inline int precedence(const not_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
+inline int right_precedence(const boolean_expression& x)
+{
+  return left_precedence(x);
+}
 
 inline const boolean_expression& unary_operand(const not_& x) { return x.operand(); }
 inline const boolean_expression& binary_left(const and_& x)   { return x.left(); }

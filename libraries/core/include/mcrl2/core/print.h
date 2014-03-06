@@ -67,13 +67,9 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
-  void print_expression(const T& x, int prec = 5)
+  void print_expression(const T& x, int context_precedence, int x_precedence)
   {
-#ifdef MCRL2_DEBUG_PRECEDENCE
-    std::cout << "<print_expression> precedence = " << prec << std::endl;
-    std::cout << "<x>" << x << " precedence = " << precedence(x) << std::endl;
-#endif
-    bool print_parens = (precedence(x) < prec);
+    bool print_parens = (x_precedence < context_precedence);
     if (print_parens)
     {
       derived().print("(");
@@ -86,24 +82,24 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
+  void print_expression(const T& x, int context_precedence = 5)
+  {
+    print_expression(x, context_precedence, left_precedence(x));
+  }
+
+  template <typename T>
   void print_unary_operation(const T& x, const std::string& op)
   {
     derived().print(op);
-    print_expression(unary_operand(x), precedence(x));
+    print_expression(unary_operand(x), left_precedence(x));
   }
 
   template <typename T>
   void print_binary_operation(const T& x, const std::string& op)
   {
-#ifdef MCRL2_DEBUG_PRECEDENCE
-    std::cout << "<binary>" << std::endl;
-    std::cout << "<x>" << x << " precedence = " << precedence(x) << std::endl;
-    std::cout << "<left>" << x.left() << " precedence = " << precedence(binary_left(x)) << std::endl;
-    std::cout << "<right>" << x.right() << " precedence = " << precedence(binary_right(x)) << std::endl;
-#endif
-    print_expression(binary_left(x), is_same_different_precedence(x, binary_left(x)) ? precedence(x) + 1 : precedence(x));
+    print_expression(binary_left(x), is_same_different_precedence(x, binary_left(x)) ? left_precedence(x) + 1 : left_precedence(x));
     derived().print(op);
-    print_expression(binary_right(x), is_same_different_precedence(x, binary_right(x)) ? precedence(x) + 1 : precedence(x));
+    print_expression(binary_right(x), is_same_different_precedence(x, binary_right(x)) ? left_precedence(x) + 1 : left_precedence(x), right_precedence(binary_right(x)));
   }
 
   template <typename Container>

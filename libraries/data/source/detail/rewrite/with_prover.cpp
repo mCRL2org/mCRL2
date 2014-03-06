@@ -42,16 +42,6 @@ RewriterProver::~RewriterProver()
   delete prover_obj;
 }
 
-bool RewriterProver::addRewriteRule(const data_equation& Rule)
-{
-  return rewr_obj->addRewriteRule(Rule);
-}
-
-bool RewriterProver::removeRewriteRule(const data_equation& Rule)
-{
-  return rewr_obj->removeRewriteRule(Rule);
-}
-
 data_expression RewriterProver::rewrite(
             const data_expression& Term,
             substitution_type& sigma)

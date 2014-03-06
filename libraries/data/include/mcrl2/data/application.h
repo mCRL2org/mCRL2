@@ -352,8 +352,10 @@ std::ostream& operator<<(std::ostream& out, const application& x)
 // #include "mcrl2/data/precedence.h"
 // Instead we do a forward declare of the precedence function. The user must make sure the file precedence.h is actually included.
 // TOOO: fix this by moving the is_??? functions to the file application.h
-int precedence(const data_expression& x);
-int precedence(const application& x);
+int left_precedence(const data_expression& x);
+int right_precedence(const data_expression& x);
+int left_precedence(const application& x);
+int right_precedence(const application& x);
 
 inline
 const data_expression& unary_operand(const application& x)

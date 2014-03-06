@@ -43,7 +43,7 @@ var e : S;
 eqn @setfset(s)  =  @set(@false_, s);
     @setcomp(f)  =  @set(f, {});
     in(e, @set(f, s))  =  !=(f(e), in(e, s));
-    ==(@set(f, s), @set(g, t))  =  forall(c:S, !=(==(f(c),g(c)),in(c,-(s,t))));
+    ==(@set(f, s), @set(g, t))  =  forall(c:S, ==(==(f(c),g(c)),==(in(c,s),in(c,t))));
     <(x, y)  =  &&(<=(x, y), !=(x, y));
     <=(x,y) = ==(*(x,y),x);
     !(@set(f, s))  =  @set(@not_(f), s);

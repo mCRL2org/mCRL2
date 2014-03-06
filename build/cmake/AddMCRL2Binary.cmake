@@ -16,7 +16,7 @@ function(_add_tests TARGET_NAME)
       target_link_libraries(${testname} ${TARGET_NAME})
       # TODO: remove the following once we get rid of the PBES/BES dependency issue
       if(TARGET_NAME STREQUAL "mcrl2_bes")
-        target_link_libraries(${testname} mcrl2_bes)
+        target_link_libraries(${testname} mcrl2_pbes mcrl2_bes)
       endif()
       add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
          --build-and-test

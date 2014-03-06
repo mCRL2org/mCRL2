@@ -21,13 +21,13 @@ namespace data
 namespace detail
 {
 
-inline variable_list get_vars(const data_expression &a)
+inline variable_list get_vars(const data_expression& a)
 {
   const std::set<variable> s=find_free_variables(a);
   return variable_list(s.begin(),s.end());
 }
 
-inline sort_expression residual_sort(const sort_expression &s, size_t no_of_initial_arguments)
+inline sort_expression residual_sort(const sort_expression& s, size_t no_of_initial_arguments)
 {
   // Remove no_of_initial_arguments sort from sort s.
 
@@ -44,33 +44,33 @@ inline sort_expression residual_sort(const sort_expression &s, size_t no_of_init
   return result;
 }
 
-inline bool get_argument_of_higher_order_term_helper(const data_expression& t, size_t& i, data_expression& result)
+inline bool get_argument_of_higher_order_term_helper(const application& t, size_t& i, data_expression& result)
 {
   // t has the shape t application(....)
-  if (is_function_symbol(atermpp::aterm_cast<const data_expression>(t[0])))
+  if (!is_application(t.head()))
   {
-    const size_t arity = t.function().arity();
+    const size_t arity = t.size();
     if (arity>i)
     {
       result=atermpp::aterm_cast<data_expression>(t[i]);
       return true;
     }
     // arity <=i
-    i=i-arity+1;
+    i=i-arity;
     return false;
   }
-  if (get_argument_of_higher_order_term_helper(atermpp::aterm_cast<data_expression>(t[0]),i,result))
+  if (get_argument_of_higher_order_term_helper(core::down_cast<application>(t.head()),i,result))
   {
     return true;
   }
-  const size_t arity = t.function().arity();
+  const size_t arity = t.size();
   if (arity>i)
   {
-    result=atermpp::aterm_cast<data_expression>(t[i]);
+    result=t[i];
     return true;
   }
   // arity <=i
-  i=i-arity+1;
+  i=i-arity;
   return false;
 }
 
@@ -79,17 +79,16 @@ inline data_expression get_argument_of_higher_order_term(const data_expression& 
   // t is a aterm of the shape application(application(...application(f,t1,...tn),tn+1....),tm...).
   // Return the i-th argument t_i. NOTE: The first argument has index 1.
 
-  assert(!is_function_symbol(t));
   data_expression result;
 #ifndef NDEBUG // avoid a warning.
   bool b=
 #endif
-          get_argument_of_higher_order_term_helper(t,i,result);
+          get_argument_of_higher_order_term_helper(core::down_cast<application>(t),i,result);
   assert(b);
   return result;
 }
 
-inline size_t recursive_number_of_args(const data_expression &t)
+inline size_t recursive_number_of_args(const data_expression& t)
 {
   if (is_function_symbol(t))
   {
@@ -100,6 +99,16 @@ inline size_t recursive_number_of_args(const data_expression &t)
   {
     return 0;
   }
+ 
+  if (is_where_clause(t))
+  {
+    return 0;
+  }
+
+  if (is_abstraction(t))
+  {
+    return 0;
+  }
 
   const application& ta = core::down_cast<application>(t);
   const size_t result=ta.size()+recursive_number_of_args(ta.head());
@@ -107,7 +116,7 @@ inline size_t recursive_number_of_args(const data_expression &t)
 }
 
 // Assume that the expression t is an application, and return its leading function symbol.
-inline const function_symbol& get_function_symbol_of_head(const data_expression &t)
+inline const function_symbol& get_function_symbol_of_head(const data_expression& t)
 {
   if (is_function_symbol(t))
   {
@@ -120,7 +129,7 @@ inline const function_symbol& get_function_symbol_of_head(const data_expression 
 }
 
 // Return the head symbol, nested within applications.
-inline const data_expression& get_nested_head(const data_expression &t)
+inline const data_expression& get_nested_head(const data_expression& t)
 {
   if (is_application(t))
   {
@@ -132,7 +141,7 @@ inline const data_expression& get_nested_head(const data_expression &t)
 }
 
 // Replace the recursively nested head symbol in t by head.
-inline const data_expression replace_nested_head(const data_expression &t, const data_expression& head)
+inline const data_expression replace_nested_head(const data_expression& t, const data_expression& head)
 {
   if (is_application(t))
   {
@@ -143,21 +152,14 @@ inline const data_expression replace_nested_head(const data_expression &t, const
   return head;
 }
 
-// Replace the recursively nested head symbol in t by head.
 template <class ARGUMENT_REWRITER>
-inline const data_expression rewrite_all_arguments(const data_expression &t, const ARGUMENT_REWRITER rewriter)
+inline const data_expression rewrite_all_arguments(const application& t, const ARGUMENT_REWRITER rewriter)
 {
-  if (is_application(t))
-  {
-    const application& ta = core::down_cast<application>(t);
-    return application(ta.head(),ta.begin(),ta.end(),rewriter);
-  }
-
-  return t;
+  return application(t.head(),t.begin(),t.end(),rewriter);
 }
 
 // Assume that the expression t is an application, and return its leading variable.
-inline const variable& get_variable_of_head(const data_expression &t)
+inline const variable& get_variable_of_head(const data_expression& t)
 {
   if (is_variable(t))
   {
