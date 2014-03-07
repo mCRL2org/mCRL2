@@ -1141,11 +1141,15 @@ inline int left_precedence(const state_formula& x)
   return core::detail::precedences::max_precedence;
 }
 
+inline int right_precedence(const mu& x)     { return (std::max)(left_precedence(x), left_precedence(static_cast<const mu&>(x).operand())); }
+inline int right_precedence(const nu& x)     { return (std::max)(left_precedence(x), left_precedence(static_cast<const nu&>(x).operand())); }
 inline int right_precedence(const forall& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const forall&>(x).body())); }
 inline int right_precedence(const exists& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const exists&>(x).body())); }
 inline int right_precedence(const state_formula& x)
 {
-       if (is_forall(x)) { return right_precedence(static_cast<const forall&>(x)); }
+       if (is_mu(x)    ) { return right_precedence(static_cast<const mu&>(x)); }
+  else if (is_nu(x)    ) { return right_precedence(static_cast<const nu&>(x)); }
+  else if (is_forall(x)) { return right_precedence(static_cast<const forall&>(x)); }
   else if (is_exists(x)) { return right_precedence(static_cast<const exists&>(x)); }
   return left_precedence(x);
 }

@@ -767,12 +767,7 @@ inline int right_precedence(const action_formula& x)
 {
   if      (is_forall(x)) { return right_precedence(static_cast<const forall&>(x)); }
   else if (is_exists(x)) { return right_precedence(static_cast<const exists&>(x)); }
-  else if (is_imp(x))    { return right_precedence(static_cast<const imp&>(x)); }
-  else if (is_or(x))     { return right_precedence(static_cast<const or_&>(x)); }
-  else if (is_and(x))    { return right_precedence(static_cast<const and_&>(x)); }
-  else if (is_at(x))     { return right_precedence(static_cast<const at&>(x)); }
-  else if (is_not(x))    { return right_precedence(static_cast<const not_&>(x)); }
-  return core::detail::precedences::max_precedence;
+  return left_precedence(x);
 }
 
 inline const action_formula& unary_operand(const not_& x) { return x.operand(); }

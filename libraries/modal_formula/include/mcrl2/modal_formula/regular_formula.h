@@ -394,11 +394,7 @@ inline int left_precedence(const regular_formula& x)
 
 inline int right_precedence(const regular_formula& x)
 {
-  if      (is_seq(x))          { return right_precedence(static_cast<const seq&>(x)); }
-  else if (is_alt(x))          { return right_precedence(static_cast<const alt&>(x)); }
-  else if (is_trans(x))        { return right_precedence(static_cast<const trans&>(x)); }
-  else if (is_trans_or_nil(x)) { return right_precedence(static_cast<const trans_or_nil&>(x)); }
-  return core::detail::precedences::max_precedence;
+  return left_precedence(x);
 }
 
 inline const regular_formula& unary_operand(const trans& x)        { return x.operand(); }
