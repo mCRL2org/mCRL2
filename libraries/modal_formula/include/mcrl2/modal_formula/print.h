@@ -262,9 +262,43 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   using super::print_variables;
   using super::print_expression;
 
+  // Determines whether or not data expressions should be wrapped inside 'val'.
+  std::vector<bool> val;
+
+  bool print_val() const
+  {
+    return val.empty();
+  }
+
+  void disable_val()
+  {
+    val.push_back(false);
+  }
+
+  void enable_val()
+  {
+    assert(!val.empty());
+    val.pop_back();
+  }
+
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
+  }
+
+  void operator()(const data::data_expression& x)
+  {
+    derived().enter(x);
+    if (print_val())
+    {
+      derived().print("val(");
+    }
+    super::operator()(x);
+    if (print_val())
+    {
+      derived().print(")");
+    }
+    derived().leave(x);
   }
 
   void operator()(const state_formulas::true_& x)
@@ -311,36 +345,44 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
 
   void operator()(const state_formulas::forall& x)
   {
+    disable_val();
     derived().enter(x);
     print_abstraction(x, "forall");
     derived().leave(x);
+    enable_val();
   }
 
   void operator()(const state_formulas::exists& x)
   {
+    disable_val();
     derived().enter(x);
     print_abstraction(x, "exists");
     derived().leave(x);
+    enable_val();
   }
 
   void operator()(const state_formulas::must& x)
   {
+    disable_val();
     derived().enter(x);
     derived().print("[");
     derived()(x.formula());
     derived().print("]");
     derived()(x.operand());
     derived().leave(x);
+    enable_val();
   }
 
   void operator()(const state_formulas::may& x)
   {
+    disable_val();
     derived().enter(x);
     derived().print("<");
     derived()(x.formula());
     derived().print(">");
     derived()(x.operand());
     derived().leave(x);
+    enable_val();
   }
 
   void operator()(const state_formulas::yaled& x)
@@ -352,11 +394,13 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
 
   void operator()(const state_formulas::yaled_timed& x)
   {
+    disable_val();
     derived().enter(x);
     derived().print("yaled");
     derived().print(" @ ");
     derived()(x.time_stamp());
     derived().leave(x);
+    enable_val();
   }
 
   void operator()(const state_formulas::delay& x)
@@ -368,24 +412,29 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
 
   void operator()(const state_formulas::delay_timed& x)
   {
+    disable_val();
     derived().enter(x);
     derived().print("delay");
     derived().print(" @ ");
     derived()(x.time_stamp());
     derived().leave(x);
+    enable_val();
   }
 
   void operator()(const state_formulas::variable& x)
   {
+    disable_val();
     derived().enter(x);
     derived()(x.name());
     print_variables(x.arguments(), false);
     derived().leave(x);
+    enable_val();
   }
 
   // TODO: merge this function with the version in data/print.h (?)
   void print_assignments(const data::assignment_list& assignments)
   {
+    disable_val();
     if (assignments.empty())
     {
       return;
@@ -404,6 +453,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
       derived()(i->rhs());
     }
     derived().print(")");
+    enable_val();
   }
 
   void operator()(const state_formulas::nu& x)

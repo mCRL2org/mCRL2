@@ -62,6 +62,9 @@ BOOST_AUTO_TEST_CASE(test_abp)
   run_test_case("(mu X. X) || mu Y. Y", lps_spec);
   run_test_case("!(mu X. X || mu X. X)", lps_spec);
   run_test_case("(forall d: D. nu X. X) && false", lps_spec);
+  run_test_case("val(true)", lps_spec);
+  run_test_case("delay @ 4", lps_spec);
+  run_test_case("nu Z(i: Nat = 0). Z(2)", lps_spec);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
