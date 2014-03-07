@@ -1,4 +1,3 @@
-#define MCRL2_TEST_COMPILERS 
 
 #ifndef ATYPES_H
 #define ATYPES_H
