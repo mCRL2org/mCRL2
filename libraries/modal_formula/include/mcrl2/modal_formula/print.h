@@ -363,26 +363,26 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
 
   void operator()(const state_formulas::must& x)
   {
-    disable_val();
     derived().enter(x);
     derived().print("[");
+    disable_val();
     derived()(x.formula());
+    enable_val();
     derived().print("]");
     derived()(x.operand());
     derived().leave(x);
-    enable_val();
   }
 
   void operator()(const state_formulas::may& x)
   {
-    disable_val();
     derived().enter(x);
     derived().print("<");
+    disable_val();
     derived()(x.formula());
+    enable_val();
     derived().print(">");
     derived()(x.operand());
     derived().leave(x);
-    enable_val();
   }
 
   void operator()(const state_formulas::yaled& x)
