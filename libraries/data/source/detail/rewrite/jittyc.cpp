@@ -383,10 +383,6 @@ static void add_to_build_pars(build_pars* pars,  const match_tree_list_list& seq
   }
 
   pars->stack = add_to_stack(pars->stack,l,r,cr);
-                                // << pars->Mlist << "\n"
-                                // << pars->Slist << "\n"
-                                // << pars->stack << "\n"
-                                // << pars->upstack << "\n\n"; 
 }
 
 static char tree_var_str[20];
@@ -505,7 +501,6 @@ static match_tree build_tree(build_pars pars, size_t i)
                     v,
                     k,
                     sigma);
-                    // substitution(aterm_cast<atermpp::aterm_appl>(e.front())[0],v));
 
       l.push_front(e.front());
       m.push_front(e.tail());
@@ -522,14 +517,10 @@ static match_tree build_tree(build_pars pars, size_t i)
       match_tree tree = build_tree(pars,i);
       for (match_tree_list::const_iterator i=readies.begin(); i!=readies.end(); ++i)
       {
-        assert(i->isCRe());
-        {
-          // Originally this could only be CRe.
-          match_tree_CRe t(readies.front());
-          inc_usedcnt(t.variables_condition());
-          inc_usedcnt(t.variables_result()); 
-          tree = match_tree_C(t.condition(),match_tree_R(t.result()),tree);
-        }
+        match_tree_CRe t(*i);
+        inc_usedcnt(t.variables_condition());
+        inc_usedcnt(t.variables_result()); 
+        tree = match_tree_C(t.condition(),match_tree_R(t.result()),tree);
       }
       ret = tree;
     }
