@@ -361,7 +361,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   data_expression partial_result=sort_bool::false_();
   bool solution_possible=true;
 
-  size_t loop_upperbound=100;
+  size_t loop_upperbound=10;
   while (loop_upperbound>0 &&
          partial_result!=sort_bool::true_() &&
          sol.next(evaluated_condition,x,solution_possible))
@@ -460,7 +460,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   data_expression partial_result=sort_bool::true_();
   bool solution_possible=true;
 
-  size_t loop_upperbound=100;
+  size_t loop_upperbound=10;
   while (loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
          sol.next(evaluated_condition,x,solution_possible))

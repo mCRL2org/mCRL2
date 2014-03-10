@@ -501,9 +501,9 @@ data_expression RewriterJitty::rewrite_aux(
     return rewrite_single_lambda(ta.variables(),ta.body(),false,sigma);
   }
 
-  // The variable term has the shape #REWR#(t,t1,...,tn);
+  // The variable term has the shape appl(t,t1,...,tn);
 
-  // First check whether t has the shape #REWR#(#REWR#...#REWR#(f,u1,...,un)(...)(...) where f is a function symbol.
+  // First check whether t has the shape appl(appl...appl(f,u1,...,un)(...)(...) where f is a function symbol.
   // In this case rewrite that function symbol. This is an optimisation. If this does not apply t is rewritten,
   // including all its subterms. But this is costly, as not all subterms will be rewritten again
   // in rewrite_aux_function_symbol.
@@ -559,7 +559,7 @@ data_expression RewriterJitty::rewrite_aux(
   }
   else if (head_is_variable(t))
   {
-    // return #REWR#(t,t1,...,tn) where t1,...,tn still need to be rewritten.
+    // return appl(t,t1,...,tn) where t1,...,tn still need to be rewritten.
     const size_t arity=term.size()-1;
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,data_expression, arity);
     // new (&args[0]) data_expression(t);
@@ -607,7 +607,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     rewritten_defined[i]=false;
   }
 
-  // const size_t op_value=op.value();
   const size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
   if (op_value>=jitty_strat.size())
   {
@@ -741,13 +740,11 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   // No rewrite rule is applicable. Rewrite the not yet rewritten arguments.
   // As we rewrite all, we do not record anymore whether terms are rewritten.
   assert(!rewritten_defined[0]);
-  // rewritten_defined[0]=true;
   new (&rewritten[0]) data_expression(op);
   for (size_t i=1; i<arity; i++)
   {
     if (!rewritten_defined[i])
     {
-      // rewritten_defined[i]=true;
       new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i-1),sigma));
     }
   }
