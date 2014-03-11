@@ -23,6 +23,8 @@ option(MCRL2_ENABLE_DEPRECATED     "Enable compilation of deprecated tools." OFF
 option(MCRL2_ENABLE_DEVELOPER      "Enable compilation of developer tools." OFF)
 option(MCRL2_ENABLE_TEST_EXAMPLES  "Enable the tests in the example directory of each library." ON)
 option(MCRL2_ENABLE_TEST_LIBRARIES "Enable the tests in the test directory of each library." ON)
+option(MCRL2_ENABLE_TEST_HEADERS   "Enable testing of self-containment of headers." OFF)
+option(MCRL2_EXTRA_TOOL_TESTS      "Enable testing of tools on more mCRL2 specifications." OFF)
 mark_as_advanced(MCRL2_ENABLE_STABLE)
 
 include(ConfigurePlatform)
@@ -50,6 +52,7 @@ add_subdirectory(3rd-party/dparser)
 add_subdirectory(libraries)
 add_subdirectory(tools)
 add_subdirectory(doc)
+add_subdirectory(tests)
 
 include(MCRL2CompilingRewriter)
 include(MCRL2Packaging)
