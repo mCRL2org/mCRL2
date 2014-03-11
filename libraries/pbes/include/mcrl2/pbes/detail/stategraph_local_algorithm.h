@@ -103,9 +103,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
             if ((X_i.used.find(m) != X_i.used.end() || X_i.changed.find(m) != X_i.changed.end()) && !Vk.has_label(X, i))
             {
               mCRL2log(log::debug1, "stategraph") << "vertex " << *p << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs "
-                  << " used: " << std::boolalpha << (X_i.used.find(m) != X_i.used.end())
-                  << " changed: " << std::boolalpha << (X_i.changed.find(m) != X_i.changed.end())
-                  << " has_label: " << std::boolalpha << Vk.has_label(X, i)
+//                  << " used: " << std::boolalpha << (X_i.used.find(m) != X_i.used.end())
+//                  << " changed: " << std::boolalpha << (X_i.changed.find(m) != X_i.changed.end())
+//                  << " has_label: " << std::boolalpha << Vk.has_label(X, i)
                   << std::endl;
               belongs.erase(j++);
             }

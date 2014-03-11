@@ -107,24 +107,26 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           // TODO: this information is not readily available, resulting in very ugly code...
           auto ci = m_control_flow_index.find(X);
           assert(ci != m_control_flow_index.end());
-#ifndef NDEBUG
           bool found = false;
-#endif
           std::size_t m = data::undefined_index();
           const std::map<std::size_t, std::size_t>& M = ci->second;
           for (auto mi = M.begin(); mi != M.end(); ++mi)
           {
             if (mi->second == k)
             {
-#ifndef NDEBUG
               assert(!found);
               found = true;
-#endif
               m = mi->first;
             }
           }
-          mCRL2log(log::debug1) << "    with parameter index " << m << " (CFP index " << index_to_cfp_index[m] << ")" << std::endl;
+          if (!found)
+          {
+            std::ostringstream out;
+            out << "component " << k << " does not contain a vertex for " << X;
+            throw mcrl2::runtime_error(out.str());
+          }
           assert(found);
+          mCRL2log(log::debug1) << "    with parameter index " << m << " (CFP index " << index_to_cfp_index[m] << ")" << std::endl;
           assert(m != data::undefined_index());
           assert(index_to_cfp_index[m] < v.size());
 
