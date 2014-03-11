@@ -383,10 +383,6 @@ static void add_to_build_pars(build_pars* pars,  const match_tree_list_list& seq
   }
 
   pars->stack = add_to_stack(pars->stack,l,r,cr);
-                                // << pars->Mlist << "\n"
-                                // << pars->Slist << "\n"
-                                // << pars->stack << "\n"
-                                // << pars->upstack << "\n\n"; 
 }
 
 static char tree_var_str[20];
@@ -505,7 +501,6 @@ static match_tree build_tree(build_pars pars, size_t i)
                     v,
                     k,
                     sigma);
-                    // substitution(aterm_cast<atermpp::aterm_appl>(e.front())[0],v));
 
       l.push_front(e.front());
       m.push_front(e.tail());
@@ -522,14 +517,10 @@ static match_tree build_tree(build_pars pars, size_t i)
       match_tree tree = build_tree(pars,i);
       for (match_tree_list::const_iterator i=readies.begin(); i!=readies.end(); ++i)
       {
-        assert(i->isCRe());
-        {
-          // Originally this could only be CRe.
-          match_tree_CRe t(readies.front());
-          inc_usedcnt(t.variables_condition());
-          inc_usedcnt(t.variables_result()); 
-          tree = match_tree_C(t.condition(),match_tree_R(t.result()),tree);
-        }
+        match_tree_CRe t(*i);
+        inc_usedcnt(t.variables_condition());
+        inc_usedcnt(t.variables_result()); 
+        tree = match_tree_C(t.condition(),match_tree_R(t.result()),tree);
       }
       ret = tree;
     }
@@ -1302,7 +1293,12 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_numb
   }
 }
 
-string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, const application& appl, const size_t startarg, variable_or_number_list nnfvars, const nfs_array& rewr)
+string RewriterCompilingJitty::calc_inner_terms(
+              nfs_array& nfs, 
+              const application& appl, 
+              const size_t startarg, 
+              variable_or_number_list nnfvars, 
+              const nfs_array& rewr)
 {
   size_t j=0;
   string result="";
@@ -1601,34 +1597,22 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         if (b || !rewr)
         {
-          const size_t index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
-          const data::function_symbol old_head=headfs;
-          const size_t total_arity=recursive_number_of_args(ta);
-          // for(size_t i=total_arity; i<=getArity(old_head); ++i)
-          // {
-            // Generate a new function symbol for the required total_arity, and all allowed higher arities,
-            // because this function symbol can be put in a context with more arguments.
-            // if (arity_is_allowed(old_head.sort(),i))
-            // {
-              std::stringstream new_name;
-              new_name << "@_rewr" << "_" << index << "_@@@_" << args_nfs.get_encoded_number()
-                                   << "_term";
-              const data::function_symbol f(new_name.str(),old_head.sort());
-              if (partially_rewritten_functions.count(f)==0)
-              {
-                partially_rewritten_functions.insert(f);
-              //   total_arity_of_partially_rewritten_functions[f]=i;
-              }
-              /* Exclude adding an extra increase of the OpId index, which refers to an OpId that is not available.
-                 The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
-                 which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
-                 to recalculate the normal form. TODO: this needs to be reconstructed. */
-              // if (i==total_arity)
-              { 
-                ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
-              }
-            //}
-          //}
+          if (data_equation_selector(headfs))
+          {
+            const size_t index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
+            const data::function_symbol old_head=headfs;
+            const size_t total_arity=recursive_number_of_args(ta);
+            std::stringstream new_name;
+            new_name << "@_rewr" << "_" << index << "_@@@_" << (getArity(headfs)>NF_MAX_ARITY?0:args_nfs.get_encoded_number())
+                                 << "_term";
+            const data::function_symbol f(new_name.str(),old_head.sort());
+            if (partially_rewritten_functions.count(f)==0)
+            {
+              partially_rewritten_functions.insert(f);
+            }
+            
+            ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
+          }
         }
         else
         {
@@ -1641,10 +1625,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         args_nfs.fill(arity);
       }
       string args_second = calc_inner_terms(args_first,ta,startarg,nnfvars,args_nfs);
-      // The assert is not valid anymore, because lambdas are sometimes returned in normal form, although not strictly
-      // asked for...
 
-      assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first==args_nfs);
+      assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first>=args_nfs);
       if (rewr && !b)
       {
         ss << "_" << arity << "_";
@@ -3115,7 +3097,6 @@ RewriterCompilingJitty::RewriterCompilingJitty(
    Rewriter(data_spec,equation_selector),
    jitty_rewriter(data_spec,equation_selector)
 {
-  // data_equation_selector=equations_selector;
   so_rewr_cleanup = NULL;
   rewriter_so = NULL;
   initialise_common();
@@ -3135,7 +3116,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(
         if (rewrite_rules.insert(rule).second)
         {
           // The equation has been added as a rewrite rule, otherwise the equation was already present.
-          data_equation_selector.add_function_symbols(rule.lhs());
+          // data_equation_selector.add_function_symbols(rule.lhs());
         }
       }
       catch (std::runtime_error& e)

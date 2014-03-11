@@ -14,6 +14,7 @@
 
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_graph.h"
 
 namespace mcrl2 {
 
@@ -26,6 +27,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
 {
   public:
     typedef stategraph_algorithm super;
+    typedef control_flow_graph::vertex_iterator vertex_iterator;
 
   protected:
     // the control flow graph

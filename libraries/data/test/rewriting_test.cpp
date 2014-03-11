@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(list_rewrite_test)
     data_rewrite_test(R, rtail(bool_(), head_true), empty_);
     data_rewrite_test(R, tail(bool_(), head_true), empty_);
   }
-}
+} 
 
 BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
 {
@@ -1050,7 +1050,7 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
     data_rewrite_test(R, e, f);
   }
 
-}
+} 
 
 BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
 {
@@ -1127,7 +1127,7 @@ BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
     data::data_expression f(parse_data_expression("true", specification));
     data_rewrite_test(R, e, f);
   }
-}
+} 
 
 BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form)
 {
@@ -1204,7 +1204,7 @@ BOOST_AUTO_TEST_CASE(rewrite_rule_for_higher_order_functions)
     data::data_expression f(parse_data_expression("f(0)(0)", specification));
     data_rewrite_test(R, e, f);
   }
-}
+}  
 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

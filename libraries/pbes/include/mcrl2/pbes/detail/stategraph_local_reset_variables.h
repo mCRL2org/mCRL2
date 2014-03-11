@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 
 #include "mcrl2/utilities/sequence.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
 
@@ -62,28 +63,6 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       return f(x);
     }
 
-    // computes the possible values of d_X[j]
-    std::vector<data::data_expression> compute_values(const core::identifier_string& X, std::size_t j)
-    {
-      std::vector<data::data_expression> result;
-
-      std::size_t k = control_flow_index(X, j);
-      if (k != data::undefined_index())
-      {
-        // find vertices X(e) in Gk
-        control_flow_graph& Gk = m_control_flow_graphs[k];
-        const std::set<stategraph_vertex*>& inst = Gk.index(X);
-        for (std::set<stategraph_vertex*>::const_iterator vi = inst.begin(); vi != inst.end(); ++vi)
-        {
-          const stategraph_vertex& u = **vi;
-          result.push_back(u.X.parameters().front());
-        }
-      }
-      mCRL2log(log::debug1, "stategraph") << "Possible values of " << X << "," << j << " are: " << core::detail::print_container(result) << std::endl;
-
-      return result;
-    }
-
     bool is_relevant(const core::identifier_string& X,
                      const predicate_variable& X_i,
                      const data::variable& d,
@@ -109,10 +88,10 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       }
 
       bool result = true;
-      std::size_t K = m_control_flow_graphs.size();
+      std::size_t K = m_local_control_flow_graphs.size();
       for (std::size_t k = 0; k < K && result; k++)
       {
-        const control_flow_graph& Gk = m_control_flow_graphs[k];
+        const local_control_flow_graph& Gk = m_local_control_flow_graphs[k];
         const std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
         std::map<core::identifier_string, std::set<data::variable> >::const_iterator i = Bk.find(X);
         if (i == Bk.end())
@@ -126,38 +105,41 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           mCRL2log(log::debug1) << "    " << data::pp(d) << " belongs to graph " << k << std::endl;
           // determine m such that m_control_flow_index[X][m] == k
           // TODO: this information is not readily available, resulting in very ugly code...
-          std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator ci = m_control_flow_index.find(X);
+          auto ci = m_control_flow_index.find(X);
           assert(ci != m_control_flow_index.end());
-#ifndef NDEBUG
           bool found = false;
-#endif
           std::size_t m = data::undefined_index();
           const std::map<std::size_t, std::size_t>& M = ci->second;
-          for (std::map<std::size_t, std::size_t>::const_iterator mi = M.begin(); mi != M.end(); ++mi)
+          for (auto mi = M.begin(); mi != M.end(); ++mi)
           {
             if (mi->second == k)
             {
               assert(!found);
-#ifndef NDEBUG
               found = true;
-#endif
               m = mi->first;
             }
           }
-          mCRL2log(log::debug1) << "    with parameter index " << m << " (CFP index " << index_to_cfp_index[m] << ")" << std::endl;
+          if (!found)
+          {
+            std::ostringstream out;
+            out << "component " << k << " does not contain a vertex for " << X;
+            throw mcrl2::runtime_error(out.str());
+          }
           assert(found);
+          mCRL2log(log::debug1) << "    with parameter index " << m << " (CFP index " << index_to_cfp_index[m] << ")" << std::endl;
           assert(m != data::undefined_index());
           assert(index_to_cfp_index[m] < v.size());
 
-          control_flow_graph::vertex_const_iterator vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[index_to_cfp_index[m]])));
-          assert(vi != Gk.end());
-          const stategraph_vertex& u = vi->second;
-          mCRL2log(log::debug1) << "      found vertex " << pp(u.X) << " with marking " << print_vector(u.marking, ", ") << std::endl;
+          // auto vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[index_to_cfp_index[m]])));
+          // assert(vi != Gk.end());
+          // const local_control_flow_graph_vertex& u = vi->second;
+          const local_control_flow_graph_vertex& u = Gk.find_vertex(X);
+          mCRL2log(log::debug1) << "      found vertex " << u.name() << " with marking " << print_vector(u.marking(), ", ") << std::endl;
 
-          result = result && utilities::detail::contains(u.marking, d);
+          result = result && utilities::detail::contains(u.marking(), d);
           if(!result)
           {
-            mCRL2log(log::debug1) << "    " << data::pp(d) << " is not contained in the marking for " << pp(u.X) << " so it is not relevant" << std::endl;
+            mCRL2log(log::debug1) << "    " << d << " is not contained in the marking for " << u.name() << " so it is not relevant" << std::endl;
           }
         }
       }
@@ -177,12 +159,12 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       {
         return false;
       }
-      const control_flow_graph& Gk = m_control_flow_graphs[k];
-      const std::set<stategraph_vertex*>& inst = Gk.index(X);
-      for (std::set<stategraph_vertex*>::const_iterator i = inst.begin(); i != inst.end(); ++i)
+      const local_control_flow_graph& Gk = m_local_control_flow_graphs[k];
+      auto const& inst = Gk.index(X);
+      for (auto i = inst.begin(); i != inst.end(); ++i)
       {
-        stategraph_vertex& u = **i;
-        if (!u.marking.empty())
+        const local_control_flow_graph_vertex& u = **i;
+        if (!u.marking().empty())
         {
           return true;
         }
@@ -509,7 +491,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
   std::vector<std::vector<data::data_expression> > values;
   for (auto ii = I.begin(); ii != I.end(); ++ii)
   {
-    auto v = compute_values(Y, *ii);
+    auto const& v = compute_values(Y, *ii);
     mCRL2log(log::debug1, "stategraph") << " values(" << *ii << ") = " << core::detail::print_container(v) << std::endl;
     values.push_back(v);
   }

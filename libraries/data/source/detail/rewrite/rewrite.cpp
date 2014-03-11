@@ -43,6 +43,11 @@ namespace data
 namespace detail
 {
 
+static size_t npos()
+{
+  return size_t(-1);
+}
+
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_a_variable
 {
@@ -338,12 +343,14 @@ data_expression Rewriter::existential_quantifier_enumeration(
   get_free_variables(t3,free_variables);
   variable_list vl_new_l;
 
+  bool sorts_are_finite=true;
   for(variable_vector::const_reverse_iterator i=vl_new_v.rbegin(); i!=vl_new_v.rend(); ++i)
   {
     const variable v= *i;
     if (free_variables.count(v)>0)
     {
       vl_new_l.push_front(v);
+      sorts_are_finite=sorts_are_finite && m_data_specification_for_enumeration.is_certainly_finite(v.sort());
     }
   }
 
@@ -353,7 +360,9 @@ data_expression Rewriter::existential_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,true,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
+  EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,true,
+                                  m_data_specification_for_enumeration, this,
+                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
 
   /* Create a list to store solutions */
   atermpp::term_list<data_expression> x;
@@ -361,7 +370,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   data_expression partial_result=sort_bool::false_();
   bool solution_possible=true;
 
-  size_t loop_upperbound=100;
+  size_t loop_upperbound=(sorts_are_finite?npos():10);
   while (loop_upperbound>0 &&
          partial_result!=sort_bool::true_() &&
          sol.next(evaluated_condition,x,solution_possible))
@@ -437,12 +446,14 @@ data_expression Rewriter::universal_quantifier_enumeration(
   get_free_variables(t3,free_variables);
   variable_list vl_new_l;
 
+  bool sorts_are_finite=true;
   for(variable_vector::const_reverse_iterator i=vl_new_v.rbegin(); i!=vl_new_v.rend(); ++i)
   {
     const variable v= *i;
     if (free_variables.count(v)>0)
     {
       vl_new_l.push_front(v);
+      sorts_are_finite=sorts_are_finite && m_data_specification_for_enumeration.is_certainly_finite(v.sort());
     }
   }
 
@@ -452,7 +463,9 @@ data_expression Rewriter::universal_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,false,m_data_specification_for_enumeration, this,data::detail::get_enumerator_variable_limit(),true);
+  EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,false,
+                                  m_data_specification_for_enumeration, this,
+                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
 
   /* Create lists to store solutions */
   data_expression_list x;
@@ -460,7 +473,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   data_expression partial_result=sort_bool::true_();
   bool solution_possible=true;
 
-  size_t loop_upperbound=100;
+  size_t loop_upperbound=(sorts_are_finite?npos():10);
   while (loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
          sol.next(evaluated_condition,x,solution_possible))

@@ -282,9 +282,6 @@ class next_state_generator
     {
       return m_all_summands;
     }
-
-  private:
-    void declare_constructors();
 };
 
 } // namespace lps

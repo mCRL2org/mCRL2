@@ -218,6 +218,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
               with a trivial predicate can still be reduced, by removing the variable. */
 
   spec_1 = parse_data_specification( "sort A = Set(Bool);");
+  r = rewriter(spec_1, s);
   data_expression t19true = parse_data_expression("true");
   data_expression t19a = parse_data_expression(
        "exists x:Set(Bool). x==x", spec_1);

@@ -28,8 +28,6 @@ next_state_generator::next_state_generator(
     m_enumerator(m_specification.data(), m_rewriter),
     m_use_enumeration_caching(use_enumeration_caching)
 {
-  declare_constructors();
-
   m_process_parameters = data::variable_vector(m_specification.process().process_parameters().begin(), m_specification.process().process_parameters().end());
 
   if(m_specification.process().has_time())
@@ -85,30 +83,6 @@ next_state_generator::next_state_generator(
 
 next_state_generator::~next_state_generator()
 {}
-
-void next_state_generator::declare_constructors()
-{
-  // Declare all constructors to the rewriter to prevent unnecessary compilation.
-  // This can be removed if the jittyc or innerc compilers are not in use anymore.
-  // In certain cases it could be useful to add the mappings also, but this appears to
-  // give a substantial performance penalty, due to the addition of symbols to the
-  // rewriter that are not used.
-
-  std::set<variable> variables = mcrl2::lps::find_all_variables(m_specification);
-  std::set<variable> free_variables = mcrl2::lps::find_free_variables(m_specification);
-  std::set<variable> nonfree_variables;
-  std::set_difference(free_variables.begin(), free_variables.end(), variables.begin(), variables.end(), std::inserter(nonfree_variables, nonfree_variables.begin()));
-
-  std::set<sort_expression> bounded_sorts;
-  for (std::set<variable>::const_iterator i = nonfree_variables.begin(); i != nonfree_variables.end(); i++)
-  {
-    bounded_sorts.insert(i->sort());
-  }
-  for (std::set<sort_expression>::const_iterator i = bounded_sorts.begin(); i != bounded_sorts.end(); i++)
-  {
-    const function_symbol_vector constructors(m_specification.data().constructors(*i));
-  }
-}
 
 data_expression_vector next_state_generator::get_internal_state(const state& s) const
 {
