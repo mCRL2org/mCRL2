@@ -152,16 +152,6 @@ static const size_t BAF_MAGIC = 0xbaf;
 
 static const size_t BAF_VERSION = 0x0302;
 
-static const size_t BAF_DEFAULT_TABLE_SIZE = 1024;
-
-static const size_t BAF_LIST_BATCH_SIZE = 64;
-
-static const size_t SYMBOL_OFFSET = 10;
-
-
-/* Maximum # of arguments to reserve space for on the stack in read_term */
-static const size_t MAX_STACK_ARGS = 4;
-
 typedef struct _trm_bucket
 {
   struct _trm_bucket* next;

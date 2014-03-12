@@ -17,6 +17,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/classic_enumerator.h"
 
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/print.h"
@@ -297,6 +298,143 @@ static void split_condition(
   }
   assert(non_real_conditions.size()==real_conditions.size());
 }
+
+static size_t global_variable_counter=0;
+
+/// \brief Find each expression of the form x<y, x<=y, x==y, x>=y x>y in t that contain variables occurring in real_parameters
+///        and replace these by a boolean variable b. This variable is added to vars
+static data_expression replace_linear_inequalities_with_reals_by_variables(
+                  const data_expression& t,
+                  data_expression& condition, 
+                  variable_list& vars,
+                  const variable_list& real_parameters)
+{
+  if (is_function_symbol(t))
+  {
+    return t;
+  }
+  if (is_variable(t))
+  {
+    const variable v(t);
+    if (std::find(real_parameters.begin(),real_parameters.end(),v)!=real_parameters.end()) // found
+    {
+      throw mcrl2::runtime_error(std::string("Variable ") + data::pp(v) + ":" + data::pp(v.sort()) + " occurs in an action and cannot be removed"); 
+    }
+    return t;
+  }
+  if (is_abstraction(t))
+  {
+    const abstraction ta(t);
+    return abstraction(ta.binding_operator(),
+                       ta.variables(),
+                       replace_linear_inequalities_with_reals_by_variables(ta.body(),condition,vars,real_parameters));
+  }
+  if (is_where_clause(t))
+  {
+    const where_clause tw(t);
+    const assignment_expression_list& l=tw.declarations();
+    assignment_expression_vector new_l;
+    for(assignment_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    {
+      const assignment ass(*i);
+      new_l.push_back(assignment(ass.lhs(),replace_linear_inequalities_with_reals_by_variables(ass.rhs(),condition,vars,real_parameters)));
+    }
+    
+    return where_clause(replace_linear_inequalities_with_reals_by_variables(tw.body(),condition,vars,real_parameters),
+                        assignment_expression_list(new_l.begin(),new_l.end()));
+  }
+
+  assert(is_application(t));
+  const application ta(t);
+  if (is_inequality(ta))
+  {
+    std::stringstream ss;
+    ss << "v@@r" << global_variable_counter;
+    variable v(ss.str(),sort_bool::bool_());
+    global_variable_counter++;
+    condition=sort_bool::and_(condition,equal_to(v,ta)); 
+    vars.push_front(v);
+    return v;
+  }
+  
+  data_expression_vector new_args;
+  for(application::const_iterator a=ta.begin(); a!=ta.end(); ++a)
+  {
+    new_args.push_back(replace_linear_inequalities_with_reals_by_variables(*a,condition,vars,real_parameters));
+  }
+  return application(replace_linear_inequalities_with_reals_by_variables(ta.head(),condition,vars,real_parameters),
+                     new_args.begin(),new_args.end());
+  
+}
+
+/// \brief Remove references to variables in real_parameters from actions,
+///        if possible. In particular actions of the shape a(x<3).....
+///        are replaced by summands of the shape x<3 -> a(true) .... + !(x<3) -> a(false) ....
+/// \param s The specification s is changed in the sense that actions are removed.
+/// \param real_parameters are used to determine what the real parameters are.
+/// \detail This routine throws an exception if there is a real parameter in an 
+///         action that it fails to remove.
+
+static void move_real_parameters_out_of_actions(specification &s, 
+                                                const variable_list& real_parameters,
+                                                const rewriter &r)
+{
+  global_variable_counter=0;
+  const lps::action_summand_vector action_smds = s.process().action_summands();
+  lps::action_summand_vector new_action_summands;
+  classic_enumerator<> enumerator(s.data(),r);
+  for (lps::action_summand_vector::const_iterator i = action_smds.begin(); i != action_smds.end(); ++i)
+  {
+     const action_list ma=i->multi_action().actions();
+     variable_list replaced_variables;
+     data_expression new_condition=sort_bool::true_();
+     action_vector new_actions;
+     for(action_list::const_iterator a=ma.begin(); a!=ma.end(); ++a)
+     {
+       const data_expression_list l=a->arguments();
+       data_expression_vector resulting_data;
+       for(data_expression_list::const_iterator j=l.begin(); j!=l.end(); ++j)
+       {
+         resulting_data.push_back(replace_linear_inequalities_with_reals_by_variables(*j,new_condition,replaced_variables,real_parameters));
+       }
+       new_actions.push_back(action(a->label(),data_expression_list(resulting_data.begin(),resulting_data.end())));
+     }
+     
+     if (replaced_variables.empty())
+     {
+       new_action_summands.push_back(*i);
+     }
+     else 
+     {
+       mutable_indexed_substitution<> empty_sigma;
+       for (classic_enumerator<>::iterator tl = enumerator.begin(replaced_variables,sort_bool::true_(),empty_sigma); tl!= enumerator.end(); ++tl)
+       { 
+         mutable_map_substitution<> sigma(replaced_variables,*tl);
+
+         action_vector new_replaced_actions;
+         for(action_vector::const_iterator j=new_actions.begin(); j!=new_actions.end(); ++j)
+         {
+           data_expression_vector new_replaced_args;
+           for(data_expression_list::const_iterator k=j->arguments().begin();k!=j->arguments().end(); ++k)
+           {
+             new_replaced_args.push_back(replace_free_variables(*k,sigma));
+           }
+           new_replaced_actions.push_back(action(j->label(),data_expression_list(new_replaced_args.begin(),new_replaced_args.end())));
+         }
+         const action_list new_action_list(new_replaced_actions.begin(),new_replaced_actions.end());
+         new_action_summands.push_back(action_summand(
+                                          i->summation_variables(), 
+                                          r(sort_bool::and_(data::replace_free_variables(new_condition,sigma),i->condition())), 
+                                          (i->has_time()?
+                                             multi_action(new_action_list,i->multi_action().time()):
+                                             multi_action(new_action_list)),
+                                          i->assignments()));
+       }
+     }
+  }
+  s.process().action_summands()=new_action_summands;
+}
+
 
 /// \brief Normalize all inequalities in the summands of the specification
 /// \details The parts of the
@@ -869,6 +1007,8 @@ specification realelm(specification s, int max_iterations, const rewrite_strateg
   const variable_list real_parameters = get_real_variables(lps.process_parameters());
   const variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
   std::vector < summand_information > summand_info;
+
+  move_real_parameters_out_of_actions(s,real_parameters,r);
   normalize_specification(s, real_parameters, r, summand_info);
 
   context_type context; // Contains introduced variables
