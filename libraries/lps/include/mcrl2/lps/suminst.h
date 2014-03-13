@@ -62,9 +62,9 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     enumerator_type m_enumerator;
 
     /// Statistiscs for verbose output
-    size_t m_processed = 0;
-    size_t m_deleted = 0;
-    size_t m_added = 0;
+    size_t m_processed;
+    size_t m_deleted;
+    size_t m_added;
 
     template <typename SummandType, typename Container>
     size_t instantiate_summand(const SummandType& s, Container& result)
@@ -188,7 +188,10 @@ class suminst_algorithm: public lps::detail::lps_algorithm
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
-        m_enumerator(spec.data(),r)
+        m_enumerator(spec.data(),r),
+        m_processed(0),
+        m_deleted(0),
+        m_added(0)
     {
       if(sorts.empty())
       {
