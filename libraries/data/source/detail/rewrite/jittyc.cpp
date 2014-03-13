@@ -1601,7 +1601,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           {
             const size_t index=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
             const data::function_symbol old_head=headfs;
-            const size_t total_arity=recursive_number_of_args(ta);
             std::stringstream new_name;
             new_name << "@_rewr" << "_" << index << "_@@@_" << (getArity(headfs)>NF_MAX_ARITY?0:args_nfs.get_encoded_number())
                                  << "_term";

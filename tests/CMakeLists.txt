@@ -1,4 +1,5 @@
 include(GenerateToolTests)
+find_package(PythonModules 2.4 COMPONENTS argparse)
 
 generate_tool_tests(${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2 "")
 
@@ -29,3 +30,21 @@ if(MCRL2_EXTRA_TOOL_TESTS)
   generate_tool_tests(${MCRL2_DIR}/rational.mcrl2 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes;lpsrealelm;lps2lts;ltsinfo;ltsconvert;ltscompare")
 endif()
 
+set(python_dirs "random" "regression")
+foreach(dir ${python_dirs})
+  set(moretests 0)
+  set(num 0)
+  while(moretests EQUAL 0)
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${dir}/test.py --name ${num} 
+                    RESULT_VARIABLE moretests
+                    OUTPUT_VARIABLE testname 
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    math(EXPR num "${num} + 1")
+    if(moretests EQUAL 0)
+      add_test(NAME ${testname}
+               WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${dir}
+               COMMAND ${PYTHON_EXECUTABLE} test.py --run ${num})
+      set_tests_properties(${testname} PROPERTIES LABELS ${dir})
+    endif()
+  endwhile()
+endforeach()
