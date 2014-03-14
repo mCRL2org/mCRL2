@@ -5,7 +5,7 @@ options:
   constraints:
     - constraints/mcrl2-attrs.yml
     - constraints/data-attrs.yml
-  path: ../tools/bin
+  path: ../../tools/bin
   platform: linux
 nodes: {l1: mCRL2Spec, l2: LPS, l3: LPS, l4.aut: LTS, l5.aut: LTS, l6: Bool}
 tools:

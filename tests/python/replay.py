@@ -6,7 +6,7 @@
 
 from __future__ import division
 import sys, logging, randgen, time, os, yaml
-from test import Test, ToolInputError, UnusedToolsError, ToolCrashedError
+from run_test import Test, ToolInputError, UnusedToolsError, ToolCrashedError
 import argparse
 
 parser = argparse.ArgumentParser(description='Executes random tests')

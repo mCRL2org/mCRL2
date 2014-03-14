@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+
+#~ Copyright 2013, 2014 Mark Geelen.
+#~ Distributed under the Boost Software License, Version 1.0.
+#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+
 import randgen, yaml
 from subprocess import Popen, PIPE, STDOUT
 import shutil
@@ -92,23 +98,23 @@ class Tool:
             #args = [os.path.join(os.getcwd(), i.label + "." + i.ext) for i in self.input]
             args = [os.path.join(os.getcwd(), i.label) for i in self.input]
         if self.outfiles:
-            #args = args + [os.path.join(os.getcwd(), o.label + "." + o.ext) for o in self.output] 
-            args = args + [os.path.join(os.getcwd(), o.label) for o in self.output] 
+            #args = args + [os.path.join(os.getcwd(), o.label + "." + o.ext) for o in self.output]
+            args = args + [os.path.join(os.getcwd(), o.label) for o in self.output]
         if verbose:
             print 'Executing ' + ' '.join([name] + args + self.args)
-        p = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, 
+        p = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE,
                   creationflags=self.subprocess_flags)
         input = None
         if not self.infiles:
             input = (b' ').join([i.value for i in self.input])
-   
+
         t = threading.Thread(target=self.threadedExecute, args=(p, input,))
         pp = psutil.Process(p.pid)
         descendants = list(pp.get_children(recursive=True))
         descendants = descendants + [pp]
         t0 = time.clock()
         t.start()
-        try: 
+        try:
             while t.isAlive():
                 if time.clock() - t0 > timeout:
                     t.join(0)
@@ -134,8 +140,8 @@ class Tool:
         res = process.communicate(input)
         for o in self.output:
             o.value = res[0]
-            if o.value == '':              
-                o.value = res[1] 
+            if o.value == '':
+                o.value = res[1]
             if o.value == '':
                 o.value = 'not None'
             self.error = self.error + res[1]
@@ -179,10 +185,10 @@ class Test:
             inputs = inputs + t.input
         self.initials = OrderedDict.fromkeys([i for i in inputs if i not in outputs]).keys()
 
-    def __addTool(self, td): 
+    def __addTool(self, td):
         input = [i for i in self.nodes if i.label in td['input']]
         output = [o for o in self.nodes if o.label in td['output']]
-        name = td['name']      
+        name = td['name']
         if re.search('(W|w)in', self.options['platform']):
             name = name + '.exe'
         self.tools.append(Tool(td['name'], input, output, td['args']))
@@ -227,8 +233,8 @@ class Test:
         return self.glbs['result']
 
     def value(self, node):
-        # Returns the value of the node. Enables 'value(l1)' in the YAML  
-        
+        # Returns the value of the node. Enables 'value(l1)' in the YAML
+
         #return node.value
         try:
             if node.value or node.type == 'Bool':
@@ -258,7 +264,7 @@ class Test:
             return term.split(' ')[-1]
         else:
             return None
-    
+
     def enabled(self):
         # Returns a list of tools that can be executed and have not been executed before
         return [t for t in self.tools if not t.executed and t.canExecute()]
@@ -267,7 +273,7 @@ class Test:
         # Reset the test to the initial values
         for n in self.nodes:
             n.value = None
-            try: 
+            try:
                 #os.remove(os.path.join(os.getcwd(), n.label + "." + n.ext))
                 os.remove(os.path.join(os.getcwd(), n.label))
             except OSError as e:
@@ -299,11 +305,11 @@ class Test:
             jobs = []
             for i in range(min(len(en), max)):
                 p = multiprocessing.Process(target=en[i].execute, args=(self.options['path'],))
-                
+
                 p.daemon = True
                 jobs.append(p)
                 p.start()
-         
+
             for j in jobs:
                 j.join()
                 if j.exitcode != 0:
@@ -314,7 +320,7 @@ class Test:
             return 'Error'
         else:
             return self.result()
-    
+
     def write_output(self, dir):
         if not os.path.exists(dir):
             os.makedirs(dir)
