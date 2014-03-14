@@ -1,3 +1,8 @@
+#!/bin/env python
+# Author(s): Jeroen Keiren
+# Copyright: see the accompanying file COPYING or copy at
+# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+
 import os
 import re
 from subprocess import call
@@ -15,7 +20,7 @@ def get_specifications():
   return specs
 
 # For all files in the current directory with the extension .spec, generated
-# the code. For the file a.spec code is generated into 
+# the code. For the file a.spec code is generated into
 #  ../include/mcrl2/data/a.h
 def main():
   usage = "usage: %prog [options]"
@@ -33,7 +38,7 @@ def main():
   specs = get_specifications()
   for spec in specs:
     print "Generating code for %s" % (spec)
-    cmd = "python ./codegen.py %s %s.spec ../include/mcrl2/data/%s.h" % (arguments, spec, spec)
+    cmd = "python ./codegen.py %s %s.spec ../../../libraries/data/include/mcrl2/data/%s.h" % (arguments, spec, spec)
     retcode = call(cmd, shell=True)
     if retcode <> 0:
       raise Exception("Failed to generate code for %s. Aborting... (while executing command %s)" % (spec, cmd))
