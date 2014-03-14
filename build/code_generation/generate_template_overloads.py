@@ -9,15 +9,15 @@ all_classes = parse_class_map(class_map)
 modifiability_map = make_modifiability_map(all_classes)
 
 file_map = {
-  'action_formulas' : '../../modal_formula/source/modal_formula.cpp',
-  'bes' : '../../bes/source/bes.cpp',
-  'core' : '../../core/source/core.cpp',
-  'data' : '../../data/source/data.cpp',
-  'lps' : '../../lps/source/lps.cpp',
-  'pbes_system' : '../../pbes/source/pbes.cpp',
-  'process' : '../../process/source/process.cpp',
-  'regular_formulas' : '../../modal_formula/source/modal_formula.cpp',
-  'state_formulas' : '../../modal_formula/source/modal_formula.cpp',
+  'action_formulas' : '../../libraries/modal_formula/source/modal_formula.cpp',
+  'bes' : '../../libraries/bes/source/bes.cpp',
+  'core' : '../../libraries/core/source/core.cpp',
+  'data' : '../../libraries/data/source/data.cpp',
+  'lps' : '../../libraries/lps/source/lps.cpp',
+  'pbes_system' : '../../libraries/pbes/source/pbes.cpp',
+  'process' : '../../libraries/process/source/process.cpp',
+  'regular_formulas' : '../../libraries/modal_formula/source/modal_formula.cpp',
+  'state_formulas' : '../../libraries/modal_formula/source/modal_formula.cpp',
 }
 
 PP_CLASSNAMES = '''

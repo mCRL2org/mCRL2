@@ -15,7 +15,7 @@ from path import *
 #---------------------------------------------------------------#
 def print_alternative(text, comment, annotation):
 # Replace text in quotes with \texttt{...}.
-    text = re.sub(r"'([^']*)'", r'\\texttt{\1}', text) 
+    text = re.sub(r"'([^']*)'", r'\\texttt{\1}', text)
 # Replace other strings with {\it ...}.
     text = re.sub(r'(\b\w+)\s', r'{\\it \1} ', text)
     text = re.sub(r'(\b\w+)$', r'{\\it \1}', text)
@@ -69,7 +69,7 @@ def main():
     parser = OptionParser(usage)
     (options, args) = parser.parse_args()
 
-    filename = '../../../doc/specs/mcrl2-syntax.g'
+    filename = '../../doc/specs/mcrl2-syntax.g'
     sections = parse_mcrl2_syntax(filename)
     for (title, productions) in sections:
         print_section(title, productions)

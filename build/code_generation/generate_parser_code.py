@@ -315,13 +315,13 @@ def main():
     parser = OptionParser(usage)
     (options, args) = parser.parse_args()
 
-    filename = '../../../doc/specs/mcrl2-syntax.g'
+    filename = '../../doc/specs/mcrl2-syntax.g'
     generate_code(filename, MCRL2_MAPPING)
 
-    filename = '../../../doc/specs/fsm-syntax.g'
+    filename = '../../doc/specs/fsm-syntax.g'
     #generate_code(filename, FSM_MAPPING)
 
-    filename = '../../../doc/specs/dot-syntax.g'
+    filename = '../../doc/specs/dot-syntax.g'
     #generate_code(filename, DOT_MAPPING)
 
 if __name__ == "__main__":
