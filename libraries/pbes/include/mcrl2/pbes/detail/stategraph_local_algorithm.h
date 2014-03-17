@@ -22,6 +22,20 @@ namespace pbes_system {
 
 namespace detail {
 
+struct default_rules_predicate
+{
+  const local_control_flow_graph& V;
+
+  default_rules_predicate(const local_control_flow_graph& V_)
+    : V(V_)
+  {}
+
+  bool operator()(const core::identifier_string& X, std::size_t i) const
+  {
+    return V.has_label(X, i);
+  }
+};
+
 /// \brief Algorithm class for the local variant of the stategraph algorithm
 class stategraph_local_algorithm: public stategraph_algorithm
 {
@@ -81,7 +95,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       return i->second;
     }
 
-    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k)
+    template <typename RulesPredicate>
+    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k, RulesPredicate rules)
     {
       mCRL2log(log::debug, "stategraph") << "--- compute belongs ---" << std::endl;
 
@@ -100,7 +115,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
           for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
           {
             std::size_t m = *j;
-            if ((X_i.used.find(m) != X_i.used.end() || X_i.changed.find(m) != X_i.changed.end()) && !Vk.has_label(X, i))
+            if ((X_i.used.find(m) != X_i.used.end() || X_i.changed.find(m) != X_i.changed.end()) && !rules(X, i))
             {
               mCRL2log(log::debug1, "stategraph") << "vertex " << *p << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs "
 //                  << " used: " << std::boolalpha << (X_i.used.find(m) != X_i.used.end())
@@ -132,7 +147,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         auto const& Vk = m_local_control_flow_graphs[k];
         auto const& values_k = m_connected_components_values[k];
-        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(Vk, values_k);
+        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(Vk, values_k, default_rules_predicate(Vk));
         m_belongs.push_back(Bk);
       }
     }
