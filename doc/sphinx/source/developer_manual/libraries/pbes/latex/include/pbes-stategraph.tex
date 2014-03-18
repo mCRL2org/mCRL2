@@ -491,7 +491,7 @@ $\qquad B_{k}:=B_{k}\cup \{(X,d_{X}[j])\mid j\in belongs\}$ \\
 \textbf{return} $B_{k}$%
 \end{tabular}%
 \end{equation*}%
-\newpage 
+\newpage
 
 \subsection{Compute values}
 
@@ -569,4 +569,56 @@ where $insert(V,E,todo,u,v)$ is shorthand for the statements%
 V:=V\cup \{v\} \\ 
 E:=E\cup \{(u,v)\}%
 \end{array}%
+\end{equation*}%
+\newpage 
+
+Let $(V$, $\mathrm{\longrightarrow })$ be a local control flow graph, and $%
+\mathrm{rules}$ be a predicate defined as%
+\begin{equation*}
+\mathrm{rules}(V,X,i)=\exists _{(X,j,e)\in V}:(X,j,e)\overset{i}{\mathrm{%
+\longrightarrow }}.
 \end{equation*}
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeBelongsNew(} $V$, $\mathrm{\longrightarrow }$, $\mathrm{rules}
+$\textsc{)} \\ 
+$B_{k}:=\emptyset $ \\ 
+\textbf{for} $(X,j,v)\in V$ \textbf{do} \\ 
+$\qquad belongs:=\{m\mid d_{X}[m]$ is a data parameter of $X\}$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
+do}}$ \\ 
+$\qquad \qquad \text{\textbf{for }}m\in belongs\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad $\textbf{if }$\left( \mathrm{used}(X,i,m)\vee \mathrm{%
+changed}(X,i,m)\right) \wedge \lnot \mathrm{rules}(V,X,i)$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad belongs:=belongs\setminus \{m\}$ \\ 
+$\qquad B_{k}:=B_{k}\cup \{(X,d_{X}[m])\mid m\in belongs\}$ \\ 
+\textbf{return} $B_{k}$%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ResetVariableLocalNew(}$i,$ $\sigma X(d_{X})=\varphi
+_{X},V_{1},\cdots ,V_{J},B_{1},\cdots ,B_{J},\mathrm{rules}$\textsc{)} \\ 
+\textbf{let }$Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
+$e^{\prime }:=e$ \\ 
+\textbf{for} $k=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
+$\qquad relevant:=true$ \\ 
+$\qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad $\textbf{if} $\mathrm{rules}(V_{j},X,i)$ \textbf{then} \\ 
+$\qquad \qquad \qquad $\textbf{let }$p^{\prime },q^{\prime }$ be such that $%
+(Y,p^{\prime },q^{\prime })\in V_{j}$ \\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,p)\neq \bot $ \textbf{%
+then} \\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge \left( \left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow d_{Y}[k]\in marking(Y,p^{\prime
+},q^{\prime })\right) $ \\ 
+$\qquad \qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge (\left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow \exists q^{\prime \prime
+}:d_{Y}[k]\in marking(Y,p^{\prime },q^{\prime \prime }))$ \\ 
+$\qquad $\textbf{if} $\lnot relevant$ \textbf{then} $e^{\prime
+}[k]:=default\_value(d_{Y}[k])$ \\ 
+\textbf{return }$Y(e^{\prime })$%
+\end{tabular}%
+\end{equation*}%
+\newpage 
