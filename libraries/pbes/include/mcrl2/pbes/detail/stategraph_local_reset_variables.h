@@ -428,40 +428,6 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
   return f.top();
 }
 
-struct reset_variable_helper
-{
-  local_reset_variables_algorithm& algorithm;
-  std::vector<pbes_expression>& phi;
-  std::vector<data::data_expression>& v_prime;
-  const core::identifier_string& Y;
-  const predicate_variable& X_i;
-  const std::vector<std::size_t>& I;
-  const std::vector<data::variable>& d_Y;
-
-  reset_variable_helper(local_reset_variables_algorithm& algorithm_,
-                        std::vector<pbes_expression>& phi_,
-                        std::vector<data::data_expression>& v_prime_,
-                        const core::identifier_string& Y_,
-                        const predicate_variable& X_i_,
-                        const std::vector<std::size_t>& I_,
-                        const std::vector<data::variable>& d_Y_
-                       )
-   : algorithm (algorithm_),
-     phi       (phi_),
-     v_prime   (v_prime_),
-     Y         (Y_),
-     X_i       (X_i_),
-     I         (I_),
-     d_Y       (d_Y_)
-   {}
-
-   void operator()()
-   {
-     phi.push_back(algorithm.reset(v_prime, Y, X_i, I, d_Y));
-   }
-};
-
-inline
 pbes_expression local_reset_variables_algorithm::reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
 {
   mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
@@ -469,53 +435,66 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
   const predicate_variable& X_i = eq_X.predicate_variables()[i];
   assert(X_i.X == x);
 
-  std::vector<pbes_expression> phi;
-  core::identifier_string Y = x.name();
+  const core::identifier_string& X = eq_X.variable().name();
+  const core::identifier_string& Y = X_i.X.name();
   const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+  auto const& e = x.parameters();
+  std::vector<data::data_expression> e1(e.begin(), e.end());
   const std::vector<data::variable>& d_Y = eq_Y.parameters();
   assert(d_Y.size() == X_i.X.parameters().size());
 
-  std::vector<std::size_t> I;
-  for (std::size_t j = 0; j < d_Y.size(); j++)
+  const std::size_t J = m_local_control_flow_graphs.size();
+
+  for (std::size_t k = 0; k < e.size(); k++)
   {
-    if (is_global_control_flow_parameter(X_i.X.name(), j) && X_i.dest.find(j) == X_i.dest.end())
+    bool relevant = true;
+    for (std::size_t j = 0; j < J; j++)
     {
-      if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
+      auto const& Vj = m_local_control_flow_graphs[j];
+      auto& Bj = m_belongs[j];
+      default_rules_predicate rules(Vj);
+      if (rules(X, i))
       {
-        I.push_back(j);
+        auto const& v = Vj.find_vertex(Y); // v = (Y, p', q')
+        std::size_t p1 = v.index();
+        auto di = X_i.dest.find(p1);
+        if (di != X_i.dest.end())
+        {
+          auto q1 = *di;
+          if (utilities::detail::contains(Bj[Y], d_Y[k]) && !utilities::detail::contains(v.marking(), d_Y[k]))
+          {
+            relevant = false;
+            break;
+          }
+        }
+        else
+        {
+          if (utilities::detail::contains(Bj[Y], d_Y[k]))
+          {
+            bool found = false;
+            for (auto vi = Vj.vertices.begin(); vi != Vj.vertices.end(); ++vi)
+            {
+              if (vi->name() == Y && v.index() == p1 && utilities::detail::contains(v.marking(), d_Y[k]))
+              {
+                found = true;
+                break;
+              }
+            }
+            if (!found)
+            {
+              relevant = false;
+              break;
+            }
+          }
+        }
       }
     }
-  }
-  mCRL2log(log::debug1, "stategraph") << "--- I = " << core::detail::print_container(I) << std::endl;
-
-  std::vector<std::vector<data::data_expression> > values;
-  for (auto ii = I.begin(); ii != I.end(); ++ii)
-  {
-    auto const& v = compute_values(Y, *ii);
-    mCRL2log(log::debug1, "stategraph") << " values(" << *ii << ") = " << core::detail::print_container(v) << std::endl;
-    values.push_back(v);
-  }
-  std::vector<data::data_expression> v_prime;
-  for (auto vi = values.begin(); vi != values.end(); ++vi)
-  {
-    // assert(!vi->empty());
-    if (vi->empty())
+    if (!relevant)
     {
-      mCRL2log(log::debug, "stategraph") << "--- WARNING: empty values array in local_reset_variables_algorithm" << std::endl;
-      return pbes_expr::true_();
+      e1[k] = default_value(e1[k].sort());
     }
-    v_prime.push_back(vi->front());
   }
-  utilities::foreach_sequence(values, v_prime.begin(),
-    // N.B. clang 3.0 segfaults on this lambda expression, so use a function object instead...
-    // [&]()
-    // {
-    //   phi.push_back(reset(v_prime, Y, X_i, I, d_Y));
-    // }
-    reset_variable_helper(*this, phi, v_prime, Y, X_i, I, d_Y)
-  );
-
-  return pbes_expr::join_and(phi.begin(), phi.end());
+  return propositional_variable_instantiation(Y, data::data_expression_list(e1.begin(), e1.end()));
 }
 
 
