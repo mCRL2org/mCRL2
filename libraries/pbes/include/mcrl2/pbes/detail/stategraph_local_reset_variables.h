@@ -56,8 +56,15 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // if true, an optimization will be applied in the reset_variable procedure
     bool m_use_marking_optimization;
 
-    data::data_expression default_value(const data::sort_expression& x)
+    // returns a default value for the given sort, that corresponds to parameter d_X[j]
+    data::data_expression default_value(const core::identifier_string& X, std::size_t j, const data::sort_expression& x)
     {
+      auto const& Xinit = m_pbes.initial_state();
+      if (X == Xinit.name())
+      {
+        return nth_element(Xinit.parameters(), j);
+      }
+
       // TODO: make this an attribute
       data::representative_generator f(m_pbes.data());
       return f(x);
@@ -232,7 +239,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         }
         else
         {
-          r.push_back(default_value(e_X[j].sort()));
+          r.push_back(default_value(X_i.X.name(), j, e_X[j].sort()));
           //r.push_back(e_X[j]);
         }
       }
@@ -445,8 +452,10 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
 
   const std::size_t J = m_local_control_flow_graphs.size();
 
-  for (std::size_t k = 0; k < e.size(); k++)
+  std::vector<std::size_t> dp = data_parameter_indices(Y);
+  for (auto dpi = dp.begin(); dpi != dp.end(); ++dpi)
   {
+    std::size_t k = *dpi;
     bool relevant = true;
     for (std::size_t j = 0; j < J; j++)
     {
@@ -455,13 +464,14 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
       default_rules_predicate rules(Vj);
       if (rules(X, i))
       {
-        auto const& v = Vj.find_vertex(Y); // v = (Y, p', q')
-        std::size_t p1 = v.index();
-        auto di = X_i.dest.find(p1);
+        auto const& v = Vj.find_vertex(Y); // v = (Y, p, q)
+        std::size_t p = v.index();
+        auto di = X_i.dest.find(p);
         if (di != X_i.dest.end())
         {
-          auto q1 = *di;
-          if (utilities::detail::contains(Bj[Y], d_Y[k]) && !utilities::detail::contains(v.marking(), d_Y[k]))
+          const data::data_expression& q1 = di->second; // q1 = dest(X, i, p)
+          auto const& u = Vj.find_vertex(local_control_flow_graph_vertex(Y, p, data::undefined_variable(), q1));
+          if (utilities::detail::contains(Bj[Y], d_Y[k]) && !utilities::detail::contains(u.marking(), d_Y[k]))
           {
             relevant = false;
             break;
@@ -474,7 +484,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
             bool found = false;
             for (auto vi = Vj.vertices.begin(); vi != Vj.vertices.end(); ++vi)
             {
-              if (vi->name() == Y && v.index() == p1 && utilities::detail::contains(v.marking(), d_Y[k]))
+              if (vi->name() == Y && v.index() == p && utilities::detail::contains(vi->marking(), d_Y[k]))
               {
                 found = true;
                 break;
@@ -491,7 +501,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
     }
     if (!relevant)
     {
-      e1[k] = default_value(e1[k].sort());
+      e1[k] = default_value(Y, k, e1[k].sort());
     }
   }
   return propositional_variable_instantiation(Y, data::data_expression_list(e1.begin(), e1.end()));
