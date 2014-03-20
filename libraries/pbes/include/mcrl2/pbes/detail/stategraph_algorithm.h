@@ -116,7 +116,6 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
 {
   protected:
     data::data_expression m_value;
-    std::set<data::variable> m_sig;
     mutable std::set<data::variable> m_marking;    // used in the reset variables procedure
     std::vector<bool> m_marked_parameters; // will be set after computing the marking
 
@@ -142,11 +141,6 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
     const data::data_expression& value() const
     {
       return m_value;
-    }
-
-    const std::set<data::variable>& signature() const
-    {
-      return m_sig;
     }
 
     const std::set<data::variable>& marking() const
@@ -542,22 +536,28 @@ class stategraph_algorithm
     // determines how local control flow parameters are computed
     //
     // Keuze uit twee alternatieven voor de berekening van lokale CFPs.
-    //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-    //          a. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
-    //          b. copy(X,i,n) is defined (en gelijk aan n) en source(X,i,n) en dest(X,i,n) zijn beide undefined.
+    // <default>
     //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
     //          a. source(X,i,n) and dest(X,i,n) zijn beide defined, of
     //          b. copy(X,i,n) is defined en gelijk aan n.
     //
-    // De eerste definieert in feite een exclusive or, terwijl de tweede een standaard or is.
+    // <alternative>
+    //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
+    //          a. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
+    //          b. copy(X,i,n) is defined (en gelijk aan n) en source(X,i,n) en dest(X,i,n) zijn beide undefined.
+    //
+    // De tweede definieert in feite een exclusive or, terwijl de eerste een standaard or is.
     bool m_use_alternative_lcfp_criterion;
 
     // determines how global control flow parameters are related
     //
     // Keuze uit twee alternatieven voor het relateren van CFPs.
+    // <default>
     //  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
     //         a. er is een i z.d.d. copy(X, i, n) = m, of
     //         b. er is een i z.d.d. copy(Y, i, m) = n
+    //
+    // <alternative>
     //  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
     //         a. er is een i z.d.d. copy(X, i, n) = m, en dest(X, i, m) is ongedefinieerd, of
     //         b. er is een i z.d.d. copy(Y, i, m) = n en dest(Y, i, n) is ongedefinieerd.
@@ -568,10 +568,13 @@ class stategraph_algorithm
     // determines how global control flow parameters are selected
     //
     // Keuze voor de selectie van globale CFPs (of globale consistentie eisen).
+    // <default>
     //  * Een set van CFPs is consistent als voor elke d^X[n], en voor alle Y in bnd(E)\{X} (dus in alle andere vergelijkingen), voor alle i waarvoor geldt pred(phi_Y, i) = X, danwel:
     //         a. dest(Y, i, n) is gedefinieerd, of
     //         b. copy(Y, i, m) = n voor een of andere globale CFP d^Y[m]
     // Deze eis is in principe voldoende om globale CFPs te identificeren. Als we echter een strikte scheiding tussen control flow parameters en data parameters willen bewerkstelligen, dan moet hier optioneel de volgende eis aan toegevoegd worden:
+    //
+    // <alternative>
     //  * Een set van CFPs is consistent als de voorgaande eisen gelden, en bovendien voor elke d^X[n] geldt dat voor alle i waarvoor pred(phi_X, i) = Y != X, als d^X[n] affects data(phi_X, i)[m], dan is d^Y[m] een globale control flow parameter.
     // Waar de eerste gemarkeerd is als "detect conflicts for parameters of Y in equations of the form X(d) = ... Y(e)"
     // en de tweede als "detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)".
@@ -1001,21 +1004,21 @@ class stategraph_algorithm
             {
               if (m_use_alternative_gcfp_relation)
               {
-                mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related "
-                                                   << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << core::pp(X) << std::endl;
-                relate_control_flow_graph_vertices(X, n, Y, m);
-              }
-              else
-              {
                 // Twee parameters zijn alleen gerelateerd als er een copy is van de een naar de ander,
                 // EN dat de dest in dat geval ongedefinieerd is (dus we weten echt geen concrete waarde
                 // voor de parameter op dat punt).
                 if (is_undefined(PVI_X_i.dest, m))
                 {
                   mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related "
-                                                       << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << core::pp(X) << " (dest is undefined)" << std::endl;
+                                                     << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << core::pp(X) << std::endl;
                   relate_control_flow_graph_vertices(X, n, Y, m);
                 }
+              }
+              else
+              {
+                mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related "
+                                                   << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << core::pp(X) << " (dest is undefined)" << std::endl;
+                relate_control_flow_graph_vertices(X, n, Y, m);
               }
             }
           }

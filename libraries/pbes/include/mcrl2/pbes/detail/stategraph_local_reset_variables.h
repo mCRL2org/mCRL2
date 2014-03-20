@@ -307,7 +307,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
 
   const std::size_t J = m_local_control_flow_graphs.size();
 
-  auto const& dp = m_occurring_data_parameters[Y];
+  auto dp = data_parameter_indices(Y);
   for (auto dpi = dp.begin(); dpi != dp.end(); ++dpi)
   {
     std::size_t k = *dpi;

@@ -226,7 +226,19 @@ class stategraph_local_algorithm: public stategraph_algorithm
         {
           const local_control_flow_graph_vertex& u = *i;
           const core::identifier_string& X = u.name();
-          u.set_marking(set_intersection(u.signature(), m_belongs[k][X]));
+          const pbes_equation& eq_X = *find_equation(m_pbes, X);
+          pbes_expression phi = eq_X.formula();
+          if (u.index() != data::undefined_index())
+          {
+            data::variable d = u.variable();
+            data::data_expression e = u.value();
+            data::mutable_map_substitution<> sigma;
+            sigma[d] = e;
+            pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
+            phi = pbesr(phi, sigma);
+          }
+          std::set<data::variable> sig = pbes_system::algorithms::significant_variables(phi);
+          u.set_marking(set_intersection(sig, m_belongs[k][X]));
         }
         mCRL2log(log::debug, "stategraph") << "--- initial control flow marking " << k << "\n" << Gk.print_marking();
       }
