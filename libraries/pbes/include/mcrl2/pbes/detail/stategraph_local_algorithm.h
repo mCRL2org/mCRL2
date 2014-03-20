@@ -105,8 +105,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         auto const& X = p->name();
         auto const& eq_X = *find_equation(m_pbes, X);
-        std::vector<std::size_t> tmp = data_parameter_indices(X);
-        std::set<std::size_t> belongs(tmp.begin(), tmp.end());
+        std::set<std::size_t> belongs = data_parameter_indices(X);
 
         auto const& predvars = eq_X.predicate_variables();
         for (std::size_t i = 0; i < predvars.size(); i++)

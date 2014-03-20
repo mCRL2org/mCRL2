@@ -1221,16 +1221,16 @@ class stategraph_algorithm
       return result;
     }
 
-    std::vector<std::size_t> data_parameter_indices(const core::identifier_string& X) const
+    std::set<std::size_t> data_parameter_indices(const core::identifier_string& X) const
     {
-      std::vector<std::size_t> result;
+      std::set<std::size_t> result;
       const stategraph_equation& eqn = *find_equation(m_pbes, X);
       const std::vector<data::variable>& dX = eqn.parameters();
       for (std::size_t k = 0; k < dX.size(); k++)
       {
         if (!is_global_control_flow_parameter(X, k))
         {
-          result.push_back(k);
+          result.insert(k);
         }
       }
       return result;
