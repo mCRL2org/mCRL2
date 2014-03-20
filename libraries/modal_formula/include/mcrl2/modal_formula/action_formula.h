@@ -742,13 +742,13 @@ inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
 //{
 //  return core::detail::precedences::max_precedence;
 //}
-inline int left_precedence(const forall& x) { return 0; }
-inline int left_precedence(const exists& x) { return 0; }
-inline int left_precedence(const imp& x)    { return 2; }
-inline int left_precedence(const or_& x)    { return 3; }
-inline int left_precedence(const and_& x)   { return 4; }
-inline int left_precedence(const at& x)     { return 5; }
-inline int left_precedence(const not_& x)   { return 6; }
+inline int left_precedence(const forall&) { return 0; }
+inline int left_precedence(const exists&) { return 0; }
+inline int left_precedence(const imp&)    { return 2; }
+inline int left_precedence(const or_&)    { return 3; }
+inline int left_precedence(const and_&)   { return 4; }
+inline int left_precedence(const at&)     { return 5; }
+inline int left_precedence(const not_&)   { return 6; }
 inline int left_precedence(const action_formula& x)
 {
   if      (is_forall(x)) { return left_precedence(static_cast<const forall&>(x)); }
