@@ -130,6 +130,7 @@ bool is_simple_substitution(const assignment_sequence_substitution& sigma)
   return true;
 }
 
+
 /// \brief Generic substitution function. The substitution is stored as a sequence
 /// of variables and a sequence of expressions.
 template <typename VariableContainer, typename ExpressionContainer>
@@ -186,7 +187,7 @@ struct sequence_sequence_substitution: public std::unary_function<typename Varia
     out << "]";
     return out.str();
   }
-};
+}; 
 
 /// \brief Utility function for creating a sequence_sequence_substitution.
 template <typename VariableContainer, typename ExpressionContainer>
@@ -210,6 +211,7 @@ bool is_simple_substitution(const sequence_sequence_substitution<VariableContain
   }
   return true;
 }
+
 
 /// \brief Generic substitution function. The substitution is stored as a sequence
 /// of pairs of variables and expressions.
@@ -246,7 +248,7 @@ struct pair_sequence_substitution: public std::unary_function<typename Container
     throw std::runtime_error("data::pair_sequence_substitution::operator(const Expression&) is a deprecated interface!");
     return data::undefined_data_expression();
   }
-};
+}; 
 
 /// \brief Utility function for creating a pair_sequence_substitution.
 template <typename Container>
@@ -360,12 +362,6 @@ public:
   typedef typename AssociativeContainer::mapped_type expression_type;
   typedef typename AssociativeContainer::const_iterator const_iterator;
   typedef typename AssociativeContainer::iterator iterator;
-
-  /// \brief Friend functions that collect some details of a substitution,
-  /// needed for rewriting in internal format, as well as alpha-conversion.
-  template<typename AssociativeContainer1, typename UnaryOperator>
-  friend mutable_map_substitution< typename std::map<typename AssociativeContainer1::key_type, data_expression> >
-  apply(const mutable_map_substitution< AssociativeContainer1 >& sigma, UnaryOperator f);
 
   template<typename AssociativeContainer1>
   friend std::set<core::identifier_string> get_identifiers(const mutable_map_substitution< AssociativeContainer1 >& sigma);
@@ -578,11 +574,6 @@ public:
   /// \brief Friend function to get all identifiers in the substitution
   template<typename VariableType1, typename ExpressionSequence1>
   friend std::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution< VariableType1, ExpressionSequence1 >& sigma);
-
-  /// \brief Friend function that applies a function to all right hand sides of the substitution.
-  template<typename VariableType1, typename ExpressionSequence1, typename UnaryOperator>
-  friend mutable_indexed_substitution<VariableType1, std::vector<data_expression> >
-  apply(const mutable_indexed_substitution<VariableType1, ExpressionSequence1 >& sigma, UnaryOperator f);
 
   /// \brief Type of variables
   typedef VariableType variable_type;
@@ -814,42 +805,6 @@ public:
 
 };
 
-/// \deprecated
-/// Provided for use with the rewriters in internal format
-/// \brief Friend function that applies a function to all right hand sides of the substitution.
-template<typename VariableType, typename ExpressionSequence, typename UnaryOperator>
-mutable_indexed_substitution<VariableType, std::vector<data_expression> >
-apply(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma, UnaryOperator f)
-{
-  mutable_indexed_substitution<VariableType, std::vector<data_expression> > result;
-  result.m_index_table=sigma.m_index_table;
-  result.m_container.resize(sigma.m_container.size(),data_expression());
-  result.m_free_positions=sigma.m_free_positions;
-
-  for(std::vector<size_t>::const_iterator i=sigma.m_index_table.begin(); i != sigma.m_index_table.end(); ++i)
-  {
-    if (*i != size_t(-1))
-    {
-      assert(*i<result.m_container.size());
-      result.m_container[*i] = f(sigma.m_container[*i]);
-    }
-  }
-  return result;
-}
-
-/// \deprecated
-/// Provided for use with the rewriters in internal format
-template<typename AssociativeContainer, typename UnaryOperator>
-mutable_map_substitution< std::map<typename AssociativeContainer::key_type, data_expression > >
-apply(const mutable_map_substitution< AssociativeContainer >& sigma, UnaryOperator f)
-{
-  mutable_map_substitution< std::map<typename AssociativeContainer::key_type, data_expression > > result;
-  for(typename mutable_map_substitution< AssociativeContainer >::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
-  {
-    result[i->first] = f(i->second);
-  }
-  return result;
-}
 
 /// \brief An adapter that makes an arbitrary substitution function mutable.
 template <typename Substitution>
@@ -964,7 +919,7 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     {
       return g_;
     }
-};
+}; 
 
 /// \brief Returns a string representation of the map, for example [a := 3, b := true].
 /// \param sigma a substitution.
