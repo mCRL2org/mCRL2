@@ -28,6 +28,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/parity_game_generator.h"
+#include "mcrl2/pbes/utility.h"
 
 #include "mcrl2/bes/bes_deprecated.h" // We use some implementation tricks from this
 

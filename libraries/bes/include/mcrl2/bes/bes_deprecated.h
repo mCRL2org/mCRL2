@@ -39,7 +39,10 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
-#include "mcrl2/pbes/utility.h"
+#include "mcrl2/data/detail/rewriter_wrapper.h"
+
+
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 
 #define RELEVANCE_MASK 1
 #define FIXPOINT_MASK 2
@@ -2102,15 +2105,15 @@ class boolean_equation_system
                             construct_counter_example,current_variable);
         return BDDif(b1,false_(),true_());
       }
-      else if (is_true(p))
+      else if (is_true(p)||p==mcrl2::data::sort_bool::true_())
       {
         return true_();
       }
-      else if (is_false(p))
+      else if (is_false(p)||p==mcrl2::data::sort_bool::false_())
       {
         return false_();
       }
-
+std::cerr << "AAA " << atermpp::aterm(p) << "\n";
       throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
                                    mcrl2::data::pp(mcrl2::data::data_expression(p)));
       return false_();
@@ -2147,6 +2150,15 @@ class boolean_equation_system
 #endif
       max_rank(0)
     {
+      typedef mcrl2::pbes_system::enumerate_quantifiers_rewriter<mcrl2::pbes_system::pbes_expression, 
+                                                                 mcrl2::data::rewriter_with_variables, 
+                                                                 mcrl2::data::data_enumerator> my_pbes_rewriter;
+      mcrl2::data::data_enumerator datae(pbes_spec.data(), data_rewriter);
+      mcrl2::data::rewriter_with_variables datarv(data_rewriter);
+      const bool enumerate_infinite_sorts=true;
+      my_pbes_rewriter pbes_rewriter(datarv, datae, enumerate_infinite_sorts);
+
+
       using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
       assert(pbes_spec.is_well_typed());
@@ -2356,15 +2368,7 @@ class boolean_equation_system
           bes_expression new_bes_expression;
           try
           {
-              // pbes_rewriter(current_pbeq.formula(),make_map_substitution_adapter(sigma)); This is the code if the
-              // rewriters work with an acceptable performance.
-            pbes_expression new_pbes_expression=
-              mcrl2::pbes_system::detail::pbes_expression_substitute_and_rewrite
-              (current_pbeq.formula(),
-               pbes_spec.data(),
-               Mucks_rewriter,
-               sigma
-              );
+            pbes_expression new_pbes_expression=pbes_rewriter(current_pbeq.formula(),sigma);
 
             new_bes_expression=
               add_propositional_variable_instantiations_to_indexed_set_and_translate(
