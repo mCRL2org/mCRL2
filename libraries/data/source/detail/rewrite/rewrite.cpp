@@ -141,7 +141,6 @@ abstraction Rewriter::rewrite_single_lambda(
   size_t count=0;
   std::vector<variable> new_variables(vl.size());
   {
-    //std::set < variable > variables_in_sigma(get_free_variables(sigma));
     const std::set<variable>& variables_in_sigma(sigma.variables_in_rhs());
     // Create new unique variables to replace the old and create storage for
     // storing old values for variables in vl.
@@ -339,8 +338,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   const data_expression t3=(t1_is_normal_form?t2:rewrite(t2,sigma));
 
   // Check whether the bound variables occur free in the rewritten body
-  std::set < variable > free_variables;
-  get_free_variables(t3,free_variables);
+  std::set < variable > free_variables=find_free_variables(t3);
   variable_list vl_new_l;
 
   bool sorts_are_finite=true;
@@ -442,8 +440,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   const data_expression t3=(t1_is_normal_form?t2:rewrite(t2,sigma));
 
   // Check whether the bound variables occur free in the rewritten body.
-  std::set < variable > free_variables;
-  get_free_variables(t3,free_variables);
+  std::set < variable > free_variables=find_free_variables(t3);
   variable_list vl_new_l;
 
   bool sorts_are_finite=true;

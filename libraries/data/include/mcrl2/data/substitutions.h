@@ -25,69 +25,7 @@ namespace mcrl2 {
 
 namespace data {
 
-namespace detail
-{
-// The function below gets all free variables of the term t, which has
-// the shape of an expression in internal format. The variables are added to result.
-// This routine should be removed after internal and external format have merged.
-inline void get_free_variables(const data_expression& t, std::set < variable >& result)
-{
-  if (is_function_symbol(t))
-  {
-    return;
-  }
-  if (is_variable(t))
-  {
-    result.insert(core::down_cast<variable>(t));
-    return;
-  }
-  if (is_where_clause(t))
-  {
-    std::set < variable > free_variables_in_body;
-    get_free_variables(data_expression(t[0]),free_variables_in_body);
 
-    variable_list bound_vars;
-    const assignment_list lv=assignment_list(t[1]);
-    for(assignment_list :: const_iterator it=lv.begin() ; it!=lv.end(); ++it)
-    {
-      bound_vars.push_front(it->lhs());
-      get_free_variables(it->rhs(),result);
-    }
-    for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
-    {
-      if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
-      {
-        result.insert(*i);
-      }
-    }
-    return;
-  }
-  if (is_abstraction(t))
-  {
-    std::set < variable > free_variables_in_body;
-    const abstraction& ta(t);
-    get_free_variables(ta.body(),free_variables_in_body);
-    const variable_list bound_vars=ta.variables();
-
-    for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
-    {
-      if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
-      {
-        result.insert(*i);
-      }
-    }
-    return;
-  }
-
-  // Here t must be an application.
-  const application& ta = core::down_cast<application>(t);
-  get_free_variables(ta.head(),result);
-  for(application::const_iterator i=ta.begin(); i!=ta.end(); ++i)
-  {
-    get_free_variables(*i,result);
-  }
-}
-} // end namespace detail
 /// \brief Returns true if FV(rhs) is included in {lhs}.
 inline
 bool is_simple_substitution(const data::variable& lhs, const data::data_expression& rhs)
@@ -640,8 +578,6 @@ public:
   /// \brief Friend function to get all identifiers in the substitution
   template<typename VariableType1, typename ExpressionSequence1>
   friend std::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution< VariableType1, ExpressionSequence1 >& sigma);
-  template<typename VariableType1, typename ExpressionSequence1>
-  friend std::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType1, ExpressionSequence1 >& sigma);
 
   /// \brief Friend function that applies a function to all right hand sides of the substitution.
   template<typename VariableType1, typename ExpressionSequence1, typename UnaryOperator>
@@ -701,7 +637,7 @@ public:
         // Set a new variable;
         if (m_variables_in_rhs_set_is_defined)
         {
-           detail::get_free_variables(e,m_variables_in_rhs);
+           m_variables_in_rhs=find_free_variables(e);
         }
 
         // Resize container if needed
@@ -813,7 +749,7 @@ public:
       {
         if (*i != size_t(-1))
         {
-          detail::get_free_variables(m_container[*i],m_variables_in_rhs);
+          m_variables_in_rhs=find_free_variables(m_container[*i]);
         }
       }
       m_variables_in_rhs_set_is_defined=true;
@@ -877,60 +813,6 @@ public:
   }
 
 };
-
-
-/// \brief Function to get all free variables in the substitution
-///        The rhs' have the shape of an expression in internal rewriter format.
-/// \deprecated
-/* template<typename VariableType, typename ExpressionSequence>
-std::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
-{
-  std::set < variable > result;
-  typedef typename ExpressionSequence::value_type expression_type;
-
-  for(std::vector<size_t> ::const_iterator i=sigma.m_index_table.begin(); i != sigma.m_index_table.end(); ++i)
-  {
-    if (*i != size_t(-1))
-    {
-      detail::get_free_variables(sigma.m_container[*i],result);
-    }
-  }
-  return result;
-}
-*/
-
-/// \brief Function to get all identifiers in the substitution
-/// \deprecated
-/* template<typename VariableType, typename ExpressionSequence>
-std::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
-{
-  typedef typename ExpressionSequence::value_type expression_type;
-
-  std::set<core::identifier_string> result;
-  for(size_t i = 0; i < sigma.size(); ++i)
-  {
-    if(sigma.get(i) != expression_type())
-    {
-      result.insert(core::identifier_string(static_cast<atermpp::function_symbol>(i).name()));
-      find_all_if(sigma.get(i),core::is_identifier_string,std::inserter(result,result.begin()));
-    }
-  }
-  return result;
-} */
-
-/// \deprecated
-/// Provided for use with the rewriters in internal format
-/* template<typename AssociativeContainer>
-std::set<core::identifier_string> get_identifiers(const mutable_map_substitution< AssociativeContainer >& sigma)
-{
-  std::set<core::identifier_string> result;
-  for(typename mutable_map_substitution< AssociativeContainer >::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
-  {
-    result.insert(i->first.name());
-    find_all_if(i->second,core::is_identifier_string,std::inserter(result,result.begin()));
-  }
-  return result;
-} */
 
 /// \deprecated
 /// Provided for use with the rewriters in internal format
