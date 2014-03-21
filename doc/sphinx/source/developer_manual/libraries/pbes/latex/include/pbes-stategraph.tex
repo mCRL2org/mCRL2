@@ -543,3 +543,103 @@ $\qquad $\textbf{if} $\lnot relevant$ \textbf{then} $e^{\prime
 \end{tabular}%
 \end{equation*}%
 \newpage 
+
+Let $\left( V,E\right) $ be a local control flow graph, and $B$ the
+corresponding belongs relation.%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{UpdateMarkingRule1(}$(V,E,B)$, $u$\textsc{)} \\ 
+\textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
+$M:=\emptyset $ \\ 
+\textbf{for} $(u,i,v)\in E$ \textbf{do} \\ 
+$\qquad $\textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
+$\qquad \text{\textbf{for }}d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
+$\qquad \qquad $\textbf{let} $Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
+$\qquad \qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
+d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\ 
+\textbf{return }$marking(u)\cup M$%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{UpdateMarkingRule2(}$i$, $\left( V,E,B\right) $, $\left( V^{\prime
+},E^{\prime },B^{\prime }\right) $, $u$, $v$\textsc{)} \\ 
+\textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
+\textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
+$M:=\emptyset $ \\ 
+$\text{\textbf{for }}d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
+$\qquad $\textbf{if} $\left( Y,d_{Y}[l]\right) \notin B^{\prime }$ \textbf{%
+then} \\ 
+$\qquad \qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
+d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\ 
+\textbf{return }$marking(u)\cup M$%
+\end{tabular}%
+\end{equation*}
+
+\bigskip 
+
+\newpage 
+
+\begin{equation*}
+\begin{array}{l}
+\begin{tabular}{l}
+\textsc{ComputeMarkingLocal(}$\mathcal{E}$, $(V_{1},E_{1},B_{1}),\cdots
+,(V_{J},E_{J},B_{J})$\textsc{)} \\ 
+\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad $\textbf{for} $u=(X,n,d_{X}[n]=z)\in V_{j}$ \textbf{do} \\ 
+$\qquad \qquad marking(u):=sig(u)\cap \{d\mid (X,d)\in B_{j}\}$ \\ 
+$stable:=false$ \\ 
+\textbf{while} $\lnot stable$ \textbf{do} \\ 
+$\qquad stableint:=false$ \\ 
+$\qquad $\textbf{while} $\lnot stableint$ \textbf{do} \\ 
+$\qquad \qquad stableint:=true$ \\ 
+$\qquad \qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad \qquad todo:=V_{j}$ \\ 
+$\qquad \qquad \qquad $\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{choose} $u=(X,n,d_{X}[n]=z)\in todo$
+\\ 
+$\qquad \qquad \qquad \qquad todo:=todo\setminus \{u\}$ \\ 
+$\qquad \qquad \qquad \qquad m:=marking(u)$ \\ 
+$\qquad \qquad \qquad \qquad marking(u):=$ \textsc{UpdateMarkingRule1(}$%
+(V_{j},E_{j},B_{j})$, $u$\textsc{)} \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}m\neq marking(u)\wedge
+\exists i:(v,i,u)\in E_{j}$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad stableint:=false$%
+\end{tabular}
+\\ 
+\begin{tabular}{l}
+$\qquad stableext:=false$ \\ 
+$\qquad $\textbf{while} $\lnot stableext$ \textbf{do} \\ 
+$\qquad \qquad stableext:=true$ \\ 
+$\qquad \qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad \qquad $\textbf{for} $u=(X,n,d_{X}[n]=z)\in V_{j}$ \textbf{do}
+\\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}%
+(\varphi _{X})$ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{let} $Y(e)=\mathrm{PVI}(\varphi
+_{X},i)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{for} $k=1\cdots J$ \textbf{do}
+\\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}k\neq j$ 
+\textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for} $%
+v=(Y,m,d_{Y}[m]=w)\in V_{k}$ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{for }}%
+d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{if} 
+$\left( Y,d_{Y}[l]\right) \notin B_{k}$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+m:=marking(u)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+marking(u):=$ \textsc{UpdateMarkingRule2(}$i$, $(V_{j},E_{j},B_{j})$, $%
+(V_{k},E_{k},B_{k})$, $u$, $v$\textsc{)} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{%
+\textbf{if }}m\neq marking(u)$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+\qquad stableint:=false$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+\qquad stableext:=false\qquad \qquad \qquad \qquad \qquad \qquad $%
+\end{tabular}%
+\end{array}%
+\end{equation*}%
+\newpage \newpage 
