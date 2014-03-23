@@ -45,7 +45,7 @@
 #include "mcrl2/data/data_equation.h"
 
 //Boolean equation systems
-#include "mcrl2/pbes/utility.h"
+// #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"

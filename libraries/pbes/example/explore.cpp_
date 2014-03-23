@@ -10,8 +10,6 @@
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/utility.h"
-
 
 //Rewriter
 #include "mcrl2/data/rewrite.h"
