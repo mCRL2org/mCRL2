@@ -404,7 +404,7 @@ static data_expression subst_values(
   }
 }
 
-// Match term t with the lhs p of an equation in internal format.
+// Match term t with the lhs p of an equation.
 
 static bool match_jitty(
                     const data_expression& t,

@@ -35,13 +35,13 @@ namespace detail
 /// tautologies or contradictions. Since provers are not necessarily complete, a prover can be unable to determine if a
 /// formula is a tautology or a contradiction for some formulas. If this is the case, the prover will indicate this fact.
 /// A prover uses a rewriter to rewrite parts of the formulas it manipulates. The constructor Prover::Prover initializes
-/// the prover's rewriter with the data equations in internal mCRL2 format passed as parameter a_equations and the rewrite
+/// the prover's rewriter with the data equations passed as parameter a_equations and the rewrite
 /// strategy passed as parameter a_strategy. To limit the number of seconds spent on proving a single formula, a time
 /// limit can be set. This time limit can be set initially by the constructor Prover::Prover and can be changed afterwards
 /// using the method Prover::set_time_limit. If the time limit is set to 0, no time limit will be enforced.
 ///
 /// Once a prover is created, the formula to be proven can be set using the method Prover::set_formula. The method
-/// Prover::set_formula takes a propositional formula in internal mCRL2 format as parameter a_formula.
+/// Prover::set_formula takes a propositional formula as parameter a_formula.
 ///
 /// The methods Prover::is_tautology and Prover::is_contradiction can then indicate whether or not this formula is a
 /// tautology or a contradiction. These methods will return answer_yes, answer_no or answer_undefined.
@@ -57,7 +57,7 @@ enum Answer
   answer_undefined
 };
 
-/// \brief A base class for provers. Provers take an expression of sort Bool in internal mCRL2 format and
+/// \brief A base class for provers. Provers take an expression of sort Bool and
 /// \brief can indicate whether or not this expression is a tautology or a contradiction.
 
 class Prover:protected mcrl2::data::rewriter
@@ -66,13 +66,13 @@ class Prover:protected mcrl2::data::rewriter
     typedef mcrl2::data::rewriter::substitution_type substitution_type;
 
   protected:
-    /// \brief An expression of sort Bool in the internal format of mCRL2.
+    /// \brief An expression of sort Bool.
     data_expression f_formula;
 
-    /// \brief A class that can be used to manipulate expressions in the internal format of the rewriter.
+    /// \brief A class that can be used to manipulate expressions.
     InternalFormatManipulator f_manipulator;
 
-    /// \brief A class that provides information about expressions in the internal format of the rewriter.
+    /// \brief A class that provides information about expressions.
     InternalFormatInfo f_info;
 
     /// \brief A flag that indicates whether or not the formala Prover::f_formula has been processed.
@@ -134,7 +134,7 @@ class Prover:protected mcrl2::data::rewriter
     }
 
     /// \brief Sets Prover::f_formula to a_formula.
-    /// precondition: the argument passed as parameter a_formula is an expression of sort Bool in internal mCRL2 format
+    /// precondition: the argument passed as parameter a_formula is an expression of sort Bool
     void set_formula(const data_expression a_formula)
     {
       f_formula = a_formula;
@@ -145,8 +145,7 @@ class Prover:protected mcrl2::data::rewriter
     /// \brief Sets Prover::f_time_limit to the value a_time_limit.
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
-    /// precondition: the argument passed as parameter a_equations is a specification of data equations in internal mCRL2
-    /// format
+    /// precondition: the argument passed as parameter a_equations is a specification of data equations.
     void set_time_limit(int a_time_limit)
     {
       f_time_limit = a_time_limit;

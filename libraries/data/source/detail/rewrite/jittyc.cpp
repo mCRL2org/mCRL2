@@ -2266,7 +2266,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const atermpp
 
 atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity)
 {
-  const data_expression& lhs = eqn.lhs(); // the lhs in internal format.
+  const data_expression& lhs = eqn.lhs(); 
 
   size_t eqn_arity = lhs.function().arity()-1;
   if (eqn_arity > arity)
@@ -2988,6 +2988,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
+// "std::cerr << \"REWRITE \" << t << \"\\n\";\n"
       "  using namespace mcrl2::data;\n"
       "  if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(t).function())==%ld)\n" // if (is_function_symbol(t))
       "  {\n"
