@@ -22,6 +22,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
+#include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
@@ -49,7 +50,7 @@ class parity_game_generator
     typedef core::term_traits<pbes_expression> tr;
 
     /// \brief Substitution function type used by the PBES rewriter.
-    typedef data::mutable_map_substitution< std::map< data::variable, data::data_expression_with_variables > > substitution_function;
+    typedef data::detail::legacy_rewriter::substitution_type substitution_function;
 
     /// \brief Mark whether initialization has been initialized.
     /// Needed to properly cope with virtual inheritance!
@@ -91,32 +92,11 @@ class parity_game_generator
     /// \brief True if it is a min-parity game.
     bool m_is_min_parity;
 
-    virtual
-    std::string print(const pbes_expression& e)
-    {
-      return pbes_system::pp(e);
-    }
-
-    /// \brief Check whether e corresponds to true
-    virtual
-    bool is_true(const pbes_expression& e) const
-    {
-      return tr::is_true(e);
-    }
-
-    /// \brief Check whether e corresponds to false
-    virtual
-    bool is_false(const pbes_expression& e) const
-    {
-      return tr::is_false(e);
-    }
-
     /// \brief Adds a BES equation for a given PBES expression, if it not already exists.
     /// \param t A PBES expression
     /// \param priority A positive integer
     /// \return The index of a BES equation corresponding to the given PBES expression.
     /// If no equation exists for the expression, a new one is added.
-    virtual
     size_t add_bes_equation(pbes_expression t, size_t priority)
     {
       size_t result;
@@ -149,39 +129,35 @@ class parity_game_generator
     /// \brief Generates a substitution function for the pbesinst rewriter.
     /// \param v A sequence of data variables
     /// \param e A sequence of data expressions
-    /// \return A substitution function.
-    virtual
-    substitution_function make_substitution(data::variable_list v, data::data_expression_list e)
+    /// \param sigma The result.
+    void make_substitution(const data::variable_list& v, const data::data_expression_list& e, substitution_function& sigma) const
     {
       assert(v.size() == e.size());
-      substitution_function sigma;
       data::variable_list::iterator i = v.begin();
       data::data_expression_list::iterator j = e.begin();
       for (; i != v.end(); ++i, ++j)
       {
         sigma[*i] = *j;
       }
-      return sigma;
     }
 
-    virtual
     pbes_expression expand_rhs(const pbes_expression& psi)
     {
       // expand the right hand side if needed
       if (tr::is_prop_var(psi))
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
-        substitution_function sigma = make_substitution(pbes_eqn.variable().parameters(), tr::param(psi));
-        mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into " << std::flush;
+        substitution_function sigma;
+        make_substitution(pbes_eqn.variable().parameters(), tr::param(psi), sigma);
+        mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << pbes_eqn.formula() << " into " << std::flush;
         pbes_expression result = R(pbes_eqn.formula(), sigma);
-        mCRL2log(log::debug2, "parity_game_generator") << print(result) << std::endl;
+        mCRL2log(log::debug2, "parity_game_generator") << result << std::endl;
         return result;
       }
       return psi;
     }
 
     /// \brief Compute equation index map.
-    virtual
     void compute_equation_index_map()
     {
 
@@ -381,7 +357,7 @@ class parity_game_generator
       {
         return PGAME_OR;
       }
-      throw(std::runtime_error("Error in parity_game_generator: unexpected operation " + print(phi)));
+      throw(std::runtime_error("Error in parity_game_generator: unexpected operation " + pbes_system::pp(phi)));
     }
 
     /// \brief Returns the priority of a vertex.
@@ -434,7 +410,7 @@ class parity_game_generator
       pbes_expression& psi = eqn.first;
       const size_t priority = eqn.second;
 
-      mCRL2log(log::debug, "parity_game_generator") << std::endl << "Generating equation for expression " << print(psi) << std::endl;
+      mCRL2log(log::debug, "parity_game_generator") << std::endl << "Generating equation for expression " << psi << std::endl;
 
       // expand the right hand side if needed
       psi = expand_rhs(psi);
@@ -460,7 +436,7 @@ class parity_game_generator
           result.insert(add_bes_equation(*i, priority));
         }
       }
-      else if (is_true(psi))
+      else if (tr::is_true(psi))
       {
         if (m_true_false_dependencies)
         {
@@ -469,7 +445,7 @@ class parity_game_generator
           result.insert(i->second);
         }
       }
-      else if (is_false(psi))
+      else if (tr::is_false(psi))
       {
         if (m_true_false_dependencies)
         {
