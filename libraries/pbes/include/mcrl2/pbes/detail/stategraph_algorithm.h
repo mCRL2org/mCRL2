@@ -116,8 +116,7 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
 {
   protected:
     data::data_expression m_value;
-    mutable std::set<data::variable> m_marking;    // used in the reset variables procedure
-    std::vector<bool> m_marked_parameters; // will be set after computing the marking
+    mutable std::set<data::variable> m_marking; // used in the reset variables procedure
 
     mutable std::map<const local_control_flow_graph_vertex*, std::set<std::size_t> > m_outgoing_edges;
     // the mapped values are the edge labels; note that there can be multiple edges with different labels
@@ -196,12 +195,6 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
         }
       }
       return result;
-    }
-
-    // returns true if the i-th parameter of X is marked
-    bool is_marked_parameter(std::size_t i) const
-    {
-      return m_marked_parameters[i];
     }
 
     std::string print_marking() const
