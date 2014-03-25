@@ -1217,16 +1217,24 @@ class stategraph_algorithm
       return result;
     }
 
+    // returns { n | !exists CFG with vertex (X, n) }
     std::set<std::size_t> data_parameter_indices(const core::identifier_string& X) const
     {
       std::set<std::size_t> result;
-      const stategraph_equation& eqn = *find_equation(m_pbes, X);
-      const std::vector<data::variable>& dX = eqn.parameters();
-      for (std::size_t k = 0; k < dX.size(); k++)
+      auto const& eq_X = *find_equation(m_pbes, X);
+      for (std::size_t i = 0; i < eq_X.parameters().size(); ++i)
       {
-        if (!is_global_control_flow_parameter(X, k))
+        result.insert(i);
+      }
+      for (auto k = m_local_control_flow_graphs.begin(); k != m_local_control_flow_graphs.end(); ++k)
+      {
+        auto const& V = k->vertices;
+        for (auto i = V.begin(); i != V.end(); ++i)
         {
-          result.insert(k);
+          if (i->name() == X && i->index() != data::undefined_index())
+          {
+            result.erase(i->index());
+          }
         }
       }
       return result;
