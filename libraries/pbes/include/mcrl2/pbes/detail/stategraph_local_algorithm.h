@@ -95,17 +95,27 @@ class stategraph_local_algorithm: public stategraph_algorithm
       return i->second;
     }
 
+    // prints a belong set
+    std::string print_belong_set(const stategraph_equation& eq, const std::set<std::size_t>& belongs) const
+    {
+      std::set<data::variable> v;
+      for (auto i = belongs.begin(); i != belongs.end(); ++i)
+      {
+        v.insert(eq.parameters()[*i]);
+      }
+      return core::detail::print_set(v);
+    }
+
     template <typename RulesPredicate>
     std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k, RulesPredicate rules)
     {
-      mCRL2log(log::debug, "stategraph") << "--- compute belongs ---" << std::endl;
-
       std::map<core::identifier_string, std::set<data::variable> > Bk;
       for (auto p = Vk.vertices.begin(); p != Vk.vertices.end(); ++p)
       {
         auto const& X = p->name();
         auto const& eq_X = *find_equation(m_pbes, X);
         std::set<std::size_t> belongs = data_parameter_indices(X);
+        mCRL2log(log::debug1, "stategraph") << "  initial belong set for vertex " << *p << " = " << print_belong_set(eq_X, belongs) << std::endl;
 
         auto const& predvars = eq_X.predicate_variables();
         for (std::size_t i = 0; i < predvars.size(); i++)
@@ -116,11 +126,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             std::size_t m = *j;
             if ((X_i.used.find(m) != X_i.used.end() || X_i.changed.find(m) != X_i.changed.end()) && !rules(X, i))
             {
-              mCRL2log(log::debug1, "stategraph") << "vertex " << *p << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs "
-//                  << " used: " << std::boolalpha << (X_i.used.find(m) != X_i.used.end())
-//                  << " changed: " << std::boolalpha << (X_i.changed.find(m) != X_i.changed.end())
-//                  << " has_label: " << std::boolalpha << Vk.has_label(X, i)
-                  << std::endl;
+              mCRL2log(log::debug1, "stategraph") << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs " << std::endl;
               belongs.erase(j++);
             }
             else
@@ -129,6 +135,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             }
           }
         }
+        mCRL2log(log::debug1, "stategraph") << "  final   belong set for vertex " << *p << " = " << print_belong_set(eq_X, belongs) << std::endl;
         for (std::set<std::size_t>::const_iterator j = belongs.begin(); j != belongs.end(); ++j)
         {
           Bk[X].insert(eq_X.parameters()[*j]);
@@ -144,6 +151,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       mCRL2log(log::debug, "stategraph") << "=== computing belongs relation ===" << std::endl;
       for (std::size_t k = 0; k < m_local_control_flow_graphs.size(); k++)
       {
+        mCRL2log(log::debug, "stategraph") << "--- compute belongs for graph " << k << " ---" << std::endl;
         auto const& Vk = m_local_control_flow_graphs[k];
         auto const& values_k = m_connected_components_values[k];
         std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(Vk, values_k, default_rules_predicate(Vk));
