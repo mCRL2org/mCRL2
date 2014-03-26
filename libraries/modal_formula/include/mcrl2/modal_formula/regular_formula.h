@@ -379,10 +379,10 @@ inline void swap(trans_or_nil& t1, trans_or_nil& t2)
 }
 //--- end generated classes ---//
 
-inline int left_precedence(const seq& x)            { return 1; }
-inline int left_precedence(const alt& x)            { return 2; }
-inline int left_precedence(const trans& x)          { return 3; }
-inline int left_precedence(const trans_or_nil& x)   { return 3; }
+inline int left_precedence(const seq&)            { return 1; }
+inline int left_precedence(const alt&)            { return 2; }
+inline int left_precedence(const trans&)          { return 3; }
+inline int left_precedence(const trans_or_nil&)   { return 3; }
 inline int left_precedence(const regular_formula& x)
 {
   if      (is_seq(x))          { return left_precedence(static_cast<const seq&>(x)); }

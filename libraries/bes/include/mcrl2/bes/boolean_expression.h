@@ -518,10 +518,10 @@ inline void swap(boolean_variable& t1, boolean_variable& t2)
 /// \brief Returns the precedence of boolean expressions
 // N.B. The is_base_of construction is needed to make sure that the precedence also works on
 // classes of type 'and_', 'or_' and 'imp'.
-inline int left_precedence(const imp& x)    { return 2; }
-inline int left_precedence(const or_& x)    { return 3; }
-inline int left_precedence(const and_& x)   { return 4; }
-inline int left_precedence(const not_& x)   { return 5; }
+inline int left_precedence(const imp&)    { return 2; }
+inline int left_precedence(const or_&)    { return 3; }
+inline int left_precedence(const and_&)   { return 4; }
+inline int left_precedence(const not_&)   { return 5; }
 inline int left_precedence(const boolean_expression& x)
 {
        if (is_imp(x)) { return left_precedence(static_cast<const imp&>(x)); }

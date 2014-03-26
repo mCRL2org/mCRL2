@@ -336,7 +336,7 @@ $\qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$%
 \textsc{ComputeControlFlowMarkingLocal(}$\mathcal{E}$, $X_{init}(e_{init})$, 
 $(V_{1},E_{1},B_{1}),\cdots ,(V_{K},E_{K},B_{K})$\textsc{)} \\ 
 \textbf{for} $k=1\cdots K$ \textbf{do} \\ 
-$\qquad $\textbf{for} $u=X(e)\in V_{k}$ \textbf{do} \\ 
+$\qquad $\textbf{for} $u=(X,p,d_{X}[p]=e)\in V_{k}$ \textbf{do} \\ 
 $\qquad \qquad marking(u):=sig(u)\cap \{d\mid (X,d)\in B_{k}\}$ \\ 
 $stable:=false$ \\ 
 \textbf{while} $\lnot stable$ \textbf{do} \\ 
@@ -344,11 +344,11 @@ $\qquad stable:=true$ \\
 $\qquad $\textbf{for} $k=1\cdots K$ \textbf{do} \\ 
 $\qquad \qquad todo:=V_{k}$ \\ 
 $\qquad \qquad $\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad \qquad \qquad $\textbf{choose} $v=X(e)\in todo$ \\ 
+$\qquad \qquad \qquad $\textbf{choose} $v=(X,p,d_{X}[p]=e)\in todo$ \\ 
 $\qquad \qquad \qquad todo:=todo\setminus \{v\}$ \\ 
 $\qquad \qquad \qquad \text{\textbf{for }}(u,v,i)\in E_{k}\text{ \textbf{do}}
 $ \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $u=Y(f)$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $u=(Y,q,d_{Y}[q]=f)$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{for }}d_{X}[j]\in marking(v)\text{
 \textbf{do}}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad M:=(FV(data(\varphi _{Y},i)[j]\setminus
@@ -360,8 +360,8 @@ $\qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\
 $\qquad \qquad $\textbf{for} $u=X(e)\in V_{k}$ \textbf{do} \\ 
 $\qquad \qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )%
 \text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $Y(f)=\mathrm{PVI}(\varphi
-_{X},i) $ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $Y(f)=\mathrm{PVI}(\varphi _{X},i)
+$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{for }}l$ such that $%
 (Y,d_{Y}[l])\notin B_{k}\text{ \textbf{do}}\wedge d_{X}[j]\notin marking(u)$
 \\ 
@@ -369,8 +369,9 @@ $\qquad \qquad \qquad \qquad \qquad M:=(\{d\mid (X,d)\in B_{k}\}\cap
 FV(f[l]))\setminus marking(u)$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset
 \wedge \exists k^{\prime }$ such that $(Y,d_{Y}[l])\in B_{k^{\prime }}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \wedge \exists w=Y(g)\in
-V_{k^{\prime }}$ \textbf{such that} $d_{Y}[l]\in marking(w)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \wedge \exists
+w=(Y,q,d_{Y}[q]=g)\in V_{k^{\prime }}$ \textbf{such that} $d_{Y}[l]\in
+marking(w)$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup
 M$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\ 
@@ -407,91 +408,9 @@ $\qquad \qquad k:=k+1$ \\
 $\qquad \varphi :=\varphi \wedge (c\Rightarrow Y(r))$ \\ 
 \textbf{return} $\varphi $%
 \end{tabular}%
-\end{equation*}%
-\begin{equation*}
-\begin{tabular}{l}
-\textsc{ResetVariableLocal(}$Y(e)$, $i,$ $V_{1},\cdots ,V_{K},B_{1},\cdots
-,B_{K}$\textsc{)} \\ 
-$\varphi :=true$ \\ 
-$I:=\{j\mid \mathrm{dest}(X,i,j)=\bot \}$ \\ 
-\textbf{for all} $v^{\prime }$ \textbf{such that }$\{i_{1},\cdots
-,i_{\left\vert I\right\vert }\}=I\wedge v^{\prime }[m]\in \mathrm{values}%
-(d_{Y}[i_{m}])$ \textbf{do} \\ 
-$\qquad c:=true$ \\ 
-$\qquad k:=1$ \\ 
-$\qquad v:=[]$ \\ 
-$\qquad $\textbf{for} $j=1\cdots \left\vert par(Y)\right\vert $ \textbf{do}
-\\ 
-$\qquad \qquad $\textbf{if} $\mathrm{CFP}(Y,j)$ \\ 
-$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,j)=\bot $ \\ 
-$\qquad \qquad \qquad \qquad v:=v\vartriangleleft v^{\prime }[k]$ \\ 
-$\qquad \qquad \qquad \qquad k:=k+1$ \\ 
-$\qquad \qquad \qquad $\textbf{else} \\ 
-$\qquad \qquad \qquad \qquad v:=v\vartriangleleft \mathrm{dest}(X,i,j)$ \\ 
-$\qquad k:=1$ \\ 
-$\qquad $\textbf{for} $j=1\cdots \left\vert par(Y)\right\vert $ \textbf{do}
-\\ 
-$\qquad \qquad r:=[]$ \\ 
-$\qquad \qquad $\textbf{if} $\mathrm{CFP}(Y,j)$ \textbf{then} \\ 
-$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,j)=\bot $ \\ 
-$\qquad \qquad \qquad \qquad c:=c\wedge (d_{Y}[j]=v[k])$ \\ 
-$\qquad \qquad \qquad r:=r\vartriangleleft v[k]$ \\ 
-$\qquad \qquad \qquad k:=k+1$ \\ 
-$\qquad \qquad $\textbf{else} \\ 
-$\qquad \qquad \qquad relevant:=true$ \\ 
-$\qquad \qquad \qquad $\textbf{for} $k$ \textbf{such} \textbf{that} $%
-(Y,d_{Y}[j])\in B_{k}$ \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $m$ \textbf{be such that} $%
-d_{Y}[m]$ \textbf{corresponds to} $G_{k}$ \\ 
-$\qquad \qquad \qquad \qquad relevant:=relevant\wedge d_{Y}[j]\in
-marking(Y(v[m]))$ \\ 
-$\qquad \qquad \qquad $\textbf{if} $relevant$ \textbf{then} $%
-r:=r\vartriangleleft e[j]$ \textbf{else} $r:=r\vartriangleleft
-default\_value(e[j])$ \\ 
-$\qquad \varphi :=\varphi \wedge (c\Rightarrow Y(r))$ \\ 
-\textbf{return} $\varphi $%
-\end{tabular}%
 \end{equation*}
 
 \newpage
-
-\subsection{Belongs relation}
-
-The following algorithm computes the belongs relation $B_{k}$ that
-corresponds with the local control flow graph $(V_{k}$, $\longrightarrow
-_{k})$.
-
-\begin{equation*}
-\begin{tabular}{l}
-\textsc{ComputeBelongs(} $\longrightarrow _{must}$, $X_{0}$, $p_{0}$, $V_{k}$%
-, $\longrightarrow _{k}$\textsc{)} \\ 
-$B_{k}:=\emptyset $ \\ 
-$todo:=\{(X_{0},p_{0})\}$ \\ 
-$visited:=\emptyset $ \\ 
-\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad $\textbf{choose} $(X,p)\in todo$ \\ 
-$\qquad todo:=todo\setminus \{(X,p)\}$ \\ 
-$\qquad visited:=visited\cup \{(X,p)\}$ \\ 
-$\qquad \text{\textbf{if }}(X,p)\nrightarrow _{must}$\textbf{\ then continue}
-\\ 
-$\qquad belongs:=\{j\mid d[j]$ is data parameter of $X\}$ \\ 
-$\qquad $\textbf{for} $(X,p)\longrightarrow _{must}(Y,q)\text{ \textbf{do}}$
-\\ 
-$\qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ 
-\textbf{do}}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{X},i)\neq Y$%
-\textbf{\ then continue} \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}(Y,q)\notin visited$ \\ 
-$\qquad \qquad \qquad \qquad todo:=todo\cup \{(Y,q)\}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{for }}j\in belongs$ \textbf{do} \\ 
-$\qquad \qquad \qquad \qquad $\textbf{if }$(\mathrm{used}(X,i,j)\vee \mathrm{%
-changed}(X,i,j))\wedge (X,\_,\_)\overset{i}{\nrightarrow }_{k}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad belongs:=belongs\setminus \{j\}$ \\ 
-$\qquad B_{k}:=B_{k}\cup \{(X,d_{X}[j])\mid j\in belongs\}$ \\ 
-\textbf{return} $B_{k}$%
-\end{tabular}%
-\end{equation*}%
-\newpage 
 
 \subsection{Compute values}
 
@@ -569,4 +488,158 @@ where $insert(V,E,todo,u,v)$ is shorthand for the statements%
 V:=V\cup \{v\} \\ 
 E:=E\cup \{(u,v)\}%
 \end{array}%
+\end{equation*}%
+\newpage
+
+Let $(V$, $\mathrm{\longrightarrow })$ be a local control flow graph, and $%
+\mathrm{rules}$ be a predicate defined as%
+\begin{equation*}
+\mathrm{rules}(V,X,i)=\exists _{(X,j,e)\in V}:(X,j,e)\overset{i}{\mathrm{%
+\longrightarrow }}.
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeBelongsNew(} $V$, $\mathrm{\longrightarrow }$, $\mathrm{rules}
+$\textsc{)} \\ 
+$B_{k}:=\emptyset $ \\ 
+\textbf{for} $(X,j,v)\in V$ \textbf{do} \\ 
+$\qquad belongs:=\{m\mid d_{X}[m]$ is a data parameter of $X\}$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
+do}}$ \\ 
+$\qquad \qquad \text{\textbf{for }}m\in belongs\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad $\textbf{if }$\left( \mathrm{used}(X,i,m)\vee \mathrm{%
+changed}(X,i,m)\right) \wedge \lnot \mathrm{rules}(V,X,i)$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad belongs:=belongs\setminus \{m\}$ \\ 
+$\qquad B_{k}:=B_{k}\cup \{(X,d_{X}[m])\mid m\in belongs\}$ \\ 
+\textbf{return} $B_{k}$%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ResetVariableLocalNew(}$i,$ $\sigma X(d_{X})=\varphi
+_{X},V_{1},\cdots ,V_{J},B_{1},\cdots ,B_{J},\mathrm{rules}$\textsc{)} \\ 
+\textbf{let }$Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
+$e^{\prime }:=e$ \\ 
+\textbf{for} $k=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
+$\qquad $\textbf{if} $\mathrm{CFP}(Y,k)$ \textbf{then continue} \\ 
+$\qquad relevant:=true$ \\ 
+$\qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad $\textbf{if} $\mathrm{rules}(V_{j},X,i)$ \textbf{then} \\ 
+$\qquad \qquad \qquad $\textbf{let }$p,q$ be such that $(Y,p,q)\in V_{j}$ \\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,p)\neq \bot $ \textbf{%
+then} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $q^{\prime }=\mathrm{dest}(X,i,p)$
+\\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge \left( \left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow d_{Y}[k]\in marking(Y,p,q^{\prime
+})\right) $ \\ 
+$\qquad \qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge (\left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow \exists r:d_{Y}[k]\in marking(Y,p,r))$
+\\ 
+$\qquad $\textbf{if} $\lnot relevant$ \textbf{then} $e^{\prime
+}[k]:=default\_value(d_{Y}[k])$ \\ 
+\textbf{return }$Y(e^{\prime })$%
+\end{tabular}%
+\end{equation*}%
+\newpage 
+
+Let $\left( V,E\right) $ be a local control flow graph, and $B$ the
+corresponding belongs relation.%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{UpdateMarkingRule1(}$(V,E,B)$, $u$\textsc{)} \\ 
+\textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
+$M:=\emptyset $ \\ 
+\textbf{for} $(u,i,v)\in E$ \textbf{do} \\ 
+$\qquad $\textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
+$\qquad \text{\textbf{for }}d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
+$\qquad \qquad $\textbf{let} $Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
+$\qquad \qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
+d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\ 
+\textbf{return }$marking(u)\cup M$%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{UpdateMarkingRule2(}$i$, $\left( V,E,B\right) $, $\left( V^{\prime
+},E^{\prime },B^{\prime }\right) $, $u$, $v$\textsc{)} \\ 
+\textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
+\textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
+$M:=\emptyset $ \\ 
+$\text{\textbf{for }}d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
+$\qquad $\textbf{if} $\left( Y,d_{Y}[l]\right) \notin B^{\prime }$ \textbf{%
+then} \\ 
+$\qquad \qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
+d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\ 
+\textbf{return }$marking(u)\cup M$%
+\end{tabular}%
 \end{equation*}
+
+\bigskip 
+
+\newpage 
+
+\begin{equation*}
+\begin{array}{l}
+\begin{tabular}{l}
+\textsc{ComputeMarkingLocal(}$\mathcal{E}$, $(V_{1},E_{1},B_{1}),\cdots
+,(V_{J},E_{J},B_{J})$\textsc{)} \\ 
+\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad $\textbf{for} $u=(X,n,d_{X}[n]=z)\in V_{j}$ \textbf{do} \\ 
+$\qquad \qquad marking(u):=sig(u)\cap \{d\mid (X,d)\in B_{j}\}$ \\ 
+$stable:=false$ \\ 
+\textbf{while} $\lnot stable$ \textbf{do} \\ 
+$\qquad stableint:=false$ \\ 
+$\qquad $\textbf{while} $\lnot stableint$ \textbf{do} \\ 
+$\qquad \qquad stableint:=true$ \\ 
+$\qquad \qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad \qquad todo:=V_{j}$ \\ 
+$\qquad \qquad \qquad $\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{choose} $u=(X,n,d_{X}[n]=z)\in todo$
+\\ 
+$\qquad \qquad \qquad \qquad todo:=todo\setminus \{u\}$ \\ 
+$\qquad \qquad \qquad \qquad m:=marking(u)$ \\ 
+$\qquad \qquad \qquad \qquad marking(u):=$ \textsc{UpdateMarkingRule1(}$%
+(V_{j},E_{j},B_{j})$, $u$\textsc{)} \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}m\neq marking(u)\wedge
+\exists i:(v,i,u)\in E_{j}$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad stableint:=false$%
+\end{tabular}
+\\ 
+\begin{tabular}{l}
+$\qquad stableext:=false$ \\ 
+$\qquad $\textbf{while} $\lnot stableext$ \textbf{do} \\ 
+$\qquad \qquad stableext:=true$ \\ 
+$\qquad \qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad \qquad $\textbf{for} $u=(X,n,d_{X}[n]=z)\in V_{j}$ \textbf{do}
+\\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}%
+(\varphi _{X})$ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{let} $Y(e)=\mathrm{PVI}(\varphi
+_{X},i)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{for} $k=1\cdots J$ \textbf{do}
+\\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}k\neq j$ 
+\textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for} $%
+v=(Y,m,d_{Y}[m]=w)\in V_{k}$ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{for }}%
+d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{if} 
+$\left( Y,d_{Y}[l]\right) \notin B_{k}$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+m:=marking(u)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+marking(u):=$ \textsc{UpdateMarkingRule2(}$i$, $(V_{j},E_{j},B_{j})$, $%
+(V_{k},E_{k},B_{k})$, $u$, $v$\textsc{)} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{%
+\textbf{if }}m\neq marking(u)$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+\qquad stableint:=false$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+\qquad stableext:=false\qquad \qquad \qquad \qquad \qquad \qquad $%
+\end{tabular}%
+\end{array}%
+\end{equation*}%
+\newpage \newpage 

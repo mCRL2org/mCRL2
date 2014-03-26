@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/detail/prover/manipulator.h
-/// \brief Interface to classes InternalFormatManipulator, AM_Jitty and AM_Inner
+/// \brief Interface to classes InternalFormatManipulator.
 
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
@@ -21,13 +21,12 @@ namespace data
 namespace detail
 {
 
-/// \brief Base class for classes that provide functionality to modify or create
-/// \brief terms in one of the internal formats of the rewriter.
+/// \brief Base class for classes that provide functionality to modify or create terms.
 
 class InternalFormatManipulator
 {
   protected:
-    /// \brief The rewriter used to translate formulas to one of the internal formats of the rewriter.
+    /// \brief The rewriter used to translate formulas.
     boost::shared_ptr<detail::Rewriter> f_rewriter;
 
     /// \brief A class that provides information on the structure of expressions in one of the
@@ -40,7 +39,7 @@ class InternalFormatManipulator
     /// not processed again, but retreived from this table.
     std::map < data_expression, data_expression> f_orient;
 
-    /// \brief aterm representing the \c if \c then \c else function in one of the internal formats of the rewriter.
+    /// \brief aterm representing the \c if \c then \c else function.
     function_symbol f_if_then_else;
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c true. Additionally, if the variable
@@ -136,7 +135,7 @@ class InternalFormatManipulator
       return v_result;
     }
 
-    /// \brief Returns an expression in the internal format of the rewriter with the Jitty strategy.
+    /// \brief Returns an expression.
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low.
     data_expression make_if_then_else(
@@ -220,8 +219,8 @@ class InternalFormatManipulator
       return v_result;
     }
 
-    /// \brief Initializes the table InternalFormatManipulator::f_set_true and calls the method
-    /// \brief AM_Jitty::f_set_true_auxiliary.
+    /// \brief Initializes the table InternalFormatManipulator::f_set_true and calls
+    /// \brief f_set_true_auxiliary.
     data_expression set_true(
                  const data_expression& a_formula,
                  const data_expression& a_guard)

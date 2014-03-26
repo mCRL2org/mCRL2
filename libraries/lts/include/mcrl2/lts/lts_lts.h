@@ -22,17 +22,16 @@
 #include <string>
 #include <vector>
 #include "mcrl2/atermpp/aterm_appl.h"
-// #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/lps/detail/multi_action_print.h"
 
 namespace mcrl2
 {
@@ -177,7 +176,7 @@ class action_label_lts:public mcrl2::lps::multi_action
       if (this->has_time())
       {
         throw mcrl2::runtime_error("Cannot transform multi action " +
-                                   lps::detail::multi_action_print(*this) + " to an atermpp::aterm as it contains time.");
+                                   lps::pp(*this) + " to an atermpp::aterm as it contains time.");
       }
       return atermpp::aterm_appl(core::detail::function_symbol_MultAct(), this->actions());
     }
@@ -213,7 +212,7 @@ class action_label_lts:public mcrl2::lps::multi_action
 /** \brief Print the action label to string. */
 inline std::string pp(const action_label_lts l)
 {
-  return lps::detail::multi_action_print(mcrl2::lps::multi_action(l));
+  return lps::pp(mcrl2::lps::multi_action(l));
 }
 
 /** \brief Parse a string into an action label.

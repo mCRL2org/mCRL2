@@ -1414,16 +1414,16 @@ inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
 // The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
 
 /// \brief Defines a precedence relation on process expressions
-inline int left_precedence(const choice& x)       { return 1; }
-inline int left_precedence(const sum& x)          { return 2; }
-inline int left_precedence(const merge& x)        { return 3; }
-inline int left_precedence(const left_merge& x)   { return 4; }
-inline int left_precedence(const if_then& x)      { return 5; }
-inline int left_precedence(const if_then_else& x) { return 5; }
-inline int left_precedence(const bounded_init& x) { return 6; }
-inline int left_precedence(const seq& x)          { return 7; }
-inline int left_precedence(const at& x)           { return 8; }
-inline int left_precedence(const sync& x)         { return 9; }
+inline int left_precedence(const choice&)       { return 1; }
+inline int left_precedence(const sum&)          { return 2; }
+inline int left_precedence(const merge&)        { return 3; }
+inline int left_precedence(const left_merge&)   { return 4; }
+inline int left_precedence(const if_then&)      { return 5; }
+inline int left_precedence(const if_then_else&) { return 5; }
+inline int left_precedence(const bounded_init&) { return 6; }
+inline int left_precedence(const seq&)          { return 7; }
+inline int left_precedence(const at&)           { return 8; }
+inline int left_precedence(const sync&)         { return 9; }
 inline int left_precedence(const process_expression& x)
 {
        if (is_choice(x))       { return left_precedence(static_cast<const choice&>(x)); }

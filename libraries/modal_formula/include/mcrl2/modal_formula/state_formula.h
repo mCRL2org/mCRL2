@@ -1116,16 +1116,16 @@ inline void swap(mu& t1, mu& t2)
 }
 //--- end generated classes ---//
 
-inline int left_precedence(const mu& x)     { return 1; }
-inline int left_precedence(const nu& x)     { return 1; }
-inline int left_precedence(const forall& x) { return 2; }
-inline int left_precedence(const exists& x) { return 2; }
-inline int left_precedence(const imp& x)    { return 3; }
-inline int left_precedence(const or_& x)    { return 4; }
-inline int left_precedence(const and_& x)   { return 5; }
-inline int left_precedence(const must& x)   { return 6; }
-inline int left_precedence(const may& x)    { return 6; }
-inline int left_precedence(const not_& x)   { return 7; }
+inline int left_precedence(const mu&)     { return 1; }
+inline int left_precedence(const nu&)     { return 1; }
+inline int left_precedence(const forall&) { return 2; }
+inline int left_precedence(const exists&) { return 2; }
+inline int left_precedence(const imp&)    { return 3; }
+inline int left_precedence(const or_&)    { return 4; }
+inline int left_precedence(const and_&)   { return 5; }
+inline int left_precedence(const must&)   { return 6; }
+inline int left_precedence(const may&)    { return 6; }
+inline int left_precedence(const not_&)   { return 7; }
 inline int left_precedence(const state_formula& x)
 {
   if      (is_mu(x))     { return left_precedence(static_cast<const mu&>(x)); }

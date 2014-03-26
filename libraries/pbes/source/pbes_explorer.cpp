@@ -1016,7 +1016,7 @@ std::string lts_info::state_to_string(const ltsmin_state& state)
         if (param_value != param_values.begin())
             ss << ", ";
         ss << *param_signature << " = ";
-        ss << pgg->print(*param_value);
+        ss << *param_value;
         if (param_signature != param_signatures.end())
         {
             ++param_signature;
@@ -1295,7 +1295,7 @@ void explorer::initial_state(int* state)
 ltsmin_state explorer::get_state(const propositional_variable_instantiation& expr) const
 {
     //std::clog << "-- get_state --" << std::endl;
-    //std::clog << "  expr = " << pgg->print(expr) << std::endl;
+    //std::clog << "  expr = " << expr << std::endl;
     propositional_variable_instantiation novalue;
     assert(tr::is_prop_var(expr) && expr != novalue);
     std::string varname = tr::name(expr);
@@ -1314,12 +1314,6 @@ ltsmin_state explorer::true_state()
 ltsmin_state explorer::false_state()
 {
     return ltsmin_state("false");
-}
-
-
-std::string explorer::data_to_string(const data::data_expression& e) {
-    //std::clog << "data_to_string: e = " << e.to_string() << std::endl;
-    return pgg->data_to_string(e);
 }
 
 
@@ -1488,7 +1482,7 @@ std::string explorer::get_value(int type_no, int index)
     else
     {
         data_expression value = get_data_value(type_no, index);
-        std::string s = this->data_to_string(value);
+        std::string s = data::pp(value);
         return s;
     }
 }
@@ -1590,18 +1584,18 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
                 != successors.end(); ++expr) {
             if (tr::is_prop_var(*expr)) {
                 result.push_back(get_state(core::static_down_cast<const propositional_variable_instantiation&>(*expr)));
-            } else if (pgg->is_true(*expr)) {
+            } else if (tr::is_true(*expr)) {
                 if (type != parity_game_generator::PGAME_AND)
                 {
                     result.push_back(true_state());
                 }
-            } else if (pgg->is_false(*expr)) {
+            } else if (tr::is_false(*expr)) {
                 if (type != parity_game_generator::PGAME_OR)
                 {
                     result.push_back(false_state());
                 }
             } else {
-                throw(std::runtime_error("!! Successor is NOT a propvar: " + pgg->print(*expr)));
+                throw(std::runtime_error("!! Successor is NOT a propvar: " + pbes_system::pp(*expr)));
             }
         }
     }
@@ -1638,21 +1632,21 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
             operation_type type = detail::map_at(info->get_variable_types(), state.get_variable());
             for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                     != successors.end(); ++expr) {
-                //std::clog << "* Successor: " << pgg->print(*expr) << std::endl;
+                //std::clog << "* Successor: " << *expr << std::endl;
                 if (tr::is_prop_var(*expr)) {
                     result.push_back(get_state(core::static_down_cast<const propositional_variable_instantiation&>(*expr)));
-                } else if (pgg->is_true(*expr)) {
+                } else if (tr::is_true(*expr)) {
                     if (type != parity_game_generator::PGAME_AND)
                     {
                         result.push_back(true_state());
                     }
-                } else if (pgg->is_false(*expr)) {
+                } else if (tr::is_false(*expr)) {
                     if (type != parity_game_generator::PGAME_OR)
                     {
                         result.push_back(false_state());
                     }
                 } else {
-                    throw(std::runtime_error("!! Successor is NOT a propvar: " + pgg->print(*expr)));
+                    throw(std::runtime_error("!! Successor is NOT a propvar: " + pbes_system::pp(*expr)));
                 }
             }
         }

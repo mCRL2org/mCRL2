@@ -26,7 +26,6 @@
 
 
 //Boolean equation systems
-// #include "mcrl2/pbes/utility.h"
 #include "mcrl2/bes/bes_deprecated.h"
 
 namespace mcrl2

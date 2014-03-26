@@ -24,6 +24,16 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::log;
 
+// The SVC I/O doesn't handle mCRL2 data types correctly. Due to this, function symbols
+// and variables may have the wrong index. This routine is a quick and dirty solution to
+// fix these indices.
+static atermpp::aterm_appl fix_index(const atermpp::aterm& x)
+{
+  atermpp::aterm_appl result = atermpp::aterm_cast<atermpp::aterm_appl>(data::detail::remove_index(x));
+  result = atermpp::aterm_cast<atermpp::aterm_appl>(data::detail::add_index(result));
+  return result;
+}
+
 static void read_from_lts(lts_lts_t& l, string const& filename)
 {
   SVCfile f;
@@ -54,7 +64,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
   {
     using namespace mcrl2::data;
     using namespace mcrl2::lts::detail;
-    aterm_appl state_label=(aterm_appl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f));
+    aterm_appl state_label = fix_index((aterm_appl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f)));
     l.add_state(state_label_lts(state_label));
   }
   else
@@ -76,7 +86,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
       {
         using namespace mcrl2::data;
         using namespace mcrl2::lts::detail;
-        aterm_appl state_label=(aterm_appl)SVCstate2ATerm(&f,(SVCstateIndex) i);
+        aterm_appl state_label = fix_index((aterm_appl)SVCstate2ATerm(&f,(SVCstateIndex) i));
         l.add_state(state_label_lts(state_label));
       }
       else
@@ -87,7 +97,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
 
     for (size_t i=l.num_action_labels(); i<=(size_t)label; i++)
     {
-      aterm_appl lab = (aterm_appl) SVClabel2ATerm(&f,(SVClabelIndex) i);
+      aterm_appl lab = fix_index((aterm_appl) SVClabel2ATerm(&f,(SVClabelIndex) i));
       l.add_action(lab,(aterm_cast<aterm_list>(lab[0]).empty())?true:false);
     }
 
@@ -135,7 +145,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
         try
 	{
 	  aterm data=read_term_from_binary_stream(g);
-          data = mcrl2::data::detail::add_index(data);
+          data = fix_index(data);
           data::data_specification data_spec(atermpp::aterm_appl(((aterm_appl)data)[0]));
           data_spec.declare_data_specification_to_be_type_checked(); // We can assume that this data spec is well typed.
           l.set_data(data::data_specification(data_spec));
@@ -191,7 +201,7 @@ static void add_extra_mcrl2_lts_data(
   aterm arg2 = (aterm)(has_params?aterm_appl(function_symbol("ParamSpec",1),(aterm) params):atermpp::aterm_appl(core::detail::function_symbol_Nil()));
   aterm arg3 = (aterm)(has_act_labels?atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), act_labels):atermpp::aterm_appl(core::detail::function_symbol_Nil()));
   aterm data = (aterm) aterm_appl(function_symbol("mCRL2LTS1",3),arg1,arg2,arg3);
-  data = mcrl2::data::detail::remove_index(data);
+  data = data::detail::remove_index(data);
 
   /* Determine the position at which the additional information starts.
      Due to the way in which file operations are implemented on Windows, we need to

@@ -155,11 +155,11 @@ MultActIdList: MultActId ( ',' MultActId )* ;                    // Multi-action
 
 MultActIdSet: '{' MultActIdList? '}' ;                           // Multi-action label set
 
-CommExpr: Id '|' MultActId '->' Id ;                             // Action synchronisation
+CommExpr: Id '|' MultActId '->' Id ;                             // Action synchronization
 
-CommExprList: CommExpr ( ',' CommExpr )* ;                       // Action synchronisations
+CommExprList: CommExpr ( ',' CommExpr )* ;                       // Action synchronizations
 
-CommExprSet: '{' CommExprList? '}' ;                             // Action synchronisation set
+CommExprSet: '{' CommExprList? '}' ;                             // Action synchronization set
 
 RenExpr: Id '->' Id ;                                            // Action renaming
 
@@ -257,13 +257,13 @@ mCRL2SpecElt
   | ProcSpec                                                     // Process specification
   ;
 
-//--- BES
+//--- Boolean equation system
 
 BesSpec: BesEqnSpec BesInit ;                                    // Boolean equation system
 
 BesEqnSpec: 'bes' BesEqnDecl+ ;                                  // Boolean equation declaration
 
-BesEqnDecl: FixedPointOperator BesVar '=' BesExpr ';' ;          // Boolean fixed poinst equation
+BesEqnDecl: FixedPointOperator BesVar '=' BesExpr ';' ;          // Boolean fixed point equation
 
 BesVar: Id ;                                                     // BES variable
 
@@ -280,11 +280,11 @@ BesExpr
 
 BesInit: 'init' BesVar ';' ;                                     // Initial BES variable
 
-//--- PBES
+//--- Parameterized Boolean equation systems
 
 PbesSpec: DataSpec? GlobVarSpec? PbesEqnSpec PbesInit ;          // PBES specification
 
-PbesEqnSpec: 'pbes' PbesEqnDecl+ ;                               // Declaratioin of PBES equations
+PbesEqnSpec: 'pbes' PbesEqnDecl+ ;                               // Declaration of PBES equations
 
 PbesEqnDecl: FixedPointOperator PropVarDecl '=' PbesExpr ';' ;   // PBES equation
 
@@ -341,7 +341,7 @@ RegFrm
   | RegFrm ('+' $binary_op_left 1) RegFrm                        // Alternative composition
   | RegFrm ('.' $binary_op_right 2) RegFrm                       // Sequential composition
   | RegFrm '*'                                 $unary_right  3   // Iteration
-  | RegFrm '+'                                 $unary_right  3   // Non-empty iteration
+  | RegFrm '+'                                 $unary_right  3   // Nonempty iteration
   ;
 
 //--- State formulas

@@ -1894,7 +1894,7 @@ bool mcrl2::data::data_type_checker::MatchFuncUpdate(const function_sort &type, 
   {
     return false;
   }
-  Arg1 = core::static_down_cast<const function_sort&>(temp_result);
+  Arg1 = core::static_down_cast<const function_sort&>(UnwindType(temp_result));
 
   // determine A and B from Arg1:
   sort_expression_list LA=Arg1.domain();
