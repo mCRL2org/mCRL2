@@ -74,28 +74,6 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       return f(x);
     }
 
-    // returns true if in the control flow graph corresponding to d_X[j] there is a vertex u = X(e) such that
-    // marking(u) is not empty
-    bool has_non_empty_marking(const core::identifier_string& X, std::size_t j) const
-    {
-      std::size_t k = control_flow_index(X, j);
-      if (k == data::undefined_index())
-      {
-        return false;
-      }
-      const local_control_flow_graph& Gk = m_local_control_flow_graphs[k];
-      auto const& inst = Gk.index(X);
-      for (auto i = inst.begin(); i != inst.end(); ++i)
-      {
-        const local_control_flow_graph_vertex& u = **i;
-        if (!u.marking().empty())
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
     void compute_occurring_data_parameters()
     {
       m_occurring_data_parameters.clear();

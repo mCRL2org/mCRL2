@@ -177,26 +177,6 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
       return m_name == other.m_name && m_index == other.m_index && m_value == other.m_value;
     }
 
-    std::set<std::size_t> marking_variable_indices(const stategraph_pbes& p) const
-    {
-      std::set<std::size_t> result;
-      for (auto i = m_marking.begin(); i != m_marking.end(); ++i)
-      {
-        // TODO: make this code more efficient
-        const stategraph_equation& eqn = *find_equation(p, m_name);
-        const std::vector<data::variable>& d = eqn.parameters();
-        for (std::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
-        {
-          if (*i == *j)
-          {
-            result.insert(j - d.begin());
-            break;
-          }
-        }
-      }
-      return result;
-    }
-
     std::string print_marking() const
     {
       std::ostringstream out;
