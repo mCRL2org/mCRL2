@@ -110,7 +110,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // Applies resetting of variables to the original PBES p.
     void reset_variables_to_original(pbes& p)
     {
-      mCRL2log(log::debug, "stategraph") << "--- resetting variables to the original PBES ---" << std::endl;
+      mCRL2log(log::debug, "stategraph") << "=== resetting variables to the original PBES ---" << std::endl;
 
       // apply the reset variable procedure to all propositional variable instantiations
       std::vector<pbes_equation>& p_eqn = p.equations();
@@ -118,6 +118,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 
       for (std::size_t k = 0; k < p_eqn.size(); k++)
       {
+        mCRL2log(log::debug1, "stategraph") << "--- resetting equation " << p_eqn[k] << std::endl;
         p_eqn[k].formula() = local_reset_variables(*this, p_eqn[k].formula(), s_eqn[k]);
       }
 
@@ -175,7 +176,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
 
   void push(const pbes_expression& x)
   {
-    mCRL2log(log::debug1) << "<push>" << "\n" << x << std::endl;
+    mCRL2log(log::debug2) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 
@@ -270,7 +271,7 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
 
 pbes_expression local_reset_variables_algorithm::reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
 {
-  mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
+  // mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
   assert(i < eq_X.predicate_variables().size());
   const predicate_variable& X_i = eq_X.predicate_variables()[i];
   assert(X_i.X == x);

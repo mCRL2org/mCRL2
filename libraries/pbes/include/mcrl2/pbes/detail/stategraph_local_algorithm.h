@@ -116,7 +116,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       out << "\n=== belongs relation ===\n";
       for (std::size_t k = 0; k < m_belongs.size(); k++)
       {
-        out << "--- belongs " << k << " ---" << std::endl;
+        out << "--- belongs relation for graph " << k << " ---" << std::endl;
         const std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
         for (std::map<core::identifier_string, std::set<data::variable> >::const_iterator i = Bk.begin(); i != Bk.end(); ++i)
         {
@@ -283,7 +283,7 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
           auto const& X = u.name();
           u.set_marking(belongs_intersection(significant_variables(u), Bj, X));
         }
-        mCRL2log(log::debug, "stategraph") << "--- initial control flow marking " << j << "\n" << Vj.print_marking();
+        mCRL2log(log::debug, "stategraph") << "--- initial control flow marking for graph " << j << "\n" << Vj.print_marking();
       }
 
       bool stable = false;
@@ -378,12 +378,11 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
 
     void print_control_flow_marking() const
     {
-      mCRL2log(log::debug, "stategraph") << "\n=== control flow marking ===" << std::endl;
       std::size_t K = m_local_control_flow_graphs.size();
       for (std::size_t k = 0; k < K; k++)
       {
         const local_control_flow_graph& Gk = m_local_control_flow_graphs[k];
-        mCRL2log(log::debug, "stategraph") <<  "--- control flow marking for graph " << k << "\n" << Gk.print_marking() << std::endl;
+        mCRL2log(log::debug, "stategraph") <<  "--- computed control flow marking for graph " << k << "\n" << Gk.print_marking() << std::endl;
       }
     }
 
