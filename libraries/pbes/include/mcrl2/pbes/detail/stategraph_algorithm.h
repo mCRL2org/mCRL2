@@ -1388,12 +1388,12 @@ class stategraph_algorithm
 
       while (!todo.empty())
       {
-        // u = (X, d, e)
+        // u = (X, k, d = e)
         auto const& u = *pick_element(todo);
         const core::identifier_string& X = u.name();
         const data::variable& d = u.variable();
         const data::data_expression& e = u.value();
-        mCRL2log(log::debug1, "stategraph") << "choose todo element (X, d, e) = " << u << std::endl;
+        mCRL2log(log::debug1, "stategraph") << "choose todo element (X, k, d=e) = " << u << std::endl;
         std::size_t k = u.index();
         const stategraph_equation& eq_X = *find_equation(m_pbes, X);
         const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
@@ -1406,7 +1406,7 @@ class stategraph_algorithm
 
           if (d == data::undefined_variable())
           {
-            // case 1: (X, e) -> (Y, d', e')
+            // case 1: (X, ?, ?=?) -> (Y, k', d'=e')
             mCRL2log(log::debug1, "stategraph") << "case 1" << std::endl;
             if (q != component_index.end()) // (Y, k1) in C
             {
@@ -1419,14 +1419,13 @@ class stategraph_algorithm
                 V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
               }
             }
-            // case 2: (X, ?) -> (Y, ?)
+            // case 2: (X, ?, ?=?) -> (Y, ?, ?=?)
             else
             {
               if (X != Y)
               {
-                std::size_t k1 = data::undefined_index();
-                mCRL2log(log::debug1, "stategraph") << "case 2: (X, ?) -> (Y, ?) ; k' = " << print_index(k1) << std::endl;
-                V.insert_edge(todo, m_pbes, u, Y, k1, data::undefined_data_expression(), edge_label);
+                mCRL2log(log::debug1, "stategraph") << "case 2: (X, ?) -> (Y, ?)" << std::endl;
+                V.insert_edge(todo, m_pbes, u, Y, data::undefined_index(), data::undefined_data_expression(), edge_label);
               }
             }
           }
@@ -1495,9 +1494,6 @@ class stategraph_algorithm
     {
       mCRL2log(log::debug, "stategraph") << "Compute local control flow graphs for component " << print_connected_component(component) << std::endl;
 
-      const propositional_variable_instantiation& init = m_pbes.initial_state();
-      const core::identifier_string& Xinit = init.name();
-
       // preprocessing
       std::map<core::identifier_string, std::size_t> component_index;
       for (auto p = component.begin(); p != component.end(); ++p)
@@ -1506,38 +1502,16 @@ class stategraph_algorithm
         component_index[w.name()] = w.index();
       }
 
-      bool found = false;
+      std::set<local_control_flow_graph_vertex> U;
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& w = m_global_control_flow_graph_vertices[*p];
-        const core::identifier_string& X = w.name();
-        if (X == Xinit)
+        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
+        for (auto q = component_values.begin(); q != component_values.end(); ++q)
         {
-          std::size_t j = w.index();
-          data::data_expression e_j = nth_element(init.parameters(), j);
-          local_control_flow_graph_vertex u(X, j, w.variable(), e_j);
-          compute_local_control_flow_graph(u, component_index);
-          found = true;
-          break;
+          U.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), *q));
         }
       }
-
-      // if no vertex was found corresponding to the initial state, then create a graph from all
-      // combinations of vertices and values
-      if (!found)
-      {
-        mCRL2log(log::debug1, "stategraph") << "no vertex found that corresponds to the initial state" << std::endl;
-        std::set<local_control_flow_graph_vertex> U;
-        for (auto p = component.begin(); p != component.end(); ++p)
-        {
-          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
-          for (auto q = component_values.begin(); q != component_values.end(); ++q)
-          {
-            U.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), *q));
-          }
-        }
-        compute_local_control_flow_graph(U, component_index);
-      }
+      compute_local_control_flow_graph(U, component_index);
     }
 
     void print_local_control_flow_graphs() const
