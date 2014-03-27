@@ -117,7 +117,7 @@ make_replace_pbes_expressions_builder(Substitution sigma, bool innermost)
 //--- start generated pbes_system replace code ---//
 template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
-                              Substitution sigma,
+                              const Substitution& sigma,
                               bool innermost,
                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                              )
@@ -127,7 +127,7 @@ void replace_sort_expressions(T& x,
 
 template <typename T, typename Substitution>
 T replace_sort_expressions(const T& x,
-                           Substitution sigma,
+                           const Substitution& sigma,
                            bool innermost,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
@@ -137,7 +137,7 @@ T replace_sort_expressions(const T& x,
 
 template <typename T, typename Substitution>
 void replace_data_expressions(T& x,
-                              Substitution sigma,
+                              const Substitution& sigma,
                               bool innermost,
                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                              )
@@ -147,7 +147,7 @@ void replace_data_expressions(T& x,
 
 template <typename T, typename Substitution>
 T replace_data_expressions(const T& x,
-                           Substitution sigma,
+                           const Substitution& sigma,
                            bool innermost,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
@@ -157,7 +157,7 @@ T replace_data_expressions(const T& x,
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
-                       Substitution sigma,
+                       const Substitution& sigma,
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                       )
 {
@@ -166,7 +166,7 @@ void replace_variables(T& x,
 
 template <typename T, typename Substitution>
 T replace_variables(const T& x,
-                    Substitution sigma,
+                    const Substitution& sigma,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
 {
@@ -175,7 +175,7 @@ T replace_variables(const T& x,
 
 template <typename T, typename Substitution>
 void replace_all_variables(T& x,
-                           Substitution sigma,
+                           const Substitution& sigma,
                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
@@ -184,7 +184,7 @@ void replace_all_variables(T& x,
 
 template <typename T, typename Substitution>
 T replace_all_variables(const T& x,
-                        Substitution sigma,
+                        const Substitution& sigma,
                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                        )
 {
@@ -195,7 +195,7 @@ T replace_all_variables(const T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 void replace_free_variables(T& x,
-                            Substitution sigma,
+                            const Substitution& sigma,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
@@ -207,7 +207,7 @@ void replace_free_variables(T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 T replace_free_variables(const T& x,
-                         Substitution sigma,
+                         const Substitution& sigma,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
@@ -219,7 +219,7 @@ T replace_free_variables(const T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_free_variables(T& x,
-                            Substitution sigma,
+                            const Substitution& sigma,
                             const VariableContainer& bound_variables,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
@@ -232,7 +232,7 @@ void replace_free_variables(T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_free_variables(const T& x,
-                         Substitution sigma,
+                         const Substitution& sigma,
                          const VariableContainer& bound_variables,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )

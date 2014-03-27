@@ -56,7 +56,7 @@ struct sort_expression_assignment: public std::unary_function<sort_expression, s
     rhs(rhs_)
   {}
 
-  const sort_expression& operator()(const sort_expression& x)
+  const sort_expression& operator()(const sort_expression& x) const
   {
     if (x == lhs)
     {
