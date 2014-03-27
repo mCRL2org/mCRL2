@@ -331,54 +331,6 @@ $\qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$%
 \end{tabular}%
 \end{equation*}
 
-\begin{equation*}
-\begin{tabular}{l}
-\textsc{ComputeControlFlowMarkingLocal(}$\mathcal{E}$, $X_{init}(e_{init})$, 
-$(V_{1},E_{1},B_{1}),\cdots ,(V_{K},E_{K},B_{K})$\textsc{)} \\ 
-\textbf{for} $k=1\cdots K$ \textbf{do} \\ 
-$\qquad $\textbf{for} $u=(X,p,d_{X}[p]=e)\in V_{k}$ \textbf{do} \\ 
-$\qquad \qquad marking(u):=sig(u)\cap \{d\mid (X,d)\in B_{k}\}$ \\ 
-$stable:=false$ \\ 
-\textbf{while} $\lnot stable$ \textbf{do} \\ 
-$\qquad stable:=true$ \\ 
-$\qquad $\textbf{for} $k=1\cdots K$ \textbf{do} \\ 
-$\qquad \qquad todo:=V_{k}$ \\ 
-$\qquad \qquad $\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad \qquad \qquad $\textbf{choose} $v=(X,p,d_{X}[p]=e)\in todo$ \\ 
-$\qquad \qquad \qquad todo:=todo\setminus \{v\}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{for }}(u,v,i)\in E_{k}\text{ \textbf{do}}
-$ \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $u=(Y,q,d_{Y}[q]=f)$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{for }}d_{X}[j]\in marking(v)\text{
-\textbf{do}}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad M:=(FV(data(\varphi _{Y},i)[j]\setminus
-marking(u))\cap \{d\mid (Y,d)\in B_{k}\}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset $ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup M$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\ 
-$\qquad \qquad $\textbf{for} $u=X(e)\in V_{k}$ \textbf{do} \\ 
-$\qquad \qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )%
-\text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $Y(f)=\mathrm{PVI}(\varphi _{X},i)
-$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{for }}l$ such that $%
-(Y,d_{Y}[l])\notin B_{k}\text{ \textbf{do}}\wedge d_{X}[j]\notin marking(u)$
-\\ 
-$\qquad \qquad \qquad \qquad \qquad M:=(\{d\mid (X,d)\in B_{k}\}\cap
-FV(f[l]))\setminus marking(u)$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset
-\wedge \exists k^{\prime }$ such that $(Y,d_{Y}[l])\in B_{k^{\prime }}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \wedge \exists
-w=(Y,q,d_{Y}[q]=g)\in V_{k^{\prime }}$ \textbf{such that} $d_{Y}[l]\in
-marking(w)$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup
-M$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{break}%
-\end{tabular}%
-\end{equation*}
-
 \newpage
 
 \subsection{Reset variables}
@@ -439,15 +391,11 @@ $\qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{Y},i)=Y\wedge
 
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ComputeLocalControlFlowGraph(}$\mathcal{E}$, $X_{init}(e_{init}),C$%
-\textsc{)} \\ 
-$V,E:=\emptyset ,\emptyset $ \\ 
-$\text{\textbf{for }}(X,j)\in C$ \textbf{do} \\ 
-$\qquad $\textbf{if} $(X=X_{init})$\textbf{\ then} \\ 
-$\qquad \qquad \text{\textbf{\ }}V,todo:=V\cup \{u\},todo\cup \{u\}$, where $%
-u=(X,d_{X}[j],e_{init}[j])$ \\ 
+\textsc{ComputeLocalControlFlowGraph(}$U,C$\textsc{)} \\ 
+$V,E:=U,\emptyset $ \\ 
+$todo:=U$ \\ 
 \textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad \text{\textbf{choose }}u=(X,d,e)\in todo$ \\ 
+$\qquad \text{\textbf{choose }}u=(X,k,d=e)\in todo$ \\ 
 $\qquad todo:=todo\setminus \{u\}$ \\ 
 $\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi _{X})\text{ 
 \textbf{do}}$ \\ 
@@ -455,11 +403,15 @@ $\qquad \qquad \text{\textbf{let }}Y=$ $\mathrm{pred}(\varphi _{X},i)$ \\
 $\qquad \qquad \text{\textbf{if }}d=\bot $ $\text{\textbf{then}}$ \\ 
 $\qquad \qquad \qquad \text{\textbf{if }}(Y,k^{\prime })\in C$ for some $%
 k^{\prime }$ \textbf{then} \\ 
-$\qquad \qquad \qquad \qquad v:=(Y,d_{Y}[k^{\prime }],e)$ \\ 
-$\qquad \qquad \qquad \qquad insert(V,E,todo,u,v)$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}\mathrm{dest}(X,i,k^{\prime
+})=e^{\prime }$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad v:=(Y,k^{\prime },d_{Y}[k^{\prime
+}]=e^{\prime })$ \\ 
+$\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,i,v)$ \\ 
 $\qquad \qquad \qquad \text{\textbf{else}}$ \\ 
-$\qquad \qquad \qquad \qquad v:=(Y,\bot ,e)$ \\ 
-$\qquad \qquad \qquad \qquad insert(V,E,todo,u,v)$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{if} $X\neq Y$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad v:=(Y,\bot ,?=?)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,i,v)$ \\ 
 $\qquad \qquad \text{\textbf{else}}$ \\ 
 $\qquad \qquad \qquad \text{\textbf{if }}(Y,k^{\prime })\in C$ for some $%
 k^{\prime }$ \textbf{then} \\ 
@@ -472,24 +424,24 @@ $\qquad \qquad \qquad \qquad \vee \left( Y\neq X\wedge \mathrm{source}%
 $\qquad \qquad \qquad \qquad \vee \left( Y\neq X\wedge \mathrm{source}%
 (X,i,k)=\bot \mathbf{\ }\wedge \mathrm{copy}(X,i,k)=e^{\prime }\right) $ 
 \textbf{then} \\ 
-$\qquad \qquad \qquad \qquad \qquad v:=(Y,d_{Y}[k^{\prime }],e^{\prime })$
-\\ 
-$\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,v)\qquad $ \\ 
+$\qquad \qquad \qquad \qquad \qquad v:=(Y,k^{\prime },d_{Y}[k^{\prime
+}]=e^{\prime })$ \\ 
+$\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,i,v)\qquad $ \\ 
 $\qquad \qquad \qquad \text{\textbf{else}}$ \\ 
-$\qquad \qquad \qquad \qquad v:=(Y,\bot ,e)$ \\ 
-$\qquad \qquad \qquad \qquad insert(V,E,todo,u,v)\qquad $ \\ 
+$\qquad \qquad \qquad \qquad v:=(Y,\bot ,?=?)$ \\ 
+$\qquad \qquad \qquad \qquad insert(V,E,todo,u,i,v)\qquad $ \\ 
 \textbf{return} $(V,E),$%
 \end{tabular}%
 \end{equation*}%
-where $insert(V,E,todo,u,v)$ is shorthand for the statements%
+where $insert(V,E,todo,u,i,v)$ is shorthand for the statements%
 \begin{equation*}
 \begin{array}{l}
 \text{\textbf{if} }v\notin todo\text{ \textbf{then} }todo:=todo\cup \{v\} \\ 
 V:=V\cup \{v\} \\ 
-E:=E\cup \{(u,v)\}%
+E:=E\cup \{(u,i,v)\}%
 \end{array}%
 \end{equation*}%
-\newpage
+\newpage 
 
 Let $(V$, $\mathrm{\longrightarrow })$ be a local control flow graph, and $%
 \mathrm{rules}$ be a predicate defined as%
@@ -499,8 +451,8 @@ Let $(V$, $\mathrm{\longrightarrow })$ be a local control flow graph, and $%
 \end{equation*}%
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ComputeBelongsNew(} $V$, $\mathrm{\longrightarrow }$, $\mathrm{rules}
-$\textsc{)} \\ 
+\textsc{ComputeBelongs(} $V$, $\mathrm{\longrightarrow }$, $\mathrm{rules}$%
+\textsc{)} \\ 
 $B_{k}:=\emptyset $ \\ 
 \textbf{for} $(X,j,v)\in V$ \textbf{do} \\ 
 $\qquad belongs:=\{m\mid d_{X}[m]$ is a data parameter of $X\}$ \\ 
@@ -516,8 +468,8 @@ $\qquad B_{k}:=B_{k}\cup \{(X,d_{X}[m])\mid m\in belongs\}$ \\
 \end{equation*}%
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ResetVariableLocalNew(}$i,$ $\sigma X(d_{X})=\varphi
-_{X},V_{1},\cdots ,V_{J},B_{1},\cdots ,B_{J},\mathrm{rules}$\textsc{)} \\ 
+\textsc{ResetVariableLocal(}$i,$ $\sigma X(d_{X})=\varphi _{X},V_{1},\cdots
+,V_{J},B_{1},\cdots ,B_{J},\mathrm{rules}$\textsc{)} \\ 
 \textbf{let }$Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
 $e^{\prime }:=e$ \\ 
 \textbf{for} $k=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
@@ -566,10 +518,10 @@ d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\
 },E^{\prime },B^{\prime }\right) $, $u$, $v$\textsc{)} \\ 
 \textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
 \textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
+\textbf{let} $Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
 $M:=\emptyset $ \\ 
 $\text{\textbf{for }}d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
-$\qquad $\textbf{if} $\left( Y,d_{Y}[l]\right) \notin B^{\prime }$ \textbf{%
-then} \\ 
+$\qquad $\textbf{if} $\left( Y,d_{Y}[l]\right) \notin B$ \textbf{then} \\ 
 $\qquad \qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
 d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\ 
 \textbf{return }$marking(u)\cup M$%
@@ -587,7 +539,7 @@ d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\
 ,(V_{J},E_{J},B_{J})$\textsc{)} \\ 
 \textbf{for} $j=1\cdots J$ \textbf{do} \\ 
 $\qquad $\textbf{for} $u=(X,n,d_{X}[n]=z)\in V_{j}$ \textbf{do} \\ 
-$\qquad \qquad marking(u):=sig(u)\cap \{d\mid (X,d)\in B_{j}\}$ \\ 
+$\qquad \qquad marking(u):=significant(u)\cap \{d\mid (X,d)\in B_{j}\}$ \\ 
 $stable:=false$ \\ 
 \textbf{while} $\lnot stable$ \textbf{do} \\ 
 $\qquad stableint:=false$ \\ 
@@ -602,13 +554,15 @@ $\qquad \qquad \qquad \qquad todo:=todo\setminus \{u\}$ \\
 $\qquad \qquad \qquad \qquad m:=marking(u)$ \\ 
 $\qquad \qquad \qquad \qquad marking(u):=$ \textsc{UpdateMarkingRule1(}$%
 (V_{j},E_{j},B_{j})$, $u$\textsc{)} \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{if }}m\neq marking(u)\wedge
-\exists i:(v,i,u)\in E_{j}$ \textbf{then} \\ 
-$\qquad \qquad \qquad \qquad \qquad stableint:=false$%
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}m\neq marking(u)$ \textbf{%
+then} \\ 
+$\qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{v\mid \exists
+i:(v,i,u)\in E_{j}\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad stableint:=false$ \\ 
+$\qquad stableext:=false$%
 \end{tabular}
 \\ 
 \begin{tabular}{l}
-$\qquad stableext:=false$ \\ 
 $\qquad $\textbf{while} $\lnot stableext$ \textbf{do} \\ 
 $\qquad \qquad stableext:=true$ \\ 
 $\qquad \qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
@@ -638,7 +592,8 @@ $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{%
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
 \qquad stableint:=false$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
-\qquad stableext:=false\qquad \qquad \qquad \qquad \qquad \qquad $%
+\qquad stableext:=false$ \\ 
+$\qquad stable:=stableint\wedge stableext$%
 \end{tabular}%
 \end{array}%
 \end{equation*}%
