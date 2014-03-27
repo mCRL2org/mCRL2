@@ -34,7 +34,7 @@ typedef lts::lts_lts_t::states_size_type lts2pbes_state_type;
 inline
 core::identifier_string make_identifier(const core::identifier_string& name, lts2pbes_state_type s)
 {
-  return core::identifier_string(std::string(name) + "@" + boost::lexical_cast<std::string>(s));
+  return core::identifier_string(std::string(name) + "'" + boost::lexical_cast<std::string>(s));
 }
 
 template <typename TermTraits>
