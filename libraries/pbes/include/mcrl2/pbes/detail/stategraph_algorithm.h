@@ -744,7 +744,7 @@ class stategraph_algorithm
                   // copy(X,i,n) is undefined
                   if (is_undefined(PVI_X_i.source, n) || is_undefined(PVI_X_i.dest, n))
                   {
-                    mCRL2log(log::debug, "stategraph") << print_cfp(X, n) << " is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << " (copy and source/dest undefined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << " (copy and source/dest undefined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
@@ -753,7 +753,7 @@ class stategraph_algorithm
                   // copy(X,i,n) is defined
                   if (!is_undefined(PVI_X_i.source, n) || !is_undefined(PVI_X_i.dest, n))
                   {
-                    mCRL2log(log::debug, "stategraph") << print_cfp(X, n) << " is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << " (copy defined and source/dest defined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << " (copy defined and source/dest defined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
@@ -808,7 +808,7 @@ class stategraph_algorithm
                   {
                     m_is_GCFP[Y][n] = false;
                     changed = true;
-                    mCRL2log(log::debug, "stategraph") << print_cfp(Y, n) << " is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(Y, n) << " is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << std::endl;
                   }
                 }
               }
@@ -845,7 +845,7 @@ class stategraph_algorithm
                   {
                     m_is_GCFP[X][m] = false;
                     changed = true;
-                    mCRL2log(log::debug, "stategraph") << print_cfp(X, m) << " is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, m) << " is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << std::endl;
                   }
                 }
               }
@@ -1166,6 +1166,17 @@ class stategraph_algorithm
       return result;
     }
 
+    std::string print_data_parameters(const core::identifier_string& X, std::set<std::size_t> I) const
+    {
+      std::ostringstream out;
+      out << "  data parameters for vertex " << X << ":";
+      for (auto q = I.begin(); q != I.end(); ++q)
+      {
+        out << " " << print_cfp(X, *q);
+      }
+      return out.str();
+    }
+
     // returns { n | !exists CFG with vertex (X, n) }
     std::set<std::size_t> data_parameter_indices(const core::identifier_string& X) const
     {
@@ -1186,6 +1197,7 @@ class stategraph_algorithm
           }
         }
       }
+      mCRL2log(log::debug1, "stategraph") << print_data_parameters(X, result) << std::endl;
       return result;
     }
 
@@ -1469,7 +1481,6 @@ class stategraph_algorithm
       V.self_check();
       m_local_control_flow_graphs.push_back(V);
       m_local_control_flow_graphs.back().compute_index();
-      mCRL2log(log::debug, "stategraph") << m_local_control_flow_graphs.back() << std::endl;
     }
 
     void compute_local_control_flow_graph(const local_control_flow_graph_vertex& u, const std::map<core::identifier_string, std::size_t>& component_index)
@@ -1533,7 +1544,7 @@ class stategraph_algorithm
     {
       for (auto i = m_local_control_flow_graphs.begin(); i != m_local_control_flow_graphs.end(); ++i)
       {
-        mCRL2log(log::debug, "stategraph") << *i << std::endl;
+        mCRL2log(log::debug, "stategraph") << "--- computed local control flow graph " << (i - m_local_control_flow_graphs.begin()) << "\n" << *i << std::endl;
       }
     }
 
@@ -1556,6 +1567,7 @@ class stategraph_algorithm
       remove_only_copy_components();
       compute_connected_component_values();
       compute_local_control_flow_graphs();
+      print_local_control_flow_graphs();
     }
 
     const stategraph_pbes& get_pbes() const
