@@ -237,6 +237,10 @@ void test_simplifying_rewriter()
   test_simplify(R, r, "forall n: Nat. val(b) && Y(n)"                                   , "val(b) && forall n: Nat. Y(n)");
   test_simplify(R, r, "forall n: Nat. val(b)"                                           , "val(b)");
   test_simplify(R, r, "forall m: Nat. val(m > 2) && X"                                  , "(forall m: Nat. val(m > 2)) && X");
+
+  // ticket 1273
+  test_simplify(R, r, "exists m: Nat. val(n == 0)"                                      , "val(n == 0)");
+
   // test_expressions(R, "Y(n+p) && Y(p+n)"                                                , "Y(n+p)");
   // test_expressions(R, "exists m:Nat. val( m== p) && Y(m)"                               , "Y(p)");
   // test_expressions(R, "X && (Y(p) || X)"                                                , "X");
