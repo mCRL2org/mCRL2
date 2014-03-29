@@ -69,7 +69,9 @@ public:
 
   data::data_specification data() const
   {
-    return data::data_specification(atermpp::aterm_cast<atermpp::aterm_appl>(data::detail::add_index((*this)[0])));
+    data::data_specification data_spec(atermpp::aterm_cast<atermpp::aterm_appl>(data::detail::add_index((*this)[0])));
+    data_spec.declare_data_specification_to_be_type_checked();  // Assume that the data specification in an lts is well typed.
+    return data_spec;
   }
 
   bool has_process_parameters() const
