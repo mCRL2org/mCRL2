@@ -36,6 +36,10 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
+#ifdef MCRL2_CUSTOM_PBES_REWRITER
+#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#endif
+
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
@@ -257,9 +261,14 @@ void test_enumerate_quantifiers_rewriter()
   data_spec.add_context_sort(data::sort_nat::nat());
   data::rewriter datar(data_spec);
   data::data_enumerator datae(data_spec, datar);
+  pbes_system::data_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
+
+#ifndef MCRL2_CUSTOM_PBES_REWRITER
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator> R(datarv, datae);
-  pbes_system::data_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
+#else
+  custom_enumerate_quantifiers_rewriter R(datar, datae);
+#endif
 
   // test_rewriters(N(R), N(r),  "(Y(0) && Y(1)) => (Y(1) && Y(0))"                                , "true");
   test_rewriters(N(R), N(r),  "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "Y(2) && Y(1) && Y(3) && Y(0)");
