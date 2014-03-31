@@ -378,7 +378,7 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
                     for (auto di = v.marking().begin(); di != v.marking().end(); ++di)
                     {
                       auto const& d = *di;
-                      if (!belongs_contains(Bk, Y, d))
+                      if (!belongs_contains(Bj, Y, d))
                       {
                         auto m = u.marking();
                         bool changed = update_marking_rule2(i, Vj, Bj, Vk, Bk, u, v);
