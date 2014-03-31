@@ -316,8 +316,15 @@ struct local_control_flow_graph
     // check if all targets of outgoing edges are part of the graph
     for (auto i = vertices.begin(); i != vertices.end(); ++i)
     {
-      auto outgoing_edges = i->outgoing_edges();
+      auto const& outgoing_edges = i->outgoing_edges();
       for (auto j = outgoing_edges.begin(); j != outgoing_edges.end(); ++j)
+      {
+        const local_control_flow_graph_vertex& v = *(j->first);
+        find_vertex(v);
+      }
+
+      auto const& incoming_edges = i->incoming_edges();
+      for (auto j = incoming_edges.begin(); j != incoming_edges.end(); ++j)
       {
         const local_control_flow_graph_vertex& v = *(j->first);
         find_vertex(v);
@@ -1477,7 +1484,7 @@ class stategraph_algorithm
           }
         }
       }
-      V.self_check();
+      // V.self_check();
       m_local_control_flow_graphs.push_back(V);
       m_local_control_flow_graphs.back().compute_index();
     }

@@ -217,7 +217,8 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
           auto const& eq_Y = *find_equation(m_pbes, Y);
           const predicate_variable& Ye = eq_X.predicate_variables()[i];
           auto const& e = Ye.X.parameters();
-          for (auto di = v.marking().begin(); di != v.marking().end(); ++di)
+          std::set<data::variable> marking = v.marking(); // N.B. We must make a copy, for the case u == v
+          for (std::set<data::variable>::const_iterator di = marking.begin(); di != marking.end(); ++di)
           {
             auto const& d = *di;
             std::size_t l = find_parameter_index(eq_Y.parameters(), d);
@@ -305,8 +306,8 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
             while (!todo.empty())
             {
               auto ti = todo.begin();
-              todo.erase(ti);
               const local_control_flow_graph_vertex& u = **ti;
+              todo.erase(ti);
               auto m = u.marking();
               bool changed = update_marking_rule1(Vj, Bj, u);
               if (changed)
