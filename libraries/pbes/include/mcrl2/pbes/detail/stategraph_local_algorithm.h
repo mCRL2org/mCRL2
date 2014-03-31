@@ -57,6 +57,26 @@ class stategraph_local_algorithm: public stategraph_algorithm
       return core::detail::print_set(v);
     }
 
+    // prints a subset of parameters of the equation corresponding to X
+    // I is a set of indices of parameters of the equation corresponding to X
+    std::string print_parameters(const core::identifier_string& X, const std::set<std::size_t>& I) const
+    {
+      auto const& eq_X = *find_equation(m_pbes, X);
+      auto const& param = eq_X.parameters();
+      std::ostringstream out;
+      out << "{";
+      for (auto i = I.begin(); i != I.end(); ++i)
+      {
+        if (i != I.begin())
+        {
+          out << ", ";
+        }
+        out << "(" << *i << ", " << param[*i] << ")";
+      }
+      out << "}";
+      return out.str();
+    }
+
     template <typename RulesPredicate>
     std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k, RulesPredicate rules)
     {
@@ -64,6 +84,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       for (auto p = Vk.vertices.begin(); p != Vk.vertices.end(); ++p)
       {
         auto const& X = p->name();
+        Bk[X]; // force the creation of an empty set corresponding to X
         auto const& eq_X = *find_equation(m_pbes, X);
         std::set<std::size_t> belongs = data_parameter_indices(X);
         mCRL2log(log::debug1, "stategraph") << "  initial belong set for vertex " << *p << " = " << print_belong_set(eq_X, belongs) << std::endl;
@@ -78,6 +99,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             if ((X_i.used.find(m) != X_i.used.end() || X_i.changed.find(m) != X_i.changed.end()) && !rules(X, i))
             {
               mCRL2log(log::debug1, "stategraph") << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs " << std::endl;
+              mCRL2log(log::debug2, "stategraph") << "  used = " << print_parameters(X_i.X.name(), X_i.used) << " changed = " << print_parameters(X_i.X.name(), X_i.changed) << std::endl;
               belongs.erase(j++);
             }
             else
