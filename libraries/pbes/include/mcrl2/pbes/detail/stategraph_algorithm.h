@@ -1306,6 +1306,7 @@ class stategraph_algorithm
         if (u.name() == Xinit)
         {
           data::data_expression d = nth_element(init.parameters(), u.index());
+          result.insert(d);
         }
       }
 
