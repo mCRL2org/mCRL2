@@ -357,6 +357,7 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
             for (auto vj = Vj.vertices.begin(); vj != Vj.vertices.end(); ++vj)
             {
               auto const& u = *vj;
+              mCRL2log(log::debug1, "stategraph") << " extend marking: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
               auto const& X = u.name();
               auto const& eq_X = *find_equation(m_pbes, X);
               auto const& predvars = eq_X.predicate_variables();
@@ -371,6 +372,7 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
                   for (auto vk = Vk.vertices.begin(); vk != Vk.vertices.end(); ++vk)
                   {
                     auto const& v = *vk;
+                    mCRL2log(log::debug1, "stategraph") << "     v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
                     if (v.name() != Y)
                     {
                       continue;
@@ -380,10 +382,12 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
                       auto const& d = *di;
                       if (!belongs_contains(Bj, Y, d))
                       {
+                        mCRL2log(log::debug1, "stategraph") << "     checking belong variable d = " << d << std::endl;
                         auto m = u.marking();
                         bool changed = update_marking_rule2(i, Vj, Bj, Vk, Bk, u, v);
                         if (changed)
                         {
+                          mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
                           stableint = false;
                           stableext = false;
                         }
