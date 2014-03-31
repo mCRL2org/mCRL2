@@ -1193,14 +1193,14 @@ class stategraph_algorithm
       {
         result.insert(i);
       }
-      for (auto k = m_local_control_flow_graphs.begin(); k != m_local_control_flow_graphs.end(); ++k)
+      for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
       {
-        auto const& V = k->vertices;
-        for (auto i = V.begin(); i != V.end(); ++i)
+        for (auto j = k->begin(); j != k->end(); ++j)
         {
-          if (i->name() == X && i->index() != data::undefined_index())
+          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
+          if (u.name() == X && u.index() != data::undefined_index())
           {
-            result.erase(i->index());
+            result.erase(u.index());
           }
         }
       }
