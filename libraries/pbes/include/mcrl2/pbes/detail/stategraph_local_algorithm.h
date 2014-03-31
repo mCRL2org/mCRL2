@@ -365,8 +365,12 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
               {
                 auto const& Ye = predvars[i];
                 auto const& Y = Ye.X.name();
-                for (std::size_t k = j + 1; k < J; k++)
+                for (std::size_t k = 0; k < J; k++)
                 {
+                  if (j == k)
+                  {
+                    continue;
+                  }
                   auto const& Vk = m_local_control_flow_graphs[k];
                   auto const& Bk = m_belongs[k];
                   for (auto vk = Vk.vertices.begin(); vk != Vk.vertices.end(); ++vk)
