@@ -570,6 +570,8 @@ $\qquad \qquad stableext:=true$ \\
 $\qquad \qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
 $\qquad \qquad \qquad $\textbf{for} $u=(X,n,d_{X}[n]=z)\in V_{j}$ \textbf{do}
 \\ 
+$\qquad \qquad \qquad \qquad $\textbf{if} $marking(u)=\{d\mid (X,d)\in
+B_{j}\}$ \textbf{then continue} \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}%
 (\varphi _{X})$ \textbf{do} \\ 
 $\qquad \qquad \qquad \qquad \qquad $\textbf{let} $Y(e)=\mathrm{PVI}(\varphi
@@ -581,16 +583,18 @@ $\qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}k\neq j$
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for} $%
 v=(Y,m,d_{Y}[m]=w)\in V_{k}$ \textbf{do} \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{if} $%
-marking(u)=\{d\mid (X,d)\in B_{j}\}$ \textbf{then continue} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad m:=marking(u)$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=$ 
+\exists v^{\prime }=(X,m^{\prime },D_{X}[m^{\prime }])\in V_{k}$ \textbf{%
+such that} $(v^{\prime },i,v)\in E_{k}$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad m:=marking(u)
+$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=$
 \textsc{UpdateMarkingRule2(}$i$, $(V_{j},E_{j},B_{j})$, $(V_{k},E_{k},B_{k})$%
 , $u$, $v$\textsc{)} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}%
-m\neq marking(u)$ \textbf{then} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{%
+\textbf{if }}m\neq marking(u)$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
 stableint:=false$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
 stableext:=false$ \\ 
 $\qquad stable:=stableint\wedge stableext$%
 \end{tabular}%

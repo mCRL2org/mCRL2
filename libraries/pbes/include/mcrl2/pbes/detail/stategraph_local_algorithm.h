@@ -288,6 +288,30 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
       return u.marking().size() != size;
     }
 
+    // returns true if there is a vertex u in V and an edge (u, i, v) in V, such that u.name() == X
+    bool has_incoming_edge(const local_control_flow_graph& V, const local_control_flow_graph_vertex& v, const core::identifier_string& X, std::size_t i) const
+    {
+      for (auto j = V.vertices.begin(); j != V.vertices.end(); ++j)
+      {
+        auto const& u = *j;
+        if (u.name() != X)
+        {
+          continue;
+        }
+        auto const& outgoing_edges = u.outgoing_edges();
+        auto k = outgoing_edges.find(&v);
+        if (k != outgoing_edges.end())
+        {
+          auto const& I = k->second;
+          if (I.find(i) != I.end())
+          {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
     void compute_control_flow_marking()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
@@ -361,6 +385,10 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
             for (auto vj = Vj.vertices.begin(); vj != Vj.vertices.end(); ++vj)
             {
               auto const& u = *vj;
+              if (u.marking().size() == Bj.size())
+              {
+                continue;
+              }
               mCRL2log(log::debug1, "stategraph") << " extend marking: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
               auto const& X = u.name();
               auto const& eq_X = *find_equation(m_pbes, X);
@@ -381,17 +409,20 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
                   {
                     auto const& v = *vk;
                     mCRL2log(log::debug1, "stategraph") << "     v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
-                    if (v.name() != Y || u.marking().size() == Bj.size())
+                    if (v.name() != Y)
                     {
                       continue;
                     }
-                    auto m = u.marking();
-                    bool changed = update_marking_rule2(i, Vj, Bj, Vk, Bk, u, v);
-                    if (changed)
+                    if (has_incoming_edge(Vk, v, X, i))
                     {
-                      mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
-                      stableint = false;
-                      stableext = false;
+                      auto m = u.marking();
+                      bool changed = update_marking_rule2(i, Vj, Bj, Vk, Bk, u, v);
+                      if (changed)
+                      {
+                        mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
+                        stableint = false;
+                        stableext = false;
+                      }
                     }
                   }
                 }

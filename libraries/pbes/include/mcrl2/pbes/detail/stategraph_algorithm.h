@@ -34,7 +34,7 @@ template <typename Container>
 typename Container::value_type pick_element(Container& v)
 {
   auto i = v.begin();
-  typename Container::value_type result = *i;
+  auto result = *i;
   v.erase(i);
   return result;
 }
