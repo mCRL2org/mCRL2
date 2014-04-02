@@ -381,6 +381,37 @@ struct local_control_flow_graph
     return result;
   }
 
+  const local_control_flow_graph_vertex& insert_vertex(const local_control_flow_graph_vertex& v_)
+  {
+    auto j = std::find(vertices.begin(), vertices.end(), v_);
+    if (j == vertices.end())
+    {
+      mCRL2log(log::debug1, "stategraph") << " add vertex v = " << v_ << std::endl;
+      auto k = vertices.insert(v_);
+      j = k.first;
+    }
+    return *j;
+  }
+
+  void insert_edge(const local_control_flow_graph_vertex& u,
+                   std::size_t i,
+                   const local_control_flow_graph_vertex& v
+                  )
+  {
+    // add edge (u, v)
+    auto q = u.outgoing_edges().find(&v);
+    if (u.outgoing_edges().find(&v) == u.outgoing_edges().end() || q->second.find(i) == q->second.end())
+    {
+      mCRL2log(log::debug1, "stategraph") << " add edge " << u << " -> " << v << std::endl;
+      u.insert_outgoing_edge(&v, i);
+      v.insert_incoming_edge(&u, i);
+    }
+    else
+    {
+      mCRL2log(log::debug1, "stategraph") << " edge already exists!" << std::endl;
+    }
+  }
+
   // Inserts an edge between the vertex u and the vertex v = (Y, k1, e1).
   void insert_edge(std::set<const local_control_flow_graph_vertex*>& todo,
                    const stategraph_pbes& p,
@@ -394,33 +425,16 @@ struct local_control_flow_graph
     mCRL2log(log::debug1, "stategraph") << " insert_edge" << std::endl;
     const stategraph_equation& eq_Y = *find_equation(p, Y);
     const data::variable& d1 = (k1 == data::undefined_index() ? data::undefined_variable() : eq_Y.parameters()[k1]);
-    local_control_flow_graph_vertex v_(Y, k1, d1, e1);
 
-    // check if v_ already exists in vertices; if not it is added
-    auto j = std::find(vertices.begin(), vertices.end(), v_);
-    if (j == vertices.end())
+    std::size_t size = vertices.size();
+    const local_control_flow_graph_vertex& v = insert_vertex(local_control_flow_graph_vertex(Y, k1, d1, e1));
+    if (vertices.size() != size)
     {
-      mCRL2log(log::debug1, "stategraph") << " add vertex v = " << v_ << std::endl;
-      auto k = vertices.insert(v_);
-      todo.insert(&(*k.first));
-      j = k.first;
+      todo.insert(&v);
     }
-    const local_control_flow_graph_vertex& v = *j; // v == v_, and v is an element of the set vertices
 
     mCRL2log(log::debug1, "stategraph") << " u.outgoing_edges() = " << u.print_outgoing_edges() << std::endl;
-
-    // add edge (u, v)
-    auto q = u.outgoing_edges().find(&v);
-    if (u.outgoing_edges().find(&v) == u.outgoing_edges().end() || q->second.find(edge_label) == q->second.end())
-    {
-      mCRL2log(log::debug1, "stategraph") << " add edge " << u << " -> " << v << std::endl;
-      u.insert_outgoing_edge(&v, edge_label);
-      v.insert_incoming_edge(&u, edge_label);
-    }
-    else
-    {
-      mCRL2log(log::debug1, "stategraph") << " edge already exists!" << std::endl;
-    }
+    insert_edge(u, edge_label, v);
     // self_check();
   }
 

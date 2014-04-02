@@ -132,6 +132,16 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
     }
 
+    std::string print_belongs(const std::map<core::identifier_string, std::set<data::variable> >& B) const
+    {
+      std::ostringstream out;
+      for (auto i = B.begin(); i != B.end(); ++i)
+      {
+        out << i->first << " -> " << core::detail::print_set(i->second) << std::endl;
+      }
+      return out.str();
+    }
+
     void print_belongs() const
     {
       std::ostringstream out;
@@ -139,11 +149,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       for (std::size_t k = 0; k < m_belongs.size(); k++)
       {
         out << "--- belongs relation for graph " << k << " ---" << std::endl;
-        const std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
-        for (std::map<core::identifier_string, std::set<data::variable> >::const_iterator i = Bk.begin(); i != Bk.end(); ++i)
-        {
-          out << core::pp(i->first) << " -> " << core::detail::print_set(i->second) << std::endl;
-        }
+        auto const& Bk = m_belongs[k];
+        out << print_belongs(Bk);
       }
       mCRL2log(log::debug, "stategraph") << out.str() << std::endl;
     }
@@ -465,6 +472,56 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
       }
     }
 
+    void remove_belongs(std::map<core::identifier_string, std::set<data::variable> >& B,
+                        const std::map<core::identifier_string, std::set<data::variable> >& B1)
+    {
+      for (auto i = B1.begin(); i != B1.end(); ++i)
+      {
+        auto const& X = i->first;
+        auto const& V = i->second;
+        auto& B_X = B[X];
+        for (auto v = V.begin(); v != V.end(); ++v)
+        {
+          B_X.erase(*v);
+        }
+      }
+    }
+
+    void compute_extra_local_control_flow_graph()
+    {
+      local_control_flow_graph V;
+      std::map<core::identifier_string, std::set<data::variable> > B;
+
+      auto const& equations = m_pbes.equations();
+      for (auto k = equations.begin(); k != equations.end(); ++k)
+      {
+        auto const& eq_X = *k;
+        auto const& X = eq_X.variable().name();
+        auto const& u = V.insert_vertex(local_control_flow_graph_vertex(X, data::undefined_data_expression()));
+
+        auto const& d_X = eq_X.parameters();
+        B[X].insert(d_X.begin(), d_X.end());
+
+        auto const& predvars = eq_X.predicate_variables();
+        for (std::size_t i = 0; i < predvars.size(); i++)
+        {
+          const predicate_variable& X_i = predvars[i];
+          for (auto j = m_belongs.begin(); j != m_belongs.end(); ++j)
+          {
+            auto const& Bj = *j;
+            remove_belongs(B, Bj);
+          }
+          auto const& v = V.insert_vertex(local_control_flow_graph_vertex(X_i.X.name(), data::undefined_data_expression()));
+          V.insert_edge(u, i, v);
+        }
+      }
+      m_local_control_flow_graphs.push_back(V);
+      m_local_control_flow_graphs.back().compute_index();
+      m_belongs.push_back(B);
+      mCRL2log(log::debug, "stategraph") << "--- extra local control flow graph\n" << m_local_control_flow_graphs.back() << std::endl;
+      mCRL2log(log::debug, "stategraph") << "--- belongs relation for extra graph\n" << print_belongs(B);
+    }
+
   public:
     stategraph_local_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
                                bool use_alternative_lcfp_criterion = false,
@@ -480,6 +537,7 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
       super::run();
       compute_belongs();
       print_belongs();
+      compute_extra_local_control_flow_graph();
       compute_control_flow_marking();
       print_control_flow_marking();
     }
