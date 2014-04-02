@@ -500,7 +500,12 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
         auto const& u = V.insert_vertex(local_control_flow_graph_vertex(X, data::undefined_data_expression()));
 
         auto const& d_X = eq_X.parameters();
-        B[X].insert(d_X.begin(), d_X.end());
+        B[X]; // force creation of empty set corresponding to X
+        std::set<std::size_t> I = data_parameter_indices(X);
+        for (auto i = I.begin(); i != I.end(); ++i)
+        {
+          B[X].insert(d_X[*i]);
+        }
 
         auto const& predvars = eq_X.predicate_variables();
         for (std::size_t i = 0; i < predvars.size(); i++)
