@@ -31,8 +31,8 @@ namespace detail
 class ss_solution
 {
   protected:
-    data_expression_list m_solution;                   // A list containing the solution of a condition in internal format.
-    data_expression m_evaluated_condition;             // The condition after substituting the solution, in internal format.
+    data_expression_list m_solution;                   // A list containing a solution of a condition.
+    data_expression m_evaluated_condition;             // The condition after substituting the solution.
 
   public:
 
@@ -59,9 +59,9 @@ class fs_expr
     variable_list m_vars;                              // The vars over which enumeration must take place.
     variable_list m_substituted_vars;                  // Variables for which a substitution exist. The substituted
                                                        // values are given in m_vals;
-    data_expression_list m_vals;  // Data expressions in internal format that are to be substituted
+    data_expression_list m_vals;                       // Data expressions that are to be substituted
                                                        // in the variables in m_substituted_vars.
-    data_expression m_expr;                        // data_expression in internal format to which internal variables
+    data_expression m_expr;                            // data_expression to which internal variables
                                                        // must adhere.
 
   public:
@@ -120,7 +120,7 @@ class EnumeratorSolutionsStandard
                                                 // desired truth value, then the variable solution_is_exact is set. */
 
     variable_list enum_vars;                    // The variables over which a solution is searched.
-    data_expression enum_expr;              // Condition to be satisfied in internal format.
+    data_expression enum_expr;              // Condition to be satisfied.
     substitution_type& enum_sigma;
 
     std::deque < fs_expr> fs_stack;
@@ -203,12 +203,12 @@ class EnumeratorSolutionsStandard
     }
  
    /**
-    * \brief Get next solution as a term_list in internal format if available.
+    * \brief Get next solution as a data_expression_list if available.
     * \param[out] evaluated_condition This optional parameter is used to return the
     *             condition in which solution is substituted. 
     * \param[out] solution Place to store the solutions.
-    *             The aterm_list solution contains solutions for the variables in internal
-    *             format in the same order as the variable list Vars.
+    *             The data_expression_list solution contains solutions for the variables
+    *             in the same order as the variable list Vars.
     * \param[out] solution_possible. This boolean indicates whether it was possible to
     *             generate a solution. If there is a variable of a sort without a constructor
     *             sort, it is not possible to generate solutions. Similarly, it can be
@@ -228,21 +228,21 @@ class EnumeratorSolutionsStandard
     **/
 
     bool next(data_expression& evaluated_condition,
-              atermpp::term_list<data_expression>& solution, 
+              data_expression_list& solution, 
               bool& solution_possible);
 
-  /** \brief Get next solution as a term_list in internal format.
+  /** \brief Get next solution as a data_expression_list.
    **/
-    bool next(atermpp::term_list<data_expression>& solution);
+    bool next(data_expression_list& solution);
 
-  /** \brief Get next solution as a term_list in internal format.
+  /** \brief Get next solution as a data_expression_list.
    **/
     bool next(data_expression& evaluated_condition,
-              atermpp::term_list<data_expression>& solution);
+              data_expression_list& solution);
 
-  /** \brief Get next solution as a term_list in internal format.
+  /** \brief Get next solution as a data_expression_list.
    **/
-    bool next(atermpp::term_list<data_expression>& solution, 
+    bool next(data_expression_list& solution, 
               bool& solution_possible);
 
 
@@ -266,7 +266,7 @@ class EnumeratorSolutionsStandard
                  const variable_list& substituted_vars,
                  const data_expression_list& exprs) const;
 
-    atermpp::term_list < data_expression> build_solution2(
+    data_expression_list build_solution2(
                  const variable_list& vars,
                  const variable_list& substituted_vars,
                  const data_expression_list& exprs) const;
