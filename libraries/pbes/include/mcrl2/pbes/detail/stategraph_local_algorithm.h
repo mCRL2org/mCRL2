@@ -216,6 +216,36 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
       return m_datar(x, sigma);
     }
 
+    std::set<data::variable> marking_update(const local_control_flow_graph_vertex& u,
+                                            std::size_t i,
+                                            const data::variable& d,
+                                            const data::data_expression_list& e,
+                                            const stategraph_equation& eq_Y,
+                                            const std::map<core::identifier_string, std::set<data::variable> >& B)
+    {
+#ifdef MCRL2_CACHE_MARKING_UPDATES
+      // check if the update is cached in u
+      auto p = std::make_pair(i, d);
+      auto const& marking_update = u.marking_update();
+      auto j = marking_update.find(p);
+      if (j != marking_update.end())
+      {
+        return j->second;
+      } 
+#endif
+      // compute the value
+      auto const& X = u.name();
+      std::size_t l = find_parameter_index(eq_Y.parameters(), d);
+      data::mutable_map_substitution<> sigma;
+      sigma[u.variable()] = u.value();
+      auto W = FV(rewr(nth_element(e, l), sigma));
+      std::set<data::variable> V = belongs_intersection(W, B, X);
+#ifdef MCRL2_CACHE_MARKING_UPDATES
+      u.set_marking_update(i, d, V);
+#endif
+      return V;
+    }
+
     // updates u.marking
     // returns true if u.marking has changed
     bool update_marking_rule1(const local_control_flow_graph& V,
@@ -243,11 +273,8 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
           for (std::set<data::variable>::const_iterator di = marking.begin(); di != marking.end(); ++di)
           {
             auto const& d = *di;
-            std::size_t l = find_parameter_index(eq_Y.parameters(), d);
-            data::mutable_map_substitution<> sigma;
-            sigma[u.variable()] = u.value();
-            auto W = FV(rewr(nth_element(e, l), sigma));
-            u.set_marking(data::detail::set_union(u.marking(), belongs_intersection(W, B, X)));
+            auto update = marking_update(u, i, d, e, eq_Y, B);
+            u.set_marking(data::detail::set_union(u.marking(), update));
           }
         }
       }
@@ -256,12 +283,10 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
 
     // updates u.marking
     // returns true if u.marking has changed
-    bool update_marking_rule2(std::size_t i,
-                              const local_control_flow_graph& V,
+    bool update_marking_rule2(const local_control_flow_graph& V,
                               const std::map<core::identifier_string, std::set<data::variable> >& B,
-                              const local_control_flow_graph& V1,
-                              const std::map<core::identifier_string, std::set<data::variable> >& B1,
                               const local_control_flow_graph_vertex& u,
+                              std::size_t i,
                               const local_control_flow_graph_vertex& v
                              )
     {
@@ -279,11 +304,8 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
         {
           continue;
         }
-        std::size_t l = find_parameter_index(eq_Y.parameters(), d);
-        data::mutable_map_substitution<> sigma;
-        sigma[u.variable()] = u.value();
-        auto W = FV(rewr(nth_element(e, l), sigma));
-        u.set_marking(data::detail::set_union(u.marking(), belongs_intersection(W, B, X)));
+        auto update = marking_update(u, i, d, e, eq_Y, B);
+        u.set_marking(data::detail::set_union(u.marking(), update));
       }
       return u.marking().size() != size;
     }
@@ -404,7 +426,6 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
                     continue;
                   }
                   auto const& Vk = m_local_control_flow_graphs[k];
-                  auto const& Bk = m_belongs[k];
                   for (auto vk = Vk.vertices.begin(); vk != Vk.vertices.end(); ++vk)
                   {
                     auto const& v = *vk;
@@ -416,7 +437,7 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
                     if (has_incoming_edge(Vk, v, X, i))
                     {
                       auto m = u.marking();
-                      bool changed = update_marking_rule2(i, Vj, Bj, Vk, Bk, u, v);
+                      bool changed = update_marking_rule2(Vj, Bj, u, i, v);
                       if (changed)
                       {
                         mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
