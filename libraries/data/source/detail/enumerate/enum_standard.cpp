@@ -403,20 +403,18 @@ bool EnumeratorSolutionsStandard::next(
 {
   data_expression_vector var_array; // TODO: locating var_array on stack is most likely more efficient.
 
-  while (ss_stack.empty() && !fs_stack.empty())
+  while (!fs_stack.empty())
   {
     fs_expr e=fs_stack.front();
     EliminateVars(e);
     fs_stack.pop_front();
     if (e.vars().empty() || e.expr()==sort_bool::false_())
     {
-      if (e.expr()!=sort_bool::false_()) // So e.vars() is empty.
-      {
-        ss_stack.push_back(
-                       ss_solution(build_solution(
-                                        enum_vars,e.substituted_vars(),
-                                        e.vals()),
-                                   e.expr()));
+      if (e.expr()!=sort_bool::false_()) 
+      { // A solution is found. Construct and return it.
+        solution = build_solution(enum_vars,e.substituted_vars(), e.vals());
+        evaluated_condition = e.expr();
+        return true;
       }
     }
     else
@@ -623,17 +621,8 @@ bool EnumeratorSolutionsStandard::next(
       }
     }
   }
-  if (!ss_stack.empty())
-  {
-    solution = ss_stack.back().solution();
-    evaluated_condition = ss_stack.back().evaluated_condition();
-    ss_stack.pop_back();
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+  /* There are no more solutions */
+  return false;
 }
 
 bool EnumeratorSolutionsStandard::next(data_expression_list& solution)

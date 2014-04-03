@@ -28,31 +28,6 @@ namespace data
 namespace detail
 {
 
-class ss_solution
-{
-  protected:
-    data_expression_list m_solution;                   // A list containing a solution of a condition.
-    data_expression m_evaluated_condition;             // The condition after substituting the solution.
-
-  public:
-
-    // Constructor.
-    ss_solution(const data_expression_list& solution, const data_expression evaluated_condition) :
-      m_solution(solution),
-      m_evaluated_condition(evaluated_condition)
-    {} 
-   
-    data_expression evaluated_condition() const
-    { 
-      return m_evaluated_condition;
-    }
-
-    data_expression_list solution() const
-    {
-      return m_solution; 
-    }
-};
-
 class fs_expr
 {
   protected:
@@ -124,7 +99,6 @@ class EnumeratorSolutionsStandard
     substitution_type& enum_sigma;
 
     std::deque < fs_expr> fs_stack;
-    std::vector< ss_solution > ss_stack;
 
     size_t used_vars;
     size_t max_vars;
