@@ -36,6 +36,65 @@ struct default_rules_predicate
   }
 };
 
+class belongs_relation
+{
+  protected:
+    typedef std::map<core::identifier_string, std::set<data::variable> > belongs_map;
+
+    belongs_map m_belongs;
+
+  public:
+    const std::set<data::variable>& operator[](const core::identifier_string& X) const
+    {
+      auto i = m_belongs.find(X);
+      if (i == m_belongs.end())
+      {
+        throw mcrl2::runtime_error("unknown key encountered in belongs_relation::operator[]");
+      }
+      return i->second;
+    }
+
+    belongs_map::iterator begin()
+    {
+      return m_belongs.begin();
+    }
+
+    belongs_map::const_iterator begin() const
+    {
+      return m_belongs.begin();
+    }
+
+    belongs_map::iterator end()
+    {
+      return m_belongs.end();
+    }
+
+    belongs_map::const_iterator end() const
+    {
+      return m_belongs.end();
+    }
+
+    belongs_map::iterator find(const core::identifier_string& X)
+    {
+      return m_belongs.find(X);
+    }
+
+    belongs_map::const_iterator find(const core::identifier_string& X) const
+    {
+      return m_belongs.find(X);
+    }
+
+    std::set<data::variable>& operator[](const core::identifier_string& X)
+    {
+      return m_belongs[X];
+    }
+
+    std::size_t size() const
+    {
+      return m_belongs.size();
+    }
+};
+
 /// \brief Algorithm class for the local variant of the stategraph algorithm
 class stategraph_local_algorithm: public stategraph_algorithm
 {
@@ -44,7 +103,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
   protected:
     // m_belongs[k] corresponds with m_control_flow_graphs[k]
-    std::vector<std::map<core::identifier_string, std::set<data::variable> > > m_belongs;
+    std::vector<belongs_relation> m_belongs;
 
     // prints a belong set
     std::string print_belong_set(const stategraph_equation& eq, const std::set<std::size_t>& belongs) const
@@ -78,9 +137,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
     template <typename RulesPredicate>
-    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k, RulesPredicate rules)
+    belongs_relation compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k, RulesPredicate rules)
     {
-      std::map<core::identifier_string, std::set<data::variable> > Bk;
+      belongs_relation Bk;
       for (auto p = Vk.vertices.begin(); p != Vk.vertices.end(); ++p)
       {
         auto const& X = p->name();
@@ -127,12 +186,12 @@ class stategraph_local_algorithm: public stategraph_algorithm
         mCRL2log(log::debug, "stategraph") << "--- compute belongs for graph " << k << " ---" << std::endl;
         auto const& Vk = m_local_control_flow_graphs[k];
         auto const& values_k = m_connected_components_values[k];
-        std::map<core::identifier_string, std::set<data::variable> > Bk = compute_belongs(Vk, values_k, default_rules_predicate(Vk));
+        belongs_relation Bk = compute_belongs(Vk, values_k, default_rules_predicate(Vk));
         m_belongs.push_back(Bk);
       }
     }
 
-    std::string print_belongs(const std::map<core::identifier_string, std::set<data::variable> >& B) const
+    std::string print_belongs(const belongs_relation& B) const
     {
       std::ostringstream out;
       for (auto i = B.begin(); i != B.end(); ++i)
@@ -190,7 +249,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
       return i - d_Y.begin();
     }
 
-    bool belongs_contains(const std::map<core::identifier_string, std::set<data::variable> >& B,
+    bool belongs_contains(const belongs_relation& B,
                           const core::identifier_string& X,
                           const data::variable& d
                          ) const
@@ -205,7 +264,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
 
     // returns the intersection of V with { d | (X, d) in B }
     std::set<data::variable> belongs_intersection(const std::set<data::variable>& V,
-                                                  const std::map<core::identifier_string, std::set<data::variable> >& B,
+                                                  const belongs_relation& B,
                                                   const core::identifier_string& X
                                                  )
     {
@@ -228,7 +287,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                                             const data::variable& d,
                                             const data::data_expression_list& e,
                                             const stategraph_equation& eq_Y,
-                                            const std::map<core::identifier_string, std::set<data::variable> >& B)
+                                            const belongs_relation& B)
     {
 #ifdef MCRL2_CACHE_MARKING_UPDATES
       // check if the update is cached in u
@@ -255,7 +314,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
 
     // updates u.marking
     // returns true if u.marking has changed
-    bool update_marking_rule(const std::map<core::identifier_string, std::set<data::variable> >& B,
+    bool update_marking_rule(const belongs_relation& B,
                              const local_control_flow_graph_vertex& u,
                              std::size_t i,
                              const local_control_flow_graph_vertex& v,
@@ -306,13 +365,6 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
       return false;
     }
 
-    std::size_t belong_size(const std::map<core::identifier_string, std::set<data::variable> >& B, const core::identifier_string& X) const
-    {
-      auto i = B.find(X);
-      assert(i != B.end());
-      return i->second.size();
-    }
-
     void compute_control_flow_marking()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
@@ -356,7 +408,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
               auto const& u = **ti;
               auto const& X = u.name();
               todo.erase(ti);
-              if (u.marking().size() == belong_size(Bj, X))
+              if (u.marking().size() == Bj[X].size())
               {
                 continue;
               }
@@ -401,7 +453,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
             {
               auto const& u = *vj;
               auto const& X = u.name();
-              if (u.marking().size() == belong_size(Bj, X))
+              if (u.marking().size() == Bj[X].size())
               {
                 continue;
               }
@@ -458,8 +510,8 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
       }
     }
 
-    void remove_belongs(std::map<core::identifier_string, std::set<data::variable> >& B,
-                        const std::map<core::identifier_string, std::set<data::variable> >& B1)
+    void remove_belongs(belongs_relation& B,
+                        const belongs_relation& B1)
     {
       for (auto i = B1.begin(); i != B1.end(); ++i)
       {
@@ -476,7 +528,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
     void compute_extra_local_control_flow_graph()
     {
       local_control_flow_graph V;
-      std::map<core::identifier_string, std::set<data::variable> > B;
+      belongs_relation B;
 
       auto const& equations = m_pbes.equations();
       for (auto k = equations.begin(); k != equations.end(); ++k)
