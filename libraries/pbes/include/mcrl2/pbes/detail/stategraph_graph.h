@@ -98,12 +98,10 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
 
     mutable std::map<const local_control_flow_graph_vertex*, std::set<std::size_t> > m_incoming_edges;
 
-#ifdef MCRL2_CACHE_MARKING_UPDATES
-    // (i, l) is mapped to FV(rewr(e[l], [d_X[n] := z]))  {d | (X, d)  B},
+    // (i, l) is mapped to FV(rewr(e[l], [d_X[n] := z])) intersect {d | (X, d) in B},
     // where Y(e) = PVI(phi_X, i), d_X[n] = variable(), z = value(), and B is the belongs relation
     // corresponding to the graph of this vertex
     mutable std::map<std::pair<std::size_t, data::variable>, std::set<data::variable> > m_marking_update;
-#endif
 
   public:
     local_control_flow_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable, const data::data_expression& value)
@@ -168,20 +166,16 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
 
     std::string print_outgoing_edges() const;
 
-#ifdef MCRL2_CACHE_MARKING_UPDATES
-    const std::set<data::variable>& set_marking_update(std::size_t i, const data::variable& d, const std::set<data::variable>& V) const
+    void set_marking_update(std::size_t i, const data::variable& d, const std::set<data::variable>& V) const
     {
       std::pair<std::size_t, data::variable> p(i, d);
-      auto j = m_marking_update.insert(std::make_pair(p, V));
-      assert(j.second);
-      return j.first->second;
+      m_marking_update[p] = V;
     }
 
     const std::map<std::pair<std::size_t, data::variable>, std::set<data::variable> >& marking_update() const
     {
       return m_marking_update;
     }
-#endif
 };
 
 inline

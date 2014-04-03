@@ -105,6 +105,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
     // m_belongs[k] corresponds with m_control_flow_graphs[k]
     std::vector<belongs_relation> m_belongs;
 
+    // if true, marking updates will be cached in the nodes of the local CFGs
+    bool m_cache_marking_updates;
+
     // if true, an optimization will be applied in the reset_variable procedure
     bool m_use_marking_optimization;
 
@@ -296,18 +299,20 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                                             const stategraph_equation& eq_Y,
                                             const belongs_relation& B)
     {
-#ifdef MCRL2_CACHE_MARKING_UPDATES
-      // check if the update is cached in u
-      auto p = std::make_pair(i, d);
-      auto const& marking_update = u.marking_update();
-      auto j = marking_update.find(p);
-      if (j != marking_update.end())
+      if (m_cache_marking_updates)
       {
-        m_marking_rewrite_count++;
-        m_marking_rewrite_cached_count++;
-        return j->second;
+        // check if the update is cached in u
+        std::pair<std::size_t, data::variable> p(i, d);
+        auto const& marking_update = u.marking_update();
+        auto j = marking_update.find(p);
+        if (j != marking_update.end())
+        {
+          m_marking_rewrite_count++;
+          m_marking_rewrite_cached_count++;
+          return j->second;
+        }
       }
-#endif
+
       // compute the value
       auto const& X = u.name();
       std::size_t l = find_parameter_index(eq_Y.parameters(), d);
@@ -315,9 +320,10 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
       sigma[u.variable()] = u.value();
       auto W = FV(rewr(nth_element(e, l), sigma));
       std::set<data::variable> V = belongs_intersection(W, B, X);
-#ifdef MCRL2_CACHE_MARKING_UPDATES
-      u.set_marking_update(i, d, V);
-#endif
+      if (m_cache_marking_updates)
+      {
+        u.set_marking_update(i, d, V);
+      }
       m_marking_rewrite_count++;
       return V;
     }
@@ -588,9 +594,11 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                                bool use_alternative_lcfp_criterion = false,
                                bool use_alternative_gcfp_relation = false,
                                bool use_alternative_gcfp_consistency = false,
+                               bool cache_marking_updates = false,
                                bool use_marking_optimization = false
                               )
       : stategraph_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency),
+        m_cache_marking_updates(cache_marking_updates),
         m_use_marking_optimization(use_marking_optimization),
         m_marking_rewrite_count(0),
         m_marking_rewrite_cached_count(0)

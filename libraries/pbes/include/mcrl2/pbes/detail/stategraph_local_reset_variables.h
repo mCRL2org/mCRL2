@@ -131,9 +131,10 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
                                     bool use_alternative_lcfp_criterion = false,
                                     bool use_alternative_gcfp_relation = false,
                                     bool use_alternative_gcfp_consistency = false,
+                                    bool cache_marking_updates = false,
                                     bool use_marking_optimization = false
                                    )
-      : stategraph_local_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency, use_marking_optimization),
+      : stategraph_local_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency, cache_marking_updates, use_marking_optimization),
         m_original_pbes(p)
     {}
 
