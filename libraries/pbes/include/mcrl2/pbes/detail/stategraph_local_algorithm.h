@@ -404,10 +404,8 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
             }
             while (!todo.empty())
             {
-              auto ti = todo.begin();
-              auto const& u = **ti;
+              auto const& u = *pick_element(todo);
               auto const& X = u.name();
-              todo.erase(ti);
               if (u.marking().size() == Bj[X].size())
               {
                 continue;
