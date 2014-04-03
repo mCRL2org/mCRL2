@@ -361,8 +361,6 @@ class quantifier_enumerator
         return Rphi;
       }
 
-      typedef std::pair<variable_type, data_term_type> data_assignment;
-
       std::set<term_type> A;
       std::vector<std::vector<data_term_type> > D;
       std::set<variable_type> dependencies;

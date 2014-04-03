@@ -501,7 +501,7 @@ corresponding belongs relation.%
 \begin{eqnarray*}
 &&%
 \begin{tabular}{l}
-\textsc{UpdateMarkingRule1(}$(V,E,B)$, $u$, $i$, $v$\textsc{)} \\ 
+\textsc{UpdateMarkingRule1(}$B$, $u$, $i$, $v$\textsc{)} \\ 
 \textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
 \textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
 \textbf{let} $Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
@@ -515,8 +515,7 @@ d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\
 && \\
 &&%
 \begin{tabular}{l}
-\textsc{UpdateMarkingRule2(}$\left( V,E,B\right) $, $u$, $i$, $v$\textsc{)}
-\\ 
+\textsc{UpdateMarkingRule2(}$B$, $u$, $i$, $v$\textsc{)} \\ 
 \textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
 \textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
 \textbf{let} $Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
@@ -557,7 +556,7 @@ B_{j}\}$ \textbf{then continue} \\
 $\qquad \qquad \qquad \qquad $\textbf{for} $(u,i,v)\in E_{j}$ \textbf{do} \\ 
 $\qquad \qquad \qquad \qquad \qquad m:=marking(u)$ \\ 
 $\qquad \qquad \qquad \qquad \qquad marking(u):=$ \textsc{UpdateMarkingRule1(%
-}$(V_{j},E_{j},B_{j})$, $u$, $i$, $v$\textsc{)} \\ 
+}$B_{j}$, $u$, $i$, $v$\textsc{)} \\ 
 $\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}m\neq marking(u)$ 
 \textbf{then} \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{v^{\prime }\mid
@@ -590,8 +589,7 @@ such that} $(v^{\prime },i,v)\in E_{k}$ \textbf{then} \\
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad m:=marking(u)
 $ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=$
-\textsc{UpdateMarkingRule2(}$(V_{j},E_{j},B_{j})$, $u$, $i$, $v$\textsc{)}
-\\ 
+\textsc{UpdateMarkingRule2(}$B_{j}$, $u$, $i$, $v$\textsc{)} \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{%
 \textbf{if }}m\neq marking(u)$ \textbf{then} \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad

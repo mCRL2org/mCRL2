@@ -53,7 +53,6 @@ class pbesinst_symbolic_rewriter
     term_type operator()(const term_type& x) const
     {
       typedef data::mutable_map_substitution<std::map< variable_type, data_term_type> > substitution_function;
-      typedef core::term_traits<term_type> tr;
       substitution_function sigma;
       detail::enumerate_quantifiers_builder<term_type, data::rewriter_with_variables, data::data_enumerator, substitution_function> r(m_rewriter_with_variables, m_enumerator, m_enumerate_infinite_sorts, m_skip_data);
       term_type result = r(x, sigma);
@@ -64,7 +63,6 @@ class pbesinst_symbolic_rewriter
     term_type operator()(const term_type& x, SubstitutionFunction sigma) const
     {
       typedef data::mutable_substitution_composer<SubstitutionFunction> substitution_function;
-      typedef core::term_traits<term_type> tr;
       detail::enumerate_quantifiers_builder<term_type, data::rewriter_with_variables, data::data_enumerator, substitution_function> r(m_rewriter_with_variables, m_enumerator, m_enumerate_infinite_sorts, m_skip_data);
       term_type result = r(x, substitution_function(sigma));
       return result;

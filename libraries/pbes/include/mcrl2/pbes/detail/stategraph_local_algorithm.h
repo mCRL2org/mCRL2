@@ -255,8 +255,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
 
     // updates u.marking
     // returns true if u.marking has changed
-    bool update_marking_rule(const local_control_flow_graph& V,
-                             const std::map<core::identifier_string, std::set<data::variable> >& B,
+    bool update_marking_rule(const std::map<core::identifier_string, std::set<data::variable> >& B,
                              const local_control_flow_graph_vertex& u,
                              std::size_t i,
                              const local_control_flow_graph_vertex& v,
@@ -373,7 +372,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                 {
                   // consider edge (u, i, v)
                   std::size_t i = *ii;
-                  bool changed = update_marking_rule(Vj, Bj, u, i, v, false);
+                  bool changed = update_marking_rule(Bj, u, i, v, false);
                   if (changed)
                   {
                     mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
@@ -431,7 +430,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                     if (has_incoming_edge(Vk, v, X, i))
                     {
                       auto m = u.marking();
-                      bool changed = update_marking_rule(Vj, Bj, u, i, v, true);
+                      bool changed = update_marking_rule(Bj, u, i, v, true);
                       if (changed)
                       {
                         mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
