@@ -328,7 +328,8 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
       auto const& eq_Y = *find_equation(m_pbes, Y);
       const predicate_variable& Ye = eq_X.predicate_variables()[i];
       auto const& e = Ye.X.parameters();
-      for (auto di = v.marking().begin(); di != v.marking().end(); ++di)
+      auto m = v.marking(); // N.B. a copy must be made, to handle the case u == v properly
+      for (auto di = m.begin(); di != m.end(); ++di)
       {
         auto const& d = *di;
         if (check_belongs && belongs_contains(B, Y, d))
