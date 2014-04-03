@@ -498,21 +498,22 @@ $\qquad $\textbf{if} $\lnot relevant$ \textbf{then} $e^{\prime
 
 Let $\left( V,E\right) $ be a local control flow graph, and $B$ the
 corresponding belongs relation.%
-\begin{equation*}
+\begin{eqnarray*}
+&&%
 \begin{tabular}{l}
-\textsc{UpdateMarkingRule1(}$(V,E,B)$, $u$\textsc{)} \\ 
+\textsc{UpdateMarkingRule1(}$(V,E,B)$, $u$, $i$, $v$\textsc{)} \\ 
 \textbf{let} $u=\left( X,n,d_{X}[n]=z\right) $ \\ 
+\textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
+\textbf{let} $Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
 $M:=\emptyset $ \\ 
-\textbf{for} $(u,i,v)\in E$ \textbf{do} \\ 
-$\qquad $\textbf{let} $v=\left( Y,m,d_{Y}[m]=w\right) $ \\ 
-$\qquad \text{\textbf{for }}d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
-$\qquad \qquad $\textbf{let} $Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
-$\qquad \qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
+$\text{\textbf{for }}d_{Y}[l]\in marking(v)\text{ \textbf{do}}$ \\ 
+$\qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
 d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\ 
 \textbf{return }$marking(u)\cup M$%
-\end{tabular}%
-\end{equation*}%
-\begin{equation*}
+\end{tabular}
+\\
+&& \\
+&&%
 \begin{tabular}{l}
 \textsc{UpdateMarkingRule2(}$\left( V,E,B\right) $, $u$, $i$, $v$\textsc{)}
 \\ 
@@ -526,7 +527,7 @@ $\qquad \qquad M:=M\cup \left( \mathrm{FV}\left( \mathrm{rewr}(e[l],\left[
 d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\ 
 \textbf{return }$marking(u)\cup M$%
 \end{tabular}%
-\end{equation*}
+\end{eqnarray*}
 
 \bigskip
 
@@ -553,14 +554,14 @@ $\qquad \qquad \qquad \qquad $\textbf{choose} $u=(X,n,d_{X}[n]=z)\in todo$
 $\qquad \qquad \qquad \qquad todo:=todo\setminus \{u\}$ \\ 
 $\qquad \qquad \qquad \qquad $\textbf{if} $marking(u)=\{d\mid (X,d)\in
 B_{j}\}$ \textbf{then continue} \\ 
-$\qquad \qquad \qquad \qquad m:=marking(u)$ \\ 
-$\qquad \qquad \qquad \qquad marking(u):=$ \textsc{UpdateMarkingRule1(}$%
-(V_{j},E_{j},B_{j})$, $u$\textsc{)} \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{if }}m\neq marking(u)$ \textbf{%
-then} \\ 
-$\qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{v\mid \exists
-i:(v,i,u)\in E_{j}\}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad stableint:=false$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{for} $(u,i,v)\in E_{j}$ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad m:=marking(u)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad marking(u):=$ \textsc{UpdateMarkingRule1(%
+}$(V_{j},E_{j},B_{j})$, $u$, $i$, $v$\textsc{)} \\ 
+$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}m\neq marking(u)$ 
+\textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad stableint:=false$ \\ 
 $\qquad stableext:=false$%
 \end{tabular}
 \\ 
