@@ -160,7 +160,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       const core::identifier_string& X = u.name();
       const pbes_equation& eq_X = *find_equation(m_pbes, X);
       pbes_expression phi = eq_X.formula();
-mCRL2log(log::debug, "stategraph") << "  compute significant variables of vertex u = " << u << std::endl;
+mCRL2log(log::debug2, "stategraph") << "  compute significant variables of vertex u = " << u << std::endl;
 pbes_expression phi0 = phi;
       if (u.index() != data::undefined_index())
       {
@@ -171,11 +171,11 @@ pbes_expression phi0 = phi;
         pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
         phi = pbesr(phi, sigma);
       }
-mCRL2log(log::debug, "stategraph") << "  rhs           = " << phi0 << std::endl;
-mCRL2log(log::debug, "stategraph") << "  simplify(rhs) = " << phi << std::endl;
+mCRL2log(log::debug2, "stategraph") << "  rhs           = " << phi0 << std::endl;
+mCRL2log(log::debug2, "stategraph") << "  simplify(rhs) = " << phi << std::endl;
       // return pbes_system::algorithms::significant_variables(phi);
       std::set<data::variable> result = pbes_system::algorithms::significant_variables(phi);
-mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detail::print_set(result) << std::endl;
+mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::detail::print_set(result) << std::endl;
       return result;
     }
 
@@ -307,6 +307,13 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
       return false;
     }
 
+    std::size_t belong_size(const std::map<core::identifier_string, std::set<data::variable> >& B, const core::identifier_string& X) const
+    {
+      auto i = B.find(X);
+      assert(i != B.end());
+      return i->second.size();
+    }
+
     void compute_control_flow_marking()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
@@ -348,8 +355,9 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
             {
               auto ti = todo.begin();
               auto const& u = **ti;
+              auto const& X = u.name();
               todo.erase(ti);
-              if (u.marking().size() == Bj.size())
+              if (u.marking().size() == belong_size(Bj, X))
               {
                 continue;
               }
@@ -369,7 +377,11 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
                   if (changed)
                   {
                     mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
-                    todo.insert(&v);
+                    auto const& incoming_edges = u.incoming_edges();
+                    for (auto fi = incoming_edges.begin(); fi != incoming_edges.end(); ++fi)
+                    {
+                      todo.insert(fi->first);
+                    }
                     stableint = false;
                   }
                 }
@@ -389,12 +401,12 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
             for (auto vj = Vj.vertices.begin(); vj != Vj.vertices.end(); ++vj)
             {
               auto const& u = *vj;
-              if (u.marking().size() == Bj.size())
+              auto const& X = u.name();
+              if (u.marking().size() == belong_size(Bj, X))
               {
                 continue;
               }
               mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
-              auto const& X = u.name();
               auto const& eq_X = *find_equation(m_pbes, X);
               auto const& predvars = eq_X.predicate_variables();
               for (std::size_t i = 0; i < predvars.size(); i++)

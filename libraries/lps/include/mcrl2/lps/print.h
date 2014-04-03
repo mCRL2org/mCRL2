@@ -102,16 +102,14 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
                                  const std::string& separator = ", "
                                 )
   {
-    typedef typename Container::value_type T;
-
     // print nothing if the container is empty
     if (container.empty())
     {
       return;
     }
 
-    typename Container::const_iterator first = container.begin();
-    typename Container::const_iterator last = container.end();
+    auto first = container.begin();
+    auto last = container.end();
 
     derived().print(opener);
 

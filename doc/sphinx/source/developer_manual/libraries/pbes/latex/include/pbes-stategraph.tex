@@ -560,7 +560,8 @@ $\qquad \qquad \qquad \qquad \qquad marking(u):=$ \textsc{UpdateMarkingRule1(%
 }$(V_{j},E_{j},B_{j})$, $u$, $i$, $v$\textsc{)} \\ 
 $\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}m\neq marking(u)$ 
 \textbf{then} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{v^{\prime }\mid
+\exists i^{\prime }:(v^{\prime },i^{\prime },u)\in E_{j}\}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad stableint:=false$ \\ 
 $\qquad stableext:=false$%
 \end{tabular}
