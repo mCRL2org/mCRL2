@@ -105,6 +105,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
     // m_belongs[k] corresponds with m_control_flow_graphs[k]
     std::vector<belongs_relation> m_belongs;
 
+    // if true, an optimization will be applied in the reset_variable procedure
+    bool m_use_marking_optimization;
+
+    std::size_t m_marking_rewrite_count;
+
+    std::size_t m_marking_rewrite_cached_count;
+
     // prints a belong set
     std::string print_belong_set(const stategraph_equation& eq, const std::set<std::size_t>& belongs) const
     {
@@ -296,6 +303,8 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
       auto j = marking_update.find(p);
       if (j != marking_update.end())
       {
+        m_marking_rewrite_count++;
+        m_marking_rewrite_cached_count++;
         return j->second;
       }
 #endif
@@ -309,7 +318,13 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
 #ifdef MCRL2_CACHE_MARKING_UPDATES
       u.set_marking_update(i, d, V);
 #endif
+      m_marking_rewrite_count++;
       return V;
+    }
+
+    void print_marking_statistics()
+    {
+      mCRL2log(log::verbose, "stategraph") << "--- marking statistics: " << m_marking_rewrite_count << " rewrite calls, from which " << m_marking_rewrite_cached_count << " were cached" << std::endl;
     }
 
     // updates u.marking
@@ -465,6 +480,10 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                 auto const& Y = Ye.X.name();
                 for (std::size_t k = 0; k < J; k++)
                 {
+                  if (m_use_marking_optimization && !stableext)
+                  {
+                    break;
+                  }
                   if (j == k)
                   {
                     continue;
@@ -568,9 +587,14 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
     stategraph_local_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
                                bool use_alternative_lcfp_criterion = false,
                                bool use_alternative_gcfp_relation = false,
-                               bool use_alternative_gcfp_consistency = false
+                               bool use_alternative_gcfp_consistency = false,
+                               bool use_marking_optimization = false
                               )
-      : stategraph_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency)
+      : stategraph_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency),
+        m_use_marking_optimization(use_marking_optimization),
+        m_marking_rewrite_count(0),
+        m_marking_rewrite_cached_count(0)
+
     { }
 
     /// \brief Computes the control flow graph
@@ -582,6 +606,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
       compute_extra_local_control_flow_graph();
       compute_control_flow_marking();
       print_control_flow_marking();
+      print_marking_statistics();
     }
 };
 

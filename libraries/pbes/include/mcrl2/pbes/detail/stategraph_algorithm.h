@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_ALGORITHM_H
 
+#define MCRL2_CACHE_MARKING_UPDATES
+
 #include <algorithm>
 #include <sstream>
 #include <boost/bind.hpp>

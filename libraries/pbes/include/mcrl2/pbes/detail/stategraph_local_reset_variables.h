@@ -54,9 +54,6 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // if true, the resulting PBES is simplified
     bool m_simplify;
 
-    // if true, an optimization will be applied in the reset_variable procedure
-    bool m_use_marking_optimization;
-
     // m_occurring_data_parameters[X] contains the indices of data parameters that occur in at least one local control flow graph
     std::map<core::identifier_string, std::set<std::size_t> > m_occurring_data_parameters;
 
@@ -133,20 +130,20 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     local_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
                                     bool use_alternative_lcfp_criterion = false,
                                     bool use_alternative_gcfp_relation = false,
-                                    bool use_alternative_gcfp_consistency = false
+                                    bool use_alternative_gcfp_consistency = false,
+                                    bool use_marking_optimization = false
                                    )
-      : stategraph_local_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency),
+      : stategraph_local_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency, use_marking_optimization),
         m_original_pbes(p)
     {}
 
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes run(bool simplify = true, bool use_marking_optimization = false)
+    pbes run(bool simplify = true)
     {
       super::run();
       m_simplify = simplify;
-      m_use_marking_optimization = use_marking_optimization;
       pbes result = m_original_pbes;
       compute_occurring_data_parameters();
       reset_variables_to_original(result);
