@@ -238,7 +238,7 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
       if (j != marking_update.end())
       {
         return j->second;
-      } 
+      }
 #endif
       // compute the value
       auto const& X = u.name();
@@ -387,10 +387,12 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
               {
                 continue;
               }
+              mCRL2log(log::debug1, "stategraph") << " extend marking rule1: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
               auto m = u.marking();
               bool changed = update_marking_rule1(Vj, Bj, u);
               if (changed)
               {
+                mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
                 auto const& outgoing_edges = u.outgoing_edges();
                 for (auto ei = outgoing_edges.begin(); ei != outgoing_edges.end(); ++ei)
                 {
@@ -418,7 +420,7 @@ mCRL2log(log::debug, "stategraph") << "  significant variables: " << core::detai
               {
                 continue;
               }
-              mCRL2log(log::debug1, "stategraph") << " extend marking: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
+              mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
               auto const& X = u.name();
               auto const& eq_X = *find_equation(m_pbes, X);
               auto const& predvars = eq_X.predicate_variables();
