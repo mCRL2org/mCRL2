@@ -24,6 +24,7 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -33,10 +34,22 @@ namespace pbes_system {
 /// \cond INTERNAL_DOCS
 namespace detail {
 
+// \pre left and right are data variables
+// if left not in preferred_left_hand_sides and right in preferred_left_hand_sides, then left and right will be swapped,
+void sort_variables(data::data_expression& left, data::data_expression& right, const std::set<data::variable>& preferred_left_hand_sides)
+{
+  if (!utilities::detail::contains(preferred_left_hand_sides, core::static_down_cast<const data::variable&>(left)) &&
+       utilities::detail::contains(preferred_left_hand_sides, core::static_down_cast<const data::variable&>(right)))
+  {
+    std::swap(left, right);
+  }
+}
+
 // Attempt to write x as (v = e), with v a data variable and e a data expression.
+// In case of (v = v), variables appearing in preferred_left_hand_sides will always be put in the left hand side of the result.
 // Returns true if succeeded.
 inline
-bool is_data_equality(const pbes_expression& x, data::variable& v, data::data_expression& e)
+bool is_data_equality(const pbes_expression& x, const std::set<data::variable>& preferred_left_hand_sides, data::variable& v, data::data_expression& e)
 {
   if (data::is_data_expression(x))
   {
@@ -47,15 +60,17 @@ bool is_data_equality(const pbes_expression& x, data::variable& v, data::data_ex
       data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(x));
       if (data::is_variable(left))
       {
-        const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
-        v = vleft;
+        if (data::is_variable(right))
+        {
+          sort_variables(left, right, preferred_left_hand_sides);
+        }
+        v = core::static_down_cast<const data::variable&>(left);
         e = right;
         return true;
       }
       else if (data::is_variable(right))
       {
-        const data::variable& vright = core::static_down_cast<const data::variable&>(right);
-        v = vright;
+        v = core::static_down_cast<const data::variable&>(right);
         e = left;
         return true;
       }
@@ -99,7 +114,7 @@ bool is_data_equality(const pbes_expression& x, data::variable& v, data::data_ex
 // Attempt to write x as (v != e), with v a data variable and e a data expression.
 // Returns true if succeeded.
 inline
-bool is_data_inequality(const pbes_expression& x, data::variable& v, data::data_expression& e)
+bool is_data_inequality(const pbes_expression& x, const std::set<data::variable>& preferred_left_hand_sides, data::variable& v, data::data_expression& e)
 {
   if (data::is_data_expression(x))
   {
@@ -110,15 +125,17 @@ bool is_data_inequality(const pbes_expression& x, data::variable& v, data::data_
       data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(x));
       if (data::is_variable(left))
       {
-        const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
-        v = vleft;
+        if (data::is_variable(right))
+        {
+          sort_variables(left, right, preferred_left_hand_sides);
+        }
+        v = core::static_down_cast<const data::variable&>(left);
         e = right;
         return true;
       }
       else if (data::is_variable(right))
       {
-        const data::variable& vright = core::static_down_cast<const data::variable&>(right);
-        v = vright;
+        v = core::static_down_cast<const data::variable&>(right);
         e = left;
         return true;
       }
@@ -165,7 +182,7 @@ void update_substitution(data::mutable_map_substitution<>& sigma, const data::va
 {
   data::mutable_map_substitution<> v_e;
   v_e[v] = e;
-  for (data::mutable_map_substitution<>::iterator i = sigma.begin(); i != sigma.end(); ++i)
+  for (auto i = sigma.begin(); i != sigma.end(); ++i)
   {
     i->second = data::replace_variables_capture_avoiding(i->second, v_e, data::substitution_variables(v_e));
   }
@@ -209,19 +226,18 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     mCRL2log(log::debug, "one_point_rewriter") << "x = " << pbes_system::pp(x) << std::endl;
     pbes_expression body = derived()(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_and(body, true);
-    mCRL2log(log::debug, "one_point_rewriter") << "split_and(x.body()) = " << core::detail::print_set(terms) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << "  split_and(x.body()) = " << core::detail::print_set(terms) << std::endl;
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
     std::vector< std::set<pbes_expression>::iterator > to_be_removed;
 
     for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
     {
-      mCRL2log(log::debug, "one_point_rewriter") << "term = " << pbes_system::pp(*i) << std::endl;
       data::variable v;
       data::data_expression e;
-      if (is_data_equality(*i, v, e))
+      if (is_data_equality(*i, variables, v, e))
       {
-        mCRL2log(log::debug, "one_point_rewriter") << "term = " << data::pp(v) << " == " << data::pp(e) << std::endl;
+        mCRL2log(log::debug, "one_point_rewriter") << "  subterm " << *i << " is a data equality" << std::endl;
         if (variables.find(v) != variables.end()) // only consider quantifier variables
         {
           e = data::replace_variables_capture_avoiding(e, sigma, data::substitution_variables(sigma));
@@ -232,6 +248,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
             std::set<data::variable> fe = data::find_free_variables(e);
             if (fe.find(v) == fe.end())
             {
+              mCRL2log(log::debug, "one_point_rewriter") << "  subterm " << *i << " causes variable " << v << " to be removed " << std::endl;
               variables.erase(v); // make sure the same variable can only be removed once
               to_be_removed.push_back(i);
             }
@@ -251,6 +268,8 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         }
       }
     }
+
+    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << data::print_substitution(sigma) << " variables = " << core::detail::print_set(variables) << std::endl;
 
     pbes_expression result;
     if (!sigma.empty())
@@ -274,7 +293,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     {
       result = exists(x.variables(), body);
     }
-    mCRL2log(log::debug, "one_point_rewriter") << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << pbes_system::pp(x) << " ---> " << pbes_system::pp(result) << std::endl;
     assert(data::detail::set_intersection(std::set<data::variable>(x.variables().begin(), x.variables().end()), pbes_system::find_free_variables(result)).empty());
     return result;
   }
@@ -284,19 +303,18 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     mCRL2log(log::debug, "one_point_rewriter") << "x = " << pbes_system::pp(x) << std::endl;
     pbes_expression body = derived()(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_or(body, true);
-    mCRL2log(log::debug, "one_point_rewriter") << "split_or(x.body()) = " << core::detail::print_set(terms) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << "  split_or(x.body()) = " << core::detail::print_set(terms) << std::endl;
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
     std::vector< std::set<pbes_expression>::iterator > to_be_removed;
 
     for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
     {
-      mCRL2log(log::debug, "one_point_rewriter") << "term = " << pbes_system::pp(*i) << std::endl;
       data::variable v;
       data::data_expression e;
-      if (is_data_inequality(*i, v, e))
+      if (is_data_inequality(*i, variables, v, e))
       {
-        mCRL2log(log::debug, "one_point_rewriter") << "term = " << data::pp(v) << " != " << data::pp(e) << std::endl;
+        mCRL2log(log::debug, "one_point_rewriter") << "  subterm " << *i << " is a data inequality" << std::endl;
         if (variables.find(data::variable(v)) != variables.end()) // only consider quantifier variables
         {
           e = data::replace_variables_capture_avoiding(e, sigma, data::substitution_variables(sigma));
@@ -304,19 +322,20 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
           std::set<data::variable> fe = data::find_free_variables(e);
           if (fe.find(v) == fe.end())
           {
+            mCRL2log(log::debug, "one_point_rewriter") << "  subterm " << *i << " causes variable " << v << " to be removed " << std::endl;
             variables.erase(v); // make sure the same variable can only be removed once
             to_be_removed.push_back(i);
           }
         }
       }
-      mCRL2log(log::debug, "one_point_rewriter") << "sigma     = " << data::print_substitution(sigma) << std::endl;
-      mCRL2log(log::debug, "one_point_rewriter") << "variables = " << core::detail::print_set(variables) << std::endl;
     }
+
+    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << data::print_substitution(sigma) << " variables = " << core::detail::print_set(variables) << std::endl;
 
     pbes_expression result;
     if (!sigma.empty())
     {
-      for (std::vector< std::set<pbes_expression>::iterator >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+      for (auto i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
       {
         terms.erase(*i);
       }
@@ -335,7 +354,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     {
       result = forall(x.variables(), body);
     }
-    mCRL2log(log::debug, "one_point_rewriter") << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << pbes_system::pp(x) << " ---> " << pbes_system::pp(result) << std::endl;
     assert(data::detail::set_intersection(std::set<data::variable>(x.variables().begin(), x.variables().end()), pbes_system::find_free_variables(result)).empty());
     return result;
   }
