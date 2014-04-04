@@ -122,6 +122,10 @@ void test_one_point_rule_rewriter()
 
   test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "val(!false)");
   test_one_point_rule_rewriter("forall d:Nat. val(d == 1) => Y(d)", "Y(1)");
+  test_one_point_rule_rewriter("forall m:Nat. exists n:Nat. val(m == n) && Y(n)", "forall m: Nat. Y(m)");
+  test_one_point_rule_rewriter("forall m:Nat. exists n:Nat. val(n == m) && Y(n)", "forall m: Nat. Y(m)");
+  test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(m != n) || Y(n)", "exists m: Nat. Y(m)");
+  test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(n != m) || Y(n)", "exists m: Nat. Y(m)");
 
   // N.B. The result of this test depends on the order of the clauses.
   // test_one_point_rule_rewriter("forall p: Bool, q: Bool. val(!(p == q)) || val(!q) || val(!(p == true))", "val(false)");
