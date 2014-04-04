@@ -147,7 +147,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
       return !m_tau_summands_only || summand.is_tau();
     }
 
-    bool must_instantiate(const deadlock_summand& summand)
+    bool must_instantiate(const deadlock_summand& )
     {
       return !m_tau_summands_only;
     }    

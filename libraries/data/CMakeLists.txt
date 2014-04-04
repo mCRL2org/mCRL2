@@ -28,7 +28,6 @@ set(mcrl2_data_src
  ${CMAKE_CURRENT_SOURCE_DIR}/source/data.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/data_specification.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/enumerate/enum_standard.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/prover/smt_lib_solver.cpp
 
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/with_prover.cpp

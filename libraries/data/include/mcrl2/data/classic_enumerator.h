@@ -82,7 +82,7 @@ class classic_enumerator
         bool m_enumerator_iterator_valid;
         bool m_solution_is_exact;
         bool m_solution_possible;
-        typedef boost::shared_ptr < detail::EnumeratorSolutionsStandard> m_generator_type;
+        typedef boost::shared_ptr < detail::EnumeratorSolutionsStandard < data_expression,rewriter > > m_generator_type;
         m_generator_type m_generator;
 
       public:
@@ -118,7 +118,7 @@ class classic_enumerator
           else
           {
             // we must calculate the solutions.
-            m_generator=m_generator_type(new detail::EnumeratorSolutionsStandard(
+            m_generator=m_generator_type(new detail::EnumeratorSolutionsStandard<data_expression,rewriter>(
                                                               variables,
                                                               condition,
                                                               sigma,

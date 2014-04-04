@@ -28,6 +28,7 @@ namespace data
 namespace detail
 {
 
+template <class TERM>
 class fs_expr
 {
   protected:
@@ -36,7 +37,7 @@ class fs_expr
                                                        // values are given in m_vals;
     data_expression_list m_vals;                       // Data expressions that are to be substituted
                                                        // in the variables in m_substituted_vars.
-    data_expression m_expr;                            // data_expression to which internal variables
+    TERM m_expr;                                       // data_expression to which internal variables
                                                        // must adhere.
 
   public:
@@ -49,7 +50,7 @@ class fs_expr
         const variable_list& vars, 
         const variable_list& substituted_vars, 
         const data_expression_list& vals, 
-        const data_expression& expr):
+        const TERM& expr):
        m_vars(vars), m_substituted_vars(substituted_vars),m_vals(vals), m_expr(expr)
     {
     }
@@ -79,6 +80,7 @@ class fs_expr
  * \brief Class for enumerating solutions to boolean expressions.
  **/
 
+template <class TERM, class REWRITER>
 class EnumeratorSolutionsStandard 
 {
   public:
@@ -95,10 +97,10 @@ class EnumeratorSolutionsStandard
                                                 // desired truth value, then the variable solution_is_exact is set. */
 
     variable_list enum_vars;                    // The variables over which a solution is searched.
-    data_expression enum_expr;              // Condition to be satisfied.
+    TERM enum_expr;                             // Condition to be satisfied.
     substitution_type& enum_sigma;
 
-    std::deque < fs_expr> fs_stack;
+    std::deque < fs_expr<TERM>> fs_stack;
 
     size_t used_vars;
     size_t max_vars;
@@ -151,7 +153,7 @@ class EnumeratorSolutionsStandard
 
     EnumeratorSolutionsStandard(
                    const variable_list& vars, 
-                   const data_expression& expr, 
+                   const TERM& expr, 
                    substitution_type& sigma,
                    const bool not_equal_to_false, 
                    const mcrl2::data::data_specification& data_spec,
@@ -228,7 +230,7 @@ class EnumeratorSolutionsStandard
                             mcrl2::data::variable& v, 
                             data_expression& e); 
 
-    void EliminateVars(fs_expr& e);
+    void EliminateVars(fs_expr<TERM>& e);
 
     data_expression build_solution_single(
                  const data_expression& t,
@@ -248,24 +250,24 @@ class EnumeratorSolutionsStandard
                  const data_expression& t,
                  const variable_list& substituted_vars,
                  const data_expression_list& exprs) const;
-    data_expression add_negations(
-                 const data_expression& condition,
+    TERM add_negations(
+                 const TERM& condition,
                  const data_expression_list& negation_term_list,
                  const bool negated) const;
     void push_on_fs_stack_and_split_or(
-                 std::deque < fs_expr>& fs_stack,
+                 std::deque < fs_expr<TERM> >& fs_stack,
                  const variable_list& var_list,
                  const variable_list& substituted_vars,
                  const data_expression_list& substitution_terms,
-                 const data_expression& condition,
+                 const TERM& condition,
                  const data_expression_list& negated_term_list,
                  const bool negated) const;
     void push_on_fs_stack_and_split_or_without_rewriting(
-                 std::deque < fs_expr>& fs_stack,
+                 std::deque < fs_expr<TERM> >& fs_stack,
                  const variable_list& var_list,
                  const variable_list& substituted_vars,
                  const data_expression_list& substitution_terms,
-                 const data_expression& condition,
+                 const TERM& condition,
                  const data_expression_list& negated_term_list,
                  const bool negated) const;
     data_expression_list negate(
@@ -275,5 +277,7 @@ class EnumeratorSolutionsStandard
 }
 } // namespace atermpp
 /// \endcond
+
+#include "mcrl2/data/detail/enum/enumerator_implementation.h"
 
 #endif
