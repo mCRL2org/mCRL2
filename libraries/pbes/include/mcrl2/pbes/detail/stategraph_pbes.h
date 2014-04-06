@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -26,21 +27,89 @@ namespace pbes_system {
 
 namespace detail {
 
-struct predicate_variable
+class predicate_variable
 {
-  predicate_variable(const propositional_variable_instantiation& X_, const pbes_expression& guard_)
-    : X(X_), guard(guard_)
-  {}
+  friend class stategraph_equation;
 
-  propositional_variable_instantiation X;
-  pbes_expression guard;
-  data::mutable_map_substitution<> sigma;
-  std::map<std::size_t, data::data_expression> source; // source[j] = e <=> source(X, i, j) = e
-  std::map<std::size_t, data::data_expression> dest;   // dest[j] = c   <=> dest(X, i, j) = c
-  std::map<std::size_t, std::size_t> copy;             // copy[j] = k   <=> copy(X, i, j) = k
-  std::set<std::size_t> used;                          // j \in used    <=> used(X, i, j)
-  std::set<std::size_t> changed;                       // j \in changed <=> changed(X, i, j)
+  protected:
+    propositional_variable_instantiation X;
+    pbes_expression m_guard;
+    data::mutable_map_substitution<> m_sigma;
+    std::map<std::size_t, data::data_expression> m_source; // source[j] = e <=> source(X, i, j) = e
+    std::map<std::size_t, data::data_expression> m_dest;   // dest[j] = c   <=> dest(X, i, j) = c
+    std::map<std::size_t, std::size_t> m_copy;             // copy[j] = k   <=> copy(X, i, j) = k
+    std::set<std::size_t> m_used;                          // j \in used    <=> used(X, i, j)
+    std::set<std::size_t> m_changed;                       // j \in changed <=> changed(X, i, j)
+
+  public:
+
+    predicate_variable(const propositional_variable_instantiation& X_, const pbes_expression& guard_)
+      : X(X_), m_guard(guard_)
+    {}
+
+    const propositional_variable_instantiation& variable() const
+    {
+      return X;
+    }
+
+    const pbes_expression& guard() const
+    {
+      return m_guard;
+    }
+
+    const core::identifier_string& name() const
+    {
+      return X.name();
+    }
+
+    const data::mutable_map_substitution<>& sigma() const
+    {
+      return m_sigma;
+    }
+
+    const data::data_expression_list& parameters() const
+    {
+      return X.parameters();
+    }
+
+    const std::map<std::size_t, data::data_expression>& source() const
+    {
+      return m_source;
+    }
+
+    const std::map<std::size_t, data::data_expression>& dest() const
+    {
+      return m_dest;
+    }
+  
+    const std::map<std::size_t, std::size_t>& copy() const
+    {
+      return m_copy;
+    }
+
+    const std::set<std::size_t>& used() const
+    {
+      return m_used;
+    }
+
+    const std::set<std::size_t>& changed() const
+    {
+      return m_changed;
+    }
+
+    void simplify_guard()
+    {
+      data::detail::simplify_rewriter r;
+      stategraph_simplifying_rewriter<pbes_expression, data::detail::simplify_rewriter> R(r);
+      m_guard = R(m_guard);
+    }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const predicate_variable& x)
+{
+  return out << x.variable();
+}
 
 class stategraph_equation: public pbes_equation
 {
@@ -60,7 +129,7 @@ class stategraph_equation: public pbes_equation
     {
       std::vector<pbes_expression> v;
       split_and(x, v);
-      for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
         if (data::is_data_expression(*i))
         {
@@ -91,7 +160,7 @@ class stategraph_equation: public pbes_equation
 
     bool is_cf(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow, const core::identifier_string& X, std::size_t i) const
     {
-      std::map<core::identifier_string, std::vector<bool> >::const_iterator j = is_control_flow.find(X);
+      auto j = is_control_flow.find(X);
       assert(j != is_control_flow.end());
       const std::vector<bool>& cf = j->second;
       assert(i < cf.size());
@@ -101,10 +170,10 @@ class stategraph_equation: public pbes_equation
     // computes the source function for a pbes equation
     void compute_source()
     {
-      for (std::vector<predicate_variable>::iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
+      for (auto i = m_predvars.begin(); i != m_predvars.end(); ++i)
       {
         std::map<data::variable, data::data_expression> sigma;
-        find_equality_conjuncts(i->guard, m_parameters, sigma);
+        find_equality_conjuncts(i->m_guard, m_parameters, sigma);
 
         // convert sigma to source
         for (std::size_t j = 0; j < m_parameters.size(); j++)
@@ -114,8 +183,8 @@ class stategraph_equation: public pbes_equation
           if (k != sigma.end())
           {
             data::data_expression e = k->second;
-            i->source[j] = e;
-            i->sigma[d_j] = e;
+            i->m_source[j] = e;
+            i->m_sigma[d_j] = e;
           }
         }
       }
@@ -125,14 +194,15 @@ class stategraph_equation: public pbes_equation
     {
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
-        const data::data_expression_list& e = m_predvars[i].X.parameters();
+        auto const& Ye = m_predvars[i];
+        auto const& e = Ye.parameters();
         std::size_t j_index = 0;
-        for (data::data_expression_list::const_iterator j = e.begin(); j != e.end(); ++j, ++j_index)
+        for (auto j = e.begin(); j != e.end(); ++j, ++j_index)
         {
-          data::data_expression c = R(*j, m_predvars[i].sigma);
+          data::data_expression c = R(*j, m_predvars[i].sigma());
           if (is_constant(c))
           {
-            m_predvars[i].dest[j_index] = c;
+            m_predvars[i].m_dest[j_index] = c;
           }
         }
       }
@@ -142,15 +212,15 @@ class stategraph_equation: public pbes_equation
     {
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
-        const data::data_expression_list& e = m_predvars[i].X.parameters();
+        auto const& e = m_predvars[i].X.parameters();
         for (std::size_t j = 0; j < m_parameters.size(); j++)
         {
           std::size_t k_index = 0;
-          for (data::data_expression_list::const_iterator k = e.begin(); k != e.end(); ++k, ++k_index)
+          for (auto k = e.begin(); k != e.end(); ++k, ++k_index)
           {
             if (m_parameters[j] == *k)
             {
-              m_predvars[i].copy[j] = k_index;
+              m_predvars[i].m_copy[j] = k_index;
             }
           }
         }
@@ -159,16 +229,31 @@ class stategraph_equation: public pbes_equation
 
     void compute_used()
     {
-      const std::vector<data::variable>& d_X = m_parameters;
+      using utilities::detail::contains;
+
+      auto const& d_X = m_parameters;
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
-        predicate_variable& Y = m_predvars[i];
-        std::set<data::variable> v = pbes_system::find_free_variables(Y.guard);
+        predicate_variable& Ye = m_predvars[i];
+        auto v = pbes_system::find_free_variables(Ye.guard());
         for (std::size_t j = 0; j < d_X.size(); j++)
         {
-          if (v.find(d_X[j]) != v.end())
+          if (contains(v, d_X[j]))
           {
-            Y.used.insert(j);
+            Ye.m_used.insert(j);
+          }
+          std::size_t p_index = 0;
+          auto const& e = Ye.parameters();
+          for (auto p = e.begin(); p != e.end(); ++p, ++p_index)
+          {
+            auto freevars = data::find_free_variables(*p);
+            if (contains(freevars, d_X[j]))
+            {
+              if ( (Ye.name() != variable().name()) || p_index != j )
+              {
+                Ye.m_used.insert(j);
+              }
+            }
           }
         }
       }
@@ -176,21 +261,21 @@ class stategraph_equation: public pbes_equation
 
     void compute_changed()
     {
-      const std::vector<data::variable>& d_X = m_parameters;
+      auto const& d_X = m_parameters;
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
-        predicate_variable& Y = m_predvars[i];
-        if (Y.X.name() != variable().name())
+        auto& Ye = m_predvars[i];
+        if (Ye.name() != variable().name())
         {
           continue;
         }
         std::size_t j_index = 0;
-        const data::data_expression_list& e = Y.X.parameters();
-        for (data::data_expression_list::const_iterator j = e.begin(); j != e.end(); ++j, ++j_index)
+        auto const& e = Ye.parameters();
+        for (auto j = e.begin(); j != e.end(); ++j, ++j_index)
         {
           if (*j != d_X[j_index])
           {
-            Y.changed.insert(j_index);
+            Ye.m_changed.insert(j_index);
           }
         }
       }
@@ -203,7 +288,7 @@ class stategraph_equation: public pbes_equation
       pbes_system::detail::guard_traverser f(dataspec);
       f(eqn.formula());
       const std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >& guards = f.expression_stack.back().guards;
-      for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = guards.begin(); i != guards.end(); ++i)
+      for (auto i = guards.begin(); i != guards.end(); ++i)
       {
         m_predvars.push_back(predicate_variable(i->first, i->second));
       }
@@ -223,10 +308,10 @@ class stategraph_equation: public pbes_equation
 
     bool is_simple() const
     {
-      for (std::vector<predicate_variable>::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
+      for (auto i = m_predvars.begin(); i != m_predvars.end(); ++i)
       {
         // TODO check this
-        if (!pbes_system::is_false(i->guard))
+        if (!pbes_system::is_false(i->guard()))
         {
           return false;
         }
@@ -259,9 +344,9 @@ class stategraph_equation: public pbes_equation
       std::ostringstream out;
       out << "equation = " << print_equation(*this) << std::endl;
       out << "guards:" << std::endl;
-      for (std::vector<predicate_variable>::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
+      for (auto i = m_predvars.begin(); i != m_predvars.end(); ++i)
       {
-        out << "variable = " << pbes_system::pp(i->X) << " guard = " << pbes_system::pp(i->guard) << std::endl;
+        out << "variable = " << i->variable() << " guard = " << i->guard() << std::endl;
       }
       out << "simple = " << std::boolalpha << is_simple() << std::endl;
       return out.str();
@@ -273,33 +358,33 @@ class stategraph_equation: public pbes_equation
       std::string X(variable().name());
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
-        out << "    predvar[" << i << "] = " << pbes_system::pp(m_predvars[i].X) << " guard = " << pbes_system::pp(m_predvars[i].guard) << std::endl;
+        out << "    predvar[" << i << "] = " << m_predvars[i] << " guard = " << m_predvars[i].guard() << std::endl;
 
         // source
-        const std::map<std::size_t, data::data_expression>& source = m_predvars[i].source;
-        for (std::map<std::size_t, data::data_expression>::const_iterator j = source.begin(); j != source.end(); ++j)
+        auto const& source = m_predvars[i].source();
+        for (auto j = source.begin(); j != source.end(); ++j)
         {
-          out << "        source(" << X << ", " << i << ", " << j->first << ") = " << data::pp(j->second) << std::endl;
+          out << "        source(" << X << ", " << i << ", " << j->first << ") = " << j->second << std::endl;
         }
 
         // sigma
-        out << "        sigma = " << data::print_substitution(m_predvars[i].sigma) << std::endl;
+        out << "        sigma = " << data::print_substitution(m_predvars[i].sigma()) << std::endl;
 
         // dest
-        const std::map<std::size_t, data::data_expression>& dest = m_predvars[i].dest;
-        for (std::map<std::size_t, data::data_expression>::const_iterator j = dest.begin(); j != dest.end(); ++j)
+        const std::map<std::size_t, data::data_expression>& dest = m_predvars[i].dest();
+        for (auto j = dest.begin(); j != dest.end(); ++j)
         {
-          out << "        dest(" << X << ", " << i << ", " << j->first << ") = " << data::pp(j->second) << std::endl;
+          out << "        dest(" << X << ", " << i << ", " << j->first << ") = " << j->second << std::endl;
         }
 
         // copy
-        const std::map<std::size_t, std::size_t>& m = m_predvars[i].copy;
-        for (std::map<std::size_t, std::size_t>::const_iterator j = m.begin(); j != m.end(); ++j)
+        auto const& copy = m_predvars[i].copy();
+        for (auto j = copy.begin(); j != copy.end(); ++j)
         {
           out << "        copy(" << X << ", " << i << ", " << j->first << ") = " << j->second << std::endl;
         }
-        out <<   "        used    = " << core::detail::print_set(m_predvars[i].used) << std::endl;
-        out <<   "        changed = " << core::detail::print_set(m_predvars[i].changed) << std::endl;
+        out <<   "        used    = " << core::detail::print_set(m_predvars[i].used()) << std::endl;
+        out <<   "        changed = " << core::detail::print_set(m_predvars[i].changed()) << std::endl;
       }
       return out.str();
     }
@@ -324,7 +409,7 @@ class stategraph_pbes
       : m_data(p.data()), m_global_variables(p.global_variables()), m_initial_state(p.initial_state())
     {
       const std::vector<pbes_equation>& equations = p.equations();
-      for (std::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      for (auto i = equations.begin(); i != equations.end(); ++i)
       {
         m_equations.push_back(stategraph_equation(*i, m_data));
       }
@@ -362,8 +447,8 @@ class stategraph_pbes
 
     data::data_expression source(std::size_t k, std::size_t i, std::size_t n) const
     {
-      const stategraph_equation& eqn = equations()[k];
-      const data::mutable_map_substitution<>& sigma = eqn.predicate_variables()[i].sigma;
+      auto const& eqn = equations()[k];
+      auto const& sigma = eqn.predicate_variables()[i].sigma();
       data::variable d_n = eqn.parameters()[n];
       data::data_expression x = sigma(d_n);
       if (x == d_n)
@@ -380,7 +465,7 @@ class stategraph_pbes
     {
       data::rewriter R(m_data);
       std::vector<stategraph_equation>& eqn = equations();
-      for (std::vector<stategraph_equation>::iterator i = eqn.begin(); i != eqn.end(); ++i)
+      for (auto i = eqn.begin(); i != eqn.end(); ++i)
       {
         i->compute_source_dest_copy(R);
       }
@@ -389,8 +474,8 @@ class stategraph_pbes
     std::string print_source_dest_copy() const
     {
       std::ostringstream out;
-      const std::vector<stategraph_equation>& eqn = equations();
-      for (std::vector<stategraph_equation>::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
+      auto const& eqn = equations();
+      for (auto i = eqn.begin(); i != eqn.end(); ++i)
       {
         out << "equation = " << print_equation(*i) << std::endl;
         out << i->print_source_dest_copy() << std::endl;
@@ -402,8 +487,8 @@ class stategraph_pbes
 inline
 std::vector<stategraph_equation>::const_iterator find_equation(const stategraph_pbes& p, const core::identifier_string& X, bool warn = true)
 {
-  const std::vector<stategraph_equation>& equations = p.equations();
-  for (std::vector<stategraph_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  auto const& equations = p.equations();
+  for (auto i = equations.begin(); i != equations.end(); ++i)
   {
     if (i->variable().name() == X)
     {
@@ -412,7 +497,7 @@ std::vector<stategraph_equation>::const_iterator find_equation(const stategraph_
   }
   if (warn)
   {
-    mCRL2log(log::debug, "stategraph") << "find_equation: could not find predicate variable " << core::pp(X) << std::endl;
+    mCRL2log(log::debug, "stategraph") << "find_equation: could not find predicate variable " << X << std::endl;
   }
   return equations.end();
 }

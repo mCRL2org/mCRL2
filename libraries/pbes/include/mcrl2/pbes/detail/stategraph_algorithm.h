@@ -30,16 +30,6 @@ namespace pbes_system {
 
 namespace detail {
 
-// Remove an element from v, and return it.
-template <typename Container>
-typename Container::value_type pick_element(Container& v)
-{
-  auto i = v.begin();
-  auto result = *i;
-  v.erase(i);
-  return result;
-}
-
 inline
 std::string print_index(std::size_t index)
 {
@@ -59,25 +49,16 @@ std::string print_index(std::size_t index)
 class stategraph_algorithm
 {
   public:
-    // simplify and rewrite the expression x
-    pbes_expression simplify(const pbes_expression& x) const
-    {
-      data::detail::simplify_rewriter r;
-      stategraph_simplifying_rewriter<pbes_expression, data::detail::simplify_rewriter> R(r);
-      return R(x);
-    }
-
     // simplify and rewrite the guards of the pbes p
     void simplify(stategraph_pbes& p) const
     {
-      std::vector<stategraph_equation>& equations = p.equations();
-      for (std::size_t k = 0; k < equations.size(); k++)
+      auto& equations = p.equations();
+      for (auto k = equations.begin(); k != equations.end(); ++k)
       {
-        stategraph_equation& eqn = equations[k];
-        std::vector<predicate_variable>& predvars = eqn.predicate_variables();
-        for (std::size_t i = 0; i < predvars.size(); i++)
+        auto& predvars = k->predicate_variables();
+        for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          predvars[i].guard = simplify(predvars[i].guard);
+          i->simplify_guard();
         }
       }
     }
@@ -244,57 +225,57 @@ class stategraph_algorithm
     {
       mCRL2log(log::debug, "stategraph") << "=== computing local control flow parameters ===" << std::endl;
 
-      const std::vector<stategraph_equation>& equations = m_pbes.equations();
+      auto const& equations = m_pbes.equations();
 
       // initialize all control flow parameters to true
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
-        const core::identifier_string& X = k->variable().name();
-        const std::vector<data::variable>& dX = k->parameters();
-        m_is_LCFP[X] = std::vector<bool>(dX.size(), true);
+        auto const& X = k->variable().name();
+        auto const& d_X = k->parameters();
+        m_is_LCFP[X] = std::vector<bool>(d_X.size(), true);
       }
 
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
-        const core::identifier_string& X = k->variable().name();
-        const std::vector<data::variable>& dX = k->parameters();
-        const std::vector<predicate_variable>& predvars = k->predicate_variables();
+        auto const& X = k->variable().name();
+        auto const& d_X = k->parameters();
+        auto const& predvars = k->predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          const predicate_variable& PVI_X_i = *i;
-          if (PVI_X_i.X.name() == X)
+          const predicate_variable& Ye = *i;
+          if (Ye.name() == X)
           {
-            for (std::size_t n = 0; n < dX.size(); n++)
+            for (std::size_t n = 0; n < d_X.size(); n++)
             {
               if (m_use_alternative_lcfp_criterion)
               {
                 // Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
                 // 1. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
                 // 2. copy(X,i,n) is defined en source(X,i,n) en dest(X,i,n) zijn beide undefined.
-                if (PVI_X_i.copy.find(n) == PVI_X_i.copy.end())
+                if (Ye.copy().find(n) == Ye.copy().end())
                 {
                   // copy(X,i,n) is undefined
-                  if (is_undefined(PVI_X_i.source, n) || is_undefined(PVI_X_i.dest, n))
+                  if (is_undefined(Ye.source(), n) || is_undefined(Ye.dest(), n))
                   {
-                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << " (copy and source/dest undefined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy and source/dest undefined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
                 else
                 {
                   // copy(X,i,n) is defined
-                  if (!is_undefined(PVI_X_i.source, n) || !is_undefined(PVI_X_i.dest, n))
+                  if (!is_undefined(Ye.source(), n) || !is_undefined(Ye.dest(), n))
                   {
-                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << " (copy defined and source/dest defined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy defined and source/dest defined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
               }
               else
               {
-                if ((is_undefined(PVI_X_i.source, n) || is_undefined(PVI_X_i.dest, n)) && !is_mapped_to(PVI_X_i.copy, n, n))
+                if ((is_undefined(Ye.source(), n) || is_undefined(Ye.dest(), n)) && !is_mapped_to(Ye.copy(), n, n))
                 {
-                  mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP due to " << pbes_system::pp(PVI_X_i.X) << "(source and dest undefined, and no copy to self)" << std::endl;
+                  mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP due to " << Ye << "(source and dest undefined, and no copy to self)" << std::endl;
                   m_is_LCFP[X][n] = false;
                 }
               }
@@ -312,7 +293,7 @@ class stategraph_algorithm
 
       m_is_GCFP = m_is_LCFP;
 
-      const std::vector<stategraph_equation>& equations = m_pbes.equations();
+      auto const& equations = m_pbes.equations();
 
       bool changed;
       do
@@ -322,25 +303,25 @@ class stategraph_algorithm
         // Detect conflicts for parameters of Y in equations of the form X(d) = ... Y(e)
         for (auto k = equations.begin(); k != equations.end(); ++k)
         {
-          const core::identifier_string& X = k->variable().name();
-          const std::vector<predicate_variable>& predvars = k->predicate_variables();
+          auto const& X = k->variable().name();
+          auto const& predvars = k->predicate_variables();
           for (auto i = predvars.begin(); i != predvars.end(); ++i)
           {
-            const predicate_variable& PVI_X_i = *i;
-            const core::identifier_string& Y = PVI_X_i.X.name();
+            auto const& Ye = *i;
+            auto const& Y = Ye.name();
             if (Y != X)
             {
-              const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-              const std::vector<data::variable>& d_Y = eq_Y.parameters();
+              auto const& eq_Y = *find_equation(m_pbes, Y);
+              auto const& d_Y = eq_Y.parameters();
               for (std::size_t n = 0; n < d_Y.size(); n++)
               {
-                if (is_undefined(PVI_X_i.dest, n) && (!maps_to_and_is_GFCP(PVI_X_i.copy, n, X)))
+                if (is_undefined(Ye.dest(), n) && (!maps_to_and_is_GFCP(Ye.copy(), n, X)))
                 {
                   if (m_is_GCFP[Y][n])
                   {
                     m_is_GCFP[Y][n] = false;
                     changed = true;
-                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(Y, n) << " is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(Y, n) << " is not a GCFP because of predicate variable " << Ye << " in equation " << X << std::endl;
                   }
                 }
               }
@@ -353,31 +334,31 @@ class stategraph_algorithm
         {
           for (auto k = equations.begin(); k != equations.end(); ++k)
           {
-            const core::identifier_string& X = k->variable().name();
-            const std::vector<predicate_variable>& predvars = k->predicate_variables();
-            const std::vector<data::variable>& dX = k->parameters();
-            std::size_t M = dX.size();
+            auto const& X = k->variable().name();
+            auto const& predvars = k->predicate_variables();
+            auto const& d_X = k->parameters();
+            std::size_t M = d_X.size();
 
             for (auto i = predvars.begin(); i != predvars.end(); ++i)
             {
-              const predicate_variable& PVI_X_i = *i;
-              const core::identifier_string& Y = PVI_X_i.X.name();
+              auto const& Ye = *i;
+              auto const& Y = Ye.name();
               if (Y == X)
               {
                 continue;
               }
-              const data::data_expression_list& e = PVI_X_i.X.parameters();
+              auto const& e = Ye.parameters();
               std::size_t n = 0;
               for (auto ei = e.begin(); ei != e.end(); ++ei, ++n)
               {
-                std::set<data::variable> V = data::find_free_variables(*ei);
+                std::set<data::variable> V = FV(*ei);
                 for (std::size_t m = 0; m < M; m++)
                 {
-                  if (m_is_GCFP[X][m] && !m_is_GCFP[Y][n] && (V.find(dX[m]) != V.end()))
+                  if (m_is_GCFP[X][m] && !m_is_GCFP[Y][n] && (V.find(d_X[m]) != V.end()))
                   {
                     m_is_GCFP[X][m] = false;
                     changed = true;
-                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, m) << " is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << X << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, m) << " is not a GCFP because of predicate variable " << Ye << " in equation " << X << std::endl;
                   }
                 }
               }
@@ -392,7 +373,7 @@ class stategraph_algorithm
 
     bool is_local_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
     {
-      std::map<core::identifier_string, std::vector<bool> >::const_iterator j = m_is_LCFP.find(X);
+      auto j = m_is_LCFP.find(X);
       assert(j != m_is_LCFP.end());
       const std::vector<bool>& cf = j->second;
       assert(i < cf.size());
@@ -401,7 +382,7 @@ class stategraph_algorithm
 
     bool is_global_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
     {
-      std::map<core::identifier_string, std::vector<bool> >::const_iterator j = m_is_GCFP.find(X);
+      auto j = m_is_GCFP.find(X);
       assert(j != m_is_GCFP.end());
       const std::vector<bool>& cf = j->second;
       assert(i < cf.size());
@@ -451,13 +432,13 @@ class stategraph_algorithm
       // step 1: create vertices in m_global_control_flow_graph_vertices
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
-        const core::identifier_string& X = k->variable().name();
-        const std::vector<data::variable>& dX = k->parameters();
-        for (std::size_t n = 0; n < dX.size(); n++)
+        auto const& X = k->variable().name();
+        auto const& d_X = k->parameters();
+        for (std::size_t n = 0; n < d_X.size(); n++)
         {
           if (is_global_control_flow_parameter(X, n))
           {
-            m_global_control_flow_graph_vertices.push_back(global_control_flow_graph_vertex(X, n, dX[n]));
+            m_global_control_flow_graph_vertices.push_back(global_control_flow_graph_vertex(X, n, d_X[n]));
           }
         }
       }
@@ -465,13 +446,14 @@ class stategraph_algorithm
       // step 2: create edges between related vertices in m_global_control_flow_graph_vertices
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
-        const core::identifier_string& X = k->variable().name();
-        const std::vector<predicate_variable>& predvars = k->predicate_variables();
+        auto const& X = k->variable().name();
+        auto const& predvars = k->predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          const predicate_variable& PVI_X_i = *i;
-          const core::identifier_string& Y = PVI_X_i.X.name();
-          for (auto j = PVI_X_i.copy.begin(); j != PVI_X_i.copy.end(); ++j)
+          auto const& Ye = *i;
+          auto const& Y = Ye.name();
+          auto const& copy = Ye.copy();
+          for (auto j = copy.begin(); j != copy.end(); ++j)
           {
             std::size_t n = j->first;
             std::size_t m = j->second;
@@ -482,17 +464,17 @@ class stategraph_algorithm
                 // Twee parameters zijn alleen gerelateerd als er een copy is van de een naar de ander,
                 // EN dat de dest in dat geval ongedefinieerd is (dus we weten echt geen concrete waarde
                 // voor de parameter op dat punt).
-                if (is_undefined(PVI_X_i.dest, m))
+                if (is_undefined(Ye.dest(), m))
                 {
                   mCRL2log(log::debug, "stategraph") << print_cfp(X, n) << " and " << print_cfp(Y, m) << " are related "
-                                                     << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << X << std::endl;
+                                                     << "because of recursion " << Ye << " in the equation for " << X << std::endl;
                   relate_control_flow_graph_vertices(X, n, Y, m);
                 }
               }
               else
               {
                 mCRL2log(log::debug, "stategraph") << print_cfp(X, n) << " and " << print_cfp(Y, m) << " are related "
-                                                   << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << X << " (dest is undefined)" << std::endl;
+                                                   << "because of recursion " << Ye << " in the equation for " << X << " (dest is undefined)" << std::endl;
                 relate_control_flow_graph_vertices(X, n, Y, m);
               }
             }
@@ -507,7 +489,7 @@ class stategraph_algorithm
       std::set<core::identifier_string> V;
       for (auto i = component.begin(); i != component.end(); ++i)
       {
-        const core::identifier_string& X = m_global_control_flow_graph_vertices[*i].name();
+        auto const& X = m_global_control_flow_graph_vertices[*i].name();
         if (V.find(X) != V.end())
         {
           return false;
@@ -548,6 +530,8 @@ class stategraph_algorithm
     // compute the connected component belonging to the vertex m_global_control_flow_graph_vertices[i]
     std::set<std::size_t> compute_connected_component(std::size_t i, std::vector<bool>& done) const
     {
+      using utilities::detail::pick_element;
+
       std::set<std::size_t> todo;
       std::set<std::size_t> component;
 
@@ -599,19 +583,19 @@ class stategraph_algorithm
       m_connected_components.erase(i, m_connected_components.end());
     }
 
-    // Returns true if dX[m] is not only copied.
+    // Returns true if d_X[m] is not only copied.
     //
-    // A CFP dX[m] is not only copied if
+    // A CFP d_X[m] is not only copied if
     //    (1) for some i    : source(X, i, m) is defined
     // or (2) for some Y, i : pred(phi_Y , i) = X and dest(Y, i, m) is defined
     bool is_not_only_copied(const core::identifier_string& X, std::size_t m) const
     {
       // check (1)
-      const stategraph_equation& eq_X = *find_equation(m_pbes, X);
-      const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+      auto const& eq_X = *find_equation(m_pbes, X);
+      auto const& predvars = eq_X.predicate_variables();
       for (auto i = predvars.begin(); i != predvars.end(); ++i)
       {
-        if (!is_undefined(i->source, m))
+        if (!is_undefined(i->source(), m))
         {
           return true;
         }
@@ -621,10 +605,10 @@ class stategraph_algorithm
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
-        const std::vector<predicate_variable>& predvars = k->predicate_variables();
+        auto const& predvars = k->predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          if (i->X.name() == X && !is_undefined(i->dest, m))
+          if (i->name() == X && !is_undefined(i->dest(), m))
           {
             return true;
           }
@@ -670,10 +654,10 @@ class stategraph_algorithm
     {
       std::set<data::variable> result;
       const std::vector<bool>& b = stategraph_values(X);
-      const stategraph_equation& eqn = *find_equation(m_pbes, X);
-      const std::vector<data::variable>& d = eqn.parameters();
+      auto const& eq_X = *find_equation(m_pbes, X);
+      auto const& d_X = eq_X.parameters();
       std::size_t index = 0;
-      for (std::vector<data::variable>::const_iterator i = d.begin(); i != d.end(); ++i, index++)
+      for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
       {
         if (b[index])
         {
@@ -686,9 +670,9 @@ class stategraph_algorithm
     std::vector<std::size_t> control_flow_parameter_indices(const core::identifier_string& X) const
     {
       std::vector<std::size_t> result;
-      const stategraph_equation& eqn = *find_equation(m_pbes, X);
-      const std::vector<data::variable>& dX = eqn.parameters();
-      for (std::size_t k = 0; k < dX.size(); k++)
+      auto const& eq_X = *find_equation(m_pbes, X);
+      auto const& d_X = eq_X.parameters();
+      for (std::size_t k = 0; k < d_X.size(); k++)
       {
         if (is_global_control_flow_parameter(X, k))
         {
@@ -736,20 +720,20 @@ class stategraph_algorithm
     // returns the parameters of the propositional variable with name X
     std::set<data::variable> propvar_parameters(const core::identifier_string& X) const
     {
-      const stategraph_equation& eqn = *find_equation(m_pbes, X);
-      const std::vector<data::variable>& d = eqn.parameters();
-      return std::set<data::variable>(d.begin(), d.end());
+      auto const& eq_X = *find_equation(m_pbes, X);
+      auto const& d_X = eq_X.parameters();
+      return std::set<data::variable>(d_X.begin(), d_X.end());
     }
 
     // removes parameter values that do not correspond to a control flow parameter
     propositional_variable_instantiation project(const propositional_variable_instantiation& x) const
     {
-      core::identifier_string X = x.name();
-      data::data_expression_list dX = x.parameters();
+      auto const& X = x.name();
+      auto const& d_X = x.parameters();
       const std::vector<bool>& b = stategraph_values(X);
       std::size_t index = 0;
       std::vector<data::data_expression> d;
-      for (data::data_expression_list::iterator i = dX.begin(); i != dX.end(); ++i, index++)
+      for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
       {
         assert(index < b.size());
         if (b[index])
@@ -763,12 +747,12 @@ class stategraph_algorithm
     // removes parameter values that do not correspond to a control flow parameter
     propositional_variable project_variable(const propositional_variable& x) const
     {
-      core::identifier_string X = x.name();
-      data::variable_list dX = x.parameters();
+      auto const& X = x.name();
+      auto const& d_X = x.parameters();
       const std::vector<bool>& b = stategraph_values(X);
       std::size_t index = 0;
       std::vector<data::variable> d;
-      for (data::variable_list::iterator i = dX.begin(); i != dX.end(); ++i, index++)
+      for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
       {
         if (b[index])
         {
@@ -823,7 +807,7 @@ class stategraph_algorithm
 
       // search for a node that corresponds to a variable in the init of the PBES
       const propositional_variable_instantiation& init = m_pbes.initial_state();
-      const core::identifier_string& Xinit = init.name();
+      auto const& Xinit = init.name();
 
       for (auto j = component.begin(); j != component.end(); ++j)
       {
@@ -839,14 +823,14 @@ class stategraph_algorithm
       for (auto p = component.begin(); p != component.end(); ++p)
       {
         const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
-        const core::identifier_string& X = u.name();
+        auto const& X = u.name();
         std::size_t k = u.index();
-        const stategraph_equation& eq_X = *find_equation(m_pbes, X);
-        const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+        auto const& eq_X = *find_equation(m_pbes, X);
+        auto const& predvars = eq_X.predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          auto q = i->source.find(k);
-          if (q != i->source.end())
+          auto q = i->source().find(k);
+          if (q != i->source().end())
           {
             const data::data_expression& v = q->second;
             result.insert(v);
@@ -858,18 +842,18 @@ class stategraph_algorithm
       for (auto p = component.begin(); p != component.end(); ++p)
       {
         const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
-        const core::identifier_string& Y = u.name();
+        auto const& Y = u.name();
         std::size_t k = u.index();
-        const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-        const std::vector<predicate_variable>& predvars = eq_Y.predicate_variables();
+        auto const& eq_Y = *find_equation(m_pbes, Y);
+        auto const& predvars = eq_Y.predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          if (i->X.name() != Y)
+          if (i->name() != Y)
           {
             continue;
           }
-          auto q = i->dest.find(k);
-          if (q != i->dest.end())
+          auto q = i->dest().find(k);
+          if (q != i->dest().end())
           {
             const data::data_expression& v = q->second;
             result.insert(v);
@@ -909,6 +893,8 @@ class stategraph_algorithm
 
     void compute_local_control_flow_graph(const std::set<local_control_flow_graph_vertex>& U, const std::map<core::identifier_string, std::size_t>& component_index)
     {
+      using utilities::detail::pick_element;
+
       mCRL2log(log::debug, "stategraph") << "--- compute_local_control_flow_graph for vertices " << core::detail::print_set(U) << std::endl;
       local_control_flow_graph V;
       std::set<const local_control_flow_graph_vertex*> todo;
@@ -923,18 +909,18 @@ class stategraph_algorithm
       {
         // u = (X, k, d = e)
         auto const& u = *pick_element(todo);
-        const core::identifier_string& X = u.name();
+        auto const& X = u.name();
         const data::variable& d = u.variable();
         const data::data_expression& e = u.value();
         mCRL2log(log::debug1, "stategraph") << "choose todo element (X, k, d=e) = " << u << std::endl;
         std::size_t k = u.index();
-        const stategraph_equation& eq_X = *find_equation(m_pbes, X);
-        const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+        auto const& eq_X = *find_equation(m_pbes, X);
+        auto const& predvars = eq_X.predicate_variables();
 
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
           std::size_t edge_label = i - predvars.begin();
-          const core::identifier_string& Y = i->X.name();
+          auto const& Y = i->name();
           auto q = component_index.find(Y);
 
           if (d == data::undefined_variable())
@@ -944,7 +930,7 @@ class stategraph_algorithm
             if (q != component_index.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
-              auto e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
+              auto e1 = mapped_value(i->dest(), k1, data::undefined_data_expression());
               if (e1 != data::undefined_data_expression())
               {
                 // dest(X, i, k') = e'
@@ -968,20 +954,20 @@ class stategraph_algorithm
             if (q != component_index.end()) // (Y, k') in C
             {
               std::size_t k1 = q->second;
-              if (is_mapped_to(i->source, k, e))
+              if (is_mapped_to(i->source(), k, e))
               {
                 // source(X, i, k) = e && dest(X, i, k') = e'
-                auto e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
+                auto e1 = mapped_value(i->dest(), k1, data::undefined_data_expression());
                 mCRL2log(log::debug1, "stategraph") << "case 3a: (X, d, e) -> (Y, d', e') ; source(X, i, k) = e && dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                 if (e1 != data::undefined_data_expression())
                 {
                   V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
                 }
               }
-              else if (Y != X && is_undefined(i->source, k))
+              else if (Y != X && is_undefined(i->source(), k))
               {
                 // Y != X && undefined(source(X, i, k)) && dest(X, i, k') = e'
-                auto e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
+                auto e1 = mapped_value(i->dest(), k1, data::undefined_data_expression());
                 if (e1 != data::undefined_data_expression())
                 {
                   mCRL2log(log::debug1, "stategraph") << "case 3b: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
@@ -989,7 +975,7 @@ class stategraph_algorithm
                 }
 
                 // Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k'
-                if (mapped_value(i->copy, k, data::undefined_index()) == k1)
+                if (mapped_value(i->copy(), k, data::undefined_index()) == k1)
                 {
                   mCRL2log(log::debug1, "stategraph") << "case 3c: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k' ; k' = " << print_index(k1) << std::endl;
                   V.insert_edge(todo, m_pbes, u, Y, k1, e, edge_label);
@@ -999,7 +985,7 @@ class stategraph_algorithm
             // case 4: (X, d, e) -> (Y, ?)
             else
             {
-              auto e1 = mapped_value(i->source, k, data::undefined_data_expression());
+              auto e1 = mapped_value(i->source(), k, data::undefined_data_expression());
               if (e1 == e || e1 == data::undefined_data_expression())
               {
                 std::size_t k1 = data::undefined_index();

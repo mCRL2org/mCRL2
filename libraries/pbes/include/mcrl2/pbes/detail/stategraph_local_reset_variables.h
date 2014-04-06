@@ -28,13 +28,13 @@ template <typename Container>
 std::string print_vector(const Container& v, const std::string& delim)
 {
   std::ostringstream os;
-  for(typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (auto i = v.begin(); i != v.end(); ++i)
   {
     if(i != v.begin())
     {
       os << delim;
     }
-    os << data::pp(*i);
+    os << *i;
   }
   return os.str();
 }
@@ -203,7 +203,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
   void leave(const pbes_system::propositional_variable_instantiation& x)
   {
     pbes_expression result = algorithm.reset_variable(x, eq_X, i);
-    mCRL2log(log::debug1, "stategraph") << "reset variable " << pbes_system::pp(x) << " with index " << i << " to " << pbes_system::pp(result) << std::endl;
+    mCRL2log(log::debug1, "stategraph") << "reset variable " << x << " with index " << i << " to " << result << std::endl;
     i++;
     push(result);
   }
@@ -269,18 +269,20 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
 
 pbes_expression local_reset_variables_algorithm::reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
 {
-  // mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
+  using utilities::detail::contains;
+
+  // mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << x << " with index " << i << std::endl;
   assert(i < eq_X.predicate_variables().size());
-  const predicate_variable& X_i = eq_X.predicate_variables()[i];
-  assert(X_i.X == x);
+  const predicate_variable& Ye = eq_X.predicate_variables()[i];
+  assert(Ye.variable() == x);
 
   const core::identifier_string& X = eq_X.variable().name();
-  const core::identifier_string& Y = X_i.X.name();
+  const core::identifier_string& Y = Ye.name();
   const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
   auto const& e = x.parameters();
   std::vector<data::data_expression> e1(e.begin(), e.end());
   const std::vector<data::variable>& d_Y = eq_Y.parameters();
-  assert(d_Y.size() == X_i.X.parameters().size());
+  assert(d_Y.size() == Ye.parameters().size());
 
   const std::size_t J = m_local_control_flow_graphs.size();
 
@@ -298,12 +300,12 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
       {
         auto const& v = Vj.find_vertex(Y); // v = (Y, p, q)
         std::size_t p = v.index();
-        auto di = X_i.dest.find(p);
-        if (di != X_i.dest.end())
+        auto di = Ye.dest().find(p);
+        if (di != Ye.dest().end())
         {
-          const data::data_expression& q1 = di->second; // q1 = dest(X, i, p)
+          auto const& q1 = di->second; // q1 = dest(X, i, p)
           auto const& u = Vj.find_vertex(local_control_flow_graph_vertex(Y, p, data::undefined_variable(), q1));
-          if (utilities::detail::contains(Bj[Y], d_Y[k]) && !utilities::detail::contains(u.marking(), d_Y[k]))
+          if (contains(Bj[Y], d_Y[k]) && !contains(u.marking(), d_Y[k]))
           {
             relevant = false;
             break;
@@ -311,12 +313,12 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
         }
         else
         {
-          if (utilities::detail::contains(Bj[Y], d_Y[k]))
+          if (contains(Bj[Y], d_Y[k]))
           {
             bool found = false;
             for (auto vi = Vj.vertices.begin(); vi != Vj.vertices.end(); ++vi)
             {
-              if (vi->name() == Y && v.index() == p && utilities::detail::contains(vi->marking(), d_Y[k]))
+              if (vi->name() == Y && v.index() == p && contains(vi->marking(), d_Y[k]))
               {
                 found = true;
                 break;

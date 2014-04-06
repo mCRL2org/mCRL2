@@ -51,6 +51,16 @@ bool contains(const std::set<T>& c, const typename std::set<T>::value_type& v)
   return c.find(v) != c.end();
 }
 
+// Remove an element from v, and return it.
+template <typename Container>
+typename Container::value_type pick_element(Container& v)
+{
+  auto i = v.begin();
+  auto result = *i;
+  v.erase(i);
+  return result;
+}
+
 } // namespace detail
 
 } // namespace utilities

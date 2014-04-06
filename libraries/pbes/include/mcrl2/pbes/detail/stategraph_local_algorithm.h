@@ -149,6 +149,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
     template <typename RulesPredicate>
     belongs_relation compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k, RulesPredicate rules)
     {
+      using utilities::detail::contains;
+
       belongs_relation Bk;
       for (auto p = Vk.vertices.begin(); p != Vk.vertices.end(); ++p)
       {
@@ -161,14 +163,14 @@ class stategraph_local_algorithm: public stategraph_algorithm
         auto const& predvars = eq_X.predicate_variables();
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          const predicate_variable& X_i = predvars[i];
-          for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
+          auto const& Ye = predvars[i];
+          for (auto j = belongs.begin(); j != belongs.end(); )
           {
             std::size_t m = *j;
-            if ((X_i.used.find(m) != X_i.used.end() || X_i.changed.find(m) != X_i.changed.end()) && !rules(X, i))
+            if ((contains(Ye.used(), m) || contains(Ye.changed(), m)) && !rules(X, i))
             {
               mCRL2log(log::debug1, "stategraph") << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs " << std::endl;
-              mCRL2log(log::debug2, "stategraph") << "  used = " << print_parameters(X_i.X.name(), X_i.used) << " changed = " << print_parameters(X_i.X.name(), X_i.changed) << std::endl;
+              mCRL2log(log::debug2, "stategraph") << "  used = " << print_parameters(Ye.name(), Ye.used()) << " changed = " << print_parameters(Ye.name(), Ye.changed()) << std::endl;
               belongs.erase(j++);
             }
             else
@@ -233,8 +235,8 @@ mCRL2log(log::debug2, "stategraph") << "  compute significant variables of verte
 pbes_expression phi0 = phi;
       if (u.index() != data::undefined_index())
       {
-        data::variable d = u.variable();
-        data::data_expression e = u.value();
+        auto const& d = u.variable();
+        auto const& e = u.value();
         data::mutable_map_substitution<> sigma;
         sigma[d] = e;
         pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
@@ -347,8 +349,8 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
       auto const& eq_X = *find_equation(m_pbes, X);
       auto const& Y = v.name();
       auto const& eq_Y = *find_equation(m_pbes, Y);
-      const predicate_variable& Ye = eq_X.predicate_variables()[i];
-      auto const& e = Ye.X.parameters();
+      auto const& Ye = eq_X.predicate_variables()[i];
+      auto const& e = Ye.parameters();
       auto m = v.marking(); // N.B. a copy must be made, to handle the case u == v properly
       for (auto di = m.begin(); di != m.end(); ++di)
       {
@@ -366,6 +368,8 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
     // returns true if there is a vertex u in V and an edge (u, i, v) in V, such that u.name() == X
     bool has_incoming_edge(const local_control_flow_graph& V, const local_control_flow_graph_vertex& v, const core::identifier_string& X, std::size_t i) const
     {
+      using utilities::detail::contains;
+
       for (auto j = V.vertices.begin(); j != V.vertices.end(); ++j)
       {
         auto const& u = *j;
@@ -378,7 +382,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
         if (k != outgoing_edges.end())
         {
           auto const& I = k->second;
-          if (I.find(i) != I.end())
+          if (contains(I, i))
           {
             return true;
           }
@@ -390,9 +394,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
     void compute_control_flow_marking()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
-      using data::detail::set_difference;
-      using data::detail::set_intersection;
-      using data::detail::set_union;
+      using utilities::detail::pick_element;
 
       std::size_t J = m_local_control_flow_graphs.size();
       for (std::size_t j = 0; j < J; j++)
@@ -488,7 +490,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                 {
                   std::size_t i = *ii;
                   auto const& Ye = predvars[i];
-                  auto const& Y = Ye.X.name();
+                  auto const& Y = Ye.name();
                   for (std::size_t k = 0; k < J; k++)
                   {
                     if (m_use_marking_optimization && !stableext)
@@ -578,13 +580,13 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
         auto const& predvars = eq_X.predicate_variables();
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          const predicate_variable& X_i = predvars[i];
+          auto const& Ye = predvars[i];
           for (auto j = m_belongs.begin(); j != m_belongs.end(); ++j)
           {
             auto const& Bj = *j;
             remove_belongs(B, Bj);
           }
-          auto const& v = V.insert_vertex(local_control_flow_graph_vertex(X_i.X.name(), data::undefined_data_expression()));
+          auto const& v = V.insert_vertex(local_control_flow_graph_vertex(Ye.name(), data::undefined_data_expression()));
           V.insert_edge(u, i, v);
         }
       }

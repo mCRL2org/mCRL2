@@ -69,14 +69,14 @@ class stategraph_global_algorithm: public stategraph_algorithm
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
           const predicate_variable& PV = predvars[i];
-          mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(PV.X) << std::endl;
-          pbes_expression g = pbesr(PV.guard, sigma);
-          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(PV.guard) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
+          mCRL2log(log::debug, "stategraph") << "Y(e) = " << PV << std::endl;
+          pbes_expression g = pbesr(PV.guard(), sigma);
+          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(PV.guard()) << data::print_substitution(sigma) << " = " << g << std::endl;
           if (is_false(g))
           {
             continue;
           }
-          propositional_variable_instantiation Ye = apply_substitution(PV.X, sigma);
+          propositional_variable_instantiation Ye = apply_substitution(PV.variable(), sigma);
           propositional_variable_instantiation Y = project(Ye);
 
           mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Y) << std::endl;
