@@ -15,6 +15,7 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
@@ -81,7 +82,7 @@ class predicate_variable
     {
       return m_dest;
     }
-  
+
     const std::map<std::size_t, std::size_t>& copy() const
     {
       return m_copy;
@@ -156,6 +157,7 @@ class stategraph_equation: public pbes_equation
           //}
         }
       }
+      mCRL2log(log::debug2, "stategraph") << "  computing source: expression = " << x << ", d_X = " << core::detail::print_list(d) << ", result = " << core::detail::print_map(result) << std::endl;
     }
 
     bool is_cf(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow, const core::identifier_string& X, std::size_t i) const

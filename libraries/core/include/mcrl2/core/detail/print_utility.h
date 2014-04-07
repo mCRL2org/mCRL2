@@ -90,6 +90,32 @@ std::string print_set(const Container& v, std::string message = "", bool print_i
   return print_container(v, "{", "}", message, print_index, boundary_spaces);
 }
 
+/// \brief Creates a string representation of a map
+/// \param v A map container
+/// \param message A string
+/// \param print_index If true, an index is written in front of each term
+template <typename MapContainer>
+std::string print_map(const MapContainer& v, std::string message = "")
+{
+  std::ostringstream out;
+  if (!message.empty())
+  {
+    out << "--- " << message << "---" << std::endl;
+  }
+  out << "{";
+  int index = 0;
+  for (auto i = v.begin(); i != v.end(); ++i)
+  {
+    if (i != v.begin())
+    {
+      out << ", ";
+    }
+    out << i->first << " -> " << i->second;
+  }
+  out << "}";
+  return out.str();
+}
+
 } // namespace detail
 
 } // namespace core
