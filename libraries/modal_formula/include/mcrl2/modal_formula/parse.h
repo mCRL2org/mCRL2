@@ -203,14 +203,18 @@ void complete_state_formula(state_formula& x, lps::specification& spec, bool che
   type_check(x, spec, check_monotonicity);
   if (translate_regular)
   {
+    mCRL2log(log::debug) << "formula before translating regular formulas: " << x << std::endl;
     translate_regular_formula(x);
+    mCRL2log(log::debug) << "formula after translating regular formulas: " << x << std::endl;
   }
   spec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
   x = state_formulas::translate_user_notation(x);
   x = state_formulas::normalize_sorts(x, spec.data());
   if (check_monotonicity && state_formulas::detail::has_name_clashes(x))
   {
+    mCRL2log(log::debug) << "formula before resolving name clashes: " << x << std::endl;
     x = state_formulas::detail::resolve_name_clashes(x);
+    mCRL2log(log::debug) << "formula after resolving name clashes: " << x << std::endl;
   }
 }
 
