@@ -14,6 +14,7 @@
 
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/traverser.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -45,7 +46,8 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
   // P(e1, ..., en)
   void enter(const process::process_instance& x)
   {
-    if (W.find(x.identifier()) == W.end())
+    using utilities::detail::contains;
+    if (!contains(W, x.identifier()))
     {
       W.insert(x.identifier());
       const process_equation& eqn = find_equation(equations, x.identifier());
@@ -60,7 +62,8 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
   // P(d1 = e1, ..., dn = en)
   void enter(const process::process_instance_assignment& x)
   {
-    if (W.find(x.identifier()) == W.end())
+    using utilities::detail::contains;
+    if (!contains(W, x.identifier()))
     {
       W.insert(x.identifier());
       const process_equation& eqn = find_equation(equations, x.identifier());

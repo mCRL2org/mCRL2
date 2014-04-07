@@ -26,6 +26,7 @@
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/alias.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -59,13 +60,14 @@ bool unique_names(variable_list const& variables)
 /// \param variables A sequence of data variables
 /// \return True if the left hand sides of assignments are contained in variables.
 inline
-bool check_assignment_variables(assignment_list const& assignments, variable_list variables)
+bool check_assignment_variables(assignment_list const& assignments, variable_list const& variables)
 {
-  std::set<variable> v;
-  std::copy(variables.begin(), variables.end(), std::inserter(v, v.begin()));
-  for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
+	using utilities::detail::contains;
+
+  std::set<variable> v(variables.begin(), variables.end());
+  for (auto i = assignments.begin(); i != assignments.end(); ++i)
   {
-    if (v.find(i->lhs()) == v.end())
+    if (!contains(v, i->lhs()))
     {
       return false;
     }
@@ -77,7 +79,7 @@ bool check_assignment_variables(assignment_list const& assignments, variable_lis
 template <typename T, typename UnaryPredicate>
 void set_remove_if(std::set<T>& s, UnaryPredicate f)
 {
-  for (typename std::set<T>::iterator i = s.begin(); i != s.end();)
+  for (auto i = s.begin(); i != s.end();)
   {
     if (f(*i))
     {
@@ -191,9 +193,11 @@ bool check_variable_sorts(const VariableContainer& variables, const SortContaine
 inline
 bool check_variable_names(variable_list const& variables, const std::set<core::identifier_string>& names)
 {
-  for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
+	using utilities::detail::contains;
+
+  for (auto i = variables.begin(); i != variables.end(); ++i)
   {
-    if (names.find(i->name()) != names.end())
+    if (contains(names, i->name()))
     {
       return false;
     }

@@ -162,7 +162,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     // in the order they are encountered in container
     std::vector<data::sort_expression_list> sort_lists;
 
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       if (sort_map.find(i->sorts()) == sort_map.end())
       {
@@ -173,7 +173,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
 
     // do the actual printing
     derived().print(opener);
-    for (std::vector<data::sort_expression_list>::iterator i = sort_lists.begin(); i != sort_lists.end(); ++i)
+    for (auto i = sort_lists.begin(); i != sort_lists.end(); ++i)
     {
       if (i != sort_lists.begin())
       {

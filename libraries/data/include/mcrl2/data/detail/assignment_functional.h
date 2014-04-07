@@ -15,6 +15,7 @@
 #include <set>
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -69,7 +70,8 @@ struct has_left_hand_side_in
   /// \return The function result
   bool operator()(assignment a) const
   {
-    return m_variables.find(a.lhs()) != m_variables.end();
+  	using utilities::detail::contains;
+    return contains(m_variables, a.lhs());
   }
 };
 

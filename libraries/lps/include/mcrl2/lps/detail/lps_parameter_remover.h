@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <vector>
 #include "mcrl2/data/detail/assignment_functional.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -55,10 +56,12 @@ struct lps_parameter_remover
   /// \brief Removes parameters from a list of variables.
   data::variable_list remove_list_copy(const data::variable_list& l) const
   {
+  	using utilities::detail::contains;
+
     std::vector<data::variable> result;
-    for (data::variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
+    for (auto i = l.begin(); i != l.end(); ++i)
     {
-      if (to_be_removed.find(*i) == to_be_removed.end())
+      if (!contains(to_be_removed, *i))
       {
         result.push_back(*i);
       }

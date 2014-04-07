@@ -15,6 +15,7 @@
 #include <set>
 #include "mcrl2/lps/action.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -53,9 +54,10 @@ bool check_action_sorts(action_list actions, const std::set<data::sort_expressio
 inline
 bool check_action_labels(action_list actions, const std::set<action_label>& labels)
 {
-  for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
+	using utilities::detail::contains;
+  for (auto i = actions.begin(); i != actions.end(); ++i)
   {
-    if (labels.find(i->label()) == labels.end())
+    if (!contains(labels, i->label()))
     {
       return false;
     }

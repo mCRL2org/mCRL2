@@ -170,7 +170,8 @@ struct substitution_updater
 
   data::variable bind(const data::variable& v)
   {
-    if (V.find(v) == V.end() && sigma(v) == v)
+  	using utilities::detail::contains;
+    if (!contains(V, v) && sigma(v) == v)
     {
       return v;
     }
@@ -178,7 +179,7 @@ struct substitution_updater
     {
       id_generator.add_identifier(v.name());
       data::variable w(id_generator(v.name()), v.sort());
-      while (sigma(w) != w || V.find(w) != V.end())
+      while (sigma(w) != w || contains(V, w))
       {
         w = data::variable(id_generator(v.name()), v.sort());
       }
@@ -242,7 +243,8 @@ struct substitution_updater
 template <typename Substitution, typename IdentifierGenerator>
 data::variable update_substitution(Substitution& sigma, const data::variable& v, const std::multiset<data::variable>& V, IdentifierGenerator& id_generator)
 {
-  if (V.find(v) == V.end() && sigma(v) == v)
+	using utilities::detail::contains;
+  if (!contains(V, v) && sigma(v) == v)
   {
     return v;
   }
@@ -251,7 +253,7 @@ data::variable update_substitution(Substitution& sigma, const data::variable& v,
     id_generator.add_identifier(v.name());
     data::variable w(id_generator(v.name()), v.sort());
 
-    while (sigma(w) != w || V.find(w) != V.end())
+    while (sigma(w) != w || contains(V, w))
     {
       w = data::variable(id_generator(v.name()), v.sort());
     }

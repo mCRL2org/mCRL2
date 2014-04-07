@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/detail/pbesinst_rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 #ifndef MCRL2_PBES_PBESINST_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_ALGORITHM_H
@@ -128,6 +129,9 @@ class pbesinst_algorithm
     /// \param p A PBES
     void run(pbes& p)
     {
+    	using utilities::detail::pick_element;
+      using utilities::detail::contains;
+
       pbes_system::detail::instantiate_global_variables(p);
 
       // initialize equation_index and E
@@ -143,8 +147,7 @@ class pbesinst_algorithm
       todo.insert(Xinit.propositional_variables().front());
       while (!todo.empty())
       {
-        propositional_variable_instantiation X = *todo.begin();
-        todo.erase(todo.begin());
+      	auto const& X = pick_element(todo);
         done.insert(X);
         propositional_variable_instantiation X_e = tr::term2propvar(R.rename(X));
         int index = equation_index[X.name()];
@@ -154,7 +157,7 @@ class pbesinst_algorithm
         pbes_expression_with_propositional_variables psi_e = R(phi, sigma);
         for (propositional_variable_instantiation_list::iterator i = psi_e.propositional_variables().begin(); i != psi_e.propositional_variables().end(); ++i)
         {
-          if (done.find(*i) == done.end())
+          if (!contains(done, *i))
           {
             todo.insert(*i);
           }

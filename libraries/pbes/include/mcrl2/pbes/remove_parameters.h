@@ -22,6 +22,7 @@
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -151,7 +152,7 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 
   propositional_variable operator()(const propositional_variable& x)
   {
-    std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed.find(x.name());
+    auto i = to_be_removed.find(x.name());
     if (i == to_be_removed.end())
     {
       return x;
@@ -161,7 +162,7 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 
   pbes_expression operator()(const propositional_variable_instantiation& x)
   {
-    std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed.find(x.name());
+    auto i = to_be_removed.find(x.name());
     if (i == to_be_removed.end())
     {
       return x;
@@ -241,10 +242,12 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 
   data::variable_list operator()(const data::variable_list& l) const
   {
+  	using utilities::detail::contains;
+
     std::vector<data::variable> result;
-    for (data::variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
+    for (auto i = l.begin(); i != l.end(); ++i)
     {
-      if (to_be_removed.find(*i) == to_be_removed.end())
+      if (!contains(to_be_removed, *i))
       {
         result.push_back(*i);
       }

@@ -17,6 +17,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/utility.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -183,7 +184,8 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   process::process_expression operator()(const lps::action& x)
   {
-    if (B.find(x.label().name()) != B.end())
+    using utilities::detail::contains;
+    if (contains(B, x.label().name()))
     {
       return delta();
     }
@@ -260,11 +262,12 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   bool restrict(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
   {
-    for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+    using utilities::detail::contains;
+    for (auto i = C.begin(); i != C.end(); ++i)
     {
       core::identifier_string_list gamma = i->action_name().names();
       core::identifier_string c = i->name();
-      if (std::find(gamma.begin(), gamma.end(), b) != gamma.end() && B.find(c) == B.end())
+      if (contains(gamma, b) && !contains(B, c))
       {
         return true;
       }
@@ -275,7 +278,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   std::set<core::identifier_string> restrict_block(const std::set<core::identifier_string>& B, const communication_expression_list& C) const
   {
     std::set<core::identifier_string> result;
-    for (std::set<core::identifier_string>::const_iterator i = B.begin(); i != B.end(); ++i)
+    for (auto i = B.begin(); i != B.end(); ++i)
     {
       if (!restrict(*i, B, C))
       {

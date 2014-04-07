@@ -16,6 +16,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -30,6 +31,7 @@ inline
 bool is_monotonous(state_formula f, const std::set<core::identifier_string>& negated_variables)
 {
   using namespace state_formulas::detail::accessors;
+  using utilities::detail::contains;
 
   //--- handle negations ---//
   if (is_not(f))
@@ -97,7 +99,7 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
     }
     else if (is_variable(f))
     {
-      return negated_variables.find(name(f)) != negated_variables.end();
+      return contains(negated_variables, name(f));
     }
     else if (is_mu(f))
     {
@@ -190,7 +192,7 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
   }
   else if (is_variable(f))
   {
-    return negated_variables.find(name(f)) == negated_variables.end();
+    return !contains(negated_variables, name(f));
   }
   else if (is_mu(f))
   {
