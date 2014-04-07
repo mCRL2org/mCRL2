@@ -62,21 +62,14 @@ bool contains(const std::multiset<T>& c, const typename std::multiset<T>::value_
 
 /// \brief Returns the value corresponding to the given key in the set m. If the key is not
 /// present, an exception is thrown.
-template <typename MapContainer>
-bool has_key(const MapContainer& c, const typename MapContainer::key_type& v)
-{
-	throw mcrl2::runtime_error("has_key not implemented");
-  return false;
-}
-
-// specialization
 template <typename Key, typename T>
 bool has_key(const std::map<Key, T>& c, const Key& v)
 {
   return c.find(v) != c.end();
 }
 
-// specialization
+/// \brief Returns the value corresponding to the given key in the set m. If the key is not
+/// present, an exception is thrown.
 template <typename Key, typename T>
 bool has_key(const std::multimap<Key, T>& c, const Key& v)
 {
