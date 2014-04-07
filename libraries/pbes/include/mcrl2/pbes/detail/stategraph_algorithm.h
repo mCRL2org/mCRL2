@@ -422,6 +422,22 @@ class stategraph_algorithm
       return out.str();
     }
 
+    std::string log_related_parameters(const core::identifier_string& X,
+                                       std::size_t n,
+                                       const core::identifier_string& Y,
+                                       std::size_t m,
+                                       const predicate_variable& Ye,
+                                       const std::string& reason = ""
+                                      ) const
+    {
+      std::ostringstream out;
+      if (X != Y || n != m)
+      {
+        out << print_cfp(X, n) << " and " << print_cfp(Y, m) << " are related " << "because of recursion " << Ye << " in the equation for " << X << reason;
+      }
+      return out.str();
+    }
+
     // Determines which control flow parameters are related. This is done by assigning neighbors to the
     // vertices in m_global_control_flow_graph_vertices.
     void compute_related_global_control_flow_parameters()
@@ -466,15 +482,13 @@ class stategraph_algorithm
                 // voor de parameter op dat punt).
                 if (is_undefined(Ye.dest(), m))
                 {
-                  mCRL2log(log::debug, "stategraph") << print_cfp(X, n) << " and " << print_cfp(Y, m) << " are related "
-                                                     << "because of recursion " << Ye << " in the equation for " << X << std::endl;
+                  mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye) << std::endl;
                   relate_control_flow_graph_vertices(X, n, Y, m);
                 }
               }
               else
               {
-                mCRL2log(log::debug, "stategraph") << print_cfp(X, n) << " and " << print_cfp(Y, m) << " are related "
-                                                   << "because of recursion " << Ye << " in the equation for " << X << " (dest is undefined)" << std::endl;
+                mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye, " (dest is undefined)") << std::endl;
                 relate_control_flow_graph_vertices(X, n, Y, m);
               }
             }
