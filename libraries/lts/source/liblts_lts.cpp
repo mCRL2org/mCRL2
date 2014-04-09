@@ -152,13 +152,13 @@ private:
 
   bool read_tag(long& extra_info_pos)
   {
-    seekg(-sizeof(m_data), std::ios_base::end);
+    seekg(-(std::streamoff)sizeof(m_data), std::ios_base::end);
     if (good())
     {
       std::fstream::read(&m_data.buf[0], sizeof(m_data));
       if (good())
       {
-        if (!strncmp(LTS_TRAILER_TAG, m_data.trailer_tag, 12))
+        if (!strncmp(LTS_TRAILER_TAG, m_data.trailer_tag, LTS_TRAILER_TAG_LENGTH))
         {
           extra_info_pos = 0;
           for (int i = 7; i >= 0; --i)
