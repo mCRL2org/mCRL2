@@ -6,17 +6,18 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/action.h
+/// \file mcrl2/process/action.h
 /// \brief The class action.
 
-#ifndef MCRL2_LPS_ACTION_H
-#define MCRL2_LPS_ACTION_H
+#ifndef MCRL2_PROCESS_ACTION_H
+#define MCRL2_PROCESS_ACTION_H
 
 #include <cassert>
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/action_label.h"
+#include "mcrl2/process/action_label.h"
+
 
 namespace mcrl2
 {
@@ -128,4 +129,4 @@ bool equal_signatures(const action& a, const action& b)
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_ACTION_H
+#endif // MCRL2_PROCESS_ACTION_H

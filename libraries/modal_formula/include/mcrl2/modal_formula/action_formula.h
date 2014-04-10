@@ -20,8 +20,8 @@
 #include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/action.h"
-#include "mcrl2/lps/untyped_action.h"
+#include "mcrl2/process/untyped_action.h"
+#include "mcrl2/process/action.h"
 
 namespace mcrl2
 {

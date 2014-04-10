@@ -15,8 +15,8 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/action_rename.h"
-#include "mcrl2/lps/untyped_action.h"
 #include "mcrl2/lps/untyped_multi_action.h"
+#include "mcrl2/process/untyped_action.h"
 
 namespace mcrl2
 {

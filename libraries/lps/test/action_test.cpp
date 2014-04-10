@@ -16,8 +16,8 @@
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/lps/action.h"
 #include "mcrl2/lps/print.h"
+#include "mcrl2/process/action.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -54,7 +54,7 @@ int test_main(int argc, char** argv)
 
 
   // Test whether the front of an action_label_list is working properly.
-  
+
   action_label_list l;
   l.push_front(aX);
   BOOST_CHECK(l.front()==aX);

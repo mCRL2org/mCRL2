@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/action_label.h
+/// \file mcrl2/process/action_label.h
 /// \brief The class action_label.
 
-#ifndef MCRL2_LPS_ACTION_LABEL_H
-#define MCRL2_LPS_ACTION_LABEL_H
+#ifndef MCRL2_PROCESS_ACTION_LABEL_H
+#define MCRL2_PROCESS_ACTION_LABEL_H
 
 #include <cassert>
 #include <set>
@@ -109,4 +109,4 @@ std::set<data::sort_expression> find_sort_expressions(const lps::action_label_li
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_ACTION_LABEL_H
+#endif // MCRL2_PROCESS_ACTION_LABEL_H

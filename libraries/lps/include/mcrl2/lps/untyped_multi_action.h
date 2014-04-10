@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_UNTYPED_MULTI_ACTION_H
 #define MCRL2_LPS_UNTYPED_MULTI_ACTION_H
 
-#include "mcrl2/lps/untyped_action.h"
+#include "mcrl2/process/untyped_action.h"
 
 namespace mcrl2 {
 

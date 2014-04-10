@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/action_parse.h
+/// \file mcrl2/process/action_parse.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_ACTION_PARSE_H
-#define MCRL2_LPS_ACTION_PARSE_H
+#ifndef MCRL2_PROCESS_ACTION_PARSE_H
+#define MCRL2_PROCESS_ACTION_PARSE_H
 
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/multi_action.h"
@@ -164,4 +164,4 @@ action parse_action(const std::string& text, const lps::action_label_list& actio
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_ACTION_PARSE_H
+#endif // MCRL2_PROCESS_ACTION_PARSE_H

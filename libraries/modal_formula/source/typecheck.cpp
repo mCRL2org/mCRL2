@@ -6,9 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/lps/action.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/monotonicity.h"
+#include "mcrl2/process/action.h"
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -499,7 +499,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
     }
     catch (mcrl2::runtime_error &e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + to_string(f)); 
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + to_string(f));
     }
   }
 

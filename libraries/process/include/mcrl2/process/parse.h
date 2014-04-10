@@ -18,7 +18,7 @@
 #include <string>
 #include <sstream>
 #include "mcrl2/core/parser_utility.h"
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/process/process_specification.h"

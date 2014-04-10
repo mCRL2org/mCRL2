@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/action_label.h"
+#include "mcrl2/process/action_label.h"
 #include "mcrl2/process/process_equation.h"
 #include "mcrl2/process/process_expression.h"
 

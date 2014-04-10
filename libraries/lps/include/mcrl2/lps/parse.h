@@ -15,7 +15,7 @@
 #include <sstream>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/specification.h"

@@ -1,7 +1,7 @@
 #include <boost/test/minimal.hpp>
 #include <exception>
 #include <sstream>
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/core/print.h"
 
@@ -40,7 +40,7 @@ int test_main(int argc, char** argv)
   s.push_front(sort_pos::pos());
   act_decls.push_front(action_label("b",s));
   act_decls.push_front(action_label(identifier_string("c"),sort_expression_list()));
-  
+
   Trace t(data_spec, act_decls);
   t.addAction(parse_multi_action("a",act_decls,data_spec));
   t.addAction(parse_multi_action("b(1,true)",act_decls,data_spec));

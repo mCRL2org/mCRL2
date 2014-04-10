@@ -27,7 +27,7 @@
 #include "mcrl2/core/detail/construction_utility.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/data/data_specification.h"
 

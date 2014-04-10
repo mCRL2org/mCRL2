@@ -29,7 +29,7 @@
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lts/lts.h"
 

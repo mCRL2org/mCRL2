@@ -18,7 +18,7 @@
 #define MCRL2_LPS_TRAVERSER_H
 
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/lps/untyped_action.h"
+#include "mcrl2/process/untyped_action.h"
 #include "mcrl2/lps/untyped_multi_action.h"
 
 namespace mcrl2
