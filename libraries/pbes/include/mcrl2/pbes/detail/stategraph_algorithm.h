@@ -172,14 +172,14 @@ class stategraph_algorithm
       return out.str();
     }
 
-    std::string print_local_control_flow_parameters()
+    std::string print_LCFP()
     {
-      return print_control_flow_parameters("--- computed local control flow parameters ---", m_is_LCFP);
+      return print_control_flow_parameters("--- computed LCFP parameters (before removing components) ---", m_is_LCFP);
     }
 
-    std::string print_global_control_flow_parameters()
+    std::string print_GCFP()
     {
-      return print_control_flow_parameters("--- computed global control flow parameters ---", m_is_GCFP);
+      return print_control_flow_parameters("--- computed GCFP parameters ---", m_is_GCFP);
     }
 
     // returns true if m is not a key in the map
@@ -283,7 +283,7 @@ class stategraph_algorithm
           }
         }
       }
-      mCRL2log(log::debug, "stategraph") << print_local_control_flow_parameters();
+      mCRL2log(log::debug, "stategraph") << print_LCFP();
     }
 
     // Computes the global control flow parameters. The result is stored in m_is_GCFP.
@@ -368,7 +368,7 @@ class stategraph_algorithm
       }
       while (changed);
 
-      mCRL2log(log::verbose, "stategraph") << print_global_control_flow_parameters();
+      mCRL2log(log::verbose, "stategraph") << print_GCFP();
     }
 
     bool is_local_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
@@ -731,6 +731,46 @@ class stategraph_algorithm
       return result;
     }
 
+    // prints all vertices of the connected components
+    void print_local_control_flow_parameters() const
+    {
+      std::ostringstream out;
+      mCRL2log(log::debug, "stategraph") << "--- computed local control flow parameters ---" << std::endl;
+
+      // collect the control flow points in the map CFP
+      std::map<core::identifier_string, std::set<const global_control_flow_graph_vertex*> > CFP;
+      for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
+      {
+        for (auto j = k->begin(); j != k->end(); ++j)
+        {
+          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
+          if (u.has_variable())
+          {
+            CFP[u.name()].insert(&u);
+          }
+        }
+      }
+
+      // print the map CFP
+      for (auto i = CFP.begin(); i != CFP.end(); ++i)
+      {
+        if (i != CFP.begin())
+        {
+          out << "\n";
+        }
+        auto const& V = i->second;
+        for (auto j = V.begin(); j != V.end(); ++j)
+        {
+          if (j != V.begin())
+          {
+            out << ", ";
+          }
+          out << **j;
+        }
+      }
+      mCRL2log(log::debug, "stategraph") << out.str() << std::endl;
+    }
+
     // returns the parameters of the propositional variable with name X
     std::set<data::variable> propvar_parameters(const core::identifier_string& X) const
     {
@@ -1072,6 +1112,7 @@ class stategraph_algorithm
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
+      print_local_control_flow_parameters();
       compute_connected_component_values();
       compute_local_control_flow_graphs();
       print_local_control_flow_graphs();

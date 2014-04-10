@@ -53,6 +53,11 @@ class control_flow_graph_vertex
     {
       return m_variable;
     }
+
+    bool has_variable() const
+    {
+      return m_index != data::undefined_index();
+    }
 };
 
 inline
@@ -111,11 +116,6 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
     local_control_flow_graph_vertex(const core::identifier_string& name, const data::data_expression& value)
       : control_flow_graph_vertex(name, data::undefined_index(), data::undefined_variable()), m_value(value)
     {}
-
-    bool has_variable() const
-    {
-      return m_index != data::undefined_index();
-    }
 
     const data::data_expression& value() const
     {
