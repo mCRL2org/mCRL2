@@ -899,7 +899,7 @@ struct absinthe_algorithm
   // add lifted mappings and equations to the data specification
   void lift_data_specification(const pbes& p, const abstraction_map& sigmaH, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
   {
-  	using utilities::detail::has_key;
+    using utilities::detail::has_key;
 
     sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
     sort_function sigma(sigmaH, sigmaS, sigmaF);

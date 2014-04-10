@@ -103,7 +103,6 @@ std::string print_map(const MapContainer& v, std::string message = "")
     out << "--- " << message << "---" << std::endl;
   }
   out << "{";
-  int index = 0;
   for (auto i = v.begin(); i != v.end(); ++i)
   {
     if (i != v.begin())
