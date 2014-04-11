@@ -27,7 +27,6 @@
 #include "mcrl2/data/hash.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
-#include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -1403,28 +1402,6 @@ struct term_traits<pbes_system::pbes_expression>
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), p));
   }
 
-  static inline
-  bool is_sorted(const term_type& p, const term_type& q)
-  {
-    pbes_system::detail::compare_pbes_expression_visitor<term_type> pvisitor;
-    pvisitor.visit(p);
-    pbes_system::detail::compare_pbes_expression_visitor<term_type> qvisitor;
-    qvisitor.visit(q);
-    if (pvisitor.has_predicate_variables != qvisitor.has_predicate_variables)
-    {
-      return qvisitor.has_predicate_variables;
-    }
-    if (pvisitor.has_quantifiers != qvisitor.has_quantifiers)
-    {
-      return qvisitor.has_quantifiers;
-    }
-    if (pvisitor.result.size() != qvisitor.result.size())
-    {
-      return pvisitor.result.size() < qvisitor.result.size();
-    }
-    return p < q;
-  }
-
   /// \brief Make a conjunction
   /// \param p A term
   /// \param q A term
@@ -1466,11 +1443,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type sorted_and(const term_type& p, const term_type& q)
   {
-#ifdef MCRL2_SMART_ARGUMENT_SORTING
-    bool sorted = is_sorted(p, q);
-#else
     bool sorted = p < q;
-#endif
     return sorted ? term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q)) : term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), q, p));
   }
 
@@ -1481,11 +1454,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type sorted_or(const term_type& p, const term_type& q)
   {
-#ifdef MCRL2_SMART_ARGUMENT_SORTING
-    bool sorted = is_sorted(p, q);
-#else
     bool sorted = p < q;
-#endif
     return sorted ? term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p, q)) : term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), q, p));
   }
 

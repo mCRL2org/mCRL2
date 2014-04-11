@@ -18,8 +18,6 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/detail/pbes_free_variable_finder.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/add_binding.h"
 #include "mcrl2/utilities/exception.h"
