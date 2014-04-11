@@ -20,13 +20,140 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
-#include "mcrl2/pbes/detail/quantifier_visitor.h"
+#include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
 namespace detail {
+
+/// Visitor for collecting the quantifier variables that occur in a pbes expression.
+struct find_quantifier_variables_traverser: public pbes_expression_traverser<find_quantifier_variables_traverser>
+{
+  typedef pbes_expression_traverser<find_quantifier_variables_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  std::set<data::variable> result;
+
+  void enter(const forall& x)
+  {
+    auto const& v = x.variables();
+    result.insert(v.begin(), v.end());
+  }
+
+  void enter(const exists& x)
+  {
+    auto const& v = x.variables();
+    result.insert(v.begin(), v.end());
+  }
+};
+
+inline
+std::set<data::variable> find_quantifier_variables(const pbes_expression& x)
+{
+  find_quantifier_variables_traverser f;
+  f(x);
+  return f.result;
+}
+
+/// \brief Visitor for determining if within the scope of a quantifier there are quantifier
+/// variables of free variables with the same name.
+struct has_quantifier_name_clashes_traverser: public pbes_expression_traverser<has_quantifier_name_clashes_traverser>
+{
+  typedef pbes_expression_traverser<has_quantifier_name_clashes_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  std::vector<data::variable_list> quantifier_stack;
+  bool result;
+  data::variable name_clash; // if result is true, then this attribute contains the conflicting variable
+
+  has_quantifier_name_clashes_traverser()
+    : result(false)
+  {}
+
+  /// \brief Returns true if the quantifier_stack contains a data variable with the given name
+  /// \param name A
+  /// \return True if the quantifier_stack contains a data variable with the given name
+  bool is_in_quantifier_stack(core::identifier_string name) const
+  {
+    for (auto i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
+    {
+      if (std::find(boost::make_transform_iterator(i->begin(), data::detail::variable_name()),
+                    boost::make_transform_iterator(i->end()  , data::detail::variable_name()),
+                    name
+                   ) != boost::make_transform_iterator(i->end()  , data::detail::variable_name())
+         )
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// \brief Adds variables to the quantifier stack, and adds replacements for the name clashes to replacements.
+  /// \param variables A sequence of data variables
+  /// \return The number of replacements that were added.
+  void push(const data::variable_list& variables)
+  {
+    if (result)
+    {
+      return;
+    }
+    for (auto i = variables.begin(); i != variables.end(); ++i)
+    {
+      if (is_in_quantifier_stack(i->name()))
+      {
+        result = true;
+        name_clash = *i;
+        return;
+      }
+    }
+    quantifier_stack.push_back(variables);
+  }
+
+  /// \brief Pops the quantifier stack
+  void pop()
+  {
+    if (result)
+    {
+      return;
+    }
+    quantifier_stack.pop_back();
+  }
+
+  void enter(const forall& x)
+  {
+    push(x.variables());
+  }
+
+  void leave(const forall& x)
+  {
+    pop();
+  }
+
+  void enter(const exists& x)
+  {
+    push(x.variables());
+  }
+
+  void leave(const exists& x)
+  {
+    pop();
+  }
+};
+
+inline
+bool has_quantifier_name_clashes(const pbes_expression& x)
+{
+  has_quantifier_name_clashes_traverser f;
+  f(x);
+  return f.result;
+}
 
 /// \brief Checks if the equation is well typed
 /// \return True if
@@ -50,13 +177,12 @@ bool is_well_typed(const pbes_equation& eqn)
   }
 
   // check 2)
-  detail::quantifier_visitor qvisitor;
-  qvisitor.visit(eqn.formula());
+  std::set<data::variable> qvariables = detail::find_quantifier_variables(eqn.formula());
   if (data::detail::sequences_do_overlap(
         boost::make_transform_iterator(eqn.variable().parameters().begin(), data::detail::variable_name()),
         boost::make_transform_iterator(eqn.variable().parameters().end()  , data::detail::variable_name()),
-        boost::make_transform_iterator(qvisitor.variables.begin()     , data::detail::variable_name()),
-        boost::make_transform_iterator(qvisitor.variables.end()       , data::detail::variable_name())
+        boost::make_transform_iterator(qvariables.begin()     , data::detail::variable_name()),
+        boost::make_transform_iterator(qvariables.end()       , data::detail::variable_name())
       )
      )
   {
@@ -65,11 +191,11 @@ bool is_well_typed(const pbes_equation& eqn)
   }
 
   // check 3)
-  detail::quantifier_name_clash_visitor nvisitor;
-  nvisitor.visit(eqn.formula());
+  has_quantifier_name_clashes_traverser nvisitor;
+  nvisitor(eqn.formula());
   if (nvisitor.result)
   {
-    mCRL2log(log::error) << "pbes_equation::is_well_typed() failed: the quantifier variable " << data::pp(nvisitor.name_clash) << " occurs within the scope of a quantifier variable with the same name." << std::endl;
+    mCRL2log(log::error) << "pbes_equation::is_well_typed() failed: the quantifier variable " << nvisitor.name_clash << " occurs within the scope of a quantifier variable with the same name." << std::endl;
     return false;
   }
 
