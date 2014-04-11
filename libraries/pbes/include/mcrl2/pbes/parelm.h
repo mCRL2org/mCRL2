@@ -24,7 +24,7 @@
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
+#include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2
@@ -50,22 +50,20 @@ class pbes_parelm_algorithm
     /// \param t A PBES expression
     /// \param bound_variables A sequence of data variables
     /// \return The unbound variables in \p t that are not contained in \p bound_variables
-    std::set<data::variable> unbound_variables(pbes_expression t, data::variable_list bound_variables) const
+    std::set<data::variable> unbound_variables(const pbes_expression& t, const data::variable_list& bound_variables) const
     {
       bool search_propositional_variables = false;
-      detail::free_variable_visitor<pbes_expression> visitor(bound_variables, search_propositional_variables);
-      visitor.visit(t);
-      return visitor.result;
+      return detail::find_free_variables(t, bound_variables, search_propositional_variables);
     }
 
     /// \brief Finds the index of a variable in a sequence
     /// \param v A sequence of data variables
     /// \param d A data variable
     /// \return The index of \p d in \p v, or -1 if the variable wasn't found
-    int variable_index(data::variable_list v, data::variable d) const
+    int variable_index(const data::variable_list& v, const data::variable& d) const
     {
       int index = 0;
-      for (data::variable_list::iterator i = v.begin(); i != v.end(); ++i)
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
         if (*i == d)
         {

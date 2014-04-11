@@ -24,7 +24,6 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/hash.h"
 #include "mcrl2/pbes/propositional_variable.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -1668,9 +1667,8 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   variable_sequence_type free_variables(const term_type& t)
   {
-    pbes_system::detail::free_variable_visitor<term_type> visitor;
-    visitor.visit(t);
-    return variable_sequence_type(visitor.result.begin(), visitor.result.end());
+    std::set<data::variable> v = find_free_variables(t);
+    return variable_sequence_type(v.begin(), v.end());
   }
 
   /// \brief Conversion from data term to term
