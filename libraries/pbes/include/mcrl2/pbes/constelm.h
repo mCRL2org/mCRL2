@@ -169,8 +169,8 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   using super::operator();
 
   typedef constelm_edge_condition<pbes_expression> edge_condition;
-  typedef typename edge_condition::condition_map condition_map;
-  typedef typename core::term_traits<pbes_expression> tr;
+  typedef edge_condition::condition_map condition_map;
+  typedef core::term_traits<pbes_expression> tr;
 
   std::vector<edge_condition> condition_stack;
 
