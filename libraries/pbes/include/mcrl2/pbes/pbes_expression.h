@@ -9,8 +9,6 @@
 /// \file mcrl2/pbes/pbes_expression.h
 /// \brief The class pbes_expression.
 
-#define MCRL2_SMART_ARGUMENT_SORTING
-
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
@@ -1434,28 +1432,6 @@ struct term_traits<pbes_system::pbes_expression>
   term_type join_and(FwdIt first, FwdIt last)
   {
     return utilities::detail::join(first, last, and_, true_());
-  }
-
-  /// \brief Make a sorted conjunction
-  /// \param p A term
-  /// \param q A term
-  /// \return The value <tt>p && q</tt>, or <tt>q && p</tt>
-  static inline
-  term_type sorted_and(const term_type& p, const term_type& q)
-  {
-    bool sorted = p < q;
-    return sorted ? term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q)) : term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), q, p));
-  }
-
-  /// \brief Make a sorted disjunction
-  /// \param p A term
-  /// \param q A term
-  /// \return The value <tt>p || q</tt>
-  static inline
-  term_type sorted_or(const term_type& p, const term_type& q)
-  {
-    bool sorted = p < q;
-    return sorted ? term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p, q)) : term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), q, p));
   }
 
   /// \brief Make an implication
