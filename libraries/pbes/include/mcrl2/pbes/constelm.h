@@ -24,8 +24,8 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -135,6 +135,10 @@ struct constelm_edge_condition
   term_type FC;
   condition_map condition;  // condT + condF
 
+  constelm_edge_condition(const term_type& tc, const term_type& fc)
+    : TC(tc), FC(fc)
+  {}
+
   /// \brief Returns the true-false pair corresponding to the edge condition
   /// \return The true-false pair corresponding to the edge condition
   true_false_pair<Term> TCFC() const
@@ -148,7 +152,7 @@ struct constelm_edge_condition
   term_type compute_condition(const std::vector<true_false_pair<Term> >& c) const
   {
     term_type result = tr::true_();
-    for (typename std::vector<true_false_pair<Term> >::const_iterator i = c.begin(); i != c.end(); ++i)
+    for (auto i = c.begin(); i != c.end(); ++i)
     {
       result = utilities::optimized_and(result, utilities::optimized_not(i->TC));
       result = utilities::optimized_and(result, utilities::optimized_not(i->FC));
@@ -157,18 +161,40 @@ struct constelm_edge_condition
   }
 };
 
-template <typename Term>
-struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edge_condition<Term> >
+struct edge_condition_traverser: public pbes_expression_traverser<edge_condition_traverser>
 {
-  typedef pbes_expression_visitor<Term, constelm_edge_condition<Term> > super;
-  typedef typename core::term_traits<Term>::term_type term_type;
-  typedef typename core::term_traits<Term>::variable_type variable_type;
-  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
-  typedef typename core::term_traits<Term>::data_term_type data_term_type;
-  typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
-  typedef constelm_edge_condition<Term> edge_condition;
+  typedef pbes_expression_traverser<edge_condition_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  typedef constelm_edge_condition<pbes_expression> edge_condition;
   typedef typename edge_condition::condition_map condition_map;
-  typedef typename core::term_traits<Term> tr;
+  typedef typename core::term_traits<pbes_expression> tr;
+
+  std::vector<edge_condition> condition_stack;
+
+  void push(const edge_condition& x)
+  {
+    condition_stack.push_back(x);
+  }
+
+  edge_condition& top()
+  {
+    return condition_stack.back();
+  }
+
+  const edge_condition& top() const
+  {
+    return condition_stack.back();
+  }
+
+  edge_condition pop()
+  {
+    edge_condition result = top();
+    condition_stack.pop_back();
+    return result;
+  }
 
   // N.B. As a side effect ec1 and ec2 are changed!!!
   void merge_conditions(edge_condition& ec1,
@@ -176,168 +202,102 @@ struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edg
                         edge_condition& ec
                        )
   {
-    for (typename condition_map::iterator i = ec1.condition.begin(); i != ec1.condition.end(); ++i)
+    for (auto i = ec1.condition.begin(); i != ec1.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
       ec.condition.insert(*i);
     }
-    for (typename condition_map::iterator i = ec2.condition.begin(); i != ec2.condition.end(); ++i)
+    for (auto i = ec2.condition.begin(); i != ec2.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
       ec.condition.insert(*i);
     }
   }
 
-  /// \brief Visit data_expression node
-  /// \param e A term
-  /// \param d A data term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_data_expression(const term_type& /* e */, const data_term_type& d, edge_condition& ec)
+  void leave(const data::data_expression& x)
   {
-    ec.TC = d;
-    ec.FC = utilities::optimized_not(d);
-    return this->stop_recursion;
+    push(edge_condition(x, utilities::optimized_not(x)));
   }
 
-  /// \brief Visit true node
-  /// \param e A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_true(const term_type& /* e */, edge_condition& ec)
+  void leave(const true_&)
   {
-    ec.TC = tr::true_();
-    ec.FC = tr::false_();
-    return this->stop_recursion;
+    push(edge_condition(tr::true_(), tr::false_()));
   }
 
-  /// \brief Visit false node
-  /// \param e A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_false(const term_type& /* e */, edge_condition& ec)
+  void leave(const false_&)
   {
-    ec.TC = tr::false_();
-    ec.FC = tr::true_();
-    return this->stop_recursion;
+    push(edge_condition(tr::false_(), tr::true_()));
   }
 
-  /// \brief Visit not node
-  /// \param e A term
-  /// \param arg A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_not(const term_type& /* e */, const term_type& arg, edge_condition& ec)
+  void leave(const not_&)
   {
-    edge_condition ec_arg;
-    super::visit(arg, ec_arg);
-    ec.TC = ec_arg.FC;
-    ec.FC = ec_arg.TC;
-    ec.condition = ec_arg.condition;
-    return this->stop_recursion;
+    edge_condition ec = pop();
+    std::swap(ec.TC, ec.FC);
+    push(ec);
   }
 
-  /// \brief Visit and node
-  /// \param e A term
-  /// \param left A term
-  /// \param right A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_and(const term_type& /* e */, const term_type& left, const term_type&  right, edge_condition& ec)
+  void leave(const and_&)
   {
-    edge_condition ec_left;
-    super::visit(left, ec_left);
-    edge_condition ec_right;
-    super::visit(right, ec_right);
-    ec.TC = utilities::optimized_and(ec_left.TC, ec_right.TC);
-    ec.FC = utilities::optimized_or(ec_left.FC, ec_right.FC);
+    edge_condition ec_right = pop();
+    edge_condition ec_left = pop();
+    edge_condition ec(utilities::optimized_and(ec_left.TC, ec_right.TC), utilities::optimized_or(ec_left.FC, ec_right.FC));
     merge_conditions(ec_left, ec_right, ec);
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit or node
-  /// \param e A term
-  /// \param left A term
-  /// \param right A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_or(const term_type& /* e */, const term_type&  left, const term_type&  right, edge_condition& ec)
+  void leave(const or_&)
   {
-    edge_condition ec_left;
-    super::visit(left, ec_left);
-    edge_condition ec_right;
-    super::visit(right, ec_right);
-    ec.TC = utilities::optimized_or(ec_left.TC, ec_right.TC);
-    ec.FC = utilities::optimized_and(ec_left.FC, ec_right.FC);
+    edge_condition ec_right = pop();
+    edge_condition ec_left = pop();
+    edge_condition ec(utilities::optimized_or(ec_left.TC, ec_right.TC), utilities::optimized_and(ec_left.FC, ec_right.FC));
     merge_conditions(ec_left, ec_right, ec);
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit imp node
-  /// \param e A term
-  /// \param left A term
-  /// \param right A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_imp(const term_type& /* e */, const term_type&  left, const term_type&  right, edge_condition& ec)
+  void leave(const imp&)
   {
-    edge_condition ec_left;
-    super::visit(left, ec_left);
-    edge_condition ec_right;
-    super::visit(right, ec_right);
-    ec.TC = utilities::optimized_or(ec_left.FC, ec_right.TC);
-    ec.FC = utilities::optimized_and(ec_left.TC, ec_right.FC);
+    edge_condition ec_right = pop();
+    edge_condition ec_left = pop();
+    edge_condition ec(utilities::optimized_or(ec_left.FC, ec_right.TC), utilities::optimized_and(ec_left.TC, ec_right.FC));
     merge_conditions(ec_left, ec_right, ec);
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit forall node
-  /// \param e A term
-  /// \param variables A sequence of variables
-  /// \param expr A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_forall(const term_type& /* e */, const variable_sequence_type& variables, const term_type& expr, edge_condition& ec)
+  void leave(const forall& x)
   {
-    super::visit(expr, ec);
-    for (typename condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
+    edge_condition ec = pop();
+    for (auto i = ec.condition.begin(); i != ec.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
-      std::for_each(i->second.begin(), i->second.end(), apply_forall<Term>(variables));
+      std::for_each(i->second.begin(), i->second.end(), apply_forall<pbes_expression>(x.variables()));
     }
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit exists node
-  /// \param e A term
-  /// \param variables A sequence of variables
-  /// \param expr A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_exists(const term_type& /* e */, const variable_sequence_type&  variables, const term_type& expr, edge_condition& ec)
+  void leave(const exists& x)
   {
-    super::visit(expr, ec);
-    for (typename condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
+    edge_condition ec = pop();
+    for (auto i = ec.condition.begin(); i != ec.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
-      std::for_each(i->second.begin(), i->second.end(), apply_exists<Term>(variables));
+      std::for_each(i->second.begin(), i->second.end(), apply_exists<pbes_expression>(x.variables()));
     }
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit propositional_variable node
-  /// \param e A term
-  /// \param v A propositional variable
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_propositional_variable(const term_type& /* e */, const propositional_variable_type& v, edge_condition& ec)
+  void leave(const propositional_variable_instantiation& x)
   {
-    ec.TC = tr::false_();
-    ec.FC = tr::false_();
-    std::vector<true_false_pair<Term> > c;
-    c.push_back(true_false_pair<Term>(tr::false_(), tr::false_()));
-    ec.condition.insert(std::make_pair(v, c));
-    return this->stop_recursion;
+    edge_condition ec(tr::false_(), tr::false_());
+    std::vector<true_false_pair<pbes_expression> > c;
+    c.push_back(true_false_pair<pbes_expression>(tr::false_(), tr::false_()));
+    ec.condition.insert(std::make_pair(x, c));
+    push(ec);
+  }
+
+  const edge_condition& result() const
+  {
+    assert(condition_stack.size() == 1);
+    return top();
   }
 };
 
@@ -418,14 +378,11 @@ class pbes_constelm_algorithm
     /// \brief The propositional variable instantiation type
     typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
-    /// \brief The visitor type for edge conditions
-    typedef typename detail::edge_condition_visitor<Term> edge_condition_visitor;
-
     /// \brief The edge condition type
-    typedef typename edge_condition_visitor::edge_condition edge_condition;
+    typedef detail::edge_condition_traverser::edge_condition edge_condition;
 
     /// \brief The edge condition map type
-    typedef typename edge_condition_visitor::condition_map condition_map;
+    typedef detail::edge_condition_traverser::condition_map condition_map;
 
     /// \brief The term traits
     typedef typename core::term_traits<Term> tr;
@@ -758,11 +715,11 @@ class pbes_constelm_algorithm
     std::map<propositional_variable_decl_type, std::vector<variable_type> > redundant_parameters() const
     {
       std::map<propositional_variable_decl_type, std::vector<variable_type> > result;
-      for (typename std::map<string_type, std::vector<size_t> >::const_iterator i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
+      for (auto i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
       {
         const vertex& v = m_vertices.find(i->first)->second;
         std::vector<variable_type>& variables = result[v.variable()];
-        for (std::vector<size_t>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+        for (auto j = i->second.begin(); j != i->second.end(); ++j)
         {
           // std::advance doesn't work for aterm lists :-(
           variable_sequence_type parameters(v.variable().parameters());
@@ -795,14 +752,14 @@ class pbes_constelm_algorithm
 
         if (compute_conditions)
         {
-          // use an edge_condition_visitor to compute the edges
-          edge_condition ec;
-          edge_condition_visitor visitor;
-          visitor.visit(i->formula(), ec);
+          // use an edge_condition_traverser to compute the edges
+          detail::edge_condition_traverser f;
+          f(i->formula());
+          edge_condition ec = f.result();
           if (!ec.condition.empty())
           {
             std::vector<edge>& edges = m_edges[name];
-            for (typename condition_map::iterator j = ec.condition.begin(); j != ec.condition.end(); ++j)
+            for (auto j = ec.condition.begin(); j != ec.condition.end(); ++j)
             {
               propositional_variable_type X = j->first;
               term_type condition = ec.compute_condition(j->second);
