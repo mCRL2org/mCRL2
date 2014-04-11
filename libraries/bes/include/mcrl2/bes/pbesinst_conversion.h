@@ -14,7 +14,7 @@
 
 #include <cassert>
 #include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/detail/pbes_expression2boolean_expression_visitor.h"
+#include "mcrl2/bes/detail/pbes_expression2boolean_expression_traverser.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -37,9 +37,7 @@ bes::boolean_variable pbesinst_conversion(const pbes_system::propositional_varia
 inline
 bes::boolean_expression pbesinst_conversion(const pbes_system::pbes_expression& x)
 {
-  bes::detail::pbes_expression2boolean_expression_visitor<pbes_system::pbes_expression> visitor;
-  visitor.visit(x);
-  return visitor.result();
+  return bes::pbes_expression2boolean_expression(x);
 }
 
 /// \brief Converts a PBES equation into a boolean equation
