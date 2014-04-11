@@ -19,7 +19,6 @@
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
-#include "mcrl2/pbes/pbes_expression_visitor.h"
 
 namespace mcrl2
 {
@@ -27,43 +26,10 @@ namespace mcrl2
 namespace pbes_system
 {
 
-namespace detail
-{
-
-struct propositional_variable_visitor: public pbes_expression_visitor<pbes_expression>
-{
-  struct found_propositional_variable
-    {};
-
-  /// \brief Visit propositional_variable node
-  /// \return The result of visiting the node
-  bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& /* v */)
-  {
-    throw found_propositional_variable();
-    return true;
-  }
-};
-
-inline
-bool has_propositional_variables(const pbes_expression& t)
-{
-  propositional_variable_visitor visitor;
-  try
-  {
-    visitor.visit(t);
-  }
-  catch (propositional_variable_visitor::found_propositional_variable&)
-  {
-    return true;
-  }
-  return false;
-}
-
-} // namespace detail
-
 class pbes_equation;
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
 bool is_well_typed(const pbes_equation& eqn);
+bool has_propositional_variables(const pbes_expression& x);
 
 /// \brief pbes equation.
 class pbes_equation
@@ -172,10 +138,7 @@ class pbes_equation
     /// \brief Returns true if the predicate formula on the right hand side contains no predicate variables.
     // (Comment Wieger: is_const would be a better name)
     /// \return True if the predicate formula on the right hand side contains no predicate variables.
-    bool is_solved() const
-    {
-      return !detail::has_propositional_variables(formula());
-    }
+    bool is_solved() const;
 
     /// \brief Swaps the contents
     void swap(pbes_equation& other)
