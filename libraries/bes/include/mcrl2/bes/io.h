@@ -27,9 +27,9 @@
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/bes/pg_parse.h"
+#include "mcrl2/bes/pbesinst_conversion.h"
 #include "mcrl2/pbes/file_formats.h"
 #include "mcrl2/pbes/is_bes.h"
-#include "mcrl2/pbes/pbesinstconversion.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/exception.h"
@@ -443,7 +443,7 @@ void load_bes(boolean_equation_system& b,
       {
         throw mcrl2::runtime_error(infilename + " does not contain a BES");
       }
-      b = pbes_system::pbesinstconversion(p);
+      b = bes::pbesinst_conversion(p);
       break;
     }
     default:

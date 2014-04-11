@@ -9,8 +9,8 @@
 /// \file mcrl2/pbes/detail/pbes_expression2boolean_expression_visitor.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_PBES_EXPRESSION2BOOLEAN_EXPRESSION_VISITOR_H
-#define MCRL2_PBES_DETAIL_PBES_EXPRESSION2BOOLEAN_EXPRESSION_VISITOR_H
+#ifndef MCRL2_BES_DETAIL_PBES_EXPRESSION2BOOLEAN_EXPRESSION_VISITOR_H
+#define MCRL2_BES_DETAIL_PBES_EXPRESSION2BOOLEAN_EXPRESSION_VISITOR_H
 
 #include "mcrl2/bes/boolean_expression.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
@@ -18,16 +18,16 @@
 namespace mcrl2
 {
 
-namespace pbes_system
+namespace bes
 {
 
 namespace detail
 {
 
 template <typename Term>
-struct pbes_expression2boolean_expression_visitor: public pbes_expression_visitor<Term>
+struct pbes_expression2boolean_expression_visitor: public pbes_system::pbes_expression_visitor<Term>
 {
-  typedef pbes_expression_visitor<Term> super;
+  typedef pbes_system::pbes_expression_visitor<Term> super;
   typedef Term term_type;
   typedef core::term_traits<Term> tr;
   typedef typename tr::variable_type variable_type;
@@ -167,8 +167,8 @@ struct pbes_expression2boolean_expression_visitor: public pbes_expression_visito
 
 } // namespace detail
 
-} // namespace pbes_system
+} // namespace bes
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_PBES_EXPRESSION2BOOLEAN_EXPRESSION_VISITOR_H
+#endif // MCRL2_BES_DETAIL_PBES_EXPRESSION2BOOLEAN_EXPRESSION_VISITOR_H

@@ -13,10 +13,10 @@
 #define MCRL2_BES_PARSE_H
 
 #include "mcrl2/core/parser_utility.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/detail/pbes_expression2boolean_expression_visitor.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/pbes/detail/pbes_expression2boolean_expression_visitor.h"
 
 namespace mcrl2
 {
@@ -114,7 +114,7 @@ boolean_equation_system parse_boolean_equation_system_new(const std::string& tex
 inline
 boolean_expression pbes_expression2boolean_expression(const pbes_system::pbes_expression& x)
 {
-  pbes_system::detail::pbes_expression2boolean_expression_visitor<pbes_system::pbes_expression> visitor;
+  bes::detail::pbes_expression2boolean_expression_visitor<pbes_system::pbes_expression> visitor;
   visitor.visit(x);
   return visitor.result();
 }

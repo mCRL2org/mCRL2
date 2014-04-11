@@ -251,9 +251,6 @@ void test_approximate()
   }
 }
 
-// Used as an example in the quickbook documentation.
-
-//[gauss_elimination1a
 // simple solver that only works if the PBES is a BES
 struct fixpoint_equation_solver
 {
@@ -264,13 +261,11 @@ struct fixpoint_equation_solver
     e.formula() = replace_propositional_variables(e.formula(), propositional_variable_substitution(e.variable(), phi));
   }
 };
-//]
 
 void tutorial1()
 {
   using namespace pbes_system;
 
-  //[gauss_elimination1b
   std::string txt =
     "pbes nu Y = X; \n"
     "     mu X = Y; \n"
@@ -280,14 +275,12 @@ void tutorial1()
   pbes p = txt2pbes(txt);
   gauss_elimination_algorithm<pbes_traits> algorithm;
   algorithm.run(p.equations().begin(), p.equations().end(), fixpoint_equation_solver());
-  //]
 }
 
 void tutorial2()
 {
   using namespace pbes_system;
 
-  //[gauss_elimination2
   std::string txt =
     "pbes mu X = X; \n"
     "               \n"
@@ -296,7 +289,6 @@ void tutorial2()
   pbes p = txt2pbes(txt);
   int solution = gauss_elimination(p);
   assert(solution == 0); // 0 indicates false
-  //]
 }
 
 int test_main(int argc, char** argv)
