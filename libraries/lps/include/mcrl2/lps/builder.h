@@ -14,6 +14,7 @@
 
 #include "mcrl2/core/builder.h"
 #include "mcrl2/data/builder.h"
+#include "mcrl2/process/builder.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/untyped_multi_action.h"
 #include "mcrl2/process/untyped_action.h"
@@ -33,30 +34,6 @@ struct add_sort_expressions: public Builder<Derived>
   using super::enter;
   using super::leave;
   using super::operator();
-
-  lps::action_label operator()(const lps::action_label& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    lps::action_label result = lps::action_label(x.name(), static_cast<Derived&>(*this)(x.sorts()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  lps::action operator()(const lps::action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    lps::action result = lps::action(static_cast<Derived&>(*this)(x.label()), static_cast<Derived&>(*this)(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  lps::untyped_action operator()(const lps::untyped_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    lps::untyped_action result = lps::untyped_action(x.name(), static_cast<Derived&>(*this)(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
 
   void operator()(lps::deadlock& x)
   {
@@ -136,9 +113,9 @@ struct add_sort_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct sort_expression_builder: public add_sort_expressions<data::sort_expression_builder, Derived>
+struct sort_expression_builder: public add_sort_expressions<process::sort_expression_builder, Derived>
 {
-  typedef add_sort_expressions<data::sort_expression_builder, Derived> super;
+  typedef add_sort_expressions<process::sort_expression_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -154,22 +131,6 @@ struct add_data_expressions: public Builder<Derived>
   using super::enter;
   using super::leave;
   using super::operator();
-
-  lps::action operator()(const lps::action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    lps::action result = lps::action(x.label(), static_cast<Derived&>(*this)(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  lps::untyped_action operator()(const lps::untyped_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    lps::untyped_action result = lps::untyped_action(x.name(), static_cast<Derived&>(*this)(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
 
   void operator()(lps::deadlock& x)
   {
@@ -244,9 +205,9 @@ struct add_data_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct data_expression_builder: public add_data_expressions<data::data_expression_builder, Derived>
+struct data_expression_builder: public add_data_expressions<process::data_expression_builder, Derived>
 {
-  typedef add_data_expressions<data::data_expression_builder, Derived> super;
+  typedef add_data_expressions<process::data_expression_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -261,22 +222,6 @@ struct add_variables: public Builder<Derived>
   using super::enter;
   using super::leave;
   using super::operator();
-
-  lps::action operator()(const lps::action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    lps::action result = lps::action(x.label(), static_cast<Derived&>(*this)(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  lps::untyped_action operator()(const lps::untyped_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    lps::untyped_action result = lps::untyped_action(x.name(), static_cast<Derived&>(*this)(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
 
   void operator()(lps::deadlock& x)
   {
@@ -355,9 +300,9 @@ struct add_variables: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct variable_builder: public add_variables<data::data_expression_builder, Derived>
+struct variable_builder: public add_variables<process::data_expression_builder, Derived>
 {
-  typedef add_variables<data::data_expression_builder, Derived> super;
+  typedef add_variables<process::data_expression_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();

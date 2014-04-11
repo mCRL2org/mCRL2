@@ -628,8 +628,8 @@ class pins
     std::set<std::string> summand_action_names(std::size_t i) const
     {
       std::set<std::string> result;
-      const action_list& l = process().action_summands()[i].multi_action().actions();
-      for (action_list::const_iterator i = l.begin(); i != l.end(); ++i)
+      auto const& l = process().action_summands()[i].multi_action().actions();
+      for (auto i = l.begin(); i != l.end(); ++i)
       {
         result.insert(std::string(i->label().name()));
       }

@@ -23,7 +23,7 @@
 namespace mcrl2
 {
 
-namespace lps
+namespace process
 {
 
 //--- start generated class action_label ---//
@@ -89,7 +89,7 @@ std::string pp(const action_label& x);
 inline
 std::ostream& operator<<(std::ostream& out, const action_label& x)
 {
-  return out << lps::pp(x);
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -103,9 +103,9 @@ inline void swap(action_label& t1, action_label& t2)
 std::string pp(const action_label_list& x);
 std::string pp(const action_label_vector& x);
 action_label_list normalize_sorts(const action_label_list& x, const data::data_specification& dataspec);
-std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x);
+std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x);
 
-} // namespace lps
+} // namespace process
 
 } // namespace mcrl2
 

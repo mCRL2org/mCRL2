@@ -28,7 +28,7 @@ class state_formula_type_checker : lps::action_type_checker
 {
 
   public:
-    state_formula_type_checker(const data::data_specification &data_spec, const lps::action_label_list& action_decls);
+    state_formula_type_checker(const data::data_specification &data_spec, const process::action_label_list& action_decls);
         /** \brief     Type check a state formula.
          *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
          *  \param[in] d A state formula that has not been type checked.

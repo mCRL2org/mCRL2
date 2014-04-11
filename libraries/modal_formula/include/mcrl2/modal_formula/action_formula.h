@@ -21,7 +21,7 @@
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/process/untyped_action.h"
-#include "mcrl2/process/action.h"
+#include "mcrl2/process/process_expression.h"
 
 namespace mcrl2
 {
@@ -643,13 +643,13 @@ class multi_action: public action_formula
     }
 
     /// \brief Constructor.
-    multi_action(const lps::action_list& actions)
+    multi_action(const process::action_list& actions)
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActMultAct(), actions))
     {}
 
-    const lps::action_list& actions() const
+    const process::action_list& actions() const
     {
-      return atermpp::aterm_cast<const lps::action_list>((*this)[0]);
+      return atermpp::aterm_cast<const process::action_list>((*this)[0]);
     }
 };
 
@@ -699,13 +699,13 @@ class untyped_multi_action: public action_formula
     }
 
     /// \brief Constructor.
-    untyped_multi_action(const lps::untyped_action_list& arguments)
+    untyped_multi_action(const process::untyped_action_list& arguments)
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedActMultAct(), arguments))
     {}
 
-    const lps::untyped_action_list& arguments() const
+    const process::untyped_action_list& arguments() const
     {
-      return atermpp::aterm_cast<const lps::untyped_action_list>((*this)[0]);
+      return atermpp::aterm_cast<const process::untyped_action_list>((*this)[0]);
     }
 };
 

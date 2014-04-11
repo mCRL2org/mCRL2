@@ -182,7 +182,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     return static_cast<Derived&>(*this);
   }
 
-  process::process_expression operator()(const lps::action& x)
+  process::process_expression operator()(const process::action& x)
   {
     using utilities::detail::contains;
     if (contains(B, x.label().name()))

@@ -8,7 +8,7 @@
 
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/monotonicity.h"
-#include "mcrl2/process/action.h"
+#include "mcrl2/process/process_expression.h"
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -154,10 +154,10 @@ action_formulas::action_formula mcrl2::state_formulas::state_formula_type_checke
   if (action_formulas::is_untyped_multi_action(ActFrm))
   {
     const action_formulas::untyped_multi_action ma(ActFrm);
-    lps::action_list r;
+    process::action_list r;
     for (auto l=ma.arguments().begin(); l!=ma.arguments().end(); ++l)
     {
-      lps::untyped_action o= *l;
+      process::untyped_action o= *l;
       r.push_front(RewrAct(Vars,o));
     }
     return action_formulas::multi_action(reverse(r));
@@ -516,7 +516,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
 mcrl2::state_formulas::state_formula_type_checker::state_formula_type_checker(
        const data::data_specification &data_spec,
-       const lps::action_label_list& action_decls)
+       const process::action_label_list& action_decls)
   :  lps::action_type_checker(data_spec,action_decls)
 {
 }

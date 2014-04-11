@@ -85,7 +85,7 @@ struct lts_generation_options
     {
       for (std::set<mcrl2::core::identifier_string>::iterator ta = trace_actions.begin(); ta != trace_actions.end(); ++ta)
       {
-        mcrl2::lps::action_label_list::iterator it = specification.action_labels().begin();
+        mcrl2::process::action_label_list::iterator it = specification.action_labels().begin();
         bool found = (std::string(*ta) == "tau");
         while (!found && it != specification.action_labels().end())
         {

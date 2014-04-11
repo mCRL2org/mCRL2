@@ -28,6 +28,7 @@
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/process/action_parse.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/data/data_specification.h"
 
@@ -91,7 +92,7 @@ class Trace
     size_t pos; // Invariant: pos <= actions.size().
 
     mcrl2::data::data_specification m_spec;
-    lps::action_label_list m_act_decls;
+    process::action_label_list m_act_decls;
     bool m_data_specification_and_act_decls_are_defined;
 
     atermpp::function_symbol const& trace_pair() const
@@ -122,7 +123,7 @@ class Trace
     /// and length of trace are set to 0.
     /// \param[in] spec The data specification that is used when parsing multi actions.
     /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
-    Trace(const mcrl2::data::data_specification &spec, const mcrl2::lps::action_label_list &act_decls)
+    Trace(const mcrl2::data::data_specification &spec, const mcrl2::process::action_label_list &act_decls)
       : m_spec(spec),
         m_act_decls(act_decls),
         m_data_specification_and_act_decls_are_defined(true)
@@ -161,7 +162,7 @@ class Trace
     /// \exception mcrl2::runtime_error message in case of failure
     Trace(std::istream& is,
           const mcrl2::data::data_specification &spec,
-          const mcrl2::lps::action_label_list &act_decls,
+          const mcrl2::process::action_label_list &act_decls,
           TraceFormat tf = tfUnknown)
       : m_spec(spec),
         m_act_decls(act_decls),
@@ -208,7 +209,7 @@ class Trace
     /// \exception mcrl2::runtime_error message in case of failure
     Trace(std::string const& filename,
           const mcrl2::data::data_specification &spec,
-          const mcrl2::lps::action_label_list &act_decls,
+          const mcrl2::process::action_label_list &act_decls,
           TraceFormat tf = tfUnknown)
       : m_spec(spec),
         m_act_decls(act_decls),
@@ -631,17 +632,17 @@ class Trace
 
         if (e.type_is_appl() && lps::is_multi_action(aterm_cast<aterm_appl>(e)))   // To be compatible with old untimed version
         {
-          addAction(multi_action(action_list(aterm_cast<aterm_appl>(e))));
+          addAction(multi_action(process::action_list(aterm_cast<aterm_appl>(e))));
         }
         else if (e.type_is_appl() && isTimedMAct(aterm_cast<aterm_appl>(e)))
         {
           if (aterm_cast<aterm_appl>(e)[1]==data::undefined_real())  // There is no time tag.
           {
-            addAction(multi_action(action_list(aterm_cast<aterm_appl>(e)[0])));
+            addAction(multi_action(process::action_list(aterm_cast<aterm_appl>(e)[0])));
           }
           else
           {
-            addAction(multi_action(action_list(aterm_cast<aterm_appl>(e)[0]),
+            addAction(multi_action(process::action_list(aterm_cast<aterm_appl>(e)[0]),
                                mcrl2::data::data_expression(aterm_cast<aterm_appl>(e)[1])));
           }
         }
@@ -689,8 +690,8 @@ class Trace
           }
           else
           {
-            addAction(mcrl2::lps::multi_action(mcrl2::lps::action(
-                      mcrl2::lps::action_label(mcrl2::core::identifier_string(buf),mcrl2::data::sort_expression_list()),
+            addAction(mcrl2::lps::multi_action(mcrl2::process::action(
+                      mcrl2::process::action_label(mcrl2::core::identifier_string(buf),mcrl2::data::sort_expression_list()),
                                            mcrl2::data::data_expression_list())));
           }
         }

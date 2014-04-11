@@ -13,12 +13,13 @@
 #define MCRL2_PROCESS_ACTION_PARSE_H
 
 #include "mcrl2/data/parse.h"
-#include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lps/typecheck.h"
+#include "mcrl2/process/untyped_action.h"
+#include "mcrl2/process/process_expression.h"
+#include "mcrl2/process/typecheck.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace process {
 
 struct action_actions: public data::data_specification_actions
 {
@@ -28,12 +29,12 @@ struct action_actions: public data::data_specification_actions
 
   untyped_action parse_Action(const core::parse_node& node)
   {
-    return untyped_action(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+    return process::untyped_action(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
   untyped_action_list parse_ActionList(const core::parse_node& node)
   {
-    return parse_list<untyped_action>(node, "Action", boost::bind(&action_actions::parse_Action, this, _1));
+    return parse_list<process::untyped_action>(node, "Action", boost::bind(&action_actions::parse_Action, this, _1));
   }
 
   bool callback_ActDecl(const core::parse_node& node, action_label_vector& result)
@@ -51,77 +52,18 @@ struct action_actions: public data::data_specification_actions
     return false;
   };
 
-  lps::action_label_list parse_ActDeclList(const core::parse_node& node)
+  action_label_list parse_ActDeclList(const core::parse_node& node)
   {
     action_label_vector result;
     traverse(node, boost::bind(&action_actions::callback_ActDecl, this, _1, boost::ref(result)));
-    return lps::action_label_list(result.begin(), result.end());
+    return process::action_label_list(result.begin(), result.end());
   }
 
-  lps::action_label_list parse_ActSpec(const core::parse_node& node)
+  action_label_list parse_ActSpec(const core::parse_node& node)
   {
     return parse_ActDeclList(node.child(1));
   }
-
-  lps::untyped_multi_action parse_MultAct(const core::parse_node& node)
-  {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::untyped_multi_action(); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList"))
-    {
-      return lps::untyped_multi_action(parse_ActionList(node.child(0)));
-    }
-    report_unexpected_node(node);
-    return lps::untyped_multi_action();
-  }
 };
-
-inline
-lps::untyped_multi_action parse_multi_action_new(const std::string& text)
-{
-  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
-  unsigned int start_symbol_index = p.start_symbol_index("MultAct");
-  bool partial_parses = false;
-  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  lps::untyped_multi_action result = action_actions(parser_tables_mcrl2).parse_MultAct(node);
-  p.destroy_parse_node(node);
-  return result;
-}
-
-inline
-multi_action complete_multi_action(untyped_multi_action& x, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
-{
-  multi_action result = lps::type_check(x, data_spec, action_decls);
-  lps::translate_user_notation(result);
-  lps::normalize_sorts(result, data_spec);
-  return result;
-}
-
-/// \brief Parses a multi_action from an input stream
-/// \param in An input stream containing a multi_action
-/// \param[in] action_decls A list of allowed action labels that is used for type checking.
-/// \param[in] data_spec The data specification that is used for type checking.
-/// \return The parsed multi_action
-/// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
-inline
-multi_action parse_multi_action(std::stringstream& in, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
-{
-  std::string text = utilities::read_text(in);
-  untyped_multi_action u = parse_multi_action_new(text);
-  return complete_multi_action(u, action_decls, data_spec);
-}
-
-/// \brief Parses a multi_action from a string
-/// \param text A string containing a multi_action
-/// \param[in] action_decls A list of allowed action labels that is used for type checking.
-/// \param[in] data_spec The data specification that is used for type checking.
-/// \return The parsed multi_action
-/// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
-inline
-multi_action parse_multi_action(const std::string& text, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
-{
-  std::stringstream ma_stream(text);
-  return parse_multi_action(ma_stream, action_decls, data_spec);
-}
 
 /// \brief Parses an action declaration from a string
 /// \param text A string containing an action declaration
@@ -129,7 +71,7 @@ multi_action parse_multi_action(const std::string& text, const lps::action_label
 /// \return A list of action labels
 /// \exception mcrl2::runtime_error when the input does not match the syntax of an action declaration.
 inline
-lps::action_label_list parse_action_declaration(const std::string& text, const data::data_specification& data_spec = data::detail::default_specification())
+process::action_label_list parse_action_declaration(const std::string& text, const data::data_specification& data_spec = data::detail::default_specification())
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("ActDecl");
@@ -138,29 +80,12 @@ lps::action_label_list parse_action_declaration(const std::string& text, const d
   action_label_vector result;
   action_actions(parser_tables_mcrl2).callback_ActDecl(node, result);
   p.destroy_parse_node(node);
-  lps::action_label_list v(result.begin(), result.end());
-  v = lps::normalize_sorts(v, data_spec);
+  process::action_label_list v(result.begin(), result.end());
+  v = process::normalize_sorts(v, data_spec);
   return v;
 }
 
-/// \brief Parses an action from a string
-/// \param text A string containing an action
-/// \param action_decls An action declaration
-/// \param[in] data_spec A data specification used for sort normalization
-/// \return An action
-/// \exception mcrl2::runtime_error when the input does not match the syntax of an action.
-inline
-action parse_action(const std::string& text, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
-{
-  multi_action result = parse_multi_action(text, action_decls, data_spec);
-  if (result.actions().size() != 1)
-  {
-    throw mcrl2::runtime_error("cannot parse '" + text + " as an action!");
-  }
-  return result.actions().front();
-}
-
-} // namespace lps
+} // namespace process
 
 } // namespace mcrl2
 

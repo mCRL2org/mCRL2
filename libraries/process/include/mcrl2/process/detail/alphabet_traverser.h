@@ -38,7 +38,7 @@ struct alphabet_node
 inline
 std::ostream& operator<<(std::ostream& out, const alphabet_node& x)
 {
-  return out << "alphabet = " << lps::pp(x.alphabet);
+  return out << "alphabet = " << pp(x.alphabet);
 }
 
 /// \brief Traverser that computes the alphabet of process expressions
@@ -70,7 +70,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   // Push a node to node_stack
   void push(const Node& node)
   {
-    mCRL2log(log::debug1) << "<push> A = " << lps::pp(node.alphabet) << std::endl;
+    mCRL2log(log::debug1) << "<push> A = " << pp(node.alphabet) << std::endl;
     node_stack.push_back(node);
   }
 
@@ -84,7 +84,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   Node pop()
   {
     Node result = node_stack.back();
-    mCRL2log(log::debug1) << "<pop> A = " << lps::pp(result.alphabet) << std::endl;
+    mCRL2log(log::debug1) << "<pop> A = " << pp(result.alphabet) << std::endl;
     node_stack.pop_back();
     return result;
   }
@@ -125,7 +125,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     push(alphabet_operations::sync(left.alphabet, right.alphabet));
   }
 
-  void leave(const lps::action& x)
+  void leave(const process::action& x)
   {
     multi_action_name alpha;
     alpha.insert(x.label().name());

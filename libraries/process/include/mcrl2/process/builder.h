@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_BUILDER_H
 
 #include "mcrl2/core/builder.h"
-#include "mcrl2/lps/builder.h"
+#include "mcrl2/data/builder.h"
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2
@@ -21,24 +21,6 @@ namespace mcrl2
 
 namespace process
 {
-
-/// \brief Traversal class for actions. Used as a base class for process_expression_traverser.
-template <typename Derived>
-struct process_expression_builder_base: public core::builder<Derived>
-{
-  typedef core::builder<Derived> super;
-  using super::operator();
-  using super::enter;
-  using super::leave;
-
-  const process_expression& operator()(const lps::action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return atermpp::aterm_cast<process_expression>(x);
-  }
-};
 
 // Adds sort expression traversal to a builder
 //--- start generated add_sort_expressions code ---//
@@ -49,6 +31,22 @@ struct add_sort_expressions: public Builder<Derived>
   using super::enter;
   using super::leave;
   using super::operator();
+
+  process::action_label operator()(const process::action_label& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::action_label result = process::action_label(x.name(), static_cast<Derived&>(*this)(x.sorts()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  process::untyped_action operator()(const process::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::untyped_action result = process::untyped_action(x.name(), static_cast<Derived&>(*this)(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
 
   void operator()(process::process_specification& x)
   {
@@ -72,6 +70,14 @@ struct add_sort_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_equation result = process::process_equation(static_cast<Derived&>(*this)(x.identifier()), static_cast<Derived&>(*this)(x.formal_parameters()), static_cast<Derived&>(*this)(x.expression()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  process::process_expression operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::process_expression result = process::action(static_cast<Derived&>(*this)(x.label()), static_cast<Derived&>(*this)(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -248,7 +254,11 @@ struct add_sort_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -332,10 +342,6 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -344,9 +350,9 @@ struct add_sort_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct sort_expression_builder: public add_sort_expressions<lps::sort_expression_builder, Derived>
+struct sort_expression_builder: public add_sort_expressions<data::sort_expression_builder, Derived>
 {
-  typedef add_sort_expressions<lps::sort_expression_builder, Derived> super;
+  typedef add_sort_expressions<data::sort_expression_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -363,6 +369,14 @@ struct add_data_expressions: public Builder<Derived>
   using super::leave;
   using super::operator();
 
+  process::untyped_action operator()(const process::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::untyped_action result = process::untyped_action(x.name(), static_cast<Derived&>(*this)(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   void operator()(process::process_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -375,6 +389,14 @@ struct add_data_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_equation result = process::process_equation(x.identifier(), x.formal_parameters(), static_cast<Derived&>(*this)(x.expression()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  process::process_expression operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::process_expression result = process::action(x.label(), static_cast<Derived&>(*this)(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -551,7 +573,11 @@ struct add_data_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -635,10 +661,6 @@ struct add_data_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -647,9 +669,9 @@ struct add_data_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct data_expression_builder: public add_data_expressions<lps::data_expression_builder, Derived>
+struct data_expression_builder: public add_data_expressions<data::data_expression_builder, Derived>
 {
-  typedef add_data_expressions<lps::data_expression_builder, Derived> super;
+  typedef add_data_expressions<data::data_expression_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -664,6 +686,14 @@ struct add_variables: public Builder<Derived>
   using super::enter;
   using super::leave;
   using super::operator();
+
+  process::untyped_action operator()(const process::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::untyped_action result = process::untyped_action(x.name(), static_cast<Derived&>(*this)(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
 
   void operator()(process::process_specification& x)
   {
@@ -686,6 +716,14 @@ struct add_variables: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_equation result = process::process_equation(static_cast<Derived&>(*this)(x.identifier()), static_cast<Derived&>(*this)(x.formal_parameters()), static_cast<Derived&>(*this)(x.expression()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  process::process_expression operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::process_expression result = process::action(x.label(), static_cast<Derived&>(*this)(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -862,7 +900,11 @@ struct add_variables: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -946,10 +988,6 @@ struct add_variables: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -958,9 +996,9 @@ struct add_variables: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct variable_builder: public add_variables<lps::data_expression_builder, Derived>
+struct variable_builder: public add_variables<data::data_expression_builder, Derived>
 {
-  typedef add_variables<lps::data_expression_builder, Derived> super;
+  typedef add_variables<data::data_expression_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -991,6 +1029,14 @@ struct add_process_expressions: public Builder<Derived>
     process::process_equation result = process::process_equation(x.identifier(), x.formal_parameters(), static_cast<Derived&>(*this)(x.expression()));
     static_cast<Derived&>(*this).leave(x);
     return result;
+  }
+
+  process::process_expression operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
   }
 
   process::process_expression operator()(const process::process_instance& x)
@@ -1165,7 +1211,11 @@ struct add_process_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -1249,10 +1299,6 @@ struct add_process_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1261,9 +1307,9 @@ struct add_process_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct process_expression_builder: public add_process_expressions<process::process_expression_builder_base, Derived>
+struct process_expression_builder: public add_process_expressions<core::builder, Derived>
 {
-  typedef add_process_expressions<process::process_expression_builder_base, Derived> super;
+  typedef add_process_expressions<core::builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -1301,6 +1347,14 @@ struct add_process_identifiers: public Builder<Derived>
     process::process_equation result = process::process_equation(static_cast<Derived&>(*this)(x.identifier()), x.formal_parameters(), static_cast<Derived&>(*this)(x.expression()));
     static_cast<Derived&>(*this).leave(x);
     return result;
+  }
+
+  process::process_expression operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
   }
 
   process::process_expression operator()(const process::process_instance& x)
@@ -1475,7 +1529,11 @@ struct add_process_identifiers: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -1559,10 +1617,6 @@ struct add_process_identifiers: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1571,9 +1625,9 @@ struct add_process_identifiers: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct process_identifier_builder: public add_process_identifiers<process::process_expression_builder_base, Derived>
+struct process_identifier_builder: public add_process_identifiers<core::builder, Derived>
 {
-  typedef add_process_identifiers<process::process_expression_builder_base, Derived> super;
+  typedef add_process_identifiers<core::builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();

@@ -6,6 +6,7 @@
 #include "mcrl2/core/print.h"
 
 using namespace std;
+using namespace mcrl2;
 using namespace mcrl2::trace;
 
 
@@ -33,13 +34,13 @@ int test_main(int argc, char** argv)
   using namespace mcrl2::lps;
   using namespace mcrl2::core;
   mcrl2::data::data_specification data_spec;
-  mcrl2::lps::action_label_list act_decls;
-  act_decls.push_front(action_label(identifier_string("a"),sort_expression_list()));
+  process::action_label_list act_decls;
+  act_decls.push_front(process::action_label(identifier_string("a"),sort_expression_list()));
   sort_expression_list s;
   s.push_front(sort_bool::bool_());
   s.push_front(sort_pos::pos());
-  act_decls.push_front(action_label("b",s));
-  act_decls.push_front(action_label(identifier_string("c"),sort_expression_list()));
+  act_decls.push_front(process::action_label("b",s));
+  act_decls.push_front(process::action_label(identifier_string("c"),sort_expression_list()));
 
   Trace t(data_spec, act_decls);
   t.addAction(parse_multi_action("a",act_decls,data_spec));
@@ -53,7 +54,7 @@ int test_main(int argc, char** argv)
   {
     t.load(trace_data,tfMcrl2);
   }
-  catch (runtime_error e)
+  catch (const mcrl2::runtime_error& e)
   {
     BOOST_ERROR(e.what());
     return false;

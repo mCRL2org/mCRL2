@@ -165,7 +165,7 @@ class lts2lps_tool : public input_output_tool
          datatype.
       */
       data_specification data;
-      action_label_list action_labels;
+      process::action_label_list action_labels;
       variable_list process_parameters;
       bool extra_data_is_defined=false;
 

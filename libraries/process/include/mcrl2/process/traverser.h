@@ -17,8 +17,8 @@
 #ifndef MCRL2_PROCESS_TRAVERSER_H
 #define MCRL2_PROCESS_TRAVERSER_H
 
-#include "mcrl2/lps/traverser.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/data/traverser.h"
+#include "mcrl2/process/untyped_action.h"
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2
@@ -26,23 +26,6 @@ namespace mcrl2
 
 namespace process
 {
-
-/// \brief Traversal class for actions. Used as a base class for process_expression_traverser.
-template <typename Derived>
-struct process_expression_traverser_base: public core::traverser<Derived>
-{
-  typedef core::traverser<Derived> super;
-  using super::operator();
-  using super::enter;
-  using super::leave;
-
-  void operator()(const lps::action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-};
 
 //--- start generated add_traverser_sort_expressions code ---//
 template <template <class> class Traverser, class Derived>
@@ -52,6 +35,20 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   using super::enter;
   using super::leave;
   using super::operator();
+
+  void operator()(const process::action_label& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.sorts());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
 
   void operator()(const process::process_specification& x)
   {
@@ -76,6 +73,14 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this)(x.identifier());
     static_cast<Derived&>(*this)(x.formal_parameters());
     static_cast<Derived&>(*this)(x.expression());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.label());
+    static_cast<Derived&>(*this)(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -243,7 +248,11 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -327,10 +336,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -338,9 +343,9 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 
 /// \brief Traverser class
 template <typename Derived>
-struct sort_expression_traverser: public add_traverser_sort_expressions<lps::sort_expression_traverser, Derived>
+struct sort_expression_traverser: public add_traverser_sort_expressions<data::sort_expression_traverser, Derived>
 {
-  typedef add_traverser_sort_expressions<lps::sort_expression_traverser, Derived> super;
+  typedef add_traverser_sort_expressions<data::sort_expression_traverser, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -356,6 +361,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   using super::leave;
   using super::operator();
 
+  void operator()(const process::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -368,6 +380,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.expression());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -532,7 +551,11 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -616,10 +639,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -627,9 +646,9 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 
 /// \brief Traverser class
 template <typename Derived>
-struct data_expression_traverser: public add_traverser_data_expressions<lps::data_expression_traverser, Derived>
+struct data_expression_traverser: public add_traverser_data_expressions<data::data_expression_traverser, Derived>
 {
-  typedef add_traverser_data_expressions<lps::data_expression_traverser, Derived> super;
+  typedef add_traverser_data_expressions<data::data_expression_traverser, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -660,6 +679,13 @@ struct add_traverser_process_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_instance& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -818,7 +844,11 @@ struct add_traverser_process_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -902,10 +932,6 @@ struct add_traverser_process_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -913,9 +939,9 @@ struct add_traverser_process_expressions: public Traverser<Derived>
 
 /// \brief Traverser class
 template <typename Derived>
-struct process_expression_traverser: public add_traverser_process_expressions<process::process_expression_traverser_base, Derived>
+struct process_expression_traverser: public add_traverser_process_expressions<core::traverser, Derived>
 {
-  typedef add_traverser_process_expressions<process::process_expression_traverser_base, Derived> super;
+  typedef add_traverser_process_expressions<core::traverser, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -930,6 +956,13 @@ struct add_traverser_variables: public Traverser<Derived>
   using super::enter;
   using super::leave;
   using super::operator();
+
+  void operator()(const process::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
 
   void operator()(const process::process_specification& x)
   {
@@ -953,6 +986,13 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this)(x.identifier());
     static_cast<Derived&>(*this)(x.formal_parameters());
     static_cast<Derived&>(*this)(x.expression());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1120,7 +1160,11 @@ struct add_traverser_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -1204,10 +1248,6 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1215,9 +1255,9 @@ struct add_traverser_variables: public Traverser<Derived>
 
 /// \brief Traverser class
 template <typename Derived>
-struct variable_traverser: public add_traverser_variables<lps::variable_traverser, Derived>
+struct variable_traverser: public add_traverser_variables<data::variable_traverser, Derived>
 {
-  typedef add_traverser_variables<lps::variable_traverser, Derived> super;
+  typedef add_traverser_variables<data::variable_traverser, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -1232,6 +1272,22 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   using super::enter;
   using super::leave;
   using super::operator();
+
+  void operator()(const process::action_label& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.name());
+    static_cast<Derived&>(*this)(x.sorts());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.name());
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
 
   void operator()(const process::process_specification& x)
   {
@@ -1280,6 +1336,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.names());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.label());
+    static_cast<Derived&>(*this)(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1454,7 +1518,11 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -1538,10 +1606,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1549,9 +1613,9 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 
 /// \brief Traverser class
 template <typename Derived>
-struct identifier_string_traverser: public add_traverser_identifier_strings<lps::identifier_string_traverser, Derived>
+struct identifier_string_traverser: public add_traverser_identifier_strings<data::identifier_string_traverser, Derived>
 {
-  typedef add_traverser_identifier_strings<lps::identifier_string_traverser, Derived> super;
+  typedef add_traverser_identifier_strings<data::identifier_string_traverser, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -1567,6 +1631,13 @@ struct add_traverser_action_labels: public Traverser<Derived>
   using super::leave;
   using super::operator();
 
+  void operator()(const process::action_label& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1580,6 +1651,13 @@ struct add_traverser_action_labels: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.expression());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.label());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1741,7 +1819,11 @@ struct add_traverser_action_labels: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_expression result;
-    if (process::is_process_instance(x))
+    if (process::is_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
+    }
+    else if (process::is_process_instance(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::process_instance>(x));
     }
@@ -1825,10 +1907,6 @@ struct add_traverser_action_labels: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_process_assignment>(x));
     }
-    else if (lps::is_action(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<lps::action>(x));
-    }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1836,9 +1914,9 @@ struct add_traverser_action_labels: public Traverser<Derived>
 
 /// \brief Traverser class
 template <typename Derived>
-struct action_label_traverser: public add_traverser_action_labels<lps::action_label_traverser, Derived>
+struct action_label_traverser: public add_traverser_action_labels<core::traverser, Derived>
 {
-  typedef add_traverser_action_labels<lps::action_label_traverser, Derived> super;
+  typedef add_traverser_action_labels<core::traverser, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();

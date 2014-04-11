@@ -46,7 +46,7 @@ class process_specification
     data::data_specification m_data;
 
     /// \brief The action specification of the specification
-    lps::action_label_list m_action_labels;
+    process::action_label_list m_action_labels;
 
     /// \brief The set of global variables
     std::set<data::variable> m_global_variables;
@@ -63,7 +63,7 @@ class process_specification
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data            = data::data_specification(atermpp::aterm_appl(*i++));
-      m_action_labels   = static_cast<lps::action_label_list>(atermpp::aterm_appl(*i++)[0]);
+      m_action_labels   = static_cast<process::action_label_list>(atermpp::aterm_appl(*i++)[0]);
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
       m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
       process_equation_list l = static_cast<process_equation_list>(atermpp::aterm_appl(*i++)[0]);
@@ -96,7 +96,7 @@ class process_specification
     }
 
     /// \brief Constructor that sets the global variables to empty;
-    process_specification(data::data_specification data, lps::action_label_list action_labels, process_equation_list equations, process_expression init)
+    process_specification(data::data_specification data, process::action_label_list action_labels, process_equation_list equations, process_expression init)
       : m_data(data),
         m_action_labels(action_labels),
         m_equations(equations.begin(), equations.end()),
@@ -106,7 +106,7 @@ class process_specification
     /// \brief Constructor of a process specification.
     process_specification(
       data::data_specification data,
-      lps::action_label_list action_labels,
+      process::action_label_list action_labels,
       data::variable_list global_variables,
       process_equation_list equations,
       process_expression init)
@@ -133,14 +133,14 @@ class process_specification
 
     /// \brief Returns the action label specification
     /// \return The action label specification
-    const lps::action_label_list& action_labels() const
+    const process::action_label_list& action_labels() const
     {
       return m_action_labels;
     }
 
     /// \brief Returns the action label specification
     /// \return The action label specification
-    lps::action_label_list& action_labels()
+    process::action_label_list& action_labels()
     {
       return m_action_labels;
     }

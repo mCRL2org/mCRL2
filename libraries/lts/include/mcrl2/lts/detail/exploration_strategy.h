@@ -10,6 +10,9 @@
 #ifndef MCRL2_LTS_DETAIL_EXPLORATION_STRATEGY_H
 #define MCRL2_LTS_DETAIL_EXPLORATION_STRATEGY_H
 
+#include <iostream>
+#include <string>
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

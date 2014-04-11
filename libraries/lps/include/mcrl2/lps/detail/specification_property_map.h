@@ -69,14 +69,14 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
 
     using super::print;
 
-    std::string print(const action_label l) const
+    std::string print(const process::action_label& l) const
     {
       return core::pp(l.name());
     }
 
-    std::string print(const action& a) const
+    std::string print(const process::action& a) const
     {
-      return lps::pp(a);
+      return process::pp(a);
     }
 
     std::string print(const deadlock& x) const
@@ -89,10 +89,10 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
       return lps::pp(x);
     }
 
-    std::string print(const std::set<std::multiset<action_label> >& v) const
+    std::string print(const std::set<std::multiset<process::action_label> >& v) const
     {
       std::set<std::string> elements;
-      for (std::set<std::multiset<action_label> >::const_iterator i = v.begin(); i != v.end(); ++i)
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
         elements.insert(print(*i));
       }
@@ -183,14 +183,14 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
     // compute functions
     //--------------------------------------------//
     // TODO: the compute functions can be combined for efficiency
-    std::set<std::multiset<action_label> > compute_used_multi_actions(const specification& spec) const
+    std::set<std::multiset<process::action_label> > compute_used_multi_actions(const specification& spec) const
     {
-      std::set<std::multiset<action_label> > result;
-      for (action_summand_vector::const_iterator i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
+      std::set<std::multiset<process::action_label> > result;
+      for (auto i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
       {
-        action_list a = i->multi_action().actions();
-        std::multiset<action_label> labels;
-        for (action_list::iterator j = a.begin(); j != a.end(); ++j)
+        process::action_list a = i->multi_action().actions();
+        std::multiset<process::action_label> labels;
+        for (auto j = a.begin(); j != a.end(); ++j)
         {
           labels.insert(j->label());
         }
@@ -199,13 +199,13 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
       return result;
     }
 
-    std::set<action_label> compute_used_action_labels(const specification& spec) const
+    std::set<process::action_label> compute_used_action_labels(const specification& spec) const
     {
-      std::set<action_label> result;
-      for (action_summand_vector::const_iterator i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
+      std::set<process::action_label> result;
+      for (auto i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
       {
-        action_list a = i->multi_action().actions();
-        for (action_list::iterator j = a.begin(); j != a.end(); ++j)
+        process::action_list a = i->multi_action().actions();
+        for (auto j = a.begin(); j != a.end(); ++j)
         {
           result.insert(j->label());
         }
@@ -217,7 +217,7 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
     {
       size_t result = 0;
       const action_summand_vector& summands = spec.process().action_summands();
-      for (action_summand_vector::const_iterator i = summands.begin(); i != summands.end(); ++i)
+      for (auto i = summands.begin(); i != summands.end(); ++i)
       {
         if (i->is_tau())
         {
@@ -248,12 +248,12 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
       size_t                                 delta_summand_count     = spec.process().deadlock_summands().size();
       std::set<data::variable>               declared_free_variables = spec.global_variables();
       std::set<data::variable>               used_free_variables     = compute_used_free_variables(spec);
-      const data::variable_list& pars=spec.process().process_parameters();
-      std::set<data::variable>               process_parameters(pars.begin(),pars.end());
-      const action_label_list& action_labels=spec.action_labels();
-      std::set<action_label>                 declared_action_labels(action_labels.begin(),action_labels.end());
-      std::set<action_label>                 used_action_labels      = compute_used_action_labels(spec);
-      std::set<std::multiset<action_label> > used_multi_actions      = compute_used_multi_actions(spec);
+      auto const&                            params                  = spec.process().process_parameters();
+      std::set<data::variable>               process_parameters(params.begin(), params.end());
+      auto const&                            action_labels = spec.action_labels();
+      std::set<process::action_label>        declared_action_labels(action_labels.begin(),action_labels.end());
+      std::set<process::action_label>        used_action_labels      = compute_used_action_labels(spec);
+      auto                                   used_multi_actions      = compute_used_multi_actions(spec);
 
       m_data["summand_count"               ] = print(summand_count);
       m_data["tau_summand_count"           ] = print(tau_summand_count);

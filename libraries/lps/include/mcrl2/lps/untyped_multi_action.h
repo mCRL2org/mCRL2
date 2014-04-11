@@ -37,13 +37,13 @@ class untyped_multi_action: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    untyped_multi_action(const untyped_action_list& actions)
+    untyped_multi_action(const process::untyped_action_list& actions)
       : atermpp::aterm_appl(core::detail::function_symbol_UntypedMultAct(), actions)
     {}
 
-    const untyped_action_list& actions() const
+    const process::untyped_action_list& actions() const
     {
-      return atermpp::aterm_cast<const untyped_action_list>((*this)[0]);
+      return atermpp::aterm_cast<const process::untyped_action_list>((*this)[0]);
     }
 };
 

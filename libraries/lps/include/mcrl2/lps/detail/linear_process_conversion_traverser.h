@@ -156,7 +156,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param l An action label
   /// \param v A sequence of data expressions
-  void leave(const lps::action& x)
+  void leave(const process::action& x)
   {
     action a(x.label(), x.arguments());
     m_multi_action = lps::multi_action(a);

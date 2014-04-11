@@ -16,7 +16,7 @@
 
 namespace mcrl2 {
 
-namespace lps {
+namespace process {
 
 //--- start generated class untyped_action ---//
 /// \brief An untyped action
@@ -81,7 +81,7 @@ std::string pp(const untyped_action& x);
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_action& x)
 {
-  return out << lps::pp(x);
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -91,7 +91,7 @@ inline void swap(untyped_action& t1, untyped_action& t2)
 }
 //--- end generated class untyped_action ---//
 
-} // namespace lps
+} // namespace process
 
 } // namespace mcrl2
 

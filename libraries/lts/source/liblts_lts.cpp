@@ -90,10 +90,10 @@ public:
     return !core::is_nil(get_arg(2)); 
   }
 
-  lps::action_label_list action_labels() const
+  process::action_label_list action_labels() const
   {
     assert(has_action_labels());
-    return lps::action_label_list(data::detail::add_index(get_arg(2)));
+    return process::action_label_list(data::detail::add_index(get_arg(2)));
   }  
 };
 
@@ -269,7 +269,7 @@ static void read_from_lts(lts_lts_t& l, const std::string& filename)
   // Read action labels
   SVCint num_labels = SVCnumLabels(&f);
   detail::action_label_lts action_label;
-  const lps::action_list tau = lps::action_list();
+  const process::action_list tau = process::action_list();
   for (SVCstateIndex i = 0; i < num_labels; ++i)
   {
     action_label = detail::action_label_lts(atermpp::aterm_cast<atermpp::aterm_appl>(data::detail::add_index(SVClabel2ATerm(&f, i))));

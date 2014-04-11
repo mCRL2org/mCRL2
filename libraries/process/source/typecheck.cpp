@@ -8,13 +8,11 @@
 
 #include "mcrl2/process/typecheck.h"
 
-
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::log;
-using namespace mcrl2::lps;
 using namespace mcrl2::data;
 using namespace mcrl2::process;
 
@@ -1013,7 +1011,7 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
 
 void mcrl2::process::process_type_checker::ReadInActs(const action_label_list &Acts)
 {
-  for (lps::action_label_list::const_iterator i=Acts.begin(); i!=Acts.end(); ++i)
+  for (process::action_label_list::const_iterator i=Acts.begin(); i!=Acts.end(); ++i)
   {
     action_label Act= *i;
     core::identifier_string ActName=Act.name();

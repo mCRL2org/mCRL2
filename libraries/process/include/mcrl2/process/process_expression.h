@@ -20,24 +20,17 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/precedence.h"
-#include "mcrl2/lps/multi_action.h"
-#include "mcrl2/process/action.h"
+#include "mcrl2/process/action_label.h"
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
 #include "mcrl2/process/communication_expression.h"
+#include "mcrl2/process/untyped_action.h"
 
 namespace mcrl2
 {
 
 namespace process
 {
-
-// Make some LPS types visible. These should become part of the process library.
-using lps::action;
-using lps::action_name_set;
-using lps::multi_action;
-using lps::multi_action_name;
-using lps::multi_action_name_set;
 
 // Needed for argument dependent lookup (?)
 using namespace core::detail::precedences;
@@ -59,11 +52,6 @@ class process_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_ProcExpr(*this));
     }
-
-    /// \brief Constructor.
-    process_expression(const lps::action& x)
-      : atermpp::aterm_appl(x)
-    {}
 };
 
 /// \brief list of process_expressions
@@ -73,6 +61,7 @@ typedef atermpp::term_list<process_expression> process_expression_list;
 typedef std::vector<process_expression>    process_expression_vector;
 
 // prototypes
+inline bool is_action(const atermpp::aterm_appl& x);
 inline bool is_process_instance(const atermpp::aterm_appl& x);
 inline bool is_process_instance_assignment(const atermpp::aterm_appl& x);
 inline bool is_delta(const atermpp::aterm_appl& x);
@@ -101,7 +90,8 @@ inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
 inline
 bool is_process_expression(const atermpp::aterm_appl& x)
 {
-  return process::is_process_instance(x) ||
+  return process::is_action(x) ||
+         process::is_process_instance(x) ||
          process::is_process_instance_assignment(x) ||
          process::is_delta(x) ||
          process::is_tau(x) ||
@@ -121,8 +111,7 @@ bool is_process_expression(const atermpp::aterm_appl& x)
          process::is_left_merge(x) ||
          process::is_choice(x) ||
          process::is_untyped_parameter_identifier(x) ||
-         process::is_untyped_process_assignment(x) ||
-         lps::is_action(x);
+         process::is_untyped_process_assignment(x);
 }
 
 // prototype declaration
@@ -139,6 +128,73 @@ std::ostream& operator<<(std::ostream& out, const process_expression& x)
 
 /// \brief swap overload
 inline void swap(process_expression& t1, process_expression& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \brief An action
+class action: public process_expression
+{
+  public:
+    /// \brief Default constructor.
+    action()
+      : process_expression(core::detail::default_values::Action)
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit action(const atermpp::aterm& term)
+      : process_expression(term)
+    {
+      assert(core::detail::check_term_Action(*this));
+    }
+
+    /// \brief Constructor.
+    action(const action_label& label, const data::data_expression_list& arguments)
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Action(), label, arguments))
+    {}
+
+    const action_label& label() const
+    {
+      return atermpp::aterm_cast<const action_label>((*this)[0]);
+    }
+
+    const data::data_expression_list& arguments() const
+    {
+      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+    }
+};
+
+/// \brief list of actions
+typedef atermpp::term_list<action> action_list;
+
+/// \brief vector of actions
+typedef std::vector<action>    action_vector;
+
+/// \brief Test for a action expression
+/// \param x A term
+/// \return True if \a x is a action expression
+inline
+bool is_action(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::Action;
+}
+
+// prototype declaration
+std::string pp(const action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const action& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(action& t1, action& t2)
 {
   t1.swap(t2);
 }
@@ -1466,6 +1522,86 @@ inline const process_expression& binary_right(const left_merge& x)   { return x.
 std::string pp(const process_expression_list& x);
 std::string pp(const process_expression_vector& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
+std::string pp(const action_list& x);
+std::string pp(const action_vector& x);
+action normalize_sorts(const action& x, const data::data_specification& dataspec);
+action translate_user_notation(const action& x);
+std::set<data::variable> find_all_variables(const action& x);
+std::set<data::variable> find_free_variables(const action& x);
+
+/// \brief Compares the signatures of two actions
+/// \param a An action
+/// \param b An action
+/// \return Returns true if the actions a and b have the same label, and
+/// the sorts of the arguments of a and b are equal.
+inline
+bool equal_signatures(const action& a, const action& b)
+{
+  if (a.label() != b.label())
+  {
+    return false;
+  }
+
+  const data::data_expression_list& a_args = a.arguments();
+  const data::data_expression_list& b_args = b.arguments();
+
+  if (a_args.size() != b_args.size())
+  {
+    return false;
+  }
+
+  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
+}
+
+/// \brief Represents the name of a multi action
+typedef std::multiset<core::identifier_string> multi_action_name;
+
+/// \brief Represents a set of multi action names
+typedef std::set<multi_action_name> multi_action_name_set;
+
+/// \brief Represents a set of action names
+typedef std::set<core::identifier_string> action_name_set;
+
+/// \brief Pretty print function for a multi action name
+inline
+std::string pp(const multi_action_name& x)
+{
+  std::ostringstream out;
+  if (x.empty())
+  {
+    out << "tau";
+  }
+  else
+  {
+    for (auto i = x.begin(); i != x.end(); ++i)
+    {
+      if (i != x.begin())
+      {
+        out << " | ";
+      }
+      out << core::pp(*i);
+    }
+  }
+  return out.str();
+}
+
+/// \brief Pretty print function for a set of multi action names
+inline
+std::string pp(const multi_action_name_set& A)
+{
+  std::ostringstream out;
+  out << "{";
+  for (auto i = A.begin(); i != A.end(); ++i)
+  {
+    if (i != A.begin())
+    {
+      out << ", ";
+    }
+    out << pp(*i);
+  }
+  out << "}";
+  return out.str();
+}
 
 } // namespace process
 

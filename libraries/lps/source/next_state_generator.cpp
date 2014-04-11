@@ -43,7 +43,7 @@ next_state_generator::next_state_generator(
     summand.condition = i->condition();
     summand.result_state = get_internal_state(i->next_state(m_specification.process().process_parameters()));
 
-    for (action_list::iterator j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
+    for (auto j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
     {
       action_internal_t action_label;
       action_label.label = j->label();
@@ -523,7 +523,7 @@ void next_state_generator::iterator::increment()
     m_transition.m_state.push_back(sar(*i));
   }
 
-  std::vector <action> actions;
+  std::vector <process::action> actions;
   actions.resize(m_summand->action_label.size());
   std::vector < data_expression> arguments;
   for (size_t i = 0; i < m_summand->action_label.size(); i++)
@@ -533,9 +533,9 @@ void next_state_generator::iterator::increment()
     {
       arguments[j] = m_generator->m_rewriter.get_rewriter().rewrite(m_summand->action_label[i].arguments[j], *m_substitution);
     }
-    actions[i] = action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
+    actions[i] = process::action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
   }
-  m_transition.m_action = multi_action(action_list(actions.begin(), actions.end()));
+  m_transition.m_action = multi_action(process::action_list(actions.begin(), actions.end()));
 
   m_transition.m_summand_index = (m_summand - &m_generator->m_summands[0]);
 

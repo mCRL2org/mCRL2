@@ -61,7 +61,7 @@ struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
     }
   }
 
-  void leave(const lps::action& x)
+  void leave(const process::action& x)
   {
     super::leave(x);
     filter();

@@ -16,12 +16,12 @@ using namespace mcrl2::log;
 using namespace mcrl2::lps;
 using namespace mcrl2::data;
 
-static action MakeAction(
+static process::action MakeAction(
                const identifier_string &Name,
                const sort_expression_list &FormParList,
                const data_expression_list &FactParList)
 {
-  return action(action_label(Name,FormParList),FactParList);
+  return process::action(process::action_label(Name,FormParList),FactParList);
 }
 
 static std::map<identifier_string,sort_expression> list_minus(const std::map<identifier_string,sort_expression> &l, const std::map<identifier_string,sort_expression> &m)
@@ -38,9 +38,9 @@ static std::map<identifier_string,sort_expression> list_minus(const std::map<ide
 }
 
 
-lps::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const lps::untyped_action &act)
+process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const process::untyped_action &act)
 {
-  action Result;
+  process::action Result;
   core::identifier_string Name(act.name());
   term_list<sort_expression_list> ParList;
 
@@ -170,17 +170,17 @@ lps::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identi
 
 
 
-lps::action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const lps::untyped_action &ma)
+process::action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const process::untyped_action &ma)
 {
   return RewrAct(Vars,ma);
 }
 
 
-void mcrl2::lps::action_type_checker::ReadInActs(const action_label_list &Acts)
+void mcrl2::lps::action_type_checker::ReadInActs(const process::action_label_list &Acts)
 {
-  for (lps::action_label_list::const_iterator i=Acts.begin(); i!=Acts.end(); ++i)
+  for (auto i=Acts.begin(); i!=Acts.end(); ++i)
   {
-    action_label Act= *i;
+    process::action_label Act= *i;
     core::identifier_string ActName=Act.name();
     sort_expression_list ActType=Act.sorts();
 
@@ -215,7 +215,7 @@ void mcrl2::lps::action_type_checker::ReadInActs(const action_label_list &Acts)
 
 mcrl2::lps::action_type_checker::action_type_checker(
             const data::data_specification &data_spec,
-            const action_label_list& action_decls)
+            const process::action_label_list& action_decls)
   : data_type_checker(data_spec)
 {
   mCRL2log(debug) << "type checking multiaction..." << std::endl;
@@ -235,11 +235,11 @@ lps::multi_action mcrl2::lps::action_type_checker::operator()(const lps::untyped
 {
   try
   {
-    action_list r;
+    process::action_list r;
 
     for (auto l=ma.actions().begin(); l!=ma.actions().end(); ++l)
     {
-      untyped_action o= *l;
+      process::untyped_action o= *l;
       const  std::map<core::identifier_string,sort_expression> NewDeclaredVars;
       r.push_front(TraverseAct(NewDeclaredVars,o));
     }
@@ -302,7 +302,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
 
   //Save the actions from LPS only for later use.
   actions_from_lps=actions;
-  const action_label_list action_labels=ar_spec.action_labels();
+  const process::action_label_list action_labels=ar_spec.action_labels();
   ReadInActs(action_labels);
 
   // Result=gstcFoldSortRefs(Result);
@@ -329,11 +329,11 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
 
     DeclaredVars=NewDeclaredVars;
-    lps::untyped_action Left(atermpp::aterm_cast<atermpp::aterm>(Rule.lhs()));
+    process::untyped_action Left(atermpp::aterm_cast<atermpp::aterm>(Rule.lhs()));
 
     //extra check requested by Tom: actions in the LHS can only come from the LPS
     actions.swap(actions_from_lps);
-    action new_action_at_the_left=TraverseAct(DeclaredVars,Left);
+    process::action new_action_at_the_left=TraverseAct(DeclaredVars,Left);
     actions_from_lps.swap(actions);
 
     data_expression Cond=Rule.condition();
@@ -342,7 +342,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     action_rename_rule_rhs Right=Rule.rhs();
     if (!Right.is_delta() && !Right.is_tau())
     {
-      Right = TraverseAct(DeclaredVars, atermpp::aterm_cast<lps::untyped_action>(Right.act()));
+      Right = TraverseAct(DeclaredVars, atermpp::aterm_cast<process::untyped_action>(Right.act()));
     }
 
     new_rules.push_back(action_rename_rule(VarList,Cond,new_action_at_the_left,Right));

@@ -36,10 +36,10 @@ static size_t count_ctau(lps::specification const& s)
 
   for (action_summand_vector::const_iterator i=v_summands.begin(); i!=v_summands.end(); ++i)
   {
-    const action_list al=i->multi_action().actions();
+    const process::action_list al=i->multi_action().actions();
     if (al.size()==1)
     {
-      const action_label lab=al.front().label();
+      const process::action_label lab=al.front().label();
       if (to_string(lab.name())=="ctau")
       {
         ++result;

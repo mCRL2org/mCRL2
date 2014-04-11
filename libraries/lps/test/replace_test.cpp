@@ -143,7 +143,7 @@ void test_action_list()
 {
   sort_expression_list s;
   s.push_front(sort_expression(sort_nat::nat()));
-  action_label label(core::identifier_string("a"), s);
+  process::action_label label(core::identifier_string("a"), s);
 
   variable b("b", data::sort_bool::bool_());
   variable c("c", data::sort_bool::bool_());
@@ -152,23 +152,23 @@ void test_action_list()
   data_expression_list e2;
   e2.push_front(data_expression(sort_bool::and_(c, c)));
 
-  action_list l1;
-  action a1(label, e1);
+  process::action_list l1;
+  process::action a1(label, e1);
   l1.push_front(a1);
 
-  action_list l2;
-  action a2(label, e2);
+  process::action_list l2;
+  process::action a2(label, e2);
   l2.push_front(a2);
 
   data::mutable_map_substitution<> sigma;
   sigma[b] = c;
 
-  l1 = lps::replace_variables_capture_avoiding(l1, sigma, data::substitution_variables(sigma));
+  l1 = process::replace_variables_capture_avoiding(l1, sigma, data::substitution_variables(sigma));
   BOOST_CHECK(l1 == l2);
 
   std::set<data::variable> v;
-  l1 = lps::replace_variables(l1, sigma);
-  l1 = lps::replace_variables_capture_avoiding(l1, sigma, v);
+  l1 = process::replace_variables(l1, sigma);
+  l1 = process::replace_variables_capture_avoiding(l1, sigma, v);
 }
 
 int test_main(int argc, char* argv[])

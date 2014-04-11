@@ -14,7 +14,7 @@
 
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/process/action.h"
+#include "mcrl2/process/process_expression.h"
 
 namespace mcrl2 {
 

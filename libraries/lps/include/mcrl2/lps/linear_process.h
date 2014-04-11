@@ -99,7 +99,7 @@ class linear_process
         else
         {
           assert(lps::is_multi_action(atermpp::aterm_cast<const atermpp::aterm_appl>(t[2])));
-          action_list actions(atermpp::aterm_cast<atermpp::aterm_list>(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])[0]));
+          process::action_list actions(atermpp::aterm_cast<atermpp::aterm_list>(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])[0]));
           m_action_summands.push_back(action_summand(summation_variables, condition, multi_action(actions, time), assignments));
         }
       }

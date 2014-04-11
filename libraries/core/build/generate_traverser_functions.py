@@ -390,7 +390,7 @@ def generate_replace_capture_avoiding_functions():
     result = generate_code('../../modal_formula/include/mcrl2/modal_formula/replace.h', 'regular_formulas', 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     result = generate_code('../../modal_formula/include/mcrl2/modal_formula/replace.h', 'state_formulas'  , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     result = generate_code('../../pbes/include/mcrl2/pbes/replace.h'                  , 'pbes_system'     , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
-    #result = generate_code('../../process/include/mcrl2/process/replace.h'            , 'process'         , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code('../../process/include/mcrl2/process/replace.h'            , 'process'         , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     return result
 
 def generate_find_functions():

@@ -132,7 +132,7 @@ std::ostream& operator<<(std::ostream& out, const allow_set& x)
 {
   if (!x.A.empty())
   {
-    out << lps::pp(x.A) << (x.A_includes_subsets ? "@" : "");
+    out << pp(x.A) << (x.A_includes_subsets ? "@" : "");
   }
   if (!x.I.empty())
   {

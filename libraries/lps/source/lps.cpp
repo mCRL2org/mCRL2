@@ -24,13 +24,7 @@ namespace lps
 {
 
 //--- start generated lps overloads ---//
-std::string pp(const lps::action_list& x) { return lps::pp< lps::action_list >(x); }
-std::string pp(const lps::action_vector& x) { return lps::pp< lps::action_vector >(x); }
-std::string pp(const lps::action_label_list& x) { return lps::pp< lps::action_label_list >(x); }
-std::string pp(const lps::action_label_vector& x) { return lps::pp< lps::action_label_vector >(x); }
 std::string pp(const lps::state& x) { return lps::pp< lps::state >(x); }
-std::string pp(const lps::action& x) { return lps::pp< lps::action >(x); }
-std::string pp(const lps::action_label& x) { return lps::pp< lps::action_label >(x); }
 std::string pp(const lps::action_summand& x) { return lps::pp< lps::action_summand >(x); }
 std::string pp(const lps::deadlock& x) { return lps::pp< lps::deadlock >(x); }
 std::string pp(const lps::deadlock_summand& x) { return lps::pp< lps::deadlock_summand >(x); }
@@ -38,21 +32,14 @@ std::string pp(const lps::linear_process& x) { return lps::pp< lps::linear_proce
 std::string pp(const lps::multi_action& x) { return lps::pp< lps::multi_action >(x); }
 std::string pp(const lps::process_initializer& x) { return lps::pp< lps::process_initializer >(x); }
 std::string pp(const lps::specification& x) { return lps::pp< lps::specification >(x); }
-std::string pp(const lps::untyped_action& x) { return lps::pp< lps::untyped_action >(x); }
 std::string pp(const lps::untyped_multi_action& x) { return lps::pp< lps::untyped_multi_action >(x); }
-lps::action normalize_sorts(const lps::action& x, const data::data_specification& dataspec) { return lps::normalize_sorts< lps::action >(x, dataspec); }
-lps::action_label_list normalize_sorts(const lps::action_label_list& x, const data::data_specification& dataspec) { return lps::normalize_sorts< lps::action_label_list >(x, dataspec); }
 void normalize_sorts(lps::multi_action& x, const data::data_specification& dataspec) { lps::normalize_sorts< lps::multi_action >(x, dataspec); }
-lps::action translate_user_notation(const lps::action& x) { return lps::translate_user_notation< lps::action >(x); }
 void translate_user_notation(lps::multi_action& x) { lps::translate_user_notation< lps::multi_action >(x); }
-std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x) { return lps::find_sort_expressions< lps::action_label_list >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x) { return lps::find_sort_expressions< lps::specification >(x); }
 std::set<data::variable> find_all_variables(const lps::linear_process& x) { return lps::find_all_variables< lps::linear_process >(x); }
 std::set<data::variable> find_all_variables(const lps::specification& x) { return lps::find_all_variables< lps::specification >(x); }
 std::set<data::variable> find_all_variables(const lps::deadlock& x) { return lps::find_all_variables< lps::deadlock >(x); }
 std::set<data::variable> find_all_variables(const lps::multi_action& x) { return lps::find_all_variables< lps::multi_action >(x); }
-std::set<data::variable> find_all_variables(const lps::action& x) { return lps::find_all_variables< lps::action >(x); }
-std::set<data::variable> find_free_variables(const lps::action& x) { return lps::find_free_variables< lps::action >(x); }
 std::set<data::variable> find_free_variables(const lps::linear_process& x) { return lps::find_free_variables< lps::linear_process >(x); }
 std::set<data::variable> find_free_variables(const lps::specification& x) { return lps::find_free_variables< lps::specification >(x); }
 std::set<data::variable> find_free_variables(const lps::deadlock& x) { return lps::find_free_variables< lps::deadlock >(x); }

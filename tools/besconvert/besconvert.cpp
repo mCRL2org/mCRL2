@@ -25,7 +25,7 @@
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/io.h"
-#include "mcrl2/process/action.h"
+#include "mcrl2/process/process_expression.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 
@@ -259,7 +259,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         {
           std::stringstream label;
           label << "self:block(" << info.first << "),op(" << info.second << ")";
-          lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
+          process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
           if (label_index == atermpp::npos)
           {
@@ -317,7 +317,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
             label << "block(" << info_target.first << "),op(" << info_target.second << ")";
           }
           size_t to = indices[*j];
-          lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
+          process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
           if (label_index == atermpp::npos)
           {

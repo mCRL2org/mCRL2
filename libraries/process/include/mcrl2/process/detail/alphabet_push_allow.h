@@ -156,7 +156,7 @@ std::ostream& operator<<(std::ostream& out, const push_allow_map& W)
 inline
 std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
 {
-  return out << "alphabet = " << lps::pp(x.alphabet) << " expression = " << process::pp(x.m_expression) << std::endl;
+  return out << "alphabet = " << pp(x.alphabet) << " expression = " << process::pp(x.m_expression) << std::endl;
 }
 
 push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, push_allow_map& W, data::set_identifier_generator& id_generator);
@@ -229,7 +229,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     }
     mCRL2log(log::debug) << msg << "push(" << A << ", " << process::pp(x) << ", " << W << ") = "
       << text1
-      << process::pp(result.m_expression) << " with alphabet(" << process::pp(result.m_expression) << ") = " << lps::pp(result.alphabet) << std::endl;
+      << process::pp(result.m_expression) << " with alphabet(" << process::pp(result.m_expression) << ") = " << pp(result.alphabet) << std::endl;
   }
 
   void log(const process_expression& x, const std::string& text = "")
@@ -242,7 +242,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return !is_merge(x) && !is_left_merge(x) && !is_sync(x) && !is_hide(x) && !is_rename(x) && !is_block(x) && !is_allow(x) && !is_comm(x);
   }
 
-  void leave(const lps::action& x)
+  void leave(const process::action& x)
   {
     multi_action_name alpha;
     alpha.insert(x.label().name());

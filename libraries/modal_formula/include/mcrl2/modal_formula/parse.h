@@ -27,10 +27,10 @@ namespace mcrl2
 namespace action_formulas
 {
 
-struct action_formula_actions: public lps::action_actions
+struct action_formula_actions: public lps::detail::multi_action_actions
 {
   action_formula_actions(const core::parser_table& table_)
-    : lps::action_actions(table_)
+    : lps::detail::multi_action_actions(table_)
   {}
 
   action_formulas::action_formula parse_ActFrm(const core::parse_node& node)
