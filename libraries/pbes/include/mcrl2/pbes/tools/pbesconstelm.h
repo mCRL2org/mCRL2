@@ -16,7 +16,7 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/rewriters/simplifying_rewriter.h"
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -58,12 +58,10 @@ void pbesconstelm(const std::string& input_filename,
     case quantifier_all:
     case quantifier_finite:
     {
-      typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator> my_pbes_rewriter;
       bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
       data::data_enumerator datae(p.data(), datar);
-      data::rewriter_with_variables datarv(datar);
-      my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
-      pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+      custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
+      pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, custom_enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, compute_conditions);
       if (remove_redundant_equations)
       {

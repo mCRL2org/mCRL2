@@ -55,18 +55,16 @@ void pbesrewr(const std::string& input_filename,
     case quantifier_all:
     {
       data::data_enumerator datae(p.data(), datar);
-      data::rewriter_with_variables datarv(datar);
       bool enumerate_infinite_sorts = true;
-      enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts, skip_data);
+      custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts, skip_data);
       pbes_rewrite(p, pbesr);
       break;
     }
     case quantifier_finite:
     {
       data::data_enumerator datae(p.data(), datar);
-      data::rewriter_with_variables datarv(datar);
       bool enumerate_infinite_sorts = false;
-      enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts, skip_data);
+      custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts, skip_data);
       pbes_rewrite(p, pbesr);
       break;
     }

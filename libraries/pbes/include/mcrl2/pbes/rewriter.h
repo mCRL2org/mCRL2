@@ -16,7 +16,7 @@
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplifying_rewriter.h"
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplifying_quantifier_rewriter.h"
 
 #endif // MCRL2_PBES_REWRITER_H

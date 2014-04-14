@@ -154,7 +154,7 @@ class quantifier_enumerator1
         std::set<data::variable> FV_c = pbes_system::find_free_variables(c);
 
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-        mCRL2log(log::verbose) << "        Z = Z + " << pbes_system::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
+        mCRL2log(log::verbose) << "        Z = Z + " << c << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
 #endif
         if (stop_(c))
         {
@@ -556,6 +556,10 @@ class custom_enumerate_quantifiers_rewriter
     bool m_skip_data;
 
   public:
+    typedef pbes_expression term_type;
+
+    typedef data::variable variable_type;
+
     /// \brief Constructor
     /// \param r A data rewriter
     /// \param e A data enumerator

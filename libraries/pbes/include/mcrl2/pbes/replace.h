@@ -281,9 +281,9 @@ T replace_variables_capture_avoiding(const T& x,
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
 void replace_propositional_variables(T& x,
-                                        Substitution sigma,
-                                        typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
-                                       )
+                                     Substitution sigma,
+                                     typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+                                    )
 {
   core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
 }
@@ -291,9 +291,9 @@ void replace_propositional_variables(T& x,
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
 T replace_propositional_variables(const T& x,
-                                     Substitution sigma,
-                                     typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
-                                    )
+                                  Substitution sigma,
+                                  typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+                                 )
 {
   return core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
 }

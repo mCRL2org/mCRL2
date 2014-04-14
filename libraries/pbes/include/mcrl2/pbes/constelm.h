@@ -38,6 +38,17 @@ namespace pbes_system
 namespace detail
 {
 
+inline
+data::mutable_map_substitution<> make_constelm_substitution(const std::map<data::variable, data::data_expression>& m)
+{
+  data::mutable_map_substitution<> result;
+  for (auto i = m.begin(); i != m.end(); ++i)
+  {
+    result[i->first] = i->second;
+  }
+  return result;
+}
+
 template <typename Term>
 struct true_false_pair
 {
@@ -573,7 +584,8 @@ class pbes_constelm_algorithm
               auto j = params.begin();
               for (auto i = e.begin(); i != e.end(); ++i, ++j)
               {
-                data_term_type e1 = datar(*i, data::make_map_substitution(e_constraints));
+                data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(e_constraints);
+                data_term_type e1 = datar(*i, sigma);
                 if (is_constant_expression(e1))
                 {
                   m_constraints[*j] = e1;
@@ -598,7 +610,8 @@ class pbes_constelm_algorithm
               {
                 continue;
               }
-              data_term_type ei = datar(*i, data::make_map_substitution(e_constraints));
+              data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(e_constraints);
+              data_term_type ei = datar(*i, sigma);
               if (ci != ei)
               {
                 ci = *j;
@@ -690,14 +703,16 @@ class pbes_constelm_algorithm
     std::string print_condition(const edge& e, const vertex& u, const term_type& value)
     {
       std::ostringstream out;
-      out << "\nEvaluated condition " << pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints())) << " to " << value << std::endl;
+      data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
+      out << "\nEvaluated condition " << pbes_system::replace_free_variables(e.condition(), sigma) << " to " << value << std::endl;
       return out.str();
     }
 
     std::string print_evaluation_failure(const edge& e, const vertex& u)
     {
       std::ostringstream out;
-      out << "\nCould not evaluate condition " << pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints())) << " to true or false";
+      data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
+      out << "\nCould not evaluate condition " << pbes_system::replace_free_variables(e.condition(), sigma) << " to true or false";
       return out.str();
     }
 
@@ -811,7 +826,8 @@ class pbes_constelm_algorithm
           vertex& v = m_vertices[e.target().name()];
           mCRL2log(log::debug) << print_edge_update(e, u, v);
 
-          term_type value = m_pbes_rewriter(e.condition(), data::make_map_substitution(u.constraints()));
+          data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
+          term_type value = m_pbes_rewriter(e.condition(), sigma);
           mCRL2log(log::debug) << print_condition(e, u, value);
 
           if (!tr::is_false(value) && !tr::is_true(value))
@@ -861,10 +877,11 @@ class pbes_constelm_algorithm
 
         if (!v.constraints().empty())
         {
+          data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(v.constraints());
           *i = pbes_equation(
                  i->symbol(),
                  i->variable(),
-                 pbes_system::replace_free_variables(i->formula(), data::make_map_substitution(v.constraints()))
+                 pbes_system::replace_free_variables(i->formula(), sigma)
                );
         }
       }
