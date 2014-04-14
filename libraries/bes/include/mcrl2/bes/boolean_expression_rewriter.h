@@ -9,14 +9,14 @@
 /// \file mcrl2/pbes/rewriters/boolean_expression_rewriter.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_REWRITERS_BOOLEAN_EXPRESSION_REWRITER_H
-#define MCRL2_PBES_REWRITERS_BOOLEAN_EXPRESSION_REWRITER_H
+#ifndef MCRL2_BES_BOOLEAN_EXPRESSION_REWRITER_H
+#define MCRL2_BES_BOOLEAN_EXPRESSION_REWRITER_H
 
 #include "mcrl2/bes/detail/boolean_simplify_builder.h"
 
 namespace mcrl2 {
 
-namespace pbes_system {
+namespace bes {
 
 /// \brief A rewriter that simplifies boolean expressions.
 template <typename Term>
@@ -39,8 +39,8 @@ class boolean_expression_rewriter
     }
 };
 
-} // namespace pbes_system
+} // namespace bes
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_REWRITERS_BOOLEAN_EXPRESSION_REWRITER_H
+#endif // MCRL2_BES_BOOLEAN_EXPRESSION_REWRITER_H

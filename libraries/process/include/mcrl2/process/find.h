@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/add_binding.h"
 #include "mcrl2/utilities/exception.h"
@@ -27,7 +26,39 @@ namespace process
 
 namespace detail
 {
+
 /// \cond INTERNAL_DOCS
+template <template <class> class Traverser, class OutputIterator>
+struct find_action_labels_traverser: public Traverser<find_action_labels_traverser<Traverser, OutputIterator> >
+{
+  typedef Traverser<find_action_labels_traverser<Traverser, OutputIterator> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  OutputIterator out;
+
+  find_action_labels_traverser(OutputIterator out_)
+    : out(out_)
+  {}
+
+  void operator()(const process::action_label& x)
+  {
+    *out = x;
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Traverser, class OutputIterator>
+find_action_labels_traverser<Traverser, OutputIterator>
+make_find_action_labels_traverser(OutputIterator out)
+{
+  return find_action_labels_traverser<Traverser, OutputIterator>(out);
+}
+
 struct find_action_names_traverser: public process::action_label_traverser<find_action_names_traverser>
 {
   typedef process::action_label_traverser<find_action_names_traverser> super;
@@ -37,7 +68,7 @@ struct find_action_names_traverser: public process::action_label_traverser<find_
 
   std::set<core::identifier_string> result;
 
-  void operator()(const lps::action_label& x)
+  void operator()(const process::action_label& x)
   {
     result.insert(x.name());
   }
@@ -235,16 +266,16 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 template <typename T, typename OutputIterator>
 void find_action_labels(const T& x, OutputIterator o)
 {
-  lps::detail::make_find_action_labels_traverser<process::action_label_traverser>(o)(x);
+  process::detail::make_find_action_labels_traverser<process::action_label_traverser>(o)(x);
 }
 
 /// \brief Returns all action labels that occur in an object
 /// \param[in] x an object containing action labels
 /// \return All action labels that occur in the object x
 template <typename T>
-std::set<lps::action_label> find_action_labels(const T& x)
+std::set<process::action_label> find_action_labels(const T& x)
 {
-  std::set<lps::action_label> result;
+  std::set<process::action_label> result;
   process::find_action_labels(x, std::inserter(result, result.end()));
   return result;
 }

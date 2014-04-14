@@ -12,7 +12,7 @@
 #ifndef MCRL2_PROCESS_TYPECHECK_H
 #define MCRL2_PROCESS_TYPECHECK_H
 
-#include "mcrl2/lps/typecheck.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2
@@ -46,7 +46,7 @@ class process_type_checker:public data::data_type_checker
     process_specification operator()();
 
   protected:
-    void ReadInActs(const lps::action_label_list &Acts);
+    void ReadInActs(const process::action_label_list &Acts);
     void ReadInProcsAndInit(const std::vector<process_equation>& Procs, const process_expression &Init);
     const process_identifier initial_process(void)
     {

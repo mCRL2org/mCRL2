@@ -29,6 +29,7 @@ void pbesstategraph(const std::string& input_filename,
                     bool /* apply_to_original */,
                     bool use_local_variant,
                     bool print_influence_graph,
+                    bool cache_marking_updates,
                     bool use_marking_optimization,
                     bool use_alternative_lcfp_criterion,
                     bool use_alternative_gcfp_relation,
@@ -42,8 +43,8 @@ void pbesstategraph(const std::string& input_filename,
 
   if (use_local_variant)
   {
-    pbes_system::detail::local_reset_variables_algorithm algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency);
-    q = algorithm.run(simplify, use_marking_optimization);
+    pbes_system::detail::local_reset_variables_algorithm algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency, cache_marking_updates, use_marking_optimization);
+    q = algorithm.run(simplify);
     if (print_influence_graph)
     {
       pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());

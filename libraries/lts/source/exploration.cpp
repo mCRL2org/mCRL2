@@ -141,7 +141,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
     for (size_t i = 0; i < specification.process().action_summands().size(); i++)
     {
       bool found = false;
-      for (action_list::iterator j = specification.process().action_summands()[i].multi_action().actions().begin(); j != specification.process().action_summands()[i].multi_action().actions().end(); j++)
+      for (auto j = specification.process().action_summands()[i].multi_action().actions().begin(); j != specification.process().action_summands()[i].multi_action().actions().end(); j++)
       {
         if (m_options.trace_actions.count(j->label().name()) > 0)
         {
@@ -158,18 +158,18 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
   {
     for (size_t i = 0; i < specification.process().action_summands().size(); i++)
     {
-      specification.process().action_summands()[i].multi_action().actions() = action_list();
+      specification.process().action_summands()[i].multi_action().actions() = process::action_list();
     }
 
     if (m_use_confluence_reduction)
     {
       for (size_t i = 0; i < nonprioritised_summands.size(); i++)
       {
-        nonprioritised_summands[i].multi_action().actions() = action_list();
+        nonprioritised_summands[i].multi_action().actions() = process::action_list();
       }
       for (size_t i = 0; i < prioritised_summands.size(); i++)
       {
-        prioritised_summands[i].multi_action().actions() = action_list();
+        prioritised_summands[i].multi_action().actions() = process::action_list();
       }
     }
   }
@@ -603,7 +603,7 @@ void lps2lts_algorithm::save_actions(const data::data_expression_vector& state, 
     {
       reason << "_" << pp(transition.action());
     }
-    for (action_list::iterator i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
+    for (auto i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
     {
       if (m_options.trace_actions.count(i->label().name()) > 0)
       {

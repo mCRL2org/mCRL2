@@ -17,8 +17,8 @@
 #ifndef MCRL2_PROCESS_ADD_BINDING_H
 #define MCRL2_PROCESS_ADD_BINDING_H
 
+#include "mcrl2/data/add_binding.h"
 #include "mcrl2/process/process_specification.h"
-#include "mcrl2/lps/add_binding.h"
 
 namespace mcrl2
 {
@@ -28,9 +28,9 @@ namespace process
 
 /// \brief Maintains a multiset of bound data variables during traversal
 template <template <class> class Builder, class Derived>
-struct add_data_variable_binding: public lps::add_data_variable_binding<Builder, Derived>
+struct add_data_variable_binding: public data::add_data_variable_binding<Builder, Derived>
 {
-  typedef lps::add_data_variable_binding<Builder, Derived> super;
+  typedef data::add_data_variable_binding<Builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();

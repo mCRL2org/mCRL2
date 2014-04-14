@@ -12,21 +12,16 @@
 #ifndef MCRL2_PROCESS_PARSE_H
 #define MCRL2_PROCESS_PARSE_H
 
-#define MCRL2_NEW_ALPHABET_REDUCE
-
 #include <iostream>
 #include <string>
 #include <sstream>
 #include "mcrl2/core/parser_utility.h"
-#include "mcrl2/lps/action_parse.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
-#include "mcrl2/process/alphabet_reduction.h"
-#ifdef MCRL2_NEW_ALPHABET_REDUCE
 #include "mcrl2/process/alphabet.h"
-#endif
 
 namespace mcrl2
 {
@@ -34,10 +29,10 @@ namespace mcrl2
 namespace process
 {
 
-struct process_actions: public lps::action_actions
+struct process_actions: public process::action_actions
 {
   process_actions(const core::parser_table& table_)
-    : lps::action_actions(table_)
+    : process::action_actions(table_)
   {}
 
   core::identifier_string_list parse_ActIdSet(const core::parse_node& node)
@@ -279,12 +274,7 @@ void complete_process_specification(process_specification& x, bool alpha_reduce 
   type_check(x);
   if (alpha_reduce)
   {
-#ifdef MCRL2_NEW_ALPHABET_REDUCE
     alphabet_reduce(x);
-#else
-    alphabet_reduction reduce;
-    reduce(x);
-#endif
   }
   process::translate_user_notation(x);
   process::normalize_sorts(x, x.data());

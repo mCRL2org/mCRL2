@@ -263,7 +263,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 
   void push(const guard_expression& x)
   {
-    mCRL2log(log::debug1) << "<push>" << "\n" << x << std::endl;
+    mCRL2log(log::debug2) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 

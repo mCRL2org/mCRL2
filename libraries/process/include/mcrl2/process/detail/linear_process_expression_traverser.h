@@ -82,7 +82,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   {
     return is_tau(x)
            || is_sync(x)
-           || lps::is_action(x)
+           || is_action(x)
            ;
   }
 

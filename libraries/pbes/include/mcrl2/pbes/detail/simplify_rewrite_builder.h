@@ -230,7 +230,6 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
   /// \return The result of visiting the node
   term_type visit_forall(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
-    typedef typename core::term_traits<data_term_type> tt;
     term_type t = super::visit(phi, sigma);
     return utilities::optimized_forall(variables, t, true);
   }
@@ -244,7 +243,6 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
   /// \return The result of visiting the node
   term_type visit_exists(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
-    typedef typename core::term_traits<data_term_type> tt;
     term_type t = super::visit(phi, sigma);
     return utilities::optimized_exists(variables, t);
   }

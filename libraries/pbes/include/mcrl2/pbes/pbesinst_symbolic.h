@@ -19,57 +19,16 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
 #include "mcrl2/utilities/logger.h"
+
+#include "mcrl2/pbes/pbesinst_algorithm.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
-
-class pbesinst_symbolic_rewriter
-{
-  protected:
-    data::rewriter m_rewriter;
-    data::data_enumerator m_enumerator;
-    data::rewriter_with_variables m_rewriter_with_variables;
-    bool m_enumerate_infinite_sorts;
-    bool m_skip_data;
-
-  public:
-    typedef pbes_expression_with_propositional_variables term_type;
-    typedef data::data_expression_with_variables data_term_type;
-    typedef data::variable variable_type;
-
-    pbesinst_symbolic_rewriter(const data::data_specification& dataspec, data::rewrite_strategy strategy = data::jitty, bool enumerate_infinite_sorts = true, bool skip_data = false)
-      : m_rewriter(dataspec, strategy),
-        m_enumerator(dataspec, m_rewriter),
-        m_rewriter_with_variables(m_rewriter),
-        m_enumerate_infinite_sorts(enumerate_infinite_sorts),
-        m_skip_data(skip_data)
-    {}
-
-    term_type operator()(const term_type& x) const
-    {
-      typedef data::mutable_map_substitution<std::map< variable_type, data_term_type> > substitution_function;
-      typedef core::term_traits<term_type> tr;
-      substitution_function sigma;
-      detail::enumerate_quantifiers_builder<term_type, data::rewriter_with_variables, data::data_enumerator, substitution_function> r(m_rewriter_with_variables, m_enumerator, m_enumerate_infinite_sorts, m_skip_data);
-      term_type result = r(x, sigma);
-      return result;
-    }
-
-    template <typename SubstitutionFunction>
-    term_type operator()(const term_type& x, SubstitutionFunction sigma) const
-    {
-      typedef data::mutable_substitution_composer<SubstitutionFunction> substitution_function;
-      typedef core::term_traits<term_type> tr;
-      detail::enumerate_quantifiers_builder<term_type, data::rewriter_with_variables, data::data_enumerator, substitution_function> r(m_rewriter_with_variables, m_enumerator, m_enumerate_infinite_sorts, m_skip_data);
-      term_type result = r(x, substitution_function(sigma));
-      return result;
-    }
-};
 
 /// \brief Algorithm class for the symbolic_exploration instantiation algorithm.
 class pbesinst_symbolic_algorithm
@@ -82,8 +41,14 @@ class pbesinst_symbolic_algorithm
     /// \brief The PBES that is being instantiated.
     pbes& m_pbes;
 
+    /// \brief Data rewriter.
+    data::rewriter datar;
+
+    /// \brief Data enumerator.
+    data::data_enumerator datae;
+
     /// \brief The rewriter.
-    pbesinst_symbolic_rewriter m_rewriter;
+    custom_enumerate_quantifiers_rewriter R;
 
     /// \brief Propositional variable instantiations that need to be handled.
     std::set<state_type> todo;
@@ -102,15 +67,17 @@ class pbesinst_symbolic_algorithm
     std::map<core::identifier_string, std::size_t> m_equation_index;
 
   public:
-    pbesinst_symbolic_algorithm(pbes& p)
+    pbesinst_symbolic_algorithm(pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : m_pbes(p),
-        m_rewriter(p.data())
+        datar(p.data(), rewrite_strategy),
+        datae(p.data(), datar),
+        R(datar, datae)
     {
       pbes_system::algorithms::instantiate_global_variables(p);
 
       // initialize m_equation_index
       std::size_t eqn_index = 0;
-      for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         m_equation_index[i->variable().name()] = eqn_index++;
       }
@@ -119,26 +86,28 @@ class pbesinst_symbolic_algorithm
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     void run()
     {
-      init = tr::term2propvar(m_rewriter(m_pbes.initial_state()));
+      init = atermpp::aterm_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.insert(init);
-      mCRL2log(log::debug, "symbolic") << "discovered vertex " << pbes_system::pp(init) << std::endl;
+      mCRL2log(log::debug, "symbolic") << "discovered vertex " << init << std::endl;
 
       while (!todo.empty())
       {
         state_type X = *todo.begin();
-        mCRL2log(log::debug, "symbolic") << "handling vertex " << pbes_system::pp(X) << std::endl;
+        mCRL2log(log::debug, "symbolic") << "handling vertex " << X << std::endl;
         todo.erase(todo.begin());
         done.insert(X);
         std::size_t index = m_equation_index[X.name()];
         const pbes_equation& eqn = m_pbes.equations()[index];
         pbes_expression phi = eqn.formula();
-        pbes_expression_with_propositional_variables psi = m_rewriter(phi, make_sequence_sequence_substitution(eqn.variable().parameters(), X.parameters()));
-        for (propositional_variable_instantiation_list::iterator i = psi.propositional_variables().begin(); i != psi.propositional_variables().end(); ++i)
+        data::mutable_map_substitution<> sigma = make_pbesinst_substitution(eqn.variable().parameters(), X.parameters());
+        pbes_expression psi = R(phi, sigma);
+        std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi);
+        for (auto i = psi_variables.begin(); i != psi_variables.end(); ++i)
         {
           if (done.find(*i) == done.end())
           {
             todo.insert(*i);
-            mCRL2log(log::debug, "symbolic") << "discovered vertex " << pbes_system::pp(*i) << std::endl;
+            mCRL2log(log::debug, "symbolic") << "discovered vertex " << *i << std::endl;
           }
         }
       }

@@ -385,11 +385,11 @@ static void move_real_parameters_out_of_actions(specification &s,
   classic_enumerator<> enumerator(s.data(),r);
   for (lps::action_summand_vector::const_iterator i = action_smds.begin(); i != action_smds.end(); ++i)
   {
-     const action_list ma=i->multi_action().actions();
+     const process::action_list ma=i->multi_action().actions();
      variable_list replaced_variables;
      data_expression new_condition=sort_bool::true_();
-     action_vector new_actions;
-     for(action_list::const_iterator a=ma.begin(); a!=ma.end(); ++a)
+     process::action_vector new_actions;
+     for(process::action_list::const_iterator a=ma.begin(); a!=ma.end(); ++a)
      {
        const data_expression_list l=a->arguments();
        data_expression_vector resulting_data;
@@ -397,7 +397,7 @@ static void move_real_parameters_out_of_actions(specification &s,
        {
          resulting_data.push_back(replace_linear_inequalities_with_reals_by_variables(*j,new_condition,replaced_variables,real_parameters));
        }
-       new_actions.push_back(action(a->label(),data_expression_list(resulting_data.begin(),resulting_data.end())));
+       new_actions.push_back(process::action(a->label(),data_expression_list(resulting_data.begin(),resulting_data.end())));
      }
      
      if (replaced_variables.empty())
@@ -411,17 +411,17 @@ static void move_real_parameters_out_of_actions(specification &s,
        { 
          mutable_map_substitution<> sigma(replaced_variables,*tl);
 
-         action_vector new_replaced_actions;
-         for(action_vector::const_iterator j=new_actions.begin(); j!=new_actions.end(); ++j)
+         process::action_vector new_replaced_actions;
+         for(process::action_vector::const_iterator j=new_actions.begin(); j!=new_actions.end(); ++j)
          {
            data_expression_vector new_replaced_args;
            for(data_expression_list::const_iterator k=j->arguments().begin();k!=j->arguments().end(); ++k)
            {
              new_replaced_args.push_back(replace_free_variables(*k,sigma));
            }
-           new_replaced_actions.push_back(action(j->label(),data_expression_list(new_replaced_args.begin(),new_replaced_args.end())));
+           new_replaced_actions.push_back(process::action(j->label(),data_expression_list(new_replaced_args.begin(),new_replaced_args.end())));
          }
-         const action_list new_action_list(new_replaced_actions.begin(),new_replaced_actions.end());
+         const process::action_list new_action_list(new_replaced_actions.begin(),new_replaced_actions.end());
          new_action_summands.push_back(action_summand(
                                           i->summation_variables(), 
                                           r(sort_bool::and_(data::replace_free_variables(new_condition,sigma),i->condition())), 
@@ -775,7 +775,7 @@ static void add_summand(summand_information& summand_info,
                         std::vector <linear_inequality> &nextstate_condition,
                         const context_type& complete_context,
                         const rewriter& r,
-                        action_label_list& a,
+                        process::action_label_list& a,
                         identifier_generator<>& variable_generator,
                         const comp_struct& cs,
                         const bool is_may_summand,
@@ -862,12 +862,12 @@ static void add_summand(summand_information& summand_info,
 
   nextstate = reverse(nextstate);
 
-  action_list new_actions=summand_info.get_multi_action().actions();
+  process::action_list new_actions=summand_info.get_multi_action().actions();
   if (!summand_info.is_delta_summand() && is_may_summand)
   {
     new_actions=reinterpret_cast<const action_summand&>(s).multi_action().actions();
-    action_list resulting_actions;
-    for (action_list::const_iterator i=new_actions.begin(); i!=new_actions.end(); i++)
+    process::action_list resulting_actions;
+    for (auto i=new_actions.begin(); i!=new_actions.end(); i++)
     {
       // put "_MAY" behind each action, and add its declaration to the action declarations.
       data_expression_list args=i->arguments();
@@ -883,12 +883,12 @@ static void add_summand(summand_information& summand_info,
         action_label_it=(action_label_map.insert(
                            std::pair< std::pair< std::string, sort_expression_list >,std::string>
                            (p,may_action_label))).first;
-        a.push_front(action_label(may_action_label,sorts));
+        a.push_front(process::action_label(may_action_label,sorts));
         protect_against_garbage_collect.push_back(sorts);
       }
 
-      action_label may_action_label(action_label_it->second,sorts);
-      resulting_actions.push_front(action(may_action_label,args));
+      process::action_label may_action_label(action_label_it->second,sorts);
+      resulting_actions.push_front(process::action(may_action_label,args));
     }
     new_actions=reverse(resulting_actions);
   }
@@ -1110,7 +1110,7 @@ specification realelm(specification s, int max_iterations, const rewrite_strateg
   // std::vector < data_expression_list > nextstate_context_combinations;
   lps::action_summand_vector action_summands;
   lps::deadlock_summand_vector deadlock_summands;
-  action_label_list new_act_declarations;
+  process::action_label_list new_act_declarations;
   for (std::vector < summand_information >::iterator i = summand_info.begin();
        i != summand_info.end(); ++i)
   {

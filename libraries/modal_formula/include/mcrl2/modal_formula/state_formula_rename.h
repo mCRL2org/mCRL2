@@ -18,6 +18,7 @@
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -182,7 +183,8 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
 
   data::variable operator()(const data::variable& x)
   {
-    if (forbidden_identifiers.find(x.name()) == forbidden_identifiers.end())
+    using utilities::detail::contains;
+    if (!contains(forbidden_identifiers, x.name()))
     {
       return x;
     }

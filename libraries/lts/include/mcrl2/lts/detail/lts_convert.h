@@ -68,7 +68,7 @@ inline void lts_convert(
   const LTS_IN_TYPE& lts_in,
   LTS_OUT_TYPE& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -104,7 +104,7 @@ inline void lts_convert(
   const lts_lts_t& lts_in,
   lts_lts_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -185,7 +185,7 @@ inline void lts_convert(
   const lts_lts_t& lts_in,
   lts_fsm_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -224,7 +224,7 @@ inline void lts_convert(
   const lts_lts_t& lts_in,
   lts_aut_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -273,7 +273,7 @@ inline void lts_convert(
   const lts_lts_t& lts_in,
   lts_dot_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -314,7 +314,7 @@ inline void lts_convert(
   const lts_lts_t& lts_in,
   lts_bcg_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -333,12 +333,12 @@ class aut_lts_convertor
 {
   protected:
     const data::data_specification& m_data;
-    const lps::action_label_list& m_action_labels;
+    const process::action_label_list& m_action_labels;
 
   public:
     aut_lts_convertor(
       const data::data_specification& data,
-      const lps::action_label_list& action_labels):
+      const process::action_label_list& action_labels):
       m_data(data),
       m_action_labels(action_labels)
     {}
@@ -357,7 +357,7 @@ class aut_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,m_data,atermpp::aterm_cast<lps::action_list>(m_action_labels));
+        al=parse_lts_action(l,m_data,atermpp::aterm_cast<process::action_list>(m_action_labels));
 
 
 
@@ -388,7 +388,7 @@ inline void lts_convert(
   const lts_aut_t& lts_in,
   lts_lts_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -420,7 +420,7 @@ inline void lts_convert(
   const lts_aut_t& lts_in,
   lts_aut_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -464,7 +464,7 @@ inline void lts_convert(
   const lts_aut_t& lts_in,
   lts_fsm_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -510,7 +510,7 @@ inline void lts_convert(
   const lts_bcg_t& lts_in,
   lts_dot_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -557,7 +557,7 @@ inline void lts_convert(
   const lts_aut_t& lts_in,
   lts_dot_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -598,7 +598,7 @@ class fsm_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,m_lts_out.data(),atermpp::aterm_cast<lps::action_list>(m_lts_out.action_labels()));
+        al=parse_lts_action(l,m_lts_out.data(),atermpp::aterm_cast<process::action_list>(m_lts_out.action_labels()));
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -647,7 +647,7 @@ inline void lts_convert(
   const lts_fsm_t& lts_in,
   lts_lts_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -693,7 +693,7 @@ inline void lts_convert(
   const lts_fsm_t& lts_in,
   lts_aut_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -718,7 +718,7 @@ inline void lts_convert(
   const lts_fsm_t& lts_in,
   lts_fsm_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -758,7 +758,7 @@ inline void lts_convert(
   const lts_fsm_t& lts_in,
   lts_bcg_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -820,7 +820,7 @@ inline void lts_convert(
   const lts_fsm_t& lts_in,
   lts_dot_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -838,12 +838,12 @@ class bcg_lts_convertor
 {
   protected:
     const data::data_specification& m_data;
-    const lps::action_label_list& m_action_labels;
+    const process::action_label_list& m_action_labels;
 
   public:
     bcg_lts_convertor(
       const data::data_specification& data,
-      const lps::action_label_list& action_labels):
+      const process::action_label_list& action_labels):
       m_data(data),
       m_action_labels(action_labels)
     {}
@@ -862,7 +862,7 @@ class bcg_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,m_data,atermpp::aterm_cast<lps::action_list>(m_action_labels));
+        al=parse_lts_action(l,m_data,atermpp::aterm_cast<process::action_list>(m_action_labels));
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -889,7 +889,7 @@ inline void lts_convert(
   const lts_bcg_t& lts_in,
   lts_lts_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -944,7 +944,7 @@ inline void lts_convert(
   const lts_bcg_t& lts_in,
   lts_aut_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -990,7 +990,7 @@ inline void lts_convert(
   const lts_bcg_t& lts_in,
   lts_fsm_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -1017,7 +1017,7 @@ inline void lts_convert(
   const lts_bcg_t& lts_in,
   lts_bcg_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -1060,7 +1060,7 @@ inline void lts_convert(
   const lts_aut_t& lts_in,
   lts_bcg_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -1102,7 +1102,7 @@ class dot_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,lts_out.data(),atermpp::aterm_cast<lps::action_list>(lts_out.action_labels()));
+        al=parse_lts_action(l,lts_out.data(),atermpp::aterm_cast<process::action_list>(lts_out.action_labels()));
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -1129,7 +1129,7 @@ inline void lts_convert(
   const lts_dot_t& lts_in,
   lts_lts_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -1177,7 +1177,7 @@ inline void lts_convert(
   const lts_dot_t& lts_in,
   lts_aut_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -1262,7 +1262,7 @@ inline void lts_convert(
   const lts_dot_t& lts_in,
   lts_fsm_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {
@@ -1302,7 +1302,7 @@ inline void lts_convert(
   const lts_dot_t& lts_in,
   lts_bcg_t& lts_out,
   const data::data_specification& data,
-  const lps::action_label_list& action_labels,
+  const process::action_label_list& action_labels,
   const data::variable_list& process_parameters,
   const bool extra_data_is_defined=true)
 {
@@ -1329,7 +1329,7 @@ inline void lts_convert(
   const lts_dot_t& lts_in,
   lts_dot_t& lts_out,
   const data::data_specification&,
-  const lps::action_label_list&,
+  const process::action_label_list&,
   const data::variable_list&,
   const bool extra_data_is_defined=true)
 {

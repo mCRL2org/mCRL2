@@ -15,6 +15,7 @@
 #include <iterator>
 #include "mcrl2/bes/boolean_expression.h"
 #include "mcrl2/bes/traverser.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -87,8 +88,9 @@ std::set<boolean_variable> find_boolean_variables(Container const& container)
 template <typename Container>
 bool search_boolean_variable(Container const& container, const boolean_variable& v)
 {
+	using utilities::detail::contains;
   std::set<boolean_variable> boolean_variables = bes::find_boolean_variables(container);
-  return boolean_variables.find(v) != boolean_variables.end();
+  return contains(boolean_variables, v);
 }
 
 } // namespace bes

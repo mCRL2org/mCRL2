@@ -19,7 +19,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/data/utility.h" // substitute
-#include "mcrl2/lps/action.h"
+#include "mcrl2/process/process_expression.h"
 #include "mcrl2/core/print.h"
 
 namespace mcrl2
@@ -39,7 +39,7 @@ class multi_action
 
   protected:
     /// \brief The actions of the summand
-    action_list m_actions;
+    process::action_list m_actions;
 
     /// \brief The time of the summand. If <tt>m_time == data::undefined_real()</tt>
     /// the multi action has no time.
@@ -47,7 +47,7 @@ class multi_action
 
   public:
     /// \brief Constructor
-    multi_action(action_list actions = action_list(), data::data_expression time = data::undefined_real())
+    multi_action(const process::action_list& actions = process::action_list(), data::data_expression time = data::undefined_real())
       : m_actions(actions), m_time(time)
     {
       assert(data::sort_real::is_real(m_time.sort()));
@@ -57,14 +57,14 @@ class multi_action
     explicit multi_action(const atermpp::aterm& t1)
       : m_time(data::undefined_real())
     {
-      const atermpp::aterm_appl t(t1);
-      assert(lps::is_action(t) || lps::is_multi_action(t));
-      m_actions = (lps::is_action(t) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]));
+      const atermpp::aterm_appl& t = atermpp::aterm_cast<atermpp::aterm_appl>(t1);
+      assert(process::is_action(t) || lps::is_multi_action(t));
+      m_actions = process::is_action(t) ? process::action_list(t) : process::action_list(t[0]);
     }
 
     /// \brief Constructor
-    multi_action(const action& l)
-      : m_actions(atermpp::make_list<action>(l)),
+    multi_action(const process::action& l)
+      : m_actions(atermpp::make_list<process::action>(l)),
         m_time(data::undefined_real())
     {}
 
@@ -77,14 +77,14 @@ class multi_action
 
     /// \brief Returns the sequence of actions.
     /// \return The sequence of actions.
-    const action_list& actions() const
+    const process::action_list& actions() const
     {
       return m_actions;
     }
 
     /// \brief Returns the sequence of actions.
     /// \return The sequence of actions.
-    action_list& actions()
+    process::action_list& actions()
     {
       return m_actions;
     }
@@ -230,13 +230,13 @@ void forall_permutations(Iter first, Iter last, Function f)
 /// \param a A sequence of actions
 /// \param b A sequence of actions
 /// \return True if the actions in a and b have the same names, and the same sorts.
-inline bool equal_action_signatures(const std::vector<action>& a, const std::vector<action>& b)
+inline bool equal_action_signatures(const std::vector<process::action>& a, const std::vector<process::action>& b)
 {
   if (a.size() != b.size())
   {
     return false;
   }
-  std::vector<action>::const_iterator i, j;
+  std::vector<process::action>::const_iterator i, j;
   for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
   {
     if (i->label() != j->label())
@@ -254,7 +254,7 @@ struct compare_action_labels
   /// \param a An action
   /// \param b An action
   /// \return The function result
-  bool operator()(const action& a, const action& b) const
+  bool operator()(const process::action& a, const process::action& b) const
   {
     return a.label() < b.label();
   }
@@ -267,7 +267,7 @@ struct compare_action_label_arguments
   /// \param a An action
   /// \param b An action
   /// \return The function result
-  bool operator()(const action& a, const action& b) const
+  bool operator()(const process::action& a, const process::action& b) const
   {
     if (a.label() != b.label())
     {
@@ -280,12 +280,12 @@ struct compare_action_label_arguments
 /// \brief Used for building an expression for the comparison of data parameters.
 struct equal_data_parameters_builder
 {
-  const std::vector<action>& a;
-  const std::vector<action>& b;
+  const std::vector<process::action>& a;
+  const std::vector<process::action>& b;
   std::set<data::data_expression>& result;
 
-  equal_data_parameters_builder(const std::vector<action>& a_,
-                                const std::vector<action>& b_,
+  equal_data_parameters_builder(const std::vector<process::action>& a_,
+                                const std::vector<process::action>& b_,
                                 std::set<data::data_expression>& result_
                                )
     : a(a_),
@@ -297,7 +297,7 @@ struct equal_data_parameters_builder
   void operator()()
   {
     std::vector<data::data_expression> v;
-    std::vector<action>::const_iterator i, j;
+    std::vector<process::action>::const_iterator i, j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
       data::data_expression_list d1 = i->arguments();
@@ -320,12 +320,12 @@ struct equal_data_parameters_builder
 /// \brief Used for building an expression for the comparison of data parameters.
 struct not_equal_multi_actions_builder
 {
-  const std::vector<action>& a;
-  const std::vector<action>& b;
+  const std::vector<process::action>& a;
+  const std::vector<process::action>& b;
   std::vector<data::data_expression>& result;
 
-  not_equal_multi_actions_builder(const std::vector<action>& a_,
-                                  const std::vector<action>& b_,
+  not_equal_multi_actions_builder(const std::vector<process::action>& a_,
+                                  const std::vector<process::action>& b_,
                                   std::vector<data::data_expression>& result_
                                  )
     : a(a_),
@@ -339,7 +339,7 @@ struct not_equal_multi_actions_builder
     using namespace data::lazy;
 
     std::vector<data::data_expression> v;
-    std::vector<action>::const_iterator i, j;
+    std::vector<process::action>::const_iterator i, j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
       data::data_expression_list d1 = i->arguments();
@@ -367,14 +367,14 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
 {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
   mCRL2log(debug) << "\n<equal multi actions>" << std::endl;
-  mCRL2log(debug) << "a = " << lps::pp(a.actions()) << std::endl;
-  mCRL2log(debug) << "b = " << lps::pp(b.actions()) << std::endl;
+  mCRL2log(debug) << "a = " << process::pp(a.actions()) << std::endl;
+  mCRL2log(debug) << "b = " << process::pp(b.actions()) << std::endl;
 #endif
   using namespace data::lazy;
 
   // make copies of a and b and sort them
-  std::vector<action> va(a.actions().begin(), a.actions().end()); // protection not needed
-  std::vector<action> vb(b.actions().begin(), b.actions().end()); // protection not needed
+  std::vector<process::action> va(a.actions().begin(), a.actions().end()); // protection not needed
+  std::vector<process::action> vb(b.actions().begin(), b.actions().end()); // protection not needed
   std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
   std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
 
@@ -382,14 +382,14 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
     mCRL2log(debug) << "different action signatures detected!" << std::endl;
-    mCRL2log(debug) << "a = " << action_list(va.begin(), va.end()) << std::endl;
-    mCRL2log(debug) << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
+    mCRL2log(debug) << "a = " << process::action_list(va.begin(), va.end()) << std::endl;
+    mCRL2log(debug) << "b = " << process::action_list(vb.begin(), vb.end()) << std::endl;
 #endif
     return data::sort_bool::false_();
   }
 
   // compute the intervals of a with equal names
-  typedef std::vector<action>::iterator action_iterator;
+  typedef std::vector<process::action>::iterator action_iterator;
   std::vector<std::pair<action_iterator, action_iterator> > intervals;
   action_iterator first = va.begin();
   while (first != va.end())
@@ -416,8 +416,8 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   using namespace data::lazy;
 
   // make copies of a and b and sort them
-  std::vector<action> va(a.actions().begin(), a.actions().end());
-  std::vector<action> vb(b.actions().begin(), b.actions().end());
+  std::vector<process::action> va(a.actions().begin(), a.actions().end());
+  std::vector<process::action> vb(b.actions().begin(), b.actions().end());
   std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
   std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
 
@@ -427,7 +427,7 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   }
 
   // compute the intervals of a with equal names
-  typedef std::vector<action>::iterator action_iterator;
+  typedef std::vector<process::action>::iterator action_iterator;
   std::vector<std::pair<action_iterator, action_iterator> > intervals;
   action_iterator first = va.begin();
   while (first != va.end())
@@ -441,56 +441,6 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
   data::data_expression result = data::lazy::join_and(z.begin(), z.end());
   return result;
-}
-
-/// \brief Represents the name of a multi action
-typedef std::multiset<core::identifier_string> multi_action_name;
-
-/// \brief Represents a set of multi action names
-typedef std::set<multi_action_name> multi_action_name_set;
-
-/// \brief Represents a set of action names
-typedef std::set<core::identifier_string> action_name_set;
-
-/// \brief Pretty print function for a multi action name
-inline
-std::string pp(const multi_action_name& x)
-{
-  std::ostringstream out;
-  if (x.empty())
-  {
-    out << "tau";
-  }
-  else
-  {
-    for (multi_action_name::const_iterator i = x.begin(); i != x.end(); ++i)
-    {
-      if (i != x.begin())
-      {
-        out << " | ";
-      }
-      out << core::pp(*i);
-    }
-  }
-  return out.str();
-}
-
-/// \brief Pretty print function for a set of multi action names
-inline
-std::string pp(const multi_action_name_set& A)
-{
-  std::ostringstream out;
-  out << "{";
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    if (i != A.begin())
-    {
-      out << ", ";
-    }
-    out << pp(*i);
-  }
-  out << "}";
-  return out.str();
 }
 
 } // namespace lps

@@ -18,7 +18,7 @@
 #include "mcrl2/bes/io.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/file_formats.h"
-#include "mcrl2/pbes/pbesinstconversion.h"
+#include "mcrl2/bes/pbesinst_conversion.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -63,7 +63,7 @@ void save_pbes(const pbes& pbes_spec,
       {
         throw mcrl2::runtime_error("the PBES cannot be saved as a BES");
       }
-      bes::boolean_equation_system bes_spec = pbesinstconversion(pbes_spec);
+      bes::boolean_equation_system bes_spec = bes::pbesinst_conversion(pbes_spec);
       bes::save_bes(bes_spec, outfilename, output_format);
       break;
     }

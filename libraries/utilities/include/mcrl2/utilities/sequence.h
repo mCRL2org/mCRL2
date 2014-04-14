@@ -54,7 +54,7 @@ void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f,
   }
   else
   {
-    for (typename std::iterator_traits<Iter1>::value_type::const_iterator j = first->begin(); j != first->end(); ++j)
+    for (auto j = first->begin(); j != first->end(); ++j)
     {
       assign(*i, *j);
       foreach_sequence_impl(boost::next(first), last, boost::next(i), f, assign);

@@ -91,8 +91,8 @@ void Disjointness_Checker::process_multi_action(size_t a_summand_number, const m
     process_data_expression(a_summand_number, v_multi_action.time());
   }
 
-  const action_list v_actions = v_multi_action.actions();
-  for (action_list::const_iterator i=v_actions.begin(); i!=v_actions.end(); ++i)
+  const process::action_list v_actions = v_multi_action.actions();
+  for (auto i=v_actions.begin(); i!=v_actions.end(); ++i)
   {
     const data_expression_list v_expressions=i->arguments();
 

@@ -27,10 +27,10 @@ namespace mcrl2
 namespace action_formulas
 {
 
-struct action_formula_actions: public lps::action_actions
+struct action_formula_actions: public lps::detail::multi_action_actions
 {
   action_formula_actions(const core::parser_table& table_)
-    : lps::action_actions(table_)
+    : lps::detail::multi_action_actions(table_)
   {}
 
   action_formulas::action_formula parse_ActFrm(const core::parse_node& node)
@@ -203,14 +203,18 @@ void complete_state_formula(state_formula& x, lps::specification& spec, bool che
   type_check(x, spec, check_monotonicity);
   if (translate_regular)
   {
+    mCRL2log(log::debug) << "formula before translating regular formulas: " << x << std::endl;
     translate_regular_formula(x);
+    mCRL2log(log::debug) << "formula after translating regular formulas: " << x << std::endl;
   }
   spec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
   x = state_formulas::translate_user_notation(x);
   x = state_formulas::normalize_sorts(x, spec.data());
   if (check_monotonicity && state_formulas::detail::has_name_clashes(x))
   {
+    mCRL2log(log::debug) << "formula before resolving name clashes: " << x << std::endl;
     x = state_formulas::detail::resolve_name_clashes(x);
+    mCRL2log(log::debug) << "formula after resolving name clashes: " << x << std::endl;
   }
 }
 

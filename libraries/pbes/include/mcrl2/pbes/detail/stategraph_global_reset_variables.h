@@ -80,7 +80,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
           std::size_t last_size = u.marking.size();
 
           const stategraph_equation& eq_X = *find_equation(m_pbes, u.X.name());
-          const propositional_variable_instantiation& Y = eq_X.predicate_variables()[i].X;
+          const propositional_variable_instantiation& Y = eq_X.predicate_variables()[i].variable();
           std::set<data::variable> dx = propvar_parameters(u.X.name());
           mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking) << std::endl;
           for (std::set<std::size_t>::const_iterator j = I.begin(); j != I.end(); ++j)
@@ -123,8 +123,8 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         if (is_global_control_flow_parameter(Y, j))
         {
           const predicate_variable& X_i = eq_X.predicate_variables()[i];
-          std::map<std::size_t, data::data_expression>::const_iterator dest_j = X_i.dest.find(j);
-          if (dest_j != X_i.dest.end())
+          std::map<std::size_t, data::data_expression>::const_iterator dest_j = X_i.dest().find(j);
+          if (dest_j != X_i.dest().end())
           {
             data::data_expression f_k = *k;
             if(f_k != dest_j->second)
@@ -145,7 +145,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
     pbes_expression reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
     {
       mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
-      assert(eq_X.predicate_variables()[i].X == x);
+      assert(eq_X.predicate_variables()[i].variable() == x);
 
       std::vector<pbes_expression> phi;
       core::identifier_string Y = x.name();
@@ -177,7 +177,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             mCRL2log(log::debug, "stategraph") << " CFP(Y, j) = true";
             data::data_expression f_k = *k++;
             const predicate_variable& X_i = eq_X.predicate_variables()[i];
-            if (X_i.dest.find(j) == X_i.dest.end() || !m_simplify)
+            if (X_i.dest().find(j) == X_i.dest().end() || !m_simplify)
             {
               condition = data::lazy::and_(condition, data::equal_to(e[j], f_k));
               r.push_back(e[j]);
@@ -186,7 +186,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             }
             else
             {
-              r.push_back(X_i.dest.find(j)->second);
+              r.push_back(X_i.dest().find(j)->second);
             }
             mCRL2log(log::debug, "stategraph") << " r := r <| " << data::pp(r.back());
 

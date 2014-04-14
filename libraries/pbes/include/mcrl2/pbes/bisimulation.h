@@ -62,10 +62,10 @@ class bisimulation_algorithm
     /// \brief Generates a name for an action_list.
     /// \param l A sequence of actions
     /// \return A string representation of the list \p l
-    std::string action_list_name(action_list l) const
+    std::string action_list_name(const process::action_list& l) const
     {
       std::ostringstream out;
-      for (action_list::iterator i = l.begin(); i != l.end(); ++i)
+      for (auto i = l.begin(); i != l.end(); ++i)
       {
         out << (i != l.begin() ? "-" : "") << std::string(i->label().name());
       }

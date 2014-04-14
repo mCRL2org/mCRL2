@@ -11,6 +11,7 @@
 
 #include <limits.h>
 #include <cassert>
+#include <deque>
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2

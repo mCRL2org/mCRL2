@@ -12,6 +12,8 @@
 #ifndef MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 #define MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 
+#include <map>
+#include <set>
 #include <sstream>
 #include "mcrl2/utilities/exception.h"
 
@@ -36,7 +38,7 @@ typename Map::mapped_type map_element(const Map& m, const typename Map::key_type
   return i->second;
 }
 
-/// \brief Returns the value corresponding to the given key in the map m. If the key is not
+/// \brief Returns the value corresponding to the given key in the set m. If the key is not
 /// present, an exception is thrown.
 template <typename Container>
 bool contains(const Container& c, const typename Container::value_type& v)
@@ -49,6 +51,39 @@ template <typename T>
 bool contains(const std::set<T>& c, const typename std::set<T>::value_type& v)
 {
   return c.find(v) != c.end();
+}
+
+// specialization
+template <typename T>
+bool contains(const std::multiset<T>& c, const typename std::multiset<T>::value_type& v)
+{
+  return c.find(v) != c.end();
+}
+
+/// \brief Returns the value corresponding to the given key in the set m. If the key is not
+/// present, an exception is thrown.
+template <typename Key, typename T>
+bool has_key(const std::map<Key, T>& c, const Key& v)
+{
+  return c.find(v) != c.end();
+}
+
+/// \brief Returns the value corresponding to the given key in the set m. If the key is not
+/// present, an exception is thrown.
+template <typename Key, typename T>
+bool has_key(const std::multimap<Key, T>& c, const Key& v)
+{
+  return c.find(v) != c.end();
+}
+
+// Remove an element from v, and return it.
+template <typename Container>
+typename Container::value_type pick_element(Container& v)
+{
+  auto i = v.begin();
+  auto result = *i;
+  v.erase(i);
+  return result;
 }
 
 } // namespace detail

@@ -39,6 +39,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 #ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 #include "mcrl2/data/detail/print_parse_check.h"
@@ -584,11 +585,13 @@ struct absinthe_algorithm
 
     data::function_symbol operator()(const data::function_symbol& f, sort_function sigma) const
     {
+    	using utilities::detail::contains;
+
       //mCRL2log(log::debug, "absinthe") << "lift_function_symbol_1_2 f = " << print_symbol(f) << std::endl;
       std::string name = std::string(f.name());
 
-      bool print_sort = suffix_with_sort.find(std::string(f.name())) != suffix_with_sort.end();
-      std::map<std::string, std::string>::const_iterator i = unprintable.find(name);
+      bool print_sort = contains(suffix_with_sort, std::string(f.name()));
+      auto i = unprintable.find(name);
       if (i != unprintable.end())
       {
         name = i->second;
@@ -896,6 +899,8 @@ struct absinthe_algorithm
   // add lifted mappings and equations to the data specification
   void lift_data_specification(const pbes& p, const abstraction_map& sigmaH, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
   {
+    using utilities::detail::has_key;
+
     sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
     sort_function sigma(sigmaH, sigmaS, sigmaF);
 
@@ -908,19 +913,19 @@ struct absinthe_algorithm
 
     // add List containers for user defined sorts, since they are used in the translation
     const data::sort_expression_vector& sorts = dataspec.user_defined_sorts();
-    for (data::sort_expression_vector::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+    for (auto i = sorts.begin(); i != sorts.end(); ++i)
     {
       data::sort_expression s = data::container_sort(data::list_container(), *i);
       dataspec.add_context_sort(s);
     }
 
     // add constructor functions of List containers of abstracted sorts to sigmaF
-    for (abstraction_map::const_iterator i = sigmaH.begin(); i != sigmaH.end(); ++i)
+    for (auto i = sigmaH.begin(); i != sigmaH.end(); ++i)
     {
       data::sort_expression s = data::container_sort(data::list_container(), i->first);
       dataspec.add_context_sort(s);
       data::function_symbol_vector list_constructors = dataspec.constructors(s);
-      for (data::function_symbol_vector::iterator j = list_constructors.begin(); j != list_constructors.end(); ++j)
+      for (auto j = list_constructors.begin(); j != list_constructors.end(); ++j)
       {
         data::function_symbol f1 = *j;
         data::function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
@@ -930,11 +935,11 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << f1 << " to sig
       }
     }
 
-    for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
+    for (auto i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
     {
       mCRL2log(log::debug, "absinthe") << "lifting function symbol: " << *i << std::endl;
       data::function_symbol f1 = *i;
-      if (sigmaF.find(f1) == sigmaF.end())
+      if (!has_key(sigmaF, f1))
       {
         data::function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
         mCRL2log(log::debug, "absinthe") << "lifted function symbol: " << f1 << " to " << f2 << std::endl;

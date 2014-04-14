@@ -121,7 +121,7 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
-             Substitution sigma,
+             const Substitution& sigma,
              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
             )
 {
@@ -136,7 +136,7 @@ void rewrite(T& x,
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
-          Substitution sigma,
+          const Substitution& sigma,
           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
          )
 {

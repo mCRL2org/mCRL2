@@ -35,7 +35,7 @@ process_expression expand_rhs(const process::process_instance_assignment& x, con
     sigma[i->lhs()] = i->rhs();
   }
   std::set<data::variable> v = process::find_free_variables(x);
-  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v, equations);
+  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
   return result;
 }
 
@@ -54,7 +54,7 @@ process_expression expand_rhs(const process::process_instance& x, const std::vec
     sigma[*di] = *ei;
   }
   std::set<data::variable> v = process::find_free_variables(x);
-  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v, equations);
+  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
   return result;
 }
 
@@ -498,7 +498,7 @@ multi_action_name_set left_arrow(const multi_action_name_set& A1, bool A1_includ
   {
     result = set_union(A1, left_arrow1(A1, A2));
   }
-  mCRL2log(log::debug) << "<left_arrow>" << lps::pp(A1) << (A1_includes_subsets ? "*" : "") << " <- " << lps::pp(A2) << " = " << lps::pp(result) << (A1_includes_subsets ? "*" : "") << std::endl;
+  mCRL2log(log::debug) << "<left_arrow>" << process::pp(A1) << (A1_includes_subsets ? "*" : "") << " <- " << process::pp(A2) << " = " << process::pp(result) << (A1_includes_subsets ? "*" : "") << std::endl;
   return result;
 }
 
@@ -604,11 +604,11 @@ inline
 multi_action_name_set comm_inverse(const communication_expression_list& C, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   multi_action_name_set result = A;
-  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  for (auto i = C.begin(); i != C.end(); ++i)
   {
     detail::apply_comm_inverse(*i, result);
   }
-  mCRL2log(log::debug) << "<comm_inverse>" << process::pp(C) << ": " << lps::pp(A) << " -> " << lps::pp(result) << std::endl;
+  mCRL2log(log::debug) << "<comm_inverse>" << process::pp(C) << ": " << process::pp(A) << " -> " << process::pp(result) << std::endl;
   return result;
 }
 

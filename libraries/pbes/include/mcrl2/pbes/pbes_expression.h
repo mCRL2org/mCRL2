@@ -9,8 +9,6 @@
 /// \file mcrl2/pbes/pbes_expression.h
 /// \brief The class pbes_expression.
 
-#define MCRL2_SMART_ARGUMENT_SORTING
-
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
@@ -26,8 +24,6 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/hash.h"
 #include "mcrl2/pbes/propositional_variable.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
-#include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -1403,28 +1399,6 @@ struct term_traits<pbes_system::pbes_expression>
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), p));
   }
 
-  static inline
-  bool is_sorted(const term_type& p, const term_type& q)
-  {
-    pbes_system::detail::compare_pbes_expression_visitor<term_type> pvisitor;
-    pvisitor.visit(p);
-    pbes_system::detail::compare_pbes_expression_visitor<term_type> qvisitor;
-    qvisitor.visit(q);
-    if (pvisitor.has_predicate_variables != qvisitor.has_predicate_variables)
-    {
-      return qvisitor.has_predicate_variables;
-    }
-    if (pvisitor.has_quantifiers != qvisitor.has_quantifiers)
-    {
-      return qvisitor.has_quantifiers;
-    }
-    if (pvisitor.result.size() != qvisitor.result.size())
-    {
-      return pvisitor.result.size() < qvisitor.result.size();
-    }
-    return p < q;
-  }
-
   /// \brief Make a conjunction
   /// \param p A term
   /// \param q A term
@@ -1457,36 +1431,6 @@ struct term_traits<pbes_system::pbes_expression>
   term_type join_and(FwdIt first, FwdIt last)
   {
     return utilities::detail::join(first, last, and_, true_());
-  }
-
-  /// \brief Make a sorted conjunction
-  /// \param p A term
-  /// \param q A term
-  /// \return The value <tt>p && q</tt>, or <tt>q && p</tt>
-  static inline
-  term_type sorted_and(const term_type& p, const term_type& q)
-  {
-#ifdef MCRL2_SMART_ARGUMENT_SORTING
-    bool sorted = is_sorted(p, q);
-#else
-    bool sorted = p < q;
-#endif
-    return sorted ? term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q)) : term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), q, p));
-  }
-
-  /// \brief Make a sorted disjunction
-  /// \param p A term
-  /// \param q A term
-  /// \return The value <tt>p || q</tt>
-  static inline
-  term_type sorted_or(const term_type& p, const term_type& q)
-  {
-#ifdef MCRL2_SMART_ARGUMENT_SORTING
-    bool sorted = is_sorted(p, q);
-#else
-    bool sorted = p < q;
-#endif
-    return sorted ? term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p, q)) : term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), q, p));
   }
 
   /// \brief Make an implication
@@ -1723,9 +1667,8 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   variable_sequence_type free_variables(const term_type& t)
   {
-    pbes_system::detail::free_variable_visitor<term_type> visitor;
-    visitor.visit(t);
-    return variable_sequence_type(visitor.result.begin(), visitor.result.end());
+    std::set<data::variable> v = find_free_variables(t);
+    return variable_sequence_type(v.begin(), v.end());
   }
 
   /// \brief Conversion from data term to term

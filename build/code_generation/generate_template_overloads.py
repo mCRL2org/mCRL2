@@ -9,15 +9,15 @@ all_classes = parse_class_map(class_map)
 modifiability_map = make_modifiability_map(all_classes)
 
 file_map = {
-  'action_formulas' : '../../libraries/modal_formula/source/modal_formula.cpp',
-  'bes' : '../../libraries/bes/source/bes.cpp',
-  'core' : '../../libraries/core/source/core.cpp',
-  'data' : '../../libraries/data/source/data.cpp',
-  'lps' : '../../libraries/lps/source/lps.cpp',
-  'pbes_system' : '../../libraries/pbes/source/pbes.cpp',
-  'process' : '../../libraries/process/source/process.cpp',
-  'regular_formulas' : '../../libraries/modal_formula/source/modal_formula.cpp',
-  'state_formulas' : '../../libraries/modal_formula/source/modal_formula.cpp',
+  'action_formulas' : '../../modal_formula/source/modal_formula.cpp',
+  'bes' : '../../bes/source/bes.cpp',
+  'core' : '../../core/source/core.cpp',
+  'data' : '../../data/source/data.cpp',
+  'lps' : '../../lps/source/lps.cpp',
+  'pbes_system' : '../../pbes/source/pbes.cpp',
+  'process' : '../../process/source/process.cpp',
+  'regular_formulas' : '../../modal_formula/source/modal_formula.cpp',
+  'state_formulas' : '../../modal_formula/source/modal_formula.cpp',
 }
 
 PP_CLASSNAMES = '''
@@ -35,10 +35,6 @@ data::structured_sort_constructor_list
 data::structured_sort_constructor_vector
 data::data_equation_list
 data::data_equation_vector
-lps::action_list
-lps::action_vector
-lps::action_label_list
-lps::action_label_vector
 lps::state
 pbes_system::pbes_equation_vector
 pbes_system::pbes_expression_list
@@ -47,6 +43,10 @@ pbes_system::propositional_variable_list
 pbes_system::propositional_variable_vector
 pbes_system::propositional_variable_instantiation_list
 pbes_system::propositional_variable_instantiation_vector
+process::action_list
+process::action_vector
+process::action_label_list
+process::action_label_vector
 process::process_identifier_list
 process::process_identifier_vector
 process::process_expression_list
@@ -62,9 +62,9 @@ data::data_equation_vector
 data::data_expression
 data::sort_expression
 data::variable_list
-lps::action
-lps::action_label_list
 lps::multi_action
+process::action
+process::action_label_list
 process::process_equation_vector
 process::process_specification
 pbes_system::pbes_equation_vector
@@ -75,9 +75,9 @@ state_formulas::state_formula
 TRANSLATE_USER_NOTATION_CLASSNAMES = '''
 data::data_expression
 data::data_equation
-lps::action
 lps::multi_action
 pbes_system::pbes
+process::action
 process::process_specification
 state_formulas::state_formula
 '''
@@ -86,9 +86,9 @@ FIND_SORT_EXPRESSIONS_CLASSNAMES = '''
 data::data_equation
 data::data_expression
 data::sort_expression
-lps::action_label_list
 lps::specification
 pbes_system::pbes
+process::action_label_list
 process::process_equation_vector
 process::process_expression
 process::process_specification
@@ -106,15 +106,14 @@ lps::linear_process
 lps::specification
 lps::deadlock
 lps::multi_action
-lps::action
 pbes_system::pbes
+process::action
 state_formulas::state_formula
 '''
 
 FIND_FREE_VARIABLES_CLASSNAMES = '''
 data::data_expression
 data::data_expression_list
-lps::action
 lps::linear_process
 lps::specification
 lps::deadlock
@@ -123,6 +122,7 @@ lps::process_initializer
 pbes_system::pbes
 pbes_system::pbes_expression
 pbes_system::pbes_equation
+process::action
 state_formulas::state_formula
 '''
 

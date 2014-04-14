@@ -11,9 +11,7 @@
 
 #include <iostream>
 #include <boost/test/included/unit_test_framework.hpp>
-#include <mcrl2/lps/parse.h>
-#include <mcrl2/lps/parelm.h>
-#include <mcrl2/lps/specification.h>
+#include <mcrl2/process/parse.h>
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;

@@ -298,7 +298,7 @@ class data_property_map
     /// Throws an exception if the key is not found.
     std::string operator[](const std::string& key) const
     {
-      std::map<std::string, std::string>::const_iterator i = m_data.find(key);
+      auto i = m_data.find(key);
       if (i == m_data.end())
       {
         throw mcrl2::runtime_error("property_map: could not find key " + key);
@@ -313,9 +313,9 @@ class data_property_map
     std::string compare(const data_property_map& other) const
     {
       std::ostringstream out;
-      for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
+      for (auto i = m_data.begin(); i != m_data.end(); ++i)
       {
-        std::map<std::string, std::string>::const_iterator j = other.data().find(i->first);
+        auto j = other.data().find(i->first);
         if (j != other.data().end())
         {
           out << static_cast< Derived const& >(*this).compare_property(i->first, i->second, j->second);

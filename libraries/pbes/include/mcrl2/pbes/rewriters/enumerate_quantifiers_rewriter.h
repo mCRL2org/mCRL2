@@ -62,7 +62,6 @@ class enumerate_quantifiers_rewriter
     term_type operator()(const term_type& x) const
     {
       typedef data::mutable_map_substitution<std::map< variable_type, data_term_type> > substitution_function;
-      typedef core::term_traits<term_type> tr;
 
       substitution_function sigma;
       detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts, m_skip_data);
@@ -82,7 +81,6 @@ class enumerate_quantifiers_rewriter
     term_type operator()(const term_type& x, SubstitutionFunction sigma) const
     {
       typedef data::mutable_substitution_composer<SubstitutionFunction> substitution_function;
-      typedef core::term_traits<term_type> tr;
 
       detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts, m_skip_data);
       term_type result = r(x, substitution_function(sigma));

@@ -100,7 +100,7 @@ class objectdatatype
 {
   public:
     identifier_string objectname;
-    action_label_list multi_action_names;
+    process::action_label_list multi_action_names;
     bool constructor;
     process_expression representedprocess;
     process_identifier process_representing_action; /* for actions target sort is used to
@@ -168,7 +168,7 @@ class objectdatatype
 class specification_basic_type:public boost::noncopyable
 {
   public:
-    action_label_list acts;     /* storage place for actions */
+    process::action_label_list acts;     /* storage place for actions */
     std::set < variable > global_variables; /* storage place for free variables occurring
                                    in processes ranging over data */
     variable_list initdatavars; /* storage place for free variables in
@@ -209,7 +209,7 @@ class specification_basic_type:public boost::noncopyable
     stackoperations* stack_operations_list;
 
   public:
-    specification_basic_type(const action_label_list &as,
+    specification_basic_type(const process::action_label_list &as,
                              const std::vector< process_equation > &ps,
                              const variable_list &idvs,
                              const data_specification &ds,
@@ -354,7 +354,7 @@ class specification_basic_type:public boost::noncopyable
       return action_list();
     }
 
-    action_label_list getnames(const process_expression multiAction)
+    process::action_label_list getnames(const process_expression multiAction)
     {
       if (is_action(multiAction))
       {
@@ -421,11 +421,11 @@ class specification_basic_type:public boost::noncopyable
       return reverse(result);
     }
 
-    action_list makemultiaction(const action_label_list actionIds, const data_expression_list args)
+    action_list makemultiaction(const process::action_label_list actionIds, const data_expression_list args)
     {
       action_list result;
       data_expression_list::const_iterator e_walker=args.begin();
-      for (action_label_list::const_iterator l=actionIds.begin() ; l!=actionIds.end() ; ++l)
+      for (process::action_label_list::const_iterator l=actionIds.begin() ; l!=actionIds.end() ; ++l)
       {
         size_t arity=l->sorts().size();
         data_expression_list temp_args;
@@ -443,7 +443,7 @@ class specification_basic_type:public boost::noncopyable
 
     size_t addMultiAction(const process_expression multiAction, bool& isnew)
     {
-      const action_label_list actionnames=getnames(multiAction);
+      const process::action_label_list actionnames=getnames(multiAction);
       size_t n=addObject((aterm_appl)(aterm_list)actionnames,isnew);
 
       if (isnew)
@@ -630,7 +630,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_action(t))
       {
-        return RewriteAction(atermpp::aterm_cast<lps::action>(t));
+        return RewriteAction(atermpp::aterm_cast<process::action>(t));
       }
 
       if (is_process_instance_assignment(t))
@@ -656,7 +656,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (isnew==0)
       {
-        throw mcrl2::runtime_error("Action " + lps::pp(actionId) + " is added twice\n");
+        throw mcrl2::runtime_error("Action " + process::pp(actionId) + " is added twice\n");
       }
 
       const identifier_string str=actionId.name();
@@ -667,9 +667,9 @@ class specification_basic_type:public boost::noncopyable
       return n;
     }
 
-    void storeact(const action_label_list& acts)
+    void storeact(const process::action_label_list& acts)
     {
-      for (action_label_list::const_iterator l=acts.begin(); l!=acts.end(); ++l)
+      for (process::action_label_list::const_iterator l=acts.begin(); l!=acts.end(); ++l)
       {
         insertAction(*l);
       }
@@ -2395,7 +2395,7 @@ class specification_basic_type:public boost::noncopyable
         {
           body1=bodytovarheadGNF(body1,name_state,freevars,v,variables_bound_in_sum);
           if (!canterminatebody(body1))
-          { 
+          {
             /* In this case there is no need to investigate body2, as it cannot be reached. */
             return body1;
           }
@@ -5029,18 +5029,18 @@ class specification_basic_type:public boost::noncopyable
     };
     /************** Merge summands using enumerated type ***********************/
 
-    /* The function below returns true if the variable var could be mapped 
+    /* The function below returns true if the variable var could be mapped
        on an existing variable v' in matchinglist. The pars and args form pair
        form a substitution that will be extended with the pair [var,v']. i
        It returns false if the variable is new.
 
-       If var is added (and not mapped on some other variable in the matchinglist/aka v)  
+       If var is added (and not mapped on some other variable in the matchinglist/aka v)
        it is checked whether var occurs in  v or in the process_parameters,
        in which case var is renamed to a fresh variable. The renaming is added
        to the substitution encoded in pars/args.
     */
-       
-       
+
+
     bool mergeoccursin(
       variable& var,
       const variable_list &v,
@@ -5117,7 +5117,7 @@ class specification_basic_type:public boost::noncopyable
           return false;
         }
       }
-      
+
 
       return false;
     }
@@ -6917,7 +6917,7 @@ class specification_basic_type:public boost::noncopyable
         }
     };
 
-    action_label can_communicate(const action_list &m, comm_entry& comm_table)
+    process::action_label can_communicate(const action_list &m, comm_entry& comm_table)
     {
       /* this function indicates whether the actions in m
          consisting of actions and data occur in C, such that
@@ -7143,7 +7143,7 @@ class specification_basic_type:public boost::noncopyable
       }
       if (n.empty())
       {
-        action_label c=can_communicate(m,comm_table); /* returns action_label() if no communication
+        process::action_label c=can_communicate(m,comm_table); /* returns action_label() if no communication
                                              is possible */
         if (c!=action_label())
         {
@@ -7296,7 +7296,7 @@ class specification_basic_type:public boost::noncopyable
       /* We follow the implementation of Muck van Weerdenburg, described in
          a note: Calculation of communication with open terms. */
 
-      mCRL2log(mcrl2::log::verbose) << 
+      mCRL2log(mcrl2::log::verbose) <<
             (is_allow ? "- calculating the communication operator modulo the allow operator on " :
              is_block ? "- calculating the communication operator modulo the block operator on " :
                         "- calculating the communication operator on ") << action_summands.size() << " action summands";
@@ -8244,8 +8244,8 @@ class specification_basic_type:public boost::noncopyable
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
           // by a constant, which by itself is a parameter.
 
-          std::set <variable> variable_list = process::find_free_variables(temporary_spec.process().action_summands());
-          const std::set <variable> variable_list1 = process::find_free_variables(temporary_spec.process().deadlock_summands());
+          std::set <variable> variable_list = lps::find_free_variables(temporary_spec.process().action_summands());
+          const std::set <variable> variable_list1 = lps::find_free_variables(temporary_spec.process().deadlock_summands());
           variable_list.insert(variable_list1.begin(),variable_list1.end());
           for (std::set <variable>::const_iterator i=variable_list.begin();
                i!=variable_list.end(); ++i)
@@ -9452,7 +9452,7 @@ class specification_basic_type:public boost::noncopyable
         if (multiaction==make_list(terminationAction))
         {
           acts.push_front(terminationAction.label());
-          mCRL2log(mcrl2::log::warning) << "The action " << lps::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
+          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
           return;
         }
       }
@@ -9594,7 +9594,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   s.insert(sort_real::real_());
   data_spec.add_context_sorts(s);
 
-  specification_basic_type spec(aterm_cast<action_label_list>(type_checked_spec.action_labels()),
+  specification_basic_type spec(aterm_cast<process::action_label_list>(type_checked_spec.action_labels()),
                                 type_checked_spec.equations(),
                                 convert<data::variable_list>(type_checked_spec.global_variables()),
                                 data_spec,

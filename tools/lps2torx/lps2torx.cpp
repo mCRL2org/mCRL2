@@ -78,15 +78,15 @@ class torx_tool : public rewriter_tool< input_tool >
       }
 
       std::string result;
-      for (action_list::const_iterator i = ma.actions().begin(); i != ma.actions().end(); i++)
+      for (auto i = ma.actions().begin(); i != ma.actions().end(); i++)
       {
-        result += lps::pp(i->label());
+        result += process::pp(i->label());
         for (data::data_expression_list::const_iterator j = i->arguments().begin(); j != i->arguments().end(); j++)
         {
           result += "!" + data::pp(*j);
         }
 
-        action_list::const_iterator next = i;
+        auto next = i;
         next++;
         if (next != ma.actions().end())
         {

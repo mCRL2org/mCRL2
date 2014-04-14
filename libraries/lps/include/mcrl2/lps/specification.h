@@ -27,8 +27,8 @@
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/action.h"
 #include "mcrl2/lps/process_initializer.h"
+#include "mcrl2/process/process_expression.h"
 
 namespace mcrl2
 {
@@ -76,7 +76,7 @@ class specification
     data::data_specification m_data;
 
     /// \brief The action specification of the specification
-    action_label_list m_action_labels;
+    process::action_label_list m_action_labels;
 
     /// \brief The set of global variables
     std::set<data::variable> m_global_variables;
@@ -93,7 +93,7 @@ class specification
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data             = atermpp::aterm_appl(*i++);
-      m_action_labels    = action_label_list(atermpp::aterm_appl(*i++)[0]);
+      m_action_labels    = process::action_label_list(atermpp::aterm_appl(*i++)[0]);
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
       m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
       m_process          = linear_process(atermpp::aterm_cast<atermpp::aterm_appl>(*i++));
@@ -132,7 +132,7 @@ class specification
     /// \param lps A linear process
     /// \param initial_process A process initializer
     specification(const data::data_specification& data,
-                  const action_label_list& action_labels,
+                  const process::action_label_list& action_labels,
                   const std::set<data::variable>& global_variables,
                   const linear_process& lps,
                   const process_initializer& initial_process)
@@ -214,7 +214,7 @@ class specification
     /// \brief Returns a sequence of action labels.
     /// This sequence contains all action labels occurring in the specification (but it can have more).
     /// \return A sequence of action labels.
-    const action_label_list& action_labels() const
+    const process::action_label_list& action_labels() const
     {
       return m_action_labels;
     }
@@ -222,7 +222,7 @@ class specification
     /// \brief Returns a sequence of action labels.
     /// This sequence contains all action labels occurring in the specification (but it can have more).
     /// \return A sequence of action labels.
-    action_label_list& action_labels()
+    process::action_label_list& action_labels()
     {
       return m_action_labels;
     }

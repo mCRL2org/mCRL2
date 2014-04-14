@@ -9,7 +9,6 @@ add_mcrl2_library(data
     data.cpp
     data_specification.cpp
     typecheck.cpp
-    detail/enumerate/enum_standard.cpp
     detail/prover/smt_lib_solver.cpp
     detail/rewrite/with_prover.cpp
     detail/rewrite/jitty.cpp
@@ -54,6 +53,14 @@ if(APPLE)
   foreach( hfile ${MCRL2_BOOST_HEADER_FILES})
     install(FILES "${Boost_INCLUDE_DIRS}/boost/${hfile}" DESTINATION "${MCRL2_INCLUDE_PATH}/boost" COMPONENT Headers)
   endforeach()
+
+# Not sure what this is, came in with a merge
+#
+#set(mcrl2_data_src
+# ${CMAKE_CURRENT_SOURCE_DIR}/source/data.cpp
+# ${CMAKE_CURRENT_SOURCE_DIR}/source/data_specification.cpp
+# ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
+# ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/prover/smt_lib_solver.cpp
 
   foreach( hdir ${MCRL2_BOOST_HEADER_DIRS})
     install(DIRECTORY "${Boost_INCLUDE_DIRS}/boost/${hdir}" DESTINATION "${MCRL2_INCLUDE_PATH}/boost" COMPONENT Headers)

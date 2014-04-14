@@ -13,8 +13,9 @@
 #define MCRL2_LPS_DETAIL_ACTION_UTILITY_H
 
 #include <set>
-#include "mcrl2/lps/action.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/process/process_expression.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -30,12 +31,12 @@ namespace detail
 /// \param sorts A set of sort expressions
 /// \return True if the sorts of the given actions are contained in sorts.
 inline
-bool check_action_sorts(action_list actions, const std::set<data::sort_expression>& sorts)
+bool check_action_sorts(const process::action_list& actions, const std::set<data::sort_expression>& sorts)
 {
-  for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
+  for (auto i = actions.begin(); i != actions.end(); ++i)
   {
     const data::sort_expression_list& s = i->label().sorts();
-    for (data::sort_expression_list::const_iterator j = s.begin(); j != s.end(); ++j)
+    for (auto j = s.begin(); j != s.end(); ++j)
     {
       if (!data::detail::check_sort(*j, sorts))
       {
@@ -51,11 +52,12 @@ bool check_action_sorts(action_list actions, const std::set<data::sort_expressio
 /// \param labels A set of action labels
 /// \return True if the labels of the given actions are contained in labels.
 inline
-bool check_action_labels(action_list actions, const std::set<action_label>& labels)
+bool check_action_labels(const process::action_list& actions, const std::set<process::action_label>& labels)
 {
-  for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
+  using utilities::detail::contains;
+  for (auto i = actions.begin(); i != actions.end(); ++i)
   {
-    if (labels.find(i->label()) == labels.end())
+    if (!contains(labels, i->label()))
     {
       return false;
     }
@@ -68,13 +70,13 @@ bool check_action_labels(action_list actions, const std::set<action_label>& labe
 /// \param sorts A set of sort expressions
 /// \return True if the sorts of the given action labels are contained in sorts.
 inline
-bool check_action_label_sorts(action_label_list action_labels, const std::set<data::sort_expression>& sorts)
+bool check_action_label_sorts(const process::action_label_list& action_labels, const std::set<data::sort_expression>& sorts)
 {
-  for (action_label_list::iterator i = action_labels.begin(); i != action_labels.end(); ++i)
+  for (auto i = action_labels.begin(); i != action_labels.end(); ++i)
   {
     data::sort_expression_list i_sorts(i->sorts());
 
-    for (data::sort_expression_list::const_iterator j = i_sorts.begin(); j != i_sorts.end(); ++j)
+    for (auto j = i_sorts.begin(); j != i_sorts.end(); ++j)
     {
       if (!data::detail::check_sort(*j, sorts))
       {

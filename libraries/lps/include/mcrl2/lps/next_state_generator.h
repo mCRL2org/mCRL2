@@ -43,7 +43,7 @@ class next_state_generator
   protected:
     struct action_internal_t
     {
-      lps::action_label label;
+      process::action_label label;
       data::data_expression_vector arguments;
     };
 

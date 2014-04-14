@@ -23,7 +23,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/exploration.h"

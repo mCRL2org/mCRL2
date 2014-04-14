@@ -134,7 +134,7 @@ static void check_lps2lts_specification(std::string const& specification,
 
 //	bool has_i_label = false;
 //	bool has_tau = false;
-//        for( lps::action_label_list::iterator i = lps.action_labels().begin(); i != lps.action_labels().end(); ++i )
+//        for( process::action_label_list::iterator i = lps.action_labels().begin(); i != lps.action_labels().end(); ++i )
 //	{
 //                has_i_label = has_i_label || ( i -> name() == atermpp::aterm_string( "i" ) );
 //	}

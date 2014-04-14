@@ -30,18 +30,18 @@ data::variable nat(std::string name)
   return data::variable(core::identifier_string(name), data::sort_nat::nat());
 }
 
-action act(std::string name, data_expression_list parameters)
+process::action act(std::string name, data_expression_list parameters)
 {
   std::vector<sort_expression> sorts;
   for (data_expression_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
   {
     sorts.push_back(i->sort());
   }
-  action_label label(name, sort_expression_list(sorts.begin(), sorts.end()));
-  return action(label, parameters);
+  process::action_label label(name, sort_expression_list(sorts.begin(), sorts.end()));
+  return process::action(label, parameters);
 }
 
-void test_multi_actions(action_list a, action_list b, data_expression expected_result = data::undefined_data_expression())
+void test_multi_actions(process::action_list a, process::action_list b, data_expression expected_result = data::undefined_data_expression())
 {
   std::cout << "--- test_multi_actions ---" << std::endl;
   data_expression result = equal_multi_actions(a, b);
@@ -60,17 +60,17 @@ void test_equal_multi_actions()
   data_expression d2 = nat("d2");
   data_expression d3 = nat("d3");
   data_expression d4 = nat("d4");
-  action_list a1  = make_list(act("a", make_list(d1)));
-  action_list a2  = make_list(act("a", make_list(d2)));
-  action_list b1  = make_list(act("b", make_list(d1)));
-  action_list b2  = make_list(act("b", make_list(d2)));
-  action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
-  action_list a12 = make_list(act("a", make_list(d1)), act("a", make_list(d2)));
-  action_list a21 = make_list(act("a", make_list(d2)), act("a", make_list(d1)));
-  action_list a22 = make_list(act("a", make_list(d2)), act("a", make_list(d2)));
-  action_list a34 = make_list(act("a", make_list(d3)), act("a", make_list(d4)));
-  action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
-  action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
+  process::action_list a1  = make_list(act("a", make_list(d1)));
+  process::action_list a2  = make_list(act("a", make_list(d2)));
+  process::action_list b1  = make_list(act("b", make_list(d1)));
+  process::action_list b2  = make_list(act("b", make_list(d2)));
+  process::action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
+  process::action_list a12 = make_list(act("a", make_list(d1)), act("a", make_list(d2)));
+  process::action_list a21 = make_list(act("a", make_list(d2)), act("a", make_list(d1)));
+  process::action_list a22 = make_list(act("a", make_list(d2)), act("a", make_list(d2)));
+  process::action_list a34 = make_list(act("a", make_list(d3)), act("a", make_list(d4)));
+  process::action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
+  process::action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
   test_multi_actions(a1,  a1, d::sort_bool::true_());
   test_multi_actions(a1,  a2, d::equal_to(d1, d2));
   test_multi_actions(a11, a11, d::sort_bool::true_());
@@ -101,10 +101,10 @@ void test_pp()
 {
   data_expression d1 = nat("d1");
   data_expression d2 = nat("d2");
-  action_list a1  = make_list(act("a", make_list(d1)));
-  action_list a2  = make_list(act("a", make_list(d2)));
-  action_list b1  = make_list(act("b", make_list(d1)));
-  action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
+  process::action_list a1  = make_list(act("a", make_list(d1)));
+  process::action_list a2  = make_list(act("a", make_list(d2)));
+  process::action_list b1  = make_list(act("b", make_list(d1)));
+  process::action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
   multi_action m(a11);
   std::string s = lps::pp(m);
   std::cout << "s = " << s << std::endl;

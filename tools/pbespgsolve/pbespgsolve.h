@@ -13,6 +13,7 @@
 #define MCRL2_TOOLS_PBESPGSOLVE_H
 
 #include <iostream>
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "ParityGame.h"
 #include "SmallProgressMeasures.h"
@@ -237,7 +238,7 @@ class pbespgsolve_algorithm
       verti goal_v;
       ParityGame pg;
 
-      pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, pp(m_options.rewrite_strategy)); // N.B. mCRL2 could raise an exception here
+      pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, data::pp(m_options.rewrite_strategy)); // N.B. mCRL2 could raise an exception here
       mCRL2log(log::verbose) << "Game: " << pg.graph().V() << " vertices, " << pg.graph().E() << " edges." << std::endl;
       m_timer.finish("initialization");
 

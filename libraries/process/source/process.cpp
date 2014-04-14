@@ -23,12 +23,18 @@ namespace process
 {
 
 //--- start generated process overloads ---//
+std::string pp(const process::action_list& x) { return process::pp< process::action_list >(x); }
+std::string pp(const process::action_vector& x) { return process::pp< process::action_vector >(x); }
+std::string pp(const process::action_label_list& x) { return process::pp< process::action_label_list >(x); }
+std::string pp(const process::action_label_vector& x) { return process::pp< process::action_label_vector >(x); }
 std::string pp(const process::process_identifier_list& x) { return process::pp< process::process_identifier_list >(x); }
 std::string pp(const process::process_identifier_vector& x) { return process::pp< process::process_identifier_vector >(x); }
 std::string pp(const process::process_expression_list& x) { return process::pp< process::process_expression_list >(x); }
 std::string pp(const process::process_expression_vector& x) { return process::pp< process::process_expression_vector >(x); }
 std::string pp(const process::process_equation_list& x) { return process::pp< process::process_equation_list >(x); }
 std::string pp(const process::process_equation_vector& x) { return process::pp< process::process_equation_vector >(x); }
+std::string pp(const process::action& x) { return process::pp< process::action >(x); }
+std::string pp(const process::action_label& x) { return process::pp< process::action_label >(x); }
 std::string pp(const process::action_name_multiset& x) { return process::pp< process::action_name_multiset >(x); }
 std::string pp(const process::allow& x) { return process::pp< process::allow >(x); }
 std::string pp(const process::at& x) { return process::pp< process::at >(x); }
@@ -55,14 +61,21 @@ std::string pp(const process::seq& x) { return process::pp< process::seq >(x); }
 std::string pp(const process::sum& x) { return process::pp< process::sum >(x); }
 std::string pp(const process::sync& x) { return process::pp< process::sync >(x); }
 std::string pp(const process::tau& x) { return process::pp< process::tau >(x); }
+std::string pp(const process::untyped_action& x) { return process::pp< process::untyped_action >(x); }
 std::string pp(const process::untyped_parameter_identifier& x) { return process::pp< process::untyped_parameter_identifier >(x); }
 std::string pp(const process::untyped_process_assignment& x) { return process::pp< process::untyped_process_assignment >(x); }
+process::action normalize_sorts(const process::action& x, const data::data_specification& dataspec) { return atermpp::aterm_cast<process::action>(process::normalize_sorts<process::process_expression>(atermpp::aterm_cast<process::process_expression>(x), dataspec)); }
+process::action_label_list normalize_sorts(const process::action_label_list& x, const data::data_specification& dataspec) { return process::normalize_sorts< process::action_label_list >(x, dataspec); }
 void normalize_sorts(process::process_equation_vector& x, const data::data_specification& dataspec) { process::normalize_sorts< process::process_equation_vector >(x, dataspec); }
 void normalize_sorts(process::process_specification& x, const data::data_specification& /* dataspec */) { process::normalize_sorts< process::process_specification >(x, x.data()); }
+process::action translate_user_notation(const process::action& x) { return atermpp::aterm_cast<process::action>(process::translate_user_notation<process::process_expression>(atermpp::aterm_cast<process::process_expression>(x))); }
 void translate_user_notation(process::process_specification& x) { process::translate_user_notation< process::process_specification >(x); }
+std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x) { return process::find_sort_expressions< process::action_label_list >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x) { return process::find_sort_expressions< process::process_equation_vector >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x) { return process::find_sort_expressions< process::process_expression >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::process_specification& x) { return process::find_sort_expressions< process::process_specification >(x); }
+std::set<data::variable> find_all_variables(const process::action& x) { return process::find_all_variables< process::action >(x); }
+std::set<data::variable> find_free_variables(const process::action& x) { return process::find_free_variables< process::action >(x); }
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x) { return process::find_identifiers< process::process_specification >(x); }
 //--- end generated process overloads ---//
 

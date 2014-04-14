@@ -26,10 +26,11 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lts/lts.h"
 
@@ -160,7 +161,7 @@ class action_label_lts:public mcrl2::lps::multi_action
     }
 
     /** \brief Constructor. Transforms action label a to form a multi_action a. */
-    action_label_lts(const lps::action a):mcrl2::lps::multi_action(a)
+    action_label_lts(const process::action a):mcrl2::lps::multi_action(a)
     {
     }
 
@@ -189,11 +190,11 @@ class action_label_lts:public mcrl2::lps::multi_action
       using namespace std;
       using namespace mcrl2::lps;
 
-      const action_list mas = this->actions();
-      action_list new_action_list;
-      for (action_list:: const_iterator i=mas.begin(); i!=mas.end(); ++i)
+      const process::action_list mas = this->actions();
+      process::action_list new_action_list;
+      for (process::action_list:: const_iterator i=mas.begin(); i!=mas.end(); ++i)
       {
-        const action a=*i;
+        const process::action a=*i;
 
         if (std::find(tau_actions.begin(),tau_actions.end(),
                       string(a.label().name()))==tau_actions.end())  // this action must not be hidden.
@@ -226,9 +227,9 @@ inline std::string pp(const action_label_lts l)
 inline action_label_lts parse_lts_action(
   const std::string& multi_action_string,
   const data::data_specification& data_spec,
-  const lps::action_list& act_decls)
+  const process::action_list& act_decls)
 {
-  lps::multi_action ma = lps::parse_multi_action(multi_action_string, atermpp::aterm_cast<lps::action_label_list>(act_decls), data_spec);
+  lps::multi_action ma = lps::parse_multi_action(multi_action_string, atermpp::aterm_cast<process::action_label_list>(act_decls), data_spec);
   return action_label_lts(atermpp::aterm_appl(core::detail::function_symbol_MultAct(), ma.actions()));
 }
 
@@ -250,7 +251,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     bool m_has_valid_parameters;
     data::variable_list m_parameters;
     bool m_has_valid_action_decls;
-    lps::action_label_list m_action_decls;
+    process::action_label_list m_action_decls;
 
   public:
 
@@ -317,7 +318,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
         l.m_has_valid_action_decls=aux;
       }
       {
-        const lps::action_label_list aux=m_action_decls;
+        const process::action_label_list aux=m_action_decls;
         m_action_decls=l.m_action_decls;
         l.m_action_decls=aux;
       }
@@ -346,7 +347,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 
     /** \brief Return action label declarations stored in this LTS.
     */
-    lps::action_label_list action_labels() const
+    process::action_label_list action_labels() const
     {
       assert(m_has_valid_action_decls);
       return m_action_decls;
@@ -355,7 +356,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     /** \brief Set the action label information for this LTS.
      * \param[in] decls  The action labels to be set in this lts.
     */
-    void set_action_labels(const lps::action_label_list& decls)
+    void set_action_labels(const process::action_label_list& decls)
     {
       m_has_valid_action_decls=true;
       m_action_decls=decls;

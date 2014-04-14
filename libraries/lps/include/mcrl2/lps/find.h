@@ -15,7 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/find.h"
+#include "mcrl2/process/find.h"
 #include "mcrl2/lps/traverser.h"
 #include "mcrl2/lps/add_binding.h"
 
@@ -24,43 +24,6 @@ namespace mcrl2
 
 namespace lps
 {
-
-namespace detail
-{
-/// \cond INTERNAL_DOCS
-template <template <class> class Traverser, class OutputIterator>
-struct find_action_labels_traverser: public Traverser<find_action_labels_traverser<Traverser, OutputIterator> >
-{
-  typedef Traverser<find_action_labels_traverser<Traverser, OutputIterator> > super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-  OutputIterator out;
-
-  find_action_labels_traverser(OutputIterator out_)
-    : out(out_)
-  {}
-
-  void operator()(const lps::action_label& x)
-  {
-    *out = x;
-  }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
-};
-
-template <template <class> class Traverser, class OutputIterator>
-find_action_labels_traverser<Traverser, OutputIterator>
-make_find_action_labels_traverser(OutputIterator out)
-{
-  return find_action_labels_traverser<Traverser, OutputIterator>(out);
-}
-/// \endcond
-
-} // namespace detail
 
 //--- start generated lps find code ---//
 /// \brief Returns all variables that occur in an object
@@ -211,16 +174,16 @@ bool search_free_variable(const T& x, const data::variable& v)
 template <typename T, typename OutputIterator>
 void find_action_labels(const T& x, OutputIterator o)
 {
-  lps::detail::make_find_action_labels_traverser<lps::action_label_traverser>(o)(x);
+  process::detail::make_find_action_labels_traverser<lps::action_label_traverser>(o)(x);
 }
 
 /// \brief Returns all action labels that occur in an object
 /// \param[in] x an object containing action labels
 /// \return All action labels that occur in the object x
 template <typename T>
-std::set<lps::action_label> find_action_labels(const T& x)
+std::set<process::action_label> find_action_labels(const T& x)
 {
-  std::set<lps::action_label> result;
+  std::set<process::action_label> result;
   lps::find_action_labels(x, std::inserter(result, result.end()));
   return result;
 }

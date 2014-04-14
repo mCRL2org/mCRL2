@@ -57,7 +57,7 @@ void test_find()
   specification spec = parse_linear_process_specification(SPEC);
   std::cout << spec.process().action_summands().size() << std::endl;
   action_summand s = spec.process().action_summands().front();
-  action a = s.multi_action().actions().front();
+  process::action a = s.multi_action().actions().front();
 
   //--- find_all_variables ---//
   data::variable m = nat("m");

@@ -138,25 +138,25 @@ namespace detail
 /**
  * \brief Creates an identifier for the for the ctau action
  **/
-inline action_label make_ctau_act_id()
+inline process::action_label make_ctau_act_id()
 {
   static atermpp::aterm_appl ctau_act_id = atermpp::aterm_appl(core::detail::function_symbol_ActId(), atermpp::aterm_appl(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
 
   assert(atermpp::detail::address(ctau_act_id));
 
-  return action_label(ctau_act_id);
+  return process::action_label(ctau_act_id);
 }
 
 /**
  * \brief Creates the ctau action
  **/
-inline action make_ctau_action()
+inline process::action make_ctau_action()
 {
   static atermpp::aterm_appl ctau_action = atermpp::aterm_appl(core::detail::function_symbol_Action(), make_ctau_act_id(), atermpp::aterm_list());
 
   assert(atermpp::detail::address(ctau_action));
 
-  return action(ctau_action);
+  return process::action(ctau_action);
 }
 
 

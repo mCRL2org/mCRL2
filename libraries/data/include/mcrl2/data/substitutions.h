@@ -56,7 +56,7 @@ struct sort_expression_assignment: public std::unary_function<sort_expression, s
     rhs(rhs_)
   {}
 
-  const sort_expression& operator()(const sort_expression& x)
+  const sort_expression& operator()(const sort_expression& x) const
   {
     if (x == lhs)
     {
@@ -187,7 +187,7 @@ struct sequence_sequence_substitution: public std::unary_function<typename Varia
     out << "]";
     return out.str();
   }
-}; 
+};
 
 /// \brief Utility function for creating a sequence_sequence_substitution.
 template <typename VariableContainer, typename ExpressionContainer>
@@ -248,7 +248,7 @@ struct pair_sequence_substitution: public std::unary_function<typename Container
     throw std::runtime_error("data::pair_sequence_substitution::operator(const Expression&) is a deprecated interface!");
     return data::undefined_data_expression();
   }
-}; 
+};
 
 /// \brief Utility function for creating a pair_sequence_substitution.
 template <typename Container>
@@ -883,7 +883,7 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
 
   protected:
     /// \brief object on which substitution manipulations are performed
-    mutable_map_substitution<AssociativeContainer>& g_;
+    substitution_type& g_;
 
   public:
 
@@ -919,7 +919,64 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     {
       return g_;
     }
-}; 
+};
+
+/// \brief Specialization for mutable_indexed_substitution.
+template <typename VariableType, typename ExpressionSequence>
+class mutable_substitution_composer<mutable_indexed_substitution<VariableType, ExpressionSequence> >: public std::unary_function<VariableType, typename ExpressionSequence::value_type>
+{
+  public:
+    /// \brief The type of the wrapped substitution
+    typedef mutable_indexed_substitution<VariableType, ExpressionSequence> substitution_type;
+
+    /// \brief type used to represent variables
+    typedef typename substitution_type::variable_type variable_type;
+
+    /// \brief type used to represent expressions
+    typedef typename substitution_type::expression_type expression_type;
+
+    /// \brief Wrapper class for internal storage and substitution updates using operator()
+    typedef typename substitution_type::assignment assignment;
+
+  protected:
+    /// \brief object on which substitution manipulations are performed
+    substitution_type& g_;
+
+  public:
+
+    /// \brief Constructor with mutable substitution object
+    /// \param[in,out] g underlying substitution object
+    mutable_substitution_composer(substitution_type& g)
+      : g_(g)
+    {}
+
+    /// \brief Apply on single single variable expression
+    /// \param[in] v the variable for which to give the associated expression
+    /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+    const expression_type operator()(variable_type const& v) const
+    {
+      return g_(v);
+    }
+
+    template <typename Expression>
+    expression_type operator()(const Expression&) const
+    {
+      throw std::runtime_error("data::mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >::operator(const Expression&) is a deprecated interface!");
+      return data::undefined_data_expression();
+    }
+
+    assignment operator[](variable_type const& v)
+    {
+      return g_[v];
+    }
+
+    /// \brief Returns the wrapped substitution
+    /// \return The wrapped substitution
+    const substitution_type& substitution() const
+    {
+      return g_;
+    }
+};
 
 /// \brief Returns a string representation of the map, for example [a := 3, b := true].
 /// \param sigma a substitution.

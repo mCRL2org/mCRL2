@@ -35,10 +35,10 @@ struct replace_sort_expressions_builder: public Builder<replace_sort_expressions
   using super::leave;
   using super::operator();
 
-  Substitution sigma;
+  const Substitution& sigma;
   bool innermost;
 
-  replace_sort_expressions_builder(Substitution sigma_, bool innermost_)
+  replace_sort_expressions_builder(const Substitution& sigma_, bool innermost_)
     : sigma(sigma_),
       innermost(innermost_)
   {}
@@ -60,7 +60,7 @@ struct replace_sort_expressions_builder: public Builder<replace_sort_expressions
 
 template <template <class> class Builder, class Substitution>
 replace_sort_expressions_builder<Builder, Substitution>
-make_replace_sort_expressions_builder(Substitution sigma, bool innermost)
+make_replace_sort_expressions_builder(const Substitution& sigma, bool innermost)
 {
   return replace_sort_expressions_builder<Builder, Substitution>(sigma, innermost);
 }
@@ -98,7 +98,7 @@ struct replace_data_expressions_builder: public Builder<replace_data_expressions
 
 template <template <class> class Builder, class Substitution>
 replace_data_expressions_builder<Builder, Substitution>
-make_replace_data_expressions_builder(Substitution sigma, bool innermost)
+make_replace_data_expressions_builder(const Substitution& sigma, bool innermost)
 {
   return replace_data_expressions_builder<Builder, Substitution>(sigma, innermost);
 }
@@ -114,14 +114,14 @@ struct replace_free_variables_builder: public Binder<Builder, replace_free_varia
   using super::bound_variables;
   using super::increase_bind_count;
 
-  Substitution sigma;
+  const Substitution& sigma;
 
-  replace_free_variables_builder(Substitution sigma_)
+  replace_free_variables_builder(const Substitution& sigma_)
     : sigma(sigma_)
   {}
 
   template <typename VariableContainer>
-  replace_free_variables_builder(Substitution sigma_, const VariableContainer& bound_variables)
+  replace_free_variables_builder(const Substitution& sigma_, const VariableContainer& bound_variables)
     : sigma(sigma_)
   {
     increase_bind_count(bound_variables);
@@ -143,14 +143,14 @@ struct replace_free_variables_builder: public Binder<Builder, replace_free_varia
 
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
 replace_free_variables_builder<Builder, Binder, Substitution>
-make_replace_free_variables_builder(Substitution sigma)
+make_replace_free_variables_builder(const Substitution& sigma)
 {
   return replace_free_variables_builder<Builder, Binder, Substitution>(sigma);
 }
 
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution, class VariableContainer>
 replace_free_variables_builder<Builder, Binder, Substitution>
-make_replace_free_variables_builder(Substitution sigma, const VariableContainer& bound_variables)
+make_replace_free_variables_builder(const Substitution& sigma, const VariableContainer& bound_variables)
 {
   return replace_free_variables_builder<Builder, Binder, Substitution>(sigma, bound_variables);
 }
@@ -170,7 +170,8 @@ struct substitution_updater
 
   data::variable bind(const data::variable& v)
   {
-    if (V.find(v) == V.end() && sigma(v) == v)
+  	using utilities::detail::contains;
+    if (!contains(V, v) && sigma(v) == v)
     {
       return v;
     }
@@ -178,7 +179,7 @@ struct substitution_updater
     {
       id_generator.add_identifier(v.name());
       data::variable w(id_generator(v.name()), v.sort());
-      while (sigma(w) != w || V.find(w) != V.end())
+      while (sigma(w) != w || contains(V, w))
       {
         w = data::variable(id_generator(v.name()), v.sort());
       }
@@ -242,7 +243,8 @@ struct substitution_updater
 template <typename Substitution, typename IdentifierGenerator>
 data::variable update_substitution(Substitution& sigma, const data::variable& v, const std::multiset<data::variable>& V, IdentifierGenerator& id_generator)
 {
-  if (V.find(v) == V.end() && sigma(v) == v)
+	using utilities::detail::contains;
+  if (!contains(V, v) && sigma(v) == v)
   {
     return v;
   }
@@ -251,7 +253,7 @@ data::variable update_substitution(Substitution& sigma, const data::variable& v,
     id_generator.add_identifier(v.name());
     data::variable w(id_generator(v.name()), v.sort());
 
-    while (sigma(w) != w || V.find(w) != V.end())
+    while (sigma(w) != w || contains(V, w))
     {
       w = data::variable(id_generator(v.name()), v.sort());
     }
@@ -382,7 +384,7 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
 //--- start generated data replace code ---//
 template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
-                              Substitution sigma,
+                              const Substitution& sigma,
                               bool innermost,
                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                              )
@@ -392,7 +394,7 @@ void replace_sort_expressions(T& x,
 
 template <typename T, typename Substitution>
 T replace_sort_expressions(const T& x,
-                           Substitution sigma,
+                           const Substitution& sigma,
                            bool innermost,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
@@ -402,7 +404,7 @@ T replace_sort_expressions(const T& x,
 
 template <typename T, typename Substitution>
 void replace_data_expressions(T& x,
-                              Substitution sigma,
+                              const Substitution& sigma,
                               bool innermost,
                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                              )
@@ -412,7 +414,7 @@ void replace_data_expressions(T& x,
 
 template <typename T, typename Substitution>
 T replace_data_expressions(const T& x,
-                           Substitution sigma,
+                           const Substitution& sigma,
                            bool innermost,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
@@ -422,7 +424,7 @@ T replace_data_expressions(const T& x,
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
-                       Substitution sigma,
+                       const Substitution& sigma,
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                       )
 {
@@ -431,7 +433,7 @@ void replace_variables(T& x,
 
 template <typename T, typename Substitution>
 T replace_variables(const T& x,
-                    Substitution sigma,
+                    const Substitution& sigma,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
 {
@@ -440,7 +442,7 @@ T replace_variables(const T& x,
 
 template <typename T, typename Substitution>
 void replace_all_variables(T& x,
-                           Substitution sigma,
+                           const Substitution& sigma,
                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
@@ -449,7 +451,7 @@ void replace_all_variables(T& x,
 
 template <typename T, typename Substitution>
 T replace_all_variables(const T& x,
-                        Substitution sigma,
+                        const Substitution& sigma,
                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                        )
 {
@@ -460,7 +462,7 @@ T replace_all_variables(const T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 void replace_free_variables(T& x,
-                            Substitution sigma,
+                            const Substitution& sigma,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
@@ -472,7 +474,7 @@ void replace_free_variables(T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 T replace_free_variables(const T& x,
-                         Substitution sigma,
+                         const Substitution& sigma,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
@@ -484,7 +486,7 @@ T replace_free_variables(const T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_free_variables(T& x,
-                            Substitution sigma,
+                            const Substitution& sigma,
                             const VariableContainer& bound_variables,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
@@ -497,7 +499,7 @@ void replace_free_variables(T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_free_variables(const T& x,
-                         Substitution sigma,
+                         const Substitution& sigma,
                          const VariableContainer& bound_variables,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
@@ -545,7 +547,7 @@ T replace_variables_capture_avoiding(const T& x,
 
 template <typename T, typename Substitution>
 void substitute_sorts(T& x,
-                      Substitution sigma,
+                      const Substitution& sigma,
                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                      )
 {
@@ -554,7 +556,7 @@ void substitute_sorts(T& x,
 
 template <typename T, typename Substitution>
 T substitute_sorts(const T& x,
-                   Substitution sigma,
+                   const Substitution& sigma,
                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                   )
 {

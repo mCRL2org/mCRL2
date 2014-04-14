@@ -40,9 +40,8 @@ void test_pbesrewr1()
   pbes p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::jitty);
   data::data_enumerator datae(p.data(), datar);
-  data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts);
+  custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
   pbes_rewrite(p, pbesr);
   // p.save("pbesrewr.pbes");
 }
@@ -57,9 +56,8 @@ void test_pbesrewr2()
 
   data::rewriter datar(p.data(), data::jitty);
   data::data_enumerator datae(p.data(), datar);
-  data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts);
+  custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
   pbes_rewrite(p, pbesr);
   BOOST_CHECK(p.is_well_typed());
 }
@@ -78,9 +76,8 @@ void test_pbesrewr3()
   pbes p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::jitty);
   data::data_enumerator datae(p.data(), datar);
-  data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts);
+  custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
   try
   {
     pbes_rewrite(p, pbesr); // we expect that an exception is raised because of the type D that cannot be enumerated

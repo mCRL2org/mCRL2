@@ -32,11 +32,9 @@ namespace detail {
   class pbes_greybox_interface: public parity_game_generator
   {
     protected:
-      typedef mcrl2::pbes_system::enumerate_quantifiers_rewriter<mcrl2::pbes_system::pbes_expression, mcrl2::data::rewriter_with_variables, mcrl2::data::data_enumerator> my_pbes_rewriter;
       data::rewriter datar;
-      data::rewriter_with_variables datarv;	                                                               	
       data::data_enumerator datae;
-      my_pbes_rewriter pbes_rewriter;
+      pbes_system::custom_enumerate_quantifiers_rewriter pbes_rewriter;
 
     public:
     /// \brief Constructor.
@@ -47,9 +45,8 @@ namespace detail {
     pbes_greybox_interface(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       : parity_game_generator(p, true_false_dependencies, is_min_parity, rewrite_strategy),
       	datar(p.data()),
-        datarv(datar),
         datae(p.data(), datar), 
-        pbes_rewriter(datarv, datae, true)
+        pbes_rewriter(datar, datae, true)
     {
       initialize_generation();
     }

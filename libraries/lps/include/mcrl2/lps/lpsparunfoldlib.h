@@ -91,7 +91,7 @@ class lpsparunfold
     mcrl2::lps::process_initializer m_init_process;
 
     /// \brief The initialization of a linear process
-    mcrl2::lps::action_label_list m_action_label_list;
+    mcrl2::process::action_label_list m_action_label_list;
 
     /// \brief The fresh sort of the unfolded process parameter used the case function.
     mcrl2::data::basic_sort fresh_basic_sort;

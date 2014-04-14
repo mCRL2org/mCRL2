@@ -358,7 +358,8 @@ data_expression Rewriter::existential_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,true,
+  EnumeratorSolutionsStandard<data_expression,rewriter>
+                              sol(vl_new_l, t3, sigma,true,
                                   m_data_specification_for_enumeration, this,
                                   (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
 
@@ -460,7 +461,8 @@ data_expression Rewriter::universal_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl_new_l, t3, sigma,false,
+  EnumeratorSolutionsStandard<data_expression,rewriter>
+                              sol(vl_new_l, t3, sigma,false,
                                   m_data_specification_for_enumeration, this,
                                   (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
 

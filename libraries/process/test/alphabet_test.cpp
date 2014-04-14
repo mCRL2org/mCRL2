@@ -18,9 +18,10 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/tuple/tuple.hpp>
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
-#include "mcrl2/lps/parse.h"
+#include "mcrl2/process/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/test_utilities.h"
@@ -41,24 +42,26 @@ struct LogDebug
 BOOST_GLOBAL_FIXTURE(LogDebug);
 
 inline
-multi_action_name name(const lps::action& x)
+multi_action_name name(const process::action& x)
 {
   multi_action_name result;
   result.insert(x.label().name());
   return result;
 }
 
+/*
 inline
-multi_action_name name(const multi_action& x)
+process::multi_action_name name(const lps::multi_action& x)
 {
   multi_action_name result;
-  lps::action_list a = x.actions();
-  for (lps::action_list::iterator i = a.begin(); i != a.end(); ++i)
+  process::action_list a = x.actions();
+  for (auto i = a.begin(); i != a.end(); ++i)
   {
     result.insert(i->label().name());
   }
   return result;
 }
+*/
 
 inline
 multi_action_name name(const core::identifier_string& x)
@@ -195,8 +198,8 @@ BOOST_AUTO_TEST_CASE(test_print)
 
 BOOST_AUTO_TEST_CASE(test_parse)
 {
-  lps::action_label_list act_decl = lps::parse_action_declaration("a: Nat;");
-  lps::action a = lps::parse_action("a(2)", act_decl);
+  process::action_label_list act_decl = process::parse_action_declaration("a: Nat;");
+  process::action a = lps::parse_action("a(2)", act_decl);
   multi_action_name A;
   A.insert(core::identifier_string("a"));
   BOOST_CHECK(name(a) == A);
@@ -437,7 +440,7 @@ BOOST_AUTO_TEST_CASE(test_alphabet_parallel)
 
   multi_action_name_set B = detail::alphabet_intersection(procspec.init(), procspec.equations(), A);
   //BOOST_CHECK_EQUAL(lps::pp(B),"{a1, a2, a3, a4, a5, a6, a7, a8, a9, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20}");
-  BOOST_CHECK_EQUAL(lps::pp(B),lps::pp(A));
+  BOOST_CHECK_EQUAL(process::pp(B), process::pp(A));
 }
 
 BOOST_AUTO_TEST_CASE(test_alphabet_new)

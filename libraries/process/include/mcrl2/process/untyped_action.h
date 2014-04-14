@@ -6,17 +6,17 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/untyped_action.h
+/// \file mcrl2/process/untyped_action.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_UNTYPED_ACTION_H
-#define MCRL2_LPS_UNTYPED_ACTION_H
+#ifndef MCRL2_PROCESS_UNTYPED_ACTION_H
+#define MCRL2_PROCESS_UNTYPED_ACTION_H
 
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace process {
 
 //--- start generated class untyped_action ---//
 /// \brief An untyped action
@@ -81,7 +81,7 @@ std::string pp(const untyped_action& x);
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_action& x)
 {
-  return out << lps::pp(x);
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -91,8 +91,8 @@ inline void swap(untyped_action& t1, untyped_action& t2)
 }
 //--- end generated class untyped_action ---//
 
-} // namespace lps
+} // namespace process
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_UNTYPED_ACTION_H
+#endif // MCRL2_PROCESS_UNTYPED_ACTION_H
