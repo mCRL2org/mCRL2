@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
+#include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/sequence.h"
 
@@ -822,15 +823,11 @@ class stategraph_algorithm
       return propositional_variable_instantiation(X.name(), data::replace_free_variables(X.parameters(), sigma));
     }
 
-    stategraph_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
-                         bool use_alternative_lcfp_criterion = false,
-                         bool use_alternative_gcfp_relation = false,
-                         bool use_alternative_gcfp_consistency = false
-                        )
-      : m_datar(p.data(), rewrite_strategy),
-        m_use_alternative_lcfp_criterion(use_alternative_lcfp_criterion),
-        m_use_alternative_gcfp_relation(use_alternative_gcfp_relation),
-        m_use_alternative_gcfp_consistency(use_alternative_gcfp_consistency)
+    stategraph_algorithm(const pbes& p, const pbesstategraph_options& options)
+      : m_datar(p.data(), options.rewrite_strategy),
+        m_use_alternative_lcfp_criterion(options.use_alternative_lcfp_criterion),
+        m_use_alternative_gcfp_relation(options.use_alternative_gcfp_relation),
+        m_use_alternative_gcfp_consistency(options.use_alternative_gcfp_consistency)
     {
       m_pbes = stategraph_pbes(p);
     }

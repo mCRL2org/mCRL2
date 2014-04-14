@@ -13,6 +13,8 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
 #include "mcrl2/utilities/sequence.h"
@@ -53,6 +55,9 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 
     // if true, the resulting PBES is simplified
     bool m_simplify;
+
+    // If true, an alternative reset is used.
+    bool m_use_alternative_reset_copy;
 
     // m_occurring_data_parameters[X] contains the indices of data parameters that occur in at least one local control flow graph
     std::map<core::identifier_string, std::set<std::size_t> > m_occurring_data_parameters;
@@ -127,24 +132,19 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       }
     }
 
-    local_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
-                                    bool use_alternative_lcfp_criterion = false,
-                                    bool use_alternative_gcfp_relation = false,
-                                    bool use_alternative_gcfp_consistency = false,
-                                    bool cache_marking_updates = false,
-                                    bool use_marking_optimization = false
-                                   )
-      : stategraph_local_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency, cache_marking_updates, use_marking_optimization),
-        m_original_pbes(p)
+    local_reset_variables_algorithm(const pbes& p, const pbesstategraph_options& options)
+      : stategraph_local_algorithm(p, options),
+        m_original_pbes(p),
+        m_simplify(options.simplify),
+        m_use_alternative_reset_copy(options.use_alternative_reset_copy)
     {}
 
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes run(bool simplify = true)
+    pbes run()
     {
       super::run();
-      m_simplify = simplify;
       pbes result = m_original_pbes;
       compute_occurring_data_parameters();
       reset_variables_to_original(result);
@@ -291,6 +291,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
   {
     std::size_t k = *dpi;
     bool relevant = true;
+    std::set<data::data_expression> condition;
     for (std::size_t j = 0; j < J; j++)
     {
       auto const& Vj = m_local_control_flow_graphs[j];
@@ -313,15 +314,27 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
         }
         else
         {
+          // update relevant and condition
           if (contains(Bj[Y], d_Y[k]))
           {
             bool found = false;
-            for (auto vi = Vj.vertices.begin(); vi != Vj.vertices.end(); ++vi)
+            for (auto wi = Vj.vertices.begin(); wi != Vj.vertices.end(); ++wi)
             {
-              if (vi->name() == Y && v.index() == p && contains(vi->marking(), d_Y[k]))
+              auto const& w = *wi;
+              if (w.name() == Y && w.index() == p)  // w = (Y, p, d_Y[p]=r)
               {
-                found = true;
-                break;
+                if (contains(w.marking(), d_Y[k]))
+                {
+                  found = true;
+                }
+                else
+                {
+                  if  (m_use_alternative_reset_copy && w.has_variable())
+                  {
+                    auto const& r = w.value();
+                    condition.insert(data::equal_to(d_Y[p], r));
+                  }
+                }
               }
             }
             if (!found)
@@ -336,6 +349,14 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
     if (!relevant)
     {
       e1[k] = default_value(Y, k, e1[k].sort());
+    }
+    else
+    {
+      if (m_use_alternative_reset_copy && !condition.empty())
+      {
+        e1[k] = data::if_(data::lazy::join_or(condition.begin(), condition.end()), default_value(Y, k, e1[k].sort()), nth_element(e, k));
+        mCRL2log(log::debug1, "stategraph") << "  reset copy Y = " << Y << " k = " << k << " e'[k] = " << e1[k] << std::endl;
+      }
     }
   }
   return propositional_variable_instantiation(Y, data::data_expression_list(e1.begin(), e1.end()));

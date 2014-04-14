@@ -598,16 +598,10 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
     }
 
   public:
-    stategraph_local_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
-                               bool use_alternative_lcfp_criterion = false,
-                               bool use_alternative_gcfp_relation = false,
-                               bool use_alternative_gcfp_consistency = false,
-                               bool cache_marking_updates = false,
-                               bool use_marking_optimization = false
-                              )
-      : stategraph_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency),
-        m_cache_marking_updates(cache_marking_updates),
-        m_use_marking_optimization(use_marking_optimization),
+    stategraph_local_algorithm(const pbes& p, const pbesstategraph_options& options)
+      : stategraph_algorithm(p, options),
+        m_cache_marking_updates(options.cache_marking_updates),
+        m_use_marking_optimization(options.use_marking_optimization),
         m_marking_rewrite_count(0),
         m_marking_rewrite_cached_count(0)
 

@@ -20,6 +20,7 @@
 #include "mcrl2/pbes/file_formats.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
+#include "mcrl2/pbes/tools/pbesstategraph_options.h"
 
 namespace mcrl2 {
 
@@ -115,16 +116,7 @@ void pbesabsinthe(const std::string& input_filename,
 
 void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
-                    data::rewrite_strategy rewrite_strategy,
-                    bool simplify,
-                    bool apply_to_original,
-                    bool use_local_variant,
-                    bool print_influence_graph,
-                    bool cache_marking_updates,
-                    bool use_marking_optimization,
-                    bool use_alternative_lcfp_criterion,
-                    bool use_alternative_gcfp_relation,
-                    bool use_alternative_gcfp_consistency
+                    const pbesstategraph_options& options
                    );
 
 } // namespace pbes_system

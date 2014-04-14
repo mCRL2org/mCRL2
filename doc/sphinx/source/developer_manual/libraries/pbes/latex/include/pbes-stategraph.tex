@@ -493,8 +493,44 @@ $\qquad $\textbf{if} $\lnot relevant$ \textbf{then} $e^{\prime
 }[k]:=default\_value(d_{Y}[k])$ \\ 
 \textbf{return }$Y(e^{\prime })$%
 \end{tabular}%
+\end{equation*}
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ResetVariableLocalNew(}$i,$ $\sigma X(d_{X})=\varphi
+_{X},V_{1},\cdots ,V_{J},B_{1},\cdots ,B_{J},\mathrm{rules}$\textsc{)} \\ 
+\textbf{let }$Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
+$e^{\prime }:=e$ \\ 
+\textbf{for} $k=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
+$\qquad $\textbf{if} $\mathrm{CFP}(Y,k)$ \textbf{then continue} \\ 
+$\qquad relevant:=true$ \\ 
+$\qquad condition:=\{\}$ \\ 
+$\qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad $\textbf{if} $\mathrm{rules}(V_{j},X,i)$ \textbf{then} \\ 
+$\qquad \qquad \qquad $\textbf{let }$p,q$ be such that $(Y,p,q)\in V_{j}$ \\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,p)\neq \bot $ \textbf{%
+then} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $q^{\prime }=\mathrm{dest}(X,i,p)$
+\\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge \left( \left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow d_{Y}[k]\in marking(Y,p,q^{\prime
+})\right) $ \\ 
+$\qquad \qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge (\left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow \exists r:d_{Y}[k]\in marking(Y,p,r))$
+\\ 
+$\qquad \qquad \qquad \qquad condition+=$ $[d_{Y}[p]=r\mid \left(
+Y,d_{Y}[k]\right) \in B_{j}\wedge (Y,p,r)\in V_{j}\wedge d_{Y}[k]\notin
+marking(Y,p,r)]$ \\ 
+$\qquad $\textbf{if} $\lnot relevant$ \textbf{then} \\ 
+$\qquad \qquad e^{\prime }[k]:=default\_value(d_{Y}[k])$ \\ 
+$\qquad $\textbf{else if} $condition\neq \{\}$ \textbf{then} \\ 
+$\qquad \qquad e^{\prime
+}[k]:=if(join\_or(condition),default\_value(d_{Y}[k]),e[k]))$ \\ 
+\textbf{return }$Y(e^{\prime })$%
+\end{tabular}%
 \end{equation*}%
-\newpage
+\newpage 
 
 Let $\left( V,E\right) $ be a local control flow graph, and $B$ the
 corresponding belongs relation.%
@@ -586,8 +622,8 @@ v=(Y,m,d_{Y}[m]=w)\in V_{k}$ \textbf{do} \\
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{if} $%
 \exists v^{\prime }=(X,m^{\prime },D_{X}[m^{\prime }])\in V_{k}$ \textbf{%
 such that} $(v^{\prime },i,v)\in E_{k}$ \textbf{then} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad m:=marking(u)
-$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+m:=marking(u) $ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=$
 \textsc{UpdateMarkingRule2(}$B_{j}$, $u$, $i$, $v$\textsc{)} \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{%
@@ -600,4 +636,4 @@ $\qquad stable:=stableint\wedge stableext$%
 \end{tabular}%
 \end{array}%
 \end{equation*}%
-\newpage \newpage 
+\newpage \newpage

@@ -13,7 +13,6 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_UTILITY_H
 
 #include <sstream>
-#include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
 

@@ -115,8 +115,8 @@ class stategraph_global_algorithm: public stategraph_algorithm
     }
 
   public:
-    stategraph_global_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
-      : stategraph_algorithm(p, rewrite_strategy)
+    stategraph_global_algorithm(const pbes& p, const pbesstategraph_options& options)
+      : stategraph_algorithm(p, options)
     { }
 
     /// \brief Computes the control flow graph
