@@ -44,6 +44,14 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       return f(x);
     }
 
+    // returns the parameters of the propositional variable with name X
+    std::set<data::variable> propvar_parameters(const core::identifier_string& X) const
+    {
+      auto const& eq_X = *find_equation(m_pbes, X);
+      auto const& d_X = eq_X.parameters();
+      return std::set<data::variable>(d_X.begin(), d_X.end());
+    }
+
     void compute_control_flow_marking(control_flow_graph& G)
     {
       mCRL2log(log::debug, "stategraph") << "--- compute initial marking ---" << std::endl;

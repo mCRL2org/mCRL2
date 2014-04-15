@@ -15,6 +15,7 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_global_graph.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -33,8 +34,53 @@ class stategraph_global_algorithm: public stategraph_algorithm
     // the control flow graph
     control_flow_graph m_control_flow_graph;
 
+    template <typename Substitution>
+    propositional_variable_instantiation apply_substitution(const propositional_variable_instantiation& X, Substitution sigma) const
+    {
+      return propositional_variable_instantiation(X.name(), data::replace_free_variables(X.parameters(), sigma));
+    }
+
+    // removes parameter values that do not correspond to a control flow parameter
+    propositional_variable_instantiation project(const propositional_variable_instantiation& x) const
+    {
+      auto const& X = x.name();
+      auto const& d_X = x.parameters();
+      const std::vector<bool>& b = is_GCFP(X);
+      std::size_t index = 0;
+      std::vector<data::data_expression> d;
+      for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
+      {
+        assert(index < b.size());
+        if (b[index])
+        {
+          d.push_back(*i);
+        }
+      }
+      return propositional_variable_instantiation(X, data::data_expression_list(d.begin(), d.end()));
+    }
+
+    // removes parameter values that do not correspond to a control flow parameter
+    propositional_variable project_variable(const propositional_variable& x) const
+    {
+      auto const& X = x.name();
+      auto const& d_X = x.parameters();
+      const std::vector<bool>& b = is_GCFP(X);
+      std::size_t index = 0;
+      std::vector<data::variable> d;
+      for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
+      {
+        if (b[index])
+        {
+          d.push_back(*i);
+        }
+      }
+      return propositional_variable(X, data::variable_list(d.begin(), d.end()));
+    }
+
     void compute_control_flow_graph()
     {
+      using utilities::detail::pick_element;
+
       mCRL2log(log::debug, "stategraph") << "=== compute control flow graph ===" << std::endl;
 
       pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
@@ -50,8 +96,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
       while (!todo.empty())
       {
         std::set<stategraph_vertex*>::iterator ti = todo.begin();
-        stategraph_vertex& u = **ti;
-        todo.erase(ti);
+        stategraph_vertex& u = *pick_element(todo);
         stategraph_vertex* source = &u;
         mCRL2log(log::debug, "stategraph") << "selected todo element u = " << pbes_system::pp(u.X) << std::endl;
 
@@ -65,7 +110,6 @@ class stategraph_global_algorithm: public stategraph_algorithm
         u.sig = pbes_system::algorithms::significant_variables(pbesr(eqn.formula(), sigma));
 
         const std::vector<predicate_variable>& predvars = eqn.predicate_variables();
-        // for (std::vector<predicate_variable>::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
           const predicate_variable& PV = predvars[i];
