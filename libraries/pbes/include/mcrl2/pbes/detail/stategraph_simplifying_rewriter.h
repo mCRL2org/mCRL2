@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFYING_REWRITER_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFYING_REWRITER_H
 
+#include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/pbes/rewriters/simplifying_quantifier_rewriter.h"
 
 namespace mcrl2 {
@@ -156,7 +157,14 @@ struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builde
 
   pbes_expression operator()(const not_& x)
   {
-    return post_process(super::operator()(x));
+    pbes_expression y = x;
+    if (is_data(x.operand()))
+    {
+      const data::data_expression& d = atermpp::aterm_cast<data::data_expression>(x.operand());
+      data::detail::one_point_rule_preprocessor R;
+      y = R(data::sort_bool::not_(d));
+    }
+    return post_process(super::operator()(y));
   }
 
   pbes_expression operator()(const and_& x)
