@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESSTATEGRAPH_OPTIONS_H
 #define MCRL2_PBES_TOOLS_PBESSTATEGRAPH_OPTIONS_H
 
-
+#include "mcrl2/data/rewrite_strategy.h"
 
 namespace mcrl2 {
 
