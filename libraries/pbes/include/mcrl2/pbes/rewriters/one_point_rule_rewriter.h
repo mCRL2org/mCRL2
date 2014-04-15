@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/one_point_rule_rewriter.h
+/// \file mcrl2/pbes/rewriters/one_point_rule_rewriter.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_ONE_POINT_RULE_REWRITER_H
-#define MCRL2_PBES_ONE_POINT_RULE_REWRITER_H
+#ifndef MCRL2_PBES_REWRITERS_ONE_POINT_RULE_REWRITER_H
+#define MCRL2_PBES_REWRITERS_ONE_POINT_RULE_REWRITER_H
 
 #include <cassert>
 #include "mcrl2/core/detail/print_utility.h"
@@ -386,4 +386,4 @@ class one_point_rule_rewriter
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_ONE_POINT_RULE_REWRITER_H
+#endif // MCRL2_PBES_REWRITERS_ONE_POINT_RULE_REWRITER_H

@@ -16,7 +16,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/tools.h"

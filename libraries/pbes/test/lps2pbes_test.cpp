@@ -26,7 +26,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/test_utility.h"
-#include "mcrl2/pbes/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"

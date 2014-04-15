@@ -30,7 +30,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
