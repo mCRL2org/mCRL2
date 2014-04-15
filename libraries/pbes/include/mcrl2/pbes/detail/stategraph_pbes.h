@@ -102,7 +102,7 @@ class predicate_variable
     void simplify_guard()
     {
       data::detail::simplify_rewriter r;
-      stategraph_simplifying_rewriter<pbes_expression, data::detail::simplify_rewriter> R(r);
+      stategraph_simplifying_rewriter<data::detail::simplify_rewriter> R(r);
       m_guard = R(m_guard);
     }
 };

@@ -194,7 +194,7 @@ void test_simplifying_rewriter()
   data::data_specification data_spec = data::data_specification();
   data_spec.add_context_sort(data::sort_nat::nat());
   data::rewriter datar(data_spec);
-  pbes_system::simplifying_quantifier_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
+  pbes_system::simplifying_quantifier_rewriter<data::rewriter> R(datar);
   pbes_system::data_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
 
   test_simplify(R, r, "val(n >= 0) || Y(n)"                                             , "true");

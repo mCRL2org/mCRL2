@@ -291,7 +291,9 @@ void test_local_stategraph()
     "init X(1,0);\n"
     ;
   p = txt2pbes(text, normalize);
-  pbes_system::detail::local_reset_variables_algorithm(p).run();
+  pbesstategraph_options options;
+  options.use_local_variant = true;
+  pbes_system::detail::local_reset_variables_algorithm(p, options).run();
 }
 
 inline
@@ -763,7 +765,8 @@ void test_cfp()
     std::vector<std::string> lines = utilities::detail::nonempty_lines(expected_result);
     std::set<std::string> lineset(lines.begin(), lines.end());
     std::string expected = utilities::string_join(lineset, ", ");
-    pbes_system::detail::stategraph_algorithm algorithm(p, data::jitty, true, true, true);
+    pbesstategraph_options options;
+    pbes_system::detail::stategraph_algorithm algorithm(p, options);
     algorithm.run();
     std::string result = utilities::string_join(print_connected_components(algorithm.connected_components(), algorithm), ", ");
 

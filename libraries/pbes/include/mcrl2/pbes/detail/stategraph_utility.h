@@ -14,7 +14,7 @@
 
 #include <sstream>
 #include "mcrl2/pbes/pbes_equation.h"
-#include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
+#include "mcrl2/pbes/rewriters/simplifying_quantifier_rewriter.h"
 
 namespace mcrl2 {
 
@@ -81,23 +81,20 @@ std::string print_pbes_expressions(const std::set<pbes_expression>& v)
   return out.str();
 }
 
-// Adds some simplifications to simplify_rewrite_builder.
-template <typename Term, typename DataRewriter, typename SubstitutionFunction = no_substitution>
-struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simplify_quantifier_builder<Term, DataRewriter, SubstitutionFunction>
+template <typename Derived, typename DataRewriter>
+struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builder<Derived, DataRewriter>
 {
-  typedef pbes_system::detail::simplify_quantifier_builder<Term, DataRewriter, SubstitutionFunction> super;
-  typedef SubstitutionFunction                                                                       argument_type;
-  typedef typename super::term_type                                                                  term_type;
-  typedef typename core::term_traits<term_type>::data_term_type                                      data_term_type;
-  typedef typename core::term_traits<term_type>::data_term_sequence_type                             data_term_sequence_type;
-  typedef typename core::term_traits<term_type>::variable_sequence_type                              variable_sequence_type;
-  typedef typename core::term_traits<term_type>::propositional_variable_type                         propositional_variable_type;
-  typedef core::term_traits<Term> tr;
+  typedef simplify_quantifier_builder<Derived, DataRewriter> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  typedef core::term_traits<pbes_expression> tr;
 
   /// \brief Constructor.
   /// \param rewr A data rewriter
   stategraph_simplify_quantifier_builder(const DataRewriter& rewr)
-    : simplify_quantifier_builder<Term, DataRewriter, SubstitutionFunction>(rewr)
+    : super(rewr)
   { }
 
   bool is_data_not(const pbes_expression& x) const
@@ -125,28 +122,28 @@ struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simpl
   // replace !(y && z) by !y || !z
   // replace !(y => z) by y || !z
   // replace y => z by !y || z
-  term_type post_process(const term_type& x)
+  pbes_expression post_process(const pbes_expression& x)
   {
-    term_type result = x;
+    pbes_expression result = x;
     if (tr::is_not(x))
     {
-      const term_type& t = tr::not_arg(x);
+      const pbes_expression& t = tr::not_arg(x);
       if (tr::is_or(t)) // x = !(y && z)
       {
-        term_type y = utilities::optimized_not(tr::left(t));
-        term_type z = utilities::optimized_not(tr::right(t));
+        pbes_expression y = utilities::optimized_not(tr::left(t));
+        pbes_expression z = utilities::optimized_not(tr::right(t));
         result = utilities::optimized_and(y, z);
       }
       else if (tr::is_and(t)) // x = !(y || z)
       {
-        term_type y = utilities::optimized_not(tr::left(t));
-        term_type z = utilities::optimized_not(tr::right(t));
+        pbes_expression y = utilities::optimized_not(tr::left(t));
+        pbes_expression z = utilities::optimized_not(tr::right(t));
         result = utilities::optimized_or(y, z);
       }
       else if (tr::is_imp(t)) // x = !(y => z)
       {
-        term_type y = tr::left(t);
-        term_type z = utilities::optimized_not(tr::right(t));
+        pbes_expression y = tr::left(t);
+        pbes_expression z = utilities::optimized_not(tr::right(t));
         result = utilities::optimized_or(y, z);
       }
       else if (is_data_not(t)) // x = !val(!y)
@@ -158,15 +155,15 @@ struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simpl
     }
     else if (tr::is_imp(x)) // x = y => z
     {
-      term_type y = utilities::optimized_not(tr::left(x));
-      term_type z = tr::right(x);
+      pbes_expression y = utilities::optimized_not(tr::left(x));
+      pbes_expression z = tr::right(x);
       result = utilities::optimized_or(y, z);
     }
     return result;
   }
 
   // replaces data operators !, ||, && by their pbes equivalent
-  term_type preprocess(const term_type& x)
+  pbes_expression preprocess(const data::data_expression& x)
   {
     typedef core::term_traits<data::data_expression> tt;
     if (is_data_not(x))
@@ -188,16 +185,16 @@ struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simpl
   }
 
   // replace the data expression y != z by !(y == z)
-  term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
+  pbes_expression operator()(const data::data_expression& x)
   {
     // if x has one of the operators !, ||, && at the top level, handle it by the PBES simplification
-    term_type y = preprocess(x);
+    pbes_expression y = preprocess(x);
     if (y != x)
     {
-      return super::visit(y, sigma);
+      return super::operator()(y);
     }
     typedef core::term_traits<data::data_expression> tt;
-    term_type result = super::visit_data_expression(x, d, sigma);
+    pbes_expression result = super::operator()(x);
     const data::data_expression& t = atermpp::aterm_cast<const data::data_expression>(result);
     if (data::is_not_equal_to_application(t)) // result = y != z
     {
@@ -208,77 +205,109 @@ struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simpl
     return post_process(result);
   }
 
-  term_type visit_true(const term_type& x, SubstitutionFunction& sigma)
+  pbes_expression operator()(const true_& x)
   {
-    return post_process(super::visit_true(x, sigma));
+    return post_process(super::operator()(x));
   }
 
-  term_type visit_false(const term_type& x, SubstitutionFunction& sigma)
+  pbes_expression operator()(const false_& x)
   {
-    return post_process(super::visit_false(x, sigma));
+    return post_process(super::operator()(x));
   }
 
-  term_type visit_not(const term_type& x, const term_type& n, SubstitutionFunction& sigma)
+  pbes_expression operator()(const not_& x)
   {
-    return post_process(super::visit_not(x, n, sigma));
+    return post_process(super::operator()(x));
   }
 
-  term_type visit_and(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
+  pbes_expression operator()(const and_& x)
   {
-    return post_process(super::visit_and(x, left, right, sigma));
+    return post_process(super::operator()(x));
   }
 
-  term_type visit_or(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
+  pbes_expression operator()(const or_& x)
   {
-    return post_process(super::visit_or(x, left, right, sigma));
+    return post_process(super::operator()(x));
   }
 
-  term_type visit_imp(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
+  pbes_expression operator()(const imp& x)
   {
-    return post_process(super::visit_imp(x, left, right, sigma));
+    return post_process(super::operator()(x));
   }
 
-  term_type visit_forall(const term_type& x, const variable_sequence_type&  variables, const term_type&  expression, SubstitutionFunction& sigma)
+  pbes_expression operator()(const forall& x)
   {
-    return post_process(super::visit_forall(x, variables, expression, sigma));
+    return post_process(super::operator()(x));
   }
 
-  term_type visit_exists(const term_type& x, const variable_sequence_type&  variables, const term_type&  expression, SubstitutionFunction& sigma)
+  pbes_expression operator()(const exists& x)
   {
-    return post_process(super::visit_exists(x, variables, expression, sigma));
+    return post_process(super::operator()(x));
   }
 
-  term_type visit_propositional_variable(const term_type& x, const propositional_variable_type&  v, SubstitutionFunction& sigma)
+  pbes_expression operator()(const propositional_variable_instantiation& x)
   {
-    return post_process(super::visit_propositional_variable(x, v, sigma));
+    return post_process(super::operator()(x));
   }
 };
 
-template <typename Term, typename DataRewriter>
+template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
+struct stategraph_simplify_quantifier_with_substitution_builder: public stategraph_simplify_quantifier_builder<Derived, DataRewriter>
+{
+  typedef stategraph_simplify_quantifier_builder<Derived, DataRewriter> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  SubstitutionFunction& sigma;
+
+  stategraph_simplify_quantifier_with_substitution_builder(const DataRewriter& R_, SubstitutionFunction& sigma_)
+    : super(R_), sigma(sigma_)
+  {}
+
+  pbes_expression operator()(const data::data_expression& x)
+  {
+    return R(x, sigma);
+  }
+};
+
+/// \brief A rewriter that simplifies expressions that simplifies quantifiers.
+template <typename DataRewriter>
 class stategraph_simplifying_rewriter
 {
   protected:
-    DataRewriter m_rewriter;
+    /// \brief The data rewriter
+    const DataRewriter& m_rewriter;
 
   public:
-    typedef typename core::term_traits<Term>::term_type term_type;
-    typedef typename core::term_traits<Term>::variable_type variable_type;
+    /// \brief The term type
+    typedef pbes_expression term_type;
 
+    /// \brief The variable type
+    typedef data::variable variable_type;
+
+    /// \brief Constructor
+    /// \param rewriter A data rewriter
     stategraph_simplifying_rewriter(const DataRewriter& rewriter)
       : m_rewriter(rewriter)
     {}
 
-    term_type operator()(const term_type& x) const
+    /// \brief Rewrites a pbes expression.
+    /// \param x A term
+    /// \return The rewrite result.
+    pbes_expression operator()(const pbes_expression& x) const
     {
-      stategraph_simplify_quantifier_builder<Term, DataRewriter> r(m_rewriter);
-      return r(x);
+      return detail::make_apply_simplify_builder<stategraph_simplify_quantifier_builder>(m_rewriter)(x);
     }
 
+    /// \brief Rewrites a pbes expression.
+    /// \param x A term
+    /// \param sigma A substitution function
+    /// \return The rewrite result.
     template <typename SubstitutionFunction>
-    term_type operator()(const term_type& x, SubstitutionFunction sigma) const
+    pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
     {
-      stategraph_simplify_quantifier_builder<Term, DataRewriter, SubstitutionFunction> r(m_rewriter);
-      return r(x, sigma);
+      return detail::make_apply_simplify_with_substitution_builder<stategraph_simplify_quantifier_with_substitution_builder>(m_rewriter, sigma)(x);
     }
 };
 
