@@ -19,6 +19,7 @@
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
+#include "mcrl2/pbes/detail/stategraph_simplifying_rewriter.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/container_utility.h"
