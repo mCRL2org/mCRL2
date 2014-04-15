@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFYING_REWRITER_H
 
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
+#include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/rewriters/simplifying_quantifier_rewriter.h"
 
 namespace mcrl2 {
@@ -36,6 +37,11 @@ struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builde
   stategraph_simplify_quantifier_builder(const DataRewriter& rewr)
     : super(rewr)
   { }
+
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
 
   bool is_data_not(const pbes_expression& x) const
   {
@@ -102,47 +108,30 @@ struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builde
     return result;
   }
 
-  // replaces data operators !, ||, && by their pbes equivalent
-  pbes_expression preprocess(const data::data_expression& x)
-  {
-    typedef core::term_traits<data::data_expression> tt;
-    if (is_data_not(x))
-    {
-      const data::data_expression& y = atermpp::aterm_cast<const data::data_expression>(x);
-      return tr::not_(not_arg(y));
-    }
-    else if (is_data_and(x))
-    {
-      const data::data_expression& y = atermpp::aterm_cast<const data::data_expression>(x);
-      return tr::and_(tt::left(y), tt::right(y));
-    }
-    else if (is_data_or(x))
-    {
-      const data::data_expression& y = atermpp::aterm_cast<const data::data_expression>(x);
-      return tr::or_(tt::left(y), tt::right(y));
-    }
-    return x;
-  }
-
   // replace the data expression y != z by !(y == z)
   pbes_expression operator()(const data::data_expression& x)
   {
-    // if x has one of the operators !, ||, && at the top level, handle it by the PBES simplification
-    pbes_expression y = preprocess(x);
-    if (y != x)
-    {
-      return super::operator()(y);
-    }
     typedef core::term_traits<data::data_expression> tt;
-    pbes_expression result = super::operator()(x);
-    const data::data_expression& t = atermpp::aterm_cast<const data::data_expression>(result);
-    if (data::is_not_equal_to_application(t)) // result = y != z
+
+    // step 1: simplify the data expression
+    data::detail::simplify_rewriter R;
+    data::data_expression x1 = R(x);
+
+    // step 2: if it is a negation, apply the one point rule preprocessor
+    if (tt::is_not(x1))
     {
-      data::data_expression y = tt::left(t);
-      data::data_expression z = tt::right(t);
-      result = tr::not_(data::equal_to(y, z));
+      data::detail::one_point_rule_preprocessor R;
+      x1 = R(x1);
     }
-    return post_process(result);
+
+    // step 3: replace the data expression y != z by !(y == z)
+    if (data::is_not_equal_to_application(x1)) // result = y != z
+    {
+      data::data_expression y = tt::left(x1);
+      data::data_expression z = tt::right(x1);
+      x1 = data::sort_bool::not_(data::equal_to(y, z));
+    }
+    return post_process(x1);
   }
 
   pbes_expression operator()(const true_& x)
@@ -157,14 +146,14 @@ struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builde
 
   pbes_expression operator()(const not_& x)
   {
-    pbes_expression y = x;
-    if (is_data(x.operand()))
+    typedef core::term_traits<data::data_expression> tt;
+
+    if (is_data(x.operand())) // convert to data expression
     {
-      const data::data_expression& d = atermpp::aterm_cast<data::data_expression>(x.operand());
-      data::detail::one_point_rule_preprocessor R;
-      y = R(data::sort_bool::not_(d));
+      pbes_expression y = data::sort_bool::not_(atermpp::aterm_cast<data::data_expression>(x.operand()));
+      return derived()(y);
     }
-    return post_process(super::operator()(y));
+    return post_process(super::operator()(x));
   }
 
   pbes_expression operator()(const and_& x)
