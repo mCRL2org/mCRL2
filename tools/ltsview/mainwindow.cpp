@@ -21,7 +21,6 @@
 #include "savevectordialog.h"
 
 MainWindow::MainWindow():
-  m_messenger(this),
   m_fileDialog("", this)
 {
   m_ui.setupUi(this);
@@ -49,6 +48,9 @@ MainWindow::MainWindow():
   m_ui.viewMenu->insertAction(m_ui.preferences, m_ui.markDock->toggleViewAction());
   m_ui.viewMenu->insertAction(m_ui.preferences, m_ui.settingsDock->toggleViewAction());
   m_ui.viewMenu->insertSeparator(m_ui.preferences);
+
+  mcrl2::log::logger::register_output_policy(m_logRelay);
+  connect(&m_logRelay, SIGNAL(logMessage(QString, QString, QDateTime, QString)), this, SLOT(logMessage(QString, QString, QDateTime, QString)));
 
   connect(m_ui.open, SIGNAL(triggered()), this, SLOT(open()));
   connect(m_ui.openTrace, SIGNAL(triggered()), this, SLOT(openTrace()));
@@ -96,6 +98,11 @@ MainWindow::MainWindow():
   QSettings settings("mCRL2", "LTSView");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
+}
+
+MainWindow::~MainWindow()
+{
+  mcrl2::log::logger::unregister_output_policy(m_logRelay);
 }
 
 void MainWindow::closeEvent(QCloseEvent */*event*/)
