@@ -195,8 +195,8 @@ class pbesinst_algorithm
         equation_index[eqn.variable().name()] = eqn_index++;
         E.push_back(std::vector<pbes_equation>());
       }
-      propositional_variable_instantiation Xinit = atermpp::aterm_cast<propositional_variable_instantiation>(R(p.initial_state()));
-      todo.insert(Xinit);
+      init = atermpp::aterm_cast<propositional_variable_instantiation>(R(p.initial_state()));
+      todo.insert(init);
       while (!todo.empty())
       {
       	auto const& X_e = pick_element(todo);
@@ -214,7 +214,7 @@ class pbesinst_algorithm
             todo.insert(*i);
           }
         }
-        pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::variable_list()), rho(psi_e));
+        pbes_equation new_eqn(eqn.symbol(), propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list()), rho(psi_e));
         if (m_print_equations)
         {
           mCRL2log(log::info) << eqn.symbol() << " " << X_e << " = " << psi_e << std::endl;
@@ -234,7 +234,7 @@ class pbesinst_algorithm
       {
         result.equations().insert(result.equations().end(), i->begin(), i->end());
       }
-      result.initial_state() = init;
+      result.initial_state() = pbesinst_rename()(init);
       return result;
     }
 
