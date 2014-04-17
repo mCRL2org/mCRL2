@@ -419,35 +419,28 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
             }
             while (!todo.empty())
             {
-              auto const& u = *pick_element(todo);
-              auto const& X = u.name();
-              if (u.marking().size() == Bj[X].size())
-              {
-                continue;
-              }
-              mCRL2log(log::debug1, "stategraph") << " extend marking rule1: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
-              auto m = u.marking();
+              auto const& v = *pick_element(todo);
 
-              auto const& outgoing_edges = u.outgoing_edges();
-              for (auto ei = outgoing_edges.begin(); ei != outgoing_edges.end(); ++ei)
+              mCRL2log(log::debug1, "stategraph") << " extend marking rule1: v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
+
+              auto const& incoming_edges = v.incoming_edges();
+              for (auto ei = incoming_edges.begin(); ei != incoming_edges.end(); ++ei)
               {
-                auto const& v = *ei->first;
+                bool changed = false;
+                auto const& u = *ei->first;
                 auto const& labels = ei->second;
-                for (auto ii = labels.begin(); ii != labels.end(); ++ii)
+                for (auto ii = labels.begin() ; ii != labels.end(); ++ii)
                 {
-                  // consider edge (u, i, v)
-                  std::size_t i = *ii;
-                  bool changed = update_marking_rule(Bj, u, i, v, false);
-                  if (changed)
-                  {
-                    mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
-                    auto const& incoming_edges = u.incoming_edges();
-                    for (auto fi = incoming_edges.begin(); fi != incoming_edges.end(); ++fi)
-                    {
-                      todo.insert(fi->first);
-                    }
-                    stableint = false;
-                  }
+                    // consider edge (u, i, v)
+                    std::size_t i = *ii;
+                    bool updated = update_marking_rule(Bj, u, i, v, false);
+                    changed = changed || updated;
+                }
+                if (changed)
+                {
+                  mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
+                  todo.insert(&u);
+                  stableint = false;
                 }
               }
             }
