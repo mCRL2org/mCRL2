@@ -370,22 +370,13 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
     {
       using utilities::detail::contains;
 
-      for (auto j = V.vertices.begin(); j != V.vertices.end(); ++j)
+      auto const& incoming_edges = v.incoming_edges();
+      for(auto j = incoming_edges.begin(); j != incoming_edges.end(); ++j)
       {
-        auto const& u = *j;
-        if (u.name() != X)
+        auto const& I = j->second;
+        if (contains(I, i))
         {
-          continue;
-        }
-        auto const& outgoing_edges = u.outgoing_edges();
-        auto k = outgoing_edges.find(&v);
-        if (k != outgoing_edges.end())
-        {
-          auto const& I = k->second;
-          if (contains(I, i))
-          {
-            return true;
-          }
+          return true;
         }
       }
       return false;
