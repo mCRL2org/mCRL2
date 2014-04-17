@@ -359,8 +359,8 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
         {
           continue;
         }
-        auto update = marking_update(u, i, d, e, eq_Y, B);
-        u.set_marking(data::detail::set_union(u.marking(), update));
+        auto const update = marking_update(u, i, d, e, eq_Y, B);
+        u.extend_marking(update);
       }
       return u.marking().size() != size;
     }
