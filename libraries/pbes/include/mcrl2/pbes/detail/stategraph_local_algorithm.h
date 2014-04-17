@@ -471,7 +471,9 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                 continue;
               }
               mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
-              auto const& eq_X = *find_equation(m_pbes, X);
+
+              bool changed = false;
+              auto const& eq_X = *find_equation(m_pbes, X); // slow
               auto const& predvars = eq_X.predicate_variables();
               auto const& outgoing_edges = u.outgoing_edges();
               for (auto ei = outgoing_edges.begin(); ei != outgoing_edges.end(); ++ei)
@@ -479,7 +481,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                 auto const& labels = ei->second;
                 for (auto ii = labels.begin(); ii != labels.end(); ++ii)
                 {
-                  std::size_t i = *ii;
+                  const std::size_t i = *ii;
                   auto const& Ye = predvars[i];
                   auto const& Y = Ye.name();
                   for (std::size_t k = 0; k < J; k++)
@@ -503,18 +505,18 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                       }
                       if (has_incoming_edge(Vk, v, X, i))
                       {
-                        auto m = u.marking();
-                        bool changed = update_marking_rule(Bj, u, i, v, true);
-                        if (changed)
-                        {
-                          mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
-                          stableint = false;
-                          stableext = false;
-                        }
+                        bool updated = update_marking_rule(Bj, u, i, v, true);
+                        changed = changed || updated;
                       }
                     }
                   }
                 }
+              }
+              if (changed)
+              {
+                mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
+                stableint = false;
+                stableext = false;
               }
             }
           }
