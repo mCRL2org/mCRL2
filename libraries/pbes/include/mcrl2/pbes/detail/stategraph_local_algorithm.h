@@ -563,17 +563,55 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
           B[X].insert(d_X[*i]);
         }
 
+        // Hmm, moet dit niet B[X] zijn? m.a.w. dit zou volgens mij efficienter moeten kunnen
+        for (auto j = m_belongs.begin(); j != m_belongs.end(); ++j)
+        {
+          auto const& Bj = *j;
+          remove_belongs(B, Bj);
+        }
+
         auto const& predvars = eq_X.predicate_variables();
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
           auto const& Ye = predvars[i];
-          for (auto j = m_belongs.begin(); j != m_belongs.end(); ++j)
+
+          std::set<data::variable> used_or_changed;
+          for(auto j = Ye.changed().begin(); j != Ye.changed().end(); ++j)
           {
-            auto const& Bj = *j;
-            remove_belongs(B, Bj);
+            used_or_changed.insert(d_X[*j]);
           }
-          auto const& v = V.insert_vertex(local_control_flow_graph_vertex(Ye.name(), data::undefined_data_expression()));
-          V.insert_edge(u, i, v);
+          for(auto j = Ye.used().begin(); j != Ye.used().end(); ++j)
+          {
+            used_or_changed.insert(d_X[*j]);
+          }
+
+          //if exists k: d_X[k] \in B && (used(X, j, k) || changed(X, j, k)) then
+          // implemented by checking for non-empty intersection
+          bool found = false;
+          std::set<data::variable>::const_iterator bi = B[X].begin();
+          std::set<data::variable>::const_iterator ui = used_or_changed.begin();
+          while (bi != B[X].end() && ui != used_or_changed.end())
+          {
+            if (*ui < *bi)
+            {
+              ++ui;
+            }
+            else if (*bi < *ui)
+            {
+              ++bi;
+            }
+            else
+            {
+              found = true;
+              break;
+            }
+          }
+
+          if(found)
+          {
+            auto const& v = V.insert_vertex(local_control_flow_graph_vertex(Ye.name(), data::undefined_data_expression()));
+            V.insert_edge(u, i, v);
+          }
         }
       }
       m_local_control_flow_graphs.push_back(V);
