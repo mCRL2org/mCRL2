@@ -9,10 +9,10 @@
 
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/set_identifier_generator.h"
 
 #include "mcrl2/lps/lpsparunfoldlib.h"
 #include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/replace.h"
 
 using namespace std;
@@ -42,6 +42,8 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
   m_glob_vars = spec.global_variables();
   m_action_label_list = spec.action_labels();
 
+  m_identifier_generator.add_identifiers(mcrl2::lps::find_identifiers(spec));
+
   for (std::vector<sort_expression>::const_iterator i =  m_data_specification.sorts().begin();
        i != m_data_specification.sorts().end();
        ++i)
@@ -51,6 +53,8 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
       sort_names.insert((basic_sort(*i)).name());
     }
   };
+
+  m_identifier_generator.add_identifiers(sort_names);
 
   {
     size_t size = mapping_and_constructor_names.size();
@@ -75,14 +79,14 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
     };
     mCRL2log(debug) << "- Specification has " <<  mapping_and_constructor_names.size() - size << " mappings " << std::endl;
   }
+
+  m_identifier_generator.add_identifiers(mapping_and_constructor_names);
 }
 
 mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort(std::string str)
 {
   //Generate a fresh Basic Sort
-  mcrl2::data::set_identifier_generator generator;
-  generator.add_identifiers(sort_names);
-  mcrl2::core::identifier_string nstr = generator(str);
+  mcrl2::core::identifier_string nstr = m_identifier_generator(str);
   mCRL2log(verbose) << "Generated fresh sort \"" <<  string(nstr) << "\" for \"" <<  str << "\"" << std::endl;
   sort_names.insert(nstr);
   return basic_sort(std::string(nstr));
@@ -94,9 +98,7 @@ mcrl2::core::identifier_string lpsparunfold::generate_fresh_constructor_and_mapp
 
   str.resize(std::remove_if(str.begin(), str.end(), &char_filter) - str.begin());
 
-  mcrl2::data::set_identifier_generator generator;
-  generator.add_identifiers(mapping_and_constructor_names);
-  mcrl2::core::identifier_string nstr = generator(str);
+  mcrl2::core::identifier_string nstr = m_identifier_generator(str);
   mCRL2log(debug) << "Generated a fresh mapping: " <<  string(nstr) << std::endl;
   mapping_and_constructor_names.insert(nstr);
   return nstr;
@@ -213,7 +215,6 @@ void lpsparunfold::create_data_equations(
   variable_vector vars;        /* Equation variables  */
   // data_equation_vector del;    /* Generated equations */
   std::set<mcrl2::core::identifier_string> var_names; /* var_names */
-  mcrl2::data::set_identifier_generator generator;
   variable v;
 
 
@@ -221,7 +222,7 @@ void lpsparunfold::create_data_equations(
   std::string dstr = "d";
 
   /* Creating variable for detector function */
-  mcrl2::core::identifier_string istr = generator(cstr);
+  mcrl2::core::identifier_string istr = m_identifier_generator(cstr);
   v = variable(istr, fresh_basic_sort);
   vars.push_back(v);
 
@@ -268,7 +269,7 @@ void lpsparunfold::create_data_equations(
       {
         if (sort_vars[*j].size() == sort_index[ *j])
         {
-          istr = generator(dstr);
+          istr = m_identifier_generator(dstr);
           variable v(istr, *j);
           sort_vars[*j].push_back(v);
         }
@@ -341,7 +342,7 @@ void lpsparunfold::create_data_equations(
 
       if (sort_vars[element_sort].size() == sort_index[ element_sort ])
       {
-        istr = generator(dstr);
+        istr = m_identifier_generator(dstr);
         variable v(istr, element_sort);
         sort_vars[ element_sort ].push_back(v);
       }
@@ -389,9 +390,7 @@ void lpsparunfold::create_data_equations(
 
 mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str, std::set<mcrl2::core::identifier_string>& process_parameter_names)
 {
-  mcrl2::data::set_identifier_generator generator;
-  generator.add_identifiers(process_parameter_names);
-  mcrl2::core::identifier_string idstr = generator(str.append("_pp"));
+  mcrl2::core::identifier_string idstr = m_identifier_generator(str.append("_pp"));
   process_parameter_names.insert(idstr);
   return idstr;
 }
@@ -735,21 +734,17 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
 
   if (is_structured_sort(lps_proc_pars[parameter_at_index].sort()))
   {
-    mcrl2::data::set_identifier_generator generator;
     mcrl2::core::identifier_string nstr;
-    nstr = generator("S");
+    nstr = m_identifier_generator("S");
     sort_names.insert(nstr);
-    generator.add_identifiers(sort_names);
     unfold_parameter_name = nstr;
   }
 
   if (is_container_sort(lps_proc_pars[parameter_at_index].sort()))
   {
-    mcrl2::data::set_identifier_generator generator;
     mcrl2::core::identifier_string nstr;
-    nstr = generator("S");
+    nstr = m_identifier_generator("S");
     sort_names.insert(nstr);
-    generator.add_identifiers(sort_names);
     unfold_parameter_name = nstr;
   }
 
@@ -763,7 +758,6 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
 {
   assert(function_sort(case_function.sort()).codomain() == function_sort(function_for_distribution.sort()).domain().front());
 
-  mcrl2::data::set_identifier_generator generator;
   variable_vector variables_used;
   mcrl2::core::identifier_string istr;
 
@@ -774,11 +768,11 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
   {
     if (i == case_function_sort_arguments.begin())
     {
-      istr = generator("b");
+      istr = m_identifier_generator("b");
     }
     else
     {
-      istr = generator("d");
+      istr = m_identifier_generator("d");
     }
     variable v(istr, *i);
     variables_used.push_back(v);
@@ -825,14 +819,13 @@ void lpsparunfold::generate_case_functions(function_symbol_vector elements_of_ne
 
   /* Generate variable identifier string for projection */
   std::string fstr = "y";
-  mcrl2::data::set_identifier_generator generator;
-  mcrl2::core::identifier_string istr = generator(fstr);
+  mcrl2::core::identifier_string istr = m_identifier_generator(fstr);
 
   variable_vector vars;
   sort_expression_list dom = function_sort(case_function.sort()).domain();
   for (sort_expression_list::const_iterator i = dom.begin(); i != dom.end(); ++i)
   {
-    istr = generator(fstr);
+    istr = m_identifier_generator(fstr);
     variable v(istr, *i);
     vars.push_back(v);
   }
