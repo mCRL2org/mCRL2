@@ -41,7 +41,7 @@
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 
-#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 
 #define RELEVANCE_MASK 1
 #define FIXPOINT_MASK 2
@@ -2149,7 +2149,7 @@ std::cerr << "AAA " << atermpp::aterm(p) << "\n";
 #endif
       max_rank(0)
     {
-      typedef mcrl2::pbes_system::custom_enumerate_quantifiers_rewriter my_pbes_rewriter;
+      typedef mcrl2::pbes_system::enumerate_quantifiers_rewriter my_pbes_rewriter;
       mcrl2::data::data_enumerator datae(pbes_spec.data(), data_rewriter);
       const bool enumerate_infinite_sorts=true;
       my_pbes_rewriter pbes_rewriter(data_rewriter, datae, enumerate_infinite_sorts);

@@ -18,7 +18,7 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
 #ifndef MCRL2_PBES_PBESINST_ALGORITHM_H
@@ -115,7 +115,7 @@ class pbesinst_algorithm
     data::data_enumerator datae;
 
     /// \brief The rewriter.
-    custom_enumerate_quantifiers_rewriter R;
+    enumerate_quantifiers_rewriter R;
 
     /// \brief The number of generated equations.
     int m_equation_count;
@@ -245,7 +245,7 @@ class pbesinst_algorithm
       return m_print_equations;
     }
 
-    custom_enumerate_quantifiers_rewriter& rewriter()
+    enumerate_quantifiers_rewriter& rewriter()
     {
       return R;
     }

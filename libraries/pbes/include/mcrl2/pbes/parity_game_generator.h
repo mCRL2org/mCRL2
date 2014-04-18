@@ -26,7 +26,7 @@
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
@@ -67,7 +67,7 @@ class parity_game_generator
     data::data_enumerator datae;
 
     /// \brief PBES rewriter.
-    pbes_system::custom_enumerate_quantifiers_rewriter R;
+    pbes_system::enumerate_quantifiers_rewriter R;
 
     /// \brief Maps propositional variables to corresponding PBES equations.
     std::map<core::identifier_string, std::vector<pbes_equation>::const_iterator > m_pbes_equation_index;

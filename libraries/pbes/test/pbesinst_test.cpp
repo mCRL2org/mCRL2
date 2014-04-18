@@ -339,7 +339,7 @@ void test_cabp()
   data::mutable_map_substitution<> sigma;
   pbes_expression t = parse_pbes_expression(expr, subst, p, sigma);
   pbesinst_algorithm algorithm(p.data());
-  custom_enumerate_quantifiers_rewriter& R = algorithm.rewriter();
+  enumerate_quantifiers_rewriter& R = algorithm.rewriter();
   pbes_expression z = R(t, sigma);
 }
 

@@ -34,7 +34,7 @@ namespace detail {
     protected:
       data::rewriter datar;
       data::data_enumerator datae;
-      pbes_system::custom_enumerate_quantifiers_rewriter pbes_rewriter;
+      pbes_system::enumerate_quantifiers_rewriter pbes_rewriter;
 
     public:
     /// \brief Constructor.

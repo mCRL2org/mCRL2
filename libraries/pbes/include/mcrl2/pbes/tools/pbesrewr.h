@@ -56,7 +56,7 @@ void pbesrewr(const std::string& input_filename,
     {
       data::data_enumerator datae(p.data(), datar);
       bool enumerate_infinite_sorts = true;
-      custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
+      enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
       pbes_rewrite(p, pbesr);
       break;
     }
@@ -64,7 +64,7 @@ void pbesrewr(const std::string& input_filename,
     {
       data::data_enumerator datae(p.data(), datar);
       bool enumerate_infinite_sorts = false;
-      custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
+      enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
       pbes_rewrite(p, pbesr);
       break;
     }

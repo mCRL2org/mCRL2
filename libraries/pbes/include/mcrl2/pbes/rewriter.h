@@ -13,7 +13,7 @@
 #define MCRL2_PBES_REWRITER_H
 
 #include "mcrl2/pbes/rewriters/bqnf_rewriter.h"
-#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"

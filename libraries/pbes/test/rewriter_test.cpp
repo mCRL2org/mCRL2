@@ -33,7 +33,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
@@ -279,7 +279,7 @@ void test_enumerate_quantifiers_rewriter()
   data::rewriter datar(data_spec);
   data::data_enumerator datae(data_spec, datar);
   pbes_system::data_rewriter<data::rewriter> r(datar);
-  custom_enumerate_quantifiers_rewriter R(datar, datae);
+  enumerate_quantifiers_rewriter R(datar, datae);
 
   // test_rewriters(N(R), N(r),  "(Y(0) && Y(1)) => (Y(1) && Y(0))"                                , "true");
   test_rewriters(N(R), N(r),  "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "Y(2) && Y(1) && Y(3) && Y(0)");
@@ -343,7 +343,7 @@ void test_enumerate_quantifiers_rewriter(std::string expr1, std::string expr2, s
   data::data_specification dspec = data::parse_data_specification(data_spec);
   data::rewriter datar(dspec);
   data::data_enumerator datae(dspec, datar);
-  pbes_system::custom_enumerate_quantifiers_rewriter R(datar, datae);
+  pbes_system::enumerate_quantifiers_rewriter R(datar, datae);
   test_expressions(R, expr1, R, expr2, var_decl, sigma, data_spec);
 }
 
@@ -392,7 +392,7 @@ void test_enumerate_quantifiers_rewriter_finite()
   data_spec.add_context_sort(data::sort_list::list(data::sort_nat::nat()));
   data::rewriter datar(data_spec);
   data::data_enumerator datae(data_spec, datar);
-  pbes_system::custom_enumerate_quantifiers_rewriter R(datar, datae, false);
+  pbes_system::enumerate_quantifiers_rewriter R(datar, datae, false);
   pbes_system::simplify_data_rewriter<data::rewriter> S(datar);
 
   test_expressions(R, "forall n:Nat, b:Bool.Z(b,n)", S, "forall n:Nat.Z(false,n) && Z(true,n)");
@@ -451,7 +451,7 @@ void test_substitutions2()
   data_spec.add_context_sort(data::sort_nat::nat());
   data::rewriter datar(data_spec);
   data::data_enumerator datae(data_spec, datar);
-  pbes_system::custom_enumerate_quantifiers_rewriter R(datar, datae);
+  pbes_system::enumerate_quantifiers_rewriter R(datar, datae);
 
   std::string var_decl;
   std::string sigma;
@@ -557,7 +557,7 @@ void test_substitutions3()
   data::data_specification data_spec = data::parse_data_specification(DATA_SPEC);
   data::rewriter datar(data_spec);
   data::data_enumerator datae(data_spec, datar);
-  pbes_system::custom_enumerate_quantifiers_rewriter r(datar, datae);
+  pbes_system::enumerate_quantifiers_rewriter r(datar, datae);
 
   data::mutable_map_substitution<> sigma;
   sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");

@@ -21,7 +21,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
-#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/pbes/pbesinst_algorithm.h"
@@ -48,7 +48,7 @@ class pbesinst_symbolic_algorithm
     data::data_enumerator datae;
 
     /// \brief The rewriter.
-    custom_enumerate_quantifiers_rewriter R;
+    enumerate_quantifiers_rewriter R;
 
     /// \brief Propositional variable instantiations that need to be handled.
     std::set<state_type> todo;
