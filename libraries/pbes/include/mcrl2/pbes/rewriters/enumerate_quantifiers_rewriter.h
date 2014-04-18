@@ -193,14 +193,14 @@ class quantifier_enumerator
         pbes_expression c = r_(phi_, sigma_);
         std::set<data::variable> FV_c = pbes_system::find_free_variables(c);
 
-        mCRL2log(log::verbose) << "        Z = Z + " << c << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << core::detail::print_list(v_) << std::endl;
+        mCRL2log(log::debug1) << "        Z = Z + " << c << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << core::detail::print_list(v_) << std::endl;
         if (stop_(c))
         {
           throw stop_early();
         }
         else if (empty_intersection(FV_c, v_))
         {
-          mCRL2log(log::verbose) << "        A = A + " << pbes_system::pp(c) << std::endl;
+          mCRL2log(log::debug1) << "        A = A + " << pbes_system::pp(c) << std::endl;
           A_.insert(c);
         }
         else
@@ -233,7 +233,7 @@ class quantifier_enumerator
     template <typename SubstitutionFunction>
     void print_arguments(data::variable_list x, const pbes_expression& phi, SubstitutionFunction& sigma, pbes_expression stop_value) const
     {
-      mCRL2log(log::verbose) << "<enumerate>"
+      mCRL2log(log::debug1) << "<enumerate>"
                              << (tr::is_false(stop_value) ? "forall " : "exists ")
                              << x << ". "
                              << phi
@@ -253,12 +253,14 @@ class quantifier_enumerator
 
     /// \brief Prints debug information to standard error
     /// \param D The sequence D of the algorithm
-    void print_D(const std::vector<std::vector<data::data_expression_with_variables> >& D) const
+    std::string print_D(const std::vector<std::vector<data::data_expression_with_variables> >& D) const
     {
+      std::ostringstream out;
       for (size_t i = 0; i < D.size(); i++)
       {
-        mCRL2log(log::verbose) << "  " << print_D_element(D[i], i);
+        out << "  " << print_D_element(D[i], i);
       }
+      return out.str();
     }
 
     /// \brief Returns a string representation of a todo list element
@@ -274,14 +276,16 @@ class quantifier_enumerator
 
     /// \brief Prints a todo list to standard error
     /// \param todo A todo list
-    void print_todo_list(const std::deque<boost::tuple<data::variable, data::data_expression_with_variables, std::size_t> >& todo) const
+    std::string print_todo_list(const std::deque<boost::tuple<data::variable, data::data_expression_with_variables, std::size_t> >& todo) const
     {
-      mCRL2log(log::verbose) << "  todo = [";
+      std::ostringstream out;
+      out << "  todo = [";
       for (auto i = todo.begin(); i != todo.end(); ++i)
       {
-        mCRL2log(log::verbose) << (i == todo.begin() ? "" : ", ") << print_todo_list_element(*i);
+        out << (i == todo.begin() ? "" : ", ") << print_todo_list_element(*i);
       }
-      mCRL2log(log::verbose) << "]" << std::endl;
+      out << "]" << std::endl;
+      return out.str();
     }
 
     template <typename SubstitutionFunction, typename VariableMap>
@@ -345,9 +349,9 @@ class quantifier_enumerator
         while (!todo.empty())
         {
           boost::tuple<data::variable, data::data_expression_with_variables, std::size_t> front = todo.front();
-          print_D(D);
-          print_todo_list(todo);
-          mCRL2log(log::verbose) << "    (y, k) = " << print_todo_list_element(front) << std::endl;
+          mCRL2log(log::debug1) << print_D(D);
+          mCRL2log(log::debug1) << print_todo_list(todo);
+          mCRL2log(log::debug1) << "    (y, k) = " << print_todo_list_element(front) << std::endl;
           todo.pop_front();
           const data::variable& xk = boost::get<0>(front);
           const data::data_expression_with_variables& y = boost::get<1>(front);
@@ -362,7 +366,7 @@ class quantifier_enumerator
           std::vector<data::data_expression_with_variables> z = datae.enumerate(y);
           for (auto i = z.begin(); i != z.end(); ++i)
           {
-            mCRL2log(log::verbose) << "      e = " << data::pp(*i) << std::endl;
+            mCRL2log(log::debug1) << "      e = " << data::pp(*i) << std::endl;
             set_insert(dependencies, i->variables());
             sigma[xk] = *i;
             D[k].clear();
@@ -375,7 +379,7 @@ class quantifier_enumerator
             if (!is_constant)
             {
               Dk.push_back(*i);
-              mCRL2log(log::verbose) << "        " << print_D_element(Dk, k) << std::endl;
+              mCRL2log(log::debug1) << "        " << print_D_element(Dk, k) << std::endl;
               if (!core::term_traits<data::data_expression_with_variables>::is_constant(*i))
               {
                 todo.push_back(boost::make_tuple(xk, *i, k));
@@ -398,7 +402,7 @@ class quantifier_enumerator
         {
           sigma[*j] = *j; // erase *j
         }
-        mCRL2log(log::verbose) << "<return>stop early: " << pbes_system::pp(stop_value) << std::endl;
+        mCRL2log(log::debug1) << "<return>stop early: " << pbes_system::pp(stop_value) << std::endl;
         redo_substitutions(sigma, undo);
         return stop_value;
       }
@@ -409,7 +413,7 @@ class quantifier_enumerator
         sigma[*i] = *i; // erase *i
       }
       pbes_expression result = join(A.begin(), A.end());
-      mCRL2log(log::verbose) << "<return> " << pbes_system::pp(result) << std::endl;
+      mCRL2log(log::debug1) << "<return> " << pbes_system::pp(result) << std::endl;
       redo_substitutions(sigma, undo);
       return result;
     }
