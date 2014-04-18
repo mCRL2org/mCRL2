@@ -13,7 +13,7 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplifying_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
@@ -74,7 +74,7 @@ std::cerr << "t1 = " << pbes_system::pp(t1) << " " << t1 << std::endl;
   pbes_system::pbes_expression t2 = visitor.evaluate();
 std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
   data::rewriter datar;
-  pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
+  pbes_system::simplify_data_rewriter<data::rewriter> R(datar);
   if (R(t1) != R(t2))
   {
     BOOST_CHECK(R(t1) == R(t2));

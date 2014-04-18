@@ -83,7 +83,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
 
       mCRL2log(log::debug, "stategraph") << "=== compute control flow graph ===" << std::endl;
 
-      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
+      pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
 
       std::set<stategraph_vertex*> todo;
 

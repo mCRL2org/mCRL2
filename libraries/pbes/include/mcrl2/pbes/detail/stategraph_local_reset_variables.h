@@ -127,7 +127,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       // TODO: merge the two rewriters?
       if (m_simplify)
       {
-        pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
+        pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
         pbes_system::pbes_rewrite(p, pbesr);
       }
     }

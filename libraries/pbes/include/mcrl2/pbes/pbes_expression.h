@@ -1711,9 +1711,9 @@ struct term_traits<pbes_system::pbes_expression>
   /// \brief Test if a term is constant
   /// \return True if the term is constant
   static inline
-  bool is_constant(const term_type& /* t */)
+  bool is_constant(const term_type& t)
   {
-    return false;
+    return pbes_system::find_free_variables(t).empty();
   }
 
   /// \brief Pretty print function

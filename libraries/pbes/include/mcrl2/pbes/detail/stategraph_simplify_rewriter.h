@@ -6,15 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/stategraph_simplifying_rewriter.h
+/// \file mcrl2/pbes/detail/stategraph_simplify_rewriter.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFYING_REWRITER_H
-#define MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFYING_REWRITER_H
+#ifndef MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H
+#define MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H
 
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
-#include "mcrl2/pbes/rewriters/simplifying_quantifier_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 
 namespace mcrl2 {
 
@@ -22,10 +22,10 @@ namespace pbes_system {
 
 namespace detail {
 
-template <typename Derived, typename DataRewriter>
-struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builder<Derived, DataRewriter>
+template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
+struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef simplify_quantifier_builder<Derived, DataRewriter> super;
+  typedef simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -34,8 +34,8 @@ struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builde
 
   /// \brief Constructor.
   /// \param rewr A data rewriter
-  stategraph_simplify_quantifier_builder(const DataRewriter& rewr)
-    : super(rewr)
+  stategraph_simplify_builder(const DataRewriter& R, SubstitutionFunction& sigma)
+    : super(R, sigma)
   { }
 
   Derived& derived()
@@ -64,6 +64,18 @@ struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builde
     return *data::application(x).begin();
   }
 
+  void split_or(const pbes_expression& expr, std::vector<pbes_expression>& result) const
+  {
+    namespace a = combined_access;
+    utilities::detail::split(expr, std::back_inserter(result), a::is_or, a::left, a::right);
+  }
+
+  void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
+  {
+    namespace a = combined_access;
+    utilities::detail::split(expr, std::back_inserter(result), a::is_and, a::left, a::right);
+  }
+
   // replace !(y || z) by !y && !z
   // replace !(y && z) by !y || !z
   // replace !(y => z) by y || !z
@@ -76,15 +88,23 @@ struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builde
       const pbes_expression& t = tr::not_arg(x);
       if (tr::is_or(t)) // x = !(y && z)
       {
-        pbes_expression y = utilities::optimized_not(tr::left(t));
-        pbes_expression z = utilities::optimized_not(tr::right(t));
-        result = utilities::optimized_and(y, z);
+        std::vector<pbes_expression> terms;
+        split_or(t, terms);
+        for (auto i = terms.begin(); i != terms.end(); ++i)
+        {
+          *i = utilities::optimized_not(*i);
+        }
+        result = pbes_expr::join_and(terms.begin(), terms.end());
       }
       else if (tr::is_and(t)) // x = !(y || z)
       {
-        pbes_expression y = utilities::optimized_not(tr::left(t));
-        pbes_expression z = utilities::optimized_not(tr::right(t));
-        result = utilities::optimized_or(y, z);
+        std::vector<pbes_expression> terms;
+        split_and(t, terms);
+        for (auto i = terms.begin(); i != terms.end(); ++i)
+        {
+          *i = utilities::optimized_not(*i);
+        }
+        result = pbes_expr::join_or(terms.begin(), terms.end());
       }
       else if (tr::is_imp(t)) // x = !(y => z)
       {
@@ -187,29 +207,9 @@ struct stategraph_simplify_quantifier_builder: public simplify_quantifier_builde
   }
 };
 
-template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
-struct stategraph_simplify_quantifier_with_substitution_builder: public stategraph_simplify_quantifier_builder<Derived, DataRewriter>
-{
-  typedef stategraph_simplify_quantifier_builder<Derived, DataRewriter> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-  SubstitutionFunction& sigma;
-
-  stategraph_simplify_quantifier_with_substitution_builder(const DataRewriter& R_, SubstitutionFunction& sigma_)
-    : super(R_), sigma(sigma_)
-  {}
-
-  pbes_expression operator()(const data::data_expression& x)
-  {
-    return R(x, sigma);
-  }
-};
-
 /// \brief A rewriter that simplifies expressions that simplifies quantifiers.
 template <typename DataRewriter>
-class stategraph_simplifying_rewriter
+class stategraph_simplify_rewriter
 {
   protected:
     /// \brief The data rewriter
@@ -224,7 +224,7 @@ class stategraph_simplifying_rewriter
 
     /// \brief Constructor
     /// \param rewriter A data rewriter
-    stategraph_simplifying_rewriter(const DataRewriter& rewriter)
+    stategraph_simplify_rewriter(const DataRewriter& rewriter)
       : m_rewriter(rewriter)
     {}
 
@@ -233,7 +233,8 @@ class stategraph_simplifying_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      return detail::make_apply_simplify_builder<stategraph_simplify_quantifier_builder>(m_rewriter)(x);
+      detail::NoSubst sigma;
+      return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma)(x);
     }
 
     /// \brief Rewrites a pbes expression.
@@ -243,7 +244,7 @@ class stategraph_simplifying_rewriter
     template <typename SubstitutionFunction>
     pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
     {
-      return detail::make_apply_simplify_with_substitution_builder<stategraph_simplify_quantifier_with_substitution_builder>(m_rewriter, sigma)(x);
+      return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma)(x);
     }
 };
 
@@ -253,4 +254,4 @@ class stategraph_simplifying_rewriter
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFYING_REWRITER_H
+#endif // MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H

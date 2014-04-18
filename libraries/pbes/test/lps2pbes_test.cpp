@@ -30,7 +30,7 @@
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplifying_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "test_specifications.h"
@@ -103,7 +103,7 @@ void one_point_rule_rewrite(pbes& p)
 
   // first preprocess data expressions
   data::detail::one_point_rule_preprocessor one_point_processor;
-  data_rewriter<pbes_expression, data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
+  data_rewriter<data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
   pbes_rewrite(p, datar_onepoint);
 
   // apply the one point rule rewriter
@@ -111,7 +111,7 @@ void one_point_rule_rewrite(pbes& p)
   pbes_rewrite(p, pbesr);
 
   // post processing: apply the simplifying rewriter
-  simplifying_rewriter<pbes_expression, data::rewriter> simp(datar);
+  simplify_data_rewriter<data::rewriter> simp(datar);
   pbes_rewrite(p, simp);
 }
 

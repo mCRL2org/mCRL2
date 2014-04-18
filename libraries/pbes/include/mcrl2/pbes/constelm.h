@@ -704,7 +704,7 @@ class pbes_constelm_algorithm
     {
       std::ostringstream out;
       data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
-      out << "\nEvaluated condition " << pbes_system::replace_free_variables(e.condition(), sigma) << " to " << value << std::endl;
+      out << "\nEvaluated condition " << e.condition() << data::print_substitution(sigma) << " to " << value << std::endl;
       return out.str();
     }
 
@@ -712,7 +712,7 @@ class pbes_constelm_algorithm
     {
       std::ostringstream out;
       data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
-      out << "\nCould not evaluate condition " << pbes_system::replace_free_variables(e.condition(), sigma) << " to true or false";
+      out << "\nCould not evaluate condition " << e.condition() << data::print_substitution(sigma) << " to true or false";
       return out.str();
     }
 

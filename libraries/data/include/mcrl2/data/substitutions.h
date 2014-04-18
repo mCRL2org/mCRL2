@@ -198,6 +198,12 @@ make_sequence_sequence_substitution(const VariableContainer& vc, const Expressio
 }
 
 template <typename VariableContainer, typename ExpressionContainer>
+std::ostream& operator<<(std::ostream& out, const sequence_sequence_substitution<VariableContainer, ExpressionContainer>& sigma)
+{
+  return out << sigma.to_string();
+}
+
+template <typename VariableContainer, typename ExpressionContainer>
 bool is_simple_substitution(const sequence_sequence_substitution<VariableContainer, ExpressionContainer>& sigma)
 {
   auto i = sigma.variables.begin();
@@ -526,6 +532,12 @@ make_mutable_map_substitution(const VariableContainer& vc, const ExpressionConta
   return mutable_map_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
 }
 
+template <typename AssociativeContainer>
+std::ostream& operator<<(std::ostream& out, const mutable_map_substitution<AssociativeContainer>& sigma)
+{
+  return out << sigma.to_string();
+}
+
 inline
 std::set<data::variable> substitution_variables(const mutable_map_substitution<>& sigma)
 {
@@ -805,6 +817,11 @@ public:
 
 };
 
+template <typename VariableType, typename ExpressionSequence>
+std::ostream& operator<<(std::ostream& out, const mutable_indexed_substitution<VariableType, ExpressionSequence>& sigma)
+{
+  return out << sigma.to_string();
+}
 
 /// \brief An adapter that makes an arbitrary substitution function mutable.
 template <typename Substitution>

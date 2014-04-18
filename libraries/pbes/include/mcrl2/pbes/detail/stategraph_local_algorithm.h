@@ -239,7 +239,7 @@ pbes_expression phi0 = phi;
         auto const& e = u.value();
         data::mutable_map_substitution<> sigma;
         sigma[d] = e;
-        pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
+        pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
         phi = pbesr(phi, sigma);
       }
 mCRL2log(log::debug2, "stategraph") << "  rhs           = " << phi0 << std::endl;
