@@ -152,11 +152,21 @@ class stategraph_equation: public pbes_equation
               result[vright] = left;
             }
           }
-          // TODO: handle conjuncts b and !b, with b a variable with sort Bool
-          //else if (data::is_variable(v_i) && sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
-          //{
-          //  sigma[data::variable(v_i)] = sort_bool::true_();
-          //}
+          // handle conjuncts b and !b, with b a variable with sort Bool
+          else if (data::is_variable(v_i) && data::sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
+          {
+            const data::variable& v = core::static_down_cast<const data::variable&>(v_i);
+            result[v] = data::sort_bool::true_();
+          }
+          else if (data::sort_bool::is_not_application(v_i))
+          {
+            data::data_expression narg(data::sort_bool::arg(v_i));
+            if (data::is_variable(narg) && data::sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(narg)) != d.end())
+            {
+              const data::variable& v = core::static_down_cast<const data::variable&>(narg);
+              result[v] = data::sort_bool::false_();
+            }
+          }
         }
       }
       mCRL2log(log::debug2, "stategraph") << "  computing source: expression = " << x << ", d_X = " << core::detail::print_list(d) << ", result = " << core::detail::print_map(result) << std::endl;
