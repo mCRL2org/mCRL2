@@ -575,39 +575,47 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
         {
           auto const& Ye = predvars[i];
 
-          std::set<data::variable> used_or_changed;
-          for(auto j = Ye.changed().begin(); j != Ye.changed().end(); ++j)
-          {
-            used_or_changed.insert(d_X[*j]);
-          }
-          for(auto j = Ye.used().begin(); j != Ye.used().end(); ++j)
-          {
-            used_or_changed.insert(d_X[*j]);
-          }
+          bool add_edge = false;
 
-          //if exists k: d_X[k] \in B && (used(X, j, k) || changed(X, j, k)) then
+          //if X != Y || exists k: d_X[k] \in B && (used(X, j, k) || changed(X, j, k)) then
           // implemented by checking for non-empty intersection
-          bool found = false;
-          std::set<data::variable>::const_iterator bi = B[X].begin();
-          std::set<data::variable>::const_iterator ui = used_or_changed.begin();
-          while (bi != B[X].end() && ui != used_or_changed.end())
+          if(X != Ye.name())
           {
-            if (*ui < *bi)
+            add_edge = true;
+          }
+          else
+          {
+            std::set<data::variable> used_or_changed;
+            for(auto j = Ye.changed().begin(); j != Ye.changed().end(); ++j)
             {
-              ++ui;
+              used_or_changed.insert(d_X[*j]);
             }
-            else if (*bi < *ui)
+            for(auto j = Ye.used().begin(); j != Ye.used().end(); ++j)
             {
-              ++bi;
+              used_or_changed.insert(d_X[*j]);
             }
-            else
+
+            std::set<data::variable>::const_iterator bi = B[X].begin();
+            std::set<data::variable>::const_iterator ui = used_or_changed.begin();
+            while (bi != B[X].end() && ui != used_or_changed.end())
             {
-              found = true;
-              break;
+              if (*ui < *bi)
+              {
+                ++ui;
+              }
+              else if (*bi < *ui)
+              {
+                ++bi;
+              }
+              else
+              {
+                add_edge = true;
+                break;
+              }
             }
           }
 
-          if(found)
+          if(add_edge)
           {
             auto const& v = V.insert_vertex(local_control_flow_graph_vertex(Ye.name(), data::undefined_data_expression()));
             V.insert_edge(u, i, v);
