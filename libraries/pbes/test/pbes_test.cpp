@@ -30,7 +30,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/complement.h"
@@ -48,7 +47,6 @@ using lps::linearise;
 using lps::specification;
 using pbes_system::pbes;
 using pbes_system::pbes_expression;
-using pbes_system::pbes_expr_builder;
 using pbes_system::pbes_equation;
 using pbes_system::lps2pbes;
 using pbes_system::propositional_variable_instantiation;

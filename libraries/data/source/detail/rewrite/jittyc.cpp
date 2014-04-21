@@ -3104,7 +3104,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(
   made_files = false;
   rewrite_rules.clear();
 
-  const data_equation_vector l=data_spec.equations();
+  const data_equation_vector& l=data_spec.equations();
   for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
   {
     if (data_equation_selector(*j))

@@ -296,7 +296,7 @@ inline void EnumeratorSolutionsStandard<TERM,REWRITER>::EliminateVars(fs_expr<TE
 
 template <class TERM, class REWRITER>
 inline data_expression EnumeratorSolutionsStandard<TERM,REWRITER>::build_solution_single(
-                 const data_expression& t,
+                 const variable& t,
                  variable_list substituted_vars,
                  data_expression_list exprs) const
 {
@@ -323,14 +323,10 @@ inline data_expression EnumeratorSolutionsStandard<TERM,REWRITER>::build_solutio
                  const variable_list& substituted_vars,
                  const data_expression_list& exprs) const
 {
+  assert(!is_where_clause(t)); // This is a non expected case as t is a normalform.
   if (is_variable(t))
   {
-    return build_solution_single(t,substituted_vars,exprs);
-  }
-  else if (is_where_clause(t))
-  {
-    assert(0); // This is a non expected case as t is a normalform.
-    return t; // compiler warning
+    return build_solution_single(atermpp::aterm_cast<variable>(t),substituted_vars,exprs);
   }
   else if (is_abstraction(t))
   {
@@ -344,24 +340,26 @@ inline data_expression EnumeratorSolutionsStandard<TERM,REWRITER>::build_solutio
   {
     return t;
   }
-  else
+
+  assert(is_application(t));
   {
     // t has the shape application(u1,...,un)
     const application t_appl(t);
-    data_expression head = t_appl.head();
+    const data_expression& head = t_appl.head();
 
-    if (!is_function_symbol(head))
+    if (is_function_symbol(head))
     {
-      head = build_solution_single(head,substituted_vars,exprs);
+      return application(head,t_appl.begin(),t_appl.end(),
+                       [&](const data_expression& t) -> data_expression const
+                            { return build_solution_aux(t,substituted_vars,exprs); });
     }
 
-    data_expression_vector args;
-    for (application::const_iterator i=t_appl.begin(); i!=t_appl.end(); i++)
-    {
-      args.push_back(build_solution_aux(*i,substituted_vars,exprs));
-    }
+    /* The head is more complex, rewrite it first; */
 
-    return application(head,args);
+    data_expression head1 = build_solution_aux(head,substituted_vars,exprs);
+    return application(head1,t_appl.begin(),t_appl.end(),
+                       [&](const data_expression& t) -> data_expression const
+                            { return build_solution_aux(t,substituted_vars,exprs); });
   }
 }
 

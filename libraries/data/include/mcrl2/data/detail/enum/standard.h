@@ -233,7 +233,7 @@ class EnumeratorSolutionsStandard
     void EliminateVars(fs_expr<TERM>& e);
 
     data_expression build_solution_single(
-                 const data_expression& t,
+                 const variable& t,
                  variable_list substituted_vars,
                  data_expression_list exprs) const;
 
