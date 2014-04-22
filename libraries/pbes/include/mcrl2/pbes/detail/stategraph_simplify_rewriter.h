@@ -82,6 +82,7 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
   using super::leave;
   using super::operator();
 
+  typedef core::term_traits<data::data_expression> tt;
   typedef core::term_traits<pbes_expression> tr;
 
   /// \brief Constructor.
@@ -177,6 +178,10 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
           *i = stategraph_not(*i);
         }
         result = stategraph_join_or(terms);
+      }
+      else
+      {
+        result = stategraph_not(arg);
       }
     }
     mCRL2log(log::debug2, "stategraph") << "  simplify-postprocess " << x << " -> " << result << std::endl;
