@@ -312,6 +312,14 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
             break;
           }
         }
+        else if(!v.has_variable())
+        {
+          if (contains(Bj[Y], d_Y[k]) && !contains(v.marking(), d_Y[k]))
+          {
+            relevant = false;
+            break;
+          }
+        }
         else
         {
           // update relevant and condition
