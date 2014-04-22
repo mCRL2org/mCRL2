@@ -33,14 +33,14 @@ std::ostream& operator<<(std::ostream& out, const NoSubst&)
 template <typename DataRewriter, typename SubstitutionFunction>
 data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, SubstitutionFunction& sigma)
 {
-  mCRL2log(log::debug) << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
+  mCRL2log(log::debug2) << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
   return R(x, sigma);
 }
 
 template <typename DataRewriter>
 data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, NoSubst&)
 {
-  mCRL2log(log::debug) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
+  mCRL2log(log::debug2) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
   return R(x);
 }
 
