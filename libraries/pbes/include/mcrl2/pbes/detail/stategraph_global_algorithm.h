@@ -55,7 +55,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
     {
       auto const& X = x.name();
       auto const& d_X = x.parameters();
-      const std::vector<bool>& b = is_GCFP_old(X);
+      const std::vector<bool>& b = is_GCFP(X);
       std::size_t index = 0;
       std::vector<data::data_expression> d;
       for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
@@ -74,7 +74,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
     {
       auto const& X = x.name();
       auto const& d_X = x.parameters();
-      const std::vector<bool>& b = is_GCFP_old(X);
+      const std::vector<bool>& b = is_GCFP(X);
       std::size_t index = 0;
       std::vector<data::variable> d;
       for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
@@ -126,11 +126,11 @@ class stategraph_global_algorithm: public stategraph_algorithm
           mCRL2log(log::debug, "stategraph") << "Y(e) = " << PV << std::endl;
           pbes_expression g = pbesr(PV.guard(), sigma);
           mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(PV.guard()) << data::print_substitution(sigma) << " = " << g << std::endl;
-          if (is_false(g))
+          if (is_universal_false(g))
           {
             continue;
           }
-          propositional_variable_instantiation Ye = apply_substitution(PV.variable(), sigma);
+          propositional_variable_instantiation Ye = core::down_cast<propositional_variable_instantiation>(pbesr(PV.variable(), sigma));
           propositional_variable_instantiation Y = project(Ye);
 
           mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Y) << std::endl;
