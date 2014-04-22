@@ -22,6 +22,58 @@ namespace pbes_system {
 
 namespace detail {
 
+inline
+pbes_expression stategraph_not(const pbes_expression& x)
+{
+  typedef core::term_traits<data::data_expression> tt;
+  typedef core::term_traits<pbes_expression> tr;
+  if (is_data(x))
+  {
+    auto const& x1 = atermpp::aterm_cast<data::data_expression>(x);
+    if (data::sort_bool::is_not_application(x1))
+    {
+      return tt::not_arg(x1);
+    }
+    else if (data::is_not_equal_to_application(x1))
+    {
+      auto const& left  = tt::left(x1);
+      auto const& right = tt::right(x1);
+      return data::equal_to(left, right);
+    }
+    else if (data::is_equal_to_application(x1))
+    {
+      auto const& left  = tt::left(x1);
+      auto const& right = tt::right(x1);
+      return data::not_equal_to(left, right);
+    }
+    else
+    {
+      return data::sort_bool::not_(x1);
+    }
+  }
+  return tr::not_(x);
+}
+
+inline
+pbes_expression smart_and(const pbes_expression& x, const pbes_expression& y)
+{
+  if (is_data(x) && is_data(y))
+  {
+    return data::sort_bool::and_(atermpp::aterm_cast<data::data_expression>(x), atermpp::aterm_cast<data::data_expression>(y));
+  }
+  return and_(x, y);
+}
+
+inline
+pbes_expression smart_or(const pbes_expression& x, const pbes_expression& y)
+{
+  if (is_data(x) && is_data(y))
+  {
+    return data::sort_bool::or_(atermpp::aterm_cast<data::data_expression>(x), atermpp::aterm_cast<data::data_expression>(y));
+  }
+  return or_(x, y);
+}
+
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction>
 {
@@ -58,100 +110,82 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
     return data::is_data_expression(x) && data::sort_bool::is_or_application(x);
   }
 
-  // returns the argument of a data not
-  data::data_expression not_arg(const data::data_expression& x)
+  // returns the argument of a not expression (pbes or data)
+  const pbes_expression& not_arg(const pbes_expression& x)
   {
-    return *data::application(x).begin();
+    if (is_data(x))
+    {
+      return atermpp::aterm_cast<pbes_expression>(*data::application(x).begin());
+    }
+    else
+    {
+      return tr::not_arg(x);
+    }
   }
 
-  void split_or(const pbes_expression& expr, std::vector<pbes_expression>& result) const
+  void stategraph_split_or(const pbes_expression& expr, std::vector<pbes_expression>& result) const
   {
     namespace a = combined_access;
     utilities::detail::split(expr, std::back_inserter(result), a::is_or, a::left, a::right);
   }
 
-  void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
+  void stategraph_split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
   {
     namespace a = combined_access;
     utilities::detail::split(expr, std::back_inserter(result), a::is_and, a::left, a::right);
   }
 
-  // replace !(y || z) by !y && !z
-  // replace !(y && z) by !y || !z
-  // replace !(y => z) by y || !z
-  // replace y => z by !y || z
+  pbes_expression stategraph_join_or(const std::vector<pbes_expression>& terms) const
+  {
+    const pbes_expression& F = atermpp::aterm_cast<pbes_expression>(false_());
+    return utilities::detail::join(terms.begin(), terms.end(), smart_or, F);
+  }
+
+  pbes_expression stategraph_join_and(const std::vector<pbes_expression>& terms) const
+  {
+    const pbes_expression& T = atermpp::aterm_cast<pbes_expression>(true_());
+    return utilities::detail::join(terms.begin(), terms.end(), smart_and, T);
+  }
+
+  // apply de Morgan rules
   pbes_expression post_process(const pbes_expression& x)
   {
     pbes_expression result = x;
-    if (tr::is_not(x))
+
+    if (is_universal_not(x))
     {
-      const pbes_expression& t = tr::not_arg(x);
-      if (tr::is_or(t)) // x = !(y && z)
+      const pbes_expression& arg = not_arg(x);
+
+      // replace !(x1 \/ ... \/ xn) by !x1 /\ ... /\ !xn
+      if (is_universal_or(arg))
       {
         std::vector<pbes_expression> terms;
-        split_or(t, terms);
+        stategraph_split_or(arg, terms);
         for (auto i = terms.begin(); i != terms.end(); ++i)
         {
-          *i = utilities::optimized_not(*i);
+          *i = stategraph_not(*i);
         }
-        result = pbes_expr::join_and(terms.begin(), terms.end());
+        result = stategraph_join_and(terms);
       }
-      else if (tr::is_and(t)) // x = !(y || z)
+      // replace !(x1 /\ ... /\ xn) by !x1 \/ ... \/ !xn
+      else if (is_universal_and(arg))
       {
         std::vector<pbes_expression> terms;
-        split_and(t, terms);
+        stategraph_split_and(arg, terms);
         for (auto i = terms.begin(); i != terms.end(); ++i)
         {
-          *i = utilities::optimized_not(*i);
+          *i = stategraph_not(*i);
         }
-        result = pbes_expr::join_or(terms.begin(), terms.end());
-      }
-      else if (tr::is_imp(t)) // x = !(y => z)
-      {
-        pbes_expression y = tr::left(t);
-        pbes_expression z = utilities::optimized_not(tr::right(t));
-        result = utilities::optimized_or(y, z);
-      }
-      else if (is_data_not(t)) // x = !val(!y)
-      {
-        const data::data_expression& z = atermpp::aterm_cast<const data::data_expression>(t);
-        data::data_expression y = not_arg(z);
-        result = y;
+        result = stategraph_join_or(terms);
       }
     }
-    else if (tr::is_imp(x)) // x = y => z
-    {
-      pbes_expression y = utilities::optimized_not(tr::left(x));
-      pbes_expression z = tr::right(x);
-      result = utilities::optimized_or(y, z);
-    }
+    mCRL2log(log::debug2, "stategraph") << "  simplify-postprocess " << x << " -> " << result << std::endl;
     return result;
   }
 
-  // replace the data expression y != z by !(y == z)
   pbes_expression operator()(const data::data_expression& x)
   {
-    typedef core::term_traits<data::data_expression> tt;
-
-    // step 1: simplify the data expression
-    data::detail::simplify_rewriter R;
-    data::data_expression x1 = R(x);
-
-    // step 2: if it is a negation, apply the one point rule preprocessor
-    if (tt::is_not(x1))
-    {
-      data::detail::one_point_rule_preprocessor R;
-      x1 = R(x1);
-    }
-
-    // step 3: replace the data expression y != z by !(y == z)
-    if (data::is_not_equal_to_application(x1)) // result = y != z
-    {
-      data::data_expression y = tt::left(x1);
-      data::data_expression z = tt::right(x1);
-      x1 = data::sort_bool::not_(data::equal_to(y, z));
-    }
-    return post_process(x1);
+    return post_process(super::operator()(data::detail::simplify(x)));
   }
 
   pbes_expression operator()(const true_& x)
@@ -166,13 +200,6 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
 
   pbes_expression operator()(const not_& x)
   {
-    typedef core::term_traits<data::data_expression> tt;
-
-    if (is_data(x.operand())) // convert to data expression
-    {
-      pbes_expression y = data::sort_bool::not_(atermpp::aterm_cast<data::data_expression>(x.operand()));
-      return derived()(y);
-    }
     return post_process(super::operator()(x));
   }
 
@@ -188,7 +215,7 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
 
   pbes_expression operator()(const imp& x)
   {
-    return post_process(super::operator()(x));
+    return derived()(or_(not_(x.left()), x.right()));
   }
 
   pbes_expression operator()(const forall& x)

@@ -764,6 +764,14 @@ bool is_universal_false(const atermpp::aterm_appl& x)
 /// \brief Test for a conjunction
 /// \param t A PBES expression or a data expression
 /// \return True if it is a conjunction
+inline bool is_universal_not(const pbes_expression& t)
+{
+  return is_pbes_not(t) || data::sort_bool::is_not_application(t);
+}
+
+/// \brief Test for a conjunction
+/// \param t A PBES expression or a data expression
+/// \return True if it is a conjunction
 inline bool is_universal_and(const pbes_expression& t)
 {
   return is_pbes_and(t) || data::sort_bool::is_and_application(t);
