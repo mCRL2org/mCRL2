@@ -300,11 +300,15 @@ inline void EnumeratorSolutionsStandard<TERM,REWRITER>::EliminateVars(fs_expr<TE
   e=fs_expr<TERM>(vars,substituted_vars,vals,expr);
 }
 
-template <class TERM, class REWRITER>
-inline data_expression EnumeratorSolutionsStandard<TERM,REWRITER>::build_solution_single(
+static data_expression build_solution_aux(
+                 const data_expression& t,
+                 const variable_list& substituted_vars,
+                 const data_expression_list& exprs);
+
+static data_expression build_solution_single(
                  const variable& t,
                  variable_list substituted_vars,
-                 data_expression_list exprs) const
+                 data_expression_list exprs) 
 {
   assert(substituted_vars.size()==exprs.size());
   while (!substituted_vars.empty() && t!=substituted_vars.front())
@@ -323,11 +327,27 @@ inline data_expression EnumeratorSolutionsStandard<TERM,REWRITER>::build_solutio
   }
 }
 
-template <class TERM, class REWRITER>
-inline data_expression EnumeratorSolutionsStandard<TERM,REWRITER>::build_solution_aux(
+class apply_build_solution_aux
+{
+  protected:
+    const variable_list& m_substituted_vars; 
+    const data_expression_list& m_expr;
+
+  public:
+    apply_build_solution_aux(const variable_list& substituted_vars, const data_expression_list& expr):
+       m_substituted_vars(substituted_vars), m_expr(expr)
+    {}
+
+    data_expression operator()(const data_expression& t) const
+    {
+      return build_solution_aux(t,m_substituted_vars,m_expr);
+    }
+};
+
+static data_expression build_solution_aux(
                  const data_expression& t,
                  const variable_list& substituted_vars,
-                 const data_expression_list& exprs) const
+                 const data_expression_list& exprs)
 {
   assert(!is_where_clause(t)); // This is a non expected case as t is a normalform.
   if (is_variable(t))
@@ -355,17 +375,13 @@ inline data_expression EnumeratorSolutionsStandard<TERM,REWRITER>::build_solutio
 
     if (is_function_symbol(head))
     {
-      return application(head,t_appl.begin(),t_appl.end(),
-                       [&](const data_expression& t) -> data_expression const
-                            { return build_solution_aux(t,substituted_vars,exprs); });
+      return application(head,t_appl.begin(),t_appl.end(),apply_build_solution_aux(substituted_vars,exprs));
     }
 
     /* The head is more complex, rewrite it first; */
 
     data_expression head1 = build_solution_aux(head,substituted_vars,exprs);
-    return application(head1,t_appl.begin(),t_appl.end(),
-                       [&](const data_expression& t) -> data_expression const
-                            { return build_solution_aux(t,substituted_vars,exprs); });
+    return application(head1,t_appl.begin(),t_appl.end(),apply_build_solution_aux(substituted_vars,exprs));
   }
 }
 

@@ -232,11 +232,6 @@ class EnumeratorSolutionsStandard
 
     void EliminateVars(fs_expr<TERM>& e);
 
-    data_expression build_solution_single(
-                 const variable& t,
-                 variable_list substituted_vars,
-                 data_expression_list exprs) const;
-
     data_expression_list build_solution(
                  const variable_list& vars,
                  const variable_list& substituted_vars,
@@ -244,10 +239,6 @@ class EnumeratorSolutionsStandard
 
     data_expression_list build_solution2(
                  const variable_list& vars,
-                 const variable_list& substituted_vars,
-                 const data_expression_list& exprs) const;
-    data_expression build_solution_aux(
-                 const data_expression& t,
                  const variable_list& substituted_vars,
                  const data_expression_list& exprs) const;
     TERM add_negations(
