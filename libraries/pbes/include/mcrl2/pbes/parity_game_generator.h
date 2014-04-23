@@ -23,7 +23,6 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"

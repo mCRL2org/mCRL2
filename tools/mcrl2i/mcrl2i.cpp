@@ -30,6 +30,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"

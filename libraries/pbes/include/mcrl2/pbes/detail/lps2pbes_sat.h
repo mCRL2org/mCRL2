@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/find.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"

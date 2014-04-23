@@ -12,6 +12,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
 namespace mcrl2
 {

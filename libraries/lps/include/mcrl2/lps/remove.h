@@ -13,6 +13,7 @@
 #define MCRL2_LPS_REMOVE_H
 
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/detail/lps_parameter_remover.h"
 #include "mcrl2/lps/replace.h"
 

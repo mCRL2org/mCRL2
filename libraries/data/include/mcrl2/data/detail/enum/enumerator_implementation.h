@@ -6,8 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/atermpp/algorithm.h"
+#ifndef MCRL2_DATA_DETAIL_ENUM_ENUMERATOR_IMPLEMENTATION_H
+#define MCRL2_DATA_DETAIL_ENUM_ENUMERATOR_IMPLEMENTATION_H
 
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/core/term_traits.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/detail/enum/standard.h"
 
 namespace mcrl2
 {
@@ -674,3 +680,5 @@ inline void EnumeratorSolutionsStandard<TERM,REWRITER>::reset(const bool not_equ
 } // namespace detail
 } // namespace data
 } // namespace mcrl2
+
+#endif // MCRL2_DATA_DETAIL_ENUM_ENUMERATOR_IMPLEMENTATION_H

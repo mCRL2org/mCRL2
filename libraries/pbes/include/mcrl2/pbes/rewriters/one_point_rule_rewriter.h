@@ -17,8 +17,8 @@
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/builder.h"
@@ -269,7 +269,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       }
     }
 
-    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << data::print_substitution(sigma) << " variables = " << core::detail::print_set(variables) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << sigma << " variables = " << core::detail::print_set(variables) << std::endl;
 
     pbes_expression result;
     if (!sigma.empty())
@@ -330,7 +330,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       }
     }
 
-    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << data::print_substitution(sigma) << " variables = " << core::detail::print_set(variables) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << sigma << " variables = " << core::detail::print_set(variables) << std::endl;
 
     pbes_expression result;
     if (!sigma.empty())

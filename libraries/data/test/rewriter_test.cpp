@@ -24,6 +24,7 @@
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
@@ -164,11 +165,11 @@ void test_expressions(Rewriter R, std::string const& expr1, std::string const& e
   {
     BOOST_CHECK(R(d1, sigma) == R(d2));
     std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
-    std::cout << "d1           " << data::pp(d1) << std::endl;
-    std::cout << "d2           " << data::pp(d2) << std::endl;
-    std::cout << "sigma\n      " << data::print_substitution(sigma) << std::endl;
-    std::cout << "R(d1, sigma) " << data::pp(R(d1, sigma)) << std::endl;
-    std::cout << "R(d2)        " << data::pp(R(d2)) << std::endl;
+    std::cout << "d1           " << d1 << std::endl;
+    std::cout << "d2           " << d2 << std::endl;
+    std::cout << "sigma\n      " << sigma << std::endl;
+    std::cout << "R(d1, sigma) " << R(d1, sigma) << std::endl;
+    std::cout << "R(d2)        " << R(d2) << std::endl;
   }
 }
 

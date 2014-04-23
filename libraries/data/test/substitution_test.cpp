@@ -21,6 +21,11 @@
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/mutable_substitution_composer.h"
+#include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

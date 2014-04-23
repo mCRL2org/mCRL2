@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"

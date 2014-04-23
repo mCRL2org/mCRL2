@@ -9,6 +9,7 @@
 
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 #include "mcrl2/lps/lpsparunfoldlib.h"
 #include "mcrl2/lps/linear_process.h"

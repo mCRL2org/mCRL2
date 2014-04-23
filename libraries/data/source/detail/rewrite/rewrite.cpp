@@ -31,6 +31,7 @@
 #include "mcrl2/data/detail/enum/standard.h" // To be removed.
 
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -394,7 +395,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
     return partial_result;
   }
 
-  // One can consider to replace the variables by their original, in order to not show 
+  // One can consider to replace the variables by their original, in order to not show
   // internally generated variables in the output.
   return abstraction(exists_binder(),vl_new_l,rewrite(t3,sigma));
 }
@@ -519,7 +520,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
     return partial_result;
   }
 
-  // One can consider to replace the variables by their original, in order to not show 
+  // One can consider to replace the variables by their original, in order to not show
   // internally generated variables in the output.
   return abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
 }

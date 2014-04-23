@@ -13,7 +13,7 @@
 #include <set>
 #include <iostream>
 #include <sstream>
-#include "mcrl2/data/substitutions.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"

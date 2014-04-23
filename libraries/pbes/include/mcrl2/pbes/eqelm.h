@@ -19,6 +19,7 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"

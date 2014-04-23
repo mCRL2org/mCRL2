@@ -19,7 +19,6 @@
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/lps/specification.h"
 
 /// The class Invariant_Checker is initialized with an LPS using the constructor Invariant_Checker::Invariant_Checker.

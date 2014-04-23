@@ -24,6 +24,8 @@
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/replace.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::core;
@@ -294,9 +296,9 @@ class subst_values_argument
     data::set_identifier_generator& m_generator;
 
   public:
-    subst_values_argument(atermpp::detail::_aterm** vars, 
-                          atermpp::detail::_aterm** terms, 
-                          const size_t assignment_size, 
+    subst_values_argument(atermpp::detail::_aterm** vars,
+                          atermpp::detail::_aterm** terms,
+                          const size_t assignment_size,
                           data::set_identifier_generator& generator)
       : m_vars(vars), m_terms(terms), m_assignment_size(assignment_size), m_generator(generator)
     {}
@@ -342,7 +344,7 @@ static data_expression subst_values(
       variables_in_substitution.insert(s.begin(),s.end());
       variables_in_substitution.insert(variable(vars[i]));
     }
-    
+
     variable_vector new_variables;
     mutable_map_substitution<> sigma;
     bool sigma_trivial=true;
@@ -356,7 +358,7 @@ static data_expression subst_values(
         sigma[*it]=fresh_variable;
         sigma_trivial=false;
       }
-      else 
+      else
       {
         new_variables.push_back(*it);
       }
@@ -366,7 +368,7 @@ static data_expression subst_values(
     {
       body=replace_variables(body,sigma);
     }
-    
+
     return abstraction(binder,variable_list(new_variables.begin(),new_variables.end()),subst_values(vars,terms,assignment_size,body,generator));
 
   }
@@ -453,7 +455,7 @@ static bool match_jitty(
       return false;
     }
 
-   
+
     size_t arity = p.size();
 
     for (size_t i=0; i<arity; i++)
@@ -507,10 +509,10 @@ data_expression RewriterJitty::rewrite_aux(
   // In this case rewrite that function symbol. This is an optimisation. If this does not apply t is rewritten,
   // including all its subterms. But this is costly, as not all subterms will be rewritten again
   // in rewrite_aux_function_symbol.
-  
+
   function_symbol head;
   const application& tapp=core::down_cast<application>(term);
-  data_expression t=tapp.head(); 
+  data_expression t=tapp.head();
   if (detail::head_is_function_symbol(term,head))
   {
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.

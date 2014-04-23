@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_DETAIL_EXPAND_PROCESS_INSTANCE_ASSIGNMENTS_H
 #define MCRL2_PROCESS_DETAIL_EXPAND_PROCESS_INSTANCE_ASSIGNMENTS_H
 
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/utility.h"
 

@@ -31,6 +31,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/selection.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/next_state_generator.h"
@@ -57,7 +58,7 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   data::variable_vector v;
   v.push_back(x);
   data::mutable_indexed_substitution<> sigma;
-  for (data::classic_enumerator<data::rewriter>::iterator 
+  for (data::classic_enumerator<data::rewriter>::iterator
        i = enumerator.begin(data::variable_list(v.begin(),v.end()), data::sort_bool::true_(), sigma, max_internal_variables); i != enumerator.end() ; ++i)
   {
     result.push_back(to_string(i->front()));

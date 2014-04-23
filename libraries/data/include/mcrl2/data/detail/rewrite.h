@@ -12,11 +12,11 @@
 #define __LIBREWRITE_H
 
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 namespace mcrl2
 {
@@ -190,7 +190,7 @@ inline size_t getArity(const data::function_symbol& op)
     sort = fsort.codomain();
   }
   return arity;
-} 
+}
 
 }
 }

@@ -23,6 +23,7 @@
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 
 namespace mcrl2
 {

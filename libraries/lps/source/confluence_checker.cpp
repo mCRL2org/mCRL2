@@ -15,8 +15,8 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/utilities/exception.h"
 

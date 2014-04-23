@@ -21,6 +21,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/undefined.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
@@ -704,7 +705,7 @@ class pbes_constelm_algorithm
     {
       std::ostringstream out;
       data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
-      out << "\nEvaluated condition " << e.condition() << data::print_substitution(sigma) << " to " << value << std::endl;
+      out << "\nEvaluated condition " << e.condition() << sigma << " to " << value << std::endl;
       return out.str();
     }
 
@@ -712,7 +713,7 @@ class pbes_constelm_algorithm
     {
       std::ostringstream out;
       data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
-      out << "\nCould not evaluate condition " << e.condition() << data::print_substitution(sigma) << " to true or false";
+      out << "\nCould not evaluate condition " << e.condition() << sigma << " to true or false";
       return out.str();
     }
 

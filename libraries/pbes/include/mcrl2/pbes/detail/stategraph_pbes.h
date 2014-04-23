@@ -17,6 +17,7 @@
 #include <sstream>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
@@ -382,7 +383,7 @@ class stategraph_equation: public pbes_equation
         }
 
         // sigma
-        out << "        sigma = " << data::print_substitution(m_predvars[i].sigma()) << std::endl;
+        out << "        sigma = " << m_predvars[i].sigma() << std::endl;
 
         // dest
         const std::map<std::size_t, data::data_expression>& dest = m_predvars[i].dest();

@@ -17,7 +17,6 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/parse.h"
@@ -25,6 +24,9 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;

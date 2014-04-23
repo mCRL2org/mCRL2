@@ -19,10 +19,10 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/replace.h"
 #include "mcrl2/process/translate_user_notation.h"
 

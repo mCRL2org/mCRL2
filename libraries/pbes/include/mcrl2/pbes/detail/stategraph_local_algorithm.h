@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H
 
 #include "mcrl2/data/undefined.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 

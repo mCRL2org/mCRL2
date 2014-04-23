@@ -17,6 +17,7 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"

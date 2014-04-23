@@ -20,6 +20,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 

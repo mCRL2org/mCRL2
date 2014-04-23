@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
+#include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
@@ -566,9 +567,5 @@ T substitute_sorts(const T& x,
 } // namespace data
 
 } // namespace mcrl2
-
-#ifndef MCRL2_DATA_SUBSTITUTIONS_H
-#include "mcrl2/data/substitutions.h"
-#endif
 
 #endif // MCRL2_DATA_REPLACE_H

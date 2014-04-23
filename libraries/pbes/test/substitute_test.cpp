@@ -12,6 +12,7 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/substitutions.h"
 #include "mcrl2/pbes/replace.h"
@@ -24,16 +25,16 @@ void test_substitution()
 {
   std::string text1 =
     "pbes nu X(n: Nat) = X(n + 1);\n"
-    "init X(0);                   \n"    
+    "init X(0);                   \n"
     ;
   pbes p1 = txt2pbes(text1);
 
   std::string text2 =
     "pbes nu X(n: Nat) = X(4 + 1);\n"
-    "init X(0);                   \n"    
+    "init X(0);                   \n"
     ;
   pbes p2 = txt2pbes(text2);
-  
+
   data::mutable_map_substitution<> sigma;
   data::variable n("n", data::sort_nat::nat());
   sigma[n] = data::parse_data_expression("4");
@@ -44,12 +45,12 @@ void test_substitution()
 
   std::cout << "--- p =\n" << pbes_system::pp(p) << std::endl;
   std::cout << "--- p1 =\n" << pbes_system::pp(p1) << std::endl;
-  
+
   pbes_system::replace_variables(p, sigma);
 
   std::cout << "--- p =\n" << pbes_system::pp(p) << std::endl;
   std::cout << "--- p2 =\n" << pbes_system::pp(p2) << std::endl;
-    
+
   // compare textual representations, to avoid conflicts between types
   BOOST_CHECK(pbes_system::pp(p) == pbes_system::pp(p2));
 }
@@ -60,7 +61,7 @@ void test_propositional_variable_substitution()
     "pbes                     \n"
     "nu X(m: Nat) = Y(m + 1); \n"
     "nu Y(n: Nat) = X(n + 2); \n"
-    "init X(0);               \n"    
+    "init X(0);               \n"
     ;
   pbes p1 = txt2pbes(text1);
 
@@ -68,12 +69,12 @@ void test_propositional_variable_substitution()
     "pbes                                     \n"
     "nu X(m: Nat) = Y(m + 1);                 \n"
     "nu Y(n: Nat) = X(n + 2 + 1) && Y(n + 2); \n"
-    "init X(0);                               \n"    
+    "init X(0);                               \n"
     ;
   pbes p2 = txt2pbes(text2);
 
   pbes p = p1;
-  propositional_variable X = p.equations().front().variable();  
+  propositional_variable X = p.equations().front().variable();
   pbes_expression phi = parse_pbes_expression("X(m + 1) && Y(m)", "datavar m: Nat; \npredvar X: Nat; Y: Nat");
   propositional_variable_substitution sigma(X, phi);
   pbes_system::replace_propositional_variables(p, sigma);

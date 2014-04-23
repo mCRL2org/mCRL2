@@ -15,6 +15,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/translate_user_notation.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 namespace mcrl2
 {
@@ -180,7 +181,16 @@ sort_expression data_expression::sort() const
   }
   assert(is_untyped_identifier(*this)); // All cases have been deal with here, except this one.
   return untyped_sort();
+}
 
+std::set<data::variable> substitution_variables(const mutable_map_substitution<>& sigma)
+{
+  std::set<data::variable> result;
+  for (auto i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    data::find_free_variables(i->second, std::inserter(result, result.end()));
+  }
+  return result;
 }
 
 } // namespace data

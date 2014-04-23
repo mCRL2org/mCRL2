@@ -25,6 +25,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/parse_substitutions.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/parse.h"

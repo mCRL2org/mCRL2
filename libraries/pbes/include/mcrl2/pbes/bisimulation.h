@@ -23,6 +23,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/pbes/pbes.h"

@@ -24,6 +24,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
@@ -193,7 +194,7 @@ class quantifier_enumerator
         pbes_expression c = r_(phi_, sigma_);
         std::set<data::variable> FV_c = pbes_system::find_free_variables(c);
 
-        mCRL2log(log::debug1) << "        Z = Z + " << c << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << core::detail::print_list(v_) << std::endl;
+        mCRL2log(log::debug1) << "        Z = Z + " << c << " sigma = " << sigma_ << " dependencies = " << core::detail::print_list(v_) << std::endl;
         if (stop_(c))
         {
           throw stop_early();
@@ -237,7 +238,7 @@ class quantifier_enumerator
                              << (tr::is_false(stop_value) ? "forall " : "exists ")
                              << x << ". "
                              << phi
-                             << data::print_substitution(sigma) << std::endl;
+                             << sigma << std::endl;
     }
 
     /// \brief Returns a string representation of D[i]

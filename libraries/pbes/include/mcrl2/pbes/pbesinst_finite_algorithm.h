@@ -21,6 +21,7 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
@@ -365,7 +366,7 @@ class pbesinst_finite_algorithm
 
         data::classic_enumerator<> enumerator(p.data(),rewr);
         mcrl2::data::mutable_indexed_substitution<> local_sigma;
-        for (auto j = enumerator.begin(data::variable_list(finite_parameters.begin(), finite_parameters.end()), 
+        for (auto j = enumerator.begin(data::variable_list(finite_parameters.begin(), finite_parameters.end()),
                     data::sort_bool::true_(), local_sigma); j != enumerator.end(); ++j)
         {
           // apply the substitution *j

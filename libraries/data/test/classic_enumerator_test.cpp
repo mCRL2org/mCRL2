@@ -24,6 +24,8 @@
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -226,7 +228,7 @@ data::data_expression_vector generate_values(const data::data_specification& dat
   data::variable_vector v;
   v.push_back(x);
   mutable_indexed_substitution<> sigma;
-  for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(variable_list(v.begin(),v.end()), data::sort_bool::true_(), 
+  for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(variable_list(v.begin(),v.end()), data::sort_bool::true_(),
                          sigma, max_internal_variables); i != enumerator.end() ; ++i)
   {
     result.push_back(i->front());

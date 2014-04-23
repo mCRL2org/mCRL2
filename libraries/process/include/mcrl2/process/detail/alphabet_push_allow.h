@@ -14,7 +14,6 @@
 
 #include <sstream>
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/process/detail/allow_set.h"
 #include "mcrl2/process/detail/alphabet_traverser.h"
 #include "mcrl2/process/find.h"

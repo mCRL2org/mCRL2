@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 
+#include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_global_graph.h"
@@ -125,7 +126,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
           const predicate_variable& PV = predvars[i];
           mCRL2log(log::debug, "stategraph") << "Y(e) = " << PV << std::endl;
           pbes_expression g = pbesr(PV.guard(), sigma);
-          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(PV.guard()) << data::print_substitution(sigma) << " = " << g << std::endl;
+          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(PV.guard()) << sigma << " = " << g << std::endl;
           if (is_universal_false(g))
           {
             continue;
