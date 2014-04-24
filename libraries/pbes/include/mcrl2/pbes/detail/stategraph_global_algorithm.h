@@ -35,22 +35,6 @@ class stategraph_global_algorithm: public stategraph_algorithm
     // the control flow graph
     control_flow_graph m_control_flow_graph;
 
-    // the control flow parameters (old version!)
-    std::map<core::identifier_string, std::vector<bool> > m_is_control_flow;
-
-    template <typename Substitution>
-    propositional_variable_instantiation apply_substitution(const propositional_variable_instantiation& X, Substitution sigma) const
-    {
-      return propositional_variable_instantiation(X.name(), data::replace_free_variables(X.parameters(), sigma));
-    }
-
-    const std::vector<bool>& is_GCFP_old(const core::identifier_string& X) const
-    {
-      std::map<core::identifier_string, std::vector<bool> >::const_iterator i = m_is_control_flow.find(X);
-      assert (i != m_is_control_flow.end());
-      return i->second;
-    }
-
     // removes parameter values that do not correspond to a control flow parameter
     propositional_variable_instantiation project(const propositional_variable_instantiation& x) const
     {
@@ -106,7 +90,6 @@ class stategraph_global_algorithm: public stategraph_algorithm
 
       while (!todo.empty())
       {
-        std::set<stategraph_vertex*>::iterator ti = todo.begin();
         stategraph_vertex& u = *pick_element(todo);
         stategraph_vertex* source = &u;
         mCRL2log(log::debug, "stategraph") << "selected todo element u = " << pbes_system::pp(u.X) << std::endl;
@@ -124,6 +107,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
           const predicate_variable& PV = predvars[i];
+
           mCRL2log(log::debug, "stategraph") << "Y(e) = " << PV << std::endl;
           pbes_expression g = pbesr(PV.guard(), sigma);
           mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(PV.guard()) << sigma << " = " << g << std::endl;
@@ -131,7 +115,26 @@ class stategraph_global_algorithm: public stategraph_algorithm
           {
             continue;
           }
-          propositional_variable_instantiation Ye = core::down_cast<propositional_variable_instantiation>(pbesr(PV.variable(), sigma));
+
+          data::data_expression_vector PV_args;
+          size_t j = 0;
+          for(auto ai = PV.parameters().begin(); ai != PV.parameters().end(); ++ai)
+          {
+            const std::map<std::size_t, data::data_expression>& dest = eqn.predicate_variables()[i].dest();
+            auto dij = dest.find(j);
+            if(dij != dest.end())
+            {
+              PV_args.push_back(dij->second);
+            }
+            else
+            {
+              PV_args.push_back(*ai);
+            }
+            ++j;
+          }
+          propositional_variable_instantiation Ye = propositional_variable_instantiation(PV.variable().name(), data::data_expression_list(PV_args.begin(), PV_args.end()));
+
+          Ye = core::down_cast<propositional_variable_instantiation>(pbesr(Ye, sigma));
           propositional_variable_instantiation Y = project(Ye);
 
           mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Y) << std::endl;
@@ -169,137 +172,6 @@ class stategraph_global_algorithm: public stategraph_algorithm
       return result;
     }
 
-    void compute_global_control_flow_parameters_old()
-    {
-      mCRL2log(log::debug, "stategraph") << "=== compute control flow parameters ===" << std::endl;
-
-      const std::vector<stategraph_equation>& equations = m_pbes.equations();
-      std::map<core::identifier_string, std::vector<data::variable> > V;
-
-      // initialize all control flow parameters to true
-      // initalize V_km to the empty set
-      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
-      {
-        propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
-        m_is_control_flow[X.name()] = std::vector<bool>(d_X.size(), true);
-        V[X.name()] = std::vector<data::variable>(d_X.size(), data::variable());
-      }
-
-      // pass 1
-      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
-      {
-        propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
-        const std::vector<predicate_variable>& predvars = k->predicate_variables();
-        for (std::vector<predicate_variable>::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
-        {
-          const propositional_variable_instantiation& Y = i->variable();
-          data::data_expression_list e = Y.parameters();
-          std::size_t index = 0;
-          for (data::data_expression_list::const_iterator q = e.begin(); q != e.end(); ++q, ++index)
-          {
-            if (data::is_variable(*q))
-            {
-              std::vector<data::variable>::const_iterator found = std::find(d_X.begin(), d_X.end(), *q);
-              if (found != d_X.end())
-              {
-                if (V[Y.name()][index] == data::variable())
-                {
-                  V[Y.name()][index] = atermpp::aterm_cast<data::variable>(*q);
-                  // mCRL2log(log::debug, "stategraph") << print_stategraph_assignment(true, index, X, Y, "pass 1");
-                }
-                else
-                {
-                  bool is_same_value = (V[Y.name()][index] == *q);
-                  m_is_control_flow[Y.name()][index] = is_same_value;
-                  // mCRL2log(log::debug, "stategraph") << print_stategraph_assignment(is_same_value, index, X, Y, "pass 1", V[Y.name()][index]);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // pass 2
-      std::set<core::identifier_string> todo;
-      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
-      {
-        todo.insert(k->variable().name());
-      }
-
-      while (!todo.empty())
-      {
-        core::identifier_string name = *todo.begin();
-        todo.erase(todo.begin());
-        const stategraph_equation& eqn = *find_equation(m_pbes, name);
-        propositional_variable X = eqn.variable();
-        const std::vector<data::variable>& d_X = eqn.parameters();
-        const std::vector<predicate_variable>& predvars = eqn.predicate_variables();
-        for (std::vector<predicate_variable>::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
-        {
-          const propositional_variable_instantiation& Y = i->variable();
-          data::data_expression_list e = Y.parameters();
-          std::size_t index = 0;
-          for (data::data_expression_list::const_iterator q = e.begin(); q != e.end(); ++q, ++index)
-          {
-            if (is_constant(*q))
-            {
-              continue;
-            }
-            else if (data::is_variable(*q))
-            {
-              std::vector<data::variable>::const_iterator found = std::find(d_X.begin(), d_X.end(), *q);
-              if (found == d_X.end())
-              {
-                if (m_is_control_flow[Y.name()][index] != false)
-                {
-                  m_is_control_flow[Y.name()][index] = false;
-                  todo.insert(Y.name());
-                  // mCRL2log(log::debug, "stategraph") << print_stategraph_assignment(false, index, X, Y, "pass 2");
-                }
-              }
-              else
-              {
-                if (X.name() == Y.name() && (found != d_X.begin() + index))
-                {
-                  if (m_is_control_flow[Y.name()][index] != false)
-                  {
-                    m_is_control_flow[Y.name()][index] = false;
-                    todo.insert(Y.name());
-                    // mCRL2log(log::debug, "stategraph") << print_stategraph_assignment(false, index, X, Y, "pass 2");
-                  }
-                }
-                else
-                {
-                  if (!m_is_control_flow[X.name()][found - d_X.begin()])
-                  {
-                    if (m_is_control_flow[Y.name()][index] != false)
-                    {
-                      m_is_control_flow[Y.name()][index] = false;
-                      todo.insert(Y.name());
-                      // mCRL2log(log::debug, "stategraph") << print_stategraph_assignment(false, index, X, Y, "pass 2");
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-              if (m_is_control_flow[Y.name()][index] != false)
-              {
-                m_is_control_flow[Y.name()][index] = false;
-                todo.insert(Y.name());
-                // mCRL2log(log::debug, "stategraph") << print_stategraph_assignment(false, index, X, Y, "pass 2");
-              }
-            }
-          }
-        }
-      }
-      //mCRL2log(log::debug) << print_control_flow_parameters();
-      mCRL2log(log::verbose) << "Computed control flow parameters" << std::endl;
-    }
-
   public:
     stategraph_global_algorithm(const pbes& p, const pbesstategraph_options& options)
       : stategraph_algorithm(p, options)
@@ -309,7 +181,6 @@ class stategraph_global_algorithm: public stategraph_algorithm
     void run()
     {
       super::run();
-      compute_global_control_flow_parameters_old();
       compute_control_flow_graph();
       mCRL2log(log::verbose) << "Computed control flow graph" << std::endl;
       mCRL2log(log::debug) << m_control_flow_graph.print(print_map());
