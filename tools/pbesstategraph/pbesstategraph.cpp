@@ -39,7 +39,6 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       options.use_alternative_lcfp_criterion = parser.option_argument_as<bool>("use-alternative-lcfp-criterion");
       options.use_alternative_gcfp_relation = parser.option_argument_as<bool>("use-alternative-gcfp-relation");
       options.use_alternative_gcfp_consistency = parser.option_argument_as<bool>("use-alternative-gcfp-consistency");
-      options.use_alternative_reset_copy = parser.option_argument_as<bool>("use-alternative-reset-copy");
     }
 
     void add_options(interface_description& desc)
@@ -54,7 +53,6 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       desc.add_option("use-alternative-lcfp-criterion", make_optional_argument("NAME", "0"), "use an alternative criterion for local control flow parameter computation", 'x');
       desc.add_option("use-alternative-gcfp-relation", make_optional_argument("NAME", "0"), "use an alternative global control flow parameter relation", 'y');
       desc.add_option("use-alternative-gcfp-consistency", make_optional_argument("NAME", "0"), "use an alternative global control flow parameter consistency", 'z');
-      desc.add_option("use-alternative-reset-copy", make_optional_argument("NAME", "0"), "use an alternative way of resetting variables");
     }
 
   public:
@@ -82,7 +80,6 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       mCRL2log(verbose) << "  use alternative lcfp criterion:   " << std::boolalpha << options.use_alternative_lcfp_criterion << std::endl;
       mCRL2log(verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
       mCRL2log(verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
-      mCRL2log(verbose) << "  use alternative reset copy:       " << std::boolalpha << options.use_alternative_reset_copy << std::endl;
 
       pbesstategraph(input_filename(), output_filename(), options);
       return true;

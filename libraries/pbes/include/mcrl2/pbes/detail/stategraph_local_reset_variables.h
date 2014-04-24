@@ -56,9 +56,6 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // if true, the resulting PBES is simplified
     bool m_simplify;
 
-    // If true, an alternative reset is used.
-    bool m_use_alternative_reset_copy;
-
     // m_occurring_data_parameters[X] contains the indices of data parameters that occur in at least one local control flow graph
     std::map<core::identifier_string, std::set<std::size_t> > m_occurring_data_parameters;
 
@@ -135,8 +132,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     local_reset_variables_algorithm(const pbes& p, const pbesstategraph_options& options)
       : stategraph_local_algorithm(p, options),
         m_original_pbes(p),
-        m_simplify(options.simplify),
-        m_use_alternative_reset_copy(options.use_alternative_reset_copy)
+        m_simplify(options.simplify)
     {}
 
     /// \brief Runs the stategraph algorithm
@@ -337,7 +333,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
                 }
                 else
                 {
-                  if  (m_use_alternative_reset_copy && w.has_variable())
+                  if  (w.has_variable())
                   {
                     auto const& r = w.value();
                     condition.insert(data::equal_to(d_Y[p], r));
@@ -360,7 +356,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
     }
     else
     {
-      if (m_use_alternative_reset_copy && !condition.empty())
+      if (!condition.empty())
       {
         e1[k] = data::if_(data::lazy::join_or(condition.begin(), condition.end()), default_value(Y, k, e1[k].sort()), nth_element(e, k));
         mCRL2log(log::debug1, "stategraph") << "  reset copy Y = " << Y << " k = " << k << " e'[k] = " << e1[k] << std::endl;

@@ -30,7 +30,6 @@ struct pbesstategraph_options
   bool use_alternative_lcfp_criterion;
   bool use_alternative_gcfp_relation;
   bool use_alternative_gcfp_consistency;
-  bool use_alternative_reset_copy;
 
   pbesstategraph_options()
   : rewrite_strategy(data::jitty),
@@ -42,8 +41,7 @@ struct pbesstategraph_options
     use_marking_optimization(false),
     use_alternative_lcfp_criterion(false),
     use_alternative_gcfp_relation(false),
-    use_alternative_gcfp_consistency(false),
-    use_alternative_reset_copy(false)
+    use_alternative_gcfp_consistency(false)
   {}
 };
 
