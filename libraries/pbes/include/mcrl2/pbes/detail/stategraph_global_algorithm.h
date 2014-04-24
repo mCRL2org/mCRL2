@@ -72,7 +72,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
       return propositional_variable(X, data::variable_list(d.begin(), d.end()));
     }
 
-    void compute_control_flow_graph()
+    void compute_global_control_flow_graph()
     {
       using utilities::detail::pick_element;
 
@@ -181,8 +181,10 @@ class stategraph_global_algorithm: public stategraph_algorithm
     void run()
     {
       super::run();
-      compute_control_flow_graph();
-      mCRL2log(log::verbose) << "Computed control flow graph" << std::endl;
+      start_timer("compute_global_control_flow_graph");
+      compute_global_control_flow_graph();
+      finish_timer("compute_global_control_flow_graph");
+      mCRL2log(log::verbose) << "Computed global control flow graph" << std::endl;
       mCRL2log(log::debug) << m_control_flow_graph.print(print_map());
     }
 };

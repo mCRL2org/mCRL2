@@ -39,6 +39,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       options.use_alternative_lcfp_criterion = parser.option_argument_as<bool>("use-alternative-lcfp-criterion");
       options.use_alternative_gcfp_relation = parser.option_argument_as<bool>("use-alternative-gcfp-relation");
       options.use_alternative_gcfp_consistency = parser.option_argument_as<bool>("use-alternative-gcfp-consistency");
+      options.timer = &timer();
     }
 
     void add_options(interface_description& desc)

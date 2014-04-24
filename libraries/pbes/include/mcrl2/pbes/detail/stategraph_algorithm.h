@@ -118,6 +118,9 @@ class stategraph_algorithm
     // en de tweede als "detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)".
     bool m_use_alternative_gcfp_consistency;
 
+    // TODO: remove the three booleans above, since they are also present in m_options
+    pbesstategraph_options m_options;
+
     // the local control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_LCFP;
 
@@ -142,13 +145,40 @@ class stategraph_algorithm
       return data::find_free_variables(x);
     }
 
+    void start_timer(const std::string& msg) const
+    {
+      if (m_options.timing_enabled())
+      {
+        m_options.timer->start(msg);
+      }
+    }
+
+    void finish_timer(const std::string& msg) const
+    {
+      if (m_options.timing_enabled())
+      {
+        m_options.timer->finish(msg);
+      }
+    }
+
   public:
     void compute_control_flow_parameters()
     {
+      start_timer("compute_local_control_flow_parameters");
       compute_local_control_flow_parameters();
+      finish_timer("compute_local_control_flow_parameters");
+
+      start_timer("compute_global_control_flow_parameters");
       compute_global_control_flow_parameters();
+      finish_timer("compute_global_control_flow_parameters");
+
+      start_timer("compute_related_global_control_flow_parameters");
       compute_related_global_control_flow_parameters();
+      finish_timer("compute_related_global_control_flow_parameters");
+
+      start_timer("compute_connected_components");
       compute_connected_components();
+      finish_timer("compute_connected_components");
     }
 
     template <typename T>
@@ -776,7 +806,8 @@ class stategraph_algorithm
       : m_datar(p.data(), options.rewrite_strategy),
         m_use_alternative_lcfp_criterion(options.use_alternative_lcfp_criterion),
         m_use_alternative_gcfp_relation(options.use_alternative_gcfp_relation),
-        m_use_alternative_gcfp_consistency(options.use_alternative_gcfp_consistency)
+        m_use_alternative_gcfp_consistency(options.use_alternative_gcfp_consistency),
+        m_options(options)
     {
       m_pbes = stategraph_pbes(p);
     }
@@ -901,7 +932,10 @@ class stategraph_algorithm
       remove_invalid_connected_components();
       remove_only_copy_components();
       print_final_control_flow_parameters();
+
+      start_timer("compute_connected_component_values");
       compute_connected_component_values();
+      finish_timer("compute_connected_component_values");
     }
 
     const stategraph_pbes& get_pbes() const

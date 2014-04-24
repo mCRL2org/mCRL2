@@ -52,7 +52,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       return std::set<data::variable>(d_X.begin(), d_X.end());
     }
 
-    void compute_control_flow_marking(control_flow_graph& G)
+    void compute_global_control_flow_marking(control_flow_graph& G)
     {
       mCRL2log(log::debug, "stategraph") << "--- compute initial marking ---" << std::endl;
       // initialization
@@ -265,7 +265,9 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
     pbes run()
     {
       super::run();
-      compute_control_flow_marking(m_control_flow_graph);
+      start_timer("compute_global_control_flow_marking");
+      compute_global_control_flow_marking(m_control_flow_graph);
+      finish_timer("compute_global_control_flow_marking");
       mCRL2log(log::verbose) << "Computed control flow marking" << std::endl;
       mCRL2log(log::debug) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
       pbes result = m_original_pbes;

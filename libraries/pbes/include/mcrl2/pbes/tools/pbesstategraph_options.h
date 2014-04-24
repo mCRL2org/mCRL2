@@ -13,6 +13,7 @@
 #define MCRL2_PBES_TOOLS_PBESSTATEGRAPH_OPTIONS_H
 
 #include "mcrl2/data/rewrite_strategy.h"
+#include "mcrl2/utilities/execution_timer.h"
 
 namespace mcrl2 {
 
@@ -30,6 +31,7 @@ struct pbesstategraph_options
   bool use_alternative_lcfp_criterion;
   bool use_alternative_gcfp_relation;
   bool use_alternative_gcfp_consistency;
+  utilities::execution_timer* timer;     // if it is non-zero, it will be used to display timing information
 
   pbesstategraph_options()
   : rewrite_strategy(data::jitty),
@@ -41,8 +43,14 @@ struct pbesstategraph_options
     use_marking_optimization(false),
     use_alternative_lcfp_criterion(false),
     use_alternative_gcfp_relation(false),
-    use_alternative_gcfp_consistency(false)
+    use_alternative_gcfp_consistency(false),
+    timer(0)
   {}
+
+  bool timing_enabled() const
+  {
+    return timer != 0;
+  }
 };
 
 } // namespace pbes_system

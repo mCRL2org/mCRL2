@@ -143,7 +143,11 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       super::run();
       pbes result = m_original_pbes;
       compute_occurring_data_parameters();
+
+      start_timer("reset_variables_to_original");
       reset_variables_to_original(result);
+      finish_timer("reset_variables_to_original");
+
       return result;
     }
 };

@@ -802,13 +802,26 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
     void run()
     {
       super::run();
+
+      start_timer("compute_local_control_flow_graphs");
       compute_local_control_flow_graphs();
+      finish_timer("compute_local_control_flow_graphs");
       print_local_control_flow_graphs();
+
+      start_timer("compute_belongs");
       compute_belongs();
+      finish_timer("compute_belongs");
       print_belongs();
+
+      start_timer("compute_extra_local_control_flow_graph");
       compute_extra_local_control_flow_graph();
+      finish_timer("compute_extra_local_control_flow_graph");
+
+      start_timer("compute_control_flow_marking");
       compute_control_flow_marking();
+      finish_timer("compute_control_flow_marking");
       print_control_flow_marking();
+
       print_marking_statistics();
     }
 };
