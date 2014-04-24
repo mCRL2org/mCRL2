@@ -369,7 +369,7 @@ class stategraph_algorithm
       }
       while (changed);
 
-      mCRL2log(log::verbose, "stategraph") << print_GCFP();
+      mCRL2log(log::debug, "stategraph") << print_GCFP();
     }
 
     bool is_local_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
@@ -733,10 +733,10 @@ class stategraph_algorithm
     }
 
     // prints all vertices of the connected components
-    void print_local_control_flow_parameters() const
+    void print_final_control_flow_parameters() const
     {
       std::ostringstream out;
-      mCRL2log(log::debug, "stategraph") << "--- computed local control flow parameters ---" << std::endl;
+      mCRL2log(log::verbose, "stategraph") << "--- computed control flow parameters ---" << std::endl;
 
       // collect the control flow points in the map CFP
       std::map<core::identifier_string, std::set<const global_control_flow_graph_vertex*> > CFP;
@@ -769,7 +769,7 @@ class stategraph_algorithm
           out << **j;
         }
       }
-      mCRL2log(log::debug, "stategraph") << out.str() << std::endl;
+      mCRL2log(log::verbose, "stategraph") << out.str() << std::endl;
     }
 
     stategraph_algorithm(const pbes& p, const pbesstategraph_options& options)
@@ -900,7 +900,7 @@ class stategraph_algorithm
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
-      print_local_control_flow_parameters();
+      print_final_control_flow_parameters();
       compute_connected_component_values();
     }
 
