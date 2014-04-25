@@ -33,7 +33,7 @@ SortExpr
 
 SortProduct                                                      // Product sort
   : SortExpr $left 2
-  | SortExpr ('#' $binary_op_left 1) SortExpr ;
+  | SortProduct ('#' $binary_op_left 1) SortExpr ;
 
 SortSpec: 'sort' SortDecl+ ;                                     // Sort specification
 
