@@ -60,14 +60,6 @@ void test_whr()
   data_expression x = parse_data_expression("exists n: Nat . n == 0 whr n = 1 end");
 }
 
-void test_sort()
-{
-  using namespace data;
-  std::string text = "Pos -> Pos # Pos -> Bool";
-  sort_expression s = parse_sort_expression(text);
-  BOOST_CHECK(data::pp(s) == text);
-}
-
 // returns true if parsing succeeded
 bool parse_sort(const data::data_specification& data_spec, const std::string& text)
 {
@@ -100,6 +92,8 @@ void test_ticket_1267()
   test_sort_expression(data_spec, "(A -> A) # A", false);
   test_sort_expression(data_spec, "A # A", false);
   test_sort_expression(data_spec, "(A # A)", false);
+  test_sort_expression(data_spec, "(A # A) -> A", false);
+  test_sort_expression(data_spec, "A -> ((A # A) -> (A -> A))", false);
 
   test_sort_expression(data_spec, "A", true);
   test_sort_expression(data_spec, "A # A -> A", true);
@@ -110,9 +104,7 @@ void test_ticket_1267()
   test_sort_expression(data_spec, "A # (A -> A) -> (A -> A)", true);
   test_sort_expression(data_spec, "(A -> A) # A -> (A -> A)", true);
   test_sort_expression(data_spec, "A # A # A -> A", true);
-
-  test_sort_expression(data_spec, "(A # A) -> A", false);
-  test_sort_expression(data_spec, "A -> ((A # A) -> (A -> A))", false);
+  test_sort_expression(data_spec, "A -> A -> A -> A", true);
 }
 
 int test_main(int argc, char** argv)
@@ -120,7 +112,6 @@ int test_main(int argc, char** argv)
   parser_test();
   test_user_defined_sort();
   test_whr();
-  test_sort();
   test_ticket_1267();
 
   return EXIT_SUCCESS;
