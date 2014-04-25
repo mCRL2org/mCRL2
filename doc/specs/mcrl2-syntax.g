@@ -14,7 +14,7 @@ ${declare longest_match}
 
 //--- Sort expressions and sort declarations
 
-SimpleSortExpr
+SortExpr
   : 'Bool'                                                       // Booleans
   | 'Pos'                                                        // Positive numbers
   | 'Nat'                                                        // Natural numbers
@@ -28,15 +28,12 @@ SimpleSortExpr
   | Id                                                           // Sort reference
   | '(' SortExpr ')'                                             // Sort expression with parentheses
   | 'struct' ConstrDeclList                                      // Structured sort
+  | SortProduct ('->' $binary_op_right 0) SortExpr;              // Function sort
   ;
 
-SortExpr
-  : SimpleSortExpr
-  | HashArgs '->' SortExpr ;                                     // Function sort
-
-SortExprList: (SortExpr '#')* SortExpr ;                         // Product sort
-
-HashArgs: SimpleSortExpr ('#' SimpleSortExpr)* ;                 // Simple product sort
+SortProduct                                                      // Product sort
+  : SortExpr $left 2
+  | SortExpr ('#' $binary_op_left 1) SortExpr ;
 
 SortSpec: 'sort' SortDecl+ ;                                     // Sort specification
 
@@ -151,7 +148,7 @@ ActIdSet: '{' IdList '}' ;                                       // Action set
 
 MultActId: Id ( '|' Id )* ;                                      // Multi-action label
 
-MultActIdList: MultActId ( ',' MultActId )* ;                    // Multi-action labels 
+MultActIdList: MultActId ( ',' MultActId )* ;                    // Multi-action labels
 
 MultActIdSet: '{' MultActIdList? '}' ;                           // Multi-action label set
 
@@ -220,7 +217,7 @@ IfThen: '->' ProcExprNoIf '<>' $left 0 ;                         // Auxiliary if
 
 Action: Id ( '(' DataExprList ')' )? ;                           // Action, process instantiation
 
-ActDecl: IdList ( ':' SortExprList )? ';' ;                      // Declarations of actions
+ActDecl: IdList ( ':' SortProduct )? ';' ;                       // Declarations of actions
 
 ActSpec: 'act' ActDecl+ ;                                        // Action specification
 
@@ -368,7 +365,7 @@ StateFrm
 
 StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;           // PBES variable declaration
 
-StateVarAssignment: Id ':' SortExpr '=' DataExpr ;               // Typed variable with initial value 
+StateVarAssignment: Id ':' SortExpr '=' DataExpr ;               // Typed variable with initial value
 
 StateVarAssignmentList: StateVarAssignment ( ',' StateVarAssignment )* ;  // Typed variable list
 

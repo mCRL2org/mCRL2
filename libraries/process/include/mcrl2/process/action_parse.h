@@ -42,7 +42,7 @@ struct action_actions: public data::data_specification_actions
     if (symbol_name(node) == "ActDecl")
     {
       core::identifier_string_list ids = parse_IdList(node.child(0));
-      data::sort_expression_list sorts = parse_SortExprList(node.child(1));
+      data::sort_expression_list sorts = parse_SortProduct(node.child(1));
       for (core::identifier_string_list::iterator i = ids.begin(); i != ids.end(); ++i)
       {
         result.push_back(action_label(*i, sorts));
