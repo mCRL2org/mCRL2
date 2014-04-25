@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/detail/prover/manipulator.h
-/// \brief Interface to classes InternalFormatManipulator.
+/// \brief Interface to classes Manipulator.
 
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
@@ -23,7 +23,7 @@ namespace detail
 
 /// \brief Base class for classes that provide functionality to modify or create terms.
 
-class InternalFormatManipulator
+class Manipulator
 {
   protected:
     /// \brief The rewriter used to translate formulas.
@@ -31,16 +31,13 @@ class InternalFormatManipulator
 
     /// \brief A class that provides information on the structure of expressions in one of the
     /// \brief internal formats of the rewriter.
-    InternalFormatInfo& f_info;
+    Info& f_info;
 
-    /// \brief A table used by the method InternalFormatManipulator::orient.
-    /// The method InternalFormatManipulator::orient stores resulting terms in this
+    /// \brief A table used by the method Manipulator::orient.
+    /// The method Manipulator::orient stores resulting terms in this
     /// table. If a term is encountered that has already been processed, it is
     /// not processed again, but retreived from this table.
     std::map < data_expression, data_expression> f_orient;
-
-    /// \brief aterm representing the \c if \c then \c else function.
-    function_symbol f_if_then_else;
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c true. Additionally, if the variable
     /// \brief on the righthand side of the guard is encountered in \c a_formula, it is replaced by the variable
@@ -54,11 +51,6 @@ class InternalFormatManipulator
       {
         return a_formula;
       }
-
-      /* if (a_formula == sort_bool::true_() || a_formula == sort_bool::false_())
-      {
-        return a_formula;
-      } */
 
       if (a_formula == a_guard)
       {
@@ -143,20 +135,19 @@ class InternalFormatManipulator
                const data_expression& a_high,
                const data_expression& a_low)
     {
-      return application(f_if_then_else, a_expr, a_high, a_low);
+      return if_(a_expr, a_high, a_low);
     }
 
   public:
     /// \brief Constructor initializing the rewriter and the field \c f_info.
-    InternalFormatManipulator(boost::shared_ptr<detail::Rewriter> a_rewriter, InternalFormatInfo& a_info):
+    Manipulator(boost::shared_ptr<detail::Rewriter> a_rewriter, Info& a_info):
       f_info(a_info)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else = if_(sort_bool::bool_());
     }
 
     /// \brief Destructor with no particular functionality.
-    ~InternalFormatManipulator()
+    ~Manipulator()
     {
     }
 
@@ -219,7 +210,7 @@ class InternalFormatManipulator
       return v_result;
     }
 
-    /// \brief Initializes the table InternalFormatManipulator::f_set_true and calls
+    /// \brief Initializes the table Manipulator::f_set_true and calls
     /// \brief f_set_true_auxiliary.
     data_expression set_true(
                  const data_expression& a_formula,
@@ -229,7 +220,7 @@ class InternalFormatManipulator
       return set_true_auxiliary(a_formula, a_guard, f_set_true);
     }
 
-    /// \brief Initializes the table InternalFormatManipulator::f_set_false and calls the method
+    /// \brief Initializes the table Manipulator::f_set_false and calls the method
     /// \brief AM_Jitty::f_set_false_auxiliary.
     data_expression set_false(
                  const data_expression& a_formula,

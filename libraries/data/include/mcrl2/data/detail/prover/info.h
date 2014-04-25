@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/detail/prover/info.h
-/// \brief Interface to classes InternalFormatInfo
+/// \brief Interface to classes Info
 
 #ifndef INFO_H
 #define INFO_H
@@ -32,14 +32,9 @@ enum Compare_Result
 
 /// \brief Base class for classes that provide information about the structure of
 /// \brief data expressions in one of the internal formats of the rewriter.
-class InternalFormatInfo
+class Info
 {
   protected:
-    /// \brief The rewriter used to translate formulas to the internal format of rewriters.
-    boost::shared_ptr<detail::Rewriter> f_rewriter;
-
-    /// \brief function symbol representing the internal \c if \c then \c else function with type Bool -> Bool -> Bool -> Bool.
-    function_symbol f_if_then_else_bool;
 
     /// \brief Flag indicating whether or not the arguments of equality functions are taken into account
     /// \brief when determining the order of expressions.
@@ -249,23 +244,21 @@ class InternalFormatInfo
 
   public:
     /// \brief Constructor that initializes the rewriter.
-    InternalFormatInfo(boost::shared_ptr<detail::Rewriter> a_rewriter)
+    Info()
     {
-      f_rewriter = a_rewriter;
-      f_if_then_else_bool = if_(sort_bool::bool_());
     }
 
     /// \brief Destructor with no particular functionality.
-    virtual ~InternalFormatInfo()
+    ~Info()
     {}
 
-    /// \brief Sets the flag InternalFormatInfo::f_reverse.
+    /// \brief Sets the flag Info::f_reverse.
     void set_reverse(bool a_reverse)
     {
       f_reverse = a_reverse;
     }
 
-    /// \brief Sets the flag InternalFormatInfo::f_full.
+    /// \brief Sets the flag Info::f_full.
     void set_full(bool a_bool)
     {
       f_full = a_bool;
@@ -357,7 +350,7 @@ class InternalFormatInfo
     }
 
     /// \brief Indicates whether or not a term is an equality.
-    virtual bool is_equality(const data_expression& a_term)
+    bool is_equality(const data_expression& a_term)
     {
       if (!is_application(a_term))
       {

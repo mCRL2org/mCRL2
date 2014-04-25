@@ -70,10 +70,10 @@ class Prover:protected mcrl2::data::rewriter
     data_expression f_formula;
 
     /// \brief A class that can be used to manipulate expressions.
-    InternalFormatManipulator f_manipulator;
+    Manipulator f_manipulator;
 
     /// \brief A class that provides information about expressions.
-    InternalFormatInfo f_info;
+    Info f_info;
 
     /// \brief A flag that indicates whether or not the formala Prover::f_formula has been processed.
     bool f_processed;
@@ -98,7 +98,7 @@ class Prover:protected mcrl2::data::rewriter
            int a_time_limit = 0):
                        mcrl2::data::rewriter(a_data_spec, equations_selector, a_rewrite_strategy),
                        f_manipulator(m_rewriter, f_info),
-                       f_info(m_rewriter)
+                       f_info()
     {
       f_time_limit = a_time_limit;
       f_processed = false;

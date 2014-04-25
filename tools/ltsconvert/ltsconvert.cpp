@@ -28,12 +28,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::log;
 
-
-static inline std::string get_base(std::string const& s)
-{
-  return s.substr(0, s.find_last_of('.'));
-}
-
 class t_tool_options
 {
   public:

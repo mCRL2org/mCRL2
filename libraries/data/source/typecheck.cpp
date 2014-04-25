@@ -1734,16 +1734,13 @@ bool mcrl2::data::data_type_checker::MatchSetOpSetCompl(const function_sort &typ
   {
     Res=UnwindType(Res);
   }
-  if (detail::IsNumericType(Res))
+  // if (detail::IsNumericType(Res))
+  if (Res==sort_bool::bool_())
   {
     result=type;
     return true;
   }
-  if (!sort_set::is_set(sort_expression(Res)))
-  {
-    return false;
-  }
-  Res=aterm_cast<container_sort>(Res).element_sort();
+
   sort_expression_list Args=type.domain();
   if (Args.size()!=1)
   {
@@ -1755,11 +1752,17 @@ bool mcrl2::data::data_type_checker::MatchSetOpSetCompl(const function_sort &typ
   {
     Arg=UnwindType(Arg);
   }
-  if (detail::IsNumericType(Arg))
+  // if (detail::IsNumericType(Arg))
+  if (Arg==sort_bool::bool_())
   {
     result=type;
     return true;
   }
+  if (!sort_set::is_set(sort_expression(Res)))
+  {
+    return false;
+  }
+  Res=aterm_cast<container_sort>(Res).element_sort();
   if (!sort_set::is_set(sort_expression(Arg)))
   {
     return false;
@@ -2240,6 +2243,7 @@ bool mcrl2::data::data_type_checker::EqTypesL(sort_expression_list Type1, sort_e
 
 sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const data_expression &d, const sort_expression &proposed_type)
 {
+std::cerr << "Determine allowed type " << d << " -- " << proposed_type << "\n";
   if (is_variable(d))
   {
     variable v(d);
@@ -2256,6 +2260,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
   const core::identifier_string& data_term_name=data::is_untyped_identifier(d)?
                       atermpp::aterm_cast<const untyped_identifier>(d).name():
                             (aterm_cast<const data::function_symbol>(d).name());
+std::cerr << "Determine allowed typeA " << data_term_name << "\n";
 
   if (data::detail::if_symbol()==data_term_name)
   {
@@ -2418,6 +2423,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
   {
     mCRL2log(debug) << "Doing SetCompl matching Type " << Type << std::endl;
     sort_expression NewType;
+std::cerr << "TYPE" << Type << "\n";
     if (!MatchSetOpSetCompl(core::static_down_cast<const function_sort&>(Type), NewType))
     {
       throw mcrl2::runtime_error("the function SetCompl has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
