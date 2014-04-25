@@ -22,6 +22,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
+#include "mcrl2/data/substitutions/enumerator_substitution.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/mutable_substitution_composer.h"
@@ -348,17 +349,51 @@ void test_sort_substitution()
 
 }
 
+void test_enumerator_substitution(const enumerator_substitution& sigma, const variable& x, const data_expression& expected_result)
+{
+  data_expression result = sigma(x);
+  if (result != expected_result)
+  {
+    std::cerr << "ERROR: sigma = " << sigma << "(" << x << ") = " << result << " expected_result = " << expected_result << std::endl;
+  }
+  BOOST_CHECK(result == expected_result);
+}
+
+void test_enumerator_substitution()
+{
+  variable x = parse_variable("x: Bool");
+  variable y = parse_variable("y: Bool");
+  variable z = parse_variable("z: Bool");
+
+  enumerator_substitution sigma1;
+  sigma1[x] = y;
+
+  enumerator_substitution sigma2;
+  sigma2[y] = z;
+
+  enumerator_substitution sigma;
+  data::data_expression expected_result;
+
+  sigma = compose(sigma1, sigma2);
+  expected_result = y;
+  test_enumerator_substitution(sigma, x, expected_result);
+
+  sigma = compose(sigma2, sigma1);
+  expected_result = z;
+  test_enumerator_substitution(sigma, x, expected_result);
+}
+
 int test_main(int /* a */, char**  /* aa */)
 {
   test_my_assignment_sequence_substitution();
   test_my_list_substitution();
-
   test_basic();
   test_assignment_sequence_substitution();
   test_list_substitution();
   test_mutable_substitution();
   test_sort_substitution();
   test_indexed_substitution();
+  test_enumerator_substitution();
 
   return EXIT_SUCCESS;
 }
