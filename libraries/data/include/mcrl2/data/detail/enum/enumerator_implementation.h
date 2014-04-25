@@ -56,7 +56,7 @@ inline TERM EnumeratorSolutionsStandard<TERM,REWRITER>::add_negations(
     {
       if (condition == sort_bool::true_())
       {
-        return sort_bool::false_(); 
+        return sort_bool::false_();
       }
       else if (condition == sort_bool::false_())
       {
@@ -75,13 +75,13 @@ inline TERM EnumeratorSolutionsStandard<TERM,REWRITER>::add_negations(
   data_expression second_argument= negation_term_list.front();
   if (!negated)
   {
-    if (second_argument == sort_bool::true_()) 
+    if (second_argument == sort_bool::true_())
     {
       return sort_bool::false_();
     }
     else if (second_argument == sort_bool::false_())
     {
-      return sort_bool::true_(); 
+      return sort_bool::true_();
     }
     else if (is_application(second_argument) && core::down_cast<application>(second_argument).head()== sort_bool::not_())
     {
@@ -308,7 +308,7 @@ static data_expression build_solution_aux(
 static data_expression build_solution_single(
                  const variable& t,
                  variable_list substituted_vars,
-                 data_expression_list exprs) 
+                 data_expression_list exprs)
 {
   assert(substituted_vars.size()==exprs.size());
   while (!substituted_vars.empty() && t!=substituted_vars.front())
@@ -330,7 +330,7 @@ static data_expression build_solution_single(
 class apply_build_solution_aux
 {
   protected:
-    const variable_list& m_substituted_vars; 
+    const variable_list& m_substituted_vars;
     const data_expression_list& m_expr;
 
   public:
@@ -409,7 +409,7 @@ inline data_expression_list EnumeratorSolutionsStandard<TERM,REWRITER>::build_so
                  const variable_list& substituted_vars,
                  const data_expression_list& exprs) const
 {
-  return build_solution2(vars,reverse(substituted_vars),reverse(exprs));
+  return build_solution2(vars, atermpp::reverse(substituted_vars), atermpp::reverse(exprs));
 }
 
 template <class TERM, class REWRITER>
@@ -427,7 +427,7 @@ inline bool EnumeratorSolutionsStandard<TERM,REWRITER>::next(
     fs_stack.pop_front();
     if (e.vars().empty() || e.expr()==sort_bool::false_())
     {
-      if (e.expr()!=sort_bool::false_()) 
+      if (e.expr()!=sort_bool::false_())
       { // A solution is found. Construct and return it.
         solution = build_solution(enum_vars,e.substituted_vars(), e.vals());
         evaluated_condition = e.expr();
