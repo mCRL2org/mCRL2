@@ -1,0 +1,10 @@
+% Check that the number 738 can be reached.
+
+< true*. report_c(738)>true
+
+% The formula below expresses that any value
+% can be reached, but this cannot be solved
+% automatically
+%
+% forall n:Pos. < true*. report_c(n)>true
+
