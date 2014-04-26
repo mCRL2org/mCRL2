@@ -18,6 +18,7 @@
 #include <string>
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
+#include "mcrl2/data/builder.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
@@ -26,80 +27,55 @@ namespace data {
 
 namespace detail {
 
-data_expression build_solution_aux(const data_expression& t, const variable_list& substituted_vars, const data_expression_list& exprs);
+// applies the enumerator substitution defined by variables and expressions to x
+template <typename T>
+data_expression enumerator_replace(const T& x, const variable_list& variables, const data_expression_list& expressions);
 
-inline
-data_expression build_solution_single(const variable& t, variable_list substituted_vars, data_expression_list exprs)
+struct enumerator_replace_builder: public data_expression_builder<enumerator_replace_builder>
 {
-  assert(substituted_vars.size() == exprs.size());
-  while (!substituted_vars.empty() && t != substituted_vars.front())
-  {
-    substituted_vars.pop_front();
-    exprs.pop_front();
-  }
-  if (substituted_vars.empty())
-  {
-    return t;
-  }
-  else
-  {
-    return build_solution_aux(exprs.front(), substituted_vars.tail(), exprs.tail());
-  }
-}
+  typedef data_expression_builder<enumerator_replace_builder> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
 
-class apply_build_solution_aux
-{
-  protected:
-    const variable_list& m_substituted_vars;
-    const data_expression_list& m_expr;
+  const variable_list& variables;
+  const data_expression_list& expressions;
 
-  public:
-    apply_build_solution_aux(const variable_list& substituted_vars, const data_expression_list& expr):
-       m_substituted_vars(substituted_vars), m_expr(expr)
-    {}
+  enumerator_replace_builder(const variable_list& variables_, const data_expression_list& expressions_)
+    : variables(variables_),
+      expressions(expressions_)
+  {}
 
-    data_expression operator()(const data_expression& t) const
+  data_expression operator()(const variable& x)
+  {
+    variable_list vars = variables;
+    data_expression_list exprs = expressions;
+    while (!vars.empty() && x != vars.front())
     {
-      return build_solution_aux(t, m_substituted_vars, m_expr);
+      vars.pop_front();
+      exprs.pop_front();
     }
+    if (vars.empty())
+    {
+      return x;
+    }
+    else
+    {
+      return enumerator_replace(exprs.front(), vars.tail(), exprs.tail());
+    }
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
 };
 
-data_expression build_solution_aux(const data_expression& t, const variable_list& substituted_vars, const data_expression_list& exprs)
+template <typename T>
+inline
+data_expression enumerator_replace(const T& x, const variable_list& variables, const data_expression_list& expressions)
 {
-  assert(!is_where_clause(t)); // This is a non expected case as t is a normalform.
-  if (is_variable(t))
-  {
-    return build_solution_single(atermpp::aterm_cast<variable>(t), substituted_vars, exprs);
-  }
-  else if (is_abstraction(t))
-  {
-    const abstraction& t1 = core::down_cast<abstraction>(t);
-    const binder_type& binder = t1.binding_operator();
-    const variable_list& bound_variables = t1.variables();
-    const data_expression& body = build_solution_aux(t1.body(), substituted_vars, exprs);
-    return abstraction(binder, bound_variables, body);
-  }
-  else if (is_function_symbol(t))
-  {
-    return t;
-  }
-
-  assert(is_application(t));
-  {
-    // t has the shape application(u1,...,un)
-    const application t_appl(t);
-    const data_expression& head = t_appl.head();
-
-    if (is_function_symbol(head))
-    {
-      return application(head, t_appl.begin(), t_appl.end(), apply_build_solution_aux(substituted_vars, exprs));
-    }
-
-    /* The head is more complex, rewrite it first; */
-
-    data_expression head1 = build_solution_aux(head, substituted_vars, exprs);
-    return application(head1, t_appl.begin(), t_appl.end(), apply_build_solution_aux(substituted_vars, exprs));
-  }
+  enumerator_replace_builder f(variables, expressions);
+  return f(x);
 }
 
 } // namespace detail
@@ -153,7 +129,7 @@ struct enumerator_substitution: public std::unary_function<data::variable, data:
 
   data::data_expression operator()(const data::variable& v) const
   {
-    return detail::build_solution_single(v, variables, expressions);
+    return detail::enumerator_replace(v, variables, expressions);
   }
 
   assignment operator[](const data::variable& v)

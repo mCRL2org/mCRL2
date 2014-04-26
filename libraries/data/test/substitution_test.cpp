@@ -1,4 +1,4 @@
-// Author(s): Jeroen van der Wulp
+// Author(s): Jeroen van der Wulp, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -13,6 +13,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
@@ -361,15 +362,22 @@ void test_enumerator_substitution(const enumerator_substitution& sigma, const va
 
 void test_enumerator_substitution()
 {
+  typedef core::term_traits<data_expression> tr;
+
   variable x = parse_variable("x: Bool");
   variable y = parse_variable("y: Bool");
   variable z = parse_variable("z: Bool");
+  data_expression x_and_y = tr::and_(x, y);
+  data_expression y_and_y = tr::and_(y, y);
 
   enumerator_substitution sigma1;
   sigma1[x] = y;
 
   enumerator_substitution sigma2;
   sigma2[y] = z;
+
+  enumerator_substitution sigma3;
+  sigma3[z] = x_and_y;
 
   enumerator_substitution sigma;
   data::data_expression expected_result;
@@ -381,6 +389,10 @@ void test_enumerator_substitution()
   sigma = compose(sigma2, sigma1);
   expected_result = z;
   test_enumerator_substitution(sigma, x, expected_result);
+
+  sigma = compose(sigma1, sigma3);
+  expected_result = y_and_y;
+  test_enumerator_substitution(sigma, z, expected_result);
 }
 
 int test_main(int /* a */, char**  /* aa */)
