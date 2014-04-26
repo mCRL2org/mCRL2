@@ -2243,7 +2243,6 @@ bool mcrl2::data::data_type_checker::EqTypesL(sort_expression_list Type1, sort_e
 
 sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const data_expression &d, const sort_expression &proposed_type)
 {
-std::cerr << "Determine allowed type " << d << " -- " << proposed_type << "\n";
   if (is_variable(d))
   {
     variable v(d);
@@ -2260,7 +2259,6 @@ std::cerr << "Determine allowed type " << d << " -- " << proposed_type << "\n";
   const core::identifier_string& data_term_name=data::is_untyped_identifier(d)?
                       atermpp::aterm_cast<const untyped_identifier>(d).name():
                             (aterm_cast<const data::function_symbol>(d).name());
-std::cerr << "Determine allowed typeA " << data_term_name << "\n";
 
   if (data::detail::if_symbol()==data_term_name)
   {
@@ -2423,7 +2421,6 @@ std::cerr << "Determine allowed typeA " << data_term_name << "\n";
   {
     mCRL2log(debug) << "Doing SetCompl matching Type " << Type << std::endl;
     sort_expression NewType;
-std::cerr << "TYPE" << Type << "\n";
     if (!MatchSetOpSetCompl(core::static_down_cast<const function_sort&>(Type), NewType))
     {
       throw mcrl2::runtime_error("the function SetCompl has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
