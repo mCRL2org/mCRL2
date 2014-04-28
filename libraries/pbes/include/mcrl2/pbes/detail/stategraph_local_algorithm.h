@@ -588,16 +588,16 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
           //             stableext := false;
           // stable := stableint /\ stableext;
           bool stableext = false;
-          auto bnd = binding_variable_names();
           auto const& equations = m_pbes.equations();
           while (!stableext)
           {
             stableext = true;
-            for (auto xi = bnd.begin(); xi != bnd.end(); ++xi)
+            for (auto xi = equations.begin(); xi != equations.end(); ++xi)
             {
-              auto const& X = *xi;
+              auto const& eq_X = *xi;
+              auto const& X = eq_X.variable().name();
               auto& EX = m_edge_index[X];
-              for (std::size_t i = 0; i < equations.size(); i++)
+              for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
               {
                 auto& EXi = EX[i];
                 for (auto ei = EXi.begin(); ei != EXi.end(); ++ei)
