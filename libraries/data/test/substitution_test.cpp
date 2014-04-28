@@ -350,6 +350,13 @@ void test_sort_substitution()
 
 }
 
+// returns the function composition f o g
+inline
+enumerator_substitution compose(const enumerator_substitution& f, const enumerator_substitution& g)
+{
+  return enumerator_substitution(g.variables + f.variables, g.expressions + f.expressions);
+}
+
 void test_enumerator_substitution(const enumerator_substitution& sigma, const variable& x, const data_expression& expected_result)
 {
   data_expression result = sigma(x);
@@ -371,13 +378,13 @@ void test_enumerator_substitution()
   data_expression y_and_y = tr::and_(y, y);
 
   enumerator_substitution sigma1;
-  sigma1[x] = y;
+  sigma1.add_assignment(x, y);
 
   enumerator_substitution sigma2;
-  sigma2[y] = z;
+  sigma2.add_assignment(y, z);
 
   enumerator_substitution sigma3;
-  sigma3[z] = x_and_y;
+  sigma3.add_assignment(z, x_and_y);
 
   enumerator_substitution sigma;
   data::data_expression expected_result;

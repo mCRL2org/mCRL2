@@ -94,29 +94,6 @@ struct enumerator_substitution: public std::unary_function<data::variable, data:
   data::variable_list variables;
   data::data_expression_list expressions;
 
-  /// \brief Wrapper class for internal storage and substitution updates using operator()
-  struct assignment
-  {
-    data::variable m_variable;
-    data::variable_list& m_variables;
-    data::data_expression_list& m_expressions;
-
-    /// \brief Constructor.
-    ///
-    /// \param[in] v a variable.
-    assignment(const data::variable& v, data::variable_list& variables, data::data_expression_list& expressions)
-      : m_variable(v), m_variables(variables), m_expressions(expressions)
-    { }
-
-    template <typename AssignableToExpression>
-    void operator=(AssignableToExpression const& e)
-    {
-      mCRL2log(log::debug2, "substitutions") << "Setting " << m_variable << " := " << e << std::endl;
-      m_variables.push_front(m_variable);
-      m_expressions.push_front(e);
-    }
-  };
-
   enumerator_substitution()
   {}
 
@@ -132,16 +109,20 @@ struct enumerator_substitution: public std::unary_function<data::variable, data:
     return detail::enumerator_replace(v, variables, expressions);
   }
 
-  assignment operator[](const data::variable& v)
-  {
-    return assignment(v, variables, expressions);
-  }
-
   template <typename Expression>
   data::data_expression operator()(const Expression&) const
   {
     throw mcrl2::runtime_error("data::enumerator_substitution::operator(const Expression&) is a deprecated interface!");
     return data::undefined_data_expression();
+  }
+
+  // Adds the assignment [v := e] to this substitution, by putting it in front of the lists with variables and expressions.
+  // Note that this operation has not the same effect as function composition with [v := e]. Therefore we use a different
+  // syntax than sigma[v] = e.
+  void add_assignment(const data::variable& v, const data::data_expression& e)
+  {
+    variables.push_front(v);
+    expressions.push_front(e);
   }
 
   std::string to_string() const
@@ -177,14 +158,6 @@ bool is_simple_substitution(const enumerator_substitution& sigma)
     }
   }
   return true;
-}
-
-// returns the function composition f o g
-inline
-enumerator_substitution compose(const enumerator_substitution& f, const enumerator_substitution& g)
-{
-  // N.B. TODO: this can probably be done more efficiently
-  return enumerator_substitution(g.variables + f.variables, g.expressions + f.expressions);
 }
 
 } // namespace data
