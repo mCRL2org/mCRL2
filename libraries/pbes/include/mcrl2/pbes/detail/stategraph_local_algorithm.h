@@ -168,6 +168,30 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
     }
 
+    std::string print_edge_index()
+    {
+      mCRL2log(log::debug, "stategraph") << "--- computed marking edge index ---" << std::endl;
+      auto const& equations = m_pbes.equations();
+      std::ostringstream out;
+
+      for (auto xi = equations.begin(); xi != equations.end(); ++xi)
+      {
+        auto const& eq_X = *xi;
+        auto const& X = eq_X.variable().name();
+        auto& EX = m_edge_index[X];
+        out << "index for equation " << X << std::endl;
+        for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
+        {
+          auto& EXi = EX[i];
+          for (auto ei = EXi.begin(); ei != EXi.end(); ++ei)
+          {
+            out << " edge " << *ei->u << " --" << i << "--> " << *ei->v << std::endl;
+          }
+        }
+      }
+      return out.str();
+    }
+
     // prints a belong set
     std::string print_belong_set(const stategraph_equation& eq, const std::set<std::size_t>& belongs) const
     {
@@ -931,6 +955,12 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
       start_timer("compute_extra_local_control_flow_graph");
       compute_extra_local_control_flow_graph();
       finish_timer("compute_extra_local_control_flow_graph");
+
+      if (m_options.use_marking_edge_index)
+      {
+        compute_edge_index();
+        mCRL2log(log::debug2, "stategraph") << print_edge_index() << std::endl;
+      }
 
       start_timer("compute_control_flow_marking");
       compute_control_flow_marking();
