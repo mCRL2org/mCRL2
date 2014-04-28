@@ -140,8 +140,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
     };
 
-    // maps label i to the set of all edges with label i
-    std::map<std::size_t, std::set<vertex_pair> > m_edge_index;
+    // maps (X, i) to the set of all edges with label i and source vertex with name X
+    std::map<core::identifier_string, std::map<std::size_t, std::set<vertex_pair> > > m_edge_index;
 
     void compute_edge_index()
     {
@@ -152,6 +152,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         for (auto ui = vertices.begin(); ui != vertices.end(); ++ui)
         {
           auto const& u = *ui;
+          auto const& X = u.name();
           auto const& outgoing_edges = u.outgoing_edges();
           for(auto j = outgoing_edges.begin(); j != outgoing_edges.end(); ++j)
           {
@@ -160,7 +161,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             for (auto ii = I.begin(); ii != I.end(); ++ii)
             {
               std::size_t i = *ii;
-              m_edge_index[i].insert(vertex_pair(&u, &v, k));
+              m_edge_index[X][i].insert(vertex_pair(&u, &v, k));
             }
           }
         }
@@ -595,10 +596,11 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
             for (auto xi = bnd.begin(); xi != bnd.end(); ++xi)
             {
               auto const& X = *xi;
+              auto& EX = m_edge_index[X];
               for (std::size_t i = 0; i < equations.size(); i++)
               {
-                auto const& Ei = m_edge_index[i];
-                for (auto ei = Ei.begin(); ei != Ei.end(); ++ei)
+                auto& EXi = EX[i];
+                for (auto ei = EXi.begin(); ei != EXi.end(); ++ei)
                 {
                   const local_control_flow_graph_vertex& u = *ei->u;
                   // const local_control_flow_graph_vertex& v = *ei->v;
@@ -608,7 +610,7 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
                   {
                     continue;
                   }
-                  for (auto ej = Ei.begin(); ej != Ei.end(); ++ej)
+                  for (auto ej = EXi.begin(); ej != EXi.end(); ++ej)
                   {
                     // const local_control_flow_graph_vertex& u1 = *ej->u;
                     const local_control_flow_graph_vertex& v1 = *ej->v;
