@@ -27,7 +27,7 @@ struct pbesstategraph_options
   bool use_local_variant;
   bool print_influence_graph;
   bool cache_marking_updates;
-  bool use_marking_optimization;
+  bool use_marking_edge_index;
   bool use_alternative_lcfp_criterion;
   bool use_alternative_gcfp_relation;
   bool use_alternative_gcfp_consistency;
@@ -40,7 +40,7 @@ struct pbesstategraph_options
     use_local_variant(false),
     print_influence_graph(false),
     cache_marking_updates(false),
-    use_marking_optimization(false),
+    use_marking_edge_index(false),
     use_alternative_lcfp_criterion(false),
     use_alternative_gcfp_relation(false),
     use_alternative_gcfp_consistency(false),

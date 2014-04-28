@@ -109,12 +109,63 @@ class stategraph_local_algorithm: public stategraph_algorithm
     // if true, marking updates will be cached in the nodes of the local CFGs
     bool m_cache_marking_updates;
 
-    // if true, an optimization will be applied in the reset_variable procedure
-    bool m_use_marking_optimization;
-
     std::size_t m_marking_rewrite_count;
 
     std::size_t m_marking_rewrite_cached_count;
+
+    std::vector<core::identifier_string> binding_variable_names() const
+    {
+      std::vector<core::identifier_string> result;
+      auto const& equations = m_pbes.equations();
+      for (auto i = equations.begin(); i != equations.end(); ++i)
+      {
+        result.push_back(i->variable().name());
+      }
+      return result;
+    }
+
+    struct vertex_pair
+    {
+      const local_control_flow_graph_vertex* u;
+      const local_control_flow_graph_vertex* v;
+      std::size_t k; // index of the graph
+
+      vertex_pair(const local_control_flow_graph_vertex* u_, const local_control_flow_graph_vertex* v_, std::size_t k_)
+        : u(u_), v(v_), k(k_)
+      {}
+
+      bool operator<(const vertex_pair& other) const
+      {
+        return u < other.u || (u == other.u && v < other.v);
+      }
+    };
+
+    // maps label i to the set of all edges with label i
+    std::map<std::size_t, std::set<vertex_pair> > m_edge_index;
+
+    void compute_edge_index()
+    {
+      for (std::size_t k = 0; k < m_local_control_flow_graphs.size(); k++)
+      {
+        auto const& Gk = m_local_control_flow_graphs[k];
+        auto const& vertices = Gk.vertices;
+        for (auto ui = vertices.begin(); ui != vertices.end(); ++ui)
+        {
+          auto const& u = *ui;
+          auto const& outgoing_edges = u.outgoing_edges();
+          for(auto j = outgoing_edges.begin(); j != outgoing_edges.end(); ++j)
+          {
+            auto const& v = *(j->first);
+            auto const& I = j->second;
+            for (auto ii = I.begin(); ii != I.end(); ++ii)
+            {
+              std::size_t i = *ii;
+              m_edge_index[i].insert(vertex_pair(&u, &v, k));
+            }
+          }
+        }
+      }
+    }
 
     // prints a belong set
     std::string print_belong_set(const stategraph_equation& eq, const std::set<std::size_t>& belongs) const
@@ -448,74 +499,137 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
           }
         }
 
-        bool stableext = false;
-        while (!stableext)
+        if (!m_options.use_marking_edge_index)
         {
-          stableext = true;
-          for (std::size_t j = 0; j < J; j++)
+          bool stableext = false;
+          while (!stableext)
           {
-            auto const& Vj = m_local_control_flow_graphs[j];
-            auto const& Bj = m_belongs[j];
-            for (auto vj = Vj.vertices.begin(); vj != Vj.vertices.end(); ++vj)
+            stableext = true;
+            for (std::size_t j = 0; j < J; j++)
             {
-              auto const& u = *vj;
-              auto const& X = u.name();
-              if (u.marking().size() == Bj[X].size())
+              auto const& Vj = m_local_control_flow_graphs[j];
+              auto const& Bj = m_belongs[j];
+              for (auto vj = Vj.vertices.begin(); vj != Vj.vertices.end(); ++vj)
               {
-                continue;
-              }
-              mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
-
-              bool changed = false;
-              auto const& eq_X = *find_equation(m_pbes, X); // slow
-              auto const& predvars = eq_X.predicate_variables();
-              auto const& outgoing_edges = u.outgoing_edges();
-              for (auto ei = outgoing_edges.begin(); ei != outgoing_edges.end(); ++ei)
-              {
-                auto const& labels = ei->second;
-                for (auto ii = labels.begin(); ii != labels.end(); ++ii)
+                auto const& u = *vj;
+                auto const& X = u.name();
+                if (u.marking().size() == Bj[X].size())
                 {
-                  const std::size_t i = *ii;
-                  auto const& Ye = predvars[i];
-                  auto const& Y = Ye.name();
-                  for (std::size_t k = 0; k < J; k++)
+                  continue;
+                }
+                mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
+
+                bool changed = false;
+                auto const& eq_X = *find_equation(m_pbes, X); // slow
+                auto const& predvars = eq_X.predicate_variables();
+                auto const& outgoing_edges = u.outgoing_edges();
+                for (auto ei = outgoing_edges.begin(); ei != outgoing_edges.end(); ++ei)
+                {
+                  auto const& labels = ei->second;
+                  for (auto ii = labels.begin(); ii != labels.end(); ++ii)
                   {
-                    if (m_use_marking_optimization && !stableext)
+                    const std::size_t i = *ii;
+                    auto const& Ye = predvars[i];
+                    auto const& Y = Ye.name();
+                    for (std::size_t k = 0; k < J; k++)
                     {
-                      break;
-                    }
-                    if (j == k)
-                    {
-                      continue;
-                    }
-                    auto const& Vk = m_local_control_flow_graphs[k];
-                    for (auto vk = Vk.vertices.begin(); vk != Vk.vertices.end(); ++vk)
-                    {
-                      auto const& v = *vk;
-                      mCRL2log(log::debug1, "stategraph") << "     v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
-                      if (v.name() != Y)
+                      if (j == k)
                       {
                         continue;
                       }
-                      if (has_incoming_edge(Vk, v, X, i))
+                      auto const& Vk = m_local_control_flow_graphs[k];
+                      for (auto vk = Vk.vertices.begin(); vk != Vk.vertices.end(); ++vk)
                       {
-                        bool updated = update_marking_rule(Bj, u, i, v, true);
-                        changed = changed || updated;
+                        auto const& v = *vk;
+                        mCRL2log(log::debug1, "stategraph") << "     v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
+                        if (v.name() != Y)
+                        {
+                          continue;
+                        }
+                        if (has_incoming_edge(Vk, v, X, i))
+                        {
+                          bool updated = update_marking_rule(Bj, u, i, v, true);
+                          changed = changed || updated;
+                        }
                       }
                     }
                   }
                 }
-              }
-              if (changed)
-              {
-                mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
-                stableint = false;
-                stableext = false;
+                if (changed)
+                {
+                  mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
+                  stableint = false;
+                  stableext = false;
+                }
               }
             }
           }
+          stable = stableint;
         }
-        stable = stableint;
+        else
+        {
+          // stableext := false
+          // while not stableext do
+          //   stableext := true;
+          //   for X in bnd(E) do
+          //     for i <= npred(phi_X) do
+          //       let E := { ( u, i, v) in E1 union ... union EJ | exists n,z: u = (X,n,dX[n]=z) };
+          //       for (u,i,v) in E do
+          //         let j be such that u in Vj;
+          //         if (marking(u) = {d | (X,d) in Bj}) then continue;
+          //         for (u',i,v') in E do
+          //           let k be such that u' in Vk;
+          //           if (j == k) then continue;
+          //           m := marking(u);
+          //           marking(u) := UpdateMarkingRule2(Bj,u,i,v')
+          //           if not(marking(u) == m) then
+          //             stableint := false;
+          //             stableext := false;
+          // stable := stableint /\ stableext;
+          bool stableext = false;
+          auto bnd = binding_variable_names();
+          auto const& equations = m_pbes.equations();
+          while (!stableext)
+          {
+            stableext = true;
+            for (auto xi = bnd.begin(); xi != bnd.end(); ++xi)
+            {
+              auto const& X = *xi;
+              for (std::size_t i = 0; i < equations.size(); i++)
+              {
+                auto const& Ei = m_edge_index[i];
+                for (auto ei = Ei.begin(); ei != Ei.end(); ++ei)
+                {
+                  const local_control_flow_graph_vertex& u = *ei->u;
+                  // const local_control_flow_graph_vertex& v = *ei->v;
+                  std::size_t j = ei->k;
+                  auto const& Bj = m_belongs[j];
+                  if (u.marking().size() == Bj[X].size())
+                  {
+                    continue;
+                  }
+                  for (auto ej = Ei.begin(); ej != Ei.end(); ++ej)
+                  {
+                    // const local_control_flow_graph_vertex& u1 = *ej->u;
+                    const local_control_flow_graph_vertex& v1 = *ej->v;
+                    std::size_t k = ej->k;
+                    if (j == k)
+                    {
+                      continue;
+                    }
+                    bool updated = update_marking_rule(Bj, u, i, v1, true);
+                    if (updated)
+                    {
+                      stableint = false;
+                      stableext = false;
+                    }
+                  }
+                }
+              }
+            }
+          }
+          stable = stableint;
+        }
       }
     }
 
@@ -792,7 +906,6 @@ mCRL2log(log::debug2, "stategraph") << "  significant variables: " << core::deta
     stategraph_local_algorithm(const pbes& p, const pbesstategraph_options& options)
       : stategraph_algorithm(p, options),
         m_cache_marking_updates(options.cache_marking_updates),
-        m_use_marking_optimization(options.use_marking_optimization),
         m_marking_rewrite_count(0),
         m_marking_rewrite_cached_count(0)
 
