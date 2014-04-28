@@ -35,7 +35,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       options.use_local_variant = parser.option_argument_as<bool>("use-local-variant");
       options.print_influence_graph = parser.option_argument_as<bool>("print-influence-graph");
       options.cache_marking_updates = parser.option_argument_as<bool>("cache-marking-updates");
-      options.use_marking_optimization = parser.option_argument_as<bool>("use-marking-optimization");
+      options.use_marking_edge_index = parser.option_argument_as<bool>("use-marking-edge-index");
       options.use_alternative_lcfp_criterion = parser.option_argument_as<bool>("use-alternative-lcfp-criterion");
       options.use_alternative_gcfp_relation = parser.option_argument_as<bool>("use-alternative-gcfp-relation");
       options.use_alternative_gcfp_consistency = parser.option_argument_as<bool>("use-alternative-gcfp-consistency");
@@ -50,7 +50,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       desc.add_option("use-local-variant", make_optional_argument("NAME", "0"), "use the local variant of the algorithm", 'l');
       desc.add_option("print-influence-graph", make_optional_argument("NAME", "0"), "print the influence graph", 'i');
       desc.add_option("cache-marking-updates", make_optional_argument("NAME", "0"), "cache rewriter calls in marking updates", 'c');
-      desc.add_option("use-marking-optimization", make_optional_argument("NAME", "0"), "apply an optimization during marking", 'm');
+      desc.add_option("use-marking-edge-index", make_optional_argument("NAME", "0"), "use an index that maps labels to edges during marking computation", 'm');
       desc.add_option("use-alternative-lcfp-criterion", make_optional_argument("NAME", "0"), "use an alternative criterion for local control flow parameter computation", 'x');
       desc.add_option("use-alternative-gcfp-relation", make_optional_argument("NAME", "0"), "use an alternative global control flow parameter relation", 'y');
       desc.add_option("use-alternative-gcfp-consistency", make_optional_argument("NAME", "0"), "use an alternative global control flow parameter consistency", 'z');
@@ -77,7 +77,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       mCRL2log(verbose) << "  use local variant:                " << std::boolalpha << options.use_local_variant << std::endl;
       mCRL2log(verbose) << "  print influence graph:            " << std::boolalpha << options.print_influence_graph << std::endl;
       mCRL2log(verbose) << "  cache marking updates:            " << std::boolalpha << options.cache_marking_updates << std::endl;
-      mCRL2log(verbose) << "  use marking optimization:         " << std::boolalpha << options.use_marking_optimization << std::endl;
+      mCRL2log(verbose) << "  use marking edge index:           " << std::boolalpha << options.use_marking_edge_index << std::endl;
       mCRL2log(verbose) << "  use alternative lcfp criterion:   " << std::boolalpha << options.use_alternative_lcfp_criterion << std::endl;
       mCRL2log(verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
       mCRL2log(verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
