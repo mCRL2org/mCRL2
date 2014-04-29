@@ -470,6 +470,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
       finish_timer("marking initialization");
 
+      start_timer("marking computation");
       bool stable = false;
       while (!stable)
       {
@@ -581,6 +582,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         }
         stable = stableint;
       }
+      finish_timer("marking computation");
     }
 
     // a comprehensible, but less efficient version
@@ -604,6 +606,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
       finish_timer("marking initialization");
 
+      start_timer("marking computation");
       bool stable = false;
       auto const& equations = m_pbes.equations();
       while (!stable)
@@ -644,6 +647,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
           }
         }
       }
+      finish_timer("marking computation");
     }
 
     // an efficient version that uses an edge index
@@ -668,6 +672,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
       finish_timer("marking initialization");
 
+      start_timer("marking computation");
       bool stable = false;
       while (!stable)
       {
@@ -777,6 +782,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         }
         stable = stableint;
       }
+      finish_timer("marking computation");
     }
 
     void print_control_flow_marking() const
@@ -1090,6 +1096,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
           break;
         }
         case 2: {
+          compute_edge_index();
+          mCRL2log(log::debug2, "stategraph") << print_edge_index() << std::endl;
           compute_control_flow_marking_efficient();
           break;
         }
