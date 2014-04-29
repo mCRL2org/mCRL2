@@ -30,8 +30,8 @@ struct data_expression_assignment: public std::unary_function<data_expression, d
   typedef data_expression variable_type;
   typedef data_expression expression_type;
 
-  data_expression lhs;
-  data_expression rhs;
+  const data_expression& lhs;
+  const data_expression& rhs;
 
   data_expression_assignment(const data_expression& lhs_, const data_expression& rhs_)
   : lhs(lhs_),

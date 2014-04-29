@@ -24,7 +24,6 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
@@ -581,7 +580,7 @@ struct enumerate_quantifiers_rewriter
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    data::mutable_map_substitution<> sigma;
+    data::rewriter::substitution_type sigma;
     return detail::make_apply_enumerate_builder<detail::enumerate_quantifiers_builder>(m_rewriter, sigma, m_enumerator, m_enumerate_infinite_sorts)(x);
   }
 

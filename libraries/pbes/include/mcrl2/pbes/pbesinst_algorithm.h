@@ -13,7 +13,7 @@
 #include <set>
 #include <iostream>
 #include <sstream>
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
@@ -33,34 +33,17 @@ namespace pbes_system
 /// \brief Creates a substitution function for the pbesinst rewriter.
 /// \param v A sequence of data variables
 /// \param e A sequence of data expressions
-/// \return The substitution that maps the i-th element of \p v to the i-th element of \p e
+/// \param sigma The substitution that maps the i-th element of \p v to the i-th element of \p e
 inline
-data::mutable_map_substitution<> make_pbesinst_substitution(const data::variable_list& v, const data::data_expression_list& e)
+void make_pbesinst_substitution(const data::variable_list& v, const data::data_expression_list& e, data::rewriter::substitution_type& sigma)
 {
   assert(v.size() == e.size());
-  data::mutable_map_substitution<> sigma;
   data::variable_list::iterator i = v.begin();
   data::data_expression_list::iterator j = e.begin();
-
   for (; i != v.end(); ++i, ++j)
   {
     sigma[*i] = *j;
   }
-  return sigma;
-}
-
-/// \brief Stream operator
-/// \param out An output stream
-/// \param sigma A pbesinst substitution function
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const data::mutable_map_substitution<>& sigma)
-{
-  for (auto i = sigma.begin(); i != sigma.end(); ++i)
-  {
-    out << "  " << data::pp(i->first) << " -> " << data::pp(i->second) << std::endl;
-  }
-  return out;
 }
 
 inline
@@ -203,7 +186,8 @@ class pbesinst_algorithm
         done.insert(X_e);
         int index = equation_index[X_e.name()];
         const pbes_equation& eqn = p.equations()[index];
-        data::mutable_map_substitution<> sigma = make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters());
+        data::rewriter::substitution_type sigma;
+        make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
         auto const& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
         std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi_e);

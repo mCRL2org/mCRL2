@@ -19,9 +19,9 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/undefined.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
@@ -40,14 +40,12 @@ namespace detail
 {
 
 inline
-data::mutable_map_substitution<> make_constelm_substitution(const std::map<data::variable, data::data_expression>& m)
+void make_constelm_substitution(const std::map<data::variable, data::data_expression>& m, data::rewriter::substitution_type& result)
 {
-  data::mutable_map_substitution<> result;
   for (auto i = m.begin(); i != m.end(); ++i)
   {
     result[i->first] = i->second;
   }
-  return result;
 }
 
 template <typename Term>
@@ -585,7 +583,8 @@ class pbes_constelm_algorithm
               auto j = params.begin();
               for (auto i = e.begin(); i != e.end(); ++i, ++j)
               {
-                data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(e_constraints);
+                data::rewriter::substitution_type sigma;
+                detail::make_constelm_substitution(e_constraints, sigma);
                 data_term_type e1 = datar(*i, sigma);
                 if (is_constant_expression(e1))
                 {
@@ -611,7 +610,8 @@ class pbes_constelm_algorithm
               {
                 continue;
               }
-              data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(e_constraints);
+              data::rewriter::substitution_type sigma;
+              detail::make_constelm_substitution(e_constraints, sigma);
               data_term_type ei = datar(*i, sigma);
               if (ci != ei)
               {
@@ -704,7 +704,8 @@ class pbes_constelm_algorithm
     std::string print_condition(const edge& e, const vertex& u, const term_type& value)
     {
       std::ostringstream out;
-      data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
+      data::rewriter::substitution_type sigma;
+      detail::make_constelm_substitution(u.constraints(), sigma);
       out << "\nEvaluated condition " << e.condition() << sigma << " to " << value << std::endl;
       return out.str();
     }
@@ -712,7 +713,8 @@ class pbes_constelm_algorithm
     std::string print_evaluation_failure(const edge& e, const vertex& u)
     {
       std::ostringstream out;
-      data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
+      data::rewriter::substitution_type sigma;
+      detail::make_constelm_substitution(u.constraints(), sigma);
       out << "\nCould not evaluate condition " << e.condition() << sigma << " to true or false";
       return out.str();
     }
@@ -827,7 +829,8 @@ class pbes_constelm_algorithm
           vertex& v = m_vertices[e.target().name()];
           mCRL2log(log::debug) << print_edge_update(e, u, v);
 
-          data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(u.constraints());
+          data::rewriter::substitution_type sigma;
+          detail::make_constelm_substitution(u.constraints(), sigma);
           term_type value = m_pbes_rewriter(e.condition(), sigma);
           mCRL2log(log::debug) << print_condition(e, u, value);
 
@@ -878,7 +881,8 @@ class pbes_constelm_algorithm
 
         if (!v.constraints().empty())
         {
-          data::mutable_map_substitution<> sigma = detail::make_constelm_substitution(v.constraints());
+          data::rewriter::substitution_type sigma;
+          detail::make_constelm_substitution(v.constraints(), sigma);
           *i = pbes_equation(
                  i->symbol(),
                  i->variable(),

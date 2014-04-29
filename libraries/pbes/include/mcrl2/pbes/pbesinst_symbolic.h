@@ -17,7 +17,6 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
@@ -100,7 +99,8 @@ class pbesinst_symbolic_algorithm
         std::size_t index = m_equation_index[X.name()];
         const pbes_equation& eqn = m_pbes.equations()[index];
         pbes_expression phi = eqn.formula();
-        data::mutable_map_substitution<> sigma = make_pbesinst_substitution(eqn.variable().parameters(), X.parameters());
+        data::rewriter::substitution_type sigma;
+        make_pbesinst_substitution(eqn.variable().parameters(), X.parameters(), sigma);
         pbes_expression psi = R(phi, sigma);
         std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi);
         for (auto i = psi_variables.begin(); i != psi_variables.end(); ++i)

@@ -17,7 +17,6 @@
 #include <sstream>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
@@ -38,7 +37,7 @@ class predicate_variable
   protected:
     propositional_variable_instantiation X;
     pbes_expression m_guard;
-    data::mutable_map_substitution<> m_sigma;
+    data::rewriter::substitution_type m_sigma;
     std::map<std::size_t, data::data_expression> m_source; // source[j] = e <=> source(X, i, j) = e
     std::map<std::size_t, data::data_expression> m_dest;   // dest[j] = c   <=> dest(X, i, j) = c
     std::map<std::size_t, std::size_t> m_copy;             // copy[j] = k   <=> copy(X, i, j) = k
@@ -66,7 +65,7 @@ class predicate_variable
       return X.name();
     }
 
-    const data::mutable_map_substitution<>& sigma() const
+    const data::rewriter::substitution_type& sigma() const
     {
       return m_sigma;
     }

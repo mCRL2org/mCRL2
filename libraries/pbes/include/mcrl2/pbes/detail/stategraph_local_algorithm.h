@@ -13,7 +13,6 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H
 
 #include "mcrl2/data/undefined.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 
@@ -310,10 +309,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       pbes_expression phi = eq_X.formula();
       if (u.index() != data::undefined_index())
       {
-        auto const& d = u.variable();
-        auto const& e = u.value();
-        data::mutable_map_substitution<> sigma;
-        sigma[d] = e;
+        data::rewriter::substitution_type sigma;
+        sigma[u.variable()] = u.value();
         pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
         phi = pbesr(phi, sigma);
       }
@@ -388,7 +385,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       // compute the value
       auto const& X = u.name();
       std::size_t l = find_parameter_index(eq_Y.parameters(), d);
-      data::mutable_map_substitution<> sigma;
+      data::rewriter::substitution_type sigma;
       sigma[u.variable()] = u.value();
       auto W = FV(rewr(nth_element(e, l), sigma));
       std::set<data::variable> V = belongs_intersection(W, B, X);
