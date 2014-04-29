@@ -230,8 +230,7 @@ data_expression Rewriter::rewrite_lambda_application(
     return rewrite_lambda_application(ta.head(),ta,sigma);
   }
 
-  const data_expression new_t=detail::replace_nested_head(ta,rewrite_lambda_application(ta.head(),sigma));
-  return rewrite(new_t,sigma);
+  return rewrite(application(rewrite_lambda_application(ta.head(),sigma),ta.begin(),ta.end()),sigma);
 }
 
 
@@ -247,7 +246,7 @@ data_expression Rewriter::rewrite_lambda_application(
                       const data_expression& t,
                       substitution_type& sigma)
 {
-  using namespace atermpp;
+  // using namespace atermpp;
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
   const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
