@@ -6,11 +6,6 @@ import multiprocessing
 
 from util import *
 
-if len(sys.argv) != 2:
-  log('build.py usage: build.py SVN_URL')
-  sys.exit(1)
-svn_url = sys.argv[1]
-
 #
 # Print some info about the build
 #
@@ -26,23 +21,8 @@ except Exception as e:
   sys.exit(1)
 
 #
-# Check out source using SVN (not via Jenkins because this leads to conflicts if 
-# different versions of SVN are installed on different clients, due to our use
-# of 'svn info' in the CMake build.
-#
-if call('SVN revert', ['svn', 'revert', srcdir]):
-  if call('SVN checkout', ['svn', 'checkout', svn_url, srcdir]):
-    log('SVN checkout failed')
-    sys.exit(1)
-else:
-  if call('SVN update', ['svn', 'update', srcdir]):
-    log('SVN update failed')
-    sys.exit(1)
-
-#
 # Configuration axis: compiler
 #
-
 compilerflags = []
 if compiler == 'clang':
   cc = which('clang')
