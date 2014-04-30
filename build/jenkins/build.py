@@ -6,16 +6,38 @@ import multiprocessing
 
 from util import *
 
+if len(sys.argv) != 2:
+  log('build.py usage: build.py SVN_URL')
+  sys.exit(1)
+svn_url = sys.argv[1]
+
 #
 # Print some info about the build
 #
 print "Building job {0} with label {1}, using compiler {2} and buildtype {3}".format(jobname, label, compiler, buildtype)
 
 #
-# Try to remove build directory. We can wait the extra few minutes if it means we don't
-# get weird errors all the time.
+# Remove build directory to avoid file corruption when a build is interrupted.
 #
-shutil.rmtree(builddir, True)
+try:
+  shutil.rmtree(builddir)
+except Exception as e:
+  log('Failed to clean workspace ({0}).'.format(e))
+  sys.exit(1)
+
+#
+# Check out source using SVN (not via Jenkins because this leads to conflicts if 
+# different versions of SVN are installed on different clients, due to our use
+# of 'svn info' in the CMake build.
+#
+if call('SVN revert', ['svn', 'revert', srcdir]):
+  if call('SVN checkout', ['svn', 'checkout', svn_url, srcdir]):
+    log('SVN checkout failed')
+    sys.exit(1)
+else:
+  if call('SVN update', ['svn', 'update', srcdir]):
+    log('SVN update failed')
+    sys.exit(1)
 
 #
 # Configuration axis: compiler
