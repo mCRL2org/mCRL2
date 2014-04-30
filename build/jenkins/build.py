@@ -12,13 +12,10 @@ from util import *
 print "Building job {0} with label {1}, using compiler {2} and buildtype {3}".format(jobname, label, compiler, buildtype)
 
 #
-# Try to remove CMake cache. We can wait the extra few minutes if it means we don't
+# Try to remove build directory. We can wait the extra few minutes if it means we don't
 # get weird errors all the time.
 #
-try:
-  os.remove(os.path.join(builddir, 'CMakeCache.txt'))
-except:
-  pass
+shutil.rmtree(builddir, True)
 
 #
 # Configuration axis: compiler
