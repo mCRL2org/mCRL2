@@ -12,15 +12,6 @@ from util import *
 print "Building job {0} with label {1}, using compiler {2} and buildtype {3}".format(jobname, label, compiler, buildtype)
 
 #
-# Remove build directory to avoid file corruption when a build is interrupted.
-#
-try:
-  shutil.rmtree(builddir)
-except Exception as e:
-  log('Failed to clean workspace ({0}).'.format(e))
-  sys.exit(1)
-
-#
 # Configuration axis: compiler
 #
 compilerflags = []
