@@ -79,9 +79,9 @@ struct add_data_rewriter: public Builder<Derived>
 };
 
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
-struct data_rewriter_builder: public add_data_rewriter<pbes_expression_builder, Derived, DataRewriter, SubstitutionFunction>
+struct data_rewriter_builder: public add_data_rewriter<pbes_system::pbes_expression_builder, Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef add_data_rewriter<pbes_expression_builder, Derived, DataRewriter, SubstitutionFunction> super;
+  typedef add_data_rewriter<pbes_system::pbes_expression_builder, Derived, DataRewriter, SubstitutionFunction> super;
   using super::enter;
   using super::leave;
   using super::operator();

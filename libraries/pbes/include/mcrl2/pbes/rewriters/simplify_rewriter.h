@@ -81,18 +81,18 @@ struct add_simplify: public Builder<Derived>
 };
 
 template <typename Derived>
-struct simplify_builder: public add_simplify<pbes_expression_builder, Derived>
+struct simplify_builder: public add_simplify<pbes_system::pbes_expression_builder, Derived>
 {
-  typedef add_simplify<pbes_expression_builder, Derived> super;
+  typedef add_simplify<pbes_system::pbes_expression_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
 };
 
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
-struct simplify_data_rewriter_builder: public add_data_rewriter<simplify_builder, Derived, DataRewriter, SubstitutionFunction>
+struct simplify_data_rewriter_builder: public add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef add_data_rewriter<simplify_builder, Derived, DataRewriter, SubstitutionFunction> super;
+  typedef add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -133,13 +133,13 @@ struct simplify_data_rewriter
   pbes_expression operator()(const pbes_expression& x) const
   {
     detail::NoSubst sigma;
-    return detail::make_apply_rewriter_builder<detail::simplify_data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma)(x);
   }
 
   template <typename SubstitutionFunction>
   pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
   {
-    return detail::make_apply_rewriter_builder<detail::simplify_data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma)(x);
   }
 };
 

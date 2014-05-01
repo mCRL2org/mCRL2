@@ -125,18 +125,18 @@ struct add_simplify_quantifiers: public Builder<Derived>
 };
 
 template <typename Derived>
-struct simplify_quantifiers_builder: public add_simplify_quantifiers<simplify_builder, Derived>
+struct simplify_quantifiers_builder: public add_simplify_quantifiers<pbes_system::detail::simplify_builder, Derived>
 {
-  typedef add_simplify_quantifiers<simplify_builder, Derived> super;
+  typedef add_simplify_quantifiers<pbes_system::detail::simplify_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
 };
 
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
-struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction>
+struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<pbes_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef add_data_rewriter<simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction> super;
+  typedef add_data_rewriter<pbes_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction> super;
   using super::enter;
   using super::leave;
   using super::operator();
