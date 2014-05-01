@@ -440,8 +440,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
       auto const& incoming_edges = v.incoming_edges();
       for(auto j = incoming_edges.begin(); j != incoming_edges.end(); ++j)
       {
+        auto const& u = *j->first;
         auto const& I = j->second;
-        if (contains(I, i))
+        if (u.name() == X && contains(I, i))
         {
           return true;
         }
