@@ -139,6 +139,21 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
     };
 
+    struct equation_label_pair
+    {
+      const core::identifier_string X;
+      std::size_t i; // label
+
+      equation_label_pair(const core::identifier_string X_, std::size_t i_)
+        : X(X_), i(i_)
+      {}
+
+      bool operator<(const equation_label_pair& other) const
+      {
+        return X < other.X || (X == other.X && i < other.i);
+      }
+    };
+
     // maps (X, i) to the set of all edges with label i and source vertex with name X
     std::map<core::identifier_string, std::map<std::size_t, std::set<vertex_pair> > > m_edge_index;
 
@@ -586,63 +601,98 @@ class stategraph_local_algorithm: public stategraph_algorithm
       finish_timer("marking computation");
     }
 
-    // a comprehensible, but less efficient version
+    // add (X, i) to todo for each incoming edge u = (X, n, dX[n] = z) --i--> v
+    void add_equation_labels(std::set<equation_label_pair>& todo, const local_control_flow_graph_vertex& v)
+    {
+      auto const& incoming_edges = v.incoming_edges();
+      for (auto ei = incoming_edges.begin(); ei != incoming_edges.end(); ++ei)
+      {
+        auto const& u = *ei->first;
+        auto const& X = u.name();
+        auto const& labels = ei->second;
+        for (auto ii = labels.begin(); ii != labels.end(); ++ii)
+        {
+          std::size_t i = *ii;
+          todo.insert(equation_label_pair(X, i));
+        }
+      }
+    }
+
+    // a more comprehensible version
     void compute_control_flow_marking_using_edge_index()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
+      using utilities::detail::pick_element;
 
       start_timer("marking initialization");
       std::size_t J = m_local_control_flow_graphs.size();
+      std::set<equation_label_pair> todo;
       for (std::size_t j = 0; j < J; j++)
       {
         auto const& Vj = m_local_control_flow_graphs[j];
         auto const& Bj = m_belongs[j];
-        for (auto ui = Vj.vertices.begin(); ui != Vj.vertices.end(); ++ui)
+        for (auto vi = Vj.vertices.begin(); vi != Vj.vertices.end(); ++vi)
         {
-          auto& u = *ui;
-          auto const& X = u.name();
-          u.set_marking(belongs_intersection(significant_variables(u), Bj, X));
-        }
+          auto& v = *vi;
+          auto const& Y = v.name();
+          v.set_marking(belongs_intersection(significant_variables(v), Bj, Y));
+          // Insert those pairs (X,i) for which some vertex u = (X,n,dX[n]=z) --i--> v and v.marking() != {}
+          if (v.marking().empty())
+          {
+            continue;
+          }
+          auto const& incoming_edges = v.incoming_edges();
+          for (auto ei = incoming_edges.begin(); ei != incoming_edges.end(); ++ei)
+          {
+            auto const& u = *ei->first;
+            auto const& X = u.name();
+            auto const& labels = ei->second;
+            for (auto ii = labels.begin(); ii != labels.end(); ++ii)
+            {
+              std::size_t i = *ii;
+              todo.insert(equation_label_pair(X, i));
+            }
+          }
+       }
         mCRL2log(log::debug, "stategraph") << "--- initial control flow marking for graph " << j << "\n" << Vj.print_marking();
       }
       finish_timer("marking initialization");
 
       start_timer("marking computation");
-      bool stable = false;
-      auto const& equations = m_pbes.equations();
-      while (!stable)
+      while (!todo.empty())
       {
-        stable = true;
-        for (auto xi = equations.begin(); xi != equations.end(); ++xi)
+        auto const& Xi = pick_element(todo);
+        auto const& X = Xi.X;
+        std::size_t i = Xi.i;
+
+        mCRL2log(log::debug1, "stategraph") << "    rule: considering equation " << X << std::endl;
+        mCRL2log(log::debug1, "stategraph") << "    rule2: considering PVI nr. " << i << std::endl;
+
+        auto& EX = m_edge_index[X];
+        auto& EXi = EX[i];
+        for (auto ei = EXi.begin(); ei != EXi.end(); ++ei)
         {
-          auto const& eq_X = *xi;
-          auto const& X = eq_X.variable().name();
-          mCRL2log(log::debug1, "stategraph") << "    rule2: considering equation " << X << std::endl;
-          auto& EX = m_edge_index[X];
-          for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
+          const local_control_flow_graph_vertex& u = *ei->u;
+          mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
+          std::size_t j = ei->k;
+          auto const& Bj = m_belongs[j];
+          for (auto ej = EXi.begin(); ej != EXi.end(); ++ej)
           {
-            auto& EXi = EX[i];
-            mCRL2log(log::debug1, "stategraph") << "    rule2: considering PVI nr. " << i << std::endl;
-            for (auto ei = EXi.begin(); ei != EXi.end(); ++ei)
+            const local_control_flow_graph_vertex& u1 = *ej->u;
+            const local_control_flow_graph_vertex& v1 = *ej->v;
+            std::size_t k = ej->k;
+            auto const& Bk = m_belongs[k];
+            bool updated = update_marking_rule(Bk, u1, i, v1, false);
+            if (updated)
             {
-              const local_control_flow_graph_vertex& u = *ei->u;
-              mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
-              std::size_t j = ei->k;
-              auto const& Bj = m_belongs[j];
-              auto& BjX = Bj[X];
-              for (auto ej = EXi.begin(); ej != EXi.end(); ++ej)
+              add_equation_labels(todo, u1);
+            }
+            if (j != k  )
+            {
+              updated = update_marking_rule(Bj, u, i, v1, true);
+              if (updated)
               {
-                const local_control_flow_graph_vertex& u1 = *ej->u;
-                const local_control_flow_graph_vertex& v1 = *ej->v;
-                std::size_t k = ej->k;
-                auto const& Bk = m_belongs[k];
-                bool updated =  update_marking_rule(Bk, u1, i, v1, false);
-                stable = stable && !updated;
-                if (j != k && (u.marking().size() < BjX.size()))
-                {
-                  updated = update_marking_rule(Bj, u, i, v1, true);
-                  stable = stable && !updated;
-                }
+                add_equation_labels(todo, u);
               }
             }
           }
