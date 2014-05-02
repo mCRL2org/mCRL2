@@ -23,6 +23,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/precedence.h"
+#include "mcrl2/data/infix_precedence.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/standard_container_utility.h"
 #include "mcrl2/data/list.h"
