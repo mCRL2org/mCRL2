@@ -242,14 +242,26 @@ class stategraph_local_algorithm: public stategraph_algorithm
     {
       using utilities::detail::contains;
 
-      belongs_relation Bk;
+      std::set<core::identifier_string> Nk; // Nk contains the names of the vertices in Vk
       for (auto p = Vk.vertices.begin(); p != Vk.vertices.end(); ++p)
       {
-        auto const& X = p->name();
+        Nk.insert(p->name());
+      }
+
+      belongs_relation Bk;
+      auto const& equations = m_pbes.equations();
+      for (auto xi = equations.begin(); xi != equations.end(); ++xi)
+      {
+        auto const& eqn = *xi;
+        auto const& X = eqn.variable().name();
+        if (!contains(Nk, X))
+        {
+          continue;
+        }
         Bk[X]; // force the creation of an empty set corresponding to X
         auto const& eq_X = *find_equation(m_pbes, X);
         std::set<std::size_t> belongs = data_parameter_indices(X);
-        mCRL2log(log::debug1, "stategraph") << "  initial belong set for vertex " << *p << " = " << print_belong_set(eq_X, belongs) << std::endl;
+        mCRL2log(log::debug1, "stategraph") << "  initial belong set for equation " << X << " = " << print_belong_set(eq_X, belongs) << std::endl;
 
         auto const& predvars = eq_X.predicate_variables();
         for (std::size_t i = 0; i < predvars.size(); i++)
@@ -270,7 +282,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             }
           }
         }
-        mCRL2log(log::debug1, "stategraph") << "  final   belong set for vertex " << *p << " = " << print_belong_set(eq_X, belongs) << std::endl;
+        mCRL2log(log::debug1, "stategraph") << "  final   belong set for equation " << X << " = " << print_belong_set(eq_X, belongs) << std::endl;
         for (std::set<std::size_t>::const_iterator j = belongs.begin(); j != belongs.end(); ++j)
         {
           Bk[X].insert(eq_X.parameters()[*j]);
