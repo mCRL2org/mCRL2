@@ -32,14 +32,6 @@ std::string tolower(std::string s)
   return s;
 }
 
-/// \brief Check whether s contains a non-whitespace character.
-static inline
-bool nonempty(std::string s)
-{
-  s.erase(std::remove_if(s.begin(), s.end(), (int(*)(int)) isspace), s.end());
-  return !s.empty();
-}
-
 LiftingStrategyFactory::~LiftingStrategyFactory()
 {
 }

@@ -159,8 +159,7 @@ verti SmallProgressMeasures::solve_one(LiftingStrategy2 &ls)
 
     assert(!is_top(v));
 
-    bool success = lift_to(v, vec(get_successor(v)), compare_strict(v));
-    assert(success);
+    assert(lift_to(v, vec(get_successor(v)), compare_strict(v)));
     dirty_[v] = false;
     // debug_print_vertex(v);
 
