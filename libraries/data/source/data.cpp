@@ -87,7 +87,9 @@ data::sort_expression normalize_sorts(const data::sort_expression& x, const data
 data::variable_list normalize_sorts(const data::variable_list& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::variable_list >(x, dataspec); }
 data::data_expression translate_user_notation(const data::data_expression& x) { return data::translate_user_notation< data::data_expression >(x); }
 data::data_equation translate_user_notation(const data::data_equation& x) { return data::translate_user_notation< data::data_equation >(x); }
-std::set<data::sort_expression> find_sort_expressions(const data::data_equation& x) { return data::find_sort_expressions< data::data_equation >(x); }
+std::set<data::sort_expression> find_sort_expressions(const data::data_equation& x) { 
+std::cerr << "Find sort expressions " << atermpp::aterm(x) << "\n" << "--- " << "\n--------------------------------------------------------------\n\n";
+return data::find_sort_expressions< data::data_equation >(x); }
 std::set<data::sort_expression> find_sort_expressions(const data::data_expression& x) { return data::find_sort_expressions< data::data_expression >(x); }
 std::set<data::sort_expression> find_sort_expressions(const data::sort_expression& x) { return data::find_sort_expressions< data::sort_expression >(x); }
 std::set<data::variable> find_all_variables(const data::data_expression& x) { return data::find_all_variables< data::data_expression >(x); }

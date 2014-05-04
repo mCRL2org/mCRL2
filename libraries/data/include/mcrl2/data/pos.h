@@ -553,59 +553,57 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@monusc
-      /// \return Identifier \@monusc
+      /// \brief Generate identifier \@powerlog2
+      /// \return Identifier \@powerlog2
       inline
-      core::identifier_string const& monus_with_carry_name()
+      core::identifier_string const& powerlog2_pos_name()
       {
-        static core::identifier_string monus_with_carry_name = core::identifier_string("@monusc");
-        return monus_with_carry_name;
+        static core::identifier_string powerlog2_pos_name = core::identifier_string("@powerlog2");
+        return powerlog2_pos_name;
       }
 
-      /// \brief Constructor for function symbol \@monusc
-      /// \return Function symbol monus_with_carry
+      /// \brief Constructor for function symbol \@powerlog2
+      /// \return Function symbol powerlog2_pos
       inline
-      function_symbol const& monus_with_carry()
+      function_symbol const& powerlog2_pos()
       {
-        static function_symbol monus_with_carry = function_symbol(monus_with_carry_name(), make_function_sort(sort_bool::bool_(), pos(), pos(), pos()));
-        return monus_with_carry;
+        static function_symbol powerlog2_pos = function_symbol(powerlog2_pos_name(), make_function_sort(pos(), pos()));
+        return powerlog2_pos;
       }
 
 
-      /// \brief Recogniser for function \@monusc
+      /// \brief Recogniser for function \@powerlog2
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@monusc
+      /// \return true iff e is the function symbol matching \@powerlog2
       inline
-      bool is_monus_with_carry_function_symbol(const atermpp::aterm_appl& e)
+      bool is_powerlog2_pos_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == monus_with_carry();
+          return function_symbol(e) == powerlog2_pos();
         }
         return false;
       }
 
-      /// \brief Application of function symbol \@monusc
+      /// \brief Application of function symbol \@powerlog2
       /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@monusc to a number of arguments
+      /// \return Application of \@powerlog2 to a number of arguments
       inline
-      application monus_with_carry(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      application powerlog2_pos(const data_expression& arg0)
       {
-        return sort_pos::monus_with_carry()(arg0, arg1, arg2);
+        return sort_pos::powerlog2_pos()(arg0);
       }
 
-      /// \brief Recogniser for application of \@monusc
+      /// \brief Recogniser for application of \@powerlog2
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol monus_with_carry to a
+      /// \return true iff e is an application of function symbol powerlog2_pos to a
       ///     number of arguments
       inline
-      bool is_monus_with_carry_application(const atermpp::aterm_appl& e)
+      bool is_powerlog2_pos_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_monus_with_carry_function_symbol(application(e).head());
+          return is_powerlog2_pos_function_symbol(application(e).head());
         }
         return false;
       }
@@ -623,7 +621,7 @@ namespace mcrl2 {
         result.push_back(sort_pos::plus());
         result.push_back(sort_pos::add_with_carry());
         result.push_back(sort_pos::times());
-        result.push_back(sort_pos::monus_with_carry());
+        result.push_back(sort_pos::powerlog2_pos());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -646,7 +644,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_add_with_carry_application(e) || is_monus_with_carry_application(e));
+        assert(is_add_with_carry_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
@@ -658,7 +656,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_add_with_carry_application(e) || is_monus_with_carry_application(e));
+        assert(is_add_with_carry_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
@@ -670,7 +668,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_add_with_carry_application(e) || is_monus_with_carry_application(e));
+        assert(is_add_with_carry_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
       }
 
@@ -682,7 +680,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_succ_application(e) || is_pos_predecessor_application(e));
+        assert(is_succ_application(e) || is_pos_predecessor_application(e) || is_powerlog2_pos_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
@@ -707,6 +705,8 @@ namespace mcrl2 {
         variable vc("c",sort_bool::bool_());
         variable vp("p",pos());
         variable vq("q",pos());
+        variable vp1("p1",pos());
+        variable vq1("q1",pos());
 
         data_equation_vector result;
         result.push_back(data_equation(atermpp::make_vector(vb, vp), equal_to(c1(), cdub(vb, vp)), sort_bool::false_()));
@@ -750,13 +750,9 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cdub(sort_bool::false_(), vp), vq), cdub(sort_bool::false_(), times(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), times(vp, cdub(sort_bool::false_(), vq)), cdub(sort_bool::false_(), times(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cdub(sort_bool::true_(), vp), cdub(sort_bool::true_(), vq)), cdub(sort_bool::true_(), add_with_carry(sort_bool::false_(), vp, add_with_carry(sort_bool::false_(), vq, cdub(sort_bool::false_(), times(vp, vq)))))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp), monus_with_carry(vb, c1(), vp), c1()));
-        result.push_back(data_equation(atermpp::make_vector(vp), monus_with_carry(sort_bool::false_(), cdub(sort_bool::false_(), vp), c1()), cdub(sort_bool::true_(), monus_with_carry(sort_bool::false_(), vp, c1()))));
-        result.push_back(data_equation(atermpp::make_vector(vp), monus_with_carry(sort_bool::false_(), cdub(sort_bool::true_(), vp), c1()), cdub(sort_bool::false_(), vp)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp), monus_with_carry(sort_bool::true_(), cdub(vb, vp), c1()), cdub(vb, monus_with_carry(sort_bool::false_(), vp, c1()))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), monus_with_carry(vb, cdub(vc, vp), cdub(vc, vq)), cdub(vb, monus_with_carry(vb, vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), monus_with_carry(vb, cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), cdub(sort_bool::not_(vb), monus_with_carry(sort_bool::true_(), vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), monus_with_carry(vb, cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), cdub(sort_bool::not_(vb), monus_with_carry(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(variable_list(), powerlog2_pos(c1()), c1()));
+        result.push_back(data_equation(atermpp::make_vector(vb), powerlog2_pos(cdub(vb, c1())), c1()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp), powerlog2_pos(cdub(vb, cdub(vc, vp))), cdub(sort_bool::false_(), powerlog2_pos(vp))));
         return result;
       }
 

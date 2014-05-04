@@ -33,37 +33,37 @@ struct is_untyped_traverser: public sort_expression_traverser<is_untyped_travers
     : result(false)
   {}
 
-  void operator()(const data::untyped_identifier& x)
+  void operator()(const data::untyped_identifier& )
   {
     result = true;
   }
 
-  void operator()(const data::untyped_identifier_assignment& x)
+  void operator()(const data::untyped_identifier_assignment& )
   {
     result = true;
   }
 
-  void operator()(const data::untyped_sort& x)
+  void operator()(const data::untyped_sort& )
   {
     result = true;
   }
 
-  void operator()(const data::untyped_possible_sorts& x)
+  void operator()(const data::untyped_possible_sorts& )
   {
     result = true;
   }
 
-  void operator()(const data::untyped_set_or_bag_comprehension& x)
+  void operator()(const data::untyped_set_or_bag_comprehension& )
   {
     result = true;
   }
 
-  void operator()(const data::structured_sort_constructor_argument& x)
+  void operator()(const data::structured_sort_constructor_argument& )
   {
     result = true;
   }
 
-  void operator()(const data::structured_sort_constructor& x)
+  void operator()(const data::structured_sort_constructor& )
   {
     result = true;
   }

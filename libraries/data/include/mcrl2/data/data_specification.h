@@ -942,7 +942,7 @@ class data_specification
           data_equation_vector e(sort_bag::bag_generate_equations_code(element_sort));
           std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
         }
-        else if (sort_bag::is_bag(sort)||sort_fbag::is_fbag(sort))
+        else if (sort_fbag::is_fbag(sort))
         {
           // Add the sorts Nat and set_(element_sort) to the specification.
           import_system_defined_sort(sort_nat::nat(),sorts_already_added_to_m_normalised_sorts); // Required for bags.

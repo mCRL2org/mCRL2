@@ -1032,6 +1032,27 @@ bool mcrl2::data::data_type_checker::MatchEqNeqComparison(const function_sort &t
   return true;
 }
 
+bool mcrl2::data::data_type_checker::MatchSqrt(const function_sort &type, sort_expression &result)
+{
+  //tries to sort out the types for sqrt. There is only one option: sqrt:Nat->Nat.
+
+  sort_expression_list Args=type.domain();
+  if (Args.size()!=1)
+  {
+    return false;
+  }
+  sort_expression Arg=Args.front();
+
+  if (Arg==sort_nat::nat())
+  {
+    result=function_sort(Args,sort_nat::nat());
+    return true;
+  }
+  return false;
+}
+
+
+
 bool mcrl2::data::data_type_checker::MatchListOpCons(const function_sort &type, sort_expression &result)
 {
   //tries to sort out the types of Cons operations (SxList(S)->List(S))
@@ -2284,6 +2305,17 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     if (!MatchEqNeqComparison(core::static_down_cast<const function_sort&>(Type), NewType))
     {
       throw mcrl2::runtime_error("the function " + core::pp(data_term_name) + " has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+    }
+    Type=NewType;
+  }
+
+  if (sort_nat::sqrt_name()==data_term_name)
+  {
+    mCRL2log(debug) << "Doing sqrt matching Type " << Type << std::endl;
+    sort_expression NewType;
+    if (!MatchSqrt(core::static_down_cast<const function_sort&>(Type), NewType))
+    {
+      throw mcrl2::runtime_error("the function sqrt has an incorrect argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
     }
     Type=NewType;
   }
@@ -4412,7 +4444,9 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   AddSystemFunction(sort_real::real2nat());
   AddSystemFunction(sort_real::real2int());
   AddSystemConstant(sort_pos::c1());
-  //more
+  //Square root for the natural numbers.
+  AddSystemFunction(sort_nat::sqrt());
+  //more about numbers
   AddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_pos::pos()));
   AddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_nat::nat()));
   AddSystemFunction(sort_real::maximum(sort_nat::nat(),sort_pos::pos()));

@@ -39,6 +39,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/detail/is_untyped.h"
 #include "mcrl2/data/traverser.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -866,6 +867,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     if (is_infix_operation(x))
     {
+/*    WIEGERS DEBUG CODE
+      if (!detail::is_untyped(x))
+      {
+        std::cerr << "TYPED: " << atermpp::aterm_cast<atermpp::aterm>(x) << std::endl;
+        std::cerr << "is_divides: " << sort_real::is_divides_application(x) << std::endl;
+      }
+      assert(detail::is_untyped(x)); */
       auto i = x.begin();
       data_expression left = *i++;
       data_expression right = *i;
@@ -1471,6 +1479,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (sort_list::is_list_enumeration_application(x))
       {
         print_list_enumeration(x);
+      }
+      else if (sort_list::is_element_at_application(x))
+      {
+        print_binary_operation(x, ".");
       }
       else
       {
