@@ -19,7 +19,7 @@ map @fset_insert <"insert">: S <"left"> # FSet(S) <"right"> -> FSet(S);
     in <"in">: S <"left"> # FSet(S) <"right"> -> Bool;
     @fset_union <"fset_union"> : (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S);
     @fset_inter <"fset_intersection">: (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S);
-    - <"difference">: FSet(S) <"arg1"> # FSet(S) <"arg2"> -> FSet(S);
+    - <"difference">: FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S);
     + <"union_"> : FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S);
     * <"intersection"> : FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S);
     # <"count"> : FSet(S) <"arg"> -> Nat;

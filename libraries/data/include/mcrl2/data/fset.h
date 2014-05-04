@@ -734,7 +734,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e));
+        assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
@@ -746,7 +746,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e) || is_difference_application(e));
+        assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
@@ -758,7 +758,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e) || is_difference_application(e));
+        assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
@@ -806,7 +806,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e));
+        assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 

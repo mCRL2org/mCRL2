@@ -106,9 +106,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       (name == data::sort_real::plus_name())          ||
       (name == data::sort_real::minus_name())         ||
       (name == data::sort_set::union_name())     ||
+      (name == data::sort_fset::union_name())     ||
       (name == data::sort_set::difference_name())      ||
+      (name == data::sort_fset::difference_name())      ||
       (name == data::sort_bag::union_name())      ||
+      (name == data::sort_fbag::union_name())      ||
       (name == data::sort_bag::difference_name())      ||
+      (name == data::sort_fbag::difference_name())      ||
       (name == data::sort_int::div_name())          ||
       (name == data::sort_int::mod_name())          ||
       (name == data::sort_real::divides_name())       ||
@@ -867,13 +871,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     if (is_infix_operation(x))
     {
-/*    WIEGERS DEBUG CODE
-      if (!detail::is_untyped(x))
-      {
-        std::cerr << "TYPED: " << atermpp::aterm_cast<atermpp::aterm>(x) << std::endl;
-        std::cerr << "is_divides: " << sort_real::is_divides_application(x) << std::endl;
-      }
-      assert(detail::is_untyped(x)); */
       auto i = x.begin();
       data_expression left = *i++;
       data_expression right = *i;
@@ -1592,9 +1589,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_fset::is_difference_application(x))
       {
-        derived()(sort_fset::arg1(x));
+        derived()(sort_fset::left(x));
         derived().print(" - ");
-        derived()(sort_fset::arg2(x));
+        derived()(sort_fset::right(x));
       }
       else if (sort_fset::is_union_application(x))
       {
@@ -1636,7 +1633,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_binary_operation(x, " - ");
       }
-
       else if (sort_bag::is_constructor_application(x))
       {
         if (is_fbag_zero(x))
@@ -1701,6 +1697,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       if (is_fbag_cons_list(x))
       {
         print_fbag_cons_list(x);
+      }
+      else if (sort_fbag::is_union_application(x))
+      {
+        print_binary_operation(x, " + ");
+      }
+      else if (sort_fbag::is_intersection_application(x))
+      {
+        print_binary_operation(x, " * ");
+      }
+
+      else if (sort_fbag::is_difference_application(x))
+      {
+        print_binary_operation(x, " - ");
       }
       else
       {
