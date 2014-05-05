@@ -1,7 +1,7 @@
 Stella Solar Car
 ================
 
-.. image:: img/stella_solar_car.tiff
+.. image:: img/Stella.jpg
    :align: right
    :width: 250px
 
