@@ -1,5 +1,5 @@
-LedSync communication protocol
-==============================
+Stella Solar Car
+================
 
 .. image:: img/stella_solar_car.tiff
    :align: right
