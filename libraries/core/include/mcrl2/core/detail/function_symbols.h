@@ -35,7 +35,10 @@ bool operator==(const size_t x, const atermpp::function_symbol& y)
   return x == y.number();
 }
 
-extern std::vector<atermpp::function_symbol> function_symbols_DataAppl;
+// We use a deque here, and not a vector, as a vector is relocated in 
+// memory, which means that function_symbol_DataAppl and function_symbol_DataAppl_helper
+// cannot deliver a reference. 
+extern std::deque<atermpp::function_symbol> function_symbols_DataAppl;
 
 inline
 const atermpp::function_symbol& function_symbol_DataAppl_helper(size_t i)
