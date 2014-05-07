@@ -72,7 +72,7 @@ class term_appl_iterator: public boost::iterator_facade<
 
     /// \brief Advance the iterator by n steps.
     /// \param n The number of increments to perform
-    void advance(std::ptrdiff_t n)
+    void advance(ptrdiff_t n)
     {
       m_term += n;
     }
@@ -81,7 +81,7 @@ class term_appl_iterator: public boost::iterator_facade<
     /// \param i The iterator which to compare to
     /// \return The number of increments needed for this iterator to
     ///         reach i (can be negative).
-    size_t distance_to(const term_appl_iterator i) const
+    ptrdiff_t distance_to(const term_appl_iterator i) const
     {
       return i.m_term-m_term;
     }
