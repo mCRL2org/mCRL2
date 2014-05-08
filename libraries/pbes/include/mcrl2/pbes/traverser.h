@@ -148,7 +148,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::pbes_expression result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -298,7 +297,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::pbes_expression result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -447,7 +445,6 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
   void operator()(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::pbes_expression result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -608,7 +605,6 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::pbes_expression result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -771,7 +767,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    pbes_system::pbes_expression result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));

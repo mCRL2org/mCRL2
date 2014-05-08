@@ -247,7 +247,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
     if (process::is_action(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
@@ -550,7 +549,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
     if (process::is_action(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
@@ -843,7 +841,6 @@ struct add_traverser_process_expressions: public Traverser<Derived>
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
     if (process::is_action(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
@@ -1159,7 +1156,6 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
     if (process::is_action(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
@@ -1517,7 +1513,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
     if (process::is_action(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));
@@ -1818,7 +1813,6 @@ struct add_traverser_action_labels: public Traverser<Derived>
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result;
     if (process::is_action(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::action>(x));

@@ -225,7 +225,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
     if (data::is_abstraction(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
@@ -256,7 +255,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const data::assignment_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result;
     if (data::is_assignment(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
@@ -271,7 +269,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const data::sort_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::sort_expression result;
     if (data::is_basic_sort(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::basic_sort>(x));
@@ -302,7 +299,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
     if (data::is_forall(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
@@ -457,7 +453,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
     if (data::is_abstraction(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
@@ -488,7 +483,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const data::assignment_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result;
     if (data::is_assignment(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
@@ -503,7 +497,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
     if (data::is_forall(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
@@ -666,7 +659,6 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
     if (data::is_abstraction(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
@@ -697,7 +689,6 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const data::assignment_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result;
     if (data::is_assignment(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
@@ -712,7 +703,6 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
     if (data::is_forall(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
@@ -946,7 +936,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
     if (data::is_abstraction(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
@@ -977,7 +966,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const data::assignment_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result;
     if (data::is_assignment(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
@@ -992,7 +980,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const data::sort_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::sort_expression result;
     if (data::is_basic_sort(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::basic_sort>(x));
@@ -1023,7 +1010,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
     if (data::is_forall(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
