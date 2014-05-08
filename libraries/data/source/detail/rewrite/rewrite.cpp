@@ -477,28 +477,6 @@ data_expression Rewriter::universal_quantifier_enumeration(
          partial_result!=sort_bool::false_() &&
          sol.next(evaluated_condition,x,solution_possible))
   {
-    // The returned evaluated condition is the negation of the entered condition,
-    // as is not_equal_to_true_or_false is set to false in sol. So, we must first
-    // negate it.
-
-    if (evaluated_condition == sort_bool::true_())
-    {
-      evaluated_condition=sort_bool::false_();
-    }
-    else if (evaluated_condition == sort_bool::false_())
-    {
-      evaluated_condition=sort_bool::true_();
-    }
-    else if (evaluated_condition[0] == sort_bool::not_())
-    {
-      evaluated_condition=static_cast<data_expression>(evaluated_condition[1]);
-    }
-    else
-    {
-      evaluated_condition=application(sort_bool::not_(), evaluated_condition);
-    }
-
-
     if (partial_result==sort_bool::true_())
     {
       partial_result=evaluated_condition;

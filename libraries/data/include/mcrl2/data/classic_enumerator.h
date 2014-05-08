@@ -51,7 +51,6 @@ class classic_enumerator
   public:
     /// \brief The type of objects that represent substitutions
     typedef typename Evaluator::substitution_type  substitution_type;
-
     /// \brief The type of objects that represent variables
     typedef typename substitution_type::variable_type                     variable_type;
     /// \brief The type of objects that represent expressions
@@ -60,7 +59,7 @@ class classic_enumerator
     typedef Evaluator                                                     evaluator_type;
 
   protected:
-    const detail::legacy_rewriter m_evaluator;     // Only here for conversion trick
+    const detail::legacy_rewriter m_evaluator;     
     const mcrl2::data::data_specification& m_data_spec;
 
   public:
@@ -78,10 +77,11 @@ class classic_enumerator
 
         typedef classic_enumerator < evaluator_type > enclosing_classic_enumerator;
         enclosing_classic_enumerator *m_enclosing_enumerator;
-        data_expression_list m_assignments; // m_assignments are only protected if it does contain something else than the empty list.
+        data_expression_list m_assignments; 
         bool m_enumerator_iterator_valid;
-        bool m_solution_is_exact;
+        data_expression m_resulting_condition;
         bool m_solution_possible;
+        bool m_not_equal_to_false;
         typedef boost::shared_ptr < detail::EnumeratorSolutionsStandard < data_expression,rewriter > > m_generator_type;
         m_generator_type m_generator;
 
@@ -97,12 +97,12 @@ class classic_enumerator
                           const bool do_not_throw_exceptions=false):
           m_enclosing_enumerator(e),
           m_enumerator_iterator_valid(false),
-          m_solution_possible(do_not_throw_exceptions)
+          m_solution_possible(do_not_throw_exceptions),
+          m_not_equal_to_false(not_equal_to_false)
         {
-          // const data_expression rewritten_condition=e->m_evaluator.get_rewriter().rewrite(condition,sigma);
-          const data_expression rewritten_condition=e->m_evaluator(condition,sigma);
-          if ((not_equal_to_false && rewritten_condition==sort_bool::false_()) ||
-              (!not_equal_to_false && rewritten_condition==sort_bool::true_()))
+          m_resulting_condition=e->m_evaluator(condition,sigma);
+          if ((m_not_equal_to_false && m_resulting_condition==sort_bool::false_()) ||
+              (!m_not_equal_to_false && m_resulting_condition==sort_bool::true_()))
           {
             // no solutions are found.
             m_solution_possible=true;
@@ -112,8 +112,6 @@ class classic_enumerator
             // in this case we generate exactly one solution.
             m_enumerator_iterator_valid=true;
             m_solution_possible=true;
-            m_solution_is_exact=((not_equal_to_false && rewritten_condition==sort_bool::true_()) ||
-                                 (!not_equal_to_false && rewritten_condition==sort_bool::false_()));
           }
           else
           {
@@ -122,7 +120,7 @@ class classic_enumerator
                                                               variables,
                                                               condition,
                                                               sigma,
-                                                              not_equal_to_false,
+                                                              m_not_equal_to_false,
                                                               m_enclosing_enumerator->m_data_spec,
                                                               &m_enclosing_enumerator->m_evaluator.get_rewriter(),
                                                               max_internal_variables));
@@ -153,7 +151,7 @@ class classic_enumerator
           m_enclosing_enumerator=other.m_enclosing_enumerator;
           m_assignments=other.m_assignments;
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
-          m_solution_is_exact=other.m_solution_is_exact;
+          m_resulting_condition=other.m_resulting_condition;
           m_solution_possible=other.m_solution_possible;
           m_generator=other.m_generator;
           return *this;
@@ -165,21 +163,19 @@ class classic_enumerator
           m_enclosing_enumerator=other.m_enclosing_enumerator;
           m_assignments=other.m_assignments;
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
-          m_solution_is_exact=other.m_solution_is_exact;
+          m_resulting_condition=other.m_resulting_condition;
           m_solution_possible=other.m_solution_possible;
           m_generator=other.m_generator;
         }
 
-        /// \brief Indicate whether this enumerated value for the variables makes the
-        //         condition exactly true if not_equal_to_false is true, or exactly false if not_equal_to_false
-        //         is false.
-        bool solution_is_exact() const
+        /// \brief Provides the last found solution, but only if a valid solution was found.
+        data_expression resulting_condition() const
         {
           assert(m_enumerator_iterator_valid);
-          return m_solution_is_exact;
-        }
+          return m_resulting_condition;
+        } 
 
-        /// \brief Indicate whether an solution was attempted to be generated (true) or whether
+        /// \brief Indicate whether a solution was attempted to be generated (true) or whether
         //         an error occurred (false).
         //  \details This indicator only works if the variable do_not_throw_exceptions was true.
         //           Otherwise an exception is thrown. If do_not_throw_exceptions was true, and
@@ -202,12 +198,7 @@ class classic_enumerator
           }
           else
           {
-            data_expression instantiated_solution;
-            m_enumerator_iterator_valid=m_generator->next(instantiated_solution,m_assignments,m_solution_possible);
-            if (m_enumerator_iterator_valid)
-            {
-              m_solution_is_exact=instantiated_solution==sort_bool::true_();
-            }
+            m_enumerator_iterator_valid=m_generator->next(m_resulting_condition,m_assignments,m_solution_possible);
           }
         }
 

@@ -33,7 +33,6 @@ term_list<Term> push_back(const term_list<Term> &l, const Term &el)
   for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
   {
     buffer[j]=i;
-    // buffer.push_back(i);  
   }
 
   term_list<Term> result;

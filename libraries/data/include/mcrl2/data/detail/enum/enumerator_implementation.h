@@ -430,7 +430,15 @@ inline bool EnumeratorSolutionsStandard<TERM,REWRITER>::next(
       if (e.expr()!=sort_bool::false_())
       { // A solution is found. Construct and return it.
         solution = build_solution(enum_vars,e.substituted_vars(), e.vals());
-        evaluated_condition = e.expr();
+        if (m_not_equal_to_false)
+        {
+          evaluated_condition = e.expr();
+        }
+        else
+        {
+          evaluated_condition = m_rewr_obj->rewrite(sort_bool::not_(e.expr()),enum_sigma);
+        }
+             
         return true;
       }
     }
@@ -669,7 +677,7 @@ inline bool EnumeratorSolutionsStandard<TERM,REWRITER>::next(
 }
 
 template <class TERM, class REWRITER>
-inline void EnumeratorSolutionsStandard<TERM,REWRITER>::reset(const bool not_equal_to_false,const bool expr_is_normal_form)
+inline void EnumeratorSolutionsStandard<TERM,REWRITER>::reset(const bool expr_is_normal_form)
 {
   if (expr_is_normal_form)
   {
@@ -679,7 +687,7 @@ inline void EnumeratorSolutionsStandard<TERM,REWRITER>::reset(const bool not_equ
                                   data_expression_list(),
                                   enum_expr,
                                   data_expression_list(),
-                                  !not_equal_to_false);
+                                  !m_not_equal_to_false);
   }
   else
   {
@@ -689,7 +697,7 @@ inline void EnumeratorSolutionsStandard<TERM,REWRITER>::reset(const bool not_equ
                                   data_expression_list(),
                                   enum_expr,
                                   data_expression_list(),
-                                  !not_equal_to_false);
+                                  !m_not_equal_to_false);
   }
 }
 

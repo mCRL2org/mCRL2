@@ -481,8 +481,9 @@ void next_state_generator::iterator::increment()
     valuation = *m_enumeration_iterator;
 
     // If we failed to exactly rewrite the condition to true, nextstate generation fails.
-    if(!m_enumeration_iterator.solution_is_exact())
+    if(m_enumeration_iterator.resulting_condition()!=sort_bool::true_())
     {
+      assert(m_enumeration_iterator.resulting_condition()!=sort_bool::false_());
       // Integrate the valuation in the substitution, to generate a more meaningful error message.
       data_expression_list::iterator v = valuation.begin();
       for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)

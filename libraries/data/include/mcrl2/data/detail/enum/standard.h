@@ -99,6 +99,7 @@ class EnumeratorSolutionsStandard
     variable_list enum_vars;                    // The variables over which a solution is searched.
     TERM enum_expr;                             // Condition to be satisfied.
     substitution_type& enum_sigma;
+    bool m_not_equal_to_false;
 
     std::deque < fs_expr<TERM>> fs_stack;
 
@@ -165,12 +166,13 @@ class EnumeratorSolutionsStandard
       enum_vars(vars),
       enum_expr(expr),
       enum_sigma(sigma),
+      m_not_equal_to_false(not_equal_to_false),
       used_vars(0),
       max_vars(MAX_VARS_INIT),
       m_max_internal_variables(max_internal_variables)
     { 
       
-      reset(not_equal_to_false,expr_is_normal_form);
+      reset(expr_is_normal_form);
     }
 
     /// Standard destructor.
@@ -223,7 +225,7 @@ class EnumeratorSolutionsStandard
 
 
   private:
-    void reset(const bool not_equal_to_false, const bool expr_is_normal_form); 
+    void reset(const bool expr_is_normal_form); 
 
     bool find_equality(const data_expression& T, 
                             const mcrl2::data::variable_list& vars, 
