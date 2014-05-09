@@ -58,8 +58,6 @@ template <typename Graph, typename Iter>
 std::vector<std::size_t> reachable_nodes(const Graph& g, Iter first, Iter last)
 {
   typedef boost::color_traits<boost::default_color_type> Color;
-  typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
-  typedef typename boost::graph_traits<Graph>::edge_descriptor edge_descriptor;
 
   std::vector<std::size_t> result;
   detail::reachable_nodes_recorder<Graph> recorder(result);
