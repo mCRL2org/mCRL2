@@ -16,6 +16,7 @@
 #include <map>
 #include <sstream>
 #include <utility>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
@@ -32,6 +33,8 @@ class enumerator_algorithm
   typedef std::map<data::sort_expression, std::vector<data::function_symbol> > constructor_map;
 
   protected:
+    const pbes_expression& phi;
+
     const pbes_expression& stop;
 
     // a rewriter
@@ -80,8 +83,8 @@ class enumerator_algorithm
     }
 
   public:
-    enumerator_algorithm(const data::variable_list& v, const pbes_expression& phi, const pbes_expression& stop_, PbesRewriter& R_, const data::data_specification& data_spec)
-      : stop(stop_), R(R_), m_data(data_spec)
+    enumerator_algorithm(const data::variable_list& v, const pbes_expression& phi_, const pbes_expression& stop_, PbesRewriter& R_, const data::data_specification& data_spec)
+      : phi(phi_), stop(stop_), R(R_), m_data(data_spec)
     {
       P.push_back(std::make_pair(v, data::enumerator_substitution()));
       for (auto i = v.begin(); i != v.end(); ++i)
@@ -103,16 +106,20 @@ class enumerator_algorithm
     template <typename Callback>
     void next(Callback report_solution)
     {
+      using core::detail::print_list;
+
       std::pair<data::variable_list, data::enumerator_substitution> p = P.front();
       P.pop_front();
       auto const& x = p.first;
       auto const& sigma = p.second;
-      pbes_expression Rx = R(x, sigma);
-      if (Rx != stop)
+      mCRL2log(log::debug) << "<x, sigma> = <" << core::detail::print_list(x) << ", " << sigma << ">" << std::endl;
+      pbes_expression Rphi = R(phi, sigma);
+      mCRL2log(log::debug) << "(" << phi << ")" << sigma << " = " << Rphi << std::endl;
+      if (Rphi != stop)
       {
         if (x.empty())
         {
-          report_solution(sigma, Rx);
+          report_solution(sigma, Rphi);
         }
         else
         {
@@ -125,7 +132,7 @@ class enumerator_algorithm
             for (auto i = C.begin(); i != C.end(); ++i)
             {
               auto const& c = *i;
-              if (is_function_sort(c.sort()))
+              if (data::is_function_sort(c.sort()))
               {
                 auto const& domain = atermpp::aterm_cast<data::function_sort>(c.sort()).domain();
                 data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s)
@@ -135,12 +142,14 @@ class enumerator_algorithm
                 );
                 data::application cy(c, y.begin(), y.end());
                 data::enumerator_substitution sigma1 = sigma;
-                sigma1.add_assignment(x1, cy);
+                sigma1.append_assignment(x1, cy);
                 P.push_back(std::make_pair(xtail + y, sigma1));
               }
               else
               {
-                throw mcrl2::runtime_error("Not a function sort: " + data::pp(c.sort()));
+                data::enumerator_substitution sigma1 = sigma;
+                sigma1.append_assignment(x1, c);
+                P.push_back(std::make_pair(xtail, sigma1));
               }
             }
           }
