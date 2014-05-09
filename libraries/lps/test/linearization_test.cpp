@@ -149,6 +149,8 @@ BOOST_AUTO_TEST_CASE(test_multiple_linearization_calls)
   spec = linearise(case_9);
 }
 
+#ifndef MCRL2_SKIP_LONG_TESTS
+
 BOOST_AUTO_TEST_CASE(test_process_assignments)
 {
   const std::string assignment_case_1
@@ -923,9 +925,9 @@ BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
   run_linearisation_test_case(spec,true);
 }
 
-// Arguments argc and argv must not be removed, despite compiler warnings,
-// as this will cause this test to fail.
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+#endif // !MCRL2_SKIP_LONG_TESTS
+
+boost::unit_test::test_suite* init_unit_test_suite(int, char**)
 {
   return 0;
 }

@@ -55,7 +55,7 @@ if label.startswith('macosx') and package in ['nightly', 'official-release']:
 # Do not run long tests, unless we're doing the ubuntu-amd64 maintainer build
 #
 testflags = []
-if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer'):
+if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
   testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
 else:
   testflags += ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
