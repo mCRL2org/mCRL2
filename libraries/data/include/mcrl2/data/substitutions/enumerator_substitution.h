@@ -125,6 +125,13 @@ struct enumerator_substitution: public std::unary_function<data::variable, data:
     expressions.push_front(e);
   }
 
+  // Reverses the order of the assignments in the substitution.
+  void revert()
+  {
+    variables = atermpp::reverse(variables);
+    expressions = atermpp::reverse(expressions);
+  }
+
   std::string to_string() const
   {
     std::ostringstream out;

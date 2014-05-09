@@ -400,6 +400,15 @@ void test_enumerator_substitution()
   sigma = compose(sigma1, sigma3);
   expected_result = y_and_y;
   test_enumerator_substitution(sigma, z, expected_result);
+
+  variable n = parse_variable("n: Nat");
+  variable q = parse_variable("q: Pos");
+  data_expression one = parse_data_expression("1");
+  enumerator_substitution rho1;
+  rho1.add_assignment(n, q);
+  rho1.add_assignment(q, one);
+  rho1.revert();
+  test_enumerator_substitution(rho1, n, one);
 }
 
 int test_main(int /* a */, char**  /* aa */)

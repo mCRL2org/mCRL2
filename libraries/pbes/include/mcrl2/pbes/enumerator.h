@@ -111,7 +111,8 @@ class enumerator_algorithm
       std::pair<data::variable_list, data::enumerator_substitution> p = P.front();
       P.pop_front();
       auto const& x = p.first;
-      auto const& sigma = p.second;
+      auto& sigma = p.second;
+      sigma.revert();
       mCRL2log(log::debug) << "<x, sigma> = <" << core::detail::print_list(x) << ", " << sigma << ">" << std::endl;
       pbes_expression Rphi = R(phi, sigma);
       mCRL2log(log::debug) << "(" << phi << ")" << sigma << " = " << Rphi << std::endl;
@@ -142,13 +143,17 @@ class enumerator_algorithm
                 );
                 data::application cy(c, y.begin(), y.end());
                 data::enumerator_substitution sigma1 = sigma;
-                sigma1.append_assignment(x1, cy);
+                // N.B. assignments are added to the substitution in the wrong order.
+                // Before applying the substitution, first a call to revert() is needed.
+                sigma1.add_assignment(x1, cy);
                 P.push_back(std::make_pair(xtail + y, sigma1));
               }
               else
               {
                 data::enumerator_substitution sigma1 = sigma;
-                sigma1.append_assignment(x1, c);
+                // N.B. assignments are added to the substitution in the wrong order.
+                // Before applying the substitution, first a call to revert() is needed.
+                sigma1.add_assignment(x1, c);
                 P.push_back(std::make_pair(xtail, sigma1));
               }
             }
