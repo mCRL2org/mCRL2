@@ -59,6 +59,15 @@ class basic_rewriter
     /// \brief The rewrite strategies of the rewriter.
     typedef rewrite_strategy strategy;
 
+    /// \brief The rewriter needs to find fresh names for
+    //         variables. This name generator can be used
+    //         for other renaming purposes as well.
+    data::set_identifier_generator& identifier_generator()
+    {
+      return m_rewriter->identifier_generator();
+    }
+
+
   protected:
 
     /// \brief Constructor.

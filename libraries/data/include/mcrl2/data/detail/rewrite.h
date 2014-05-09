@@ -69,6 +69,12 @@ class Rewriter
     {
     }
 
+    /** \brief The fresh name generator of the rewriter */
+    data::set_identifier_generator& identifier_generator()
+    {
+      return generator;
+    }
+
     /**
      * \brief Get rewriter strategy that is used.
      * \return Used rewriter strategy.
@@ -91,6 +97,16 @@ class Rewriter
      *         normal form.
      **/
     virtual data_expression_list rewrite_list(const data_expression_list& Terms, substitution_type& sigma);
+
+    /** 
+     * \brief Provide the rewriter with a () operator, such that it can also
+     *        rewrite terms using this operator.
+     **/
+
+    data_expression operator() (const data_expression& term, substitution_type& sigma)
+    {
+      return rewrite(term,sigma);
+    }
 
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */

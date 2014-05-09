@@ -44,22 +44,20 @@ namespace data
 ///        length as a variable list. For a variable list [v1,...,vn] and data_expression_list
 ///        [t1,...,tn] the data_expression ti is the solution for variable vi.
 
-template < typename Evaluator = rewriter >
+template < typename REWRITER = rewriter >
 class classic_enumerator
 {
 
   public:
     /// \brief The type of objects that represent substitutions
-    typedef typename Evaluator::substitution_type  substitution_type;
+    typedef typename REWRITER::substitution_type  substitution_type;
     /// \brief The type of objects that represent variables
     typedef typename substitution_type::variable_type                     variable_type;
     /// \brief The type of objects that represent expressions
     typedef typename substitution_type::expression_type                   expression_type;
-    /// \brief The type of objects that represent evaluator components
-    typedef Evaluator                                                     evaluator_type;
 
   protected:
-    const detail::legacy_rewriter m_evaluator;     
+    REWRITER m_evaluator;     
     const mcrl2::data::data_specification& m_data_spec;
 
   public:
@@ -75,14 +73,14 @@ class classic_enumerator
     {
       protected:
 
-        typedef classic_enumerator < evaluator_type > enclosing_classic_enumerator;
+        typedef classic_enumerator < REWRITER > enclosing_classic_enumerator;
         enclosing_classic_enumerator *m_enclosing_enumerator;
         data_expression_list m_assignments; 
         bool m_enumerator_iterator_valid;
         data_expression m_resulting_condition;
         bool m_solution_possible;
         bool m_not_equal_to_false;
-        typedef boost::shared_ptr < detail::EnumeratorSolutionsStandard < data_expression,rewriter > > m_generator_type;
+        typedef boost::shared_ptr < detail::EnumeratorSolutionsStandard < data_expression,REWRITER > > m_generator_type;
         m_generator_type m_generator;
 
       public:
@@ -100,7 +98,7 @@ class classic_enumerator
           m_solution_possible(do_not_throw_exceptions),
           m_not_equal_to_false(not_equal_to_false)
         {
-          m_resulting_condition=e->m_evaluator(condition,sigma);
+          m_resulting_condition= (e->m_evaluator)(condition,sigma);
           if ((m_not_equal_to_false && m_resulting_condition==sort_bool::false_()) ||
               (!m_not_equal_to_false && m_resulting_condition==sort_bool::true_()))
           {
@@ -116,13 +114,14 @@ class classic_enumerator
           else
           {
             // we must calculate the solutions.
-            m_generator=m_generator_type(new detail::EnumeratorSolutionsStandard<data_expression,rewriter>(
+            m_generator=m_generator_type(new detail::EnumeratorSolutionsStandard<data_expression,REWRITER>(
                                                               variables,
                                                               condition,
                                                               sigma,
                                                               m_not_equal_to_false,
                                                               m_enclosing_enumerator->m_data_spec,
-                                                              &m_enclosing_enumerator->m_evaluator.get_rewriter(),
+                                                              // &detail::legacy_rewriter(m_enclosing_enumerator->m_evaluator).get_rewriter(),
+                                                              m_enclosing_enumerator->m_evaluator,
                                                               max_internal_variables));
             increment();
           }
@@ -256,7 +255,7 @@ class classic_enumerator
      * \param[in] evaluator A component that is used for evaluating conditions, generally an ordinary rewriter
      **/
     classic_enumerator(const data_specification &specification,
-                       const evaluator_type &evaluator):
+                       const REWRITER& evaluator):
       m_evaluator(evaluator),
       m_data_spec(specification)
     {

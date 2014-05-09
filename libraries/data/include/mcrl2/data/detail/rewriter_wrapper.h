@@ -54,9 +54,37 @@ struct legacy_rewriter : public mcrl2::data::rewriter
 
     mcrl2::data::detail::Rewriter& get_rewriter() const
     {
-      return *const_cast< mcrl2::data::detail::Rewriter* >(m_rewriter.get());
+      return *const_cast< Rewriter* >(m_rewriter.get());
+    }
+
+    data::set_identifier_generator& rewriter_name_generator()
+    {
+      return m_rewriter.get()->generator;
     }
 }; 
+
+struct rewriter_wrapper
+{
+  public: 
+    typedef Rewriter::substitution_type substitution_type;
+
+    rewriter_wrapper(Rewriter* r):
+      m_rewriter(r)
+    {}
+   
+    data_expression operator()(const data_expression& t, Rewriter::substitution_type& sigma) const
+    {
+      return m_rewriter->rewrite(t,sigma);
+    }
+
+    data::set_identifier_generator& identifier_generator()
+    {
+      return m_rewriter->identifier_generator();
+    }
+
+  protected: 
+    Rewriter* m_rewriter;
+};
 
 
 } // namespace detail

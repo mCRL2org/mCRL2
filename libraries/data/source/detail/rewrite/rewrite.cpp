@@ -29,6 +29,8 @@
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
 #include "mcrl2/data/detail/enum/standard.h" // To be removed.
+#include "mcrl2/data/detail/rewriter_wrapper.h" // To be removed.
+#include "mcrl2/data/classic_enumerator.h"
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
@@ -358,33 +360,37 @@ data_expression Rewriter::existential_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard<data_expression,rewriter>
+  /* EnumeratorSolutionsStandard<data_expression,rewriter>
                               sol(vl_new_l, t3, sigma,true,
                                   m_data_specification_for_enumeration, this,
-                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
+                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true); */
+
+  typedef classic_enumerator<rewriter_wrapper> enumerator_type;
+  rewriter_wrapper wrapped_rewriter(this);
+  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter);
+    
+   /*                            sol(vl_new_l, t3, sigma,true,
+                                  m_data_specification_for_enumeration, this,
+                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true); */
 
   /* Create a list to store solutions */
-  atermpp::term_list<data_expression> x;
-  data_expression evaluated_condition=sort_bool::false_();
   data_expression partial_result=sort_bool::false_();
   bool solution_possible=true;
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  while (loop_upperbound>0 &&
+  for(enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, true, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
+         loop_upperbound>0 && 
          partial_result!=sort_bool::true_() &&
-         sol.next(evaluated_condition,x,solution_possible))
+         sol!=enumerator.end(); 
+         ++sol)
   {
     if (partial_result==sort_bool::false_())
     {
-      partial_result=evaluated_condition;
+      partial_result=sol.resulting_condition();
     }
-    else if (partial_result==sort_bool::true_())
+    else if (partial_result!=sort_bool::true_())
     {
-      partial_result=sort_bool::true_();
-    }
-    else
-    {
-      partial_result=application(sort_bool::or_(), partial_result,evaluated_condition);
+      partial_result=application(sort_bool::or_(), partial_result,sol.resulting_condition());
     }
     loop_upperbound--;
   }
@@ -461,33 +467,34 @@ data_expression Rewriter::universal_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard<data_expression,rewriter>
+
+ /*  EnumeratorSolutionsStandard<data_expression,rewriter>
                               sol(vl_new_l, t3, sigma,false,
                                   m_data_specification_for_enumeration, this,
-                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
+                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true); */
+  typedef classic_enumerator<rewriter_wrapper> enumerator_type;
+  rewriter_wrapper wrapped_rewriter(this);
+  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter);
+
 
   /* Create lists to store solutions */
-  data_expression_list x;
-  data_expression evaluated_condition=sort_bool::true_();
   data_expression partial_result=sort_bool::true_();
   bool solution_possible=true;
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  while (loop_upperbound>0 &&
+  for(enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, false, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
+         loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
-         sol.next(evaluated_condition,x,solution_possible))
+         sol!=enumerator.end();
+         ++sol)
   {
     if (partial_result==sort_bool::true_())
     {
-      partial_result=evaluated_condition;
+      partial_result=sol.resulting_condition();
     }
-    else if (partial_result==sort_bool::false_())
+    else if (partial_result!=sort_bool::false_())
     {
-      partial_result=sort_bool::false_();
-    }
-    else
-    {
-      partial_result=application(sort_bool::and_(), partial_result, evaluated_condition);
+      partial_result=application(sort_bool::and_(), partial_result, sol.resulting_condition());
     }
     loop_upperbound--;
   }

@@ -89,7 +89,7 @@ class EnumeratorSolutionsStandard
   protected:
 
     const mcrl2::data::data_specification& m_data_spec;
-    Rewriter* m_rewr_obj;
+    REWRITER m_rewr_obj;
 
 //    detail::EnumeratorStandard *m_enclosing_enumerator;
 /*    data_expression desired_truth_value;    // We search for solutions for the condition enum_expr that are not
@@ -158,7 +158,7 @@ class EnumeratorSolutionsStandard
                    substitution_type& sigma,
                    const bool not_equal_to_false, 
                    const mcrl2::data::data_specification& data_spec,
-                   Rewriter* rewr_obj,
+                   REWRITER rewr_obj,
                    const size_t max_internal_variables=0,
                    const bool expr_is_normal_form=false) :
       m_data_spec(data_spec),
@@ -171,7 +171,6 @@ class EnumeratorSolutionsStandard
       max_vars(MAX_VARS_INIT),
       m_max_internal_variables(max_internal_variables)
     { 
-      
       reset(expr_is_normal_form);
     }
 
