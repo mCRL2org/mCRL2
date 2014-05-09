@@ -166,7 +166,6 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
       // compute the dependency graph G
       typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> graph;
-      typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
       graph G(process_parameters.size());
       for (action_summand_vector::const_iterator i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
       {
