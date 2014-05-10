@@ -22,6 +22,7 @@
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/replace.h"
 
 namespace mcrl2 {
 
@@ -130,7 +131,7 @@ class enumerator_algorithm
     }
 
     template <typename Accept>
-    pbes_expression next(const pbes_expression& phi, enumerator_list& P, Accept accept)
+    pbes_expression next(const data::variable_list& v, const pbes_expression& phi, enumerator_list& P, Accept accept)
     {
       using core::detail::print_list;
 
@@ -139,15 +140,18 @@ class enumerator_algorithm
       auto const& x = p.first;
       auto& sigma = p.second;
       mCRL2log(log::debug) << "  process partial solution " << x << sigma << std::endl;
-      // TODO: applying sigma can probably been done more efficiently
-      sigma.revert();
+
+      // TODO: applying sigma can probably be done more efficiently
+      data::enumerator_substitution sigma_copy = sigma;
+      sigma_copy.revert();
       data::mutable_map_substitution<> rho;
-      for (auto i = sigma.variables.begin(); i != sigma.variables.end(); ++i)
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
-        rho[*i] = sigma(*i);
+        rho[*i] = sigma_copy(*i);
       }
-      pbes_expression Rphi = R(phi, rho);
-      sigma.revert();
+      pbes_expression psi = pbes_system::replace_variables_capture_avoiding(phi, rho, v);
+
+      pbes_expression Rphi = R(psi);
       mCRL2log(log::debug) << "(" << phi << ")" << sigma << " = " << Rphi << std::endl;
       if (accept(Rphi))
       {
@@ -204,7 +208,7 @@ class enumerator_algorithm
           {
             throw mcrl2::runtime_error("Cannot enumerate variable " + print(x1));
           }
-          return next(phi, P, accept);
+          return next(v, phi, P, accept);
         }
       }
       return data::undefined_data_expression();

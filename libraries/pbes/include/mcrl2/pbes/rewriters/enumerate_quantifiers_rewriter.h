@@ -22,7 +22,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/enumerator.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
@@ -120,7 +119,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     enumerator_list P = E.start(v, phi);
     while (!P.empty())
     {
-      pbes_expression e = E.next(phi, P, is_not_true());
+      pbes_expression e = E.next(v, phi, P, is_not_true());
       if (e == data::undefined_data_expression())
       {
         continue;
@@ -140,7 +139,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     enumerator_list P = E.start(v, phi);
     while (!P.empty())
     {
-      pbes_expression e = E.next(phi, P, is_not_false());
+      pbes_expression e = E.next(v, phi, P, is_not_false());
       if (e == data::undefined_data_expression())
       {
         continue;
@@ -202,12 +201,6 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       }
     }
     return result;
-  }
-
-  template <typename Substitution>
-  pbes_expression operator()(const pbes_expression& x, Substitution& rho)
-  {
-    return (*this)(pbes_system::replace_variables_capture_avoiding(x, rho, substitution_variables(rho)));
   }
 };
 

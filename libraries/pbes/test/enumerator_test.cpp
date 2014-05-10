@@ -52,7 +52,7 @@ void test_enumerator()
   enumerator_list P = E.start(v, phi);
   while (!P.empty())
   {
-    pbes_expression e = E.next(phi, P, is_not_true());
+    pbes_expression e = E.next(v, phi, P, is_not_true());
     if (e == data::undefined_data_expression())
     {
       continue;
