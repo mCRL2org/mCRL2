@@ -153,6 +153,7 @@ std::ostream& operator<<(std::ostream& out, const enumerator_substitution& sigma
   return out << sigma.to_string();
 }
 
+inline
 bool is_simple_substitution(const enumerator_substitution& sigma)
 {
   auto i = sigma.variables.begin();

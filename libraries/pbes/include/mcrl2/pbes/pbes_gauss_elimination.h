@@ -127,8 +127,7 @@ int gauss_elimination(pbes& p)
   typedef core::term_traits<pbes_expression> tr;
 
   data::rewriter datar(p.data());
-  data::data_enumerator datae(p.data(), datar);
-  enumerate_quantifiers_rewriter pbesr(datar, datae);
+  enumerate_quantifiers_rewriter pbesr(datar, p.data());
 
   gauss_elimination_algorithm<pbes_traits> algorithm;
   algorithm.run(p.equations().begin(), p.equations().end(), pbes_equation_solver<enumerate_quantifiers_rewriter>(pbesr));

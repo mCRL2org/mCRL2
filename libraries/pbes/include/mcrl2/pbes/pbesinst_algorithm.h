@@ -94,9 +94,6 @@ class pbesinst_algorithm
     /// \brief Data rewriter.
     data::rewriter datar;
 
-    /// \brief Data enumerator.
-    data::data_enumerator datae;
-
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter R;
 
@@ -154,8 +151,7 @@ class pbesinst_algorithm
                       )
       :
         datar(data_spec, rewrite_strategy),
-        datae(data_spec, datar),
-        R(datar, datae),
+        R(datar, data_spec),
         m_equation_count(0),
         m_print_equations(print_equations)
     {}

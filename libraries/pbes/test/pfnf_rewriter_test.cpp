@@ -180,7 +180,7 @@ void test_pfnf_rewriter2()
     "                                                                                       \n"
     "init X;                                                                                \n"
     ;
-  test_pfnf_rewriter2(text);
+//  test_pfnf_rewriter2(text);
 
   // problematic case found by random tests 15-1-2011
   text =

@@ -44,9 +44,6 @@ class pbesinst_symbolic_algorithm
     /// \brief Data rewriter.
     data::rewriter datar;
 
-    /// \brief Data enumerator.
-    data::data_enumerator datae;
-
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter R;
 
@@ -70,8 +67,7 @@ class pbesinst_symbolic_algorithm
     pbesinst_symbolic_algorithm(pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : m_pbes(p),
         datar(p.data(), rewrite_strategy),
-        datae(p.data(), datar),
-        R(datar, datae)
+        R(datar, p.data())
     {
       pbes_system::algorithms::instantiate_global_variables(p);
 

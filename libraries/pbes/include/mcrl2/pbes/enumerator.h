@@ -20,11 +20,32 @@
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
+
+struct is_not_false
+{
+  typedef core::term_traits<pbes_expression> tr;
+  bool operator()(const pbes_expression& x) const
+  {
+    return !tr::is_false(x);
+  }
+};
+
+struct is_not_true
+{
+  typedef core::term_traits<pbes_expression> tr;
+  bool operator()(const pbes_expression& x) const
+  {
+    return !tr::is_true(x);
+  }
+};
+
+typedef std::deque<std::pair<data::variable_list, data::enumerator_substitution> > enumerator_list;
 
 template <typename PbesRewriter>
 class enumerator_algorithm
@@ -33,18 +54,11 @@ class enumerator_algorithm
   typedef std::map<data::sort_expression, std::vector<data::function_symbol> > constructor_map;
 
   protected:
-    const pbes_expression& phi;
-
-    const pbes_expression& stop;
-
     // a rewriter
     PbesRewriter& R;
 
     /// \brief A data specification.
-    const data::data_specification& m_data;
-
-    // the list of partial solutions
-    std::deque<std::pair<data::variable_list, data::enumerator_substitution> > P;
+    const data::data_specification& dataspec;
 
     data::set_identifier_generator id_generator;
 
@@ -61,7 +75,7 @@ class enumerator_algorithm
       {
         return i->second;
       }
-      m_constructors[s] = m_data.constructors(s);
+      m_constructors[s] = dataspec.constructors(s);
       return m_constructors[s];
     }
 
@@ -77,16 +91,31 @@ class enumerator_algorithm
       return false;
     }
 
-    bool is_function_sort(const data::sort_expression& x) const
+    data::variable_list filter(const data::variable_list v, const std::set<data::variable>& fv)
     {
-      return false;
+      using utilities::detail::contains;
+
+      std::vector<data::variable> result;
+      for (auto i = v.begin(); i != v.end(); ++i)
+      {
+        if (contains(fv, *i))
+        {
+          result.push_back(*i);
+        }
+      }
+      return data::variable_list(result.begin(), result.end());
     }
 
   public:
-    enumerator_algorithm(const data::variable_list& v, const pbes_expression& phi_, const pbes_expression& stop_, PbesRewriter& R_, const data::data_specification& data_spec)
-      : phi(phi_), stop(stop_), R(R_), m_data(data_spec)
+    enumerator_algorithm(PbesRewriter& R_, const data::data_specification& dataspec_)
+      : R(R_), dataspec(dataspec_)
+    {}
+
+    enumerator_list start(const data::variable_list& v, const pbes_expression& phi)
     {
-      P.push_back(std::make_pair(v, data::enumerator_substitution()));
+      enumerator_list result;
+      std::set<data::variable> fv = pbes_system::find_free_variables(phi);
+      data::variable_list v1 = filter(v, fv);
       for (auto i = v.begin(); i != v.end(); ++i)
       {
         id_generator.add_identifier(i->name());
@@ -96,15 +125,12 @@ class enumerator_algorithm
       {
         id_generator.add_identifier(*i);
       }
+      result.push_back(std::make_pair(v1, data::enumerator_substitution()));
+      return result;
     }
 
-    bool is_finished() const
-    {
-      return P.empty();
-    }
-
-    template <typename Callback>
-    void next(Callback report_solution)
+    template <typename Accept>
+    pbes_expression next(const pbes_expression& phi, enumerator_list& P, Accept accept)
     {
       using core::detail::print_list;
 
@@ -112,15 +138,22 @@ class enumerator_algorithm
       P.pop_front();
       auto const& x = p.first;
       auto& sigma = p.second;
+      mCRL2log(log::debug) << "  process partial solution " << x << sigma << std::endl;
+      // TODO: applying sigma can probably been done more efficiently
       sigma.revert();
-      mCRL2log(log::debug) << "<x, sigma> = <" << core::detail::print_list(x) << ", " << sigma << ">" << std::endl;
-      pbes_expression Rphi = R(phi, sigma);
+      data::mutable_map_substitution<> rho;
+      for (auto i = sigma.variables.begin(); i != sigma.variables.end(); ++i)
+      {
+        rho[*i] = sigma(*i);
+      }
+      pbes_expression Rphi = R(phi, rho);
+      sigma.revert();
       mCRL2log(log::debug) << "(" << phi << ")" << sigma << " = " << Rphi << std::endl;
-      if (Rphi != stop)
+      if (accept(Rphi))
       {
         if (x.empty())
         {
-          report_solution(sigma, Rphi);
+          return Rphi;
         }
         else
         {
@@ -146,6 +179,7 @@ class enumerator_algorithm
                 // N.B. assignments are added to the substitution in the wrong order.
                 // Before applying the substitution, first a call to revert() is needed.
                 sigma1.add_assignment(x1, cy);
+                mCRL2log(log::debug) << "  add partial solution " << x1 << sigma1 << std::endl;
                 P.push_back(std::make_pair(xtail + y, sigma1));
               }
               else
@@ -154,23 +188,26 @@ class enumerator_algorithm
                 // N.B. assignments are added to the substitution in the wrong order.
                 // Before applying the substitution, first a call to revert() is needed.
                 sigma1.add_assignment(x1, c);
+                mCRL2log(log::debug) << "  add partial solution " << x1 << sigma1 << std::endl;
                 P.push_back(std::make_pair(xtail, sigma1));
               }
             }
           }
-          else if (is_finite_set(x1.sort()))
-          {
-          }
-          else if (is_function_sort(x1.sort()))
-          {
-          }
+//          else if (is_finite_set(x1.sort()))
+//          {
+//          }
+//          else if (data::is_function_sort(x1.sort()))
+//          {
+//            mCRL2log(log::debug) << "Function sort: " << x1.sort() << std::endl;
+//          }
           else
           {
             throw mcrl2::runtime_error("Cannot enumerate variable " + print(x1));
           }
-          next(report_solution);
+          return next(phi, P, accept);
         }
       }
+      return data::undefined_data_expression();
     }
 };
 

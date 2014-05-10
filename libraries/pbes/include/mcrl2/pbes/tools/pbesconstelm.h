@@ -59,8 +59,7 @@ void pbesconstelm(const std::string& input_filename,
     case quantifier_finite:
     {
       bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
-      data::data_enumerator datae(p.data(), datar);
-      enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, compute_conditions);
       if (remove_redundant_equations)

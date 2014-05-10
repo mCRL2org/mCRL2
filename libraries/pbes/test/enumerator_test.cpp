@@ -10,6 +10,7 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes.h"
@@ -46,19 +47,24 @@ void test_enumerator()
   pbes_expression phi = parse_pbes_expression("val(n < 2)", VARSPEC);
   pbes_expression stop = tt::false_();
 
-  std::size_t solution_count = 0;
-  enumerator_algorithm<pbes_rewriter> E(v, phi, stop, R, data_spec);
-  while (!E.is_finished())
+  enumerator_algorithm<pbes_rewriter> E(R, data_spec);
+  std::vector<pbes_system::pbes_expression> solutions;
+  enumerator_list P = E.start(v, phi);
+  while (!P.empty())
   {
-    E.next([&](const data::enumerator_substitution& sigma, const pbes_expression& x)
-      {
-        std::cerr << "x = " << x << std::endl;
-        std::cerr << "sigma = " << sigma << std::endl;
-        solution_count++;
-      }
-    );
+    pbes_expression e = E.next(phi, P, is_not_true());
+    if (e == data::undefined_data_expression())
+    {
+      continue;
+    }
+    solutions.push_back(e);
+    if (tr::is_false(e))
+    {
+      break;
+    }
   }
-  BOOST_CHECK(solution_count == 2);
+  std::clog << "solutions = " << core::detail::print_list(solutions) << std::endl;
+  BOOST_CHECK(solutions.size() >= 1);
 }
 
 int test_main(int argc, char** argv)

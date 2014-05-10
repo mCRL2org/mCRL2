@@ -33,7 +33,6 @@ namespace detail {
   {
     protected:
       data::rewriter datar;
-      data::data_enumerator datae;
       pbes_system::enumerate_quantifiers_rewriter pbes_rewriter;
 
     public:
@@ -45,8 +44,7 @@ namespace detail {
     pbes_greybox_interface(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       : parity_game_generator(p, true_false_dependencies, is_min_parity, rewrite_strategy),
       	datar(p.data()),
-        datae(p.data(), datar), 
-        pbes_rewriter(datar, datae, true)
+        pbes_rewriter(datar, p.data(), true)
     {
       initialize_generation();
     }

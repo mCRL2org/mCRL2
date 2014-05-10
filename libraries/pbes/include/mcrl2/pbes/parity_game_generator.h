@@ -61,9 +61,6 @@ class parity_game_generator
     /// \brief Data rewriter.
     data::rewriter datar;
 
-    /// \brief Data enumerator.
-    data::data_enumerator datae;
-
     /// \brief PBES rewriter.
     pbes_system::enumerate_quantifiers_rewriter R;
 
@@ -281,8 +278,7 @@ class parity_game_generator
       m_initialized(false),
       m_pbes(p),
       datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
-      datae(p.data(), datar),
-      R(datar, datae),
+      R(datar, p.data()),
       m_true_false_dependencies(true_false_dependencies),
       m_is_min_parity(is_min_parity)
     {

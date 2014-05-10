@@ -2149,9 +2149,8 @@ std::cerr << "AAA " << atermpp::aterm(p) << "\n";
       max_rank(0)
     {
       typedef mcrl2::pbes_system::enumerate_quantifiers_rewriter my_pbes_rewriter;
-      mcrl2::data::data_enumerator datae(pbes_spec.data(), data_rewriter);
       const bool enumerate_infinite_sorts=true;
-      my_pbes_rewriter pbes_rewriter(data_rewriter, datae, enumerate_infinite_sorts);
+      my_pbes_rewriter pbes_rewriter(data_rewriter, pbes_spec.data(), enumerate_infinite_sorts);
 
 
       using namespace mcrl2::data;
