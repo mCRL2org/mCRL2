@@ -97,7 +97,7 @@ class Prover:protected mcrl2::data::rewriter
            mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
            int a_time_limit = 0):
                        mcrl2::data::rewriter(a_data_spec, equations_selector, a_rewrite_strategy),
-                       f_manipulator(m_rewriter, f_info),
+                       f_manipulator(f_info),
                        f_info()
     {
       f_time_limit = a_time_limit;
@@ -168,7 +168,7 @@ class Prover:protected mcrl2::data::rewriter
     virtual data_expression get_counter_example() = 0;
 
     /// \brief Returns the rewriter used by this prover (i.e. it returns Prover::f_rewriter).
-    boost::shared_ptr<detail::Rewriter> get_rewriter()
+    std::shared_ptr<detail::Rewriter> get_rewriter()
     {
       return m_rewriter;
     }

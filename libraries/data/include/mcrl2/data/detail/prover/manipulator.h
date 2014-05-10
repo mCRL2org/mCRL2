@@ -26,9 +26,6 @@ namespace detail
 class Manipulator
 {
   protected:
-    /// \brief The rewriter used to translate formulas.
-    boost::shared_ptr<detail::Rewriter> f_rewriter;
-
     /// \brief A class that provides information on the structure of expressions in one of the
     /// \brief internal formats of the rewriter.
     Info& f_info;
@@ -140,10 +137,9 @@ class Manipulator
 
   public:
     /// \brief Constructor initializing the rewriter and the field \c f_info.
-    Manipulator(boost::shared_ptr<detail::Rewriter> a_rewriter, Info& a_info):
+    Manipulator(Info& a_info):
       f_info(a_info)
     {
-      f_rewriter = a_rewriter;
     }
 
     /// \brief Destructor with no particular functionality.

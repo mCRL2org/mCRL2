@@ -17,7 +17,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "boost/shared_ptr.hpp"
 #include "boost/type_traits/add_reference.hpp"
 
 #include "mcrl2/utilities/exception.h"
@@ -46,7 +45,7 @@ class basic_rewriter
 
   protected:
     /// \brief The wrapped Rewriter.
-    boost::shared_ptr<detail::Rewriter> m_rewriter;
+    std::shared_ptr<detail::Rewriter> m_rewriter;
 
   public:
 
@@ -73,7 +72,7 @@ class basic_rewriter
 
     /// \brief Constructor.
     /// \param[in] r A rewriter
-    basic_rewriter(const boost::shared_ptr<detail::Rewriter> & r) :
+    basic_rewriter(const std::shared_ptr<detail::Rewriter> & r) :
       m_rewriter(r)
     {}
 
