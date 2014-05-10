@@ -22,7 +22,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
-#include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
@@ -50,7 +49,7 @@ class parity_game_generator
     typedef core::term_traits<pbes_expression> tr;
 
     /// \brief Substitution function type used by the PBES rewriter.
-    typedef data::detail::legacy_rewriter::substitution_type substitution_function;
+    typedef data::rewriter::substitution_type substitution_function;
 
     /// \brief Mark whether initialization has been initialized.
     /// Needed to properly cope with virtual inheritance!

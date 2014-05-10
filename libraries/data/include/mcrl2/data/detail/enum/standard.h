@@ -13,7 +13,6 @@
 
 #include "mcrl2/data/detail/enumerator_variable_limit.h"
 
-
 #define MAX_VARS_INIT   1000
 #define MAX_VARS_FACTOR 5
 
@@ -73,11 +72,9 @@ class fs_expr
     }
 };
 
-}
-}
-} // namespace atermpp
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 /// \endcond
-
-// #include "mcrl2/data/detail/enum/enumerator_implementation.h"
 
 #endif

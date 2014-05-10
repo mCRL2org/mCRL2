@@ -12,13 +12,10 @@
 #ifndef _MCRL2_DATA_CLASSIC_ENUMERATOR__HPP_
 #define _MCRL2_DATA_CLASSIC_ENUMERATOR__HPP_
 
-#include <set>
-
 #include "boost/iterator/iterator_facade.hpp"
 
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/detail/enum/standard.h"
 
 namespace mcrl2
@@ -47,11 +44,9 @@ class classic_enumerator
 
   public:
     /// \brief The type of objects that represent substitutions
-    typedef typename REWRITER::substitution_type  substitution_type;
-    /// \brief The type of objects that represent variables
-    typedef typename substitution_type::variable_type                     variable_type;
+    typedef typename REWRITER::substitution_type substitution_type;
     /// \brief The type of objects that represent expressions
-    typedef typename substitution_type::expression_type                   expression_type;
+    typedef TERM expression_type;
 
   protected:
     REWRITER m_evaluator;     
@@ -78,11 +73,9 @@ class classic_enumerator
         bool m_solution_possible;
         bool m_not_equal_to_false;
         bool m_generator;
-
-// Below we find the variables for an EnumeratorSolutionsStandard in an attemp to merge these two classes.
         variable_list enum_vars;                    // The variables over which a solution is searched.
         TERM enum_expr;                             // Condition to be satisfied.
-        substitution_type& enum_sigma;
+        substitution_type* enum_sigma;
     
         std::deque < detail::fs_expr<TERM>> fs_stack;
     
@@ -101,11 +94,12 @@ class classic_enumerator
           static data_specification default_data_spec;
           return default_data_spec;
         }
-// -------------------------------------------------------
 
       public:
 
-        /// \brief Constructor. Use it via the begin function of the classic enumerator class.
+        /// \brief Constructor. 
+        //  \details Use it via begin() of the classic enumerator class. See the
+        //           explanation at this function for the meaning of the parameters.
         iterator(enclosing_classic_enumerator *e,
                           const variable_list& variables,
                           const TERM& condition,
@@ -114,11 +108,8 @@ class classic_enumerator
                           const size_t max_internal_variables=0,
                           const bool do_not_throw_exceptions=false):
           m_enclosing_enumerator(e),
-          m_enumerator_iterator_valid(false),
-          m_solution_possible(do_not_throw_exceptions),
           m_not_equal_to_false(not_equal_to_false),
-          m_generator(false),
-          enum_sigma(sigma),
+          enum_sigma(&sigma),
           m_max_internal_variables(max_internal_variables)
         {
           m_resulting_condition= (e->m_evaluator)(condition,sigma);
@@ -127,10 +118,12 @@ class classic_enumerator
           {
             // no solutions are found.
             m_solution_possible=true;
+            m_enumerator_iterator_valid=false;
           }
           else if (variables.empty())
           {
             // in this case we generate exactly one solution.
+            m_generator=false;
             m_enumerator_iterator_valid=true;
             m_solution_possible=true;
           }
@@ -138,6 +131,7 @@ class classic_enumerator
           {
             // we must calculate the solutions.
             m_generator=true;
+            m_solution_possible=do_not_throw_exceptions;
             enum_vars=variables;
             enum_expr=condition;
             used_vars=0;
@@ -152,54 +146,7 @@ class classic_enumerator
         //  \details It is advisable to avoid its use, and use end instead.
         iterator():
            m_enumerator_iterator_valid(false),
-           m_solution_possible(false),
-           m_not_equal_to_false(false),
-           enum_sigma(default_sigma())
-        {
-        }
-
-        /// \brief Destructor.
-        ~iterator()
-        {
-        }
-
-        /// \brief Standard assignment operator.
-        iterator& operator=(const iterator &other)
-        {
-          m_enclosing_enumerator=other.m_enclosing_enumerator;
-          m_assignments=other.m_assignments;
-          m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
-          m_resulting_condition=other.m_resulting_condition;
-          m_solution_possible=other.m_solution_possible;
-          m_not_equal_to_false=other.m_not_equal_to_false;
-          m_generator=other.m_generator;
-          enum_sigma=other.enum_sigma;
-          enum_vars=other.enum_vars;  
-          enum_expr=other.enum_expr;  
-          fs_stack=other.fs_stack;
-          used_vars=other.used_vars;
-          max_vars=other.max_vars;
-          m_max_internal_variables=other.m_max_internal_variables;
-
-          return *this;
-        }
-
-        /// \brief Standard copy constructor
-        iterator(const iterator &other):
-          m_enclosing_enumerator(other.m_enclosing_enumerator),
-          m_assignments(other.m_assignments),
-          m_enumerator_iterator_valid(other.m_enumerator_iterator_valid),
-          m_resulting_condition(other.m_resulting_condition),
-          m_solution_possible(other.m_solution_possible),
-          m_not_equal_to_false(false),
-          m_generator(other.m_generator),
-          enum_vars(other.enum_vars),  
-          enum_expr(other.enum_expr),  
-          enum_sigma(other.enum_sigma),
-          fs_stack(other.fs_stack),
-          used_vars(other.used_vars),
-          max_vars(other.max_vars),
-          m_max_internal_variables(other.m_max_internal_variables)
+           enum_sigma(&default_sigma())
         {
         }
 

@@ -194,7 +194,7 @@ inline void classic_enumerator<REWRITER,TERM>::iterator::push_on_fs_stack_and_sp
                                 var_list,
                                 substituted_vars,
                                 substitution_terms,
-                                m_enclosing_enumerator->m_evaluator(condition,enum_sigma),
+                                m_enclosing_enumerator->m_evaluator(condition,*enum_sigma),
                                 negated_term_list,
                                 negated);
 }
@@ -279,10 +279,10 @@ inline void classic_enumerator<REWRITER,TERM>::iterator::EliminateVars(detail::f
 
     // Use a rewrite here to remove occurrences of subexpressions the form t==t caused by
     // replacing in x==t the variable x by t.
-    const data_expression old_val=enum_sigma(var);
-    enum_sigma[var]=val;
-    expr = m_enclosing_enumerator->m_evaluator(expr,enum_sigma);
-    enum_sigma[var]=old_val;
+    const data_expression old_val=(*enum_sigma)(var);
+    (*enum_sigma)[var]=val;
+    expr = m_enclosing_enumerator->m_evaluator(expr,*enum_sigma);
+    (*enum_sigma)[var]=old_val;
   }
 
 #ifndef NDEBUG
@@ -396,7 +396,7 @@ inline data_expression_list classic_enumerator<REWRITER,TERM>::iterator::build_s
   else
   {
     data_expression_list result=build_solution2(vars.tail(),substituted_vars,exprs);
-    result.push_front(m_enclosing_enumerator->m_evaluator(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
+    result.push_front(m_enclosing_enumerator->m_evaluator(build_solution_single(vars.front(),substituted_vars,exprs),*enum_sigma));
     return result;
   }
 }
@@ -434,7 +434,7 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
         }
         else
         {
-          evaluated_condition = m_enclosing_enumerator->m_evaluator(sort_bool::not_(e.expr()),enum_sigma);
+          evaluated_condition = m_enclosing_enumerator->m_evaluator(sort_bool::not_(e.expr()),*enum_sigma);
         }
              
         return true;
@@ -588,13 +588,13 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
             // using it is much cheaper than using a default substitution.
 
             const data_expression term_rf = m_enclosing_enumerator->m_evaluator(
-                       application(*it,var_array),enum_sigma);
+                       application(*it,var_array),*enum_sigma);
             var_array.clear();
 
-            const data_expression old_substituted_value=enum_sigma(var);
-            enum_sigma[var]=term_rf;
-            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expr(),enum_sigma);
-            enum_sigma[var]=old_substituted_value;
+            const data_expression old_substituted_value=(*enum_sigma)(var);
+            (*enum_sigma)[var]=term_rf;
+            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expr(),*enum_sigma);
+            (*enum_sigma)[var]=old_substituted_value;
             variable_list templist1=e.substituted_vars();
             templist1.push_front(var);
             data_expression_list templist2=e.vals();
@@ -617,13 +617,13 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
-            const data_expression term_rf = m_enclosing_enumerator->m_evaluator(*it,enum_sigma);
+            const data_expression term_rf = m_enclosing_enumerator->m_evaluator(*it,*enum_sigma);
 
-            const data_expression old_substituted_value=enum_sigma(var);
-            enum_sigma[var]=term_rf;
-            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expr(),enum_sigma);
+            const data_expression old_substituted_value=(*enum_sigma)(var);
+            (*enum_sigma)[var]=term_rf;
+            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expr(),*enum_sigma);
 
-            enum_sigma[var]=old_substituted_value;
+            (*enum_sigma)[var]=old_substituted_value;
             variable_list templist1=e.substituted_vars();
             templist1.push_front(var);
             data_expression_list templist2=e.vals();

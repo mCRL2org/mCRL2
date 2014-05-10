@@ -62,6 +62,7 @@ class basic_rewriter
     /// \brief The rewriter needs to find fresh names for
     //         variables. This name generator can be used
     //         for other renaming purposes as well.
+    //  \deprecated Do not use this, as it will be removed.
     data::set_identifier_generator& identifier_generator()
     {
       return m_rewriter->identifier_generator();

@@ -195,17 +195,16 @@ public:
     return false;
   }
 
-  /// \brief Assignment operator
-  mutable_indexed_substitution& operator=(const mutable_indexed_substitution& other)
-  {
-    m_container=other.m_container;
-    m_index_table=other.m_index_table;
-    m_free_positions=other.m_free_positions;
-    m_variables_in_rhs_set_is_defined=other.m_variables_in_rhs_set_is_defined;
-    m_variables_in_rhs=other.m_variables_in_rhs;
-    return *this;
-  }
+  /// \brief Copy constructor
+  mutable_indexed_substitution(const mutable_indexed_substitution& other) = default;
 
+  /// \brief Assignment operator
+  mutable_indexed_substitution& operator=(const mutable_indexed_substitution& other) = default;
+
+  /// \brief Assignment move operator
+  mutable_indexed_substitution& operator=(mutable_indexed_substitution&& other) = default;
+
+  /// \brief Provides a set of variables that occur in the right hand sides of the assignments.
   const std::set<variable>& variables_in_rhs()
   {
     if (!m_variables_in_rhs_set_is_defined)

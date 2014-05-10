@@ -39,7 +39,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
-#include "mcrl2/data/detail/rewriter_wrapper.h"
 
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 
@@ -209,8 +208,8 @@ inline
 void assign_variables_in_tree(
      atermpp::aterm t,
      mcrl2::data::variable_list::iterator& var_iter,
-     mcrl2::data::detail::legacy_rewriter& rewriter,
-     mcrl2::data::detail::legacy_rewriter::substitution_type &sigma)
+     mcrl2::data::rewriter& rewriter,
+     mcrl2::data::rewriter::substitution_type &sigma)
 {
   using namespace atermpp;
   if (is_pair(t))
@@ -1146,8 +1145,8 @@ inline bes_expression toBDD(const bes_expression &b)
 
 inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
      const mcrl2::pbes_system::pbes_expression &p,
-     mcrl2::data::detail::legacy_rewriter& R,
-     mcrl2::data::detail::legacy_rewriter::substitution_type &sigma,
+     mcrl2::data::rewriter& R,
+     mcrl2::data::rewriter::substitution_type &sigma,
      const bool convert_data_to_pbes = true)
 {
   using namespace mcrl2;
@@ -1403,8 +1402,8 @@ class boolean_equation_system
     std::vector < std::deque < counter_example> > data_to_construct_counter_example;
     bool construct_counter_example;
     atermpp::indexed_set variable_index;  //Used for constructing counter examples
-    mcrl2::data::detail::legacy_rewriter Mucks_rewriter;
-    typedef mcrl2::data::detail::legacy_rewriter::substitution_type substitution_type;
+    mcrl2::data::rewriter Mucks_rewriter;
+    typedef mcrl2::data::rewriter::substitution_type substitution_type;
 
     const bool internal_opt_store_as_tree;
 

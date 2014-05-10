@@ -68,7 +68,7 @@ namespace detail {
     /// \return the result of the rewrite.
     pbes_expression rewrite_and_simplify_expression(const pbes_expression& e, const bool convert_data_to_pbes = true)
     {
-      data::detail::legacy_rewriter::substitution_type sigma;
+      data::rewriter::substitution_type sigma;
       pbes_expression phi = pbes_rewriter(e, sigma);
       return phi;
     }
@@ -161,7 +161,7 @@ namespace detail {
 
         pbes_expression result;
 
-        data::detail::legacy_rewriter::substitution_type sigma;
+        data::rewriter::substitution_type sigma;
         make_substitution(pbes_eqn.variable().parameters(), tr::param(psi),sigma);
         result = pbes_rewriter(expr,sigma);
 

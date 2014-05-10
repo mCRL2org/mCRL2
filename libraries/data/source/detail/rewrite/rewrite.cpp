@@ -28,8 +28,8 @@
 
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
-#include "mcrl2/data/detail/enum/standard.h" // To be removed.
-#include "mcrl2/data/detail/rewriter_wrapper.h" // To be removed.
+// #include "mcrl2/data/detail/enum/standard.h" 
+#include "mcrl2/data/detail/rewriter_wrapper.h" 
 #include "mcrl2/data/classic_enumerator.h"
 
 #include "mcrl2/data/data_expression.h"
