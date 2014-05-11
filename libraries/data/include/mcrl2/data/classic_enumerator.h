@@ -41,22 +41,15 @@ namespace data
 template < typename REWRITER = rewriter, typename TERM = data_expression >
 class classic_enumerator
 {
-
   public:
     /// \brief The type of objects that represent substitutions
     typedef typename REWRITER::substitution_type substitution_type;
     /// \brief The type of objects that represent expressions
     typedef TERM expression_type;
 
-  protected:
-    REWRITER m_evaluator;     
-    const mcrl2::data::data_specification& m_data_spec;
-
-  public:
-
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
-    ///          the list of variables for which a solution is sought.
+    ///          the list of variables for which a solution is sought. 
     class iterator :
         public boost::iterator_facade<
                  iterator,
@@ -70,9 +63,8 @@ class classic_enumerator
         data_expression_list m_assignments; 
         bool m_enumerator_iterator_valid;
         TERM m_resulting_condition;
-        bool m_solution_possible;
+        bool m_exception_occurred;
         bool m_not_equal_to_false;
-        bool m_generator;
         variable_list enum_vars;                    // The variables over which a solution is searched.
         TERM enum_expr;                             // Condition to be satisfied.
         substitution_type* enum_sigma;
@@ -81,7 +73,6 @@ class classic_enumerator
     
         size_t used_vars;
         size_t max_vars;
-        size_t m_max_internal_variables;
     
         substitution_type& default_sigma()
         {
@@ -104,40 +95,39 @@ class classic_enumerator
                           const variable_list& variables,
                           const TERM& condition,
                           substitution_type& sigma,
-                          const bool not_equal_to_false=true,
-                          const size_t max_internal_variables=0,
-                          const bool do_not_throw_exceptions=false):
+                          const bool not_equal_to_false=true):
           m_enclosing_enumerator(e),
           m_not_equal_to_false(not_equal_to_false),
-          enum_sigma(&sigma),
-          m_max_internal_variables(max_internal_variables)
+          enum_sigma(&sigma)
         {
           m_resulting_condition= (e->m_evaluator)(condition,sigma);
           if ((m_not_equal_to_false && m_resulting_condition==sort_bool::false_()) ||
               (!m_not_equal_to_false && m_resulting_condition==sort_bool::true_()))
           {
             // no solutions are found.
-            m_solution_possible=true;
+            m_exception_occurred=false;
             m_enumerator_iterator_valid=false;
           }
           else if (variables.empty())
           {
             // in this case we generate exactly one solution.
-            m_generator=false;
             m_enumerator_iterator_valid=true;
-            m_solution_possible=true;
+            m_exception_occurred=false;
           }
           else
           {
             // we must calculate the solutions.
-            m_generator=true;
-            m_solution_possible=do_not_throw_exceptions;
             enum_vars=variables;
             enum_expr=condition;
             used_vars=0;
             max_vars=MAX_VARS_INIT;
-            m_max_internal_variables=max_internal_variables;
-            reset();
+            push_on_fs_stack_and_split_or(fs_stack,
+                                enum_vars,
+                                variable_list(),
+                                data_expression_list(),
+                                enum_expr,
+                                data_expression_list(),
+                                !m_not_equal_to_false);
             increment();
           }
         }
@@ -151,38 +141,30 @@ class classic_enumerator
         }
 
         /// \brief Provides the last found solution, but only if a valid solution was found.
+        ///        This is the initial condition to which the solution of the variables
+        ///        has been applied, and which is rewritten by the rewriter.
         const TERM &resulting_condition() const
         {
           assert(m_enumerator_iterator_valid);
           return m_resulting_condition;
         } 
 
-        /// \brief Indicate whether a solution was attempted to be generated (true) or whether
-        //         an error occurred (false).
-        //  \details This indicator only works if the variable do_not_throw_exceptions was true.
-        //           Otherwise an exception is thrown. If do_not_throw_exceptions was true, and
-        //           this function returns false, then the iterator is equal to end().
-        bool solution_is_possible() const
+        /// \brief Indicate whether a problem occurred when enumerating solutions. 
+        //  \details This indicator only works if the parameter throw_exceptions was not set.
+        //           Otherwise an exception is thrown. If throw_exceptions was false, and
+        //           this function returns false, then the iterator is equal to end(), but
+        //           in this case not all possible solutions have been generated.
+        bool exception_occurred() const
         {
-          assert(!m_enumerator_iterator_valid);
-          return m_solution_possible;
+          assert(!(m_exception_occurred&&m_enumerator_iterator_valid));
+          return m_exception_occurred;
         }
 
       protected:
 
         friend class boost::iterator_core_access;
 
-        void increment()
-        {
-          if (!m_generator)
-          {
-            m_enumerator_iterator_valid=false; // There was only one solution.
-          }
-          else
-          {
-            m_enumerator_iterator_valid=next(m_resulting_condition,m_assignments,m_solution_possible);
-          }
-        }
+        void increment();
 
         bool equal(iterator const& other) const
         {
@@ -196,58 +178,12 @@ class classic_enumerator
           return m_assignments;
         }
 
-      private:
-
-       /**
-        * \brief Get next solution as a data_expression_list if available.
-        * \param[out] evaluated_condition This optional parameter is used to return the
-        *             condition in which solution is substituted. 
-        * \param[out] solution Place to store the solutions.
-        *             The data_expression_list solution contains solutions for the variables
-        *             in the same order as the variable list Vars.
-        * \param[out] solution_possible. This boolean indicates whether it was possible to
-        *             generate a solution. If there is a variable of a sort without a constructor
-        *             sort, it is not possible to generate solutions. Similarly, it can be
-        *             that the maximum number of solutions has been reached. In this case the variable
-        *             solution_possible is false, and the function returns false. 
-        *             This variable should be true when calling next. If it is initially false, 
-        *             or if a variant of next is used
-        *             without this parameter, an mcrl2::runtime_error exception is thrown if no solutions exist, or
-        *             if the maximum number of internal variables is reached.
-        * \param[in]  max_internal_variables The maximum number of variables to be 
-        *             used internally when generating solutions. If set to 0 an unbounded number
-        *             of variables are used, and warnings are printed to warn for potentially
-        *             unbounded loops.
-        * \return Whether or not a solution was found and stored in
-        *         solution. If false, there are no more solutions to be found. 
-        *
-        **/
-
-        bool next(TERM& evaluated_condition,
-                  data_expression_list& solution, 
-                  bool& solution_possible);
-
-        /** \brief Get next solution as a data_expression_list.
-         **/
-        //  bool next(data_expression_list& solution);
-
-        /** \brief Get next solution as a data_expression_list.
-         **/
-        //  bool next(TERM& evaluated_condition,
-        //            data_expression_list& solution);
-
-        /** \brief Get next solution as a data_expression_list.
-         **/
-        //  bool next(data_expression_list& solution, 
-        //            bool& solution_possible);
-
-
         void reset();
 
         bool find_equality(const data_expression& T,
-                                const mcrl2::data::variable_list& vars,
-                                mcrl2::data::variable& v,
-                                data_expression& e);
+                           const mcrl2::data::variable_list& vars,
+                           mcrl2::data::variable& v,
+                           data_expression& e);
 
         void EliminateVars(detail::fs_expr<TERM>& e);
 
@@ -301,23 +237,12 @@ class classic_enumerator
     /// \param[in] max_internal_variables The maximal number of internally generatable variables.
     ///            If zero, then there is no bound. If the bound is reached, generating
     ///            new solutions stops with or without an exception as desired.
-    /// \param[in] do_not_throw_exceptions A boolean indicating whether an exception can be thrown.
-    ///            if not, the function solution_is_possible can be used to indicate whether
-    ///            valid solutions are being generated.
     iterator begin(const variable_list& variables,
                    const TERM& condition,
                    substitution_type& sigma,
-                   const bool not_equal_to_false=true,
-                   const size_t max_internal_variables=0,
-                   const bool do_not_throw_exceptions=false)
+                   const bool not_equal_to_false=true)
     {
-      return iterator(this, variables, condition,sigma,not_equal_to_false,max_internal_variables,do_not_throw_exceptions);
-    }
-
-    iterator& default_end_iterator() const
-    {
-      static iterator default_end_iterator;
-      return default_end_iterator;
+      return iterator(this, variables, condition,sigma,not_equal_to_false);
     }
 
 
@@ -331,33 +256,36 @@ class classic_enumerator
     /** \brief Constructs a classic enumerator to
      * \param[in] specification A data specification containing the definitions of sorts
      * \param[in] evaluator A component that is used for evaluating conditions, generally an ordinary rewriter
+     * \param[in]  max_internal_variables The maximum number of variables to be 
+     *             used internally when generating solutions. If set to 0 an unbounded number
+     *             of variables are allowed, and warnings are printed to warn for potentially
+     *             unbounded loops.
+     * \param[in] throw_exceptions A boolean indicating whether an exception can be thrown.
+     *            if false, the function exception_occurred of the iterator can be used to indicate whether
+     *            valid solutions are being generated. 
      **/
     classic_enumerator(const data_specification &specification,
-                       const REWRITER& evaluator):
+                       const REWRITER& evaluator,
+                       const size_t max_internal_variables=0,
+                       const bool throw_exceptions=true):
       m_evaluator(evaluator),
-      m_data_spec(specification)
+      m_data_spec(specification),
+      m_max_internal_variables(max_internal_variables),
+      m_throw_exceptions(throw_exceptions)
     {
     }
 
-    /// \brief Standard destructor
-    ~classic_enumerator()
-    {
-    }
+  protected:
+    REWRITER m_evaluator;     
+    const mcrl2::data::data_specification& m_data_spec;
+    const size_t m_max_internal_variables;
+    const bool m_throw_exceptions;
 
-    /// \brief Copy constructor
-    classic_enumerator(classic_enumerator const& other):
-      m_evaluator(other.m_evaluator),
-      m_data_spec(other.m_data_spec)
+    /// \brief A static end iterator, such that it does not need to be reconstructed each time end() is used.
+    iterator& default_end_iterator() const
     {
-    }
-
-
-    /// \brief Assignment operator
-    classic_enumerator& operator=(const classic_enumerator & other)
-    {
-      m_evaluator=other.m_evaluator;
-      m_data_spec=other.m_data_spec;
-      return *this;
+      static iterator default_end_iterator;
+      return default_end_iterator;
     }
 
 };

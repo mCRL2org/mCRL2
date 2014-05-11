@@ -125,7 +125,7 @@ class enumerator_algorithm
       for (auto i = N.begin(); i != N.end(); ++i)
       {
         id_generator.add_identifier(*i);
-      }
+      } 
       result.push_back(std::make_pair(v1, data::enumerator_substitution()));
       return result;
     }

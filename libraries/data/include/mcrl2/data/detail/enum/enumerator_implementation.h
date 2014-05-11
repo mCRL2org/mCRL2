@@ -410,14 +410,10 @@ inline data_expression_list classic_enumerator<REWRITER,TERM>::iterator::build_s
   return build_solution2(vars, atermpp::reverse(substituted_vars), atermpp::reverse(exprs));
 }
 
-template <class REWRITER, class TERM>
-inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
-              TERM& evaluated_condition,
-              data_expression_list& solution,
-              bool& solution_possible)
-{
-  data_expression_vector var_array; // TODO: locating var_array on stack is most likely more efficient.
 
+template <class REWRITER, class TERM>
+inline void classic_enumerator<REWRITER,TERM>::iterator::increment()
+{
   while (!fs_stack.empty())
   {
     detail::fs_expr<TERM> e=fs_stack.front();
@@ -427,17 +423,19 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
     {
       if (e.expr()!=sort_bool::false_())
       { // A solution is found. Construct and return it.
-        solution = build_solution(enum_vars,e.substituted_vars(), e.vals());
+        m_assignments = build_solution(enum_vars,e.substituted_vars(), e.vals());
         if (m_not_equal_to_false)
         {
-          evaluated_condition = e.expr();
+          m_resulting_condition = e.expr();
         }
         else
         {
-          evaluated_condition = m_enclosing_enumerator->m_evaluator(sort_bool::not_(e.expr()),*enum_sigma);
+          m_resulting_condition = m_enclosing_enumerator->m_evaluator(sort_bool::not_(e.expr()),*enum_sigma);
         }
              
-        return true;
+        m_exception_occurred=false;
+        m_enumerator_iterator_valid=true;
+        return;
       }
     }
     else
@@ -451,10 +449,11 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
 
       if (is_function_sort(sort))
       {
-        if (solution_possible)
+        if (!m_enclosing_enumerator->m_throw_exceptions)
         {
-          solution_possible=false;
-          return false;
+          m_exception_occurred=true;
+          m_enumerator_iterator_valid=false;
+          return;
         }
         else
         {
@@ -465,10 +464,11 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
       }
       else if (sort_bag::is_bag(sort))
       {
-        if (solution_possible)
+        if (!m_enclosing_enumerator->m_throw_exceptions)
         {
-          solution_possible=false;
-          return false;
+          m_exception_occurred=true;
+          m_enumerator_iterator_valid=false;
+          return;
         }
         else
         {
@@ -489,10 +489,11 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
         }
         else */
         {
-          if (solution_possible)
+          if (!m_enclosing_enumerator->m_throw_exceptions)
           {
-            solution_possible=false;
-            return false;
+            m_exception_occurred=true;
+            m_enumerator_iterator_valid=false;
+            return;
           }
           else
           {
@@ -508,10 +509,11 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
 
         if ( it == constructors_for_sort.end() )
         {
-          if (solution_possible)
+          if (!m_enclosing_enumerator->m_throw_exceptions)
           {
-            solution_possible=false;
-            return false;
+            m_exception_occurred=true;
+            m_enumerator_iterator_valid=false;
+            return;
           }
           else
           {
@@ -523,9 +525,6 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
         assert(!it->empty());
         for( ; it!=constructors_for_sort.end() ; ++it)
         {
-          // Construct the domain and target sort for the constructor.
-          // sort_expression target_sort=it->sort();
-          // sort_expression_list domain_sorts;
           const sort_expression& it_sort=it->sort();
           if (is_function_sort(it_sort))
           {
@@ -533,29 +532,28 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
             assert(function_sort(it_sort).codomain()==sort);
 
             variable_list var_list;
-            assert(var_array.size()==0);
 
             for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
             {
               const variable fv(m_enclosing_enumerator->m_evaluator.identifier_generator()("@x@",false),*i);
               var_list.push_front(fv);
-              var_array.push_back(fv);
 
               used_vars++;
-              if (m_max_internal_variables!=0 && used_vars > m_max_internal_variables)
+              if (m_enclosing_enumerator->m_max_internal_variables!=0 && used_vars > m_enclosing_enumerator->m_max_internal_variables)
               {
-                if (solution_possible && max_vars != 0)
+                if (!m_enclosing_enumerator->m_throw_exceptions && max_vars != 0)
                 {
                   mCRL2log(log::debug)   << "Enumerating expression: "<< enum_expr << std::endl;
-                  mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used.\n";
-                  solution_possible=false;
-                  return false;
+                  mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_enclosing_enumerator->m_max_internal_variables << " are used.\n";
+                  m_exception_occurred=true;
+                  m_enumerator_iterator_valid=false;
+                  return;
                 }
                 else
                 {
                   fs_stack.clear();
                   std::stringstream exception_message;
-                  exception_message << "needed more than " << m_max_internal_variables << " variables to find all valuations of ";
+                  exception_message << "needed more than " << m_enclosing_enumerator->m_max_internal_variables << " variables to find all valuations of ";
                   for (variable_list::const_iterator k=enum_vars.begin(); k!=enum_vars.end(); ++k)
                   {
                     if (k != enum_vars.begin())
@@ -587,9 +585,10 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
 
+            variable_list reverted_var_list=reverse(var_list);
             const data_expression term_rf = m_enclosing_enumerator->m_evaluator(
-                       application(*it,var_array),*enum_sigma);
-            var_array.clear();
+                       application(*it,reverted_var_list.begin(),reverted_var_list.end()),*enum_sigma);
+
 
             const data_expression old_substituted_value=(*enum_sigma)(var);
             (*enum_sigma)[var]=term_rf;
@@ -642,19 +641,9 @@ inline bool classic_enumerator<REWRITER,TERM>::iterator::next(
     }
   }
   /* There are no more solutions */
-  return false;
-}
-
-template <class REWRITER, class TERM>
-inline void classic_enumerator<REWRITER,TERM>::iterator::reset()
-{
-  push_on_fs_stack_and_split_or(fs_stack,
-                                enum_vars,
-                                variable_list(),
-                                data_expression_list(),
-                                enum_expr,
-                                data_expression_list(),
-                                !m_not_equal_to_false);
+  m_exception_occurred=false;
+  m_enumerator_iterator_valid=false;
+  return;
 }
 
 } // namespace data

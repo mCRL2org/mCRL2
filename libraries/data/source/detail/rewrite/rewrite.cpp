@@ -314,8 +314,6 @@ data_expression Rewriter::existential_quantifier_enumeration(
       const bool t1_is_normal_form,
       substitution_type& sigma)
 {
-
-
   // Rename the bound variables to unique
   // variables, to avoid naming conflicts.
 
@@ -360,26 +358,16 @@ data_expression Rewriter::existential_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  /* EnumeratorSolutionsStandard<data_expression,rewriter>
-                              sol(vl_new_l, t3, sigma,true,
-                                  m_data_specification_for_enumeration, this,
-                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true); */
-
   typedef classic_enumerator<rewriter_wrapper> enumerator_type;
   rewriter_wrapper wrapped_rewriter(this);
-  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter);
-    
-   /*                            sol(vl_new_l, t3, sigma,true,
-                                  m_data_specification_for_enumeration, this,
-                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true); */
+  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
 
   /* Create a list to store solutions */
   data_expression partial_result=sort_bool::false_();
-  bool solution_possible=true;
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  for(enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, true, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
-         loop_upperbound>0 && 
+  enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, true);
+  for( ; loop_upperbound>0 && 
          partial_result!=sort_bool::true_() &&
          sol!=enumerator.end(); 
          ++sol)
@@ -395,7 +383,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
     loop_upperbound--;
   }
 
-  if (solution_possible && (loop_upperbound>0 || partial_result==sort_bool::true_()))
+  if (!sol.exception_occurred() && (loop_upperbound>0 || partial_result==sort_bool::true_()))
   {
     return partial_result;
   }
@@ -468,22 +456,17 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   /* Find A solution*/
 
- /*  EnumeratorSolutionsStandard<data_expression,rewriter>
-                              sol(vl_new_l, t3, sigma,false,
-                                  m_data_specification_for_enumeration, this,
-                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true); */
   typedef classic_enumerator<rewriter_wrapper> enumerator_type;
   rewriter_wrapper wrapped_rewriter(this);
-  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter);
+  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
 
 
   /* Create lists to store solutions */
   data_expression partial_result=sort_bool::true_();
-  bool solution_possible=true;
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  for(enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, false, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
-         loop_upperbound>0 &&
+  enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, false);
+  for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
          sol!=enumerator.end();
          ++sol)
@@ -499,7 +482,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
     loop_upperbound--;
   }
 
-  if (solution_possible && (loop_upperbound>0 || partial_result==sort_bool::false_()))
+  if (!sol.exception_occurred() && (loop_upperbound>0 || partial_result==sort_bool::false_()))
   {
     return partial_result;
   }
