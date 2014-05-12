@@ -52,13 +52,16 @@ if label.startswith('macosx') and package in ['nightly', 'official-release']:
   packageflags += ['-DMCRL2_OSX_PACKAGE=ON'] # Needed for packaging relevant Boost headers (for compiling rewriter)
 
 #
-# Do not run long tests, unless we're doing the ubuntu-amd64 maintainer build
+# Enable random tests for all builds.
 #
-testflags = []
-if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
+testflags = ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
+
+#
+# Do not run long tests if we're doing the ubuntu-amd64 clang maintainer 
+# build (these time out because profiling is on in Clang).
+#
+if (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
   testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
-else:
-  testflags += ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
 
 #
 # For Windows, explicitly tell CMake which generator to use to avoid trouble
