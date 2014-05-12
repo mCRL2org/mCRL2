@@ -111,22 +111,6 @@ class enumerator_algorithm
       : R(R_), dataspec(dataspec_)
     {}
 
-    enumerator_list start(const data::variable_list& v, const pbes_expression& phi)
-    {
-      enumerator_list result;
-//      for (auto i = v.begin(); i != v.end(); ++i)
-//      {
-//        id_generator.add_identifier(i->name());
-//      }
-//      std::set<core::identifier_string> N = pbes_system::find_identifiers(phi);
-//      for (auto i = N.begin(); i != N.end(); ++i)
-//      {
-//        id_generator.add_identifier(*i);
-//      }
-      result.push_back(std::make_pair(v, data::enumerator_substitution()));
-      return result;
-    }
-
     template <typename Accept>
     pbes_expression next(const data::variable_list& v, const pbes_expression& phi, enumerator_list& P, Accept accept)
     {

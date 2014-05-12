@@ -49,7 +49,8 @@ void test_enumerator()
 
   enumerator_algorithm<pbes_rewriter> E(R, data_spec);
   std::vector<pbes_system::pbes_expression> solutions;
-  enumerator_list P = E.start(v, phi);
+  enumerator_list P;
+  P.push_back(std::make_pair(v, data::enumerator_substitution()));
   while (!P.empty())
   {
     pbes_expression e = E.next(v, phi, P, is_not_true());

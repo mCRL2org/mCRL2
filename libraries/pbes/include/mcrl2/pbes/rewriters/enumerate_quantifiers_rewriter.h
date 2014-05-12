@@ -133,7 +133,8 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     data::variable_list v1 = free_variables(v, phi);
     pbes_expression result = tr::true_();
-    enumerator_list P = E.start(v1, phi);
+    enumerator_list P;
+    P.push_back(std::make_pair(v1, data::enumerator_substitution()));
     while (!P.empty())
     {
       pbes_expression e = E.next(v1, phi, P, is_not_true());
@@ -154,7 +155,8 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     data::variable_list v1 = free_variables(v, phi);
     pbes_expression result = tr::false_();
-    enumerator_list P = E.start(v1, phi);
+    enumerator_list P;
+    P.push_back(std::make_pair(v1, data::enumerator_substitution()));
     while (!P.empty())
     {
       pbes_expression e = E.next(v1, phi, P, is_not_false());
