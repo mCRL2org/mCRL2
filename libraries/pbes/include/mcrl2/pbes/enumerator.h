@@ -62,6 +62,20 @@ pbes_expression apply_enumerator_substitution(const pbes_expression& x, const da
   return pbes_system::replace_variables_capture_avoiding(x, rho, v);
 }
 
+struct sort_name_generator
+{
+  data::set_identifier_generator& id_generator;
+
+  sort_name_generator(data::set_identifier_generator& id_generator_)
+    : id_generator(id_generator_)
+  {}
+
+  data::variable operator()(const data::sort_expression& s) const
+  {
+    return data::variable(id_generator("@x"), s);
+  }
+};
+
 template <typename PbesRewriter>
 class enumerator_algorithm
 {
@@ -146,11 +160,14 @@ class enumerator_algorithm
               if (data::is_function_sort(c.sort()))
               {
                 auto const& domain = atermpp::aterm_cast<data::function_sort>(c.sort()).domain();
-                data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s)
-                  {
-                    return data::variable(id_generator("@x"), s);
-                  }
-                );
+                // Lambda expressions do not work with g++ 4.4
+                //
+                // data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s)
+                //   {
+                //     return data::variable(id_generator("@x"), s);
+                //   }
+                // );
+                data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
                 data::application cy(c, y.begin(), y.end());
                 data::enumerator_substitution sigma1 = sigma;
                 // N.B. assignments are added to the substitution in the wrong order.
