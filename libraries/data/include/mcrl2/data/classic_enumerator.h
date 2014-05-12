@@ -143,7 +143,7 @@ class classic_enumerator
         /// \brief Provides the last found solution, but only if a valid solution was found.
         ///        This is the initial condition to which the solution of the variables
         ///        has been applied, and which is rewritten by the rewriter.
-        const TERM &resulting_condition() const
+        const TERM& resulting_condition() const
         {
           assert(m_enumerator_iterator_valid);
           return m_resulting_condition;

@@ -195,15 +195,6 @@ public:
     return false;
   }
 
-  /// \brief Copy constructor
-  mutable_indexed_substitution(const mutable_indexed_substitution& other) = default;
-
-  /// \brief Assignment operator
-  mutable_indexed_substitution& operator=(const mutable_indexed_substitution& other) = default;
-
-  /// \brief Assignment move operator
-  // mutable_indexed_substitution& operator=(mutable_indexed_substitution&& other) = default;
-
   /// \brief Provides a set of variables that occur in the right hand sides of the assignments.
   const std::set<variable>& variables_in_rhs()
   {

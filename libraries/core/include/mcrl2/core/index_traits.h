@@ -136,7 +136,7 @@ struct index_traits
   }
 
   /// \brief Note: intended for internal use only!
-  /// Removes the variable from the index map.
+  /// Provides the size of the variable index map.
   static inline
   std::size_t size()
   {
