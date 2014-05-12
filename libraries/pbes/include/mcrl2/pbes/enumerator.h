@@ -48,6 +48,20 @@ struct is_not_true
 
 typedef std::deque<std::pair<data::variable_list, data::enumerator_substitution> > enumerator_list;
 
+// Applies the substitution sigma to the expression x. The list v contains variables that occur freely in x.
+inline
+pbes_expression apply_enumerator_substitution(const pbes_expression& x, const data::enumerator_substitution& sigma, const data::variable_list& v)
+{
+  data::enumerator_substitution sigma_copy = sigma;
+  sigma_copy.revert();
+  data::mutable_map_substitution<> rho;
+  for (auto i = v.begin(); i != v.end(); ++i)
+  {
+    rho[*i] = sigma_copy(*i);
+  }
+  return pbes_system::replace_variables_capture_avoiding(x, rho, v);
+}
+
 template <typename PbesRewriter>
 class enumerator_algorithm
 {
@@ -125,7 +139,7 @@ class enumerator_algorithm
       for (auto i = N.begin(); i != N.end(); ++i)
       {
         id_generator.add_identifier(*i);
-      } 
+      }
       result.push_back(std::make_pair(v1, data::enumerator_substitution()));
       return result;
     }
@@ -141,17 +155,9 @@ class enumerator_algorithm
       auto& sigma = p.second;
       mCRL2log(log::debug) << "  process partial solution " << x << sigma << std::endl;
 
-      // TODO: applying sigma can probably be done more efficiently
-      data::enumerator_substitution sigma_copy = sigma;
-      sigma_copy.revert();
-      data::mutable_map_substitution<> rho;
-      for (auto i = v.begin(); i != v.end(); ++i)
-      {
-        rho[*i] = sigma_copy(*i);
-      }
-      pbes_expression psi = pbes_system::replace_variables_capture_avoiding(phi, rho, v);
+      pbes_expression phi1 = apply_enumerator_substitution(phi, sigma, v);
+      pbes_expression Rphi = R(phi1);
 
-      pbes_expression Rphi = R(psi);
       mCRL2log(log::debug) << "(" << phi << ")" << sigma << " = " << Rphi << std::endl;
       if (accept(Rphi))
       {
