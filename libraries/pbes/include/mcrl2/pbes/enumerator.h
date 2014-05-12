@@ -106,21 +106,6 @@ class enumerator_algorithm
       return false;
     }
 
-    data::variable_list filter(const data::variable_list v, const std::set<data::variable>& fv)
-    {
-      using utilities::detail::contains;
-
-      std::vector<data::variable> result;
-      for (auto i = v.begin(); i != v.end(); ++i)
-      {
-        if (contains(fv, *i))
-        {
-          result.push_back(*i);
-        }
-      }
-      return data::variable_list(result.begin(), result.end());
-    }
-
   public:
     enumerator_algorithm(PbesRewriter& R_, const data::data_specification& dataspec_)
       : R(R_), dataspec(dataspec_)
@@ -129,18 +114,16 @@ class enumerator_algorithm
     enumerator_list start(const data::variable_list& v, const pbes_expression& phi)
     {
       enumerator_list result;
-      std::set<data::variable> fv = pbes_system::find_free_variables(phi);
-      data::variable_list v1 = filter(v, fv);
-      for (auto i = v.begin(); i != v.end(); ++i)
-      {
-        id_generator.add_identifier(i->name());
-      }
-      std::set<core::identifier_string> N = pbes_system::find_identifiers(phi);
-      for (auto i = N.begin(); i != N.end(); ++i)
-      {
-        id_generator.add_identifier(*i);
-      }
-      result.push_back(std::make_pair(v1, data::enumerator_substitution()));
+//      for (auto i = v.begin(); i != v.end(); ++i)
+//      {
+//        id_generator.add_identifier(i->name());
+//      }
+//      std::set<core::identifier_string> N = pbes_system::find_identifiers(phi);
+//      for (auto i = N.begin(); i != N.end(); ++i)
+//      {
+//        id_generator.add_identifier(*i);
+//      }
+      result.push_back(std::make_pair(v, data::enumerator_substitution()));
       return result;
     }
 
@@ -181,7 +164,7 @@ class enumerator_algorithm
                 auto const& domain = atermpp::aterm_cast<data::function_sort>(c.sort()).domain();
                 data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s)
                   {
-                    return data::variable(id_generator("q"), s);
+                    return data::variable(id_generator("@x"), s);
                   }
                 );
                 data::application cy(c, y.begin(), y.end());
