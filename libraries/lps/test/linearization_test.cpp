@@ -927,7 +927,7 @@ BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
 
 #endif // !MCRL2_SKIP_LONG_TESTS
 
-boost::unit_test::test_suite* init_unit_test_suite(int, const char**)
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char** argv)
 {
   return 0;
 }
