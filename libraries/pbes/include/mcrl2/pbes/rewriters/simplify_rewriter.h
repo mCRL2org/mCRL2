@@ -49,6 +49,10 @@ struct add_simplify: public Builder<Derived>
   pbes_expression operator()(const and_& x)
   {
     auto left = super::operator()(x.left());
+    if (tr::is_false(left))
+    {
+      return tr::false_();
+    }
     auto right = super::operator()(x.right());
     return utilities::optimized_and(left, right);
   }
@@ -56,6 +60,10 @@ struct add_simplify: public Builder<Derived>
   pbes_expression operator()(const or_& x)
   {
     auto left = super::operator()(x.left());
+    if (tr::is_true(left))
+    {
+      return tr::true_();
+    }
     auto right = super::operator()(x.right());
     return utilities::optimized_or(left, right);
   }
@@ -63,6 +71,10 @@ struct add_simplify: public Builder<Derived>
   pbes_expression operator()(const imp& x)
   {
     auto left = super::operator()(x.left());
+    if (tr::is_false(left))
+    {
+      return tr::true_();
+    }
     auto right = super::operator()(x.right());
     return utilities::optimized_imp(left, right);
   }
