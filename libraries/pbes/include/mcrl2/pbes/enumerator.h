@@ -50,7 +50,7 @@ typedef std::deque<std::pair<data::variable_list, data::enumerator_substitution>
 
 // Applies the substitution sigma to the expression x. The list v contains variables that occur freely in x.
 inline
-pbes_expression apply_enumerator_substitution(const pbes_expression& x, const data::enumerator_substitution& sigma, const data::variable_list& v)
+pbes_expression apply_enumerator_substitution(const data::variable_list& v, const pbes_expression& x, const data::enumerator_substitution& sigma)
 {
   data::enumerator_substitution sigma_copy = sigma;
   sigma_copy.revert();
@@ -59,7 +59,7 @@ pbes_expression apply_enumerator_substitution(const pbes_expression& x, const da
   {
     rho[*i] = sigma_copy(*i);
   }
-  return pbes_system::replace_variables_capture_avoiding(x, rho, v);
+  return pbes_system::replace_variables(x, rho);
 }
 
 struct sort_name_generator
@@ -136,7 +136,7 @@ class enumerator_algorithm
       auto& sigma = p.second;
       mCRL2log(log::debug) << "  process partial solution " << x << sigma << std::endl;
 
-      pbes_expression phi1 = apply_enumerator_substitution(phi, sigma, v);
+      pbes_expression phi1 = apply_enumerator_substitution(v, phi, sigma);
       pbes_expression Rphi = R(phi1);
 
       mCRL2log(log::debug) << "(" << phi << ")" << sigma << " = " << Rphi << std::endl;
