@@ -113,28 +113,11 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     return static_cast<Derived&>(*this);
   }
 
-  // returns the variables in v that occur freely in phi
-  data::variable_list free_variables(const data::variable_list& v, const pbes_expression& phi) const
-  {
-    using utilities::detail::contains;
-    std::set<data::variable> fv = pbes_system::find_free_variables(phi);
-    std::vector<data::variable> result;
-    for (auto i = v.begin(); i != v.end(); ++i)
-    {
-      if (contains(fv, *i))
-      {
-        result.push_back(*i);
-      }
-    }
-    return data::variable_list(result.begin(), result.end());
-  }
-
   pbes_expression enumerate_forall(const data::variable_list& v, const pbes_expression& phi)
   {
-    data::variable_list v1 = free_variables(v, phi);
     pbes_expression result = tr::true_();
     enumerator_list P;
-    P.push_back(enumerator_list_element(v1, phi));
+    P.push_back(enumerator_list_element(v, phi));
     while (!P.empty())
     {
       pbes_expression e = E.next(P, is_not_true());
@@ -153,10 +136,9 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
 
   pbes_expression enumerate_exists(const data::variable_list& v, const pbes_expression& phi)
   {
-    data::variable_list v1 = free_variables(v, phi);
     pbes_expression result = tr::false_();
     enumerator_list P;
-    P.push_back(enumerator_list_element(v1, phi));
+    P.push_back(enumerator_list_element(v, phi));
     while (!P.empty())
     {
       pbes_expression e = E.next(P, is_not_false());
