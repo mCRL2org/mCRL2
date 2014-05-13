@@ -933,7 +933,7 @@ BOOST_AUTO_TEST_CASE(skip_linearization_test)
 
 #endif // ndef MCRL2_SKIP_LONG_TESTS
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char** argv)
+boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
 {
   return 0;
 }
