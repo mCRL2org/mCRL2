@@ -48,7 +48,8 @@ void pbesrewr(const std::string& input_filename,
   {
     case simplify:
     {
-      simplify_data_rewriter<data::rewriter> pbesr(datar);
+      simplify_quantifiers_data_rewriter<data::rewriter> pbesr(datar);
+      //simplify_data_rewriter<data::rewriter> pbesr(datar);
       pbes_rewrite(p, pbesr);
       break;
     }
