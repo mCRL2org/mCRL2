@@ -50,10 +50,10 @@ void test_enumerator()
   enumerator_algorithm<pbes_rewriter> E(R, data_spec);
   std::vector<pbes_system::pbes_expression> solutions;
   enumerator_list P;
-  P.push_back(std::make_pair(v, data::enumerator_substitution()));
+  P.push_back(enumerator_list_element(v, phi));
   while (!P.empty())
   {
-    pbes_expression e = E.next(v, phi, P, is_not_true());
+    pbes_expression e = E.next(P, is_not_true());
     if (e == data::undefined_data_expression())
     {
       continue;
@@ -70,7 +70,7 @@ void test_enumerator()
 
 int test_main(int argc, char** argv)
 {
-  // log::mcrl2_logger::set_reporting_level(log::debug);
+  log::mcrl2_logger::set_reporting_level(log::debug);
   test_enumerator();
 
   return 0;

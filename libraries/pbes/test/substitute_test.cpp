@@ -13,6 +13,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/variable_assignment.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/substitutions.h"
 #include "mcrl2/pbes/replace.h"
@@ -108,11 +109,44 @@ void test_replace_pbes_expressions()
   BOOST_CHECK(result == expected_result);
 }
 
+void test_replace_variables()
+{
+  pbes_expression x = parse_pbes_expression("forall n: Nat. exists m: Nat. val(m > n)");
+  pbes_expression expected_result = parse_pbes_expression("forall n: Nat. exists m: Nat. val(n > n)");
+  data::mutable_map_substitution<> sigma;
+  data::variable m("m", data::sort_nat::nat());
+  data::variable n("n", data::sort_nat::nat());
+  sigma[m] = n;
+  pbes_expression result = pbes_system::replace_variables(x, sigma);
+  if (!(result == expected_result))
+  {
+    std::cout << "error: " << pbes_system::pp(result) << " != " << pbes_system::pp(expected_result) << std::endl;
+  }
+  BOOST_CHECK(result == expected_result);
+}
+
+void test_variable_assignment()
+{
+  pbes_expression x = parse_pbes_expression("forall n: Nat. exists m: Nat. val(m > n)");
+  pbes_expression expected_result = parse_pbes_expression("forall n: Nat. exists m: Nat. val(n > n)");
+  data::variable m("m", data::sort_nat::nat());
+  data::variable n("n", data::sort_nat::nat());
+  data::variable_assignment sigma(m, n);
+  pbes_expression result = pbes_system::replace_variables(x, sigma);
+  if (!(result == expected_result))
+  {
+    std::cout << "error: " << pbes_system::pp(result) << " != " << pbes_system::pp(expected_result) << std::endl;
+  }
+  BOOST_CHECK(result == expected_result);
+}
+
 int test_main(int argc, char* argv[])
 {
   test_substitution();
   test_propositional_variable_substitution();
   test_replace_pbes_expressions();
+  test_replace_variables();
+  test_variable_assignment();
 
   return 0;
 }

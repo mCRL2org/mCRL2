@@ -21,6 +21,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/variable_assignment.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/replace.h"
 
@@ -46,7 +47,24 @@ struct is_not_true
   }
 };
 
-typedef std::deque<std::pair<data::variable_list, data::enumerator_substitution> > enumerator_list;
+struct enumerator_list_element
+{
+  data::variable_list v;
+  pbes_expression phi;
+  data::enumerator_substitution sigma;
+
+  enumerator_list_element(const data::variable_list& v_, const pbes_expression& phi_, const data::enumerator_substitution& sigma_ = data::enumerator_substitution())
+    : v(v_), phi(phi_), sigma(sigma_)
+  {}
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const enumerator_list_element& p)
+{
+  return out << "variables = " << core::detail::print_list(p.v) << " expression = " << p.phi << " substitution = " << p.sigma;
+}
+
+typedef std::deque<enumerator_list_element> enumerator_list;
 
 // Applies the substitution sigma to the expression x. The list v contains variables that occur freely in x.
 inline
@@ -126,32 +144,29 @@ class enumerator_algorithm
     {}
 
     template <typename Accept>
-    pbes_expression next(const data::variable_list& v, const pbes_expression& phi, enumerator_list& P, Accept accept)
+    pbes_expression next(enumerator_list& P, Accept accept)
     {
       using core::detail::print_list;
 
-      std::pair<data::variable_list, data::enumerator_substitution> p = P.front();
+      auto p = P.front();
+      auto const& v = p.v;
+      auto const& phi = p.phi;
+      auto sigma = p.sigma;
+      pbes_expression Rphi = R(phi);
+      mCRL2log(log::debug) << "  process partial solution " << p << std::endl;
       P.pop_front();
-      auto const& x = p.first;
-      auto& sigma = p.second;
-      mCRL2log(log::debug) << "  process partial solution " << x << sigma << std::endl;
-
-      pbes_expression phi1 = apply_enumerator_substitution(v, phi, sigma);
-      pbes_expression Rphi = R(phi1);
-
-      mCRL2log(log::debug) << "(" << phi << ")" << sigma << " = " << Rphi << std::endl;
       if (accept(Rphi))
       {
-        if (x.empty())
+        if (v.empty())
         {
           return Rphi;
         }
         else
         {
-          auto const& x1 = x.front();
-          auto const& xtail = x.tail();
+          auto const& v1 = v.front();
+          auto const& vtail = v.tail();
 
-          auto const& C = constructors(x1.sort());
+          auto const& C = constructors(v1.sort());
           if (!C.empty())
           {
             for (auto i = C.begin(); i != C.end(); ++i)
@@ -169,21 +184,19 @@ class enumerator_algorithm
                 // );
                 data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
                 data::application cy(c, y.begin(), y.end());
-                data::enumerator_substitution sigma1 = sigma;
-                // N.B. assignments are added to the substitution in the wrong order.
-                // Before applying the substitution, first a call to revert() is needed.
-                sigma1.add_assignment(x1, cy);
-                mCRL2log(log::debug) << "  add partial solution " << x1 << sigma1 << std::endl;
-                P.push_back(std::make_pair(xtail + y, sigma1));
+                sigma.add_assignment(v1, cy);
+                pbes_expression phi1 = pbes_system::replace_variables(Rphi, data::variable_assignment(v1, cy));
+                enumerator_list_element p(vtail + y, phi1, sigma);
+                mCRL2log(log::debug) << "  add partial solution " << p << std::endl;
+                P.push_back(p);
               }
               else
               {
-                data::enumerator_substitution sigma1 = sigma;
-                // N.B. assignments are added to the substitution in the wrong order.
-                // Before applying the substitution, first a call to revert() is needed.
-                sigma1.add_assignment(x1, c);
-                mCRL2log(log::debug) << "  add partial solution " << x1 << sigma1 << std::endl;
-                P.push_back(std::make_pair(xtail, sigma1));
+                sigma.add_assignment(v1, c);
+                pbes_expression phi1 = pbes_system::replace_variables(Rphi, data::variable_assignment(v1, c));
+                enumerator_list_element p(vtail, phi1, sigma);
+                mCRL2log(log::debug) << "  add partial solution " << p << std::endl;
+                P.push_back(p);
               }
             }
           }
@@ -196,9 +209,9 @@ class enumerator_algorithm
 //          }
           else
           {
-            throw mcrl2::runtime_error("Cannot enumerate variable " + print(x1));
+            throw mcrl2::runtime_error("Cannot enumerate variable " + print(v1));
           }
-          return next(v, phi, P, accept);
+          return next(P, accept);
         }
       }
       return data::undefined_data_expression();
