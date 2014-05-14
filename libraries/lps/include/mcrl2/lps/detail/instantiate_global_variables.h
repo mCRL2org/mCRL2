@@ -13,6 +13,7 @@
 #define MCRL2_LPS_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H
 
 #include "mcrl2/data/representative_generator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/remove.h"

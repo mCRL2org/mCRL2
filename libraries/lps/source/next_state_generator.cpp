@@ -257,7 +257,7 @@ void next_state_generator::summand_subset_t::build_pruning_parameters(const acti
 
 bool next_state_generator::summand_subset_t::is_not_false(const next_state_generator::summand_t& summand)
 {
-  return m_generator->m_rewriter.get_rewriter().rewrite(summand.condition, m_pruning_substitution) != data::sort_bool::false_();
+  return m_generator->m_rewriter(summand.condition, m_pruning_substitution) != data::sort_bool::false_();
 }
 
 atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_generator::summand_subset_t::begin(const data_expression_vector& state)
@@ -346,34 +346,33 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
 
 struct action_argument_converter
 {
-  const data::detail::legacy_rewriter& m_rewriter;
+  const rewriter& m_rewriter;
   next_state_generator::substitution_t *m_substitution;
 
-  action_argument_converter(const data::detail::legacy_rewriter& rewriter, next_state_generator::substitution_t *substitution):
+  action_argument_converter(const data::rewriter& rewriter, next_state_generator::substitution_t *substitution):
         m_rewriter(rewriter),
         m_substitution(substitution)
   {}
 
   data_expression operator()(const data_expression& t) const
   {
-    return atermpp::aterm_cast<data_expression>(m_rewriter.get_rewriter().rewrite(t, *m_substitution));
+    return m_rewriter(t, *m_substitution);
   }
 };
 
 struct state_argument_rewriter
 {
-  const data::detail::legacy_rewriter& m_rewriter;
+  const data::rewriter& m_rewriter;
   next_state_generator::substitution_t *m_substitution;
 
-  state_argument_rewriter(const data::detail::legacy_rewriter& rewriter, next_state_generator::substitution_t *substitution):
+  state_argument_rewriter(const data::rewriter& rewriter, next_state_generator::substitution_t *substitution):
         m_rewriter(rewriter),
         m_substitution(substitution)
   {}
 
-  data_expression operator()(const atermpp::aterm& t) const
+  data_expression operator()(const data_expression& t) const
   {
-    return atermpp::aterm_cast<data_expression>(
-                m_rewriter.get_rewriter().rewrite(atermpp::aterm_cast<data_expression>(t), *m_substitution));
+    return m_rewriter(atermpp::aterm_cast<data_expression>(t), *m_substitution);
   }
 };
 
@@ -395,7 +394,7 @@ void next_state_generator::iterator::increment()
   data::data_expression_vector condition_arguments;
   while (!m_summand ||
     (m_cached && m_enumeration_cache_iterator == m_enumeration_cache_end) ||
-    (!m_cached && m_enumeration_iterator == enumerator_t::iterator()))
+    (!m_cached && m_enumeration_iterator == m_generator->m_enumerator.end()))
   {
     if (m_caching)
     {
@@ -466,7 +465,8 @@ void next_state_generator::iterator::increment()
       {
         (*m_substitution)[*i] = *i;  // Reset the variable.
       }
-      m_enumeration_iterator = m_generator->m_enumerator.begin(m_summand->variables, m_summand->condition, *m_substitution);
+      // Apply an assignment move, as the right hand side is not used anymore, and this is far more efficient.
+      m_enumeration_iterator=m_generator->m_enumerator.begin(m_summand->variables, m_summand->condition, *m_substitution);
     }
   }
 
@@ -481,8 +481,9 @@ void next_state_generator::iterator::increment()
     valuation = *m_enumeration_iterator;
 
     // If we failed to exactly rewrite the condition to true, nextstate generation fails.
-    if(!m_enumeration_iterator.solution_is_exact())
+    if(m_enumeration_iterator.resulting_condition()!=sort_bool::true_())
     {
+      assert(m_enumeration_iterator.resulting_condition()!=sort_bool::false_());
       // Integrate the valuation in the substitution, to generate a more meaningful error message.
       data_expression_list::iterator v = valuation.begin();
       for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)
@@ -491,7 +492,7 @@ void next_state_generator::iterator::increment()
       }
 
       // Reduce condition as much as possible, and give a hint of the original condition in the error message.
-      data_expression reduced_condition(m_generator->m_rewriter.get_rewriter().rewrite(m_summand->condition, *m_substitution));
+      data_expression reduced_condition(m_generator->m_rewriter(m_summand->condition, *m_substitution));
       std::string printed_condition(data::pp(m_summand->condition).substr(0, 300));
 
       throw mcrl2::runtime_error("Expression " + data::pp(reduced_condition) +
@@ -531,7 +532,7 @@ void next_state_generator::iterator::increment()
     arguments.resize(m_summand->action_label[i].arguments.size());
     for (size_t j = 0; j < m_summand->action_label[i].arguments.size(); j++)
     {
-      arguments[j] = m_generator->m_rewriter.get_rewriter().rewrite(m_summand->action_label[i].arguments[j], *m_substitution);
+      arguments[j] = m_generator->m_rewriter(m_summand->action_label[i].arguments[j], *m_substitution);
     }
     actions[i] = process::action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
   }

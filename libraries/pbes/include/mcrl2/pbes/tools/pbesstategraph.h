@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -24,28 +25,18 @@ namespace pbes_system {
 
 void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
-                    data::rewrite_strategy rewrite_strategy,
-                    bool simplify,
-                    bool /* apply_to_original */,
-                    bool use_local_variant,
-                    bool print_influence_graph,
-                    bool cache_marking_updates,
-                    bool use_marking_optimization,
-                    bool use_alternative_lcfp_criterion,
-                    bool use_alternative_gcfp_relation,
-                    bool use_alternative_gcfp_consistency
-                   )
+                    const pbesstategraph_options& options)
 {
   pbes p;
   pbes_system::algorithms::load_pbes(p, input_filename);
   pbes_system::algorithms::normalize(p);
   pbes q;
 
-  if (use_local_variant)
+  if (options.use_local_variant)
   {
-    pbes_system::detail::local_reset_variables_algorithm algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency, cache_marking_updates, use_marking_optimization);
-    q = algorithm.run(simplify);
-    if (print_influence_graph)
+    pbes_system::detail::local_reset_variables_algorithm algorithm(p, options);
+    q = algorithm.run();
+    if (options.print_influence_graph)
     {
       pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
       ialgo.run();
@@ -53,9 +44,9 @@ void pbesstategraph(const std::string& input_filename,
   }
   else
   {
-    pbes_system::detail::global_reset_variables_algorithm algorithm(p, rewrite_strategy);
-    q = algorithm.run(simplify);
-    if (print_influence_graph)
+    pbes_system::detail::global_reset_variables_algorithm algorithm(p, options);
+    q = algorithm.run();
+    if (options.print_influence_graph)
     {
       pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
       ialgo.run();

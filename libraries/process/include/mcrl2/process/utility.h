@@ -12,6 +12,8 @@
 #ifndef MCRL2_PROCESS_UTILITY_H
 #define MCRL2_PROCESS_UTILITY_H
 
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/print.h"

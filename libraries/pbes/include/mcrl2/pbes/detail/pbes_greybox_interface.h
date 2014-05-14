@@ -33,8 +33,7 @@ namespace detail {
   {
     protected:
       data::rewriter datar;
-      data::data_enumerator datae;
-      pbes_system::custom_enumerate_quantifiers_rewriter pbes_rewriter;
+      pbes_system::enumerate_quantifiers_rewriter pbes_rewriter;
 
     public:
     /// \brief Constructor.
@@ -45,8 +44,7 @@ namespace detail {
     pbes_greybox_interface(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       : parity_game_generator(p, true_false_dependencies, is_min_parity, rewrite_strategy),
       	datar(p.data()),
-        datae(p.data(), datar), 
-        pbes_rewriter(datar, datae, true)
+        pbes_rewriter(datar, p.data(), true)
     {
       initialize_generation();
     }
@@ -68,7 +66,7 @@ namespace detail {
     /// \return the result of the rewrite.
     pbes_expression rewrite_and_simplify_expression(const pbes_expression& e, const bool convert_data_to_pbes = true)
     {
-      data::detail::legacy_rewriter::substitution_type sigma;
+      data::rewriter::substitution_type sigma;
       pbes_expression phi = pbes_rewriter(e, sigma);
       return phi;
     }
@@ -161,7 +159,7 @@ namespace detail {
 
         pbes_expression result;
 
-        data::detail::legacy_rewriter::substitution_type sigma;
+        data::rewriter::substitution_type sigma;
         make_substitution(pbes_eqn.variable().parameters(), tr::param(psi),sigma);
         result = pbes_rewriter(expr,sigma);
 

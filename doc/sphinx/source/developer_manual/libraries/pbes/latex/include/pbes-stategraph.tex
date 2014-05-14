@@ -4,6 +4,10 @@
 
 \section{Stategraph}
 
+This section describes the implementation of the tool pbesstategraph.
+
+\subsection{Definitions}
+
 We denote the number of predicate variable instances occurring in a
 predicate formula $\varphi $ by $\mathrm{npred}(\varphi )$. We assume that
 predicate variable instances in $\varphi $ are assigned a unique natural
@@ -68,7 +72,8 @@ true &  & \text{otherwise}%
 \right.%
 \end{array}%
 \end{equation*}%
-We define the function $sig$ recursively as follows:%
+We define the function $sig$ for computing significant variables recursively
+as follows:%
 \begin{equation*}
 \begin{array}{lll}
 sig(b) & = & FV(b) \\ 
@@ -82,7 +87,7 @@ sig(\lnot \varphi ) & = & sig(\varphi )%
 \end{array}%
 \end{equation*}
 
-\subsection{The functions source, dest and copy}
+\subsubsection{The functions source, dest and copy}
 
 Let $X(d:D)=\varphi $ be a PBES equation. Let $\mathrm{source}$ be a
 function with the property that 
@@ -266,9 +271,9 @@ in this graph are the local control flow graphs. A local control flow graph
 is called \emph{invalid} if it contains two vertices $(X,i)$ and $(X,j)$
 with $i\neq j$. \newpage
 
-\subsection{Global control flow graph}
+\subsection{Global algorithm}
 
-\subsubsection{Notations}
+\subsubsection{Global control flow graph}
 
 In the following algorithm we use a projection that removes all parameters
 of a predicate variable that do not correspond to a control flow parameter.
@@ -294,28 +299,39 @@ $\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
 do}}$ \\ 
 $\qquad \qquad g:=R(guard^{i}(\varphi _{X}),[d_{X}:=e])$ \\ 
 $\qquad \qquad \text{\textbf{if }}g\neq false$ \\ 
-$\qquad \qquad \qquad Y(f):=\mathrm{PVI}(\varphi _{X},i)[d:=e]$ \\ 
+$\qquad \qquad \qquad Y(f):=\text{\textsc{PutDest}}(\mathrm{PVI}(\varphi
+_{X},i),X,i)$ \\ 
+$\qquad \qquad \qquad Y(f):=Y(f)[d:=e]$ \\ 
 $\qquad \qquad \qquad v:=Y(\widehat{f})$ \\ 
 $\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
 $\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
 $\qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
-$\qquad \qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
-$\qquad \qquad \qquad label(u,v):=i$ \\ 
+$\qquad \qquad \qquad E:=E\cup \{(u,i,v)\}$ \\ 
 $\text{\textbf{return} }(V,E)$%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+$\text{\textsc{PutDest}}$\textsc{(}$Y(e),X,i$\textsc{)} \\ 
+$e^{\prime }:=e$ \\ 
+\textbf{for }$j=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
+$\qquad \text{\textbf{if }}\mathrm{dest}(X,i,p)\neq \bot $ \textbf{then} \\ 
+$\qquad \qquad e^{\prime }[j]:=\mathrm{dest}(X,i,p)$ \\ 
+$\text{\textbf{return} }Y(e^{\prime })$%
 \end{tabular}%
 \end{equation*}
 
 \newpage
 
-\subsection{\protect\bigskip Control flow marking}
+\subsubsection{Global control flow marking}
 
 The following algorithm computes the function $marking$ that denotes which
 parameters are marked in a vertex of the control flow graph $(V,E)$.
 
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ComputeControlFlowMarking(}$\mathcal{E}$, $X_{init}(e_{init})$, $V$, 
-$E$\textsc{)} \\ 
+\textsc{ComputeMarkingGlobal(}$\mathcal{E}$, $X_{init}(e_{init})$, $V$, $E$%
+\textsc{)} \\ 
 \textbf{for} $u=X(e)\in V$ \textbf{do }$marking(u):=sig(u)\cap par(X)$ \\ 
 $todo:=V$ \\ 
 \textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
@@ -331,9 +347,7 @@ $\qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$%
 \end{tabular}%
 \end{equation*}
 
-\newpage
-
-\subsection{Reset variables}
+\subsubsection{Global reset variables}
 
 Let $\mathrm{PVI}(\varphi _{X},i)=Y(e)$ and let $V$ be the global control
 flow graph. Then we define
@@ -389,6 +403,12 @@ $\qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{Y},i)=Y\wedge
 \end{tabular}%
 \end{equation*}
 
+\newpage
+
+\subsection{Local algorithm}
+
+\subsubsection{Local control flow graph}
+
 \begin{equation*}
 \begin{tabular}{l}
 \textsc{ComputeLocalControlFlowGraph(}$U,C$\textsc{)} \\ 
@@ -443,6 +463,8 @@ E:=E\cup \{(u,i,v)\}%
 \end{equation*}%
 \newpage
 
+\subsubsection{Local belongs relation}
+
 Let $(V$, $\mathrm{\longrightarrow })$ be a local control flow graph, and $%
 \mathrm{rules}$ be a predicate defined as%
 \begin{equation*}
@@ -465,36 +487,9 @@ $\qquad \qquad \qquad \qquad belongs:=belongs\setminus \{m\}$ \\
 $\qquad B_{k}:=B_{k}\cup \{(X,d_{X}[m])\mid m\in belongs\}$ \\ 
 \textbf{return} $B_{k}$%
 \end{tabular}%
-\end{equation*}%
-\begin{equation*}
-\begin{tabular}{l}
-\textsc{ResetVariableLocal(}$i,$ $\sigma X(d_{X})=\varphi _{X},V_{1},\cdots
-,V_{J},B_{1},\cdots ,B_{J},\mathrm{rules}$\textsc{)} \\ 
-\textbf{let }$Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
-$e^{\prime }:=e$ \\ 
-\textbf{for} $k=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
-$\qquad $\textbf{if} $\mathrm{CFP}(Y,k)$ \textbf{then continue} \\ 
-$\qquad relevant:=true$ \\ 
-$\qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
-$\qquad \qquad $\textbf{if} $\mathrm{rules}(V_{j},X,i)$ \textbf{then} \\ 
-$\qquad \qquad \qquad $\textbf{let }$p,q$ be such that $(Y,p,q)\in V_{j}$ \\ 
-$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,p)\neq \bot $ \textbf{%
-then} \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $q^{\prime }=\mathrm{dest}(X,i,p)$
-\\ 
-$\qquad \qquad \qquad \qquad relevant:=relevant\wedge \left( \left(
-Y,d_{Y}[k]\right) \in B_{j}\Rightarrow d_{Y}[k]\in marking(Y,p,q^{\prime
-})\right) $ \\ 
-$\qquad \qquad \qquad $\textbf{else} \\ 
-$\qquad \qquad \qquad \qquad relevant:=relevant\wedge (\left(
-Y,d_{Y}[k]\right) \in B_{j}\Rightarrow \exists r:d_{Y}[k]\in marking(Y,p,r))$
-\\ 
-$\qquad $\textbf{if} $\lnot relevant$ \textbf{then} $e^{\prime
-}[k]:=default\_value(d_{Y}[k])$ \\ 
-\textbf{return }$Y(e^{\prime })$%
-\end{tabular}%
-\end{equation*}%
-\newpage
+\end{equation*}
+
+\subsubsection{Local control flow marking}
 
 Let $\left( V,E\right) $ be a local control flow graph, and $B$ the
 corresponding belongs relation.%
@@ -527,10 +522,6 @@ d_{X}[n]:=z\right] )\right) \cap \{d\mid (X,d)\in B\}\right) $ \\
 \textbf{return }$marking(u)\cup M$%
 \end{tabular}%
 \end{eqnarray*}
-
-\bigskip
-
-\newpage
 
 \begin{equation*}
 \begin{array}{l}
@@ -586,8 +577,8 @@ v=(Y,m,d_{Y}[m]=w)\in V_{k}$ \textbf{do} \\
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{if} $%
 \exists v^{\prime }=(X,m^{\prime },D_{X}[m^{\prime }])\in V_{k}$ \textbf{%
 such that} $(v^{\prime },i,v)\in E_{k}$ \textbf{then} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad m:=marking(u)
-$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+m:=marking(u) $ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=$
 \textsc{UpdateMarkingRule2(}$B_{j}$, $u$, $i$, $v$\textsc{)} \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \text{%
@@ -599,5 +590,45 @@ stableext:=false$ \\
 $\qquad stable:=stableint\wedge stableext$%
 \end{tabular}%
 \end{array}%
+\end{equation*}
+
+\newpage
+
+\subsubsection{Local reset variables}
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ResetVariableLocal(}$i,$ $\sigma X(d_{X})=\varphi _{X},V_{1},\cdots
+,V_{J},B_{1},\cdots ,B_{J},\mathrm{rules}$\textsc{)} \\ 
+\textbf{let }$Y(e)=\mathrm{PVI}(\varphi _{X},i)$ \\ 
+$e^{\prime }:=e$ \\ 
+\textbf{for} $k=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
+$\qquad $\textbf{if} $\mathrm{CFP}(Y,k)$ \textbf{then continue} \\ 
+$\qquad relevant:=true$ \\ 
+$\qquad condition:=\{\}$ \\ 
+$\qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
+$\qquad \qquad $\textbf{if} $\mathrm{rules}(V_{j},X,i)$ \textbf{then} \\ 
+$\qquad \qquad \qquad $\textbf{let }$p,q$ be such that $(Y,p,q)\in V_{j}$ \\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,p)\neq \bot $ \textbf{%
+then} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $q^{\prime }=\mathrm{dest}(X,i,p)$
+\\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge \left( \left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow d_{Y}[k]\in marking(Y,p,q^{\prime
+})\right) $ \\ 
+$\qquad \qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge (\left(
+Y,d_{Y}[k]\right) \in B_{j}\Rightarrow \exists r:d_{Y}[k]\in marking(Y,p,r))$
+\\ 
+$\qquad \qquad \qquad \qquad condition+=$ $[d_{Y}[p]=r\mid \left(
+Y,d_{Y}[k]\right) \in B_{j}\wedge (Y,p,r)\in V_{j}\wedge d_{Y}[k]\notin
+marking(Y,p,r)]$ \\ 
+$\qquad $\textbf{if} $\lnot relevant$ \textbf{then} \\ 
+$\qquad \qquad e^{\prime }[k]:=default\_value(d_{Y}[k])$ \\ 
+$\qquad $\textbf{else if} $condition\neq \{\}$ \textbf{then} \\ 
+$\qquad \qquad e^{\prime
+}[k]:=if(join\_or(condition),default\_value(d_{Y}[k]),e[k]))$ \\ 
+\textbf{return }$Y(e^{\prime })$%
+\end{tabular}%
 \end{equation*}%
-\newpage \newpage 
+\newpage

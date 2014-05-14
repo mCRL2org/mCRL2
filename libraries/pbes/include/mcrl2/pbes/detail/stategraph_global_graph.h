@@ -23,7 +23,6 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/rewrite.h"

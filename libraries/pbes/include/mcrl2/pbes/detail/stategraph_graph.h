@@ -132,6 +132,11 @@ class local_control_flow_graph_vertex: public control_flow_graph_vertex
       m_marking = marking;
     }
 
+    void extend_marking(const std::set<data::variable>& marking) const
+    {
+      m_marking.insert(marking.begin(), marking.end());
+    }
+
     const std::map<const local_control_flow_graph_vertex*, std::set<std::size_t> >& outgoing_edges() const
     {
       return m_outgoing_edges;

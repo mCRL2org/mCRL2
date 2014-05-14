@@ -18,7 +18,6 @@
 
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/atermpp/shared_subset.h"
@@ -35,7 +34,7 @@ class next_state_generator
     typedef std::list<data::data_expression_list> summand_enumeration_t;
     typedef atermpp::term_appl<data::data_expression> condition_arguments_t;
 
-    typedef data::detail::legacy_rewriter rewriter_t;
+    typedef data::rewriter rewriter_t;
     typedef data::classic_enumerator<rewriter_t> enumerator_t;
 
     typedef data::rewriter::substitution_type substitution_t;

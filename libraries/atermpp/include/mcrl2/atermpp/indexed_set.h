@@ -13,6 +13,7 @@
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
 #include <stack>
+#include <vector>
 #include "mcrl2/atermpp/aterm_list.h"
 
 namespace atermpp

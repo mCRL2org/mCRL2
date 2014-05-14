@@ -168,7 +168,7 @@ ParityGame::Strategy DecycleSolver::solve()
     {
         // Don't construct a subgame if it is identical to the input game:
         mCRL2log(mcrl2::log::verbose, "DecycleSolver") << "No suitable cycles found! Solving..." << std::endl;
-        std::auto_ptr<ParityGameSolver> subsolver(
+        std::unique_ptr<ParityGameSolver> subsolver(
             pgsf_.create(game_, vmap_, vmap_size_) );
         subsolver->solve().swap(strategy);
         return strategy;
@@ -193,7 +193,7 @@ ParityGame::Strategy DecycleSolver::solve()
 
     // Construct solver:
     std::vector<verti> submap;  // declared here so it survives subsolver
-    std::auto_ptr<ParityGameSolver> subsolver;
+    std::unique_ptr<ParityGameSolver> subsolver;
     if (vmap_size_ > 0)
     {
         // Need to create merged vertex map:

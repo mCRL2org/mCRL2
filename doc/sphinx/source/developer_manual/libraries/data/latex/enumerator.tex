@@ -1,0 +1,108 @@
+% concatenation: ++
+
+
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Monday, January 21, 2013 17:27:12}
+%TCIDATA{LastRevised=Tuesday, May 13, 2014 13:18:27}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\input{include/tcilatex}
+\providecommand{\concat}{\ensuremath{\hspace{0.12em}\raisebox{0.2ex}{\text{\scriptsize+}\!\text{\scriptsize+}}\hspace{0.12em}}}
+
+
+\begin{document}
+
+
+\section{Enumerator}
+
+This document specifies an algorithm for enumeration. Let $v$ be a list of
+variables, $\varphi ,\widehat{\varphi }$ expressions of type Bool and, $R$ a
+rewriter. For each sort $S$ a set of constructor functions $\mathrm{%
+constructors}(S)$ is defined. We assume that $\mathrm{constructors}(\mathrm{%
+sort}(d))\neq \emptyset $ for all $d\in v$. Note that the algorithm computes
+all solutions of the condition $\varphi $ that are not equal to $\widehat{%
+\varphi }$. Each solution corresponds with an assignment to the original
+variables $v$. The algorithm can be easily extended to compute this
+assignment.
+
+\bigskip 
+\[
+\begin{tabular}{l}
+\textsc{Enumerate(}$v,\varphi ,\widehat{\varphi },R$\textsc{)} \\ 
+$P:=[\left\langle v,\varphi \right\rangle ]$ \\ 
+$\Omega :=\emptyset $ \\ 
+\textbf{while} $P\neq \emptyset $ \textbf{do} \\ 
+\qquad \textbf{let} $\left\langle v,\varphi \right\rangle =\mathrm{head}(P)$
+\\ 
+\qquad $P:=\mathrm{tail}(P)$ \\ 
+\qquad \textbf{let} $v=[v_{1},\ldots ,v_{n}]$ \\ 
+\qquad $\text{\textbf{if }}R(\varphi )\neq \widehat{\varphi }\text{ \textbf{%
+then}}$ \\ 
+\qquad \qquad $\text{\textbf{if }}v=[]\text{ \textbf{then}}$ \\ 
+\qquad \qquad \qquad $\Omega :=\Omega \cup \left\{ R(\varphi )\right\} $ \\ 
+\qquad \qquad $\text{\textbf{else}}$ \\ 
+\qquad \qquad \qquad $\text{\textbf{if }}\mathrm{constructors}(\mathrm{sort}%
+(v_{1}))\neq \emptyset \text{ \textbf{then}}$ \\ 
+\qquad \qquad \qquad \qquad \textbf{for} $c\in $ $\mathrm{constructors}(%
+\mathrm{sort}(v_{1}))$ \textbf{do} \\ 
+\qquad \qquad \qquad \qquad \qquad \textbf{let} $c:D_{1}\times \ldots \times
+D_{m}\rightarrow \mathrm{sort}(v_{1})$ \\ 
+\qquad \qquad \qquad \qquad \qquad \textbf{choose }$y_{1},\ldots ,y_{m}$ 
+\textbf{such} that $y_{i}\notin \{v_{1},\ldots ,v_{n}\}\cup FV(\varphi )$,
+for $i=1,\cdots ,m$ \\ 
+\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
+[v_{2},\ldots ,v_{n},y_{1},\ldots ,y_{m}],R(\varphi )[v_{1}:=c(y_{1},\ldots
+,y_{m})]\right\rangle ]$ \\ 
+\qquad \qquad \qquad $\text{\textbf{else if }}\mathrm{sort}(x_{1})=Set(E)$
+with $E$ finite$\text{ \textbf{then}}$ \\ 
+\qquad \qquad \qquad \qquad \textbf{for} $e\in \mathrm{subsets}(E)$ \textbf{%
+do} \\ 
+\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
+[v_{2},\ldots ,v_{n}],R(\varphi )[v_{1}:=e]\right\rangle ]$ \\ 
+\qquad \qquad \qquad $\text{\textbf{else if }}\mathrm{sort}%
+(v_{1})=D_{1}\times \ldots \times D_{m}\rightarrow D\text{ \textbf{then}}$
+\\ 
+\qquad \qquad \qquad \qquad \textbf{for} $f\in \mathrm{functions}(\mathrm{%
+sort}(v_{1}))$ \textbf{do} \\ 
+\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
+[v_{2},\ldots ,v_{n}],R(\varphi )[v_{1}:=f]\right\rangle ]$ \\ 
+\qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
+\qquad \qquad \qquad \qquad $\text{\textbf{error}}$ \\ 
+$\text{\textbf{return}}$ $\Omega $%
+\end{tabular}%
+\]%
+where $\epsilon $ is the empty substitution.
+
+\end{document}

@@ -47,14 +47,6 @@ struct sort_expression_actions: public core::default_parser_actions
 
   data::sort_expression parse_SortExpr(const core::parse_node& node)
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "SimpleSortExpr")) { return parse_SimpleSortExpr(node.child(0)); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "HashArgs") && (symbol_name(node.child(2)) == "SortExpr")) { return function_sort(parse_SimpleSortExprList(node.child(0)), parse_SortExpr(node.child(2))); }
-    report_unexpected_node(node);
-    return data::sort_expression();
-  }
-
-  data::sort_expression parse_SimpleSortExpr(const core::parse_node& node)
-  {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Bool")) { return sort_bool::bool_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Pos")) { return sort_pos::pos(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Nat")) { return sort_nat::nat(); }
@@ -68,18 +60,14 @@ struct sort_expression_actions: public core::default_parser_actions
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return basic_sort(parse_Id(node.child(0))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "SortExpr") && (symbol_name(node.child(2)) == ")")) { return parse_SortExpr(node.child(1)); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "struct") && (symbol_name(node.child(1)) == "ConstrDeclList")) { return structured_sort(parse_ConstrDeclList(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortProduct") && (node.child(1).string() == "->") && (symbol_name(node.child(2)) == "SortExpr")) { return function_sort(parse_SortProduct(node.child(0)), parse_SortExpr(node.child(2))); }
     report_unexpected_node(node);
     return data::sort_expression();
   }
 
-  data::sort_expression_list parse_SortExprList(const core::parse_node& node)
+  data::sort_expression_list parse_SortProduct(const core::parse_node& node)
   {
     return parse_list<data::sort_expression>(node, "SortExpr", boost::bind(&sort_expression_actions::parse_SortExpr, this, _1));
-  }
-
-  data::sort_expression_list parse_SimpleSortExprList(const core::parse_node& node)
-  {
-    return parse_list<data::sort_expression>(node, "SimpleSortExpr", boost::bind(&sort_expression_actions::parse_SimpleSortExpr, this, _1));
   }
 
   data::structured_sort_constructor parse_ConstrDecl(const core::parse_node& node)

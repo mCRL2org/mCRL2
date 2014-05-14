@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_LPS2PBES_RHS_H
 
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/traverser.h"

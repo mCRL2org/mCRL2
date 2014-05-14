@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstring>
 #include <cassert>
+#include <vector>
 
 // Maximal arity for which we generate functions for every combination of
 // arguments that are in normal form or not. The value of 4 is chosen because a function

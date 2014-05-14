@@ -17,7 +17,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "boost/shared_ptr.hpp"
 #include "boost/type_traits/add_reference.hpp"
 
 #include "mcrl2/utilities/exception.h"
@@ -27,6 +26,7 @@
 #include "mcrl2/data/detail/data_expression_with_variables_traits.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 namespace mcrl2
 {
@@ -41,11 +41,11 @@ class basic_rewriter
 {
   public:
     /// \brief The type for the substitution that is used internally.
-    typedef detail::Rewriter::substitution_type substitution_type;
+    typedef data::mutable_indexed_substitution<> substitution_type;
 
   protected:
     /// \brief The wrapped Rewriter.
-    boost::shared_ptr<detail::Rewriter> m_rewriter;
+    std::shared_ptr<detail::Rewriter> m_rewriter;
 
   public:
 
@@ -58,11 +58,21 @@ class basic_rewriter
     /// \brief The rewrite strategies of the rewriter.
     typedef rewrite_strategy strategy;
 
+    /// \brief The rewriter needs to find fresh names for
+    //         variables. This name generator can be used
+    //         for other renaming purposes as well.
+    //  \deprecated Do not use this, as it will be removed.
+    data::set_identifier_generator& identifier_generator()
+    {
+      return m_rewriter->identifier_generator();
+    }
+
+
   protected:
 
     /// \brief Constructor.
     /// \param[in] r A rewriter
-    basic_rewriter(const boost::shared_ptr<detail::Rewriter> & r) :
+    basic_rewriter(const std::shared_ptr<detail::Rewriter> & r) :
       m_rewriter(r)
     {}
 
@@ -127,7 +137,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     basic_rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
       basic_rewriter< atermpp::aterm >(d,selector,s)
     { }
-}; 
+};
 
 /// \brief Rewriter that operates on data expressions.
 //
@@ -212,14 +222,14 @@ class rewriter: public basic_rewriter<data_expression>
 #endif
       return result;
     }
-    
+
     /// \brief Rewrites the data expression d, and on the fly applies a substitution function
     /// to data variables.
     /// \param[in] d A data expression
     /// \param[in] sigma A substitution function
     /// \return The normal form of the term.
     //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
-    //  an arbitrary SubstitionFunction, as this is prohibitively costly. 
+    //  an arbitrary SubstitionFunction, as this is prohibitively costly.
 
     data_expression operator()(const data_expression& d, substitution_type& sigma) const
     {
@@ -228,7 +238,7 @@ class rewriter: public basic_rewriter<data_expression>
       data_expression result(m_rewriter->rewrite(d,sigma));
       mCRL2log(log::debug) << " ------------> " << result << std::endl;
       return result;
-#else 
+#else
       return m_rewriter->rewrite(d,sigma);
 #endif
     }
@@ -238,7 +248,7 @@ class rewriter: public basic_rewriter<data_expression>
     /// \param[in] sigma A substitution function
     /// \return The normal form of the term.
     //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
-    //  an arbitrary SubstitionFunction, as this is prohibitively costly. 
+    //  an arbitrary SubstitionFunction, as this is prohibitively costly.
 
     data_expression operator()(const data_expression& d, const substitution_type& sigma) const
     {
@@ -248,7 +258,7 @@ class rewriter: public basic_rewriter<data_expression>
       data_expression result(m_rewriter->rewrite(d,sigma1));
       mCRL2log(log::debug) << " ------------> " << result << std::endl;
       return result;
-#else 
+#else
       return m_rewriter->rewrite(d,sigma1);
 #endif
     }

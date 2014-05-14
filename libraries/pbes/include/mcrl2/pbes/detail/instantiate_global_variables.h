@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 

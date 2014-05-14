@@ -45,6 +45,8 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat;
     @swap_zero_add <"swap_zero_add">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat;
     @swap_zero_min <"swap_zero_min">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat;
     @swap_zero_monus <"swap_zero_monus">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat;
+    sqrt <"sqrt">:Nat <"arg"> -> Nat;
+    @sqrt_nat <"sqrt_nat_aux_func">:Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> Nat;
 
 % functions for natpair
     @first <"first"> : @NatPair <"arg"> -> Nat;
@@ -143,6 +145,13 @@ eqn ==(@c0, @cNat(p)) = false;
     @swap_zero_monus(@c0, @cNat(p), @c0, n) = @c0;
     @swap_zero_monus(@c0, @cNat(p), @cNat(q), n) = @monus(@cNat(q), @swap_zero(@cNat(p), n));
     @swap_zero_monus(@cNat(p), @cNat(q), m, n) = @swap_zero(@monus(@cNat(p),@cNat(q)),@monus(@swap_zero(@cNat(p),m), @swap_zero(@cNat(q),n)));
+    sqrt(@c0) = @c0;
+    sqrt(@cNat(p)) = @sqrt_nat(@cNat(p),@c0,@powerlog2(p));
+    @sqrt_nat(n,m,@c1) = if(<=(n,m),@c0,@cNat(@c1));
+    @sqrt_nat(n,m,@cDub(b,p)) =
+              if(>(*(+(@cNat(@cDub(b,p)),m),@cNat(@cDub(b,p))),n),
+                   @sqrt_nat(n,m,p),
+                   +(@cNat(@cDub(b,p)),@sqrt_nat(@monus(n,*(+(@cNat(@cDub(b,p)),m),@cNat(@cDub(b,p)))),+(m,@cNat(@cDub(false,@cDub(b,p)))),p)));
 
 % equations for natpair
     ==(@cPair(m,n), @cPair(u,v)) = &&(==(m,u),==(n,v));

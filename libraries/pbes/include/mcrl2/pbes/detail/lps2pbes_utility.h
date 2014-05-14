@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_LPS2PBES_UTILITY_H
 #define MCRL2_PBES_DETAIL_LPS2PBES_UTILITY_H
 
-#include "mcrl2/data/substitutions.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/pbes.h"

@@ -206,7 +206,7 @@ std::string x17 = "binding_variables = X1, X(s3_X: Pos)";
 
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
-  typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
+  typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
 
   pbes p = txt2pbes(pbes_spec);
   pbes q = p;
@@ -249,6 +249,8 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
 
 int test_main(int argc, char** argv)
 {
+  log::mcrl2_logger::set_reporting_level(log::debug);
+
   test_pbes(t1 , x1 , false);
   test_pbes(t2 , x2 , false);
   test_pbes(t3 , x3 , false);

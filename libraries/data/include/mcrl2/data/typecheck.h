@@ -180,6 +180,7 @@ class data_type_checker:public sort_type_checker
     sort_expression determine_allowed_type(const data_expression &d, const sort_expression &proposed_type);
     bool MatchIf(const function_sort &type, sort_expression &result);
     bool MatchEqNeqComparison(const function_sort &type, sort_expression &result);
+    bool MatchSqrt(const function_sort &type, sort_expression &result);
     bool MatchListOpCons(const function_sort &type, sort_expression &result);
     bool MatchListOpSnoc(const function_sort &type, sort_expression &result);
     bool MatchListOpConcat(const function_sort &type, sort_expression &result);

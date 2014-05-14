@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
+#include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/sequence.h"
 
@@ -117,6 +118,9 @@ class stategraph_algorithm
     // en de tweede als "detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)".
     bool m_use_alternative_gcfp_consistency;
 
+    // TODO: remove the three booleans above, since they are also present in m_options
+    pbesstategraph_options m_options;
+
     // the local control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_LCFP;
 
@@ -141,13 +145,40 @@ class stategraph_algorithm
       return data::find_free_variables(x);
     }
 
+    void start_timer(const std::string& msg) const
+    {
+      if (m_options.timing_enabled())
+      {
+        m_options.timer->start(msg);
+      }
+    }
+
+    void finish_timer(const std::string& msg) const
+    {
+      if (m_options.timing_enabled())
+      {
+        m_options.timer->finish(msg);
+      }
+    }
+
   public:
     void compute_control_flow_parameters()
     {
+      start_timer("compute_local_control_flow_parameters");
       compute_local_control_flow_parameters();
+      finish_timer("compute_local_control_flow_parameters");
+
+      start_timer("compute_global_control_flow_parameters");
       compute_global_control_flow_parameters();
+      finish_timer("compute_global_control_flow_parameters");
+
+      start_timer("compute_related_global_control_flow_parameters");
       compute_related_global_control_flow_parameters();
+      finish_timer("compute_related_global_control_flow_parameters");
+
+      start_timer("compute_connected_components");
       compute_connected_components();
+      finish_timer("compute_connected_components");
     }
 
     template <typename T>
@@ -368,7 +399,7 @@ class stategraph_algorithm
       }
       while (changed);
 
-      mCRL2log(log::verbose, "stategraph") << print_GCFP();
+      mCRL2log(log::debug, "stategraph") << print_GCFP();
     }
 
     bool is_local_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
@@ -656,7 +687,7 @@ class stategraph_algorithm
       print_connected_components();
     }
 
-    const std::vector<bool>& stategraph_values(const core::identifier_string& X) const
+    const std::vector<bool>& is_GCFP(const core::identifier_string& X) const
     {
       std::map<core::identifier_string, std::vector<bool> >::const_iterator i = m_is_GCFP.find(X);
       assert (i != m_is_GCFP.end());
@@ -667,7 +698,7 @@ class stategraph_algorithm
     std::set<data::variable> control_flow_parameters(const core::identifier_string& X) const
     {
       std::set<data::variable> result;
-      const std::vector<bool>& b = stategraph_values(X);
+      const std::vector<bool>& b = is_GCFP(X);
       auto const& eq_X = *find_equation(m_pbes, X);
       auto const& d_X = eq_X.parameters();
       std::size_t index = 0;
@@ -732,10 +763,10 @@ class stategraph_algorithm
     }
 
     // prints all vertices of the connected components
-    void print_local_control_flow_parameters() const
+    void print_final_control_flow_parameters() const
     {
       std::ostringstream out;
-      mCRL2log(log::debug, "stategraph") << "--- computed local control flow parameters ---" << std::endl;
+      mCRL2log(log::verbose, "stategraph") << "--- computed control flow parameters ---" << std::endl;
 
       // collect the control flow points in the map CFP
       std::map<core::identifier_string, std::set<const global_control_flow_graph_vertex*> > CFP;
@@ -768,69 +799,15 @@ class stategraph_algorithm
           out << **j;
         }
       }
-      mCRL2log(log::debug, "stategraph") << out.str() << std::endl;
+      mCRL2log(log::verbose, "stategraph") << out.str() << std::endl;
     }
 
-    // returns the parameters of the propositional variable with name X
-    std::set<data::variable> propvar_parameters(const core::identifier_string& X) const
-    {
-      auto const& eq_X = *find_equation(m_pbes, X);
-      auto const& d_X = eq_X.parameters();
-      return std::set<data::variable>(d_X.begin(), d_X.end());
-    }
-
-    // removes parameter values that do not correspond to a control flow parameter
-    propositional_variable_instantiation project(const propositional_variable_instantiation& x) const
-    {
-      auto const& X = x.name();
-      auto const& d_X = x.parameters();
-      const std::vector<bool>& b = stategraph_values(X);
-      std::size_t index = 0;
-      std::vector<data::data_expression> d;
-      for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
-      {
-        assert(index < b.size());
-        if (b[index])
-        {
-          d.push_back(*i);
-        }
-      }
-      return propositional_variable_instantiation(X, data::data_expression_list(d.begin(), d.end()));
-    }
-
-    // removes parameter values that do not correspond to a control flow parameter
-    propositional_variable project_variable(const propositional_variable& x) const
-    {
-      auto const& X = x.name();
-      auto const& d_X = x.parameters();
-      const std::vector<bool>& b = stategraph_values(X);
-      std::size_t index = 0;
-      std::vector<data::variable> d;
-      for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
-      {
-        if (b[index])
-        {
-          d.push_back(*i);
-        }
-      }
-      return propositional_variable(X, data::variable_list(d.begin(), d.end()));
-    }
-
-    template <typename Substitution>
-    propositional_variable_instantiation apply_substitution(const propositional_variable_instantiation& X, Substitution sigma) const
-    {
-      return propositional_variable_instantiation(X.name(), data::replace_free_variables(X.parameters(), sigma));
-    }
-
-    stategraph_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
-                         bool use_alternative_lcfp_criterion = false,
-                         bool use_alternative_gcfp_relation = false,
-                         bool use_alternative_gcfp_consistency = false
-                        )
-      : m_datar(p.data(), rewrite_strategy),
-        m_use_alternative_lcfp_criterion(use_alternative_lcfp_criterion),
-        m_use_alternative_gcfp_relation(use_alternative_gcfp_relation),
-        m_use_alternative_gcfp_consistency(use_alternative_gcfp_consistency)
+    stategraph_algorithm(const pbes& p, const pbesstategraph_options& options)
+      : m_datar(p.data(), options.rewrite_strategy),
+        m_use_alternative_lcfp_criterion(options.use_alternative_lcfp_criterion),
+        m_use_alternative_gcfp_relation(options.use_alternative_gcfp_relation),
+        m_use_alternative_gcfp_consistency(options.use_alternative_gcfp_consistency),
+        m_options(options)
     {
       m_pbes = stategraph_pbes(p);
     }
@@ -945,164 +922,6 @@ class stategraph_algorithm
       throw mcrl2::runtime_error("error in compute_values: vertex not found");
     }
 
-    void compute_local_control_flow_graph(const std::set<local_control_flow_graph_vertex>& U, const std::map<core::identifier_string, std::size_t>& component_index)
-    {
-      using utilities::detail::pick_element;
-
-      mCRL2log(log::debug, "stategraph") << "--- compute_local_control_flow_graph for vertices " << core::detail::print_set(U) << std::endl;
-      local_control_flow_graph V;
-      std::set<const local_control_flow_graph_vertex*> todo;
-
-      for (auto i = U.begin(); i != U.end(); ++i)
-      {
-        auto k = V.insert(*i);
-        todo.insert(&(*k.first));
-      }
-
-      while (!todo.empty())
-      {
-        // u = (X, k, d = e)
-        auto const& u = *pick_element(todo);
-        auto const& X = u.name();
-        const data::variable& d = u.variable();
-        const data::data_expression& e = u.value();
-        mCRL2log(log::debug1, "stategraph") << "choose todo element (X, k, d=e) = " << u << std::endl;
-        std::size_t k = u.index();
-        auto const& eq_X = *find_equation(m_pbes, X);
-        auto const& predvars = eq_X.predicate_variables();
-
-        for (auto i = predvars.begin(); i != predvars.end(); ++i)
-        {
-          std::size_t edge_label = i - predvars.begin();
-          auto const& Y = i->name();
-          auto q = component_index.find(Y);
-
-          if (d == data::undefined_variable())
-          {
-            // case 1: (X, ?, ?=?) -> (Y, k', d'=e')
-            mCRL2log(log::debug1, "stategraph") << "case 1" << std::endl;
-            if (q != component_index.end()) // (Y, k1) in C
-            {
-              std::size_t k1 = q->second;
-              auto e1 = mapped_value(i->dest(), k1, data::undefined_data_expression());
-              if (e1 != data::undefined_data_expression())
-              {
-                // dest(X, i, k') = e'
-                mCRL2log(log::debug1, "stategraph") << "case 1: (X, e) -> (Y, d', e') ; dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
-                V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
-              }
-            }
-            // case 2: (X, ?, ?=?) -> (Y, ?, ?=?)
-            else
-            {
-              if (X != Y)
-              {
-                mCRL2log(log::debug1, "stategraph") << "case 2: (X, ?) -> (Y, ?)" << std::endl;
-                V.insert_edge(todo, m_pbes, u, Y, data::undefined_index(), data::undefined_data_expression(), edge_label);
-              }
-            }
-          }
-          else
-          {
-            // case 3: (X, d, e) -> (Y, d', e')
-            if (q != component_index.end()) // (Y, k') in C
-            {
-              std::size_t k1 = q->second;
-              if (is_mapped_to(i->source(), k, e))
-              {
-                // source(X, i, k) = e && dest(X, i, k') = e'
-                auto e1 = mapped_value(i->dest(), k1, data::undefined_data_expression());
-                mCRL2log(log::debug1, "stategraph") << "case 3a: (X, d, e) -> (Y, d', e') ; source(X, i, k) = e && dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
-                if (e1 != data::undefined_data_expression())
-                {
-                  V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
-                }
-              }
-              else if (Y != X && is_undefined(i->source(), k))
-              {
-                // Y != X && undefined(source(X, i, k)) && dest(X, i, k') = e'
-                auto e1 = mapped_value(i->dest(), k1, data::undefined_data_expression());
-                if (e1 != data::undefined_data_expression())
-                {
-                  mCRL2log(log::debug1, "stategraph") << "case 3b: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
-                  V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
-                }
-
-                // Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k'
-                if (mapped_value(i->copy(), k, data::undefined_index()) == k1)
-                {
-                  mCRL2log(log::debug1, "stategraph") << "case 3c: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k' ; k' = " << print_index(k1) << std::endl;
-                  V.insert_edge(todo, m_pbes, u, Y, k1, e, edge_label);
-                }
-              }
-            }
-            // case 4: (X, d, e) -> (Y, ?)
-            else
-            {
-              auto e1 = mapped_value(i->source(), k, data::undefined_data_expression());
-              if (e1 == e || e1 == data::undefined_data_expression())
-              {
-                std::size_t k1 = data::undefined_index();
-                mCRL2log(log::debug1, "stategraph") << "case 4: (X, d, e) -> (Y, ?)" << std::endl;
-                V.insert_edge(todo, m_pbes, u, Y, k1, data::undefined_data_expression(), edge_label);
-              }
-            }
-          }
-        }
-      }
-      // V.self_check();
-      m_local_control_flow_graphs.push_back(V);
-      m_local_control_flow_graphs.back().compute_index();
-    }
-
-    void compute_local_control_flow_graph(const local_control_flow_graph_vertex& u, const std::map<core::identifier_string, std::size_t>& component_index)
-    {
-      std::set<local_control_flow_graph_vertex> U;
-      U.insert(u);
-      compute_local_control_flow_graph(U, component_index);
-    }
-
-    // Computes a local control flow graph that corresponds to the given component in m_global_control_flow_graph_vertices.
-    void compute_local_control_flow_graph(const std::set<std::size_t>& component, const std::set<data::data_expression>& component_values)
-    {
-      mCRL2log(log::debug, "stategraph") << "Compute local control flow graphs for component " << print_connected_component(component) << std::endl;
-
-      // preprocessing
-      std::map<core::identifier_string, std::size_t> component_index;
-      for (auto p = component.begin(); p != component.end(); ++p)
-      {
-        const global_control_flow_graph_vertex& w = m_global_control_flow_graph_vertices[*p];
-        component_index[w.name()] = w.index();
-      }
-
-      std::set<local_control_flow_graph_vertex> U;
-      for (auto p = component.begin(); p != component.end(); ++p)
-      {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
-        for (auto q = component_values.begin(); q != component_values.end(); ++q)
-        {
-          U.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), *q));
-        }
-      }
-      compute_local_control_flow_graph(U, component_index);
-    }
-
-    void print_local_control_flow_graphs() const
-    {
-      for (auto i = m_local_control_flow_graphs.begin(); i != m_local_control_flow_graphs.end(); ++i)
-      {
-        mCRL2log(log::debug, "stategraph") << "--- computed local control flow graph " << (i - m_local_control_flow_graphs.begin()) << "\n" << *i << std::endl;
-      }
-    }
-
-    void compute_local_control_flow_graphs()
-    {
-      for (std::size_t i = 0; i < m_connected_components.size(); i++)
-      {
-        compute_local_control_flow_graph(m_connected_components[i], m_connected_components_values[i]);
-      }
-    }
-
     /// \brief Computes the control flow graph
     void run()
     {
@@ -1112,10 +931,11 @@ class stategraph_algorithm
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
-      print_local_control_flow_parameters();
+      print_final_control_flow_parameters();
+
+      start_timer("compute_connected_component_values");
       compute_connected_component_values();
-      compute_local_control_flow_graphs();
-      print_local_control_flow_graphs();
+      finish_timer("compute_connected_component_values");
     }
 
     const stategraph_pbes& get_pbes() const

@@ -140,7 +140,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -298,7 +297,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -455,7 +453,6 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -615,7 +612,6 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -775,7 +771,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -918,7 +913,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::regular_formula result;
     if (action_formulas::is_action_formula(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
@@ -1008,7 +1002,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::regular_formula result;
     if (action_formulas::is_action_formula(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
@@ -1098,7 +1091,6 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
   void operator()(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::regular_formula result;
     if (action_formulas::is_action_formula(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
@@ -1188,7 +1180,6 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::regular_formula result;
     if (action_formulas::is_action_formula(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
@@ -1278,7 +1269,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    regular_formulas::regular_formula result;
     if (action_formulas::is_action_formula(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
@@ -1481,7 +1471,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -1708,7 +1697,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -1931,7 +1919,6 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
   void operator()(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -2160,7 +2147,6 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -2383,7 +2369,6 @@ struct add_traverser_state_variables: public Traverser<Derived>
   void operator()(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -2615,7 +2600,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
@@ -2840,7 +2824,6 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
   void operator()(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result;
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));

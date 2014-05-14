@@ -66,6 +66,8 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
 
   pbes_expression normalize(const pbes_expression& x)
   {
+    typedef core::term_traits<pbes_expression> tr;
+
     if (is_and(x))
     {
       std::multiset<pbes_expression> s = split_and(x);
@@ -82,7 +84,7 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   // to prevent default operator() being called
   data::data_expression operator()(const data::data_expression& x)
   {
-  	return x;
+    return x;
   }
 
   pbes_expression operator()(const pbes_expression& x)

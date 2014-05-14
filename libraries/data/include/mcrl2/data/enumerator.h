@@ -14,12 +14,12 @@
 
 #include <functional>
 #include <utility>
-#include <boost/shared_ptr.hpp>
 #include "mcrl2/utilities/sequence.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 

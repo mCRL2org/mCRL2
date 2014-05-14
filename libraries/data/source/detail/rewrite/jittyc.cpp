@@ -35,7 +35,9 @@
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/traverser.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -223,11 +225,11 @@ static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_c
 
   assert(is_application(t));
   const application ta(t);
-  size_t arity = ta.size(); 
+  size_t arity = ta.size();
 
   if (!ommit_head)
   {
-    s.push_front(match_tree_F(function_symbol(ta.head()),dummy,dummy)); 
+    s.push_front(match_tree_F(function_symbol(ta.head()),dummy,dummy));
   }
 
   size_t j=1;
@@ -239,7 +241,7 @@ static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_c
       s.push_front(match_tree_N(dummy,0));
     }
   }
-  
+
   if (!ommit_head)
   {
     s.push_front(match_tree_D(dummy,0));
@@ -265,10 +267,10 @@ static match_tree_list create_sequence(const data_equation& rule, size_t* var_cn
     size_t lhs_arity = lhs_innera.size();
 
     if (is_application(lhs_innera.head()))
-    { 
+    {
       term2seq(lhs_innera.head(),rseq,var_cnt,true);
       rseq.push_front(match_tree_N(dummy,0));
-    } 
+    }
 
     size_t j=1;
     for (application::const_iterator i=lhs_innera.begin(); i!=lhs_innera.end(); ++i,++j)
@@ -309,9 +311,9 @@ typedef struct
 static void initialise_build_pars(build_pars* p)
 {
   p->Flist = match_tree_list_list();
-  p->Slist = match_tree_list_list(); 
+  p->Slist = match_tree_list_list();
   p->Mlist = match_tree_list_list();
-  p->stack = make_list<match_tree_list_list>(match_tree_list_list());    
+  p->stack = make_list<match_tree_list_list>(match_tree_list_list());
   p->upstack = match_tree_list_list();
 }
 
@@ -392,10 +394,10 @@ static variable createFreshVar(const sort_expression& sort, size_t* i)
   return data::variable(tree_var_str, atermpp::aterm_cast<const sort_expression>(sort));
 }
 
-static match_tree_list subst_var(const match_tree_list& l, 
-                                 const variable& old, 
-                                 const variable& new_val, 
-                                 const size_t num, 
+static match_tree_list subst_var(const match_tree_list& l,
+                                 const variable& old,
+                                 const variable& new_val,
+                                 const size_t num,
                                  const mutable_map_substitution<>& substs)
 {
   match_tree_vector result;
@@ -497,7 +499,7 @@ static match_tree build_tree(build_pars pars, size_t i)
       mutable_map_substitution<> sigma;
       sigma[match_tree_S(e.front()).target_variable()]=v;
       e = subst_var(e,
-                    match_tree_S(e.front()).target_variable(), 
+                    match_tree_S(e.front()).target_variable(),
                     v,
                     k,
                     sigma);
@@ -519,14 +521,14 @@ static match_tree build_tree(build_pars pars, size_t i)
       {
         match_tree_CRe t(*i);
         inc_usedcnt(t.variables_condition());
-        inc_usedcnt(t.variables_result()); 
+        inc_usedcnt(t.variables_result());
         tree = match_tree_C(t.condition(),match_tree_R(t.result()),tree);
       }
       ret = tree;
     }
     else
     {
-      
+
       inc_usedcnt(r.variables());
       ret = match_tree_R(r.result());
     }
@@ -805,7 +807,7 @@ static variable_list get_doubles(const data_expression& t)
 static variable_list dep_vars(const data_equation& eqn)
 {
   size_t rule_arity=recursive_number_of_args(eqn.lhs());
-  
+
   std::vector < bool > bs(rule_arity);
 
   const data_expression& lhs_internal = eqn.lhs();
@@ -985,7 +987,7 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
   {
     return false; // This is not an allowed arity, or the actual number of arguments is larger than the requested number.
   }
-  
+
   e=data_equation(vars,e.condition(),lhs,rhs);
   return true;
 }
@@ -998,7 +1000,7 @@ data_equation_list RewriterCompilingJitty::lift_rewrite_rules_to_right_arity(con
   {
     data_equation e=*i;
     if (lift_rewrite_rule_to_right_arity(e,arity))
-    { 
+    {
       result.push_back(e);
     }
   }
@@ -1046,7 +1048,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(
     // Check all arguments
     for (size_t i = 0; i < rule_arity; i++)
     {
-      if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i)))  
+      if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i)))
       {
         // Argument is not a variable, so it needs to be rewritten
         bs[i] = true;
@@ -1229,8 +1231,8 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
 }
 
 void RewriterCompilingJitty::calc_nfs_list(
-                nfs_array& nfs, 
-                const application& appl, 
+                nfs_array& nfs,
+                const application& appl,
                 variable_or_number_list nnfvars)
 {
   for(size_t i=0; i<recursive_number_of_args(appl); ++i)
@@ -1256,10 +1258,10 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_numb
     // term is a normal form. An expression with an exists/forall is never a normal form.
     const abstraction& ta(t);
     if (is_lambda_binder(ta.binding_operator()))
-    {  
+    {
       return calc_nfs(ta.body(),nnfvars);
     }
-    return false; 
+    return false;
   }
   else if (is_where_clause(t))
   {
@@ -1269,10 +1271,10 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_numb
 
   // t has the shape application(head,t1,...,tn)
   const application ta(t);
-  const size_t arity = recursive_number_of_args(ta);       
+  const size_t arity = recursive_number_of_args(ta);
   const data_expression& head=ta.head();
   function_symbol dummy;
-  if (head_is_function_symbol(head,dummy))    
+  if (head_is_function_symbol(head,dummy))
   {
     assert(arity!=0);
     if (opid_is_nf(aterm_cast<function_symbol>(head),arity))
@@ -1294,26 +1296,26 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_numb
 }
 
 string RewriterCompilingJitty::calc_inner_terms(
-              nfs_array& nfs, 
-              const application& appl, 
-              const size_t startarg, 
-              variable_or_number_list nnfvars, 
+              nfs_array& nfs,
+              const application& appl,
+              const size_t startarg,
+              variable_or_number_list nnfvars,
               const nfs_array& rewr)
 {
   size_t j=0;
   string result="";
   for(application::const_iterator i=appl.begin(); i!=appl.end(); ++i, ++j)
   {
-    pair<bool,string> head = calc_inner_term(*i, startarg+j,nnfvars,rewr.get(j)); 
+    pair<bool,string> head = calc_inner_term(*i, startarg+j,nnfvars,rewr.get(j));
     nfs.set(j,head.first);
 
     result=result + (j==0?"":",") + head.second;
   }
-  return result; 
+  return result;
 }
 
 // arity is one if there is a single head. Arity is two is there is a head and one argument, etc.
-static string calc_inner_appl_head(size_t arity) 
+static string calc_inner_appl_head(size_t arity)
 {
   stringstream ss;
   if (arity == 1)
@@ -1334,8 +1336,8 @@ static string calc_inner_appl_head(size_t arity)
 static std::map<data_expression,size_t> protected_data_expressions;
 std::vector <data_expression> prepared_normal_forms;
 
-/// This function generates a string of C++ code to calculate the data_expression t. 
-/// If the result is a normal form the resulting boolean is true, otherwise it is false. 
+/// This function generates a string of C++ code to calculate the data_expression t.
+/// If the result is a normal form the resulting boolean is true, otherwise it is false.
 /// The data expression t is the term for which C code is generated.
 /// The size_t start_arg gives the index of the position of the current term in the surrounding application.
 //                 The head has index 0. The first argument has index 1, etc.
@@ -1352,13 +1354,13 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   // Experiment: if the term has no free variables, deliver the normal form directly.
   // This code can be removed, when it does not turn out to be useful.
   // This requires the use of the jitty rewriter to calculate normal forms.
-  
+
   if (find_free_variables(t).empty())
   {
     // Returning a value is better than an index in an array.
     substitution_type sigma;
     const data_expression t_normal_form=jitty_rewriter.rewrite(t,sigma);
-    
+
     size_t index;
     if (protected_data_expressions.count(t_normal_form)>0)
     {
@@ -1374,7 +1376,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
     ss << "prepared_normal_forms[" << index << "]";
     return pair<bool,string>(true,ss.str());
-  } 
+  }
 
   if (is_function_symbol(t))
   {
@@ -1609,7 +1611,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
             {
               partially_rewritten_functions.insert(f);
             }
-            
+
             ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
           }
         }
@@ -1823,7 +1825,7 @@ void RewriterCompilingJitty::implement_tree_aux(
       size_t cnt,
       size_t d,
       const size_t arity,
-      const std::vector<bool>& used, 
+      const std::vector<bool>& used,
       variable_or_number_list nnfvars)
 // Print code representing tree to f.
 //
@@ -1908,7 +1910,7 @@ void RewriterCompilingJitty::implement_tree_aux(
     const match_tree_F& treeF(tree);
     if (level == 0)
     {
-      if (!is_function_sort(treeF.function().sort())) 
+      if (!is_function_sort(treeF.function().sort()))
       {
       fprintf(f,"%sif (atermpp::detail::address(arg%lu)==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F1\n"
               "%s{\n",
@@ -2110,7 +2112,7 @@ static std::string finish_function_return_term(const size_t arity,
   assert(arity>0);
   const sort_expression_list arg_sorts=function_sort(s).domain();
   const sort_expression& target_sort=function_sort(s).codomain();
-  
+
   if (arg_sorts.size() > 5)
   {
     ss << "make_term_with_many_arguments(" << head;
@@ -2119,7 +2121,7 @@ static std::string finish_function_return_term(const size_t arity,
   {
     ss << "application(" << head;
   }
-  
+
   for (size_t i=0; i<arg_sorts.size(); i++)
   {
     if (used[i+used_arguments])
@@ -2133,7 +2135,7 @@ static std::string finish_function_return_term(const size_t arity,
   }
   ss << ")";
   used_arguments=used_arguments+arg_sorts.size();
-  
+
   return finish_function_return_term(arity-arg_sorts.size(),ss.str(),target_sort,used,used_arguments);
 }
 
@@ -2177,11 +2179,11 @@ void RewriterCompilingJitty::finish_function(FILE* f,
 }
 
 void RewriterCompilingJitty::implement_strategy(
-               FILE* f, 
-               match_tree_list strat, 
-               size_t arity, 
+               FILE* f,
+               match_tree_list strat,
+               size_t arity,
                size_t d,
-               const function_symbol& opid, 
+               const function_symbol& opid,
                const nfs_array& nf_args)
 {
   std::vector<bool> used=nf_args; // This vector maintains which arguments are in normal form. Initially only those in nf_args are in normal form.
@@ -2266,7 +2268,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const atermpp
 
 atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity)
 {
-  const data_expression& lhs = eqn.lhs(); 
+  const data_expression& lhs = eqn.lhs();
 
   size_t eqn_arity = lhs.function().arity()-1;
   if (eqn_arity > arity)
@@ -2275,7 +2277,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equatio
   }
   if (eqn_arity <= arg)
   {
-    const data_expression& rhs = eqn.rhs();  
+    const data_expression& rhs = eqn.rhs();
     function_symbol head;
     if (is_function_symbol(rhs))
     {
@@ -2464,7 +2466,7 @@ static std::string get_heads(const sort_expression& s, const std::string& base_s
 static std::string get_recursive_argument(const sort_expression& s, const size_t index, const std::string& base_string, const size_t number_of_arguments)
 {
   /* This function provides the index-th argument of an expression provided in base_string, given that its head
-     symbol has type s and there are number_of_arguments arguments. Example: if f:D->E->F and index is 0, base_string 
+     symbol has type s and there are number_of_arguments arguments. Example: if f:D->E->F and index is 0, base_string
      is "t", base_string is set to "atermpp::aterm_cast<application>(t[0])[0] */
   assert(is_function_sort(s));
 
@@ -2641,7 +2643,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f, "  return t;\n");
   fprintf(f, "}\n");
 
-  
+
   // Declare function types
   fprintf(f,  "typedef data_expression (*func_type)(const data_expression& );\n");
   fprintf(f,  "func_type* int2func[%zu];\n", max_arity+1);
@@ -3025,10 +3027,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "      {\n"
       "        const argument_rewriter_struct argument_rewriter;\n"
       "        return mcrl2::data::application(rewrite(ta.head()),ta.begin(),ta.end(),argument_rewriter);\n"
-      "      }\n" 
+      "      }\n"
       "    }\n"
       "    else\n"
-      "    {\n"   
+      "    {\n"
       "      return rewrite_appl_aux(ta);\n"
       "    }\n"
       "  }\n"
@@ -3104,7 +3106,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(
   made_files = false;
   rewrite_rules.clear();
 
-  const data_equation_vector l=data_spec.equations();
+  const data_equation_vector& l=data_spec.equations();
   for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
   {
     if (data_equation_selector(*j))

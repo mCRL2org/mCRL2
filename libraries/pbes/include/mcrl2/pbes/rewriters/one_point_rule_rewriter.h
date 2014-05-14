@@ -6,19 +6,19 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/one_point_rule_rewriter.h
+/// \file mcrl2/pbes/rewriters/one_point_rule_rewriter.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_ONE_POINT_RULE_REWRITER_H
-#define MCRL2_PBES_ONE_POINT_RULE_REWRITER_H
+#ifndef MCRL2_PBES_REWRITERS_ONE_POINT_RULE_REWRITER_H
+#define MCRL2_PBES_REWRITERS_ONE_POINT_RULE_REWRITER_H
 
 #include <cassert>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/builder.h"
@@ -269,7 +269,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       }
     }
 
-    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << data::print_substitution(sigma) << " variables = " << core::detail::print_set(variables) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << sigma << " variables = " << core::detail::print_set(variables) << std::endl;
 
     pbes_expression result;
     if (!sigma.empty())
@@ -330,7 +330,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       }
     }
 
-    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << data::print_substitution(sigma) << " variables = " << core::detail::print_set(variables) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << "  sigma = " << sigma << " variables = " << core::detail::print_set(variables) << std::endl;
 
     pbes_expression result;
     if (!sigma.empty())
@@ -386,4 +386,4 @@ class one_point_rule_rewriter
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_ONE_POINT_RULE_REWRITER_H
+#endif // MCRL2_PBES_REWRITERS_ONE_POINT_RULE_REWRITER_H

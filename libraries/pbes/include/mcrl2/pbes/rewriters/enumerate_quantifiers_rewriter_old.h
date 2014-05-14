@@ -6,15 +6,29 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h
+/// \file mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_REWRITERS_CUSTOM_ENUMERATE_QUANTIFIERS_REWRITER_H
-#define MCRL2_PBES_REWRITERS_CUSTOM_ENUMERATE_QUANTIFIERS_REWRITER_H
+#ifndef MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_OLD_H
+#define MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_OLD_H
 
+#include <numeric>
+#include <set>
+#include <utility>
+#include <deque>
+#include <sstream>
+#include <vector>
+#include <boost/tuple/tuple.hpp>
+#include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
-#include "mcrl2/pbes/pbes_expression_with_variables.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/pbes/replace.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/utilities/sequence.h"
+#include "mcrl2/utilities/detail/join.h"
 
 namespace mcrl2 {
 
@@ -42,8 +56,34 @@ void set_remove(std::set<T>& s, const Container& c)
   }
 }
 
+/// \brief Computes the subset with variables of finite sort and infinite.
+// TODO: this should be done more efficiently, by avoiding aterm lists
+/// \param variables A sequence of data variables
+/// \param data A data specification
+/// \param finite_variables A sequence of data variables
+/// \param infinite_variables A sequence of data variables
+inline
+void split_finite_variables(data::variable_list variables, const data::data_specification& data, data::variable_list& finite_variables, data::variable_list& infinite_variables)
+{
+  std::vector<data::variable> finite;
+  std::vector<data::variable> infinite;
+  for (auto i = variables.begin(); i != variables.end(); ++i)
+  {
+    if (data.is_certainly_finite(i->sort()))
+    {
+      finite.push_back(*i);
+    }
+    else
+    {
+      infinite.push_back(*i);
+    }
+  }
+  finite_variables = data::variable_list(finite.begin(), finite.end());
+  infinite_variables = data::variable_list(infinite.begin(), infinite.end());
+}
+
 template <typename PbesRewriter>
-class quantifier_enumerator1
+class quantifier_enumerator
 {
   protected:
     PbesRewriter& pbesr;
@@ -153,18 +193,14 @@ class quantifier_enumerator1
         pbes_expression c = r_(phi_, sigma_);
         std::set<data::variable> FV_c = pbes_system::find_free_variables(c);
 
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-        mCRL2log(log::verbose) << "        Z = Z + " << c << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
-#endif
+        mCRL2log(log::debug1) << "        Z = Z + " << c << " sigma = " << sigma_ << " dependencies = " << core::detail::print_list(v_) << std::endl;
         if (stop_(c))
         {
           throw stop_early();
         }
         else if (empty_intersection(FV_c, v_))
         {
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-          mCRL2log(log::verbose) << "        A = A + " << pbes_system::pp(c) << std::endl;
-#endif
+          mCRL2log(log::debug1) << "        A = A + " << pbes_system::pp(c) << std::endl;
           A_.insert(c);
         }
         else
@@ -197,11 +233,11 @@ class quantifier_enumerator1
     template <typename SubstitutionFunction>
     void print_arguments(data::variable_list x, const pbes_expression& phi, SubstitutionFunction& sigma, pbes_expression stop_value) const
     {
-      mCRL2log(log::verbose) << "<enumerate>"
+      mCRL2log(log::debug1) << "<enumerate>"
                              << (tr::is_false(stop_value) ? "forall " : "exists ")
-                             << data::pp(x) << ". "
-                             << pbes_system::pp(phi)
-                             << data::print_substitution(sigma) << std::endl;
+                             << x << ". "
+                             << phi
+                             << sigma << std::endl;
     }
 
     /// \brief Returns a string representation of D[i]
@@ -211,18 +247,20 @@ class quantifier_enumerator1
     std::string print_D_element(const std::vector<data::data_expression_with_variables>& Di, std::size_t i) const
     {
       std::ostringstream out;
-      out << "D[" << i << "] = " << print_term_container(Di) << std::endl;
+      out << "D[" << i << "] = " << core::detail::print_list(Di) << std::endl;
       return out.str();
     }
 
     /// \brief Prints debug information to standard error
     /// \param D The sequence D of the algorithm
-    void print_D(const std::vector<std::vector<data::data_expression_with_variables> >& D) const
+    std::string print_D(const std::vector<std::vector<data::data_expression_with_variables> >& D) const
     {
+      std::ostringstream out;
       for (size_t i = 0; i < D.size(); i++)
       {
-        mCRL2log(log::verbose) << "  " << print_D_element(D[i], i);
+        out << "  " << print_D_element(D[i], i);
       }
+      return out.str();
     }
 
     /// \brief Returns a string representation of a todo list element
@@ -238,14 +276,16 @@ class quantifier_enumerator1
 
     /// \brief Prints a todo list to standard error
     /// \param todo A todo list
-    void print_todo_list(const std::deque<boost::tuple<data::variable, data::data_expression_with_variables, std::size_t> >& todo) const
+    std::string print_todo_list(const std::deque<boost::tuple<data::variable, data::data_expression_with_variables, std::size_t> >& todo) const
     {
-      mCRL2log(log::verbose) << "  todo = [";
+      std::ostringstream out;
+      out << "  todo = [";
       for (auto i = todo.begin(); i != todo.end(); ++i)
       {
-        mCRL2log(log::verbose) << (i == todo.begin() ? "" : ", ") << print_todo_list_element(*i);
+        out << (i == todo.begin() ? "" : ", ") << print_todo_list_element(*i);
       }
-      mCRL2log(log::verbose) << "]" << std::endl;
+      out << "]" << std::endl;
+      return out.str();
     }
 
     template <typename SubstitutionFunction, typename VariableMap>
@@ -278,9 +318,7 @@ class quantifier_enumerator1
         }
       }
 
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
       print_arguments(x, phi, sigma, stop_value);
-#endif
       pbes_expression Rphi = pbesr(phi, sigma);
       if (tr::is_constant(Rphi))
       {
@@ -311,11 +349,9 @@ class quantifier_enumerator1
         while (!todo.empty())
         {
           boost::tuple<data::variable, data::data_expression_with_variables, std::size_t> front = todo.front();
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-          print_D(D);
-          print_todo_list(todo);
-          mCRL2log(log::verbose) << "    (y, k) = " << print_todo_list_element(front) << std::endl;
-#endif
+          mCRL2log(log::debug1) << print_D(D);
+          mCRL2log(log::debug1) << print_todo_list(todo);
+          mCRL2log(log::debug1) << "    (y, k) = " << print_todo_list_element(front) << std::endl;
           todo.pop_front();
           const data::variable& xk = boost::get<0>(front);
           const data::data_expression_with_variables& y = boost::get<1>(front);
@@ -330,9 +366,7 @@ class quantifier_enumerator1
           std::vector<data::data_expression_with_variables> z = datae.enumerate(y);
           for (auto i = z.begin(); i != z.end(); ++i)
           {
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-            mCRL2log(log::verbose) << "      e = " << data::pp(*i) << std::endl;
-#endif
+            mCRL2log(log::debug1) << "      e = " << data::pp(*i) << std::endl;
             set_insert(dependencies, i->variables());
             sigma[xk] = *i;
             D[k].clear();
@@ -345,9 +379,7 @@ class quantifier_enumerator1
             if (!is_constant)
             {
               Dk.push_back(*i);
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-              mCRL2log(log::verbose) << "        " << print_D_element(Dk, k) << std::endl;
-#endif
+              mCRL2log(log::debug1) << "        " << print_D_element(Dk, k) << std::endl;
               if (!core::term_traits<data::data_expression_with_variables>::is_constant(*i))
               {
                 todo.push_back(boost::make_tuple(xk, *i, k));
@@ -370,9 +402,7 @@ class quantifier_enumerator1
         {
           sigma[*j] = *j; // erase *j
         }
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-        mCRL2log(log::verbose) << "<return>stop early: " << pbes_system::pp(stop_value) << std::endl;
-#endif
+        mCRL2log(log::debug1) << "<return>stop early: " << pbes_system::pp(stop_value) << std::endl;
         redo_substitutions(sigma, undo);
         return stop_value;
       }
@@ -383,15 +413,13 @@ class quantifier_enumerator1
         sigma[*i] = *i; // erase *i
       }
       pbes_expression result = join(A.begin(), A.end());
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-      mCRL2log(log::verbose) << "<return> " << pbes_system::pp(result) << std::endl;
-#endif
+      mCRL2log(log::debug1) << "<return> " << pbes_system::pp(result) << std::endl;
       redo_substitutions(sigma, undo);
       return result;
     }
 
   public:
-    quantifier_enumerator1(PbesRewriter& r, const data::data_enumerator& e)
+    quantifier_enumerator(PbesRewriter& r, const data::data_enumerator& e)
       : pbesr(r), datae(e)
     {}
 
@@ -420,11 +448,16 @@ class quantifier_enumerator1
 
 // Simplifying PBES rewriter that eliminates quantifiers using enumeration.
 /// \param SubstitutionFunction This must be a MapSubstitution.
-template <typename SubstitutionFunction>
-struct custom_enumerate_quantifiers_builder: public simplify_rewrite_builder<pbes_expression, data::rewriter, SubstitutionFunction>
+template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
+struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef custom_enumerate_quantifiers_builder<SubstitutionFunction> self;
-  typedef simplify_rewrite_builder<pbes_expression, data::rewriter, SubstitutionFunction> super;
+  typedef simplify_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::sigma;
+
+  typedef enumerate_quantifiers_builder<Derived, DataRewriter, SubstitutionFunction> self;
   typedef core::term_traits<pbes_expression> tr;
 
   const data::data_enumerator& m_data_enumerator;
@@ -432,168 +465,134 @@ struct custom_enumerate_quantifiers_builder: public simplify_rewrite_builder<pbe
   /// If true, quantifier variables of infinite sort are enumerated.
   bool m_enumerate_infinite_sorts;
 
-  /// If true, data expressions are not rewritten.
-  bool m_skip_data;
-
   /// \brief Constructor.
   /// \param r A data rewriter
   /// \param enumerator A data enumerator
   /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well
-  custom_enumerate_quantifiers_builder(const data::rewriter& r, const data::data_enumerator& enumerator, bool enumerate_infinite_sorts = true, bool skip_data = false)
-    : super(r), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts), m_skip_data(skip_data)
+  enumerate_quantifiers_builder(const data::rewriter& R, SubstitutionFunction& sigma, const data::data_enumerator& enumerator, bool enumerate_infinite_sorts = true)
+    : super(R, sigma), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
   { }
 
-
-  /// \brief Visit forall node
-  /// Visit forall node.
-  /// \param x A term
-  /// \param variables A sequence of variables
-  /// \param phi A term
-  /// \param sigma A substitution function
-  /// \return The result of visiting the node
-  pbes_expression visit_forall(const pbes_expression& /* x */, const data::variable_list& variables, const pbes_expression& phi, SubstitutionFunction& sigma)
+  Derived& derived()
   {
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    mCRL2log(log::verbose) << "<visit_forall>" << tr::pp(forall(variables, phi)) << std::endl;
-#endif
+    return static_cast<Derived&>(*this);
+  }
+
+  pbes_expression operator()(const forall& x)
+  {
     pbes_expression result;
     if (m_enumerate_infinite_sorts)
     {
-      result = quantifier_enumerator1<self>(*this, m_data_enumerator).enumerate_universal_quantification(variables, phi, sigma);
+      result = quantifier_enumerator<self>(*this, m_data_enumerator).enumerate_universal_quantification(x.variables(), x.body(), sigma);
     }
     else
     {
       data::variable_list finite;
       data::variable_list infinite;
-      split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
+      split_finite_variables(x.variables(), m_data_enumerator.data(), finite, infinite);
       if (finite.empty())
       {
-        result = utilities::optimized_forall(infinite, super::visit(phi, sigma));
+        result = utilities::optimized_forall(infinite, derived()(x.body()));
       }
       else
       {
-        result = utilities::optimized_forall_no_empty_domain(infinite, quantifier_enumerator1<self>(*this, m_data_enumerator).enumerate_universal_quantification(finite, phi, sigma));
+        result = utilities::optimized_forall_no_empty_domain(infinite, quantifier_enumerator<self>(*this, m_data_enumerator).enumerate_universal_quantification(finite, x.body(), sigma));
       }
     }
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    mCRL2log(log::verbose) << "<visit_forall_result>" << tr::pp(result) << std::endl;
-#endif
     return result;
   }
 
-  /// \brief Visit exists node
-  /// Visit exists node.
-  /// \param x A term
-  /// \param variables A sequence of variables
-  /// \param phi A term
-  /// \param sigma A substitution function
-  /// \return The result of visiting the node
-  pbes_expression visit_exists(const pbes_expression& /* x */, const data::variable_list& variables, const pbes_expression& phi, SubstitutionFunction& sigma)
+  pbes_expression operator()(const exists& x)
   {
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    mCRL2log(log::verbose) << "<visit_exists>" << tr::pp(exists(variables, phi)) << std::endl;
-#endif
     pbes_expression result;
     if (m_enumerate_infinite_sorts)
     {
-      result = quantifier_enumerator1<self>(*this, m_data_enumerator).enumerate_existential_quantification(variables, phi, sigma);
+      result = quantifier_enumerator<self>(*this, m_data_enumerator).enumerate_existential_quantification(x.variables(), x.body(), sigma);
     }
     else
     {
       data::variable_list finite;
       data::variable_list infinite;
-      split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
+      split_finite_variables(x.variables(), m_data_enumerator.data(), finite, infinite);
       if (finite.empty())
       {
-        result = utilities::optimized_exists(infinite, super::visit(phi, sigma));
+        result = utilities::optimized_exists(infinite, derived()(x.body()));
       }
       else
       {
-        result = utilities::optimized_exists_no_empty_domain(infinite, quantifier_enumerator1<self>(*this, m_data_enumerator).enumerate_existential_quantification(finite, phi, sigma));
+        result = utilities::optimized_exists_no_empty_domain(infinite, quantifier_enumerator<self>(*this, m_data_enumerator).enumerate_existential_quantification(finite, x.body(), sigma));
       }
     }
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    mCRL2log(log::verbose) << "<visit_exists_result>" << tr::pp(result) << std::endl;
-#endif
     return result;
   }
 
-  /// \brief Visit data_expression node
-  /// Visit data expression node.
-  /// \param x A term
-  /// \param d A data term
-  /// \param sigma A substitution function
-  /// \return The result of visiting the node
-  pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& d, SubstitutionFunction& sigma)
+  // TODO: this function should be removed
+  pbes_expression operator()(const pbes_expression& x, SubstitutionFunction&)
   {
-    if (m_skip_data)
-    {
-      return x;
-    }
-    else
-    {
-      return super::visit_data_expression(x, d, sigma);
-    }
+    return (*this)(x);
   }
 };
+
+template <template <class, class, class> class Builder, class DataRewriter, class SubstitutionFunction>
+struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction>
+{
+  typedef Builder<apply_enumerate_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  apply_enumerate_builder(const DataRewriter& R, SubstitutionFunction& sigma, const data::data_enumerator& enumerator, bool enumerate_infinite_sorts)
+    : super(R, sigma, enumerator, enumerate_infinite_sorts)
+  {}
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class, class, class> class Builder, class DataRewriter, class SubstitutionFunction>
+apply_enumerate_builder<Builder, DataRewriter, SubstitutionFunction>
+make_apply_enumerate_builder(const DataRewriter& R, SubstitutionFunction& sigma, const data::data_enumerator& enumerator, bool enumerate_infinite_sorts)
+{
+  return apply_enumerate_builder<Builder, DataRewriter, SubstitutionFunction>(R, sigma, enumerator, enumerate_infinite_sorts);
+}
 
 } // namespace detail
 
 /// \brief An attempt for improving the efficiency.
-class custom_enumerate_quantifiers_rewriter
+struct enumerate_quantifiers_rewriter
 {
-  protected:
-    /// \brief A data rewriter
-    data::rewriter m_rewriter;
+  /// \brief A data rewriter
+  data::rewriter m_rewriter;
 
-    /// \brief A data enumerator
-    data::data_enumerator m_enumerator;
+  /// \brief A data enumerator
+  data::data_enumerator m_enumerator;
 
-    /// \brief If true, quantifier variables of infinite sort are enumerated.
-    bool m_enumerate_infinite_sorts;
+  /// \brief If true, quantifier variables of infinite sort are enumerated.
+  bool m_enumerate_infinite_sorts;
 
-    /// If true, data expressions are not rewritten.
-    bool m_skip_data;
+  typedef pbes_expression term_type;
+  typedef data::variable variable_type;
 
-  public:
-    typedef pbes_expression term_type;
+  enumerate_quantifiers_rewriter(const data::rewriter& R, const data::data_specification& dataspec, bool enumerate_infinite_sorts = true)
+    : m_rewriter(R), m_enumerator(dataspec, R), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
+  {}
 
-    typedef data::variable variable_type;
+  pbes_expression operator()(const pbes_expression& x) const
+  {
+    data::rewriter::substitution_type sigma;
+    return detail::make_apply_enumerate_builder<detail::enumerate_quantifiers_builder>(m_rewriter, sigma, m_enumerator, m_enumerate_infinite_sorts)(x);
+  }
 
-    /// \brief Constructor
-    /// \param r A data rewriter
-    /// \param e A data enumerator
-    /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated.
-    /// \param skip_data If false, data expressions are also rewritten. If true,
-    ///        only PBES expressions are rewritten, and the data expressions are not.
-    custom_enumerate_quantifiers_rewriter(const data::rewriter& r, const data::data_enumerator& e, bool enumerate_infinite_sorts = true, bool skip_data = false)
-      : m_rewriter(r), m_enumerator(e), m_enumerate_infinite_sorts(enumerate_infinite_sorts), m_skip_data(skip_data)
-    {}
-
-    /// \brief Rewrites a pbes expression.
-    /// \param x A term
-    /// \return The rewrite result.
-    pbes_expression operator()(const pbes_expression& x) const
-    {
-      data::mutable_map_substitution<> sigma;
-      detail::custom_enumerate_quantifiers_builder<data::mutable_map_substitution<> > R(m_rewriter, m_enumerator, m_enumerate_infinite_sorts, m_skip_data);
-      return R(x, sigma);
-    }
-
-    /// \brief Rewrites a pbes expression.
-    /// \param x A term
-    /// \param sigma A substitution function
-    /// \return The rewrite result.
-    template <typename SubstitutionFunction>
-    pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
-    {
-      detail::custom_enumerate_quantifiers_builder<SubstitutionFunction> R(m_rewriter, m_enumerator, m_enumerate_infinite_sorts, m_skip_data);
-      return R(x, sigma);
-    }
+  template <typename SubstitutionFunction>
+  pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
+  {
+    return detail::make_apply_enumerate_builder<detail::enumerate_quantifiers_builder>(m_rewriter, sigma, m_enumerator, m_enumerate_infinite_sorts)(x);
+  }
 };
 
 } // namespace pbes_system
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_REWRITERS_CUSTOM_ENUMERATE_QUANTIFIERS_REWRITER_H
+#endif // MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_OLD_H

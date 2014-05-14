@@ -17,6 +17,7 @@
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/replace.h"
@@ -117,7 +118,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
             {
               sigma[*j]=*k;
             }
-            mCRL2log(log::debug, "suminst") << "substitutions: " << data::print_substitution(sigma) << std::endl;
+            mCRL2log(log::debug, "suminst") << "substitutions: " << sigma << std::endl;
 
             SummandType t(s);
             t.summation_variables() = new_summation_variables;
@@ -150,7 +151,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     bool must_instantiate(const deadlock_summand& )
     {
       return !m_tau_summands_only;
-    }    
+    }
 
     template <typename SummandListType, typename Container>
     void run(const SummandListType& list, Container& result)
@@ -174,7 +175,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
           result.push_back(*i);
         }
         ++m_processed;
-        mCRL2log(log::status) << "Replaced " << m_processed << " summands by " << (m_processed + m_added - m_deleted) 
+        mCRL2log(log::status) << "Replaced " << m_processed << " summands by " << (m_processed + m_added - m_deleted)
                               << " summands (" << m_deleted << " were deleted)" << std::endl;
       }
     }

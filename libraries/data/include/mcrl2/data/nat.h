@@ -1413,6 +1413,118 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier sqrt
+      /// \return Identifier sqrt
+      inline
+      core::identifier_string const& sqrt_name()
+      {
+        static core::identifier_string sqrt_name = core::identifier_string("sqrt");
+        return sqrt_name;
+      }
+
+      /// \brief Constructor for function symbol sqrt
+      /// \return Function symbol sqrt
+      inline
+      function_symbol const& sqrt()
+      {
+        static function_symbol sqrt = function_symbol(sqrt_name(), make_function_sort(nat(), nat()));
+        return sqrt;
+      }
+
+
+      /// \brief Recogniser for function sqrt
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching sqrt
+      inline
+      bool is_sqrt_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == sqrt();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol sqrt
+      /// \param arg0 A data expression
+      /// \return Application of sqrt to a number of arguments
+      inline
+      application sqrt(const data_expression& arg0)
+      {
+        return sort_nat::sqrt()(arg0);
+      }
+
+      /// \brief Recogniser for application of sqrt
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol sqrt to a
+      ///     number of arguments
+      inline
+      bool is_sqrt_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_sqrt_function_symbol(application(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@sqrt_nat
+      /// \return Identifier \@sqrt_nat
+      inline
+      core::identifier_string const& sqrt_nat_aux_func_name()
+      {
+        static core::identifier_string sqrt_nat_aux_func_name = core::identifier_string("@sqrt_nat");
+        return sqrt_nat_aux_func_name;
+      }
+
+      /// \brief Constructor for function symbol \@sqrt_nat
+      /// \return Function symbol sqrt_nat_aux_func
+      inline
+      function_symbol const& sqrt_nat_aux_func()
+      {
+        static function_symbol sqrt_nat_aux_func = function_symbol(sqrt_nat_aux_func_name(), make_function_sort(nat(), nat(), sort_pos::pos(), nat()));
+        return sqrt_nat_aux_func;
+      }
+
+
+      /// \brief Recogniser for function \@sqrt_nat
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@sqrt_nat
+      inline
+      bool is_sqrt_nat_aux_func_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == sqrt_nat_aux_func();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@sqrt_nat
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \return Application of \@sqrt_nat to a number of arguments
+      inline
+      application sqrt_nat_aux_func(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        return sort_nat::sqrt_nat_aux_func()(arg0, arg1, arg2);
+      }
+
+      /// \brief Recogniser for application of \@sqrt_nat
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol sqrt_nat_aux_func to a
+      ///     number of arguments
+      inline
+      bool is_sqrt_nat_aux_func_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_sqrt_nat_aux_func_function_symbol(application(e).head());
+        }
+        return false;
+      }
+
       /// \brief Generate identifier \@first
       /// \return Identifier \@first
       inline
@@ -1723,6 +1835,8 @@ namespace mcrl2 {
         result.push_back(sort_nat::swap_zero_add());
         result.push_back(sort_nat::swap_zero_min());
         result.push_back(sort_nat::swap_zero_monus());
+        result.push_back(sort_nat::sqrt());
+        result.push_back(sort_nat::sqrt_nat_aux_func());
         result.push_back(sort_nat::first());
         result.push_back(sort_nat::last());
         result.push_back(sort_nat::divmod());
@@ -1750,7 +1864,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
@@ -1762,7 +1876,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
@@ -1774,7 +1888,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
       }
 
@@ -1798,7 +1912,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_even_application(e) || is_first_application(e) || is_last_application(e));
+        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_even_application(e) || is_sqrt_application(e) || is_first_application(e) || is_last_application(e));
         return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
@@ -1908,6 +2022,10 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vn, vp), swap_zero_monus(c0(), cnat(vp), c0(), vn), c0()));
         result.push_back(data_equation(atermpp::make_vector(vn, vp, vq), swap_zero_monus(c0(), cnat(vp), cnat(vq), vn), monus(cnat(vq), swap_zero(cnat(vp), vn))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn, vp, vq), swap_zero_monus(cnat(vp), cnat(vq), vm, vn), swap_zero(monus(cnat(vp), cnat(vq)), monus(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
+        result.push_back(data_equation(variable_list(), sqrt(c0()), c0()));
+        result.push_back(data_equation(atermpp::make_vector(vp), sqrt(cnat(vp)), sqrt_nat_aux_func(cnat(vp), c0(), sort_pos::powerlog2_pos(vp))));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), sqrt_nat_aux_func(vn, vm, sort_pos::c1()), if_(less_equal(vn, vm), c0(), cnat(sort_pos::c1()))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vm, vn, vp), sqrt_nat_aux_func(vn, vm, sort_pos::cdub(vb, vp)), if_(greater(times(plus(cnat(sort_pos::cdub(vb, vp)), vm), cnat(sort_pos::cdub(vb, vp))), vn), sqrt_nat_aux_func(vn, vm, vp), plus(cnat(sort_pos::cdub(vb, vp)), sqrt_nat_aux_func(monus(vn, times(plus(cnat(sort_pos::cdub(vb, vp)), vm), cnat(sort_pos::cdub(vb, vp)))), plus(vm, cnat(sort_pos::cdub(sort_bool::false_(), sort_pos::cdub(vb, vp)))), vp)))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn, vu, vv), equal_to(cpair(vm, vn), cpair(vu, vv)), sort_bool::and_(equal_to(vm, vu), equal_to(vn, vv))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn, vu, vv), less(cpair(vm, vn), cpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less(vn, vv)))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn, vu, vv), less_equal(cpair(vm, vn), cpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less_equal(vn, vv)))));

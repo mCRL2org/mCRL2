@@ -19,6 +19,7 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
@@ -215,7 +216,7 @@ class pbes_eqelm_algorithm
         for (typename equivalence_class::iterator k = equiv.begin(); k != equiv.end(); ++k)
         {
           size_t p = index_of(*k, m_parameters[Y]);
-          pbes_system::data_rewriter<Term, DataRewriter> rewr(m_data_rewriter);
+          pbes_system::data_rewriter<DataRewriter> rewr(m_data_rewriter);
           pbes_system::pbes_expression e_p = rewr(e[p], vX);
           w[atermpp::aterm_cast<const data::data_expression>(e_p)].insert(*k);
         }

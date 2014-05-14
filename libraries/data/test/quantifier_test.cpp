@@ -68,7 +68,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   BOOST_CHECK(r(t1dd1) == r(t1dd2));
 
   /* Test 1e*/
-  data_expression t1ed1 = parse_data_expression("forall x: Bool. x == true && x==false");
+  data_expression t1ed1 = parse_data_expression("exists x: Bool. x == true && x==false");
   data_expression t1ed2 = parse_data_expression("false");
   BOOST_CHECK(r(t1ed1) == r(t1ed2));
 
@@ -78,7 +78,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   BOOST_CHECK(r(t1fd1) == r(t1fd2));
 
   /* Test 1g*/
-  data_expression t1gd1 = parse_data_expression("forall x: Bool. x == true || x==false");
+  data_expression t1gd1 = parse_data_expression("exists x: Bool. x == true || x==false");
   data_expression t1gd2 = parse_data_expression("true");
   BOOST_CHECK(r(t1gd1) == r(t1gd2));
 

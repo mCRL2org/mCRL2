@@ -102,7 +102,6 @@ struct approximate
     typedef BooleanExpressionTraits tr;
     typedef typename BooleanExpressionTraits::expression_type expression_type;
     typedef typename BooleanExpressionTraits::variable_type variable_type;
-    typedef typename BooleanExpressionTraits::equation_type equation_type;
 
     const expression_type& phi = eq.formula();
     const variable_type& X = eq.variable();

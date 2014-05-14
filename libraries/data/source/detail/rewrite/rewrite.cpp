@@ -28,9 +28,12 @@
 
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
-#include "mcrl2/data/detail/enum/standard.h" // To be removed.
+// #include "mcrl2/data/detail/enum/standard.h" 
+#include "mcrl2/data/detail/rewriter_wrapper.h" 
+#include "mcrl2/data/classic_enumerator.h"
 
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -229,8 +232,7 @@ data_expression Rewriter::rewrite_lambda_application(
     return rewrite_lambda_application(ta.head(),ta,sigma);
   }
 
-  const data_expression new_t=detail::replace_nested_head(ta,rewrite_lambda_application(ta.head(),sigma));
-  return rewrite(new_t,sigma);
+  return rewrite(application(rewrite_lambda_application(ta.head(),sigma),ta.begin(),ta.end()),sigma);
 }
 
 
@@ -246,7 +248,7 @@ data_expression Rewriter::rewrite_lambda_application(
                       const data_expression& t,
                       substitution_type& sigma)
 {
-  using namespace atermpp;
+  // using namespace atermpp;
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
   const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
@@ -312,8 +314,6 @@ data_expression Rewriter::existential_quantifier_enumeration(
       const bool t1_is_normal_form,
       substitution_type& sigma)
 {
-
-
   // Rename the bound variables to unique
   // variables, to avoid naming conflicts.
 
@@ -358,43 +358,37 @@ data_expression Rewriter::existential_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard<data_expression,rewriter>
-                              sol(vl_new_l, t3, sigma,true,
-                                  m_data_specification_for_enumeration, this,
-                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
+  typedef classic_enumerator<rewriter_wrapper> enumerator_type;
+  rewriter_wrapper wrapped_rewriter(this);
+  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
 
   /* Create a list to store solutions */
-  atermpp::term_list<data_expression> x;
-  data_expression evaluated_condition=sort_bool::false_();
   data_expression partial_result=sort_bool::false_();
-  bool solution_possible=true;
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  while (loop_upperbound>0 &&
+  enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, true);
+  for( ; loop_upperbound>0 && 
          partial_result!=sort_bool::true_() &&
-         sol.next(evaluated_condition,x,solution_possible))
+         sol!=enumerator.end(); 
+         ++sol)
   {
     if (partial_result==sort_bool::false_())
     {
-      partial_result=evaluated_condition;
+      partial_result=sol.resulting_condition();
     }
-    else if (partial_result==sort_bool::true_())
+    else if (partial_result!=sort_bool::true_())
     {
-      partial_result=sort_bool::true_();
-    }
-    else
-    {
-      partial_result=application(sort_bool::or_(), partial_result,evaluated_condition);
+      partial_result=application(sort_bool::or_(), partial_result,sol.resulting_condition());
     }
     loop_upperbound--;
   }
 
-  if (solution_possible && (loop_upperbound>0 || partial_result==sort_bool::true_()))
+  if (!sol.exception_occurred() && (loop_upperbound>0 || partial_result==sort_bool::true_()))
   {
     return partial_result;
   }
 
-  // One can consider to replace the variables by their original, in order to not show 
+  // One can consider to replace the variables by their original, in order to not show
   // internally generated variables in the output.
   return abstraction(exists_binder(),vl_new_l,rewrite(t3,sigma));
 }
@@ -461,65 +455,39 @@ data_expression Rewriter::universal_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard<data_expression,rewriter>
-                              sol(vl_new_l, t3, sigma,false,
-                                  m_data_specification_for_enumeration, this,
-                                  (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()),true);
+
+  typedef classic_enumerator<rewriter_wrapper> enumerator_type;
+  rewriter_wrapper wrapped_rewriter(this);
+  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
+
 
   /* Create lists to store solutions */
-  data_expression_list x;
-  data_expression evaluated_condition=sort_bool::true_();
   data_expression partial_result=sort_bool::true_();
-  bool solution_possible=true;
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  while (loop_upperbound>0 &&
+  enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, false);
+  for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
-         sol.next(evaluated_condition,x,solution_possible))
+         sol!=enumerator.end();
+         ++sol)
   {
-    // The returned evaluated condition is the negation of the entered condition,
-    // as is not_equal_to_true_or_false is set to false in sol. So, we must first
-    // negate it.
-
-    if (evaluated_condition == sort_bool::true_())
-    {
-      evaluated_condition=sort_bool::false_();
-    }
-    else if (evaluated_condition == sort_bool::false_())
-    {
-      evaluated_condition=sort_bool::true_();
-    }
-    else if (evaluated_condition[0] == sort_bool::not_())
-    {
-      evaluated_condition=static_cast<data_expression>(evaluated_condition[1]);
-    }
-    else
-    {
-      evaluated_condition=application(sort_bool::not_(), evaluated_condition);
-    }
-
-
     if (partial_result==sort_bool::true_())
     {
-      partial_result=evaluated_condition;
+      partial_result=sol.resulting_condition();
     }
-    else if (partial_result==sort_bool::false_())
+    else if (partial_result!=sort_bool::false_())
     {
-      partial_result=sort_bool::false_();
-    }
-    else
-    {
-      partial_result=application(sort_bool::and_(), partial_result, evaluated_condition);
+      partial_result=application(sort_bool::and_(), partial_result, sol.resulting_condition());
     }
     loop_upperbound--;
   }
 
-  if (solution_possible && (loop_upperbound>0 || partial_result==sort_bool::false_()))
+  if (!sol.exception_occurred() && (loop_upperbound>0 || partial_result==sort_bool::false_()))
   {
     return partial_result;
   }
 
-  // One can consider to replace the variables by their original, in order to not show 
+  // One can consider to replace the variables by their original, in order to not show
   // internally generated variables in the output.
   return abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
 }

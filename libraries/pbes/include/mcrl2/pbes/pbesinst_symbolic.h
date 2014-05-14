@@ -21,7 +21,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
-#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/pbes/pbesinst_algorithm.h"
@@ -44,11 +44,8 @@ class pbesinst_symbolic_algorithm
     /// \brief Data rewriter.
     data::rewriter datar;
 
-    /// \brief Data enumerator.
-    data::data_enumerator datae;
-
     /// \brief The rewriter.
-    custom_enumerate_quantifiers_rewriter R;
+    enumerate_quantifiers_rewriter R;
 
     /// \brief Propositional variable instantiations that need to be handled.
     std::set<state_type> todo;
@@ -70,8 +67,7 @@ class pbesinst_symbolic_algorithm
     pbesinst_symbolic_algorithm(pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : m_pbes(p),
         datar(p.data(), rewrite_strategy),
-        datae(p.data(), datar),
-        R(datar, datae)
+        R(datar, p.data())
     {
       pbes_system::algorithms::instantiate_global_variables(p);
 
@@ -99,7 +95,8 @@ class pbesinst_symbolic_algorithm
         std::size_t index = m_equation_index[X.name()];
         const pbes_equation& eqn = m_pbes.equations()[index];
         pbes_expression phi = eqn.formula();
-        data::mutable_map_substitution<> sigma = make_pbesinst_substitution(eqn.variable().parameters(), X.parameters());
+        data::rewriter::substitution_type sigma;
+        make_pbesinst_substitution(eqn.variable().parameters(), X.parameters(), sigma);
         pbes_expression psi = R(phi, sigma);
         std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi);
         for (auto i = psi_variables.begin(); i != psi_variables.end(); ++i)

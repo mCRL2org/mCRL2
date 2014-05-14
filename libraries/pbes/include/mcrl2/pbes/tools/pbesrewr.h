@@ -16,7 +16,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/tools.h"
@@ -48,23 +48,22 @@ void pbesrewr(const std::string& input_filename,
   {
     case simplify:
     {
-      simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
+      simplify_quantifiers_data_rewriter<data::rewriter> pbesr(datar);
+      //simplify_data_rewriter<data::rewriter> pbesr(datar);
       pbes_rewrite(p, pbesr);
       break;
     }
     case quantifier_all:
     {
-      data::data_enumerator datae(p.data(), datar);
       bool enumerate_infinite_sorts = true;
-      custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts, skip_data);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_rewrite(p, pbesr);
       break;
     }
     case quantifier_finite:
     {
-      data::data_enumerator datae(p.data(), datar);
       bool enumerate_infinite_sorts = false;
-      custom_enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts, skip_data);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_rewrite(p, pbesr);
       break;
     }
@@ -72,7 +71,7 @@ void pbesrewr(const std::string& input_filename,
     {
       // first preprocess data expressions
       data::detail::one_point_rule_preprocessor one_point_processor;
-      data_rewriter<pbes_expression, data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
+      data_rewriter<data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
       pbes_rewrite(p, datar_onepoint);
 
       // apply the one point rule rewriter
@@ -80,7 +79,7 @@ void pbesrewr(const std::string& input_filename,
       pbes_rewrite(p, pbesr);
 
       // post processing: apply the simplifying rewriter
-      simplifying_rewriter<pbes_expression, data::rewriter> simp(datar);
+      simplify_data_rewriter<data::rewriter> simp(datar);
       pbes_rewrite(p, simp);
       break;
     }

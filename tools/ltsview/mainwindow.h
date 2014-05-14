@@ -15,6 +15,7 @@
 #include "ui_mainwindow.h"
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/logwidget.h"
 #include "mcrl2/utilities/persistentfiledialog.h"
 
 #include "infodock.h"
@@ -27,28 +28,13 @@
 #include "settingsdock.h"
 #include "simdock.h"
 
-class LogMessenger : public mcrl2::log::output_policy
-{
-  public:
-    LogMessenger(QWidget *parent): m_parent(parent) { mcrl2::log::logger::register_output_policy(*this); }
-    ~LogMessenger() { mcrl2::log::logger::unregister_output_policy(*this); }
-    void output(const mcrl2::log::log_level_t level, const std::string& /*hint*/, const time_t /*timestamp*/, const std::string& msg)
-    {
-      if (level == mcrl2::log::error)
-      {
-        QMessageBox::critical(m_parent, "LTSView - An error occured", QString::fromStdString(msg));
-      }
-    }
-  private:
-    QWidget *m_parent;
-};
-
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
   public:
     MainWindow();
+    ~MainWindow();
 
   public slots:
     void open(QString filename);
@@ -75,6 +61,17 @@ class MainWindow : public QMainWindow
     void zoomChanged() { m_ui.zoomOut->setEnabled(m_ltsManager->lts()->getPreviousLevel() != 0); }
     void startStructuring() { setEnabled(false); m_ltsCanvas->setUpdatesEnabled(false); }
     void stopStructuring() { m_ltsCanvas->setUpdatesEnabled(true); setEnabled(true); }
+    void logMessage(QString level, QString hint, QDateTime /* timestamp */, QString message) 
+    {
+      if (log_level_from_string(level.toStdString()) == mcrl2::log::error)
+      {
+        QMessageBox::critical(this, QString("LTSView - An error occured (%1)").arg(hint), message);
+      }
+      else
+      {
+        setStatusBar(message);
+      }
+    }
 
   protected:
     /**
@@ -84,7 +81,6 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow m_ui;
-    LogMessenger m_messenger;
     Settings m_settings;
     LtsManager *m_ltsManager;
     MarkManager *m_markManager;
@@ -95,6 +91,7 @@ class MainWindow : public QMainWindow
     SettingsDialog *m_settingsDialog;
     LtsCanvas *m_ltsCanvas;
     QProgressDialog *m_progressDialog;
+    mcrl2::utilities::qt::LogRelay m_logRelay;
 
     mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
 };

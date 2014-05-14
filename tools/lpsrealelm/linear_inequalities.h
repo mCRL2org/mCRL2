@@ -22,6 +22,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/substitutions/map_substitution.h"
 
 namespace mcrl2
 {

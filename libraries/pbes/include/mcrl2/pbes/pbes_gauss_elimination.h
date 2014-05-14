@@ -12,10 +12,9 @@
 #ifndef MCRL2_PBES_PBES_GAUSS_ELIMINATION_H
 #define MCRL2_PBES_PBES_GAUSS_ELIMINATION_H
 
-#include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
@@ -128,11 +127,10 @@ int gauss_elimination(pbes& p)
   typedef core::term_traits<pbes_expression> tr;
 
   data::rewriter datar(p.data());
-  data::data_enumerator datae(p.data(), datar);
-  custom_enumerate_quantifiers_rewriter pbesr(datar, datae);
+  enumerate_quantifiers_rewriter pbesr(datar, p.data());
 
   gauss_elimination_algorithm<pbes_traits> algorithm;
-  algorithm.run(p.equations().begin(), p.equations().end(), pbes_equation_solver<custom_enumerate_quantifiers_rewriter>(pbesr));
+  algorithm.run(p.equations().begin(), p.equations().end(), pbes_equation_solver<enumerate_quantifiers_rewriter>(pbesr));
 
   if (tr::is_false(p.equations().front().formula()))
   {

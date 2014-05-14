@@ -1011,7 +1011,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             if len(updates) == 0:
                 visit_text = '// skip'
             else:
-                visit_text = '%s result;\n' % classname + '\nelse '.join(updates)
+                visit_text = '\nelse '.join(updates)
         else:
             if 'E' in self.modifiers():
                 return_type = self.superclass(include_namespace = True)

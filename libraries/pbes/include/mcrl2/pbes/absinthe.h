@@ -30,7 +30,6 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"

@@ -203,11 +203,15 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
       }
     }
   }
+  else if (data::sort_real::is_reduce_fraction_application(x))
+  {
+    x = data::sort_real::divides(sort_real::left(x),sort_real::right(x));
+  }
   else if (data::sort_real::is_reduce_fraction_where_application(x))
   {
     x = data::sort_real::plus(sort_real::int2real(sort_real::arg2(x)),
                               sort_real::divides(sort_real::arg3(x),
-                              sort_real::arg1(x))
+                                                 sort_nat::pos2nat(sort_real::arg1(x)))
                              );
   }
   return x;

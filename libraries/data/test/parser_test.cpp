@@ -35,7 +35,7 @@ void parser_test()
   BOOST_CHECK(spec.sorts().size() == 6); // Bool, S, List(S), S->List(S), Nat, @NatPair.
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors(data::basic_sort("S"))).size() == 1);
   std::cerr << "number of functions " << boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() << "\n";
-  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 94);
+  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 96);
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
   BOOST_CHECK(data::parse_data_expression("0") == data::sort_nat::nat(0));
@@ -60,12 +60,51 @@ void test_whr()
   data_expression x = parse_data_expression("exists n: Nat . n == 0 whr n = 1 end");
 }
 
-void test_sort()
+// returns true if parsing succeeded
+bool parse_sort(const data::data_specification& data_spec, const std::string& text)
 {
-  using namespace data;
-  std::string text = "Pos -> Pos # Pos -> Bool";
-  sort_expression s = parse_sort_expression(text);
-  BOOST_CHECK(data::pp(s) == text);
+  try
+  {
+    data::sort_expression s = data::parse_sort_expression(text, data_spec);
+  }
+  catch (mcrl2::runtime_error&)
+  {
+    return false;
+  }
+  return true;
+}
+
+// if expected_result is false, parsing is expected to fail
+void test_sort_expression(const data::data_specification& data_spec, const std::string& text, bool expected_result)
+{
+  bool result = parse_sort(data_spec, text);
+  if (result != expected_result)
+  {
+    std::cout << "ERROR: parsing the sort expression '" << text << "' produced the result " << std::boolalpha << result << std::endl;
+  }
+  BOOST_CHECK(result == expected_result);
+}
+
+void test_ticket_1267()
+{
+  data::data_specification data_spec = data::parse_data_specification("sort A;");
+  test_sort_expression(data_spec, "A -> A # A", false);
+  test_sort_expression(data_spec, "(A -> A) # A", false);
+  test_sort_expression(data_spec, "A # A", false);
+  test_sort_expression(data_spec, "(A # A)", false);
+  test_sort_expression(data_spec, "(A # A) -> A", false);
+  test_sort_expression(data_spec, "A -> ((A # A) -> (A -> A))", false);
+
+  test_sort_expression(data_spec, "A", true);
+  test_sort_expression(data_spec, "A # A -> A", true);
+  test_sort_expression(data_spec, "A -> A # A -> A -> A", true);
+  test_sort_expression(data_spec, "A -> (A -> A)", true);
+  test_sort_expression(data_spec, "(A -> A) -> A", true);
+  test_sort_expression(data_spec, "A # A -> (A -> A)", true);
+  test_sort_expression(data_spec, "A # (A -> A) -> (A -> A)", true);
+  test_sort_expression(data_spec, "(A -> A) # A -> (A -> A)", true);
+  test_sort_expression(data_spec, "A # A # A -> A", true);
+  test_sort_expression(data_spec, "A -> A -> A -> A", true);
 }
 
 int test_main(int argc, char** argv)
@@ -73,7 +112,7 @@ int test_main(int argc, char** argv)
   parser_test();
   test_user_defined_sort();
   test_whr();
-  test_sort();
+  test_ticket_1267();
 
   return EXIT_SUCCESS;
 }

@@ -12,7 +12,7 @@ function(_add_library_tests TARGET_NAME)
       get_filename_component(base ${test} NAME_WE)
       set(testname ${category}_${TARGET_NAME}_${base})
       add_executable(${testname} EXCLUDE_FROM_ALL ${test})
-      set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${category})
+      set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category})
       target_link_libraries(${testname} ${TARGET_NAME})
       # TODO: remove the following once we get rid of the PBES/BES dependency issue
       if(TARGET_NAME STREQUAL "mcrl2_bes")
@@ -27,7 +27,7 @@ function(_add_library_tests TARGET_NAME)
          --build-generator "${CMAKE_GENERATOR}"
          --build-target "${testname}"
          --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
-         --test-command "${CMAKE_CURRENT_BINARY_DIR}/${category}/${testname}"
+         --test-command "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}"
         )
       set_tests_properties(${testname} PROPERTIES LABELS ${category})
     endforeach()

@@ -22,11 +22,9 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
-#include "mcrl2/data/detail/rewriter_wrapper.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/rewriters/custom_enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
@@ -51,7 +49,7 @@ class parity_game_generator
     typedef core::term_traits<pbes_expression> tr;
 
     /// \brief Substitution function type used by the PBES rewriter.
-    typedef data::detail::legacy_rewriter::substitution_type substitution_function;
+    typedef data::rewriter::substitution_type substitution_function;
 
     /// \brief Mark whether initialization has been initialized.
     /// Needed to properly cope with virtual inheritance!
@@ -63,11 +61,8 @@ class parity_game_generator
     /// \brief Data rewriter.
     data::rewriter datar;
 
-    /// \brief Data enumerator.
-    data::data_enumerator datae;
-
     /// \brief PBES rewriter.
-    pbes_system::custom_enumerate_quantifiers_rewriter R;
+    pbes_system::enumerate_quantifiers_rewriter R;
 
     /// \brief Maps propositional variables to corresponding PBES equations.
     std::map<core::identifier_string, std::vector<pbes_equation>::const_iterator > m_pbes_equation_index;
@@ -283,8 +278,7 @@ class parity_game_generator
       m_initialized(false),
       m_pbes(p),
       datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
-      datae(p.data(), datar),
-      R(datar, datae),
+      R(datar, p.data()),
       m_true_false_dependencies(true_false_dependencies),
       m_is_min_parity(is_min_parity)
     {

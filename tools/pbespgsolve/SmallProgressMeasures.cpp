@@ -159,7 +159,10 @@ verti SmallProgressMeasures::solve_one(LiftingStrategy2 &ls)
 
     assert(!is_top(v));
 
-    bool success = lift_to(v, vec(get_successor(v)), compare_strict(v));
+    #ifndef NDEBUG
+    bool success =
+    #endif // NDEBUG 
+    lift_to(v, vec(get_successor(v)), compare_strict(v));
     assert(success);
     dirty_[v] = false;
     // debug_print_vertex(v);
@@ -380,7 +383,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
         mCRL2log(mcrl2::log::verbose) << "Solving for Even..." << std::endl;
         DenseSPM spm( game(), PLAYER_EVEN,
                       stats_, vmap_, vmap_size_ );
-        std::auto_ptr<LiftingStrategy> ls(lsf_->create(game_, spm));
+        std::unique_ptr<LiftingStrategy> ls(lsf_->create(game_, spm));
         while (spm.solve_some(*ls) == 0)
         {
             if (aborted()) return ParityGame::Strategy();
@@ -418,7 +421,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
         mCRL2log(mcrl2::log::verbose) << "Solving for Odd..." << std::endl;
         DenseSPM spm( subgame, PLAYER_ODD,
                       stats_, submap, submap_size );
-        std::auto_ptr<LiftingStrategy> ls(lsf_->create(subgame, spm));
+        std::unique_ptr<LiftingStrategy> ls(lsf_->create(subgame, spm));
         while (spm.solve_some(*ls) == 0)
         {
             if (aborted()) return ParityGame::Strategy();
@@ -438,7 +441,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
 ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
 {
     // Create two SPM and two lifting strategy instances:
-    std::auto_ptr<SmallProgressMeasures> spm[2];
+    std::unique_ptr<SmallProgressMeasures> spm[2];
     spm[0].reset(new DenseSPM( game_, PLAYER_EVEN,
                                stats_, vmap_, vmap_size_ ));
     spm[1].reset(new DenseSPM( game_, PLAYER_ODD,
@@ -451,7 +454,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
     {
         mCRL2log(mcrl2::log::verbose) << "Switching to "
                                        << (player == 0 ? "normal" : "dual") << " game..." << std::endl;
-        std::auto_ptr<LiftingStrategy> ls(lsf_->create(game_, *spm[player]));
+        std::unique_ptr<LiftingStrategy> ls(lsf_->create(game_, *spm[player]));
 
         /* Note: work size should be large enough so that dumb strategies like
                  linear lifting are still able to detect termination! */
@@ -470,7 +473,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
 
     // One game is solved; solve other game completely too:
     mCRL2log(mcrl2::log::verbose) << "Finishing " << (player == 0 ? "normal" : "dual") << "game..." << std::endl;
-    std::auto_ptr<LiftingStrategy> ls(lsf_->create(game_, *spm[player]));
+    std::unique_ptr<LiftingStrategy> ls(lsf_->create(game_, *spm[player]));
     while (spm[player]->solve_some(*ls) == 0)
     {
         if (aborted()) return ParityGame::Strategy();
@@ -543,7 +546,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
         mCRL2log(mcrl2::log::verbose) << "Solving for Even..." << std::endl;
         DenseSPM spm( game(), PLAYER_EVEN,
                       stats_, vmap_, vmap_size_ );
-        std::auto_ptr<LiftingStrategy2> ls(lsf_->create2(game_, spm));
+        std::unique_ptr<LiftingStrategy2> ls(lsf_->create2(game_, spm));
         spm.initialize_lifting_strategy(*ls);
         while (spm.solve_some(*ls) == 0)
         {
@@ -582,7 +585,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
         mCRL2log(mcrl2::log::verbose) << "Solving for Odd..." << std::endl;
         DenseSPM spm( subgame, PLAYER_ODD,
                       stats_, submap, submap_size );
-        std::auto_ptr<LiftingStrategy2> ls(lsf_->create2(subgame, spm));
+        std::unique_ptr<LiftingStrategy2> ls(lsf_->create2(subgame, spm));
         spm.initialize_lifting_strategy(*ls);
         while (spm.solve_some(*ls) == 0)
         {
@@ -603,7 +606,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
 ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
 {
     // Create two SPM and two lifting strategy instances:
-    std::auto_ptr<SmallProgressMeasures> spm[2];
+    std::unique_ptr<SmallProgressMeasures> spm[2];
     spm[0].reset(new DenseSPM( game_, PLAYER_EVEN,
                                stats_, vmap_, vmap_size_ ));
     spm[1].reset(new DenseSPM( game_, PLAYER_ODD,
@@ -615,7 +618,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
     while (!half_solved)
     {
         mCRL2log(mcrl2::log::verbose) << "Switching to " << (player == 0 ? "normal" : "dual") << " game..." << std::endl;
-        std::auto_ptr<LiftingStrategy2> ls(lsf_->create2(game_, *spm[player]));
+        std::unique_ptr<LiftingStrategy2> ls(lsf_->create2(game_, *spm[player]));
         spm[player]->initialize_lifting_strategy(*ls);
 
         for ( long long work = game_.graph().V(); work > 0 && !half_solved;
@@ -633,7 +636,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
 
     // One game is solved; solve other game completely too:
     mCRL2log(mcrl2::log::verbose) << "Finishing " << (player == 0 ? "normal" : "dual") << " game..." << std::endl;
-    std::auto_ptr<LiftingStrategy2> ls(lsf_->create2(game_, *spm[player]));
+    std::unique_ptr<LiftingStrategy2> ls(lsf_->create2(game_, *spm[player]));
     spm[player]->initialize_lifting_strategy(*ls);
     while (spm[player]->solve_some(*ls) == 0)
     {

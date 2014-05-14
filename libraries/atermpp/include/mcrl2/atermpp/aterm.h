@@ -15,7 +15,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include <vector>
+// #include <vector>
 
 #include "boost/type_traits/is_base_of.hpp"
 #include "boost/static_assert.hpp"
@@ -46,6 +46,9 @@ class aterm
 
     template <class Term, class Iter, class ATermConverter>
     friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+
+    template <class Term, class Iter, class ATermConverter>
+    friend const detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
 
     friend const detail::_aterm* detail::address(const aterm &t);
   protected:

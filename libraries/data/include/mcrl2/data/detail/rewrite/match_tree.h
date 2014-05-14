@@ -12,6 +12,8 @@
 #define __MATCH_TREE_H
 
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {
@@ -297,13 +299,13 @@ class match_tree_F:public match_tree
       assert(isF());
     }
     
-    match_tree_F(const function_symbol& function, const match_tree& true_tree, const match_tree& false_tree):
+    match_tree_F(const data::function_symbol& function, const match_tree& true_tree, const match_tree& false_tree):
           match_tree(atermpp::aterm_appl(afunF(),function,true_tree,false_tree))
     {}
 
-    const function_symbol& function() const
+    const data::function_symbol& function() const
     {
-      return atermpp::aterm_cast<const function_symbol>((*this)[0]);
+      return atermpp::aterm_cast<const data::function_symbol>((*this)[0]);
     }
 
     const match_tree& true_tree() const

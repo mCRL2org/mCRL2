@@ -26,7 +26,7 @@ class RewriterProver: public Rewriter
 {
   public:
     BDD_Prover* prover_obj;
-    boost::shared_ptr<detail::Rewriter> rewr_obj;
+    std::shared_ptr<detail::Rewriter> rewr_obj;
 
     typedef Rewriter::substitution_type substitution_type;
 

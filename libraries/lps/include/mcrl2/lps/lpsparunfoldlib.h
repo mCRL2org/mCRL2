@@ -69,6 +69,8 @@ class lpsparunfold
     mcrl2::lps::specification algorithm(size_t parameter_at_index);
 
   private:
+    /// set of identifiers to use during fresh variable generation
+    mcrl2::data::set_identifier_generator m_identifier_generator;
 
     std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element >* m_cache;
 

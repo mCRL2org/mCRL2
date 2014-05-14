@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -339,7 +340,7 @@ void test_cabp()
   data::mutable_map_substitution<> sigma;
   pbes_expression t = parse_pbes_expression(expr, subst, p, sigma);
   pbesinst_algorithm algorithm(p.data());
-  custom_enumerate_quantifiers_rewriter& R = algorithm.rewriter();
+  enumerate_quantifiers_rewriter& R = algorithm.rewriter();
   pbes_expression z = R(t, sigma);
 }
 

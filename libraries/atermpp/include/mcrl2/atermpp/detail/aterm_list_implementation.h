@@ -33,7 +33,6 @@ term_list<Term> push_back(const term_list<Term> &l, const Term &el)
   for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
   {
     buffer[j]=i;
-    // buffer.push_back(i);  
   }
 
   term_list<Term> result;
@@ -168,14 +167,25 @@ namespace detail
   {
     BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
     BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-    std::vector<Term> temporary_store;  
-    temporary_store.reserve(64);
-    for(; first != last; ++first)
+
+    const size_t len=std::distance(first,last);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,Term, len);
+    Term *const buffer_begin=buffer;
+    Term* i=buffer_begin;
+    for(; first != last; ++first,++i)
     {
-      temporary_store.push_back(convert_to_aterm(*first));
+      // Placement new; The buffer is not properly initialised.
+      new (i) Term(convert_to_aterm(*first));
     }
 
-    return make_list_backward<Term>(temporary_store.begin(), temporary_store.end(), do_not_convert_term<Term>());
+    const _aterm* result=aterm::empty_aterm_list();
+    for( ; i!=buffer_begin ; )
+    {
+      --i;
+      result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,aterm_cast<term_list<Term> >(aterm(result)));
+      (*i).~Term(); // Destroy the elements in the buffer explicitly.
+    }
+    return result; 
   }
 
 }

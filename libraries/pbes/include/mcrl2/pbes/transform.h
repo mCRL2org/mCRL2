@@ -23,7 +23,7 @@ void pbes_transform(pbes& x, unsigned int iterations, bool mu_value = false, boo
 {
   propositional_variable_substitution sigma;
   propositional_variable_substitution sigma_final;
-  typedef typename core::term_traits<pbes_expression> tr;
+  typedef core::term_traits<pbes_expression> tr;
 
   for (auto i = x.equations().begin(); i != x.equations().end(); ++i)
   {

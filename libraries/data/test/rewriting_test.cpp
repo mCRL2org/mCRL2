@@ -55,9 +55,9 @@ void data_rewrite_test(Rewriter& R, data_expression const& input, data_expressio
               << "expected " << data::pp(expected_output) << std::endl
               << "output " << data::pp(output) << std::endl
               << " -- term representations -- " << std::endl
-              << "input    " << input << std::endl
-              << "expected " << expected_output << std::endl
-              << "R(input) " << output << std::endl;
+              << "input    " << atermpp::aterm(input) << std::endl
+              << "expected " << atermpp::aterm(expected_output) << std::endl
+              << "R(input) " << atermpp::aterm(output) << std::endl;
   }
 }
 
@@ -1205,6 +1205,140 @@ BOOST_AUTO_TEST_CASE(rewrite_rule_for_higher_order_functions)
     data_rewrite_test(R, e, f);
   }
 }  
+
+BOOST_AUTO_TEST_CASE(check_whether_counting_of_elements_in_an_FBag_works_properly)
+{
+  std::string s(
+  "map f:FBag(Bool);\n"
+  "    g:FBag(Nat);\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("{true:7,false:8}-{true:4,false:4}", specification));
+    data::data_expression f(parse_data_expression("{false:4,true:3}", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("{false:14,true:8}-{true:29,false:4}", specification));
+    f(parse_data_expression("{false:10}", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("{0:14,7:8}-{0:29,7:4}", specification));
+    f(parse_data_expression("{7:4}", specification));
+    data_rewrite_test(R, e, R(f));
+  }
+}  
+
+
+BOOST_AUTO_TEST_CASE(square_root_test)
+{
+  std::string s(
+  "map f:Nat;\n"
+  "eqn f=sqrt(1);\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("Nat2Pos(sqrt(2578))", specification));
+    data::data_expression f(parse_data_expression("50", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(0)", specification));
+    f(parse_data_expression("0", specification));
+    data_rewrite_test(R, e, f);
+
+    e(parse_data_expression("sqrt(1)", specification));
+    f(parse_data_expression("Pos2Nat(1)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(2)", specification));
+    f(parse_data_expression("Pos2Nat(1)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(3)", specification));
+    f(parse_data_expression("Pos2Nat(1)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(4)", specification));
+    f(parse_data_expression("Pos2Nat(2)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(5)", specification));
+    f(parse_data_expression("Pos2Nat(2)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(6)", specification));
+    f(parse_data_expression("Pos2Nat(2)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(7)", specification));
+    f(parse_data_expression("Pos2Nat(2)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(8)", specification));
+    f(parse_data_expression("Pos2Nat(2)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(9)", specification));
+    f(parse_data_expression("Pos2Nat(3)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(10)", specification));
+    f(parse_data_expression("Pos2Nat(3)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(11)", specification));
+    f(parse_data_expression("Pos2Nat(3)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(12)", specification));
+    f(parse_data_expression("Pos2Nat(3)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(13)", specification));
+    f(parse_data_expression("Pos2Nat(3)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(14)", specification));
+    f(parse_data_expression("Pos2Nat(3)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(15)", specification));
+    f(parse_data_expression("Pos2Nat(3)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(16)", specification));
+    f(parse_data_expression("Pos2Nat(4)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(17)", specification));
+    f(parse_data_expression("Pos2Nat(4)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(18)", specification));
+    f(parse_data_expression("Pos2Nat(4)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(19)", specification));
+    f(parse_data_expression("Pos2Nat(4)", specification));
+    data_rewrite_test(R, e, R(f));
+
+    e(parse_data_expression("sqrt(20)", specification));
+    f(parse_data_expression("Pos2Nat(4)", specification));
+    data_rewrite_test(R, e, R(f));
+  }
+}
+
 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

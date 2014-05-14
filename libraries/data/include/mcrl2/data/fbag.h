@@ -1108,8 +1108,8 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb), difference(s, vb, empty(s)), vb));
         result.push_back(data_equation(atermpp::make_vector(vc), difference(s, empty(s), vc), empty(s)));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vp), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vp, vc)), difference(s, vb, vc)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vp, vq), less(vp, vq), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_pos::monus_with_carry(sort_bool::false_(), vq, vp), difference(s, vb, vc))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vp, vq), less(vq, vp), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_pos::monus_with_carry(sort_bool::false_(), vp, vq), difference(s, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vp, vq), less(vp, vq), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), difference(s, vb, vc)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vp, vq), less(vq, vp), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_nat::nat2pos(sort_nat::gte_subtract_with_borrow(sort_bool::false_(), vp, vq)), difference(s, vb, vc))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(vd, ve), difference(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, vd, vp, difference(s, vb, cons_(s, ve, vq, vc)))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(ve, vd), difference(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, ve, vq, difference(s, cons_(s, vd, vp, vb), vc))));
         result.push_back(data_equation(atermpp::make_vector(vb), union_(s, vb, empty(s)), vb));

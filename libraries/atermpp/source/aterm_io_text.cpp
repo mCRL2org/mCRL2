@@ -100,15 +100,27 @@ static void write_string_with_escape_symbols(const std::string &s, std::ostream&
   }
 }
 
-static void topWriteToStream(const aterm &t, std::ostream& os);
-
 static void writeToStream(const aterm &t, std::ostream& os)
 {
   if (t.type_is_int())
   {
     os << aterm_int(t).value();
   }
-  else if (t.type_is_appl())
+  else if (t.type_is_list())
+  {
+    os << "[";
+    const aterm_list& list = aterm_cast<aterm_list>(t);
+    for(aterm_list::const_iterator i=list.begin(); i!=list.end(); ++i)
+    {
+      if (i!=list.begin())
+      {
+        os << ",";
+      }
+      writeToStream(*i, os);
+    }
+    os << "]";
+  }
+  else // t.type_is_appl()
   {
     const aterm_appl &appl = aterm_cast<aterm_appl>(t);
     const function_symbol sym = appl.function();
@@ -116,43 +128,14 @@ static void writeToStream(const aterm &t, std::ostream& os)
     if (sym.arity() > 0)
     {
       os << "(";
-      topWriteToStream(appl[0], os);
+      writeToStream(appl[0], os);
       for (size_t i = 1; i < sym.arity(); i++)
       {
         os << ",";
-        topWriteToStream(appl[i], os);
+        writeToStream(appl[i], os);
       }
       os << ")";
     }
-  }
-  else if (t.type_is_list())
-  {
-    aterm_list list = aterm_cast<aterm_list>(t);
-    if (!list.empty())
-    {
-      topWriteToStream(list.front(), os);
-      list = list.tail();
-      while (!list.empty())
-      {
-        os << ",";
-        topWriteToStream(list.front(), os);
-        list = list.tail();
-      }
-    }
-  }
-}
-
-static void topWriteToStream(const aterm &t, std::ostream& os)
-{
-  if (t.type_is_list())
-  {
-    os << "[";
-    writeToStream(t, os);
-    os << "]";
-  }
-  else
-  {
-    writeToStream(t, os);
   }
 }
 
@@ -163,14 +146,14 @@ static void topWriteToStream(const aterm &t, std::ostream& os)
 std::ostream& operator<<(std::ostream& out, const aterm& t)
 {
   aterm_io_init();
-  topWriteToStream(t, out);
+  writeToStream(t, out);
   return out;
 }
 
 void write_term_to_text_stream(const aterm &t, std::ostream &os)
 {
   aterm_io_init();
-  topWriteToStream(t,os);
+  writeToStream(t,os);
 }
 
 /**

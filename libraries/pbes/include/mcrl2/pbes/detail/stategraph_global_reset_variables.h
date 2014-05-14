@@ -44,7 +44,15 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       return f(x);
     }
 
-    void compute_control_flow_marking(control_flow_graph& G)
+    // returns the parameters of the propositional variable with name X
+    std::set<data::variable> propvar_parameters(const core::identifier_string& X) const
+    {
+      auto const& eq_X = *find_equation(m_pbes, X);
+      auto const& d_X = eq_X.parameters();
+      return std::set<data::variable>(d_X.begin(), d_X.end());
+    }
+
+    void compute_global_control_flow_marking(control_flow_graph& G)
     {
       mCRL2log(log::debug, "stategraph") << "--- compute initial marking ---" << std::endl;
       // initialization
@@ -240,24 +248,26 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       // TODO: merge the two rewriters?
       if (m_simplify)
       {
-        pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
+        pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
         pbes_system::pbes_rewrite(p, pbesr);
       }
     }
 
-    global_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
-      : stategraph_global_algorithm(p, rewrite_strategy),
-        m_original_pbes(p)
+    global_reset_variables_algorithm(const pbes& p, const pbesstategraph_options& options)
+      : stategraph_global_algorithm(p, options),
+        m_original_pbes(p),
+        m_simplify(options.simplify)
     {}
 
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes run(bool simplify = true)
+    pbes run()
     {
       super::run();
-      m_simplify = simplify;
-      compute_control_flow_marking(m_control_flow_graph);
+      start_timer("compute_global_control_flow_marking");
+      compute_global_control_flow_marking(m_control_flow_graph);
+      finish_timer("compute_global_control_flow_marking");
       mCRL2log(log::verbose) << "Computed control flow marking" << std::endl;
       mCRL2log(log::debug) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
       pbes result = m_original_pbes;

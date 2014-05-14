@@ -9,6 +9,7 @@
 /// \file replace_test.cpp
 /// \brief Add your file description here.
 
+#include <vector>
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>

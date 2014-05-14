@@ -13,6 +13,7 @@
 #define MCRL2_LPSREALELM_REALELM_H
 
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 
 #include "comp.h"

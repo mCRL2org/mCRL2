@@ -16,8 +16,10 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
+#include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -35,7 +37,7 @@ class predicate_variable
   protected:
     propositional_variable_instantiation X;
     pbes_expression m_guard;
-    data::mutable_map_substitution<> m_sigma;
+    data::rewriter::substitution_type m_sigma;
     std::map<std::size_t, data::data_expression> m_source; // source[j] = e <=> source(X, i, j) = e
     std::map<std::size_t, data::data_expression> m_dest;   // dest[j] = c   <=> dest(X, i, j) = c
     std::map<std::size_t, std::size_t> m_copy;             // copy[j] = k   <=> copy(X, i, j) = k
@@ -63,7 +65,7 @@ class predicate_variable
       return X.name();
     }
 
-    const data::mutable_map_substitution<>& sigma() const
+    const data::rewriter::substitution_type& sigma() const
     {
       return m_sigma;
     }
@@ -101,7 +103,7 @@ class predicate_variable
     void simplify_guard()
     {
       data::detail::simplify_rewriter r;
-      stategraph_simplifying_rewriter<pbes_expression, data::detail::simplify_rewriter> R(r);
+      stategraph_simplify_rewriter<data::detail::simplify_rewriter> R(r);
       m_guard = R(m_guard);
     }
 };
@@ -150,11 +152,21 @@ class stategraph_equation: public pbes_equation
               result[vright] = left;
             }
           }
-          // TODO: handle conjuncts b and !b, with b a variable with sort Bool
-          //else if (data::is_variable(v_i) && sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
-          //{
-          //  sigma[data::variable(v_i)] = sort_bool::true_();
-          //}
+          // handle conjuncts b and !b, with b a variable with sort Bool
+          else if (data::is_variable(v_i) && data::sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
+          {
+            const data::variable& v = core::static_down_cast<const data::variable&>(v_i);
+            result[v] = data::sort_bool::true_();
+          }
+          else if (data::sort_bool::is_not_application(v_i))
+          {
+            data::data_expression narg(data::sort_bool::arg(v_i));
+            if (data::is_variable(narg) && data::sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(narg)) != d.end())
+            {
+              const data::variable& v = core::static_down_cast<const data::variable&>(narg);
+              result[v] = data::sort_bool::false_();
+            }
+          }
         }
       }
       mCRL2log(log::debug2, "stategraph") << "  computing source: expression = " << x << ", d_X = " << core::detail::print_list(d) << ", result = " << core::detail::print_map(result) << std::endl;
@@ -370,7 +382,7 @@ class stategraph_equation: public pbes_equation
         }
 
         // sigma
-        out << "        sigma = " << data::print_substitution(m_predvars[i].sigma()) << std::endl;
+        out << "        sigma = " << m_predvars[i].sigma() << std::endl;
 
         // dest
         const std::map<std::size_t, data::data_expression>& dest = m_predvars[i].dest();

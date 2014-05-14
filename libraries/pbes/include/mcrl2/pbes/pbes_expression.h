@@ -764,6 +764,14 @@ bool is_universal_false(const atermpp::aterm_appl& x)
 /// \brief Test for a conjunction
 /// \param t A PBES expression or a data expression
 /// \return True if it is a conjunction
+inline bool is_universal_not(const pbes_expression& t)
+{
+  return is_pbes_not(t) || data::sort_bool::is_not_application(t);
+}
+
+/// \brief Test for a conjunction
+/// \param t A PBES expression or a data expression
+/// \return True if it is a conjunction
 inline bool is_universal_and(const pbes_expression& t)
 {
   return is_pbes_and(t) || data::sort_bool::is_and_application(t);
@@ -1711,9 +1719,9 @@ struct term_traits<pbes_system::pbes_expression>
   /// \brief Test if a term is constant
   /// \return True if the term is constant
   static inline
-  bool is_constant(const term_type& /* t */)
+  bool is_constant(const term_type& t)
   {
-    return false;
+    return pbes_system::find_free_variables(t).empty();
   }
 
   /// \brief Pretty print function

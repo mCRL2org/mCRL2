@@ -319,12 +319,17 @@ class lts
     }
 
     /** \brief Clear the transitions of an lts.
+     *  \param[n] An optional parameter that indicates how
+     *            many transitions are to be expected. This is
+     *            used to set the reserved size of a vector, to
+     *            prevent unnecessary resizing.
      *  \details This resets the transition vector in an lts, but
      *          leaves other related items, such as state or
      *          action labels untouched. */
-    void clear_transitions()
+    void clear_transitions(const size_t n=0)
     {
       m_transitions = std::vector<transition>();
+      m_transitions.reserve(n);
     }
 
     /** \brief Clear the action labels of an lts.

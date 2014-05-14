@@ -15,9 +15,9 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/invariant_checker.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2

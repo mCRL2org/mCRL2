@@ -13,7 +13,7 @@
 #define MCRL2_LPS_RESOLVE_NAME_CLASHES_H
 
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/substitutions.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/replace.h"
 

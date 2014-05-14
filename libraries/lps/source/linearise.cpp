@@ -48,6 +48,8 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/map_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 //mCRL2 processes
 #include "mcrl2/process/find.h"

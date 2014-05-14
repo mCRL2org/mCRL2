@@ -82,7 +82,7 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
   void leave(const exists& x)
   {
     const data::variable_list& v = x.variables();
-    for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (auto i = v.begin(); i != v.end(); ++i)
     {
       top().erase(*i);
     }
@@ -91,7 +91,7 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
   void leave(const forall& x)
   {
     const data::variable_list& v = x.variables();
-    for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (auto i = v.begin(); i != v.end(); ++i)
     {
       top().erase(*i);
     }

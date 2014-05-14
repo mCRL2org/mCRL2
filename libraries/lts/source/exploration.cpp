@@ -528,7 +528,10 @@ bool lps2lts_algorithm::save_trace(const data::data_expression_vector& state1, c
   }
 }
 
-bool lps2lts_algorithm::search_divergence(const data::data_expression_vector& state, std::set<data::data_expression_vector>& current_path, std::set<data::data_expression_vector>& visited)
+bool lps2lts_algorithm::search_divergence(
+              const data::data_expression_vector& state, 
+              std::set<data::data_expression_vector>& current_path, 
+              std::set<data::data_expression_vector>& visited)
 {
   current_path.insert(state);
 
@@ -541,7 +544,7 @@ bool lps2lts_algorithm::search_divergence(const data::data_expression_vector& st
     {
       new_states.push_back(j->internal_state());
     }
-    else if (visited.count(j->internal_state()) != 0)
+    else if (current_path.count(j->internal_state()) != 0)
     {
       return true;
     }
@@ -555,6 +558,7 @@ bool lps2lts_algorithm::search_divergence(const data::data_expression_vector& st
     }
   }
 
+  assert(current_path.count(state)==1);
   current_path.erase(state);
   return false;
 }

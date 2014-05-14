@@ -104,7 +104,6 @@ struct add_traverser_boolean_expressions: public Traverser<Derived>
   void operator()(const bes::boolean_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    bes::boolean_expression result;
     if (bes::is_true(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::true_>(x));
@@ -229,7 +228,6 @@ struct add_traverser_boolean_variables: public Traverser<Derived>
   void operator()(const bes::boolean_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    bes::boolean_expression result;
     if (bes::is_true(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::true_>(x));
