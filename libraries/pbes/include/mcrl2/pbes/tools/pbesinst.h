@@ -52,7 +52,7 @@ bool pbesinst(const std::string& input_filename,
     {
       pbes_system::normalize(p);
     }
-    pbesinst_algorithm algorithm(p.data(), rewrite_strategy, false, false);
+    pbesinst_algorithm algorithm(p.data(), rewrite_strategy, false);
     algorithm.run(p);
     p = algorithm.get_result();
   }
