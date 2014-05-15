@@ -299,18 +299,6 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     assert(top().check_guards(x, R));
   }
 
-  void leave(const pbes_system::true_& x)
-  {
-    push(guard_expression(x));
-    assert(top().check_guards(x, R));
-  }
-
-  void leave(const pbes_system::false_& x)
-  {
-    push(guard_expression(x));
-    assert(top().check_guards(x, R));
-  }
-
   void leave(const pbes_system::not_& x)
   {
     top().negate();

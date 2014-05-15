@@ -333,16 +333,6 @@ struct reset_traverser: public pbes_expression_traverser<reset_traverser>
     push(result);
   }
 
-  void leave(const pbes_system::true_& x)
-  {
-    push(x);
-  }
-
-  void leave(const pbes_system::false_& x)
-  {
-    push(x);
-  }
-
   void leave(const pbes_system::not_& /* x */)
   {
     pbes_expression operand = pop();

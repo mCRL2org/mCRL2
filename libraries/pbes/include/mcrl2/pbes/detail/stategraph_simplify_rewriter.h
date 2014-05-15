@@ -193,16 +193,6 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
     return post_process(super::operator()(data::detail::simplify(x)));
   }
 
-  pbes_expression operator()(const true_& x)
-  {
-    return post_process(super::operator()(x));
-  }
-
-  pbes_expression operator()(const false_& x)
-  {
-    return post_process(super::operator()(x));
-  }
-
   pbes_expression operator()(const not_& x)
   {
     return post_process(super::operator()(x));

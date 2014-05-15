@@ -217,11 +217,6 @@ class pbes_type_checker:public data::data_type_checker
           return d;
         }
 
-        if (is_pbes_true(PBESTerm) || is_pbes_false(PBESTerm))
-        {
-          return PBESTerm;
-        }
-
         if (is_pbes_not(PBESTerm))
         {
           const not_& argument=aterm_cast<const not_>(PBESTerm);

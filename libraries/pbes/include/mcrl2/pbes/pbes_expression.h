@@ -69,8 +69,6 @@ typedef std::vector<pbes_expression>    pbes_expression_vector;
 
 // prototypes
 inline bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x);
-inline bool is_true(const atermpp::aterm_appl& x);
-inline bool is_false(const atermpp::aterm_appl& x);
 inline bool is_not(const atermpp::aterm_appl& x);
 inline bool is_and(const atermpp::aterm_appl& x);
 inline bool is_or(const atermpp::aterm_appl& x);
@@ -86,8 +84,6 @@ bool is_pbes_expression(const atermpp::aterm_appl& x)
 {
   return data::is_data_expression(x) ||
          pbes_system::is_propositional_variable_instantiation(x) ||
-         pbes_system::is_true(x) ||
-         pbes_system::is_false(x) ||
          pbes_system::is_not(x) ||
          pbes_system::is_and(x) ||
          pbes_system::is_or(x) ||
@@ -210,98 +206,6 @@ std::ostream& operator<<(std::ostream& out, const propositional_variable_instant
 
 /// \brief swap overload
 inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \brief The value true for pbes expressions
-class true_: public pbes_expression
-{
-  public:
-    /// \brief Default constructor.
-    true_()
-      : pbes_expression(core::detail::default_values::PBESTrue)
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit true_(const atermpp::aterm& term)
-      : pbes_expression(term)
-    {
-      assert(core::detail::check_term_PBESTrue(*this));
-    }
-};
-
-/// \brief Test for a true expression
-/// \param x A term
-/// \return True if \a x is a true expression
-inline
-bool is_true(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::PBESTrue;
-}
-
-// prototype declaration
-std::string pp(const true_& x);
-
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const true_& x)
-{
-  return out << pbes_system::pp(x);
-}
-
-/// \brief swap overload
-inline void swap(true_& t1, true_& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \brief The value false for pbes expressions
-class false_: public pbes_expression
-{
-  public:
-    /// \brief Default constructor.
-    false_()
-      : pbes_expression(core::detail::default_values::PBESFalse)
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit false_(const atermpp::aterm& term)
-      : pbes_expression(term)
-    {
-      assert(core::detail::check_term_PBESFalse(*this));
-    }
-};
-
-/// \brief Test for a false expression
-/// \param x A term
-/// \return True if \a x is a false expression
-inline
-bool is_false(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::PBESFalse;
-}
-
-// prototype declaration
-std::string pp(const false_& x);
-
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const false_& x)
-{
-  return out << pbes_system::pp(x);
-}
-
-/// \brief swap overload
-inline void swap(false_& t1, false_& t2)
 {
   t1.swap(t2);
 }
@@ -678,20 +582,34 @@ std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expre
 std::set<data::variable> find_free_variables(const pbes_system::pbes_expression& x);
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v);
 
-/// \brief Returns true if the term t is equal to true
-/// \param t A PBES expression
-/// \return True if the term t is equal to true
-inline bool is_pbes_true(const pbes_expression& t)
+/// \return Returns the value true
+inline
+pbes_expression true_()
 {
-  return pbes_system::is_true(t);
+  return data::sort_bool::true_();
 }
 
-/// \brief Returns true if the term t is equal to false
-/// \param t A PBES expression
-/// \return True if the term t is equal to false
-inline bool is_pbes_false(const pbes_expression& t)
+/// \return Returns the value false
+inline
+pbes_expression false_()
 {
-  return pbes_system::is_false(t);
+  return data::sort_bool::false_();
+}
+
+/// \brief Test for the value true
+/// \param t A PBES expression
+/// \return True if it is the value \p true
+inline bool is_true(const pbes_expression& t)
+{
+  return data::sort_bool::is_true_function_symbol(t);
+}
+
+/// \brief Test for the value false
+/// \param t A PBES expression
+/// \return True if it is the value \p false
+inline bool is_false(const pbes_expression& t)
+{
+  return data::sort_bool::is_false_function_symbol(t);
 }
 
 /// \brief Returns true if the term t is a not expression
@@ -701,7 +619,6 @@ inline bool is_pbes_not(const pbes_expression& t)
 {
   return pbes_system::is_not(t);
 }
-
 
 /// \brief Returns true if the term t is an and expression
 /// \param t A PBES expression
@@ -741,24 +658,6 @@ inline bool is_pbes_forall(const pbes_expression& t)
 inline bool is_pbes_exists(const pbes_expression& t)
 {
   return pbes_system::is_exists(t);
-}
-
-/// \brief Test for a true expression (either PBES or data)
-/// \param x A term
-/// \return True if \a x is a true expression
-inline
-bool is_universal_true(const atermpp::aterm_appl& x)
-{
-  return is_true(x) || data::sort_bool::is_true_function_symbol(x);
-}
-
-/// \brief Test for a false expression (either PBES or data)
-/// \param x A term
-/// \return True if \a x is a false expression
-inline
-bool is_universal_false(const atermpp::aterm_appl& x)
-{
-  return is_false(x) || data::sort_bool::is_false_function_symbol(x);
 }
 
 /// \brief Test for a conjunction
@@ -981,7 +880,7 @@ namespace pbes_expr
 inline
 pbes_expression true_()
 {
-  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESTrue()));
+  return pbes_system::true_();
 }
 
 /// \brief Make the value false
@@ -989,7 +888,7 @@ pbes_expression true_()
 inline
 pbes_expression false_()
 {
-  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESFalse()));
+  return pbes_system::false_();
 }
 
 /// \brief Make a negation
@@ -1257,7 +1156,7 @@ namespace combined_access
 /// \return True if it is the value \p true
 inline bool is_true(const pbes_expression& t)
 {
-  return is_pbes_true(t) || data::sort_bool::is_true_function_symbol(t);
+  return data::sort_bool::is_true_function_symbol(t);
 }
 
 /// \brief Test for the value false
@@ -1265,7 +1164,7 @@ inline bool is_true(const pbes_expression& t)
 /// \return True if it is the value \p false
 inline bool is_false(const pbes_expression& t)
 {
-  return is_pbes_false(t) || data::sort_bool::is_false_function_symbol(t);
+  return data::sort_bool::is_false_function_symbol(t);
 }
 
 /// \brief Test for a negation
@@ -1387,7 +1286,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type true_()
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESTrue()));
+    return pbes_system::true_();
   }
 
   /// \brief Make the value false
@@ -1395,7 +1294,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type false_()
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESFalse()));
+    return pbes_system::false_();
   }
 
   /// \brief Make a negation
@@ -1497,7 +1396,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_true(const term_type& t)
   {
-    return pbes_system::is_pbes_true(t) || data::sort_bool::is_true_function_symbol(t);
+    return data::sort_bool::is_true_function_symbol(t);
   }
 
   /// \brief Test for the value false
@@ -1506,7 +1405,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_false(const term_type& t)
   {
-    return pbes_system::is_pbes_false(t) || data::sort_bool::is_false_function_symbol(t);
+    return data::sort_bool::is_false_function_symbol(t);
   }
 
   /// \brief Test for a negation

@@ -1156,39 +1156,28 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
 
   pbes_expression result;
 
-  if (is_pbes_true(p))
-
-  {
-    // p is True
-    result = p;
-  }
-  else if (is_pbes_false(p))
-  {
-    // p is False
-    result = p;
-  }
-  else if (is_pbes_and(p))
+  if (is_pbes_and(p))
   {
     // p = and(left, right)
     //Rewrite left and right as far as possible
     pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), R,sigma);
-    if (is_pbes_false(l))
+    if (is_false(l))
     {
-      result = pbes_expr::false_();
+      result = pbes_system::false_();
     }
     else
     {
       pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), R,sigma);
       //Options for left and right
-      if (is_pbes_false(rt))
+      if (is_false(rt))
       {
-        result = pbes_expr::false_();
+        result = pbes_system::false_();
       }
-      else if (is_pbes_true(l))
+      else if (is_true(l))
       {
         result = rt;
       }
-      else if (is_pbes_true(rt))
+      else if (is_true(rt))
       {
         result = l;
       }
@@ -1207,22 +1196,22 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     // p = or(left, right)
     //Rewrite left and right as far as possible
     pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), R,sigma);
-    if (is_pbes_true(l))
+    if (is_true(l))
     {
       result = pbes_expr::true_();
     }
     else
     {
       pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), R,sigma);
-      if (is_pbes_true(rt))
+      if (is_true(rt))
       {
         result = pbes_expr::true_();
       }
-      else if (is_pbes_false(l))
+      else if (is_false(l))
       {
         result = rt;
       }
-      else if (is_pbes_false(rt))
+      else if (is_false(rt))
       {
         result = l;
       }
@@ -1241,22 +1230,22 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     // p = implies(left, right)
     //Rewrite left and right as far as possible
     pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), R,sigma);
-    if (is_pbes_false(l))
+    if (is_false(l))
     {
       result = pbes_expr::true_();
     }
     else
     {
       pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), R,sigma);
-      if (is_pbes_true(rt))
+      if (is_true(rt))
       {
         result = pbes_expr::true_();
       }
-      else if (is_pbes_true(l))
+      else if (is_true(l))
       {
         result = rt;
       }
-      else if (is_pbes_false(rt))
+      else if (is_false(rt))
       {
         result = pbes_expr::not_(l);
       }
@@ -1273,11 +1262,11 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_pbes_not(p))
   {
     pbes_expression l = pbes_expression_rewrite_and_simplify(arg(p), R,sigma);
-    if (is_pbes_false(l))
+    if (is_false(l))
     {
        result = pbes_expr::true_();
     }
-    else if (is_pbes_true(l))
+    else if (is_true(l))
     {
        result = pbes_expr::false_();
     }

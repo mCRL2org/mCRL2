@@ -229,7 +229,7 @@ void test_is_pfnf()
   BOOST_CHECK(pbes_system::detail::is_pfnf_imp(x));
   std::vector<pbes_expression> v = pbes_system::detail::pfnf_implications(x);
   BOOST_CHECK(v.size() == 1);
-  BOOST_CHECK(pbes_system::pp(v[0]) == "true => X(0) || X(1)");
+  BOOST_CHECK(pbes_system::pp(v[0]) == "val(true) => X(0) || X(1)");
 
   x = p.equations()[3].formula();
   BOOST_CHECK(pbes_system::detail::is_pfnf_or(x));

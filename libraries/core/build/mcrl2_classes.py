@@ -200,8 +200,6 @@ pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_e
 PBES_EXPRESSION_CLASSES = r'''
 pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PBExpr            | A pbes expression
 propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECUIs | PropVarInst       | A propositional variable instantiation
-true_()                                                                                                                 : public pbes_system::pbes_expression | EI    | PBESTrue          | The value true for pbes expressions
-false_()                                                                                                                : public pbes_system::pbes_expression | EI    | PBESFalse         | The value false for pbes expressions
 not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | EI    | PBESNot           | The not operator for pbes expressions
 and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | EI    | PBESAnd           | The and operator for pbes expressions
 or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESOr            | The or operator for pbes expressions

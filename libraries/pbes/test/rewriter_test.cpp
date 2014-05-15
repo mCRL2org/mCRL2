@@ -167,11 +167,11 @@ struct equal_to: public std::binary_function<pbes_expression, pbes_expression, b
     {
       return true;
     }
-    if (is_universal_true(x) && is_universal_true(y))
+    if (is_true(x) && is_true(y))
     {
       return true;
     }
-    if (is_universal_false(x) && is_universal_false(y))
+    if (is_false(x) && is_false(y))
     {
       return true;
     }

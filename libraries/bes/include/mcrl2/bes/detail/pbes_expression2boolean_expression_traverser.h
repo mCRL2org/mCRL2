@@ -73,16 +73,6 @@ struct pbes_expression2boolean_expression_traverser: public pbes_system::pbes_ex
     }
   }
 
-  void leave(const pbes_system::true_&)
-  {
-    push(br::true_());
-  }
-
-  void leave(const pbes_system::false_&)
-  {
-    push(br::false_());
-  }
-
   void leave(const pbes_system::not_&)
   {
     bes::boolean_expression b = pop();

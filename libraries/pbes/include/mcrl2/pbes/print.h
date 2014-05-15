@@ -152,20 +152,6 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::true_& x)
-  {
-    derived().enter(x);
-    derived().print("true");
-    derived().leave(x);
-  }
-
-  void operator()(const pbes_system::false_& x)
-  {
-    derived().enter(x);
-    derived().print("false");
-    derived().leave(x);
-  }
-
   void operator()(const pbes_system::not_& x)
   {
     derived().enter(x);

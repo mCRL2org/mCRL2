@@ -111,7 +111,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
           mCRL2log(log::debug, "stategraph") << "Y(e) = " << PV << std::endl;
           pbes_expression g = pbesr(PV.guard(), sigma);
           mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(PV.guard()) << sigma << " = " << g << std::endl;
-          if (is_universal_false(g))
+          if (is_false(g))
           {
             continue;
           }

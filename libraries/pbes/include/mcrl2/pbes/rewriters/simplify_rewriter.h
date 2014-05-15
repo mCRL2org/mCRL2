@@ -31,16 +31,6 @@ struct add_simplify: public Builder<Derived>
 
   typedef core::term_traits<pbes_expression> tr;
 
-  pbes_expression operator()(const true_&)
-  {
-    return tr::true_();
-  }
-
-  pbes_expression operator()(const false_&)
-  {
-    return tr::false_();
-  }
-
   pbes_expression operator()(const not_& x)
   {
     return utilities::optimized_not(super::operator()(x.operand()));
