@@ -11,7 +11,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Monday, January 21, 2013 17:27:12}
-%TCIDATA{LastRevised=Thursday, May 15, 2014 09:29:37}
+%TCIDATA{LastRevised=Thursday, May 15, 2014 13:07:45}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -41,6 +41,7 @@
 \input{include/tcilatex}
 \providecommand{\concat}{\ensuremath{\hspace{0.12em}\raisebox{0.2ex}{\text{\scriptsize+}\!\text{\scriptsize+}}\hspace{0.12em}}}
 
+\input{tcilatex}
 
 \begin{document}
 
@@ -85,13 +86,13 @@ for $i=1,\cdots ,m$ \\
 \qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi
 )[v_{1}:=c(y_{1},\ldots ,y_{m})]$ \\ 
 \qquad \qquad \qquad \qquad \qquad $\text{\textbf{if }}\varphi ^{\prime
-}\neq \varphi \text{ \textbf{then}}$ \\ 
+}=\varphi \text{ \textbf{then}}$ \\ 
+\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
+[v_{2},\ldots ,v_{n}],\varphi ^{\prime }\right\rangle ]$ \\ 
+\qquad \qquad \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
 \qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
 [v_{2},\ldots ,v_{n},y_{1},\ldots ,y_{m}],\varphi ^{\prime }\right\rangle ]$
 \\ 
-\qquad \qquad \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
-\qquad \qquad \qquad \qquad \qquad \qquad $\Omega :=\Omega \cup \left\{
-\varphi \right\} $ \\ 
 \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
 \qquad \qquad \qquad \qquad $\text{\textbf{error}}$ \\ 
 $\text{\textbf{return}}$ $\Omega $%
@@ -109,7 +110,7 @@ do} \\
 \qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi )[v_{1}:=e]
 $ \\ 
 \qquad \qquad \qquad \qquad \qquad $\text{\textbf{if }}\varphi ^{\prime
-}\neq \varphi \text{ \textbf{then}}$ \\ 
+}=\varphi \text{ \textbf{then}}$ \\ 
 \qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
 [v_{2},\ldots ,v_{n}],\varphi ^{\prime }\right\rangle ]$ \\ 
 \qquad \qquad \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 

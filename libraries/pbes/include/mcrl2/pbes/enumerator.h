@@ -66,20 +66,6 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element& p)
 
 typedef std::deque<enumerator_list_element> enumerator_list;
 
-// Applies the substitution sigma to the expression x. The list v contains variables that occur freely in x.
-inline
-pbes_expression apply_enumerator_substitution(const data::variable_list& v, const pbes_expression& x, const data::enumerator_substitution& sigma)
-{
-  data::enumerator_substitution sigma_copy = sigma;
-  sigma_copy.revert();
-  data::mutable_map_substitution<> rho;
-  for (auto i = v.begin(); i != v.end(); ++i)
-  {
-    rho[*i] = sigma_copy(*i);
-  }
-  return pbes_system::replace_variables(x, rho);
-}
-
 struct sort_name_generator
 {
   data::set_identifier_generator& id_generator;
@@ -194,8 +180,9 @@ class enumerator_algorithm
                 pbes_expression phi1 = pbes_system::replace_variables(Rphi, data::variable_assignment(v1, cy));
                 if (phi1 == phi)
                 {
-                  mCRL2log(log::debug) << "  solution " << phi1 << std::endl;
-                  return phi1;
+                  enumerator_list_element p(vtail, phi1, sigma);
+                  mCRL2log(log::debug) << "  add " << p << " with " << v1 << " := " << cy << std::endl;
+                  P.push_back(p);
                 }
                 else
                 {
@@ -208,17 +195,9 @@ class enumerator_algorithm
               {
                 sigma.add_assignment(v1, c);
                 pbes_expression phi1 = pbes_system::replace_variables(Rphi, data::variable_assignment(v1, c));
-                if (phi1 == phi)
-                {
-                  mCRL2log(log::debug) << "  solution " << phi1 << std::endl;
-                  return phi1;
-                }
-                else
-                {
-                  enumerator_list_element p(vtail, phi1, sigma);
-                  mCRL2log(log::debug) << "  add " << p  << " with " << v1 << " := " << c << std::endl;
-                  P.push_back(p);
-                }
+                enumerator_list_element p(vtail, phi1, sigma);
+                mCRL2log(log::debug) << "  add " << p  << " with " << v1 << " := " << c << std::endl;
+                P.push_back(p);
               }
             }
           }

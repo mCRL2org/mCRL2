@@ -282,6 +282,7 @@ void test_enumerate_quantifiers_rewriter()
   enumerate_quantifiers_rewriter R(datar, dataspec);
 
   // test_rewriters(N(R), N(r),  "(Y(0) && Y(1)) => (Y(1) && Y(0))"                                , "true");
+  test_rewriters(N(R), N(r),  "forall n, m: Nat. val(n > 3) || val(b)"                          , "val(b)");
   test_rewriters(N(R), N(r),  "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "Y(2) && Y(1) && Y(3) && Y(0)");
   test_rewriters(N(R), N(r),  "(Y(0) && Y(1)) => (Y(0) && Y(1))"                                , "true");
   test_rewriters(N(R), N(r),  "exists b: Bool. val(if(b, false, b))"                            , "false");
