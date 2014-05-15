@@ -11,7 +11,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Monday, January 21, 2013 17:27:12}
-%TCIDATA{LastRevised=Tuesday, May 13, 2014 13:18:27}
+%TCIDATA{LastRevised=Thursday, May 15, 2014 09:29:37}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -82,27 +82,54 @@ D_{m}\rightarrow \mathrm{sort}(v_{1})$ \\
 \qquad \qquad \qquad \qquad \qquad \textbf{choose }$y_{1},\ldots ,y_{m}$ 
 \textbf{such} that $y_{i}\notin \{v_{1},\ldots ,v_{n}\}\cup FV(\varphi )$,
 for $i=1,\cdots ,m$ \\ 
-\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
-[v_{2},\ldots ,v_{n},y_{1},\ldots ,y_{m}],R(\varphi )[v_{1}:=c(y_{1},\ldots
-,y_{m})]\right\rangle ]$ \\ 
-\qquad \qquad \qquad $\text{\textbf{else if }}\mathrm{sort}(x_{1})=Set(E)$
-with $E$ finite$\text{ \textbf{then}}$ \\ 
-\qquad \qquad \qquad \qquad \textbf{for} $e\in \mathrm{subsets}(E)$ \textbf{%
-do} \\ 
-\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
-[v_{2},\ldots ,v_{n}],R(\varphi )[v_{1}:=e]\right\rangle ]$ \\ 
-\qquad \qquad \qquad $\text{\textbf{else if }}\mathrm{sort}%
-(v_{1})=D_{1}\times \ldots \times D_{m}\rightarrow D\text{ \textbf{then}}$
+\qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi
+)[v_{1}:=c(y_{1},\ldots ,y_{m})]$ \\ 
+\qquad \qquad \qquad \qquad \qquad $\text{\textbf{if }}\varphi ^{\prime
+}\neq \varphi \text{ \textbf{then}}$ \\ 
+\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
+[v_{2},\ldots ,v_{n},y_{1},\ldots ,y_{m}],\varphi ^{\prime }\right\rangle ]$
 \\ 
-\qquad \qquad \qquad \qquad \textbf{for} $f\in \mathrm{functions}(\mathrm{%
-sort}(v_{1}))$ \textbf{do} \\ 
-\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
-[v_{2},\ldots ,v_{n}],R(\varphi )[v_{1}:=f]\right\rangle ]$ \\ 
+\qquad \qquad \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
+\qquad \qquad \qquad \qquad \qquad \qquad $\Omega :=\Omega \cup \left\{
+\varphi \right\} $ \\ 
 \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
 \qquad \qquad \qquad \qquad $\text{\textbf{error}}$ \\ 
 $\text{\textbf{return}}$ $\Omega $%
 \end{tabular}%
 \]%
-where $\epsilon $ is the empty substitution.
+where $\epsilon $ is the empty substitution. The enumeration can be extended
+to finite sets and functions by adding
+
+\[
+\begin{tabular}{l}
+\qquad \qquad \qquad $\text{\textbf{else if }}\mathrm{sort}(v_{1})=Set(E)$
+with $E$ finite$\text{ \textbf{then}}$ \\ 
+\qquad \qquad \qquad \qquad \textbf{for} $e\in \mathrm{subsets}(E)$ \textbf{%
+do} \\ 
+\qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi )[v_{1}:=e]
+$ \\ 
+\qquad \qquad \qquad \qquad \qquad $\text{\textbf{if }}\varphi ^{\prime
+}\neq \varphi \text{ \textbf{then}}$ \\ 
+\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
+[v_{2},\ldots ,v_{n}],\varphi ^{\prime }\right\rangle ]$ \\ 
+\qquad \qquad \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
+\qquad \qquad \qquad \qquad \qquad \qquad $\Omega :=\Omega \cup \left\{
+\varphi \right\} $ \\ 
+\qquad \qquad \qquad $\text{\textbf{else if }}\mathrm{sort}%
+(v_{1})=D_{1}\times \ldots \times D_{m}\rightarrow D\text{ \textbf{then}}$
+\\ 
+\qquad \qquad \qquad \qquad \textbf{for} $f\in \mathrm{functions}(\mathrm{%
+sort}(v_{1}))$ \textbf{do} \\ 
+\qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi )[v_{1}:=f]
+$ \\ 
+\qquad \qquad \qquad \qquad \qquad $\text{\textbf{if }}\varphi ^{\prime
+}\neq \varphi \text{ \textbf{then}}$ \\ 
+\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
+[v_{2},\ldots ,v_{n}],\varphi ^{\prime }\right\rangle ]$ \\ 
+\qquad \qquad \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
+\qquad \qquad \qquad \qquad \qquad \qquad $\Omega :=\Omega \cup \left\{
+\varphi \right\} $%
+\end{tabular}%
+\]
 
 \end{document}

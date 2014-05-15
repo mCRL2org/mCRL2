@@ -61,7 +61,7 @@ struct enumerator_list_element
 inline
 std::ostream& operator<<(std::ostream& out, const enumerator_list_element& p)
 {
-  return out << "variables = " << core::detail::print_list(p.v) << " expression = " << p.phi << " substitution = " << p.sigma;
+  return out << p.phi << " " << core::detail::print_list(p.v);
 }
 
 typedef std::deque<enumerator_list_element> enumerator_list;
@@ -148,17 +148,23 @@ class enumerator_algorithm
     {
       using core::detail::print_list;
 
+      if (P.empty())
+      {
+        return data::undefined_data_expression();
+      }
+
       auto p = P.front();
       auto const& v = p.v;
       auto const& phi = p.phi;
       auto sigma = p.sigma;
       pbes_expression Rphi = R(phi);
-      mCRL2log(log::debug) << "  process partial solution " << p << std::endl;
+      mCRL2log(log::debug) << "  process " << p << std::endl;
       P.pop_front();
       if (accept(Rphi))
       {
         if (v.empty())
         {
+          mCRL2log(log::debug) << "  solution " << Rphi << std::endl;
           return Rphi;
         }
         else
@@ -186,17 +192,33 @@ class enumerator_algorithm
                 data::application cy(c, y.begin(), y.end());
                 sigma.add_assignment(v1, cy);
                 pbes_expression phi1 = pbes_system::replace_variables(Rphi, data::variable_assignment(v1, cy));
-                enumerator_list_element p(vtail + y, phi1, sigma);
-                mCRL2log(log::debug) << "  add partial solution " << p << std::endl;
-                P.push_back(p);
+                if (phi1 == phi)
+                {
+                  mCRL2log(log::debug) << "  solution " << phi1 << std::endl;
+                  return phi1;
+                }
+                else
+                {
+                  enumerator_list_element p(vtail + y, phi1, sigma);
+                  mCRL2log(log::debug) << "  add " << p << " with " << v1 << " := " << cy << std::endl;
+                  P.push_back(p);
+                }
               }
               else
               {
                 sigma.add_assignment(v1, c);
                 pbes_expression phi1 = pbes_system::replace_variables(Rphi, data::variable_assignment(v1, c));
-                enumerator_list_element p(vtail, phi1, sigma);
-                mCRL2log(log::debug) << "  add partial solution " << p << std::endl;
-                P.push_back(p);
+                if (phi1 == phi)
+                {
+                  mCRL2log(log::debug) << "  solution " << phi1 << std::endl;
+                  return phi1;
+                }
+                else
+                {
+                  enumerator_list_element p(vtail, phi1, sigma);
+                  mCRL2log(log::debug) << "  add " << p  << " with " << v1 << " := " << c << std::endl;
+                  P.push_back(p);
+                }
               }
             }
           }
