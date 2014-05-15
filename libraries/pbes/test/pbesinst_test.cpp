@@ -484,8 +484,7 @@ void test_abp_no_deadlock()
   pbes p = lps2pbes(spec, formula, timed);
   data::rewriter::strategy rewriter_strategy = data::jitty;
   bool print_equations = true;
-  bool print_rewriter_output = true;
-  pbes_system::pbesinst_algorithm algorithm(p.data(), rewriter_strategy, print_equations, print_rewriter_output);
+  pbes_system::pbesinst_algorithm algorithm(p.data(), rewriter_strategy, print_equations);
   algorithm.run(p);
   pbes q = algorithm.get_result();
   std::cout << "--- ABP ---" << std::endl;

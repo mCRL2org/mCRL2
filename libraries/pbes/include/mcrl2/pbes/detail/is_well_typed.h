@@ -131,7 +131,7 @@ struct has_quantifier_name_clashes_traverser: public pbes_expression_traverser<h
     push(x.variables());
   }
 
-  void leave(const forall& x)
+  void leave(const forall&)
   {
     pop();
   }
@@ -141,7 +141,7 @@ struct has_quantifier_name_clashes_traverser: public pbes_expression_traverser<h
     push(x.variables());
   }
 
-  void leave(const exists& x)
+  void leave(const exists&)
   {
     pop();
   }

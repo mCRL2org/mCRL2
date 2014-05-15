@@ -238,7 +238,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
     template <typename RulesPredicate>
-    belongs_relation compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k, RulesPredicate rules)
+    belongs_relation compute_belongs(const local_control_flow_graph& Vk, RulesPredicate rules)
     {
       using utilities::detail::contains;
 
@@ -300,8 +300,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         mCRL2log(log::debug, "stategraph") << "--- compute belongs for graph " << k << " ---" << std::endl;
         auto const& Vk = m_local_control_flow_graphs[k];
-        auto const& values_k = m_connected_components_values[k];
-        belongs_relation Bk = compute_belongs(Vk, values_k, default_rules_predicate(Vk));
+        belongs_relation Bk = compute_belongs(Vk, default_rules_predicate(Vk));
         m_belongs.push_back(Bk);
       }
     }

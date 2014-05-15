@@ -36,6 +36,7 @@ namespace detail {
 
 // \pre left and right are data variables
 // if left not in preferred_left_hand_sides and right in preferred_left_hand_sides, then left and right will be swapped,
+inline
 void sort_variables(data::data_expression& left, data::data_expression& right, const std::set<data::variable>& preferred_left_hand_sides)
 {
   if (!utilities::detail::contains(preferred_left_hand_sides, core::static_down_cast<const data::variable&>(left)) &&
