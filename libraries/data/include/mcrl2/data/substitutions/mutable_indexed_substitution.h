@@ -245,11 +245,9 @@ protected:
   /// N.B. This is an expensive operation!
   const core::identifier_string& variable_name(std::size_t i) const
   {
-    std::cout << "variable_name " << i << std::endl;
     auto& m = core::variable_index_map<variable, variable_key_type>();
     for (auto j = m.begin(); j != m.end(); ++j)
     {
-      std::cout << "map (" << j->first.first << ", " << j->first.second << ") -> " << j->second << std::endl;
       if (j->second == i)
       {
         const variable_key_type& v = j->first;
