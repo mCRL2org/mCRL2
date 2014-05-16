@@ -86,6 +86,26 @@ typename Container::value_type pick_element(Container& v)
   return result;
 }
 
+// inserts elements of c into s
+template <typename T, typename Container>
+void set_insert(std::set<T>& s, const Container& c)
+{
+  for (auto i = c.begin(); i != c.end(); ++i)
+  {
+    s.insert(*i);
+  }
+}
+
+// removes elements of c from s
+template <typename T, typename Container>
+void set_remove(std::set<T>& s, const Container& c)
+{
+  for (auto i = c.begin(); i != c.end(); ++i)
+  {
+    s.erase(*i);
+  }
+}
+
 } // namespace detail
 
 } // namespace utilities

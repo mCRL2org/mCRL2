@@ -11,7 +11,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Monday, January 21, 2013 17:27:12}
-%TCIDATA{LastRevised=Thursday, May 15, 2014 13:07:45}
+%TCIDATA{LastRevised=Friday, May 16, 2014 17:51:53}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -41,7 +41,6 @@
 \input{include/tcilatex}
 \providecommand{\concat}{\ensuremath{\hspace{0.12em}\raisebox{0.2ex}{\text{\scriptsize+}\!\text{\scriptsize+}}\hspace{0.12em}}}
 
-\input{tcilatex}
 
 \begin{document}
 
@@ -50,29 +49,31 @@
 
 This document specifies an algorithm for enumeration. Let $v$ be a list of
 variables, $\varphi ,\widehat{\varphi }$ expressions of type Bool and, $R$ a
-rewriter. For each sort $S$ a set of constructor functions $\mathrm{%
-constructors}(S)$ is defined. We assume that $\mathrm{constructors}(\mathrm{%
-sort}(d))\neq \emptyset $ for all $d\in v$. Note that the algorithm computes
-all solutions of the condition $\varphi $ that are not equal to $\widehat{%
-\varphi }$. Each solution corresponds with an assignment to the original
-variables $v$. The algorithm can be easily extended to compute this
-assignment.
+rewriter, and $\sigma $ a substitution that is applied during rewriting with 
+$R$. For each sort $S$ a set of constructor functions $\mathrm{constructors}%
+(S)$ is defined. We assume that $\mathrm{constructors}(\mathrm{sort}(d))\neq
+\emptyset $ for all $d\in v$. Note that the algorithm computes all solutions
+of the condition $\varphi $ that are not equal to $\widehat{\varphi }$. Each
+solution corresponds with an assignment to the original variables $v$. The
+algorithm can be easily extended to compute this assignment. A precondition
+of the algorithm is that for all $v_{i}\in v$ we must have $\sigma
+(v_{i})=v_{i}$.
 
 \bigskip 
 \[
 \begin{tabular}{l}
-\textsc{Enumerate(}$v,\varphi ,\widehat{\varphi },R$\textsc{)} \\ 
-$P:=[\left\langle v,\varphi \right\rangle ]$ \\ 
+\textsc{Enumerate(}$v,\varphi ,\widehat{\varphi },R,\sigma $\textsc{)} \\ 
+$P:=[\left\langle v,R(\varphi ,\sigma )\right\rangle ]$ \\ 
 $\Omega :=\emptyset $ \\ 
 \textbf{while} $P\neq \emptyset $ \textbf{do} \\ 
 \qquad \textbf{let} $\left\langle v,\varphi \right\rangle =\mathrm{head}(P)$
 \\ 
 \qquad $P:=\mathrm{tail}(P)$ \\ 
 \qquad \textbf{let} $v=[v_{1},\ldots ,v_{n}]$ \\ 
-\qquad $\text{\textbf{if }}R(\varphi )\neq \widehat{\varphi }\text{ \textbf{%
-then}}$ \\ 
+\qquad $\text{\textbf{if }}\varphi \neq \widehat{\varphi }\text{ \textbf{then%
+}}$ \\ 
 \qquad \qquad $\text{\textbf{if }}v=[]\text{ \textbf{then}}$ \\ 
-\qquad \qquad \qquad $\Omega :=\Omega \cup \left\{ R(\varphi )\right\} $ \\ 
+\qquad \qquad \qquad $\Omega :=\Omega \cup \left\{ \varphi \right\} $ \\ 
 \qquad \qquad $\text{\textbf{else}}$ \\ 
 \qquad \qquad \qquad $\text{\textbf{if }}\mathrm{constructors}(\mathrm{sort}%
 (v_{1}))\neq \emptyset \text{ \textbf{then}}$ \\ 
@@ -83,8 +84,8 @@ D_{m}\rightarrow \mathrm{sort}(v_{1})$ \\
 \qquad \qquad \qquad \qquad \qquad \textbf{choose }$y_{1},\ldots ,y_{m}$ 
 \textbf{such} that $y_{i}\notin \{v_{1},\ldots ,v_{n}\}\cup FV(\varphi )$,
 for $i=1,\cdots ,m$ \\ 
-\qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi
-)[v_{1}:=c(y_{1},\ldots ,y_{m})]$ \\ 
+\qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi ,\sigma
+\lbrack v_{1}:=c(y_{1},\ldots ,y_{m})])$ \\ 
 \qquad \qquad \qquad \qquad \qquad $\text{\textbf{if }}\varphi ^{\prime
 }=\varphi \text{ \textbf{then}}$ \\ 
 \qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
@@ -107,29 +108,16 @@ to finite sets and functions by adding
 with $E$ finite$\text{ \textbf{then}}$ \\ 
 \qquad \qquad \qquad \qquad \textbf{for} $e\in \mathrm{subsets}(E)$ \textbf{%
 do} \\ 
-\qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi )[v_{1}:=e]
-$ \\ 
-\qquad \qquad \qquad \qquad \qquad $\text{\textbf{if }}\varphi ^{\prime
-}=\varphi \text{ \textbf{then}}$ \\ 
-\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
-[v_{2},\ldots ,v_{n}],\varphi ^{\prime }\right\rangle ]$ \\ 
-\qquad \qquad \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
-\qquad \qquad \qquad \qquad \qquad \qquad $\Omega :=\Omega \cup \left\{
-\varphi \right\} $ \\ 
+\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
+[v_{2},\ldots ,v_{n}],R(\varphi ,\sigma \lbrack v_{1}:=e])\right\rangle ]$
+\\ 
 \qquad \qquad \qquad $\text{\textbf{else if }}\mathrm{sort}%
 (v_{1})=D_{1}\times \ldots \times D_{m}\rightarrow D\text{ \textbf{then}}$
 \\ 
 \qquad \qquad \qquad \qquad \textbf{for} $f\in \mathrm{functions}(\mathrm{%
 sort}(v_{1}))$ \textbf{do} \\ 
-\qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi )[v_{1}:=f]
-$ \\ 
-\qquad \qquad \qquad \qquad \qquad $\text{\textbf{if }}\varphi ^{\prime
-}\neq \varphi \text{ \textbf{then}}$ \\ 
-\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
-[v_{2},\ldots ,v_{n}],\varphi ^{\prime }\right\rangle ]$ \\ 
-\qquad \qquad \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
-\qquad \qquad \qquad \qquad \qquad \qquad $\Omega :=\Omega \cup \left\{
-\varphi \right\} $%
+\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
+[v_{2},\ldots ,v_{n}],R(\varphi ,\sigma \lbrack v_{1}:=f])\right\rangle ]$%
 \end{tabular}%
 \]
 

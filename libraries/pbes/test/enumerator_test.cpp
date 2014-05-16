@@ -47,7 +47,8 @@ void test_enumerator()
   pbes_expression phi = parse_pbes_expression("val(n < 2)", VARSPEC);
   pbes_expression stop = tt::false_();
 
-  enumerator_algorithm<pbes_rewriter> E(R, data_spec);
+  data::mutable_indexed_substitution<> sigma;
+  enumerator_algorithm<pbes_rewriter, data::mutable_indexed_substitution<> > E(R, sigma, data_spec);
   std::vector<pbes_system::pbes_expression> solutions;
   enumerator_list P;
   P.push_back(enumerator_list_element(v, phi));

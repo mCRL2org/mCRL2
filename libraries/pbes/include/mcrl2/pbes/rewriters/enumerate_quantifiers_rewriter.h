@@ -12,10 +12,11 @@
 #ifndef MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
 #define MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
 
-#ifdef MCRL2_USE_PBES_ENUMERATOR
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter_new.h"
+#ifdef MCRL2_USE_ALTERNATIVE_PBES_ENUMERATOR
+#define enumerate_quantifiers_alternative_rewriter enumerate_quantifiers_rewriter
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_alternative_rewriter.h"
 #else
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter_old.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter_new.h"
 #endif
 
 #endif // MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H

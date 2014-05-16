@@ -80,19 +80,23 @@ struct sort_name_generator
   }
 };
 
-template <typename PbesRewriter>
+template <typename PbesRewriter, typename MutableSubstitution>
 class enumerator_algorithm
 {
   /// \brief A map that caches the constructors corresponding to sort expressions.
   typedef std::map<data::sort_expression, std::vector<data::function_symbol> > constructor_map;
 
   protected:
-    // a rewriter
+    // A PBES rewriter
     PbesRewriter& R;
+
+    // N.B. this is the substitution that is used internally by R
+    MutableSubstitution& Rsigma;
 
     /// \brief A data specification.
     const data::data_specification& dataspec;
 
+    // A name generator
     data::set_identifier_generator id_generator;
 
     /// \brief A mapping with constructors.
@@ -125,8 +129,8 @@ class enumerator_algorithm
     }
 
   public:
-    enumerator_algorithm(PbesRewriter& R_, const data::data_specification& dataspec_)
-      : R(R_), dataspec(dataspec_)
+    enumerator_algorithm(PbesRewriter& R_, MutableSubstitution& Rsigma_, const data::data_specification& dataspec_)
+      : R(R_), Rsigma(Rsigma_), dataspec(dataspec_)
     {}
 
     template <typename Accept>
@@ -143,15 +147,14 @@ class enumerator_algorithm
       auto const& v = p.v;
       auto const& phi = p.phi;
       auto sigma = p.sigma;
-      pbes_expression Rphi = R(phi);
       mCRL2log(log::debug) << "  process " << p << std::endl;
       P.pop_front();
-      if (accept(Rphi))
+      if (accept(phi))
       {
         if (v.empty())
         {
-          mCRL2log(log::debug) << "  solution " << Rphi << std::endl;
-          return Rphi;
+          mCRL2log(log::debug) << "  solution " << phi << std::endl;
+          return phi;
         }
         else
         {
@@ -177,7 +180,9 @@ class enumerator_algorithm
                 data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
                 data::application cy(c, y.begin(), y.end());
                 sigma.add_assignment(v1, cy);
-                pbes_expression phi1 = pbes_system::replace_variables(Rphi, data::variable_assignment(v1, cy));
+                Rsigma[v1] = cy;
+                pbes_expression phi1 = R(phi, Rsigma);
+                Rsigma[v1] = v1;
                 if (phi1 == phi)
                 {
                   enumerator_list_element p(vtail, phi1, sigma);
@@ -194,7 +199,9 @@ class enumerator_algorithm
               else
               {
                 sigma.add_assignment(v1, c);
-                pbes_expression phi1 = pbes_system::replace_variables(Rphi, data::variable_assignment(v1, c));
+                Rsigma[v1] = c;
+                pbes_expression phi1 = R(phi, Rsigma);
+                Rsigma[v1] = v1;
                 enumerator_list_element p(vtail, phi1, sigma);
                 mCRL2log(log::debug) << "  add " << p  << " with " << v1 << " := " << c << std::endl;
                 P.push_back(p);

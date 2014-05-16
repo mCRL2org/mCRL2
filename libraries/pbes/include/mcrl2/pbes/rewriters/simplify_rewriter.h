@@ -99,6 +99,7 @@ struct simplify_data_rewriter_builder: public add_data_rewriter<pbes_system::det
   using super::leave;
   using super::operator();
   using super::sigma;
+  using super::R;
 
   simplify_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma)
