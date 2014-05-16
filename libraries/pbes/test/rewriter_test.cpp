@@ -24,7 +24,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
-#include "mcrl2/data/detail/parse_substitutions.h"
+#include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
@@ -108,10 +108,10 @@ class rewriter_with_substitution
     /// \brief The variable type
     typedef typename Rewriter::variable_type variable_type;
 
-    rewriter_with_substitution(Rewriter& R_, const std::string& substitutions)
+    rewriter_with_substitution(Rewriter& R_, const std::string& substitution_text)
       : R(R_)
     {
-      data::detail::parse_substitutions(substitutions, sigma);
+      data::detail::parse_substitution(substitution_text, sigma);
     }
 
     /// \brief Rewrites a boolean expression.

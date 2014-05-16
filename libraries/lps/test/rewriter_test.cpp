@@ -165,8 +165,8 @@ void test_lps_rewriter(std::string src_text, std::string dest_text, std::string 
 
   // rewrite the specification src
   data::rewriter R(src.data());
-  data::mutable_map_substitution< > sigma;
-  data::detail::parse_substitutions(sigma_text, src.data(), sigma);
+  data::mutable_map_substitution<> sigma;
+  data::detail::parse_substitution(sigma_text, sigma, src.data());
   lps::rewrite(src, R, sigma);
 
   if (src != dest)
