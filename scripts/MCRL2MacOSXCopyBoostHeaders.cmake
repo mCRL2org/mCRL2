@@ -30,6 +30,8 @@ set( R_MCRL2_BOOST_HEADER_FILES
   boost/current_function.hpp
   boost/get_pointer.hpp
   boost/implicit_cast.hpp
+  boost/integer.hpp
+  boost/integer_fwd.hpp
   boost/integer_traits.hpp
   boost/is_placeholder.hpp
   boost/iterator.hpp
@@ -39,6 +41,7 @@ set( R_MCRL2_BOOST_HEADER_FILES
   boost/memory_order.hpp
   boost/next_prior.hpp
   boost/noncopyable.hpp
+  boost/predef.h
   boost/ref.hpp
   boost/shared_ptr.hpp
   boost/signals2.hpp
@@ -59,11 +62,13 @@ set ( R_MCRL2_BOOST_HEADER_DIRS
   boost/detail
   boost/exception
   boost/functional
+  boost/integer
   boost/iterator
   boost/mpl
   boost/math
   boost/multi_index
   boost/numeric
+  boost/predef
   boost/preprocessor
   boost/range
   boost/signals2

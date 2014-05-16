@@ -69,7 +69,4 @@ if(MCRL2_OSX_PACKAGE)
   set(MCRL2_MAN_DIR "man/man1")
   set(MCRL2_EXAMPLES_DIR "Examples")
   set(MCRL2_INCLUDE_DIR "Headers/include")
- 
-  #Override install location
-  set(CMAKE_INSTALL_PREFIX "/mCRL2")
 endif(MCRL2_OSX_PACKAGE)

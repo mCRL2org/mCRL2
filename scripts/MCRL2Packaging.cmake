@@ -209,6 +209,11 @@ if(APPLE)
   #This workaround enables to install mCRL2 properly. (CMake 2.8.9, PackageMaker 3.0.4)
   set(CPACK_MONOLITHIC_INSTALL 1)
 
+  # Install the tools (when installing the Packagemaker project) in the following directory
+  # relative to the directory in which the package is installed.
+  # By default ${CPACK_PACKAGE_DEFAULT_LOCATION}
+  set(CPACK_PACKAGING_INSTALL_PREFIX "/mCRL2")
+
 endif()
 
 # Windows
