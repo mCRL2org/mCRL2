@@ -241,8 +241,26 @@ protected:
     return m_container[m_index_table[i]];
   }
 
+  /// \brief Returns the name of the variable with index i. Throws mcrl2::runtime_error if no such variable exists.
+  /// N.B. This is an expensive operation!
+  const core::identifier_string& variable_name(std::size_t i) const
+  {
+    std::cout << "variable_name " << i << std::endl;
+    auto& m = core::variable_index_map<variable, variable_key_type>();
+    for (auto j = m.begin(); j != m.end(); ++j)
+    {
+      std::cout << "map (" << j->first.first << ", " << j->first.second << ") -> " << j->second << std::endl;
+      if (j->second == i)
+      {
+        const variable_key_type& v = j->first;
+        return atermpp::aterm_cast<core::identifier_string>(v.first);
+      }
+    }
+    throw mcrl2::runtime_error("mutable_indexed_substitution::variable_name: index does not exist");
+  }
+
 public:
-  /// \brief string representation of the substitution
+  /// \brief string representation of the substitution. N.B. This is an expensive operation!
   std::string to_string() const
   {
     std::stringstream result;
@@ -260,7 +278,7 @@ public:
         {
           result << "; ";
         }
-        result << core::identifier_string(static_cast<atermpp::function_symbol>(m_index_table[i]).name()) << " := " << get(i);
+        result << variable_name(i) << " := " << get(i);
       }
     }
     result << "]";
