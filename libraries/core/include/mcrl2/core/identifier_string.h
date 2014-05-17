@@ -76,4 +76,19 @@ identifier_string empty_identifier_string()
 
 } // namespace mcrl2
 
+
+namespace std {
+
+/// \brief hash specialization
+template<>
+struct hash<mcrl2::core::identifier_string>
+{
+  std::size_t operator()(const mcrl2::core::identifier_string& x) const
+  {
+    return std::hash<atermpp::aterm>()(static_cast<atermpp::aterm>(x));
+  }
+};
+
+} // namespace std
+
 #endif // MCRL2_BASIC_IDENTIFIER_STRING_H

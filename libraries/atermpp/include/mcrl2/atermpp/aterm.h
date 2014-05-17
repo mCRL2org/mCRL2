@@ -15,7 +15,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-// #include <vector>
+#include <functional>
 
 #include "boost/type_traits/is_base_of.hpp"
 #include "boost/static_assert.hpp"
@@ -303,6 +303,28 @@ inline void swap(atermpp::aterm &t1, atermpp::aterm &t2)
 {
   t1.swap(t2);
 }
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<atermpp::aterm>
+{
+  std::size_t operator()(const atermpp::aterm& t) const
+  {
+    // const std::hash<atermpp::detail::_aterm*> aterm_hash;
+    return std::hash<atermpp::detail::_aterm*>()(const_cast<atermpp::detail::_aterm*>(atermpp::detail::address(t)));
+  }
+};
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<std::pair<atermpp::aterm,atermpp::aterm> >
+{
+  std::size_t operator()(const std::pair<atermpp::aterm, atermpp::aterm>& x) const
+  {
+    return std::hash<atermpp::aterm>()(x.first) ^ std::hash<atermpp::aterm>()(x.second);
+  }
+};
+
 } // namespace std
 
 

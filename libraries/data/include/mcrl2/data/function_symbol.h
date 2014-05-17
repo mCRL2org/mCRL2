@@ -15,7 +15,6 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/index_traits.h"
-#include "mcrl2/core/hash.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/sort_expression.h"
