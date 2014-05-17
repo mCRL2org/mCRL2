@@ -118,7 +118,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       mCRL2log(verbose) << "  only generate:   " << std::boolalpha << m_options.only_generate << std::endl;
 
       bool value;
-      if(pbes_input_format() == pbes_file_pgsolver)
+      if(pbes_input_format() == bes::bes_format_pgsolver())
       {
         pbespgsolve_algorithm algorithm(timer(), m_options);
         ParityGame pg;

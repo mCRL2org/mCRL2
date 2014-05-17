@@ -249,6 +249,27 @@ class pbes
       return m_initial_state;
     }
 
+    void load(std::istream& stream, bool binary=true)
+    {
+      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
+                                : atermpp::read_term_from_text_stream(stream);
+      t = pbes_system::detail::add_index(t);
+      if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
+      {
+        throw mcrl2::runtime_error("The loaded ATerm is not a PBES.");
+      }
+      init_term(atermpp::aterm_appl(t));
+      m_data.declare_data_specification_to_be_type_checked();
+      complete_data_specification(*this); // Add all the sorts that are used in the specification
+      // to the data specification. This is important for those
+      // sorts that are built in, because these are not explicitly
+      // declared.
+
+      // The well typedness check is only done in debug mode, since for large
+      // PBESs it takes too much time
+      assert(is_well_typed());
+    }
+
     /// \brief Reads the pbes from file.
     /// \param filename A string
     /// If filename is nonempty, input is read from the file named filename.
@@ -279,18 +300,9 @@ class pbes
     /// much more compact than the ascii representation.
     /// \param filename A string
     /// \param no_well_typedness_check If true the well typedness check is skipped.
-#ifndef NDEBUG
-    void save(const std::string& filename, bool binary = true, bool no_well_typedness_check = false) const
-#else
-    void save(const std::string& filename, bool binary = true, bool = false) const
-#endif
+    void save(std::ostream& stream, bool binary = true) const
     {
-      assert(no_well_typedness_check || is_well_typed());
-
-      pbes tmp(*this);
-      atermpp::aterm t = pbes_to_aterm(tmp);
-      t = pbes_system::detail::remove_index(t);
-      core::detail::save_aterm(t, filename, binary);
+      core::detail::save_aterm(pbes_system::detail::remove_index(pbes_to_aterm(*this)), stream, binary);
     }
 
     /// \brief Returns the set of binding variables of the pbes.

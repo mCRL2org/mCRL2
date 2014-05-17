@@ -19,11 +19,18 @@
 #include <string>
 #include <utility>
 
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
+
+#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/pbesinst_algorithm.h"
+#include "mcrl2/pbes/pbesinst_finite_algorithm.h"
+#include "mcrl2/pbes/pbesinst_strategy.h"
+#include "mcrl2/bes/io.h"
+#include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -34,19 +41,18 @@ using utilities::interface_description;
 using utilities::make_optional_argument;
 using utilities::make_enum_argument;
 using utilities::tools::input_output_tool;
-using utilities::tools::pbes_input_output_tool;
+using utilities::tools::pbes_input_tool;
+using utilities::tools::bes_output_tool;
 using utilities::tools::rewriter_tool;
 
 /// The pbesinst tool.
-class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_tool> >
+class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > >
 {
   protected:
-    typedef rewriter_tool<pbes_input_output_tool<input_output_tool> > super;
+    typedef rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > super;
 
     pbesinst_strategy m_strategy;
-    pbes_file_format m_output_format;
     std::string m_finite_parameter_selection;
-    bool m_aterm_ascii;
     bool m_remove_redundant_equations;
 
     /// Parse the non-default options.
@@ -67,7 +73,6 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
 
       m_strategy = parser.option_argument_as<pbesinst_strategy>("strategy");
       m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
-      m_aterm_ascii = parser.options.count("aterm-ascii") > 0;
     }
 
     void add_options(interface_description& desc)
@@ -85,7 +90,6 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
                  "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
                  "            *(*:Bool)\n",
                  'f');
-      desc.add_option("aterm-ascii", "store ATerms in ascii format (default: false)", 'a');
       desc.add_hidden_option("equation_limit",
                              make_optional_argument("NAME", "-1"),
                              "Set a limit to the number of generated BES equations",
@@ -109,8 +113,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         "  'bes'  for the mCRL2 BES format,\n"
         "  'cwi'  for the CWI BES format\n"
       ),
-      m_strategy(pbesinst_lazy_strategy),
-      m_aterm_ascii(false)
+      m_strategy(pbesinst_lazy_strategy)
     {}
 
     /// Runs the algorithm.
@@ -122,23 +125,69 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  strategy:           " << m_strategy << std::endl;
-      mCRL2log(verbose) << "  output format:      " << pbes_system::file_format_to_string(pbes_output_format()) << std::endl;
+      mCRL2log(verbose) << "  output format:      " << pbes_output_format() << std::endl;
       mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
       if (m_strategy == pbesinst_finite_strategy)
       {
         mCRL2log(verbose) << "  parameter selection: " << m_finite_parameter_selection << std::endl;
       }
 
-      return pbesinst(input_filename(),
-              output_filename(),
-              pbes_input_format(),
-              pbes_output_format(),
-              rewrite_strategy(),
-              m_strategy,
-              m_finite_parameter_selection,
-              m_remove_redundant_equations,
-              m_aterm_ascii
-             );
+      // load the pbes
+      pbes p;
+      load_pbes(p, input_filename(), pbes_input_format());
+
+      if (!p.is_closed())
+      {
+        mCRL2log(log::error) << "The PBES is not closed. Pbes2bes cannot handle this kind of PBESs"
+                             << std::endl << "Computation aborted." << std::endl;
+        return false;
+      }
+
+      if (m_strategy == pbesinst_lazy_strategy)
+      {
+        // TODO: let pbesinst handle ! and => properly
+        if (!is_normalized(p))
+        {
+          algorithms::normalize(p);
+        }
+        pbesinst_algorithm algorithm(p.data(), m_rewrite_strategy, false);
+        algorithm.run(p);
+        p = algorithm.get_result();
+      }
+      else if (m_strategy == pbesinst_finite_strategy)
+      {
+        try
+        {
+          algorithms::pbesinst_finite(p, m_rewrite_strategy, m_finite_parameter_selection);
+        }
+        catch (const empty_parameter_selection&)
+        {
+          throw mcrl2::runtime_error("No parameters were selected with the -f option!");
+        }
+      }
+
+      if (log::mcrl2_logger::get_reporting_level() >= log::verbose)
+      {
+        if (algorithms::is_bes(p))
+        {
+          mCRL2log(log::debug) << "The result is a BES.\n";
+        }
+        else
+        {
+           mCRL2log(log::debug) << "The result is a PBES.\n";
+        }
+      }
+
+      if (m_remove_redundant_equations)
+      {
+        std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
+        mCRL2log(log::verbose) << algorithms::print_removed_equations(V);
+      }
+
+      // save the result
+      bes::save_pbes(p, output_filename(), pbes_output_format());
+
+      return true;
     }
 };
 

@@ -12,6 +12,8 @@
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -19,9 +21,9 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
+class pbes_stategraph_tool: public pbes_input_tool<pbes_output_tool<rewriter_tool<input_output_tool> > >
 {
-  typedef rewriter_tool<input_output_tool> super;
+  typedef pbes_input_tool<pbes_output_tool<rewriter_tool<input_output_tool> > > super;
 
   protected:
     pbesstategraph_options options;
@@ -52,7 +54,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       desc.add_option("simplify", make_optional_argument("NAME", "1"), "simplify the PBES during reduction", 's');
       desc.add_option("apply-to-original", make_optional_argument("NAME", "0"), "apply reduction on the original PBES", 'a');
       desc.add_option("use-local-variant", make_optional_argument("NAME", "0"), "use the local variant of the algorithm", 'l');
-      desc.add_option("print-influence-graph", make_optional_argument("NAME", "0"), "print the influence graph", 'i');
+      desc.add_option("print-influence-graph", make_optional_argument("NAME", "0"), "print the influence graph", 'I');
       desc.add_option("cache-marking-updates", make_optional_argument("NAME", "0"), "cache rewriter calls in marking updates", 'c');
       desc.add_option("marking-algorithm", make_optional_argument("NAME", "0"), "specifies the algorithm that is used for the marking computation 0 (default), 1 or 2", 'm');
       desc.add_option("use-alternative-lcfp-criterion", make_optional_argument("NAME", "0"), "use an alternative criterion for local control flow parameter computation", 'x');
@@ -86,7 +88,11 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       mCRL2log(verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
       mCRL2log(verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
 
-      pbesstategraph(input_filename(), output_filename(), options);
+      pbesstategraph(input_filename(),
+                     output_filename(),
+                     pbes_input_format(),
+                     pbes_output_format(),
+                     options);
       return true;
     }
 };

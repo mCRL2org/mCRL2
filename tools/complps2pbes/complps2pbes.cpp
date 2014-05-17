@@ -20,9 +20,9 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
 
-class complps2pbes_tool : public input_output_tool
+class complps2pbes_tool : public pbes_output_tool<input_output_tool>
 {
-    typedef input_output_tool super;
+    typedef pbes_output_tool<input_output_tool> super;
 
   protected:
     std::string formfilename;
@@ -64,9 +64,10 @@ class complps2pbes_tool : public input_output_tool
     bool run()
     {
       complps2pbes(input_filename(),
-               output_filename(),
-               formfilename
-             );
+                   output_filename(),
+                   pbes_output_format(),
+                   formfilename
+                  );
       return true;
     }
 

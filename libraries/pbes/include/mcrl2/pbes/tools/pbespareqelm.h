@@ -13,11 +13,10 @@
 #define MCRL2_PBES_TOOLS_PBESPAREQELM_H
 
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/tools.h"
 
 namespace mcrl2 {
 
@@ -25,6 +24,8 @@ namespace pbes_system {
 
 void pbespareqelm(const std::string& input_filename,
                   const std::string& output_filename,
+                  const utilities::file_format* input_format,
+                  const utilities::file_format* output_format,
                   data::rewrite_strategy rewrite_strategy,
                   pbes_rewriter_type rewriter_type,
                   bool ignore_initial_state
@@ -32,7 +33,7 @@ void pbespareqelm(const std::string& input_filename,
 {
   // load the pbes
   pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename);
+  load_pbes(p, input_filename, input_format);
 
   // data rewriter
   data::rewriter datar(p.data(), rewrite_strategy);
@@ -44,7 +45,7 @@ void pbespareqelm(const std::string& input_filename,
     {
       typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
       pbes_rewriter pbesr(datar);
-      pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
+      pbes_eqelm_algorithm<pbes_expression, data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, ignore_initial_state);
       break;
     }
@@ -53,7 +54,7 @@ void pbespareqelm(const std::string& input_filename,
     {
       bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
       enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
-      pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
+      pbes_eqelm_algorithm<pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, ignore_initial_state);
       break;
     }
@@ -62,7 +63,7 @@ void pbespareqelm(const std::string& input_filename,
   }
 
   // save the result
-  p.save(output_filename);
+  save_pbes(p, output_filename, output_format);
 }
 
 } // namespace pbes_system

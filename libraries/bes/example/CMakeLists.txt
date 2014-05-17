@@ -30,13 +30,10 @@ foreach( OBJ ${TERM_OBJS} )
   )
   
   target_link_libraries(${PROJECT_NAME}
-     mcrl2_lps
-     mcrl2_lts
-     mcrl2_utilities
-     mcrl2_pbes
+     mcrl2_bes
   )
 
-  build_and_run_test_example_target( ${PROJECT_NAME} )
+  build_and_run_test_example_target( ${PROJECT_NAME} "-h" )
 
 endforeach( OBJ )
 

@@ -25,6 +25,7 @@
 #include "mcrl2/pbes/lts2pbes.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 #include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
@@ -34,12 +35,13 @@ using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::data;
 using mcrl2::utilities::tools::input_output_tool;
+using mcrl2::utilities::tools::pbes_output_tool;
 using namespace mcrl2::log;
 
-class lts2pbes_tool : public input_output_tool
+class lts2pbes_tool : public pbes_output_tool<input_output_tool>
 {
   private:
-    typedef input_output_tool super;
+    typedef pbes_output_tool<input_output_tool> super;
 
   protected:
     typedef enum { none_e, data_e, lps_e, mcrl2_e } data_file_type_t;
@@ -305,7 +307,7 @@ class lts2pbes_tool : public input_output_tool
       {
         mCRL2log(verbose) << "writing PBES to file '" <<  output_filename() << "'..." << std::endl;
       }
-      result.save(output_filename());
+      save_pbes(result, output_filename(), pbes_output_format());
       return true;
     }
 };

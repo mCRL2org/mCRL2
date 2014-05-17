@@ -17,20 +17,20 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
-using utilities::tools::input_output_tool;
-using utilities::tools::rewriter_tool;
-using utilities::tools::pbes_rewriter_tool;
+using namespace mcrl2::utilities::tools;
 
-class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
+class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > >
 {
   protected:
-    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
+    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > > super;
 
     /// \brief If true, the initial state is ignored.
     bool m_ignore_initial_state;
@@ -44,7 +44,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("ignore-initial-state", "ignore the initial state in the computation", 'i');
+      desc.add_option("ignore-initial-state", "ignore the initial state in the computation", 'I');
     }
 
   public:
@@ -67,6 +67,8 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
 
       pbespareqelm(input_filename(),
                    output_filename(),
+                   pbes_input_format(),
+                   pbes_output_format(),
                    rewrite_strategy(),
                    rewriter_type(),
                    m_ignore_initial_state

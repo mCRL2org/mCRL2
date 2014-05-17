@@ -407,6 +407,8 @@ class symbolic_exploration_algorithm
 inline
 void symbolic_exploration(const std::string& input_filename,
                           const std::string& output_filename,
+                          const utilities::file_format* input_format,
+                          const utilities::file_format* output_format,
                           bool optimized = true,
                           bool clustered = false,
                           bool instantiate = false
@@ -414,14 +416,14 @@ void symbolic_exploration(const std::string& input_filename,
 {
   // load the pbes
   pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename);
+  load_pbes(p, input_filename, input_format);
 
   // apply the algorithm
   symbolic_exploration_algorithm algorithm(p, optimized, clustered);
   algorithm.run();
 
   // save the result
-  p.save(output_filename);
+  save_pbes(p, output_filename, output_format);
 
   if (instantiate)
   {

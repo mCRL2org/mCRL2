@@ -13,14 +13,11 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 
 add_executable(${PROJECT_NAME}
-    pbespp.cpp
+  pbespp.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
-  mcrl2_data
   mcrl2_pbes
-  mcrl2_utilities
-  mcrl2_syntax
 )
 
 # install target:

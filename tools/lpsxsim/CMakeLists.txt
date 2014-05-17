@@ -48,12 +48,8 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
-  mcrl2_atermpp
-  mcrl2_core
-  mcrl2_data
   mcrl2_lps
   mcrl2_lts
-  mcrl2_utilities
   mcrl2_utilities_qt
 )
 

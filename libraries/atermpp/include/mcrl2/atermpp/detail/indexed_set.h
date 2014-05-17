@@ -14,6 +14,7 @@
 #define MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
 
 #include <cstdlib>
+#include <vector>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 

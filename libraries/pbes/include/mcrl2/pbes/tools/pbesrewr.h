@@ -16,10 +16,10 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/detail/bqnf_traverser.h"
 #include "mcrl2/pbes/detail/ppg_traverser.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
@@ -31,14 +31,14 @@ namespace pbes_system {
 
 void pbesrewr(const std::string& input_filename,
               const std::string& output_filename,
+              const utilities::file_format* input_format,
+              const utilities::file_format* output_format,
               const data::rewrite_strategy rewrite_strategy,
-              pbes_rewriter_type rewriter_type,
-              bool skip_data
-             )
+              pbes_rewriter_type rewriter_type)
 {
   // load the pbes
   pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename);
+  load_pbes(p, input_filename, input_format);
 
   // data rewriter
   data::rewriter datar(p.data(), rewrite_strategy);
@@ -127,7 +127,7 @@ void pbesrewr(const std::string& input_filename,
       break;
     }
   }
-  p.save(output_filename);
+  save_pbes(p, output_filename, output_format);
 }
 
 } // namespace pbes_system

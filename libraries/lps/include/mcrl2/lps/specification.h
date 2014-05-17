@@ -173,14 +173,16 @@ class specification
     /// If binary is true the linear process is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    void save(const std::string& filename, bool binary = true) const
+    void save(const std::string& filename) const
     {
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time
       assert(is_well_typed(*this));
       atermpp::aterm t = specification_to_aterm(*this);
       t = data::detail::remove_index(t);
-      core::detail::save_aterm(t, filename, binary);
+      std::ofstream stream(filename);
+      atermpp::write_term_to_binary_stream(t, stream);
+      stream.close();
     }
 
     /// \brief Returns the linear process of the specification.

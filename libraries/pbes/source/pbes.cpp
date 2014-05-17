@@ -68,21 +68,6 @@ void instantiate_global_variables(pbes& p)
   pbes_system::detail::instantiate_global_variables(p);
 }
 
-void save_pbes(const pbes& pbes_spec, const std::string& outfilename, pbes_file_format output_format, bool aterm_ascii)
-{
-  pbes_system::save_pbes(pbes_spec, outfilename, output_format, aterm_ascii);
-}
-
-void load_pbes(pbes& p, const std::string& infilename, const pbes_file_format f)
-{
-  pbes_system::load_pbes(p, infilename, f);
-}
-
-void load_pbes(pbes& p, const std::string& infilename)
-{
-  pbes_system::load_pbes(p, infilename);
-}
-
 bool is_bes(const pbes& x)
 {
   return pbes_system::is_bes(x);

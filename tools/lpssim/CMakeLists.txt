@@ -21,7 +21,6 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
-  mcrl2_utilities
 )
 
 # add install target:

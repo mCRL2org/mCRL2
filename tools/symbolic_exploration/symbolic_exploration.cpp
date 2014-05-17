@@ -10,6 +10,8 @@
 
 #include "mcrl2/pbes/detail/symbolic_exploration.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -17,9 +19,9 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class symbolic_exploration_tool: public input_output_tool
+class symbolic_exploration_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {
-  typedef input_output_tool super;
+  typedef pbes_input_tool<pbes_output_tool<input_output_tool> > super;
 
   protected:
     bool m_optimized;
@@ -37,9 +39,9 @@ class symbolic_exploration_tool: public input_output_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("optimize", make_optional_argument("NAME", "1"), "simplify the PBES during the normalization (default true)", 'o');
+      desc.add_option("optimize", make_optional_argument("NAME", "1"), "simplify the PBES during the normalization (default true)", 'O');
       desc.add_option("clustered", "generate a clustered PBES", 'c');
-      desc.add_option("instantiate", "instantiate the PBES", 'i');
+      desc.add_option("instantiate", "instantiate the PBES", 'I');
     }
 
   public:
@@ -61,7 +63,13 @@ class symbolic_exploration_tool: public input_output_tool
       mCRL2log(verbose) << "  optimized:          " << std::boolalpha << m_optimized << std::endl;
       mCRL2log(verbose) << "  clustered:          " << std::boolalpha << m_clustered << std::endl;
       mCRL2log(verbose) << "  instantiate:        " << std::boolalpha << m_instantiate << std::endl;
-      pbes_system::detail::symbolic_exploration(input_filename(), output_filename(), m_optimized, m_clustered, m_instantiate);
+      pbes_system::detail::symbolic_exploration(input_filename(),
+                                                output_filename(),
+                                                pbes_input_format(),
+                                                pbes_output_format(),
+                                                m_optimized,
+                                                m_clustered,
+                                                m_instantiate);
       return true;
     }
 };

@@ -21,10 +21,11 @@ set(PROJECT_NAME "${PREFIX}_algorithm")
 project( ${PROJECT_NAME} )
 
 add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
-      algorithm.cpp 
+  algorithm.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
+  mcrl2_atermpp
 )
 
 build_and_run_test_example_target( ${PROJECT_NAME} )

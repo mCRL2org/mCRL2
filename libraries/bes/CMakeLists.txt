@@ -26,11 +26,14 @@ add_custom_command(
 
 add_library(${PROJECT_NAME}
   ${CMAKE_BINARY_DIR}/libraries/bes/source/pg_syntax.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/bes.cpp
+  source/bes.cpp
+  source/pgsolver.cpp
+  source/cwi.cpp
 )
 
 target_link_libraries(
   ${PROJECT_NAME}
+  mcrl2_pbes
   dparser
 )
 

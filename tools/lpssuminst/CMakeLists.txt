@@ -14,13 +14,11 @@ cmake_minimum_required(VERSION 2.6)
 
 # actual target:
 add_executable(${PROJECT_NAME}
-    lpssuminst.cpp
+  lpssuminst.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
-  mcrl2_utilities
-  mcrl2_syntax
 )
 
 # install target:

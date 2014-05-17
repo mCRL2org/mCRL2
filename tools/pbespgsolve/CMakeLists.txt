@@ -46,10 +46,7 @@ add_executable(${PROJECT_NAME}
 include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(mcrl2_${PROJECT_NAME}
-  mcrl2_data
   mcrl2_pbes
-  mcrl2_utilities
-  mcrl2_syntax
 )
 
 target_link_libraries(${PROJECT_NAME}

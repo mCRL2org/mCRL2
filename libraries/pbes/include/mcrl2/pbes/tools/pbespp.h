@@ -13,8 +13,7 @@
 #define MCRL2_PBES_TOOLS_PBESPP_H
 
 #include <fstream>
-#include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -23,12 +22,12 @@ namespace pbes_system {
 
 void pbespp(const std::string& input_filename,
             const std::string& output_filename,
-            pbes_file_format pbes_input_format,
+            const utilities::file_format* input_format,
             core::print_format_type format
            )
 {
-  pbes_system::pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename, pbes_input_format);
+  pbes p;
+  load_pbes(p, input_filename, input_format);
 
   mCRL2log(log::verbose) << "printing PBES from "
                          << (input_filename.empty()?"standard input":input_filename)
@@ -39,11 +38,11 @@ void pbespp(const std::string& input_filename,
   {
     if (format == core::print_internal)
     {
-      std::cout << pbes_system::pbes_to_aterm(p);
+      std::cout << pbes_to_aterm(p);
     }
     else
     {
-      std::cout << pbes_system::pp(p);
+      std::cout << pp(p);
     }
   }
   else
@@ -53,11 +52,11 @@ void pbespp(const std::string& input_filename,
     {
       if (format == core::print_internal)
       {
-        out << pbes_system::pbes_to_aterm(p);
+        out << pbes_to_aterm(p);
       }
       else
       {
-        out << pbes_system::pp(p);
+        out << pp(p);
       }
       out.close();
     }

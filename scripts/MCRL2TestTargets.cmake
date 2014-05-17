@@ -57,7 +57,6 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURR
     set_tests_properties("${TARGET}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
   endmacro( build_and_run_test_target TARGET )
 
-  # add_subdirectory( libraries/aterm/test)
   add_subdirectory( libraries/lps/test)
   add_subdirectory( libraries/bes/test)
   add_subdirectory( libraries/pbes/test)
@@ -80,6 +79,11 @@ message(STATUS "MCRL2_ENABLE_TEST_COMPILED_EXAMPLES: ${MCRL2_ENABLE_TEST_COMPILE
     if(NOT CMAKE_CFG_INTDIR STREQUAL ".")
       set(_configuration --build-config "$<CONFIGURATION>")
     endif()
+    if(${ARGC} GREATER 1)
+      set(_command "${TARGET}" "${ARGN}")
+    else()
+      set(_command "${TARGET}")
+    endif()
     if(MCRL2_ENABLE_TEST_COMPILED_EXAMPLES)
       ADD_TEST(NAME "${TARGET}" COMMAND ${CMAKE_CTEST_COMMAND}
        --build-and-test
@@ -90,20 +94,20 @@ message(STATUS "MCRL2_ENABLE_TEST_COMPILED_EXAMPLES: ${MCRL2_ENABLE_TEST_COMPILE
        --build-generator "${CMAKE_GENERATOR}"
        --build-target "${TARGET}"
        --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
+       --build-exe-dir "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
        ${_configuration}
-       --test-command "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}"
+       --test-command ${_command}
       )
       set_tests_properties("${TARGET}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
     endif(MCRL2_ENABLE_TEST_COMPILED_EXAMPLES)	
   endmacro( build_and_run_test_example_target TARGET )
 
-   add_subdirectory( libraries/atermpp/example)
-   add_subdirectory( libraries/data/example)
-   add_subdirectory( libraries/lps/example)
-   add_subdirectory( libraries/utilities/example )
-   add_subdirectory( libraries/pbes/example)
-   add_subdirectory( libraries/bes/example)
-
+  add_subdirectory( libraries/atermpp/example)
+  add_subdirectory( libraries/data/example)
+  add_subdirectory( libraries/lps/example)
+  add_subdirectory( libraries/utilities/example )
+  add_subdirectory( libraries/pbes/example)
+  add_subdirectory( libraries/bes/example)
 
 if( MCRL2_ENABLE_TEST_TARGETS )
    add_subdirectory( tools/lpsparunfold/test )

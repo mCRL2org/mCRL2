@@ -94,9 +94,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
   mcrl2_lts
-  mcrl2_utilities
   mcrl2_utilities_qt
-  mcrl2_syntax
   tr
 )
 

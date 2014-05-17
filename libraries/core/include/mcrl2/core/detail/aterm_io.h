@@ -63,7 +63,7 @@ aterm load_aterm(const std::string& filename)
         is.open(filename.c_str(), std::ios::binary);
         if (is.fail())
         {
-          throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading.");
+          throw atermpp::aterm_io_error("Could not open input file.");
         }
         result=read_term_from_binary_stream(is);
       }
@@ -72,85 +72,46 @@ aterm load_aterm(const std::string& filename)
         is.open(filename.c_str());
         if (is.fail())
         {
-          throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading.");
+          throw atermpp::aterm_io_error("Could not open input file.");
         }
         result=read_term_from_text_stream(is);
       }
       is.close();
     }
   }
-  catch (baf_version_error& e)
+  catch (std::runtime_error& e)
   {
     std::ostringstream ss;
-    ss << std::showbase // show the 0x prefix
-       << std::internal // fill between the prefix and the number
-       << std::setfill('0')  // fill with 0s
-       << "could not read a valid aterm from " + ((filename.empty())?"stdin":("'" + filename + "'"))
-       << ", it was created with an older version of mCRL2 (file format version number "
-       << std::hex << std::setw(4) << e.version
-       << ", expected " << std::setw(4) << e.expected_version << ".";
-    throw mcrl2::runtime_error(ss.str());
-  }
-  catch (std::runtime_error&)
-  {
-    throw mcrl2::runtime_error("could not read a valid aterm from " + ((filename.empty())?"stdin":("'" + filename + "'")));
+    ss << "Could not read a valid aterm from ";
+    if (filename.empty())
+    {
+      ss << "stdin. Caused by:\n";
+    }
+    else
+    {
+      ss << "'" << filename << "'. Caused by:\n";
+    }
+    ss << e.what();
+    throw atermpp::aterm_io_error(ss.str());
   }
   return result;
 }
 
-
-/// \brief Saves an aterm to the given file, or to stdout if filename is the empty string.
-/// If writing fails an exception is thrown.
+/// \brief Saves an aterm to the given stream.
 /// \param term A term
-/// \param filename A string
+/// \param stream An output stream
 /// \param binary If true the term is stored in binary format
 inline
-void save_aterm(aterm term, const std::string& filename, bool binary = true)
+void save_aterm(aterm term, std::ostream& stream, bool binary = true)
 {
-  using namespace std;
-
-  if (filename.empty())
+  if (binary)
   {
-    if (binary)
-    {
-      write_term_to_binary_stream(term, cout);
-    }
-    else
-    {
-      write_term_to_text_stream(term, cout);
-    }
-    if (cout.fail())
-    {
-      throw mcrl2::runtime_error("could not write aterm to standard out");
-    }
+    write_term_to_binary_stream(term, stream);
   }
   else
   {
-    std::ofstream os;
-    if (binary)
-    {
-      os.open(filename.c_str(), std::ios::binary);
-      write_term_to_binary_stream(term, os);
-    }
-    else
-    {
-      os.open(filename.c_str());
-      write_term_to_text_stream(term, os);
-    }
-    if (os.fail())
-    {
-      throw mcrl2::runtime_error("could not write aterm to " + filename);
-    }
-    os.close();
+    write_term_to_text_stream(term, stream);
   }
-}
-
-/// \brief Specialization for aterm_appl.
-inline
-void save_aterm(atermpp::aterm_appl term, const std::string& filename, bool binary = true)
-{
-  aterm_appl t = term;
-  save_aterm(static_cast<aterm>(t), filename, binary);
 }
 
 } // namespace detail

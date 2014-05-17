@@ -15,7 +15,6 @@
 #include <fstream>
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -24,15 +23,16 @@ namespace pbes_system {
 
 void txt2pbes(const std::string& input_filename,
               const std::string& output_filename,
+              const utilities::file_format* output_format,
               bool normalize
              )
 {
-  pbes_system::pbes p;
+  pbes p;
   if (input_filename.empty())
   {
     //parse specification from stdin
     mCRL2log(log::verbose) << "reading input from stdin..." << std::endl;
-    p = pbes_system::txt2pbes(std::cin, normalize);
+    p = txt2pbes(std::cin, normalize);
   }
   else
   {
@@ -43,18 +43,10 @@ void txt2pbes(const std::string& input_filename,
     {
       throw mcrl2::runtime_error("cannot open input file: " + input_filename);
     }
-    p = pbes_system::txt2pbes(instream, normalize);
+    p = txt2pbes(instream, normalize);
     instream.close();
   }
-  if (output_filename.empty())
-  {
-    mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
-  }
-  else
-  {
-    mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename << "'..." << std::endl;
-  }
-  p.save(output_filename);
+  save_pbes(p, output_filename, output_format);
 }
 
 } // namespace pbes_system

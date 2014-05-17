@@ -23,6 +23,56 @@ namespace mcrl2
 namespace utilities
 {
 
+class file_format
+{
+private:
+  std::string m_shortname;
+  std::string m_description;
+  std::vector<std::string> m_extensions;
+public:
+  file_format(const std::string& shortname, const std::string& description)
+    : m_shortname(shortname), m_description(description)
+  { }
+  void add_extension(const std::string& ext)
+  {
+    m_extensions.push_back(ext);
+  }
+  const std::string& shortname() const { return m_shortname; }
+  const std::string& description() const { return m_description; }
+  bool matches(const std::string& filename) const
+  {
+    for (auto it = m_extensions.begin(); it != m_extensions.end(); ++it)
+    {
+      if (filename.rfind(*it, filename.size() - it->size()) != std::string::npos)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+  static const file_format* unknown()
+  {
+    static file_format unknown("unknown", "Unknown format");
+    return &unknown;
+  }
+  bool operator==(const file_format& other)
+  {
+    return m_shortname == other.m_shortname;
+  }
+};
+
+inline
+std::ostream& operator<<(std::ostream& stream, const file_format& format)
+{
+  return stream << format.shortname();
+}
+
+inline
+std::ostream& operator<<(std::ostream& stream, const file_format* format)
+{
+  return stream << format->shortname();
+}
+
 inline
 bool file_exists(const std::string& filename)
 {

@@ -39,11 +39,11 @@ set(PROJECT_NAME "${PREFIX}_enumerator")
 project( ${PROJECT_NAME} )
 
 add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
-      enumerator.cpp
+  enumerator.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
-   mcrl2_data
+  mcrl2_data
 )
 
 build_and_run_test_example_target( ${PROJECT_NAME} )

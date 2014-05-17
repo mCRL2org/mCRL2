@@ -44,7 +44,7 @@
 
 //Boolean equation systems
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
@@ -53,10 +53,10 @@
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 using namespace std;
+using namespace ::bes;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using bes::bes_expression;
-using namespace ::bes;
 
 // using atermpp::make_substitution;
 
@@ -125,7 +125,6 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
 
       if (parser.options.count("output")) // Output format is deprecated.
       {
-        std::string format = parser.option_argument("output");
         throw parser.error("the option --output or -o is deprecated. Use the tool pbes2bes for this functionality. ");
       }
     }
@@ -135,10 +134,10 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       super::add_options(desc);
       desc.
       add_option("strategy", make_enum_argument<transformation_strategy>("STRAT")
-                 .add_value(lazy, true)
-                 .add_value(optimize)
-                 .add_value(on_the_fly)
-                 .add_value(on_the_fly_with_fixed_points),
+                 .add_value(::lazy, true)
+                 .add_value(::optimize)
+                 .add_value(::on_the_fly)
+                 .add_value(::on_the_fly_with_fixed_points),
                  "use strategy STRAT:",
                  's').
       add_option("counter",
@@ -177,7 +176,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
 
       // load the pbes
       mcrl2::pbes_system::pbes p;
-      load_pbes(p, input_filename(), pbes_input_format());
+      mcrl2::bes::load_pbes(p, input_filename(), pbes_input_format());
 
       pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);

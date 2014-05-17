@@ -13,7 +13,8 @@
 #define MCRL2_PBES_TOOLS_PBESABSINTHE_H
 
 #include "mcrl2/pbes/absinthe.h"
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/absinthe_strategy.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
@@ -22,6 +23,8 @@ namespace pbes_system {
 
 void pbesabsinthe(const std::string& input_filename,
                   const std::string& output_filename,
+                  const utilities::file_format* input_format,
+                  const utilities::file_format* output_format,
                   const std::string& abstraction_file,
                   absinthe_strategy strategy,
                   bool print_used_function_symbols,
@@ -30,11 +33,11 @@ void pbesabsinthe(const std::string& input_filename,
 {
   // load the pbes
   pbes p;
-  p.load(input_filename);
+  load_pbes(p, input_filename, input_format);
 
   if (print_used_function_symbols)
   {
-    pbes_system::detail::print_used_function_symbols(p);
+    detail::print_used_function_symbols(p);
   }
 
   std::string abstraction_text;
@@ -53,7 +56,7 @@ void pbesabsinthe(const std::string& input_filename,
   algorithm.run(p, abstraction_text, over_approximation);
 
   // save the result
-  p.save(output_filename);
+  save_pbes(p, output_filename, output_format);
 }
 
 } // namespace pbes_system

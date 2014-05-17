@@ -13,11 +13,11 @@
 #define MCRL2_PBES_TOOLS_H
 
 #include <string>
+#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/core/print_format.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pbes/absinthe_strategy.h"
 #include "mcrl2/pbes/bisimulation_type.h"
-#include "mcrl2/pbes/file_formats.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
@@ -28,42 +28,37 @@ namespace pbes_system {
 
 void pbesrewr(const std::string& input_filename,
               const std::string& output_filename,
+              const utilities::file_format* input_format,
+              const utilities::file_format* output_format,
               const data::rewrite_strategy rewrite_strategy,
-              pbes_rewriter_type rewriter_type,
-              bool skip_data
-             );
+              pbes_rewriter_type rewriter_typ);
 
 void pbesconstelm(const std::string& input_filename,
                   const std::string& output_filename,
+                  const utilities::file_format* input_format,
+                  const utilities::file_format* output_format,
                   data::rewrite_strategy rewrite_strategy,
                   pbes_rewriter_type rewriter_type,
                   bool compute_conditions,
                   bool remove_redundant_equations
                  );
 
-bool pbesinst(const std::string& input_filename,
-              const std::string& output_filename,
-              pbes_file_format pbes_input_format,
-              pbes_file_format pbes_output_format,
-              data::rewrite_strategy rewrite_strategy,
-              pbesinst_strategy m_strategy,
-              const std::string& finite_parameter_selection,
-              bool remove_redundant_equations,
-              bool aterm_ascii
-             );
-
 void pbesinfo(const std::string& input_filename,
               const std::string& input_file_message,
-              pbes_file_format file_format,
+              const utilities::file_format* file_format,
               bool opt_full
              );
 
 void pbesparelm(const std::string& input_filename,
-                const std::string& output_filename
+                const std::string& output_filename,
+                const utilities::file_format* input_format,
+                const utilities::file_format* output_format
                );
 
 void pbespareqelm(const std::string& input_filename,
                   const std::string& output_filename,
+                  const utilities::file_format* input_format,
+                  const utilities::file_format* output_format,
                   data::rewrite_strategy rewrite_strategy,
                   pbes_rewriter_type rewriter_type,
                   bool ignore_initial_state
@@ -71,17 +66,19 @@ void pbespareqelm(const std::string& input_filename,
 
 void pbespp(const std::string& input_filename,
             const std::string& output_filename,
-            pbes_file_format pbes_input_format,
+            const utilities::file_format* input_format,
             core::print_format_type format
            );
 
 void txt2pbes(const std::string& input_filename,
               const std::string& output_filename,
+              const utilities::file_format* output_format,
               bool normalize
              );
 
 void lps2pbes(const std::string& input_filename,
               const std::string& output_filename,
+              const utilities::file_format* output_format,
               const std::string& formula_filename,
               bool timed,
               bool structured,
@@ -90,24 +87,30 @@ void lps2pbes(const std::string& input_filename,
 
 void complps2pbes(const std::string& input_filename,
                   const std::string& output_filename,
+                  const utilities::file_format* output_format,
                   const std::string& formula_filename
                  );
 
 void lpsbisim2pbes(const std::string& input_filename1,
                    const std::string& input_filename2,
                    const std::string& output_filename,
+                   const utilities::file_format* output_format,
                    bisimulation_type type,
                    bool normalize
                   );
 
 void pbesabstract(const std::string& input_filename,
                   const std::string& output_filename,
+                  const utilities::file_format* input_format,
+                  const utilities::file_format* output_format,
                   const std::string& parameter_selection,
                   bool value_true
                  );
 
 void pbesabsinthe(const std::string& input_filename,
                   const std::string& output_filename,
+                  const utilities::file_format* input_format,
+                  const utilities::file_format* output_format,
                   const std::string& abstraction_file,
                   absinthe_strategy strategy,
                   bool print_used_function_symbols,
@@ -116,6 +119,8 @@ void pbesabsinthe(const std::string& input_filename,
 
 void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
+                    const utilities::file_format* input_format,
+                    const utilities::file_format* output_format,
                     const pbesstategraph_options& options
                    );
 
