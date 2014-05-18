@@ -126,7 +126,13 @@ cxx11_check_feature("variadic_templates" HAS_CXX11_VARIADIC_TEMPLATES False)
 cxx11_check_feature("unique_ptr" HAS_CXX11_UNIQUE_PTR False)
 cxx11_check_feature("is_sorted" HAS_CXX11_IS_SORTED True) # Assumed to be supported
 cxx11_check_feature("unordered_set" HAS_CXX11_UNORDERED_SET False)
+cxx11_check_feature("noexcept" HAS_CXX11_NOEXCEPT False)
 
+if(HAS_CXX11_NOEXCEPT)
+  add_definitions(-DNOEXCEPT=noexcept)
+else()
+  add_definitions(-DNOEXCEPT)
+endif()
 if(HAS_CXX11_NULLPTR)
   add_definitions(-DMCRL2_HAVE_NULLPTR)
 endif()

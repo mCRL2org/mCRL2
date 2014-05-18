@@ -82,7 +82,7 @@ public:
       expected_version(expected_version_)
   { }
 
-  const char* what() const noexcept
+  const char* what() const NOEXCEPT
   {
     std::stringstream ss;
     ss << std::internal << std::showbase << std::hex << std::setfill('0') << std::setw(4)

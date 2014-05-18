@@ -14,8 +14,8 @@
 
 #include <ctime>
 #include <cstdio>
-#include <string>
-#include <boost/lexical_cast.hpp>
+#include <sstream>
+#include <vector>
 
 namespace mcrl2
 {
@@ -87,8 +87,9 @@ bool file_exists(const std::string& filename)
 inline
 std::string create_filename(const std::string& prefix = "file", const std::string& extension = ".txt")
 {
-  time_t seconds = time(0);
-  return prefix + boost::lexical_cast<std::string>(seconds) + extension;
+  std::stringstream ss;
+  ss << prefix << time(nullptr) << extension;
+  return ss.str();
 }
 
 } // namespace utilities
