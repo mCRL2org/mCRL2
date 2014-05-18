@@ -23,7 +23,7 @@ std::string boolean_variables2pgsolver(Iter first, Iter last, const variable_map
   for (Iter i = first; i != last; ++i)
   {
     assert(tr::is_variable(*i));
-    typename variable_map::const_iterator j = variables.find(tr::name(*i));
+    variable_map::const_iterator j = variables.find(tr::name(*i));
     if (j == variables.end())
     {
       throw mcrl2::runtime_error("Found undeclared variable in boolean_variables2pgsolver: " + tr::pp(*i));
@@ -51,7 +51,7 @@ std::string bes_expression2pgsolver(const term_type& p, const variable_map& vari
   }
   else if (tr::is_prop_var(p))
   {
-    typename variable_map::const_iterator i = variables.find(tr::name(p));
+    variable_map::const_iterator i = variables.find(tr::name(p));
     if (i == variables.end())
     {
       throw mcrl2::runtime_error("Found undeclared variable in bes_expression2cwi: " + tr::pp(p));
