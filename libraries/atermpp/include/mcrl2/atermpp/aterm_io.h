@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/workarounds.h"
 
 #include <iomanip>
 
