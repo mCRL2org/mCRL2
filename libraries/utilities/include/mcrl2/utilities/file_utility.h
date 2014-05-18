@@ -88,7 +88,7 @@ inline
 std::string create_filename(const std::string& prefix = "file", const std::string& extension = ".txt")
 {
   std::stringstream ss;
-  ss << prefix << time(nullptr) << extension;
+  ss << prefix << time(0) << extension;
   return ss.str();
 }
 
