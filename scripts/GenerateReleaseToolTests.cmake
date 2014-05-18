@@ -1199,7 +1199,7 @@ endmacro( add_pbespareqelm_release_test ARGS )
 
 macro( gen_pbespareqelm_release_tests )
 					add_pbespareqelm_release_test(  "" )
-					add_pbespareqelm_release_test(  "-i" )
+					add_pbespareqelm_release_test(  "-I" )
 					add_pbespareqelm_release_test(  "-psimplify" )
 					add_pbespareqelm_release_test(  "-pquantifier-all" )
 					add_pbespareqelm_release_test(  "-pquantifier-finite" )

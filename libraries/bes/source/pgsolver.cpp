@@ -7,10 +7,10 @@ namespace mcrl2
 namespace bes
 {
 
-typedef typename boolean_equation_system::equation_type equation_type;
-typedef typename equation_type::term_type term_type;
-typedef typename core::term_traits<term_type> tr;
-typedef typename tr::string_type string_type;
+typedef boolean_equation_system::equation_type equation_type;
+typedef equation_type::term_type term_type;
+typedef core::term_traits<term_type> tr;
+typedef tr::string_type string_type;
 typedef std::map<string_type, size_t> variable_map;
 
 ///
