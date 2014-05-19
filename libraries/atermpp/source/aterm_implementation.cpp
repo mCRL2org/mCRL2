@@ -287,16 +287,9 @@ void collect_terms_with_reference_count_0()
   garbage_collect_count_down=(1+number_of_blocks)*(BLOCK_SIZE/(sizeof(size_t)*16));
 }
 
-
-
-#ifndef NDEBUG
+#ifdef MCRL2_CHECK_ATERMPP_CLEANUP
 static void check_that_all_objects_are_free()
 {
-  return; // Remove this return to check whether all data terms and function symbols
-          // have been removed. On some platforms this does not work, as some global
-          // data structures (vectors, maps, etc.) have not been destroyed when this
-          // function is called.
-
   collect_terms_with_reference_count_0();
 
   bool result=true;
@@ -322,14 +315,12 @@ static void check_that_all_objects_are_free()
     }
   }
 
-  // Check the function symbols. The first four function symbols
-  // can be constructed twice in the same spot (function_symbol_constants.h)
-  // and only destroyed once and therefore their reference counts can be 1 at
-  // termination. The function symbols with number 0 and 3 even can have reference
-  // count 2, because the terms containing may still exist as they are also constructed
-  // in a nonderministic fashion using a placement new. So, they can be constructed
-  // without properly being destroyed, increasing the reference count of the function
-  // symbols in it by 1.
+  /* Check the function symbols. The first four function symbols can be constructed twice in the
+   * same spot (function_symbol_constants.h) and only destroyed once and therefore their reference
+   * counts can be 1 at termination. The function symbols with number 0 and 3 even can have
+   * reference count 2, because the terms containing may still exist as they are also constructed in
+   * a nonderministic fashion using a placement new. So, they can be constructed without properly
+   * being destroyed, increasing the reference count of the function symbols in it by 1. */
   for(size_t i=0; i<function_symbol_index_table_number_of_elements; ++i)
   {
     for(size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; ++j)
@@ -354,19 +345,14 @@ static void check_that_all_objects_are_free()
   }
   assert(result);
 }
-
 #endif
-
-
 
 void initialise_aterm_administration()
 {
-  // Explict initialisation on first use. This first
-  // use is when a function symbol is created for the first time,
-  // which may be due to the initialisation of a global variable in
-  // a .cpp file, or due to the initialisation of a pre-main initialisation
-  // of a static variable, which some compilers do.
-
+  /* Explict initialisation on first use. This first use is when a function symbol is created for
+   * the first time, which may be due to the initialisation of a global variable in a .cpp file, or
+   * due to the initialisation of a pre-main initialisation of a static variable, which some
+   * compilers do. */
   aterm_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
   if (aterm_hashtable==NULL)
   {
@@ -384,24 +370,24 @@ void initialise_aterm_administration()
     new (&terminfo[i]) TermInfo();
   }
 
-  new (&detail::static_undefined_aterm) aterm(detail::term_appl0(detail::function_adm.AS_DEFAULT)); // Use placement new as static_undefined_aterm
-                                                                                // may not have initialised when this is called,
-                                                                                // causing a problem with reference counting.
+  /* Use placement new (twice) as these (static) objects may not have initialised when this is
+   * called, causing a problem with reference counting. */
+  new (&detail::static_undefined_aterm) aterm(detail::term_appl0(detail::function_adm.AS_DEFAULT));
+  new (&detail::static_empty_aterm_list) aterm(detail::term_appl0(detail::function_adm.AS_EMPTY_LIST));
 
-  new (&detail::static_empty_aterm_list) aterm(detail::term_appl0(detail::function_adm.AS_EMPTY_LIST)); // Use placement new as static_empty_atermlist
-                                                                                 // may not have initialised when this is called,
-                                                                                 // causing a problem with reference counting.
-
-// Check at exit that all function symbols and terms have been cleaned up properly.
-// TODO: on windows it turns out that the reference counts do not reduce to 0.
-//       The reason for it is unclear. It could either be due to an unforeseen sequence
-//       of destroying static and global variables, in relation to the execution of the
-//       exit function defined below. Or it could be that on windows global variables
-//       are not properly cleaned up. This requires further investigation.
-#if !(defined(_WIN32) || defined(_WIN64))
-  assert(!atexit(check_that_all_objects_are_free)); // zero is returned when registering is successful.
+  /* Check at exit that all function symbols and terms have been cleaned up properly.
+   * TODO: on windows it turns out that the reference counts do not reduce to 0. The reason for it
+   *       is unclear. It could either be due to an unforeseen sequence of destroying static and
+   *       global variables, in relation to the execution of the exit function defined below. Or it
+   *       could be that on windows global variables are not properly cleaned up. This requires
+   *       further investigation. */
+#ifdef MCRL2_CHECK_ATERMPP_CLEANUP
+  assert(atexit(check_that_all_objects_are_free) == 0);
 #endif
 
+  /* Check for reasonably sized aterm (at least 32 bits, 4 bytes). This check might break on
+   * perfectly valid architectures that have char == 2 bytes, and sizeof(header_type) == 2 */
+  assert(sizeof(size_t) == sizeof(aterm*) && sizeof(size_t) < 4);
 }
 
 /* allocate a block of memory to contain terms consisting of `size' objects

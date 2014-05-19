@@ -35,13 +35,13 @@ const utilities::file_format* bes_file_formats(size_t i)
   static std::vector<utilities::file_format> result;
   if (result.empty())
   {
-    result.push_back(utilities::file_format("bes", "BES in internal format"));
+    result.push_back(utilities::file_format("bes", "BES in internal format", false));
     result.back().add_extension(".bes");
-    result.push_back(utilities::file_format("bes_text", "BES in internal textual format"));
+    result.push_back(utilities::file_format("bes_text", "BES in internal textual format", true));
     result.back().add_extension(".aterm");
-    result.push_back(utilities::file_format("cwi", "BES in CWI format"));
+    result.push_back(utilities::file_format("cwi", "BES in CWI format", true));
     result.back().add_extension(".cwi");
-    result.push_back(utilities::file_format("pgsolver", "BES in PGSolver format"));
+    result.push_back(utilities::file_format("pgsolver", "BES in PGSolver format", true));
     result.back().add_extension(".gm");
     result.back().add_extension(".pg");
   }
@@ -200,22 +200,8 @@ void save_bes(const boolean_equation_system &bes, const std::string &filename,
   {
     format = guess_format(filename);
   }
-  if (filename.empty() || filename == "-")
-  {
-    save_bes(bes, std::cout, format);
-  }
-  else
-  {
-    std::ofstream out(filename.c_str());
-    if (out.good())
-    {
-      save_bes(bes, out, format);
-    }
-    else
-    {
-      throw mcrl2::runtime_error("Could not open file " + filename);
-    }
-  }
+  utilities::output_file file = format->open_output(filename);
+  save_bes(bes, file.stream(), format);
 }
 
 /// \brief Loads a BES from a file.
@@ -231,22 +217,8 @@ void load_bes(boolean_equation_system& bes, const std::string& filename,
   {
     format = guess_format(filename);
   }
-  if (filename.empty() || filename == "-")
-  {
-    load_bes(bes, std::cin, format);
-  }
-  else
-  {
-    std::ifstream in(filename.c_str());
-    if (in.good())
-    {
-      load_bes(bes, in, format);
-    }
-    else
-    {
-      throw mcrl2::runtime_error("Could not open file " + filename);
-    }
-  }
+  utilities::input_file file = format->open_input(filename);
+  load_bes(bes, file.stream(), format);
 }
 
 /// \brief Loads a PBES from a file. If the file stores a BES, then it is converted to a PBES.
@@ -327,22 +299,8 @@ void save_pbes(const pbes_system::pbes& pbes, const std::string& filename,
   {
     format = guess_format(filename);
   }
-  if (filename.empty() || filename == "-")
-  {
-    bes::save_pbes(pbes, std::cout, format);
-  }
-  else
-  {
-    std::ofstream out(filename.c_str());
-    if (out.good())
-    {
-      bes::save_pbes(pbes, out, format);
-    }
-    else
-    {
-      throw mcrl2::runtime_error("Could not open file " + filename);
-    }
-  }
+  utilities::output_file file = format->open_output(filename);
+  bes::save_pbes(pbes, file.stream(), format);
 }
 
 } // namespace bes

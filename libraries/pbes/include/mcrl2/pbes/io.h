@@ -32,11 +32,11 @@ const std::vector<utilities::file_format>& pbes_file_formats()
   static std::vector<utilities::file_format> result;
   if (result.empty())
   {
-    result.push_back(utilities::file_format("pbes", "PBES in internal format"));
+    result.push_back(utilities::file_format("pbes", "PBES in internal format", false));
     result.back().add_extension(".pbes");
-    result.push_back(utilities::file_format("pbes_text", "PBES in internal textual format"));
+    result.push_back(utilities::file_format("pbes_text", "PBES in internal textual format", true));
     result.back().add_extension(".aterm");
-    result.push_back(utilities::file_format("text", "PBES in textual (mCRL2) format"));
+    result.push_back(utilities::file_format("text", "PBES in textual (mCRL2) format", true));
     result.back().add_extension(".txt");
   }
   return result;
@@ -162,22 +162,8 @@ void save_pbes(const pbes &pbes, const std::string &filename,
   {
     format = guess_format(filename);
   }
-  if (filename.empty() || filename == "-")
-  {
-    save_pbes(pbes, std::cout, format);
-  }
-  else
-  {
-    std::ofstream out(filename.c_str());
-    if (out.good())
-    {
-      save_pbes(pbes, out, format);
-    }
-    else
-    {
-      throw mcrl2::runtime_error("Could not open file " + filename);
-    }
-  }
+  utilities::output_file file = format->open_output(filename);
+  save_pbes(pbes, file.stream(), format);
 }
 
 /// \brief Load pbes from file.
@@ -193,22 +179,8 @@ void load_pbes(pbes& pbes, const std::string& filename,
   {
     format = guess_format(filename);
   }
-  if (filename.empty() || filename == "-")
-  {
-    load_pbes(pbes, std::cin, format);
-  }
-  else
-  {
-    std::ifstream in(filename.c_str());
-    if (in.good())
-    {
-      load_pbes(pbes, in, format);
-    }
-    else
-    {
-      throw mcrl2::runtime_error("Could not open file " + filename);
-    }
-  }
+  utilities::input_file file = format->open_input(filename);
+  load_pbes(pbes, file.stream(), format);
 }
 
 } // namespace pbes_system
