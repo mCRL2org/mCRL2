@@ -34,6 +34,7 @@ namespace utilities
 {
 
 #ifdef WIN32
+inline
 void set_binary_mode(std::ios& stream)
 {
   std::string name;
