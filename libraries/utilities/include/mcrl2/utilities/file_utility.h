@@ -14,6 +14,7 @@
 
 #include "mcrl2/utilities/workarounds.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 #include <ctime>
 #include <cstdio>
 #include <sstream>
@@ -36,29 +37,29 @@ namespace utilities
 void set_binary_mode(std::ios& stream)
 {
   std::string name;
-  int fileno;
+  FILE* handle;
   if (stream.rdbuf() == std::cin.rdbuf())
   {
     name = "cin";
-    fileno = _fileno(stdin);
+    handle = stdin;
   }
   else
   if (stream.rdbuf() == std::cout.rdbuf())
   {
     name = "cout";
-    fileno = _fileno(stdout);
+    handle = stdout;
     fflush(stdout);
   }
   else
   if (stream.rdbuf() == std::cerr.rdbuf())
   {
     name = "cerr";
-    fileno = _fileno(stderr);
+    handle = stderr;
     fflush(stderr);
   }
   if (!name.empty())
   {
-    if (_setmode(fileno, _O_BINARY) == -1)
+    if (_setmode(_fileno(handle), _O_BINARY) == -1)
     {
       mCRL2log(mcrl2::log::warning) << "Cannot set " << name << " to binary mode.\n";
     }
