@@ -82,6 +82,16 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   data_expression t1gd2 = parse_data_expression("true");
   BOOST_CHECK(r(t1gd1) == r(t1gd2));
 
+  /* Test 1h*/
+  data_expression t1hd1 = parse_data_expression("forall x:Bool.exists y: Bool. x == y ");
+  data_expression t1hd2 = parse_data_expression("true");
+  BOOST_CHECK(r(t1hd1) == r(t1hd2));
+
+  /* Test 1i*/
+  data_expression t1id1 = parse_data_expression("exists x: Bool.forall y:Bool.x == y");
+  data_expression t1id2 = parse_data_expression("false");
+  BOOST_CHECK(r(t1id1) == r(t1id2));
+
   /* Test 2*/
   data_expression t2d1 = parse_data_expression("exists x: Nat. (  x in {1,2,25,600} && 25 == x )", specification);
   data_expression t2d2 = parse_data_expression("true");
