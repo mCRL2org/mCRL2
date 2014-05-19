@@ -82,6 +82,36 @@ static void initialise_common()
 #define is_ar_or(x) (x.function()==afunARor)
 #define is_ar_var(x) (x.function()==afunARvar)
 
+size_t RewriterCompilingJitty::ar_index(
+                const data::function_symbol& f, 
+                const size_t arity, 
+                const size_t arg)
+{
+  assert(arg<arity);
+  assert(int2ar_idx[f]+((arity-1)*arity)/2+arg<ar.size());
+  return int2ar_idx[f]+((arity-1)*arity)/2+arg;
+
+}
+
+atermpp::aterm_appl RewriterCompilingJitty::get_ar_array(
+                const data::function_symbol& f, 
+                const size_t arity, 
+                const size_t arg)
+{
+  return ar[ar_index(f,arity,arg)];
+}
+
+
+void RewriterCompilingJitty::set_ar_array(
+                const data::function_symbol& f, 
+                const size_t arity, 
+                const size_t arg,
+                const atermpp::aterm_appl ar_expression)
+{
+  ar[ar_index(f,arity,arg)]=ar_expression;
+}
+
+
 static atermpp::aterm_appl make_ar_true()
 {
   return ar_true;
@@ -227,9 +257,16 @@ static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_c
   const application ta(t);
   size_t arity = ta.size();
 
-  if (!ommit_head)
+  if (is_application(ta.head()))
   {
-    s.push_front(match_tree_F(function_symbol(ta.head()),dummy,dummy));
+    term2seq(ta.head(),s,var_cnt,ommit_head);
+    s.push_front(match_tree_N(dummy,0));
+  }
+  else if (!ommit_head)
+  {
+    {
+      s.push_front(match_tree_F(function_symbol(ta.head()),dummy,dummy));
+    }
   }
 
   size_t j=1;
@@ -2187,6 +2224,9 @@ void RewriterCompilingJitty::implement_strategy(
                const nfs_array& nf_args)
 {
   std::vector<bool> used=nf_args; // This vector maintains which arguments are in normal form. Initially only those in nf_args are in normal form.
+stringstream ss;
+ss << "//" << strat << "\n";
+fprintf(f,"%s",ss.str().c_str());
   while (!strat.empty())
   {
     if (strat.front().isA())
@@ -2214,7 +2254,16 @@ void RewriterCompilingJitty::implement_strategy(
   finish_function(f,arity,opid,used);
 }
 
-atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const atermpp::aterm_appl& expr, const variable& var)
+
+
+// The function build_ar_internal returns an and/or tree indicating on which function symbol with which
+// arity the variable var depends. The idea is that if var must be a normal form if any of these arguments
+// must be a normal form. In this way the reduction to normal forms of these argument is not unnecessarily 
+// postponed. For example in the expression if(!b,1,0) the typical result is @@and(@@var(149),@@var(720))
+// indicating that b must not be rewritten to a normal form anyhow if the first argument of ! must not always be rewritten
+// to a normalform and the first argument of if must not always be rewritten to normal form.
+
+atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const data_expression& expr, const variable& var)
 {
   if (is_function_symbol(expr))
   {
@@ -2258,19 +2307,17 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const atermpp
   size_t arity = recursive_number_of_args(expra);
   for (size_t i=0; i<arity; i++)
   {
-    const size_t idx = int2ar_idx[head] + ((arity-1)*arity)/2 + i;
+    const size_t idx = ar_index(head,arity,i); 
     atermpp::aterm_appl t = build_ar_expr_internal(get_argument_of_higher_order_term(expra,i),var);
     result = make_ar_or(result,make_ar_and(make_ar_var(idx),t));
   }
-
   return result;
 }
 
 atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity)
 {
-  const data_expression& lhs = eqn.lhs();
-
-  size_t eqn_arity = lhs.function().arity()-1;
+  const function_symbol head=get_function_symbol_of_head(eqn.lhs());
+  size_t eqn_arity = recursive_number_of_args(eqn.lhs());
   if (eqn_arity > arity)
   {
     return make_ar_true();
@@ -2281,7 +2328,8 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equatio
     function_symbol head;
     if (is_function_symbol(rhs))
     {
-      const size_t idx = int2ar_idx[aterm_cast<function_symbol>(rhs)] + ((arity-1)*arity)/2 + arg;
+      const size_t idx = ar_index(aterm_cast<function_symbol>(rhs),arity,arg);
+      assert(idx<ar.size());
       return make_ar_var(idx);
     }
     else if (head_is_function_symbol(rhs,head))
@@ -2289,8 +2337,8 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equatio
       int rhs_arity = recursive_number_of_args(rhs)-1;
       size_t diff_arity = arity-eqn_arity;
       int rhs_new_arity = rhs_arity+diff_arity;
-      size_t idx = int2ar_idx[head] +
-                         ((rhs_new_arity-1)*rhs_new_arity)/2 + (arg - eqn_arity + rhs_arity);
+      size_t idx = ar_index(head,rhs_new_arity,(arg - eqn_arity + rhs_arity));
+      assert(idx<ar.size());
       return make_ar_var(idx);
     }
     else
@@ -2299,7 +2347,10 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equatio
     }
   }
 
-  atermpp::aterm_appl arg_term = atermpp::aterm_cast<atermpp::aterm_appl>(lhs[arg+1]);
+  // Here we know that eqn.lhs() must be an application. If it were a function symbol
+  // it would have been dealt with above.
+  const application& lhs = core::down_cast<application>(eqn.lhs());
+  const data_expression& arg_term = get_argument_of_higher_order_term(lhs,arg);
   if (!is_variable(arg_term))
   {
     return make_ar_true();
@@ -2317,14 +2368,12 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equatio
 
 atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr(const data_equation_list& eqns, const size_t arg, const size_t arity)
 {
-  if (eqns.empty())
+  atermpp::aterm_appl result=make_ar_true();
+  for(data_equation_list::const_iterator i=eqns.begin(); i!=eqns.end(); ++i)
   {
-    return make_ar_true();
+    result=make_ar_and(build_ar_expr_aux(*i,arg,arity),result);
   }
-  else
-  {
-    return make_ar_and(build_ar_expr_aux(eqns.front(),arg,arity),build_ar_expr(eqns.tail(),arg,arity));
-  }
+  return result;
 }
 
 bool RewriterCompilingJitty::always_rewrite_argument(
@@ -2332,7 +2381,7 @@ bool RewriterCompilingJitty::always_rewrite_argument(
      const size_t arity,
      const size_t arg)
 {
-  return !is_ar_false(ar[int2ar_idx[opid]+((arity-1)*arity)/2+arg]);
+  return !is_ar_false(get_ar_array(opid,arity,arg)); 
 }
 
 bool RewriterCompilingJitty::calc_ar(const atermpp::aterm_appl& expr)
@@ -2366,12 +2415,11 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   {
     size_t arity = getArity(it->first);
     const data_equation_list& eqns = jittyc_eqns[it->first];
-    size_t idx = it->second;
     for (size_t i=1; i<=arity; i++)
     {
       for (size_t j=0; j<i; j++)
       {
-        ar[idx+((i-1)*i)/2+j] = build_ar_expr(eqns,j,i);
+        set_ar_array(it->first,i,j,build_ar_expr(eqns,j,i));
       }
     }
   }
@@ -2576,6 +2624,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   all_function_symbols.insert(all_function_symbols.begin(),
                               m_data_specification_for_enumeration.mappings().begin(),
                               m_data_specification_for_enumeration.mappings().end());
+
   for(function_symbol_vector::const_iterator l = all_function_symbols.begin()
         ; l != all_function_symbols.end()
         ; ++l)
@@ -2876,6 +2925,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "data_expression rewrite_appl_aux(const application& t)\n"
       "{\n"
+// "std::cerr << \"REWR_APPL_AUX \" << t << \"\\n\";"
       "  mcrl2::data::function_symbol thead;\n"
       "  if (mcrl2::data::detail::head_is_function_symbol(t,thead))\n"
       "  {\n"

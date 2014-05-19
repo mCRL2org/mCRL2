@@ -94,7 +94,7 @@ class RewriterCompilingJitty: public Rewriter
     std::map <mcrl2::data::function_symbol,size_t> int2ar_idx;
     size_t ar_size;
     std::vector<atermpp::aterm_appl> ar;
-    atermpp::aterm_appl build_ar_expr_internal(const atermpp::aterm_appl& expr, const variable& var);
+    atermpp::aterm_appl build_ar_expr_internal(const data_expression& expr, const variable& var);
     atermpp::aterm_appl build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity);
     atermpp::aterm_appl build_ar_expr(const data_equation_list& eqns, const size_t arg, const size_t arity);
     bool always_rewrite_argument(const function_symbol& opid, const size_t arity, const size_t arg);
@@ -129,6 +129,10 @@ class RewriterCompilingJitty: public Rewriter
     sort_list_vector get_residual_sorts(const sort_expression& s, const size_t actual_arity, const size_t requested_arity);
     data_equation_list lift_rewrite_rules_to_right_arity(const data_equation_list& eqns,const size_t arity);
     match_tree_list create_strategy(const data_equation_list& rules, const size_t arity, nfs_array& nfs);
+    size_t ar_index( const data::function_symbol& f, const size_t arity, const size_t arg);
+    atermpp::aterm_appl get_ar_array( const data::function_symbol& f, const size_t arity, const size_t arg);
+    void set_ar_array( const data::function_symbol& f, const size_t arity, const size_t index, const atermpp::aterm_appl ar_expression);
+
 };
 
 struct rewriter_interface

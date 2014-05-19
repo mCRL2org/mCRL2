@@ -46,7 +46,6 @@ public:
   // Return the values of this vector as if it encodes a number in bits..
   size_t get_encoded_number() const
   {
-    assert(size() <= NF_MAX_ARITY);
     size_t result=0;
     for(size_t i=0; i<size(); ++i)
     {
