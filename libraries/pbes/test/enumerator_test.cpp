@@ -31,6 +31,21 @@ using namespace mcrl2::pbes_system;
     "  Y: Nat;       \n"
     ;
 
+// TODO: use a lambda expression instead of this struct
+struct report
+{
+  std::vector<pbes_system::pbes_expression>& solutions;
+
+  report(std::vector<pbes_system::pbes_expression>& solutions_)
+    : solutions(solutions_)
+  {}
+
+  void operator()(const enumerator_list_element<pbes_expression>& e) const
+  {
+    solutions.push_back(e.phi);
+  }
+};
+
 void test_enumerator()
 {
   typedef pbes_system::simplify_data_rewriter<data::rewriter> pbes_rewriter;
@@ -50,21 +65,9 @@ void test_enumerator()
   data::mutable_indexed_substitution<> sigma;
   enumerator_algorithm<pbes_rewriter, data::mutable_indexed_substitution<> > E(R, sigma, data_spec);
   std::vector<pbes_system::pbes_expression> solutions;
-  enumerator_list P;
-  P.push_back(enumerator_list_element(v, phi));
-  while (!P.empty())
-  {
-    pbes_expression e = E.next(P, is_not_true());
-    if (e == data::undefined_data_expression())
-    {
-      continue;
-    }
-    solutions.push_back(e);
-    if (tr::is_false(e))
-    {
-      break;
-    }
-  }
+  std::deque<enumerator_list_element<pbes_expression> > P;
+  P.push_back(enumerator_list_element<pbes_expression>(v, phi));
+  E.next(P, is_not_true(), report(solutions));
   std::clog << "solutions = " << core::detail::print_list(solutions) << std::endl;
   BOOST_CHECK(solutions.size() >= 1);
 }

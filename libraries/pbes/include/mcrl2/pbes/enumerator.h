@@ -20,10 +20,7 @@
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/data/substitutions/variable_assignment.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/replace.h"
 
 namespace mcrl2 {
 
@@ -47,24 +44,68 @@ struct is_not_true
   }
 };
 
+/// \brief The default element for the todo list of the enumerator
+template <typename Expression>
 struct enumerator_list_element
 {
   data::variable_list v;
-  pbes_expression phi;
-  data::enumerator_substitution sigma;
+  Expression phi;
 
-  enumerator_list_element(const data::variable_list& v_, const pbes_expression& phi_, const data::enumerator_substitution& sigma_ = data::enumerator_substitution())
-    : v(v_), phi(phi_), sigma(sigma_)
+  /// \brief Constructs the element (v, phi)
+  enumerator_list_element(const data::variable_list& v_, const Expression& phi_)
+    : v(v_), phi(phi_)
   {}
+
+  /// \brief Constructs the element (v, phi)
+  enumerator_list_element(const data::variable_list& v_,
+                          const Expression& phi_,
+                          const enumerator_list_element&,
+                          const data::variable&,
+                          const data::data_expression&
+                         )
+    : v(v_), phi(phi_)
+  {}
+
+  bool is_solution() const
+  {
+    return v.empty();
+  }
 };
 
-inline
-std::ostream& operator<<(std::ostream& out, const enumerator_list_element& p)
+/// \brief An element for the todo list of the enumerator that collects the substitution
+/// corresponding to the expression phi
+template <typename Expression>
+struct enumerator_list_element_with_substitution: public enumerator_list_element<Expression>
+{
+  data::variable_list variables;
+  data::data_expression_list expressions;
+
+  /// \brief Constructs the element (v, phi, [])
+  enumerator_list_element_with_substitution(const data::variable_list& v, const Expression& phi)
+    : enumerator_list_element<Expression>(v, phi)
+  {}
+
+  /// \brief Constructs the element (v, phi, e.sigma[v := x])
+  enumerator_list_element_with_substitution(const data::variable_list& v,
+                          const Expression& phi,
+                          const enumerator_list_element_with_substitution<Expression>& elem,
+                          const data::variable& d,
+                          const data::data_expression& e
+                         )
+    : enumerator_list_element<Expression>(v, phi),
+      variables(elem.variables),
+      expressions(elem.expressions)
+  {
+    variables.push_front(d);
+    expressions.push_front(e);
+  }
+};
+
+template <typename Expression>
+std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expression>& p)
 {
   return out << p.phi << " " << core::detail::print_list(p.v);
 }
-
-typedef std::deque<enumerator_list_element> enumerator_list;
 
 struct sort_name_generator
 {
@@ -80,17 +121,18 @@ struct sort_name_generator
   }
 };
 
-template <typename PbesRewriter, typename MutableSubstitution>
+/// \brief An enumerator algorithm that generates solutions of a condition.
+template <typename Rewriter, typename MutableSubstitution>
 class enumerator_algorithm
 {
   /// \brief A map that caches the constructors corresponding to sort expressions.
   typedef std::map<data::sort_expression, std::vector<data::function_symbol> > constructor_map;
 
   protected:
-    // A PBES rewriter
-    PbesRewriter& R;
+    // A rewriter
+    Rewriter& R;
 
-    // N.B. this is the substitution that is used internally by R
+    // The substitution that is used internally by R
     MutableSubstitution& Rsigma;
 
     /// \brief A data specification.
@@ -105,7 +147,7 @@ class enumerator_algorithm
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
-    const std::vector<data::function_symbol>& constructors(const data::sort_expression& s) const
+    const std::vector<data::function_symbol>& constructors(const data::sort_expression& s)
     {
       auto i = m_constructors.find(s);
       if (i != m_constructors.end())
@@ -129,100 +171,104 @@ class enumerator_algorithm
     }
 
   public:
-    enumerator_algorithm(PbesRewriter& R_, MutableSubstitution& Rsigma_, const data::data_specification& dataspec_)
+    enumerator_algorithm(Rewriter& R_, MutableSubstitution& Rsigma_, const data::data_specification& dataspec_)
       : R(R_), Rsigma(Rsigma_), dataspec(dataspec_)
     {}
 
-    template <typename Accept>
-    pbes_expression next(enumerator_list& P, Accept accept)
+    /// \brief Enumerates the front element of the todo list P.
+    /// \param P The todo list of the algorithm.
+    /// \param accept Elements p for which accept(p) is false are discarded.
+    /// \pre !P.empty()
+    template <typename EnumeratorListElement, typename Accept>
+    void enumerate_front(std::deque<EnumeratorListElement>& P, Accept accept)
     {
-      using core::detail::print_list;
-
-      if (P.empty())
-      {
-        return data::undefined_data_expression();
-      }
+      assert(!P.empty());
 
       auto p = P.front();
       auto const& v = p.v;
       auto const& phi = p.phi;
-      auto sigma = p.sigma;
       mCRL2log(log::debug) << "  process " << p << std::endl;
       P.pop_front();
-      if (accept(phi))
-      {
-        if (v.empty())
-        {
-          mCRL2log(log::debug) << "  solution " << phi << std::endl;
-          return phi;
-        }
-        else
-        {
-          auto const& v1 = v.front();
-          auto const& vtail = v.tail();
 
-          auto const& C = constructors(v1.sort());
-          if (!C.empty())
+      auto const& v1 = v.front();
+      auto const& vtail = v.tail();
+      auto const& C = constructors(v1.sort());
+
+      if (!C.empty())
+      {
+        for (auto i = C.begin(); i != C.end(); ++i)
+        {
+          auto const& constructor = *i;
+          if (data::is_function_sort(constructor.sort()))
           {
-            for (auto i = C.begin(); i != C.end(); ++i)
+            auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
+            data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
+            data::application cy(constructor, y.begin(), y.end());
+            Rsigma[v1] = cy;
+            auto phi1 = R(phi, Rsigma);
+            Rsigma[v1] = v1;
+            if (accept(phi1))
             {
-              auto const& c = *i;
-              if (data::is_function_sort(c.sort()))
+              if (phi1 == phi)
               {
-                auto const& domain = atermpp::aterm_cast<data::function_sort>(c.sort()).domain();
-                // Lambda expressions do not work with g++ 4.4
-                //
-                // data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s)
-                //   {
-                //     return data::variable(id_generator("@x"), s);
-                //   }
-                // );
-                data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
-                data::application cy(c, y.begin(), y.end());
-                sigma.add_assignment(v1, cy);
-                Rsigma[v1] = cy;
-                pbes_expression phi1 = R(phi, Rsigma);
-                Rsigma[v1] = v1;
-                if (phi1 == phi)
-                {
-                  enumerator_list_element p(vtail, phi1, sigma);
-                  mCRL2log(log::debug) << "  add " << p << " with " << v1 << " := " << cy << std::endl;
-                  P.push_back(p);
-                }
-                else
-                {
-                  enumerator_list_element p(vtail + y, phi1, sigma);
-                  mCRL2log(log::debug) << "  add " << p << " with " << v1 << " := " << cy << std::endl;
-                  P.push_back(p);
-                }
+                P.push_back(EnumeratorListElement(vtail, phi1, p, v1, cy));
               }
               else
               {
-                sigma.add_assignment(v1, c);
-                Rsigma[v1] = c;
-                pbes_expression phi1 = R(phi, Rsigma);
-                Rsigma[v1] = v1;
-                enumerator_list_element p(vtail, phi1, sigma);
-                mCRL2log(log::debug) << "  add " << p  << " with " << v1 << " := " << c << std::endl;
-                P.push_back(p);
+                P.push_back(EnumeratorListElement(vtail + y, phi1, p, v1, cy));
               }
+              mCRL2log(log::debug) << "  add " << P.back() << " with " << v1 << " := " << cy << std::endl;
             }
           }
-//          else if (is_finite_set(x1.sort()))
-//          {
-//          }
-//          else if (data::is_function_sort(x1.sort()))
-//          {
-//            mCRL2log(log::debug) << "Function sort: " << x1.sort() << std::endl;
-//          }
           else
           {
-            throw mcrl2::runtime_error("Cannot enumerate variable " + print(v1));
+            Rsigma[v1] = constructor;
+            auto phi1 = R(phi, Rsigma);
+            Rsigma[v1] = v1;
+            if (accept(phi1))
+            {
+              P.push_back(EnumeratorListElement(vtail, phi1, p, v1, constructor));
+              mCRL2log(log::debug) << "  add " << P.back() << " with " << v1 << " := " << constructor << std::endl;
+            }
           }
-          return next(P, accept);
         }
       }
-      return data::undefined_data_expression();
+
+//      else if (is_finite_set(x1.sort()))
+//      {
+//      }
+//      else if (data::is_function_sort(x1.sort()))
+//      {
+//        mCRL2log(log::debug) << "Function sort: " << x1.sort() << std::endl;
+//      }
+      else
+      {
+        throw mcrl2::runtime_error("Cannot enumerate variable " + print(v1));
+      }
+    }
+
+    /// \brief Enumerates the front element of the todo list P until a solution
+    /// has been found, or until P is empty.
+    /// \param P The todo list of the algorithm.
+    /// \param accept Elements p for which accept(p) is false are discarded.
+    /// \param report If a solution p is found, report(p) is called.
+    template <typename EnumeratorListElement, typename Accept, typename Report>
+    void next(std::deque<EnumeratorListElement>& P, Accept accept, Report report)
+    {
+      while (!P.empty())
+      {
+        if (P.front().is_solution())
+        {
+          mCRL2log(log::debug) << "  solution " << P.front() << std::endl;
+          report(P.front());
+          P.pop_front();
+          return;
+        }
+        else
+        {
+          enumerate_front(P, accept);
+        }
+      }
     }
 };
 

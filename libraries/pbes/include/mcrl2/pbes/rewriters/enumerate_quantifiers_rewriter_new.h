@@ -33,6 +33,38 @@ namespace pbes_system {
 
 namespace detail {
 
+// TODO: use a lambda expression instead of this struct
+template <typename EnumeratorListElement>
+struct report_forall
+{
+  pbes_expression& result;
+
+  report_forall(pbes_expression& result_)
+    : result(result_)
+  {}
+
+  void operator()(const EnumeratorListElement& e) const
+  {
+    result = utilities::optimized_and(result, e.phi);
+  }
+};
+
+// TODO: use a lambda expression instead of this struct
+template <typename EnumeratorListElement>
+struct report_exists
+{
+  pbes_expression& result;
+
+  report_exists(pbes_expression& result_)
+    : result(result_)
+  {}
+
+  void operator()(const EnumeratorListElement& e) const
+  {
+    result = utilities::optimized_or(result, e.phi);
+  }
+};
+
 // Simplifying PBES rewriter that eliminates quantifiers using enumeration.
 /// \param MutableSubstitution This must be a MapSubstitution.
 template <typename Derived, typename DataRewriter, typename MutableSubstitution>
@@ -41,6 +73,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   typedef simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution> super;
   typedef enumerate_quantifiers_builder<Derived, DataRewriter, MutableSubstitution> self;
   typedef core::term_traits<pbes_expression> tr;
+  typedef enumerator_list_element<pbes_expression> enumerator_element;
 
   using super::enter;
   using super::leave;
@@ -95,16 +128,11 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     auto undo = undo_substitution(v);
     pbes_expression result = tr::true_();
-    enumerator_list P;
-    P.push_back(enumerator_list_element(v, derived()(phi)));
+    std::deque<enumerator_element> P;
+    P.push_back(enumerator_element(v, derived()(phi)));
     while (!P.empty())
     {
-      pbes_expression e = E.next(P, is_not_true());
-      if (e == data::undefined_data_expression())
-      {
-        continue;
-      }
-      result = utilities::optimized_and(result, e);
+      E.next(P, is_not_true(), report_forall<enumerator_element>(result));
       if (tr::is_false(result))
       {
         break;
@@ -118,16 +146,11 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     auto undo = undo_substitution(v);
     pbes_expression result = tr::false_();
-    enumerator_list P;
-    P.push_back(enumerator_list_element(v, derived()(phi)));
+    std::deque<enumerator_element> P;
+    P.push_back(enumerator_element(v, derived()(phi)));
     while (!P.empty())
     {
-      pbes_expression e = E.next(P, is_not_false());
-      if (e == data::undefined_data_expression())
-      {
-        continue;
-      }
-      result = utilities::optimized_or(result, e);
+      E.next(P, is_not_false(), report_exists<enumerator_element>(result));
       if (tr::is_true(result))
       {
         break;
