@@ -23,6 +23,7 @@
 #ifdef WIN32
 #include <io.h>
 #include <fcntl.h>
+#include <iostream>
 #endif
 
 namespace mcrl2
@@ -35,25 +36,29 @@ namespace utilities
 void set_binary_mode(std::ios& stream)
 {
   std::string name;
-  if (stream.rdbuf() == std::cin::rdbuf())
+  int fileno;
+  if (stream.rdbuf() == std::cin.rdbuf())
   {
     name = "cin";
+    fileno = _fileno(stdin);
   }
   else
-  if (stream.rdbuf() == std::cout::rdbuf())
+  if (stream.rdbuf() == std::cout.rdbuf())
   {
     name = "cout";
+    fileno = _fileno(stdout);
     fflush(stdout);
   }
   else
-  if (stream.rdbuf() == std::cerr::rdbuf())
+  if (stream.rdbuf() == std::cerr.rdbuf())
   {
     name = "cerr";
+    fileno = _fileno(stderr);
     fflush(stderr);
   }
   if (!name.empty())
   {
-    if (_setmode(_fileno(stdout), _O_BINARY) == -1)
+    if (_setmode(fileno, _O_BINARY) == -1)
     {
       mCRL2log(mcrl2::log::warning) << "Cannot set " << name << " to binary mode.\n";
     }
