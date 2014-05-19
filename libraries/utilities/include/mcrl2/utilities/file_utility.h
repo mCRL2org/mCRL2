@@ -74,7 +74,7 @@ private:
 public:
   stream_wrapper(const std::string& filename, bool text, stream_type* stdstream)
   {
-    m_stdio = !filename.empty() && filename != "-";
+    m_stdio = filename.empty() || filename == "-";
     if (m_stdio)
     {
       m_stream = stdstream;
