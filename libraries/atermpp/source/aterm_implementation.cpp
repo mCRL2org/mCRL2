@@ -387,7 +387,7 @@ void initialise_aterm_administration()
 
   /* Check for reasonably sized aterm (at least 32 bits, 4 bytes). This check might break on
    * perfectly valid architectures that have char == 2 bytes, and sizeof(header_type) == 2 */
-  assert(sizeof(size_t) == sizeof(aterm*) && sizeof(size_t) < 4);
+  assert(sizeof(size_t) == sizeof(aterm*) && sizeof(size_t) >= 4);
 }
 
 /* allocate a block of memory to contain terms consisting of `size' objects
