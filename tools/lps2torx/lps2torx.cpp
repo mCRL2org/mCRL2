@@ -114,7 +114,6 @@ class torx_tool : public rewriter_tool< input_tool >
       lps_specification.load(m_input_filename);
 
       next_state_generator generator(lps_specification, data::rewriter(lps_specification.data(), rewrite_strategy()));
-      next_state_generator::substitution_t substitution;
 
       state current = generator.initial_state();
       std::deque<state> states;
@@ -189,7 +188,7 @@ class torx_tool : public rewriter_tool< input_tool >
 
               for(size_t summand_index = 0; summand_index < lps_specification.process().action_summands().size(); ++summand_index)
               {
-                for (next_state_generator::iterator i = generator.begin(current, &substitution, summand_index); i != generator.end(); i++)
+                for (next_state_generator::iterator i = generator.begin(current, summand_index); i != generator.end(); i++)
                 {
                   /* Rebuild transition string in Torx format*/
                   std::cout << "Ee " << "_e" << summand_index << "." << states.size() << "\t" << (i->action().actions().empty() ? 0 : 1) << "\t" << 1 << "\t" << print_torx_action(i->action()) << "\t\t\t";

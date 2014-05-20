@@ -181,6 +181,7 @@ class next_state_generator
   protected:
     specification m_specification;
     rewriter_t m_rewriter;
+    substitution_t m_substitution;
     enumerator_t m_enumerator;
 
     bool m_use_enumeration_caching;
@@ -202,42 +203,42 @@ class next_state_generator
     ~next_state_generator();
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(const state& state, substitution_t *substitution)
+    iterator begin(const state& state)
     {
-      return begin(get_internal_state(state), substitution);
+      return begin(get_internal_state(state));
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(const data::data_expression_vector& state, substitution_t *substitution)
+    iterator begin(const data::data_expression_vector& state)
     {
-      return iterator(this, state, substitution, m_all_summands);
+      return iterator(this, state, &m_substitution, m_all_summands);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors using summands from \a summand_subset are generated.
-    iterator begin(const state& state, substitution_t *substitution, summand_subset_t& summand_subset)
+    iterator begin(const state& state, summand_subset_t& summand_subset)
     {
-      return begin(get_internal_state(state), substitution, summand_subset);
+      return begin(get_internal_state(state), summand_subset);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(const data::data_expression_vector& state, substitution_t *substitution, summand_subset_t& summand_subset)
+    iterator begin(const data::data_expression_vector& state, summand_subset_t& summand_subset)
     {
-      return iterator(this, state, substitution, summand_subset);
-    }
-
-    /// \brief Returns an iterator for generating the successors of the given state.
-    /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(const state& state, substitution_t *substitution, size_t summand_index)
-    {
-      return begin(get_internal_state(state), substitution, summand_index);
+      return iterator(this, state, &m_substitution, summand_subset);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(const data::data_expression_vector& state, substitution_t *substitution, size_t summand_index)
+    iterator begin(const state& state, size_t summand_index)
     {
-      return iterator(this, state, substitution, summand_index);
+      return begin(get_internal_state(state), summand_index);
+    }
+
+    /// \brief Returns an iterator for generating the successors of the given state.
+    /// Only the successors with respect to the summand with the given index are generated.
+    iterator begin(const data::data_expression_vector& state, size_t summand_index)
+    {
+      return iterator(this, state, &m_substitution, summand_index);
     }
 
     /// \brief Returns an iterator pointing to the end of a next state list.

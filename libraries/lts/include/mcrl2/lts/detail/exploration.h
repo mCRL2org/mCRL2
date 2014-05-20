@@ -39,7 +39,6 @@ class lps2lts_algorithm
   private:
     lts_generation_options m_options;
     next_state_generator *m_generator;
-    next_state_generator::substitution_t m_substitution;
     next_state_generator::summand_subset_t *m_main_subset;
 
     bool m_use_confluence_reduction;

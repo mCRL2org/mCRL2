@@ -378,7 +378,7 @@ data::data_expression_vector lps2lts_algorithm::get_prioritised_representative(d
       low[state] = count;
       next[state] = std::list<data::data_expression_vector>();
 
-      for (next_state_generator::iterator i = m_generator->begin(state, &m_substitution, m_prioritized_subset); i; i++)
+      for (next_state_generator::iterator i = m_generator->begin(state, m_prioritized_subset); i; i++)
       {
         next[state].push_back(i->internal_state());
         if (number.count(i->internal_state()) == 0)
@@ -498,7 +498,7 @@ bool lps2lts_algorithm::save_trace(const data::data_expression_vector& state1, c
   trace.setState(m_generator->get_state(state));
   for (std::deque<data::data_expression_vector>::iterator i = states.begin(); i != states.end(); i++)
   {
-    for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution); j != m_generator->end(); j++)
+    for (next_state_generator::iterator j = m_generator->begin(state); j != m_generator->end(); j++)
     {
       data::data_expression_vector destination = j->internal_state();
       if (m_use_confluence_reduction)
@@ -529,14 +529,14 @@ bool lps2lts_algorithm::save_trace(const data::data_expression_vector& state1, c
 }
 
 bool lps2lts_algorithm::search_divergence(
-              const data::data_expression_vector& state, 
-              std::set<data::data_expression_vector>& current_path, 
+              const data::data_expression_vector& state,
+              std::set<data::data_expression_vector>& current_path,
               std::set<data::data_expression_vector>& visited)
 {
   current_path.insert(state);
 
   std::vector<data::data_expression_vector> new_states;
-  for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution, m_tau_summands); j != m_generator->end(); j++)
+  for (next_state_generator::iterator j = m_generator->begin(state, m_tau_summands); j != m_generator->end(); j++)
   {
     assert(j->action().actions().size() == 0);
 
@@ -746,7 +746,7 @@ void lps2lts_algorithm::get_transitions(const data::data_expression_vector& stat
   // std::list<next_state_generator::transition_t> transitions;
   try
   {
-    next_state_generator::iterator it(m_generator->begin(state, &m_substitution, *m_main_subset));
+    next_state_generator::iterator it(m_generator->begin(state, *m_main_subset));
     while (it)
     {
       transitions.push_back(*it++);
@@ -790,7 +790,7 @@ void lps2lts_algorithm::generate_lts_breadth()
   while (!m_must_abort && (current_state < m_state_numbers.size()) &&
          (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
-    data::data_expression_vector state = 
+    data::data_expression_vector state =
                generator_state(static_cast<const lps2lts_algorithm::storage_state_t&>(m_state_numbers.get(current_state)));
     std::list<next_state_generator::transition_t> transitions;
     get_transitions(state,transitions);

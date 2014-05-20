@@ -175,7 +175,7 @@ std::vector<simulation::transition_t> simulation::transitions(state source_state
   try
   {
     std::vector<simulation::transition_t> output;
-    for (next_state_generator::iterator i = m_generator.begin(source_state, &m_substitution); i != m_generator.end(); i++)
+    for (next_state_generator::iterator i = m_generator.begin(source_state); i != m_generator.end(); i++)
     {
       transition_t transition;
       transition.destination = i->state();

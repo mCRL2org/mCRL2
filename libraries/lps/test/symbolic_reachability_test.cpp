@@ -200,7 +200,6 @@ int test_main(int argc, char** argv)
     model.process().deadlock_summands().clear();
 
     data::rewriter        rewriter(model.data());
-    next_state_generator::substitution_t dummy;
 
     next_state_generator explorer(model, rewriter);
 
@@ -217,7 +216,7 @@ int test_main(int argc, char** argv)
 
       for (size_t i = 0; i < model.process().summand_count(); ++i)
       {
-        for(next_state_generator::iterator j = explorer.begin(current, &dummy, i); j != explorer.end(); ++j)
+        for(next_state_generator::iterator j = explorer.begin(current, i); j != explorer.end(); ++j)
         {
           if (known.find(j->state()) == known.end())
           {
