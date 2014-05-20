@@ -93,7 +93,7 @@ data_expression_vector next_state_generator::get_internal_state(const state& s) 
   {
     arguments.push_back(s[i]);
   }
-  return arguments; 
+  return arguments;
 
 }
 
@@ -104,7 +104,7 @@ state next_state_generator::get_state(const data_expression_vector& internal_sta
   {
     s.push_back(*i);
   }
-  return s; 
+  return s;
 }
 
 
@@ -344,38 +344,6 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
   increment();
 }
 
-struct action_argument_converter
-{
-  const rewriter& m_rewriter;
-  next_state_generator::substitution_t *m_substitution;
-
-  action_argument_converter(const data::rewriter& rewriter, next_state_generator::substitution_t *substitution):
-        m_rewriter(rewriter),
-        m_substitution(substitution)
-  {}
-
-  data_expression operator()(const data_expression& t) const
-  {
-    return m_rewriter(t, *m_substitution);
-  }
-};
-
-struct state_argument_rewriter
-{
-  const data::rewriter& m_rewriter;
-  next_state_generator::substitution_t *m_substitution;
-
-  state_argument_rewriter(const data::rewriter& rewriter, next_state_generator::substitution_t *substitution):
-        m_rewriter(rewriter),
-        m_substitution(substitution)
-  {}
-
-  data_expression operator()(const data_expression& t) const
-  {
-    return m_rewriter(atermpp::aterm_cast<data_expression>(t), *m_substitution);
-  }
-};
-
 struct condition_converter
 {
   const data_expression_vector& m_state;
@@ -516,12 +484,11 @@ void next_state_generator::iterator::increment()
     (*m_substitution)[*i] = *v;
   }
 
-  const state_argument_rewriter sar(m_generator->m_rewriter,m_substitution);
   const data_expression_vector &state_args=m_summand->result_state;
   m_transition.m_state.clear();
   for(data_expression_vector::const_iterator i=state_args.begin(); i!=state_args.end(); ++i)
   {
-    m_transition.m_state.push_back(sar(*i));
+    m_transition.m_state.push_back(m_generator->m_rewriter(*i, *m_substitution));
   }
 
   std::vector <process::action> actions;
