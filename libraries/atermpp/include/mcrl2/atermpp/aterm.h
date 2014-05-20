@@ -310,7 +310,6 @@ struct hash<atermpp::aterm>
 {
   std::size_t operator()(const atermpp::aterm& t) const
   {
-    // const std::hash<atermpp::detail::_aterm*> aterm_hash;
     return std::hash<atermpp::detail::_aterm*>()(const_cast<atermpp::detail::_aterm*>(atermpp::detail::address(t)));
   }
 };
@@ -321,7 +320,9 @@ struct hash<std::pair<atermpp::aterm,atermpp::aterm> >
 {
   std::size_t operator()(const std::pair<atermpp::aterm, atermpp::aterm>& x) const
   {
-    return std::hash<atermpp::aterm>()(x.first) ^ std::hash<atermpp::aterm>()(x.second);
+    // The hashing function below is taken from boost (http://www.boost.org/doc/libs/1_35_0/doc/html/boost/hash_combine_id241013.html).
+    size_t seed=std::hash<atermpp::aterm>()(x.first);
+    return std::hash<atermpp::aterm>()(x.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
   }
 };
 
