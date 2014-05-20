@@ -324,7 +324,6 @@ class pins
     std::vector<std::vector<size_t> > m_write_group;
     lps::specification m_specification;
     lps::next_state_generator m_generator;
-    lps::next_state_generator::substitution_t m_substitution;
     std::vector<std::string> m_process_parameter_names;
 
     // The type mappings
@@ -661,7 +660,7 @@ class pins
       }
       data::data_expression_vector source = state_arguments;
 
-      for (next_state_generator::iterator i = m_generator.begin(source, &m_substitution); i; i++)
+      for (next_state_generator::iterator i = m_generator.begin(source); i; i++)
       {
         data::data_expression_vector destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
@@ -701,7 +700,7 @@ class pins
       }
       data::data_expression_vector source = state_arguments;
 
-      for (next_state_generator::iterator i = m_generator.begin(source, &m_substitution, group); i; i++)
+      for (next_state_generator::iterator i = m_generator.begin(source, group); i; i++)
       {
         data::data_expression_vector destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
