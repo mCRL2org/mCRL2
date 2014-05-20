@@ -38,18 +38,19 @@ namespace data
 ///        length as a variable list. For a variable list [v1,...,vn] and data_expression_list
 ///        [t1,...,tn] the data_expression ti is the solution for variable vi.
 
-template < typename REWRITER = rewriter, typename TERM = data_expression >
+template < typename REWRITER = rewriter, typename MutableIndexedSubstitution = data::mutable_indexed_substitution<> >
 class classic_enumerator
 {
   public:
     /// \brief The type of objects that represent substitutions
-    typedef typename REWRITER::substitution_type substitution_type;
+    typedef MutableIndexedSubstitution substitution_type;
     /// \brief The type of objects that represent expressions
-    typedef TERM expression_type;
+    typedef typename REWRITER::term_type expression_type;
+    typedef expression_type TERM;
 
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
-    ///          the list of variables for which a solution is sought. 
+    ///          the list of variables for which a solution is sought.
     class iterator :
         public boost::iterator_facade<
                  iterator,
@@ -60,7 +61,7 @@ class classic_enumerator
 
         typedef classic_enumerator < REWRITER > enclosing_classic_enumerator;
         enclosing_classic_enumerator *m_enclosing_enumerator;
-        data_expression_list m_assignments; 
+        data_expression_list m_assignments;
         bool m_enumerator_iterator_valid;
         TERM m_resulting_condition;
         bool m_exception_occurred;
@@ -68,18 +69,18 @@ class classic_enumerator
         variable_list enum_vars;                    // The variables over which a solution is searched.
         TERM enum_expr;                             // Condition to be satisfied.
         substitution_type* enum_sigma;
-    
+
         std::deque < detail::fs_expr<TERM>> fs_stack;
-    
+
         size_t used_vars;
         size_t max_vars;
-    
+
         substitution_type& default_sigma()
         {
           static substitution_type default_sigma;
           return default_sigma;
         }
-    
+
         data_specification& default_data_spec()
         {
           static data_specification default_data_spec;
@@ -88,7 +89,7 @@ class classic_enumerator
 
       public:
 
-        /// \brief Constructor. 
+        /// \brief Constructor.
         //  \details Use it via begin() of the classic enumerator class. See the
         //           explanation at this function for the meaning of the parameters.
         iterator(enclosing_classic_enumerator *e,
@@ -147,9 +148,9 @@ class classic_enumerator
         {
           assert(m_enumerator_iterator_valid);
           return m_resulting_condition;
-        } 
+        }
 
-        /// \brief Indicate whether a problem occurred when enumerating solutions. 
+        /// \brief Indicate whether a problem occurred when enumerating solutions.
         //  \details This indicator only works if the parameter throw_exceptions was not set.
         //           Otherwise an exception is thrown. If throw_exceptions was false, and
         //           this function returns false, then the iterator is equal to end(), but
@@ -221,7 +222,7 @@ class classic_enumerator
 
     };
 
-    /// \brief An iterator that delivers solutions for variables to satisfy a condition. 
+    /// \brief An iterator that delivers solutions for variables to satisfy a condition.
     /// \details The solutions that are sought are those that do not make the condition false, or
     ///           if not_equal_to_false is set to false, make the solution not equal to true.
     ///           The method solution_is_exact can be used to find out whether the solution is
@@ -256,13 +257,13 @@ class classic_enumerator
     /** \brief Constructs a classic enumerator to
      * \param[in] specification A data specification containing the definitions of sorts
      * \param[in] evaluator A component that is used for evaluating conditions, generally an ordinary rewriter
-     * \param[in]  max_internal_variables The maximum number of variables to be 
+     * \param[in]  max_internal_variables The maximum number of variables to be
      *             used internally when generating solutions. If set to 0 an unbounded number
      *             of variables are allowed, and warnings are printed to warn for potentially
      *             unbounded loops.
      * \param[in] throw_exceptions A boolean indicating whether an exception can be thrown.
      *            if false, the function exception_occurred of the iterator can be used to indicate whether
-     *            valid solutions are being generated. 
+     *            valid solutions are being generated.
      **/
     classic_enumerator(const data_specification &specification,
                        const REWRITER& evaluator,
@@ -276,7 +277,7 @@ class classic_enumerator
     }
 
   protected:
-    REWRITER m_evaluator;     
+    REWRITER m_evaluator;
     const mcrl2::data::data_specification& m_data_spec;
     const size_t m_max_internal_variables;
     const bool m_throw_exceptions;

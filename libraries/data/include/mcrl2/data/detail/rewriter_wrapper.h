@@ -27,13 +27,15 @@ namespace detail
 
 struct rewriter_wrapper
 {
-  public: 
+  public:
     typedef Rewriter::substitution_type substitution_type;
+
+    typedef data_expression term_type;
 
     rewriter_wrapper(Rewriter* r):
       m_rewriter(r)
     {}
-   
+
     data_expression operator()(const data_expression& t, Rewriter::substitution_type& sigma) const
     {
       return m_rewriter->rewrite(t,sigma);
@@ -44,7 +46,7 @@ struct rewriter_wrapper
       return m_rewriter->identifier_generator();
     }
 
-  protected: 
+  protected:
     Rewriter* m_rewriter;
 };
 

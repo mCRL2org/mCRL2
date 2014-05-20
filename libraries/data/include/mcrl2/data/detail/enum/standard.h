@@ -11,6 +11,8 @@
 #ifndef _ENUM_STANDARD_H
 #define _ENUM_STANDARD_H
 
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/detail/enumerator_variable_limit.h"
 
 #define MAX_VARS_INIT   1000
