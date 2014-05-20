@@ -26,7 +26,7 @@ namespace data
 
 /** \brief Component for selecting a subset of equations that are actually used in an encompassing specification
  *
- * This component can be used with the constructor of data::basic_rewriter
+ * This component can be used with the constructor of data::rewriter
  * derived classes to select a smaller set of equations that are used as
  * rewrite rules. This limited set of rewrite rules should be enough for the
  * purpose of rewriting objects that occur in the encompassing

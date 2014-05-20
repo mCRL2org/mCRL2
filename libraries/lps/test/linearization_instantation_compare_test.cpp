@@ -25,7 +25,7 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-typedef data::basic_rewriter<data::data_expression>::strategy rewrite_strategy;
+typedef data::rewriter::strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy> rewrite_strategy_vector;
 
 template <class LTS_TYPE>

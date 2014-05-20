@@ -49,11 +49,8 @@ class basic_rewriter
 
   public:
 
-    /// \brief The term type of the rewriter.
-    typedef Term term_type;
-
     /// \brief The type for expressions manipulated by the rewriter.
-    typedef Term expression_type;
+    typedef Term term_type;
 
     /// \brief The rewrite strategies of the rewriter.
     typedef rewrite_strategy strategy;
@@ -66,7 +63,6 @@ class basic_rewriter
     {
       return m_rewriter->identifier_generator();
     }
-
 
   protected:
 
@@ -82,61 +78,17 @@ class basic_rewriter
     {}
 
     /// \brief Constructor.
+    /// \param[in] d A data specification
+    /// \param[in] s A rewriter strategy.
+    basic_rewriter(const data_specification& d, const strategy s = jitty) :
+      m_rewriter(detail::createRewriter(d, used_data_equation_selector(d), static_cast< rewrite_strategy >(s)))
+    { }
+
+    /// \brief Constructor.
     basic_rewriter(const data_specification & d, const used_data_equation_selector &equation_selector, const strategy s = jitty) :
       m_rewriter(detail::createRewriter(d, equation_selector, static_cast< rewrite_strategy >(s)))
     {}
 
-};
-
-/// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
-/// and data_expression_with_variables.
-template <>
-class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm >
-{
-    template < typename CompatibleExpression >
-    friend class basic_rewriter;
-    friend class enumerator;
-
-  public:
-    /// \brief The term type of the rewriter.
-    typedef data_expression                                     expression_type;
-    /// \brief The variable type of the rewriter.
-    typedef core::term_traits< expression_type >::variable_type variable_type;
-
-
-    typedef basic_rewriter< data_expression >::substitution_type substitution_type;
-
-  protected:
-
-    /// \brief Copy constructor for conversion between derived types
-    template < typename CompatibleExpression >
-    basic_rewriter(const basic_rewriter< CompatibleExpression > & other) :
-      basic_rewriter< data_expression >(other)
-    { }
-
-  public:
-
-    /// \brief Constructor.
-    /// \param[in] other A rewriter
-    basic_rewriter(const basic_rewriter & other) :
-      basic_rewriter< atermpp::aterm >(other)
-    { }
-
-    /// \brief Constructor.
-    /// \param[in] d A data specification
-    /// \param[in] s A rewriter strategy.
-    basic_rewriter(const data_specification& d, const strategy s = jitty) :
-      basic_rewriter< atermpp::aterm >(d,used_data_equation_selector(d),s)
-    { }
-
-    /// \brief Constructor.
-    /// \param[in] d A data specification
-    /// \param[in] s A rewriter strategy.
-    /// \param[in] selector A component that selects the equations that are converted to rewrite rules
-    template < typename EquationSelector >
-    basic_rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
-      basic_rewriter< atermpp::aterm >(d,selector,s)
-    { }
 };
 
 /// \brief Rewriter that operates on data expressions.
