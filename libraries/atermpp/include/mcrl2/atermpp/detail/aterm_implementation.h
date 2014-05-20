@@ -33,7 +33,7 @@ struct Block
 
     // The assignment operator is made private to indicate that
     // assigning a Block is also not allowed.
-    Block& operator=(const Block &/*other*/)
+    Block& operator=(const Block& /*other*/)
     {
       assert(0);
       return *this;
@@ -84,13 +84,13 @@ size_t COMBINE(const HashNumber hnr, const size_t w)
 }
 
 inline
-size_t COMBINE(const HashNumber hnr, const aterm &w)
+size_t COMBINE(const HashNumber hnr, const aterm& w)
 {
   return COMBINE(hnr,reinterpret_cast<size_t>(address(w)));
 }
 
 inline
-void CHECK_TERM(const aterm &
+void CHECK_TERM(const aterm&
 #ifndef NDEBUG
 t
 #endif
@@ -103,7 +103,7 @@ t
 
 inline HashNumber hash_number(const detail::_aterm *t)
 {
-  const function_symbol &f=t->function();
+  const function_symbol& f=t->function();
   HashNumber hnr = SHIFT(addressf(f));
 
   const size_t* begin=reinterpret_cast<const size_t*>(t)+TERM_SIZE;
@@ -148,7 +148,7 @@ inline const _aterm* allocate_term(const size_t size)
     resize_aterm_hashtable();
   }
 
-  TermInfo &ti = terminfo[size];
+  TermInfo& ti = terminfo[size];
   if (garbage_collect_count_down>0)
   {
     garbage_collect_count_down--;
@@ -211,7 +211,7 @@ inline void insert_in_hashtable(const _aterm *t, const size_t hnr)
   total_nodes_in_hashtable++;
 }
 
-inline const _aterm* address(const aterm &t)
+inline const _aterm* address(const aterm& t)
 {
   return t.m_term;
 }
