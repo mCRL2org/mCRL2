@@ -180,7 +180,7 @@ class specification
       assert(is_well_typed(*this));
       atermpp::aterm t = specification_to_aterm(*this);
       t = data::detail::remove_index(t);
-      std::ofstream stream(filename);
+      std::ofstream stream(filename, std::ios::binary);
       atermpp::write_term_to_binary_stream(t, stream);
       stream.close();
     }
