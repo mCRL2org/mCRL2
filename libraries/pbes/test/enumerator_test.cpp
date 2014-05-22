@@ -79,7 +79,7 @@ void test_enumerator_with_iterator()
   enumerator_algorithm_with_iterator<pbes_rewriter, data::mutable_indexed_substitution<>, enumerator_list_element<pbes_expression> > E(R, data_spec);
   std::vector<pbes_system::pbes_expression> solutions;
 
-  auto end = E.end();
+  auto end = E.end(is_not_true());
   for (auto i = E.begin(E, sigma, enumerator_list_element<pbes_expression>(v, phi), is_not_true()); i != end; ++i)
   {
     solutions.push_back(i->expression());
