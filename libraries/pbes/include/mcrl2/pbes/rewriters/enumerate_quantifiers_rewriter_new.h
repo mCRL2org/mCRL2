@@ -33,38 +33,6 @@ namespace pbes_system {
 
 namespace detail {
 
-// TODO: use a lambda expression instead of this struct
-template <typename EnumeratorListElement>
-struct report_forall
-{
-  pbes_expression& result;
-
-  report_forall(pbes_expression& result_)
-    : result(result_)
-  {}
-
-  void operator()(const EnumeratorListElement& e) const
-  {
-    result = utilities::optimized_and(result, e.phi);
-  }
-};
-
-// TODO: use a lambda expression instead of this struct
-template <typename EnumeratorListElement>
-struct report_exists
-{
-  pbes_expression& result;
-
-  report_exists(pbes_expression& result_)
-    : result(result_)
-  {}
-
-  void operator()(const EnumeratorListElement& e) const
-  {
-    result = utilities::optimized_or(result, e.phi);
-  }
-};
-
 // Simplifying PBES rewriter that eliminates quantifiers using enumeration.
 /// \param MutableSubstitution This must be a MapSubstitution.
 template <typename Derived, typename DataRewriter, typename MutableSubstitution>
@@ -87,14 +55,14 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   bool m_enumerate_infinite_sorts;
 
   /// The enumerator
-  enumerator_algorithm<self, MutableSubstitution> E;
+  enumerator_algorithm<self> E;
 
   /// \brief Constructor.
   /// \param r A data rewriter
   /// \param dataspec A data specification
   /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well
   enumerate_quantifiers_builder(const data::rewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, bool enumerate_infinite_sorts = true)
-    : super(R, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, sigma, m_dataspec)
+    : super(R, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec)
   { }
 
   Derived& derived()
@@ -130,13 +98,16 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     pbes_expression result = tr::true_();
     std::deque<enumerator_element> P;
     P.push_back(enumerator_element(v, derived()(phi)));
+    E.next(P, sigma, is_not_true());
     while (!P.empty())
     {
-      E.next(P, is_not_true(), report_forall<enumerator_element>(result));
+      result = utilities::optimized_and(result, P.front().expression());
+      P.pop_front();
       if (tr::is_false(result))
       {
         break;
       }
+      E.next(P, sigma, is_not_true());
     }
     redo_substitution(v, undo);
     return result;
@@ -148,13 +119,16 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     pbes_expression result = tr::false_();
     std::deque<enumerator_element> P;
     P.push_back(enumerator_element(v, derived()(phi)));
+    E.next(P, sigma, is_not_false());
     while (!P.empty())
     {
-      E.next(P, is_not_false(), report_exists<enumerator_element>(result));
+      result = utilities::optimized_or(result, P.front().expression());
+      P.pop_front();
       if (tr::is_true(result))
       {
         break;
       }
+      E.next(P, sigma, is_not_false());
     }
     redo_substitution(v, undo);
     return result;

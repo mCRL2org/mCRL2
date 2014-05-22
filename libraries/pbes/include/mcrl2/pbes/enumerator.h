@@ -16,6 +16,7 @@
 #include <map>
 #include <sstream>
 #include <utility>
+#include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
@@ -46,30 +47,42 @@ struct is_not_true
 
 /// \brief The default element for the todo list of the enumerator
 template <typename Expression>
-struct enumerator_list_element
+class enumerator_list_element
 {
-  data::variable_list v;
-  Expression phi;
+  protected:
+    data::variable_list v;
+    Expression phi;
 
-  /// \brief Constructs the element (v, phi)
-  enumerator_list_element(const data::variable_list& v_, const Expression& phi_)
-    : v(v_), phi(phi_)
-  {}
+  public:
+    /// \brief Constructs the element (v, phi)
+    enumerator_list_element(const data::variable_list& v_, const Expression& phi_)
+      : v(v_), phi(phi_)
+    {}
 
-  /// \brief Constructs the element (v, phi)
-  enumerator_list_element(const data::variable_list& v_,
-                          const Expression& phi_,
-                          const enumerator_list_element&,
-                          const data::variable&,
-                          const data::data_expression&
-                         )
-    : v(v_), phi(phi_)
-  {}
+    /// \brief Constructs the element (v, phi)
+    enumerator_list_element(const data::variable_list& v_,
+                            const Expression& phi_,
+                            const enumerator_list_element&,
+                            const data::variable&,
+                            const data::data_expression&
+                           )
+      : v(v_), phi(phi_)
+    {}
 
-  bool is_solution() const
-  {
-    return v.empty();
-  }
+    const data::variable_list& variables() const
+    {
+      return v;
+    }
+
+    const Expression& expression() const
+    {
+      return phi;
+    }
+
+    bool is_solution() const
+    {
+      return v.empty();
+    }
 };
 
 /// \brief An element for the todo list of the enumerator that collects the substitution
@@ -104,7 +117,7 @@ struct enumerator_list_element_with_substitution: public enumerator_list_element
 template <typename Expression>
 std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expression>& p)
 {
-  return out << p.phi << " " << core::detail::print_list(p.v);
+  return out << p.expression() << " " << core::detail::print_list(p.variables());
 }
 
 struct sort_name_generator
@@ -122,7 +135,7 @@ struct sort_name_generator
 };
 
 /// \brief An enumerator algorithm that generates solutions of a condition.
-template <typename Rewriter, typename MutableSubstitution>
+template <typename Rewriter>
 class enumerator_algorithm
 {
   /// \brief A map that caches the constructors corresponding to sort expressions.
@@ -131,9 +144,6 @@ class enumerator_algorithm
   protected:
     // A rewriter
     Rewriter& R;
-
-    // The substitution that is used internally by R
-    MutableSubstitution& Rsigma;
 
     /// \brief A data specification.
     const data::data_specification& dataspec;
@@ -171,22 +181,23 @@ class enumerator_algorithm
     }
 
   public:
-    enumerator_algorithm(Rewriter& R_, MutableSubstitution& Rsigma_, const data::data_specification& dataspec_)
-      : R(R_), Rsigma(Rsigma_), dataspec(dataspec_)
+    enumerator_algorithm(Rewriter& R_, const data::data_specification& dataspec_)
+      : R(R_), dataspec(dataspec_)
     {}
 
     /// \brief Enumerates the front element of the todo list P.
     /// \param P The todo list of the algorithm.
+    /// \param xxx
     /// \param accept Elements p for which accept(p) is false are discarded.
     /// \pre !P.empty()
-    template <typename EnumeratorListElement, typename Accept>
-    void enumerate_front(std::deque<EnumeratorListElement>& P, Accept accept)
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
+    void enumerate_front(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept)
     {
       assert(!P.empty());
 
       auto p = P.front();
-      auto const& v = p.v;
-      auto const& phi = p.phi;
+      auto const& v = p.variables();
+      auto const& phi = p.expression();
       mCRL2log(log::debug) << "  process " << p << std::endl;
       P.pop_front();
 
@@ -204,9 +215,9 @@ class enumerator_algorithm
             auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
             data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
             data::application cy(constructor, y.begin(), y.end());
-            Rsigma[v1] = cy;
-            auto phi1 = R(phi, Rsigma);
-            Rsigma[v1] = v1;
+            sigma[v1] = cy;
+            auto phi1 = R(phi, sigma);
+            sigma[v1] = v1;
             if (accept(phi1))
             {
               if (phi1 == phi)
@@ -222,9 +233,9 @@ class enumerator_algorithm
           }
           else
           {
-            Rsigma[v1] = constructor;
-            auto phi1 = R(phi, Rsigma);
-            Rsigma[v1] = v1;
+            sigma[v1] = constructor;
+            auto phi1 = R(phi, sigma);
+            sigma[v1] = v1;
             if (accept(phi1))
             {
               P.push_back(EnumeratorListElement(vtail, phi1, p, v1, constructor));
@@ -247,28 +258,100 @@ class enumerator_algorithm
       }
     }
 
-    /// \brief Enumerates the front element of the todo list P until a solution
+    /// \brief Enumerates the front elements of the todo list P until a solution
     /// has been found, or until P is empty.
     /// \param P The todo list of the algorithm.
     /// \param accept Elements p for which accept(p) is false are discarded.
-    /// \param report If a solution p is found, report(p) is called.
-    template <typename EnumeratorListElement, typename Accept, typename Report>
-    void next(std::deque<EnumeratorListElement>& P, Accept accept, Report report)
+    /// \post Either P.empty() or P.front().is_solution()
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
+    void next(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept)
     {
       while (!P.empty())
       {
         if (P.front().is_solution())
         {
           mCRL2log(log::debug) << "  solution " << P.front() << std::endl;
-          report(P.front());
-          P.pop_front();
-          return;
+          break;
         }
         else
         {
-          enumerate_front(P, accept);
+          enumerate_front(P, sigma, accept);
         }
       }
+    }
+};
+
+/// \brief An enumerator algorithm with an iterator interface.
+template <typename Rewriter, typename MutableSubstitution, typename EnumeratorListElement>
+class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
+{
+  private:
+    struct no_filter
+    {};
+
+  public:
+    typedef enumerator_algorithm<Rewriter> super;
+
+    /// \brief A class to enumerate solutions for terms.
+    /// \details Solutions are presented as data_expression_lists of the same length as
+    ///          the list of variables for which a solution is sought.
+    template <typename Filter>
+    class iterator: public boost::iterator_facade<iterator<Filter>, const EnumeratorListElement, boost::forward_traversal_tag>
+    {
+      protected:
+        enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E;
+        MutableSubstitution* sigma;
+        std::deque<EnumeratorListElement> P;
+        Filter accept;
+
+      public:
+        iterator(enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_, MutableSubstitution* sigma_, const EnumeratorListElement& p, Filter accept_)
+          : E(E_), sigma(sigma_), accept(accept_)
+        {
+          P.push_back(p);
+          E->next(P, *sigma, accept);
+        }
+
+        iterator(Filter accept_)
+          : E(0), sigma(0), accept(accept_)
+        { }
+
+      protected:
+        friend class boost::iterator_core_access;
+
+        void increment()
+        {
+          assert(!P.empty());
+          P.pop_front();
+          E->next(P, *sigma, Filter());
+        }
+
+        bool equal(iterator<Filter> const& other) const
+        {
+          return P.size() == other.P.size();
+        }
+
+        const EnumeratorListElement& dereference() const
+        {
+          assert(!P.empty());
+          return P.front();
+        }
+    };
+
+    enumerator_algorithm_with_iterator(Rewriter& R, const data::data_specification& dataspec)
+      : super(R, dataspec)
+    {}
+
+    template <typename Filter>
+    iterator<Filter> begin(enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>& E, MutableSubstitution& sigma, const EnumeratorListElement& p, Filter accept) const
+    {
+      return iterator<Filter>(&E, &sigma, p, accept);
+    }
+
+    template <typename Filter>
+    iterator<Filter> end(Filter accept) const
+    {
+      return iterator<Filter>(accept);
     }
 };
 
