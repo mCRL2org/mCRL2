@@ -22,7 +22,7 @@
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/detail/enumerator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/split_finite_variables.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"

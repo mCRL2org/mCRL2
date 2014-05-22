@@ -12,16 +12,15 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
-#include <functional>
+#include <deque>
+#include <map>
+#include <sstream>
 #include <utility>
-#include "mcrl2/utilities/sequence.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
+#include <boost/iterator/iterator_facade.hpp>
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/number_postfix_generator.h"
+#include "mcrl2/data/substitutions/enumerator_substitution.h"
 
 namespace mcrl2
 {
@@ -29,56 +28,125 @@ namespace mcrl2
 namespace data
 {
 
-/// \cond INTERNAL_DOCS
-namespace detail
+/// \brief The default element for the todo list of the enumerator
+template <typename Expression>
+class enumerator_list_element
 {
+  protected:
+    data::variable_list v;
+    Expression phi;
 
-struct data_enumerator_helper
+  public:
+    /// \brief Constructs the element (v, phi)
+    enumerator_list_element(const data::variable_list& v_, const Expression& phi_)
+      : v(v_), phi(phi_)
+    {}
+
+    /// \brief Constructs the element (v, phi)
+    enumerator_list_element(const data::variable_list& v_,
+                            const Expression& phi_,
+                            const enumerator_list_element&,
+                            const data::variable&,
+                            const data::data_expression&
+                           )
+      : v(v_), phi(phi_)
+    {}
+
+    const data::variable_list& variables() const
+    {
+      return v;
+    }
+
+    const Expression& expression() const
+    {
+      return phi;
+    }
+
+    bool is_solution() const
+    {
+      return v.empty();
+    }
+};
+
+/// \brief An element for the todo list of the enumerator that collects the substitution
+/// corresponding to the expression phi
+template <typename Expression>
+class enumerator_list_element_with_substitution: public enumerator_list_element<Expression>
 {
-  const data_expression_with_variables& e_;
-  const std::vector<data_expression_with_variables>& values_;
-  std::vector<data_expression_with_variables>& result_;
+  protected:
+    data::variable_list m_variables;
+    data::data_expression_list m_expressions;
 
-  data_enumerator_helper(const data_expression_with_variables& e,
-                         const std::vector<data_expression_with_variables>& values,
-                         std::vector<data_expression_with_variables>& result
-                        )
-    : e_(e), values_(values), result_(result)
+  public:
+    /// \brief Constructs the element (v, phi, [])
+    enumerator_list_element_with_substitution(const data::variable_list& v, const Expression& phi)
+      : enumerator_list_element<Expression>(v, phi)
+    {}
+
+    /// \brief Constructs the element (v, phi, e.sigma[v := x])
+    enumerator_list_element_with_substitution(const data::variable_list& v,
+                            const Expression& phi,
+                            const enumerator_list_element_with_substitution<Expression>& elem,
+                            const data::variable& d,
+                            const data::data_expression& e
+                           )
+      : enumerator_list_element<Expression>(v, phi),
+        m_variables(elem.m_variables),
+        m_expressions(elem.m_expressions)
+    {
+      m_variables.push_front(d);
+      m_expressions.push_front(e);
+    }
+
+    /// \brief Adds the assignments that corresponds with this element to the substitution result.
+    template <typename MutableSubstitution>
+    void add_assignments(const data::variable_list& v, MutableSubstitution& result) const
+    {
+      data::enumerator_substitution sigma(m_variables, m_expressions);
+      sigma.revert();
+      for (auto i = v.begin(); i != v.end(); ++i)
+      {
+        result[*i] = sigma(*i);
+      }
+    }
+};
+
+template <typename Expression>
+std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expression>& p)
+{
+  return out << p.expression() << " " << core::detail::print_list(p.variables());
+}
+
+struct sort_name_generator
+{
+  data::set_identifier_generator& id_generator;
+
+  sort_name_generator(data::set_identifier_generator& id_generator_)
+    : id_generator(id_generator_)
   {}
 
-  /// \brief Function call operator
-  void operator()()
+  data::variable operator()(const data::sort_expression& s) const
   {
-    data_expression d = data::replace_variables(static_cast<const data_expression&>(e_), data::make_sequence_sequence_substitution(e_.variables(), values_));
-
-    std::vector<variable> v;
-    for (std::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
-    {
-      v.insert(v.end(), i->variables().begin(), i->variables().end());
-    }
-    result_.push_back(data_expression_with_variables(d, variable_list(v.begin(), v.end())));
+    return data::variable(id_generator("@x"), s);
   }
 };
 
-} // namespace detail
-/// \endcond
-
-/// \brief Class for enumerating data expressions.
-class data_enumerator
+/// \brief An enumerator algorithm that generates solutions of a condition.
+template <typename Rewriter>
+class enumerator_algorithm
 {
-  protected:
+  /// \brief A map that caches the constructors corresponding to sort expressions.
+  typedef std::map<data::sort_expression, std::vector<data::function_symbol> > constructor_map;
 
-    /// \brief A map that caches the constructors corresponding to sort expressions.
-    typedef std::map<sort_expression, std::vector<function_symbol> > constructor_map;
+  protected:
+    // A rewriter
+    Rewriter& R;
 
     /// \brief A data specification.
-    const data_specification* m_data;
+    const data::data_specification& dataspec;
 
-    /// \brief A rewriter.
-    const data::rewriter* m_rewriter;
-
-    /// \brief An identifier generator.
-    mutable utilities::number_postfix_generator m_generator;
+    // A name generator
+    data::set_identifier_generator id_generator;
 
     /// \brief A mapping with constructors.
     mutable constructor_map m_constructors;
@@ -86,111 +154,197 @@ class data_enumerator
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
-    const std::vector<function_symbol>& constructors(sort_expression s) const
+    const std::vector<data::function_symbol>& constructors(const data::sort_expression& s)
     {
-      constructor_map::const_iterator i = m_constructors.find(s);
+      auto i = m_constructors.find(s);
       if (i != m_constructors.end())
       {
         return i->second;
       }
-      m_constructors[s] = m_data->constructors(s);
+      m_constructors[s] = dataspec.constructors(s);
       return m_constructors[s];
     }
 
+    std::string print(const data::variable& x) const
+    {
+      std::ostringstream out;
+      out << x << ": " << x.sort();
+      return out.str();
+    }
+
+    bool is_finite_set(const data::sort_expression& x) const
+    {
+      return false;
+    }
+
   public:
-
-    /// \brief The variable type of the enumerator.
-    typedef variable variable_type;
-
-    /// \brief The term type of the enumerator.
-    typedef data_expression_with_variables term_type;
-
-    /// \brief Constructor.
-    /// \param data_spec A data specification.
-    /// \param rewriter A rewriter.
-    /// \param identifier_prefix A unique prefix, used by the identifier generator.
-    data_enumerator(const data_specification& data_spec,
-                    const data::rewriter& rewriter,
-                    const std::string& identifier_prefix = "UNIQUE_PREFIX"
-                   )
-      : m_data(&data_spec), m_rewriter(&rewriter), m_generator(identifier_prefix)
+    enumerator_algorithm(Rewriter& R_, const data::data_specification& dataspec_)
+      : R(R_), dataspec(dataspec_)
     {}
 
-    /// \brief The data specification.
-    /// \return The data specification.
-    const data_specification& data() const
+    /// \brief Enumerates the front element of the todo list P.
+    /// \param P The todo list of the algorithm.
+    /// \param xxx
+    /// \param accept Elements p for which accept(p) is false are discarded.
+    /// \pre !P.empty()
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
+    void enumerate_front(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept)
     {
-      return *m_data;
-    }
+      assert(!P.empty());
 
-    /// \return The identifier generator used for generating new variables.
-    const utilities::number_postfix_generator& generator() const
-    {
-      return m_generator;
-    }
+      auto p = P.front();
+      auto const& v = p.variables();
+      auto const& phi = p.expression();
+      mCRL2log(log::debug) << "  process " << p << std::endl;
+      P.pop_front();
 
-    /// \return The identifier generator used for generating new variables.
-    utilities::number_postfix_generator& generator()
-    {
-      return m_generator;
-    }
+      auto const& v1 = v.front();
+      auto const& vtail = v.tail();
+      auto const& C = constructors(v1.sort());
 
-    /// \brief Enumerates a data variable.
-    /// \param v A data variable
-    /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
-    std::vector<data_expression_with_variables> enumerate(const variable& v) const
-    {
-      std::vector<data_expression_with_variables> result;
-      const std::vector<function_symbol>& c = constructors(v.sort());
-      if (c.empty())
+      if (!C.empty())
       {
-        throw mcrl2::runtime_error("Could not enumerate variable " + data::pp(v) + " of sort " + data::pp(v.sort()) + " as there are no constructors.");
-      }
-      for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
-      {
-        if (is_function_sort(i->sort()))
+        for (auto i = C.begin(); i != C.end(); ++i)
         {
-          std::vector<variable> variables;
-
-          sort_expression_list i_domain(function_sort(i->sort()).domain());
-          for (sort_expression_list::const_iterator j = i_domain.begin(); j != i_domain.end(); ++j)
+          auto const& constructor = *i;
+          if (data::is_function_sort(constructor.sort()))
           {
-            variables.push_back(variable(m_generator(), *j));
+            auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
+            data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
+            data::application cy(constructor, y.begin(), y.end());
+            sigma[v1] = cy;
+            auto phi1 = R(phi, sigma);
+            sigma[v1] = v1;
+            if (accept(phi1))
+            {
+              if (phi1 == phi)
+              {
+                P.push_back(EnumeratorListElement(vtail, phi1, p, v1, cy));
+              }
+              else
+              {
+                P.push_back(EnumeratorListElement(vtail + y, phi1, p, v1, cy));
+              }
+              mCRL2log(log::debug) << "  add " << P.back() << " with " << v1 << " := " << cy << std::endl;
+            }
           }
+          else
+          {
+            sigma[v1] = constructor;
+            auto phi1 = R(phi, sigma);
+            sigma[v1] = v1;
+            if (accept(phi1))
+            {
+              P.push_back(EnumeratorListElement(vtail, phi1, p, v1, constructor));
+              mCRL2log(log::debug) << "  add " << P.back() << " with " << v1 << " := " << constructor << std::endl;
+            }
+          }
+        }
+      }
 
-          variable_list w(variables.begin(),variables.end());
+//      else if (is_finite_set(x1.sort()))
+//      {
+//      }
+//      else if (data::is_function_sort(x1.sort()))
+//      {
+//        mCRL2log(log::debug) << "Function sort: " << x1.sort() << std::endl;
+//      }
+      else
+      {
+        throw mcrl2::runtime_error("Cannot enumerate variable " + print(v1));
+      }
+    }
 
-          result.push_back(data_expression_with_variables(application(*i, atermpp::aterm_cast< data_expression_list >(w)), w));
+    /// \brief Enumerates the front elements of the todo list P until a solution
+    /// has been found, or until P is empty.
+    /// \param P The todo list of the algorithm.
+    /// \param accept Elements p for which accept(p) is false are discarded.
+    /// \post Either P.empty() or P.front().is_solution()
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
+    void next(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept)
+    {
+      while (!P.empty())
+      {
+        if (P.front().is_solution())
+        {
+          mCRL2log(log::debug) << "  solution " << P.front() << std::endl;
+          break;
         }
         else
         {
-          result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));
+          enumerate_front(P, sigma, accept);
         }
       }
-      return result;
+    }
+};
+
+/// \brief An enumerator algorithm with an iterator interface.
+template <typename Rewriter, typename MutableSubstitution, typename EnumeratorListElement>
+class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
+{
+  public:
+    typedef enumerator_algorithm<Rewriter> super;
+
+    /// \brief A class to enumerate solutions for terms.
+    /// \details Solutions are presented as data_expression_lists of the same length as
+    ///          the list of variables for which a solution is sought.
+    template <typename Filter>
+    class iterator: public boost::iterator_facade<iterator<Filter>, const EnumeratorListElement, boost::forward_traversal_tag>
+    {
+      protected:
+        enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E;
+        MutableSubstitution* sigma;
+        std::deque<EnumeratorListElement> P;
+        Filter accept;
+
+      public:
+        iterator(enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_, MutableSubstitution* sigma_, const EnumeratorListElement& p, Filter accept_)
+          : E(E_), sigma(sigma_), accept(accept_)
+        {
+          P.push_back(p);
+          E->next(P, *sigma, accept);
+        }
+
+        iterator(Filter accept_)
+          : E(0), sigma(0), accept(accept_)
+        { }
+
+      protected:
+        friend class boost::iterator_core_access;
+
+        void increment()
+        {
+          assert(!P.empty());
+          P.pop_front();
+          E->next(P, *sigma, Filter());
+        }
+
+        bool equal(iterator<Filter> const& other) const
+        {
+          return P.size() == other.P.size();
+        }
+
+        const EnumeratorListElement& dereference() const
+        {
+          assert(!P.empty());
+          return P.front();
+        }
+    };
+
+    enumerator_algorithm_with_iterator(Rewriter& R, const data::data_specification& dataspec)
+      : super(R, dataspec)
+    {}
+
+    template <typename Filter>
+    iterator<Filter> begin(enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>& E, MutableSubstitution& sigma, const EnumeratorListElement& p, Filter accept) const
+    {
+      return iterator<Filter>(&E, &sigma, p, accept);
     }
 
-    /// \brief Enumerates a data expression. Only the variables of the enumerator
-    /// expression are expanded. Fresh variables are created using the
-    /// identifier generator that was passed in the constructor.
-    /// \param e A data expression.
-    /// \return A sequence of expressions that is the result of applying the enumerator to the expression once.
-    std::vector<data_expression_with_variables> enumerate(const data_expression_with_variables& e) const
+    template <typename Filter>
+    iterator<Filter> end(Filter accept) const
     {
-      std::vector<data_expression_with_variables> result;
-
-      // Compute the instantiations for each variable of e.
-      std::vector<std::vector<data_expression_with_variables> > enumerated_values;
-      variable_list variables(e.variables());
-      for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
-      {
-        enumerated_values.push_back(enumerate(*i));
-      }
-
-      std::vector<data_expression_with_variables> values(enumerated_values.size());
-
-      utilities::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
-      return result;
+      return iterator<Filter>(accept);
     }
 };
 

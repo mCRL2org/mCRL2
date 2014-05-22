@@ -41,7 +41,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   typedef simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution> super;
   typedef enumerate_quantifiers_builder<Derived, DataRewriter, MutableSubstitution> self;
   typedef core::term_traits<pbes_expression> tr;
-  typedef enumerator_list_element<pbes_expression> enumerator_element;
+  typedef data::enumerator_list_element<pbes_expression> enumerator_element;
 
   using super::enter;
   using super::leave;
@@ -55,7 +55,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   bool m_enumerate_infinite_sorts;
 
   /// The enumerator
-  enumerator_algorithm<self> E;
+  data::enumerator_algorithm<self> E;
 
   /// \brief Constructor.
   /// \param r A data rewriter
