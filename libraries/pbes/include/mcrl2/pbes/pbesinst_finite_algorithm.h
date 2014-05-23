@@ -399,8 +399,8 @@ class pbesinst_finite_algorithm
       }
 
       // compute new initial state
-      detail::NoSubst sigma;
-      detail::pbesinst_finite_builder<data::rewriter, detail::NoSubst> visitor(rewr, sigma, pbesinst_finite_rename(), p.data(), index_map, variable_map);
+      data::no_substitution sigma;
+      detail::pbesinst_finite_builder<data::rewriter, data::no_substitution> visitor(rewr, sigma, pbesinst_finite_rename(), p.data(), index_map, variable_map);
       propositional_variable_instantiation initial_state = visitor.visit_initial_state(p.initial_state());
 
       // assign the result

@@ -255,7 +255,7 @@ class stategraph_simplify_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      detail::NoSubst sigma;
+      data::no_substitution sigma;
       return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma)(x);
     }
 

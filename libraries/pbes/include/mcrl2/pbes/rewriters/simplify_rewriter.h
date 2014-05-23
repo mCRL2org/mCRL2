@@ -135,7 +135,7 @@ struct simplify_data_rewriter
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    detail::NoSubst sigma;
+    data::no_substitution sigma;
     return detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma)(x);
   }
 
