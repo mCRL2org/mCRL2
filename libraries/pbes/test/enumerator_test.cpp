@@ -79,7 +79,7 @@ void test_enumerator_with_iterator()
   std::vector<pbes_system::pbes_expression> solutions;
 
   auto end = E.end(is_not_true());
-  for (auto i = E.begin(E, sigma, enumerator_element(v, phi), is_not_true()); i != end; ++i)
+  for (auto i = E.begin(sigma, enumerator_element(v, phi), is_not_true()); i != end; ++i)
   {
     solutions.push_back(i->expression());
   }
@@ -105,7 +105,7 @@ void test_enumerator_with_substitutions()
   std::vector<pbes_system::pbes_expression> solutions;
 
   auto end = E.end(is_not_true());
-  for (auto i = E.begin(E, sigma, enumerator_element(v, phi), is_not_true()); i != end; ++i)
+  for (auto i = E.begin(sigma, enumerator_element(v, phi), is_not_true()); i != end; ++i)
   {
     solutions.push_back(i->expression());
     data::mutable_map_substitution<> sigma;

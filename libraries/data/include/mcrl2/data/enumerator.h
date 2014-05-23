@@ -160,7 +160,7 @@ class enumerator_algorithm
     const data::data_specification& dataspec;
 
     // A name generator
-    data::set_identifier_generator id_generator;
+    mutable data::set_identifier_generator id_generator;
 
     /// \brief A mapping with constructors.
     mutable constructor_map m_constructors;
@@ -168,7 +168,7 @@ class enumerator_algorithm
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
-    const std::vector<data::function_symbol>& constructors(const data::sort_expression& s)
+    const std::vector<data::function_symbol>& constructors(const data::sort_expression& s) const
     {
       auto i = m_constructors.find(s);
       if (i != m_constructors.end())
@@ -202,7 +202,7 @@ class enumerator_algorithm
     /// \param accept Elements p for which accept(p) is false are discarded.
     /// \pre !P.empty()
     template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
-    void enumerate_front(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept)
+    void enumerate_front(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
     {
       assert(!P.empty());
 
@@ -276,7 +276,7 @@ class enumerator_algorithm
     /// \return The number of elements that have been processed
     /// \post Either P.empty() or P.front().is_solution()
     template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
-    std::size_t next(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept)
+    std::size_t next(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
     {
       std::size_t count = 0;
       while (!P.empty())
@@ -310,7 +310,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     class iterator: public boost::iterator_facade<iterator<Filter>, const EnumeratorListElement, boost::forward_traversal_tag>
     {
       protected:
-        enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E;
+        const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E;
         MutableSubstitution* sigma;
         std::deque<EnumeratorListElement> P;
         Filter accept;
@@ -319,7 +319,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
         bool throw_exceptions;
 
       public:
-        iterator(enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_,
+        iterator(const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_,
                  MutableSubstitution* sigma_,
                  const EnumeratorListElement& p,
                  Filter accept_,
@@ -385,15 +385,14 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     /// \param throw_exceptions If true, an exception is thrown when the enumeration is aborted.
     /// Otherwise an invalidated enumerator element is returned when it is dereferenced.
     template <typename Filter>
-    iterator<Filter> begin(enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>& E,
-                           MutableSubstitution& sigma,
+    iterator<Filter> begin(MutableSubstitution& sigma,
                            const EnumeratorListElement& p,
                            Filter accept,
                            std::size_t max_count = std::numeric_limits<std::size_t>::max(),
                            bool throw_exceptions = false
                           ) const
     {
-      return iterator<Filter>(&E, &sigma, p, accept, max_count, throw_exceptions);
+      return iterator<Filter>(this, &sigma, p, accept, max_count, throw_exceptions);
     }
 
     template <typename Filter>
