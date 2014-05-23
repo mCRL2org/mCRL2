@@ -346,7 +346,9 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
           {
             if (throw_exceptions)
             {
-              throw mcrl2::runtime_error("");
+              std::ostringstream out;
+              out << "enumeration was aborted, since it did complete within " << max_count << " iterations";
+              throw mcrl2::runtime_error(out.str());
             }
             else
             {
@@ -374,10 +376,10 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
       : super(R, dataspec)
     {}
 
-    /// \brief Returns an iterator that enumerates solutions of the expression contained in p
+    /// \brief Returns an iterator that enumerates solutions for variables that satisfy a condition
     /// \param E An enumerator
     /// \param sigma A mutable substitution that is applied by the rewriter contained in E
-    /// \param p The boolean expression that is enumerated, together with a list of variables
+    /// \param p The condition that is solved, together with the list of variables
     /// \param accept Enumerator elements p for which accept(p) is false are discarded.
     /// \param max_count The enumeration is aborted after max_count iterations
     /// \param throw_exceptions If true, an exception is thrown when the enumeration is aborted.
