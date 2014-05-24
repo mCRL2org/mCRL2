@@ -309,7 +309,7 @@ class enumerator_algorithm
       return count;
     }
 
-    bool max_count() const
+    std::size_t max_count() const
     {
       return m_max_count;
     }
