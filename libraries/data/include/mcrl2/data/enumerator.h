@@ -165,6 +165,12 @@ class enumerator_algorithm
     /// \brief A mapping with constructors.
     mutable constructor_map m_constructors;
 
+    /// \brief max_count The enumeration is aborted after max_count iterations
+    std::size_t m_max_count;
+
+    /// \brief throw_exceptions If true, an exception is thrown when the enumeration is aborted.
+    bool m_throw_exceptions;
+
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
@@ -192,13 +198,17 @@ class enumerator_algorithm
     }
 
   public:
-    enumerator_algorithm(Rewriter& R_, const data::data_specification& dataspec_)
-      : R(R_), dataspec(dataspec_)
+    enumerator_algorithm(Rewriter& R_,
+                         const data::data_specification& dataspec_,
+                         std::size_t max_count = std::numeric_limits<std::size_t>::max(),
+                         bool throw_exceptions = false
+                       )
+      : R(R_), dataspec(dataspec_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
     {}
 
     /// \brief Enumerates the front element of the todo list P.
     /// \param P The todo list of the algorithm.
-    /// \param xxx
+    /// \param sigma A mutable substitution that is applied by the rewriter.
     /// \param accept Elements p for which accept(p) is false are discarded.
     /// \pre !P.empty()
     template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
@@ -290,9 +300,23 @@ class enumerator_algorithm
         {
           enumerate_front(P, sigma, accept);
           count++;
+          if (count >= m_max_count)
+          {
+            break;
+          }
         }
       }
       return count;
+    }
+
+    bool max_count() const
+    {
+      return m_max_count;
+    }
+
+    bool throw_exceptions() const
+    {
+      return m_throw_exceptions;
     }
 };
 
@@ -315,25 +339,21 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
         std::deque<EnumeratorListElement> P;
         Filter accept;
         std::size_t count;
-        std::size_t max_count;
-        bool throw_exceptions;
 
       public:
         iterator(const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_,
                  MutableSubstitution* sigma_,
                  const EnumeratorListElement& p,
-                 Filter accept_,
-                 std::size_t max_count_ = std::numeric_limits<std::size_t>::max(),
-                 bool throw_exceptions_ = false
+                 Filter accept_
                 )
-          : E(E_), sigma(sigma_), accept(accept_), count(0), max_count(max_count_), throw_exceptions(throw_exceptions_)
+          : E(E_), sigma(sigma_), accept(accept_), count(0)
         {
           P.push_back(p);
           count += E->next(P, *sigma, accept);
         }
 
         iterator(Filter accept_)
-          : E(0), sigma(0), accept(accept_), count(0), max_count(0), throw_exceptions(false)
+          : E(0), sigma(0), accept(accept_), count(0)
         { }
 
       protected:
@@ -342,12 +362,12 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
         void increment()
         {
           assert(!P.empty());
-          if (count >= max_count)
+          if (count >= E->max_count())
           {
-            if (throw_exceptions)
+            if (E->throw_exceptions())
             {
               std::ostringstream out;
-              out << "enumeration was aborted, since it did complete within " << max_count << " iterations";
+              out << "enumeration was aborted, since it did complete within " << E->max_count() << " iterations";
               throw mcrl2::runtime_error(out.str());
             }
             else
@@ -381,18 +401,11 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     /// \param sigma A mutable substitution that is applied by the rewriter contained in E
     /// \param p The condition that is solved, together with the list of variables
     /// \param accept Enumerator elements p for which accept(p) is false are discarded.
-    /// \param max_count The enumeration is aborted after max_count iterations
-    /// \param throw_exceptions If true, an exception is thrown when the enumeration is aborted.
     /// Otherwise an invalidated enumerator element is returned when it is dereferenced.
     template <typename Filter>
-    iterator<Filter> begin(MutableSubstitution& sigma,
-                           const EnumeratorListElement& p,
-                           Filter accept,
-                           std::size_t max_count = std::numeric_limits<std::size_t>::max(),
-                           bool throw_exceptions = false
-                          ) const
+    iterator<Filter> begin(MutableSubstitution& sigma, const EnumeratorListElement& p, Filter accept) const
     {
-      return iterator<Filter>(this, &sigma, p, accept, max_count, throw_exceptions);
+      return iterator<Filter>(this, &sigma, p, accept);
     }
 
     template <typename Filter>
