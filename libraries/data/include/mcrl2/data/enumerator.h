@@ -200,7 +200,7 @@ class enumerator_algorithm
   public:
     enumerator_algorithm(Rewriter& R_,
                          const data::data_specification& dataspec_,
-                         std::size_t max_count = std::numeric_limits<std::size_t>::max(),
+                         std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                          bool throw_exceptions = false
                        )
       : R(R_), dataspec(dataspec_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
