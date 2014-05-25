@@ -419,7 +419,7 @@ data::data_expression_vector lps2lts_algorithm::get_prioritised_representative(d
 
 void lps2lts_algorithm::value_prioritize(std::list<next_state_generator::transition_t>& transitions)
 {
-  data::data_expression lowest_value=mcrl2::data::sort_nat::c0();
+  data::data_expression lowest_value;
 
   for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
   {
@@ -428,15 +428,22 @@ void lps2lts_algorithm::value_prioritize(std::list<next_state_generator::transit
       const data::data_expression& argument = i->action().actions().front().arguments().front();
       if (mcrl2::data::sort_nat::is_nat(argument.sort()))
       {
-        data::data_expression result = m_generator->get_rewriter()(data::greater(lowest_value, argument));
-
-        if (data::sort_bool::is_true_function_symbol(result))
+        if (lowest_value==data::data_expression()) // lowest value is undefined.
         {
           lowest_value = argument;
         }
-        else if (!data::sort_bool::is_false_function_symbol(result))
+        else 
         {
-          throw mcrl2::runtime_error("Fail to rewrite term " + data::pp(result) + " to true or false.");
+          const data::data_expression result = m_generator->get_rewriter()(data::greater(lowest_value, argument));
+
+          if (data::sort_bool::is_true_function_symbol(result))
+          {
+            lowest_value = argument;
+          }
+          else if (!data::sort_bool::is_false_function_symbol(result))
+          {
+            throw mcrl2::runtime_error("Fail to rewrite term " + data::pp(result) + " to true or false.");
+          }
         }
       }
     }
