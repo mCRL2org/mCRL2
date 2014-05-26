@@ -80,6 +80,29 @@ class pbes_type_checker:public data::data_type_checker
       normalize_sorts(type_checked_pbes_spec,type_checked_data_spec);
     }
 
+
+    template <typename VariableContainer, typename PropositionalVariableContainer>
+    pbes_type_checker(const data::data_specification& dataspec, const VariableContainer& variables, const PropositionalVariableContainer& propositional_variables)
+    : data::data_type_checker(dataspec)
+    {
+      for (auto i = variables.begin(); i != variables.end(); ++i)
+      {
+        glob_vars[i->name()] = i->sort();
+      }
+      for (auto i = propositional_variables.begin(); i != propositional_variables.end(); ++i)
+      {
+        const data::variable_list& PBVars = i->parameters();
+        data::sort_expression_list PBType;
+        for (auto l = PBVars.begin(); l != PBVars.end(); ++l)
+        {
+          PBType.push_front(l->sort());
+        }
+        PBType = atermpp::reverse(PBType);
+        IsSortExprListDeclared(PBType);
+        PBs[i->name()] = atermpp::make_list<data::sort_expression_list>(PBType);
+      }
+    }
+
      /** \brief     Type check a process expression.
       * Throws a mcrl2::runtime_error exception if the expression is not well typed.
       *  \param[in] d A process expression that has not been type checked.
@@ -448,6 +471,55 @@ void type_check(pbes& pbes_spec)
   catch (mcrl2::runtime_error &e)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pbes_system::pp(pbes_spec));
+  }
+}
+
+/** \brief     Type check a parsed mCRL2 propositional variable.
+ *  Throws an exception if something went wrong.
+ *  \param[in] dataspec A data specification.
+ *  \param[in] variables A sequence of data variables that may appear in x.
+ *  \return    the type checked expression
+ **/
+template <typename VariableContainer>
+propositional_variable type_check(const propositional_variable& x, const VariableContainer& variables, const data::data_specification& dataspec = data::data_specification())
+{
+  // This function should be implemented using the PBES type checker, but it is not immediately clear how to do that.
+  try
+  {
+    const data::variable_list& parameters = x.parameters();
+    std::vector<data::variable> typed_parameters;
+    for (auto i = parameters.begin(); i != parameters.end(); ++i)
+    {
+      data::data_expression d = atermpp::aterm_cast<data::data_expression>(*i);
+      data::type_check(d, variables.begin(), variables.end(), dataspec);
+      typed_parameters.push_back(atermpp::aterm_cast<data::variable>(d));
+    }
+    return propositional_variable(x.name(), data::variable_list(typed_parameters.begin(), typed_parameters.end()));
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pbes_system::pp(x));
+  }
+}
+
+/** \brief     Type check a parsed mCRL2 pbes expression.
+ *  Throws an exception if something went wrong.
+ *  \param[in] dataspec A data specification.
+ *  \param[in] variables A sequence of data variables that may appear in x.
+ *  \param[in] propositional_variables A sequence of propositional variables that may appear in x.
+ *  \return    the type checked expression
+ **/
+template <typename VariableContainer, typename PropositionalVariableContainer>
+pbes_expression type_check(pbes_expression& x, const VariableContainer& variables, const PropositionalVariableContainer& propositional_variables, const data::data_specification& dataspec = data::data_specification())
+{
+  try
+  {
+    pbes_type_checker type_checker(dataspec, variables, propositional_variables);
+    return type_checker(x);
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pbes_system::pp(x));
   }
 }
 

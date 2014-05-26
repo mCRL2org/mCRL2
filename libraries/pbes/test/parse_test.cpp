@@ -43,9 +43,23 @@ void test_parse()
   std::cout << "x = " << pbes_system::pp(x) << std::endl;
 }
 
+void test_parse_pbes_expression()
+{
+  data::variable_vector vardecl;
+  data::parse_variables("b: Bool; n: Nat;", std::back_inserter(vardecl));
+  std::vector<propositional_variable> propvardecl;
+  propositional_variable X = parse_propositional_variable("X(b: Bool, n: Nat)", vardecl);
+  propositional_variable Y = parse_propositional_variable("Y(n: Nat)", vardecl);
+  propvardecl.push_back(X);
+  propvardecl.push_back(Y);
+  pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1)", vardecl, propvardecl);
+  BOOST_CHECK(pbes_system::pp(x) == "X(true, 2) && Y(n + 1)");
+}
+
 int test_main(int argc, char* argv[])
 {
   test_parse();
+  test_parse_pbes_expression();
 
   return 0;
 }

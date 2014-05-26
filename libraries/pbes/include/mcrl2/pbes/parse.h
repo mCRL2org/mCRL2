@@ -164,6 +164,47 @@ pbes parse_pbes(const std::string& text)
   return parse_pbes(in);
 }
 
+
+template <typename VariableContainer>
+propositional_variable parse_propositional_variable(const std::string& text,
+                                                    const VariableContainer& variables,
+                                                    const data::data_specification& dataspec = data::data_specification()
+                                                   )
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PropVarDecl");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  propositional_variable result = pbes_actions(parser_tables_mcrl2).parse_PropVarDecl(node);
+  p.destroy_parse_node(node);
+  return type_check(result, variables, dataspec);
+}
+
+/** \brief     Type check a pbes expression.
+ *  Throws an exception if something went wrong.
+ *  \param[in] text A string containing a pbes expression.
+ *  \param[in] dataspec A data specification.
+ *  \param[in] variables A sequence of data variables that may appear in x.
+ *  \param[in] propositional_variables A sequence of propositional variables that may appear in x.
+ *  \return    the type checked expression
+ **/
+template <typename VariableContainer, typename PropositionalVariableContainer>
+pbes_expression parse_pbes_expression(const std::string& text,
+                                      const VariableContainer& variables,
+                                      const PropositionalVariableContainer& propositional_variables,
+                                      const data::data_specification& dataspec = data::data_specification()
+                                     )
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  pbes_expression result = pbes_actions(parser_tables_mcrl2).parse_PbesExpr(node);
+  p.destroy_parse_node(node);
+  return type_check(result, variables, propositional_variables, dataspec);
+}
+
 /// \brief Parses a sequence of pbes expressions. The format of the text is as
 /// follows:
 /// <ul>
