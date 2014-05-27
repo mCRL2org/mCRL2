@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/detail/simplify_rewrite_builder.h
+/// \file mcrl2/data/rewriters/simplify_rewriter.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_SIMPLIFY_REWRITE_BUILDER_H
-#define MCRL2_DATA_DETAIL_SIMPLIFY_REWRITE_BUILDER_H
+#ifndef MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITE_BUILDER_H
+#define MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITE_BUILDER_H
 
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/find.h"
@@ -125,31 +125,32 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
     }
 };
 
+} // namespace detail
+
 struct simplify_rewriter: public std::unary_function<data_expression, data_expression>
 {
   data_expression operator()(const data_expression& x) const
   {
-    return core::make_apply_builder<simplify_rewrite_builder>()(x);
+    return core::make_apply_builder<detail::simplify_rewrite_builder>()(x);
   }
 };
 
 template <typename T>
 void simplify(T& x, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0)
 {
-  core::make_update_apply_builder<data::data_expression_builder>(detail::simplify_rewriter())(x);
+  core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter())(x);
 }
 
 template <typename T>
 T simplify(const T& x, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0)
 {
-  T result = core::make_update_apply_builder<data::data_expression_builder>(detail::simplify_rewriter())(x);
+  T result = core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter())(x);
   return result;
 }
-
-} // namespace detail
 
 } // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_SIMPLIFY_REWRITE_BUILDER_H
+#endif // MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITE_BUILDER_H
+

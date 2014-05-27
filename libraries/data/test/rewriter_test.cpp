@@ -22,7 +22,7 @@
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
-#include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -216,7 +216,7 @@ void one_point_rule_preprocessor_test()
 
 void simplify_rewriter_test()
 {
-  data::detail::simplify_rewriter R;
+  data::simplify_rewriter R;
   test_rewriters(N(R), N(I), "!(true && false)", "true");
   test_rewriters(N(R), N(I), "exists n:Nat, b:Bool. b", "exists b:Bool. b");
   test_rewriters(N(R), N(I), "forall b:Bool. !!b", "forall b:Bool. b");

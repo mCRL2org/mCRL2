@@ -16,7 +16,7 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
@@ -102,8 +102,8 @@ class predicate_variable
 
     void simplify_guard()
     {
-      data::detail::simplify_rewriter r;
-      stategraph_simplify_rewriter<data::detail::simplify_rewriter> R(r);
+      data::simplify_rewriter r;
+      stategraph_simplify_rewriter<data::simplify_rewriter> R(r);
       m_guard = R(m_guard);
     }
 };
