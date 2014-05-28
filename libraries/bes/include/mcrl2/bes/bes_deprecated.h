@@ -1218,7 +1218,7 @@ class boolean_equation_system
       assert(v<=nr_of_variables());
       assert(control_info[v]>0);
 
-      return (((control_info[v]& FIXPOINT_MASK) ==0) ? mcrl2::pbes_system::fixpoint_symbol::nu() : mcrl2::pbes_system::fixpoint_symbol::mu());
+      return (((control_info[v] & FIXPOINT_MASK) ==0) ? mcrl2::pbes_system::fixpoint_symbol::nu() : mcrl2::pbes_system::fixpoint_symbol::mu());
     }
 
 
