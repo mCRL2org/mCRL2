@@ -95,7 +95,7 @@ struct add_simplify_quantifiers: public Builder<Derived>
     {
       auto const& left = core::down_cast<or_>(body).left();
       auto const& right = core::down_cast<or_>(body).right();
-      result = utilities::optimized_and(utilities::optimized_exists(variables, left, true), utilities::optimized_forall(variables, right, true));
+      result = utilities::optimized_or(utilities::optimized_exists(variables, left, true), utilities::optimized_forall(variables, right, true));
     }
     else if (tr::is_and(body))
     {
