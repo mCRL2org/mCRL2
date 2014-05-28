@@ -105,11 +105,11 @@ struct add_simplify_quantifiers: public Builder<Derived>
       data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
       if (lv.empty())
       {
-        result = utilities::optimized_or(left, utilities::optimized_exists_no_empty_domain(rv, right, true));
+        result = utilities::optimized_and(left, utilities::optimized_exists_no_empty_domain(rv, right, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_or(right, utilities::optimized_exists_no_empty_domain(lv, left, true));
+        result = utilities::optimized_and(right, utilities::optimized_exists_no_empty_domain(lv, left, true));
       }
       else
       {
