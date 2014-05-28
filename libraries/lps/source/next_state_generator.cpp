@@ -39,10 +39,10 @@ next_state_generator::next_state_generator(
   {
     summand_t summand;
     summand.summand = &(*i);
-    summand.variables = i->summation_variables();
+    summand.variables =  order_variables_to_optimise_enumeration(i->summation_variables(),spec.data());
     summand.condition = i->condition();
     summand.result_state = get_internal_state(i->next_state(m_specification.process().process_parameters()));
-
+    
     for (auto j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
     {
       action_internal_t action_label;
@@ -54,7 +54,7 @@ next_state_generator::next_state_generator(
       }
 
       summand.action_label.push_back(action_label);
-    }
+    } 
 
     for (size_t j = 0; j < m_process_parameters.size(); j++)
     {
