@@ -381,7 +381,7 @@ class specification_basic_type:public boost::noncopyable
          processes to one linear process where variable names are joined. If this
          is not being done (as happened before 4/1/2008) very long lists of parameters
          can occur when linearising using regular2 */
-        if (is_variable(*l1)&& std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
+        if (is_variable(*l1) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
         {
           const variable& v = core::static_down_cast<const variable&>(*l1);
           result.push_front(v);
@@ -483,7 +483,7 @@ class specification_basic_type:public boost::noncopyable
       bool isnew=false;
       size_t n=addObject(var.name(),isnew);
 
-      if ((!isnew)&&(mustbenew))
+      if ((!isnew) && mustbenew)
       {
         throw mcrl2::runtime_error("variable " + data::pp(var) + " already exists");
       }
@@ -1355,7 +1355,7 @@ class specification_basic_type:public boost::noncopyable
            to errors. Should be investigated. */
         else
           return
-            (!occursintermlist(var,data_expression_list(sum(p).bound_variables())))&&
+            (!occursintermlist(var,data_expression_list(sum(p).bound_variables()))) &&
             occursinpCRLterm(var,sum(p).operand(),strict);
       }
       if (is_process_instance(p))
@@ -2348,7 +2348,7 @@ class specification_basic_type:public boost::noncopyable
         const process_expression body1=if_then_else(body).then_case();
         const process_expression body2=if_then_else(body).else_case();
 
-        if ((isDeltaAtZero(body1))&&(isDeltaAtZero(body2)))
+        if (isDeltaAtZero(body1) && isDeltaAtZero(body2))
         {
           return body1;
         }
@@ -4586,7 +4586,7 @@ class specification_basic_type:public boost::noncopyable
       /* translate the condition */
 
       data_expression condition1;
-      if ((regular)&&(singlestate))
+      if (regular && singlestate)
       {
         condition1=sort_bool::true_();
       }
@@ -4598,7 +4598,7 @@ class specification_basic_type:public boost::noncopyable
       for (; (is_if_then(summandterm)) ;)
       {
         const data_expression localcondition=data_expression(if_then(summandterm).condition());
-        if (!((regular)&&(singlestate)))
+        if (!(regular && singlestate))
         {
           condition1=lazy::and_(
                        condition1,
@@ -4854,7 +4854,7 @@ class specification_basic_type:public boost::noncopyable
     {
       size_t w;
 
-      for (w=0; ((w<enumeratedtypes.size())&&(enumeratedtypes[w].size!=n)); ++w) {};
+      for (w=0; ((w<enumeratedtypes.size()) && (enumeratedtypes[w].size!=n)); ++w) {};
 
       if (w==enumeratedtypes.size()) // There is no enumeratedtype of arity n.
       {
@@ -5767,7 +5767,7 @@ class specification_basic_type:public boost::noncopyable
             // the growth of the state space, as dc1 is not set to a default value, but
             // keeps the value v.
             equaluptillnow=((equalterm==auxresult1)||
-                               ((equalterm==data_expression()||is_global_variable(equalterm))&&
+                               ((equalterm==data_expression()||is_global_variable(equalterm)) &&
                                                     is_global_variable(auxresult1)));
           }
 
@@ -6243,7 +6243,7 @@ class specification_basic_type:public boost::noncopyable
          lowest index. In particular initial states get value 1, instead of the
          highest value, as happened hitherto (29/9/05). Not necessary anymore, now
          that we are using a vector (16/5/2009). */
-      if ((!regular)||((!singlecontrolstate)&&(options.newstate)&&(!options.binary)))
+      if ((!regular)||((!singlecontrolstate) && (options.newstate) && (!options.binary)))
       {
         declare_control_state(pCRLprocs);
       }
@@ -8050,7 +8050,7 @@ class specification_basic_type:public boost::noncopyable
           if ((multiaction1==make_list(terminationAction))==(multiaction2==make_list(terminationAction)))
           {
             action_list multiaction3;
-            if ((multiaction1==make_list(terminationAction))&&(multiaction2==make_list(terminationAction)))
+            if ((multiaction1==make_list(terminationAction)) && (multiaction2==make_list(terminationAction)))
             {
               multiaction3.push_front(terminationAction);
             }
@@ -8939,7 +8939,7 @@ class specification_basic_type:public boost::noncopyable
 
       size_t n=objectIndex(procId);
 
-      if ((objectdata[n].processstatus!=mCRL)&&
+      if ((objectdata[n].processstatus!=mCRL) &&
           (objectdata[n].canterminate==0))
       {
         /* no new process needs to be constructed */
