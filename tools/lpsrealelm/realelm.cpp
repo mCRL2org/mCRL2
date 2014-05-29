@@ -382,7 +382,7 @@ static void move_real_parameters_out_of_actions(specification &s,
   global_variable_counter=0;
   const lps::action_summand_vector action_smds = s.process().action_summands();
   lps::action_summand_vector new_action_summands;
-  classic_enumerator<> enumerator(s.data(),r);
+  classic_enumerator<> enumerator(r,s.data());
   for (lps::action_summand_vector::const_iterator i = action_smds.begin(); i != action_smds.end(); ++i)
   {
      const process::action_list ma=i->multi_action().actions();

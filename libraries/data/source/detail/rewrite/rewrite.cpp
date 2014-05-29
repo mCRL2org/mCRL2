@@ -360,7 +360,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   /* Find A solution*/
   typedef classic_enumerator<rewriter_wrapper> enumerator_type;
   rewriter_wrapper wrapped_rewriter(this);
-  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
+  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
 
   /* Create a list to store solutions */
   data_expression partial_result=sort_bool::false_();
@@ -458,7 +458,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   typedef classic_enumerator<rewriter_wrapper> enumerator_type;
   rewriter_wrapper wrapped_rewriter(this);
-  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
+  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
 
 
   /* Create lists to store solutions */

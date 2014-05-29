@@ -299,7 +299,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
             term=rewr(term);
             typedef classic_enumerator< rewriter > enumerator_type;
-            enumerator_type enumerator(spec,rewr);
+            enumerator_type enumerator(rewr,spec);
 
             data::mutable_indexed_substitution<> sigma;
             for (enumerator_type::iterator

@@ -222,7 +222,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     }
 
     std::set<pbes_expression> result;
-    data::classic_enumerator<> enumerator(m_data_spec, super::R);
+    data::classic_enumerator<> enumerator(super::R, m_data_spec);
     mcrl2::data::mutable_indexed_substitution<> local_sigma;
     for (auto i = enumerator.begin(data::variable_list(di.begin(), di.end()), data::sort_bool::true_(), local_sigma); i != enumerator.end(); ++i)
     {
@@ -364,7 +364,7 @@ class pbesinst_finite_algorithm
         detail::split_parameters(i->variable(), index_map, finite_parameters, infinite_parameters);
         data::variable_list infinite = atermpp::convert<data::variable_list>(infinite_parameters);
 
-        data::classic_enumerator<> enumerator(p.data(),rewr);
+        data::classic_enumerator<> enumerator(rewr,p.data());
         mcrl2::data::mutable_indexed_substitution<> local_sigma;
         for (auto j = enumerator.begin(data::variable_list(finite_parameters.begin(), finite_parameters.end()),
                     data::sort_bool::true_(), local_sigma); j != enumerator.end(); ++j)

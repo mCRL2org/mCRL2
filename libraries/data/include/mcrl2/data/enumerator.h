@@ -392,8 +392,12 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
         }
     };
 
-    enumerator_algorithm_with_iterator(Rewriter& R, const data::data_specification& dataspec)
-      : super(R, dataspec)
+    enumerator_algorithm_with_iterator(
+                Rewriter& R, 
+                const data::data_specification& dataspec,                     
+                std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
+                bool throw_exceptions = false)
+      : super(R, dataspec,max_count,throw_exceptions)
     {}
 
     /// \brief Returns an iterator that enumerates solutions for variables that satisfy a condition

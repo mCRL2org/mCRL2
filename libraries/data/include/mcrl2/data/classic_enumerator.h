@@ -265,8 +265,8 @@ class classic_enumerator
      *            if false, the function exception_occurred of the iterator can be used to indicate whether
      *            valid solutions are being generated.
      **/
-    classic_enumerator(const data_specification &specification,
-                       const REWRITER& evaluator,
+    classic_enumerator(const REWRITER& evaluator,
+                       const data_specification &specification,
                        const size_t max_internal_variables=0,
                        const bool throw_exceptions=true):
       m_evaluator(evaluator),

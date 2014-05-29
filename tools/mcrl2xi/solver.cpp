@@ -85,7 +85,7 @@ void Solver::solve(QString specification, QString dataExpression)
 
       typedef mcrl2::data::classic_enumerator< mcrl2::data::rewriter > enumerator_type;
 
-      enumerator_type enumerator(m_data_spec,rewr);
+      enumerator_type enumerator(rewr,m_data_spec);
 
       mcrl2::data::mutable_indexed_substitution<> sigma;
       // Stop when more than 10000 internal variables are required.
