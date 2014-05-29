@@ -154,9 +154,9 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
           mcrl2::data::mutable_indexed_substitution<> local_sigma;
           for (enumerator_type::iterator j=enumerator.begin(
+                           local_sigma,
                            atermpp::make_list<data::variable>(par),
-                           data::sort_bool::true_(),
-                           local_sigma);
+                           data::sort_bool::true_());
                 j != enumerator.end() ; ++j)
           {
             enumerated_elements.push_back(j->front());

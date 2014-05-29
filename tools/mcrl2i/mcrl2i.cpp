@@ -303,7 +303,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
             data::mutable_indexed_substitution<> sigma;
             for (enumerator_type::iterator
-                      i=enumerator.begin(variable_list(vars.begin(),vars.end()),term,sigma, 10000); // Stop when more than 10000 internal variables are required
+                      i=enumerator.begin(sigma, variable_list(vars.begin(), vars.end()), term, 10000); // Stop when more than 10000 internal variables are required
                       i != enumerator.end() ; ++i)
             {
               cout << "[";

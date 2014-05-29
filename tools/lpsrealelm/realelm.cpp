@@ -407,7 +407,7 @@ static void move_real_parameters_out_of_actions(specification &s,
      else 
      {
        mutable_indexed_substitution<> empty_sigma;
-       for (classic_enumerator<>::iterator tl = enumerator.begin(replaced_variables,sort_bool::true_(),empty_sigma); tl!= enumerator.end(); ++tl)
+       for (classic_enumerator<>::iterator tl = enumerator.begin(empty_sigma,replaced_variables,sort_bool::true_()); tl!= enumerator.end(); ++tl)
        { 
          mutable_map_substitution<> sigma(replaced_variables,*tl);
 

@@ -224,7 +224,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     std::set<pbes_expression> result;
     data::classic_enumerator<> enumerator(super::R, m_data_spec);
     mcrl2::data::mutable_indexed_substitution<> local_sigma;
-    for (auto i = enumerator.begin(data::variable_list(di.begin(), di.end()), data::sort_bool::true_(), local_sigma); i != enumerator.end(); ++i)
+    for (auto i = enumerator.begin(local_sigma, data::variable_list(di.begin(), di.end()), data::sort_bool::true_()); i != enumerator.end(); ++i)
     {
       mCRL2log(log::debug1) << "sigma = " << sigma << "\n";
       data::mutable_indexed_substitution<> sigma_i;
@@ -366,8 +366,8 @@ class pbesinst_finite_algorithm
 
         data::classic_enumerator<> enumerator(rewr,p.data());
         mcrl2::data::mutable_indexed_substitution<> local_sigma;
-        for (auto j = enumerator.begin(data::variable_list(finite_parameters.begin(), finite_parameters.end()),
-                    data::sort_bool::true_(), local_sigma); j != enumerator.end(); ++j)
+        for (auto j = enumerator.begin(local_sigma, data::variable_list(finite_parameters.begin(), finite_parameters.end()),
+                    data::sort_bool::true_()); j != enumerator.end(); ++j)
         {
           // apply the substitution *j
           // TODO: use a generic substitution routine (does that already exist in the data library?)

@@ -89,7 +89,7 @@ void Solver::solve(QString specification, QString dataExpression)
 
       mcrl2::data::mutable_indexed_substitution<> sigma;
       // Stop when more than 10000 internal variables are required.
-      for (enumerator_type::iterator i = enumerator.begin(mcrl2::data::variable_list(m_vars.begin(),m_vars.end()),term,sigma,10000); 
+      for (enumerator_type::iterator i = enumerator.begin(sigma,mcrl2::data::variable_list(m_vars.begin(),m_vars.end()),term,10000); 
            i != enumerator.end() && !m_abort; ++i)
       {
         mCRL2log(info) << "Solution found" << std::endl;

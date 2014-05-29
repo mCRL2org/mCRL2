@@ -238,9 +238,9 @@ class classic_enumerator
     /// \param[in] max_internal_variables The maximal number of internally generatable variables.
     ///            If zero, then there is no bound. If the bound is reached, generating
     ///            new solutions stops with or without an exception as desired.
-    iterator begin(const variable_list& variables,
+    iterator begin(substitution_type& sigma,
+                   const variable_list& variables,
                    const TERM& condition,
-                   substitution_type& sigma,
                    const bool not_equal_to_false=true)
     {
       return iterator(this, variables, condition,sigma,not_equal_to_false);
@@ -253,10 +253,9 @@ class classic_enumerator
       return default_end_iterator();
     }
 
-  public:
     /** \brief Constructs a classic enumerator to
-     * \param[in] specification A data specification containing the definitions of sorts
      * \param[in] evaluator A component that is used for evaluating conditions, generally an ordinary rewriter
+     * \param[in] specification A data specification containing the definitions of sorts
      * \param[in]  max_internal_variables The maximum number of variables to be
      *             used internally when generating solutions. If set to 0 an unbounded number
      *             of variables are allowed, and warnings are printed to warn for potentially
@@ -266,7 +265,7 @@ class classic_enumerator
      *            valid solutions are being generated.
      **/
     classic_enumerator(const REWRITER& evaluator,
-                       const data_specification &specification,
+                       const data_specification& specification,
                        const size_t max_internal_variables=0,
                        const bool throw_exceptions=true):
       m_evaluator(evaluator),

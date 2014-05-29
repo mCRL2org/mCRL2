@@ -366,7 +366,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   data_expression partial_result=sort_bool::false_();
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, true);
+  enumerator_type::iterator sol=enumerator.begin(sigma, vl_new_l, t3, true);
   for( ; loop_upperbound>0 && 
          partial_result!=sort_bool::true_() &&
          sol!=enumerator.end(); 
@@ -465,7 +465,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   data_expression partial_result=sort_bool::true_();
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, false);
+  enumerator_type::iterator sol=enumerator.begin(sigma, vl_new_l, t3, false);
   for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
          sol!=enumerator.end();
