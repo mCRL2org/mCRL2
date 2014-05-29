@@ -17,6 +17,7 @@
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -86,6 +87,7 @@ void pbesrewr(const std::string& input_filename,
     case pfnf:
     {
       pfnf_rewriter pbesr;
+      pbes_system::normalize(p);
       pbes_rewrite(p, pbesr);
       break;
     }
