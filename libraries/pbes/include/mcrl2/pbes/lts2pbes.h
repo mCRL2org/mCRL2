@@ -24,7 +24,7 @@
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
-#include "mcrl2/modal_formula/state_formula_normalize.h"
+#include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/lts2pbes_lts.h"
 #include "mcrl2/pbes/detail/lts2pbes_e.h"

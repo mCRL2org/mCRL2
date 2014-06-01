@@ -17,7 +17,7 @@
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/replace.h"
-#include "mcrl2/modal_formula/state_formula_normalize.h"
+#include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/modal_formula/translate_user_notation.h"
 
 namespace mcrl2

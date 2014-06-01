@@ -650,6 +650,25 @@ void test_data2pbes()
   BOOST_CHECK(pbes_system::pp(y) == "forall n: Nat. val(n != 3) && val(n == 5)");
 }
 
+void test_simplify_rewriter()
+{
+  std::string text =
+    "pbes nu X(b: Bool) =                                  \n"
+    "       val(b) && (X(b) || X(!b)) && (X(b) || X(!!b)); \n"
+    "                                                      \n"
+    "init X(true);                                         \n"
+    ;
+  text =  "pbes mu X0(n: Nat) =\n"
+          "           (exists t: Nat. val(t < 3) || !X0(1)) => val(n > 0);\n"
+          "     nu X1 = true;\n"
+          "init X0(0);\n"
+          ;
+
+  pbes p = txt2pbes(text, false);
+  pbes_system::simplify_rewriter R;
+  pbes_system::pbes_rewrite(p, R);
+}
+
 int test_main(int argc, char* argv[])
 {
   log::mcrl2_logger::set_reporting_level(log::debug);
@@ -663,6 +682,7 @@ int test_main(int argc, char* argv[])
   test_substitutions3();
   test_substitutions4();
   test_data2pbes();
+  test_simplify_rewriter();
 
   return 0;
 }

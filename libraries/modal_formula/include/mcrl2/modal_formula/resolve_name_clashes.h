@@ -9,8 +9,8 @@
 /// \file mcrl2/modal_formula/detail/state_formula_name_clash_resolver.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_RESOLVER_H
-#define MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_RESOLVER_H
+#ifndef MCRL2_MODAL_FORMULA_RESOLVE_NAME_CLASHES_H
+#define MCRL2_MODAL_FORMULA_RESOLVE_NAME_CLASHES_H
 
 #include <set>
 #include "mcrl2/utilities/number_postfix_generator.h"
@@ -119,17 +119,17 @@ class state_formula_name_clash_resolver: public state_formulas::state_formula_bu
     }
 };
 
+} // namespace detail
+
 /// \brief Resolves name clashes in state formula f
 inline
 state_formula resolve_name_clashes(const state_formula& x)
 {
-  return core::make_apply_builder<state_formula_name_clash_resolver>()(x);
+  return core::make_apply_builder<detail::state_formula_name_clash_resolver>()(x);
 }
-
-} // namespace detail
 
 } // namespace state_formulas
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_RESOLVER_H
+#endif // MCRL2_MODAL_FORMULA_RESOLVE_NAME_CLASHES_H

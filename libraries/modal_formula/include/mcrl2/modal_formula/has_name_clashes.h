@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/modal_formula/detail/state_formula_name_clash_checker.h
+/// \file mcrl2/modal_formula/detail/has_name_clashes.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_CHECKER_H
-#define MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_CHECKER_H
+#ifndef MCRL2_MODAL_FORMULA_HAS_NAME_CLASHES_H
+#define MCRL2_MODAL_FORMULA_HAS_NAME_CLASHES_H
 
 #include <vector>
 #include "mcrl2/modal_formula/traverser.h"
@@ -79,13 +79,15 @@ class state_formula_name_clash_checker: public state_formulas::state_formula_tra
     }
 };
 
+} // namespace detail
+
 /// \brief Throws a mcrl2::runtime_exception if the formula contains name clashes
 inline
 bool has_name_clashes(const state_formula& f)
 {
   try
   {
-    state_formula_name_clash_checker checker;
+    detail::state_formula_name_clash_checker checker;
     checker(f);
   }
   catch (mcrl2::runtime_error e)
@@ -95,10 +97,8 @@ bool has_name_clashes(const state_formula& f)
   return false;
 }
 
-} // namespace detail
-
 } // namespace state_formulas
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_CHECKER_H
+#endif // MCRL2_MODAL_FORMULA_HAS_NAME_CLASHES_H

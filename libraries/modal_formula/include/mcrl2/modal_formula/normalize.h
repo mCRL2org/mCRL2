@@ -6,15 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/modal_formula/state_formula_normalize.h
+/// \file mcrl2/modal_formula/normalize.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 #define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/detail/state_variable_negator.h"
-#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
+#include "mcrl2/modal_formula/negate_variables.h"
 #include "mcrl2/data/bool.h"
 
 namespace mcrl2
@@ -211,7 +210,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   {
     if (negated)
     {
-      return nu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
+      return nu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
     }
     else
     {
@@ -223,7 +222,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   {
     if (negated)
     {
-      return mu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
+      return mu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
     }
     else
     {

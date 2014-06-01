@@ -19,8 +19,8 @@
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/modal_formula/detail/state_formula_name_clash_checker.h"
-#include "mcrl2/modal_formula/detail/state_formula_name_clash_resolver.h"
+#include "mcrl2/modal_formula/has_name_clashes.h"
+#include "mcrl2/modal_formula/resolve_name_clashes.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
@@ -35,10 +35,10 @@ void run_monotonicity_test_case(const std::string& formula, const std::string& l
   specification spec = linearise(lps_spec);
   bool check_monotonicity = false;
   state_formula f = parse_state_formula(formula, spec, check_monotonicity);
-  if (state_formulas::detail::has_name_clashes(f))
+  if (state_formulas::has_name_clashes(f))
   {
     std::cerr << "Error: " << state_formulas::pp(f) << " has name clashes" << std::endl;
-    f = state_formulas::detail::resolve_name_clashes(f);
+    f = state_formulas::resolve_name_clashes(f);
     std::cerr << "resolved to " << state_formulas::pp(f) << std::endl;
   }
   BOOST_CHECK(is_monotonous(f) == expect_success);

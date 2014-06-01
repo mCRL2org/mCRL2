@@ -10,7 +10,7 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
-#include "mcrl2/modal_formula/detail/regfrmtrans.h"
+#include "mcrl2/modal_formula/translate_regular_formulas.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;

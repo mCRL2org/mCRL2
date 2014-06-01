@@ -37,7 +37,7 @@ namespace state_formulas
 inline
 state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula, const lps::specification& spec)
 {
-  using namespace state_formulas::detail::accessors;
+  // using namespace state_formulas::detail::accessors;
   namespace s = state_formulas;
 
   state_formulas::state_formula f = formula;
