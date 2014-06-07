@@ -224,22 +224,24 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     std::set<pbes_expression> result;
     data::classic_enumerator<> enumerator(super::R, m_data_spec);
     mcrl2::data::mutable_indexed_substitution<> local_sigma;
-    for (auto i = enumerator.begin(local_sigma, data::variable_list(di.begin(), di.end()), data::sort_bool::true_()); i != enumerator.end(); ++i)
+    const data::variable_list vl(di.begin(), di.end());
+    for (auto i = enumerator.begin(local_sigma, vl, data::sort_bool::true_()); i != enumerator.end(); ++i)
     {
       mCRL2log(log::debug1) << "sigma = " << sigma << "\n";
       data::mutable_indexed_substitution<> sigma_i;
-      data::data_expression_list::const_iterator k = i->begin();
+      /* data::data_expression_list::const_iterator k = i->begin();
       for (auto j = di.begin(); j != di.end(); ++j, ++k)
       {
         sigma_i[*j]=*k;
-      }
+      } */
+      i->add_assignments(vl,sigma_i,super::R);
       mCRL2log(log::debug1) << "*i    = " << sigma_i << "\n";
       data::data_expression_list d_copy = d;
       data::detail::rewrite_container(d_copy, super::R, sigma);
       data::data_expression_list e_copy = e;
       data::detail::rewrite_container(e_copy, super::R, sigma);
 
-      data::data_expression_list di_copy = atermpp::convert<data::data_expression_list>(di);
+      data::data_expression_list di_copy = atermpp::aterm_cast<data::data_expression_list>(vl);
       di_copy = data::replace_free_variables(di_copy, sigma_i);
 
       data::data_expression c = make_condition(di_copy, d_copy);
@@ -366,17 +368,12 @@ class pbesinst_finite_algorithm
 
         data::classic_enumerator<> enumerator(rewr,p.data());
         mcrl2::data::mutable_indexed_substitution<> local_sigma;
-        for (auto j = enumerator.begin(local_sigma, data::variable_list(finite_parameters.begin(), finite_parameters.end()),
-                    data::sort_bool::true_()); j != enumerator.end(); ++j)
+        const data::variable_list vl(finite_parameters.begin(), finite_parameters.end());
+        for (auto j = enumerator.begin(local_sigma, vl, data::sort_bool::true_()); j != enumerator.end(); ++j)
         {
-          // apply the substitution *j
-          // TODO: use a generic substitution routine (does that already exist in the data library?)
+          // apply the substitution contained in the enumerated element. 
           data::mutable_indexed_substitution<> sigma_j;
-          data::data_expression_list::const_iterator kk=j->begin();
-          for(auto jj=finite_parameters.begin(); jj!=finite_parameters.end(); ++jj, ++kk)
-          {
-            sigma_j[*jj]=*kk;
-          }
+          j->add_assignments(vl,sigma_j,rewr);
 
           std::vector<data::data_expression> finite;
           for (std::vector<data::variable>::iterator k = finite_parameters.begin(); k != finite_parameters.end(); ++k)

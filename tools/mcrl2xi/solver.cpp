@@ -96,18 +96,18 @@ void Solver::solve(QString specification, QString dataExpression)
 
         QString s('[');
 
-        mcrl2::data::data_expression_list::const_iterator j=i->begin();
+        // mcrl2::data::data_expression_list::const_iterator j=i->begin();
         mcrl2::data::mutable_indexed_substitution<> sigma_i;
-        for (std::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v, ++j)
+        i->add_assignments(m_vars,sigma_i);
+        for (std::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v)
         {
-          sigma_i[*v]=*j;
           if( v != m_vars.begin() )
           {
             s.append(", ");
           }
           s.append(mcrl2::data::pp(*v).c_str());
           s.append(" := ");
-          s.append(mcrl2::data::pp(*j).c_str());
+          s.append(mcrl2::data::pp(sigma_i(*v)).c_str());
         }
         s.append("] evaluates to ");
         s.append(mcrl2::data::pp(rewr(term,sigma_i)).c_str());

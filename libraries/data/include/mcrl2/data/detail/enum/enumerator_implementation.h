@@ -129,34 +129,32 @@ inline data_expression_list classic_enumerator<REWRITER, MutableSubstitution>::i
 
 template <class REWRITER, class MutableSubstitution>
 inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::push_on_fs_stack_and_split_or_without_rewriting(
-                                std::deque < detail::fs_expr<typename REWRITER::term_type> >& fs_stack,
-                                const variable_list& var_list,
-                                const variable_list& substituted_vars,
-                                const data_expression_list& substitution_terms,
-                                const typename REWRITER::term_type& condition,
+                                const enumerator_list_element_with_substitution<typename REWRITER::term_type>& partial_solution,
                                 const data_expression_list& negated_term_list,
-                                const bool negated) const
+                                const bool negated) 
 {
   /* If the negated_term_list equals t1,...,tn, store condition /\ !t1 /\ !t2 /\ ... /\ !tn
      on the fs_stack.  If the condition to be stored on the fs_stack has the shape phi \/ psi, then
      store phi and psi /\ !phi separately. This allows the equality eliminator to remove
      more equalities and therefore be more effective. */
+ const variable_list& var_list=partial_solution.variables();
+ const typename REWRITER::term_type& condition=partial_solution.expression();
   if (is_application(condition))
   {
     const application& ca = core::down_cast<application>(condition);
     if (ca.head() == sort_bool::not_())
     {
-      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[0],negate(negated_term_list),!negated);
+      push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(var_list,ca[0],partial_solution),negate(negated_term_list),!negated);
       return;
     }
     if ((negated && ca.head() == sort_bool::and_()) ||
              (!negated && ca.head() == sort_bool::or_()))
     {
       assert(condition.size()==3);
-      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[0],negated_term_list,negated);
+      push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(var_list,ca[0],partial_solution),negated_term_list,negated);
       data_expression_list temp=negated_term_list;
       temp.push_front(ca[0]);
-      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[1], temp,negated);
+      push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(var_list,ca[1],partial_solution),temp,negated);
       return;
     }
   }
@@ -165,37 +163,18 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::push_on
 
   if (new_expr!=sort_bool::false_())
   {
-#ifndef NDEBUG
-    // Check that substituted variables do not occur in the expression expr.
-    std::set <variable> s=data::find_free_variables(new_expr);
-    for(std::set <variable>::const_iterator it=s.begin(); it!=s.end(); ++it)
-    {
-      assert(std::find(substituted_vars.begin(),substituted_vars.end(),*it)==substituted_vars.end());
-    }
-#endif
-    fs_stack.push_back(detail::fs_expr<typename REWRITER::term_type>(var_list,
-                               substituted_vars,
-                               substitution_terms,
-                               new_expr));
+    fs_stack.emplace_back(partial_solution_type(var_list, new_expr, partial_solution));
   }
 }
 
 template <class REWRITER, class MutableSubstitution>
 inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::push_on_fs_stack_and_split_or(
-                                std::deque < detail::fs_expr<typename REWRITER::term_type> >& fs_stack,
-                                const variable_list& var_list,
-                                const variable_list& substituted_vars,
-                                const data_expression_list& substitution_terms,
-                                const typename REWRITER::term_type& condition,
+                                const enumerator_list_element_with_substitution<typename REWRITER::term_type>& partial_solution,
                                 const data_expression_list& negated_term_list,
-                                const bool negated) const
+                                const bool negated)
 {
   classic_enumerator<REWRITER, MutableSubstitution>::iterator::push_on_fs_stack_and_split_or_without_rewriting(
-                                fs_stack,
-                                var_list,
-                                substituted_vars,
-                                substitution_terms,
-                                m_enclosing_enumerator->m_evaluator(condition,*enum_sigma),
+                                partial_solution,
                                 negated_term_list,
                                 negated);
 }
@@ -262,221 +241,74 @@ inline bool classic_enumerator<REWRITER, MutableSubstitution>::iterator::find_eq
 }
 
 template <class REWRITER, class MutableSubstitution>
-inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::EliminateVars(detail::fs_expr<typename REWRITER::term_type>& e)
+inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::EliminateVars(partial_solution_type& e)
 {
-  variable_list vars = e.vars();
-  variable_list substituted_vars = e.substituted_vars();
-  data_expression_list vals = e.vals();
-  data_expression expr = e.expr();
-
   variable var;
   data_expression val;
 
-  while (!vars.empty() && find_equality(expr,vars,var,val))
+  while (!e.variables().empty() && find_equality(e.expression(),e.variables(),var,val))
   {
-    vars = remove_one_element(vars, var);
-    substituted_vars.push_front(var);
-    vals.push_front(val);
-
     // Use a rewrite here to remove occurrences of subexpressions the form t==t caused by
     // replacing in x==t the variable x by t.
     const data_expression old_val=(*enum_sigma)(var);
     (*enum_sigma)[var]=val;
-    expr = m_enclosing_enumerator->m_evaluator(expr,*enum_sigma);
+    e=partial_solution_type(
+                  remove_one_element(e.variables(),var),
+                  m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma),
+                  e,var,val);
     (*enum_sigma)[var]=old_val;
   }
-
-#ifndef NDEBUG
-  // Check that substituted variables do not occur in the expression expr.
-
-  std::set <variable> s=data::find_free_variables(expr);
-  for(std::set <variable>::const_iterator it=s.begin(); it!=s.end(); ++it)
-  {
-    assert(std::find(substituted_vars.begin(),substituted_vars.end(),*it)==substituted_vars.end());
-  }
-
-#endif
-  e=detail::fs_expr<typename REWRITER::term_type>(vars,substituted_vars,vals,expr);
-}
-
-static data_expression build_solution_aux(
-                 const data_expression& t,
-                 const variable_list& substituted_vars,
-                 const data_expression_list& exprs);
-
-static data_expression build_solution_single(
-                 const variable& t,
-                 variable_list substituted_vars,
-                 data_expression_list exprs)
-{
-  assert(substituted_vars.size()==exprs.size());
-  while (!substituted_vars.empty() && t!=substituted_vars.front())
-  {
-    substituted_vars.pop_front();
-    exprs.pop_front();
-  }
-
-  if (substituted_vars.empty())
-  {
-    return t;
-  }
-  else
-  {
-    return build_solution_aux(exprs.front(),substituted_vars.tail(),exprs.tail());
-  }
-}
-
-class apply_build_solution_aux
-{
-  protected:
-    const variable_list& m_substituted_vars;
-    const data_expression_list& m_expr;
-
-  public:
-    apply_build_solution_aux(const variable_list& substituted_vars, const data_expression_list& expr):
-       m_substituted_vars(substituted_vars), m_expr(expr)
-    {}
-
-    data_expression operator()(const data_expression& t) const
-    {
-      return build_solution_aux(t,m_substituted_vars,m_expr);
-    }
-};
-
-static data_expression build_solution_aux(
-                 const data_expression& t,
-                 const variable_list& substituted_vars,
-                 const data_expression_list& exprs)
-{
-  assert(!is_where_clause(t)); // This is a non expected case as t is a normalform.
-  if (is_variable(t))
-  {
-    return build_solution_single(atermpp::aterm_cast<variable>(t),substituted_vars,exprs);
-  }
-  else if (is_abstraction(t))
-  {
-    const abstraction& t1=core::down_cast<abstraction>(t);
-    const binder_type& binder=t1.binding_operator();
-    const variable_list& bound_variables=t1.variables();
-    const data_expression& body=build_solution_aux(t1.body(),substituted_vars,exprs);
-    return abstraction(binder,bound_variables,body);
-  }
-  else if (is_function_symbol(t))
-  {
-    return t;
-  }
-
-  assert(is_application(t));
-  {
-    // t has the shape application(u1,...,un)
-    const application t_appl(t);
-    const data_expression& head = t_appl.head();
-
-    if (is_function_symbol(head))
-    {
-      return application(head,t_appl.begin(),t_appl.end(),apply_build_solution_aux(substituted_vars,exprs));
-    }
-
-    /* The head is more complex, rewrite it first; */
-
-    data_expression head1 = build_solution_aux(head,substituted_vars,exprs);
-    return application(head1,t_appl.begin(),t_appl.end(),apply_build_solution_aux(substituted_vars,exprs));
-  }
 }
 
 template <class REWRITER, class MutableSubstitution>
-inline data_expression_list classic_enumerator<REWRITER, MutableSubstitution>::iterator::build_solution2(
-                 const variable_list& vars,
-                 const variable_list& substituted_vars,
-                 const data_expression_list& exprs) const
+inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::find_next_solution(const bool pop_front_of_stack)
 {
-  if (vars.empty())
+  if (pop_front_of_stack)
   {
-    return data_expression_list();
-  }
-  else
-  {
-    data_expression_list result=build_solution2(vars.tail(),substituted_vars,exprs);
-    result.push_front(m_enclosing_enumerator->m_evaluator(build_solution_single(vars.front(),substituted_vars,exprs),*enum_sigma));
-    return result;
-  }
-}
-
-template <class REWRITER, class MutableSubstitution>
-inline data_expression_list classic_enumerator<REWRITER, MutableSubstitution>::iterator::build_solution(
-                 const variable_list& vars,
-                 const variable_list& substituted_vars,
-                 const data_expression_list& exprs) const
-{
-  return build_solution2(vars, atermpp::reverse(substituted_vars), atermpp::reverse(exprs));
-}
-
-
-template <class REWRITER, class MutableSubstitution>
-inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::increment()
-{
-  while (!fs_stack.empty())
-  {
-    detail::fs_expr<typename REWRITER::term_type> e=fs_stack.front();
-    EliminateVars(e);
     fs_stack.pop_front();
-    if (e.vars().empty() || e.expr()==sort_bool::false_())
+  }
+  for( ; !fs_stack.empty() ; fs_stack.pop_front())
+  {
+    partial_solution_type& e=fs_stack.front();  // e is intensionally a reference into fs_stack.
+    EliminateVars(e);
+    if (e.variables().empty() || e.expression()==sort_bool::false_())
     {
-      if (e.expr()!=sort_bool::false_())
-      { // A solution is found. Construct and return it.
-        m_assignments = build_solution(enum_vars,e.substituted_vars(), e.vals());
-        if (m_not_equal_to_false)
+      if (e.expression()!=sort_bool::false_())
+      { 
+        // A solution is found. 
+        if (!m_not_equal_to_false)
         {
-          m_resulting_condition = e.expr();
+          e=partial_solution_type(e.variables(),m_enclosing_enumerator->m_evaluator(sort_bool::not_(e.expression()),*enum_sigma),e);
         }
-        else
-        {
-          m_resulting_condition = m_enclosing_enumerator->m_evaluator(sort_bool::not_(e.expr()),*enum_sigma);
-        }
-
-        m_exception_occurred=false;
-        m_enumerator_iterator_valid=true;
         return;
       }
     }
     else
     {
-      assert(!e.vars().empty());
-      assert(e.expr()!=sort_bool::false_());
-      const variable& var = e.vars().front();
+      assert(!e.variables().empty());
+      assert(e.expression()!=sort_bool::false_());
+      const variable& var = e.variables().front();
       const sort_expression& sort = var.sort();
-      const variable_list& uvars = e.vars().tail();
+      const variable_list& uvars = e.variables().tail();
 
 
       if (is_function_sort(sort))
       {
-        if (!m_enclosing_enumerator->m_throw_exceptions)
+        e.invalidate();
+        if (m_enclosing_enumerator->m_throw_exceptions)
         {
-          m_exception_occurred=true;
-          m_enumerator_iterator_valid=false;
-          return;
-        }
-        else
-        {
-          fs_stack.clear();
           throw mcrl2::runtime_error("cannot enumerate elements of the function sort " + data::pp(sort));
         }
-
+        return;
       }
       else if (sort_bag::is_bag(sort))
       {
-        if (!m_enclosing_enumerator->m_throw_exceptions)
+        e.invalidate();
+        if (m_enclosing_enumerator->m_throw_exceptions)
         {
-          m_exception_occurred=true;
-          m_enumerator_iterator_valid=false;
-          return;
-        }
-        else
-        {
-          fs_stack.clear();
           throw mcrl2::runtime_error("cannot enumerate elements of a bag of sort " + data::pp(sort));
         }
-
+        return;
       }
       else if (sort_set::is_set(sort))
       {
@@ -490,17 +322,12 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::increme
         }
         else */
         {
-          if (!m_enclosing_enumerator->m_throw_exceptions)
+          e.invalidate();
+          if (m_enclosing_enumerator->m_throw_exceptions)
           {
-            m_exception_occurred=true;
-            m_enumerator_iterator_valid=false;
-            return;
-          }
-          else
-          {
-            fs_stack.clear();
             throw mcrl2::runtime_error("cannot enumerate all elements of a set of sort " + data::pp(sort));
           }
+          return;
         }
       }
       else
@@ -510,17 +337,12 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::increme
 
         if ( it == constructors_for_sort.end() )
         {
-          if (!m_enclosing_enumerator->m_throw_exceptions)
+          e.invalidate();
+          if (m_enclosing_enumerator->m_throw_exceptions)
           {
-            m_exception_occurred=true;
-            m_enumerator_iterator_valid=false;
-            return;
-          }
-          else
-          {
-            fs_stack.clear();
             throw mcrl2::runtime_error("cannot enumerate elements of sort " + data::pp(sort) + " as it does not have constructor functions");
           }
+          return;
         }
 
         assert(!it->empty());
@@ -546,13 +368,11 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::increme
                 {
                   mCRL2log(log::debug)   << "Enumerating expression: "<< enum_expr << std::endl;
                   mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_enclosing_enumerator->m_max_internal_variables << " are used.\n";
-                  m_exception_occurred=true;
-                  m_enumerator_iterator_valid=false;
+                  e.invalidate();
                   return;
                 }
                 else
                 {
-                  fs_stack.clear();
                   std::stringstream exception_message;
                   exception_message << "needed more than " << m_enclosing_enumerator->m_max_internal_variables << " variables to find all valuations of ";
                   for (variable_list::const_iterator k=enum_vars.begin(); k!=enum_vars.end(); ++k)
@@ -593,18 +413,9 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::increme
 
             const data_expression old_substituted_value=(*enum_sigma)(var);
             (*enum_sigma)[var]=term_rf;
-            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expr(),*enum_sigma);
+            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
             (*enum_sigma)[var]=old_substituted_value;
-            variable_list templist1=e.substituted_vars();
-            templist1.push_front(var);
-            data_expression_list templist2=e.vals();
-            templist2.push_front(term_rf);
-            push_on_fs_stack_and_split_or_without_rewriting(
-                                    fs_stack,
-                                    uvars+var_list,
-                                    templist1,
-                                    templist2,
-                                    rewritten_expr,
+            push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(uvars+var_list,rewritten_expr,e,var,term_rf),
                                     data_expression_list(),
                                     false);
           }
@@ -621,19 +432,10 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::increme
 
             const data_expression old_substituted_value=(*enum_sigma)(var);
             (*enum_sigma)[var]=term_rf;
-            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expr(),*enum_sigma);
+            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
 
             (*enum_sigma)[var]=old_substituted_value;
-            variable_list templist1=e.substituted_vars();
-            templist1.push_front(var);
-            data_expression_list templist2=e.vals();
-            templist2.push_front(term_rf);
-            push_on_fs_stack_and_split_or_without_rewriting(
-                                    fs_stack,
-                                    uvars,
-                                    templist1,
-                                    templist2,
-                                    rewritten_expr,
+            push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(uvars,rewritten_expr,e,var,term_rf),
                                     data_expression_list(),
                                     false);
           }
@@ -642,8 +444,6 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::increme
     }
   }
   /* There are no more solutions */
-  m_exception_occurred=false;
-  m_enumerator_iterator_valid=false;
   return;
 }
 

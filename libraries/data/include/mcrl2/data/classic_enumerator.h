@@ -1,4 +1,4 @@
-// Author(s): Jeroen van der Wulp, Jan Friso Groote
+// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -12,11 +12,16 @@
 #ifndef _MCRL2_DATA_CLASSIC_ENUMERATOR__HPP_
 #define _MCRL2_DATA_CLASSIC_ENUMERATOR__HPP_
 
+// Constant used for printing progress messages
+const size_t MAX_VARS_INIT=1000;  
+const size_t MAX_VARS_FACTOR=5;
+
 #include "boost/iterator/iterator_facade.hpp"
 
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/enum/standard.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/detail/enumerator_variable_limit.h"
 
 namespace mcrl2
 {
@@ -44,9 +49,12 @@ class classic_enumerator
   public:
     /// \brief The type of objects that represent substitutions
     typedef MutableIndexedSubstitution substitution_type;
+    
     /// \brief The type of objects that represent expressions
     typedef typename REWRITER::term_type expression_type;
-    typedef expression_type TERM;
+    
+    /// \brief The type used to store partial solutions.
+    typedef enumerator_list_element_with_substitution<expression_type> partial_solution_type;
 
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
@@ -54,23 +62,19 @@ class classic_enumerator
     class iterator :
         public boost::iterator_facade<
                  iterator,
-                 const data_expression_list,
+                 const partial_solution_type&,
                  boost::forward_traversal_tag >
     {
       protected:
 
         typedef classic_enumerator < REWRITER > enclosing_classic_enumerator;
         enclosing_classic_enumerator *m_enclosing_enumerator;
-        data_expression_list m_assignments;
-        bool m_enumerator_iterator_valid;
-        TERM m_resulting_condition;
-        bool m_exception_occurred;
         bool m_not_equal_to_false;
-        variable_list enum_vars;                    // The variables over which a solution is searched.
-        TERM enum_expr;                             // Condition to be satisfied.
+        variable_list enum_vars;                    // The variables over which a solution is searched, used for debug en exception messages.
+        expression_type enum_expr;                  // Initial condition to be satisfied, used for debug and exception messages.
         substitution_type* enum_sigma;
 
-        std::deque < detail::fs_expr<TERM>> fs_stack;
+        std::deque < partial_solution_type > fs_stack;
 
         size_t used_vars;
         size_t max_vars;
@@ -93,100 +97,77 @@ class classic_enumerator
         //  \details Use it via begin() of the classic enumerator class. See the
         //           explanation at this function for the meaning of the parameters.
         iterator(enclosing_classic_enumerator *e,
-                          const variable_list& variables,
-                          const TERM& condition,
+                          const partial_solution_type& partial_solution,
                           substitution_type& sigma,
                           const bool not_equal_to_false=true):
           m_enclosing_enumerator(e),
           m_not_equal_to_false(not_equal_to_false),
+          enum_vars(partial_solution.variables()),
+          enum_expr(partial_solution.expression()),
           enum_sigma(&sigma)
         {
-          m_resulting_condition= (e->m_evaluator)(condition,sigma);
-          if ((m_not_equal_to_false && m_resulting_condition==sort_bool::false_()) ||
-              (!m_not_equal_to_false && m_resulting_condition==sort_bool::true_()))
+// std::cerr << "START ITERATOR " << enum_vars << " : " << enum_expr << "\n";
+          const data_expression condition= (e->m_evaluator)(partial_solution.expression(),sigma);
+          if ((m_not_equal_to_false && condition==sort_bool::false_()) ||
+              (!m_not_equal_to_false && condition==sort_bool::true_()))
           {
             // no solutions are found.
-            m_exception_occurred=false;
-            m_enumerator_iterator_valid=false;
           }
-          else if (variables.empty())
+          else if (partial_solution.variables().empty())
           {
             // in this case we generate exactly one solution.
-            m_enumerator_iterator_valid=true;
-            m_exception_occurred=false;
+            fs_stack.emplace_back(partial_solution.variables(),condition);
           }
           else
           {
-            // we must calculate the solutions.
-            enum_vars=variables;
-            enum_expr=condition;
             used_vars=0;
             max_vars=MAX_VARS_INIT;
-            push_on_fs_stack_and_split_or(fs_stack,
-                                enum_vars,
-                                variable_list(),
-                                data_expression_list(),
-                                enum_expr,
-                                data_expression_list(),
-                                !m_not_equal_to_false);
-            increment();
+            push_on_fs_stack_and_split_or_without_rewriting(
+                                          partial_solution_type(partial_solution.variables(),condition),
+                                          data_expression_list(),
+                                          !m_not_equal_to_false);
+            find_next_solution(false);
           }
         }
 
         /// \brief Constructor representing the end of an iterator.
         //  \details It is advisable to avoid its use, and use end instead.
         iterator():
-           m_enumerator_iterator_valid(false),
            enum_sigma(&default_sigma())
         {
-        }
-
-        /// \brief Provides the last found solution, but only if a valid solution was found.
-        ///        This is the initial condition to which the solution of the variables
-        ///        has been applied, and which is rewritten by the rewriter.
-        const TERM& resulting_condition() const
-        {
-          assert(m_enumerator_iterator_valid);
-          return m_resulting_condition;
-        }
-
-        /// \brief Indicate whether a problem occurred when enumerating solutions.
-        //  \details This indicator only works if the parameter throw_exceptions was not set.
-        //           Otherwise an exception is thrown. If throw_exceptions was false, and
-        //           this function returns false, then the iterator is equal to end(), but
-        //           in this case not all possible solutions have been generated.
-        bool exception_occurred() const
-        {
-          assert(!(m_exception_occurred&&m_enumerator_iterator_valid));
-          return m_exception_occurred;
         }
 
       protected:
 
         friend class boost::iterator_core_access;
 
-        void increment();
+        void increment()
+        {
+          find_next_solution(true);
+        } 
 
         bool equal(iterator const& other) const
         {
           /* Only check whether end of enumerator has been reached */
-          return m_enumerator_iterator_valid==other.m_enumerator_iterator_valid;
+          return fs_stack.size()==other.fs_stack.size();
         }
 
-        const data_expression_list& dereference() const
+        const partial_solution_type& dereference() const
         {
-          assert(m_enumerator_iterator_valid);
-          return m_assignments;
+          assert(fs_stack.size()>0);
+          assert(fs_stack.front().is_valid());
+// std::cerr << "Return value " << fs_stack.front().expression() << "\n";
+          return fs_stack.front();
         }
 
-        void reset();
+        void find_next_solution(const bool pop_front_of_stack);
 
         bool find_equality(const data_expression& T,
                            const mcrl2::data::variable_list& vars,
                            mcrl2::data::variable& v,
                            data_expression& e);
 
-        void EliminateVars(detail::fs_expr<TERM>& e);
+        void EliminateVars(partial_solution_type& e);
 
         data_expression_list build_solution(
                      const variable_list& vars,
@@ -197,26 +178,18 @@ class classic_enumerator
                      const variable_list& vars,
                      const variable_list& substituted_vars,
                      const data_expression_list& exprs) const;
-        TERM add_negations(
-                     const TERM& condition,
+        expression_type add_negations(
+                     const expression_type& condition,
                      const data_expression_list& negation_term_list,
                      const bool negated) const;
         void push_on_fs_stack_and_split_or(
-                     std::deque < detail::fs_expr<TERM> >& fs_stack,
-                     const variable_list& var_list,
-                     const variable_list& substituted_vars,
-                     const data_expression_list& substitution_terms,
-                     const TERM& condition,
+                     const enumerator_list_element_with_substitution<typename REWRITER::term_type>& partial_solution,
                      const data_expression_list& negated_term_list,
-                     const bool negated) const;
+                     const bool negated);
         void push_on_fs_stack_and_split_or_without_rewriting(
-                     std::deque < detail::fs_expr<TERM> >& fs_stack,
-                     const variable_list& var_list,
-                     const variable_list& substituted_vars,
-                     const data_expression_list& substitution_terms,
-                     const TERM& condition,
+                     const enumerator_list_element_with_substitution<typename REWRITER::term_type>& partial_solution,
                      const data_expression_list& negated_term_list,
-                     const bool negated) const;
+                     const bool negated);
         data_expression_list negate(
                      const data_expression_list& l) const;
 
@@ -240,10 +213,10 @@ class classic_enumerator
     ///            new solutions stops with or without an exception as desired.
     iterator begin(substitution_type& sigma,
                    const variable_list& variables,
-                   const TERM& condition,
+                   const expression_type& condition,
                    const bool not_equal_to_false=true)
     {
-      return iterator(this, variables, condition,sigma,not_equal_to_false);
+      return iterator(this, partial_solution_type(variables, condition),sigma,not_equal_to_false);
     }
 
 

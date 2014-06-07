@@ -17,8 +17,6 @@
 #include <string>
 #include <cctype>
 
-#include "boost/utility.hpp"
-
 #include <cstdio>
 #include <cerrno>
 #include <cstdlib>
@@ -306,17 +304,18 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
                       i=enumerator.begin(sigma, variable_list(vars.begin(), vars.end()), term, 10000); // Stop when more than 10000 internal variables are required
                       i != enumerator.end() ; ++i)
             {
-              cout << "[";
-              data::data_expression_list::const_iterator j=i->begin();
               data::mutable_indexed_substitution<> sigma_i;
-              for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v, ++j)
+              i->add_assignments(vars,sigma_i,rewr);
+
+              cout << "[";
+              for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
               {
-                cout << data::pp(*v) << " := " << data::pp(*j);
-                sigma_i[*v]=*j;
-                if (boost::next(v)!=vars.end())
+                if (v!=vars.begin())
                 {
                   cout << ", ";
                 }
+             
+                cout << data::pp(*v) << " := " << data::pp(sigma(*v));
               }
               cout << "] evaluates to "<< data::pp(rewr(term,sigma_i)) << "\n";
             }

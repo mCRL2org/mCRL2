@@ -74,11 +74,11 @@ class enumerator_list_element
       phi = data::undefined_data_expression();
     }
 
-    /// \brief Returns true if the element has been invalidated. This is used to signal that
+    /// \brief Returns true if the element is valid. If it becomes false, this is used to signal that
     /// the enumeration has been aborted.
-    bool is_invalid() const
+    bool is_valid() const
     {
-      return phi == data::undefined_data_expression();
+      return phi != data::undefined_data_expression();
     }
 };
 
@@ -100,6 +100,18 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     /// \brief Constructs the element (v, phi, e.sigma[v := x])
     enumerator_list_element_with_substitution(const data::variable_list& v,
                             const Expression& phi,
+                            const enumerator_list_element_with_substitution<Expression>& elem
+                           )
+      : enumerator_list_element<Expression>(v, phi),
+        m_variables(elem.m_variables),
+        m_expressions(elem.m_expressions)
+    {
+    }
+
+    /// \brief Constructs the element (v, phi, e.sigma[v := x])
+    enumerator_list_element_with_substitution(
+                            const data::variable_list& v,
+                            const Expression& phi,
                             const enumerator_list_element_with_substitution<Expression>& elem,
                             const data::variable& d,
                             const data::data_expression& e
@@ -113,14 +125,14 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     }
 
     /// \brief Adds the assignments that corresponds with this element to the substitution result.
-    template <typename MutableSubstitution>
-    void add_assignments(const data::variable_list& v, MutableSubstitution& result) const
+    template <typename VariableList, typename MutableSubstitution, typename Rewriter>
+    void add_assignments(const VariableList& v, MutableSubstitution& result, Rewriter rewriter) const
     {
       data::enumerator_substitution sigma(m_variables, m_expressions);
       sigma.revert();
       for (auto i = v.begin(); i != v.end(); ++i)
       {
-        result[*i] = sigma(*i);
+        result[*i] = rewriter(sigma(*i));
       }
     }
 };

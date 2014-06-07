@@ -113,11 +113,12 @@ class suminst_algorithm: public lps::detail::lps_algorithm
                   i != m_enumerator.end(); ++i)
           {
             mutable_indexed_substitution<> sigma;
-            data_expression_list::const_iterator k=i->begin();
+            i->add_assignments(vl,sigma,m_rewriter);
+            /* data_expression_list::const_iterator k=i->begin();
             for(auto j=vl.begin(); j!=vl.end(); ++j, ++k)
             {
               sigma[*j]=*k;
-            }
+            } */
             mCRL2log(log::debug, "suminst") << "substitutions: " << sigma << std::endl;
 
             SummandType t(s);

@@ -109,7 +109,7 @@ void test_enumerator_with_substitutions()
   {
     solutions.push_back(i->expression());
     data::mutable_map_substitution<> sigma;
-    i->add_assignments(v, sigma);
+    i->add_assignments(v, sigma, datar);
     std::clog << "  solutions " << i->expression() << " substitution = " << sigma << std::endl;
     BOOST_CHECK(R(phi, sigma) == i->expression());
   }

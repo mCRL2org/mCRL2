@@ -65,6 +65,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   /* Test 1d*/
   data_expression t1dd1 = parse_data_expression("forall x: Bool. x == true && x==false");
   data_expression t1dd2 = parse_data_expression("false");
+std::cerr << r(t1dd1) << "  --  " << r(t1dd2) << "\n";
   BOOST_CHECK(r(t1dd1) == r(t1dd2));
 
   /* Test 1e*/

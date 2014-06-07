@@ -228,10 +228,12 @@ data::data_expression_vector generate_values(const data::data_specification& dat
   data::variable_vector v;
   v.push_back(x);
   mutable_indexed_substitution<> sigma;
-  for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(sigma, variable_list(v.begin(),v.end()), data::sort_bool::true_(),
+  variable_list vl(v.begin(),v.end());
+  for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(sigma, vl, data::sort_bool::true_(),
                          max_internal_variables); i != enumerator.end() ; ++i)
   {
-    result.push_back(i->front());
+    i->add_assignments(vl,sigma,rewr);
+    result.push_back(sigma(vl.front()));
     if (result.size() >= max_size)
     {
       break;

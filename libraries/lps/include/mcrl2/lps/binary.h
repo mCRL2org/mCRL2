@@ -153,13 +153,16 @@ class binary_algorithm: public lps::detail::lps_algorithm
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
           mcrl2::data::mutable_indexed_substitution<> local_sigma;
+          const data::variable_list vl=atermpp::make_list<data::variable>(par);
+
           for (enumerator_type::iterator j=enumerator.begin(
                            local_sigma,
-                           atermpp::make_list<data::variable>(par),
+                           vl,
                            data::sort_bool::true_());
                 j != enumerator.end() ; ++j)
           {
-            enumerated_elements.push_back(j->front());
+            j->add_assignments(vl,local_sigma,m_rewriter);
+            enumerated_elements.push_back(local_sigma(par));
           }
 
           m_enumerated_elements[par] = enumerated_elements;

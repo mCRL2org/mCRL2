@@ -443,21 +443,21 @@ void next_state_generator::iterator::increment()
   {
     valuation = *m_enumeration_cache_iterator;
     m_enumeration_cache_iterator++;
+    assert(valuation.size() == m_summand->variables.size());
+    data_expression_list::iterator v = valuation.begin();
+    for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)
+    {
+      (*m_substitution)[*i] = *v;
+    }
   }
   else
   {
-    valuation = *m_enumeration_iterator;
+    m_enumeration_iterator->add_assignments(m_summand->variables,*m_substitution,m_generator->m_rewriter); 
 
     // If we failed to exactly rewrite the condition to true, nextstate generation fails.
-    if(m_enumeration_iterator.resulting_condition()!=sort_bool::true_())
+    if (m_enumeration_iterator->expression()!=sort_bool::true_())
     {
-      assert(m_enumeration_iterator.resulting_condition()!=sort_bool::false_());
-      // Integrate the valuation in the substitution, to generate a more meaningful error message.
-      data_expression_list::iterator v = valuation.begin();
-      for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)
-      {
-        (*m_substitution)[*i] = *v;
-      }
+      assert(m_enumeration_iterator->expression()!=sort_bool::false_());
 
       // Reduce condition as much as possible, and give a hint of the original condition in the error message.
       data_expression reduced_condition(m_generator->m_rewriter(m_summand->condition, *m_substitution));
@@ -470,6 +470,11 @@ void next_state_generator::iterator::increment()
     }
 
     m_enumeration_iterator++;
+    if (m_caching)
+    {
+      valuation=data_expression_list(m_summand->variables.begin(),m_summand->variables.end(),*m_substitution);
+      assert(valuation.size() == m_summand->variables.size());
+    }
   }
 
   if (m_caching)
@@ -477,14 +482,7 @@ void next_state_generator::iterator::increment()
     m_enumeration_log.push_back(valuation);
   }
 
-  assert(valuation.size() == m_summand->variables.size());
-  data_expression_list::iterator v = valuation.begin();
-  for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)
-  {
-    (*m_substitution)[*i] = *v;
-  }
-
-  const data_expression_vector &state_args=m_summand->result_state;
+  const data_expression_vector& state_args=m_summand->result_state;
   m_transition.m_state.clear();
   for(data_expression_vector::const_iterator i=state_args.begin(); i!=state_args.end(); ++i)
   {

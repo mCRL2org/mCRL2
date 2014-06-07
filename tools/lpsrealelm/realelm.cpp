@@ -409,7 +409,8 @@ static void move_real_parameters_out_of_actions(specification &s,
        mutable_indexed_substitution<> empty_sigma;
        for (classic_enumerator<>::iterator tl = enumerator.begin(empty_sigma,replaced_variables,sort_bool::true_()); tl!= enumerator.end(); ++tl)
        { 
-         mutable_map_substitution<> sigma(replaced_variables,*tl);
+         mutable_map_substitution<> sigma;
+         tl->add_assignments(replaced_variables,sigma);
 
          process::action_vector new_replaced_actions;
          for(process::action_vector::const_iterator j=new_actions.begin(); j!=new_actions.end(); ++j)

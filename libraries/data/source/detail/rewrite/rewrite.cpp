@@ -369,27 +369,28 @@ data_expression Rewriter::existential_quantifier_enumeration(
   enumerator_type::iterator sol=enumerator.begin(sigma, vl_new_l, t3, true);
   for( ; loop_upperbound>0 && 
          partial_result!=sort_bool::true_() &&
-         sol!=enumerator.end(); 
+         sol!=enumerator.end() && sol->is_valid(); 
          ++sol)
   {
     if (partial_result==sort_bool::false_())
     {
-      partial_result=sol.resulting_condition();
+      partial_result=sol->expression();
     }
     else if (partial_result!=sort_bool::true_())
     {
-      partial_result=application(sort_bool::or_(), partial_result,sol.resulting_condition());
+      partial_result=application(sort_bool::or_(), partial_result,sol->expression());
     }
     loop_upperbound--;
   }
 
-  if (!sol.exception_occurred() && (loop_upperbound>0 || partial_result==sort_bool::true_()))
+  if ((sol==enumerator.end() && loop_upperbound>0) || partial_result==sort_bool::true_())
   {
     return partial_result;
   }
 
   // One can consider to replace the variables by their original, in order to not show
   // internally generated variables in the output.
+  assert(!sol->is_valid()||loop_upperbound==0);
   return abstraction(exists_binder(),vl_new_l,rewrite(t3,sigma));
 }
 
@@ -468,27 +469,27 @@ data_expression Rewriter::universal_quantifier_enumeration(
   enumerator_type::iterator sol=enumerator.begin(sigma, vl_new_l, t3, false);
   for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
-         sol!=enumerator.end();
+         sol!=enumerator.end() && sol->is_valid();
          ++sol)
   {
     if (partial_result==sort_bool::true_())
     {
-      partial_result=sol.resulting_condition();
+      partial_result=sol->expression();
     }
     else if (partial_result!=sort_bool::false_())
     {
-      partial_result=application(sort_bool::and_(), partial_result, sol.resulting_condition());
+      partial_result=application(sort_bool::and_(), partial_result, sol->expression());
     }
     loop_upperbound--;
   }
 
-  if (!sol.exception_occurred() && (loop_upperbound>0 || partial_result==sort_bool::false_()))
+  if ((sol==enumerator.end() && loop_upperbound>0) || partial_result==sort_bool::false_())
   {
     return partial_result;
   }
-
   // One can consider to replace the variables by their original, in order to not show
   // internally generated variables in the output.
+  assert(!sol->is_valid()||loop_upperbound==0);
   return abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
 }
 
