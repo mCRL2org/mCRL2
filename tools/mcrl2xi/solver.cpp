@@ -98,7 +98,7 @@ void Solver::solve(QString specification, QString dataExpression)
 
         // mcrl2::data::data_expression_list::const_iterator j=i->begin();
         mcrl2::data::mutable_indexed_substitution<> sigma_i;
-        i->add_assignments(m_vars,sigma_i);
+        i->add_assignments(m_vars,sigma_i,rewr);
         for (std::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v)
         {
           if( v != m_vars.begin() )
