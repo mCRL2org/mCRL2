@@ -37,8 +37,8 @@ class test_equal
 
 }
 
-template <class REWRITER, class MutableSubstitution>
-inline typename REWRITER::term_type classic_enumerator<REWRITER, MutableSubstitution>::iterator::add_negations(
+template <class REWRITER, class MutableSubstitution, class EnumeratorListElement>
+inline typename REWRITER::term_type classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::add_negations(
                                 const typename REWRITER::term_type& condition,
                                 const data_expression_list& negation_term_list,
                                 const bool negated) const
@@ -115,8 +115,8 @@ inline typename REWRITER::term_type classic_enumerator<REWRITER, MutableSubstitu
   }
 }
 
-template <class REWRITER, class MutableSubstitution>
-inline data_expression_list classic_enumerator<REWRITER, MutableSubstitution>::iterator::negate(const data_expression_list& l) const
+template <class REWRITER, class MutableSubstitution, class EnumeratorListElement>
+inline data_expression_list classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::negate(const data_expression_list& l) const
 {
   if (l.empty())
   {
@@ -127,9 +127,9 @@ inline data_expression_list classic_enumerator<REWRITER, MutableSubstitution>::i
   return result;
 }
 
-template <class REWRITER, class MutableSubstitution>
-inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::push_on_fs_stack_and_split_or_without_rewriting(
-                                const enumerator_list_element_with_substitution<typename REWRITER::term_type>& partial_solution,
+template <class REWRITER, class MutableSubstitution, class EnumeratorListElement>
+inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::push_on_fs_stack_and_split_or_without_rewriting(
+                                const EnumeratorListElement& partial_solution,
                                 const data_expression_list& negated_term_list,
                                 const bool negated) 
 {
@@ -144,17 +144,17 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::push_on
     const application& ca = core::down_cast<application>(condition);
     if (ca.head() == sort_bool::not_())
     {
-      push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(var_list,ca[0],partial_solution),negate(negated_term_list),!negated);
+      push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(var_list,ca[0],partial_solution),negate(negated_term_list),!negated);
       return;
     }
     if ((negated && ca.head() == sort_bool::and_()) ||
              (!negated && ca.head() == sort_bool::or_()))
     {
       assert(condition.size()==3);
-      push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(var_list,ca[0],partial_solution),negated_term_list,negated);
+      push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(var_list,ca[0],partial_solution),negated_term_list,negated);
       data_expression_list temp=negated_term_list;
       temp.push_front(ca[0]);
-      push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(var_list,ca[1],partial_solution),temp,negated);
+      push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(var_list,ca[1],partial_solution),temp,negated);
       return;
     }
   }
@@ -163,24 +163,24 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::push_on
 
   if (new_expr!=sort_bool::false_())
   {
-    fs_stack.emplace_back(partial_solution_type(var_list, new_expr, partial_solution));
+    fs_stack.emplace_back(EnumeratorListElement(var_list, new_expr, partial_solution));
   }
 }
 
-template <class REWRITER, class MutableSubstitution>
-inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::push_on_fs_stack_and_split_or(
-                                const enumerator_list_element_with_substitution<typename REWRITER::term_type>& partial_solution,
+template <class REWRITER, class MutableSubstitution, class EnumeratorListElement>
+inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::push_on_fs_stack_and_split_or(
+                                const EnumeratorListElement& partial_solution,
                                 const data_expression_list& negated_term_list,
                                 const bool negated)
 {
-  classic_enumerator<REWRITER, MutableSubstitution>::iterator::push_on_fs_stack_and_split_or_without_rewriting(
+  classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::push_on_fs_stack_and_split_or_without_rewriting(
                                 partial_solution,
                                 negated_term_list,
                                 negated);
 }
 
-template <class REWRITER, class MutableSubstitution>
-inline bool classic_enumerator<REWRITER, MutableSubstitution>::iterator::find_equality(
+template <class REWRITER, class MutableSubstitution, class EnumeratorListElement>
+inline bool classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::find_equality(
                         const data_expression& t,
                         const mcrl2::data::variable_list& vars,
                         mcrl2::data::variable& v,
@@ -240,8 +240,8 @@ inline bool classic_enumerator<REWRITER, MutableSubstitution>::iterator::find_eq
   return false;
 }
 
-template <class REWRITER, class MutableSubstitution>
-inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::EliminateVars(partial_solution_type& e)
+template <class REWRITER, class MutableSubstitution, class EnumeratorListElement>
+inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::EliminateVars(EnumeratorListElement& e)
 {
   variable var;
   data_expression val;
@@ -252,7 +252,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::Elimina
     // replacing in x==t the variable x by t.
     const data_expression old_val=(*enum_sigma)(var);
     (*enum_sigma)[var]=val;
-    e=partial_solution_type(
+    e=EnumeratorListElement(
                   remove_one_element(e.variables(),var),
                   m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma),
                   e,var,val);
@@ -260,8 +260,8 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::Elimina
   }
 }
 
-template <class REWRITER, class MutableSubstitution>
-inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::find_next_solution(const bool pop_front_of_stack)
+template <class REWRITER, class MutableSubstitution, class EnumeratorListElement>
+inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::find_next_solution(const bool pop_front_of_stack)
 {
   if (pop_front_of_stack)
   {
@@ -269,7 +269,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::find_ne
   }
   for( ; !fs_stack.empty() ; fs_stack.pop_front())
   {
-    partial_solution_type& e=fs_stack.front();  // e is intensionally a reference into fs_stack.
+    EnumeratorListElement& e=fs_stack.front();  // e is intensionally a reference into fs_stack.
     EliminateVars(e);
     if (e.variables().empty() || e.expression()==sort_bool::false_())
     {
@@ -278,7 +278,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::find_ne
         // A solution is found. 
         if (!m_not_equal_to_false)
         {
-          e=partial_solution_type(e.variables(),m_enclosing_enumerator->m_evaluator(sort_bool::not_(e.expression()),*enum_sigma),e);
+          e=EnumeratorListElement(e.variables(),m_enclosing_enumerator->m_evaluator(sort_bool::not_(e.expression()),*enum_sigma),e);
         }
         return;
       }
@@ -415,7 +415,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::find_ne
             (*enum_sigma)[var]=term_rf;
             const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
             (*enum_sigma)[var]=old_substituted_value;
-            push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(uvars+var_list,rewritten_expr,e,var,term_rf),
+            push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars+var_list,rewritten_expr,e,var,term_rf),
                                     data_expression_list(),
                                     false);
           }
@@ -435,7 +435,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution>::iterator::find_ne
             const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
 
             (*enum_sigma)[var]=old_substituted_value;
-            push_on_fs_stack_and_split_or_without_rewriting(partial_solution_type(uvars,rewritten_expr,e,var,term_rf),
+            push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,term_rf),
                                     data_expression_list(),
                                     false);
           }

@@ -109,7 +109,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
           mCRL2log(log::debug, "suminst") << "enumerating variables " << vl << " in condition: " << data::pp(s.condition()) << std::endl;
 
           mcrl2::data::mutable_indexed_substitution<> local_sigma;
-          for (enumerator_type::iterator i=m_enumerator.begin(local_sigma, vl, s.condition());
+          for (enumerator_type::iterator i=m_enumerator.begin(local_sigma, data::enumerator_list_element_with_substitution<mcrl2::data::data_expression>(vl, s.condition()));
                   i != m_enumerator.end(); ++i)
           {
             mutable_indexed_substitution<> sigma;

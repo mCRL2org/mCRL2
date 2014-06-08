@@ -434,7 +434,9 @@ void next_state_generator::iterator::increment()
         (*m_substitution)[*i] = *i;  // Reset the variable.
       }
       // Apply an assignment move, as the right hand side is not used anymore, and this is far more efficient.
-      m_enumeration_iterator=m_generator->m_enumerator.begin(*m_substitution, m_summand->variables, m_summand->condition);
+      m_enumeration_iterator=m_generator->m_enumerator.begin(
+                              *m_substitution, 
+                              enumerator_list_element_with_substitution<data_expression>(m_summand->variables, m_summand->condition));
     }
   }
 

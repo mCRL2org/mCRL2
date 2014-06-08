@@ -15,12 +15,16 @@ void enumerate(const variable_list& variables, const data_expression& condition)
   rewriter evaluator(data_spec);
   mutable_indexed_substitution<> sigma;
 
-  classic_enumerator<> enumerator(data_spec, evaluator);
+  classic_enumerator<rewriter, 
+                     mutable_indexed_substitution<>,
+                     enumerator_list_element_with_substitution<data_expression> > enumerator(evaluator, data_spec);
 
-  for (classic_enumerator<>::iterator i = enumerator.begin(variables, condition, sigma); i!= enumerator.end(); ++i)
+  for (classic_enumerator<>::iterator i = enumerator.begin(
+                   sigma, enumerator_list_element_with_substitution<data_expression>(variables, condition)); 
+       i!= enumerator.end(); ++i)
   {
-    enumerator_substitution sigma2(variables, *i);
-    std::cout << data::replace_free_variables(condition, sigma2) << std::endl;
+    i->add_assignments(variables,sigma,evaluator);
+    std::cout << data::replace_free_variables(condition, sigma) << std::endl;
   }
 }
 

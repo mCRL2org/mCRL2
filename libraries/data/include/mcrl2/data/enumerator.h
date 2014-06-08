@@ -46,6 +46,14 @@ class enumerator_list_element
     /// \brief Constructs the element (v, phi)
     enumerator_list_element(const data::variable_list& v_,
                             const Expression& phi_,
+                            const enumerator_list_element&
+                           )
+      : v(v_), phi(phi_)
+    {}
+
+    /// \brief Constructs the element (v, phi)
+    enumerator_list_element(const data::variable_list& v_,
+                            const Expression& phi_,
                             const enumerator_list_element&,
                             const data::variable&,
                             const data::data_expression&
@@ -204,7 +212,7 @@ class enumerator_algorithm
       return out.str();
     }
 
-    bool is_finite_set(const data::sort_expression& x) const
+    bool is_finite_set(const data::sort_expression& ) const
     {
       return false;
     }

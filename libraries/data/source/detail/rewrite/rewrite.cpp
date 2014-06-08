@@ -28,7 +28,6 @@
 
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
-// #include "mcrl2/data/detail/enum/standard.h" 
 #include "mcrl2/data/detail/rewriter_wrapper.h" 
 #include "mcrl2/data/classic_enumerator.h"
 
@@ -358,7 +357,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  typedef classic_enumerator<rewriter_wrapper> enumerator_type;
+  typedef classic_enumerator<rewriter_wrapper, rewriter_wrapper::substitution_type, enumerator_list_element< data_expression> > enumerator_type;
   rewriter_wrapper wrapped_rewriter(this);
   enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
 
@@ -366,7 +365,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   data_expression partial_result=sort_bool::false_();
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  enumerator_type::iterator sol=enumerator.begin(sigma, vl_new_l, t3, true);
+  enumerator_type::iterator sol=enumerator.begin(sigma, enumerator_list_element<data_expression>(vl_new_l, t3), true);
   for( ; loop_upperbound>0 && 
          partial_result!=sort_bool::true_() &&
          sol!=enumerator.end() && sol->is_valid(); 
@@ -457,7 +456,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   /* Find A solution*/
 
-  typedef classic_enumerator<rewriter_wrapper> enumerator_type;
+  typedef classic_enumerator<rewriter_wrapper, rewriter_wrapper::substitution_type, enumerator_list_element< data_expression> > enumerator_type;
   rewriter_wrapper wrapped_rewriter(this);
   enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
 
@@ -466,7 +465,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   data_expression partial_result=sort_bool::true_();
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  enumerator_type::iterator sol=enumerator.begin(sigma, vl_new_l, t3, false);
+  enumerator_type::iterator sol=enumerator.begin(sigma, enumerator_list_element<data_expression>(vl_new_l, t3), false);
   for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
          sol!=enumerator.end() && sol->is_valid();

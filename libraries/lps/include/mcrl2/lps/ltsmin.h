@@ -53,14 +53,15 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   std::size_t max_internal_variables = 10000;
 
   data::rewriter rewr(dataspec);
-  data::classic_enumerator<data::rewriter> enumerator(rewr, dataspec);
+  typedef data::classic_enumerator<data::rewriter> enumerator_type;
+  enumerator_type enumerator(rewr, dataspec);
   data::variable x("x", s);
   data::variable_vector v;
   v.push_back(x);
   data::mutable_indexed_substitution<> sigma;
   data::variable_list vl(v.begin(),v.end());
-  for (data::classic_enumerator<data::rewriter>::iterator
-       i = enumerator.begin(sigma, vl, data::sort_bool::true_(), max_internal_variables); i != enumerator.end() ; ++i)
+  for (enumerator_type::iterator
+       i = enumerator.begin(sigma, data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()), max_internal_variables); i != enumerator.end() ; ++i)
   {
     i->add_assignments(vl,sigma,rewr);
     result.push_back(to_string(sigma(vl.front())));

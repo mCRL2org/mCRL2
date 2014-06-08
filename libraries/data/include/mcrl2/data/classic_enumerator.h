@@ -43,7 +43,9 @@ namespace data
 ///        length as a variable list. For a variable list [v1,...,vn] and data_expression_list
 ///        [t1,...,tn] the data_expression ti is the solution for variable vi.
 
-template < typename REWRITER = rewriter, typename MutableIndexedSubstitution = data::mutable_indexed_substitution<> >
+template < typename REWRITER = rewriter, 
+           typename MutableIndexedSubstitution = data::mutable_indexed_substitution<>, 
+           typename EnumeratorListElement = enumerator_list_element_with_substitution<typename REWRITER::term_type> >
 class classic_enumerator
 {
   public:
@@ -53,28 +55,25 @@ class classic_enumerator
     /// \brief The type of objects that represent expressions
     typedef typename REWRITER::term_type expression_type;
     
-    /// \brief The type used to store partial solutions.
-    typedef enumerator_list_element_with_substitution<expression_type> partial_solution_type;
-
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
     ///          the list of variables for which a solution is sought.
     class iterator :
         public boost::iterator_facade<
                  iterator,
-                 const partial_solution_type&,
+                 const EnumeratorListElement&,
                  boost::forward_traversal_tag >
     {
       protected:
 
-        typedef classic_enumerator < REWRITER > enclosing_classic_enumerator;
+        typedef classic_enumerator < REWRITER, MutableIndexedSubstitution, EnumeratorListElement > enclosing_classic_enumerator;
         enclosing_classic_enumerator *m_enclosing_enumerator;
         bool m_not_equal_to_false;
         variable_list enum_vars;                    // The variables over which a solution is searched, used for debug en exception messages.
         expression_type enum_expr;                  // Initial condition to be satisfied, used for debug and exception messages.
         substitution_type* enum_sigma;
 
-        std::deque < partial_solution_type > fs_stack;
+        std::deque < EnumeratorListElement > fs_stack;
 
         size_t used_vars;
         size_t max_vars;
@@ -97,7 +96,7 @@ class classic_enumerator
         //  \details Use it via begin() of the classic enumerator class. See the
         //           explanation at this function for the meaning of the parameters.
         iterator(enclosing_classic_enumerator *e,
-                          const partial_solution_type& partial_solution,
+                          const EnumeratorListElement& partial_solution,
                           substitution_type& sigma,
                           const bool not_equal_to_false=true):
           m_enclosing_enumerator(e),
@@ -106,7 +105,6 @@ class classic_enumerator
           enum_expr(partial_solution.expression()),
           enum_sigma(&sigma)
         {
-// std::cerr << "START ITERATOR " << enum_vars << " : " << enum_expr << "\n";
           const data_expression condition= (e->m_evaluator)(partial_solution.expression(),sigma);
           if ((m_not_equal_to_false && condition==sort_bool::false_()) ||
               (!m_not_equal_to_false && condition==sort_bool::true_()))
@@ -123,7 +121,7 @@ class classic_enumerator
             used_vars=0;
             max_vars=MAX_VARS_INIT;
             push_on_fs_stack_and_split_or_without_rewriting(
-                                          partial_solution_type(partial_solution.variables(),condition),
+                                          EnumeratorListElement(partial_solution.variables(),condition),
                                           data_expression_list(),
                                           !m_not_equal_to_false);
             find_next_solution(false);
@@ -152,11 +150,10 @@ class classic_enumerator
           return fs_stack.size()==other.fs_stack.size();
         }
 
-        const partial_solution_type& dereference() const
+        const EnumeratorListElement& dereference() const
         {
           assert(fs_stack.size()>0);
           assert(fs_stack.front().is_valid());
-// std::cerr << "Return value " << fs_stack.front().expression() << "\n";
           return fs_stack.front();
         }
 
@@ -167,27 +164,18 @@ class classic_enumerator
                            mcrl2::data::variable& v,
                            data_expression& e);
 
-        void EliminateVars(partial_solution_type& e);
+        void EliminateVars(EnumeratorListElement& e);
 
-        data_expression_list build_solution(
-                     const variable_list& vars,
-                     const variable_list& substituted_vars,
-                     const data_expression_list& exprs) const;
-
-        data_expression_list build_solution2(
-                     const variable_list& vars,
-                     const variable_list& substituted_vars,
-                     const data_expression_list& exprs) const;
         expression_type add_negations(
                      const expression_type& condition,
                      const data_expression_list& negation_term_list,
                      const bool negated) const;
         void push_on_fs_stack_and_split_or(
-                     const enumerator_list_element_with_substitution<typename REWRITER::term_type>& partial_solution,
+                     const EnumeratorListElement& partial_solution,
                      const data_expression_list& negated_term_list,
                      const bool negated);
         void push_on_fs_stack_and_split_or_without_rewriting(
-                     const enumerator_list_element_with_substitution<typename REWRITER::term_type>& partial_solution,
+                     const EnumeratorListElement& partial_solution,
                      const data_expression_list& negated_term_list,
                      const bool negated);
         data_expression_list negate(
@@ -212,11 +200,10 @@ class classic_enumerator
     ///            If zero, then there is no bound. If the bound is reached, generating
     ///            new solutions stops with or without an exception as desired.
     iterator begin(substitution_type& sigma,
-                   const variable_list& variables,
-                   const expression_type& condition,
+                   const EnumeratorListElement& p,
                    const bool not_equal_to_false=true)
     {
-      return iterator(this, partial_solution_type(variables, condition),sigma,not_equal_to_false);
+      return iterator(this, p, sigma, not_equal_to_false);
     }
 
 
