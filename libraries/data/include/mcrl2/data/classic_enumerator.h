@@ -114,7 +114,7 @@ class classic_enumerator
           else if (partial_solution.variables().empty())
           {
             // in this case we generate exactly one solution.
-            fs_stack.emplace_back(partial_solution.variables(),condition);
+            fs_stack.emplace_back(EnumeratorListElement(partial_solution.variables(),condition));
           }
           else
           {
