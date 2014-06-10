@@ -84,13 +84,8 @@ def timeout_command(program, options, timeout = -1):
         time.sleep(0.1)
         now = datetime.datetime.now()
         if (now - start).seconds > timeout:
-            if platform.system() == 'Windows':
-                #os.kill(process.pid, signal.CTRL_C_EVENT)
-                #os.kill(process.pid, signal.CTRL_BREAK_EVENT)
-                os.kill(process.pid, signal.SIGABRT)
-            else:
-                os.kill(process.pid, signal.SIGKILL)
-                os.waitpid(-1, os.WNOHANG)
+            process.kill()
+            process.wait()
             return None, None
 
     return (process.stdout.read(), process.stderr.read())
