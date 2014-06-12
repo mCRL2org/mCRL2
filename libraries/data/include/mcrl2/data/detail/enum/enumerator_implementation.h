@@ -188,7 +188,16 @@ inline bool classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
 {
   if (is_variable(t))
   {
-    assert(variable(t).sort()==sort_bool::bool_());
+    const variable& var=core::down_cast<variable>(t);
+    assert(var.sort()==sort_bool::bool_());
+    if (std::find(vars.begin(),vars.end(),var)!=vars.end())
+    {
+      // This expression is a variable that must be true. We can derive
+      // the assignment var:=true from this.
+      v = var;
+      e = sort_bool::true_();
+      return true;
+    }
     return false;
   }
 
