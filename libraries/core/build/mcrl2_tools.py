@@ -84,8 +84,14 @@ def timeout_command(program, options, timeout = -1):
         time.sleep(0.1)
         now = datetime.datetime.now()
         if (now - start).seconds > timeout:
-            process.kill()
-            process.wait()
+            try:
+                process.kill()
+                process.wait()
+            except WindowsError:
+                # We might be trying to kill a process that just terminated
+                # of its own accord, or maybe Windows just doesn't like us
+                # enough. In either case, there's nothing we can do about it
+                pass
             return None, None
 
     return (process.stdout.read(), process.stderr.read())
