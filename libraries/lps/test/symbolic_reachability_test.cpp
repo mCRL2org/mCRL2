@@ -23,7 +23,7 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/linearise.h"
 
 using namespace mcrl2;
@@ -195,7 +195,7 @@ int test_main(int argc, char** argv)
 
   if (1 < argc)
   {
-    model.load(argv[1]);
+    load_lps(model, argv[1]);
 
     model.process().deadlock_summands().clear();
 

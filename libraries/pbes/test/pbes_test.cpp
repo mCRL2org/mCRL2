@@ -138,7 +138,7 @@ void test_pbes()
 
   try
   {
-    p.load("non-existing file");
+    load_pbes(p, "non-existing file");
     BOOST_CHECK(false); // loading is expected to fail
   }
   catch (mcrl2::runtime_error e)
