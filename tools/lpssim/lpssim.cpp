@@ -27,7 +27,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/simulation.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 using namespace mcrl2;
@@ -97,16 +97,15 @@ class sim_tool : public rewriter_tool< input_tool >
 
     bool run()
     {
-      mcrl2::lps::specification lps_specification;
-
-      lps_specification.load(m_input_filename);
+      mcrl2::lps::specification spec;
+      load_lps(spec, input_filename());
 
       if (!m_do_not_use_dummies)
       {
-        lps::detail::instantiate_global_variables(lps_specification);
+        lps::detail::instantiate_global_variables(spec);
       }
 
-      lps::simulation simulation(lps_specification, rewrite_strategy());
+      lps::simulation simulation(spec, rewrite_strategy());
       size_t state_index = 0;
 
 

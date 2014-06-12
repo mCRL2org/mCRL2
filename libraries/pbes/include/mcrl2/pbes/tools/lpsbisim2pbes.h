@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_TOOLS_LPSBISIM2PBES_H
 #define MCRL2_PBES_TOOLS_LPSBISIM2PBES_H
 
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/bisimulation.h"
@@ -33,8 +33,8 @@ void lpsbisim2pbes(const std::string& input_filename1,
   lps::specification M;
   lps::specification S;
 
-  M.load(input_filename1);
-  S.load(input_filename2);
+  load_lps(M, input_filename1);
+  load_lps(S, input_filename2);
   pbes result;
   switch (type)
   {

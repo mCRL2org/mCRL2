@@ -17,7 +17,7 @@
 #include <map>
 #include <set>
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/aterm_io.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/core/down_cast.h"
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/data/data_specification.h"
@@ -270,30 +270,6 @@ class pbes
       assert(is_well_typed());
     }
 
-    /// \brief Reads the pbes from file.
-    /// \param filename A string
-    /// If filename is nonempty, input is read from the file named filename.
-    /// If filename is empty, input is read from standard input.
-    void load(const std::string& filename)
-    {
-      atermpp::aterm t = core::detail::load_aterm(filename);
-      t = pbes_system::detail::add_index(t);
-      if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
-      {
-        throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a PBES");
-      }
-      init_term(atermpp::aterm_appl(t));
-      m_data.declare_data_specification_to_be_type_checked();
-      complete_data_specification(*this); // Add all the sorts that are used in the specification
-      // to the data specification. This is important for those
-      // sorts that are built in, because these are not explicitly
-      // declared.
-
-      // The well typedness check is only done in debug mode, since for large
-      // PBESs it takes too much time
-      assert(is_well_typed());
-    }
-
     /// \brief Writes the pbes to file.
     /// \param binary If binary is true the pbes is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
@@ -302,7 +278,15 @@ class pbes
     /// \param no_well_typedness_check If true the well typedness check is skipped.
     void save(std::ostream& stream, bool binary = true) const
     {
-      core::detail::save_aterm(pbes_system::detail::remove_index(pbes_to_aterm(*this)), stream, binary);
+      atermpp::aterm term = pbes_system::detail::remove_index(pbes_to_aterm(*this));
+      if (binary)
+      {
+        write_term_to_binary_stream(term, stream);
+      }
+      else
+      {
+        write_term_to_text_stream(term, stream);
+      }
     }
 
     /// \brief Returns the set of binding variables of the pbes.

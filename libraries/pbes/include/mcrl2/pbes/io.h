@@ -77,7 +77,7 @@ const utilities::file_format* guess_format(const std::string& filename)
 
 ///
 /// \brief Save a PBES in the format specified.
-/// \param pbes The pbes to be stored
+/// \param pbes The PBES to be stored
 /// \param filename The name of the file to which the output is stored.
 /// \param format Determines the format in which the result is written. If unspecified, or
 ///        pbes_file_unknown is specified, then a default format is chosen.
@@ -111,10 +111,11 @@ void save_pbes(const pbes& pbes, std::ostream& stream,
   }
 }
 
-/// \brief Load pbes from file.
-/// \param p The pbes to which the result is loaded.
-/// \param infilename The file from which to load the PBES.
-/// \param f The format that should be assumed for the file in infilename.
+/// \brief Load a PBES from file.
+/// \param pbes The PBES to which the result is loaded.
+/// \param stream The stream from which to load the PBES.
+/// \param format The format that should be assumed for the file in infilename. If unspecified, or
+///        pbes_file_unknown is specified, then a default format is chosen.
 inline
 void load_pbes(pbes& pbes, std::istream& stream, const utilities::file_format* format)
 {
@@ -143,12 +144,15 @@ void load_pbes(pbes& pbes, std::istream& stream, const utilities::file_format* f
   }
 }
 
-///
 /// \brief save_pbes Saves a PBES to a file.
 /// \param pbes The PBES to save.
 /// \param filename The file to save the PBES in.
 /// \param format The format in which to save the PBES.
+/// \param welltypedness_check If set to false, skips checking whether pbes is well typed before
+///                            saving it to file.
 ///
+/// The format of the file in infilename is guessed if format is not given or if it is equal to
+/// utilities::file_format::unknown().
 inline
 void save_pbes(const pbes &pbes, const std::string &filename,
                const utilities::file_format* format=utilities::file_format::unknown(),
@@ -167,10 +171,12 @@ void save_pbes(const pbes &pbes, const std::string &filename,
 }
 
 /// \brief Load pbes from file.
-/// \param p The pbes to which the result is loaded.
-/// \param infilename The file from which to load the PBES.
+/// \param pbes The pbes to which the result is loaded.
+/// \param filename The file from which to load the PBES.
+/// \param format The format in which the PBES is stored in the file.
 ///
-/// The format of the file in infilename is guessed.
+/// The format of the file in infilename is guessed if format is not given or if it is equal to
+/// utilities::file_format::unknown().
 inline
 void load_pbes(pbes& pbes, const std::string& filename,
                const utilities::file_format* format=utilities::file_format::unknown())

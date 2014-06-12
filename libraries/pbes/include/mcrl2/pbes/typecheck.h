@@ -232,7 +232,7 @@ class pbes_type_checker:public data::data_type_checker
       pbes_expression TraversePBESVarConstPB(const std::map<core::identifier_string,data::sort_expression> &Vars, const pbes_expression &PBESTerm)
       {
         using namespace data;
-        using namespace core::detail;
+        using namespace atermpp;
         if (is_data_expression(PBESTerm))
         {
           data_expression d(PBESTerm);

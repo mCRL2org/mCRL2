@@ -14,6 +14,7 @@
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/representative_generator.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
@@ -1222,7 +1223,7 @@ std::string ltsmin_state::state_to_string() const
 
 explorer::explorer(const std::string& filename, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false, bool always_split_flag = false)
 {
-    p.load(filename);
+    load_pbes(p, filename);
     for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
                 != p.equations().end(); ++eqn) {
         std::string variable_name = (*eqn).variable().name();

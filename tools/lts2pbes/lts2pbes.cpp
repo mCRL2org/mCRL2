@@ -16,7 +16,7 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/data/parse.h"
-#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/modal_formula/algorithms.h"
@@ -169,11 +169,11 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       {
         // First try to read the provided file as a .lps file.
         lps::specification spec;
-        spec.load(datafile.c_str());
-        data=spec.data();
-        action_labels=spec.action_labels();
-        process_parameters=spec.process().process_parameters();
-        extra_data_is_defined=true;
+        load_lps(spec, datafile);
+        data = spec.data();
+        action_labels = spec.action_labels();
+        process_parameters = spec.process().process_parameters();
+        extra_data_is_defined = true;
       }
       else
       {

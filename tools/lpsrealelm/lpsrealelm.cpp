@@ -23,6 +23,9 @@
 #include <mcrl2/atermpp/table.h>
 #include <mcrl2/atermpp/algorithm.h>
 
+//LPS
+#include "mcrl2/lps/io.h"
+
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -86,15 +89,15 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
       mCRL2log(verbose) << "  data rewriter       " << m_rewrite_strategy << std::endl;
       mCRL2log(verbose) << "  max_iterations:     " << max_iterations << std::endl;
 
-      specification lps_specification;
-      lps_specification.load(m_input_filename);
+      specification spec;
+      load_lps(spec, input_filename());
 
       // Untime lps_specification and save the output to a binary file
       // rewriter r=create_rewriter(lps_specification.data());
-      specification new_spec = realelm(lps_specification, max_iterations, rewrite_strategy());
+      specification new_spec = realelm(spec, max_iterations, rewrite_strategy());
 
       mCRL2log(verbose) << "Real time abstraction completed, saving to " << m_output_filename << "\n";
-      new_spec.save(m_output_filename);
+      save_lps(new_spec, output_filename());
 
       return true;
     }

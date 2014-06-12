@@ -25,6 +25,7 @@
 #include "mcrl2/lps/suminst.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/untime.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -37,11 +38,11 @@ void lpsbinary(const std::string& input_filename,
                const std::string& output_filename)
 {
   lps::specification spec;
-  spec.load(input_filename);
+  load_lps(spec, input_filename);
   data::rewriter r(spec.data());
 
   lps::binary_algorithm<data::rewriter>(spec, r).run();
-  spec.save(output_filename);
+  save_lps(spec, output_filename);
 }
 
 void lpsconstelm(const std::string& input_filename,
@@ -54,7 +55,7 @@ void lpsconstelm(const std::string& input_filename,
                 )
 {
   lps::specification spec;
-  spec.load(input_filename);
+  load_lps(spec, input_filename);
   mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
   lps::constelm_algorithm<data::rewriter> algorithm(spec, R);
 
@@ -73,7 +74,7 @@ void lpsconstelm(const std::string& input_filename,
     algorithm.remove_trivial_summands();
   }
 
-  spec.save(output_filename);
+  save_lps(spec, output_filename);
 }
 
 void lpsinfo(const std::string& input_filename,
@@ -81,7 +82,7 @@ void lpsinfo(const std::string& input_filename,
             )
 {
   specification spec;
-  spec.load(input_filename);
+  load_lps(spec, input_filename);
   lps::detail::specification_property_map info(spec);
   std::cout << input_file_message << "\n\n";
   std::cout << info.info();
@@ -102,10 +103,10 @@ void lpsinvelm(const std::string& input_filename,
                const bool apply_induction,
                const int time_limit)
 {
-  lps::specification specification;
+  lps::specification spec;
   data::data_expression invariant;
 
-  specification.load(input_filename);
+  load_lps(spec, input_filename);
 
   if (!invariant_filename.empty())
   {
@@ -118,8 +119,8 @@ void lpsinvelm(const std::string& input_filename,
 
     mCRL2log(log::verbose) << "parsing input file '" <<  invariant_filename << "'..." << std::endl;
 
-    data::variable_list& parameters=specification.process().process_parameters();
-    invariant = data::parse_data_expression(instream, parameters.begin(), parameters.end(), specification.data());
+    data::variable_list& parameters=spec.process().process_parameters();
+    invariant = data::parse_data_expression(instream, parameters.begin(), parameters.end(), spec.data());
 
     instream.close();
   }
@@ -136,7 +137,7 @@ void lpsinvelm(const std::string& input_filename,
   }
   else
   {
-    detail::Invariant_Checker v_invariant_checker(specification,
+    detail::Invariant_Checker v_invariant_checker(spec,
                                           rewrite_strategy,
                                           time_limit,
                                           path_eliminator,
@@ -151,7 +152,7 @@ void lpsinvelm(const std::string& input_filename,
 
   if (invariance_result)
   {
-    invelm_algorithm algorithm(specification,
+    invelm_algorithm algorithm(spec,
                                rewrite_strategy,
                                time_limit,
                                path_eliminator,
@@ -159,7 +160,7 @@ void lpsinvelm(const std::string& input_filename,
                                apply_induction,
                                simplify_all);
     algorithm.run(invariant, !no_elimination);
-    specification.save(output_filename);
+    save_lps(spec, output_filename);
   }
 }
 
@@ -168,9 +169,9 @@ void lpsparelm(const std::string& input_filename,
               )
 {
   lps::specification spec;
-  spec.load(input_filename);
+  load_lps(spec, input_filename);
   lps::parelm(spec, true);
-  spec.save(output_filename);
+  save_lps(spec, output_filename);
 }
 
 void lpspp(const std::string& input_filename,
@@ -180,7 +181,7 @@ void lpspp(const std::string& input_filename,
           )
 {
   lps::specification spec;
-  spec.load(input_filename);
+  load_lps(spec, input_filename);
 
   mCRL2log(log::verbose) << "printing LPS from "
                     << (input_filename.empty()?"standard input":input_filename)
@@ -235,7 +236,7 @@ void lpsrewr(const std::string& input_filename,
             )
 {
   lps::specification spec;
-  spec.load(input_filename);
+  load_lps(spec, input_filename);
   mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
   if (benchmark)
   {
@@ -243,20 +244,20 @@ void lpsrewr(const std::string& input_filename,
   }
   lps::rewrite(spec, R);
   lps::remove_trivial_summands(spec);
-  spec.save(output_filename);
+  save_lps(spec, output_filename);
 }
 
 void lpssumelm(const std::string& input_filename,
                const std::string& output_filename,
                const bool decluster)
 {
-  lps::specification specification;
-  specification.load(input_filename);
+  lps::specification spec;
+  load_lps(spec, input_filename);
 
-  lps::sumelm_algorithm(specification, decluster).run();
+  lps::sumelm_algorithm(spec, decluster).run();
 
   mCRL2log(log::debug) << "Sum elimination completed, saving to " <<  output_filename << std::endl;
-  specification.save(output_filename);
+  save_lps(spec, output_filename);
 }
 
 void lpssuminst(const std::string& input_filename,
@@ -266,8 +267,8 @@ void lpssuminst(const std::string& input_filename,
                 const bool finite_sorts_only,
                 const bool tau_summands_only)
 {
-  lps::specification lps_specification;
-  lps_specification.load(input_filename);
+  lps::specification spec;
+  load_lps(spec, input_filename);
   std::set<data::sort_expression> sorts;
 
   // Determine set of sorts to be expanded
@@ -276,35 +277,35 @@ void lpssuminst(const std::string& input_filename,
     std::vector<std::string> parts = utilities::split(utilities::remove_whitespace(sorts_string), ",");
     for(std::vector<std::string>::const_iterator i = parts.begin(); i != parts.end(); ++i)
     {
-      sorts.insert(data::parse_sort_expression(*i, lps_specification.data()));
+      sorts.insert(data::parse_sort_expression(*i, spec.data()));
     }
   }
   else if (finite_sorts_only)
   {
-    sorts = lps::finite_sorts(lps_specification.data());
+    sorts = lps::finite_sorts(spec.data());
   }
   else
   {
-    const data::sort_expression_vector& sort_vector=lps_specification.data().sorts();
+    const data::sort_expression_vector& sort_vector=spec.data().sorts();
     sorts = std::set<data::sort_expression>(sort_vector.begin(),sort_vector.end());
   }
 
   mCRL2log(log::verbose, "lpssuminst") << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
 
-  mcrl2::data::rewriter r(lps_specification.data(), rewrite_strategy);
-  lps::suminst_algorithm<data::rewriter>(lps_specification, r, sorts, tau_summands_only).run();
-  lps_specification.save(output_filename);
+  mcrl2::data::rewriter r(spec.data(), rewrite_strategy);
+  lps::suminst_algorithm<data::rewriter>(spec, r, sorts, tau_summands_only).run();
+  save_lps(spec, output_filename);
 }
 
 void lpsuntime(const std::string& input_filename,
                const std::string& output_filename)
 {
   lps::specification spec;
-  spec.load(input_filename);
+  load_lps(spec, input_filename);
 
   lps::untime_algorithm(spec).run();
 
-  spec.save(output_filename);
+  save_lps(spec, output_filename);
 }
 
 void txt2lps(const std::string& input_filename,
@@ -312,20 +313,8 @@ void txt2lps(const std::string& input_filename,
             )
 {
   lps::specification spec;
-  if (input_filename.empty())
-  {
-    spec = lps::parse_linear_process_specification(std::cin);
-  }
-  else
-  {
-    std::ifstream from(input_filename.c_str());
-    if (!from)
-    {
-      throw mcrl2::runtime_error("Could not read from input file: " + input_filename);
-    }
-    spec = lps::parse_linear_process_specification(from);
-  }
-  spec.save(output_filename);
+  load_lps(spec, input_filename, lps_format_text());
+  save_lps(spec, output_filename);
 }
 
 } // namespace lps

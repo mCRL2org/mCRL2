@@ -26,13 +26,12 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/pbes/io.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -178,17 +177,17 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         {
           // Try to read a linear specification
           mcrl2::lps::specification p;
-          p.load(input_filename());
-          spec=p.data();
+          load_lps(p, input_filename());
+          spec = p.data();
           context_variables = p.global_variables();
         }
-        catch (mcrl2::runtime_error e)
+        catch (mcrl2::runtime_error)
         {
           try
           {
             // Try to read a pbes.
             mcrl2::pbes_system::pbes p;
-            p.load(input_filename());
+            load_pbes(p, input_filename());
             spec=p.data();
             context_variables = p.global_variables();
           }

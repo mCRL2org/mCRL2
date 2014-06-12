@@ -22,7 +22,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 
-#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/process/action_parse.h"
 
 #include "mcrl2/lts/lts_io.h"
@@ -114,7 +114,7 @@ class lps2lts_tool : public lps2lts_base
 
     bool run()
     {
-      m_options.specification.load(m_filename);
+      load_lps(m_options.specification, m_filename);
       m_options.trace_prefix = m_filename.substr(0, m_options.trace_prefix.find_last_of('.'));
 
       // check_whether_actions_on_commandline_exist(m_options.trace_actions, m_options.specification.action_labels());
