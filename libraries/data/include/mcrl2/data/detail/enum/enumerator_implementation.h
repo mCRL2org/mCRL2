@@ -197,7 +197,7 @@ inline bool classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
       v = var;
       e = sort_bool::true_();
       return true;
-    }
+    } 
     return false;
   }
 
@@ -217,7 +217,24 @@ inline bool classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
   if (is_function_symbol(ta.head()))
   {
     const function_symbol& f = core::down_cast<function_symbol>(ta.head());
-    if (f == sort_bool::and_())
+    if (f == sort_bool::not_())
+    {
+      // If the expression has the shape !x where x is a variable over which enumeration is taking
+      // place, return x:=false.
+      if (is_variable(ta[0]))
+      { 
+        const variable& var=core::down_cast<variable>(ta[0]);
+        assert(var.sort()==sort_bool::bool_());
+        if (std::find(vars.begin(),vars.end(),var)!=vars.end())
+        {
+          v = var;
+          e = sort_bool::false_();
+          return true;
+        }
+      }
+      return false;
+    }
+    else if (f == sort_bool::and_())
     {
       assert(ta.size()==2);
       return find_equality(ta[0],vars,v,e) || find_equality(ta[1],vars,v,e);
