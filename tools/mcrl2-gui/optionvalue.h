@@ -20,16 +20,17 @@
 
 #include "toolinformation.h"
 
-class OptionValue
+class OptionValue : public QObject
 {
+    Q_OBJECT
 public:
-    OptionValue(ToolOption option, QCheckBox *cbEnabled);
-    OptionValue(ToolOption option, QCheckBox *cbEnabled, QButtonGroup *argValue);
-    OptionValue(ToolOption option, QCheckBox *cbEnabled, QLineEdit *argValue);
-    OptionValue(ToolOption option, QCheckBox *cbEnabled, QSpinBox *argValue, QCheckBox *argEnabled = NULL);
-    OptionValue(ToolOption option, QCheckBox *cbEnabled, QDoubleSpinBox *argValue, QCheckBox *argEnabled = NULL);
-    OptionValue(ToolOption option, QCheckBox *cbEnabled, FilePicker *argValue);
-    OptionValue(ToolOption option, QCheckBox *cbEnabled, QCheckBox *argValue);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QObject* parent=nullptr);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QButtonGroup *argValue, QObject* parent=nullptr);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QLineEdit *argValue, QObject* parent=nullptr);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QSpinBox *argValue, QCheckBox *argEnabled = nullptr, QObject* parent=nullptr);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QDoubleSpinBox *argValue, QCheckBox *argEnabled = nullptr, QObject* parent=nullptr);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, FilePicker *argValue, QObject* parent=nullptr);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QCheckBox *argValue, QObject* parent=nullptr);
 
     QString value();
 private:
@@ -37,7 +38,8 @@ private:
     QCheckBox *m_enabled;
     QObject *m_value;
     QCheckBox *m_argEnabled;
-
+protected slots:
+    void onValueChange();
 };
 
 #endif // OPTIONVALUE_H

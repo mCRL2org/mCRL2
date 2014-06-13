@@ -33,6 +33,7 @@ set(MCRL2_GUI_MOC_HEADERS
   filebrowser.h
   toolaction.h
   toolinstance.h
+  optionvalue.h
   fileinformation.h
   filepicker.h
   copydialog.h

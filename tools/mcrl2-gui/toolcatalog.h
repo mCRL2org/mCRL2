@@ -32,7 +32,7 @@ class ToolCatalog
     QStringList categories();
 
     QList<ToolInformation> tools(QString category);
-    QList<ToolInformation> tools(QString category, QString extension);
+    //QList<ToolInformation> tools(QString category, QString extension);
 
   private:
     void generateFileTypes();

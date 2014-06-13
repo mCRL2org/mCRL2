@@ -96,6 +96,7 @@ class ToolInformation
     void load();
     bool hasOutput() { return !output.isEmpty(); }
     bool hasSecondInput() { return !input2.isEmpty(); }
+    bool inputMatchesAny(QStringList filetypes);
 
     QString path, name, input2, output, desc, author;
     QSet<QString> input;

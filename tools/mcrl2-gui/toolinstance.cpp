@@ -105,7 +105,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
     if (!option.hasArgument())
     {
       m_ui.frmOptions2->addRow(cbOpt, lblOpt);
-      m_optionValues.append(OptionValue(option, cbOpt));
+      m_optionValues.append(new OptionValue(option, cbOpt));
     }
     else
     {
@@ -136,7 +136,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
               case LevelArgument:
                 {
                   QLineEdit *edtLdt = new QLineEdit("verbose", this);
-                  m_optionValues.append(OptionValue(option, cbOpt, edtLdt));
+                  m_optionValues.append(new OptionValue(option, cbOpt, edtLdt));
                   edtArg = edtLdt;
                 }
                 break;
@@ -148,11 +148,11 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
                   {
                     QCheckBox *cbOptional = new QCheckBox(this);
                     lytArg->addWidget(cbOptional);
-                    m_optionValues.append(OptionValue(option, cbOpt, edtSpb, cbOptional));
+                    m_optionValues.append(new OptionValue(option, cbOpt, edtSpb, cbOptional));
                   }
                   else
                   {
-                    m_optionValues.append(OptionValue(option, cbOpt, edtSpb));
+                    m_optionValues.append(new OptionValue(option, cbOpt, edtSpb));
                   }
                   edtArg = edtSpb;
                 }
@@ -165,11 +165,11 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
                   {
                     QCheckBox *cbOptional = new QCheckBox(this);
                     lytArg->addWidget(cbOptional);
-                    m_optionValues.append(OptionValue(option, cbOpt, edtSpb, cbOptional));
+                    m_optionValues.append(new OptionValue(option, cbOpt, edtSpb, cbOptional));
                   }
                   else
                   {
-                    m_optionValues.append(OptionValue(option, cbOpt, edtSpb));
+                    m_optionValues.append(new OptionValue(option, cbOpt, edtSpb));
                   }
                   edtArg = edtSpb;
                 }
@@ -177,7 +177,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
               case BooleanArgument:
                 {
                   QCheckBox *edtChb = new QCheckBox("Yes", this);
-                  m_optionValues.append(OptionValue(option, cbOpt, edtChb));
+                  m_optionValues.append(new OptionValue(option, cbOpt, edtChb));
                   edtArg = edtChb;
                 }
                 break;
@@ -185,7 +185,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
               default:
                 {
                   QLineEdit *edtLdt = new QLineEdit(this);
-                  m_optionValues.append(OptionValue(option, cbOpt, edtLdt));
+                  m_optionValues.append(new OptionValue(option, cbOpt, edtLdt));
                   edtArg = edtLdt;
                 }
                 break;
@@ -216,7 +216,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 
             FilePicker *edtArg = new FilePicker(m_fileDialog, this, false);
             lytArg->addWidget(edtArg);
-            m_optionValues.append(OptionValue(option, cbOpt, edtArg));
+            m_optionValues.append(new OptionValue(option, cbOpt, edtArg));
 
             if (!option.argument.optional)
             {
@@ -248,7 +248,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 
               lytValues->addRow(rbVal, lblVal);
             }
-            m_optionValues.append(OptionValue(option, cbOpt, grpValues));
+            m_optionValues.append(new OptionValue(option, cbOpt, grpValues));
 
             lytOpt->addLayout(lytValues);
           }
@@ -265,6 +265,14 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
         m_ui.frmOptions2->addRow("<b>"+option.nameLong+": </b>", lytOpt);
       }
     }
+  }
+}
+
+ToolInstance::~ToolInstance()
+{
+  for (auto option = m_optionValues.begin(); option != m_optionValues.end(); ++option)
+  {
+    delete *option;
   }
 }
 
@@ -311,7 +319,7 @@ QString ToolInstance::arguments()
 
   for (int i = 0; i < m_optionValues.count(); i++)
   {
-    OptionValue val =  m_optionValues.at(i);
+    OptionValue& val =  *m_optionValues[i];
     if (!val.value().isEmpty())
     {
       result.append(" ").append(val.value());
