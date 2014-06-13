@@ -24,13 +24,13 @@ class OptionValue : public QObject
 {
     Q_OBJECT
 public:
-    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QObject* parent=nullptr);
-    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QButtonGroup *argValue, QObject* parent=nullptr);
-    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QLineEdit *argValue, QObject* parent=nullptr);
-    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QSpinBox *argValue, QCheckBox *argEnabled = nullptr, QObject* parent=nullptr);
-    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QDoubleSpinBox *argValue, QCheckBox *argEnabled = nullptr, QObject* parent=nullptr);
-    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, FilePicker *argValue, QObject* parent=nullptr);
-    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QCheckBox *argValue, QObject* parent=nullptr);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QObject* parent=NULL);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QButtonGroup *argValue, QObject* parent=NULL);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QLineEdit *argValue, QObject* parent=NULL);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QSpinBox *argValue, QCheckBox *argEnabled = NULL, QObject* parent=NULL);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QDoubleSpinBox *argValue, QCheckBox *argEnabled = NULL, QObject* parent=NULL);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, FilePicker *argValue, QObject* parent=NULL);
+    explicit OptionValue(ToolOption option, QCheckBox *cbEnabled, QCheckBox *argValue, QObject* parent=NULL);
 
     QString value();
 private:
