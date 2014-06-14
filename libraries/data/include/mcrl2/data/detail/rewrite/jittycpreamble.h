@@ -1,12 +1,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "mcrl2/atermpp/detail/function_symbol_constants.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/toolset_version_const.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/utilities/toolset_version_const.h"
 
 using namespace mcrl2::data::detail;
 using namespace atermpp;
