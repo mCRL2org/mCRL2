@@ -35,7 +35,69 @@ class test_equal
     }
 };
 
+
+inline data_expression make_if_expression(size_t& function_index, 
+                                          const size_t argument_index,
+                                          const std::vector < data_expression_vector >& data_domain_expressions,
+                                          const data_expression_vector& codomain_expressions,
+                                          const variable_vector& parameters)
+{
+ if (argument_index==data_domain_expressions.size())
+ {
+   size_t result_expression_index=function_index % codomain_expressions.size();
+   function_index= function_index / codomain_expressions.size();
+
+   return codomain_expressions[result_expression_index];
+ }
+
+ data_expression result; 
+ const data_expression_vector& current_enumerated_elements=data_domain_expressions[argument_index];
+ for(data_expression_vector::const_reverse_iterator i=current_enumerated_elements.rbegin(); i!=current_enumerated_elements.rend(); ++i)
+ {
+   if (i==current_enumerated_elements.rbegin())
+   { 
+     result=make_if_expression(function_index,argument_index+1,data_domain_expressions,codomain_expressions,parameters);
+   }
+   else
+   {
+     const data_expression lhs=make_if_expression(function_index,argument_index+1,data_domain_expressions,codomain_expressions,parameters);
+     if (lhs!=result) // Optimize: if the lhs and rhs are equal, return the rhs.
+     { result=if_(equal_to(parameters[argument_index],*i),lhs,result);
+     }
+   }
+ }
+
+ return result;
 }
+
+}
+
+/// \brief This function delivers a vector with all elements of sort s.
+/// \detail It is assumed that the sort s has only a finite number of elements.
+// TODO: This function should probably be moved to some utility library, and
+//       some applications of the enumerators can be replaced by using this code.
+//
+template <class REWRITER>
+data_expression_vector get_all_expressions(const sort_expression& s, const data_specification& data_spec, const REWRITER& rewr)
+{
+  assert(data_spec.is_certainly_finite(s));
+  typedef classic_enumerator<REWRITER, typename REWRITER::substitution_type> enumerator_type;
+  enumerator_type enumerator(rewr, data_spec); 
+  data_expression_vector result;
+  mutable_indexed_substitution<> sigma;
+  const variable v("@var@",s);
+  const variable_list vl=atermpp::make_list<variable>(v);
+  for(typename enumerator_type::iterator i=enumerator.begin(sigma,enumerator_list_element_with_substitution<data_expression>(vl,sort_bool::true_())); 
+              i!=enumerator.end(); ++i)
+  {
+    i->add_assignments(vl,sigma,rewr);
+    result.push_back(sigma(v));
+  }
+  return result;
+}
+
+
+
 
 template <class REWRITER, class MutableSubstitution, class EnumeratorListElement>
 inline typename REWRITER::term_type classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::add_negations(
@@ -320,12 +382,84 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
 
       if (is_function_sort(sort))
       {
-        e.invalidate();
-        if (m_enclosing_enumerator->m_throw_exceptions)
+        if (m_enclosing_enumerator->m_data_spec.is_certainly_finite(sort))
         {
-          throw mcrl2::runtime_error("cannot enumerate elements of the function sort " + data::pp(sort));
+          // Enumerate all functions of this sort. 
+          function_sort fsort=core::down_cast<function_sort>(sort);
+          data_expression_vector codomain_expressions=get_all_expressions(fsort.codomain(),m_enclosing_enumerator->m_data_spec, m_enclosing_enumerator->m_evaluator);
+          std::vector < data_expression_vector > domain_expressions;
+          size_t total_domain_size=1;
+          variable_vector function_parameters;
+
+          for(sort_expression_list::const_iterator i=fsort.domain().begin(); i!=fsort.domain().end(); ++i)
+          {
+            domain_expressions.push_back(get_all_expressions(*i,m_enclosing_enumerator->m_data_spec,m_enclosing_enumerator->m_evaluator));
+            total_domain_size=total_domain_size*domain_expressions.back().size();
+            function_parameters.push_back(variable(m_enclosing_enumerator->m_evaluator.identifier_generator()("var_func",false),*i));
+          }
+          
+          if (total_domain_size*log2(codomain_expressions.size())>=32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
+          {
+            e.invalidate();
+            if (m_enclosing_enumerator->m_throw_exceptions)
+            {
+              std::stringstream ss;
+              ss << "Cannot generate " << codomain_expressions.size() << "^" << 
+                            total_domain_size << " functions to enumerate function sort" << sort << "\n";
+              throw mcrl2::runtime_error(ss.str()); 
+            }
+            return;
+          }
+          if (total_domain_size*log2(codomain_expressions.size())>16)  // If there are more than 2^16 functions, provide a warning.
+          {
+            mCRL2log(log::warning) << "Generate " << codomain_expressions.size() << "^" << 
+                            total_domain_size << " functions to enumerate sort" << sort << "\n";
+          }
+        
+          const size_t number_of_functions=pow(codomain_expressions.size(),total_domain_size);
+          
+          const variable_list par_list(function_parameters.begin(), function_parameters.end());
+          if (number_of_functions==1) // In this case generate lambda var1,var2,....,var3.result.
+          {
+            const data_expression lambda_term=abstraction(lambda_binder(),par_list,codomain_expressions.front());
+            const data_expression old_substituted_value=(*enum_sigma)(var);
+            (*enum_sigma)[var]=lambda_term;
+            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
+            (*enum_sigma)[var]=old_substituted_value;
+
+            push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,lambda_term),
+                                    data_expression_list(),
+                                    false);
+          }
+          else 
+          {
+            const data_expression old_substituted_value=(*enum_sigma)(var);
+            for(size_t i=0; i<number_of_functions; ++i)
+            {
+              size_t function_index=i; // function_index is changed in make_if_expression. A copy is therefore required.
+              const data_expression lambda_term=abstraction(lambda_binder(),
+                                                            par_list,
+                                                            detail::make_if_expression(function_index,0,domain_expressions,codomain_expressions,function_parameters));
+              assert(function_index==0);
+              (*enum_sigma)[var]=lambda_term;
+              const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
+
+              push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,lambda_term),
+                                      data_expression_list(),
+                                      false);
+            }
+            (*enum_sigma)[var]=old_substituted_value;
+          }
         }
-        return;
+        else
+        { 
+          e.invalidate();
+          if (m_enclosing_enumerator->m_throw_exceptions)
+          {
+            throw mcrl2::runtime_error("cannot enumerate elements of the function sort " + data::pp(sort));
+          }
+          return;
+        }
       }
       else if (sort_bag::is_bag(sort))
       {
@@ -351,7 +485,27 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
           e.invalidate();
           if (m_enclosing_enumerator->m_throw_exceptions)
           {
-            throw mcrl2::runtime_error("cannot enumerate all elements of a set of sort " + data::pp(sort));
+            throw mcrl2::runtime_error("cannot enumerate all elements of a finite set of sort " + data::pp(sort));
+          }
+          return;
+        }
+      }
+      else if (sort_fset::is_fset(sort))
+      {
+        //const sort_expression element_sort=container_sort(sort).element_sort();
+        /* if (m_enclosing_enumerator->m_data_spec.is_certainly_finite(element_sort))
+        {
+          / * Enumerate and store
+          for( TODO
+          {
+          } * /
+        }
+        else */
+        {
+          e.invalidate();
+          if (m_enclosing_enumerator->m_throw_exceptions)
+          {
+            throw mcrl2::runtime_error("cannot enumerate all elements of a finite set of sort " + data::pp(sort));
           }
           return;
         }

@@ -41,6 +41,12 @@ struct rewriter_wrapper
       return m_rewriter->rewrite(t,sigma);
     }
 
+    data_expression operator()(const data_expression& t) const
+    {
+      Rewriter::substitution_type sigma;
+      return m_rewriter->rewrite(t,sigma);
+    }
+
     data::set_identifier_generator& identifier_generator()
     {
       return m_rewriter->identifier_generator();

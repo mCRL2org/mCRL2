@@ -138,7 +138,7 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     {
       data::enumerator_substitution sigma(m_variables, m_expressions);
       sigma.revert();
-      for (auto i = v.begin(); i != v.end(); ++i)
+      for (typename VariableList::const_iterator i = v.begin(); i != v.end(); ++i)
       {
         result[*i] = rewriter(sigma(*i));
       }

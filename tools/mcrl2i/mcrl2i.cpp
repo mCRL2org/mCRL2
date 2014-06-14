@@ -308,8 +308,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
                                10000); // Stop when more than 10000 internal variables are required
                       i != enumerator.end() ; ++i)
             {
-              data::mutable_indexed_substitution<> sigma_i;
-              i->add_assignments(vars,sigma_i,rewr);
+              i->add_assignments(vars,sigma,rewr);
 
               cout << "[";
               for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
@@ -321,7 +320,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
              
                 cout << data::pp(*v) << " := " << data::pp(sigma(*v));
               }
-              cout << "] evaluates to "<< data::pp(rewr(term,sigma_i)) << "\n";
+              cout << "] evaluates to "<< data::pp(rewr(term,sigma)) << "\n";
             }
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))

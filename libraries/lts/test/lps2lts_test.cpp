@@ -514,6 +514,26 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_to_functions_are_causing_problems)
   check_lps2lts_specification(spec, 1, 1, 1);
 }
   
+BOOST_AUTO_TEST_CASE(test_whether_functions_can_be_enumerated)
+{
+  std::string spec(
+    "act int:Bool->Bool;\n"
+    "proc P = sum f:Bool->Bool.int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 4, 4);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_functions_with_more_arguments_can_be_enumerated)
+{
+  std::string spec(
+    "act int:Bool#Bool#Bool->Bool;\n"
+    "proc P = sum f:Bool#Bool#Bool->Bool.f(true,true,true)->int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 128, 128);
+}
+  
 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
