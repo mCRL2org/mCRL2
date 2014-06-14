@@ -35,6 +35,22 @@ class test_equal
     }
 };
 
+inline data_expression make_set(size_t function_index, 
+                                const sort_expression& element_sort,
+                                const data_expression_vector& set_elements)
+{
+ data_expression result=sort_fset::empty(element_sort);
+ for(data_expression_vector::const_iterator i=set_elements.begin(); i!=set_elements.end(); ++i)
+ {
+   if (function_index % 2==1)
+   {
+     result=sort_fset::insert(element_sort,*i,result);
+   }
+   function_index = function_index /2;
+ }
+ return result;
+}
+
 
 inline data_expression make_if_expression(size_t& function_index, 
                                           const size_t argument_index,
@@ -405,7 +421,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             {
               std::stringstream ss;
               ss << "Cannot generate " << codomain_expressions.size() << "^" << 
-                            total_domain_size << " functions to enumerate function sort" << sort << "\n";
+                            total_domain_size << " functions to enumerate function sort " << sort << "\n";
               throw mcrl2::runtime_error(ss.str()); 
             }
             return;
@@ -413,7 +429,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
           if (total_domain_size*log2(codomain_expressions.size())>16)  // If there are more than 2^16 functions, provide a warning.
           {
             mCRL2log(log::warning) << "Generate " << codomain_expressions.size() << "^" << 
-                            total_domain_size << " functions to enumerate sort" << sort << "\n";
+                            total_domain_size << " functions to enumerate sort " << sort << "\n";
           }
         
           const size_t number_of_functions=pow(codomain_expressions.size(),total_domain_size);
@@ -427,9 +443,12 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
             (*enum_sigma)[var]=old_substituted_value;
 
-            push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,lambda_term),
+            if (rewritten_expr!=sort_bool::false_())
+            {
+              push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,lambda_term),
                                     data_expression_list(),
                                     false);
+            }
           }
           else 
           {
@@ -444,9 +463,12 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
               (*enum_sigma)[var]=lambda_term;
               const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
 
-              push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,lambda_term),
+              if (rewritten_expr!=sort_bool::false_())
+              {
+                push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,lambda_term),
                                       data_expression_list(),
                                       false);
+              }
             }
             (*enum_sigma)[var]=old_substituted_value;
           }
@@ -456,7 +478,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
           e.invalidate();
           if (m_enclosing_enumerator->m_throw_exceptions)
           {
-            throw mcrl2::runtime_error("cannot enumerate elements of the function sort " + data::pp(sort));
+            throw mcrl2::runtime_error("Cannot enumerate elements of the function sort " + data::pp(sort));
           }
           return;
         }
@@ -466,46 +488,102 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
         e.invalidate();
         if (m_enclosing_enumerator->m_throw_exceptions)
         {
-          throw mcrl2::runtime_error("cannot enumerate elements of a bag of sort " + data::pp(sort));
+          throw mcrl2::runtime_error("Cannot enumerate elements of a bag " + data::pp(sort));
+        }
+        return;
+      }
+      else if (sort_fbag::is_fbag(sort))
+      {
+        e.invalidate();
+        if (m_enclosing_enumerator->m_throw_exceptions)
+        {
+          throw mcrl2::runtime_error("Cannot enumerate elements of a finite bag " + data::pp(sort));
         }
         return;
       }
       else if (sort_set::is_set(sort))
       {
-        //const sort_expression element_sort=container_sort(sort).element_sort();
-        /* if (m_enclosing_enumerator->m_data_spec.is_certainly_finite(element_sort))
+        const sort_expression element_sort=container_sort(sort).element_sort();
+        if (m_enclosing_enumerator->m_data_spec.is_certainly_finite(element_sort))
         {
-          / * Enumerate and store
-          for( TODO
-          {
-          } * /
+          const data_expression lambda_term=abstraction(
+                                              lambda_binder(),
+                                              atermpp::make_list<variable>(variable(m_enclosing_enumerator->m_evaluator.identifier_generator()("var_func",false),element_sort)),
+                                              sort_bool::false_());
+          const variable fset_variable(m_enclosing_enumerator->m_evaluator.identifier_generator()("@var_fset@",false),sort_fset::fset(element_sort));
+          const data_expression term=sort_set::constructor(element_sort,lambda_term,fset_variable);
+          const data_expression old_substituted_value=(*enum_sigma)(var);
+          (*enum_sigma)[var]=term;
+          const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
+          (*enum_sigma)[var]=old_substituted_value;
+
+          if (rewritten_expr!=sort_bool::false_())
+          { 
+            push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars+atermpp::make_list(fset_variable),rewritten_expr,e,var,term),
+                                      data_expression_list(),
+                                      false);
+          }
         }
-        else */
+        else 
         {
           e.invalidate();
           if (m_enclosing_enumerator->m_throw_exceptions)
           {
-            throw mcrl2::runtime_error("cannot enumerate all elements of a finite set of sort " + data::pp(sort));
+            throw mcrl2::runtime_error("Cannot enumerate all elements of a set " + data::pp(sort));
           }
           return;
         }
       }
       else if (sort_fset::is_fset(sort))
       {
-        //const sort_expression element_sort=container_sort(sort).element_sort();
-        /* if (m_enclosing_enumerator->m_data_spec.is_certainly_finite(element_sort))
+        const sort_expression& element_sort=container_sort(sort).element_sort();
+        if (m_enclosing_enumerator->m_data_spec.is_certainly_finite(element_sort))
         {
-          / * Enumerate and store
-          for( TODO
+          data_expression_vector all_element_expressions=get_all_expressions(element_sort,m_enclosing_enumerator->m_data_spec, m_enclosing_enumerator->m_evaluator);
+          if (all_element_expressions.size()>=32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
           {
-          } * /
+            e.invalidate();
+            if (m_enclosing_enumerator->m_throw_exceptions)
+            {
+              std::stringstream ss;
+              ss << "Will not generate the 2^" << 
+                            all_element_expressions.size() << " sets to enumerate all sets of sort " << sort << "\n";
+              throw mcrl2::runtime_error(ss.str()); 
+            }
+            return;
+          }
+          if (all_element_expressions.size()>16)  // If there are more than 2^16 functions, provide a warning.
+          {
+            mCRL2log(log::warning) << "Generate 2^" <<
+                            all_element_expressions.size() << " sets to enumerate sort " << sort << "\n";
+          }
+        
+          const size_t number_of_sets=pow(2,all_element_expressions.size());
+          
+          const data_expression old_substituted_value=(*enum_sigma)(var);
+         
+          for(size_t i=0; i<number_of_sets; ++i)
+          {
+            const data_expression set=m_enclosing_enumerator->m_evaluator(detail::make_set(i,element_sort,all_element_expressions),*enum_sigma);
+            (*enum_sigma)[var]=set;
+            const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
+
+            if (rewritten_expr!=sort_bool::false_())
+            { 
+              push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,set),
+                                    data_expression_list(),
+                                    false);
+            }
+          }
+          (*enum_sigma)[var]=old_substituted_value;
+
         }
-        else */
+        else 
         {
           e.invalidate();
           if (m_enclosing_enumerator->m_throw_exceptions)
           {
-            throw mcrl2::runtime_error("cannot enumerate all elements of a finite set of sort " + data::pp(sort));
+            throw mcrl2::runtime_error("Cannot enumerate all elements of a finite set " + data::pp(sort));
           }
           return;
         }
@@ -520,7 +598,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
           e.invalidate();
           if (m_enclosing_enumerator->m_throw_exceptions)
           {
-            throw mcrl2::runtime_error("cannot enumerate elements of sort " + data::pp(sort) + " as it does not have constructor functions");
+            throw mcrl2::runtime_error("Cannot enumerate elements of sort " + data::pp(sort) + " as it does not have constructor functions");
           }
           return;
         }
@@ -595,9 +673,12 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             (*enum_sigma)[var]=term_rf;
             const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
             (*enum_sigma)[var]=old_substituted_value;
-            push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars+var_list,rewritten_expr,e,var,term_rf),
+            if (rewritten_expr!=sort_bool::false_())
+            {
+              push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars+var_list,rewritten_expr,e,var,term_rf),
                                     data_expression_list(),
                                     false);
+            }
           }
           else
           {
@@ -615,9 +696,12 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
 
             (*enum_sigma)[var]=old_substituted_value;
-            push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,term_rf),
+            if (rewritten_expr!=sort_bool::false_())
+            {
+              push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,term_rf),
                                     data_expression_list(),
                                     false);
+            }
           }
         }
       }
