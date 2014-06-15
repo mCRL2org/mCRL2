@@ -20,7 +20,6 @@
 #include "boost/assert.hpp"
 #include "boost/utility/enable_if.hpp"
 #include "boost/type_traits/is_convertible.hpp"
-#include "boost/call_traits.hpp"
 #include "boost/type_traits/remove_reference.hpp"
 #include "boost/type_traits/add_reference.hpp"
 #include "boost/iterator/iterator_adaptor.hpp"
@@ -142,26 +141,6 @@ struct is_set_impl< std::multiset< T > >
 template < typename T >
 struct is_set : public is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
   { };
-
-/// The Boost.phoenix library has a nice implementation that can also be used...
-/// For our limited purposes this is enough though
-template < typename Result >
-struct construct
-{
-  typedef Result result_type;
-
-  template < typename A >
-  Result operator()(typename boost::call_traits< A >::param_type a) const
-  {
-    return Result(a);
-  }
-
-  template < typename A, typename A1 >
-  Result operator()(A a, A1 a1) const
-  {
-    return Result(a, a1);
-  }
-};
 
 } // namespace detail
 
