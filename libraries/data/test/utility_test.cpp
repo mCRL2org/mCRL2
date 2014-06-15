@@ -131,18 +131,13 @@ void list_construction_test()
 
 void convert_test()
 {
-
   std::vector< data_expression > l;
 
   l.push_back(sort_bool::true_());
 
-  atermpp::aterm_list al = atermpp::convert< atermpp::aterm_list >(l);
+  atermpp::aterm_list al(l.begin(),l.end());
 
   BOOST_CHECK(l.size() == al.size());
-
-  // Could loop indefinitely if the wrong overload is chosen through type-unsafe conversion
-  // The transformation below does not work, due to lacking conversions. 
-  // std::vector< data_expression > r = atermpp::convert< std::vector< data_expression > >(static_cast< aterm_list >(al));
 }
 
 int test_main(int argc, char** argv)

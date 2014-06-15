@@ -19,7 +19,6 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/utilities/workarounds.h" // for nullptr on older compilers
 
 namespace mcrl2

@@ -4130,13 +4130,12 @@ class specification_basic_type:public boost::noncopyable
 
       action_list result=adapt_multiaction_to_stack_rec(multiAction.tail(),stack,vars);
 
-      result.push_front(
-               action(act.label(),
-                      atermpp::convert<data_expression_list>(adapt_termlist_to_stack(
+      const data_expression_vector vec(adapt_termlist_to_stack(
                             act.arguments().begin(),
                             act.arguments().end(),
                             stack,
-                            vars))));
+                            vars));
+      result.push_front(action(act.label(),data_expression_list(vec.begin(),vec.end())));
       return result;
     }
 
@@ -9598,7 +9597,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
 
   specification_basic_type spec(aterm_cast<process::action_label_list>(type_checked_spec.action_labels()),
                                 type_checked_spec.equations(),
-                                convert<data::variable_list>(type_checked_spec.global_variables()),
+                                data::variable_list(type_checked_spec.global_variables().begin(),type_checked_spec.global_variables().end()),
                                 data_spec,
                                 type_checked_spec.global_variables(),
                                 lin_options,

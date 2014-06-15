@@ -209,8 +209,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     std::vector<data::data_expression> infinite_parameters;
     split_parameters(x, m_index_map, finite_parameters, infinite_parameters);
     mCRL2log(log::debug, "pbesinst_finite") << print_parameters(finite_parameters, infinite_parameters);
-    data::data_expression_list d = atermpp::convert<data::data_expression_list>(finite_parameters);
-    data::data_expression_list e = atermpp::convert<data::data_expression_list>(infinite_parameters);
+    data::data_expression_list d = data::data_expression_list(finite_parameters.begin(),finite_parameters.end());
+    data::data_expression_list e = data::data_expression_list(infinite_parameters.begin(),infinite_parameters.end());
     core::identifier_string Xi = x.name();
     // x = Xi(d,e)
 
@@ -263,8 +263,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     std::vector<data::data_expression> finite_parameters_vector;
     std::vector<data::data_expression> infinite_parameters_vector;
     split_parameters(init, m_index_map, finite_parameters_vector, infinite_parameters_vector);
-    data::data_expression_list finite_parameters = atermpp::convert<data::data_expression_list>(finite_parameters_vector);
-    data::data_expression_list infinite_parameters = atermpp::convert<data::data_expression_list>(infinite_parameters_vector);
+    data::data_expression_list finite_parameters = data::data_expression_list(finite_parameters_vector.begin(),finite_parameters_vector.end());
+    data::data_expression_list infinite_parameters = data::data_expression_list(infinite_parameters_vector.begin(),infinite_parameters_vector.end());
 
     data::detail::rewrite_container(finite_parameters, super::R);
     data::detail::rewrite_container(infinite_parameters, super::R);

@@ -450,7 +450,7 @@ class pins
                               std::inserter(used_write_parameters,
                                             used_write_parameters.begin()));
 
-        std::vector<data::variable> parameters_list = atermpp::convert<std::vector<data::variable> >(proc.process_parameters());
+        std::vector<data::variable> parameters_list(proc.process_parameters().begin(),proc.process_parameters().end());
 
         for (std::vector<data::variable>::const_iterator j = parameters_list.begin(); j != parameters_list.end(); ++j)
         {
@@ -507,7 +507,7 @@ class pins
       // Each state parameter type gets it's own pins_data_type. State parameters of the same
       // type share the pins_data_type.
       std::map<data::sort_expression, pins_data_type*> existing_type_maps;
-      std::vector<data::variable> parameters = atermpp::convert<std::vector<data::variable> >(process().process_parameters());
+      std::vector<data::variable> parameters(process().process_parameters().begin(),process().process_parameters().end());
       for (std::size_t i = 0; i < params.size(); i++)
       {
         data::sort_expression s = parameters[i].sort();

@@ -54,8 +54,6 @@ application list(const sort_expression& s,
 
   for (std::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i)
   {
-    // BOOST_ASSERT(is_convertible(i->sort(), s)); This is not always true, due to type conversion.
-
     list_expression = sort_list::cons_(s, *i, list_expression);
   }
 
@@ -282,9 +280,9 @@ application fset(const sort_expression& s,
 /// \param[in] range a sequence of elements
 inline
 application fset(const sort_expression& s,
-                 data_expression_list const& range)
+                 const data_expression_list& range)
 {
-  return fset(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
+  return fset(s, data_expression_vector(range.begin(),range.end()));
 }
 
 }
@@ -434,9 +432,9 @@ application fbag(const sort_expression& s, Sequence const& range,
 /// \param[in] s the sort of list elements
 /// \param[in] range a range of elements of sort s.
 inline
-application fbag(const sort_expression& s, data_expression_list const& range)
+application fbag(const sort_expression& s, const data_expression_list& range)
 {
-  return fbag(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
+  return fbag(s, data_expression_vector(range.begin(),range.end()));
 }
 }
 

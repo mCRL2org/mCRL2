@@ -714,8 +714,8 @@ struct absinthe_algorithm
           throw std::runtime_error("can not generalize functions with abstraction sorts in the domain: " + data::pp(f1) + ": " + data::pp(s1));
         }
 
-        std::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
-        variables = atermpp::convert<data::variable_list>(x);
+        data::variable_vector x = make_variables(fs2.domain(), "x", sigma);
+        variables = data::variable_list(x.begin(),x.end());
         lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
         data::application f_x(f1, data::data_expression_list(x.begin(), x.end()));
 

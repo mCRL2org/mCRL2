@@ -94,7 +94,7 @@ class specification
       m_data             = atermpp::aterm_appl(*i++);
       m_action_labels    = process::action_label_list(atermpp::aterm_appl(*i++)[0]);
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
-      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
+      m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
       m_process          = linear_process(atermpp::aterm_cast<atermpp::aterm_appl>(*i++));
       m_initial_process  = process_initializer(atermpp::aterm_cast<atermpp::aterm_appl>(*i));
       m_data.declare_data_specification_to_be_type_checked();
@@ -304,7 +304,7 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec)
   return atermpp::aterm_appl(core::detail::function_symbol_LinProcSpec(),
            data::detail::data_specification_to_aterm_data_spec(spec.data()),
            atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
-           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), atermpp::convert<data::variable_list>(spec.global_variables())),
+           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
            linear_process_to_aterm(spec.process()),
            spec.initial_process()
          );

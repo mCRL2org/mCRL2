@@ -89,7 +89,7 @@ class pbes
       m_data = atermpp::aterm_appl(*i++);
 
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
-      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
+      m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
 
       atermpp::aterm_appl eqn_spec = atermpp::aterm_appl(*i++);
       atermpp::aterm_list eqn = static_cast<atermpp::aterm_list>(eqn_spec[0]);
@@ -404,7 +404,9 @@ std::ostream& operator<<(std::ostream& out, const pbes& x)
 inline
 atermpp::aterm_appl pbes_to_aterm(const pbes& p)
 {
-  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), atermpp::convert<data::variable_list>(p.global_variables()));
+  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), 
+                                                             data::variable_list(p.global_variables().begin(),
+                                                                                 p.global_variables().end()));
 
   atermpp::aterm_list eqn_list;
   const std::vector<pbes_equation>& eqn = p.equations();

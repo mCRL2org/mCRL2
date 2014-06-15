@@ -123,10 +123,10 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
   structured_sort_constructor c1("c1", a1, "is_c1");
   structured_sort_constructor c2("c2", a2);
   BOOST_CHECK_EQUAL(to_string(c1.name()), "c1");
-  BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c1.arguments()) == a1);
+  BOOST_CHECK(structured_sort_constructor_argument_vector(c1.arguments().begin(),c1.arguments().end()) == a1);
   BOOST_CHECK_EQUAL(to_string(c1.recogniser()), "is_c1");
   BOOST_CHECK_EQUAL(to_string(c2.name()), "c2");
-  BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c2.arguments()) == a2);
+  BOOST_CHECK(structured_sort_constructor_argument_vector(c2.arguments().begin(),c2.arguments().end()) == a2);
   BOOST_CHECK_EQUAL(c2.recogniser(), core::empty_identifier_string());
 
   structured_sort_constructor_list cs = atermpp::make_list(c1, c2);

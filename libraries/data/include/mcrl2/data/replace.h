@@ -322,7 +322,7 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
 
   data_expression operator()(const data::where_clause& x)
   {
-    data::assignment_list assignments = atermpp::convert<data::assignment_list>(x.declarations());
+    data::assignment_list assignments = atermpp::aterm_cast<data::assignment_list>(x.declarations());
     std::vector<data::variable> tmp;
     for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
     {

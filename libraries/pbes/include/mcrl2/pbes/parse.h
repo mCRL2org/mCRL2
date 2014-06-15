@@ -20,6 +20,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/lexical_cast.hpp>
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/parse.h"

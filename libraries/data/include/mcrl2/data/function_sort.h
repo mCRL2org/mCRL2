@@ -21,7 +21,6 @@
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2

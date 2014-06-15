@@ -167,7 +167,7 @@ class propositional_variable_instantiation: public pbes_expression
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       core::identifier_string name(p.first);
-      data::data_expression_list parameters = atermpp::convert<data::data_expression_list>(p.second);
+      data::data_expression_list parameters = p.second;
       copy_term(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
         name,
         parameters,

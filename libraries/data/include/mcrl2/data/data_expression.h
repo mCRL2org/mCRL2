@@ -212,7 +212,7 @@ bool is_data_expression(const atermpp::aterm_appl& x)
 template < typename Container >
 inline data_expression_list make_data_expression_list(Container const& r, typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
 {
-  return atermpp::convert< data_expression_list >(r);
+  return data_expression_list(r.begin(),r.end());
 }
 
 class variable;

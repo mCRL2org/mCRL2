@@ -77,7 +77,7 @@ class propositional_variable: public atermpp::aterm_appl
     propositional_variable(const std::string& s)
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
-      copy_term(atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), core::identifier_string(p.first), atermpp::convert< data::variable_list >(p.second)));
+      copy_term(atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), core::identifier_string(p.first), atermpp::aterm_cast< data::variable_list >(p.second)));
     }
 //--- end user section propositional_variable ---//
 };
