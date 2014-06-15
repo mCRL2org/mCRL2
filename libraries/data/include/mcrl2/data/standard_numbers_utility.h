@@ -14,7 +14,6 @@
 
 #include "boost/utility.hpp"
 #include "boost/utility/enable_if.hpp"
-#include "boost/assert.hpp"
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/make_unsigned.hpp"
 #include "boost/type_traits/is_floating_point.hpp"
@@ -50,7 +49,7 @@ inline std::vector< char > string_to_vector_number(std::string const& s)
 
   for (std::string::const_iterator i = s.begin(); i != s.end(); ++i)
   {
-    BOOST_ASSERT('0' <= *i && *i <= '9');
+    assert('0' <= *i && *i <= '9');
 
     result.push_back(*i - '0');
   }
@@ -101,7 +100,7 @@ inline std::string as_decimal_string(T t)
 /// A number d0 d1 ... dn is represented as s[0] s[1] ... s[n]
 inline void decimal_number_divide_by_two(std::vector< char >& number)
 {
-  BOOST_ASSERT(0 < number.size());
+  assert(0 < number.size());
 
   std::vector< char >           result(number.size(), 0);
   std::vector< char >::iterator j(result.begin());
@@ -160,7 +159,7 @@ inline void decimal_number_multiply_by_two(std::vector< char >& number)
 /// A number d0 d1 ... dn is represented as s[0] s[1] ... s[n]
 inline void decimal_number_increment(std::vector< char >& number)
 {
-  BOOST_ASSERT(0 < number.size());
+  assert(0 < number.size());
 
   for (std::vector< char >::reverse_iterator i = number.rbegin(); i != number.rend(); ++i)
   {
@@ -190,7 +189,7 @@ template < typename T >
 inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
 pos(const T t)
 {
-  BOOST_ASSERT(0 < t);
+  assert(0 < t);
 
   std::vector< bool > bits;
   bits.reserve(8 * sizeof(T));
@@ -290,7 +289,7 @@ template < typename T >
 inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
 nat(T t)
 {
-  BOOST_ASSERT(0 <= t);
+  assert(0 <= t);
   return (t == 0) ? sort_nat::c0() : static_cast< data_expression const& >(sort_nat::cnat(sort_pos::pos(t)));
 }
 

@@ -89,7 +89,7 @@ public:
   template <typename VariableContainer, typename ExpressionContainer>
   mutable_map_substitution(VariableContainer const& vc, ExpressionContainer const& ec)
   {
-    BOOST_ASSERT(vc.size() == ec.size());
+    asssert(vc.size() == ec.size());
 
     typename ExpressionContainer::const_iterator j = ec.begin();
     for (typename VariableContainer::const_iterator i = vc.begin(); i != vc.end(); ++i, ++j)

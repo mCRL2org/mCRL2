@@ -14,7 +14,6 @@
 
 #include "boost/utility.hpp"
 #include "boost/utility/enable_if.hpp"
-#include "boost/assert.hpp"
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/make_unsigned.hpp"
 #include "boost/type_traits/is_floating_point.hpp"
@@ -266,8 +265,6 @@ application fset(const sort_expression& s,
   // in the same order as the input
   for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i)
   {
-    // BOOST_ASSERT(is_convertible(i->sort(), s));
-
     fset_expression = sort_fset::insert(s, *i, fset_expression);
   }
 
@@ -420,7 +417,6 @@ application fbag(const sort_expression& s, Sequence const& range,
   // in the same order as the input
   for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i, ++i)
   {
-    // BOOST_ASSERT(is_convertible(boost::next(i, 1)->sort(), s));
     fbag_expression = sort_fbag::cinsert(s, *boost::next(i, 1), *i, fbag_expression);
   }
 
