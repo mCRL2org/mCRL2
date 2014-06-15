@@ -18,8 +18,6 @@
 #include <functional>
 
 #include "boost/type_traits/is_base_of.hpp"
-#include "boost/static_assert.hpp"
-
 #include "mcrl2/atermpp/detail/aterm.h"
 
 /// \brief The main namespace for the aterm++ library.
@@ -269,8 +267,8 @@ class aterm
 template <class ATERM_TYPE_OUT>
 const ATERM_TYPE_OUT &aterm_cast(const aterm &t)
 {
-  BOOST_STATIC_ASSERT((boost::is_base_of<aterm, ATERM_TYPE_OUT>::value));
-  BOOST_STATIC_ASSERT((sizeof(ATERM_TYPE_OUT)==sizeof(aterm)));
+  static_assert(boost::is_base_of<aterm, ATERM_TYPE_OUT>::value,"Aterm_cast must be applied on a term derived from aterm");
+  static_assert(sizeof(ATERM_TYPE_OUT)==sizeof(aterm),"Aterm_cast cannot be applied types derived from aterms where extra fields are added");
 #ifndef NDEBUG
   // This assignment checks whether e has the right type;
   ATERM_TYPE_OUT t0=(ATERM_TYPE_OUT &)t;

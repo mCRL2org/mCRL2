@@ -69,8 +69,8 @@ class term_list:public aterm
     /// \param t An aterm.
     explicit term_list(const aterm &t):aterm(t)
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
+      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
       // Term list can be undefined; Generally, this is used to indicate an error situation.
       // This use should be discouraged. For this purpose exceptions ought to be used.
       assert(!defined() || type_is_list());

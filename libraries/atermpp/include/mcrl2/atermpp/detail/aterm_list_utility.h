@@ -12,8 +12,6 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_LIST_UTILITY_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_LIST_UTILITY_H
 
-#include "boost/static_assert.hpp"
-
 #include "mcrl2/atermpp/aterm_list.h"
 
 namespace atermpp
@@ -29,7 +27,7 @@ template < typename Expression, typename CompatibleExpression >
 inline
 atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression > &l, const atermpp::term_list< CompatibleExpression > &m)
 {
-  BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
+  static_assert(boost::is_convertible< CompatibleExpression, Expression >::value,"Concatenated lists must be of the same type (1)");
 
   return atermpp::term_list< Expression >(l+aterm_cast< atermpp::term_list<Expression > >(m));
 }
@@ -43,7 +41,7 @@ template < typename Expression, typename CompatibleExpression >
 inline
 atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression > &l, const CompatibleExpression &m)
 {
-  BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
+  static_assert(boost::is_convertible< CompatibleExpression, Expression >::value,"Concatenated lists must be of the same type (2)");
 
   atermpp::term_list< Expression > resultl=l;
   resultl.push_back(aterm_cast< Expression >(m));
@@ -59,7 +57,7 @@ template < typename Expression, typename CompatibleExpression >
 inline
 atermpp::term_list< Expression > operator+(const CompatibleExpression &m, const atermpp::term_list< Expression > &l)
 {
-  BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
+  static_assert(boost::is_convertible< CompatibleExpression, Expression >::value,"Concatenated lists must be of the same type (3)");
   atermpp::term_list< Expression > result=l;
   result.push_front(aterm_cast<Expression>(m));
   return result;

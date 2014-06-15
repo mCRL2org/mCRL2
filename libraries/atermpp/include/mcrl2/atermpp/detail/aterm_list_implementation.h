@@ -151,8 +151,8 @@ namespace detail
   template <class Term, class Iter, class ATermConverter>
   inline const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm)
   {
-    BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-    BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
+    static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
     const _aterm* result=aterm::empty_aterm_list();
     while (first != last)
     {
@@ -165,8 +165,8 @@ namespace detail
   template <class Term, class Iter, class ATermConverter>
   inline const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter &convert_to_aterm)
   {
-    BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-    BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
+    static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     const size_t len=std::distance(first,last);
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,Term, len);
