@@ -67,7 +67,23 @@ struct sort_expression_actions: public core::default_parser_actions
 
   data::sort_expression_list parse_SortProduct(const core::parse_node& node)
   {
-    return parse_list<data::sort_expression>(node, "SortExpr", boost::bind(&sort_expression_actions::parse_SortExpr, this, _1));
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "SortExpr"))
+    {
+      sort_expression s = parse_SortExpr(node.child(0));
+      data::sort_expression_list result;
+      result.push_front(s);
+      return result;
+    }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortProduct") && (node.child(1).string() == "#") && (symbol_name(node.child(2)) == "SortExpr")) { return parse_list<data::sort_expression>(node, "SortExpr", boost::bind(&sort_expression_actions::parse_SortExpr, this, _1)); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortProduct") && (node.child(1).string() == "->") && (symbol_name(node.child(2)) == "SortExpr"))
+    {
+      function_sort fs(parse_SortProduct(node.child(0)), parse_SortExpr(node.child(2)));
+      data::sort_expression_list result;
+      result.push_front(fs);
+      return result;
+    }
+    report_unexpected_node(node);
+    return data::sort_expression_list();
   }
 
   data::structured_sort_constructor parse_ConstrDecl(const core::parse_node& node)
