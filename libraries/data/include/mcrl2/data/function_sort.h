@@ -13,7 +13,6 @@
 #define MCRL2_DATA_FUNCTION_SORT_H
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"

@@ -111,11 +111,11 @@ class data_property_map
       return (print_separators) ? add_separators< Container >(print(v)) : print(v);
     }
 
-    template < typename Expression >
+    /* template < typename Expression >
     std::string print(const atermpp::term_list< Expression >& v, bool print_separators = true) const
     {
       return print(boost::make_iterator_range(v), print_separators);
-    }
+    } */
 
     //--------------------------------------------//
     // parse functions

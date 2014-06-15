@@ -558,14 +558,14 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
   // with arguments, without recogniser
   //  a(a0 : A)
   constructors.push_back(structured_sort_constructor("a",
-                         boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+                         structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1)));
   // two arguments, with recogniser
   //  b(B)?is_b
   constructors.push_back(structured_sort_constructor("b",
-                         boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
+                         structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
   //  c(n0 : Nat, n1 : Nat)?is_c
   constructors.push_back(structured_sort_constructor("c",
-                         boost::make_iterator_range(arguments.begin() + 2, arguments.end()), "is_c"));
+                         structured_sort_constructor_argument_list(arguments.begin() + 2, arguments.end()), "is_c"));
 
   data::structured_sort ls(constructors);
 

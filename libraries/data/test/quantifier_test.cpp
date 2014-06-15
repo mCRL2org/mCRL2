@@ -9,7 +9,6 @@
 /// \file list_test.cpp
 /// \brief Basic regression test for quantifier expressions.
 
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/list.h"

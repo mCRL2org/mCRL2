@@ -12,7 +12,6 @@
 #define MCRL2_DEBUG_EXPRESSION_BUILDER
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/process/parse.h"

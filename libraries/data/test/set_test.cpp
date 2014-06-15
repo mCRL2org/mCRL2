@@ -9,7 +9,6 @@
 /// \file set_test.cpp
 /// \brief Basic regression test for set expressions.
 
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/standard.h"

@@ -148,8 +148,8 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
 
   structured_sort_constructor_argument_vector nv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_nat::nat()))));
   structured_sort_constructor_argument_vector bv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_bool::bool_()))));
-  structured_sort_constructor b("B", boost::make_iterator_range(nv));
-  structured_sort_constructor c("C", boost::make_iterator_range(bv));
+  structured_sort_constructor b("B", nv);
+  structured_sort_constructor c("C", bv);
   structured_sort bc(atermpp::make_vector(b,c));
 
   BOOST_CHECK_EQUAL(bc.constructors(), structured_sort_constructor_list(atermpp::make_list(b,c)));

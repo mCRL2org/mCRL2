@@ -17,7 +17,6 @@
 #include <set>
 #include <utility>
 #include "boost/bind.hpp"
-#include "boost/range/iterator_range.hpp"
 
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard_utility.h"

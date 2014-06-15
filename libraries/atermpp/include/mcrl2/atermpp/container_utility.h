@@ -23,7 +23,6 @@
 #include "boost/call_traits.hpp"
 #include "boost/type_traits/remove_reference.hpp"
 #include "boost/type_traits/add_reference.hpp"
-#include "boost/range/iterator_range.hpp"
 #include "boost/iterator/iterator_adaptor.hpp"
 #include "boost/iterator/iterator_facade.hpp"
 
@@ -70,12 +69,6 @@ struct is_container_impl< std::vector< T > >
 
 template < typename T >
 struct is_container_impl< atermpp::term_list< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< boost::iterator_range< T > >
 {
   typedef boost::true_type type;
 };
