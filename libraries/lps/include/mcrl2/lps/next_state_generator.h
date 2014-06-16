@@ -35,7 +35,11 @@ class next_state_generator
     typedef atermpp::term_appl<data::data_expression> condition_arguments_t;
 
     typedef data::rewriter rewriter_t;
+#ifdef MCRL2_USE_NEW_ENUMERATOR
+    typedef data::enumerator_algorithm_with_iterator<rewriter_t, data::mutable_indexed_substitution<>, data::enumerator_list_element_with_substitution<data::data_expression> > enumerator_t;
+#else
     typedef data::classic_enumerator<rewriter_t> enumerator_t;
+#endif
 
     typedef data::rewriter::substitution_type substitution_t;
 
@@ -141,7 +145,11 @@ class next_state_generator
         bool m_cached;
         summand_enumeration_t::iterator m_enumeration_cache_iterator;
         summand_enumeration_t::iterator m_enumeration_cache_end;
+#ifdef MCRL2_USE_NEW_ENUMERATOR
+        enumerator_t::iterator<data::is_not_false> m_enumeration_iterator;
+#else
         enumerator_t::iterator m_enumeration_iterator;
+#endif
         bool m_caching;
         condition_arguments_t m_enumeration_cache_key;
         summand_enumeration_t m_enumeration_log;
@@ -149,6 +157,9 @@ class next_state_generator
       public:
         iterator()
           : m_generator(0)
+#ifdef MCRL2_USE_NEW_ENUMERATOR
+            , m_enumeration_iterator(data::is_not_false())
+#endif
         {
         }
 
