@@ -29,6 +29,24 @@ namespace mcrl2
 namespace data
 {
 
+struct is_not_false
+{
+  typedef core::term_traits<data_expression> tr;
+  bool operator()(const data_expression& x) const
+  {
+    return !tr::is_false(x);
+  }
+};
+
+struct is_not_true
+{
+  typedef core::term_traits<data_expression> tr;
+  bool operator()(const data_expression& x) const
+  {
+    return !tr::is_true(x);
+  }
+};
+
 /// \brief The default element for the todo list of the enumerator
 template <typename Expression>
 class enumerator_list_element
@@ -413,8 +431,8 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     };
 
     enumerator_algorithm_with_iterator(
-                Rewriter& R, 
-                const data::data_specification& dataspec,                     
+                Rewriter& R,
+                const data::data_specification& dataspec,
                 std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                 bool throw_exceptions = false)
       : super(R, dataspec,max_count,throw_exceptions)
