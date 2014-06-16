@@ -12,6 +12,8 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
+// #define MCRL2_USE_NEW_ENUMERATOR
+
 #include <deque>
 #include <limits>
 #include <map>
@@ -379,6 +381,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
         std::size_t count;
 
       public:
+        /// \pre p.expression() is already rewritten, and accept_(p) is true
         iterator(const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_,
                  MutableSubstitution* sigma_,
                  const EnumeratorListElement& p,
@@ -447,7 +450,15 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     template <typename Filter>
     iterator<Filter> begin(MutableSubstitution& sigma, const EnumeratorListElement& p, Filter accept) const
     {
-      return iterator<Filter>(this, &sigma, p, accept);
+      auto phi = super::R(p.expression(), sigma);
+      if (accept(phi))
+      {
+        return iterator<Filter>(this, &sigma, EnumeratorListElement(p.variables(), phi), accept);
+      }
+      else
+      {
+        return end(accept);
+      }
     }
 
     template <typename Filter>
