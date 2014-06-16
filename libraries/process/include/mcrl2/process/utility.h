@@ -20,6 +20,7 @@
 #include "mcrl2/process/replace.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/sequence.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -310,28 +311,6 @@ bool includes(const multi_action_name_set& A, const multi_action_name& y)
     }
   }
   return false;
-}
-
-// checks if the sorted ranges [first1, ..., last1) and [first2, ..., last2) have an empty intersection
-template <typename InputIterator1, typename InputIterator2>
-bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2)
-{
-  while (first1 != last1 && first2 != last2)
-  {
-    if (*first1 < *first2)
-    {
-      ++first1;
-    }
-    else if (*first2 < *first1)
-    {
-      ++first2;
-    }
-    else
-    {
-      return false;
-    }
-  }
-  return true;
 }
 
 inline
@@ -704,7 +683,7 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
   {
     for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
     {
-      if (detail::has_empty_intersection(beta.begin(), beta.end(), i->begin(), i->end()))
+      if (utilities::detail::has_empty_intersection(beta.begin(), beta.end(), i->begin(), i->end()))
       {
         result.insert(*i);
       }
