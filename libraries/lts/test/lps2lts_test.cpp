@@ -537,7 +537,7 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_with_more_arguments_can_be_enumerate
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_can_be_enumerated)
 {
   std::string spec(
-    "act FSet(Bool);\n"
+    "act int:FSet(Bool);\n"
     "proc P = sum f:FSet(Bool).int(f).P;\n"
     "init P;\n"
   );
@@ -547,7 +547,7 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_can_be_enumerated)
 BOOST_AUTO_TEST_CASE(test_whether_sets_can_be_enumerated)
 {
   std::string spec(
-    "act FSet(Bool);\n"
+    "act int:FSet(Bool);\n"
     "proc P = sum f:FSet(Bool).int(f).P;\n"
     "init P;\n"
   );
@@ -578,10 +578,20 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_of_functions_can_be_enumerated)
 {
   std::string spec(
     "act int:FSet(Bool->Bool);\n"
-    "proc P = sum f:FSet(Bool).(true in f) -> int(f).P;\n"
+    "proc P = sum f:FSet(Bool->Bool).((lambda x:Bool.true) in f) -> int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 16, 16);
+  check_lps2lts_specification(spec, 1, 8, 8);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
+{
+  std::string spec(
+    "act int:Set(Bool->Bool);\n"
+    "proc P = sum f:Set(Bool->Bool).((lambda x:Bool.true) in f) -> int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 8, 8);
 }
   
 

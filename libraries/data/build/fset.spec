@@ -38,6 +38,8 @@ eqn @fset_insert(d, {})  =  @fset_cons(d, {});
     @fset_cinsert(d, true, s)  =  @fset_insert(d, s);
     in(d, {})  =  false;
     in(d,@fset_cons(e,s)) = ||(==(d,e),in(d,s));
+% The rule below is added such that set membership can still be calculated although the set elements cannot be effectively ordered.
+    in(d,@fset_insert(e,s)) = ||(==(d,e),in(d,s));
     @fset_union(f, g, {}, {})  =  {};
     @fset_union(f, g, @fset_cons(d, s), {})  =  @fset_cinsert(d, !(g(d)), @fset_union(f, g, s, {}));
     @fset_union(f, g, {}, @fset_cons(e, t))  =  @fset_cinsert(e, !(f(e)), @fset_union(f, g, {}, t));

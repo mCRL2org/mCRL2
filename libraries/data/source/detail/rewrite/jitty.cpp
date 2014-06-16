@@ -654,7 +654,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         no_assignments=0; //subst.clear();
 
         bool matches = true;
-
         for (size_t i=1; i<rule_arity; i++)
         {
           assert(i<arity);

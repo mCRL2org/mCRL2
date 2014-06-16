@@ -836,6 +836,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vd, vs), cinsert(s, vd, sort_bool::true_(), vs), insert(s, vd, vs)));
         result.push_back(data_equation(atermpp::make_vector(vd), in(s, vd, empty(s)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), in(s, vd, insert(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
         result.push_back(data_equation(atermpp::make_vector(vf, vg), fset_union(s, vf, vg, empty(s), empty(s)), empty(s)));
         result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), fset_union(s, vf, vg, cons_(s, vd, vs), empty(s)), cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, empty(s)))));
         result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), fset_union(s, vf, vg, empty(s), cons_(s, ve, vt)), cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, empty(s), vt))));

@@ -72,6 +72,13 @@ class used_data_equation_selector
         // Always add equality and inequality of each sort. The one point rewriter is using this for instance.
         add_symbol(equal_to(*j));
         add_symbol(not_equal_to(*j));
+
+        // Always add insert for an FSet(S) function, as it is used when enumerating the elements of an FSet.
+        if (sort_fset::is_fset(*j))
+        {
+          const container_sort s=core::down_cast<container_sort>(*j);
+          add_symbol(sort_fset::insert(s.element_sort()));
+        }
       }
 
       std::set< data_equation > equations(specification.equations().begin(),specification.equations().end());

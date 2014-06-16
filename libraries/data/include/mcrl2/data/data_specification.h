@@ -856,7 +856,7 @@ class data_specification
       }
       else if (is_function_sort(sort))
       {
-        const sort_expression t=function_sort(sort).codomain();
+        const sort_expression& t=function_sort(sort).codomain();
         import_system_defined_sort(t,sorts_already_added_to_m_normalised_sorts);
         const sort_expression_list& l=function_sort(sort).domain();
         for (sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
