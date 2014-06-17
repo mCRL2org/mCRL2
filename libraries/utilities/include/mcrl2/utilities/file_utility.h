@@ -110,6 +110,7 @@ public:
   {
     if (!m_stdio)
     {
+      static_cast<filestream_type*>(m_stream)->close();
       delete m_stream;
     }
   }
