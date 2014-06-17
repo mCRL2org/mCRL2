@@ -28,6 +28,10 @@
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/exploration.h"
 
+#ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
+#include "mcrl2/data/detail/rewrite_statistics.h"
+#endif
+
 #define __STRINGIFY(x) #x
 #define STRINGIFY(x) __STRINGIFY(x)
 
@@ -384,7 +388,7 @@ int main(int argc, char** argv)
   {
     result = tool_instance->execute(argc, argv);
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
-    data::detail::display_rewrite_statistics();
+    mcrl2::data::detail::display_rewrite_statistics();
 #endif
   }
   catch (...)
