@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/constelm.h"
+#include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/utilities/logger.h"

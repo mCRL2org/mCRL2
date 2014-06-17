@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"

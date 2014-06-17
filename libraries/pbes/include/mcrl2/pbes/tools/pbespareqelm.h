@@ -15,6 +15,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/eqelm.h"
+#include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 
