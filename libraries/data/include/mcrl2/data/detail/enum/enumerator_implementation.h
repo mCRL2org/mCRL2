@@ -9,6 +9,7 @@
 #ifndef MCRL2_DATA_DETAIL_ENUM_ENUMERATOR_IMPLEMENTATION_H
 #define MCRL2_DATA_DETAIL_ENUM_ENUMERATOR_IMPLEMENTATION_H
 
+#include <cmath>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/data/classic_enumerator.h"
@@ -435,7 +436,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
                             total_domain_size << " functions to enumerate sort " << sort << "\n";
           }
 
-          const size_t number_of_functions=pow(codomain_expressions.size(),total_domain_size);
+          const size_t number_of_functions = std::pow(codomain_expressions.size(),total_domain_size);
 
           const variable_list par_list(function_parameters.begin(), function_parameters.end());
           if (number_of_functions==1) // In this case generate lambda var1,var2,....,var3.result.
@@ -561,7 +562,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
                             all_element_expressions.size() << " sets to enumerate sort " << sort << "\n";
           }
 
-          const size_t number_of_sets=pow(2,all_element_expressions.size());
+          const size_t number_of_sets = std::pow(2,all_element_expressions.size());
 
           const data_expression old_substituted_value=(*enum_sigma)(var);
 
