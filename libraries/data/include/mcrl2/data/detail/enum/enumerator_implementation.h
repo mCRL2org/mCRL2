@@ -35,7 +35,7 @@ class test_equal
     }
 };
 
-inline data_expression make_set(size_t function_index, 
+inline data_expression make_set(size_t function_index,
                                 const sort_expression& element_sort,
                                 const data_expression_vector& set_elements)
 {
@@ -52,7 +52,7 @@ inline data_expression make_set(size_t function_index,
 }
 
 
-inline data_expression make_if_expression(size_t& function_index, 
+inline data_expression make_if_expression(size_t& function_index,
                                           const size_t argument_index,
                                           const std::vector < data_expression_vector >& data_domain_expressions,
                                           const data_expression_vector& codomain_expressions,
@@ -66,12 +66,12 @@ inline data_expression make_if_expression(size_t& function_index,
    return codomain_expressions[result_expression_index];
  }
 
- data_expression result; 
+ data_expression result;
  const data_expression_vector& current_enumerated_elements=data_domain_expressions[argument_index];
  for(data_expression_vector::const_reverse_iterator i=current_enumerated_elements.rbegin(); i!=current_enumerated_elements.rend(); ++i)
  {
    if (i==current_enumerated_elements.rbegin())
-   { 
+   {
      result=make_if_expression(function_index,argument_index+1,data_domain_expressions,codomain_expressions,parameters);
    }
    else
@@ -98,12 +98,12 @@ data_expression_vector get_all_expressions(const sort_expression& s, const data_
 {
   assert(data_spec.is_certainly_finite(s));
   typedef classic_enumerator<REWRITER, typename REWRITER::substitution_type> enumerator_type;
-  enumerator_type enumerator(rewr, data_spec); 
+  enumerator_type enumerator(rewr, data_spec);
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@",s);
   const variable_list vl=atermpp::make_list<variable>(v);
-  for(typename enumerator_type::iterator i=enumerator.begin(sigma,enumerator_list_element_with_substitution<data_expression>(vl,sort_bool::true_())); 
+  for(typename enumerator_type::iterator i=enumerator.begin(sigma,enumerator_list_element_with_substitution<data_expression>(vl,sort_bool::true_()));
               i!=enumerator.end(); ++i)
   {
     i->add_assignments(vl,sigma,rewr);
@@ -209,7 +209,7 @@ template <class REWRITER, class MutableSubstitution, class EnumeratorListElement
 inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElement>::iterator::push_on_fs_stack_and_split_or_without_rewriting(
                                 const EnumeratorListElement& partial_solution,
                                 const data_expression_list& negated_term_list,
-                                const bool negated) 
+                                const bool negated)
 {
   /* If the negated_term_list equals t1,...,tn, store condition /\ !t1 /\ !t2 /\ ... /\ !tn
      on the fs_stack.  If the condition to be stored on the fs_stack has the shape phi \/ psi, then
@@ -217,6 +217,8 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
      more equalities and therefore be more effective. */
  const variable_list& var_list=partial_solution.variables();
  const typename REWRITER::term_type& condition=partial_solution.expression();
+
+#ifndef MCRL2_DISABLE_ENUMERATOR_SPLIT_DISJUNCTIONS
   if (is_application(condition))
   {
     const application& ca = core::down_cast<application>(condition);
@@ -236,6 +238,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
       return;
     }
   }
+#endif
 
   const typename REWRITER::term_type new_expr = add_negations(condition,negated_term_list,negated);
 
@@ -275,7 +278,7 @@ inline bool classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
       v = var;
       e = sort_bool::true_();
       return true;
-    } 
+    }
     return false;
   }
 
@@ -300,7 +303,7 @@ inline bool classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
       // If the expression has the shape !x where x is a variable over which enumeration is taking
       // place, return x:=false.
       if (is_variable(ta[0]))
-      { 
+      {
         const variable& var=core::down_cast<variable>(ta[0]);
         assert(var.sort()==sort_bool::bool_());
         if (std::find(vars.begin(),vars.end(),var)!=vars.end())
@@ -378,8 +381,8 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
     if (e.variables().empty() || e.expression()==sort_bool::false_())
     {
       if (e.expression()!=sort_bool::false_())
-      { 
-        // A solution is found. 
+      {
+        // A solution is found.
         if (!m_not_equal_to_false)
         {
           e=EnumeratorListElement(e.variables(),m_enclosing_enumerator->m_evaluator(sort_bool::not_(e.expression()),*enum_sigma),e);
@@ -400,7 +403,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
       {
         if (m_enclosing_enumerator->m_data_spec.is_certainly_finite(sort))
         {
-          // Enumerate all functions of this sort. 
+          // Enumerate all functions of this sort.
           function_sort fsort=core::down_cast<function_sort>(sort);
           data_expression_vector codomain_expressions=get_all_expressions(fsort.codomain(),m_enclosing_enumerator->m_data_spec, m_enclosing_enumerator->m_evaluator);
           std::vector < data_expression_vector > domain_expressions;
@@ -413,27 +416,27 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             total_domain_size=total_domain_size*domain_expressions.back().size();
             function_parameters.push_back(variable(m_enclosing_enumerator->m_evaluator.identifier_generator()("var_func",false),*i));
           }
-          
+
           if (total_domain_size*log2(codomain_expressions.size())>=32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
           {
             e.invalidate();
             if (m_enclosing_enumerator->m_throw_exceptions)
             {
               std::stringstream ss;
-              ss << "Cannot generate " << codomain_expressions.size() << "^" << 
+              ss << "Cannot generate " << codomain_expressions.size() << "^" <<
                             total_domain_size << " functions to enumerate function sort " << sort << "\n";
-              throw mcrl2::runtime_error(ss.str()); 
+              throw mcrl2::runtime_error(ss.str());
             }
             return;
           }
           if (total_domain_size*log2(codomain_expressions.size())>16)  // If there are more than 2^16 functions, provide a warning.
           {
-            mCRL2log(log::warning) << "Generate " << codomain_expressions.size() << "^" << 
+            mCRL2log(log::warning) << "Generate " << codomain_expressions.size() << "^" <<
                             total_domain_size << " functions to enumerate sort " << sort << "\n";
           }
-        
+
           const size_t number_of_functions=pow(codomain_expressions.size(),total_domain_size);
-          
+
           const variable_list par_list(function_parameters.begin(), function_parameters.end());
           if (number_of_functions==1) // In this case generate lambda var1,var2,....,var3.result.
           {
@@ -450,7 +453,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
                                     false);
             }
           }
-          else 
+          else
           {
             const data_expression old_substituted_value=(*enum_sigma)(var);
             for(size_t i=0; i<number_of_functions; ++i)
@@ -474,7 +477,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
           }
         }
         else
-        { 
+        {
           e.invalidate();
           if (m_enclosing_enumerator->m_throw_exceptions)
           {
@@ -518,13 +521,13 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
           (*enum_sigma)[var]=old_substituted_value;
 
           if (rewritten_expr!=sort_bool::false_())
-          { 
+          {
             push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars+atermpp::make_list(fset_variable),rewritten_expr,e,var,term),
                                       data_expression_list(),
                                       false);
           }
         }
-        else 
+        else
         {
           e.invalidate();
           if (m_enclosing_enumerator->m_throw_exceptions)
@@ -546,9 +549,9 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             if (m_enclosing_enumerator->m_throw_exceptions)
             {
               std::stringstream ss;
-              ss << "Will not generate the 2^" << 
+              ss << "Will not generate the 2^" <<
                             all_element_expressions.size() << " sets to enumerate all sets of sort " << sort << "\n";
-              throw mcrl2::runtime_error(ss.str()); 
+              throw mcrl2::runtime_error(ss.str());
             }
             return;
           }
@@ -557,11 +560,11 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             mCRL2log(log::warning) << "Generate 2^" <<
                             all_element_expressions.size() << " sets to enumerate sort " << sort << "\n";
           }
-        
+
           const size_t number_of_sets=pow(2,all_element_expressions.size());
-          
+
           const data_expression old_substituted_value=(*enum_sigma)(var);
-         
+
           for(size_t i=0; i<number_of_sets; ++i)
           {
             const data_expression set=m_enclosing_enumerator->m_evaluator(detail::make_set(i,element_sort,all_element_expressions),*enum_sigma);
@@ -569,7 +572,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             const data_expression rewritten_expr=m_enclosing_enumerator->m_evaluator(e.expression(),*enum_sigma);
 
             if (rewritten_expr!=sort_bool::false_())
-            { 
+            {
               push_on_fs_stack_and_split_or_without_rewriting(EnumeratorListElement(uvars,rewritten_expr,e,var,set),
                                     data_expression_list(),
                                     false);
@@ -578,7 +581,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
           (*enum_sigma)[var]=old_substituted_value;
 
         }
-        else 
+        else
         {
           e.invalidate();
           if (m_enclosing_enumerator->m_throw_exceptions)
