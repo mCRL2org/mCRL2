@@ -16,6 +16,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/exception.h"
