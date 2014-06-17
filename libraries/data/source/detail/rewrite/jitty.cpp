@@ -784,6 +784,14 @@ data_expression RewriterJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
+#ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
+  static std::size_t counter;
+  counter++;
+  if (counter % 10000 == 0)
+  {
+    mCRL2log(verbose) << "rewrite count = " << counter << std::endl;
+  }
+#endif
   return rewrite_aux(term, sigma);
 }
 

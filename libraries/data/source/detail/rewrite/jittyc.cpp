@@ -3192,6 +3192,14 @@ data_expression RewriterCompilingJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
+#ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
+  static std::size_t counter;
+  counter++;
+  if (counter % 10000 == 0)
+  {
+    mCRL2log(verbose) << "rewrite count = " << counter << std::endl;
+  }
+#endif
   // Save global sigma and restore it afterwards, as rewriting might be recursive with different
   // substitutions, due to the enumerator.
   substitution_type *saved_sigma=global_sigma;
