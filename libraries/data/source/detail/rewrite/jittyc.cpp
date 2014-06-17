@@ -39,6 +39,10 @@
 #include "mcrl2/data/traverser.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
+#ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
+#include "mcrl2/data/detail/rewrite_statistics.h"
+#endif
+
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
@@ -83,8 +87,8 @@ static void initialise_common()
 #define is_ar_var(x) (x.function()==afunARvar)
 
 size_t RewriterCompilingJitty::ar_index(
-                const data::function_symbol& f, 
-                const size_t arity, 
+                const data::function_symbol& f,
+                const size_t arity,
                 const size_t arg)
 {
   assert(arg<arity);
@@ -94,8 +98,8 @@ size_t RewriterCompilingJitty::ar_index(
 }
 
 atermpp::aterm_appl RewriterCompilingJitty::get_ar_array(
-                const data::function_symbol& f, 
-                const size_t arity, 
+                const data::function_symbol& f,
+                const size_t arity,
                 const size_t arg)
 {
   return ar[ar_index(f,arity,arg)];
@@ -103,8 +107,8 @@ atermpp::aterm_appl RewriterCompilingJitty::get_ar_array(
 
 
 void RewriterCompilingJitty::set_ar_array(
-                const data::function_symbol& f, 
-                const size_t arity, 
+                const data::function_symbol& f,
+                const size_t arity,
                 const size_t arg,
                 const atermpp::aterm_appl ar_expression)
 {
@@ -2258,7 +2262,7 @@ fprintf(f,"%s",ss.str().c_str());
 
 // The function build_ar_internal returns an and/or tree indicating on which function symbol with which
 // arity the variable var depends. The idea is that if var must be a normal form if any of these arguments
-// must be a normal form. In this way the reduction to normal forms of these argument is not unnecessarily 
+// must be a normal form. In this way the reduction to normal forms of these argument is not unnecessarily
 // postponed. For example in the expression if(!b,1,0) the typical result is @@and(@@var(149),@@var(720))
 // indicating that b must not be rewritten to a normal form anyhow if the first argument of ! must not always be rewritten
 // to a normalform and the first argument of if must not always be rewritten to normal form.
@@ -2307,7 +2311,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const data_ex
   size_t arity = recursive_number_of_args(expra);
   for (size_t i=0; i<arity; i++)
   {
-    const size_t idx = ar_index(head,arity,i); 
+    const size_t idx = ar_index(head,arity,i);
     atermpp::aterm_appl t = build_ar_expr_internal(get_argument_of_higher_order_term(expra,i),var);
     result = make_ar_or(result,make_ar_and(make_ar_var(idx),t));
   }
@@ -2381,7 +2385,7 @@ bool RewriterCompilingJitty::always_rewrite_argument(
      const size_t arity,
      const size_t arg)
 {
-  return !is_ar_false(get_ar_array(opid,arity,arg)); 
+  return !is_ar_false(get_ar_array(opid,arity,arg));
 }
 
 bool RewriterCompilingJitty::calc_ar(const atermpp::aterm_appl& expr)
@@ -3193,12 +3197,7 @@ data_expression RewriterCompilingJitty::rewrite(
      substitution_type& sigma)
 {
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
-  static std::size_t counter;
-  counter++;
-  if (counter % 10000 == 0)
-  {
-    mCRL2log(verbose) << "rewrite count = " << counter << std::endl;
-  }
+  data::detail::increment_rewrite_count();
 #endif
   // Save global sigma and restore it afterwards, as rewriting might be recursive with different
   // substitutions, due to the enumerator.

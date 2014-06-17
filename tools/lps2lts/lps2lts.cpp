@@ -383,6 +383,9 @@ int main(int argc, char** argv)
   try
   {
     result = tool_instance->execute(argc, argv);
+#ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
+    data::detail::display_rewrite_statistics();
+#endif
   }
   catch (...)
   {
