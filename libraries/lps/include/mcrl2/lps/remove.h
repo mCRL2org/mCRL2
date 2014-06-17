@@ -48,13 +48,12 @@ struct is_singleton_sort
 
   bool operator()(const data::sort_expression& s) const
   {
-    data::function_symbol_vector c(m_data_spec.constructors(s));
-    if (boost::distance(c) != 1)
+    auto const& constructors = m_data_spec.constructors(s);
+    if (constructors.size() != 1)
     {
       return false;
     }
-    data::function_symbol f = *c.begin();
-    return !is_function_sort(f.sort());
+    return !is_function_sort(constructors.front().sort());
   }
 };
 
