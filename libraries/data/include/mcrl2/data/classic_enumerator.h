@@ -12,6 +12,8 @@
 #ifndef _MCRL2_DATA_CLASSIC_ENUMERATOR__HPP_
 #define _MCRL2_DATA_CLASSIC_ENUMERATOR__HPP_
 
+#include <cstddef>
+
 // Constant used for printing progress messages
 const size_t MAX_VARS_INIT=1000;  
 const size_t MAX_VARS_FACTOR=5;
