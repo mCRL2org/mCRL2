@@ -522,7 +522,7 @@ class bisim_partitioner
 
           if (mCRL2logEnabled(log::debug))
           {
-            const size_t m=static_cast<size_t>(std::pow(10, std::floor(std::log10(static_cast<double>((blocks.size()+1)/2)))));
+            const size_t m = static_cast<size_t>(std::pow(10.0, std::floor(std::log10(static_cast<double>((blocks.size()+1)/2)))));
             if ((blocks.size()+1)/2 % m==0)
             {
               mCRL2log(log::debug) << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << std::endl;
