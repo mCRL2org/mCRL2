@@ -170,7 +170,6 @@ struct find_equalities_traverser: public Traverser<Derived>
 
   void push(const find_equalities_expression& x)
   {
-    mCRL2log(log::verbose) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 
@@ -277,7 +276,7 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
     else
     {
-      mCRL2log(log::debug) << "ignoring " << x << std::endl;
+      mCRL2log(log::debug1) << "ignoring " << x << std::endl;
       push(find_equalities_expression());
     }
   }

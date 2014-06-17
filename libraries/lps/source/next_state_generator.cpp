@@ -42,7 +42,7 @@ next_state_generator::next_state_generator(
     summand.variables =  order_variables_to_optimise_enumeration(i->summation_variables(),spec.data());
     summand.condition = i->condition();
     summand.result_state = get_internal_state(i->next_state(m_specification.process().process_parameters()));
-    
+
     for (auto j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
     {
       action_internal_t action_label;
@@ -54,7 +54,7 @@ next_state_generator::next_state_generator(
       }
 
       summand.action_label.push_back(action_label);
-    } 
+    }
 
     for (size_t j = 0; j < m_process_parameters.size(); j++)
     {
@@ -444,14 +444,7 @@ void next_state_generator::iterator::increment()
       {
         (*m_substitution)[*i] = *i;  // Reset the variable.
       }
-      // Apply an assignment move, as the right hand side is not used anymore, and this is far more efficient.
-      m_enumeration_iterator=m_generator->m_enumerator.begin(
-                              *m_substitution, 
-                              enumerator_list_element_with_substitution<data_expression>(m_summand->variables, m_summand->condition)
-#ifdef MCRL2_USE_NEW_ENUMERATOR
-                              , data::is_not_false()
-#endif
-                             );
+      enumerate(m_summand->variables, m_summand->condition, *m_substitution);
     }
   }
 
@@ -469,7 +462,7 @@ void next_state_generator::iterator::increment()
   }
   else
   {
-    m_enumeration_iterator->add_assignments(m_summand->variables,*m_substitution,m_generator->m_rewriter); 
+    m_enumeration_iterator->add_assignments(m_summand->variables,*m_substitution,m_generator->m_rewriter);
 
     // If we failed to exactly rewrite the condition to true, nextstate generation fails.
     if (m_enumeration_iterator->expression()!=sort_bool::true_())

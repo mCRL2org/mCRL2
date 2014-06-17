@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
-// #define MCRL2_USE_NEW_ENUMERATOR
-
 #include <deque>
 #include <limits>
 #include <map>

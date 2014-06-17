@@ -11,13 +11,18 @@
 #ifndef MCRL2_LPS_NEXT_STATE_GENERATOR_H
 #define MCRL2_LPS_NEXT_STATE_GENERATOR_H
 
+// #define MCRL2_USE_NEW_ENUMERATOR
+
 #include <iterator>
 #include <string>
 #include <vector>
 #include <boost/iterator/iterator_facade.hpp>
 
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/enumerator.h"
+#ifdef MCRL2_NEXT_STATE_LOG_EQUALITIES
+#include "mcrl2/data/find_equalities.h"
+#endif
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/atermpp/shared_subset.h"
@@ -37,8 +42,10 @@ class next_state_generator
     typedef data::rewriter rewriter_t;
 #ifdef MCRL2_USE_NEW_ENUMERATOR
     typedef data::enumerator_algorithm_with_iterator<rewriter_t, data::mutable_indexed_substitution<>, data::enumerator_list_element_with_substitution<data::data_expression> > enumerator_t;
+    typedef enumerator_t::iterator<data::is_not_false> enumerator_iterator_t;
 #else
     typedef data::classic_enumerator<rewriter_t> enumerator_t;
+    typedef enumerator_t::iterator enumerator_iterator_t;
 #endif
 
     typedef data::rewriter::substitution_type substitution_t;
@@ -145,14 +152,34 @@ class next_state_generator
         bool m_cached;
         summand_enumeration_t::iterator m_enumeration_cache_iterator;
         summand_enumeration_t::iterator m_enumeration_cache_end;
-#ifdef MCRL2_USE_NEW_ENUMERATOR
-        enumerator_t::iterator<data::is_not_false> m_enumeration_iterator;
-#else
-        enumerator_t::iterator m_enumeration_iterator;
-#endif
+        enumerator_iterator_t m_enumeration_iterator;
         bool m_caching;
         condition_arguments_t m_enumeration_cache_key;
         summand_enumeration_t m_enumeration_log;
+
+        /// \brief Enumerate <variables, phi> with substitution sigma.
+        void enumerate(const data::variable_list& variables, const data::data_expression& phi, data::mutable_indexed_substitution<>& sigma)
+        {
+#ifdef MCRL2_NEXT_STATE_LOG_EQUALITIES
+          data::detail::find_equalities_traverser_inst f;
+          f(phi);
+          auto const& equalities = f.top().equalities;
+          for (auto i = variables.begin(); i != variables.end(); ++i)
+          {
+            auto j = equalities.find(*i);
+            if (j != equalities.end())
+            {
+              std::cout << "EQUALITY: " << j->first << " -> " << core::detail::print_set(j->second) << std::endl;
+            }
+          }
+#endif
+          m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, data::enumerator_list_element_with_substitution<data::data_expression>(variables, phi)
+#ifdef MCRL2_USE_NEW_ENUMERATOR
+                                  , data::is_not_false()
+#endif
+          );
+        }
+
 
       public:
         iterator()
