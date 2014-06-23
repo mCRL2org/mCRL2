@@ -60,8 +60,10 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   v.push_back(x);
   data::mutable_indexed_substitution<> sigma;
   data::variable_list vl(v.begin(),v.end());
+  std::deque < data::enumerator_list_element_with_substitution<data::data_expression> >
+      enumerator_deque(1,data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()));
   for (enumerator_type::iterator
-       i = enumerator.begin(sigma, data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()), max_internal_variables); i != enumerator.end() ; ++i)
+       i = enumerator.begin(sigma, enumerator_deque, max_internal_variables); i != enumerator.end() ; ++i)
   {
     i->add_assignments(vl,sigma,rewr);
     result.push_back(to_string(sigma(vl.front())));

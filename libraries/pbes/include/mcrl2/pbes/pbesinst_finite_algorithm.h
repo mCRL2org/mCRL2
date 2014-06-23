@@ -225,7 +225,9 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     data::classic_enumerator<> enumerator(super::R, m_data_spec);
     mcrl2::data::mutable_indexed_substitution<> local_sigma;
     const data::variable_list vl(di.begin(), di.end());
-    for (auto i = enumerator.begin(local_sigma, data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_())); 
+    std::deque < data::enumerator_list_element_with_substitution<data::data_expression> >
+         enumerator_deque(1,data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()));
+    for (auto i = enumerator.begin(local_sigma, enumerator_deque);
          i != enumerator.end(); ++i)
     {
       mCRL2log(log::debug1) << "sigma = " << sigma << "\n";
@@ -370,7 +372,9 @@ class pbesinst_finite_algorithm
         data::classic_enumerator<> enumerator(rewr,p.data());
         mcrl2::data::mutable_indexed_substitution<> local_sigma;
         const data::variable_list vl(finite_parameters.begin(), finite_parameters.end());
-        for (auto j = enumerator.begin(local_sigma, data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_())); 
+        std::deque < data::enumerator_list_element_with_substitution<data::data_expression> >
+              enumerator_deque(1,data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()));
+        for (auto j = enumerator.begin(local_sigma, enumerator_deque);
              j != enumerator.end(); ++j)
         {
           // apply the substitution contained in the enumerated element. 

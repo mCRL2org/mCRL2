@@ -154,10 +154,11 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
           data::mutable_indexed_substitution<> local_sigma;
           const data::variable_list vl=atermpp::make_list<data::variable>(par);
-
+          std::deque<data::enumerator_list_element_with_substitution<data::data_expression> >
+                     enumerator_deque(1,data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()));
           for (enumerator_type::iterator j=enumerator.begin(
                            local_sigma,
-                           data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()));
+                           enumerator_deque);
                 j != enumerator.end() ; ++j)
           {
             j->add_assignments(vl,local_sigma,m_rewriter);

@@ -75,7 +75,7 @@ class classic_enumerator
         expression_type enum_expr;                  // Initial condition to be satisfied, used for debug and exception messages.
         substitution_type* enum_sigma;
 
-        std::deque < EnumeratorListElement > fs_stack;
+        std::deque < EnumeratorListElement >* fs_stack;
 
         size_t used_vars;
         size_t max_vars;
@@ -86,11 +86,17 @@ class classic_enumerator
           return default_sigma;
         }
 
-        data_specification& default_data_spec()
+        std::deque<EnumeratorListElement>& default_deque()
+        {
+          static std::deque<EnumeratorListElement> default_deque;
+          return default_deque;
+        }
+
+        /* data_specification& default_data_spec()
         {
           static data_specification default_data_spec;
           return default_data_spec;
-        }
+        } */
 
       public:
 
@@ -98,25 +104,28 @@ class classic_enumerator
         //  \details Use it via begin() of the classic enumerator class. See the
         //           explanation at this function for the meaning of the parameters.
         iterator(enclosing_classic_enumerator *e,
-                          const EnumeratorListElement& partial_solution,
+                          std::deque<EnumeratorListElement>& partial_solutions,
                           substitution_type& sigma,
                           const bool not_equal_to_false=true):
           m_enclosing_enumerator(e),
           m_not_equal_to_false(not_equal_to_false),
-          enum_vars(partial_solution.variables()),
-          enum_expr(partial_solution.expression()),
-          enum_sigma(&sigma)
+          enum_vars(partial_solutions.front().variables()),
+          enum_expr(partial_solutions.front().expression()),
+          enum_sigma(&sigma),
+          fs_stack(&partial_solutions)
         {
+          EnumeratorListElement& partial_solution=partial_solutions.front();
           const data_expression condition= (e->m_evaluator)(partial_solution.expression(),sigma);
           if ((m_not_equal_to_false && condition==sort_bool::false_()) ||
               (!m_not_equal_to_false && condition==sort_bool::true_()))
           {
             // no solutions are found.
+            find_next_solution(true);
           }
           else if (partial_solution.variables().empty())
           {
             // in this case we generate exactly one solution.
-            fs_stack.emplace_back(EnumeratorListElement(partial_solution.variables(),condition));
+            partial_solution.expression()=condition; // =EnumeratorListElement(partial_solution.variables(),condition);
           }
           else
           {
@@ -126,14 +135,15 @@ class classic_enumerator
                                           EnumeratorListElement(partial_solution.variables(),condition),
                                           data_expression_list(),
                                           !m_not_equal_to_false);
-            find_next_solution(false);
-          }
+            find_next_solution(true);
+          } 
         }
 
         /// \brief Constructor representing the end of an iterator.
         //  \details It is advisable to avoid its use, and use end instead.
         iterator():
-           enum_sigma(&default_sigma())
+           enum_sigma(&default_sigma()),
+           fs_stack(&default_deque())
         {
         }
 
@@ -149,14 +159,14 @@ class classic_enumerator
         bool equal(iterator const& other) const
         {
           /* Only check whether end of enumerator has been reached */
-          return fs_stack.size()==other.fs_stack.size();
+          return fs_stack->size()==other.fs_stack->size();
         }
 
         const EnumeratorListElement& dereference() const
         {
-          assert(fs_stack.size()>0);
-          assert(fs_stack.front().is_valid());
-          return fs_stack.front();
+          assert(fs_stack->size()>0);
+          assert(fs_stack->front().is_valid());
+          return fs_stack->front();
         }
 
         void find_next_solution(const bool pop_front_of_stack);
@@ -202,10 +212,11 @@ class classic_enumerator
     ///            If zero, then there is no bound. If the bound is reached, generating
     ///            new solutions stops with or without an exception as desired.
     iterator begin(substitution_type& sigma,
-                   const EnumeratorListElement& p,
+                   std::deque<EnumeratorListElement>& partial_solutions,
+//const EnumeratorListElement& p,
                    const bool not_equal_to_false=true)
     {
-      return iterator(this, p, sigma, not_equal_to_false);
+      return iterator(this, partial_solutions, sigma, not_equal_to_false);
     }
 
 

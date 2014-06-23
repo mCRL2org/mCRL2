@@ -299,12 +299,14 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             enumerator_type enumerator(rewr,spec);
 
             data::mutable_indexed_substitution<> sigma;
+            std::deque < enumerator_list_element_with_substitution<data_expression> >
+                 enumerator_deque(1,enumerator_list_element_with_substitution<data_expression>(
+                                             variable_list(vars.begin(), vars.end()),
+                                             term));
             for (enumerator_type::iterator
                       i=enumerator.begin(
                                sigma, 
-                               enumerator_list_element_with_substitution<data_expression>(
-                                             variable_list(vars.begin(), vars.end()), 
-                                             term), 
+                               enumerator_deque,
                                10000); // Stop when more than 10000 internal variables are required
                       i != enumerator.end() ; ++i)
             {

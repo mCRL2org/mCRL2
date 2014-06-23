@@ -104,7 +104,8 @@ data_expression_vector get_all_expressions(const sort_expression& s, const data_
   mutable_indexed_substitution<> sigma;
   const variable v("@var@",s);
   const variable_list vl=atermpp::make_list<variable>(v);
-  for(typename enumerator_type::iterator i=enumerator.begin(sigma,enumerator_list_element_with_substitution<data_expression>(vl,sort_bool::true_()));
+  std::deque< enumerator_list_element_with_substitution<data_expression> > enumerator_elements(1,enumerator_list_element_with_substitution<data_expression>(vl,sort_bool::true_()));
+  for(typename enumerator_type::iterator i=enumerator.begin(sigma,enumerator_elements);
               i!=enumerator.end(); ++i)
   {
     i->add_assignments(vl,sigma,rewr);
@@ -245,7 +246,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
 
   if (new_expr!=sort_bool::false_())
   {
-    fs_stack.emplace_back(EnumeratorListElement(var_list, new_expr, partial_solution));
+    fs_stack->emplace_back(EnumeratorListElement(var_list, new_expr, partial_solution));
   }
 }
 
@@ -373,11 +374,11 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
 {
   if (pop_front_of_stack)
   {
-    fs_stack.pop_front();
+    fs_stack->pop_front();
   }
-  for( ; !fs_stack.empty() ; fs_stack.pop_front())
+  for( ; !fs_stack->empty() ; fs_stack->pop_front())
   {
-    EnumeratorListElement& e=fs_stack.front();  // e is intensionally a reference into fs_stack.
+    EnumeratorListElement& e=fs_stack->front();  // e is intensionally a reference into fs_stack.
     EliminateVars(e);
     if (e.variables().empty() || e.expression()==sort_bool::false_())
     {

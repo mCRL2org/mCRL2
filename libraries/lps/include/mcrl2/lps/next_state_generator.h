@@ -157,6 +157,8 @@ class next_state_generator
         condition_arguments_t m_enumeration_cache_key;
         summand_enumeration_t m_enumeration_log;
 
+        std::deque < data::enumerator_list_element_with_substitution< data::data_expression> > m_enumeration_queue;
+
         /// \brief Enumerate <variables, phi> with substitution sigma.
         void enumerate(const data::variable_list& variables, const data::data_expression& phi, data::mutable_indexed_substitution<>& sigma)
         {
@@ -173,11 +175,13 @@ class next_state_generator
             }
           }
 #endif
-          m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, data::enumerator_list_element_with_substitution<data::data_expression>(variables, phi)
+          m_enumeration_queue.clear();
+          m_enumeration_queue.push_back(data::enumerator_list_element_with_substitution<data::data_expression>(variables, phi));
 #ifdef MCRL2_USE_NEW_ENUMERATOR
-                                  , data::is_not_false()
+          m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, m_enumeration_queue, data::is_not_false());
+#else
+          m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, m_enumeration_queue);
 #endif
-          );
         }
 
 

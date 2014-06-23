@@ -90,11 +90,12 @@ void Solver::solve(QString specification, QString dataExpression)
 
       mutable_indexed_substitution<> sigma;
       // Stop when more than 10000 internal variables are required.
+      std::deque < enumerator_list_element_with_substitution<data_expression> >
+                     enumerator_deque(1,enumerator_list_element_with_substitution<data_expression>(
+                                          variable_list(m_vars.begin(),m_vars.end()),term));
       for (enumerator_type::iterator i = 
                enumerator.begin(sigma,
-                                enumerator_list_element_with_substitution<data_expression>(
-                                          variable_list(m_vars.begin(),m_vars.end()),
-                                          term),
+                                enumerator_deque,
                                 10000); 
            i != enumerator.end() && !m_abort; ++i)
       {

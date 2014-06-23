@@ -43,9 +43,11 @@ void enumerate(const data_specification& d,
   enumerator_type enumerator(evaluator,d);
   size_t number_of_solutions=0;
   mcrl2::data::mutable_indexed_substitution<> local_sigma;
+  std::deque < enumerator_list_element_with_substitution<data_expression> >
+          enumerator_deque(1,enumerator_list_element_with_substitution<data_expression>(variable_list(v.begin(),v.end()), c));
   enumerator_type::iterator i=enumerator.begin(
                                            local_sigma,
-                                           enumerator_list_element_with_substitution<data_expression>(variable_list(v.begin(),v.end()), c));
+                                           enumerator_deque);
   for ( ; number_of_solutions< expected_no_of_solutions && i != enumerator.end(); ++i)
   {
     number_of_solutions++;
@@ -85,7 +87,9 @@ void empty_test()
   enumerator_type enumerator(evaluator,specification);
 
   mcrl2::data::mutable_indexed_substitution<> local_sigma;
-  for (enumerator_type::iterator i=enumerator.begin(local_sigma, enumerator_list_element<data_expression>(variable_list(variables.begin(),variables.end()),sort_bool::true_())); 
+  std::deque < enumerator_list_element<data_expression> >
+          enumerator_deque(1,enumerator_list_element<data_expression>(variable_list(variables.begin(),variables.end()),sort_bool::true_()));
+  for (enumerator_type::iterator i=enumerator.begin(local_sigma, enumerator_deque);
        i != enumerator.end(); ++i)
   {
     count++;
@@ -93,7 +97,9 @@ void empty_test()
   BOOST_CHECK(count == 1);
 
   // explicit with condition but without condition evaluator
-  for (enumerator_type::iterator i=enumerator.begin(local_sigma, enumerator_list_element<data_expression>(variable_list(variables.begin(),variables.end()),sort_bool::true_())); 
+  enumerator_deque.clear();
+  enumerator_deque.emplace_back(enumerator_list_element<data_expression>(variable_list(variables.begin(),variables.end()),sort_bool::true_()));
+  for (enumerator_type::iterator i=enumerator.begin(local_sigma, enumerator_deque);
        i != enumerator.end(); ++i)
   {
     count++;
@@ -101,8 +107,10 @@ void empty_test()
   BOOST_CHECK(count == 2);
 
   variables.insert(variable("y", sort_nat::nat()));
-
-  for (enumerator_type::iterator i=enumerator.begin(local_sigma, enumerator_list_element<data_expression>(variable_list(variables.begin(),variables.end()), sort_bool::false_())); 
+  
+  enumerator_deque.clear();
+  enumerator_deque.emplace_back(enumerator_list_element<data_expression>(variable_list(variables.begin(),variables.end()), sort_bool::false_()));
+  for (enumerator_type::iterator i=enumerator.begin(local_sigma, enumerator_deque);
        i != enumerator.end(); ++i)
   {
     BOOST_CHECK(false);
@@ -234,8 +242,10 @@ data::data_expression_vector generate_values(const data::data_specification& dat
   v.push_back(x);
   mutable_indexed_substitution<> sigma;
   variable_list vl(v.begin(),v.end());
-  for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(sigma, enumerator_list_element_with_substitution<data_expression>(vl, data::sort_bool::true_()),
-                         max_internal_variables); i != enumerator.end() ; ++i)
+  std::deque < enumerator_list_element_with_substitution<data_expression> > 
+    enumerator_deque(1,enumerator_list_element_with_substitution<data_expression>(vl, data::sort_bool::true_()));
+  for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(sigma, enumerator_deque, max_internal_variables); 
+                       i != enumerator.end() ; ++i)
   {
     i->add_assignments(vl,sigma,rewr);
     result.push_back(sigma(vl.front()));

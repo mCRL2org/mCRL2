@@ -365,7 +365,8 @@ data_expression Rewriter::existential_quantifier_enumeration(
   data_expression partial_result=sort_bool::false_();
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  enumerator_type::iterator sol=enumerator.begin(sigma, enumerator_list_element<data_expression>(vl_new_l, t3), true);
+  std::deque <enumerator_list_element <data_expression> > enumerator_solution_deque(1,enumerator_list_element<data_expression>(vl_new_l, t3));
+  enumerator_type::iterator sol=enumerator.begin(sigma, enumerator_solution_deque, true);
   for( ; loop_upperbound>0 && 
          partial_result!=sort_bool::true_() &&
          sol!=enumerator.end() && sol->is_valid(); 
@@ -465,7 +466,8 @@ data_expression Rewriter::universal_quantifier_enumeration(
   data_expression partial_result=sort_bool::true_();
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  enumerator_type::iterator sol=enumerator.begin(sigma, enumerator_list_element<data_expression>(vl_new_l, t3), false);
+  std::deque <enumerator_list_element <data_expression> > enumerator_solution_deque(1,enumerator_list_element<data_expression>(vl_new_l, t3));
+  enumerator_type::iterator sol=enumerator.begin(sigma, enumerator_solution_deque, false);
   for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
          sol!=enumerator.end() && sol->is_valid();

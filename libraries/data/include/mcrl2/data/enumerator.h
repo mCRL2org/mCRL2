@@ -89,6 +89,11 @@ class enumerator_list_element
       return phi;
     }
 
+    Expression& expression()
+    {
+      return phi;
+    }
+
     bool is_solution() const
     {
       return v.empty();
@@ -374,25 +379,29 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
       protected:
         const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E;
         MutableSubstitution* sigma;
-        std::deque<EnumeratorListElement> P;
+        std::deque<EnumeratorListElement>& P;
         Filter accept;
         std::size_t count;
 
-      public:
-        /// \pre p.expression() is already rewritten, and accept_(p) is true
-        iterator(const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_,
-                 MutableSubstitution* sigma_,
-                 const EnumeratorListElement& p,
-                 Filter accept_
-                )
-          : E(E_), sigma(sigma_), accept(accept_), count(0)
+        static std::deque<EnumeratorListElement>& default_deque()
         {
-          P.push_back(p);
+          static std::deque<EnumeratorListElement> result;
+          return result;
+        }
+
+      public:
+        iterator(const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_,
+                 std::deque<EnumeratorListElement>& P_,
+                 MutableSubstitution* sigma_,
+                 Filter accept_ = Filter()
+                )
+          : E(E_), sigma(sigma_), P(P_), accept(accept_), count(0)
+        {
           count += E->next(P, *sigma, accept);
         }
 
-        iterator(Filter accept_)
-          : E(0), sigma(0), accept(accept_), count(0)
+        iterator(Filter accept_ = Filter())
+          : E(0), sigma(0), P(default_deque()), accept(accept_), count(0)
         { }
 
       protected:
@@ -446,12 +455,14 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     /// \param accept Enumerator elements p for which accept(p) is false are discarded.
     /// Otherwise an invalidated enumerator element is returned when it is dereferenced.
     template <typename Filter>
-    iterator<Filter> begin(MutableSubstitution& sigma, const EnumeratorListElement& p, Filter accept) const
+    iterator<Filter> begin(MutableSubstitution& sigma, std::deque<EnumeratorListElement>& P, Filter accept = Filter()) const
     {
-      auto phi = super::R(p.expression(), sigma);
-      if (accept(phi))
+      assert(!P.empty());
+      auto& p = P.front();
+      p.expression() = super::R(p.expression(), sigma);
+      if (accept(p.expression()))
       {
-        return iterator<Filter>(this, &sigma, EnumeratorListElement(p.variables(), phi), accept);
+        return iterator<Filter>(this, P, &sigma, accept);
       }
       else
       {
@@ -460,7 +471,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     }
 
     template <typename Filter>
-    iterator<Filter> end(Filter accept) const
+    iterator<Filter> end(Filter accept = Filter()) const
     {
       return iterator<Filter>(accept);
     }
