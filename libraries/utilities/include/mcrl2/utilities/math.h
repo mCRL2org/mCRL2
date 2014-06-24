@@ -33,6 +33,24 @@ size_t ceil_log2(size_t n)
   return result;
 }
 
+// Calculate n^m for numbers n,m of type size_t
+inline 
+size_t power_size_t(const size_t n_in, const size_t m_in)
+{
+  size_t result=1;
+  size_t n=n_in;
+  size_t m=m_in;
+  while (m>0)  // Invariant: result*n^m=n_in^m_in;
+  {
+    if (m % 2==1)
+    {
+      result=result*n;
+    }
+    n=n*n;
+    m=m/2;
+  }
+  return result;
+}
 
 } // utilities
 } // mcrl2

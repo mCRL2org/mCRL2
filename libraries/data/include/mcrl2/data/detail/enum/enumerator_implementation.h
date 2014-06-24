@@ -438,7 +438,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
                             total_domain_size << " functions to enumerate sort " << sort << "\n";
           }
 
-          const size_t number_of_functions = static_cast<std::size_t>(std::pow(static_cast<double>(codomain_expressions.size()), static_cast<double>(total_domain_size)));
+          const size_t number_of_functions = utilities::power_size_t(codomain_expressions.size(), total_domain_size);
 
           const variable_list par_list(function_parameters.begin(), function_parameters.end());
           if (number_of_functions==1) // In this case generate lambda var1,var2,....,var3.result.
@@ -564,7 +564,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
                             all_element_expressions.size() << " sets to enumerate sort " << sort << "\n";
           }
 
-          const size_t number_of_sets = static_cast<std::size_t>(std::pow(2.0, all_element_expressions.size()));
+          const size_t number_of_sets = utilities::power_size_t(2, all_element_expressions.size());
 
           const data_expression old_substituted_value=(*enum_sigma)(var);
 
