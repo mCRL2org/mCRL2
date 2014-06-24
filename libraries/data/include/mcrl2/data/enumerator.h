@@ -262,7 +262,7 @@ class enumerator_algorithm
       auto p = P.front();
       auto const& v = p.variables();
       auto const& phi = p.expression();
-      mCRL2log(log::debug) << "  process " << p << std::endl;
+      // mCRL2log(log::debug) << "  process " << p << std::endl;
       P.pop_front();
 
       auto const& v1 = v.front();
@@ -292,7 +292,7 @@ class enumerator_algorithm
               {
                 P.push_back(EnumeratorListElement(vtail + y, phi1, p, v1, cy));
               }
-              mCRL2log(log::debug) << "  add " << P.back() << " with " << v1 << " := " << cy << std::endl;
+              // mCRL2log(log::debug) << "  add " << P.back() << " with " << v1 << " := " << cy << std::endl;
             }
           }
           else
@@ -303,7 +303,7 @@ class enumerator_algorithm
             if (accept(phi1))
             {
               P.push_back(EnumeratorListElement(vtail, phi1, p, v1, constructor));
-              mCRL2log(log::debug) << "  add " << P.back() << " with " << v1 << " := " << constructor << std::endl;
+              // mCRL2log(log::debug) << "  add " << P.back() << " with " << v1 << " := " << constructor << std::endl;
             }
           }
         }
@@ -336,7 +336,7 @@ class enumerator_algorithm
       {
         if (P.front().is_solution())
         {
-          mCRL2log(log::debug) << "  solution " << P.front() << std::endl;
+          // mCRL2log(log::debug) << "  solution " << P.front() << std::endl;
           break;
         }
         else
