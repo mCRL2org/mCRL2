@@ -400,15 +400,6 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
           count += E->next(*P, *sigma, accept);
         }
 
-        iterator(const iterator& other)
-          : E(other.E),
-            sigma(other.sigma),
-            P(other.P),
-            accept(other.accept),
-            count(other.count)
-        { }
-
-
         iterator(Filter accept_ = Filter())
           : E(0), sigma(0), P(&default_deque()), accept(accept_), count(0)
         { }
@@ -480,9 +471,10 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     }
 
     template <typename Filter>
-    iterator<Filter> end(Filter accept = Filter()) const
+    const iterator<Filter>& end(Filter accept = Filter()) const
     {
-      return iterator<Filter>(accept);
+      static iterator<Filter> result(accept);
+      return result;
     }
 };
 
