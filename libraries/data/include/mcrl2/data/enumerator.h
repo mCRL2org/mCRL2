@@ -379,7 +379,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
       protected:
         const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E;
         MutableSubstitution* sigma;
-        std::deque<EnumeratorListElement>& P;
+        std::deque<EnumeratorListElement>* P;
         Filter accept;
         std::size_t count;
 
@@ -391,17 +391,26 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
 
       public:
         iterator(const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_,
-                 std::deque<EnumeratorListElement>& P_,
+                 std::deque<EnumeratorListElement>* P_,
                  MutableSubstitution* sigma_,
                  Filter accept_ = Filter()
                 )
           : E(E_), sigma(sigma_), P(P_), accept(accept_), count(0)
         {
-          count += E->next(P, *sigma, accept);
+          count += E->next(*P, *sigma, accept);
         }
 
+        iterator(const iterator& other)
+          : E(other.E),
+            sigma(other.sigma),
+            P(other.P),
+            accept(other.accept),
+            count(other.count)
+        { }
+
+
         iterator(Filter accept_ = Filter())
-          : E(0), sigma(0), P(default_deque()), accept(accept_), count(0)
+          : E(0), sigma(0), P(&default_deque()), accept(accept_), count(0)
         { }
 
       protected:
@@ -409,7 +418,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
 
         void increment()
         {
-          assert(!P.empty());
+          assert(!P->empty());
           if (count >= E->max_count())
           {
             if (E->throw_exceptions())
@@ -420,23 +429,23 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
             }
             else
             {
-              P.front().invalidate();
+              P->front().invalidate();
               return;
             }
           }
-          P.pop_front();
-          count += E->next(P, *sigma, Filter());
+          P->pop_front();
+          count += E->next(*P, *sigma, Filter());
         }
 
         bool equal(iterator<Filter> const& other) const
         {
-          return P.size() == other.P.size();
+          return P->size() == other.P->size();
         }
 
         const EnumeratorListElement& dereference() const
         {
-          assert(!P.empty());
-          return P.front();
+          assert(!P->empty());
+          return P->front();
         }
     };
 
@@ -462,7 +471,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
       p.expression() = super::R(p.expression(), sigma);
       if (accept(p.expression()))
       {
-        return iterator<Filter>(this, P, &sigma, accept);
+        return iterator<Filter>(this, &P, &sigma, accept);
       }
       else
       {
