@@ -22,7 +22,6 @@
 #include <map>
 
 #include "mcrl2/atermpp/indexed_set.h"
-#include "mcrl2/atermpp/table.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/core/print.h"
@@ -679,7 +678,7 @@ inline bes_expression substitute_true_false_rec(
   const bes_expression& b,
   const variable_type v,
   const bes_expression b_subst,
-  atermpp::table& hashtable,
+  std::map < bes_expression, bes_expression > hashtable,
   std::deque < counter_example >& counter_example_queue=bes_global_variables<size_t>::COUNTER_EXAMPLE_NULL_QUEUE)
 {
   assert(is_true(b_subst)||is_false(b_subst));
@@ -693,7 +692,7 @@ inline bes_expression substitute_true_false_rec(
 
   if (bes_global_variables<size_t>::opt_use_hashtables)
   {
-    result=hashtable.get(b);
+    result=hashtable[b];
     if (result==bes_expression())
     {
       return result;
@@ -822,7 +821,7 @@ inline bes_expression substitute_true_false_rec(
 
   if (bes_global_variables<size_t>::opt_use_hashtables)
   {
-    hashtable.put(b,result);
+    hashtable[b]=result;
   }
   return result;
 }
@@ -841,7 +840,7 @@ bes_expression substitute_true_false(
     return b;
   }
 
-  static atermpp::table hashtable1(10,50);
+  std::map < bes_expression, bes_expression > hashtable1;
 
   bes_expression result=substitute_true_false_rec(b,v,b_subst,hashtable1,counter_example_queue);
 
@@ -857,13 +856,13 @@ bes_expression BDDif_rec(
   const bes_expression& b1,
   const bes_expression& b2,
   const bes_expression& b3,
-  atermpp::table& hashtable);
+  std::map < bes_expression, bes_expression >& hashtable);
 
 
 inline bes_expression BDDif(const bes_expression& b1, const bes_expression& b2, const bes_expression& b3)
 {
 
-  static atermpp::table hashtable(100,75);
+  std::map < bes_expression, bes_expression > hashtable;
   static size_t hashtable_reset_counter=0;
 
   bes_expression b=BDDif_rec(b1,b2,b3,hashtable);
@@ -876,7 +875,7 @@ inline bes_expression BDDif(const bes_expression& b1, const bes_expression& b2, 
   return b;
 }
 
-inline bes_expression BDDif_rec(const bes_expression& b1, const bes_expression& b2, const bes_expression& b3,atermpp::table& hashtable)
+inline bes_expression BDDif_rec(const bes_expression& b1, const bes_expression& b2, const bes_expression& b3, std::map< bes_expression, bes_expression >& hashtable)
 {
   /* Assume that b1, b2 and b3 are ordered BDDs. Return an
      ordered BDD */
@@ -910,7 +909,7 @@ inline bes_expression BDDif_rec(const bes_expression& b1, const bes_expression& 
     else
     {
       b1b2b3=if_(b1,b2,b3);
-      bes_expression b(hashtable.get(b1b2b3));
+      bes_expression b(hashtable[b1b2b3]);
       if (b!=bes_expression())
       {
         return b;
@@ -941,7 +940,7 @@ inline bes_expression BDDif_rec(const bes_expression& b1, const bes_expression& 
   {
     /* hence not is_false(b3) */
     b1b2b3=if_(b1,b2,b3);
-    bes_expression b(hashtable.get(b1b2b3));
+    bes_expression b(hashtable[b1b2b3]);
     if (b!=bes_expression())
     {
       return b;
@@ -1060,11 +1059,11 @@ inline bes_expression BDDif_rec(const bes_expression& b1, const bes_expression& 
 
   /* Add (if_(b1,b2,b3),result) to hashtable. */
 
-  hashtable.put(b1b2b3,result);
+  hashtable[b1b2b3]=result;
   return result;
 }
 
-static bes_expression toBDD_rec(const bes_expression& b1,atermpp::table& hashtable)
+static bes_expression toBDD_rec(const bes_expression& b1,std::map< bes_expression, bes_expression>& hashtable)
 {
   if ((b1==true_()) || (b1==false_()))
   {
@@ -1072,7 +1071,7 @@ static bes_expression toBDD_rec(const bes_expression& b1,atermpp::table& hashtab
   }
 
   bes_expression result;
-  bes_expression b(hashtable.get(b1));
+  bes_expression b(hashtable[b1]);
   if (b!=bes_expression())
   {
     return b;
@@ -1103,14 +1102,14 @@ static bes_expression toBDD_rec(const bes_expression& b1,atermpp::table& hashtab
     assert(0);
   }
 
-  hashtable.put(b1,result);
+  hashtable[b1]=result;
   return result;
 }
 
 
 inline bes_expression toBDD(const bes_expression& b)
 {
-  static atermpp::table hashtable(100,75);
+  std::map <bes_expression, bes_expression > hashtable;
   return toBDD_rec(b,hashtable);
 }
 
@@ -2005,7 +2004,7 @@ class boolean_equation_system
 
       // Vector with the order of the variable names used for sorting the result
 
-      atermpp::table variable_rank(2*eqsys.size(),50);
+      std::map < mcrl2::core::identifier_string, size_t> variable_rank;
 
       // Fill the pbes_equations table
       mCRL2log(mcrl2::log::verbose) << "Retrieving pbes_equations from equation system..." << std::endl;
@@ -2033,7 +2032,7 @@ class boolean_equation_system
           current_fixpoint_symbol=eqi->symbol();
           rank=rank+1;
         }
-        variable_rank.put(eqi->variable().name(),atermpp::aterm_int(rank));
+        variable_rank[eqi->variable().name()]=rank;
       }
 
       size_t relevance_counter=0;
@@ -2162,7 +2161,7 @@ class boolean_equation_system
               if (find_mu_loop(
                     new_bes_expression,
                     variable_to_be_processed,
-                    atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value()))
+                    variable_rank[current_pbeq.variable().name()]))
               {
                 new_bes_expression=false_();
                 if (opt_construct_counter_example)
@@ -2177,7 +2176,7 @@ class boolean_equation_system
               if (find_nu_loop(
                     new_bes_expression,
                     variable_to_be_processed,
-                    atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value()))
+                    variable_rank[current_pbeq.variable().name()]))
               {
                 new_bes_expression=true_();
                 if (opt_construct_counter_example)
@@ -2194,7 +2193,7 @@ class boolean_equation_system
             add_equation(
               variable_to_be_processed,
               current_pbeq.symbol(),
-              atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value(),
+              variable_rank[current_pbeq.variable().name()],
               new_bes_expression,
               todo);
 
@@ -2216,7 +2215,7 @@ class boolean_equation_system
             add_equation(
               variable_to_be_processed,
               current_pbeq.symbol(),
-              atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value(),
+              variable_rank[current_pbeq.variable().name()],
               new_bes_expression);
           }
 
@@ -2486,7 +2485,7 @@ static bes_expression substitute_rank(
   const std::vector<bes_expression>& approximation,
   bes::boolean_equation_system& bes_equations,
   const bool use_hashtable,
-  atermpp::table& hashtable,
+  std::map <bes_expression, bes_expression >& hashtable,
   bool store_counter_example=false,
   bes::variable_type current_variable=0)
 {
@@ -2501,7 +2500,7 @@ static bes_expression substitute_rank(
   bes_expression result;
   if (use_hashtable)
   {
-    result=hashtable.get(b);
+    result=hashtable[b];
     if (result!=bes_expression())
     {
       return result;
@@ -2663,7 +2662,7 @@ static bes_expression substitute_rank(
 
   if (use_hashtable)
   {
-    hashtable.put(b,result);
+    hashtable[b]=result;
   }
   return result;
 }
@@ -2676,7 +2675,7 @@ static bes_expression evaluate_bex(
   const size_t rank,
   bes::boolean_equation_system& bes_equations,
   const bool use_hashtable,
-  atermpp::table& hashtable,
+  std::map<bes_expression, bes_expression>& hashtable,
   const bool construct_counter_example,
   const bes::variable_type current_variable)
 {
@@ -2692,7 +2691,7 @@ static bes_expression evaluate_bex(
   bes_expression result;
   if (use_hashtable)
   {
-    result=hashtable.get(b);
+    result=hashtable[b];
     if (result!=bes_expression())
     {
       return result;
@@ -2827,7 +2826,7 @@ static bes_expression evaluate_bex(
 
   if (use_hashtable)
   {
-    hashtable.put(b,result);
+    hashtable[b]=result;
   }
   return result;
 }
@@ -2846,7 +2845,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
 
   std::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
 
-  atermpp::table bex_hashtable(10,5);
+  std::map<bes_expression, bes_expression> bex_hashtable;
 
   /* Set the approximation to its initial value */
   for (bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)

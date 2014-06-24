@@ -24,8 +24,8 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/table.h"
 #include "mcrl2/atermpp/detail/indexed_set.h"
+#include "mcrl2/atermpp/indexed_set.h"
 
 
 namespace atermpp
