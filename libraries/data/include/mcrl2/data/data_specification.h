@@ -19,7 +19,6 @@
 #include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/table.h"
 
 // utilities
 #include "mcrl2/atermpp/container_utility.h"

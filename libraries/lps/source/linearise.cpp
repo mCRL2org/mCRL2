@@ -33,6 +33,13 @@
 #include <memory>
 #include <algorithm>
 
+// Boost utilities
+#include "boost/format.hpp"
+#include "boost/utility.hpp"
+
+// ATermpp libraries
+#include "mcrl2/atermpp/indexed_set.h"
+
 // linear process libraries.
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/logger.h"
@@ -58,9 +65,6 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/replace.h"
 
-// Boost utilities
-#include "boost/format.hpp"
-#include "boost/utility.hpp"
 
 // For Aterm library extension functions
 using namespace atermpp;

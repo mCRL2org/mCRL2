@@ -20,7 +20,6 @@
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
 #include <mcrl2/atermpp/aterm_list.h>
-#include <mcrl2/atermpp/table.h>
 #include <mcrl2/atermpp/algorithm.h>
 
 //LPS

@@ -33,32 +33,6 @@ namespace detail
 {
 
 template < class LTS_TYPE>
-size_t determine_tau_label(const LTS_TYPE& l)
-{
-  // Set the tau_label to an existing label, if possible.
-  // If nothing is found the tau label becomes l.num_action_labels,
-  // but there will not be a tau anyhow in this case.
-  size_t tau_label=l.num_action_labels();
-  for (size_t i=0; i<l.num_action_labels(); ++i)
-  {
-    if (l.is_tau(i))
-    {
-      tau_label=i;
-      break;
-    }
-  }
-  if (tau_label==l.num_action_labels())
-  {
-    mCRL2log(mcrl2::log::debug) << "Note that there is no tau action\n";
-  }
-  else
-  {
-    mCRL2log(mcrl2::log::debug) << "Using <" << pp(l.action_label(tau_label)) << "> as tau label.\n";
-  }
-  return tau_label;
-}
-
-template < class LTS_TYPE>
 class bisim_partitioner
 {
 
@@ -311,10 +285,10 @@ class bisim_partitioner
         initial_partition.non_inert_transitions.reserve(current_inert_transition_counter);
       }
 
-      const std::vector<transition> & trans=aut.get_transitions();
+      const std::vector<transition>& trans=aut.get_transitions();
       for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
       {
-        const transition t= *r;
+        const transition t=* r;
 
         if (branching && aut.is_tau(t.label()))
         {

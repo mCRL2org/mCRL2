@@ -59,7 +59,7 @@ const std::string test4=
   "(1,\"b\",5)\n";
 
 // Example below is inspired by the rhs of Milner's third tau law, a(tau.b+c)=a(tau.b+c)+a.b
-// which contains an non inert tau.
+// which contains a non inert tau.
 const std::string test5=
   "des (0,6,7)\n"
   "(0,\"a\",1)\n"
@@ -68,6 +68,23 @@ const std::string test5=
   "(1,\"c\",4)\n"
   "(3,\"b\",5)\n"
   "(2,\"b\",6)\n";
+
+// Example below is inspired by Milner's third tau law, a(tau.b+c)=a(tau.b+c)+a.b.
+// The states 1 and 2 should be identified in weak bisimulation, but not in branching
+// bisimulation.
+const std::string test5a=
+  "des (0,10,7)\n"
+  "(0,\"d\",1)\n"
+  "(0,\"d\",2)\n"
+  "(1,\"a\",3)\n"
+  "(2,\"a\",4)\n"
+  "(2,\"a\",5)\n"
+  "(3,\"b\",6)\n"
+  "(3,\"tau\",4)\n"
+  "(4,\"c\",6)\n"
+  "(5,\"b\",6)\n"
+  "(5,\"tau\",4)\n";
+
 
 // In the term a.Y with Y=tau.Y divergence preserving bisimulation must not remove the tau.
 const std::string test6=
@@ -177,6 +194,17 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
   reduce(t5,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
+  reduce(t5,lts_eq_weak_bisim); //Weak bisimulation reduction
+  BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==6);
+
+  std::cerr << "Test5a\n";
+  lts_aut_t t5a=parse_aut(test5a);
+  reduce(t5a,lts_eq_bisim); //Strong bisimulation reduction
+  BOOST_CHECK(t5a.num_states()==6 && t5a.num_transitions()==8);
+  reduce(t5a,lts_eq_branching_bisim); //Branching bisimulation reduction
+  BOOST_CHECK(t5a.num_states()==6 && t5a.num_transitions()==8);
+  reduce(t5a,lts_eq_weak_bisim); //Weak bisimulation reduction
+  BOOST_CHECK(t5a.num_states()==5 && t5a.num_transitions()==7);
 
   std::cerr << "Test6\n";
   lts_aut_t t6=parse_aut(test6);
