@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/utilities/math.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/data/classic_enumerator.h"
 
@@ -419,7 +420,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             function_parameters.push_back(variable(m_enclosing_enumerator->m_evaluator.identifier_generator()("var_func",false),*i));
           }
 
-          if (total_domain_size * std::log2(codomain_expressions.size())>=32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
+          if (total_domain_size * utilities::ceil_log2(codomain_expressions.size())>=32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
           {
             e.invalidate();
             if (m_enclosing_enumerator->m_throw_exceptions)
@@ -431,7 +432,7 @@ inline void classic_enumerator<REWRITER, MutableSubstitution, EnumeratorListElem
             }
             return;
           }
-          if (total_domain_size * std::log2(codomain_expressions.size())>16)  // If there are more than 2^16 functions, provide a warning.
+          if (total_domain_size * utilities::ceil_log2(codomain_expressions.size())>16)  // If there are more than 2^16 functions, provide a warning.
           {
             mCRL2log(log::warning) << "Generate " << codomain_expressions.size() << "^" <<
                             total_domain_size << " functions to enumerate sort " << sort << "\n";

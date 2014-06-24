@@ -12,10 +12,10 @@
 #ifndef MCRL2_LPS_BINARY_H
 #define MCRL2_LPS_BINARY_H
 
-// #include <cmath>
 #include <iterator>
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/math.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/replace.h"
@@ -31,21 +31,6 @@ namespace mcrl2
 namespace lps
 {
 
-// Compute base 2 logarithm of n, by checking which is the leftmost
-// bit that has been set.
-inline
-size_t ceil_log2(size_t n)
-{
-  assert(n>0);
-  size_t result = 0;
-  while(n != 0)
-  {
-    n = n >> 1;
-    ++result;
-  }
-  return result;
-}
-
 // Compute the number of booleans needed to represent a set of size n.
 inline
 size_t nr_of_booleans_for_elements(size_t n)
@@ -56,7 +41,7 @@ size_t nr_of_booleans_for_elements(size_t n)
   }
   else
   {
-    return ceil_log2(n-1);
+    return utilities::ceil_log2(n-1);
   }
 }
 
