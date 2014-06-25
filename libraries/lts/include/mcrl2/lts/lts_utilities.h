@@ -178,6 +178,7 @@ size_t mark_explicit_divergence_transitions(LTS_TYPE& l)
   return divergent_transition_label;
 }
 
+// Replace each transition in a state that is an outgoing divergent_transition with a tau_loop in that state.
 template < class LTS_TYPE >
 void unmark_explicit_divergence_transitions(LTS_TYPE& l, const size_t divergent_transition_label)
 {
@@ -186,8 +187,7 @@ void unmark_explicit_divergence_transitions(LTS_TYPE& l, const size_t divergent_
   {
     if (i->label()==divergent_transition_label)
     { 
-      assert(i->to()==i->from());
-      *i = transition(i->to(),tau_label,i->to());
+      *i = transition(i->from(),tau_label,i->from());
     }
   }
 }
