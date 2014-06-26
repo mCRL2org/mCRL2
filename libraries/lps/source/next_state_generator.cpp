@@ -25,7 +25,11 @@ next_state_generator::next_state_generator(
   bool use_summand_pruning)
   : m_specification(spec),
     m_rewriter(rewriter),
-    m_enumerator(m_rewriter,m_specification.data()),
+#ifdef MCRL2_USE_NEW_ENUMERATOR
+    m_enumerator(m_rewriter, m_specification.data(), m_rewriter),
+#else
+    m_enumerator(m_rewriter, m_specification.data()),
+#endif
     m_use_enumeration_caching(use_enumeration_caching)
 {
   m_process_parameters = data::variable_vector(m_specification.process().process_parameters().begin(), m_specification.process().process_parameters().end());

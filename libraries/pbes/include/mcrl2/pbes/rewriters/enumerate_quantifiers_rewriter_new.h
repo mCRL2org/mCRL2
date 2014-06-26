@@ -62,7 +62,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   /// \param dataspec A data specification
   /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well
   enumerate_quantifiers_builder(const data::rewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, bool enumerate_infinite_sorts = true)
-    : super(R, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec)
+    : super(R, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec, R)
   { }
 
   Derived& derived()

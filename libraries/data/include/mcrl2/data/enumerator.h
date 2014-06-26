@@ -332,7 +332,7 @@ class enumerator_algorithm
     const data::data_specification& dataspec;
 
     // Needed for enumerate_expressions
-    data::rewriter datar;
+    const data::rewriter& datar;
 
     // A name generator
     mutable data::set_identifier_generator id_generator;
@@ -385,10 +385,11 @@ class enumerator_algorithm
   public:
     enumerator_algorithm(const Rewriter& R_,
                          const data::data_specification& dataspec_,
+                         const data::rewriter& datar_,
                          std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                          bool throw_exceptions = false
                        )
-      : R(R_), dataspec(dataspec_), datar(dataspec_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
+      : R(R_), dataspec(dataspec_), datar(datar_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
     {}
 
     /// \brief Enumerates the front element of the todo list P.
@@ -666,9 +667,10 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     enumerator_algorithm_with_iterator(
                 const Rewriter& R,
                 const data::data_specification& dataspec,
+                const data::rewriter& datar,
                 std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                 bool throw_exceptions = false)
-      : super(R, dataspec, max_count, throw_exceptions)
+      : super(R, dataspec, datar, max_count, throw_exceptions)
     {}
 
     /// \brief Returns an iterator that enumerates solutions for variables that satisfy a condition
@@ -707,14 +709,14 @@ data_expression_vector enumerate_expressions(const sort_expression& s, const dat
   typedef typename Rewriter::term_type term_type;
   typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
   assert(dataspec.is_certainly_finite(s));
-  enumerator_algorithm_with_iterator<Rewriter, mutable_indexed_substitution<>, enumerator_element, data::is_not_false> E(rewr, dataspec);
+  enumerator_algorithm_with_iterator<Rewriter, mutable_indexed_substitution<>, enumerator_element, data::is_not_false> E(rewr, dataspec, rewr);
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);
   const variable_list vl = atermpp::make_list<variable>(v);
   std::deque<enumerator_list_element_with_substitution<data_expression> > P;
   P.emplace_back(enumerator_element(vl, sort_bool::true_()));
-  for (auto i = E.begin(sigma, P, data::is_not_false()); i != E.end(data::is_not_false()); ++i)
+  for (auto i = E.begin(sigma, P); i != E.end(); ++i)
   {
     i->add_assignments(vl, sigma, rewr);
     result.push_back(sigma(v));
