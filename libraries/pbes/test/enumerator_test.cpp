@@ -75,14 +75,12 @@ void test_enumerator_with_iterator()
   v.push_front(data::variable("n", data::sort_nat::nat()));
   pbes_expression phi = parse_pbes_expression("val(n < 2)", VARSPEC);
   data::mutable_indexed_substitution<> sigma;
-  data::enumerator_algorithm_with_iterator<pbes_rewriter, data::mutable_indexed_substitution<>, enumerator_element> E(R, data_spec);
+  data::enumerator_algorithm_with_iterator<pbes_rewriter, data::mutable_indexed_substitution<>, enumerator_element, pbes_system::is_not_true> E(R, data_spec);
   std::vector<pbes_system::pbes_expression> solutions;
 
   std::deque<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
-  auto end = E.end(is_not_true());
-
-  for (auto i = E.begin(sigma, P, is_not_true()); i != end; ++i)
+  for (auto i = E.begin(sigma, P); i != E.end(); ++i)
   {
     solutions.push_back(i->expression());
   }
@@ -104,14 +102,12 @@ void test_enumerator_with_substitutions()
   v.push_front(data::variable("n", data::sort_nat::nat()));
   pbes_expression phi = parse_pbes_expression("val(n < 2)", VARSPEC);
   data::mutable_indexed_substitution<> sigma;
-  data::enumerator_algorithm_with_iterator<pbes_rewriter, data::mutable_indexed_substitution<>, enumerator_element> E(R, data_spec);
+  data::enumerator_algorithm_with_iterator<pbes_rewriter, data::mutable_indexed_substitution<>, enumerator_element, pbes_system::is_not_true> E(R, data_spec);
   std::vector<pbes_system::pbes_expression> solutions;
 
   std::deque<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
-  auto end = E.end(is_not_true());
-
-  for (auto i = E.begin(sigma, P, is_not_true()); i != end; ++i)
+  for (auto i = E.begin(sigma, P); i != E.end(); ++i)
   {
     solutions.push_back(i->expression());
     data::mutable_map_substitution<> sigma;

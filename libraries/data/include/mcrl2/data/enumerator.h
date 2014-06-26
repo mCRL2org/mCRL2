@@ -588,7 +588,7 @@ class enumerator_algorithm
 };
 
 /// \brief An enumerator algorithm with an iterator interface.
-template <typename Rewriter, typename MutableSubstitution, typename EnumeratorListElement>
+template <typename Rewriter, typename MutableSubstitution, typename EnumeratorListElement, typename Filter>
 class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
 {
   public:
@@ -597,11 +597,10 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
     ///          the list of variables for which a solution is sought.
-    template <typename Filter>
-    class iterator: public boost::iterator_facade<iterator<Filter>, const EnumeratorListElement, boost::forward_traversal_tag>
+    class iterator: public boost::iterator_facade<iterator, const EnumeratorListElement, boost::forward_traversal_tag>
     {
       protected:
-        const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E;
+        const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement, Filter>* E;
         MutableSubstitution* sigma;
         std::deque<EnumeratorListElement>* P;
         Filter accept;
@@ -614,7 +613,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
         }
 
       public:
-        iterator(const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement>* E_,
+        iterator(const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement, Filter>* E_,
                  std::deque<EnumeratorListElement>* P_,
                  MutableSubstitution* sigma_,
                  Filter accept_ = Filter()
@@ -652,7 +651,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
           count += E->next(*P, *sigma, Filter());
         }
 
-        bool equal(iterator<Filter> const& other) const
+        bool equal(iterator const& other) const
         {
           return P->size() == other.P->size();
         }
@@ -678,15 +677,14 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     /// \param p The condition that is solved, together with the list of variables
     /// \param accept Enumerator elements p for which accept(p) is false are discarded.
     /// Otherwise an invalidated enumerator element is returned when it is dereferenced.
-    template <typename Filter>
-    iterator<Filter> begin(MutableSubstitution& sigma, std::deque<EnumeratorListElement>& P, Filter accept = Filter()) const
+    iterator begin(MutableSubstitution& sigma, std::deque<EnumeratorListElement>& P, Filter accept = Filter()) const
     {
       assert(!P.empty());
       auto& p = P.front();
       p.expression() = super::R(p.expression(), sigma);
       if (accept(p.expression()))
       {
-        return iterator<Filter>(this, &P, &sigma, accept);
+        return iterator(this, &P, &sigma, accept);
       }
       else
       {
@@ -694,10 +692,9 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
       }
     }
 
-    template <typename Filter>
-    const iterator<Filter>& end(Filter accept = Filter()) const
+    const iterator& end(Filter accept = Filter()) const
     {
-      static iterator<Filter> result(accept);
+      static iterator result(accept);
       return result;
     }
 };
@@ -710,7 +707,7 @@ data_expression_vector enumerate_expressions(const sort_expression& s, const dat
   typedef typename Rewriter::term_type term_type;
   typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
   assert(dataspec.is_certainly_finite(s));
-  enumerator_algorithm_with_iterator<Rewriter, mutable_indexed_substitution<>, enumerator_element> E(rewr, dataspec);
+  enumerator_algorithm_with_iterator<Rewriter, mutable_indexed_substitution<>, enumerator_element, data::is_not_false> E(rewr, dataspec);
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);

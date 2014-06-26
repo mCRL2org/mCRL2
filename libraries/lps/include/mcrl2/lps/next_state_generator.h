@@ -41,8 +41,8 @@ class next_state_generator
 
     typedef data::rewriter rewriter_t;
 #ifdef MCRL2_USE_NEW_ENUMERATOR
-    typedef data::enumerator_algorithm_with_iterator<rewriter_t, data::mutable_indexed_substitution<>, data::enumerator_list_element_with_substitution<data::data_expression> > enumerator_t;
-    typedef enumerator_t::iterator<data::is_not_false> enumerator_iterator_t;
+    typedef data::enumerator_algorithm_with_iterator<rewriter_t, data::mutable_indexed_substitution<>, data::enumerator_list_element_with_substitution<data::data_expression>, data::is_not_false> enumerator_t;
+    typedef enumerator_t::iterator enumerator_iterator_t;
 #else
     typedef data::classic_enumerator<rewriter_t> enumerator_t;
     typedef enumerator_t::iterator enumerator_iterator_t;

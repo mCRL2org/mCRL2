@@ -302,9 +302,6 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_single_summand(false),
     m_use_summand_pruning(summand_subset.m_use_summand_pruning),
     m_summand(0),
-#ifdef MCRL2_USE_NEW_ENUMERATOR
-    m_enumeration_iterator(data::is_not_false()),
-#endif
     m_caching(false)
 {
   if (m_use_summand_pruning)
@@ -335,9 +332,6 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_single_summand_index(summand_index),
     m_use_summand_pruning(false),
     m_summand(0),
-#ifdef MCRL2_USE_NEW_ENUMERATOR
-    m_enumeration_iterator(data::is_not_false()),
-#endif
     m_caching(false)
 {
   m_transition.m_generator = m_generator;
@@ -368,11 +362,7 @@ void next_state_generator::iterator::increment()
   data::data_expression_vector condition_arguments;
   while (!m_summand ||
          (m_cached && m_enumeration_cache_iterator == m_enumeration_cache_end) ||
-#ifdef MCRL2_USE_NEW_ENUMERATOR
-         (!m_cached && m_enumeration_iterator == m_generator->m_enumerator.end(data::is_not_false()))
-#else
          (!m_cached && m_enumeration_iterator == m_generator->m_enumerator.end())
-#endif
         )
   {
     if (m_caching)
