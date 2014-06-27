@@ -20,7 +20,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/standard_utility.h"
@@ -45,7 +45,7 @@ void enumerate(const data_specification& dataspec,
                bool more_solutions_possible)
 {
   typedef enumerator_list_element_with_substitution<data_expression> enumerator_element;
-  typedef classic_enumerator<rewriter> enumerator_type;
+  typedef enumerator_algorithm_with_iterator<rewriter, mutable_indexed_substitution<>, enumerator_element, is_not_false> enumerator_type;
 
   rewriter rewr(dataspec);
   enumerator_type enumerator(rewr, dataspec);
@@ -81,7 +81,7 @@ void empty_test()
   std::clog << "empty_test\n";
 
   typedef enumerator_list_element_with_substitution<data_expression> enumerator_element;
-  typedef classic_enumerator<rewriter> enumerator_type;
+  typedef enumerator_algorithm_with_iterator<rewriter, mutable_indexed_substitution<>, enumerator_element, is_not_false> enumerator_type;
 
   // test manual construction of rewr with rewriter
   data_specification dataspec;
@@ -245,7 +245,7 @@ inline
 data_expression_vector generate_values(const data_specification& dataspec, const sort_expression& s, std::size_t max_size = 1000)
 {
   typedef enumerator_list_element_with_substitution<data_expression> enumerator_element;
-  typedef classic_enumerator<rewriter> enumerator_type;
+  typedef enumerator_algorithm_with_iterator<rewriter, mutable_indexed_substitution<>, enumerator_element, is_not_false> enumerator_type;
 
   std::size_t max_internal_variables = 10000;
   data_expression_vector result;
