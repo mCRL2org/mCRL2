@@ -23,6 +23,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/detail/enumerator_variable_limit.h"
 #include "mcrl2/utilities/math.h"
 
 namespace mcrl2
@@ -300,7 +301,7 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
 template <typename Expression>
 std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expression>& p)
 {
-  return out << p.expression() << " " << core::detail::print_list(p.variables());
+  return out << "{ variables = " << core::detail::print_list(p.variables()) << ", expression = " << p.expression() << " }";
 }
 
 struct sort_name_generator
@@ -382,7 +383,85 @@ class enumerator_algorithm
       }
     }
 
+    // add element without additional variables
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter, typename Expression>
+    void add_element(std::deque<EnumeratorListElement>& P,
+                     MutableSubstitution& sigma,
+                     Filter accept,
+                     const data::variable_list& variables,
+                     const Expression& phi,
+                     const EnumeratorListElement& p,
+                     const data::variable& v,
+                     const data::data_expression& e) const
+    {
+      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+      if (accept(phi1))
+      {
+        P.emplace_back(EnumeratorListElement(variables, phi1, p, v, e));
+      }
+      // mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
+    }
+
+    // add element with additional variables
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter, typename Expression>
+    void add_element(std::deque<EnumeratorListElement>& P,
+                     MutableSubstitution& sigma,
+                     Filter accept,
+                     const data::variable_list& variables,
+                     const data::variable_list& added_variables,
+                     const Expression& phi,
+                     const EnumeratorListElement& p,
+                     const data::variable& v,
+                     const data::data_expression& e) const
+    {
+      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+      if (accept(phi1))
+      {
+        // Additional variables are put at the end of the list!
+        P.emplace_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
+      }
+      // mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
+    }
+
+    // specialization for enumerator_list_element; in this case we are not interested in the substitutions,
+    // and this allows an optimization
+    template <typename MutableSubstitution, typename Filter, typename Expression>
+    void add_element(std::deque<enumerator_list_element<Expression> >& P,
+                     MutableSubstitution& sigma,
+                     Filter accept,
+                     const data::variable_list& variables,
+                     const data::variable_list& added_variables,
+                     const Expression& phi,
+                     const enumerator_list_element<Expression>& p,
+                     const data::variable& v,
+                     const data::data_expression& e) const
+    {
+      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+      if (accept(phi1))
+      {
+        if (phi1 == phi)
+        {
+          // Discard the added_variables, since we know they do not appear in phi1
+          P.emplace_back(enumerator_list_element<Expression>(variables, phi1, p, v, e));
+        }
+        else
+        {
+          // Additional variables are put at the end of the list!
+          P.emplace_back(enumerator_list_element<Expression>(variables + added_variables, phi1, p, v, e));
+        }
+      }
+      // mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
+    }
+
   public:
+    enumerator_algorithm(const data::rewriter& R_,
+                         const data::data_specification& dataspec_,
+                         std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
+                         bool throw_exceptions = false
+                       )
+      : R(R_), dataspec(dataspec_), datar(R_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
+    {}
+
     enumerator_algorithm(const Rewriter& R_,
                          const data::data_specification& dataspec_,
                          const data::rewriter& datar_,
@@ -400,16 +479,16 @@ class enumerator_algorithm
     template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
     void enumerate_front(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
     {
-      auto& R_ = const_cast<Rewriter&>(R);
       assert(!P.empty());
 
       auto p = P.front();
       auto const& v = p.variables();
       auto const& phi = p.expression();
+      // mCRL2log(log::debug) << "  <process-element> " << p << std::endl;
       P.pop_front();
 
-      auto const& vtail = v.tail();
       auto const& v1 = v.front();
+      auto const& vtail = v.tail();
       auto const& sort = v1.sort();
 
       if (data::is_function_sort(sort))
@@ -420,19 +499,18 @@ class enumerator_algorithm
           data_expression_vector function_sorts;
           variable_list function_parameter_list;
           bool result = detail::compute_finite_function_sorts(function, id_generator, dataspec, datar, sigma, function_sorts, function_parameter_list);
+
+// std::cout << "<function_sorts>" << core::detail::print_list(function_sorts) << std::endl;
+
           if (!result)
           {
             cannot_enumerate(p, "Sort " + data::pp(sort) + " has too many elements to enumerate");
           }
           const data_expression old_substituted_value = sigma(v1);
-          for(auto i = function_sorts.begin(); i != function_sorts.end(); ++i)
+          for (auto i = function_sorts.begin(); i != function_sorts.end(); ++i)
           {
             sigma[v1] = *i;
-            auto phi1 = R_(phi, sigma);
-            if (accept(phi1))
-            {
-              P.emplace_back(EnumeratorListElement(vtail, phi1, p, v1, *i));
-            }
+            add_element(P, sigma, accept, vtail, phi, p, v1, *i);
           }
           sigma[v1] = old_substituted_value;
         }
@@ -451,12 +529,7 @@ class enumerator_algorithm
           const data_expression term = sort_set::constructor(element_sort, lambda_term, fset_variable);
           const data_expression old_substituted_value = sigma(v1);
           sigma[v1] = term;
-          auto phi1 = R_(phi, sigma);
-          sigma[v1] = old_substituted_value;
-          if (accept(phi1))
-          {
-            P.emplace_back(EnumeratorListElement(vtail + atermpp::make_list(fset_variable), phi1, p, v1, term));
-          }
+          add_element(P, sigma, accept, vtail, phi, p, v1, term);
         }
         else
         {
@@ -471,6 +544,9 @@ class enumerator_algorithm
         {
           data_expression_vector set_elements;
           bool result = detail::compute_finite_set_elements(fset, dataspec, datar, sigma, set_elements);
+
+// std::cout << "<set_elements>" << core::detail::print_list(set_elements) << std::endl;
+
           if (!result)
           {
             cannot_enumerate(p, "Finite set sort " + data::pp(sort) + " has too many elements to enumerate");
@@ -479,11 +555,7 @@ class enumerator_algorithm
           for (auto i = set_elements.begin(); i != set_elements.end(); ++i)
           {
             sigma[v1] = *i;
-            auto phi1 = R_(phi, sigma);
-            if (accept(phi1))
-            {
-              P.emplace_back(EnumeratorListElement(vtail, phi1, p, v1, *i));
-            }
+            add_element(P, sigma, accept, vtail, phi, p, v1, *i);
           }
           sigma[v1] = old_substituted_value;
         }
@@ -506,44 +578,32 @@ class enumerator_algorithm
       else
       {
         auto const& C = constructors(sort);
-        if (C.empty())
+        if (!C.empty())
+        {
+          for (auto i = C.begin(); i != C.end(); ++i)
+          {
+            auto const& constructor = *i;
+            if (data::is_function_sort(constructor.sort()))
+            {
+              auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
+              data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
+              data::application cy(constructor, y.begin(), y.end());
+              sigma[v1] = cy;
+              add_element(P, sigma, accept, vtail, y, phi, p, v1, cy);
+              sigma[v1] = v1;
+            }
+            else
+            {
+              sigma[v1] = constructor;
+              add_element(P, sigma, accept, vtail, phi, p, v1, constructor);
+              sigma[v1] = v1;
+            }
+          }
+        }
+        else
         {
           cannot_enumerate(p, "Cannot enumerate elements of sort without constructors " + data::pp(sort));
           return;
-        }
-        for (auto i = C.begin(); i != C.end(); ++i)
-        {
-          auto const& constructor = *i;
-          if (data::is_function_sort(constructor.sort()))
-          {
-            auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
-            data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
-            data::application cy(constructor, y.begin(), y.end());
-            sigma[v1] = cy;
-            auto phi1 = R_(phi, sigma);
-            sigma[v1] = v1;
-            if (accept(phi1))
-            {
-              if (phi1 == phi)
-              {
-                P.emplace_back(EnumeratorListElement(vtail, phi1, p, v1, cy));
-              }
-              else
-              {
-                P.emplace_back(EnumeratorListElement(vtail + y, phi1, p, v1, cy));
-              }
-            }
-          }
-          else
-          {
-            sigma[v1] = constructor;
-            auto phi1 = R_(phi, sigma);
-            sigma[v1] = v1;
-            if (accept(phi1))
-            {
-              P.emplace_back(EnumeratorListElement(vtail, phi1, p, v1, constructor));
-            }
-          }
         }
       }
     }
@@ -557,11 +617,13 @@ class enumerator_algorithm
     template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
     std::size_t next(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
     {
+      // mCRL2log(log::debug) << "  <next> " << core::detail::print_list(P) << std::endl;
       std::size_t count = 0;
       while (!P.empty())
       {
         if (P.front().is_solution())
         {
+          // mCRL2log(log::debug) << "  <solution> " << P.front() << std::endl;
           break;
         }
         else
@@ -665,6 +727,14 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     };
 
     enumerator_algorithm_with_iterator(
+                const data::rewriter& R,
+                const data::data_specification& dataspec,
+                std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
+                bool throw_exceptions = false)
+      : super(R, dataspec, R, max_count, throw_exceptions)
+    {}
+
+    enumerator_algorithm_with_iterator(
                 const Rewriter& R,
                 const data::data_specification& dataspec,
                 const data::rewriter& datar,
@@ -681,7 +751,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     /// Otherwise an invalidated enumerator element is returned when it is dereferenced.
     iterator begin(MutableSubstitution& sigma, std::deque<EnumeratorListElement>& P, Filter accept = Filter()) const
     {
-      assert(!P.empty());
+      assert(P.size() == 1);
       auto& p = P.front();
       p.expression() = super::R(p.expression(), sigma);
       if (accept(p.expression()))
@@ -714,7 +784,7 @@ data_expression_vector enumerate_expressions(const sort_expression& s, const dat
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);
   const variable_list vl = atermpp::make_list<variable>(v);
-  std::deque<enumerator_list_element_with_substitution<data_expression> > P;
+  std::deque<enumerator_element> P;
   P.emplace_back(enumerator_element(vl, sort_bool::true_()));
   for (auto i = E.begin(sigma, P); i != E.end(); ++i)
   {
