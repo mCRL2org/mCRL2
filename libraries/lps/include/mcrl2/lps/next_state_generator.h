@@ -11,14 +11,11 @@
 #ifndef MCRL2_LPS_NEXT_STATE_GENERATOR_H
 #define MCRL2_LPS_NEXT_STATE_GENERATOR_H
 
-// #define MCRL2_USE_NEW_ENUMERATOR
-
 #include <iterator>
 #include <string>
 #include <vector>
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator.h"
 #ifdef MCRL2_NEXT_STATE_LOG_EQUALITIES
 #include "mcrl2/data/find_equalities.h"
@@ -40,13 +37,8 @@ class next_state_generator
     typedef atermpp::term_appl<data::data_expression> condition_arguments_t;
 
     typedef data::rewriter rewriter_t;
-#ifdef MCRL2_USE_NEW_ENUMERATOR
     typedef data::enumerator_algorithm_with_iterator<rewriter_t, data::mutable_indexed_substitution<>, data::enumerator_list_element_with_substitution<data::data_expression>, data::is_not_false> enumerator_t;
     typedef enumerator_t::iterator enumerator_iterator_t;
-#else
-    typedef data::classic_enumerator<rewriter_t> enumerator_t;
-    typedef enumerator_t::iterator enumerator_iterator_t;
-#endif
 
     typedef data::rewriter::substitution_type substitution_t;
 
@@ -177,20 +169,13 @@ class next_state_generator
 #endif
           m_enumeration_queue.clear();
           m_enumeration_queue.push_back(data::enumerator_list_element_with_substitution<data::data_expression>(variables, phi));
-#ifdef MCRL2_USE_NEW_ENUMERATOR
-          m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, m_enumeration_queue, data::is_not_false());
-#else
           m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, m_enumeration_queue);
-#endif
         }
 
 
       public:
         iterator()
           : m_generator(0)
-#ifdef MCRL2_USE_NEW_ENUMERATOR
-            , m_enumeration_iterator(data::is_not_false())
-#endif
         {
         }
 
