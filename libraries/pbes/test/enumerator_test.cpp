@@ -75,7 +75,7 @@ void test_enumerator_with_iterator()
   v.push_front(data::variable("n", data::sort_nat::nat()));
   pbes_expression phi = parse_pbes_expression("val(n < 2)", VARSPEC);
   data::mutable_indexed_substitution<> sigma;
-  data::enumerator_algorithm_with_iterator<pbes_rewriter, data::mutable_indexed_substitution<>, enumerator_element, pbes_system::is_not_true> E(R, data_spec, datar);
+  data::enumerator_algorithm_with_iterator<pbes_rewriter, data::mutable_indexed_substitution<>, enumerator_element, pbes_system::is_not_true> E(R, data_spec, datar, 20);
   std::vector<pbes_system::pbes_expression> solutions;
 
   std::deque<enumerator_element> P;
@@ -102,7 +102,7 @@ void test_enumerator_with_substitutions()
   v.push_front(data::variable("n", data::sort_nat::nat()));
   pbes_expression phi = parse_pbes_expression("val(n < 2)", VARSPEC);
   data::mutable_indexed_substitution<> sigma;
-  data::enumerator_algorithm_with_iterator<pbes_rewriter, data::mutable_indexed_substitution<>, enumerator_element, pbes_system::is_not_true> E(R, data_spec, datar);
+  data::enumerator_algorithm_with_iterator<pbes_rewriter, data::mutable_indexed_substitution<>, enumerator_element, pbes_system::is_not_false> E(R, data_spec, datar);
   std::vector<pbes_system::pbes_expression> solutions;
 
   std::deque<enumerator_element> P;
