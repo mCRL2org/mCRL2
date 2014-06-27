@@ -241,6 +241,18 @@ void mutually_recursive_test()
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
+void set_test()
+{
+  std::clog << "set_test\n";
+  std::string dataspec_text = "sort Dummy;\n";
+  std::string variable_text = "f: Set(Bool);";
+  std::string expression_text = "true in f";
+  std::string free_variable_text = "f: Set(Bool);";
+  std::size_t number_of_solutions = 4;
+  bool more_solutions_possible = false;
+  enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
+}
+
 inline
 data_expression_vector generate_values(const data_specification& dataspec, const sort_expression& s, std::size_t max_size = 1000)
 {
@@ -340,6 +352,7 @@ int test_main(int argc, char** argv)
   mutually_recursive_test();
   equality_substitution_test();
   generate_values_test();
+  set_test();
 
   return EXIT_SUCCESS;
 }

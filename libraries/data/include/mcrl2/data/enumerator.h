@@ -398,8 +398,8 @@ class enumerator_algorithm
       if (accept(phi1))
       {
         P.emplace_back(EnumeratorListElement(variables, phi1, p, v, e));
+        mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
       }
-      // mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
     }
 
     // add element with additional variables
@@ -419,8 +419,8 @@ class enumerator_algorithm
       {
         // Additional variables are put at the end of the list!
         P.emplace_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
+        mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
       }
-      // mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
     }
 
     // specialization for enumerator_list_element; in this case we are not interested in the substitutions,
@@ -449,8 +449,8 @@ class enumerator_algorithm
           // Additional variables are put at the end of the list!
           P.emplace_back(enumerator_list_element<Expression>(variables + added_variables, phi1, p, v, e));
         }
+        mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
       }
-      // mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
     }
 
   public:
@@ -484,7 +484,7 @@ class enumerator_algorithm
       auto p = P.front();
       auto const& v = p.variables();
       auto const& phi = p.expression();
-      // mCRL2log(log::debug) << "  <process-element> " << p << std::endl;
+      mCRL2log(log::debug) << "  <process-element> " << p << std::endl;
       P.pop_front();
 
       auto const& v1 = v.front();
@@ -529,7 +529,8 @@ class enumerator_algorithm
           const data_expression term = sort_set::constructor(element_sort, lambda_term, fset_variable);
           const data_expression old_substituted_value = sigma(v1);
           sigma[v1] = term;
-          add_element(P, sigma, accept, vtail, phi, p, v1, term);
+          add_element(P, sigma, accept, vtail, atermpp::make_list(fset_variable), phi, p, v1, term);
+          sigma[v1] = old_substituted_value;
         }
         else
         {
@@ -617,13 +618,13 @@ class enumerator_algorithm
     template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
     std::size_t next(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
     {
-      // mCRL2log(log::debug) << "  <next> " << core::detail::print_list(P) << std::endl;
+      mCRL2log(log::debug) << "  <next> " << core::detail::print_list(P) << std::endl;
       std::size_t count = 0;
       while (!P.empty())
       {
         if (P.front().is_solution())
         {
-          // mCRL2log(log::debug) << "  <solution> " << P.front() << std::endl;
+          mCRL2log(log::debug) << "  <solution> " << P.front() << std::endl;
           break;
         }
         else
