@@ -621,46 +621,45 @@ void parse_variables(std::istream& in,
                      const Variable_iterator end,
                      const data_specification& data_spec = detail::default_specification())
 {
-  // Parse the variables list.
   std::string text = utilities::read_text(in);
-  variable_list data_vars = parse_variables_new(text);
+  boost::trim(text);
+  variable_list data_vars;
 
-  // Type check the variable list.
-  /* atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
-                                      mcrl2::data::remove_all_system_defined(data_spec)); */
-  // atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec);
-
-  atermpp::aterm_list temporary_data_vars = data_vars;
-  data_type_checker type_checker(data_spec);
-  // temporary_data_vars = core::type_check_data_vars(data_vars, d);
-  temporary_data_vars = type_checker(data_vars);
-
-  if (temporary_data_vars == atermpp::aterm_list(atermpp::aterm()))
+  if (!text.empty())
   {
-    throw mcrl2::runtime_error("Error while type checking data variable declarations.");
-  }
-  data_vars=variable_list(temporary_data_vars);
+    data_vars = parse_variables_new(text);
 
-  // Undo sort renamings for compatibility with type checker
-  // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
-  data_vars = atermpp::reverse(data_vars);
-  data_vars = normalize_sorts(data_vars,data_spec);
+    atermpp::aterm_list temporary_data_vars = data_vars;
+    data_type_checker type_checker(data_spec);
+    temporary_data_vars = type_checker(data_vars);
 
-  // Check that variables do not have equal names.
-  for (variable_list::const_iterator v=data_vars.begin(); v!=data_vars.end(); ++v)
-  {
-    for (Variable_iterator i=begin; i!=end; ++i)
+    if (temporary_data_vars == atermpp::aterm_list(atermpp::aterm()))
     {
-      if (v->name()==i->name())
-      {
-        throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*i) + " and " + data::pp(*v) + ".");
-      }
+      throw mcrl2::runtime_error("Error while type checking data variable declarations.");
     }
-    for (variable_list::const_iterator v1=data_vars.begin(); v1!=data_vars.end(); ++v1)
+    data_vars=variable_list(temporary_data_vars);
+
+    // Undo sort renamings for compatibility with type checker
+    // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
+    data_vars = atermpp::reverse(data_vars);
+    data_vars = normalize_sorts(data_vars,data_spec);
+
+    // Check that variables do not have equal names.
+    for (auto v = data_vars.begin(); v != data_vars.end(); ++v)
     {
-      if (((*v1)!=(*v)) && (v1->name()==v->name()))
+      for (Variable_iterator i = begin; i != end; ++i)
       {
-        throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*v1) + " and " + data::pp(*v) + ".");
+        if (v->name()==i->name())
+        {
+          throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*i) + " and " + data::pp(*v) + ".");
+        }
+      }
+      for (auto v1 = data_vars.begin(); v1 != data_vars.end(); ++v1)
+      {
+        if (((*v1)!=(*v)) && (v1->name()==v->name()))
+        {
+          throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*v1) + " and " + data::pp(*v) + ".");
+        }
       }
     }
   }
