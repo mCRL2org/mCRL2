@@ -18,7 +18,7 @@
 #include <vector>
 #include <set>
 #include <sstream>
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
@@ -204,6 +204,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
 
   pbes_expression operator()(const propositional_variable_instantiation& x)
   {
+    typedef data::enumerator_list_element_with_substitution<data::data_expression> enumerator_element;
+
     // TODO: this code contains too much conversion between vectors and aterm lists
     std::vector<data::data_expression> finite_parameters;
     std::vector<data::data_expression> infinite_parameters;
@@ -222,13 +224,11 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     }
 
     std::set<pbes_expression> result;
-    data::classic_enumerator<> enumerator(super::R, m_data_spec);
+    data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, enumerator_element, data::is_not_false> enumerator(super::R, m_data_spec, super::R);
     mcrl2::data::mutable_indexed_substitution<> local_sigma;
     const data::variable_list vl(di.begin(), di.end());
-    std::deque < data::enumerator_list_element_with_substitution<data::data_expression> >
-         enumerator_deque(1,data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()));
-    for (auto i = enumerator.begin(local_sigma, enumerator_deque);
-         i != enumerator.end(); ++i)
+    std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+    for (auto i = enumerator.begin(local_sigma, enumerator_deque); i != enumerator.end(); ++i)
     {
       mCRL2log(log::debug1) << "sigma = " << sigma << "\n";
       data::mutable_indexed_substitution<> sigma_i;
@@ -358,8 +358,6 @@ class pbesinst_finite_algorithm
 
       data::rewriter rewr(p.data(), m_rewriter_strategy);
 
-      typedef data::classic_enumerator<>::substitution_type substitution_type;
-
       // compute new equations
       std::vector<pbes_equation> equations;
       for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
@@ -369,15 +367,14 @@ class pbesinst_finite_algorithm
         detail::split_parameters(i->variable(), index_map, finite_parameters, infinite_parameters);
         data::variable_list infinite = atermpp::convert<data::variable_list>(infinite_parameters);
 
-        data::classic_enumerator<> enumerator(rewr,p.data());
+        typedef data::enumerator_list_element_with_substitution<data::data_expression> enumerator_element;
+        data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, enumerator_element, data::is_not_false> enumerator(rewr, p.data(), rewr);
         mcrl2::data::mutable_indexed_substitution<> local_sigma;
         const data::variable_list vl(finite_parameters.begin(), finite_parameters.end());
-        std::deque < data::enumerator_list_element_with_substitution<data::data_expression> >
-              enumerator_deque(1,data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()));
-        for (auto j = enumerator.begin(local_sigma, enumerator_deque);
-             j != enumerator.end(); ++j)
+        std::deque <enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+        for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end(); ++j)
         {
-          // apply the substitution contained in the enumerated element. 
+          // apply the substitution contained in the enumerated element.
           data::mutable_indexed_substitution<> sigma_j;
           j->add_assignments(vl,sigma_j,rewr);
 
@@ -391,7 +388,7 @@ class pbesinst_finite_algorithm
           propositional_variable X(name, infinite);
           mCRL2log(log::debug1) << "formula before = " << pbes_system::pp(i->formula()) << "\n";
           mCRL2log(log::debug1) << "sigma = " << sigma_j << "\n";
-          detail::pbesinst_finite_builder<data::rewriter, substitution_type> visitor(rewr, sigma_j, pbesinst_finite_rename(), p.data(), index_map, variable_map);
+          detail::pbesinst_finite_builder<data::rewriter, data::mutable_indexed_substitution<>> visitor(rewr, sigma_j, pbesinst_finite_rename(), p.data(), index_map, variable_map);
           pbes_expression formula = visitor(i->formula());
           mCRL2log(log::debug1) << "formula after  = " << pbes_system::pp(formula) << "\n";
           pbes_equation eqn(i->symbol(), X, formula);
