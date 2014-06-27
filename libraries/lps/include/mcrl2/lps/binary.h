@@ -19,7 +19,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
@@ -52,7 +52,8 @@ size_t nr_of_booleans_for_elements(size_t n)
 template<typename DataRewriter>
 class binary_algorithm: public lps::detail::lps_algorithm
 {
-    typedef data::classic_enumerator< data::rewriter > enumerator_type;
+  typedef data::enumerator_list_element_with_substitution<mcrl2::data::data_expression> enumerator_element;
+  typedef data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, enumerator_element, data::is_not_false> enumerator_type;
 
   protected:
     /// Rewriter
@@ -125,7 +126,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       data::set_identifier_generator generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
-      enumerator_type enumerator(m_rewriter,m_spec.data());
+      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
@@ -139,14 +140,10 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
           data::mutable_indexed_substitution<> local_sigma;
           const data::variable_list vl=atermpp::make_list<data::variable>(par);
-          std::deque<data::enumerator_list_element_with_substitution<data::data_expression> >
-                     enumerator_deque(1,data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()));
-          for (enumerator_type::iterator j=enumerator.begin(
-                           local_sigma,
-                           enumerator_deque);
-                j != enumerator.end() ; ++j)
+          std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+          for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end() ; ++j)
           {
-            j->add_assignments(vl,local_sigma,m_rewriter);
+            j->add_assignments(vl, local_sigma,m_rewriter);
             enumerated_elements.push_back(local_sigma(par));
           }
 

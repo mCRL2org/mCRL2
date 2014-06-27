@@ -25,7 +25,7 @@
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
@@ -53,8 +53,8 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   std::size_t max_internal_variables = 10000;
 
   data::rewriter rewr(dataspec);
-  typedef data::classic_enumerator<data::rewriter> enumerator_type;
-  enumerator_type enumerator(rewr, dataspec);
+  typedef data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, data::enumerator_list_element<data::data_expression>, data::is_not_false> enumerator_type;
+  enumerator_type enumerator(rewr, dataspec, rewr);
   data::variable x("x", s);
   data::variable_vector v;
   v.push_back(x);

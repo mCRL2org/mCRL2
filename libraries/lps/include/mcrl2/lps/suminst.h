@@ -16,7 +16,7 @@
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/utilities/logger.h"
 
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 #include "mcrl2/lps/rewrite.h"
@@ -48,8 +48,8 @@ std::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 template<typename DataRewriter>
 class suminst_algorithm: public lps::detail::lps_algorithm
 {
-
-    typedef data::classic_enumerator< data::rewriter > enumerator_type;
+  typedef data::enumerator_list_element_with_substitution<mcrl2::data::data_expression> enumerator_element;
+  typedef data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, enumerator_element, data::is_not_false> enumerator_type;
 
   protected:
     /// Sorts to be instantiated
@@ -109,10 +109,8 @@ class suminst_algorithm: public lps::detail::lps_algorithm
           mCRL2log(log::debug, "suminst") << "enumerating variables " << vl << " in condition: " << data::pp(s.condition()) << std::endl;
 
           mcrl2::data::mutable_indexed_substitution<> local_sigma;
-          std::deque < data::enumerator_list_element_with_substitution<mcrl2::data::data_expression> > 
-             enumerator_deque(1,data::enumerator_list_element_with_substitution<mcrl2::data::data_expression>(vl, s.condition()));
-          for (enumerator_type::iterator i=m_enumerator.begin(local_sigma, enumerator_deque);
-                  i != m_enumerator.end(); ++i)
+          std::deque <enumerator_element> enumerator_deque(1, enumerator_element(vl, s.condition()));
+          for (auto i = m_enumerator.begin(local_sigma, enumerator_deque); i != m_enumerator.end(); ++i)
           {
             mutable_indexed_substitution<> sigma;
             i->add_assignments(vl,sigma,m_rewriter);
@@ -192,7 +190,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
-        m_enumerator(r,spec.data()),
+        m_enumerator(r, spec.data(), r),
         m_processed(0),
         m_deleted(0),
         m_added(0)
