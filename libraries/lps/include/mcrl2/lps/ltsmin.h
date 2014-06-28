@@ -81,7 +81,7 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
 class pins_data_type
 {
   protected:
-    atermpp::indexed_set m_indexed_set;
+    atermpp::indexed_set<atermpp::aterm> m_indexed_set;
     lps::next_state_generator& m_generator;
     bool m_is_bounded;
 
@@ -204,13 +204,13 @@ class pins_data_type
     }
 
     /// \brief Returns the indexed_set holding the values
-    atermpp::indexed_set& indexed_set()
+    atermpp::indexed_set<atermpp::aterm>& indexed_set()
     {
       return m_indexed_set;
     }
 
     /// \brief Returns the indexed_set holding the values
-    const atermpp::indexed_set& indexed_set() const
+    const atermpp::indexed_set<atermpp::aterm>& indexed_set() const
     {
       return m_indexed_set;
     }

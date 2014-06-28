@@ -45,11 +45,11 @@ class lps2lts_algorithm
     next_state_generator::summand_subset_t m_nonprioritized_subset;
     next_state_generator::summand_subset_t m_prioritized_subset;
 
-    atermpp::indexed_set m_state_numbers;
+    atermpp::indexed_set<storage_state_t> m_state_numbers;
     bit_hash_table m_bit_hash_table;
 
     lts_lts_t m_output_lts;
-    atermpp::indexed_set m_action_label_numbers;
+    atermpp::indexed_set<atermpp::aterm> m_action_label_numbers; // aterm should be replace by proper type.
     std::ofstream m_aut_file;
 
     bool m_maintain_traces;

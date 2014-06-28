@@ -21,7 +21,6 @@ add_library(${PROJECT_NAME}
   source/aterm_implementation.cpp
   source/aterm_io_text.cpp
   source/aterm_io_binary.cpp
-  source/indexed_set.cpp
 )
 
 target_link_libraries( ${PROJECT_NAME}

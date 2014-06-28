@@ -1176,11 +1176,11 @@ class boolean_equation_system
     std::vector<bes_expression> right_hand_sides;
     bool variable_occurrences_are_stored;
     std::vector< std::set <variable_type> > variable_occurrence_sets;
-    atermpp::indexed_set variable_relevance_indexed_set;
+    atermpp::indexed_set<bes_expression> variable_relevance_indexed_set;
     bool count_variable_relevance;
     std::vector < std::deque < counter_example> > data_to_construct_counter_example;
     bool construct_counter_example;
-    atermpp::indexed_set variable_index;  //Used for constructing counter examples
+    atermpp::indexed_set<atermpp::aterm> variable_index;  //Used for constructing counter examples
     typedef mcrl2::data::rewriter::substitution_type substitution_type;
 
     const bool internal_opt_store_as_tree;
@@ -1699,7 +1699,7 @@ class boolean_equation_system
     //and translate to pbes expression to a bes_expression in BDD format.
     bes_expression add_propositional_variable_instantiations_to_indexed_set_and_translate(
       const mcrl2::pbes_system::pbes_expression& p,
-      atermpp::indexed_set& variable_index,
+      atermpp::indexed_set<atermpp::aterm>& variable_index,
       size_t& nr_of_generated_variables,
       const bool to_bdd,
       const transformation_strategy strategy,

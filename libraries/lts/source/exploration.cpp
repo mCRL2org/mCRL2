@@ -34,7 +34,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
   }
   else
   {
-    m_state_numbers = atermpp::indexed_set(m_options.initial_table_size, 50);
+    m_state_numbers = atermpp::indexed_set<storage_state_t>(m_options.initial_table_size, 50);
   }
 
   m_num_states = 0;

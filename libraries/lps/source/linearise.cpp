@@ -210,7 +210,7 @@ class specification_basic_type:public boost::noncopyable
                                               // be moved to another place when the object data structure grows. This
                                               // is because objects in this datatype  are passed around by reference.
 
-    indexed_set objectIndexTable;
+    indexed_set<aterm_appl> objectIndexTable;
     set_identifier_generator fresh_identifier_generator;
     std::vector < enumeratedtype > enumeratedtypes;
     stackoperations* stack_operations_list;
@@ -231,7 +231,7 @@ class specification_basic_type:public boost::noncopyable
       timeIsBeingUsed(false),
       fresh_equation_added(false)
     {
-      objectIndexTable=indexed_set(1024,75);
+      objectIndexTable=indexed_set<aterm_appl>(1024,75);
 
       // find_identifiers does not find the identifiers in the enclosed data specification.
       fresh_identifier_generator.add_identifiers(process::find_identifiers(procspec));
@@ -296,7 +296,6 @@ class specification_basic_type:public boost::noncopyable
 
     size_t addObject(aterm_appl o, bool& b)
     {
-      // size_t result=ATindexedSetPut(objectIndexTable,(aterm)o,&isnew);
       std::pair<size_t, bool> result=objectIndexTable.put(o);
       if (objectdata.size()<=result.first)
       {

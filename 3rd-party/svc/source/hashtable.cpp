@@ -45,7 +45,7 @@ using namespace atermpp;
 /* ======= Initialize the hash table ======= */
 int HTinit(HTable* table)
 {
-  new (&table->terms) atermpp::indexed_set(PT_INITIALSIZE, 75); // Placement new.
+  new (&table->terms) atermpp::indexed_set<aterm>(PT_INITIALSIZE, 75); // Placement new.
   PTinit(&table->pointers);
 
   return 0;

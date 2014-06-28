@@ -24,6 +24,7 @@
 #include <limits.h>
 #include <svc/huffman.h>
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 
 using namespace atermpp;
 
