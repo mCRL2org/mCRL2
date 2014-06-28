@@ -106,12 +106,11 @@ bool compute_finite_set_elements(const container_sort& sort, const data_specific
 }
 
 /// \brief Computes the elements of a finite function sort, and puts them in result. If there are too many elements, false is returned.
-template <class IdentifierGenerator, class Rewriter, class MutableSubstitution>
+template <class IdentifierGenerator, class Rewriter>
 bool compute_finite_function_sorts(const function_sort& sort,
                                    const IdentifierGenerator& id_generator,
                                    const data::data_specification& dataspec,
                                    Rewriter datar,
-                                   const MutableSubstitution& sigma,
                                    data_expression_vector& result,
                                    variable_list& function_parameter_list
                                   )
@@ -498,7 +497,7 @@ class enumerator_algorithm
         {
           data_expression_vector function_sorts;
           variable_list function_parameter_list;
-          bool result = detail::compute_finite_function_sorts(function, id_generator, dataspec, datar, sigma, function_sorts, function_parameter_list);
+          bool result = detail::compute_finite_function_sorts(function, id_generator, dataspec, datar, function_sorts, function_parameter_list);
 
 // std::cout << "<function_sorts>" << core::detail::print_list(function_sorts) << std::endl;
 
