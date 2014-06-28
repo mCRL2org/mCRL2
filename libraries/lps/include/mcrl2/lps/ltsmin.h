@@ -53,19 +53,20 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   std::size_t max_internal_variables = 10000;
 
   data::rewriter rewr(dataspec);
-  typedef data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, data::enumerator_list_element<data::data_expression>, data::is_not_false> enumerator_type;
-  enumerator_type enumerator(rewr, dataspec, rewr);
+
+  typedef data::enumerator_list_element_with_substitution<mcrl2::data::data_expression> enumerator_element;
+  typedef data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, enumerator_element, data::is_not_false> enumerator_type;
+
+  enumerator_type enumerator(rewr, dataspec, rewr, max_internal_variables);
   data::variable x("x", s);
   data::variable_vector v;
   v.push_back(x);
   data::mutable_indexed_substitution<> sigma;
   data::variable_list vl(v.begin(),v.end());
-  std::deque < data::enumerator_list_element_with_substitution<data::data_expression> >
-      enumerator_deque(1,data::enumerator_list_element_with_substitution<data::data_expression>(vl, data::sort_bool::true_()));
-  for (enumerator_type::iterator
-       i = enumerator.begin(sigma, enumerator_deque, max_internal_variables); i != enumerator.end() ; ++i)
+  std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+  for (auto i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() ; ++i)
   {
-    i->add_assignments(vl,sigma,rewr);
+    i->add_assignments(vl, sigma, rewr);
     result.push_back(to_string(sigma(vl.front())));
     if (result.size() >= max_size)
     {
