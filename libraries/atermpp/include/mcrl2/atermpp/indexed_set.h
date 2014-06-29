@@ -13,9 +13,10 @@
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
 #include <vector>
+#include <deque>
 #include <cassert>
-#include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/detail/atypes.h"
+#include "mcrl2/atermpp/detail/aterm_implementation.h"
+
 namespace atermpp
 {
 
@@ -28,8 +29,7 @@ class indexed_set
     unsigned int max_load;
     size_t max_entries;
     std::vector<size_t> hashtable;
-    std::vector < std::vector <ELEMENT > > m_keys;
-    std::size_t m_size;                   /**< the number of entries of the table */
+    std::deque <ELEMENT > m_keys;
 
     /* Find whether the key is already inserted in the hashtable.
        If no, insert n as the index for key. If yes return its already
@@ -40,6 +40,10 @@ class indexed_set
     void hashResizeSet();
 
   public:
+    /// \brief A constant that if returned as an index means that the index does not exist.
+    //         In general this means that a requested element is not in the set.
+    static const size_t npos=static_cast<size_t>(-1);
+
     /// Create a new indexed_set.
     /// \param initial_size The initial capacity of the set.
     /// \param max_load_pct The maximum load percentage.
@@ -64,7 +68,7 @@ class indexed_set
 
     /// \brief Find the index of elem in set.
     /// The index assigned to elem is returned, except when elem is not in the set, in
-    /// which case the return value is atermpp::npos, i.e. the largest number in size_t.
+    /// which case the return value is indexed_set::npos, i.e. the largest number in size_t.
     /// \param elem An element of the set.
     /// \return The index of the element.
     ssize_t index(const ELEMENT& elem) const;
@@ -77,12 +81,12 @@ class indexed_set
     size_t operator[](const ELEMENT& elem)
     {
       std::size_t result = index(elem);
-      if (result == atermpp::npos)
+      if (result == npos)
       {
         std::pair<size_t, bool> p=put(elem);
         if(!p.second)
         {
-          throw mcrl2::runtime_error("failed to add element to indexed set");
+          throw std::runtime_error("failed to add element to indexed set");
         }
         result = p.first;
       }
@@ -99,7 +103,7 @@ class indexed_set
     /// \brief Returns the size of the indexed set.
     std::size_t size() const
     {
-      return m_size;
+      return m_keys.size();
     }
 };
 

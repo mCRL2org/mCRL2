@@ -13,52 +13,10 @@
 #ifndef MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
 #define MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
 
-#include <cstdlib>
-#include <vector>
-
 namespace atermpp
 {
 namespace detail
 {
-
-static const size_t TABLE_SHIFT = 14;
-static const size_t ELEMENTS_PER_TABLE = 1L<<TABLE_SHIFT;
-inline
-size_t modELEMENTS_PER_TABLE(const size_t n)
-{
-  return (n & (ELEMENTS_PER_TABLE-1));
-}
-
-inline
-size_t divELEMENTS_PER_TABLE(const size_t n)
-{
-  return n >> TABLE_SHIFT;
-}
-
-/*-----------------------------------------------------------*/
-
-template <class ELEMENT>
-inline const ELEMENT& tableGet(const std::vector< std::vector<ELEMENT> >& tableindex, size_t n)
-{
-  return tableindex[divELEMENTS_PER_TABLE(n)][modELEMENTS_PER_TABLE(n)];
-}
-
-template <class ELEMENT>
-inline void insertKeyOrValue(std::vector<std::vector<ELEMENT> >& vec, size_t n, const ELEMENT& t)
-{
-  const size_t x = divELEMENTS_PER_TABLE(n);
-  const size_t y = modELEMENTS_PER_TABLE(n);
-
-
-  if (x>=vec.size())
-  {
-    vec.push_back(std::vector<ELEMENT>(ELEMENTS_PER_TABLE));
-  }
-
-  vec[x][y] = t;
-}
-
-/* ======================================================= */
 
 static const size_t STEP = 1; /* The position on which the next hash entry //searched */
 
@@ -119,7 +77,7 @@ size_t indexed_set<ELEMENT>::hashPut(const ELEMENT& key, size_t n)
       return n;
     }
 
-    if (detail::tableGet(m_keys, v)==key)
+    if (m_keys[v]==key)
     {
       /* key is already in the set, return position of key */
       return v;
@@ -142,9 +100,9 @@ inline void indexed_set<ELEMENT>::hashResizeSet()
   max_entries = ((sizeMinus1/100)*max_load);
 
   /* rebuild the hashtable again */
-  for (size_t i=0; i<m_size; i++)
+  for (size_t i=0; i<m_keys.size(); i++)
   {
-    const ELEMENT& t = detail::tableGet(m_keys, i);
+    const ELEMENT& t = m_keys[i];
     hashPut(t, i);
   }
 }
@@ -155,8 +113,7 @@ inline indexed_set<ELEMENT>::indexed_set(size_t initial_size /* = 100 */, unsign
       : sizeMinus1(detail::approximatepowerof2(initial_size)),
         max_load(max_load_pct),
         max_entries(((sizeMinus1/100)*max_load)),
-        hashtable(std::vector<size_t>(1+sizeMinus1,detail::EMPTY)),
-        m_size(0)
+        hashtable(std::vector<size_t>(1+sizeMinus1,detail::EMPTY))
 {
 }
 
@@ -171,10 +128,10 @@ inline inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
     size_t v=hashtable[c];
     if (v == detail::EMPTY)
     {
-      return atermpp::npos; /* Not found. */
+      return npos; /* Not found. */
     }
 
-    if (elem==detail::tableGet(m_keys, v))
+    if (elem==m_keys[v])
     {
       return v;
     }
@@ -183,15 +140,15 @@ inline inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
   }
   while (c != start);
 
-  return atermpp::npos; /* Not found. */
+  return npos; /* Not found. */
 }
 
 
 template <class ELEMENT>
 inline inline const ELEMENT& indexed_set<ELEMENT>::get(size_t index) const
 {
-  assert(m_size>index);
-  return detail::tableGet(m_keys, index);
+  assert(m_keys.size()>index);
+  return m_keys[index];
 }
 
 
@@ -204,23 +161,21 @@ inline void indexed_set<ELEMENT>::clear()
   }
 
   m_keys.clear();
-  m_size=0;
 }
 
 
 template <class ELEMENT>
 inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
 {
-  const size_t n = hashPut(key,m_size);
-  if (n != m_size)
+  const size_t n = hashPut(key,m_keys.size());
+  if (n != m_keys.size())
   {
       return std::make_pair(n,false);
   }
   
-  m_size++;
 
-  detail::insertKeyOrValue(m_keys, n, key);
-  if (m_size >= max_entries)
+  m_keys.push_back(key);
+  if (m_keys.size() >= max_entries)
   {
     hashResizeSet(); 
   }
