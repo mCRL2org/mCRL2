@@ -119,7 +119,7 @@ inline indexed_set<ELEMENT>::indexed_set(size_t initial_size /* = 100 */, unsign
 
 
 template <class ELEMENT>
-inline inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
+inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 {
   size_t start = detail::hashcode(detail::address(elem), sizeMinus1);
   size_t c = start;
@@ -145,7 +145,7 @@ inline inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 
 
 template <class ELEMENT>
-inline inline const ELEMENT& indexed_set<ELEMENT>::get(size_t index) const
+inline const ELEMENT& indexed_set<ELEMENT>::get(size_t index) const
 {
   assert(m_keys.size()>index);
   return m_keys[index];
