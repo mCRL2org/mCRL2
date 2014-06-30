@@ -52,8 +52,8 @@ size_t nr_of_booleans_for_elements(size_t n)
 template<typename DataRewriter>
 class binary_algorithm: public lps::detail::lps_algorithm
 {
-  typedef data::enumerator_list_element_with_substitution<mcrl2::data::data_expression> enumerator_element;
-  typedef data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, enumerator_element, data::is_not_false> enumerator_type;
+  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+  typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
 
   protected:
     /// Rewriter

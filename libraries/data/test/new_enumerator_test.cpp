@@ -44,8 +44,8 @@ void enumerate(const data_specification& dataspec,
                std::size_t expected_no_of_solutions,
                bool more_solutions_possible)
 {
-  typedef enumerator_list_element_with_substitution<data_expression> enumerator_element;
-  typedef enumerator_algorithm_with_iterator<rewriter, mutable_indexed_substitution<>, enumerator_element, is_not_false> enumerator_type;
+  typedef enumerator_list_element_with_substitution<> enumerator_element;
+  typedef enumerator_algorithm_with_iterator<> enumerator_type;
 
   rewriter rewr(dataspec);
   enumerator_type enumerator(rewr, dataspec);
@@ -80,8 +80,8 @@ void empty_test()
 {
   std::clog << "empty_test\n";
 
-  typedef enumerator_list_element_with_substitution<data_expression> enumerator_element;
-  typedef enumerator_algorithm_with_iterator<rewriter, mutable_indexed_substitution<>, enumerator_element, is_not_false> enumerator_type;
+  typedef enumerator_list_element_with_substitution<> enumerator_element;
+  typedef enumerator_algorithm_with_iterator<> enumerator_type;
 
   // test manual construction of rewr with rewriter
   data_specification dataspec;
@@ -256,8 +256,8 @@ void set_test()
 inline
 data_expression_vector generate_values(const data_specification& dataspec, const sort_expression& s, std::size_t max_size = 1000)
 {
-  typedef enumerator_list_element_with_substitution<data_expression> enumerator_element;
-  typedef enumerator_algorithm_with_iterator<rewriter, mutable_indexed_substitution<>, enumerator_element, is_not_false> enumerator_type;
+  typedef enumerator_list_element_with_substitution<> enumerator_element;
+  typedef enumerator_algorithm_with_iterator<> enumerator_type;
 
   std::size_t max_internal_variables = 10000;
   data_expression_vector result;

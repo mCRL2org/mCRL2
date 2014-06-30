@@ -204,7 +204,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
 
   pbes_expression operator()(const propositional_variable_instantiation& x)
   {
-    typedef data::enumerator_list_element_with_substitution<data::data_expression> enumerator_element;
+    typedef data::enumerator_list_element_with_substitution<> enumerator_element;
 
     // TODO: this code contains too much conversion between vectors and aterm lists
     std::vector<data::data_expression> finite_parameters;
@@ -224,7 +224,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     }
 
     std::set<pbes_expression> result;
-    data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, enumerator_element, data::is_not_false> enumerator(super::R, m_data_spec, super::R);
+    data::enumerator_algorithm_with_iterator<> enumerator(super::R, m_data_spec, super::R);
     mcrl2::data::mutable_indexed_substitution<> local_sigma;
     const data::variable_list vl(di.begin(), di.end());
     std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
@@ -367,8 +367,8 @@ class pbesinst_finite_algorithm
         detail::split_parameters(i->variable(), index_map, finite_parameters, infinite_parameters);
         data::variable_list infinite = atermpp::convert<data::variable_list>(infinite_parameters);
 
-        typedef data::enumerator_list_element_with_substitution<data::data_expression> enumerator_element;
-        data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, enumerator_element, data::is_not_false> enumerator(rewr, p.data(), rewr);
+        typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+        data::enumerator_algorithm_with_iterator<> enumerator(rewr, p.data(), rewr);
         mcrl2::data::mutable_indexed_substitution<> local_sigma;
         const data::variable_list vl(finite_parameters.begin(), finite_parameters.end());
         std::deque <enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));

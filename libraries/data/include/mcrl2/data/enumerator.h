@@ -177,7 +177,7 @@ struct is_not_true
 };
 
 /// \brief The default element for the todo list of the enumerator
-template <typename Expression>
+template <typename Expression = data::data_expression>
 class enumerator_list_element
 {
   protected:
@@ -244,7 +244,7 @@ class enumerator_list_element
 
 /// \brief An element for the todo list of the enumerator that collects the substitution
 /// corresponding to the expression phi
-template <typename Expression>
+template <typename Expression = data::data_expression>
 class enumerator_list_element_with_substitution: public enumerator_list_element<Expression>
 {
   protected:
@@ -318,7 +318,7 @@ struct sort_name_generator
 };
 
 /// \brief An enumerator algorithm that generates solutions of a condition.
-template <typename Rewriter>
+template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter>
 class enumerator_algorithm
 {
   /// \brief A map that caches the constructors corresponding to sort expressions.
@@ -332,7 +332,7 @@ class enumerator_algorithm
     const data::data_specification& dataspec;
 
     // Needed for enumerate_expressions
-    const data::rewriter& datar;
+    const DataRewriter& datar;
 
     // A name generator
     mutable data::set_identifier_generator id_generator;
@@ -463,7 +463,7 @@ class enumerator_algorithm
 
     enumerator_algorithm(const Rewriter& R_,
                          const data::data_specification& dataspec_,
-                         const data::rewriter& datar_,
+                         const DataRewriter& datar_,
                          std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                          bool throw_exceptions = false
                        )
@@ -651,11 +651,11 @@ class enumerator_algorithm
 };
 
 /// \brief An enumerator algorithm with an iterator interface.
-template <typename Rewriter, typename MutableSubstitution, typename EnumeratorListElement, typename Filter>
-class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
+template <typename Rewriter = data::rewriter, typename EnumeratorListElement = enumerator_list_element_with_substitution<>, typename Filter = data::is_not_false, typename DataRewriter = data::rewriter, typename MutableSubstitution = data::mutable_indexed_substitution<> >
+class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, DataRewriter>
 {
   public:
-    typedef enumerator_algorithm<Rewriter> super;
+    typedef enumerator_algorithm<Rewriter, DataRewriter> super;
 
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
@@ -663,7 +663,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     class iterator: public boost::iterator_facade<iterator, const EnumeratorListElement, boost::forward_traversal_tag>
     {
       protected:
-        const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement, Filter>* E;
+        const enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>* E;
         MutableSubstitution* sigma;
         std::deque<EnumeratorListElement>* P;
         Filter accept;
@@ -676,7 +676,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
         }
 
       public:
-        iterator(const enumerator_algorithm_with_iterator<Rewriter, MutableSubstitution, EnumeratorListElement, Filter>* E_,
+        iterator(const enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>* E_,
                  std::deque<EnumeratorListElement>* P_,
                  MutableSubstitution* sigma_,
                  Filter accept_ = Filter()
@@ -737,7 +737,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter>
     enumerator_algorithm_with_iterator(
                 const Rewriter& R,
                 const data::data_specification& dataspec,
-                const data::rewriter& datar,
+                const DataRewriter& datar,
                 std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                 bool throw_exceptions = false)
       : super(R, dataspec, datar, max_count, throw_exceptions)
@@ -779,7 +779,7 @@ data_expression_vector enumerate_expressions(const sort_expression& s, const dat
   typedef typename Rewriter::term_type term_type;
   typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
   assert(dataspec.is_certainly_finite(s));
-  enumerator_algorithm_with_iterator<Rewriter, mutable_indexed_substitution<>, enumerator_element, data::is_not_false> E(rewr, dataspec, rewr);
+  enumerator_algorithm_with_iterator<> E(rewr, dataspec, rewr);
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);

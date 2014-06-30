@@ -37,7 +37,7 @@ class next_state_generator
     typedef atermpp::term_appl<data::data_expression> condition_arguments_t;
 
     typedef data::rewriter rewriter_t;
-    typedef data::enumerator_algorithm_with_iterator<rewriter_t, data::mutable_indexed_substitution<>, data::enumerator_list_element_with_substitution<data::data_expression>, data::is_not_false> enumerator_t;
+    typedef data::enumerator_algorithm_with_iterator<> enumerator_t;
     typedef enumerator_t::iterator enumerator_iterator_t;
 
     typedef data::rewriter::substitution_type substitution_t;

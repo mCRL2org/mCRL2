@@ -54,8 +54,8 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
 
   data::rewriter rewr(dataspec);
 
-  typedef data::enumerator_list_element_with_substitution<mcrl2::data::data_expression> enumerator_element;
-  typedef data::enumerator_algorithm_with_iterator<data::rewriter, data::mutable_indexed_substitution<>, enumerator_element, data::is_not_false> enumerator_type;
+  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+  typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
 
   enumerator_type enumerator(rewr, dataspec, rewr, max_internal_variables);
   data::variable x("x", s);
