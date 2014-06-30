@@ -72,6 +72,27 @@ class stategraph_global_algorithm: public stategraph_algorithm
       return propositional_variable(X, data::variable_list(d.begin(), d.end()));
     }
 
+    data::data_expression_list put_dest(const predicate_variable& PV, const stategraph_equation& eqn, std::size_t i) const
+    {
+      data::data_expression_vector PV_args;
+      size_t j = 0;
+      for(auto ai = PV.parameters().begin(); ai != PV.parameters().end(); ++ai)
+      {
+        const std::map<std::size_t, data::data_expression>& dest = eqn.predicate_variables()[i].dest();
+        auto dij = dest.find(j);
+        if(dij != dest.end())
+        {
+          PV_args.push_back(dij->second);
+        }
+        else
+        {
+          PV_args.push_back(*ai);
+        }
+        ++j;
+      }
+      return data::data_expression_list(PV_args.begin(), PV_args.end());
+    }
+
     void compute_global_control_flow_graph()
     {
       using utilities::detail::pick_element;
@@ -116,22 +137,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
             continue;
           }
 
-          data::data_expression_vector PV_args;
-          size_t j = 0;
-          for(auto ai = PV.parameters().begin(); ai != PV.parameters().end(); ++ai)
-          {
-            const std::map<std::size_t, data::data_expression>& dest = eqn.predicate_variables()[i].dest();
-            auto dij = dest.find(j);
-            if(dij != dest.end())
-            {
-              PV_args.push_back(dij->second);
-            }
-            else
-            {
-              PV_args.push_back(*ai);
-            }
-            ++j;
-          }
+          data::data_expression_list PV_args = put_dest(PV, eqn, i);
           propositional_variable_instantiation Ye = propositional_variable_instantiation(PV.variable().name(), data::data_expression_list(PV_args.begin(), PV_args.end()));
 
           Ye = core::down_cast<propositional_variable_instantiation>(pbesr(Ye, sigma));
