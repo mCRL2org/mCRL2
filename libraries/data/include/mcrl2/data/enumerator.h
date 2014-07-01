@@ -86,7 +86,7 @@ data_expression make_if_expression_(std::size_t& function_index,
 
 /// \brief Computes the elements of a finite set sort, and puts them in result. If there are too many elements, false is returned.
 template <class Rewriter, class MutableSubstitution>
-bool compute_finite_set_elements(const container_sort& sort, const data_specification& dataspec, Rewriter datar, const MutableSubstitution& sigma, data_expression_vector& result)
+bool compute_finite_set_elements(const container_sort& sort, const data_specification& dataspec, Rewriter datar, MutableSubstitution& sigma, data_expression_vector& result)
 {
   data_expression_vector all_element_expressions = enumerate_expressions(sort.element_sort(), dataspec, datar);
   if (all_element_expressions.size() >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
@@ -779,7 +779,7 @@ data_expression_vector enumerate_expressions(const sort_expression& s, const dat
   typedef typename Rewriter::term_type term_type;
   typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
   assert(dataspec.is_certainly_finite(s));
-  enumerator_algorithm_with_iterator<> E(rewr, dataspec, rewr);
+  enumerator_algorithm_with_iterator<Rewriter, enumerator_element, is_not_false, Rewriter> E(rewr, dataspec, rewr);
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);
