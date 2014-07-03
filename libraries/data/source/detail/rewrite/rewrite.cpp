@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#define MCRL2_USE_NEW_ENUMERATOR
+
 #include <cstdlib>
 #include <cassert>
 #include <stdexcept>
