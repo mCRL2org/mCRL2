@@ -587,15 +587,18 @@ class enumerator_algorithm
             {
               auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
               data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
-              data::application cy(constructor, y.begin(), y.end());
+              // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
+              data_expression cy = datar(application(constructor, y.begin(), y.end()), sigma);
               sigma[v1] = cy;
               add_element(P, sigma, accept, vtail, y, phi, p, v1, cy);
               sigma[v1] = v1;
             }
             else
             {
-              sigma[v1] = constructor;
-              add_element(P, sigma, accept, vtail, phi, p, v1, constructor);
+              // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
+              auto const e1 = datar(constructor, sigma);
+              sigma[v1] = e1;
+              add_element(P, sigma, accept, vtail, phi, p, v1, e1);
               sigma[v1] = v1;
             }
           }
