@@ -288,25 +288,6 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
     }
 };
 
-
-/// \brief Function object for converting a data rewriter into a rewriter that
-/// applies a substitution.
-template <typename DataRewriter, typename Substitution>
-struct rewriter_adapter
-{
-  const DataRewriter& R_;
-  const Substitution& sigma_;
-
-  rewriter_adapter(const DataRewriter& R, const Substitution& sigma)
-    : R_(R), sigma_(sigma)
-  {}
-
-  data::data_expression operator()(const data::data_expression& t) const
-  {
-    return R_(t, sigma_);
-  }
-};
-
 } // namespace data
 
 } // namespace mcrl2
