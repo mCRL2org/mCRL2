@@ -1,0 +1,9 @@
+var x,y,z:Piece;
+    b,b':Bool;
+eqn if(b,true,false)=b;
+    if(b,false,b')=!b && b';
+    
+    if(b,x,y)==z = if(b,x==z,y==z);
+    z==if(b,x,y) = if(b,z==x,z==x);
+
+rename ready => ready;

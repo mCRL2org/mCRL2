@@ -31,7 +31,7 @@ void test_initial_state_successors(const specification& lps_spec)
 
   for (next_state_generator::iterator it = generator.begin(generator.initial_state()); it != generator.end(); it++)
   {
-    std::cout << lps::pp(it->state()) << std::endl;
+    std::cout << atermpp::pp(it->state()) << std::endl;
   }
 }
 

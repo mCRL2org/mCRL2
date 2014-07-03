@@ -64,18 +64,6 @@ class term_balanced_tree: public aterm_appl
     }
 
     template < typename ForwardTraversalIterator >
-    static size_t get_distance(ForwardTraversalIterator begin, ForwardTraversalIterator end)
-    {
-      size_t size=0;
-      for (ForwardTraversalIterator i=begin; i!=end; ++i)
-      {
-        ++size;
-      }
-      return size;
-    }
-
-
-    template < typename ForwardTraversalIterator >
     const detail::_aterm* make_tree(ForwardTraversalIterator& p, const size_t size)
     {
       if (size>1)
@@ -132,15 +120,6 @@ class term_balanced_tree: public aterm_appl
     {
     }
 
-    /// Creates an term_balanced_tree with a copy of a range.
-    /// \param first The start of a range of elements.
-    /// \param last The end of a range of elements.
-    template < typename ForwardTraversalIterator >
-    term_balanced_tree(ForwardTraversalIterator first, const ForwardTraversalIterator last)
-      : aterm_appl(make_tree(first,get_distance(first,last)))
-    {
-    }
-
     /// \brief Creates an term_balanced_tree with a copy of a range.
     /// \param first The start of a range of elements.
     /// \param size The size of the range of elements.
@@ -173,7 +152,7 @@ class term_balanced_tree: public aterm_appl
     /// \details This operation behaves linear with respect to container size,
     ///          because it must calculate the size of the container. The operator
     ///          element_at behaves logarithmically.
-    const Term &operator[](size_t position) const
+    const Term& operator[](size_t position) const
     {
       return element_at(position, size());
     }
@@ -185,7 +164,7 @@ class term_balanced_tree: public aterm_appl
     /// \details By providing the size this operation is logarithmic. If a wrong
     ///         size is provided the outcome is not determined. See also operator [].
     /// \return The element at the indicated position.
-    const Term &element_at(size_t position, size_t size) const
+    const Term& element_at(size_t position, size_t size) const
     {
       assert(size == this->size());
       assert(position < size);
@@ -199,7 +178,7 @@ class term_balanced_tree: public aterm_appl
                right_branch().element_at(position-left_size, size - left_size);
       }
 
-      return *this;
+      return aterm_cast<Term>(*this);
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the term_balanced_tree.
@@ -241,6 +220,7 @@ class term_balanced_tree: public aterm_appl
     {
       return function()==tree_node_function();
     }
+
 };
 
 template < typename Value >
@@ -332,12 +312,31 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
     term_balanced_tree_iterator(term_balanced_tree_iterator const& other) : m_trees(other.m_trees)
     { }
+
 };
 
 
 /// \brief A term_balanced_tree with elements of type aterm.
 typedef term_balanced_tree<aterm> aterm_balanced_tree;
 
+template <class Term>
+std::string pp(const term_balanced_tree<Term> t)
+{
+  std::stringstream ss;
+  for(typename term_balanced_tree<Term>::iterator i=t.begin(); i!=t.end(); ++i)
+  {
+    if (i!=t.begin()) 
+    {
+      ss << ", ";
+    }
+    ss << pp(*i);
+  }
+  return ss.str();
+}
+} // namespace atermpp
+
+namespace std
+{
 /// \brief Swaps two balanced trees.
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
@@ -348,7 +347,7 @@ inline void swap(atermpp::term_balanced_tree<T> &t1, atermpp::term_balanced_tree
 {
   t1.swap(t2);
 }
-
 } // namespace atermpp
+
 
 #endif // MCRL2_ATERMPP_ATERM_BALANCED_TREE_H

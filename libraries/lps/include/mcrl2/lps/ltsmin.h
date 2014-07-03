@@ -622,7 +622,7 @@ class pins
     /// \brief Assigns the initial state to s.
     void get_initial_state(ltsmin_state_type& s)
     {
-      data::data_expression_vector initial_state = m_generator.internal_initial_state();
+      state initial_state = m_generator.initial_state();
       for (size_t i = 0; i < m_state_length; i++)
       {
         s[i] = state_type_map(i)[initial_state[i]];
@@ -664,11 +664,12 @@ class pins
       {
         state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
-      data::data_expression_vector source = state_arguments;
+      // data::data_expression_vector source = state_arguments;
+      state source(state_arguments.begin(),nparams);
 
       for (next_state_generator::iterator i = m_generator.begin(source); i; i++)
       {
-        data::data_expression_vector destination = i->internal_state();
+        state destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
@@ -704,11 +705,11 @@ class pins
       {
         state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
-      data::data_expression_vector source = state_arguments;
+      state source(state_arguments.begin(),nparams);
 
       for (next_state_generator::iterator i = m_generator.begin(source, group); i; i++)
       {
-        data::data_expression_vector destination = i->internal_state();
+        state destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];

@@ -13,7 +13,6 @@
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/replace.h"
-#include "mcrl2/lps/state.h"
 #include "mcrl2/lps/translate_user_notation.h"
 #include "mcrl2/lps/detail/lps_well_typed_checker.h"
 
@@ -24,7 +23,7 @@ namespace lps
 {
 
 //--- start generated lps overloads ---//
-std::string pp(const lps::state& x) { return lps::pp< lps::state >(x); }
+// std::string pp(const lps::state& x) { return lps::pp< lps::state >(x); }
 std::string pp(const lps::action_summand& x) { return lps::pp< lps::action_summand >(x); }
 std::string pp(const lps::deadlock& x) { return lps::pp< lps::deadlock >(x); }
 std::string pp(const lps::deadlock_summand& x) { return lps::pp< lps::deadlock_summand >(x); }

@@ -649,12 +649,12 @@ class Trace
         else
         {
           // So, e is a list of data expressions.
-          aterm_list l(e);
-          mcrl2::lps::state s;
-          for( ; !l.empty() ; l=l.tail())
+          data::data_expression_list l(e);
+          mcrl2::lps::state s(l);
+          /* for( ; !l.empty() ; l=l.tail())
           {
             s.push_back(mcrl2::data::data_expression(l.front()));
-          }
+          } */
           setState(s);
         }
       }
@@ -720,12 +720,12 @@ class Trace
           using namespace mcrl2::lps;
           // Translate the vector into a list of aterms representing data expressions.
           atermpp::aterm_list l;
-          const state & s=states[i];
-          for(mcrl2::lps::state::const_reverse_iterator j=s.rbegin(); j!=s.rend(); ++j)
+          const state& s=states[i];
+          for(mcrl2::lps::state::iterator j=s.begin(); j!=s.end(); ++j)
           {
             l.push_front(atermpp::aterm(*j));
           }
-          trace.push_front(atermpp::aterm(l));
+          trace.push_front(atermpp::aterm(reverse(l)));
         }
       }
 

@@ -18,7 +18,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/process/print.h"
 #include "mcrl2/lps/traverser.h"
-#include "mcrl2/lps/state.h"
+// #include "mcrl2/lps/state.h"
 
 namespace mcrl2
 {
@@ -227,7 +227,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const lps::state &x)
+  /* void operator()(const lps::state &x)
   {
     derived().enter(x);
     derived().print("state(");
@@ -243,7 +243,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     }
     derived().print(")");
     derived().leave(x);
-  }
+  } */
 };
 
 } // namespace detail

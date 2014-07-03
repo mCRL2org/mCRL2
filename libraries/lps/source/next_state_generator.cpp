@@ -41,7 +41,8 @@ next_state_generator::next_state_generator(
     summand.summand = &(*i);
     summand.variables =  order_variables_to_optimise_enumeration(i->summation_variables(),spec.data());
     summand.condition = i->condition();
-    summand.result_state = get_internal_state(i->next_state(m_specification.process().process_parameters()));
+    const data_expression_list& l=i->next_state(m_specification.process().process_parameters());
+    summand.result_state = data_expression_vector(l.begin(),l.end());
 
     for (auto j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
     {
@@ -70,43 +71,19 @@ next_state_generator::next_state_generator(
     m_summands.push_back(summand);
   }
 
-  state initial_state_raw = m_specification.initial_process().state(m_specification.process().process_parameters());
-  state initial_state;
-  for (size_t i = 0; i < initial_state_raw.size(); i++)
+  data::data_expression_list initial_state_raw = m_specification.initial_process().state(m_specification.process().process_parameters());
+  data::data_expression_vector initial_state;
+  for (data::data_expression_list::const_iterator i = initial_state_raw.begin(); i != initial_state_raw.end(); i++)
   {
-    initial_state.push_back(m_rewriter(initial_state_raw[i]));
+    initial_state.push_back(m_rewriter(*i));
   }
-  m_initial_state = get_internal_state(initial_state);
+  m_initial_state = state(initial_state.begin(),initial_state.size());
 
   m_all_summands = summand_subset_t(this, use_summand_pruning);
 }
 
 next_state_generator::~next_state_generator()
 {}
-
-data_expression_vector next_state_generator::get_internal_state(const state& s) const
-{
-  const size_t len=s.size();
-  data_expression_vector arguments;
-  arguments.reserve(len);
-  for (size_t i = 0; i < len; i++)
-  {
-    arguments.push_back(s[i]);
-  }
-  return arguments;
-
-}
-
-state next_state_generator::get_state(const data_expression_vector& internal_state) const
-{
-  state s;
-  for (data_expression_vector::const_iterator i = internal_state.begin(); i != internal_state.end(); i++)
-  {
-    s.push_back(*i);
-  }
-  return s;
-}
-
 
 next_state_generator::summand_subset_t::summand_subset_t(next_state_generator *generator, bool use_summand_pruning)
   : m_generator(generator),
@@ -260,7 +237,7 @@ bool next_state_generator::summand_subset_t::is_not_false(const next_state_gener
   return m_generator->m_rewriter(summand.condition, m_pruning_substitution) != data::sort_bool::false_();
 }
 
-atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_generator::summand_subset_t::begin(const data_expression_vector& state)
+atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_generator::summand_subset_t::begin(const state& state)
 {
   assert(m_use_summand_pruning);
 
@@ -274,7 +251,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
   for (size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
     size_t parameter = m_pruning_parameters[i];
-    data_expression argument = state[parameter];
+    data_expression argument = state[parameter];  // TODO state[parameter] is not very efficient.
     m_pruning_substitution[m_generator->m_process_parameters[parameter]] = argument;
     std::map<data_expression, pruning_tree_node_t>::iterator position = node->children.find(argument);
     if (position == node->children.end())
@@ -295,7 +272,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
 
 
 
-next_state_generator::iterator::iterator(next_state_generator *generator, const data_expression_vector& state, next_state_generator::substitution_t *substitution, summand_subset_t& summand_subset)
+next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, summand_subset_t& summand_subset)
   : m_generator(generator),
     m_state(state),
     m_substitution(substitution),
@@ -316,15 +293,16 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
 
   m_transition.m_generator = m_generator;
 
-  for (size_t i = 0; i < generator->m_process_parameters.size(); i++)
+  size_t j=0;
+  for (state::iterator i = state.begin(); i!=state.end(); ++i, ++j)
   {
-    (*m_substitution)[generator->m_process_parameters[i]] = state[i];
+    (*m_substitution)[generator->m_process_parameters[j]] = *i;
   }
 
   increment();
 }
 
-next_state_generator::iterator::iterator(next_state_generator *generator, const data_expression_vector& state, next_state_generator::substitution_t *substitution, size_t summand_index)
+next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, size_t summand_index)
   : m_generator(generator),
     m_state(state),
     m_substitution(substitution),
@@ -336,15 +314,16 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
 {
   m_transition.m_generator = m_generator;
 
-  for (size_t i = 0; i < generator->m_process_parameters.size(); i++)
+  size_t j=0;
+  for (state::iterator i = state.begin(); i!=state.end(); ++i, ++j)
   {
-    (*m_substitution)[generator->m_process_parameters[i]] = state[i];
+    (*m_substitution)[generator->m_process_parameters[j]] = *i;
   }
 
   increment();
 }
 
-struct condition_converter
+/* struct condition_converter
 {
   const data_expression_vector& m_state;
 
@@ -353,9 +332,9 @@ struct condition_converter
 
   const data_expression& operator()(const size_t parameter) const
   {
-    return m_state[parameter];
+    return m_state[parameter];  
   }
-};
+}; */
 
 void next_state_generator::iterator::increment()
 {
@@ -483,11 +462,13 @@ void next_state_generator::iterator::increment()
   }
 
   const data_expression_vector& state_args=m_summand->result_state;
-  m_transition.m_state.clear();
+  // TODO: remove the use of this intermediate vector to store an intermediate result.
+  data_expression_vector substituted_state;
   for(data_expression_vector::const_iterator i=state_args.begin(); i!=state_args.end(); ++i)
   {
-    m_transition.m_state.push_back(m_generator->m_rewriter(*i, *m_substitution));
-  }
+    substituted_state.push_back(m_generator->m_rewriter(*i, *m_substitution));
+  } 
+  m_transition.m_state=lps::state(substituted_state.begin(),substituted_state.size());
 
   std::vector <process::action> actions;
   actions.resize(m_summand->action_label.size());

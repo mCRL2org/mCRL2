@@ -16,7 +16,7 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/state.h"
+// #include "mcrl2/lps/state.h"
 
 namespace mcrl2
 {
@@ -30,6 +30,8 @@ namespace lps
 class simulation
 {
   public:
+
+    typedef atermpp::term_balanced_tree<data::data_expression> state;
     struct transition_t
     {
       state destination;

@@ -23,6 +23,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/atermpp/shared_subset.h"
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
 
 namespace mcrl2
 {
@@ -41,6 +42,7 @@ class next_state_generator
     typedef enumerator_t::iterator enumerator_iterator_t;
 
     typedef data::rewriter::substitution_type substitution_t;
+    typedef atermpp::term_balanced_tree<data::data_expression> state;
 
   protected:
     struct action_internal_t
@@ -100,7 +102,7 @@ class next_state_generator
         static bool summand_set_contains(const std::set<action_summand>& summand_set, const summand_t& summand);
         void build_pruning_parameters(const action_summand_vector& summands);
         bool is_not_false(const summand_t& summand);
-        atermpp::shared_subset<summand_t>::iterator begin(const data::data_expression_vector& state);
+        atermpp::shared_subset<summand_t>::iterator begin(const state& state);
     };
 
     class transition_t
@@ -108,18 +110,18 @@ class next_state_generator
       friend class next_state_generator::iterator;
       private:
         next_state_generator *m_generator;
-        data::data_expression_vector m_state;
+        lps::state m_state;
         lps::multi_action m_action;
         size_t m_summand_index;
 
       public:
-        lps::state state() const
+        state state() const
         {
-          return m_generator->get_state(m_state);
+          return m_state;
         }
 
-        data::data_expression_vector& internal_state() { return m_state; }
-        const data::data_expression_vector& internal_state() const { return m_state; }
+        lps::state& internal_state() { return m_state; }
+        const lps::state& internal_state() const { return m_state; }
         lps::multi_action& action() { return m_action; }
         const lps::multi_action& action() const { return m_action; }
         size_t summand_index() const { return m_summand_index; }
@@ -130,7 +132,7 @@ class next_state_generator
       protected:
         transition_t m_transition;
         next_state_generator *m_generator;
-        data::data_expression_vector m_state;
+        state m_state;
         substitution_t *m_substitution;
 
         bool m_single_summand;
@@ -179,9 +181,9 @@ class next_state_generator
         {
         }
 
-        iterator(next_state_generator *generator, const data::data_expression_vector& state, substitution_t *substitution, summand_subset_t& summand_subset);
+        iterator(next_state_generator *generator, const state& state, substitution_t *substitution, summand_subset_t& summand_subset);
 
-        iterator(next_state_generator *generator, const data::data_expression_vector& state, substitution_t *substitution, size_t summand_index);
+        iterator(next_state_generator *generator, const state& state, substitution_t *substitution, size_t summand_index);
 
         operator bool() const
         {
@@ -215,7 +217,7 @@ class next_state_generator
 
     data::variable_vector m_process_parameters;
     std::vector<summand_t> m_summands;
-    data::data_expression_vector m_initial_state;
+    state m_initial_state;
 
     summand_subset_t m_all_summands;
 
@@ -232,38 +234,18 @@ class next_state_generator
     /// \brief Returns an iterator for generating the successors of the given state.
     iterator begin(const state& state)
     {
-      return begin(get_internal_state(state));
-    }
-
-    /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(const data::data_expression_vector& state)
-    {
       return iterator(this, state, &m_substitution, m_all_summands);
-    }
+    } 
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    /// Only the successors using summands from \a summand_subset are generated.
     iterator begin(const state& state, summand_subset_t& summand_subset)
     {
-      return begin(get_internal_state(state), summand_subset);
-    }
-
-    /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(const data::data_expression_vector& state, summand_subset_t& summand_subset)
-    {
       return iterator(this, state, &m_substitution, summand_subset);
-    }
+    } 
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors with respect to the summand with the given index are generated.
     iterator begin(const state& state, size_t summand_index)
-    {
-      return begin(get_internal_state(state), summand_index);
-    }
-
-    /// \brief Returns an iterator for generating the successors of the given state.
-    /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(const data::data_expression_vector& state, size_t summand_index)
     {
       return iterator(this, state, &m_substitution, summand_index);
     }
@@ -277,14 +259,14 @@ class next_state_generator
     /// \brief Gets the initial state.
     state initial_state() const
     {
-      return get_state(internal_initial_state());
+      return m_initial_state;
     }
 
     /// \brief Gets the initial state in internal format.
-    data::data_expression_vector internal_initial_state() const
+    /* lps::state internal_initial_state() const
     {
       return m_initial_state;
-    }
+    } */
 
     /// \brief Returns the currently loaded specification.
     const lps::specification& get_specification() const
@@ -299,10 +281,10 @@ class next_state_generator
     }
 
     /// \brief Converts states to internal states.
-    data::data_expression_vector get_internal_state(const state& s) const;
+    // data::data_expression_vector get_internal_state(const state& s) const;
 
     /// \brief Converts internal states to states.
-    state get_state(const data::data_expression_vector& internal_state) const;
+    // state get_state(const data::data_expression_vector& internal_state) const;
 
     /// \brief Returns a reference to the summand subset containing all summands.
     summand_subset_t& full_subset()

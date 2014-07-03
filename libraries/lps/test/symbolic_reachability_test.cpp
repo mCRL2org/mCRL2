@@ -220,7 +220,7 @@ int test_main(int argc, char** argv)
         {
           if (known.find(j->state()) == known.end())
           {
-            std::cerr << pp(j->state()) << std::endl;
+            std::cerr << atermpp::pp(j->state()) << std::endl;
             known.insert(j->state());
             stack.push(j->state());
           }
