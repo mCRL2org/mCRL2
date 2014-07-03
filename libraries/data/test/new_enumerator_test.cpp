@@ -10,7 +10,7 @@
 #include <sstream>
 #include <stack>
 
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/print_utility.h"
@@ -76,10 +76,8 @@ void enumerate(const std::string& dataspec_text,
   enumerate(dataspec, variables, expression, number_of_solutions, more_solutions_possible);
 }
 
-void empty_test()
+BOOST_AUTO_TEST_CASE(empty_test)
 {
-  std::clog << "empty_test\n";
-
   typedef enumerator_list_element_with_substitution<> enumerator_element;
   typedef enumerator_algorithm_with_iterator<> enumerator_type;
 
@@ -119,9 +117,8 @@ void empty_test()
   }
 }
 
-void list_test()
+BOOST_AUTO_TEST_CASE(list_test)
 {
-  std::clog << "list_test\n";
   std::string dataspec_text =
     "sort list_of_booleans;                                    \n"
     "cons empty : list_of_booleans;                            \n"
@@ -140,9 +137,8 @@ void list_test()
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
-void structured_sort_test()
+BOOST_AUTO_TEST_CASE(structured_sort_test)
 {
-  std::clog << "structured_sort_test\n";
   std::string dataspec_text =
     "sort D = struct d1(E) | d2(E); \n"
     "     E = struct e1 | e2;       \n"
@@ -155,10 +151,8 @@ void structured_sort_test()
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
-void equality_substitution_test()
+BOOST_AUTO_TEST_CASE(equality_substitution_test)
 {
-  std::clog << "equality_substitution_test\n";
-
   std::string dataspec_text = "sort L = Nat;";
   std::string variable_text = "";
   std::string expression_text = "x == 17 && x != 17";
@@ -190,9 +184,8 @@ void equality_substitution_test()
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
-void tree_test()
+BOOST_AUTO_TEST_CASE(tree_test)
 {
-  std::clog << "tree_test\n";
   std::string dataspec_text =
     "sort tree_with_booleans;                                                   \n"
     "cons leaf : Bool -> tree_with_booleans;                                    \n"
@@ -206,7 +199,7 @@ void tree_test()
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
-void mutually_recursive_test()
+BOOST_AUTO_TEST_CASE(mutually_recursive_test)
 {
   std::string dataspec_text =
     "sort this;                                              \n"
@@ -228,7 +221,6 @@ void mutually_recursive_test()
     "     maximum_b(0,b) = true;                             \n"
     ;
 
-  std::clog << "tree_test1\n";
   std::string variable_text = "x : this;";
   std::string expression_text = "true";
   std::string free_variable_text = "";
@@ -236,14 +228,12 @@ void mutually_recursive_test()
   bool more_solutions_possible = true;
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 
-  std::clog << "tree_test2\n";
   variable_text = "x : that;";
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
-void set_test()
+BOOST_AUTO_TEST_CASE(set_test)
 {
-  std::clog << "set_test\n";
   std::string dataspec_text = "sort Dummy;\n";
   std::string variable_text = "f: Set(Bool);";
   std::string expression_text = "true in f";
@@ -288,7 +278,7 @@ bool no_duplicates(const data_expression_vector& v)
   return s.size() == v.size();
 }
 
-void generate_values_test()
+BOOST_AUTO_TEST_CASE(generate_values_test)
 {
   std::string DATASPEC =
     "sort Identifiers = struct t1 | t2 | t3 | t4 | t5 | p1 | p2 | s1 | r1 | r2 | r3 | IL;                                                                                  \n"
@@ -343,16 +333,31 @@ void generate_values_test()
   }
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form_test)
 {
-  empty_test();
-  list_test();
-  structured_sort_test();
-  tree_test();
-  mutually_recursive_test();
-  equality_substitution_test();
-  generate_values_test();
-  set_test();
+  std::string dataspec_text =
+    "sort FloorID     = struct F1 | F2;\n"
+    " \n"
+    "map  fSucc      : FloorID           -> FloorID;\n"
+    "     equal      : FloorID # FloorID      -> Bool;\n"
+    "\n"
+    "var  f,g       : FloorID;\n"
+    "eqn  F2               = fSucc(F1); \n"
+    "     equal(fSucc(f),fSucc(g))  = equal(f,g);\n"
+    "     equal(fSucc(f),F1)      = false;\n"
+    "     equal(F1,fSucc(g))      = false;\n"
+    "     equal(F1,F1)        = true;\n"
+    "     f==g            = equal(f,g);\n"
+    ;
+  std::string variable_text = "f: FloorID;";
+  std::string expression_text = "equal(f, F2)";
+  std::string free_variable_text = variable_text;
+  std::size_t number_of_solutions = 1;
+  bool more_solutions_possible = false;
+  enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
+}
 
-  return EXIT_SUCCESS;
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+{
+  return 0;
 }
