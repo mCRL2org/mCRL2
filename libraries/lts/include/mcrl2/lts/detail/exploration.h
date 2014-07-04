@@ -100,7 +100,7 @@ class lps2lts_algorithm
     data::data_expression_vector generator_state(const storage_state_t& storage_state);
     storage_state_t storage_state(const data::data_expression_vector& generator_state);
     storage_state_t get_prioritised_representative(const storage_state_t& state);
-    void value_prioritize(std::list<next_state_generator::transition_t>& transitions);
+    void value_prioritize(std::vector<next_state_generator::transition_t>& transitions);
     bool save_trace(const storage_state_t& state, const std::string& filename);
     bool search_divergence(const storage_state_t& state, std::set<storage_state_t>& current_path, std::set<storage_state_t>& visited);
     void check_divergence(const storage_state_t& state);
@@ -109,7 +109,7 @@ class lps2lts_algorithm
     void save_error(const storage_state_t& state);
     bool add_transition(const storage_state_t& source_state, next_state_generator::transition_t& transition);
     void get_transitions(const storage_state_t& state,
-                         std::list<lps2lts_algorithm::next_state_generator::transition_t>& transitions);
+                         std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions);
 
     void generate_lts_breadth();
     void generate_lts_breadth_bithashing(const storage_state_t& initial_state);

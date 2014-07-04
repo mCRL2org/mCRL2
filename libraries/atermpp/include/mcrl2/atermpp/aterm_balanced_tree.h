@@ -23,8 +23,17 @@
 namespace atermpp
 {
 
-template < typename Value >
+template < typename Term >
 class term_balanced_tree_iterator;
+
+template < class Term >
+struct idle_transformer
+{
+  const Term& operator()(const Term& t) const
+  {
+    return t;
+  }
+};
 
 /// \brief Read-only balanced binary tree of terms.
 template <typename Term>
@@ -61,21 +70,21 @@ class term_balanced_tree: public aterm_appl
       return tree->function() == tree_empty_function();
     }
 
-    template < typename ForwardTraversalIterator >
-    const detail::_aterm* make_tree(ForwardTraversalIterator& p, const size_t size)
+    template < typename ForwardTraversalIterator, class Transformer >
+    const detail::_aterm* make_tree(ForwardTraversalIterator& p, const size_t size, const Transformer& transformer )
     {
       if (size>1)
       {
         size_t left_size = (size + 1) >> 1; // size/2 rounded up.
-        const term_balanced_tree left_tree(make_tree(p, left_size));
+        const term_balanced_tree left_tree(make_tree(p, left_size,transformer));
         size_t right_size = size >> 1; // size/2 rounded down.
-        const term_balanced_tree right_tree(make_tree(p, right_size));
+        const term_balanced_tree right_tree(make_tree(p, right_size,transformer));
         return reinterpret_cast<const detail::_aterm*>(detail::term_appl2<term_balanced_tree>(tree_node_function(),left_tree,right_tree));
       }
 
       if (size==1)
       {
-        return atermpp::detail::address(*(p++));
+        return atermpp::detail::address(transformer(*(p++)));
       }
 
       assert(size==0);
@@ -123,7 +132,18 @@ class term_balanced_tree: public aterm_appl
     /// \param size The size of the range of elements.
     template < typename ForwardTraversalIterator >
     term_balanced_tree(ForwardTraversalIterator first, const size_t size)
-      : aterm_appl(make_tree(first,size))
+      : aterm_appl(make_tree(first,size,idle_transformer<Term>()))
+    {
+    }
+
+    /// \brief Creates an term_balanced_tree with a copy of a range, where a transformer is applied to each term
+    //         before adding it to the tree..
+    /// \param first The start of a range of elements.
+    /// \param size The size of the range of elements.
+    /// \param transformer. A class with an operator() that is applied to each term before adding it to the tree..
+    template < typename ForwardTraversalIterator, class Transformer >
+    term_balanced_tree(ForwardTraversalIterator first, const size_t size, const Transformer& transformer)
+      : aterm_appl(make_tree(first,size,transformer))
     {
     }
 
@@ -147,13 +167,13 @@ class term_balanced_tree: public aterm_appl
 
     /// \brief Element indexing operator.
     /// \param position Index in the tree.
-    /// \details This operation behaves linear with respect to container size,
+    /// \details This operation behaves linearly with respect to container size,
     ///          because it must calculate the size of the container. The operator
     ///          element_at behaves logarithmically.
     const Term& operator[](size_t position) const
     {
       return element_at(position, size());
-    }
+    } 
 
     /// \brief Get an element at the indicated position.
     /// \param position The required position

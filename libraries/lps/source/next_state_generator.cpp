@@ -18,6 +18,43 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
+// First we provide two classes, that represent lambdas.
+class rewriter_class
+{
+  protected:
+    const rewriter& m_r;
+    mutable_indexed_substitution<>& m_sigma;
+
+  public:
+    rewriter_class(const rewriter& r, mutable_indexed_substitution<>& sigma)
+      :  m_r(r), 
+         m_sigma(sigma)
+    {}
+
+    const data_expression operator()(const data_expression& t) const
+    {
+      return m_r(t,m_sigma);
+    }
+};
+
+class state_applier
+{
+  protected:
+    const state& m_state;
+    const size_t m_size;
+
+  public:
+    state_applier(const state& state, const size_t size)
+      :  m_state(state),
+         m_size(size)
+    {}
+
+    const data_expression& operator()(const size_t n) const
+    {
+      return m_state.element_at(n,m_size);
+    }
+};
+
 next_state_generator::next_state_generator(
   const specification& spec,
   const data::rewriter& rewriter,
@@ -72,12 +109,9 @@ next_state_generator::next_state_generator(
   }
 
   data::data_expression_list initial_state_raw = m_specification.initial_process().state(m_specification.process().process_parameters());
-  data::data_expression_vector initial_state;
-  for (data::data_expression_list::const_iterator i = initial_state_raw.begin(); i != initial_state_raw.end(); i++)
-  {
-    initial_state.push_back(m_rewriter(*i));
-  }
-  m_initial_state = state_t(initial_state.begin(),initial_state.size());
+
+  rewriter_class r(m_rewriter,m_substitution);
+  m_initial_state = state(initial_state_raw.begin(),initial_state_raw.size(),r);
 
   m_all_summands = summand_subset_t(this, use_summand_pruning);
 }
@@ -251,7 +285,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
   for (size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
     size_t parameter = m_pruning_parameters[i];
-    data_expression argument = state[parameter];  // TODO state[parameter] is not very efficient.
+    data_expression argument = state.element_at(parameter,m_generator->m_process_parameters.size());  
     m_pruning_substitution[m_generator->m_process_parameters[parameter]] = argument;
     std::map<data_expression, pruning_tree_node_t>::iterator position = node->children.find(argument);
     if (position == node->children.end())
@@ -323,22 +357,9 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
   increment();
 }
 
-/* struct condition_converter
-{
-  const data_expression_vector& m_state;
-
-  condition_converter(const data_expression_vector& state):m_state(state)
-  {}
-
-  const data_expression& operator()(const size_t parameter) const
-  {
-    return m_state[parameter];  
-  }
-}; */
 
 void next_state_generator::iterator::increment()
 {
-  data::data_expression_vector condition_arguments;
   while (!m_summand ||
          (m_cached && m_enumeration_cache_iterator == m_enumeration_cache_end) ||
          (!m_cached && m_enumeration_iterator == m_generator->m_enumerator.end())
@@ -379,13 +400,11 @@ void next_state_generator::iterator::increment()
 
     if (m_generator->m_use_enumeration_caching)
     {
-      condition_arguments.resize(m_summand->condition_parameters.size());
-
-      for (size_t i = 0; i < m_summand->condition_parameters.size(); i++)
-      {
-        condition_arguments[i] = m_state[m_summand->condition_parameters[i]];
-      }
-      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, condition_arguments.begin(), condition_arguments.end());
+      state_applier apply_m_state(m_state,m_generator->m_process_parameters.size());
+      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, 
+                                                      m_summand->condition_parameters.begin(),  
+                                                      m_summand->condition_parameters.end(),
+                                                      apply_m_state); 
 
       std::map<condition_arguments_t, summand_enumeration_t>::iterator position = m_summand->enumeration_cache.find(m_enumeration_cache_key);
       if (position == m_summand->enumeration_cache.end())
@@ -462,13 +481,8 @@ void next_state_generator::iterator::increment()
   }
 
   const data_expression_vector& state_args=m_summand->result_state;
-  // TODO: remove the use of this intermediate vector to store an intermediate result.
-  data_expression_vector substituted_state;
-  for(data_expression_vector::const_iterator i=state_args.begin(); i!=state_args.end(); ++i)
-  {
-    substituted_state.push_back(m_generator->m_rewriter(*i, *m_substitution));
-  } 
-  m_transition.m_state=lps::state(substituted_state.begin(),substituted_state.size());
+  rewriter_class r(m_generator->m_rewriter,*m_substitution);
+  m_transition.m_state=lps::state(state_args.begin(),state_args.size(),r);
 
   std::vector <process::action> actions;
   actions.resize(m_summand->action_label.size());
