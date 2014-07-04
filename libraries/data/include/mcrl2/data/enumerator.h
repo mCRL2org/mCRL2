@@ -305,9 +305,10 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
 
 struct sort_name_generator
 {
-  data::set_identifier_generator& id_generator;
+  // utilities::number_postfix_generator& id_generator;
+  utilities::number_postfix_generator& id_generator;
 
-  sort_name_generator(data::set_identifier_generator& id_generator_)
+  sort_name_generator(utilities::number_postfix_generator& id_generator_)
     : id_generator(id_generator_)
   {}
 
@@ -335,7 +336,7 @@ class enumerator_algorithm
     const DataRewriter& datar;
 
     // A name generator
-    mutable data::set_identifier_generator id_generator;
+    mutable utilities::number_postfix_generator id_generator;
 
     /// \brief A mapping with constructors.
     mutable constructor_map m_constructors;
@@ -397,7 +398,7 @@ class enumerator_algorithm
       if (accept(phi1))
       {
         P.emplace_back(EnumeratorListElement(variables, phi1, p, v, e));
-        mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
+        //mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
       }
     }
 
@@ -418,7 +419,7 @@ class enumerator_algorithm
       {
         // Additional variables are put at the end of the list!
         P.emplace_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
-        mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
+        //mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
       }
     }
 
@@ -448,7 +449,7 @@ class enumerator_algorithm
           // Additional variables are put at the end of the list!
           P.emplace_back(enumerator_list_element<Expression>(variables + added_variables, phi1, p, v, e));
         }
-        mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
+        //mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
       }
     }
 
@@ -483,7 +484,7 @@ class enumerator_algorithm
       auto p = P.front();
       auto const& v = p.variables();
       auto const& phi = p.expression();
-      mCRL2log(log::debug) << "  <process-element> " << p << std::endl;
+      //mCRL2log(log::debug) << "  <process-element> " << p << std::endl;
       P.pop_front();
 
       auto const& v1 = v.front();
@@ -620,13 +621,13 @@ class enumerator_algorithm
     template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
     std::size_t next(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
     {
-      mCRL2log(log::debug) << "  <next> " << core::detail::print_list(P) << std::endl;
+      //mCRL2log(log::debug) << "  <next> " << core::detail::print_list(P) << std::endl;
       std::size_t count = 0;
       while (!P.empty())
       {
         if (P.front().is_solution())
         {
-          mCRL2log(log::debug) << "  <solution> " << P.front() << std::endl;
+          //mCRL2log(log::debug) << "  <solution> " << P.front() << std::endl;
           break;
         }
         else

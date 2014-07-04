@@ -12,6 +12,7 @@
 #ifndef MCRL2_UTILITIES_NUMBER_POSTFIX_GENERATOR_H
 #define MCRL2_UTILITIES_NUMBER_POSTFIX_GENERATOR_H
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <map>
@@ -22,6 +23,39 @@
 namespace mcrl2 {
 
 namespace utilities {
+
+namespace detail {
+
+// code suggestion by Alf P. Steinbach
+inline
+void unsigned_to_decimal(std::size_t number, char* buffer)
+{
+  if (number == 0)
+  {
+    *buffer++ = '0';
+  }
+  else
+  {
+    char* first = buffer;
+    while (number != 0)
+    {
+      *buffer++ = '0' + number % 10;
+      number /= 10;
+    }
+    std::reverse(first, buffer);
+  }
+  *buffer++ = '\0';
+}
+
+inline
+std::string number2string(std::size_t number)
+{
+  char buffer[std::numeric_limits<std::size_t>::digits10 + 1];
+  unsigned_to_decimal(number, buffer);
+  return std::string(buffer);
+}
+
+} // namespace detail
 
 /// \brief Identifier generator that generates names consisting of a prefix followed by a number.
 /// For each prefix an index is maintained, that is incremented after each call to operator()(prefix).
@@ -89,7 +123,7 @@ class number_postfix_generator
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
-    std::string operator()(std::string hint)
+    std::string operator()(std::string hint, bool add_to_context = true)
     {
       // make sure there are no digits at the end of hint
       if (std::isdigit(hint[hint.size() - 1]))
@@ -97,17 +131,17 @@ class number_postfix_generator
         std::string::size_type i = hint.find_last_not_of("0123456789");
         hint = hint.substr(0, i + 1);
       }
-
-      std::ostringstream out;
-      out << hint << ++m_index[hint];
-      return out.str();
+      return hint + detail::number2string(add_to_context ? ++m_index[hint] : m_index[hint] + 1);
+//      std::ostringstream out;
+//      out << hint << (add_to_context ? ++m_index[hint] : m_index[hint] + 1);
+//      return out.str();
     }
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
-    std::string operator()()
+    std::string operator()(bool add_to_context = true)
     {
-      return (*this)(m_hint);
+      return (*this)(m_hint, add_to_context);
     }
 
     /// \brief Returns the default hint.
