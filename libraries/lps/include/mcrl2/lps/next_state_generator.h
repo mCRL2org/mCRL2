@@ -42,7 +42,7 @@ class next_state_generator
     typedef enumerator_t::iterator enumerator_iterator_t;
 
     typedef data::rewriter::substitution_type substitution_t;
-    typedef atermpp::term_balanced_tree<data::data_expression> state;
+    typedef atermpp::term_balanced_tree<data::data_expression> state_t;
 
   protected:
     struct action_internal_t
@@ -102,7 +102,7 @@ class next_state_generator
         static bool summand_set_contains(const std::set<action_summand>& summand_set, const summand_t& summand);
         void build_pruning_parameters(const action_summand_vector& summands);
         bool is_not_false(const summand_t& summand);
-        atermpp::shared_subset<summand_t>::iterator begin(const state& state);
+        atermpp::shared_subset<summand_t>::iterator begin(const state_t& state_t);
     };
 
     class transition_t
@@ -132,7 +132,7 @@ class next_state_generator
       protected:
         transition_t m_transition;
         next_state_generator *m_generator;
-        state m_state;
+        state_t m_state;
         substitution_t *m_substitution;
 
         bool m_single_summand;
@@ -181,9 +181,9 @@ class next_state_generator
         {
         }
 
-        iterator(next_state_generator *generator, const state& state, substitution_t *substitution, summand_subset_t& summand_subset);
+        iterator(next_state_generator *generator, const state_t& state_t, substitution_t *substitution, summand_subset_t& summand_subset);
 
-        iterator(next_state_generator *generator, const state& state, substitution_t *substitution, size_t summand_index);
+        iterator(next_state_generator *generator, const state_t& state_t, substitution_t *substitution, size_t summand_index);
 
         operator bool() const
         {
@@ -217,7 +217,7 @@ class next_state_generator
 
     data::variable_vector m_process_parameters;
     std::vector<summand_t> m_summands;
-    state m_initial_state;
+    state_t m_initial_state;
 
     summand_subset_t m_all_summands;
 
@@ -257,7 +257,7 @@ class next_state_generator
     }
 
     /// \brief Gets the initial state.
-    state initial_state() const
+    state_t initial_state() const
     {
       return m_initial_state;
     }

@@ -77,7 +77,7 @@ next_state_generator::next_state_generator(
   {
     initial_state.push_back(m_rewriter(*i));
   }
-  m_initial_state = state(initial_state.begin(),initial_state.size());
+  m_initial_state = state_t(initial_state.begin(),initial_state.size());
 
   m_all_summands = summand_subset_t(this, use_summand_pruning);
 }
