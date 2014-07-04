@@ -91,19 +91,11 @@ void xyz_identifier_generator_test()
   BOOST_CHECK(s == str("Z0"));
 }
 
-// test if std::to_string is supported on all compilers
-void to_string_test()
-{
-  int i = 42;
-  std::cout << std::to_string(i) << std::endl;
-}
-
 int test_main(int argc, char** argv)
 {
   set_identifier_generator_test();
   multiset_identifier_generator_test();
   xyz_identifier_generator_test();
-  to_string_test();
 
   return EXIT_SUCCESS;
 }
