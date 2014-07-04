@@ -29,7 +29,7 @@ namespace atermpp
 // Note that the hook_tables are not destroyed before stopping the program.
 typedef std::vector<std::pair<const function_symbol*,term_callback> > hook_table;
 
-hook_table& creation_hooks()
+static hook_table& creation_hooks()
 {
   static hook_table creation_hooks;
   return creation_hooks;

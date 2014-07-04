@@ -115,7 +115,7 @@ class next_state_generator
         size_t m_summand_index;
 
       public:
-        state state() const
+        state_t state() const
         {
           return m_state;
         }
