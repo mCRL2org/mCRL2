@@ -27,8 +27,6 @@ template < typename Value >
 class term_balanced_tree_iterator;
 
 /// \brief Read-only balanced binary tree of terms.
-///
-/// Models Random Access Container (STL concept)
 template <typename Term>
 class term_balanced_tree: public aterm_appl
 {

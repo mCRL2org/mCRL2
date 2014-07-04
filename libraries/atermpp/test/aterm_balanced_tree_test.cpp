@@ -59,7 +59,7 @@ struct func
   } 
 }; 
 
-void test_aterm_balanced_tree()
+static void test_aterm_balanced_tree()
 {
   aterm_balanced_tree empty_tree;
   BOOST_CHECK(empty_tree.begin() == empty_tree.end());
@@ -80,7 +80,7 @@ void test_aterm_balanced_tree()
 
   BOOST_CHECK(std::equal(qtree.begin(), qtree.end(), q.begin()));
   BOOST_CHECK(std::equal(q.begin(), q.end(), qtree.begin()));
-  BOOST_CHECK(aterm_balanced_tree(q.begin(), q.end()) == qtree);
+  BOOST_CHECK(aterm_balanced_tree(q.begin(), q.size()) == qtree);
 
   int count = 0;
 
