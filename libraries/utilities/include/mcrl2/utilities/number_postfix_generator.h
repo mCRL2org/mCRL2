@@ -17,7 +17,6 @@
 #include <cctype>
 #include <map>
 #include <string>
-#include <sstream>
 #include <boost/lexical_cast.hpp>
 
 namespace mcrl2 {
@@ -132,16 +131,13 @@ class number_postfix_generator
         hint = hint.substr(0, i + 1);
       }
       return hint + detail::number2string(add_to_context ? ++m_index[hint] : m_index[hint] + 1);
-//      std::ostringstream out;
-//      out << hint << (add_to_context ? ++m_index[hint] : m_index[hint] + 1);
-//      return out.str();
     }
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
-    std::string operator()(bool add_to_context = true)
+    std::string operator()()
     {
-      return (*this)(m_hint, add_to_context);
+      return (*this)(m_hint, true);
     }
 
     /// \brief Returns the default hint.
