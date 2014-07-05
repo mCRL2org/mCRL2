@@ -305,10 +305,9 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
 
 struct sort_name_generator
 {
-  // utilities::number_postfix_generator& id_generator;
-  utilities::number_postfix_generator& id_generator;
+  data::set_identifier_generator& id_generator;
 
-  sort_name_generator(utilities::number_postfix_generator& id_generator_)
+  sort_name_generator(data::set_identifier_generator& id_generator_)
     : id_generator(id_generator_)
   {}
 
@@ -336,7 +335,7 @@ class enumerator_algorithm
     const DataRewriter& datar;
 
     // A name generator
-    mutable utilities::number_postfix_generator id_generator;
+    mutable data::set_identifier_generator id_generator;
 
     /// \brief A mapping with constructors.
     mutable constructor_map m_constructors;
