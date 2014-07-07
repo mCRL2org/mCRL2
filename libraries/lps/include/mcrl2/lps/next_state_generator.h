@@ -40,6 +40,7 @@ class next_state_generator
     typedef data::rewriter rewriter_t;
     typedef data::enumerator_algorithm_with_iterator<> enumerator_t;
     typedef enumerator_t::iterator enumerator_iterator_t;
+    typedef std::deque<data::enumerator_list_element_with_substitution<> > enumerator_queue_t;
 
     typedef data::rewriter::substitution_type substitution_t;
     typedef atermpp::term_balanced_tree<data::data_expression> state_t;
@@ -131,9 +132,9 @@ class next_state_generator
     {
       protected:
         transition_t m_transition;
-        next_state_generator *m_generator;
+        next_state_generator* m_generator;
         state_t m_state;
-        substitution_t *m_substitution;
+        substitution_t* m_substitution;
 
         bool m_single_summand;
         size_t m_single_summand_index;
@@ -151,7 +152,7 @@ class next_state_generator
         condition_arguments_t m_enumeration_cache_key;
         summand_enumeration_t m_enumeration_log;
 
-        std::deque < data::enumerator_list_element_with_substitution< data::data_expression> > m_enumeration_queue;
+        enumerator_queue_t* m_enumeration_queue;
 
         /// \brief Enumerate <variables, phi> with substitution sigma.
         void enumerate(const data::variable_list& variables, const data::data_expression& phi, data::mutable_indexed_substitution<>& sigma)
@@ -169,9 +170,9 @@ class next_state_generator
             }
           }
 #endif
-          m_enumeration_queue.clear();
-          m_enumeration_queue.push_back(data::enumerator_list_element_with_substitution<data::data_expression>(variables, phi));
-          m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, m_enumeration_queue);
+          m_enumeration_queue->clear();
+          m_enumeration_queue->push_back(data::enumerator_list_element_with_substitution<>(variables, phi));
+          m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, *m_enumeration_queue);
         }
 
 
@@ -181,9 +182,9 @@ class next_state_generator
         {
         }
 
-        iterator(next_state_generator *generator, const state_t& state_t, substitution_t *substitution, summand_subset_t& summand_subset);
+        iterator(next_state_generator* generator, const state_t& state_t, substitution_t* substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue);
 
-        iterator(next_state_generator *generator, const state_t& state_t, substitution_t *substitution, size_t summand_index);
+        iterator(next_state_generator* generator, const state_t& state_t, substitution_t* substitution, size_t summand_index, enumerator_queue_t* enumeration_queue);
 
         operator bool() const
         {
@@ -232,22 +233,22 @@ class next_state_generator
     ~next_state_generator();
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(const state& state)
+    iterator begin(const state& state, enumerator_queue_t* enumeration_queue)
     {
-      return iterator(this, state, &m_substitution, m_all_summands);
-    } 
+      return iterator(this, state, &m_substitution, m_all_summands, enumeration_queue);
+    }
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(const state& state, summand_subset_t& summand_subset)
+    iterator begin(const state& state, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue)
     {
-      return iterator(this, state, &m_substitution, summand_subset);
-    } 
+      return iterator(this, state, &m_substitution, summand_subset, enumeration_queue);
+    }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(const state& state, size_t summand_index)
+    iterator begin(const state& state, size_t summand_index, enumerator_queue_t* enumeration_queue)
     {
-      return iterator(this, state, &m_substitution, summand_index);
+      return iterator(this, state, &m_substitution, summand_index, enumeration_queue);
     }
 
     /// \brief Returns an iterator pointing to the end of a next state list.

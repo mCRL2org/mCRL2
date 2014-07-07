@@ -109,8 +109,9 @@ class lps2lts_algorithm
     void save_error(const storage_state_t& state);
     bool add_transition(const storage_state_t& source_state, next_state_generator::transition_t& transition);
     void get_transitions(const storage_state_t& state,
-                         std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions);
-
+                         std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
+                         next_state_generator::enumerator_queue_t& enumeration_queue
+    );
     void generate_lts_breadth();
     void generate_lts_breadth_bithashing(const storage_state_t& initial_state);
     void generate_lts_depth(const storage_state_t& initial_state);

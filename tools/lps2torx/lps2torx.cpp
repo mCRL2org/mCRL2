@@ -189,7 +189,8 @@ class torx_tool : public rewriter_tool< input_tool >
 
               for(size_t summand_index = 0; summand_index < spec.process().action_summands().size(); ++summand_index)
               {
-                for (next_state_generator::iterator i = generator.begin(current, summand_index); i != generator.end(); i++)
+                next_state_generator::enumerator_queue_t enumeration_queue;
+                for (next_state_generator::iterator i = generator.begin(current, summand_index, &enumeration_queue); i != generator.end(); i++)
                 {
                   /* Rebuild transition string in Torx format*/
                   std::cout << "Ee " << "_e" << summand_index << "." << states.size() << "\t" << (i->action().actions().empty() ? 0 : 1) << "\t" << 1 << "\t" << print_torx_action(i->action()) << "\t\t\t";

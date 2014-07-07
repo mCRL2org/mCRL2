@@ -27,7 +27,7 @@ class rewriter_class
 
   public:
     rewriter_class(const rewriter& r, mutable_indexed_substitution<>& sigma)
-      :  m_r(r), 
+      :  m_r(r),
          m_sigma(sigma)
     {}
 
@@ -285,7 +285,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
   for (size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
     size_t parameter = m_pruning_parameters[i];
-    data_expression argument = state.element_at(parameter,m_generator->m_process_parameters.size());  
+    data_expression argument = state.element_at(parameter,m_generator->m_process_parameters.size());
     m_pruning_substitution[m_generator->m_process_parameters[parameter]] = argument;
     std::map<data_expression, pruning_tree_node_t>::iterator position = node->children.find(argument);
     if (position == node->children.end())
@@ -306,14 +306,15 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
 
 
 
-next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, summand_subset_t& summand_subset)
+next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue)
   : m_generator(generator),
     m_state(state),
     m_substitution(substitution),
     m_single_summand(false),
     m_use_summand_pruning(summand_subset.m_use_summand_pruning),
     m_summand(0),
-    m_caching(false)
+    m_caching(false),
+    m_enumeration_queue(enumeration_queue)
 {
   if (m_use_summand_pruning)
   {
@@ -336,7 +337,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
   increment();
 }
 
-next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, size_t summand_index)
+next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, size_t summand_index, enumerator_queue_t* enumeration_queue)
   : m_generator(generator),
     m_state(state),
     m_substitution(substitution),
@@ -344,7 +345,8 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_single_summand_index(summand_index),
     m_use_summand_pruning(false),
     m_summand(0),
-    m_caching(false)
+    m_caching(false),
+    m_enumeration_queue(enumeration_queue)
 {
   m_transition.m_generator = m_generator;
 
@@ -401,10 +403,10 @@ void next_state_generator::iterator::increment()
     if (m_generator->m_use_enumeration_caching)
     {
       state_applier apply_m_state(m_state,m_generator->m_process_parameters.size());
-      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, 
-                                                      m_summand->condition_parameters.begin(),  
+      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function,
+                                                      m_summand->condition_parameters.begin(),
                                                       m_summand->condition_parameters.end(),
-                                                      apply_m_state); 
+                                                      apply_m_state);
 
       std::map<condition_arguments_t, summand_enumeration_t>::iterator position = m_summand->enumeration_cache.find(m_enumeration_cache_key);
       if (position == m_summand->enumeration_cache.end())
