@@ -124,13 +124,23 @@ class number_postfix_generator
     /// \return A fresh identifier.
     std::string operator()(std::string hint, bool add_to_context = true)
     {
-      // make sure there are no digits at the end of hint
+      // remove digits at the end of hint
       if (std::isdigit(hint[hint.size() - 1]))
       {
         std::string::size_type i = hint.find_last_not_of("0123456789");
         hint = hint.substr(0, i + 1);
       }
-      return hint + detail::number2string(add_to_context ? ++m_index[hint] : m_index[hint] + 1);
+
+      auto j = m_index.find(hint);
+      if (j == m_index.end())
+      {
+        if (add_to_context)
+        {
+          m_index[hint] = 0;
+        }
+        return hint;
+      }
+      return hint + detail::number2string(add_to_context ? ++(j->second) : j->second + 1);
     }
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.

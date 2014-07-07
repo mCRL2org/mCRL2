@@ -45,7 +45,22 @@ BOOST_AUTO_TEST_CASE(identifier_generator_test)
   BOOST_CHECK_EQUAL(s, "a4");
 
   s = generator();
+  BOOST_CHECK_EQUAL(s, "FRESH_VAR");
+
+  s = generator();
   BOOST_CHECK_EQUAL(s, "FRESH_VAR1");
+
+  s = generator("b", false);
+  BOOST_CHECK_EQUAL(s, "b");
+
+  s = generator("b", false);
+  BOOST_CHECK_EQUAL(s, "b");
+
+  s = generator("b");
+  BOOST_CHECK_EQUAL(s, "b");
+
+  s = generator("b", false);
+  BOOST_CHECK_EQUAL(s, "b1");
 
   generator.add_identifier("a0");
   s = generator("a2");
