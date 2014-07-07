@@ -124,7 +124,7 @@ bool compute_finite_function_sorts(const function_sort& sort,
   {
     domain_expressions.push_back(enumerate_expressions(*i, dataspec, datar));
     total_domain_size = total_domain_size * domain_expressions.back().size();
-    function_parameters.push_back(variable(const_cast<IdentifierGenerator&>(id_generator)("var_func", false), *i));
+    function_parameters.push_back(variable(const_cast<IdentifierGenerator&>(id_generator)("x"), *i));
   }
 
   if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
@@ -305,9 +305,9 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
 
 struct sort_name_generator
 {
-  data::set_identifier_generator& id_generator;
+  utilities::number_postfix_generator& id_generator;
 
-  sort_name_generator(data::set_identifier_generator& id_generator_)
+  sort_name_generator(utilities::number_postfix_generator& id_generator_)
     : id_generator(id_generator_)
   {}
 
@@ -335,7 +335,7 @@ class enumerator_algorithm
     const DataRewriter& datar;
 
     // A name generator
-    mutable data::set_identifier_generator id_generator;
+    mutable utilities::number_postfix_generator id_generator;
 
     /// \brief A mapping with constructors.
     mutable constructor_map m_constructors;
@@ -523,7 +523,7 @@ class enumerator_algorithm
         const sort_expression element_sort = container_sort(sort).element_sort();
         if (dataspec.is_certainly_finite(element_sort))
         {
-          const data_expression lambda_term = abstraction(lambda_binder(), atermpp::make_list<variable>(variable(id_generator("var_func", false), element_sort)), sort_bool::false_());
+          const data_expression lambda_term = abstraction(lambda_binder(), atermpp::make_list<variable>(variable(id_generator("x"), element_sort)), sort_bool::false_());
           const variable fset_variable(id_generator("@var_fset@", false), sort_fset::fset(element_sort));
           const data_expression term = sort_set::constructor(element_sort, lambda_term, fset_variable);
           const data_expression old_substituted_value = sigma(v1);
