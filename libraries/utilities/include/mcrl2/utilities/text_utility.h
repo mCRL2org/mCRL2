@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -24,6 +25,33 @@ namespace mcrl2
 
 namespace utilities
 {
+
+namespace detail
+{
+
+// code suggestion by Alf P. Steinbach
+inline
+void unsigned_to_decimal(std::size_t number, char* buffer)
+{
+  if (number == 0)
+  {
+    *buffer++ = '0';
+  }
+  else
+  {
+    char* first = buffer;
+    while (number != 0)
+    {
+      *buffer++ = '0' + number % 10;
+      number /= 10;
+    }
+    std::reverse(first, buffer);
+  }
+  *buffer++ = '\0';
+}
+
+} // namespace detail
+
 /// \brief Transform parameter into string.
 /// \param x Some expression
 /// \pre type T has operator <<
@@ -121,6 +149,16 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
 /// \param s A string of text.
 /// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const std::string& s);
+
+/// \brief Convert a number to string.
+/// \param A number.
+inline
+std::string number2string(std::size_t number)
+{
+  char buffer[std::numeric_limits<std::size_t>::digits10 + 1];
+  detail::unsigned_to_decimal(number, buffer);
+  return std::string(buffer);
+}
 
 } // namespace utilities
 

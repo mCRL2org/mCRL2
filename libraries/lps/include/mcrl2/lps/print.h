@@ -12,13 +12,10 @@
 #ifndef MCRL2_LPS_PRINT_H
 #define MCRL2_LPS_PRINT_H
 
-#include <boost/lexical_cast.hpp>
-
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/process/print.h"
 #include "mcrl2/lps/traverser.h"
-// #include "mcrl2/lps/state.h"
 
 namespace mcrl2
 {
@@ -75,12 +72,12 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     {
       return;
     }
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       derived().print("\n");
       derived().print(number_separator);
       derived().print("%");
-      derived().print(boost::lexical_cast<std::string>(index++));
+      derived().print(utilities::number2string(index++));
 
       derived().print("\n");
       if (i == container.begin() && !print_start_separator)

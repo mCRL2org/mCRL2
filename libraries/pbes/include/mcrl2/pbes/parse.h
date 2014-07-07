@@ -19,7 +19,6 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/join.hpp>
-#include <boost/lexical_cast.hpp>
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
@@ -230,7 +229,7 @@ inline
 std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
 {
   std::string unique_prefix("UNIQUE_PREFIX");
-  int unique_prefix_index = 0;
+  std::size_t unique_prefix_index = 0;
 
   text = utilities::remove_comments(text);
   const std::string separator1 = "datavar";
@@ -279,7 +278,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
       std::vector<std::string> w = utilities::split(*j, ",");
       for (std::vector<std::string>::iterator k = w.begin(); k != w.end(); ++k)
       {
-        *k = unique_prefix + boost::lexical_cast<std::string>(unique_prefix_index++) + ": " + *k;
+        *k = unique_prefix + utilities::number2string(unique_prefix_index++) + ": " + *k;
       }
       *j = boost::algorithm::join(w, ", ");
     }
@@ -312,7 +311,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
     pbesspec = pbesspec
                + "\nmu "
                + unique_prefix
-               + boost::lexical_cast<std::string>(unique_prefix_index++)
+               + utilities::number2string(unique_prefix_index++)
                + (datavar_text.empty() ? "" : "(")
                + datavar_text
                + (datavar_text.empty() ? "" : ")")

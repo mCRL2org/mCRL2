@@ -18,43 +18,11 @@
 #include <map>
 #include <string>
 #include <boost/lexical_cast.hpp>
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 
 namespace utilities {
-
-namespace detail {
-
-// code suggestion by Alf P. Steinbach
-inline
-void unsigned_to_decimal(std::size_t number, char* buffer)
-{
-  if (number == 0)
-  {
-    *buffer++ = '0';
-  }
-  else
-  {
-    char* first = buffer;
-    while (number != 0)
-    {
-      *buffer++ = '0' + number % 10;
-      number /= 10;
-    }
-    std::reverse(first, buffer);
-  }
-  *buffer++ = '\0';
-}
-
-inline
-std::string number2string(std::size_t number)
-{
-  char buffer[std::numeric_limits<std::size_t>::digits10 + 1];
-  unsigned_to_decimal(number, buffer);
-  return std::string(buffer);
-}
-
-} // namespace detail
 
 /// \brief Identifier generator that generates names consisting of a prefix followed by a number.
 /// For each prefix an index is maintained, that is incremented after each call to operator()(prefix).
@@ -140,7 +108,7 @@ class number_postfix_generator
         }
         return hint;
       }
-      return hint + detail::number2string(add_to_context ? ++(j->second) : j->second + 1);
+      return hint + utilities::number2string(add_to_context ? ++(j->second) : j->second + 1);
     }
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.

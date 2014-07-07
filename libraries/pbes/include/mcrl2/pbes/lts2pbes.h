@@ -18,7 +18,6 @@
 #endif
 
 #include <map>
-#include <boost/lexical_cast.hpp>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/algorithms.h"
