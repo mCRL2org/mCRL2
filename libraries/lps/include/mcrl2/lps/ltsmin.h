@@ -667,7 +667,8 @@ class pins
       // data::data_expression_vector source = state_arguments;
       state source(state_arguments.begin(),nparams);
 
-      for (next_state_generator::iterator i = m_generator.begin(source); i; i++)
+      next_state_generator::enumerator_queue_t enumeration_queue;
+      for (next_state_generator::iterator i = m_generator.begin(source, &enumeration_queue); i; i++)
       {
         state destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
@@ -707,7 +708,8 @@ class pins
       }
       state source(state_arguments.begin(),nparams);
 
-      for (next_state_generator::iterator i = m_generator.begin(source, group); i; i++)
+      next_state_generator::enumerator_queue_t enumeration_queue;
+      for (next_state_generator::iterator i = m_generator.begin(source, group, &enumeration_queue); i; i++)
       {
         state destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)

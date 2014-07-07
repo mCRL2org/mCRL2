@@ -216,7 +216,8 @@ int test_main(int argc, char** argv)
 
       for (size_t i = 0; i < model.process().summand_count(); ++i)
       {
-        for(next_state_generator::iterator j = explorer.begin(current, i); j != explorer.end(); ++j)
+        next_state_generator::enumerator_queue_t enumeration_queue;
+        for(next_state_generator::iterator j = explorer.begin(current, i, &enumeration_queue); j != explorer.end(); ++j)
         {
           if (known.find(j->state()) == known.end())
           {
