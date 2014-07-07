@@ -13,18 +13,14 @@
 #define MCRL2_ATERMPP_ATERM_BALANCED_TREE_H
 
 #include <cassert>
-#include <limits>
-#include <memory>
-#include <stack>
+// #include <limits>
+// #include <memory>
 #include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/function_symbol.h"
 
 namespace atermpp
 {
-
-template < typename Term >
-class term_balanced_tree_iterator;
 
 template < class Term >
 struct idle_transformer
@@ -39,15 +35,9 @@ struct idle_transformer
 template <typename Term>
 class term_balanced_tree: public aterm_appl
 {
-    template < typename T >
-    friend class term_balanced_tree_iterator;
-
-    // template <typename T, typename F>
-    // friend term_balanced_tree< T > apply(const term_balanced_tree< T > &l, const F f);
-
   protected:
 
-    static const atermpp::function_symbol &tree_empty_function()
+    static const atermpp::function_symbol& tree_empty_function()
     {
       static const atermpp::function_symbol empty("@empty@", 0);
       return empty;
@@ -59,15 +49,10 @@ class term_balanced_tree: public aterm_appl
       return node;
     }
 
-    static const aterm_appl &empty_tree()
+    static const aterm_appl& empty_tree()
     {
       static const aterm_appl empty_term(tree_empty_function());
       return empty_term;
-    }
-
-    static bool is_empty(const detail::_aterm* tree)
-    {
-      return tree->function() == tree_empty_function();
     }
 
     template < typename ForwardTraversalIterator, class Transformer >
@@ -88,13 +73,14 @@ class term_balanced_tree: public aterm_appl
       }
 
       assert(size==0);
-      return atermpp::detail::address(empty_tree()); // must be optimised.
+      return atermpp::detail::address(empty_tree()); 
     }
 
   public:
 
     /// The type of object, T stored in the term_balanced_tree.
     typedef Term value_type;
+    
     /// Pointer to T.
     typedef Term* pointer;
 
@@ -110,19 +96,13 @@ class term_balanced_tree: public aterm_appl
     /// A signed integral type.
     typedef ptrdiff_t difference_type;
 
-    /// Iterator used to iterate through an term_balanced_tree.
-    typedef term_balanced_tree_iterator<Term> iterator;
-
-    /// Const iterator used to iterate through an term_balanced_tree.
-    typedef term_balanced_tree_iterator<Term> const_iterator;
-
     /// Default constructor. Creates an empty tree.
     term_balanced_tree()
       : aterm_appl(empty_tree())
     {}
 
     /// Construction from aterm
-    explicit term_balanced_tree(const aterm &tree)
+    explicit term_balanced_tree(const aterm& tree)
        : aterm_appl(tree)
     {
     }
@@ -199,20 +179,6 @@ class term_balanced_tree: public aterm_appl
       return aterm_cast<Term>(*this);
     }
 
-    /// \brief Returns a const_iterator pointing to the beginning of the term_balanced_tree.
-    /// \return The beginning of the list.
-    const_iterator begin() const
-    {
-      return const_iterator(*this);
-    }
-
-    /// \brief Returns a const_iterator pointing to the end of the term_balanced_tree.
-    /// \return The end of the list.
-    const_iterator end() const
-    {
-      return const_iterator();
-    }
-
     /// \brief Returns the size of the term_balanced_tree.
     /// \details This operator is linear in the size of the balanced tree.
     /// \return The size of the tree.
@@ -239,100 +205,131 @@ class term_balanced_tree: public aterm_appl
       return function()==tree_node_function();
     }
 
-};
-
-template < typename Value >
-class term_balanced_tree_iterator: public boost::iterator_facade<
-  term_balanced_tree_iterator< Value >, // Derived
-  const Value,                          // Value
-  boost::forward_traversal_tag,         // CategoryOrTraversal
-  const Value &                         // Reference
-  >
-{
-  private:
-
-    friend class boost::iterator_core_access;
-
-    std::stack< const atermpp::detail::_aterm* > m_trees;
-
-    /// \brief Dereference operator
-    /// \return The value that the iterator references
-    const Value &dereference() const
+    class iterator: public boost::iterator_facade<
+      iterator,                            // Derived
+      const Term,                          // Value
+      boost::forward_traversal_tag,        // CategoryOrTraversal
+      const Term&                          // Reference
+      >
     {
-      return reinterpret_cast<const Value &>(m_trees.top());
-    }
-
-    /// \brief Determine if a stack is empty
-    bool is_empty(const std::stack<const atermpp::detail::_aterm*>& tree) const
-    {
-      return tree.empty() || (tree.size() == 1 && term_balanced_tree<Value>::is_empty(tree.top()));
-    }
-
-    /// \brief Equality operator
-    bool equal(const term_balanced_tree_iterator &other) const
-    {
-      return m_trees == other.m_trees || (is_empty(m_trees) && is_empty(other.m_trees));
-    }
-
-    /// \brief Increments the iterator
-    void increment()
-    {
-
-      m_trees.pop();
-
-      if (!m_trees.empty())
-      {
-        const detail::_aterm* current = m_trees.top();
-
-        if (current->function()!=term_balanced_tree < Value >::tree_node_function())
+      private:
+    
+        friend class boost::iterator_core_access;
+    
+        static const size_t maximal_size_of_stack=20;      // We assume here that a tree never has more than 2^20 leaves, o
+                                                           // equivalently that states consist of not more than 2^20 data_expressions.
+        const atermpp::detail::_aterm* m_stack[maximal_size_of_stack]; 
+        size_t m_top_of_stack;                             // First element in the stack that is empty.
+    
+        /// \brief Dereference operator
+        /// \return The value that the iterator references
+        const Term& dereference() const
         {
-          return;
+          assert(m_top_of_stack>0);
+          return reinterpret_cast<const Term&>(m_stack[m_top_of_stack-1]);
         }
-        m_trees.pop();
-        do
+    
+        /// \brief Equality operator
+        bool equal(const iterator& other) const
         {
-          m_trees.push(atermpp::detail::address((reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[1])));
-          current=atermpp::detail::address(reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[0]);
+          if (m_top_of_stack != other.m_top_of_stack)
+          {
+            return false; 
+          }
+          
+          for(size_t i=0; i<m_top_of_stack; ++i)
+          { 
+            if (m_stack[i]!= other.m_stack[i])
+            {
+              return false;
+            }
+          }
+          return true;
         }
-        while (current->function()==term_balanced_tree < Value >::tree_node_function());
+    
+        /// \brief Increments the iterator
+        void increment()
+        {
+    
+          --m_top_of_stack;
+    
+          if (m_top_of_stack>0)
+          {
+            const detail::_aterm* current = m_stack[m_top_of_stack-1];
+    
+            if (current->function()!=term_balanced_tree < Term >::tree_node_function())
+            {
+              return;
+            }
+            --m_top_of_stack;
+          
+            do
+            {
+              m_stack[m_top_of_stack++]=atermpp::detail::address((reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[1]));
+              current=atermpp::detail::address(reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[0]);
+            }
+            while (current->function()==term_balanced_tree < Term >::tree_node_function());
+    
+            m_stack[m_top_of_stack++]=current;
+          }
+        }
+    
+        void initialise(const term_balanced_tree<Term>& tree)
+        {
+          if (tree.empty())
+          {
+            return;
+          }
+          const detail::_aterm_appl<aterm>* current = reinterpret_cast<const detail::_aterm_appl<aterm> *>(atermpp::detail::address(tree));
+    
+          while (current->function()==term_balanced_tree< Term >::tree_node_function())
+          {
+            assert(m_top_of_stack+1<maximal_size_of_stack);
+            m_stack[m_top_of_stack++]=atermpp::detail::address(current->arg[1]);
+            current=reinterpret_cast<const detail::_aterm_appl<aterm > *>(atermpp::detail::address(current->arg[0]));
+          }
+          assert(m_top_of_stack+1<maximal_size_of_stack);
+          m_stack[m_top_of_stack++]=current;
+        }
+    
+      public:
+    
+        iterator()
+          : m_top_of_stack(0)
+        { }
+    
+        iterator(const term_balanced_tree<Term>& tree)
+          : m_top_of_stack(0)
+        {
+          initialise(tree);
+        } 
+    
+        iterator(const iterator& other) 
+           : m_top_of_stack(other.m_top_of_stack)
+        { 
+          for(size_t i=0; i<m_top_of_stack; ++i)
+          {
+            m_stack[i]=other.m_stack[i];
+          }
+        }
+    
+    };
 
-        m_trees.push(current);
-      }
-    }
-
-    void initialise(const aterm &tree)
+    /// \brief Returns an iterator pointing to the beginning of the term_balanced_tree.
+    /// \return The beginning of the list.
+    iterator begin() const
     {
-      const detail::_aterm_appl<aterm>* current = reinterpret_cast<const detail::_aterm_appl<aterm> *>(atermpp::detail::address(tree));
-
-      while (current->function()==term_balanced_tree< Value >::tree_node_function())
-      {
-        m_trees.push(atermpp::detail::address(current->arg[1]));
-        current=reinterpret_cast<const detail::_aterm_appl<aterm > *>(atermpp::detail::address(current->arg[0]));
-      }
-      m_trees.push(current);
+      return iterator(*this);
     }
 
-  public:
-
-    term_balanced_tree_iterator()
-    { }
-
-    term_balanced_tree_iterator(const aterm &tree)
+    /// \brief Returns an iterator pointing to the end of the term_balanced_tree.
+    /// \return The end of the list.
+    iterator end() const
     {
-      initialise(tree);
+      return iterator();
     }
-
-    template < typename OtherTermType >
-    term_balanced_tree_iterator(term_balanced_tree< OtherTermType > const& tree)
-    {
-      initialise(tree);
-    }
-
-    term_balanced_tree_iterator(term_balanced_tree_iterator const& other) : m_trees(other.m_trees)
-    { }
 
 };
-
 
 /// \brief A term_balanced_tree with elements of type aterm.
 typedef term_balanced_tree<aterm> aterm_balanced_tree;
@@ -361,7 +358,7 @@ namespace std
 /// \param t1 The first term
 /// \param t2 The second term
 template <class T>
-inline void swap(atermpp::term_balanced_tree<T> &t1, atermpp::term_balanced_tree<T> &t2)
+inline void swap(atermpp::term_balanced_tree<T>& t1, atermpp::term_balanced_tree<T>& t2)
 {
   t1.swap(t2);
 }
