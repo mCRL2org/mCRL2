@@ -133,6 +133,7 @@ cxx11_check_feature("is_convertible" HAS_CXX11_IS_CONVERTIBLE False)
 cxx11_check_feature("is_integral" HAS_CXX11_IS_INTEGRAL False)
 cxx11_check_feature("make_unsigned" HAS_CXX11_MAKE_UNSIGNED False)
 cxx11_check_feature("remove_reference" HAS_CXX11_REMOVE_REFERENCE False)
+cxx11_check_feature("enable_if" HAS_CXX11_ENABLE_IF False)
 
 if(HAS_CXX11_NOEXCEPT)
   add_definitions(-DMCRL2_HAVE_NOEXCEPT)
