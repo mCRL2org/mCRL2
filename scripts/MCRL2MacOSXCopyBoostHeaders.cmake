@@ -77,12 +77,21 @@ set ( R_MCRL2_BOOST_HEADER_DIRS
   boost/utility
 )
 
+# Mark each of the header files and directories
+# above for installation. However, first check if the file
+# really exists. This is done to cope with headers that are
+# missing in some older boost installation (esp. predef(.h) has
+# only been added recently. 
 foreach( hfile ${R_MCRL2_BOOST_HEADER_FILES})
   string(FIND ${hfile} "/" IDX REVERSE)
-  install(FILES "${Boost_INCLUDE_DIRS}/${hfile}" DESTINATION "${MCRL2_INCLUDE_DIR}/boost" COMPONENT Headers)
+  if(EXISTS "${Boost_INCLUDE_DIRS}/${hfile}")
+    install(FILES "${Boost_INCLUDE_DIRS}/${hfile}" DESTINATION "${MCRL2_INCLUDE_DIR}/boost" COMPONENT Headers)
+  endif()
 endforeach( hfile ${R_MCRL2_BOOST_HEADER_FILES})
 
 foreach( hdir ${R_MCRL2_BOOST_HEADER_DIRS})
   string(FIND ${hdir} "/" IDX REVERSE)
-  install(DIRECTORY "${Boost_INCLUDE_DIRS}/${hdir}" DESTINATION "${MCRL2_INCLUDE_DIR}/boost" COMPONENT Headers) 
+  if(EXISTS "${Boost_INCLUDE_DIRS}/${hdir}")
+    install(DIRECTORY "${Boost_INCLUDE_DIRS}/${hdir}" DESTINATION "${MCRL2_INCLUDE_DIR}/boost" COMPONENT Headers) 
+  endif()
 endforeach( hdir ${R_MCRL2_BOOST_HEADER_DIRS})
