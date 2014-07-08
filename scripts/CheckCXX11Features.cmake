@@ -128,6 +128,11 @@ cxx11_check_feature("is_sorted" HAS_CXX11_IS_SORTED True) # Assumed to be suppor
 cxx11_check_feature("unordered_set" HAS_CXX11_UNORDERED_SET False)
 cxx11_check_feature("noexcept" HAS_CXX11_NOEXCEPT False)
 cxx11_check_feature("to_string" HAS_CXX11_TO_STRING False)
+cxx11_check_feature("is_base_of" HAS_CXX11_IS_BASE_OF False)
+cxx11_check_feature("is_convertible" HAS_CXX11_IS_CONVERTIBLE False)
+cxx11_check_feature("is_integral" HAS_CXX11_IS_INTEGRAL False)
+cxx11_check_feature("make_unsigned" HAS_CXX11_MAKE_UNSIGNED False)
+cxx11_check_feature("remove_reference" HAS_CXX11_REMOVE_REFERENCE False)
 
 if(HAS_CXX11_NOEXCEPT)
   add_definitions(-DMCRL2_HAVE_NOEXCEPT)
