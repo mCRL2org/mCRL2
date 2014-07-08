@@ -251,6 +251,13 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     data::variable_list m_variables;
     data::data_expression_list m_expressions;
 
+    // TODO: this is a hack to solve an efficiency problem in the data rewriter
+    static mutable_indexed_substitution<>& empty_substitution()
+    {
+      static mutable_indexed_substitution<> result;
+      return result;
+    }
+
   public:
     /// \brief Constructs the element (v, phi, [])
     enumerator_list_element_with_substitution(const data::variable_list& v, const Expression& phi)
@@ -290,9 +297,9 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     {
       data::enumerator_substitution sigma(m_variables, m_expressions);
       sigma.revert();
-      for (typename VariableList::const_iterator i = v.begin(); i != v.end(); ++i)
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
-        result[*i] = rewriter(sigma(*i));
+        result[*i] = rewriter(sigma(*i), empty_substitution());
       }
     }
 };
