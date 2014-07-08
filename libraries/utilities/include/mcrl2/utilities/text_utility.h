@@ -26,32 +26,6 @@ namespace mcrl2
 namespace utilities
 {
 
-namespace detail
-{
-
-// code suggestion by Alf P. Steinbach
-inline
-void unsigned_to_decimal(std::size_t number, char* buffer)
-{
-  if (number == 0)
-  {
-    *buffer++ = '0';
-  }
-  else
-  {
-    char* first = buffer;
-    while (number != 0)
-    {
-      *buffer++ = '0' + number % 10;
-      number /= 10;
-    }
-    std::reverse(first, buffer);
-  }
-  *buffer++ = '\0';
-}
-
-} // namespace detail
-
 /// \brief Transform parameter into string.
 /// \param x Some expression
 /// \pre type T has operator <<
@@ -155,8 +129,21 @@ bool is_numeric_string(const std::string& s);
 inline
 std::string number2string(std::size_t number)
 {
-  char buffer[std::numeric_limits<std::size_t>::digits10 + 1];
-  detail::unsigned_to_decimal(number, buffer);
+  char _buffer[std::numeric_limits<std::size_t>::digits10 + 1];
+  char* buffer = _buffer + std::numeric_limits<std::size_t>::digits10 + 1;
+  *--buffer = 0;
+  if (number == 0)
+  {
+    *--buffer = '0';
+  }
+  else
+  {
+    while (number != 0)
+    {
+      *--buffer = '0' + number % 10;
+      number /= 10;
+    }
+  }
   return std::string(buffer);
 }
 
