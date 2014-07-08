@@ -17,7 +17,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/print.h"
@@ -382,7 +382,7 @@ static void move_real_parameters_out_of_actions(specification &s,
   global_variable_counter=0;
   const lps::action_summand_vector action_smds = s.process().action_summands();
   lps::action_summand_vector new_action_summands;
-  classic_enumerator<> enumerator(r,s.data());
+  enumerator_algorithm_with_iterator<> enumerator(r,s.data());
   for (lps::action_summand_vector::const_iterator i = action_smds.begin(); i != action_smds.end(); ++i)
   {
      const process::action_list ma=i->multi_action().actions();
@@ -407,10 +407,9 @@ static void move_real_parameters_out_of_actions(specification &s,
      else 
      {
        mutable_indexed_substitution<> empty_sigma;
-       std::deque < enumerator_list_element_with_substitution<data_expression> > 
-               enumerator_deque(1,enumerator_list_element_with_substitution<data_expression>(replaced_variables,sort_bool::true_()));
-       for (classic_enumerator<>::iterator tl = enumerator.begin(empty_sigma, enumerator_deque);
-                                           tl!= enumerator.end(); ++tl)
+       std::deque<enumerator_list_element_with_substitution<> > 
+               enumerator_deque(1, enumerator_list_element_with_substitution<>(replaced_variables,sort_bool::true_()));
+       for (auto tl = enumerator.begin(empty_sigma, enumerator_deque); tl!= enumerator.end(); ++tl)
        { 
          mutable_map_substitution<> sigma;
          tl->add_assignments(replaced_variables,sigma,r);

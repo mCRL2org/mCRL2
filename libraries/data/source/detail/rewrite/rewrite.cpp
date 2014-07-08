@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#define MCRL2_USE_NEW_ENUMERATOR
-
 #include <cstdlib>
 #include <cassert>
 #include <stdexcept>
@@ -31,14 +29,7 @@
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
 #include "mcrl2/data/detail/rewriter_wrapper.h"
-
-#ifdef MCRL2_USE_NEW_ENUMERATOR
 #include "mcrl2/data/enumerator.h"
-#else
-#include "mcrl2/data/classic_enumerator.h"
-#endif
-
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 using namespace mcrl2::core;
@@ -368,14 +359,8 @@ data_expression Rewriter::existential_quantifier_enumeration(
   auto const throw_exceptions = true;
   auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
-#ifdef MCRL2_USE_NEW_ENUMERATOR
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_false, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
   enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
-#else
-  typedef classic_enumerator<rewriter_wrapper, rewriter_wrapper::substitution_type, enumerator_list_element<> > enumerator_type;
-  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, max_count, throw_exceptions);
-  const bool not_equal_to_false = true;
-#endif
 
   /* Create a list to store solutions */
   data_expression partial_result=sort_bool::false_();
@@ -383,12 +368,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   size_t loop_upperbound=(sorts_are_finite?npos():10);
   std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
 
-#ifdef MCRL2_USE_NEW_ENUMERATOR
   enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
-#else
-  enumerator_type::iterator sol=enumerator.begin(sigma, enumerator_solution_deque, not_equal_to_false);
-#endif
-
   for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::true_() &&
          sol!=enumerator.end() && sol->is_valid();
@@ -482,14 +462,8 @@ data_expression Rewriter::universal_quantifier_enumeration(
   auto const throw_exceptions = true;
   auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
-#ifdef MCRL2_USE_NEW_ENUMERATOR
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_true, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
   enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
-#else
-  typedef classic_enumerator<rewriter_wrapper, rewriter_wrapper::substitution_type, enumerator_list_element<> > enumerator_type;
-  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, max_count, throw_exceptions);
-  const bool not_equal_to_false = false;
-#endif
 
   /* Create lists to store solutions */
   data_expression partial_result=sort_bool::true_();
@@ -497,12 +471,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   size_t loop_upperbound=(sorts_are_finite?npos():10);
   std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
 
-#ifdef MCRL2_USE_NEW_ENUMERATOR
   enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
-#else
-  enumerator_type::iterator sol=enumerator.begin(sigma, enumerator_solution_deque, not_equal_to_false);
-#endif
-
   for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
          sol!=enumerator.end() && sol->is_valid();

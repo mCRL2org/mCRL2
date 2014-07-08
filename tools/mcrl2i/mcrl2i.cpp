@@ -24,7 +24,7 @@
 #include <cassert>
 
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
@@ -295,20 +295,13 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             }
 
             term=rewr(term);
-            typedef classic_enumerator< rewriter > enumerator_type;
-            enumerator_type enumerator(rewr,spec);
+            typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
+            enumerator_type enumerator(rewr, spec, rewr, 10000);
 
             data::mutable_indexed_substitution<> sigma;
-            std::deque < enumerator_list_element_with_substitution<data_expression> >
-                 enumerator_deque(1,enumerator_list_element_with_substitution<data_expression>(
-                                             variable_list(vars.begin(), vars.end()),
-                                             term));
-            for (enumerator_type::iterator
-                      i=enumerator.begin(
-                               sigma, 
-                               enumerator_deque,
-                               10000); // Stop when more than 10000 internal variables are required
-                      i != enumerator.end() ; ++i)
+            std::deque<enumerator_list_element_with_substitution<> >
+                 enumerator_deque(1, enumerator_list_element_with_substitution<>(variable_list(vars.begin(), vars.end()), term));
+            for (enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end(); ++i)
             {
               i->add_assignments(vars,sigma,rewr);
 
