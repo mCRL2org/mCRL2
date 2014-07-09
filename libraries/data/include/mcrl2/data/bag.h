@@ -258,7 +258,7 @@ namespace mcrl2 {
       /// \param s1 A sort expression
       ///\return Function symbol count
       inline
-      function_symbol count(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
+      function_symbol count(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort(sort_nat::nat());
         function_symbol count(count_name(), make_function_sort(s0, s1, target_sort));
@@ -319,7 +319,7 @@ namespace mcrl2 {
       /// \param s1 A sort expression
       ///\return Function symbol in
       inline
-      function_symbol in(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
+      function_symbol in(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort(sort_bool::bool_());
         function_symbol in(in_name(), make_function_sort(s0, s1, target_sort));

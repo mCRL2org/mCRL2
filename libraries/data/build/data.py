@@ -396,7 +396,7 @@ class function_declaration_list():
           const='const& ' if sortparams == [] else '',
           static='static ' if sortparams == [] else '')
 
-      def polymorphic_function_constructor(self, fullname, name, sortparams, domainparams, targetsort, sort):
+      def polymorphic_function_constructor(self, fullname, name, sortparams):
         CODE_TEMPLATE = Template('''
       ///\\brief Constructor for function symbol ${namestring}
       ${sortparameterstring}
@@ -410,13 +410,64 @@ class function_declaration_list():
       }
 ''')
 
+        # There is polymorphism at play, hence we need to compute the
+        # allowed sorts first.
+        # That is, we have parameters for all domain elements
+        # based on those, we compute the corresponding target sort
+        domain_sort_ids = [sort_identifier(identifier("s%s" % i)) for i in range(len(self.sort_expression_list.elements[0].domain.elements))]
+        target_sort_id = sort_identifier(identifier("target_sort"))
+        new_sort = sort_arrow(domain(False, domain_sort_ids), target_sort_id)
+
+        # If all codomains are equal we have a unique target sort, otherwise
+        # this is detemined from the domain_sort_ids
+        first_codomain = self.sort_expression_list.elements[0].codomain
+        simple = False
+        if all(map(lambda x: x.codomain == first_codomain, self.sort_expression_list.elements)):
+          target_sort = 'sort_expression {0}({1});'.format(target_sort_id, first_codomain.code(spec))
+          simple = True
+        else:
+          CASE_TEMPLATE = Template('''        ${elsestr}if (${condition})
+        {
+          target_sort = ${sort};
+        }''')
+
+          TARGET_SORT_TEMPLATE = Template('''sort_expression ${target_sort_id};
+${cases}
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for ${functionname} with domain sorts \" + ${sortmsg});
+        }
+''')
+
+          cases = []
+          for (i,sort) in enumerate(self.sort_expression_list.elements):
+            cases.append(CASE_TEMPLATE.substitute(
+              elsestr = '' if i == 0 else 'else ',
+              condition = ' && '.join(map(lambda (j,domsort): '{0} == {1}'.format(domain_sort_ids[j].code(spec), domsort.code(spec)), enumerate(sort.domain.sorts()))),
+              sort = sort.codomain.code(spec)
+            ))
+
+          target_sort = TARGET_SORT_TEMPLATE.substitute(
+            target_sort_id = target_sort_id.code(spec),
+            cases = '\n'.join(cases),
+            functionname = self.label,
+            sortmsg = " + \", \" + ".join(['to_string({0})'.format(domain_sort_ids[j].code(spec)) for j in range(len(sort.domain.elements))])
+            )
+
+        parameters = []
+        if domain_sort_ids != [] and sortparams != [] and simple:
+          parameters += map(lambda x: 'const sort_expression& ', sortparams)
+        else:
+          parameters += map(lambda x: 'const sort_expression& {0}'.format(x.code()), sortparams)
+        parameters += map(lambda x: 'const sort_expression& {0}'.format(x.code()), domain_sort_ids)
+
         return self.function_name(fullname, name) + CODE_TEMPLATE.substitute(
           namestring = escape(fullname),
-          sortparameterstring = '\n      '.join(map(lambda x: '/// \\param {0} A sort expression'.format(escape(x.code())), sortparams + domainparams)),
+          sortparameterstring = '\n      '.join(map(lambda x: '/// \\param {0} A sort expression'.format(escape(x.code())), sortparams + domain_sort_ids)),
           functionname = name,
-          parameters = ', '.join(map(lambda x: 'const sort_expression& {0}'.format(x.code()), sortparams + domainparams)),
-          targetsort = targetsort,
-          sortname = sort
+          parameters = ', '.join(parameters),
+          targetsort = target_sort,
+          sortname = new_sort.code(spec)
           )
 
       def function_recogniser(self, fullname, name, sortparams):
@@ -545,50 +596,8 @@ class function_declaration_list():
 
         else:
           assert self.sort_expression_list.elements > 1
-          # There is polymorphism at play, hence we need to compute the
-          # allowed sorts first.
-          # That is, we have parameters for all domain elements
-          # based on those, we compute the corresponding target sort
-          domain_sort_ids = [sort_identifier(identifier("s%s" % i)) for i in range(len(self.sort_expression_list.elements[0].domain.elements))]
-          target_sort_id = sort_identifier(identifier("target_sort"))
-          new_sort = sort_arrow(domain(False, domain_sort_ids), target_sort_id)
 
-          # If all codomains are equal we have a unique target sort, otherwise
-          # this is detemined from the domain_sort_ids
-          first_codomain = self.sort_expression_list.elements[0].codomain
-          if all(map(lambda x: x.codomain == first_codomain, self.sort_expression_list.elements)):
-            target_sort = 'sort_expression {0}({1});'.format(target_sort_id, first_codomain.code(spec))
-
-          else:
-            CASE_TEMPLATE = Template('''        ${elsestr}if (${condition})
-        {
-          target_sort = ${sort};
-        }''')
-
-            TARGET_SORT_TEMPLATE = Template('''sort_expression ${target_sort_id};
-${cases}
-        else
-        {
-          throw mcrl2::runtime_error("cannot compute target sort for ${functionname} with domain sorts \" + ${sortmsg});
-        }
-''')
-
-            cases = []
-            for (i,sort) in enumerate(self.sort_expression_list.elements):
-              cases.append(CASE_TEMPLATE.substitute(
-                elsestr = '' if i == 0 else 'else ',
-                condition = ' && '.join(map(lambda (j,domsort): '{0} == {1}'.format(domain_sort_ids[j].code(spec), domsort.code(spec)), enumerate(sort.domain.sorts()))),
-                sort = sort.codomain.code(spec)
-              ))
-
-            target_sort = TARGET_SORT_TEMPLATE.substitute(
-              target_sort_id = target_sort_id.code(spec),
-              cases = '\n'.join(cases),
-              functionname = self.label,
-              sortmsg = " + \", \" + ".join(['to_string({0})'.format(domain_sort_ids[j].code(spec)) for j in range(len(sort.domain.elements))])
-              )
-
-          return self.polymorphic_function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec), domain_sort_ids, target_sort, new_sort.code(spec)) + \
+          return self.polymorphic_function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec)) + \
                  self.polymorphic_function_recogniser(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec)) + \
                  self.function_application_code(self.sort_expression_list.elements[0], True)
 
