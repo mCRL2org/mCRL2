@@ -110,14 +110,14 @@ class transforming_term_appl_prepend_iterator: public boost::iterator_facade<
     /// \brief Equality check
     /// \param other An iterator
     /// \return True if the iterators are equal
-    bool equal(transforming_term_appl_prepend_iterator const& other) const
+    bool equal(const transforming_term_appl_prepend_iterator& other) const
     {
       return this->m_prepend == other.m_prepend && this->m_it == other.m_it;
     }
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
-    const data_expression &dereference() const
+    const data_expression& dereference() const
     {
       if (m_prepend)
       {
@@ -294,14 +294,14 @@ class application: public data_expression
     /// \brief Get the function at the head of this expression.
     const data_expression& head() const
     {
-      return atermpp::aterm_cast<const data_expression>(static_cast<atermpp::aterm_appl>(*this)[0]);
+      return atermpp::aterm_cast<const data_expression>(atermpp::aterm_appl::operator[](0));
     }
 
     /// \brief Get the i-th argument of this expression.
     const data_expression& operator[](size_t index) const
     {
       assert(index<size());
-      return atermpp::aterm_cast<const data_expression>(static_cast<const atermpp::aterm_appl&>(*this)[index+1]);
+      return atermpp::aterm_cast<const data_expression>(atermpp::aterm_appl::operator[](index+1));
     }
 
     /// \brief Returns an iterator pointing to the first argument of the
@@ -323,7 +323,7 @@ class application: public data_expression
     size_t size() const
     {
       using namespace atermpp;
-      return atermpp::aterm_cast<atermpp::aterm_appl>(*this).size()-1;
+      return atermpp::aterm_appl::size() - 1;
     }
 };
 
@@ -359,40 +359,40 @@ int right_precedence(const application& x);
 inline
 const data_expression& unary_operand(const application& x)
 {
-  return *x.begin();
+  return x[0];
 }
 
 inline
 const data_expression& binary_left(const application& x)
 {
-  return *x.begin();
+  return x[0];
 }
 
 inline
 const data_expression& binary_right(const application& x)
 {
-  return *(++x.begin());
+  return x[1];
 }
 
 inline
 const data_expression& unary_operand1(const data_expression& x)
 {
   const application& y = core::static_down_cast<const application&>(x);
-  return *y.begin();
+  return y[0];
 }
 
 inline
 const data_expression& binary_left1(const data_expression& x)
 {
   const application& y = core::static_down_cast<const application&>(x);
-  return *y.begin();
+  return y[0];
 }
 
 inline
 const data_expression& binary_right1(const data_expression & x)
 {
   const application& y = core::static_down_cast<const application&>(x);
-  return *(++y.begin());
+  return y[1];
 }
 
 } // namespace data
