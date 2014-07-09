@@ -650,11 +650,7 @@ class Trace
         {
           // So, e is a list of data expressions.
           data::data_expression_list l(e);
-          mcrl2::lps::state s(l);
-          /* for( ; !l.empty() ; l=l.tail())
-          {
-            s.push_back(mcrl2::data::data_expression(l.front()));
-          } */
+          mcrl2::lps::state s(l.begin(), l.size());
           setState(s);
         }
       }
