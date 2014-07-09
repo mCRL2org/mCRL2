@@ -12,11 +12,9 @@
 #ifndef MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
 #define MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
 
-#include "boost/utility.hpp"
 #include "boost/utility/enable_if.hpp"
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/make_unsigned.hpp"
-#include "boost/type_traits/is_floating_point.hpp"
 
 // Workaround for OS X with Apples patched gcc 4.0.1
 #undef nil
