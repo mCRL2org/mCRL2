@@ -12,6 +12,7 @@
 #include "solver.h"
 #include "parsing.h"
 
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/utilities/atermthread.h"
 
 const std::string Solver::className = "Solver";
@@ -84,20 +85,15 @@ void Solver::solve(QString specification, QString dataExpression)
 
       term=rewr(term);
 
-      typedef classic_enumerator< rewriter > enumerator_type;
+      typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
+      typedef enumerator_list_element_with_substitution<> enumerator_element;
 
-      enumerator_type enumerator(rewr,m_data_spec);
+      // Stop when more than 10000 internal variables are required.
+      enumerator_type enumerator(rewr, m_data_spec, rewr, 10000);
 
       mutable_indexed_substitution<> sigma;
-      // Stop when more than 10000 internal variables are required.
-      std::deque < enumerator_list_element_with_substitution<data_expression> >
-                     enumerator_deque(1,enumerator_list_element_with_substitution<data_expression>(
-                                          variable_list(m_vars.begin(),m_vars.end()),term));
-      for (enumerator_type::iterator i = 
-               enumerator.begin(sigma,
-                                enumerator_deque,
-                                10000); 
-           i != enumerator.end() && !m_abort; ++i)
+      std::deque<enumerator_element> enumerator_deque(1, enumerator_element(variable_list(m_vars.begin(),m_vars.end()), term));
+      for (enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() && !m_abort; ++i)
       {
         mCRL2log(info) << "Solution found" << std::endl;
 
