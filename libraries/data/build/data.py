@@ -315,12 +315,11 @@ class function_declaration_list():
       projection = []
              
       if len(index_table) == 1:
-#        projection.append("return *boost::next(static_cast< application >(e).arguments().begin(), {0});".format(index_table.keys()[0]))
-        projection.append("return *boost::next(atermpp::aterm_cast<const application >(e).begin(), {0});".format(index_table.keys()[0]))
+        projection.append("return atermpp::aterm_cast<const application >(e)[{0}];".format(index_table.keys()[0]))
       else:
         projection_case = '''        if ({0})
         {
-          return *boost::next(atermpp::aterm_cast<const application >(e).begin(), %s);\n" % (i)
+          return atermpp::aterm_cast<const application >(e)[%s];\n" % (i)
         }'''.format(" || ".join(["is_{0}_application(e)".format(c[1] for c in index_table[i])]), i)
         projection.append(projection_case)
 
@@ -1962,7 +1961,6 @@ class specification():
     code += "\n"
     code += "#ifndef MCRL2_DATA_%s_H\n" % (self.get_namespace().upper())
     code += "#define MCRL2_DATA_%s_H\n\n" % (self.get_namespace().upper())
-    code += "#include \"boost/utility.hpp\"\n\n"
     code += "#include \"mcrl2/utilities/exception.h\"\n"
     code += "#include \"mcrl2/data/basic_sort.h\"\n"
     code += "#include \"mcrl2/data/function_sort.h\"\n"
