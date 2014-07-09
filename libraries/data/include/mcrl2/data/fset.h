@@ -15,8 +15,6 @@
 #ifndef MCRL2_DATA_FSET_H
 #define MCRL2_DATA_FSET_H
 
-#include "boost/utility.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -77,6 +75,7 @@ namespace mcrl2 {
 
       } // namespace detail
 
+
       /// \brief Generate identifier {}
       /// \return Identifier {}
       inline
@@ -95,7 +94,6 @@ namespace mcrl2 {
         function_symbol empty(empty_name(), fset(s));
         return empty;
       }
-
 
       /// \brief Recogniser for function {}
       /// \param e A data expression
@@ -128,7 +126,6 @@ namespace mcrl2 {
         function_symbol cons_(cons_name(), make_function_sort(s, fset(s), fset(s)));
         return cons_;
       }
-
 
       /// \brief Recogniser for function \@fset_cons
       /// \param e A data expression
@@ -167,7 +164,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined constructors for fset
       /// \param s A sort expression
       /// \return All system defined constructors for fset
@@ -180,6 +176,7 @@ namespace mcrl2 {
 
         return result;
       }
+
       /// \brief Generate identifier \@fset_insert
       /// \return Identifier \@fset_insert
       inline
@@ -198,7 +195,6 @@ namespace mcrl2 {
         function_symbol insert(insert_name(), make_function_sort(s, fset(s), fset(s)));
         return insert;
       }
-
 
       /// \brief Recogniser for function \@fset_insert
       /// \param e A data expression
@@ -256,7 +252,6 @@ namespace mcrl2 {
         function_symbol cinsert(cinsert_name(), make_function_sort(s, sort_bool::bool_(), fset(s), fset(s)));
         return cinsert;
       }
-
 
       /// \brief Recogniser for function \@fset_cinsert
       /// \param e A data expression
@@ -316,7 +311,6 @@ namespace mcrl2 {
         return in;
       }
 
-
       /// \brief Recogniser for function in
       /// \param e A data expression
       /// \return true iff e is the function symbol matching in
@@ -373,7 +367,6 @@ namespace mcrl2 {
         function_symbol fset_union(fset_union_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
         return fset_union;
       }
-
 
       /// \brief Recogniser for function \@fset_union
       /// \param e A data expression
@@ -434,7 +427,6 @@ namespace mcrl2 {
         return fset_intersection;
       }
 
-
       /// \brief Recogniser for function \@fset_inter
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset_inter
@@ -494,7 +486,6 @@ namespace mcrl2 {
         return difference;
       }
 
-
       /// \brief Recogniser for function -
       /// \param e A data expression
       /// \return true iff e is the function symbol matching -
@@ -551,7 +542,6 @@ namespace mcrl2 {
         function_symbol union_(union_name(), make_function_sort(fset(s), fset(s), fset(s)));
         return union_;
       }
-
 
       /// \brief Recogniser for function +
       /// \param e A data expression
@@ -610,7 +600,6 @@ namespace mcrl2 {
         return intersection;
       }
 
-
       /// \brief Recogniser for function *
       /// \param e A data expression
       /// \return true iff e is the function symbol matching *
@@ -668,7 +657,6 @@ namespace mcrl2 {
         return count;
       }
 
-
       /// \brief Recogniser for function #
       /// \param e A data expression
       /// \return true iff e is the function symbol matching #
@@ -705,7 +693,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined mappings for fset
       /// \param s A sort expression
       /// \return All system defined mappings for fset
@@ -735,7 +722,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::aterm_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -747,7 +734,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -759,7 +746,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::aterm_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -771,7 +758,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_cinsert_application(e) || is_fset_union_application(e) || is_fset_intersection_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
+        return atermpp::aterm_cast<const application >(e)[2];
       }
 
       ///\brief Function for projecting out argument
@@ -783,7 +770,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_fset_union_application(e) || is_fset_intersection_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 3);
+        return atermpp::aterm_cast<const application >(e)[3];
       }
 
       ///\brief Function for projecting out argument
@@ -795,7 +782,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_count_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -807,7 +794,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for fset
