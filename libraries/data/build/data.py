@@ -3,6 +3,7 @@
 # flexibility.
 
 import string
+from string import Template
 import copy
 import re
 import logging
@@ -18,7 +19,6 @@ LOG = logging.getLogger("data")
 
 # create console handler and set level to debug
 CH = logging.StreamHandler()
-
 LOG.addHandler(CH)
 
 def indent(n):
@@ -38,18 +38,18 @@ def add_namespace(function_symbol_name, function_symbol_namespace, other_namespa
 
 # Remove trailing _ from a string
 def remove_underscore(s):
-  if s.endswith("_"):
-    return s[:-1]
-  else:
-    return s
+  return s[:-1] if s.endswith('_') else s
 
 # Escape an initial @ sign is present. Needed for doxygen code extraction
 def escape(x):
-  s = "{0}".format(x)
-  if s.startswith("@"):
-    return "\\{0}".format(s)
+  x = str(x)
+  return '\\' + x if x.startswith('@') else x
+
+def fcode(x, spec):
+  if isinstance(x, str):
+    return x
   else:
-    return s
+    return x.code(spec)
 
 # Merge elements of a list of lists into a single list.
 # Elements in the result are sorted and unique.
@@ -67,7 +67,7 @@ def difference(l1, l2):
   for x in l1:
     if x not in l2:
       result.append(x)
-  return result  
+  return result
 
 def is_standard_function(s):
   return str(s) in ["equal_to", "not_equal_to", "if_", "less", "less_equal", "greater", "greater_equal"]
@@ -81,7 +81,7 @@ def target_sort(sort_expr):
 class identifier():
   def __init__(self, string):
     self.string = string
-    
+
   def __str__(self):
     return self.string
 
@@ -90,10 +90,10 @@ class identifier():
       return self.string == other.string
     else:
       return self.string == other
-  
+
   def __hash__(self):
     return hash(self.string)
-    
+
 class label():
   def __init__(self, id):
     assert(isinstance(id, identifier))
@@ -109,7 +109,7 @@ class label():
       return NotImplemented
 
   def __hash__(self):
-    return hash(self.identifier) 
+    return hash(self.identifier)
 
 class variable_declaration():
   def __init__(self, id, sort_expr):
@@ -126,7 +126,7 @@ class variable_declaration():
       return self.id == other.id and self.sort_expression == other.sort_expression
     else:
       return NotImplemented
-    
+
   def sort_parameters(self, spec):
     return self.sort_expression.sort_parameters(spec)
 
@@ -137,7 +137,7 @@ class variable_declaration_list():
   def __init__(self, elements):
     assert(all(map(lambda x: isinstance(x, variable_declaration), elements)))
     self.elements = elements
-    
+
   def __str__(self):
     return ", ".join([str(e) for e in self.elements])
 
@@ -146,7 +146,7 @@ class variable_declaration_list():
       return self.elements == other.elements
     else:
       return NotImplemented
-    
+
   def push_back(self, element):
     if element not in self.elements:
       self.elements.append(element)
@@ -155,7 +155,7 @@ class variable_declaration_list():
     for e in self.elements:
       if e.id == variable.id:
         return e
-    
+
   def code(self, spec):
     return "".join(["{0};\n".format(e.code(spec)) for e in self.elements])
 
@@ -169,13 +169,13 @@ class function_declaration():
     self.label = l
     self.namespace = ""
     self.original_namespace = ""
-  
+
   def __eq__(self, other):
     if hasattr(other, "id") and hasattr(other, "label") and hasattr(other, "namespace") and hasattr(other, "original_namespace"):
       return self.id == other.id and self.label == other.label and self.namespace == other.namespace and self.original_namespace == other.original_namespace
     else:
       return NotImplemented
-    
+
   def set_namespace(self, string):
     self.namespace = string
     if self.original_namespace == "":
@@ -190,7 +190,7 @@ class function_declaration():
           projection_arguments[a].append(value)
         except:
           projection_arguments[a] = [value]
-          
+
     return projection_arguments
 
   def sort_parameters(self, spec):
@@ -202,7 +202,7 @@ class function_declaration():
   def generator_code(self, spec, function_declarations):
     if self.namespace <> self.original_namespace or self.namespace <> function_declarations.namespace or self.namespace <> spec.namespace:
       return ""
-    
+
     sort_params = self.sort_expression.sort_parameters(spec)
     # Determine whether this function is overloaded
     functions = filter(lambda x: (x.id == self.id) and (x.label == self.label) and (x.namespace == self.namespace), function_declarations.elements)
@@ -212,9 +212,9 @@ class function_declaration():
         extra_parameters.append(self.sort_expression.domain.code(spec))
       except:
         pass # in case sort_expression has no domain
-    
+
     return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
-    
+
 
 class function_declaration_list():
   def __init__(self, elements):
@@ -222,7 +222,7 @@ class function_declaration_list():
     self.elements = elements
     self.namespace = ""
     self.original_namespace = ""
-    
+
   def __eq__(self, other):
     return self.elements == other.elements and self.namespace == other.namespace and self.original_namespace == other.original_namespace
 
@@ -283,14 +283,14 @@ class function_declaration_list():
     for e in self.elements:
       if not is_constructor_declaration or not spec.sort_specification.is_alias(target_sort(e.sort_expression)):
         code += e.generator_code(spec, self)
-    return code        
-    
+    return code
+
   def projection_code(self, spec):
     projection_arguments = {}
     for e in self.elements:
       if (e.namespace == e.original_namespace and e.namespace == spec.namespace):
         projection_arguments = e.projection_arguments(projection_arguments)
-        
+
     code = []
     for p in projection_arguments:
       # Filter duplicates
@@ -309,11 +309,11 @@ class function_declaration_list():
           index_table[idx].append((id, label))
         except:
           index_table[idx] = [(id, label)]
-          
+
       # If all projection project out the argument with the same index, do not generate a condition;
       # otherwise we generate an if statement for the different cases.
       projection = []
-             
+
       if len(index_table) == 1:
         projection.append("return atermpp::aterm_cast<const application >(e)[{0}];".format(index_table.keys()[0]))
       else:
@@ -334,10 +334,10 @@ class function_declaration_list():
         assert({2});
         {3}
       }}'''.format(escape(p), p, " || ".join(assertions), "\n".join(projection))
-      
-      
+
+
       code.append(function)
-      
+
     return "{0}\n\n".format("\n\n".join(code))
 
   def code(self, spec, is_constructor_declaration = False):
@@ -362,234 +362,241 @@ class function_declaration_list():
         return "{0} : { {1} }".format(self.id, self.sort_expression_list)
 
       def function_name(self, fullname, name):
-        code  = ""
-        code += "      /// \\brief Generate identifier %s\n" % (escape(fullname))
-        code += "      /// \\return Identifier %s\n" % (escape(fullname))
-        code += "      inline\n"
-        code += "      core::identifier_string const& %s_name()\n" % (name)
-        code += "      {\n"
-        code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (name, fullname)
-        code += "        return %s_name;\n" % (name)
-        code += "      }\n\n"
-        return code
+        CODE_TEMPLATE = Template('''
+      /// \\brief Generate identifier ${namestring}
+      /// \\return Identifier ${namestring}
+      inline
+      core::identifier_string const& ${namecode}_name()
+      {
+        static core::identifier_string ${namecode}_name = core::identifier_string("${name}");
+        return ${namecode}_name;
+      }
+''')
+        return CODE_TEMPLATE.substitute(namestring=escape(fullname), namecode=name, name=fullname)
 
       def function_constructor(self, fullname, name, sortparams, sort):
-        code  = ""
-        code += self.function_name(fullname, name)
-        code += "      /// \\brief Constructor for function symbol %s\n" % (escape(fullname))
-        sortparams_list = string.split(sortparams, ", ")
-        if sortparams_list <> ['']:
-          for s in sortparams_list:
-            code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
-        code += "      /// \\return Function symbol %s\n" % (escape(name))
-        code += "      inline\n"
-        if sortparams_list <> ['']:
-          code += "      function_symbol %s(%s)\n" % (name, sortparams)
-          code += "      {\n"
-          code += "        function_symbol %s(%s_name(), %s);\n" % (name, name, sort)
-        else:
-          code += "      function_symbol const& %s(%s)\n" % (name, sortparams)
-          code += "      {\n"
-          code += "        static function_symbol %s = function_symbol(%s_name(), %s);\n" % (name, name, sort)
-        code += "        return %s;\n" % (name)
-        code += "      }\n\n"
-        return code
+        CODE_TEMPLATE = Template('''
+      /// \\brief Constructor for function symbol ${namestring}
+      ${sortparameterstring}
+      /// \\return Function symbol ${functionname}
+      inline
+      function_symbol ${const}${functionname}(${sortparameters})
+      {
+        ${static}function_symbol ${functionname}(${functionname}_name(), ${sortname});
+        return ${functionname};
+      }
+''')
 
-      def polymorphic_function_constructor(self, fullname, name, sortparams, comma, domainparams, targetsort, sort):
-        code  = ""
-        code += self.function_name(fullname, name)
-        code += "      ///\\brief Constructor for function symbol %s\n" % (escape(fullname))
-        sortparams_list = string.split(sortparams, ", ")
-        if sortparams_list <> ['']:
-          for s in sortparams_list:
-            code += "       /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
-        domainparams_list = string.split(domainparams, ", ")
-        if domainparams_list <> ['']:
-          for s in domainparams_list:
-            code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
-        code += "      ///\\return Function symbol %s\n" % (escape(name))
-        code += "      inline\n"
-        code += "      function_symbol %s(%s%s%s)\n" % (name, sortparams, comma, domainparams)
-        code += "      {\n"
-        code += "        %s\n" % (targetsort)
-        code += "        function_symbol %s(%s_name(), %s);\n" % (name, name, sort)
-        code += "        return %s;\n" % (name)
-        code += "      }\n"
-        return code
+        return self.function_name(fullname, name) + CODE_TEMPLATE.substitute(
+          namestring=escape(fullname),
+          sortparameterstring='\n      '.join(map(lambda x: '/// \\param {0} A sort expression'.format(escape(x.code())), sortparams)),
+          functionname=escape(name),
+          sortparameters = ', '.join(map(lambda x: 'const sort_expression& {0}'.format(x.code()), sortparams)),
+          sortname=sort,
+          const='const& ' if sortparams == [] else '',
+          static='static ' if sortparams == [] else '')
+
+      def polymorphic_function_constructor(self, fullname, name, sortparams, domainparams, targetsort, sort):
+        CODE_TEMPLATE = Template('''
+      ///\\brief Constructor for function symbol ${namestring}
+      ${sortparameterstring}
+      ///\\return Function symbol ${functionname}
+      inline
+      function_symbol ${functionname}(${parameters})
+      {
+        ${targetsort}
+        function_symbol ${functionname}(${functionname}_name(), ${sortname});
+        return ${functionname};
+      }
+''')
+
+        return self.function_name(fullname, name) + CODE_TEMPLATE.substitute(
+          namestring = escape(fullname),
+          sortparameterstring = '\n      '.join(map(lambda x: '/// \\param {0} A sort expression'.format(escape(x.code())), sortparams + domainparams)),
+          functionname = name,
+          parameters = ', '.join(map(lambda x: 'const sort_expression& {0}'.format(x.code()), sortparams + domainparams)),
+          targetsort = targetsort,
+          sortname = sort
+          )
 
       def function_recogniser(self, fullname, name, sortparams):
-        code  = ""
-        code += "      /// \\brief Recogniser for function %s\n" % (escape(fullname))
-        code += "      /// \\param e A data expression\n"
-        code += "      /// \\return true iff e is the function symbol matching %s\n" % (escape(fullname))
-        code += "      inline\n"
-        code += "      bool is_%s_function_symbol(const atermpp::aterm_appl& e)\n" % (name)
-        code += "      {\n"
-        code += "        if (is_function_symbol(e))\n"
-        code += "        {\n"
-        sortparams_list = string.split(sortparams, ", ")
-        if sortparams_list == ['']:
-          code += "          return function_symbol(e) == %s();\n" % (name)
-        else:
-          # TODO, make something stronger here!
-          code += "          return function_symbol(e).name() == %s_name();\n" % (name)
-        code += "        }\n"
-        code += "        return false;\n"
-        code += "      }\n"
-        return code
+        CODE_TEMPLATE = Template('''
+      /// \\brief Recogniser for function ${namestring}
+      /// \\param e A data expression
+      /// \\return true iff e is the function symbol matching ${namestring}
+      inline
+      bool is_${functionname}_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e)${getnamef} == ${functionname}${getname}();
+        }
+        return false;
+      }
+''')
+
+        return CODE_TEMPLATE.substitute(
+          namestring = escape(fullname),
+          functionname = name,
+          getnamef = '' if sortparams == [] else '.name()',
+          getname = '' if sortparams == [] else '_name'
+        )
 
       def polymorphic_function_recogniser(self, fullname, name, sortparams):
-        code  = ""
-        code += "      /// \\brief Recogniser for function %s\n" % (escape(fullname))
-        code += "      /// \\param e A data expression\n"
-        code += "      /// \\return true iff e is the function symbol matching %s\n" % (escape(fullname))
-        code += "      inline\n"
-        code += "      bool is_%s_function_symbol(const atermpp::aterm_appl& e)\n" % (name)
-        code += "      {\n"
-        code += "        if (is_function_symbol(e))\n"
-        code += "        {\n"
-        code += "          function_symbol f(e);\n"
-        sortparams_list = string.split(sortparams, ", ")
-        if sortparams_list == ['']:
+        CODE_TEMPLATE = Template('''
+      /// \\brief Recogniser for function ${namestring}
+      /// \\param e A data expression
+      /// \\return true iff e is the function symbol matching ${namestring}
+      inline
+      bool is_${functionname}_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          function_symbol f(e);
+          return f.name() == ${functionname}_name()${condition};
+        }
+        return false;
+      }
+''')
+
+        condition = ''
+        if sortparams == '':
           domain_size = len(self.sort_expression_list.elements[0].domain.elements)
           cases = []
           for s in self.sort_expression_list.elements:
             d = s.domain
             assert(len(d.elements) == domain_size)
-            cases.append("f == %s(%s)" % (name, d.code(spec)))
-          code += "          return f.name() == %s_name() && function_sort(f.sort()).domain().size() == %d && (%s);\n" % (name, domain_size, string.join(cases, " || "))
-        else:
-          # TODO, make something stronger here!
-          code += "          return f.name() == %s_name();\n" % (name)
-        code += "        }\n"
-        code += "        return false;\n"
-        code += "      }\n"
-        return code
+            cases.append('f == {0}({1})'.format(name, d.code(spec)))
+          condition = ' && function_sort(f.sort()).domain().size() == {0} && ({1})'.format(domain_size, ' || '.join(cases))
 
-      def function_application(self, fullname, name, formsortparams, comma, formparams, actsortparams, actparams):
-        code  = ""
-        code += "      /// \\brief Application of function symbol %s\n" % (escape(fullname))
-        formsortparams_list = string.split(formsortparams, ", ")
-        if formsortparams_list <> ['']:
-          for s in formsortparams_list:
-            code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
-        formparams_list = string.split(formparams, ", ")
-        if formparams_list <> ['']:
-          for d in formparams_list:
-            code += "      /// \\param %s A data expression\n" % (escape(d[len("const data_expression& "):]))
-        code += "      /// \\return Application of %s to a number of arguments\n" % (escape(fullname))
-        code += "      inline\n"
-        code += "      application %s(%s%s%s)\n" % (name, formsortparams, comma, formparams)
-        code += "      {\n"
-        code += "        return %s(%s)(%s);\n" % (add_namespace(name, self.namespace), actsortparams, actparams)
-        code += "      }\n"
-        return code
+        return CODE_TEMPLATE.substitute(
+          namestring = escape(fullname),
+          functionname = name,
+          condition = condition
+        )
+
+      def function_application(self, fullname, name, sort_params, data_params, polymorphic):
+        CODE_TEMPLATE = Template('''
+      /// \\brief Application of function symbol ${namestring}
+      ${sortparameterstring}
+      ${dataparameterstring}
+      /// \\return Application of ${namestring} to a number of arguments
+      inline
+      application ${functionname}(${parameters})
+      {
+        return ${nsfunctionname}(${actsortparameters})(${actdataparameters});
+      }
+''')
+
+        formal_sort_params = map(lambda x: 'const sort_expression& {0}'.format(fcode(x, spec)), sort_params)
+        formal_data_params = map(lambda x: 'const data_expression& {0}'.format(fcode(x, spec)), data_params)
+        domain_params = map(lambda x: '{0}.sort()'.format(x), data_params) if polymorphic else []
+        return CODE_TEMPLATE.substitute(
+          namestring = escape(fullname),
+          sortparameterstring = '' if sort_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A sort expression'.format(fcode(x, spec)), sort_params)),
+          dataparameterstring = '' if data_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A data expression'.format(fcode(x, spec)), data_params)),
+          functionname = name,
+          parameters = ', '.join(formal_sort_params + formal_data_params),
+          nsfunctionname = add_namespace(name, self.namespace),
+          actsortparameters = ', '.join(map(lambda x: fcode(x, spec), sort_params + domain_params)),
+          actdataparameters = ', '.join(map(lambda x: fcode(x, spec), data_params))
+        )
 
       def function_application_recogniser(self, fullname, name):
-        code  = ""
-        code += "      /// \\brief Recogniser for application of %s\n" % (escape(fullname))
-        code += "      /// \\param e A data expression\n"
-        code += "      /// \\return true iff e is an application of function symbol %s to a\n" % (escape(name))
-        code += "      ///     number of arguments\n"
-        code += "      inline\n"
-        code += "      bool is_%s_application(const atermpp::aterm_appl& e)\n" % (name)
-        code += "      {\n"
-        code += "        if (is_application(e))\n"
-        code += "        {\n"
-        code += "          return is_%s_function_symbol(application(e).head());\n" % (name)
-        code += "        }\n"
-        code += "        return false;\n"
-        code += "      }\n"
-        return code
+        CODE_TEMPLATE = Template('''
+      /// \\brief Recogniser for application of ${namestring}
+      /// \\param e A data expression
+      /// \\return true iff e is an application of function symbol ${functionname} to a
+      ///     number of arguments
+      inline
+      bool is_${functionname}_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_${functionname}_function_symbol(application(e).head());
+        }
+        return false;
+      }
+''')
+
+        return CODE_TEMPLATE.substitute(
+          namestring = escape(fullname),
+          functionname = name,
+        )
 
       def function_application_code(self, sort, polymorphic = False):
-        code = ""
-        comma = ""
-        if self.sort_expression_list.formal_parameters_code(spec) <> "":
-          comma = ", "
-        if isinstance(sort, sort_arrow):
-          act_sort_params = []
-          if polymorphic:
-            params = string.split(sort.domain.actual_parameters_code(spec), ", ")
-            for p in params:
-              act_sort_params += ["%s.sort()" % (p)]
-          if self.sort_expression_list.actual_parameters_code(spec) <> "":
-            act_sort_params = [self.sort_expression_list.actual_parameters_code(spec)] + act_sort_params
+        if not isinstance(sort, sort_arrow):
+          return ''
 
-          code += self.function_application(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec), comma, sort.domain.formal_parameters_code(spec), string.join(act_sort_params, ", "), sort.domain.actual_parameters_code(spec))
-          code += "\n"
-          code += self.function_application_recogniser(self.id, self.label)
-          code += "\n"
-        return code
+        return self.function_application(self.id, self.label, self.sort_expression_list.sort_parameters(spec), sort.domain.parameters(spec), polymorphic) + \
+               self.function_application_recogniser(self.id, self.label)
 
       def code(self, spec):
         assert(isinstance(spec, specification))
-                
-        if self.namespace <> spec.namespace :
-          return ""
 
-        code = ""
+        if self.namespace <> spec.namespace:
+          return ''
+
         if len(self.sort_expression_list.elements) == 1:
           sort = self.sort_expression_list.elements[0] # as len is 1
-          code += self.function_constructor(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec), sort.code(spec))
-          code += "\n"
-          code += self.function_recogniser(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec))
-          code += "\n"
-          code += self.function_application_code(sort)
+          return self.function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec), sort.code(spec)) + \
+                 self.function_recogniser(self.id, self.label, self.sort_expression_list.sort_parameters(spec)) + \
+                 self.function_application_code(sort)
+
         else:
-          # There is polymorphism in play, hence we need to compute the
+          assert self.sort_expression_list.elements > 1
+          # There is polymorphism at play, hence we need to compute the
           # allowed sorts first.
           # That is, we have parameters for all domain elements
-          # bases on those, we compute the corresponding target sort
-          new_domain_sorts = [sort_identifier(identifier("s%s" % i)) for i in range(len(self.sort_expression_list.elements[0].domain.elements))]
-
-          first_codomain = self.sort_expression_list.elements[0].codomain
-          if all(map(lambda x: str(x.codomain) == str(first_codomain), self.sort_expression_list.elements)):
-            target_sort = "sort_expression target_sort(%s);\n" % (first_codomain.code(spec))
-          else:
-            target_sort = "sort_expression target_sort;\n"
-            for (i,sort) in enumerate(self.sort_expression_list.elements):
-              if i == 0:
-                target_sort += "        if ("
-              else:
-                target_sort += "        else if ("
-              for (j,domsort) in enumerate(sort.domain.elements):
-                if j <> 0:
-                  target_sort += " && "
-                if sort.domain.labelled:
-                  domain_element = domsort[0]
-                else:
-                  domain_element = domsort
-                target_sort += "%s == %s" % (new_domain_sorts[j].code(spec), domain_element.code(spec))
-              target_sort += ")\n"
-              target_sort += "        {\n"
-              target_sort += "          target_sort = %s;\n" % (sort.codomain.code(spec))
-              target_sort += "        }\n"
-            target_sort += "        else\n"
-            target_sort += "        {\n"
-            target_sort += "          throw mcrl2::runtime_error(\"cannot compute target sort for %s with domain sorts \" + %s);\n" % (self.label, string.join([("to_string(%s)" % new_domain_sorts[j].code(spec)) for j in range(len(sort.domain.elements))], " + \", \" + "))
-            target_sort += "        }\n"
+          # based on those, we compute the corresponding target sort
+          domain_sort_ids = [sort_identifier(identifier("s%s" % i)) for i in range(len(self.sort_expression_list.elements[0].domain.elements))]
           target_sort_id = sort_identifier(identifier("target_sort"))
-          new_sort = sort_arrow(domain(False, new_domain_sorts), target_sort_id)
+          new_sort = sort_arrow(domain(False, domain_sort_ids), target_sort_id)
 
-          domain_param_code = map(lambda x: "const sort_expression& %s" % (x.code(spec)), new_domain_sorts)
+          # If all codomains are equal we have a unique target sort, otherwise
+          # this is detemined from the domain_sort_ids
+          first_codomain = self.sort_expression_list.elements[0].codomain
+          if all(map(lambda x: x.codomain == first_codomain, self.sort_expression_list.elements)):
+            target_sort = 'sort_expression {0}({1});'.format(target_sort_id, first_codomain.code(spec))
 
-          comma = ""
-          if self.sort_expression_list.formal_parameters_code(spec) <> "":
-            comma = ", "
-          code += self.polymorphic_function_constructor(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec), comma, string.join(domain_param_code, ", "), target_sort, new_sort.code(spec))
-          code += "\n"
-          code += self.polymorphic_function_recogniser(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec))
-          code += "\n"
-          code += self.function_application_code(self.sort_expression_list.elements[0], True)
+          else:
+            CASE_TEMPLATE = Template('''        ${elsestr}if (${condition})
+        {
+          target_sort = ${sort};
+        }''')
 
-        return "%s" % (code)
+            TARGET_SORT_TEMPLATE = Template('''sort_expression ${target_sort_id};
+${cases}
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for ${functionname} with domain sorts \" + ${sortmsg});
+        }
+''')
+
+            cases = []
+            for (i,sort) in enumerate(self.sort_expression_list.elements):
+              cases.append(CASE_TEMPLATE.substitute(
+                elsestr = '' if i == 0 else 'else ',
+                condition = ' && '.join(map(lambda (j,domsort): '{0} == {1}'.format(domain_sort_ids[j].code(spec), domsort.code(spec)), enumerate(sort.domain.sorts()))),
+                sort = sort.codomain.code(spec)
+              ))
+
+            target_sort = TARGET_SORT_TEMPLATE.substitute(
+              target_sort_id = target_sort_id.code(spec),
+              cases = '\n'.join(cases),
+              functionname = self.label,
+              sortmsg = " + \", \" + ".join(['to_string({0})'.format(domain_sort_ids[j].code(spec)) for j in range(len(sort.domain.elements))])
+              )
+
+          return self.polymorphic_function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec), domain_sort_ids, target_sort, new_sort.code(spec)) + \
+                 self.polymorphic_function_recogniser(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec)) + \
+                 self.function_application_code(self.sort_expression_list.elements[0], True)
 
     class multi_function_declaration_list():
       def __init__(self, elements):
         assert(all(map(lambda x: isinstance(x, multi_function_declaration), elements)))
         self.elements = elements
-        
+
       def __eq__(self, other):
         return self.elements == other.elements
 
@@ -604,7 +611,7 @@ class function_declaration_list():
             if all(map(lambda x: str(x) <> str(element.sort_expression), e.sort_expression_list.elements)):
               e.sort_expression_list.push_back(element.sort_expression)
             return
-        
+
         self.elements += [multi_function_declaration(element.id, element.namespace, sort_expression_list([element.sort_expression]), element.label)]
 
       def __str__(self):
@@ -637,7 +644,7 @@ class equation_declaration():
     self.lhs = lhs
     self.rhs = rhs
     self.condition = condition
-    
+
   def __eq__(self, other):
     return self.condition == other.condition and self.lhs == other.lhs and self.rhs == other.rhs and self.condition == other.condition and self.namespace == other.namespace and self.original_namespace == other.original_namespace
 
@@ -687,7 +694,7 @@ class equation_declaration():
     if self.condition:
       variables = self.condition.free_variables()
     variables = merge([variables, self.lhs.free_variables(), self.rhs.free_variables()])
-    
+
     if len(variables) == 0:
       variables_string = "variable_list()"
     else:
@@ -704,7 +711,7 @@ class equation_declaration_list():
     self.elements = elements
     self.namespace = ""
     self.original_namespace = ""
-    
+
   def __eq__(self, other):
     return self.elements == other.elements and self.namespace == other.namespace and self.original_namespace == other.original_namespace
 
@@ -744,11 +751,10 @@ class equation_declaration_list():
 
   def code(self, spec, function_spec, variable_spec):
     self = self.determinise_variable_or_function_symbol(function_spec, variable_spec)
-    
+
     sort_parameters = self.sort_parameters(spec, function_spec, variable_spec)
-    formal_parameters_code = []
-    for s in sort_parameters:
-      formal_parameters_code += [s.formal_parameter_code()]
+    formal_parameters_code = map(lambda x: x.formal_parameter_code(), sort_parameters)
+
     code  = "      /// \\brief Give all system defined equations for %s\n" % (escape(spec.get_namespace()))
     for s in sort_parameters:
       code += "      /// \\param %s A sort expression\n" % (escape(s.code(spec)))
@@ -789,13 +795,12 @@ class data_application(data_expression):
     assert(isinstance(arguments, data_expression_list))
     self.head = head
     self.arguments = arguments
-    
+
   def __eq__(self, other):
     return self.head == other.head and self.arguments == other.arguments
 
   def sort_parameters(self, spec, function_spec, variable_spec):
-    result = merge([self.head.sort_parameters(spec, function_spec, variable_spec), self.arguments.sort_parameters(spec, function_spec, variable_spec)])
-    return result
+    return merge([self.head.sort_parameters(spec, function_spec, variable_spec), self.arguments.sort_parameters(spec, function_spec, variable_spec)])
 
   def determinise_variable_or_function_symbol(self, function_spec, variable_spec):
     return data_application(self.head.determinise_variable_or_function_symbol(function_spec, variable_spec), self.arguments.determinise_variable_or_function_symbol(function_spec, variable_spec))
@@ -826,18 +831,18 @@ class data_application(data_expression):
         head_code = "sort_nat::plus"
       else:
         head_code = self.head.code(spec, function_spec, variable_spec, indentlog + 2, len(self.arguments.elements))
-        # make generated code a bit more readable 
+        # make generated code a bit more readable
         head_code = head_code[:head_code.find("(")]
     else:
       head_code = self.head.code(spec, function_spec, variable_spec, indentlog + 2)
-      
+
     sort_parameters_code = []
 
     # FIXME: workaround for complement and join
     if isinstance(self.head, function_symbol) and (head_code <> "sort_bool_::not_" and head_code <> "sort_nat::plus"):
       sort_parameters = self.head.sort_parameters(spec, function_spec, variable_spec)
-      for s in sort_parameters:
-        sort_parameters_code += [s.code(spec)]
+      sort_parameters_code += map(lambda x: x.code(spec), sort_parameters)
+
     sort_parameters_code += [self.arguments.code(spec, function_spec, variable_spec, indentlog + 2)]
 
     result = "%s(%s)" % (head_code, string.join(sort_parameters_code, ", "))
@@ -865,7 +870,7 @@ class data_variable(data_expression):
   def __init__(self, id):
     assert(isinstance(id, identifier))
     self.id = id
-    
+
   def __eq__(self, other):
     if hasattr(other, "id"):
       return self.id == other.id
@@ -898,7 +903,7 @@ class function_symbol(data_expression):
   def __init__(self, id):
     assert(isinstance(id, identifier))
     self.id = id
-    
+
   def __eq__(self, other):
     return self.id == other.id
 
@@ -929,7 +934,7 @@ class lambda_abstraction(data_expression):
     assert(isinstance(expression, data_expression))
     self.variable_declaration = var_declaration
     self.expression = expression
-    
+
   def __eq__(self, other):
     return self.variable_declaration == other.variable_declaration and self.expression == other.expression
 
@@ -967,10 +972,10 @@ class forall(data_expression):
     assert(isinstance(expression, data_expression))
     self.variable_declaration = var_declaration
     self.expression = expression
-    
+
   def __eq__(self, other):
     return self.variable_declaration == other.variable_declaration and self.expression == other.expression
-    
+
   def sort_parameters(self, spec, function_spec, variable_spec):
     return merge([self.variable_declaration.sort_parameters(spec), self.expression.sort_parameters(spec, function_spec, variable_spec)])
 
@@ -1005,7 +1010,7 @@ class exists(data_expression):
     assert(isinstance(expression, data_expression))
     self.variable_declaration = var_declaration
     self.expression = expression
-    
+
   def __eq__(self, other):
     return self.variable_declaration == other.variable_declaration and self.expression == other.expression
 
@@ -1041,7 +1046,7 @@ class data_expression_list():
   def __init__(self, elements):
     assert(all(map(lambda x: isinstance(x, data_expression), elements)))
     self.elements = elements
-    
+
   def __eq__(self, other):
     return self.elements == other.elements
 
@@ -1080,7 +1085,7 @@ class sort_expression_list():
   def __init__(self, elements):
     assert(all(map(lambda x: isinstance(x, sort_expression), elements)))
     self.elements = elements
-    
+
   def __eq__(self, other):
     return self.elements == other.elements
 
@@ -1114,13 +1119,13 @@ class sort_identifier(sort_expression):
   def __init__(self, id):
     assert(isinstance(id, identifier))
     self.name = id
-    
+
   def __eq__(self, other):
     if hasattr(other, "name"):
       return self.name == other.name
     else:
       return NotImplemented
-    
+
   def sort_parameters(self, spec):
     if self in spec.sort_parameters():
       return [self]
@@ -1136,34 +1141,34 @@ class sort_identifier(sort_expression):
   def actual_parameter_code(self):
     return str(self.name).lower()
 
-  def code(self, spec):
-    assert(isinstance(spec, specification))
-    if (spec.sort_specification.has_sort(self)):
+  def code(self, spec = None):
+    #assert(isinstance(spec, specification))
+    if (spec != None and spec.sort_specification.has_sort(self)):
       return spec.sort_specification.get_sort(self).inline_code(spec)
     else:
-      return "{0}".format(self.name).lower()
+      return str(self.name).lower()
 
 class domain(sort_expression):
   def __init__(self, labelled, elements):
     assert(isinstance(labelled, bool))
     self.labelled = labelled
     self.elements = elements
-    
+
   def __eq__(self, other):
     if hasattr(other, "labelled") and hasattr(other, "elements"):
       return self.labelled == other.labelled and self.elements == other.elements
     else:
       return NotImplemented
-    
-  def __sorts(self):
+
+  def sorts(self):
     if self.labelled:
       return [e[0] for e in self.elements]
     else:
       return self.elements
- 
+
   def __labels(self):
     return [e[1] for e in self.elements]
-    
+
   def push_back(self, element):
     self.elements.append(element)
 
@@ -1174,13 +1179,16 @@ class domain(sort_expression):
       return [(e, i) for (i, e) in enumerate(self.__labels())]
 
   def sort_parameters(self, spec):
-    return merge([p.sort_parameters(spec) for p in self.__sorts()])
+    return merge([p.sort_parameters(spec) for p in self.sorts()])
+
+  def parameters(self, spec):
+    return ['arg{0}'.format(i) for i in range(0,len(self.elements))]
 
   def formal_parameters_code(self, spec):
-    return ", ".join(["const data_expression& arg{0}".format(i) for i in range(0,len(self.elements))])
-    
+    return ', '.join(map(lambda x: 'const data_expression& {0}'.format(str(x)), self.parameters(spec)))
+
   def actual_parameters_code(self, spec):
-    return ", ".join(["arg{0}".format(i) for i in range(0,len(self.elements))])
+    return ', '.join(self.parameters(spec))
 
   def assertions_code(self):
     return ""
@@ -1190,9 +1198,9 @@ class domain(sort_expression):
       return " # ".join(["{0} <\"{1}\">".format(e[0], e[1]) for e in self.elements])
     else:
       return " # ".join(map(str, self.elements))
-  
+
   def code(self, spec):
-    return ", ".join([e.code(spec) for e in self.__sorts()])
+    return ", ".join([e.code(spec) for e in self.sorts()])
 
 class sort_arrow(sort_expression):
   def __init__(self, dom, codom):
@@ -1200,10 +1208,10 @@ class sort_arrow(sort_expression):
     assert(isinstance(codom, sort_expression))
     self.domain = dom
     self.codomain = codom
-    
+
   def __eq__(self, other):
     return self.domain == other.domain and self.codomain == other.codomain
-    
+
   def sort_parameters(self, spec):
     return merge([self.codomain.sort_parameters(spec), self.domain.sort_parameters(spec)])
 
@@ -1220,13 +1228,13 @@ class sort_container(sort_expression):
     assert(isinstance(element_sort, sort_expression))
     self.container = container
     self.element_sort = element_sort
-    
+
   def __eq__(self, other):
     if hasattr(other, "container") and hasattr(other, "element_sort"):
       return self.container == other.container and self.element_sort == other.element_sort
     else:
       return NotImplemented
-    
+
   def sort_parameters(self, spec):
     return self.element_sort.sort_parameters(spec)
 
@@ -1254,7 +1262,7 @@ class structured_sort_declaration():
     self.arguments = arguments
     self.namespace = ""
     self.original_namespace = ""
-    
+
   def __eq__(self, other):
     return self.id == other.id and self.label == other.label and self.arguments == other.arguments and self.namespace == other.namespace and self.original_namespace == other.original_namespace
 
@@ -1300,7 +1308,7 @@ class structured_sort_declaration_list():
     self.elements = elements
     self.namespace = ""
     self.original_namespace = ""
-    
+
   def __eq__(self, other):
     return self.elements == other.elements and self.namespace == other.namespace and self.original_namespace == other.original_namespace
 
@@ -1335,7 +1343,7 @@ class structured_sort_specification():
     self.elements = elements
     self.namespace = ""
     self.original_namespace = ""
-    
+
   def __eq__(self, other):
     if hasattr(other, "elements") and hasattr(other, "namespace") and hasattr(other, "original_namespace"):
       return self.elements == other.elements and self.namespace == other.namespace and self.original_namespace == other.original_namespace
@@ -1880,7 +1888,7 @@ class specification():
   def set_using(self, uses):
     assert(isinstance(uses, using_list))
     self.uses = uses
-    
+
   def set_subtypes(self, subtypes):
     self.subtypes = subtypes
 
@@ -2007,7 +2015,7 @@ class specification():
     code = p.sub(r'sort_\1\2', code)
     p = re.compile('is_([A-Za-z0-9]*)_\(')
     code = p.sub(r'is_\1(',code)
-    
+
     return code
 
 class include_list():
