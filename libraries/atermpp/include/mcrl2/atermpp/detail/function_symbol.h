@@ -37,6 +37,8 @@ bool is_valid_function_symbol(const detail::_function_symbol* f)
   return (f->reference_count>0) && check_that_the_function_symbol_points_to_memory_containing_a_function(f);
 }
 
+size_t get_sufficiently_large_postfix_index(const string& prefix_);
+
 } // namespace detail
 } // namespace atermpp
 

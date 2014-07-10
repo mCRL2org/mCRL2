@@ -14,7 +14,7 @@
 
 #include <cassert>
 #include <cctype>
-#include "mcrl2/atermpp/aterm_string.h"
+// #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace atermpp {
@@ -34,11 +34,10 @@ class function_symbol_generator
       : prefix(prefix_)
     {
       assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
-
-      // TODO: add the computation of index
+      
       // set index such that no function symbol exists with the name 'prefix + std::to_string(n)'
       // for all values n >= index
-      index = 12345;
+      index = get_sufficiently_large_postfix_index(prefix_);
     }
 
     /// \brief Generates a unique function symbol with the given prefix followed by a number.

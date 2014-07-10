@@ -130,7 +130,7 @@ namespace detail
   }
 
 
-  static HashNumber calculate_hash_of_function_symbol(const std::string &name, const size_t arity);
+  static HashNumber calculate_hash_of_function_symbol(const std::string& name, const size_t arity);
   
   static void resize_function_symbol_hashtable()
   {
@@ -171,7 +171,7 @@ namespace detail
   
   static const size_t MAGIC_PRIME = 7;
   
-  static HashNumber calculate_hash_of_function_symbol(const std::string &name, const size_t arity)
+  static HashNumber calculate_hash_of_function_symbol(const std::string& name, const size_t arity)
   {
     HashNumber hnr = arity*3;
   
@@ -194,7 +194,7 @@ function_symbol::function_symbol()
   increase_reference_count<false>();
 }
 
-function_symbol::function_symbol(const std::string &name, const size_t arity_)
+function_symbol::function_symbol(const std::string& name, const size_t arity_)
 {
   if (detail::function_symbol_table_size==0)
   {
@@ -221,8 +221,8 @@ function_symbol::function_symbol(const std::string &name, const size_t arity_)
   }
 
   // The function symbol does not exist. Make it.
-  if (detail::function_symbol_free_list==detail::END_OF_LIST) // There is a free place in function_lookup_table() to store an function_symbol.
-  {
+  if (detail::function_symbol_free_list==detail::END_OF_LIST) // There is no free place in function_lookup_table() to store an function_symbol.
+  {                                                           // Create a new block of function symbols.
     detail::create_new_function_symbol_block();
   }
 

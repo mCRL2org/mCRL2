@@ -130,7 +130,7 @@ class term_list:public aterm
     ///  \param convert_to_aterm A class with a () operation, whic is applied to each element
     ///                      before it is put into the list.
     template <class Iter, class  ATermConverter>
-             term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm, typename boost::disable_if<
+             term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm, typename boost::disable_if<
              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
              boost::random_access_traversal_tag >::type >::type* = 0):
          aterm(detail::make_list_forward<Term,Iter,ATermConverter>

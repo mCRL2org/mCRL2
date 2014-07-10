@@ -24,7 +24,7 @@ namespace atermpp
 class function_symbol
 {
 
-  friend size_t detail::addressf(const function_symbol &t);
+  friend size_t detail::addressf(const function_symbol& t);
   protected:
     const detail::_function_symbol* m_function_symbol;
 
@@ -55,7 +55,7 @@ class function_symbol
     /// \brief Constructor.
     /// \param name A string
     /// \param arity The arity of the function.
-    function_symbol(const std::string &name, const size_t arity);
+    function_symbol(const std::string& name, const size_t arity);
 
     /// \brief default constructor
     /// \details This function is deprecated and should not be used
@@ -71,13 +71,13 @@ class function_symbol
     }
 
     /// \brief Copy constructor
-    function_symbol(const function_symbol &f):m_function_symbol(f.m_function_symbol)
+    function_symbol(const function_symbol& f):m_function_symbol(f.m_function_symbol)
     {
       increase_reference_count<true>();
     }
 
     /// \brief Assignment operator.
-    function_symbol &operator=(const function_symbol &f)
+    function_symbol& operator=(const function_symbol& f)
     {
       f.increase_reference_count<true>();
       decrease_reference_count(); // Decrease the reference count after increasing it,
@@ -97,7 +97,7 @@ class function_symbol
 
     /// \brief Return the name of the function_symbol.
     /// \return The name of the function symbol.
-    const std::string &name() const
+    const std::string& name() const
     {
       assert(detail::is_valid_function_symbol(m_function_symbol));
       return m_function_symbol->name;
@@ -124,7 +124,7 @@ class function_symbol
     /// \details This operator compares the indices of the function symbols. This means
     ///         that this operation takes constant time.
     /// \returns True iff the function symbols are the same.
-    bool operator ==(const function_symbol &f) const
+    bool operator ==(const function_symbol& f) const
     {
       assert(detail::is_valid_function_symbol(m_function_symbol));
       assert(detail::is_valid_function_symbol(f.m_function_symbol));
@@ -134,7 +134,7 @@ class function_symbol
     /// \brief Inequality test.
     /// \details This operator takes constant time.
     /// \returns True iff the function symbols are not equal.
-    bool operator !=(const function_symbol &f) const
+    bool operator !=(const function_symbol& f) const
     {
       assert(detail::is_valid_function_symbol(m_function_symbol));
       assert(detail::is_valid_function_symbol(f.m_function_symbol));
@@ -144,7 +144,7 @@ class function_symbol
     /// \brief Comparison operation.
     /// \details This operator takes constant time.
     /// \returns True iff this function has a lower index than the argument.
-    bool operator <(const function_symbol &f) const
+    bool operator <(const function_symbol& f) const
     {
       assert(detail::is_valid_function_symbol(m_function_symbol));
       assert(detail::is_valid_function_symbol(f.m_function_symbol));
@@ -154,7 +154,7 @@ class function_symbol
     /// \brief Comparison operation.
     /// \details This operator takes constant time.
     /// \returns True iff this function has a higher index than the argument.
-    bool operator >(const function_symbol &f) const
+    bool operator >(const function_symbol& f) const
     {
       assert(detail::is_valid_function_symbol(m_function_symbol));
       assert(detail::is_valid_function_symbol(f.m_function_symbol));
@@ -164,7 +164,7 @@ class function_symbol
     /// \brief Comparison operation.
     /// \details This operator takes constant time.
     /// \returns True iff this function has a lower or equal index than the argument.
-    bool operator <=(const function_symbol &f) const
+    bool operator <=(const function_symbol& f) const
     {
       assert(detail::is_valid_function_symbol(m_function_symbol));
       assert(detail::is_valid_function_symbol(f.m_function_symbol));
@@ -174,7 +174,7 @@ class function_symbol
     /// \brief Comparison operation.
     /// \details This operator takes constant time.
     /// \returns True iff this function has a larger or equal index than the argument.
-    bool operator >=(const function_symbol &f) const
+    bool operator >=(const function_symbol& f) const
     {
       assert(detail::is_valid_function_symbol(m_function_symbol));
       assert(detail::is_valid_function_symbol(f.m_function_symbol));
@@ -184,7 +184,7 @@ class function_symbol
     /// \brief Swap this function with its argument.
     /// \details More efficient than assigning twice.
     /// \param f The function symbol with which the swap takes place.
-    void swap(function_symbol &f)
+    void swap(function_symbol& f)
     {
       using std::swap;
       swap(f.m_function_symbol,m_function_symbol);
@@ -211,7 +211,7 @@ namespace std
 /// \param t2 The second term
 
 template <>
-inline void swap(atermpp::function_symbol &t1, atermpp::function_symbol &t2)
+inline void swap(atermpp::function_symbol& t1, atermpp::function_symbol& t2)
 {
   t1.swap(t2);
 }
