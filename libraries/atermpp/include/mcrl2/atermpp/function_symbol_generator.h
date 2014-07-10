@@ -33,7 +33,7 @@ class function_symbol_generator
     function_symbol_generator(const std::string& prefix_)
       : prefix(prefix_)
     {
-      assert(!prefix.empty() && !(std::isdigit(prefix.back())));
+      assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
 
       // TODO: add the computation of index
       // set index such that no function symbol exists with the name 'prefix + std::to_string(n)'
