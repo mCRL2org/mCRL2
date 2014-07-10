@@ -120,6 +120,10 @@ class stategraph_equation: public pbes_equation
     std::vector<predicate_variable> m_predvars;
     std::vector<data::variable> m_parameters;
     pbes_expression m_condition;
+    mutable std::vector<std::size_t> m_control_flow_parameter_indices;
+    mutable data::variable_vector m_control_flow_parameters;
+    mutable std::set<std::size_t> m_data_parameter_indices;
+    mutable data::variable_vector m_data_parameters;
 
     void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
     {
@@ -318,6 +322,47 @@ class stategraph_equation: public pbes_equation
       compute_copy();
       compute_used();
       compute_changed();
+    }
+
+    /// \brief Sets the control flow parameters and data parameters of this equation
+    /// \param CFP contains the indices of the control flow parameters of this equation
+    void set_control_flow_parameters(const std::set<std::size_t>& CFP) const
+    {
+      for (std::size_t i = 0; i < m_parameters.size(); i++)
+      {
+        m_data_parameter_indices.insert(i);
+      }
+      for (auto i = CFP.begin(); i != CFP.end(); ++i)
+      {
+        m_control_flow_parameters.push_back(m_parameters[*i]);
+        m_data_parameter_indices.erase(*i);
+      }
+      m_control_flow_parameter_indices = std::vector<std::size_t>(CFP.begin(), CFP.end());
+
+      for (auto i = m_data_parameter_indices.begin(); i != m_data_parameter_indices.end(); ++i)
+      {
+        m_data_parameters.push_back(m_parameters[*i]);
+      }
+    }
+
+    const data::variable_vector& control_flow_parameters() const
+    {
+      return m_control_flow_parameters;
+    }
+
+    const std::vector<std::size_t>& control_flow_parameter_indices() const
+    {
+      return m_control_flow_parameter_indices;
+    }
+
+    const data::variable_vector& data_parameters() const
+    {
+      return m_data_parameters;
+    }
+
+    const std::set<std::size_t>& data_parameter_indices() const
+    {
+      return m_data_parameter_indices;
     }
 
     bool is_simple() const

@@ -738,6 +738,29 @@ class stategraph_algorithm
       return out.str();
     }
 
+    // set the control flow parameter information in p
+    void set_control_flow_parameters(const stategraph_pbes& p)
+    {
+      std::map<core::identifier_string, std::set<std::size_t> > CFP; // CFP["X"] is the set of indices of control flow parameters of equation "X"
+      for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
+      {
+        for (auto j = k->begin(); j != k->end(); ++j)
+        {
+          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
+          if (u.has_variable())
+          {
+            CFP[u.name()].insert(u.index());
+          }
+        }
+      }
+      for (auto i = CFP.begin(); i != CFP.end(); ++i)
+      {
+        auto const& X = i->first;
+        auto const& eqn = *find_equation(p, X);
+        eqn.set_control_flow_parameters(i->second);
+      }
+    }
+
     // returns { n | !exists CFG with vertex (X, n) }
     std::set<std::size_t> data_parameter_indices(const core::identifier_string& X) const
     {
@@ -931,6 +954,7 @@ class stategraph_algorithm
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
+      set_control_flow_parameters(m_pbes);
       print_final_control_flow_parameters();
 
       start_timer("compute_connected_component_values");
