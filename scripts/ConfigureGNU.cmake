@@ -38,13 +38,13 @@ if(NOT MCRL2_CLANG)
 endif()
 
 # The following is only implemented in clang, but not on Apple.
-if (NOT APPLE)    
-  if (MCRL2_CLANG)
+if(MCRL2_CLANG AND NOT APPLE)    
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.4")
     # We need to add the proper flag to the linker before we try:
-     set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
-     try_add_c_flag(-fsanitize=address       MAINTAINER)
-     try_add_c_flag(-fno-omit-frame-pointer  MAINTAINER)
+    set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
   endif()
+  try_add_c_flag(-fsanitize=address       MAINTAINER)
+  try_add_c_flag(-fno-omit-frame-pointer  MAINTAINER)
 endif()
 
 ##---------------------------------------------------
@@ -94,12 +94,12 @@ if(NOT MCRL2_CLANG)
 endif()
 
 # The following is only implemented in clang
-if (NOT APPLE)
-  if(MCRL2_CLANG)
+if(MCRL2_CLANG AND NOT APPLE)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.4")
     # We need to add the proper flag to the linker before we try:
     set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
-    try_add_cxx_flag(-fsanitize=address       MAINTAINER)
   endif()
+  try_add_cxx_flag(-fsanitize=address       MAINTAINER)
 endif()
 
 if(BUILD_SHARED_LIBS)
