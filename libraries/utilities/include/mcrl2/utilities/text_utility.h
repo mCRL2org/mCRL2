@@ -148,9 +148,9 @@ char* number2string(std::size_t number, char* buffer)
   buffer[position] = '\0'; // end of string marker.
   while (position>0)
   {
-    buffer[position-1] = '0' + number % 10;
-    number = number/10;
     --position;
+    buffer[position] = '0' + number % 10;
+    number = number/10;
   }
   return &buffer[number_of_digits];
 }
@@ -161,9 +161,8 @@ inline
 std::string number2string(std::size_t number)
 {
   char _buffer[std::numeric_limits<std::size_t>::digits10 + 1];
-  char* buffer = _buffer + std::numeric_limits<std::size_t>::digits10 + 1;
-  number2string(number, buffer);
-  return std::string(buffer);
+  number2string(number, _buffer);
+  return std::string(_buffer);
 }
 
 
