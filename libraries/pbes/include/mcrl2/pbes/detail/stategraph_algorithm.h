@@ -128,9 +128,9 @@ class stategraph_algorithm
     std::map<core::identifier_string, std::vector<bool> > m_is_GCFP;
 
     // the vertices of the control flow graph
-    std::vector<global_control_flow_graph_vertex> m_global_control_flow_graph_vertices;
+    GCFP_graph m_GCFP_graph;
 
-    // the connected components in the control flow graph; a component contains the indices in the vector m_global_control_flow_graph_vertices
+    // the connected components in the control flow graph; a component contains the indices of vertices in the graph m_GCFP_graph
     std::vector<std::set<std::size_t> > m_connected_components;
 
     // the possible values of the connected components in the control flow graph
@@ -172,9 +172,9 @@ class stategraph_algorithm
       compute_global_control_flow_parameters();
       finish_timer("compute_global_control_flow_parameters");
 
-      start_timer("compute_related_global_control_flow_parameters");
-      compute_related_global_control_flow_parameters();
-      finish_timer("compute_related_global_control_flow_parameters");
+      start_timer("compute_related_GCFP_parameters");
+      compute_related_GCFP_parameters();
+      finish_timer("compute_related_GCFP_parameters");
 
       start_timer("compute_connected_components");
       compute_connected_components();
@@ -420,26 +420,12 @@ class stategraph_algorithm
       return cf[i];
     }
 
-    // returns an iterator to an element of m_global_control_flow_graph_vertices
-    std::vector<global_control_flow_graph_vertex>::iterator find_vertex(const core::identifier_string& X, std::size_t n)
-    {
-      for (auto i = m_global_control_flow_graph_vertices.begin(); i != m_global_control_flow_graph_vertices.end(); ++i)
-      {
-        if (i->name() == X && i->index() == n)
-        {
-          return i;
-        }
-      }
-      throw mcrl2::runtime_error("vertex not found in dependency graph");
-      return m_global_control_flow_graph_vertices.end();
-    }
-
     // relate (X, n) and (Y, m) in the dependency graph
     // \pre: the equation of X has a lower rank than the equation of Y
-    void relate_control_flow_graph_vertices(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y, std::size_t m)
+    void relate_GCFP_vertices(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y, std::size_t m)
     {
-      global_control_flow_graph_vertex& u = *find_vertex(X, n);
-      global_control_flow_graph_vertex& v = *find_vertex(Y, m);
+      GCFP_vertex& u = m_GCFP_graph.find_vertex(X, n);
+      GCFP_vertex& v = m_GCFP_graph.find_vertex(Y, m);
       u.neighbors().insert(&v);
       v.neighbors().insert(&u);
     }
@@ -470,13 +456,13 @@ class stategraph_algorithm
     }
 
     // Determines which control flow parameters are related. This is done by assigning neighbors to the
-    // vertices in m_global_control_flow_graph_vertices.
-    void compute_related_global_control_flow_parameters()
+    // vertices in m_GCFP_graph.
+    void compute_related_GCFP_parameters()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing related global control flow parameters ===" << std::endl;
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
 
-      // step 1: create vertices in m_global_control_flow_graph_vertices
+      // step 1: create vertices in m_GCFP_graph
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         auto const& X = k->variable().name();
@@ -485,12 +471,12 @@ class stategraph_algorithm
         {
           if (is_global_control_flow_parameter(X, n))
           {
-            m_global_control_flow_graph_vertices.push_back(global_control_flow_graph_vertex(X, n, d_X[n]));
+            m_GCFP_graph.add_vertex(GCFP_vertex(X, n, d_X[n]));
           }
         }
       }
 
-      // step 2: create edges between related vertices in m_global_control_flow_graph_vertices
+      // step 2: create edges between related vertices in m_GCFP_graph
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         auto const& X = k->variable().name();
@@ -514,13 +500,13 @@ class stategraph_algorithm
                 if (is_undefined(Ye.dest(), m))
                 {
                   mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye) << std::endl;
-                  relate_control_flow_graph_vertices(X, n, Y, m);
+                  relate_GCFP_vertices(X, n, Y, m);
                 }
               }
               else
               {
                 mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye, " (dest is undefined)") << std::endl;
-                relate_control_flow_graph_vertices(X, n, Y, m);
+                relate_GCFP_vertices(X, n, Y, m);
               }
             }
           }
@@ -534,7 +520,7 @@ class stategraph_algorithm
       std::set<core::identifier_string> V;
       for (auto i = component.begin(); i != component.end(); ++i)
       {
-        auto const& X = m_global_control_flow_graph_vertices[*i].name();
+        auto const& X = m_GCFP_graph.vertex(*i).name();
         if (V.find(X) != V.end())
         {
           return false;
@@ -554,7 +540,7 @@ class stategraph_algorithm
         {
           out << ", ";
         }
-        out << m_global_control_flow_graph_vertices[*i];
+        out << m_GCFP_graph.vertex(*i);
       }
       out << "}";
       if (!is_valid_connected_component(component))
@@ -572,7 +558,7 @@ class stategraph_algorithm
       }
     }
 
-    // compute the connected component belonging to the vertex m_global_control_flow_graph_vertices[i]
+    // compute the connected component belonging to vertex i in m_GCFP_graph
     std::set<std::size_t> compute_connected_component(std::size_t i, std::vector<bool>& done) const
     {
       using utilities::detail::pick_element;
@@ -584,14 +570,14 @@ class stategraph_algorithm
       while (!todo.empty())
       {
         std::size_t u_index = pick_element(todo);
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[u_index];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(u_index);
         done[u_index] = true;
         component.insert(u_index);
 
         for (auto k = u.neighbors().begin(); k != u.neighbors().end(); ++k)
         {
-          const global_control_flow_graph_vertex* w = *k;
-          std::size_t w_index = w - &(m_global_control_flow_graph_vertices.front());
+          const GCFP_vertex* w = *k;
+          std::size_t w_index = m_GCFP_graph.index(*w);
           if (!done[w_index])
           {
             todo.insert(w_index);
@@ -605,8 +591,8 @@ class stategraph_algorithm
     {
       mCRL2log(log::debug, "stategraph") << "=== computing connected components ===" << std::endl;
 
-      // done[i] means that m_global_control_flow_graph_vertices[i] has been processed
-      std::vector<bool> done(m_global_control_flow_graph_vertices.size(), false);
+      // done[i] means that vertex i in m_GCFP_graph has been processed
+      std::vector<bool> done(m_GCFP_graph.vertices().size(), false);
 
       for (std::size_t i = 0; i < done.size(); i++)
       {
@@ -667,7 +653,7 @@ class stategraph_algorithm
     {
       for (auto i = component.begin(); i != component.end(); ++i)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*i];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*i);
         auto X = u.name();
         auto m = u.index();
         if (is_not_only_copied(X, m))
@@ -746,7 +732,7 @@ class stategraph_algorithm
       {
         for (auto j = k->begin(); j != k->end(); ++j)
         {
-          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
+          const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
           if (u.has_variable())
           {
             CFP[u.name()].insert(u.index());
@@ -774,7 +760,7 @@ class stategraph_algorithm
       {
         for (auto j = k->begin(); j != k->end(); ++j)
         {
-          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
+          const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
           if (u.name() == X && u.index() != data::undefined_index())
           {
             result.erase(u.index());
@@ -792,12 +778,12 @@ class stategraph_algorithm
       mCRL2log(log::verbose, "stategraph") << "--- computed control flow parameters ---" << std::endl;
 
       // collect the control flow points in the map CFP
-      std::map<core::identifier_string, std::set<const global_control_flow_graph_vertex*> > CFP;
+      std::map<core::identifier_string, std::set<const GCFP_vertex*> > CFP;
       for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
       {
         for (auto j = k->begin(); j != k->end(); ++j)
         {
-          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
+          const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
           if (u.has_variable())
           {
             CFP[u.name()].insert(&u);
@@ -835,19 +821,13 @@ class stategraph_algorithm
       m_pbes = stategraph_pbes(p);
     }
 
-    /// \brief Returns the vertices of the global control flow graph
-    const std::vector<global_control_flow_graph_vertex>& control_flow_graph_vertices() const
-    {
-      return m_global_control_flow_graph_vertices;
-    }
-
     /// \brief Returns the connected components of the global control flow graph.
     const std::vector<std::set<std::size_t> >& connected_components() const
     {
       return m_connected_components;
     }
 
-    std::string print(const global_control_flow_graph_vertex& u) const
+    std::string print(const GCFP_vertex& u) const
     {
       std::ostringstream out;
       out << '(' << u.name() << ", " << find_equation(m_pbes, u.name())->parameters()[u.index()].name() << ')';
@@ -865,7 +845,7 @@ class stategraph_algorithm
 
       for (auto j = component.begin(); j != component.end(); ++j)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
         if (u.name() == Xinit)
         {
           data::data_expression d = nth_element(init.parameters(), u.index());
@@ -876,7 +856,7 @@ class stategraph_algorithm
       // source(X, i, k) = v
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*p);
         auto const& X = u.name();
         std::size_t k = u.index();
         auto const& eq_X = *find_equation(m_pbes, X);
@@ -895,7 +875,7 @@ class stategraph_algorithm
       // dest(X, i, k) = v
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*p);
         auto const& Y = u.name();
         std::size_t k = u.index();
         auto const& eq_Y = *find_equation(m_pbes, Y);

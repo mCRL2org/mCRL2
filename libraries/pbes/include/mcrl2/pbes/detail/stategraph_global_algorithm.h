@@ -178,6 +178,39 @@ class stategraph_global_algorithm: public stategraph_algorithm
       return result;
     }
 
+//    bool enabled_edge()
+//    {
+//      bool result = true;
+//    }
+//
+//    void compute_global_control_flow_graph_new()
+//    {
+//      using utilities::detail::pick_element;
+//
+//      mCRL2log(log::debug, "stategraph") << "--- compute_global_control_flow_graph_new" << std::endl;
+//      global_control_flow_graph V;
+//      std::set<const GCFP_vertex*> todo; // T
+//
+//      // initialize todo
+//
+//      while (!todo.empty())
+//      {
+//        // u = Y(e)
+//        auto const& u = *pick_element(todo);
+//        auto const& Y = u.name();
+//        auto const& e = u.value();
+//        auto const& eq_Y = *find_equation(m_pbes, Y);
+//        auto const& predvars = eq_Y.predicate_variables();
+//
+//        mCRL2log(log::debug1, "stategraph") << "choose todo element Y(e) = " << u << std::endl;
+//
+//        for (auto i = predvars.begin(); i != predvars.end(); ++i)
+//        {
+//        }
+//        // V.insert_vertex(u);
+//      }
+//    }
+
   public:
     stategraph_global_algorithm(const pbes& p, const pbesstategraph_options& options)
       : stategraph_algorithm(p, options)

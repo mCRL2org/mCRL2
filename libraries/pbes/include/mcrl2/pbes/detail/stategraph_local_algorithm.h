@@ -1075,7 +1075,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       compute_local_control_flow_graph(U, component_index);
     }
 
-    // Computes a local control flow graph that corresponds to the given component in m_global_control_flow_graph_vertices.
+    // Computes a local control flow graph that corresponds to the given component in m_GCFP_graph.
     void compute_local_control_flow_graph(const std::set<std::size_t>& component, const std::set<data::data_expression>& component_values)
     {
       mCRL2log(log::debug, "stategraph") << "Compute local control flow graphs for component " << print_connected_component(component) << std::endl;
@@ -1084,14 +1084,14 @@ class stategraph_local_algorithm: public stategraph_algorithm
       std::map<core::identifier_string, std::size_t> component_index;
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& w = m_global_control_flow_graph_vertices[*p];
+        const GCFP_vertex& w = m_GCFP_graph.vertex(*p);
         component_index[w.name()] = w.index();
       }
 
       std::set<local_control_flow_graph_vertex> U;
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*p);
         for (auto q = component_values.begin(); q != component_values.end(); ++q)
         {
           U.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), *q));
