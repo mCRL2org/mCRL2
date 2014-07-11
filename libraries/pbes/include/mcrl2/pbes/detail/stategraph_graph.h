@@ -35,7 +35,7 @@ class LCFP_vertex
     data::variable m_variable;
 
   public:
-    LCFP_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable)
+    LCFP_vertex(const core::identifier_string& name, std::size_t index = data::undefined_index(), const data::variable& variable = data::undefined_variable())
       : m_name(name), m_index(index), m_variable(variable)
     {}
 
@@ -129,20 +129,57 @@ class GCFP_graph
     }
 };
 
-class local_control_flow_graph_vertex;
-std::ostream& operator<<(std::ostream&, const local_control_flow_graph_vertex&);
+// This class is used to add labeled edges to a vertex
+template <typename Vertex>
+class add_edges
+{
+  protected:
+    mutable std::map<const Vertex*, std::set<std::size_t> > m_outgoing_edges;
+    mutable std::map<const Vertex*, std::set<std::size_t> > m_incoming_edges;
+    // the mapped values are the edge labels; note that there can be multiple edges with different labels
+
+  public:
+    const std::map<const Vertex*, std::set<std::size_t> >& outgoing_edges() const
+    {
+      return m_outgoing_edges;
+    }
+
+    const std::map<const Vertex*, std::set<std::size_t> >& incoming_edges() const
+    {
+      return m_incoming_edges;
+    }
+
+    void insert_outgoing_edge(const Vertex* u, std::size_t label) const
+    {
+      m_outgoing_edges[u].insert(label);
+    }
+
+    void insert_incoming_edge(const Vertex* u, std::size_t label) const
+    {
+      m_incoming_edges[u].insert(label);
+    }
+
+    std::string print_outgoing_edges() const
+    {
+      std::ostringstream out;
+      for (auto i = m_outgoing_edges.begin(); i != m_outgoing_edges.end(); ++i)
+      {
+        if (i != m_outgoing_edges.begin())
+        {
+          out << "; ";
+        }
+        out << *i->first << " (labels = " << core::detail::print_set(i->second) << ")";
+      }
+      return out.str();
+    }
+};
 
 // Vertex in a local control flow graph.
-class local_control_flow_graph_vertex: public LCFP_vertex
+class local_control_flow_graph_vertex: public LCFP_vertex, public add_edges<local_control_flow_graph_vertex>
 {
   protected:
     data::data_expression m_value;
     mutable std::set<data::variable> m_marking; // used in the reset variables procedure
-
-    mutable std::map<const local_control_flow_graph_vertex*, std::set<std::size_t> > m_outgoing_edges;
-    // the mapped values are the edge labels; note that there can be multiple edges with different labels
-
-    mutable std::map<const local_control_flow_graph_vertex*, std::set<std::size_t> > m_incoming_edges;
 
     // (i, l) is mapped to FV(rewr(e[l], [d_X[n] := z])) intersect {d | (X, d) in B},
     // where Y(e) = PVI(phi_X, i), d_X[n] = variable(), z = value(), and B is the belongs relation
@@ -155,7 +192,7 @@ class local_control_flow_graph_vertex: public LCFP_vertex
     {}
 
     local_control_flow_graph_vertex(const core::identifier_string& name, const data::data_expression& value)
-      : LCFP_vertex(name, data::undefined_index(), data::undefined_variable()), m_value(value)
+      : LCFP_vertex(name), m_value(value)
     {}
 
     const data::data_expression& value() const
@@ -178,26 +215,6 @@ class local_control_flow_graph_vertex: public LCFP_vertex
       m_marking.insert(marking.begin(), marking.end());
     }
 
-    const std::map<const local_control_flow_graph_vertex*, std::set<std::size_t> >& outgoing_edges() const
-    {
-      return m_outgoing_edges;
-    }
-
-    void insert_outgoing_edge(const local_control_flow_graph_vertex* u, std::size_t label) const
-    {
-      m_outgoing_edges[u].insert(label);
-    }
-
-    void insert_incoming_edge(const local_control_flow_graph_vertex* u, std::size_t label) const
-    {
-      m_incoming_edges[u].insert(label);
-    }
-
-    const std::map<const local_control_flow_graph_vertex*, std::set<std::size_t> >& incoming_edges() const
-    {
-      return m_incoming_edges;
-    }
-
     bool operator==(const local_control_flow_graph_vertex& other) const
     {
       return m_name == other.m_name && m_index == other.m_index && m_value == other.m_value;
@@ -209,8 +226,6 @@ class local_control_flow_graph_vertex: public LCFP_vertex
       out << "vertex " << *this << " marking = " << core::detail::print_set(m_marking);
       return out.str();
     }
-
-    std::string print_outgoing_edges() const;
 
     void set_marking_update(std::size_t i, const data::variable& d, const std::set<data::variable>& V) const
     {
@@ -233,22 +248,6 @@ std::ostream& operator<<(std::ostream& out, const local_control_flow_graph_verte
     assert(u.value() == data::undefined_data_expression());
   }
   return out << '(' << u.name() << ", " << u.index() << ", " << data::pp(u.variable()) << "=" << data::pp(u.value()) << ')';
-}
-
-// The implementation is pulled outside the class, since the stream operator for local_control_flow_graph_vertex is needed.
-inline
-std::string local_control_flow_graph_vertex::print_outgoing_edges() const
-{
-  std::ostringstream out;
-  for (auto i = m_outgoing_edges.begin(); i != m_outgoing_edges.end(); ++i)
-  {
-    if (i != m_outgoing_edges.begin())
-    {
-      out << "; ";
-    }
-    out << *i->first << " (labels = " << core::detail::print_set(i->second) << ")";
-  }
-  return out.str();
 }
 
 inline
@@ -532,7 +531,13 @@ const Vertex& control_flow_graph1<Vertex>::find_vertex(const Vertex& u) const
 }
 
 typedef control_flow_graph1<local_control_flow_graph_vertex> local_control_flow_graph;
-typedef control_flow_graph1<GCFP_vertex> global_control_flow_graph;
+
+// Vertex in the global control flow graph.
+class global_control_flow_graph_vertex: public add_edges<global_control_flow_graph_vertex>
+{
+};
+
+typedef control_flow_graph1<global_control_flow_graph_vertex> global_control_flow_graph;
 
 } // namespace detail
 
