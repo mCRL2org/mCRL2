@@ -324,21 +324,22 @@ class stategraph_equation: public pbes_equation
       compute_changed();
     }
 
-    /// \brief Sets the control flow parameters and data parameters of this equation
+    /// \brief Sets the control flow parameters of this equation
     /// \param CFP contains the indices of the control flow parameters of this equation
     void set_control_flow_parameters(const std::set<std::size_t>& CFP) const
     {
-      for (std::size_t i = 0; i < m_parameters.size(); i++)
-      {
-        m_data_parameter_indices.insert(i);
-      }
-      for (auto i = CFP.begin(); i != CFP.end(); ++i)
+      m_control_flow_parameter_indices = std::vector<std::size_t>(CFP.begin(), CFP.end());
+      for (auto i = m_control_flow_parameter_indices.begin(); i != m_control_flow_parameter_indices.end(); ++i)
       {
         m_control_flow_parameters.push_back(m_parameters[*i]);
-        m_data_parameter_indices.erase(*i);
       }
-      m_control_flow_parameter_indices = std::vector<std::size_t>(CFP.begin(), CFP.end());
+    }
 
+    /// \brief Sets the data parameters of this equation
+    /// \param DP contains the indices of the control flow parameters of this equation
+    void set_data_parameters(const std::set<std::size_t>& DP) const
+    {
+      m_data_parameter_indices = DP;
       for (auto i = m_data_parameter_indices.begin(); i != m_data_parameter_indices.end(); ++i)
       {
         m_data_parameters.push_back(m_parameters[*i]);

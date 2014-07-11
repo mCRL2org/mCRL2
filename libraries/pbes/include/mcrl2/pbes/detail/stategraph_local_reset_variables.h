@@ -94,8 +94,9 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       for (auto i = m_occurring_data_parameters.begin(); i != m_occurring_data_parameters.end(); ++i)
       {
         auto const& X = i->first;
-        auto dp = data_parameter_indices(X);
-        i->second = data::detail::set_intersection(i->second, dp);
+        auto const& eq_X = *find_equation(m_pbes, X);
+        auto const& dp_X = eq_X.data_parameter_indices();
+        i->second = data::detail::set_intersection(i->second, dp_X);
       }
     }
 
@@ -273,11 +274,10 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
   std::vector<data::data_expression> e1(e.begin(), e.end());
   const std::vector<data::variable>& d_Y = eq_Y.parameters();
   assert(d_Y.size() == Ye.parameters().size());
-
   const std::size_t J = m_local_control_flow_graphs.size();
 
-  auto dp = data_parameter_indices(Y);
-  for (auto dpi = dp.begin(); dpi != dp.end(); ++dpi)
+  auto const& dp_Y = eq_Y.data_parameter_indices();
+  for (auto dpi = dp_Y.begin(); dpi != dp_Y.end(); ++dpi)
   {
     std::size_t k = *dpi;
     bool relevant = true;

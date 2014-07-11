@@ -260,7 +260,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         }
         Bk[X]; // force the creation of an empty set corresponding to X
         auto const& eq_X = *find_equation(m_pbes, X);
-        std::set<std::size_t> belongs = data_parameter_indices(X);
+        std::set<std::size_t> belongs = eq_X.data_parameter_indices();
         mCRL2log(log::debug1, "stategraph") << "  initial belong set for equation " << X << " = " << print_belong_set(eq_X, belongs) << std::endl;
 
         auto const& predvars = eq_X.predicate_variables();
@@ -886,7 +886,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
         auto const& d_X = eq_X.parameters();
         B[X]; // force creation of empty set corresponding to X
-        std::set<std::size_t> I = data_parameter_indices(X);
+        auto const& I = eq_X.data_parameter_indices();
         for (auto i = I.begin(); i != I.end(); ++i)
         {
           B[X].insert(d_X[*i]);

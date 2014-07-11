@@ -724,9 +724,10 @@ class stategraph_algorithm
       return out.str();
     }
 
-    // set the control flow parameter information in p
-    void set_control_flow_parameters(const stategraph_pbes& p)
+    // set the control flow and data parameter information in p
+    void set_parameters(const stategraph_pbes& p)
     {
+      // set control flow parameters
       std::map<core::identifier_string, std::set<std::size_t> > CFP; // CFP["X"] is the set of indices of control flow parameters of equation "X"
       for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
       {
@@ -745,30 +746,31 @@ class stategraph_algorithm
         auto const& eqn = *find_equation(p, X);
         eqn.set_control_flow_parameters(i->second);
       }
-    }
 
-    // returns { n | !exists CFG with vertex (X, n) }
-    std::set<std::size_t> data_parameter_indices(const core::identifier_string& X) const
-    {
-      std::set<std::size_t> result;
-      auto const& eq_X = *find_equation(m_pbes, X);
-      for (std::size_t i = 0; i < eq_X.parameters().size(); ++i)
+      // set data parameters
+      auto const& eqn = m_pbes.equations();
+      for (auto k = eqn.begin(); k != eqn.end(); ++k)
       {
-        result.insert(i);
-      }
-      for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
-      {
-        for (auto j = k->begin(); j != k->end(); ++j)
+        auto const& eq_X = *k;
+        auto const& X = eq_X.variable().name();
+        std::set<std::size_t> I; // data parameters of equation eq_X
+        for (std::size_t i = 0; i < eq_X.parameters().size(); ++i)
         {
-          const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
-          if (u.name() == X && u.index() != data::undefined_index())
+          I.insert(i);
+        }
+        for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
+        {
+          for (auto j = k->begin(); j != k->end(); ++j)
           {
-            result.erase(u.index());
+            const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
+            if (u.name() == X && u.index() != data::undefined_index())
+            {
+              I.erase(u.index());
+            }
           }
         }
+        eq_X.set_data_parameters(I);
       }
-      mCRL2log(log::debug1, "stategraph") << print_data_parameters(X, result) << std::endl;
-      return result;
     }
 
     // prints all vertices of the connected components
@@ -934,7 +936,7 @@ class stategraph_algorithm
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
-      set_control_flow_parameters(m_pbes);
+      set_parameters(m_pbes);
       print_final_control_flow_parameters();
 
       start_timer("compute_connected_component_values");
