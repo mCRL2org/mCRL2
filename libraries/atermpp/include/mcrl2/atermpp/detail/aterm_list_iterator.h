@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jan Friso Groote, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -31,8 +31,19 @@ namespace detail
 template <typename Term>
 class term_list_iterator 
 {
+    template<class T>
+    friend class term_list;
+
   protected:
     const detail::_aterm_list<Term>* m_list;
+
+    /// \brief Constructor from an aterm which must be a list.
+    /// \param l A sequence of terms
+    term_list_iterator(const aterm& l)
+      : m_list(reinterpret_cast<const detail::_aterm_list<Term>*>(detail::address(l)))
+    { 
+      assert(l.type_is_list());
+    } 
 
   public:
     typedef Term value_type;
@@ -51,14 +62,6 @@ class term_list_iterator
     term_list_iterator(const term_list_iterator& other)
       : m_list(other.m_list)
     { 
-    } 
-
-    /// \brief Constructor from an aterm which must be a list.
-    /// \param l A sequence of terms
-    term_list_iterator(const aterm& l)
-      : m_list(reinterpret_cast<const detail::_aterm_list<Term>*>(detail::address(l)))
-    { 
-      assert(l.type_is_list());
     } 
 
     /// \brief Assignment

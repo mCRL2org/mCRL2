@@ -3907,7 +3907,7 @@ class specification_basic_type:public boost::noncopyable
          representing the value i, when there are l->n elements */
       {
         size_t k=upperpowerof2(stack.no_of_states);
-        variable_list::const_iterator boolean_state_variables=stack.booleanStateVariables;
+        variable_list::const_iterator boolean_state_variables=stack.booleanStateVariables.begin();
         for (; k>0 ; k--, ++boolean_state_variables)
         {
           if ((i % 2)==0)
@@ -3957,7 +3957,7 @@ class specification_basic_type:public boost::noncopyable
          representing the value i, when there are l->n elements */
       {
         size_t k=upperpowerof2(stack.no_of_states);
-        variable_list::const_iterator boolean_state_variables=stack.booleanStateVariables;
+        variable_list::const_iterator boolean_state_variables=stack.booleanStateVariables.begin();
         for (; k>0 ; k--, ++boolean_state_variables)
         {
           if ((i % 2)==0)
