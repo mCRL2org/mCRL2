@@ -91,6 +91,30 @@ namespace detail
     return false;
   }
 
+  size_t get_sufficiently_large_postfix_index(const std::string& prefix_)
+  {
+    size_t index=0;
+    for(size_t i=0; i<function_symbol_index_table_number_of_elements; ++i)
+    {
+      std::string& function_name=detail::function_symbol_index_table[i>>FUNCTION_SYMBOL_BLOCK_CLASS][i & FUNCTION_SYMBOL_BLOCK_MASK].name;
+      if (function_name.compare(0,prefix_.size(),prefix_)==0)   // The function name starts with the prefix
+      {
+        std::string potential_number=function_name.substr(prefix_.size()); // Get the trailing string after prefix_ of function_name.
+        size_t end_of_number;
+        size_t number=std::stol(potential_number,&end_of_number);
+        if (end_of_number==potential_number.size()) // A proper number was read.
+        {
+          if (number>=index)
+          {
+            index=number+1;
+          }
+        }
+      }
+
+    }
+    return index;
+  }
+
   void initialise_administration()
   {
     // Explict initialisation on first use. This first

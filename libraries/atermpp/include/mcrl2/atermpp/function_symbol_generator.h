@@ -14,7 +14,7 @@
 
 #include <cassert>
 #include <cctype>
-// #include "mcrl2/atermpp/aterm_string.h"
+#include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace atermpp {
@@ -23,28 +23,28 @@ namespace atermpp {
 class function_symbol_generator
 {
   protected:
-    std::string prefix;
-    std::size_t index;
+    std::string m_prefix;
+    std::size_t m_index;
 
   public:
     /// \brief Constructor
     /// \param The prefix of the generated generated strings
     /// \pre The prefix may not be empty, and it may not have trailing digits
-    function_symbol_generator(const std::string& prefix_)
-      : prefix(prefix_)
+    function_symbol_generator(const std::string& prefix)
+      : m_prefix(prefix)
     {
-      assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
+      assert(!m_prefix.empty() && !(std::isdigit(*m_prefix.rbegin())));
       
-      // set index such that no function symbol exists with the name 'prefix + std::to_string(n)'
-      // for all values n >= index
-      index = get_sufficiently_large_postfix_index(prefix_);
+      // set m_index such that no function symbol exists with the name 'prefix + std::to_string(n)'
+      // for all values n >= m_index
+      m_index = detail::get_sufficiently_large_postfix_index(m_prefix);
     }
 
     /// \brief Generates a unique function symbol with the given prefix followed by a number.
     function_symbol operator()(std::size_t arity = 0)
     {
       // TODO: this code can probably be optimized
-      return function_symbol(prefix + mcrl2::utilities::number2string(index++), arity);
+      return function_symbol(m_prefix + mcrl2::utilities::number2string(m_index++), arity);
     }
 };
 
