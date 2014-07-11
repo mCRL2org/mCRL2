@@ -448,6 +448,17 @@ class stategraph_equation: public pbes_equation
       }
       return out.str();
     }
+
+    data::data_expression_list project(const data::data_expression_list& e) const
+    {
+      assert(e.size() == m_parameters.size());
+      data::data_expression_vector result;
+      for (auto i = m_data_parameter_indices.begin(); i != m_data_parameter_indices.end(); ++i)
+      {
+        result.push_back(nth_element(e, *i));
+      }
+      return data::data_expression_list(result.begin(), result.end());
+    }
 };
 
 // explicit representation of a pbes in STATEGRAPH format

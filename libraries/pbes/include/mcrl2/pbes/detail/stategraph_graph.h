@@ -127,6 +127,23 @@ class GCFP_graph
     {
       return &u - &(m_vertices.front());
     }
+
+    // \pre (X, n) must be a vertex of the graph
+    // Returns an index m such that (X, n) is related to (Y, m), or data::undefined_index() if no such m exists.
+    std::size_t related_parameter_index(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y)
+    {
+      GCFP_vertex& u = find_vertex(X, n);
+      auto const& neighbors = u.neighbors();
+      for (auto i = neighbors.begin(); i != neighbors.end(); ++i)
+      {
+        auto const& v = **i;
+        if (v.name() == Y)
+        {
+          return v.index();
+        }
+      }
+      return data::undefined_index();
+    }
 };
 
 // This class is used to add labeled edges to a vertex
@@ -559,7 +576,7 @@ class global_control_flow_graph_vertex: public add_edges<global_control_flow_gra
 {
   protected:
     core::identifier_string m_name;
-    data::data_expression_vector m_values;
+    data::data_expression_list m_values;
 
   public:
     using add_edges::incoming_edges;
@@ -569,7 +586,7 @@ class global_control_flow_graph_vertex: public add_edges<global_control_flow_gra
     using add_edges::insert_incoming_edge;
     using add_edges::remove_edges;
 
-    global_control_flow_graph_vertex(const core::identifier_string& name, const data::data_expression_vector& values)
+    global_control_flow_graph_vertex(const core::identifier_string& name, const data::data_expression_list& values)
       : m_name(name), m_values(values)
     {}
 
@@ -578,9 +595,14 @@ class global_control_flow_graph_vertex: public add_edges<global_control_flow_gra
       return m_name;
     }
 
-    const data::data_expression_vector& values() const
+    const data::data_expression_list& values() const
     {
       return m_values;
+    }
+
+    bool operator==(const global_control_flow_graph_vertex& other) const
+    {
+      return m_name == other.m_name && m_values == other.m_values;
     }
 };
 

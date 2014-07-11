@@ -178,38 +178,92 @@ class stategraph_global_algorithm: public stategraph_algorithm
       return result;
     }
 
-//    bool enabled_edge()
-//    {
-//      bool result = true;
-//    }
-//
-//    void compute_global_control_flow_graph_new()
-//    {
-//      using utilities::detail::pick_element;
-//
-//      mCRL2log(log::debug, "stategraph") << "--- compute_global_control_flow_graph_new" << std::endl;
-//      global_control_flow_graph V;
-//      std::set<const GCFP_vertex*> todo; // T
-//
-//      // initialize todo
-//
-//      while (!todo.empty())
-//      {
-//        // u = Y(e)
-//        auto const& u = *pick_element(todo);
-//        auto const& Y = u.name();
-//        auto const& e = u.value();
-//        auto const& eq_Y = *find_equation(m_pbes, Y);
-//        auto const& predvars = eq_Y.predicate_variables();
-//
-//        mCRL2log(log::debug1, "stategraph") << "choose todo element Y(e) = " << u << std::endl;
-//
-//        for (auto i = predvars.begin(); i != predvars.end(); ++i)
-//        {
-//        }
-//        // V.insert_vertex(u);
-//      }
-//    }
+    // returns true if there is an edge from u = (Y, e) to v = (Z, ?) with label i
+    bool enabled_edge(const data::data_expression_list& e, const stategraph_equation& eq_Z, const predicate_variable& Z)
+    {
+      auto const& dpZ = eq_Z.data_parameter_indices();
+      for (auto j = dpZ.begin(); j != dpZ.end(); ++j)
+      {
+        auto k = Z.source().find(*j);
+        if (k != Z.source().end() && k->second != nth_element(e, *j))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    const global_control_flow_graph_vertex& compute_vertex(global_control_flow_graph& G, const core::identifier_string& Y, const data::data_expression_list& e, const stategraph_equation& eq_Z, const predicate_variable& Zf)
+    {
+      data::data_expression_vector f;
+      auto const& Z = eq_Z.variable().name();
+      auto const& dpZ = eq_Z.data_parameter_indices();
+      for (auto j = dpZ.begin(); j != dpZ.end(); ++j)
+      {
+        auto k = Zf.target().find(*j);
+        if (k != Zf.target().end())
+        {
+          f.push_back(k->second);
+        }
+        else
+        {
+          std::size_t l = m_GCFP_graph.related_parameter_index(Z, *j, Y);
+          assert(l != data::undefined_index());
+          f.push_back(nth_element(e, l));
+        }
+      }
+      return G.insert_vertex(global_control_flow_graph_vertex(Zf.variable().name(), data::data_expression_list(f.begin(), f.end())));
+    }
+
+    void compute_global_control_flow_graph_new()
+    {
+      using utilities::detail::contains;
+      using utilities::detail::pick_element;
+
+      mCRL2log(log::debug, "stategraph") << "--- compute_global_control_flow_graph_new" << std::endl;
+      global_control_flow_graph G;
+      std::set<const global_control_flow_graph_vertex*> todo;
+      std::set<const global_control_flow_graph_vertex*> done;
+
+      // initialize todo
+      auto const& Xinit = m_pbes.initial_state();
+      auto const& X = Xinit.name();
+      auto const& eq_X = *find_equation(m_pbes, X);
+      auto einit = eq_X.project(Xinit.parameters());
+      auto const& u = G.insert_vertex(global_control_flow_graph_vertex(X, einit));
+      todo.insert(&u);
+      done.insert(&u);
+
+      while (!todo.empty())
+      {
+        // u = (Y, e)
+        auto const& u = *pick_element(todo);
+        auto const& Y = u.name();
+        auto const& e = u.values();
+        auto const& eq_Y = *find_equation(m_pbes, Y);
+        auto const& predvars = eq_Y.predicate_variables();
+
+        mCRL2log(log::debug1, "stategraph") << "choose todo element Y(e) = " << u << std::endl;
+
+        for (std::size_t i = 0; i < predvars.size(); i++)
+        {
+          auto const& Zf = predvars[i];
+          auto const& Z = Zf.variable().name();
+          auto const& eq_Z = *find_equation(m_pbes, Z);
+          if (enabled_edge(e, eq_Z, Zf))
+          {
+            const global_control_flow_graph_vertex& v = compute_vertex(G, Y, e, eq_Z, Zf);
+            G.insert_edge(u, i, v);
+            if (!contains(done, &v))
+            {
+              todo.insert(&v);
+              done.insert(&v);
+            }
+          }
+        }
+      }
+      mCRL2log(log::debug, "stategraph") << "new global control flow graph = \n" << G << std::endl;
+    }
 
   public:
     stategraph_global_algorithm(const pbes& p, const pbesstategraph_options& options)
@@ -225,6 +279,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
       finish_timer("compute_global_control_flow_graph");
       mCRL2log(log::verbose) << "Computed global control flow graph" << std::endl;
       mCRL2log(log::debug) << m_control_flow_graph.print(print_map());
+      // compute_global_control_flow_graph_new();
     }
 };
 
