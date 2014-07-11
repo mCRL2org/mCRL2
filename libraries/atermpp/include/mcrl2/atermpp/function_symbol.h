@@ -25,6 +25,8 @@ class function_symbol
 {
 
   friend size_t detail::addressf(const function_symbol& t);
+  friend class function_symbol_generator;
+
   protected:
     const detail::_function_symbol* m_function_symbol;
 
@@ -46,6 +48,13 @@ class function_symbol
         free_function_symbol();
       }
     }
+
+    /// A special function symbol constructor for use in the function symbol
+    /// generator. This constructor assumes that the name and arity combination
+    /// does not exist yet, and that the prefix and number combination is neatly
+    /// recoreded in the appropriate number generator as being used. Furthermore,
+    /// it takes a pointer to a char* to represent its string.
+    function_symbol(const char* name_begin, const char* name_end, const size_t arity_);
 
 
   public:

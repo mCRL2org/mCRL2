@@ -25,33 +25,45 @@ class function_symbol_generator
   protected:
     std::string m_prefix;
     size_t m_index;
+    char* string_buffer;
 
   public:
     /// \brief Constructor
     /// \param The prefix of the generated generated strings
     /// \pre The prefix may not be empty, and it may not have trailing digits
     function_symbol_generator(const std::string& prefix)
-      : m_prefix(prefix)
+      : m_prefix(prefix),
+        string_buffer(new char [prefix.size()+std::numeric_limits<std::size_t>::digits10 + 1])
     {
-      assert(!m_prefix.empty() && !(std::isdigit(*m_prefix.rbegin())));
+      assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
+      
+      size_t j=0;
+      for(std::string::const_iterator i=prefix.begin(); i!=prefix.end(); ++i, ++j)
+      {
+        string_buffer[j]= *i;
+      }
+      string_buffer[j]='\0';
       
       // set m_index such that no function symbol exists with the name 'prefix + std::to_string(n)'
       // for all values n >= m_index
-      m_index = detail::get_sufficiently_large_postfix_index(m_prefix);
+      m_index = detail::get_sufficiently_large_postfix_index(prefix);
       detail::index_increaser increase_m_index(m_index);
-      detail::register_functon_symbol_prefix_string(m_prefix,increase_m_index);
+      detail::register_function_symbol_prefix_string(prefix,increase_m_index);
     }
 
     ~function_symbol_generator()
     {
-      detail::deregister_functon_symbol_prefix_string(m_prefix);
+      detail::deregister_function_symbol_prefix_string(m_prefix);
+      delete string_buffer;
     }
 
     /// \brief Generates a unique function symbol with the given prefix followed by a number.
     function_symbol operator()(std::size_t arity = 0)
     {
-      // TODO: this code can probably be optimized
-      return function_symbol(m_prefix + mcrl2::utilities::number2string(m_index++), arity);
+      // Put the number m_index after the prefix in the string buffer.
+      char* end = mcrl2::utilities::number2string(m_index,&string_buffer[m_prefix.size()]);
+      m_index++;
+      return function_symbol(&string_buffer[0],end,arity);
     }
 };
 

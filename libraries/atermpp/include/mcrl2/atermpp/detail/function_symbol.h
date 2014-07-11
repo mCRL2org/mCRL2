@@ -11,6 +11,7 @@ const size_t FUNCTION_SYMBOL_BLOCK_MASK=FUNCTION_SYMBOL_BLOCK_SIZE-1;
 namespace atermpp
 {
 class function_symbol;
+class function_symbol_generator;
 
 namespace detail
 {
@@ -73,13 +74,12 @@ struct index_increaser
   }
 };
 
-
 // register a prefix for a function symbol, such that the index of this prefix can be increased when
 // some other process makes a function symbol with the same prefix.
-extern void register_functon_symbol_prefix_string(std::string& prefix, index_increaser& increase_index);
+extern void register_function_symbol_prefix_string(const std::string& prefix, index_increaser& increase_index);
 
 // deregister a prefix for a function symbol.
-extern void deregister_functon_symbol_prefix_string(std::string& prefix);
+extern void deregister_function_symbol_prefix_string(const std::string& prefix);
 
 } // namespace detail
 } // namespace atermpp
