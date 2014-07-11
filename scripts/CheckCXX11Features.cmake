@@ -137,6 +137,7 @@ cxx11_check_feature("add_reference" HAS_CXX11_ADD_REFERENCE False)
 cxx11_check_feature("enable_if" HAS_CXX11_ENABLE_IF True)
 cxx11_check_feature("unary_function" HAS_CXX11_UNARY_FUNCTION False)
 cxx11_check_feature("next" HAS_CXX11_NEXT False)
+cxx11_check_feature("integral_constant" HAS_CXX11_INTEGRAL_CONSTANT False)
 
 if(HAS_CXX11_NOEXCEPT)
   add_definitions(-DMCRL2_HAVE_NOEXCEPT)
