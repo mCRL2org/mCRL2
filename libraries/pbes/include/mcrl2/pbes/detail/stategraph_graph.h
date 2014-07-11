@@ -172,6 +172,12 @@ class add_edges
       }
       return out.str();
     }
+
+    void remove_edges()
+    {
+      m_outgoing_edges.clear();
+      m_incoming_edges.clear();
+    }
 };
 
 // Vertex in a local control flow graph.
@@ -187,6 +193,13 @@ class local_control_flow_graph_vertex: public LCFP_vertex, public add_edges<loca
     mutable std::map<std::pair<std::size_t, data::variable>, std::set<data::variable> > m_marking_update;
 
   public:
+    using add_edges::incoming_edges;
+    using add_edges::outgoing_edges;
+    using add_edges::print_outgoing_edges;
+    using add_edges::insert_outgoing_edge;
+    using add_edges::insert_incoming_edge;
+    using add_edges::remove_edges;
+
     local_control_flow_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable, const data::data_expression& value)
       : LCFP_vertex(name, index, variable), m_value(value)
     {}
@@ -265,37 +278,40 @@ bool operator<(const local_control_flow_graph_vertex& u, const local_control_flo
 }
 
 template <typename Vertex>
-struct control_flow_graph1
+struct control_flow_graph
 {
   std::set<Vertex> vertices;
 
   // an index for the vertices in the control flow graph with a given name
-  std::map<core::identifier_string, std::set<const Vertex*> > m_stategraph_index;
+  std::map<core::identifier_string, std::set<const Vertex*> > m_graph_index;
 
-  const Vertex& find_vertex(const Vertex& u) const;
-
-  // finds the vertex with given name and index
-  const Vertex& find_vertex(const core::identifier_string& X, std::size_t p) const;
-
-  // finds the vertex with given name
-  const Vertex& find_vertex(const core::identifier_string& X) const;
+  const Vertex& find_vertex(const Vertex& u) const
+  {
+    auto i = vertices.find(u);
+    if (i == vertices.end())
+    {
+      std::cout << "could not find vertex " << u << " in the graph\n" << *this << std::endl;
+      throw mcrl2::runtime_error("control_flow_graph::find_vertex: vertex not found!");
+    }
+    return *i;
+  }
 
   void compute_index()
   {
-    m_stategraph_index.clear();
+    m_graph_index.clear();
 
     // create an index for the vertices in the control flow graph with a given name
     for (auto i = vertices.begin(); i != vertices.end(); ++i)
     {
       const Vertex& u = *i;
-      m_stategraph_index[u.name()].insert(&u);
+      m_graph_index[u.name()].insert(&u);
     }
   }
 
   const std::set<const Vertex*>& index(const core::identifier_string& X) const
   {
-    auto i = m_stategraph_index.find(X);
-    assert(i != m_stategraph_index.end());
+    auto i = m_graph_index.find(X);
+    assert(i != m_graph_index.end());
     return i->second;
   }
 
@@ -312,17 +328,18 @@ struct control_flow_graph1
   }
 
   /// \brief Default constructor
-  control_flow_graph1()
+  control_flow_graph()
   {}
 
   /// \brief Copy constructor N.B. The implementation is rather inefficient!
-  control_flow_graph1(const control_flow_graph1<Vertex>& other)
+  control_flow_graph(const control_flow_graph<Vertex>& other)
   {
     // copy the vertices, but not the neighbors
     for (auto i = other.vertices.begin(); i != other.vertices.end(); ++i)
     {
-      auto const& u = *i;
-      vertices.insert(Vertex(u.name(), u.index(), u.variable(), u.value()));
+      auto u = *i;
+      u.remove_edges();
+      vertices.insert(u);
     }
 
     // reconstruct the incoming and outgoing edges
@@ -424,32 +441,6 @@ struct control_flow_graph1
     }
   }
 
-  // Inserts an edge between the vertex u and the vertex v = (Y, k1, e1).
-  void insert_edge(std::set<const Vertex*>& todo,
-                   const stategraph_pbes& p,
-                   const Vertex& u,
-                   const core::identifier_string& Y,
-                   std::size_t k1,
-                   const data::data_expression& e1,
-                   std::size_t edge_label
-                  )
-  {
-    mCRL2log(log::debug1, "stategraph") << " insert_edge" << std::endl;
-    const stategraph_equation& eq_Y = *find_equation(p, Y);
-    const data::variable& d1 = (k1 == data::undefined_index() ? data::undefined_variable() : eq_Y.parameters()[k1]);
-
-    std::size_t size = vertices.size();
-    const Vertex& v = insert_vertex(Vertex(Y, k1, d1, e1));
-    if (vertices.size() != size)
-    {
-      todo.insert(&v);
-    }
-
-    mCRL2log(log::debug1, "stategraph") << " u.outgoing_edges() = " << u.print_outgoing_edges() << std::endl;
-    insert_edge(u, edge_label, v);
-    // self_check();
-  }
-
   // Returns true if there is an edge X(e) -- label --> Y(f) in the graph, for some e, f, Y.
   bool has_label(const core::identifier_string& X, std::size_t label) const
   {
@@ -470,6 +461,61 @@ struct control_flow_graph1
     }
     return false;
   }
+};
+
+template <typename Vertex>
+std::ostream& operator<<(std::ostream& out, const control_flow_graph<Vertex>& G)
+{
+  for (auto i = G.vertices.begin(); i != G.vertices.end(); ++i)
+  {
+    out << "vertex " << *i << " outgoing_edges: " << i->print_outgoing_edges() << std::endl;
+  }
+  return out;
+}
+
+struct local_control_flow_graph: public control_flow_graph<local_control_flow_graph_vertex>
+{
+  typedef control_flow_graph<local_control_flow_graph_vertex> super;
+
+  using super::find_vertex;
+  using super::has_label;
+  using super::insert_edge;
+  using super::insert_vertex;
+
+  /// \brief Default constructor
+  local_control_flow_graph()
+  {}
+
+  /// \brief Copy constructor N.B. The implementation is rather inefficient!
+  local_control_flow_graph(const local_control_flow_graph& other)
+    : super(other)
+  {}
+
+  // Inserts an edge between the vertex u and the vertex v = (Y, k1, e1).
+  void insert_edge(std::set<const local_control_flow_graph_vertex*>& todo,
+                   const stategraph_pbes& p,
+                   const local_control_flow_graph_vertex& u,
+                   const core::identifier_string& Y,
+                   std::size_t k1,
+                   const data::data_expression& e1,
+                   std::size_t edge_label
+                  )
+  {
+    mCRL2log(log::debug1, "stategraph") << " insert_edge" << std::endl;
+    const stategraph_equation& eq_Y = *find_equation(p, Y);
+    const data::variable& d1 = (k1 == data::undefined_index() ? data::undefined_variable() : eq_Y.parameters()[k1]);
+
+    std::size_t size = vertices.size();
+    const local_control_flow_graph_vertex& v = insert_vertex(local_control_flow_graph_vertex(Y, k1, d1, e1));
+    if (vertices.size() != size)
+    {
+      todo.insert(&v);
+    }
+
+    mCRL2log(log::debug1, "stategraph") << " u.outgoing_edges() = " << u.print_outgoing_edges() << std::endl;
+    insert_edge(u, edge_label, v);
+    // self_check();
+  }
 
   std::string print_marking() const
   {
@@ -480,64 +526,88 @@ struct control_flow_graph1
     }
     return out.str();
   }
+
+  // finds the vertex with given name and index
+  const local_control_flow_graph_vertex& find_vertex(const core::identifier_string& X, std::size_t p) const
+  {
+    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    {
+      if (i->name() == X && i->index() == p)
+      {
+        return *i;
+      }
+    }
+    throw mcrl2::runtime_error("stategraph_global_graph::find_vertex: vertex not found!");
+  }
+
+  // finds the vertex with given name
+  const local_control_flow_graph_vertex& find_vertex(const core::identifier_string& X) const
+  {
+    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    {
+      if (i->name() == X)
+      {
+        return *i;
+      }
+    }
+    throw mcrl2::runtime_error("stategraph_global_graph::find_vertex: vertex not found!");
+  }
 };
-
-template <typename Vertex>
-std::ostream& operator<<(std::ostream& out, const control_flow_graph1<Vertex>& G)
-{
-  for (auto i = G.vertices.begin(); i != G.vertices.end(); ++i)
-  {
-    out << "vertex " << *i << " outgoing_edges: " << i->print_outgoing_edges() << std::endl;
-  }
-  return out;
-}
-
-template <typename Vertex>
-const Vertex& control_flow_graph1<Vertex>::find_vertex(const core::identifier_string& X, std::size_t p) const
-{
-  for (auto i = vertices.begin(); i != vertices.end(); ++i)
-  {
-    if (i->name() == X && i->index() == p)
-    {
-      return *i;
-    }
-  }
-  throw mcrl2::runtime_error("control_flow_graph::find_vertex: vertex not found!");
-}
-
-template <typename Vertex>
-const Vertex& control_flow_graph1<Vertex>::find_vertex(const core::identifier_string& X) const
-{
-  for (auto i = vertices.begin(); i != vertices.end(); ++i)
-  {
-    if (i->name() == X)
-    {
-      return *i;
-    }
-  }
-  throw mcrl2::runtime_error("control_flow_graph::find_vertex: vertex not found!");
-}
-
-template <typename Vertex>
-const Vertex& control_flow_graph1<Vertex>::find_vertex(const Vertex& u) const
-{
-  auto i = vertices.find(u);
-  if (i == vertices.end())
-  {
-    std::cout << "could not find vertex " << u << " in the graph\n" << *this << std::endl;
-    throw mcrl2::runtime_error("control_flow_graph::find_vertex: vertex not found!");
-  }
-  return *i;
-}
-
-typedef control_flow_graph1<local_control_flow_graph_vertex> local_control_flow_graph;
 
 // Vertex in the global control flow graph.
 class global_control_flow_graph_vertex: public add_edges<global_control_flow_graph_vertex>
 {
+  protected:
+    core::identifier_string m_name;
+    data::data_expression_vector m_values;
+
+  public:
+    using add_edges::incoming_edges;
+    using add_edges::outgoing_edges;
+    using add_edges::print_outgoing_edges;
+    using add_edges::insert_outgoing_edge;
+    using add_edges::insert_incoming_edge;
+    using add_edges::remove_edges;
+
+    global_control_flow_graph_vertex(const core::identifier_string& name, const data::data_expression_vector& values)
+      : m_name(name), m_values(values)
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return m_name;
+    }
+
+    const data::data_expression_vector& values() const
+    {
+      return m_values;
+    }
 };
 
-typedef control_flow_graph1<global_control_flow_graph_vertex> global_control_flow_graph;
+inline
+bool operator<(const global_control_flow_graph_vertex& x, const global_control_flow_graph_vertex& y)
+{
+  return x.name() < y.name() || (x.name() == y.name() && x.values() < y.values());
+}
+
+std::ostream& operator<<(std::ostream& out, const global_control_flow_graph_vertex& u)
+{
+  return out << "vertex " << u.name() << " " << core::detail::print_list(u.values());
+}
+
+struct global_control_flow_graph: public control_flow_graph<global_control_flow_graph_vertex>
+{
+  typedef control_flow_graph<global_control_flow_graph_vertex> super;
+
+  /// \brief Default constructor
+  global_control_flow_graph()
+  {}
+
+  /// \brief Copy constructor N.B. The implementation is rather inefficient!
+  global_control_flow_graph(const global_control_flow_graph& other)
+    : super(other)
+  {}
+};
 
 } // namespace detail
 

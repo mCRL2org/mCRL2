@@ -29,11 +29,11 @@ class stategraph_global_algorithm: public stategraph_algorithm
 {
   public:
     typedef stategraph_algorithm super;
-    typedef control_flow_graph::vertex_iterator vertex_iterator;
+    typedef stategraph_global_graph::vertex_iterator vertex_iterator;
 
   protected:
     // the control flow graph
-    control_flow_graph m_control_flow_graph;
+    stategraph_global_graph m_control_flow_graph;
 
     // removes parameter values that do not correspond to a control flow parameter
     propositional_variable_instantiation project(const propositional_variable_instantiation& x) const

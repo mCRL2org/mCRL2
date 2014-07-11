@@ -52,7 +52,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       return std::set<data::variable>(d_X.begin(), d_X.end());
     }
 
-    void compute_global_control_flow_marking(control_flow_graph& G)
+    void compute_global_control_flow_marking(stategraph_global_graph& G)
     {
       mCRL2log(log::debug, "stategraph") << "--- compute initial marking ---" << std::endl;
       // initialization

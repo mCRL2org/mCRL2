@@ -159,7 +159,7 @@ std::string stategraph_edge::print() const
   return out.str();
 }
 
-struct control_flow_graph
+struct stategraph_global_graph
 {
   // vertices of the control flow graph
   std::map<propositional_variable_instantiation, stategraph_vertex> m_control_vertices;
@@ -224,10 +224,10 @@ struct control_flow_graph
     }
   }
 
-  control_flow_graph()
+  stategraph_global_graph()
   {}
 
-  control_flow_graph(const control_flow_graph& other)
+  stategraph_global_graph(const stategraph_global_graph& other)
     : m_control_vertices(other.m_control_vertices)
   {
     // reset the pointers
