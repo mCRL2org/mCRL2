@@ -201,6 +201,8 @@ class add_edges
 class local_control_flow_graph_vertex: public LCFP_vertex, public add_edges<local_control_flow_graph_vertex>
 {
   protected:
+    typedef add_edges<local_control_flow_graph_vertex> super_t;
+
     data::data_expression m_value;
     mutable std::set<data::variable> m_marking; // used in the reset variables procedure
 
@@ -210,12 +212,12 @@ class local_control_flow_graph_vertex: public LCFP_vertex, public add_edges<loca
     mutable std::map<std::pair<std::size_t, data::variable>, std::set<data::variable> > m_marking_update;
 
   public:
-    using add_edges::incoming_edges;
-    using add_edges::outgoing_edges;
-    using add_edges::print_outgoing_edges;
-    using add_edges::insert_outgoing_edge;
-    using add_edges::insert_incoming_edge;
-    using add_edges::remove_edges;
+    using super_t::incoming_edges;
+    using super_t::outgoing_edges;
+    using super_t::print_outgoing_edges;
+    using super_t::insert_outgoing_edge;
+    using super_t::insert_incoming_edge;
+    using super_t::remove_edges;
 
     local_control_flow_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable, const data::data_expression& value)
       : LCFP_vertex(name, index, variable), m_value(value)
