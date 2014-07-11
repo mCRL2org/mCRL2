@@ -78,9 +78,9 @@ class stategraph_global_algorithm: public stategraph_algorithm
       size_t j = 0;
       for(auto ai = PV.parameters().begin(); ai != PV.parameters().end(); ++ai)
       {
-        const std::map<std::size_t, data::data_expression>& dest = eqn.predicate_variables()[i].dest();
-        auto dij = dest.find(j);
-        if(dij != dest.end())
+        const std::map<std::size_t, data::data_expression>& target = eqn.predicate_variables()[i].target();
+        auto dij = target.find(j);
+        if(dij != target.end())
         {
           PV_args.push_back(dij->second);
         }

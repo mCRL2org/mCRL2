@@ -39,7 +39,7 @@ class predicate_variable
     pbes_expression m_guard;
     data::rewriter::substitution_type m_sigma;
     std::map<std::size_t, data::data_expression> m_source; // source[j] = e <=> source(X, i, j) = e
-    std::map<std::size_t, data::data_expression> m_dest;   // dest[j] = c   <=> dest(X, i, j) = c
+    std::map<std::size_t, data::data_expression> m_dest;   // target[j] = c   <=> target(X, i, j) = c
     std::map<std::size_t, std::size_t> m_copy;             // copy[j] = k   <=> copy(X, i, j) = k
     std::set<std::size_t> m_used;                          // j \in used    <=> used(X, i, j)
     std::set<std::size_t> m_changed;                       // j \in changed <=> changed(X, i, j)
@@ -80,7 +80,7 @@ class predicate_variable
       return m_source;
     }
 
-    const std::map<std::size_t, data::data_expression>& dest() const
+    const std::map<std::size_t, data::data_expression>& target() const
     {
       return m_dest;
     }
@@ -430,11 +430,11 @@ class stategraph_equation: public pbes_equation
         // sigma
         out << "        sigma = " << m_predvars[i].sigma() << std::endl;
 
-        // dest
-        const std::map<std::size_t, data::data_expression>& dest = m_predvars[i].dest();
-        for (auto j = dest.begin(); j != dest.end(); ++j)
+        // target
+        const std::map<std::size_t, data::data_expression>& target = m_predvars[i].target();
+        for (auto j = target.begin(); j != target.end(); ++j)
         {
-          out << "        dest(" << X << ", " << i << ", " << j->first << ") = " << j->second << std::endl;
+          out << "        target(" << X << ", " << i << ", " << j->first << ") = " << j->second << std::endl;
         }
 
         // copy
