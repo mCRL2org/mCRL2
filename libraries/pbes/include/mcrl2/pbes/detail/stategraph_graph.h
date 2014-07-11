@@ -88,6 +88,9 @@ class GCFP_vertex: public LCFP_vertex
     }
 };
 
+class GCFP_graph;
+std::ostream& operator<<(std::ostream& out, const GCFP_graph& G);
+
 class GCFP_graph
 {
   protected:
@@ -120,7 +123,9 @@ class GCFP_graph
           return *i;
         }
       }
-      throw mcrl2::runtime_error("vertex not found in GCFP graph");
+      std::ostringstream out;
+      out << "vertex (" << X << ", " << n << ") not found in GCFP graph";
+      throw mcrl2::runtime_error(out.str());
     }
 
     std::size_t index(const GCFP_vertex& u) const
@@ -145,6 +150,17 @@ class GCFP_graph
       return data::undefined_index();
     }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const GCFP_graph& G)
+{
+  auto const& V = G.vertices();
+  for (auto i = V.begin(); i != V.end(); ++i)
+  {
+    out << "vertex: " << *i << std::endl;
+  }
+  return out;
+}
 
 // This class is used to add labeled edges to a vertex
 template <typename Vertex>
@@ -201,7 +217,7 @@ class add_edges
 class local_control_flow_graph_vertex: public LCFP_vertex, public add_edges<local_control_flow_graph_vertex>
 {
   protected:
-    typedef add_edges<local_control_flow_graph_vertex> super_t;
+    typedef add_edges<local_control_flow_graph_vertex> super;
 
     data::data_expression m_value;
     mutable std::set<data::variable> m_marking; // used in the reset variables procedure
@@ -212,12 +228,12 @@ class local_control_flow_graph_vertex: public LCFP_vertex, public add_edges<loca
     mutable std::map<std::pair<std::size_t, data::variable>, std::set<data::variable> > m_marking_update;
 
   public:
-    using super_t::incoming_edges;
-    using super_t::outgoing_edges;
-    using super_t::print_outgoing_edges;
-    using super_t::insert_outgoing_edge;
-    using super_t::insert_incoming_edge;
-    using super_t::remove_edges;
+    using super::incoming_edges;
+    using super::outgoing_edges;
+    using super::print_outgoing_edges;
+    using super::insert_outgoing_edge;
+    using super::insert_incoming_edge;
+    using super::remove_edges;
 
     local_control_flow_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable, const data::data_expression& value)
       : LCFP_vertex(name, index, variable), m_value(value)
@@ -577,16 +593,17 @@ struct local_control_flow_graph: public control_flow_graph<local_control_flow_gr
 class global_control_flow_graph_vertex: public add_edges<global_control_flow_graph_vertex>
 {
   protected:
+    typedef add_edges<global_control_flow_graph_vertex> super;
     core::identifier_string m_name;
     data::data_expression_list m_values;
 
   public:
-    using add_edges::incoming_edges;
-    using add_edges::outgoing_edges;
-    using add_edges::print_outgoing_edges;
-    using add_edges::insert_outgoing_edge;
-    using add_edges::insert_incoming_edge;
-    using add_edges::remove_edges;
+    using super::incoming_edges;
+    using super::outgoing_edges;
+    using super::print_outgoing_edges;
+    using super::insert_outgoing_edge;
+    using super::insert_incoming_edge;
+    using super::remove_edges;
 
     global_control_flow_graph_vertex(const core::identifier_string& name, const data::data_expression_list& values)
       : m_name(name), m_values(values)
