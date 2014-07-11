@@ -1,5 +1,5 @@
-#include <iostream> // std::cout
-#include <type_traits> // std::is_same
+#include <iostream> 
+#include <type_traits> 
  
 template <typename T>
 struct increment
