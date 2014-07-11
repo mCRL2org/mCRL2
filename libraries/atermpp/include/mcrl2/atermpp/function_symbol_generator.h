@@ -54,7 +54,7 @@ class function_symbol_generator
     ~function_symbol_generator()
     {
       detail::deregister_function_symbol_prefix_string(m_prefix);
-      delete string_buffer;
+      delete[] string_buffer;
     }
 
     /// \brief Generates a unique function symbol with the given prefix followed by a number.
