@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -12,8 +12,10 @@
 #ifndef MCRL2_ATERMPP_FUNCTION_SYMBOL_GENERATOR_H
 #define MCRL2_ATERMPP_FUNCTION_SYMBOL_GENERATOR_H
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
+#include <memory>
 #include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -25,7 +27,7 @@ class function_symbol_generator
   protected:
     std::string m_prefix;
     size_t m_index;
-    char* string_buffer;
+    std::unique_ptr<char[]> m_string_buffer;
 
   public:
     /// \brief Constructor
@@ -33,16 +35,12 @@ class function_symbol_generator
     /// \pre The prefix may not be empty, and it may not have trailing digits
     function_symbol_generator(const std::string& prefix)
       : m_prefix(prefix),
-        string_buffer(new char [prefix.size()+std::numeric_limits<std::size_t>::digits10 + 1])
+        m_string_buffer(new char[prefix.size() + std::numeric_limits<std::size_t>::digits10 + 1])
     {
       assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
       
-      size_t j=0;
-      for(std::string::const_iterator i=prefix.begin(); i!=prefix.end(); ++i, ++j)
-      {
-        string_buffer[j]= *i;
-      }
-      string_buffer[j]='\0';
+      std::copy(prefix.begin(), prefix.end(), &m_string_buffer[0]);
+      m_string_buffer[prefix.size()] = '\0';
       
       // set m_index such that no function symbol exists with the name 'prefix + std::to_string(n)'
       // for all values n >= m_index
@@ -54,16 +52,15 @@ class function_symbol_generator
     ~function_symbol_generator()
     {
       detail::deregister_function_symbol_prefix_string(m_prefix);
-      delete[] string_buffer;
     }
 
     /// \brief Generates a unique function symbol with the given prefix followed by a number.
     function_symbol operator()(std::size_t arity = 0)
     {
       // Put the number m_index after the prefix in the string buffer.
-      char* end = mcrl2::utilities::number2string(m_index,&string_buffer[m_prefix.size()]);
+      char* end = mcrl2::utilities::number2string(m_index, &m_string_buffer[m_prefix.size()]);
       m_index++;
-      return function_symbol(&string_buffer[0],end,arity);
+      return function_symbol(&m_string_buffer[0], end, arity);
     }
 };
 
