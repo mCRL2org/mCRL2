@@ -41,6 +41,46 @@ bool is_valid_function_symbol(const detail::_function_symbol* f)
 // for all values n >= index
 extern size_t get_sufficiently_large_postfix_index(const std::string& prefix_);
 
+// Ugly class, to be replaced by a lambda function.
+struct index_increaser
+{
+  size_t* m_index;
+
+  index_increaser()
+   : m_index(NULL)
+  {}
+
+  index_increaser(size_t& index)
+   : m_index(&index)
+  {}
+
+  index_increaser(const index_increaser& other)
+   : m_index(other.m_index)
+  {}
+
+  index_increaser& operator=(const index_increaser& other)
+  {
+    m_index=other.m_index;
+    return *this;
+  }
+
+  void operator ()(size_t new_index)
+  {
+    if (*m_index<new_index)
+    {
+      *m_index=new_index;
+    }
+  }
+};
+
+
+// register a prefix for a function symbol, such that the index of this prefix can be increased when
+// some other process makes a function symbol with the same prefix.
+extern void register_functon_symbol_prefix_string(std::string& prefix, index_increaser& increase_index);
+
+// deregister a prefix for a function symbol.
+extern void deregister_functon_symbol_prefix_string(std::string& prefix);
+
 } // namespace detail
 } // namespace atermpp
 

@@ -24,7 +24,7 @@ class function_symbol_generator
 {
   protected:
     std::string m_prefix;
-    std::size_t m_index;
+    size_t m_index;
 
   public:
     /// \brief Constructor
@@ -38,6 +38,13 @@ class function_symbol_generator
       // set m_index such that no function symbol exists with the name 'prefix + std::to_string(n)'
       // for all values n >= m_index
       m_index = detail::get_sufficiently_large_postfix_index(m_prefix);
+      detail::index_increaser increase_m_index(m_index);
+      detail::register_functon_symbol_prefix_string(m_prefix,increase_m_index);
+    }
+
+    ~function_symbol_generator()
+    {
+      detail::deregister_functon_symbol_prefix_string(m_prefix);
     }
 
     /// \brief Generates a unique function symbol with the given prefix followed by a number.

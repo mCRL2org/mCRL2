@@ -91,6 +91,12 @@ namespace detail
     return false;
   }
 
+  // A map that records for each prefix a function that must be called to set the
+  // postfix number to a sufficiently high number if a function symbol with the same
+  // prefix string is registered.
+  
+  static std::map < std::string, detail::index_increaser> prefix_to_register_function_map;
+
   size_t get_sufficiently_large_postfix_index(const std::string& prefix_)
   {
     size_t index=0;
@@ -101,19 +107,40 @@ namespace detail
       {
         std::string potential_number=function_name.substr(prefix_.size()); // Get the trailing string after prefix_ of function_name.
         size_t end_of_number;
-        size_t number=std::stol(potential_number,&end_of_number);
-        if (end_of_number==potential_number.size()) // A proper number was read.
+        try
         {
-          if (number>=index)
+          size_t number=std::stol(potential_number,&end_of_number);
+          if (end_of_number==potential_number.size()) // A proper number was read.
           {
-            index=number+1;
+            if (number>=index)
+            {
+              index=number+1;
+            }
           }
         }
+        catch (std::exception&)
+        {
+          // Can be std::invalid_argument or an out_of_range exception.
+          // In both cases nothing needs to be done, and the exception can be ignored.
+        }
       }
-
     }
     return index;
   }
+
+  // register a prefix for a function symbol, such that the index of this prefix can be increased when
+  // some other process makes a function symbol with the same prefix.
+  void register_functon_symbol_prefix_string(std::string& prefix, index_increaser& increase_index)
+  {
+    prefix_to_register_function_map[prefix]=increase_index;
+  }
+  
+  // deregister a prefix for a function symbol.
+  void deregister_functon_symbol_prefix_string(std::string& prefix)
+  {
+    prefix_to_register_function_map.erase(prefix);
+  }
+
 
   void initialise_administration()
   {
@@ -260,6 +287,27 @@ function_symbol::function_symbol(const std::string& name, const size_t arity_)
   detail::function_symbol_hashtable[hnr] = cur;
   m_function_symbol=cur;
   increase_reference_count<false>();
+
+  // Check whether there is a registered prefix p such that name equal pn where n is a number.
+  // In that case prevent that pn will be generated as a fresh function name.
+  size_t start_of_index=name.find_last_not_of("0123456789")+1;
+  if (start_of_index<name.size()) // Otherwise there is no trailing number.
+  {
+    std::string potential_number=name.substr(start_of_index); // Get the trailing string after prefix_ of function_name.
+    std::string prefix=name.substr(0,start_of_index-1);
+    std::map < std::string, detail::index_increaser>::iterator i=detail::prefix_to_register_function_map.find(prefix);
+    if (i!=detail::prefix_to_register_function_map.end())  // i points to the prefix.
+    try
+    {
+      size_t number=std::stol(potential_number);
+      i->second(number+1); // Set the index belonging to the found prefix to at least a safe number+1.
+    }
+    catch (std::exception)
+    {
+      // Can be std::invalid_argument or an out_of_range exception.
+      // In both cases nothing needs to be done, and the exception can be ignored.
+    }
+  }
 }
 
 
