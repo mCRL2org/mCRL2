@@ -122,7 +122,7 @@ class stategraph_equation: public pbes_equation
     pbes_expression m_condition;
     mutable std::vector<std::size_t> m_control_flow_parameter_indices;
     mutable data::variable_vector m_control_flow_parameters;
-    mutable std::set<std::size_t> m_data_parameter_indices;
+    mutable std::vector<std::size_t> m_data_parameter_indices;
     mutable data::variable_vector m_data_parameters;
 
     void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
@@ -339,7 +339,7 @@ class stategraph_equation: public pbes_equation
     /// \param DP contains the indices of the control flow parameters of this equation
     void set_data_parameters(const std::set<std::size_t>& DP) const
     {
-      m_data_parameter_indices = DP;
+      m_data_parameter_indices = std::vector<std::size_t>(DP.begin(), DP.end());
       for (auto i = m_data_parameter_indices.begin(); i != m_data_parameter_indices.end(); ++i)
       {
         m_data_parameters.push_back(m_parameters[*i]);
@@ -361,7 +361,7 @@ class stategraph_equation: public pbes_equation
       return m_data_parameters;
     }
 
-    const std::set<std::size_t>& data_parameter_indices() const
+    const std::vector<std::size_t>& data_parameter_indices() const
     {
       return m_data_parameter_indices;
     }
@@ -453,7 +453,7 @@ class stategraph_equation: public pbes_equation
     {
       assert(e.size() == m_parameters.size());
       data::data_expression_vector result;
-      for (auto i = m_data_parameter_indices.begin(); i != m_data_parameter_indices.end(); ++i)
+      for (auto i = m_control_flow_parameter_indices.begin(); i != m_control_flow_parameter_indices.end(); ++i)
       {
         result.push_back(nth_element(e, *i));
       }

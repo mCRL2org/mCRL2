@@ -157,7 +157,7 @@ std::ostream& operator<<(std::ostream& out, const GCFP_graph& G)
   auto const& V = G.vertices();
   for (auto i = V.begin(); i != V.end(); ++i)
   {
-    out << "vertex: " << *i << std::endl;
+    out << *i << std::endl;
   }
   return out;
 }
@@ -503,7 +503,7 @@ std::ostream& operator<<(std::ostream& out, const control_flow_graph<Vertex>& G)
 {
   for (auto i = G.vertices.begin(); i != G.vertices.end(); ++i)
   {
-    out << "vertex " << *i << " outgoing_edges: " << i->print_outgoing_edges() << std::endl;
+    out << *i << " outgoing_edges: " << i->print_outgoing_edges() << std::endl;
   }
   return out;
 }
@@ -633,7 +633,7 @@ bool operator<(const global_control_flow_graph_vertex& x, const global_control_f
 
 std::ostream& operator<<(std::ostream& out, const global_control_flow_graph_vertex& u)
 {
-  return out << "vertex " << u.name() << " " << core::detail::print_list(u.values());
+  return out << "vertex " << u.name() << core::detail::print_container(u.values(), "(", ")", "", false, false);
 }
 
 struct global_control_flow_graph: public control_flow_graph<global_control_flow_graph_vertex>
