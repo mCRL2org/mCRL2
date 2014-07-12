@@ -180,6 +180,10 @@ namespace detail
       function_adm.initialise_function_symbols();
 
       initialise_aterm_administration();
+
+      // Take care that the prefix_to_register_function_map is initialized. Use a placement new, because
+      // the memory address of prefix_to_register_function_map may be unitialized.
+      new (&prefix_to_register_function_map) std::map < std::string, detail::index_increaser>();
     }
   }
 
