@@ -355,6 +355,7 @@ lps2lts_algorithm::storage_state_t lps2lts_algorithm::get_prioritised_representa
   std::map<storage_state_t, size_t> low;
   std::map<storage_state_t, std::list<storage_state_t> > next;
   std::map<storage_state_t, storage_state_t> back;
+  next_state_generator::enumerator_queue_t enumeration_queue;
 
   size_t count = 0;
   number[state] = 0;
@@ -369,7 +370,7 @@ lps2lts_algorithm::storage_state_t lps2lts_algorithm::get_prioritised_representa
       low[state] = count;
       next[state] = std::list<storage_state_t>();
 
-      next_state_generator::enumerator_queue_t enumeration_queue;
+      enumeration_queue.clear();
       for (next_state_generator::iterator i = m_generator->begin(state, m_prioritized_subset, &enumeration_queue); i; i++)
       {
         const storage_state_t s=i->internal_state();
@@ -491,9 +492,9 @@ bool lps2lts_algorithm::save_trace(const storage_state_t& state1, const std::str
 
   mcrl2::trace::Trace trace;
   trace.setState(state);
+  next_state_generator::enumerator_queue_t enumeration_queue;
   for (std::deque<storage_state_t>::iterator i = states.begin(); i != states.end(); i++)
   {
-    next_state_generator::enumerator_queue_t enumeration_queue;
     for (next_state_generator::iterator j = m_generator->begin(state, &enumeration_queue); j != m_generator->end(); j++)
     {
       storage_state_t destination = j->internal_state();
@@ -507,6 +508,7 @@ bool lps2lts_algorithm::save_trace(const storage_state_t& state1, const std::str
         break;
       }
     }
+    enumeration_queue.clear();
     state = *i;
     trace.setState(state);
   }
