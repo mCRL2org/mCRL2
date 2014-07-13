@@ -164,11 +164,11 @@ proc FourInaRow(b:Board,WhoMoves:Piece)=
 
        (WhoMoves==Yellow && Four_in_a_row(Red,b)) ->
              RedWins.
-                FourInaRow(initial_board,None)+
+                FourInaRow(b,None)+
 
        (WhoMoves==Red && Four_in_a_row(Yellow,b)) ->
              YellowWins.
-                FourInaRow(initial_board,None);
+                FourInaRow(b,None);
                   
 % Note that the board is reversed. The bottom row is drawn at the top.
 map initial_board:Board;
