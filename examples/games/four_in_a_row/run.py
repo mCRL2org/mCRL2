@@ -10,7 +10,8 @@ os.system('lpsconstelm -v -c -rjittyc temp1.lps temp2.lps')
 os.system('lps2lts -v -rjittyc --prune temp2.lps') 
 # Also pbes2bool does not tend to terminate on the full game, as it is too big.
 os.system('lps2pbes -vfred_wins.mcf temp2.lps temp.pbes')
-os.system('pbes2bool -rjittyc -v -s2 temp.pbes')
+os.system('pbesrewr -pquantifier-all temp.pbes | pbesconstelm -v > temp1.pbes')
+os.system('pbes2bool -rjittyc -v -s2 temp1.pbes')
 
 
 
