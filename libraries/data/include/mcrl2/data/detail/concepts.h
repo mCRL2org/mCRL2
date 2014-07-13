@@ -28,7 +28,7 @@ BOOST_concept(Substitution,(S)) :
 
   BOOST_CONCEPT_USAGE(Substitution)
   {
-    static_assert(boost::is_convertible< variable_type, expression_type >::value,"variable_type and expression_type must be convertible");
+    static_assert(std::is_convertible< variable_type, expression_type >::value,"variable_type and expression_type must be convertible");
 
     s(static_cast< expression_type const& >(e)) == e;
     s(static_cast< variable_type const& >(v)) == v;

@@ -15,8 +15,8 @@
 #include <unistd.h>
 #include <stack>
 #include <limits>
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_base_of.hpp>
+#include <type_traits>
+
 #include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
 #include "mcrl2/atermpp/aterm.h"
 
@@ -32,7 +32,7 @@ class term_appl:public aterm
     /// \brief Constructor.
     term_appl (const detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<const detail::_aterm*>(t))
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -69,7 +69,7 @@ class term_appl:public aterm
     /// \param t The aterm.
     term_appl (const term_appl &t):aterm(t)
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -77,7 +77,7 @@ class term_appl:public aterm
     /// \param t The aterm.
     explicit term_appl (const aterm &t):aterm(t)
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -94,10 +94,10 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym,
               const ForwardIterator begin,
               const ForwardIterator end,
-              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, ForwardIterator>::type>::type* = 0)
+              typename std::enable_if< !std::is_base_of<atermpp::aterm, ForwardIterator>::value>::type* = 0)
         :aterm(detail::local_term_appl<Term,ForwardIterator>(sym,begin,end))
     {
-      static_assert((boost::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
+      static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -115,11 +115,11 @@ class term_appl:public aterm
               InputIterator begin,
               InputIterator end,
               const ATermConverter &convert_to_aterm,
-              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, InputIterator>::type>::type* = 0,
-              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, ATermConverter>::type>::type* = 0)
+              typename std::enable_if< !std::is_base_of<atermpp::aterm, InputIterator>::value>::type* = 0,
+              typename std::enable_if< !std::is_base_of<atermpp::aterm, ATermConverter>::value>::type* = 0)
          :aterm(detail::local_term_appl_with_converter<Term,InputIterator,ATermConverter>(sym,begin,end,convert_to_aterm))
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -128,7 +128,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym)
          :aterm(detail::term_appl0(sym))
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -138,7 +138,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1)
          :aterm(detail::term_appl1<Term>(sym,t1))
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -149,7 +149,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2)
          :aterm(detail::term_appl2<Term>(sym,t1,t2))
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -161,7 +161,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3)
          :aterm(detail::term_appl3<Term>(sym,t1,t2,t3))
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -174,7 +174,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4)
          :aterm(detail::term_appl4<Term>(sym,t1,t2,t3,t4))
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -188,7 +188,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5)
          :aterm(detail::term_appl5<Term>(sym,t1,t2,t3,t4,t5))
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
@@ -203,7 +203,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5, const Term &t6)
          :aterm(detail::term_appl6<Term>(sym,t1,t2,t3,t4,t5,t6))
     {
-      static_assert(boost::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 

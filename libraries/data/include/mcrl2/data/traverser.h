@@ -17,8 +17,7 @@
 #ifndef MCRL2_DATA_TRAVERSER_H
 #define MCRL2_DATA_TRAVERSER_H
 
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits/is_base_of.hpp"
+#include <type_traits>
 
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/data/assignment.h"

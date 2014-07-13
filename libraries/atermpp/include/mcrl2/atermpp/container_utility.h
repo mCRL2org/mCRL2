@@ -16,10 +16,7 @@
 #include <list>
 #include <set>
 #include <vector>
-
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits/is_convertible.hpp"
-#include "boost/type_traits/remove_reference.hpp"
+#include <type_traits>
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -33,109 +30,87 @@ namespace detail
 
 // Condition for recognising types that represent containers
 template < typename T >
-struct is_container_impl
-{
-  typedef boost::false_type type;
-};
+struct is_container_impl : public std::false_type
+{ };
 
 template < typename T >
-struct is_container_impl<std::list<T> >
-{
-  typedef boost::true_type type;
-};
+struct is_container_impl<std::list<T> > : public std::true_type
+{ };
 
 template < typename T >
-struct is_container_impl< std::set< T > >
-{
-  typedef boost::true_type type;
-};
+struct is_container_impl< std::set< T > > : public std::true_type
+{ };
 
 template < typename T >
-struct is_container_impl< std::multiset< T > >
-{
-  typedef boost::true_type type;
-};
+struct is_container_impl< std::multiset< T > > : public std::true_type
+{ };
 
 template < typename T >
-struct is_container_impl< std::vector< T > >
-{
-  typedef boost::true_type type;
-};
+struct is_container_impl< std::vector< T > > : public std::true_type
+{ };
 
 template < typename T >
-struct is_container_impl< atermpp::term_list< T > >
-{
-  typedef boost::true_type type;
-};
+struct is_container_impl< atermpp::term_list< T > > : public std::true_type
+{ };
 
 template < bool C, typename Container, typename Value >
-struct lazy_check_value_type
-{
-  typedef boost::false_type type;
-};
+struct lazy_check_value_type : public std::false_type
+{ };
 
 template < typename Container, typename ValueType >
-struct lazy_check_value_type< true, Container, ValueType >
-{
-  typedef typename boost::is_convertible< typename Container::value_type, ValueType >::type type;
-};
+struct lazy_check_value_type< true, Container, ValueType > : public
+    std::is_convertible< typename Container::value_type, ValueType >
+{ };
 
-/// type condition for use with boost::enable_if
+/// type condition for use with std::enable_if
 /// T the type to be tested
 /// \pre V is void or T::value_type convertible to V
 template < typename T, typename V = void >
 struct is_container;
 
-/// type condition for use with boost::enable_if
+/// type condition for use with std::enable_if
 /// T is the container type
 template < typename T >
 struct is_container< T, void > : public
-    is_container_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
+    is_container_impl< typename std::remove_reference< typename boost::remove_const< T >::type >::type >
   { };
 
 template < typename T, typename V >
-struct is_container
-{
-  typedef typename lazy_check_value_type< is_container< T, void >::type::value, T, V >::type type;
-};
+struct is_container : public lazy_check_value_type< is_container< T, void >::value, T, V >
+  { };
 
-/// type condition for use with boost::enable_if
+/// type condition for use with std::enable_if
 /// T the type to be tested
 /// \pre V is void or T::value_type convertible to V
 template < typename T, typename V = void >
 struct enable_if_container : public
-    boost::enable_if< typename atermpp::detail::is_container< T, V >::type >
-  {};
+    std::enable_if< atermpp::detail::is_container< T, V >::value >
+  { };
 
-/// type condition for use with boost::enable_if
+/// type condition for use with std::enable_if
 /// T the type to be tested
 /// \pre V is void or T::value_type convertible to V
 template < typename T, typename V = void >
 struct disable_if_container : public
-    boost::disable_if< typename atermpp::detail::is_container< T, V >::type >
-  {};
+    std::enable_if< !atermpp::detail::is_container< T, V >::value >
+  { };
 
 template < typename T >
-struct is_set_impl
-{
-  typedef boost::false_type type;
-};
+struct is_set_impl : public std::false_type
+  { };
 
 template < typename T >
-struct is_set_impl< std::set< T > >
-{
-  typedef boost::true_type type;
-};
+struct is_set_impl< std::set< T > > : public std::true_type
+  { };
 
 template < typename T >
-struct is_set_impl< std::multiset< T > >
-{
-  typedef boost::true_type type;
-};
+struct is_set_impl< std::multiset< T > > :public std::true_type
+  { };
 
-// type condition for use with boost::enable_if
+// type condition for use with std::enable_if
 template < typename T >
-struct is_set : public is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
+struct is_set : public
+    is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
   { };
 
 } // namespace detail

@@ -23,10 +23,6 @@
 namespace atermpp
 {
 
-// The hook_tables are pointers, which allows to explicitly initialise them at
-// first use. Otherwise the compiler initialises these variables, possibly after
-// some callbacks have been registered, loosing information.
-// Note that the hook_tables are not destroyed before stopping the program.
 typedef std::vector<std::pair<const function_symbol*,term_callback> > hook_table;
 
 static hook_table& creation_hooks()

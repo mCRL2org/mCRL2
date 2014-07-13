@@ -145,6 +145,7 @@ void save_lps(const specification &spec, const std::string &filename,
   }
   utilities::output_file file = format->open_output(filename);
   save_lps(spec, file.stream(), format);
+  file.stream() << std::flush;
 }
 
 /// \brief Load LPS from file.

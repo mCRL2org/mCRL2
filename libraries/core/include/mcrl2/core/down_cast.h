@@ -12,9 +12,8 @@
 #ifndef MCRL2_CORE_DOWN_CAST_H
 #define MCRL2_CORE_DOWN_CAST_H
 
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_base_of.hpp>
-#include <boost/type_traits/is_convertible.hpp>
+#include <type_traits>
+
 #include "mcrl2/atermpp/aterm.h"
 
 namespace mcrl2
@@ -25,8 +24,8 @@ namespace core
 
 template <class Derived, class Base>
 Derived down_cast(Base t,
-            typename boost::enable_if< boost::is_base_of<Base, Derived> >::type* = 0,
-            typename boost::enable_if< boost::is_base_of<atermpp::aterm, Base> >::type* = 0)
+            typename std::enable_if< std::is_base_of<Base, Derived>::value >::type* = 0,
+            typename std::enable_if< std::is_base_of<atermpp::aterm, Base>::value >::type* = 0)
 {
   static_assert(sizeof(Derived)==sizeof(atermpp::aterm),
                 "Size of types should be equal to the size of an atermpp::aterm");
@@ -35,9 +34,9 @@ Derived down_cast(Base t,
 
 template <class Derived, class Base>
 Derived down_cast(Base t,
-            typename boost::enable_if< boost::is_base_of<Base, Derived> >::type* = 0,
-            typename boost::disable_if< boost::is_base_of<atermpp::aterm, Base> >::type* = 0,
-            typename boost::enable_if< boost::is_convertible<Base, Derived> >::type* = 0)
+            typename std::enable_if< std::is_base_of<Base, Derived>::value >::type* = 0,
+            typename std::enable_if< !std::is_base_of<atermpp::aterm, Base>::value >::type* = 0,
+            typename std::enable_if< std::is_convertible<Base, Derived>::value >::type* = 0)
 {
   return (Derived)t;
 }
@@ -45,9 +44,9 @@ Derived down_cast(Base t,
 
 template <class Derived, class Base>
 Derived down_cast(Base t,
-            typename boost::enable_if< boost::is_base_of<Base, Derived> >::type* = 0,
-            typename boost::disable_if< boost::is_base_of<atermpp::aterm, Base> >::type* = 0,
-            typename boost::disable_if< boost::is_convertible<Base, Derived> >::type* = 0)
+            typename std::enable_if< std::is_base_of<Base, Derived>::value >::type* = 0,
+            typename std::enable_if< !std::is_base_of<atermpp::aterm, Base>::value >::type* = 0,
+            typename std::enable_if< !std::is_convertible<Base, Derived>::value >::type* = 0)
 {
   return Derived(t);
 }

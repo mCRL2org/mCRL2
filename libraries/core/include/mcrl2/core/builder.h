@@ -13,8 +13,8 @@
 #define MCRL2_CORE_BUILDER_H
 
 #include <stdexcept>
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_base_of.hpp>
+#include <type_traits>
+
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/down_cast.h"
@@ -60,7 +60,7 @@ struct builder
   // aterm update
   template <typename T>
   void update(T& x,
-              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+              typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
              )
   {
     msg("aterm update");
@@ -70,7 +70,7 @@ struct builder
   // non-aterm update
   template <typename T>
   void update(T& x,
-              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+              typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
              )
   {
     msg("non-aterm update");
@@ -80,7 +80,7 @@ struct builder
   // aterm update copy
   template <typename T>
   T update_copy(const T& x,
-                typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                )
   {
     msg("aterm update copy");
@@ -90,7 +90,7 @@ struct builder
   // non-aterm update copy
   template <typename T>
   T& update_copy(T& x,
-                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                 typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                 )
   {
     msg("non-aterm update copy");
@@ -163,7 +163,7 @@ struct builder
   // aterm traversal
   template <typename T>
   T operator()(const T& x,
-               typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+               typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
               )
   {
     msg("aterm traversal");
@@ -173,7 +173,7 @@ struct builder
   // non-aterm traversal
   template <typename T>
   void operator()(T& x,
-                  typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                  typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                  )
   {
     msg("non aterm traversal");

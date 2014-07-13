@@ -52,7 +52,7 @@ boolean_expression replace_boolean_variables(const boolean_expression& x, Substi
 template <typename T, typename Substitution>
 void replace_all_boolean_variables(T& x,
                                    Substitution sigma,
-                                   typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                                   typename std::enable_if< !std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                                   )
 {
   core::make_update_apply_builder<bes::boolean_variable_builder>(sigma)(x);
@@ -61,7 +61,7 @@ void replace_all_boolean_variables(T& x,
 template <typename T, typename Substitution>
 T replace_all_boolean_variables(const T& x,
                                 Substitution sigma,
-                                typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                                typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                                )
 {
   return core::make_update_apply_builder<bes::boolean_variable_builder>(sigma)(x);

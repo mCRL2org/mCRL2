@@ -253,7 +253,7 @@ class application: public data_expression
     application(const data_expression& head,
                 FwdIter first,
                 FwdIter last,
-                typename boost::disable_if<typename boost::is_base_of<data_expression, FwdIter>::type>::type* = 0)
+                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
                                          term_appl_prepend_iterator<FwdIter>(first, &head),
                                          term_appl_prepend_iterator<FwdIter>(last)))
@@ -267,7 +267,7 @@ class application: public data_expression
                 const data_expression& head,
                 FwdIter first,
                 FwdIter last,
-                typename boost::disable_if<typename boost::is_base_of<data_expression, FwdIter>::type>::type* = 0)
+                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arity + 1),
                                          term_appl_prepend_iterator<FwdIter>(first, &head),
                                          term_appl_prepend_iterator<FwdIter>(last)))
@@ -283,8 +283,8 @@ class application: public data_expression
                 FwdIter first,
                 FwdIter last,
                 ArgumentConverter convert_arguments,
-                typename boost::disable_if<typename boost::is_base_of<data_expression, FwdIter>::type>::type* = 0,
-                typename boost::disable_if<typename boost::is_base_of<data_expression, ArgumentConverter>::type>::type* = 0)
+                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0,
+                typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
                                          transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(first, &head, convert_arguments),
                                          transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(last,nullptr,convert_arguments)))

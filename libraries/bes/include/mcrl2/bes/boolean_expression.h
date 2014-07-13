@@ -14,9 +14,7 @@
 
 #include <cassert>
 #include <string>
-
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_base_of.hpp>
+#include <type_traits>
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/utilities/detail/join.h"

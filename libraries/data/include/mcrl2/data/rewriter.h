@@ -17,8 +17,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "boost/type_traits/add_reference.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/detail/rewrite.h"

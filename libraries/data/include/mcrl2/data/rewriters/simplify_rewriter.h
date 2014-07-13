@@ -136,13 +136,13 @@ struct simplify_rewriter: public std::unary_function<data_expression, data_expre
 };
 
 template <typename T>
-void simplify(T& x, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0)
+void simplify(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
 {
   core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter())(x);
 }
 
 template <typename T>
-T simplify(const T& x, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0)
+T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
 {
   T result = core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter())(x);
   return result;

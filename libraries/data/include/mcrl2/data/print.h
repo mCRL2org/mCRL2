@@ -16,8 +16,7 @@
 #include <sstream>
 #include <list>
 #include <iterator>
-
-#include "boost/utility/enable_if.hpp"
+#include <type_traits>
 
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/print.h"

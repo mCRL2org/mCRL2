@@ -58,10 +58,10 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
 /// \cond INTERNAL_DOCS
 
 template <typename T>
-void normalize(T& x, bool negated = false, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0);
+void normalize(T& x, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0);
 
 template <typename T>
-T normalize(const T& x, bool negated = false, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0);
+T normalize(const T& x, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0);
 
 // \brief Visitor for normalizing a state formula.
 struct normalize_builder: public state_formula_builder<normalize_builder>
@@ -267,7 +267,7 @@ bool is_normalized(const T& x)
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing state formulas
 template <typename T>
-void normalize(T& x, bool negated, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type*)
+void normalize(T& x, bool negated, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
   normalize_builder f(negated);
   f(x);
@@ -277,7 +277,7 @@ void normalize(T& x, bool negated, typename boost::disable_if<typename boost::is
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing state formulas
 template <typename T>
-T normalize(const T& x, bool negated, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type*)
+T normalize(const T& x, bool negated, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
   normalize_builder f(negated);
   return f(x);

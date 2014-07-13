@@ -16,7 +16,6 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include <ctime>
-#include <cstdio>
 #include <sstream>
 #include <fstream>
 #include <vector>
@@ -24,7 +23,6 @@
 #ifdef WIN32
 #include <io.h>
 #include <fcntl.h>
-#include <iostream>
 #endif
 
 namespace mcrl2
@@ -110,7 +108,6 @@ public:
   {
     if (!m_stdio)
     {
-      static_cast<filestream_type*>(m_stream)->close();
       delete m_stream;
     }
   }

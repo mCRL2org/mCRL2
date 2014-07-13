@@ -12,9 +12,7 @@
 #ifndef MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
 #define MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
 
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits/is_integral.hpp"
-#include "boost/type_traits/make_unsigned.hpp"
+#include <type_traits>
 
 // Workaround for OS X with Apples patched gcc 4.0.1
 #undef nil
@@ -184,7 +182,7 @@ namespace sort_pos
 /// \brief Constructs expression of type Bool from an integral type
 /// Type T is an unsigned integral type.
 template < typename T >
-inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
+inline typename std::enable_if<std::is_integral< T >::value, data_expression>::type
 pos(const T t)
 {
   assert(0 < t);
@@ -284,7 +282,7 @@ namespace sort_nat
 
 /// \brief Constructs expression of type pos from an integral type
 template < typename T >
-inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
+inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 nat(T t)
 {
   assert(0 <= t);
@@ -331,10 +329,10 @@ namespace sort_int
 
 /// \brief Constructs expression of type pos from an integral type
 template < typename T >
-inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
+inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 int_(T t)
 {
-  std::string number(detail::as_decimal_string< typename boost::make_unsigned< T >::type >((0 <= t) ? t : -t));
+  std::string number(detail::as_decimal_string< typename std::make_unsigned< T >::type >((0 <= t) ? t : -t));
 
   return (t < 0) ? sort_int::cneg(sort_pos::pos(-t)) :
          static_cast< data_expression const& >(sort_int::cint(sort_nat::nat(t)));
@@ -383,7 +381,7 @@ namespace sort_real
 /// \brief Constructs expression of type pos from an integral type
 /// \param t An expression of type T
 template < typename T >
-inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
+inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 real_(T t)
 {
   return sort_real::creal(sort_int::int_(t), sort_pos::c1());
@@ -393,7 +391,7 @@ real_(T t)
 /// \param numerator numerator
 /// \param denominator denominator
 template < typename T >
-inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
+inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 real_(T numerator, T denominator)
 {
   return sort_real::creal(sort_int::int_(numerator), sort_pos::pos(denominator));
