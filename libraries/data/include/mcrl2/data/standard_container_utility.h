@@ -13,7 +13,7 @@
 #define MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 
 #include <type_traits>
-#include "boost/utility.hpp"
+#include <iterator>
 
 #include "mcrl2/utilities/detail/join.h"
 
@@ -414,7 +414,7 @@ application fbag(const sort_expression& s, Sequence const& range,
   // in the same order as the input
   for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i, ++i)
   {
-    fbag_expression = sort_fbag::cinsert(s, *boost::next(i, 1), *i, fbag_expression);
+    fbag_expression = sort_fbag::cinsert(s, *std::next(i, 1), *i, fbag_expression);
   }
 
   return static_cast< application >(fbag_expression);

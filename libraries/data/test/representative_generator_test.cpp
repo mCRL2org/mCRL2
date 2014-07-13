@@ -9,12 +9,12 @@
 /// \file data_utility_test.cpp
 /// \brief Add your file description here.
 
+#include <iterator>
 #include <iostream>
 #include <string>
 #include <set>
 #include <algorithm>
 
-#include "boost/bind.hpp"
 #include "boost/test/minimal.hpp"
 
 #include "mcrl2/data/representative_generator.h"
@@ -61,11 +61,11 @@ void test_representative_generator()
 
   // Should be e(0), since constants are preferred to other constructors or mappings
   BOOST_CHECK(default_expression_generator(basic_sort("E")) ==
-              boost::next(constructors.begin(), 1)->constructor_function(basic_sort("E"))(default_expression_generator(sort_nat::nat())));
+              constructors[1].constructor_function(basic_sort("E"))(default_expression_generator(sort_nat::nat())));
 
   // Should be d(e(0)), since constants are preferred to other constructors or mappings
   BOOST_CHECK(default_expression_generator(basic_sort("D")) ==
-              boost::next(constructors.begin(), 0)->constructor_function(basic_sort("D"))(default_expression_generator(basic_sort("E"))));
+              constructors[0].constructor_function(basic_sort("D"))(default_expression_generator(basic_sort("E"))));
 
   // Check whether the representative of the set of reals is the empty set of reals.
   BOOST_CHECK(default_expression_generator(container_sort(set_container(),data::sort_real::real_())) ==
