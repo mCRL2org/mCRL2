@@ -244,6 +244,7 @@ void lpsrewr(const std::string& input_filename,
   }
   lps::rewrite(spec, R);
   lps::remove_trivial_summands(spec);
+  lps::remove_redundant_assignments(spec);
   save_lps(spec, output_filename);
 }
 

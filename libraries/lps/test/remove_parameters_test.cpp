@@ -72,10 +72,45 @@ void test_instantiate_free_variables()
   algorithm.instantiate_free_variables();
 }
 
+void test_remove_rundant_assignments()
+{
+  std::string lpsspec_text =
+    "act  a;\n"
+    "proc P(x: Nat) = a.P(x = x);\n"
+    "init P(0);"
+  ;
+  std::string expected_result_text = 
+    "act  a;\n"
+    "proc P(x: Nat) = a.P();\n"
+    "init P(0);"
+  ;
+
+  specification result = parse_linear_process_specification(lpsspec_text);
+  remove_redundant_assignments(result);
+  specification expected_result = parse_linear_process_specification(expected_result_text);
+  BOOST_CHECK(result == expected_result);
+
+  lpsspec_text =
+    "act  a;\n"
+    "proc P(x: Nat) = sum x: Nat. a.P(x = x);\n"
+    "init P(0);"
+  ;
+  expected_result_text = 
+    "act  a;\n"
+    "proc P(x: Nat) = sum x: Nat. a.P(x = x);\n"
+    "init P(0);"
+  ;
+  result = parse_linear_process_specification(lpsspec_text);
+  remove_redundant_assignments(result);
+  expected_result = parse_linear_process_specification(expected_result_text);
+  BOOST_CHECK(result == expected_result);
+}
+
 int test_main(int argc, char* argv[])
 {
   test_remove_parameters();
   test_instantiate_free_variables();
+  test_remove_rundant_assignments();
 
   return 0;
 }
