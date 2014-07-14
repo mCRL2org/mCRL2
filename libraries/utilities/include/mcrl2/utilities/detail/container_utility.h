@@ -38,6 +38,18 @@ typename Map::mapped_type map_element(const Map& m, const typename Map::key_type
   return i->second;
 }
 
+// Returns the value corresponding to the given key in map m, or undefined_value if no such value exists.
+template <typename Map>
+typename Map::mapped_type mapped_value(const Map& m, const typename Map::key_type& key, const typename Map::mapped_type& undefined_value)
+{
+  auto i = m.find(key);
+  if (i != m.end())
+  {
+    return i->second;
+  }
+  return undefined_value;
+}
+
 /// \brief Returns the value corresponding to the given key in the set m. If the key is not
 /// present, an exception is thrown.
 template <typename Container>

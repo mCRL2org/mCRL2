@@ -228,18 +228,6 @@ class stategraph_algorithm
       return i != m.end() && i->second == value;
     }
 
-    // if key is in m, the corresponding value is returned, otherwise undefined_value
-    template <typename Map>
-    typename Map::mapped_type mapped_value(const Map& m, const typename Map::key_type& key, const typename Map::mapped_type& undefined_value) const
-    {
-      auto i = m.find(key);
-      if (i != m.end())
-      {
-        return i->second;
-      }
-      return undefined_value;
-    }
-
     bool maps_to_and_is_GFCP(const std::map<std::size_t, std::size_t>& m, std::size_t value, const core::identifier_string& X)
     {
       for (auto i = m.begin(); i != m.end(); ++i)

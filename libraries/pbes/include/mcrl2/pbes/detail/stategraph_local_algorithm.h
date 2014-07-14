@@ -998,7 +998,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             if (q != component_index.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
-              auto e1 = mapped_value(i->target(), k1, data::undefined_data_expression());
+              auto e1 = i->target(k1);
               if (e1 != data::undefined_data_expression())
               {
                 // target(X, i, k') = e'
@@ -1025,7 +1025,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               if (is_mapped_to(i->source(), k, e))
               {
                 // source(X, i, k) = e && target(X, i, k') = e'
-                auto e1 = mapped_value(i->target(), k1, data::undefined_data_expression());
+                auto e1 = i->target(k1);
                 mCRL2log(log::debug1, "stategraph") << "case 3a: (X, d, e) -> (Y, d', e') ; source(X, i, k) = e && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                 if (e1 != data::undefined_data_expression())
                 {
@@ -1035,7 +1035,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               else if (Y != X && is_undefined(i->source(), k))
               {
                 // Y != X && undefined(source(X, i, k)) && target(X, i, k') = e'
-                auto e1 = mapped_value(i->target(), k1, data::undefined_data_expression());
+                auto e1 = i->target(k1);
                 if (e1 != data::undefined_data_expression())
                 {
                   mCRL2log(log::debug1, "stategraph") << "case 3b: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
@@ -1043,7 +1043,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
                 }
 
                 // Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k'
-                if (mapped_value(i->copy(), k, data::undefined_index()) == k1)
+                if (i->copy(k) == k1)
                 {
                   mCRL2log(log::debug1, "stategraph") << "case 3c: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k' ; k' = " << print_index(k1) << std::endl;
                   V.insert_edge(todo, m_pbes, u, Y, k1, e, edge_label);
@@ -1053,7 +1053,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             // case 4: (X, d, e) -> (Y, ?)
             else
             {
-              auto e1 = mapped_value(i->source(), k, data::undefined_data_expression());
+              auto e1 = i->source(k);
               if (e1 == e || e1 == data::undefined_data_expression())
               {
                 std::size_t k1 = data::undefined_index();

@@ -39,7 +39,7 @@ class predicate_variable
     pbes_expression m_guard;
     data::rewriter::substitution_type m_sigma;
     std::map<std::size_t, data::data_expression> m_source; // source[j] = e <=> source(X, i, j) = e
-    std::map<std::size_t, data::data_expression> m_dest;   // target[j] = c   <=> target(X, i, j) = c
+    std::map<std::size_t, data::data_expression> m_target; // target[j] = c   <=> target(X, i, j) = c
     std::map<std::size_t, std::size_t> m_copy;             // copy[j] = k   <=> copy(X, i, j) = k
     std::set<std::size_t> m_used;                          // j \in used    <=> used(X, i, j)
     std::set<std::size_t> m_changed;                       // j \in changed <=> changed(X, i, j)
@@ -80,14 +80,35 @@ class predicate_variable
       return m_source;
     }
 
+    // Returns source(k), or data::undefined_data_expression() if source(k) does not exist.
+    data::data_expression source(std::size_t k) const
+    {
+      using utilities::detail::mapped_value;
+      return mapped_value(m_source, k, data::undefined_data_expression());
+    }
+
     const std::map<std::size_t, data::data_expression>& target() const
     {
-      return m_dest;
+      return m_target;
+    }
+
+    // Returns target(k), or data::undefined_data_expression() if target(k) does not exist.
+    data::data_expression target(std::size_t k) const
+    {
+      using utilities::detail::mapped_value;
+      return mapped_value(m_target, k, data::undefined_data_expression());
     }
 
     const std::map<std::size_t, std::size_t>& copy() const
     {
       return m_copy;
+    }
+
+    // Returns copy(k), or data::undefined_index() if copy(k) does not exist.
+    std::size_t copy(std::size_t k) const
+    {
+      using utilities::detail::mapped_value;
+      return mapped_value(m_copy, k, data::undefined_index());
     }
 
     const std::set<std::size_t>& used() const
@@ -220,7 +241,7 @@ class stategraph_equation: public pbes_equation
           data::data_expression c = R(*j, m_predvars[i].sigma());
           if (is_constant(c))
           {
-            m_predvars[i].m_dest[j_index] = c;
+            m_predvars[i].m_target[j_index] = c;
           }
         }
       }

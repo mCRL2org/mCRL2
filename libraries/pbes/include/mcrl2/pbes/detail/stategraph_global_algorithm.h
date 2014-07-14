@@ -186,9 +186,10 @@ class stategraph_global_algorithm: public stategraph_algorithm
       auto const& cfp_X = eq_X.control_flow_parameter_indices();
       for (std::size_t k = 0; k < cfp_X.size(); k++)
       {
-//        auto q = mapped_value(Yf.source(), cfp_X[k], data::undefined_data_expression());
+// This is slightly more efficient:
+//        auto q = Yf.source(cfp_X[k]);
 //        if (q != data::undefined_data_expression() && q != nth_element(e, k))
-        if (mapped_value(Yf.source(), cfp_X[k], data::undefined_data_expression()) != nth_element(e, k))
+        if (Yf.source(cfp_X[k]) != nth_element(e, k))
         {
           return false;
         }
@@ -211,7 +212,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
 
       for (std::size_t l = 0; l < cfp_Y.size(); l++)
       {
-        auto q = mapped_value(Yf.target(), cfp_Y[l], data::undefined_data_expression());
+        auto q = Yf.target(cfp_Y[l]);
         if (q != data::undefined_data_expression())
         {
           f.push_back(q);
