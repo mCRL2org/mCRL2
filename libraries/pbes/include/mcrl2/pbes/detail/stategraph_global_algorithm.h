@@ -178,13 +178,17 @@ class stategraph_global_algorithm: public stategraph_algorithm
       return result;
     }
 
-    bool enabled_edge(const stategraph_equation& eq_X, const data::data_expression_list& e, const stategraph_equation& eq_Y, const predicate_variable& Yf)
+    // eq_X is the equation corresponding to u = (X, e)
+    // eq_Y is the equation corresponding to Yf
+    bool enabled_edge(const global_control_flow_graph_vertex& u, const stategraph_equation& eq_X, const predicate_variable& Yf, const stategraph_equation& eq_Y)
     {
+      auto const& e = u.values();
       auto const& cfp_X = eq_X.control_flow_parameter_indices();
       for (std::size_t k = 0; k < cfp_X.size(); k++)
       {
-        auto q = mapped_value(Yf.source(), cfp_X[k], data::undefined_data_expression());
-        if (q != data::undefined_data_expression() && q != nth_element(e, k))
+//        auto q = mapped_value(Yf.source(), cfp_X[k], data::undefined_data_expression());
+//        if (q != data::undefined_data_expression() && q != nth_element(e, k))
+        if (mapped_value(Yf.source(), cfp_X[k], data::undefined_data_expression()) != nth_element(e, k))
         {
           return false;
         }
@@ -192,11 +196,12 @@ class stategraph_global_algorithm: public stategraph_algorithm
       return true;
     }
 
-    const global_control_flow_graph_vertex& compute_vertex(global_control_flow_graph& G, const stategraph_equation& eq_X, const data::data_expression_list& e, const stategraph_equation& eq_Y, const predicate_variable& Yf)
+    const global_control_flow_graph_vertex& compute_vertex(global_control_flow_graph& G, const global_control_flow_graph_vertex& u, const stategraph_equation& eq_X, const predicate_variable& Yf, const stategraph_equation& eq_Y)
     {
       data::data_expression_vector f;
-      auto const& X = eq_X.variable().name();
-      auto const& Y = eq_Y.variable().name();
+      auto const& X = u.name();
+      auto const& e = u.values();
+      auto const& Y = Yf.name();
       auto const& cfp_X = eq_X.control_flow_parameter_indices();
       auto const& cfp_Y = eq_Y.control_flow_parameter_indices();
 
@@ -245,14 +250,12 @@ class stategraph_global_algorithm: public stategraph_algorithm
       auto einit = eq_X.project(Xinit.parameters());
       auto const& u = G.insert_vertex(global_control_flow_graph_vertex(Xinit.name(), einit));
       todo.insert(&u);
-      done.insert(&u);
 
       while (!todo.empty())
       {
         // u = (X, e)
         auto const& u = *pick_element(todo);
         auto const& X = u.name();
-        auto const& e = u.values();
         auto const& eq_X = *find_equation(m_pbes, X);
         auto const& predvars = eq_X.predicate_variables();
 
@@ -263,9 +266,9 @@ class stategraph_global_algorithm: public stategraph_algorithm
           auto const& Yf = predvars[i];
           auto const& Y = Yf.variable().name();
           auto const& eq_Y = *find_equation(m_pbes, Y);
-          if (enabled_edge(eq_X, e, eq_Y, Yf))
+          if (enabled_edge(u, eq_X, Yf, eq_Y))
           {
-            const global_control_flow_graph_vertex& v = compute_vertex(G, eq_X, e, eq_Y, Yf);
+            const global_control_flow_graph_vertex& v = compute_vertex(G, u, eq_X, Yf, eq_Y);
             G.insert_edge(u, i, v);
             if (!contains(done, &v))
             {
