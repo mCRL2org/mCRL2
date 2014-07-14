@@ -247,9 +247,9 @@ bool lps2lts_algorithm::generate_lts()
     }
     else
     {
-      if (m_options.todo_max==0)
+      if (m_options.todo_max==std::string::npos)
       { 
-        generate_lts_breadth_todo_max_is_0();
+        generate_lts_breadth_todo_max_is_npos();
       }
       else 
       { 
@@ -785,9 +785,9 @@ void lps2lts_algorithm::get_transitions(const storage_state_t& state,
   }
 }
 
-void lps2lts_algorithm::generate_lts_breadth_todo_max_is_0()
+void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos()
 {
-  assert(m_options.todo_max==0);
+  assert(m_options.todo_max==string::npos);
   size_t current_state = 0;
   size_t start_level_seen = 1;
   size_t start_level_transitions = 0;
@@ -836,7 +836,7 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_0()
 
 void lps2lts_algorithm::generate_lts_breadth_todo_max_larger_than_0(const storage_state_t& initial_state)
 {
-  assert(m_options.todo_max>0);
+  assert(m_options.todo_max!=std::string::npos);
   size_t current_state = 0;
   size_t start_level_seen = 1;
   size_t start_level_explored = 0;
