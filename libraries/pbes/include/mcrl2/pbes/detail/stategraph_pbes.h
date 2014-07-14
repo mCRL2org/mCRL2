@@ -470,6 +470,7 @@ class stategraph_equation: public pbes_equation
       return out.str();
     }
 
+    // Removes the values from e that correspond to a data parameter
     data::data_expression_list project(const data::data_expression_list& e) const
     {
       assert(e.size() == m_parameters.size());

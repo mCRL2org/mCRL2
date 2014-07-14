@@ -332,7 +332,8 @@ flow graph.%
 \textsc{)} \\ 
 $V:=\emptyset $ \\ 
 $E:=\emptyset $ \\ 
-$todo:=\{(X_{init},project_{X}(e_{init}))\}$ \\ 
+$todo:=\{(X_{init},e)\mid \forall k\leq \left\vert c_{X}\right\vert
+:e[k]=e_{init}[\downarrow _{X}k]\}$ \\ 
 \textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
 $\qquad $\textbf{choose} $u\in todo$ \\ 
 $\qquad todo:=todo\setminus \{u\}$ \\ 
@@ -367,16 +368,19 @@ $\text{\textbf{return} }true$%
 $\text{\textsc{ComputeVertex}}$\textsc{(}$u,i,Y(f)$\textsc{)} \\ 
 \textbf{let }$u=(X,e)$ \\ 
 \textbf{for }$l=1\cdots \left\vert c_{Y}\right\vert $ \textbf{do} \\ 
-$\qquad q:=$ $\mathrm{target}(X,i,\downarrow _{X}l)$ \\ 
+$\qquad q:=$ $\mathrm{target}(X,i,\downarrow _{Y}l)$ \\ 
 $\qquad \text{\textbf{if }}q=\bot $ \textbf{then} \\ 
-$\qquad \qquad \text{\textbf{choose }}k$ \textbf{such that }$\text{\textsc{%
-IsRelated(}}Y,\downarrow _{Y}l,X,\downarrow _{X}k\text{\textsc{)}}$ \\ 
+$\qquad \qquad \text{\textbf{choose }}k$ \textbf{such that }$\mathrm{copy}%
+(X,i,\downarrow _{Y}l)=\downarrow _{X}k$ \\ 
 $\qquad \qquad v_{l}:=e_{k}$ \\ 
 $\qquad \text{\textbf{else}}$ \\ 
 $\qquad \qquad v_{l}:=q$ \\ 
 $\text{\textbf{return} }(Y,v)$%
 \end{tabular}%
-\end{equation*}
+\end{equation*}%
+Note that $\mathrm{copy}(X,i,\downarrow _{Y}l)=\downarrow _{X}k$ implies
+that parameters $(X,\downarrow _{X}k)$ and $(Y,\downarrow _{Y}l)$ are
+related.
 
 \newpage 
 

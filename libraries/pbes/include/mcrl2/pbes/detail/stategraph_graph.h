@@ -132,23 +132,6 @@ class GCFP_graph
     {
       return &u - &(m_vertices.front());
     }
-
-    // \pre (X, n) must be a vertex of the graph
-    // Returns an index m such that (X, n) is related to (Y, m), or data::undefined_index() if no such m exists.
-    std::size_t related_parameter_index(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y)
-    {
-      GCFP_vertex& u = find_vertex(X, n);
-      auto const& neighbors = u.neighbors();
-      for (auto i = neighbors.begin(); i != neighbors.end(); ++i)
-      {
-        auto const& v = **i;
-        if (v.name() == Y)
-        {
-          return v.index();
-        }
-      }
-      return data::undefined_index();
-    }
 };
 
 inline

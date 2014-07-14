@@ -195,12 +195,24 @@ class stategraph_global_algorithm: public stategraph_algorithm
       return true;
     }
 
+    // Returns k such that cfp[k] == l. Throws an exception if no such k exists.
+    std::size_t unproject(const std::vector<std::size_t>& cfp, std::size_t l) const
+    {
+      for (std::size_t k = 0; k < cfp.size(); k++)
+      {
+        if (cfp[k] == l)
+        {
+          return l;
+        }
+      }
+      throw mcrl2::runtime_error("no index found in stategraph_global_algorithm::unproject");
+    }
+
     const global_control_flow_graph_vertex& compute_vertex(global_control_flow_graph& G, const global_control_flow_graph_vertex& u, const stategraph_equation& eq_X, const predicate_variable& Yf, const stategraph_equation& eq_Y)
     {
       data::data_expression_vector f;
       auto const& X = u.name();
       auto const& e = u.values();
-      auto const& Y = Yf.name();
       auto const& cfp_X = eq_X.control_flow_parameter_indices();
       auto const& cfp_Y = eq_Y.control_flow_parameter_indices();
 
@@ -217,16 +229,11 @@ class stategraph_global_algorithm: public stategraph_algorithm
         }
         else
         {
-          std::size_t cfpXk = m_GCFP_graph.related_parameter_index(Y, cfp_Y[l], X);
-          std::size_t k;
-          for (k = 0; k < cfp_X.size(); ++k)
-          {
-            if (cfp_X[k] == cfpXk)
-            {
-              break;
-            }
-          }
-          assert(k != cfp_X.size());
+          // Compute k such that (X, k) and (Y, l) are related. This implies copy(X, i, cfp_X[k]) == cfp_Y[l].
+          auto p = Yf.copy(cfp_Y[l]);
+          assert(p != data::undefined_index());
+          std::size_t k = unproject(cfp_X, p);
+
           f.push_back(nth_element(e, k));
         }
       }
@@ -278,7 +285,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
           }
         }
       }
-      mCRL2log(log::debug, "stategraph") << "--- computed new global control flow graph ---\n" << G << std::endl;
+      mCRL2log(log::debug) << "--- new global control flow graph ---\n" << G << std::endl;
     }
 
   public:
