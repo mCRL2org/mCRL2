@@ -247,7 +247,14 @@ bool lps2lts_algorithm::generate_lts()
     }
     else
     {
-      generate_lts_breadth();
+      if (m_options.todo_max==0)
+      { 
+        generate_lts_breadth_todo_max_is_0();
+      }
+      else 
+      { 
+        generate_lts_breadth_todo_max_larger_than_0(initial_state);
+      }
     }
 
     mCRL2log(verbose) << "done with state space generation ("
@@ -778,8 +785,9 @@ void lps2lts_algorithm::get_transitions(const storage_state_t& state,
   }
 }
 
-void lps2lts_algorithm::generate_lts_breadth()
+void lps2lts_algorithm::generate_lts_breadth_todo_max_is_0()
 {
+  assert(m_options.todo_max==0);
   size_t current_state = 0;
   size_t start_level_seen = 1;
   size_t start_level_transitions = 0;
@@ -790,7 +798,6 @@ void lps2lts_algorithm::generate_lts_breadth()
   while (!m_must_abort && (current_state < m_state_numbers.size()) &&
          (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
-
     storage_state_t state=m_state_numbers.get(current_state);
     get_transitions(state,transitions, enumeration_queue);
 
@@ -805,6 +812,83 @@ void lps2lts_algorithm::generate_lts_breadth()
     {
       m_level++;
       start_level_seen = m_num_states;
+      start_level_transitions = m_num_transitions;
+    }
+
+    if (!m_options.suppress_progress_messages && time(&new_log_time) > last_log_time)
+    {
+      last_log_time = new_log_time;
+      size_t lvl_states = m_num_states - start_level_seen;
+      size_t lvl_transitions = m_num_transitions - start_level_transitions;
+      mCRL2log(status) << std::fixed << std::setprecision(2)
+                       << m_num_states << "st, " << m_num_transitions << "tr"
+                       << ", explored " << 100.0 * ((float)current_state / m_num_states)
+                       << "%. Last level: " << m_level << ", " << lvl_states << "st, " << lvl_transitions
+                       << "tr.\n";
+    }
+  }
+
+  if (current_state == m_options.max_states)
+  {
+    mCRL2log(verbose) << "explored the maximum number (" << m_options.max_states << ") of states, terminating." << std::endl;
+  }
+}
+
+void lps2lts_algorithm::generate_lts_breadth_todo_max_larger_than_0(const storage_state_t& initial_state)
+{
+  assert(m_options.todo_max>0);
+  size_t current_state = 0;
+  size_t start_level_seen = 1;
+  size_t start_level_explored = 0;
+  size_t start_level_transitions = 0;
+  time_t last_log_time = time(NULL) - 1, new_log_time;
+
+  queue<storage_state_t> state_queue;
+  state_queue.set_max_size(m_options.max_states < m_options.todo_max ? m_options.max_states : m_options.todo_max);
+  state_queue.add_to_queue(initial_state);
+  state_queue.swap_queues();
+  std::vector<next_state_generator::transition_t> transitions;
+  next_state_generator::enumerator_queue_t enumeration_queue;
+
+  while (!m_must_abort && (state_queue.remaining() > 0) &&
+         (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
+  {
+    const storage_state_t state=state_queue.get_from_queue();
+    get_transitions(state,transitions, enumeration_queue);
+
+    for (std::vector<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
+    {
+      if (add_transition(state, *i))
+      {
+        storage_state_t removed = state_queue.add_to_queue(i->internal_state());
+        if (removed != storage_state_t())
+        {
+          m_num_states--;
+        }
+      }
+    }
+    transitions.clear();
+
+    if (state_queue.remaining() == 0)
+    {
+      state_queue.swap_queues();
+    }
+
+    current_state++;
+    if (current_state == start_level_seen)
+    {
+      if (!m_options.suppress_progress_messages)
+      {
+        mCRL2log(verbose) << "monitor: level " << m_level << " done."
+                          << " (" << (current_state - start_level_explored) << " state"
+                          << ((current_state - start_level_explored)==1?"":"s") << ", "
+                          << (m_num_transitions - start_level_transitions) << " transition"
+                          << ((m_num_transitions - start_level_transitions)==1?")\n":"s)\n");
+      }
+
+      m_level++;
+      start_level_seen = m_num_states;
+      start_level_explored = current_state;
       start_level_transitions = m_num_transitions;
     }
 

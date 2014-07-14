@@ -112,7 +112,8 @@ class lps2lts_algorithm
                          std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
                          next_state_generator::enumerator_queue_t& enumeration_queue
     );
-    void generate_lts_breadth();
+    void generate_lts_breadth_todo_max_is_0();
+    void generate_lts_breadth_todo_max_larger_than_0(const storage_state_t& initial_state);
     void generate_lts_breadth_bithashing(const storage_state_t& initial_state);
     void generate_lts_depth(const storage_state_t& initial_state);
     void generate_lts_random(const storage_state_t& initial_state);
