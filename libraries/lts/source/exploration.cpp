@@ -787,7 +787,7 @@ void lps2lts_algorithm::get_transitions(const storage_state_t& state,
 
 void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos()
 {
-  assert(m_options.todo_max==string::npos);
+  assert(m_options.todo_max==std::string::npos);
   size_t current_state = 0;
   size_t start_level_seen = 1;
   size_t start_level_transitions = 0;
