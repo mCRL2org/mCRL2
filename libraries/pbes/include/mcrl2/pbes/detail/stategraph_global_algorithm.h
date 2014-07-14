@@ -186,10 +186,8 @@ class stategraph_global_algorithm: public stategraph_algorithm
       auto const& cfp_X = eq_X.control_flow_parameter_indices();
       for (std::size_t k = 0; k < cfp_X.size(); k++)
       {
-// This is slightly more efficient:
-//        auto q = Yf.source(cfp_X[k]);
-//        if (q != data::undefined_data_expression() && q != nth_element(e, k))
-        if (Yf.source(cfp_X[k]) != nth_element(e, k))
+        auto q = Yf.source(cfp_X[k]);
+        if (q != data::undefined_data_expression() && q != nth_element(e, k))
         {
           return false;
         }

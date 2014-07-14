@@ -356,8 +356,8 @@ $\text{\textbf{return} }(V,E)$%
 $\text{\textsc{EnabledEdge}}$\textsc{(}$u,i$\textsc{)} \\ 
 \textbf{let }$u=(X,e)$ \\ 
 \textbf{for }$k=1\cdots \left\vert c_{X}\right\vert $ \textbf{do} \\ 
-$\qquad \text{\textbf{if }}\mathrm{source}(X,i,\downarrow _{X}k)\neq e_{k}$ 
-\textbf{then} \\ 
+$\qquad \text{\textbf{if }}\mathrm{source}(X,i,\downarrow _{X}k)\neq \bot
+\wedge \mathrm{source}(X,i,\downarrow _{X}k)\neq e_{k}$ \textbf{then} \\ 
 $\qquad \qquad \text{\textbf{return} }false$ \\ 
 $\text{\textbf{return} }true$%
 \end{tabular}%
