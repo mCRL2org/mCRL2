@@ -57,10 +57,10 @@ class basic_rewriter
     //         variables. This name generator can be used
     //         for other renaming purposes as well.
     //  \deprecated Do not use this, as it will be removed.
-    data::set_identifier_generator& identifier_generator()
+    /* data::set_identifier_generator& identifier_generator()
     {
       return m_rewriter->identifier_generator();
-    }
+    } */
 
   protected:
 

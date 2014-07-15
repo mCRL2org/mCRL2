@@ -47,11 +47,6 @@ struct rewriter_wrapper
       return m_rewriter->rewrite(t,sigma);
     }
 
-    data::set_identifier_generator& identifier_generator()
-    {
-      return m_rewriter->identifier_generator();
-    }
-
   protected:
     Rewriter* m_rewriter;
 };
