@@ -55,7 +55,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   bool m_enumerate_infinite_sorts;
 
   /// The enumerator
-  data::enumerator_algorithm<self, DataRewriter> E;
+  data::enumerator_algorithm<self> E;
 
   /// \brief Constructor.
   /// \param r A data rewriter
@@ -261,15 +261,15 @@ struct enumerate_quantifiers_split_builder: public enumerate_quantifiers_builder
   }
 };
 
-template <typename DataRewriter, typename MutableSubstitution>
-struct apply_enumerate_quantifiers_builder: public enumerate_quantifiers_builder<apply_enumerate_quantifiers_builder<DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>
+template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
+struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>
 {
-  typedef enumerate_quantifiers_builder<apply_enumerate_quantifiers_builder<DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution> super;
+  typedef Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution> super;
   using super::enter;
   using super::leave;
   using super::operator();
 
-  apply_enumerate_quantifiers_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, bool enumerate_infinite_sorts)
+  apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, bool enumerate_infinite_sorts)
     : super(R, sigma, dataspec, enumerate_infinite_sorts)
   {}
 
@@ -277,6 +277,13 @@ struct apply_enumerate_quantifiers_builder: public enumerate_quantifiers_builder
 #include "mcrl2/core/detail/builder_msvc.inc.h"
 #endif
 };
+
+template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
+apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>
+make_apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, bool enumerate_infinite_sorts)
+{
+  return apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>(R, sigma, dataspec, enumerate_infinite_sorts);
+}
 
 } // namespace detail
 
@@ -302,13 +309,13 @@ struct enumerate_quantifiers_rewriter
   pbes_expression operator()(const pbes_expression& x) const
   {
     data::rewriter::substitution_type sigma;
-    return detail::apply_enumerate_quantifiers_builder<data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, m_dataspec, m_enumerate_infinite_sorts)(x);
+    return detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, m_dataspec, m_enumerate_infinite_sorts)(x);
   }
 
   template <typename MutableSubstitution>
   pbes_expression operator()(const pbes_expression& x, MutableSubstitution& sigma) const
   {
-    return detail::apply_enumerate_quantifiers_builder<data::rewriter, MutableSubstitution>(m_rewriter, sigma, m_dataspec, m_enumerate_infinite_sorts)(x);
+    return detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, m_dataspec, m_enumerate_infinite_sorts)(x);
   }
 };
 
