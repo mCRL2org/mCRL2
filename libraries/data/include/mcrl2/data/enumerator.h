@@ -18,6 +18,7 @@
 #include <sstream>
 #include <utility>
 #include <boost/iterator/iterator_facade.hpp>
+#include "mcrl2/atermpp/function_symbol_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
@@ -124,7 +125,7 @@ bool compute_finite_function_sorts(const function_sort& sort,
   {
     domain_expressions.push_back(enumerate_expressions(*i, dataspec, datar));
     total_domain_size = total_domain_size * domain_expressions.back().size();
-    function_parameters.push_back(variable(const_cast<IdentifierGenerator&>(id_generator)("x"), *i));
+    function_parameters.push_back(variable(const_cast<IdentifierGenerator&>(id_generator)(), *i));
   }
 
   if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
@@ -310,17 +311,37 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
   return out << "{ variables = " << core::detail::print_list(p.variables()) << ", expression = " << p.expression() << " }";
 }
 
+class enumerator_identifier_generator
+{
+  protected:
+    atermpp::function_symbol_generator f;
+
+  public:
+    /// \brief Constructor
+    /// \param The prefix of the generated generated strings
+    /// \pre The prefix may not be empty, and it may not have trailing digits
+    enumerator_identifier_generator(const std::string& prefix)
+      : f(prefix)
+    { }
+
+    /// \brief Generates a unique function symbol with the given prefix followed by a number.
+    core::identifier_string operator()()
+    {
+      return core::identifier_string(f());
+    }
+};
+
 struct sort_name_generator
 {
-  utilities::number_postfix_generator& id_generator;
+  enumerator_identifier_generator& id_generator;
 
-  sort_name_generator(utilities::number_postfix_generator& id_generator_)
+  sort_name_generator(enumerator_identifier_generator& id_generator_)
     : id_generator(id_generator_)
   {}
 
   data::variable operator()(const data::sort_expression& s) const
   {
-    return data::variable(id_generator("@x"), s);
+    return data::variable(id_generator(), s);
   }
 };
 
@@ -341,8 +362,8 @@ class enumerator_algorithm
     // Needed for enumerate_expressions
     const DataRewriter& datar;
 
-    // A name generator
-    mutable utilities::number_postfix_generator id_generator;
+    // A name generator, used for generating variable names
+    mutable enumerator_identifier_generator id_generator;
 
     /// \brief A mapping with constructors.
     mutable constructor_map m_constructors;
@@ -466,7 +487,7 @@ class enumerator_algorithm
                          std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                          bool throw_exceptions = false
                        )
-      : R(R_), dataspec(dataspec_), datar(datar_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
+      : R(R_), dataspec(dataspec_), datar(datar_), id_generator("x"), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
     {}
 
   private:
@@ -528,8 +549,8 @@ class enumerator_algorithm
         const sort_expression element_sort = container_sort(sort).element_sort();
         if (dataspec.is_certainly_finite(element_sort))
         {
-          const data_expression lambda_term = abstraction(lambda_binder(), atermpp::make_list<variable>(variable(id_generator("x"), element_sort)), sort_bool::false_());
-          const variable fset_variable(id_generator("@var_fset@", false), sort_fset::fset(element_sort));
+          const data_expression lambda_term = abstraction(lambda_binder(), atermpp::make_list<variable>(variable(id_generator(), element_sort)), sort_bool::false_());
+          const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
           const data_expression term = sort_set::constructor(element_sort, lambda_term, fset_variable);
           const data_expression old_substituted_value = sigma(v1);
           sigma[v1] = term;
