@@ -56,6 +56,7 @@ macro( gen_mcrl22lps_release_tests )
   add_mcrl22lps_release_test( "--timings" "")
   add_mcrl22lps_release_test( "-w" "")
   add_mcrl22lps_release_test( "-z" "")
+ 	set_tests_properties("mcrl22lps_${BASENAME_TEST}-ARGS-e" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
 endmacro( gen_mcrl22lps_release_tests )
 
 ####################
@@ -73,7 +74,7 @@ macro( add_lpsinfo_release_test ARGS)
 
   ADD_TEST(NAME "lpsinfo_${POST_FIX_TEST}" COMMAND lpsinfo ${ARGS} ${testdir}/${BASENAME_TEST}.lps )
 	set_tests_properties("lpsinfo_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
- 	set_tests_properties("lpsinfo_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+ 	set_tests_properties("lpsinfo_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsinfo_release_test ARGS)
 
 macro( gen_lpsinfo_release_tests )
@@ -99,7 +100,7 @@ macro( add_lpspp_release_test ARGS SAVE)
 	endif( NOT ${SAVE} )
 
 	set_tests_properties("lpspp_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpspp_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpspp_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 
 endmacro( )
 
@@ -128,7 +129,7 @@ macro( add_lps2lts_release_test ARGS SAVE)
 		endif( NOT ${SAVE} )
 
 		set_tests_properties("lps2lts_${POST_FIX_TEST}_${EXT}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-    set_tests_properties("lps2lts_${POST_FIX_TEST}_${EXT}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+    set_tests_properties("lps2lts_${POST_FIX_TEST}_${EXT}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 
 	endforeach(EXT ${LTS_EXTS})
 endmacro( add_lps2lts_release_test ARGS SAVE)
@@ -187,7 +188,7 @@ macro( add_lpsconstelm_release_test ARGS)
 
   ADD_TEST(NAME "lpsconstelm_${POST_FIX_TEST}" COMMAND lpsconstelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("lpsconstelm_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsconstelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpsconstelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsconstelm_release_test ARGS)
 
 macro( gen_lpsconstelm_release_tests )
@@ -217,7 +218,7 @@ macro( add_lpsrewr_release_test ARGS)
 
   ADD_TEST(NAME "lpsrewr_${POST_FIX_TEST}" COMMAND lpsrewr ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("lpsrewr_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsrewr_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpsrewr_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsrewr_release_test ARGS)
 
 macro( gen_lpsrewr_release_tests )
@@ -242,7 +243,7 @@ macro( add_lpsparelm_release_test ARGS)
 
   ADD_TEST(NAME "lpsparelm_${POST_FIX_TEST}" COMMAND lpsparelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("lpsparelm_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsparelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpsparelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsparelm_release_test ARGS)
 
 macro( gen_lpsparelm_release_tests )
@@ -263,7 +264,7 @@ macro( add_lpssumelm_release_test ARGS)
 
   ADD_TEST(NAME "lpssumelm_${POST_FIX_TEST}" COMMAND lpssumelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("lpssumelm_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpssumelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpssumelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpssumelm_release_test ARGS)
 
 macro( gen_lpssumelm_release_tests )
@@ -286,7 +287,7 @@ macro( add_lpsactionrename_release_test ARGS)
 
   ADD_TEST(NAME "${TESTNAME}" COMMAND lpsactionrename ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("${TESTNAME}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsactionrename_release_test ARGS)
 
 macro( gen_lpsactionrename_release_tests )
@@ -319,7 +320,7 @@ macro( add_lpsuntime_release_test ARGS)
 
   ADD_TEST(NAME "lpsuntime_${POST_FIX_TEST}" COMMAND lpsuntime ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("lpsuntime_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsuntime_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpsuntime_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsuntime_release_test ARGS)
 
 macro( gen_lpsuntime_release_tests )
@@ -342,7 +343,7 @@ macro( add_lpsinvelm_release_test ARGS)
 
   ADD_TEST(NAME "${TESTNAME}" COMMAND lpsinvelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("${TESTNAME}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsinvelm_release_test ARGS)
 
 macro( gen_lpsinvelm_release_tests )
@@ -375,7 +376,7 @@ macro( add_lpsconfcheck_release_test ARGS)
 
   ADD_TEST(NAME "${TESTNAME}" COMMAND lpsconfcheck ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("${TESTNAME}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("${TESTNAME}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsconfcheck_release_test ARGS)
 
 macro( gen_lpsconfcheck_release_tests )
@@ -411,7 +412,7 @@ macro( add_lpsbinary_release_test ARGS)
 
   ADD_TEST(NAME "lpsbinary_${POST_FIX_TEST}" COMMAND lpsbinary ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("lpsbinary_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsbinary_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpsbinary_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsbinary_release_test ARGS)
 
 macro( gen_lpsbinary_release_tests )
@@ -437,7 +438,7 @@ macro( add_lpsparunfold_release_test ARGS)
 
   ADD_TEST(NAME "lpsparunfold_${POST_FIX_TEST}" COMMAND lpsparunfold ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("lpsparunfold_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsparunfold_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpsparunfold_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsparunfold_release_test ARGS)
 
 macro( gen_lpsparunfold_release_tests )
@@ -465,7 +466,7 @@ macro( add_lpssuminst_release_test ARGS)
 
   ADD_TEST(NAME "lpssuminst_${POST_FIX_TEST}" COMMAND lpssuminst ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("lpssuminst_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpssuminst_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpssuminst_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpssuminst_release_test ARGS)
 
 macro( gen_lpssuminst_release_tests )
@@ -630,7 +631,7 @@ macro( add_lps2pbes_release_test INPUT ARGS SAVE)
       ADD_TEST(NAME "lps2pbes_${POST_FIX_TEST}" COMMAND lps2pbes ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/dummy.pbes )
 		endif( NOT ${SAVE} )
 		set_tests_properties("lps2pbes_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-    set_tests_properties("lps2pbes_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+    set_tests_properties("lps2pbes_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 
 
 endmacro( add_lps2pbes_release_test INPUT ARGS SAVE)
@@ -1262,7 +1263,7 @@ macro( add_lpsbisim2pbes_release_test ARGS )
 
   ADD_TEST(NAME "lpsbisim2pbes_${POST_FIX_TEST}" COMMAND lpsbisim2pbes ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}.pbes )
 	set_tests_properties("lpsbisim2pbes_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsbisim2pbes_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpsbisim2pbes_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 
 endmacro( add_lpsbisim2pbes_release_test ARGS )
 
@@ -1316,7 +1317,7 @@ macro( add_lpsrealelm_release_test ARGS)
 
   ADD_TEST(NAME "lpsrealelm_${POST_FIX_TEST}" COMMAND lpsrealelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
 	set_tests_properties("lpsrealelm_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-  set_tests_properties("lpsrealelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+  set_tests_properties("lpsrealelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-e" )
 endmacro( add_lpsrealelm_release_test ARGS)
 
 macro( gen_lpsrealelm_release_tests )
