@@ -35,7 +35,6 @@ data::structured_sort_constructor_list
 data::structured_sort_constructor_vector
 data::data_equation_list
 data::data_equation_vector
-lps::state
 pbes_system::pbes_equation_vector
 pbes_system::pbes_expression_list
 pbes_system::pbes_expression_vector
@@ -63,7 +62,6 @@ data::data_expression
 data::sort_expression
 data::variable_list
 lps::multi_action
-process::action
 process::action_label_list
 process::process_equation_vector
 process::process_specification
@@ -77,7 +75,6 @@ data::data_expression
 data::data_equation
 lps::multi_action
 pbes_system::pbes
-process::action
 process::process_specification
 state_formulas::state_formula
 '''

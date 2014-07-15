@@ -64,11 +64,9 @@ std::string pp(const process::tau& x) { return process::pp< process::tau >(x); }
 std::string pp(const process::untyped_action& x) { return process::pp< process::untyped_action >(x); }
 std::string pp(const process::untyped_parameter_identifier& x) { return process::pp< process::untyped_parameter_identifier >(x); }
 std::string pp(const process::untyped_process_assignment& x) { return process::pp< process::untyped_process_assignment >(x); }
-process::action normalize_sorts(const process::action& x, const data::data_specification& dataspec) { return atermpp::aterm_cast<process::action>(process::normalize_sorts<process::process_expression>(atermpp::aterm_cast<process::process_expression>(x), dataspec)); }
 process::action_label_list normalize_sorts(const process::action_label_list& x, const data::data_specification& dataspec) { return process::normalize_sorts< process::action_label_list >(x, dataspec); }
 void normalize_sorts(process::process_equation_vector& x, const data::data_specification& dataspec) { process::normalize_sorts< process::process_equation_vector >(x, dataspec); }
 void normalize_sorts(process::process_specification& x, const data::data_specification& /* dataspec */) { process::normalize_sorts< process::process_specification >(x, x.data()); }
-process::action translate_user_notation(const process::action& x) { return atermpp::aterm_cast<process::action>(process::translate_user_notation<process::process_expression>(atermpp::aterm_cast<process::process_expression>(x))); }
 void translate_user_notation(process::process_specification& x) { process::translate_user_notation< process::process_specification >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x) { return process::find_sort_expressions< process::action_label_list >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x) { return process::find_sort_expressions< process::process_equation_vector >(x); }
@@ -78,6 +76,10 @@ std::set<data::variable> find_all_variables(const process::action& x) { return p
 std::set<data::variable> find_free_variables(const process::action& x) { return process::find_free_variables< process::action >(x); }
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x) { return process::find_identifiers< process::process_specification >(x); }
 //--- end generated process overloads ---//
+
+// manually added template function overloads
+process::action normalize_sorts(const process::action& x, const data::data_specification& dataspec) { return atermpp::aterm_cast<process::action>(process::normalize_sorts<process::process_expression>(atermpp::aterm_cast<process::process_expression>(x), dataspec)); }
+process::action translate_user_notation(const process::action& x) { return atermpp::aterm_cast<process::action>(process::translate_user_notation<process::process_expression>(atermpp::aterm_cast<process::process_expression>(x))); }
 
 static bool register_hooks()
 {

@@ -23,7 +23,6 @@ namespace lps
 {
 
 //--- start generated lps overloads ---//
-// std::string pp(const lps::state& x) { return lps::pp< lps::state >(x); }
 std::string pp(const lps::action_summand& x) { return lps::pp< lps::action_summand >(x); }
 std::string pp(const lps::deadlock& x) { return lps::pp< lps::deadlock >(x); }
 std::string pp(const lps::deadlock_summand& x) { return lps::pp< lps::deadlock_summand >(x); }
