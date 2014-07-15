@@ -111,16 +111,6 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     expression_stack.push(x);
   }
 
-  void enter(const true_& x)
-  {
-    expression_stack.push(x);
-  }
-
-  void enter(const false_& x)
-  {
-    expression_stack.push(x);
-  }
-
   void enter(const propositional_variable_instantiation& x)
   {
     expression_stack.push(x);

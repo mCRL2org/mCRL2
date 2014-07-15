@@ -24,7 +24,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
-#include "mcrl2/data/detail/parse_substitutions.h"
+#include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
@@ -108,10 +108,10 @@ class rewriter_with_substitution
     /// \brief The variable type
     typedef typename Rewriter::variable_type variable_type;
 
-    rewriter_with_substitution(Rewriter& R_, const std::string& substitutions)
+    rewriter_with_substitution(Rewriter& R_, const std::string& substitution_text)
       : R(R_)
     {
-      data::detail::parse_substitutions(substitutions, sigma);
+      data::detail::parse_substitution(substitution_text, sigma);
     }
 
     /// \brief Rewrites a boolean expression.
@@ -167,11 +167,11 @@ struct equal_to: public std::binary_function<pbes_expression, pbes_expression, b
     {
       return true;
     }
-    if (is_universal_true(x) && is_universal_true(y))
+    if (is_true(x) && is_true(y))
     {
       return true;
     }
-    if (is_universal_false(x) && is_universal_false(y))
+    if (is_false(x) && is_false(y))
     {
       return true;
     }
@@ -282,6 +282,7 @@ void test_enumerate_quantifiers_rewriter()
   enumerate_quantifiers_rewriter R(datar, dataspec);
 
   // test_rewriters(N(R), N(r),  "(Y(0) && Y(1)) => (Y(1) && Y(0))"                                , "true");
+  test_rewriters(N(R), N(r),  "forall n, m: Nat. val(n > 3) || val(b)"                          , "val(b)");
   test_rewriters(N(R), N(r),  "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "Y(2) && Y(1) && Y(3) && Y(0)");
   test_rewriters(N(R), N(r),  "(Y(0) && Y(1)) => (Y(0) && Y(1))"                                , "true");
   test_rewriters(N(R), N(r),  "exists b: Bool. val(if(b, false, b))"                            , "false");
@@ -649,6 +650,25 @@ void test_data2pbes()
   BOOST_CHECK(pbes_system::pp(y) == "forall n: Nat. val(n != 3) && val(n == 5)");
 }
 
+void test_simplify_rewriter()
+{
+  std::string text =
+    "pbes nu X(b: Bool) =                                  \n"
+    "       val(b) && (X(b) || X(!b)) && (X(b) || X(!!b)); \n"
+    "                                                      \n"
+    "init X(true);                                         \n"
+    ;
+  text =  "pbes mu X0(n: Nat) =\n"
+          "           (exists t: Nat. val(t < 3) || !X0(1)) => val(n > 0);\n"
+          "     nu X1 = true;\n"
+          "init X0(0);\n"
+          ;
+
+  pbes p = txt2pbes(text, false);
+  pbes_system::simplify_rewriter R;
+  pbes_system::pbes_rewrite(p, R);
+}
+
 int test_main(int argc, char* argv[])
 {
   log::mcrl2_logger::set_reporting_level(log::debug);
@@ -662,6 +682,7 @@ int test_main(int argc, char* argv[])
   test_substitutions3();
   test_substitutions4();
   test_data2pbes();
+  test_simplify_rewriter();
 
   return 0;
 }

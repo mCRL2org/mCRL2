@@ -15,6 +15,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/abstraction.h"
 #include "mcrl2/core/detail/construction_utility.h"
 
 
@@ -30,6 +31,7 @@ namespace sort_bool
 basic_sort const& bool_();
 function_symbol const& false_();
 function_symbol const& true_();
+application and_(const data_expression&,const data_expression&);
 application not_(const data_expression&);
 bool is_bool(const sort_expression&);
 }
@@ -412,6 +414,31 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
   result.push_back(data_equation(atermpp::make_vector(x), less_equal(x,x), sort_bool::true_()));
   result.push_back(data_equation(atermpp::make_vector(x, y), greater_equal(x,y), less_equal(y,x)));
   result.push_back(data_equation(atermpp::make_vector(x, y), greater(x,y), less(y,x)));
+
+  // For a function sort, add the equation f==g iff forall x.f(x)==g(x). This equation is not in the Specification and Analysis of Communicating Systems of 2014.
+  if (is_function_sort(s))
+  {
+    const function_sort& fs=core::down_cast<function_sort>(s);
+    variable_vector xvars,yvars;
+    data_expression rhs=sort_bool::true_();
+    size_t index=0;
+    for(sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+    {
+      std::stringstream xs;
+      xs << "x" << index;
+      variable x(xs.str(),*i);
+      xvars.push_back(x);
+    }
+    variable f("f",s);
+    variable g("g",s);
+    variable_list xvar_list=variable_list(xvars.begin(),xvars.end());
+    result.push_back(data_equation(atermpp::make_list(f,g)+xvar_list,
+                                   equal_to(f,g),
+                                   abstraction(forall_binder(),xvar_list,
+                                      equal_to(
+                                          application(f,xvars.begin(),xvars.end()),
+                                          application(g,xvars.begin(),xvars.end())))));
+  }
 
   return result;
 }

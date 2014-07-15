@@ -17,6 +17,7 @@
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_explorer.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 
 using namespace mcrl2;
@@ -310,7 +311,7 @@ BOOST_AUTO_TEST_CASE(buffer_2_read_then_eventually_send_pbesparelm_simple)
   int num_transitions = 414;
 
   std::string pbes_filename = utilities::temporary_filename("pbes_explorer_test");
-  txt2pbes(pbes_text).save(pbes_filename);
+  save_pbes(txt2pbes(pbes_text), pbes_filename);
 
   run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jitty");
   run_pbes_explorer_file(pbes_filename, num_parts, num_groups, num_states, num_transitions, "jitty");

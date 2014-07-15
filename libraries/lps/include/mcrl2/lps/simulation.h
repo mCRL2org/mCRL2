@@ -16,7 +16,7 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/state.h"
+#include "mcrl2/trace/trace.h"
 
 namespace mcrl2
 {
@@ -30,6 +30,8 @@ namespace lps
 class simulation
 {
   public:
+
+    typedef atermpp::term_balanced_tree<data::data_expression> state;
     struct transition_t
     {
       state destination;
@@ -67,9 +69,10 @@ class simulation
   private:
     std::vector<transition_t> transitions(state source_state);
     std::vector<transition_t> prioritize(const std::vector<transition_t> &transitions);
+    void push_back(const lps::state& state);
     bool is_prioritized(const multi_action &action);
     void prioritize_trace();
-    std::deque<state_t> match_trace(std::deque<state_t> trace, const std::vector<transition_t> &transitions, size_t transition_number);
+    bool match_trace(trace::Trace& trace);
     bool match(const state &left, const state &right);
 
   private:

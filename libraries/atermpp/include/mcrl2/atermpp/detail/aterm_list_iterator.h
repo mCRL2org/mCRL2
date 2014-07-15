@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jan Friso Groote, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
 #define MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
 
-#include <boost/iterator/iterator_facade.hpp>
+// #include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
@@ -24,70 +24,133 @@ namespace detail
   template <class Term>
   class _aterm_list;
 }
+
 /// \endcond
 
 /// \brief Iterator for term_list.
 template <typename Term>
-class term_list_iterator: public boost::iterator_facade<
-  term_list_iterator<Term>,         // Derived
-  const Term,                       // Value
-  boost::forward_traversal_tag,     // CategoryOrTraversal
-  const Term &                      // Reference
-  >
+class term_list_iterator 
 {
-  public:
-    typedef typename boost::iterator_facade<term_list_iterator<Term>,
-            const Term,
-            boost::forward_traversal_tag,
-            const Term>::difference_type iterator_type;
+    template<class T>
+    friend class term_list;
 
-    /// \brief Constructor.
-    term_list_iterator()
-      : m_list(NULL)
-    {}
+  protected:
+    const detail::_aterm_list<Term>* m_list;
 
-    /// \brief Constructor.
+    /// \brief Constructor from an aterm which must be a list.
     /// \param l A sequence of terms
-    term_list_iterator(const aterm &l)
+    term_list_iterator(const aterm& l)
       : m_list(reinterpret_cast<const detail::_aterm_list<Term>*>(detail::address(l)))
     { 
       assert(l.type_is_list());
     } 
 
-    /// \brief Constructor.
+  public:
+    typedef Term value_type;
+    typedef Term& reference;
+    typedef Term* pointer;
+    typedef ptrdiff_t difference_type;
+    typedef std::forward_iterator_tag iterator_category;
+
+    /// \brief Default constructor.
+    term_list_iterator()
+      : m_list(NULL)
+    {}
+
+    /// \brief Copy constructor.
     /// \param l A sequence of terms
-    term_list_iterator(const detail::_aterm *l)
-      : m_list(reinterpret_cast<const detail::_aterm_list<Term>*>(l))
+    term_list_iterator(const term_list_iterator& other)
+      : m_list(other.m_list)
     { 
-      assert(l->function()==detail::function_adm.AS_LIST || l->function()==detail::function_adm.AS_EMPTY_LIST);
     } 
 
-  private:
-    friend class boost::iterator_core_access;
+    /// \brief Assignment
+    /// \param l A sequence of terms
+    term_list_iterator& operator=(const term_list_iterator& other)
+    { 
+      m_list=other.m_list;
+      return *this;
+    } 
 
-    /// \brief Equality operator
-    /// \param other An iterator
-    /// \return True if the iterators are equal
-    bool equal(term_list_iterator const& other) const
-    {
-      return this->m_list == other.m_list;
-    }
-
-    /// \brief Dereference operator
-    /// \return The value that the iterator references
-    const Term &dereference() const
+    /// \brief Dereference operator on an iterator
+    const Term& operator*() const
     {
       assert(m_list->function()==detail::function_adm.AS_LIST);
       return m_list->head;
     }
 
-    /// \brief Increments the iterator
-    void increment()
+    /// Arrow operator on an iterator
+    const Term* operator->() const
     {
+      assert(m_list->function()==detail::function_adm.AS_LIST);
+      return &m_list->head;
+    }
+    
+    /// \brief Prefix increment operator on iterator.
+    term_list_iterator& operator++()
+    {
+      assert(m_list->function()==detail::function_adm.AS_LIST);
       m_list = reinterpret_cast<const detail::_aterm_list<Term>*>(detail::address(m_list->tail));
+      return *this;
     }
 
-    const detail::_aterm_list<Term>* m_list;
+    /// \brief Postfix increment operator on iterator.
+    term_list_iterator operator++(int)
+    {
+      assert(m_list->function()==detail::function_adm.AS_LIST);
+      const term_list_iterator temp = *this;
+      m_list = reinterpret_cast<const detail::_aterm_list<Term>*>(detail::address(m_list->tail));
+      return temp;
+    }
+
+    /// \brief Equality of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_list.
+    bool operator ==(const term_list_iterator& other) const
+    {
+      return m_list == other.m_list;
+    }
+
+    /// \brief Inequality of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators do not point to the same term_list.
+    bool operator !=(const term_list_iterator& other) const
+    {
+      return m_list != other.m_list;
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the pointer to this termlist is smaller than the other pointer.
+    bool operator <(const term_list_iterator& other) const
+    {
+      return m_list < other.m_list;
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_list.
+    bool operator <=(const term_list_iterator& other) const
+    {
+      return m_list <= other.m_list;
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_list.
+    bool operator >(const term_list_iterator& other) const
+    {
+      return m_list > other.m_list;
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_list.
+    bool operator >=(const term_list_iterator& other) const
+    {
+      return m_list >= other.m_list;
+    }
+
 };
 
 } // namespace atermpp

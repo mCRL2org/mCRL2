@@ -222,7 +222,7 @@ class Induction
     /// \brief
     Induction(const data_specification& a_data_spec)
     {
-      f_constructors=function_symbol_list(atermpp::convert< atermpp::aterm_list > (a_data_spec.constructors()));
+      f_constructors=function_symbol_list(a_data_spec.constructors().begin(),a_data_spec.constructors().end());
       f_cons_name = sort_list::cons_name();
     }
 

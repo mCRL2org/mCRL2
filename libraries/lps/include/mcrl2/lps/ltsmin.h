@@ -25,7 +25,7 @@
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
@@ -33,7 +33,7 @@
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/next_state_generator.h"
 
 // For backwards compatibility
@@ -53,15 +53,21 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   std::size_t max_internal_variables = 10000;
 
   data::rewriter rewr(dataspec);
-  data::classic_enumerator<data::rewriter> enumerator(dataspec, rewr);
+
+  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+  typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
+
+  enumerator_type enumerator(rewr, dataspec, rewr, max_internal_variables);
   data::variable x("x", s);
   data::variable_vector v;
   v.push_back(x);
   data::mutable_indexed_substitution<> sigma;
-  for (data::classic_enumerator<data::rewriter>::iterator
-       i = enumerator.begin(data::variable_list(v.begin(),v.end()), data::sort_bool::true_(), sigma, max_internal_variables); i != enumerator.end() ; ++i)
+  data::variable_list vl(v.begin(),v.end());
+  std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+  for (auto i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() ; ++i)
   {
-    result.push_back(to_string(i->front()));
+    i->add_assignments(vl, sigma, rewr);
+    result.push_back(to_string(sigma(vl.front())));
     if (result.size() >= max_size)
     {
       break;
@@ -75,7 +81,7 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
 class pins_data_type
 {
   protected:
-    atermpp::indexed_set m_indexed_set;
+    atermpp::indexed_set<atermpp::aterm> m_indexed_set;
     lps::next_state_generator& m_generator;
     bool m_is_bounded;
 
@@ -198,13 +204,13 @@ class pins_data_type
     }
 
     /// \brief Returns the indexed_set holding the values
-    atermpp::indexed_set& indexed_set()
+    atermpp::indexed_set<atermpp::aterm>& indexed_set()
     {
       return m_indexed_set;
     }
 
     /// \brief Returns the indexed_set holding the values
-    const atermpp::indexed_set& indexed_set() const
+    const atermpp::indexed_set<atermpp::aterm>& indexed_set() const
     {
       return m_indexed_set;
     }
@@ -324,7 +330,6 @@ class pins
     std::vector<std::vector<size_t> > m_write_group;
     lps::specification m_specification;
     lps::next_state_generator m_generator;
-    lps::next_state_generator::substitution_t m_substitution;
     std::vector<std::string> m_process_parameter_names;
 
     // The type mappings
@@ -448,7 +453,7 @@ class pins
                               std::inserter(used_write_parameters,
                                             used_write_parameters.begin()));
 
-        std::vector<data::variable> parameters_list = atermpp::convert<std::vector<data::variable> >(proc.process_parameters());
+        std::vector<data::variable> parameters_list(proc.process_parameters().begin(),proc.process_parameters().end());
 
         for (std::vector<data::variable>::const_iterator j = parameters_list.begin(); j != parameters_list.end(); ++j)
         {
@@ -482,7 +487,7 @@ class pins
     static lps::specification load_specification(const std::string& filename)
     {
       lps::specification specification;
-      specification.load(filename);
+      load_lps(specification, filename);
       return specification;
     }
 
@@ -505,7 +510,7 @@ class pins
       // Each state parameter type gets it's own pins_data_type. State parameters of the same
       // type share the pins_data_type.
       std::map<data::sort_expression, pins_data_type*> existing_type_maps;
-      std::vector<data::variable> parameters = atermpp::convert<std::vector<data::variable> >(process().process_parameters());
+      std::vector<data::variable> parameters(process().process_parameters().begin(),process().process_parameters().end());
       for (std::size_t i = 0; i < params.size(); i++)
       {
         data::sort_expression s = parameters[i].sort();
@@ -617,7 +622,7 @@ class pins
     /// \brief Assigns the initial state to s.
     void get_initial_state(ltsmin_state_type& s)
     {
-      data::data_expression_vector initial_state = m_generator.internal_initial_state();
+      state initial_state = m_generator.initial_state();
       for (size_t i = 0; i < m_state_length; i++)
       {
         s[i] = state_type_map(i)[initial_state[i]];
@@ -659,11 +664,13 @@ class pins
       {
         state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
-      data::data_expression_vector source = state_arguments;
+      // data::data_expression_vector source = state_arguments;
+      state source(state_arguments.begin(),nparams);
 
-      for (next_state_generator::iterator i = m_generator.begin(source, &m_substitution); i; i++)
+      next_state_generator::enumerator_queue_t enumeration_queue;
+      for (next_state_generator::iterator i = m_generator.begin(source, &enumeration_queue); i; i++)
       {
-        data::data_expression_vector destination = i->internal_state();
+        state destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
@@ -699,11 +706,12 @@ class pins
       {
         state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
-      data::data_expression_vector source = state_arguments;
+      state source(state_arguments.begin(),nparams);
 
-      for (next_state_generator::iterator i = m_generator.begin(source, &m_substitution, group); i; i++)
+      next_state_generator::enumerator_queue_t enumeration_queue;
+      for (next_state_generator::iterator i = m_generator.begin(source, group, &enumeration_queue); i; i++)
       {
-        data::data_expression_vector destination = i->internal_state();
+        state destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];

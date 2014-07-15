@@ -15,8 +15,6 @@
 #ifndef MCRL2_DATA_BOOL_H
 #define MCRL2_DATA_BOOL_H
 
-#include "boost/utility.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -62,6 +60,7 @@ namespace mcrl2 {
         return false;
       }
 
+
       /// \brief Generate identifier true
       /// \return Identifier true
       inline
@@ -72,14 +71,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol true
+      
       /// \return Function symbol true_
       inline
       function_symbol const& true_()
       {
-        static function_symbol true_ = function_symbol(true_name(), bool_());
+        static function_symbol true_(true_name(), bool_());
         return true_;
       }
-
 
       /// \brief Recogniser for function true
       /// \param e A data expression
@@ -104,14 +103,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol false
+      
       /// \return Function symbol false_
       inline
       function_symbol const& false_()
       {
-        static function_symbol false_ = function_symbol(false_name(), bool_());
+        static function_symbol false_(false_name(), bool_());
         return false_;
       }
-
 
       /// \brief Recogniser for function false
       /// \param e A data expression
@@ -125,7 +124,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined constructors for bool_
       /// \return All system defined constructors for bool_
       inline
@@ -137,6 +135,7 @@ namespace mcrl2 {
 
         return result;
       }
+
       /// \brief Generate identifier !
       /// \return Identifier !
       inline
@@ -147,14 +146,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol !
+      
       /// \return Function symbol not_
       inline
       function_symbol const& not_()
       {
-        static function_symbol not_ = function_symbol(not_name(), make_function_sort(bool_(), bool_()));
+        static function_symbol not_(not_name(), make_function_sort(bool_(), bool_()));
         return not_;
       }
-
 
       /// \brief Recogniser for function !
       /// \param e A data expression
@@ -170,6 +169,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol !
+      
       /// \param arg0 A data expression
       /// \return Application of ! to a number of arguments
       inline
@@ -202,14 +202,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol &&
+      
       /// \return Function symbol and_
       inline
       function_symbol const& and_()
       {
-        static function_symbol and_ = function_symbol(and_name(), make_function_sort(bool_(), bool_(), bool_()));
+        static function_symbol and_(and_name(), make_function_sort(bool_(), bool_(), bool_()));
         return and_;
       }
-
 
       /// \brief Recogniser for function &&
       /// \param e A data expression
@@ -225,6 +225,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol &&
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of && to a number of arguments
@@ -258,14 +259,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol ||
+      
       /// \return Function symbol or_
       inline
       function_symbol const& or_()
       {
-        static function_symbol or_ = function_symbol(or_name(), make_function_sort(bool_(), bool_(), bool_()));
+        static function_symbol or_(or_name(), make_function_sort(bool_(), bool_(), bool_()));
         return or_;
       }
-
 
       /// \brief Recogniser for function ||
       /// \param e A data expression
@@ -281,6 +282,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol ||
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of || to a number of arguments
@@ -314,14 +316,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol =>
+      
       /// \return Function symbol implies
       inline
       function_symbol const& implies()
       {
-        static function_symbol implies = function_symbol(implies_name(), make_function_sort(bool_(), bool_(), bool_()));
+        static function_symbol implies(implies_name(), make_function_sort(bool_(), bool_(), bool_()));
         return implies;
       }
-
 
       /// \brief Recogniser for function =>
       /// \param e A data expression
@@ -337,6 +339,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol =>
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of => to a number of arguments
@@ -359,7 +362,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined mappings for bool_
       /// \return All system defined mappings for bool_
       inline
@@ -381,7 +383,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -393,7 +395,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::aterm_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -405,7 +407,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_not_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for bool_

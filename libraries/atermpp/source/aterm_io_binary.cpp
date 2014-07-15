@@ -30,10 +30,10 @@ using detail::writeInt;
 
 using namespace std;
 
-static void aterm_io_init(std::basic_ios<char>& 
+static void aterm_io_init(std::basic_ios<char>&
 #ifdef WIN32 // This suppresses a compiler warning.
 s
-#endif 
+#endif
 )
 {
   /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
@@ -1069,7 +1069,7 @@ aterm read_baf(istream &is)
   std::size_t version = readInt(is);
   if (version != BAF_VERSION)
   {
-    throw baf_version_error("wrong BAF version number ", version, BAF_VERSION);
+    throw baf_version_error(version, BAF_VERSION);
   }
 
   nr_unique_symbols = readInt(is);

@@ -14,7 +14,6 @@
 
 #ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 
-#include "mcrl2/core/hash.h"
 #include "mcrl2/data/variable.h"
 
 namespace std {
@@ -25,7 +24,7 @@ struct hash<std::pair<mcrl2::core::identifier_string, mcrl2::data::variable_list
 {
   std::size_t operator()(const std::pair<mcrl2::core::identifier_string, mcrl2::data::variable_list>& x) const
   {
-    return mcrl2::core::hash_value(x.first, x.second);
+    return std::hash<std::pair<atermpp::aterm,atermpp::aterm> >()(x);
   }
 };
 
@@ -35,7 +34,7 @@ struct hash<std::pair<mcrl2::core::identifier_string, mcrl2::data::data_expressi
 {
   std::size_t operator()(const std::pair<mcrl2::core::identifier_string, mcrl2::data::data_expression_list>& x) const
   {
-    return mcrl2::core::hash_value(x.first, x.second);
+    return std::hash<std::pair<atermpp::aterm,atermpp::aterm> >()(x);
   }
 };
 

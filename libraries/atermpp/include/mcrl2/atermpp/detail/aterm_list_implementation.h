@@ -12,7 +12,7 @@ namespace atermpp
 {
 
 template <class Term>
-void term_list<Term>::push_front(const Term &el)
+void term_list<Term>::push_front(const Term& el)
 {
    *this=aterm_cast<const term_list<Term> > (term_appl<aterm> (detail::function_adm.AS_LIST,el,*this));
 }
@@ -20,7 +20,7 @@ void term_list<Term>::push_front(const Term &el)
 
 template <typename Term>
 inline
-term_list<Term> push_back(const term_list<Term> &l, const Term &el)
+term_list<Term> push_back(const term_list<Term>& l, const Term& el)
 {
   typedef typename term_list<Term>::const_iterator const_iterator;
   
@@ -50,7 +50,7 @@ term_list<Term> push_back(const term_list<Term> &l, const Term &el)
 
 template <typename Term>
 inline
-term_list<Term> reverse(const term_list<Term> &l)
+term_list<Term> reverse(const term_list<Term>& l)
 {
   term_list<Term> result;
   for(typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -63,7 +63,7 @@ term_list<Term> reverse(const term_list<Term> &l)
 
 template <typename Term>
 inline
-term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
+term_list<Term> remove_one_element(const term_list<Term>& list, const Term& t)
 {
   typedef typename term_list<Term>::const_iterator const_iterator;
   
@@ -107,7 +107,7 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
 
 template <typename Term>
 inline
-term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
+term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
 {
   typedef typename term_list<Term>::const_iterator const_iterator;
 
@@ -149,10 +149,10 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
 namespace detail
 {
   template <class Term, class Iter, class ATermConverter>
-  inline const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm)
+  inline const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm)
   {
-    BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-    BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
     const _aterm* result=aterm::empty_aterm_list();
     while (first != last)
     {
@@ -163,10 +163,10 @@ namespace detail
 
 
   template <class Term, class Iter, class ATermConverter>
-  inline const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter &convert_to_aterm)
+  inline const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm)
   {
-    BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-    BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     const size_t len=std::distance(first,last);
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,Term, len);

@@ -16,7 +16,9 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
-#include "mcrl2/pbes/file_formats.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/bes/io.h"
+#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
 namespace mcrl2
@@ -33,53 +35,29 @@ namespace tools
 template <typename Tool>
 class pbes_output_tool: public Tool
 {
-  public:
-
-    /// \brief Returns a description of a pbes file format
-    /// \param f a pbes file format
-    /// \return A description of the file format
-    static
-    std::string output_description(pbes_system::pbes_file_format f)
-    {
-      switch (f)
-      {
-        case pbes_system::pbes_file_pbes     :
-          return "  'pbes'     PBES in internal format";
-        case pbes_system::pbes_file_bes      :
-          return "  'bes'      BES in internal format";
-        case pbes_system::pbes_file_cwi      :
-          return "  'cwi'      BES in CWI format";
-        case pbes_system::pbes_file_pgsolver :
-          return "  'pgsolver' max-parity game in PGSolver format";
-        default:
-          return "  unknown file format";
-      }
-    }
-
   protected:
 
     /// \brief The type of the pbes output format
-    pbes_system::pbes_file_format m_pbes_output_format;
+    const file_format* m_pbes_output_format;
 
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
     /// \return The set { pbes, bes, cwi, pgsolver }
-    virtual std::set<pbes_system::pbes_file_format> available_output_formats() const
+    virtual std::set<const file_format*> available_output_formats() const
     {
-      std::set<pbes_system::pbes_file_format> result;
-      result.insert(pbes_system::pbes_file_pbes);
-      result.insert(pbes_system::pbes_file_bes);
-      result.insert(pbes_system::pbes_file_cwi);
-      result.insert(pbes_system::pbes_file_pgsolver);
+      std::set<const file_format*> result;
+      result.insert(pbes_system::pbes_format_internal());
+      result.insert(pbes_system::pbes_format_internal_text());
+      result.insert(pbes_system::pbes_format_text());
       return result;
     }
 
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual std::string default_output_format() const
+    virtual const file_format* default_output_format() const
     {
-      return "pbes";
+      return pbes_system::guess_format(Tool::output_filename());
     }
 
     /// \brief Add options to an interface description. Also includes
@@ -88,22 +66,13 @@ class pbes_output_tool: public Tool
     void add_options(interface_description& desc)
     {
       Tool::add_options(desc);
-      std::string text = "use output format FORMAT:\n";
-      std::set<pbes_system::pbes_file_format> types = available_output_formats();
-      for (typename std::set<pbes_system::pbes_file_format>::iterator i = types.begin(); i != types.end(); ++i)
+      std::set<const file_format*> types = available_output_formats();
+      auto option_argument = make_enum_argument<std::string>("FORMAT");
+      for (auto it = types.begin(); it != types.end(); ++it)
       {
-        text = text + (i == types.begin() ? "" : "\n") + output_description(*i);
-        if(pbes_system::file_format_to_string(*i) == default_output_format())
-        {
-          text = text + " (default)";
-        }
+        option_argument.add_value_desc((*it)->shortname(), (*it)->description(), *it == default_output_format());
       }
-      desc.add_option(
-        "out",
-        make_mandatory_argument("FORMAT"),
-        text,
-        'o'
-      );
+      desc.add_option("out", option_argument, "use output format FORMAT:", 'o');
     }
 
     /// \brief Parse non-standard options
@@ -111,20 +80,28 @@ class pbes_output_tool: public Tool
     void parse_options(const command_line_parser& parser)
     {
       Tool::parse_options(parser);
+      m_pbes_output_format = file_format::unknown();
       if(parser.options.count("out"))
       {
-        m_pbes_output_format = pbes_system::file_format_from_string(parser.option_argument("out"));
+        std::set<const file_format*> types = available_output_formats();
+        std::string arg = parser.option_argument_as<std::string>("out");
+        for (auto it = types.begin(); it != types.end(); ++it)
+        {
+          if ((*it)->shortname() == arg)
+          {
+            m_pbes_output_format = *it;
+          }
+        }
+        if (m_pbes_output_format == file_format::unknown())
+        {
+          mCRL2log(log::warning) << "Invalid input format given (" << arg << ").\n";
+        }
       }
-      else
+      if (m_pbes_output_format == file_format::unknown())
       {
-        try
-        {
-          m_pbes_output_format = pbes_system::guess_format(Tool::output_filename());
-        }
-        catch(mcrl2::runtime_error&)
-        {
-          m_pbes_output_format = pbes_system::file_format_from_string(default_output_format());
-        }
+        m_pbes_output_format = default_output_format();
+        mCRL2log(log::verbose) << "Guessing output format: " << m_pbes_output_format->description()
+                               << std::endl;
       }
     }
 
@@ -147,7 +124,7 @@ class pbes_output_tool: public Tool
 
     /// \brief Returns the output format
     /// \return The output format
-    pbes_system::pbes_file_format pbes_output_format() const
+    const file_format* pbes_output_format() const
     {
       return m_pbes_output_format;
     }
@@ -175,18 +152,40 @@ class bes_output_tool: public pbes_output_tool<Tool>
     {}
 
   protected:
+
+    /// \brief Returns the file formats that are available for this tool.
+    /// Override this method to change the standard behavior.
+    /// \return The set { pbes, bes, cwi, pgsolver }
+    virtual std::set<const file_format*> available_output_formats() const
+    {
+      std::set<const file_format*> result;
+      result.insert(pbes_system::pbes_format_internal());
+      result.insert(pbes_system::pbes_format_internal_text());
+      result.insert(pbes_system::pbes_format_text());
+      result.insert(bes::bes_format_internal());
+      result.insert(bes::bes_format_internal_text());
+      result.insert(bes::bes_format_cwi());
+      result.insert(bes::bes_format_pgsolver());
+      return result;
+    }
+
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual std::string default_output_format() const
+    virtual const file_format* default_output_format() const
     {
-      return "bes";
+      const file_format* result = bes::guess_format(Tool::output_filename());
+      if (result == file_format::unknown())
+      {
+        result = pbes_system::guess_format(Tool::output_filename());
+      }
+      return result;
     }
 
   public:
     /// \brief Returns the output format
     /// \return The output file format
-    pbes_system::pbes_file_format bes_output_format() const
+    const file_format* bes_output_format() const
     {
       return pbes_output_tool<Tool>::pbes_output_format();
     }

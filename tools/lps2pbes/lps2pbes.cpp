@@ -20,9 +20,9 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
 
-class lps2pbes_tool : public input_output_tool
+class lps2pbes_tool : public pbes_output_tool<input_output_tool>
 {
-    typedef input_output_tool super;
+    typedef pbes_output_tool<input_output_tool> super;
 
   protected:
     std::string formula_filename;
@@ -75,6 +75,7 @@ class lps2pbes_tool : public input_output_tool
     {
       lps2pbes(input_filename(),
                output_filename(),
+               pbes_output_format(),
                formula_filename,
                timed,
                structured,

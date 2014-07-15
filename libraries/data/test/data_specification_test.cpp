@@ -10,7 +10,6 @@
 /// \brief Basic regression test for data specifications.
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/data_specification.h"
@@ -204,11 +203,11 @@ void test_aliases()
   /* std::set< sort_expression > aliases;
   aliases.insert(s1);
   aliases.insert(s2);
-  spec.add_aliases(boost::make_iterator_range(aliases));
+  spec.add_aliases(aliases);
 
   BOOST_CHECK(boost::distance(spec.aliases(s)) == 2);
   BOOST_CHECK(boost::distance(spec.aliases(t)) == 0);
-  BOOST_CHECK(spec.aliases(s) == boost::make_iterator_range(aliases)); */
+  BOOST_CHECK(spec.aliases(s) == aliases); */
 }
 
 void test_constructors()
@@ -327,7 +326,7 @@ void test_equations()
   data::function_symbol f("f", s0s);
   variable x("x", s0);
   data_expression_vector xel(atermpp::make_vector(reinterpret_cast<data_expression&>(x)));
-  application fx(f, boost::make_iterator_range(xel));
+  application fx(f, xel.begin(), xel.end());
   variable_vector xl(atermpp::make_vector(x));
   data_equation fxx(xl, x, fx, x);
 
@@ -369,7 +368,7 @@ void test_is_certainly_finite()
   data::function_symbol f("f", s);
   data::function_symbol g("g", s0s0);
   variable x("x", s0);
-  application gx(g, boost::make_iterator_range(atermpp::make_vector(static_cast<data_expression&>(x))));
+  application gx(g, atermpp::make_vector(static_cast<data_expression&>(x)));
   data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
@@ -425,17 +424,14 @@ void test_is_certainly_finite()
   arguments.push_back(data::structured_sort_constructor_argument(s1));
 
   std::vector< data::structured_sort_constructor > constructors;
-  constructors.push_back(data::structured_sort_constructor("a",
-                         boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
-  constructors.push_back(data::structured_sort_constructor("b",
-                         boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2)));
-  constructors.push_back(data::structured_sort_constructor("b",
-                         boost::make_iterator_range(arguments.begin() + 2, arguments.begin() + 3)));
+  constructors.push_back(data::structured_sort_constructor("a", structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1)));
+  constructors.push_back(data::structured_sort_constructor("b", structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.begin() + 2)));
+  constructors.push_back(data::structured_sort_constructor("b", structured_sort_constructor_argument_list(arguments.begin() + 2, arguments.begin() + 3)));
 
-  structured_sort struct1(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1));
-  structured_sort struct2(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2));
-  structured_sort struct3(boost::make_iterator_range(constructors.begin() + 2, constructors.begin() + 3));
-  structured_sort struct4(boost::make_iterator_range(constructors.begin() + 0, constructors.begin() + 3));
+  structured_sort struct1(structured_sort_constructor_list(constructors.begin(), constructors.begin() + 1));
+  structured_sort struct2(structured_sort_constructor_list(constructors.begin() + 1, constructors.begin() + 2));
+  structured_sort struct3(structured_sort_constructor_list(constructors.begin() + 2, constructors.begin() + 3));
+  structured_sort struct4(structured_sort_constructor_list(constructors.begin() + 0, constructors.begin() + 3));
   spec.add_sort(struct1);
   spec.add_sort(struct2);
   spec.add_sort(struct3);
@@ -547,8 +543,7 @@ void test_system_defined()
   arguments.push_back(data::structured_sort_constructor_argument(basic_sort("Q")));
 
   std::vector< data::structured_sort_constructor > constructors;
-  constructors.push_back(data::structured_sort_constructor("q",
-                         boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+  constructors.push_back(data::structured_sort_constructor("q",structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1)));
 
   specification.add_alias(alias(basic_sort("Q"), data::structured_sort(constructors)));
 }
@@ -656,12 +651,12 @@ void test_normalisation()
 
   std::vector< structured_sort_constructor > constructors;
 
-  constructors.push_back(structured_sort_constructor("a", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
-  constructors.push_back(structured_sort_constructor("b", boost::make_iterator_range(arguments.begin() + 1, arguments.end())));
+  constructors.push_back(structured_sort_constructor("a", structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1)));
+  constructors.push_back(structured_sort_constructor("b", structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.end())));
   constructors.push_back(structured_sort_constructor("c"));
 
-  structured_sort sA(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)));
-  structured_sort sB(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
+  structured_sort sA(data::structured_sort(structured_sort_constructor_list(constructors.begin(), constructors.begin() + 1)));
+  structured_sort sB(data::structured_sort(structured_sort_constructor_list(constructors.begin() + 1, constructors.end())));
 
   const std::vector<sort_expression> sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sA,specification)) != sorts.end());

@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -12,16 +12,20 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
-#include <functional>
+#include <deque>
+#include <limits>
+#include <map>
+#include <sstream>
 #include <utility>
-#include "mcrl2/utilities/sequence.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
+#include <boost/iterator/iterator_facade.hpp>
+#include "mcrl2/atermpp/function_symbol_generator.h"
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/number_postfix_generator.h"
+#include "mcrl2/data/substitutions/enumerator_substitution.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/detail/enumerator_variable_limit.h"
+#include "mcrl2/utilities/math.h"
 
 namespace mcrl2
 {
@@ -29,170 +33,787 @@ namespace mcrl2
 namespace data
 {
 
-/// \cond INTERNAL_DOCS
 namespace detail
 {
 
-struct data_enumerator_helper
+inline
+data_expression make_set_(std::size_t function_index, const sort_expression& element_sort, const data_expression_vector& set_elements)
 {
-  const data_expression_with_variables& e_;
-  const std::vector<data_expression_with_variables>& values_;
-  std::vector<data_expression_with_variables>& result_;
-
-  data_enumerator_helper(const data_expression_with_variables& e,
-                         const std::vector<data_expression_with_variables>& values,
-                         std::vector<data_expression_with_variables>& result
-                        )
-    : e_(e), values_(values), result_(result)
-  {}
-
-  /// \brief Function call operator
-  void operator()()
+  data_expression result = sort_fset::empty(element_sort);
+  for (auto i = set_elements.begin(); i != set_elements.end(); ++i)
   {
-    data_expression d = data::replace_variables(static_cast<const data_expression&>(e_), data::make_sequence_sequence_substitution(e_.variables(), values_));
-
-    std::vector<variable> v;
-    for (std::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
+    if (function_index % 2 == 1)
     {
-      v.insert(v.end(), i->variables().begin(), i->variables().end());
+      result=sort_fset::insert(element_sort, *i, result);
     }
-    result_.push_back(data_expression_with_variables(d, variable_list(v.begin(), v.end())));
+    function_index = function_index / 2;
+  }
+  return result;
+}
+
+inline
+data_expression make_if_expression_(std::size_t& function_index,
+                                   const std::size_t argument_index,
+                                   const std::vector<data_expression_vector>& data_domain_expressions,
+                                   const data_expression_vector& codomain_expressions,
+                                   const variable_vector& parameters)
+{
+  if (argument_index == data_domain_expressions.size())
+  {
+    std::size_t result_expression_index = function_index % codomain_expressions.size();
+    function_index = function_index / codomain_expressions.size();
+    return codomain_expressions[result_expression_index];
+  }
+
+  data_expression result;
+  const data_expression_vector& current_enumerated_elements = data_domain_expressions[argument_index];
+  for (auto i = current_enumerated_elements.rbegin(); i != current_enumerated_elements.rend(); ++i)
+  {
+    if (i == current_enumerated_elements.rbegin())
+    {
+      result = make_if_expression_(function_index, argument_index + 1, data_domain_expressions, codomain_expressions, parameters);
+    }
+    else
+    {
+      const data_expression lhs = make_if_expression_(function_index, argument_index + 1, data_domain_expressions, codomain_expressions, parameters);
+      if (lhs != result) // Optimize: if the lhs and rhs are equal, return the rhs.
+      {
+        result = if_(equal_to(parameters[argument_index], *i), lhs, result);
+      }
+    }
+  }
+  return result;
+}
+
+/// \brief Computes the elements of a finite set sort, and puts them in result. If there are too many elements, false is returned.
+template <class Rewriter, class MutableSubstitution>
+bool compute_finite_set_elements(const container_sort& sort, const data_specification& dataspec, Rewriter datar, MutableSubstitution& sigma, data_expression_vector& result)
+{
+  data_expression_vector all_element_expressions = enumerate_expressions(sort.element_sort(), dataspec, datar);
+  if (all_element_expressions.size() >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
+  {
+    return false;
+  }
+  if (all_element_expressions.size() > 16)  // If there are more than 2^16 functions, provide a warning.
+  {
+    mCRL2log(log::warning) << "Generate 2^" << all_element_expressions.size() << " sets to enumerate sort " << sort << "\n";
+  }
+  const size_t number_of_sets = utilities::power_size_t(2, all_element_expressions.size());
+  for (std::size_t i = 0; i < number_of_sets; ++i)
+  {
+    result.push_back(datar(make_set_(i, sort.element_sort(), all_element_expressions), sigma));
+  }
+  return true;
+}
+
+/// \brief Computes the elements of a finite function sort, and puts them in result. If there are too many elements, false is returned.
+template <class IdentifierGenerator, class Rewriter>
+bool compute_finite_function_sorts(const function_sort& sort,
+                                   const IdentifierGenerator& id_generator,
+                                   const data::data_specification& dataspec,
+                                   Rewriter datar,
+                                   data_expression_vector& result,
+                                   variable_list& function_parameter_list
+                                  )
+{
+  data_expression_vector codomain_expressions = enumerate_expressions(sort.codomain(), dataspec, datar);
+  std::vector<data_expression_vector> domain_expressions;
+  std::size_t total_domain_size = 1;
+  variable_vector function_parameters;
+
+  for (auto i = sort.domain().begin(); i != sort.domain().end(); ++i)
+  {
+    domain_expressions.push_back(enumerate_expressions(*i, dataspec, datar));
+    total_domain_size = total_domain_size * domain_expressions.back().size();
+    function_parameters.push_back(variable(const_cast<IdentifierGenerator&>(id_generator)(), *i));
+  }
+
+  if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
+  {
+    return false;
+  }
+
+  if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) > 16)  // If there are more than 2^16 functions, provide a warning.
+  {
+    mCRL2log(log::warning) << "Generate " << codomain_expressions.size() << "^" << total_domain_size << " functions to enumerate sort " << sort << "\n";
+  }
+
+  function_parameter_list = variable_list(function_parameters.begin(), function_parameters.end());
+
+  const std::size_t number_of_functions = utilities::power_size_t(codomain_expressions.size(), total_domain_size);
+
+  if (number_of_functions == 1)
+  {
+    result.push_back(abstraction(lambda_binder(), function_parameter_list, codomain_expressions.front()));
+  }
+  else
+  {
+    for (std::size_t i = 0; i < number_of_functions; ++i)
+    {
+      std::size_t function_index = i; // function_index is changed in make_if_expression. A copy is therefore required.
+      result.push_back(abstraction(lambda_binder(), function_parameter_list, make_if_expression_(function_index, 0, domain_expressions, codomain_expressions, function_parameters)));
+    }
+  }
+  return true;
+}
+
+} // namespace detail
+
+struct is_not_false
+{
+  typedef core::term_traits<data_expression> tr;
+  bool operator()(const data_expression& x) const
+  {
+    return !tr::is_false(x);
   }
 };
 
-} // namespace detail
-/// \endcond
+struct is_not_true
+{
+  typedef core::term_traits<data_expression> tr;
+  bool operator()(const data_expression& x) const
+  {
+    return !tr::is_true(x);
+  }
+};
 
-/// \brief Class for enumerating data expressions.
-class data_enumerator
+/// \brief The default element for the todo list of the enumerator
+template <typename Expression = data::data_expression>
+class enumerator_list_element
 {
   protected:
+    data::variable_list v;
+    Expression phi;
 
-    /// \brief A map that caches the constructors corresponding to sort expressions.
-    typedef std::map<sort_expression, std::vector<function_symbol> > constructor_map;
+  public:
+    /// \brief Constructs the element (v, phi)
+    enumerator_list_element(const data::variable_list& v_, const Expression& phi_)
+      : v(v_), phi(phi_)
+    {}
+
+    /// \brief Constructs the element (v, phi)
+    enumerator_list_element(const data::variable_list& v_,
+                            const Expression& phi_,
+                            const enumerator_list_element&
+                           )
+      : v(v_), phi(phi_)
+    {}
+
+    /// \brief Constructs the element (v, phi)
+    enumerator_list_element(const data::variable_list& v_,
+                            const Expression& phi_,
+                            const enumerator_list_element&,
+                            const data::variable&,
+                            const data::data_expression&
+                           )
+      : v(v_), phi(phi_)
+    {}
+
+    const data::variable_list& variables() const
+    {
+      return v;
+    }
+
+    const Expression& expression() const
+    {
+      return phi;
+    }
+
+    Expression& expression()
+    {
+      return phi;
+    }
+
+    bool is_solution() const
+    {
+      return v.empty();
+    }
+
+    /// \brief Invalidates the element, by giving phi an undefined value
+    void invalidate()
+    {
+      phi = data::undefined_data_expression();
+    }
+
+    /// \brief Returns true if the element is valid. If it becomes false, this is used to signal that
+    /// the enumeration has been aborted.
+    bool is_valid() const
+    {
+      return phi != data::undefined_data_expression();
+    }
+};
+
+/// \brief An element for the todo list of the enumerator that collects the substitution
+/// corresponding to the expression phi
+template <typename Expression = data::data_expression>
+class enumerator_list_element_with_substitution: public enumerator_list_element<Expression>
+{
+  protected:
+    data::variable_list m_variables;
+    data::data_expression_list m_expressions;
+
+    // TODO: this is a hack to solve an efficiency problem in the data rewriter
+    static mutable_indexed_substitution<>& empty_substitution()
+    {
+      static mutable_indexed_substitution<> result;
+      return result;
+    }
+
+  public:
+    /// \brief Constructs the element (v, phi, [])
+    enumerator_list_element_with_substitution(const data::variable_list& v, const Expression& phi)
+      : enumerator_list_element<Expression>(v, phi)
+    {}
+
+    /// \brief Constructs the element (v, phi, e.sigma[v := x])
+    enumerator_list_element_with_substitution(const data::variable_list& v,
+                            const Expression& phi,
+                            const enumerator_list_element_with_substitution<Expression>& elem
+                           )
+      : enumerator_list_element<Expression>(v, phi),
+        m_variables(elem.m_variables),
+        m_expressions(elem.m_expressions)
+    {
+    }
+
+    /// \brief Constructs the element (v, phi, e.sigma[v := x])
+    enumerator_list_element_with_substitution(
+                            const data::variable_list& v,
+                            const Expression& phi,
+                            const enumerator_list_element_with_substitution<Expression>& elem,
+                            const data::variable& d,
+                            const data::data_expression& e
+                           )
+      : enumerator_list_element<Expression>(v, phi),
+        m_variables(elem.m_variables),
+        m_expressions(elem.m_expressions)
+    {
+      m_variables.push_front(d);
+      m_expressions.push_front(e);
+    }
+
+    /// \brief Adds the assignments that correspond with this element to the substitution result.
+    template <typename VariableList, typename MutableSubstitution, typename Rewriter>
+    void add_assignments(const VariableList& v, MutableSubstitution& result, const Rewriter& rewriter) const
+    {
+      data::enumerator_substitution sigma(m_variables, m_expressions);
+      sigma.revert();
+      for (auto i = v.begin(); i != v.end(); ++i)
+      {
+        result[*i] = rewriter(sigma(*i), empty_substitution());
+      }
+    }
+};
+
+template <typename Expression>
+std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expression>& p)
+{
+  return out << "{ variables = " << core::detail::print_list(p.variables()) << ", expression = " << p.expression() << " }";
+}
+
+class enumerator_identifier_generator
+{
+  protected:
+    atermpp::function_symbol_generator f;
+
+  public:
+    /// \brief Constructor
+    /// \param The prefix of the generated generated strings
+    /// \pre The prefix may not be empty, and it may not have trailing digits
+    enumerator_identifier_generator(const std::string& prefix)
+      : f(prefix)
+    { }
+
+    /// \brief Generates a unique function symbol with the given prefix followed by a number.
+    core::identifier_string operator()()
+    {
+      return core::identifier_string(f());
+    }
+};
+
+struct sort_name_generator
+{
+  enumerator_identifier_generator& id_generator;
+
+  sort_name_generator(enumerator_identifier_generator& id_generator_)
+    : id_generator(id_generator_)
+  {}
+
+  data::variable operator()(const data::sort_expression& s) const
+  {
+    return data::variable(id_generator(), s);
+  }
+};
+
+/// \brief An enumerator algorithm that generates solutions of a condition.
+template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter>
+class enumerator_algorithm
+{
+  /// \brief A map that caches the constructors corresponding to sort expressions.
+  typedef std::map<data::sort_expression, std::vector<data::function_symbol> > constructor_map;
+
+  protected:
+    // A rewriter
+    const Rewriter& R;
 
     /// \brief A data specification.
-    const data_specification* m_data;
+    const data::data_specification& dataspec;
 
-    /// \brief A rewriter.
-    const data::rewriter* m_rewriter;
+    // Needed for enumerate_expressions
+    const DataRewriter& datar;
 
-    /// \brief An identifier generator.
-    mutable utilities::number_postfix_generator m_generator;
+    // A name generator, used for generating variable names
+    mutable enumerator_identifier_generator id_generator;
 
     /// \brief A mapping with constructors.
     mutable constructor_map m_constructors;
 
+    /// \brief max_count The enumeration is aborted after max_count iterations
+    std::size_t m_max_count;
+
+    /// \brief throw_exceptions If true, an exception is thrown when the enumeration is aborted.
+    bool m_throw_exceptions;
+
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
-    const std::vector<function_symbol>& constructors(sort_expression s) const
+    const std::vector<data::function_symbol>& constructors(const data::sort_expression& s) const
     {
-      constructor_map::const_iterator i = m_constructors.find(s);
+      auto i = m_constructors.find(s);
       if (i != m_constructors.end())
       {
         return i->second;
       }
-      m_constructors[s] = m_data->constructors(s);
+      m_constructors[s] = dataspec.constructors(s);
       return m_constructors[s];
     }
 
-  public:
-
-    /// \brief The variable type of the enumerator.
-    typedef variable variable_type;
-
-    /// \brief The term type of the enumerator.
-    typedef data_expression_with_variables term_type;
-
-    /// \brief Constructor.
-    /// \param data_spec A data specification.
-    /// \param rewriter A rewriter.
-    /// \param identifier_prefix A unique prefix, used by the identifier generator.
-    data_enumerator(const data_specification& data_spec,
-                    const data::rewriter& rewriter,
-                    const std::string& identifier_prefix = "UNIQUE_PREFIX"
-                   )
-      : m_data(&data_spec), m_rewriter(&rewriter), m_generator(identifier_prefix)
-    {}
-
-    /// \brief The data specification.
-    /// \return The data specification.
-    const data_specification& data() const
+    std::string print(const data::variable& x) const
     {
-      return *m_data;
+      std::ostringstream out;
+      out << x << ": " << x.sort();
+      return out.str();
     }
 
-    /// \return The identifier generator used for generating new variables.
-    const utilities::number_postfix_generator& generator() const
+    bool is_finite_set(const data::sort_expression& ) const
     {
-      return m_generator;
+      return false;
     }
 
-    /// \return The identifier generator used for generating new variables.
-    utilities::number_postfix_generator& generator()
+    template <typename EnumeratorListElement>
+    void cannot_enumerate(EnumeratorListElement& e, const std::string& msg) const
     {
-      return m_generator;
-    }
-
-    /// \brief Enumerates a data variable.
-    /// \param v A data variable
-    /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
-    std::vector<data_expression_with_variables> enumerate(const variable& v) const
-    {
-      std::vector<data_expression_with_variables> result;
-      const std::vector<function_symbol>& c = constructors(v.sort());
-      if (c.empty())
+      e.invalidate();
+      if (m_throw_exceptions)
       {
-        throw mcrl2::runtime_error("Could not enumerate variable " + data::pp(v) + " of sort " + data::pp(v.sort()) + " as there are no constructors.");
+        throw mcrl2::runtime_error(msg);
       }
-      for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
+    }
+
+    // add element without additional variables
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter, typename Expression>
+    void add_element(std::deque<EnumeratorListElement>& P,
+                     MutableSubstitution& sigma,
+                     Filter accept,
+                     const data::variable_list& variables,
+                     const Expression& phi,
+                     const EnumeratorListElement& p,
+                     const data::variable& v,
+                     const data::data_expression& e) const
+    {
+      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+      if (accept(phi1))
       {
-        if (is_function_sort(i->sort()))
+        P.emplace_back(EnumeratorListElement(variables, phi1, p, v, e));
+        //mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
+      }
+    }
+
+    // add element with additional variables
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter, typename Expression>
+    void add_element(std::deque<EnumeratorListElement>& P,
+                     MutableSubstitution& sigma,
+                     Filter accept,
+                     const data::variable_list& variables,
+                     const data::variable_list& added_variables,
+                     const Expression& phi,
+                     const EnumeratorListElement& p,
+                     const data::variable& v,
+                     const data::data_expression& e) const
+    {
+      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+      if (accept(phi1))
+      {
+        // Additional variables are put at the end of the list!
+        P.emplace_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
+        //mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
+      }
+    }
+
+    // specialization for enumerator_list_element; in this case we are not interested in the substitutions,
+    // and this allows an optimization
+    template <typename MutableSubstitution, typename Filter, typename Expression>
+    void add_element(std::deque<enumerator_list_element<Expression> >& P,
+                     MutableSubstitution& sigma,
+                     Filter accept,
+                     const data::variable_list& variables,
+                     const data::variable_list& added_variables,
+                     const Expression& phi,
+                     const enumerator_list_element<Expression>& p,
+                     const data::variable& v,
+                     const data::data_expression& e) const
+    {
+      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+      if (accept(phi1))
+      {
+        if (phi1 == phi)
         {
-          std::vector<variable> variables;
-
-          sort_expression_list i_domain(function_sort(i->sort()).domain());
-          for (sort_expression_list::const_iterator j = i_domain.begin(); j != i_domain.end(); ++j)
-          {
-            variables.push_back(variable(m_generator(), *j));
-          }
-
-          variable_list w(variables.begin(),variables.end());
-
-          result.push_back(data_expression_with_variables(application(*i, atermpp::aterm_cast< data_expression_list >(w)), w));
+          // Discard the added_variables, since we know they do not appear in phi1
+          P.emplace_back(enumerator_list_element<Expression>(variables, phi1, p, v, e));
         }
         else
         {
-          result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));
+          // Additional variables are put at the end of the list!
+          P.emplace_back(enumerator_list_element<Expression>(variables + added_variables, phi1, p, v, e));
         }
+        //mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
       }
-      return result;
     }
 
-    /// \brief Enumerates a data expression. Only the variables of the enumerator
-    /// expression are expanded. Fresh variables are created using the
-    /// identifier generator that was passed in the constructor.
-    /// \param e A data expression.
-    /// \return A sequence of expressions that is the result of applying the enumerator to the expression once.
-    std::vector<data_expression_with_variables> enumerate(const data_expression_with_variables& e) const
+  public:
+    enumerator_algorithm(const Rewriter& R_,
+                         const data::data_specification& dataspec_,
+                         const DataRewriter& datar_,
+                         std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
+                         bool throw_exceptions = false
+                       )
+      : R(R_), dataspec(dataspec_), datar(datar_), id_generator("x"), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
+    {}
+
+  private:
+    // enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
+    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&)
+    {}
+
+  public:
+    /// \brief Enumerates the front element of the todo list P.
+    /// \param P The todo list of the algorithm.
+    /// \param sigma A mutable substitution that is applied by the rewriter.
+    /// \param accept Elements p for which accept(p) is false are discarded.
+    /// \pre !P.empty()
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
+    void enumerate_front(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
     {
-      std::vector<data_expression_with_variables> result;
+      assert(!P.empty());
 
-      // Compute the instantiations for each variable of e.
-      std::vector<std::vector<data_expression_with_variables> > enumerated_values;
-      variable_list variables(e.variables());
-      for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
+      auto p = P.front();
+      auto const& v = p.variables();
+      auto const& phi = p.expression();
+      //mCRL2log(log::debug) << "  <process-element> " << p << std::endl;
+      P.pop_front();
+
+      auto const& v1 = v.front();
+      auto const& vtail = v.tail();
+      auto const& sort = v1.sort();
+
+      if (data::is_function_sort(sort))
       {
-        enumerated_values.push_back(enumerate(*i));
+        const function_sort& function = atermpp::aterm_cast<function_sort>(sort);
+        if (dataspec.is_certainly_finite(function))
+        {
+          data_expression_vector function_sorts;
+          variable_list function_parameter_list;
+          bool result = detail::compute_finite_function_sorts(function, id_generator, dataspec, datar, function_sorts, function_parameter_list);
+
+// std::cout << "<function_sorts>" << core::detail::print_list(function_sorts) << std::endl;
+
+          if (!result)
+          {
+            cannot_enumerate(p, "Sort " + data::pp(sort) + " has too many elements to enumerate");
+          }
+          const data_expression old_substituted_value = sigma(v1);
+          for (auto i = function_sorts.begin(); i != function_sorts.end(); ++i)
+          {
+            sigma[v1] = *i;
+            add_element(P, sigma, accept, vtail, phi, p, v1, *i);
+          }
+          sigma[v1] = old_substituted_value;
+        }
+        else
+        {
+          cannot_enumerate(p, "Cannot enumerate elements of function sort " + data::pp(sort));
+        }
       }
+      else if (sort_set::is_set(sort))
+      {
+        const sort_expression element_sort = container_sort(sort).element_sort();
+        if (dataspec.is_certainly_finite(element_sort))
+        {
+          const data_expression lambda_term = abstraction(lambda_binder(), atermpp::make_list<variable>(variable(id_generator(), element_sort)), sort_bool::false_());
+          const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
+          const data_expression term = sort_set::constructor(element_sort, lambda_term, fset_variable);
+          const data_expression old_substituted_value = sigma(v1);
+          sigma[v1] = term;
+          add_element(P, sigma, accept, vtail, atermpp::make_list(fset_variable), phi, p, v1, term);
+          sigma[v1] = old_substituted_value;
+        }
+        else
+        {
+          cannot_enumerate(p, "Cannot enumerate elements of set sort " + data::pp(sort));
+          return;
+        }
+      }
+      else if (sort_fset::is_fset(sort))
+      {
+        const container_sort& fset = atermpp::aterm_cast<container_sort>(sort);
+        if (dataspec.is_certainly_finite(fset.element_sort()))
+        {
+          data_expression_vector set_elements;
+          bool result = detail::compute_finite_set_elements(fset, dataspec, datar, sigma, set_elements);
 
-      std::vector<data_expression_with_variables> values(enumerated_values.size());
+// std::cout << "<set_elements>" << core::detail::print_list(set_elements) << std::endl;
 
-      utilities::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
+          if (!result)
+          {
+            cannot_enumerate(p, "Finite set sort " + data::pp(sort) + " has too many elements to enumerate");
+          }
+          const data_expression old_substituted_value = sigma(v1);
+          for (auto i = set_elements.begin(); i != set_elements.end(); ++i)
+          {
+            sigma[v1] = *i;
+            add_element(P, sigma, accept, vtail, phi, p, v1, *i);
+          }
+          sigma[v1] = old_substituted_value;
+        }
+        else
+        {
+          cannot_enumerate(p, "Cannot enumerate elements of finite set sort " + data::pp(sort));
+          return;
+        }
+      }
+      else if (sort_bag::is_bag(sort))
+      {
+        cannot_enumerate(p, "Cannot enumerate elements of bag sort " + data::pp(sort));
+        return;
+      }
+      else if (sort_fbag::is_fbag(sort))
+      {
+        cannot_enumerate(p, "Cannot enumerate elements of finite bag sort " + data::pp(sort));
+        return;
+      }
+      else
+      {
+        auto const& C = constructors(sort);
+        if (!C.empty())
+        {
+          for (auto i = C.begin(); i != C.end(); ++i)
+          {
+            auto const& constructor = *i;
+            if (data::is_function_sort(constructor.sort()))
+            {
+              auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
+              data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
+              // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
+              data_expression cy = datar(application(constructor, y.begin(), y.end()), sigma);
+              sigma[v1] = cy;
+              add_element(P, sigma, accept, vtail, y, phi, p, v1, cy);
+              sigma[v1] = v1;
+            }
+            else
+            {
+              // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
+              auto const e1 = datar(constructor, sigma);
+              sigma[v1] = e1;
+              add_element(P, sigma, accept, vtail, phi, p, v1, e1);
+              sigma[v1] = v1;
+            }
+          }
+        }
+        else
+        {
+          cannot_enumerate(p, "Cannot enumerate elements of sort without constructors " + data::pp(sort));
+          return;
+        }
+      }
+    }
+
+    /// \brief Enumerates the front elements of the todo list P until a solution
+    /// has been found, or until P is empty.
+    /// \param P The todo list of the algorithm.
+    /// \param accept Elements p for which accept(p) is false are discarded.
+    /// \return The number of elements that have been processed
+    /// \post Either P.empty() or P.front().is_solution()
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
+    std::size_t next(std::deque<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
+    {
+      //mCRL2log(log::debug) << "  <next> " << core::detail::print_list(P) << std::endl;
+      std::size_t count = 0;
+      while (!P.empty())
+      {
+        if (P.front().is_solution())
+        {
+          //mCRL2log(log::debug) << "  <solution> " << P.front() << std::endl;
+          break;
+        }
+        else
+        {
+          enumerate_front(P, sigma, accept);
+          count++;
+          if (count >= m_max_count)
+          {
+            break;
+          }
+        }
+      }
+      return count;
+    }
+
+    std::size_t max_count() const
+    {
+      return m_max_count;
+    }
+
+    bool throw_exceptions() const
+    {
+      return m_throw_exceptions;
+    }
+};
+
+/// \brief An enumerator algorithm with an iterator interface.
+template <typename Rewriter = data::rewriter, typename EnumeratorListElement = enumerator_list_element_with_substitution<>, typename Filter = data::is_not_false, typename DataRewriter = data::rewriter, typename MutableSubstitution = data::mutable_indexed_substitution<> >
+class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, DataRewriter>
+{
+  public:
+    typedef enumerator_algorithm<Rewriter, DataRewriter> super;
+
+    /// \brief A class to enumerate solutions for terms.
+    /// \details Solutions are presented as data_expression_lists of the same length as
+    ///          the list of variables for which a solution is sought.
+    class iterator: public boost::iterator_facade<iterator, const EnumeratorListElement, boost::forward_traversal_tag>
+    {
+      protected:
+        const enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>* E;
+        MutableSubstitution* sigma;
+        std::deque<EnumeratorListElement>* P;
+        Filter accept;
+        std::size_t count;
+
+        static std::deque<EnumeratorListElement>& default_deque()
+        {
+          static std::deque<EnumeratorListElement> result;
+          return result;
+        }
+
+      public:
+        iterator(const enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>* E_,
+                 std::deque<EnumeratorListElement>* P_,
+                 MutableSubstitution* sigma_,
+                 Filter accept_ = Filter()
+                )
+          : E(E_), sigma(sigma_), P(P_), accept(accept_), count(0)
+        {
+          count += E->next(*P, *sigma, accept);
+        }
+
+        iterator(Filter accept_ = Filter())
+          : E(0), sigma(0), P(&default_deque()), accept(accept_), count(0)
+        { }
+
+      protected:
+        friend class boost::iterator_core_access;
+
+        void increment()
+        {
+          assert(!P->empty());
+          if (count >= E->max_count())
+          {
+            if (E->throw_exceptions())
+            {
+              std::ostringstream out;
+              out << "enumeration was aborted, since it did complete within " << E->max_count() << " iterations";
+              throw mcrl2::runtime_error(out.str());
+            }
+            else
+            {
+              P->front().invalidate();
+              return;
+            }
+          }
+          P->pop_front();
+          count += E->next(*P, *sigma, Filter());
+        }
+
+        bool equal(iterator const& other) const
+        {
+          return P->size() == other.P->size();
+        }
+
+        const EnumeratorListElement& dereference() const
+        {
+          assert(!P->empty());
+          return P->front();
+        }
+    };
+
+    enumerator_algorithm_with_iterator(
+                const Rewriter& R,
+                const data::data_specification& dataspec,
+                const DataRewriter& datar,
+                std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
+                bool throw_exceptions = false)
+      : super(R, dataspec, datar, max_count, throw_exceptions)
+    {}
+
+    /// \brief Returns an iterator that enumerates solutions for variables that satisfy a condition
+    /// \param E An enumerator
+    /// \param sigma A mutable substitution that is applied by the rewriter contained in E
+    /// \param p The condition that is solved, together with the list of variables
+    /// \param accept Enumerator elements p for which accept(p) is false are discarded.
+    /// Otherwise an invalidated enumerator element is returned when it is dereferenced.
+    iterator begin(MutableSubstitution& sigma, std::deque<EnumeratorListElement>& P, Filter accept = Filter()) const
+    {
+      assert(P.size() == 1);
+      auto& p = P.front();
+      p.expression() = super::R(p.expression(), sigma);
+      if (accept(p.expression()))
+      {
+        return iterator(this, &P, &sigma, accept);
+      }
+      else
+      {
+        return end(accept);
+      }
+    }
+
+    const iterator& end(Filter accept = Filter()) const
+    {
+      static iterator result(accept);
       return result;
     }
 };
+
+/// \brief Returns a vector with all expressions of sort s.
+/// \detail It is assumed that the sort s has only a finite number of elements.
+template <class Rewriter>
+data_expression_vector enumerate_expressions(const sort_expression& s, const data_specification& dataspec, const Rewriter& rewr)
+{
+  typedef typename Rewriter::term_type term_type;
+  typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
+  assert(dataspec.is_certainly_finite(s));
+  enumerator_algorithm_with_iterator<Rewriter, enumerator_element, is_not_false, Rewriter> E(rewr, dataspec, rewr);
+  data_expression_vector result;
+  mutable_indexed_substitution<> sigma;
+  const variable v("@var@", s);
+  const variable_list vl = atermpp::make_list<variable>(v);
+  std::deque<enumerator_element> P;
+  P.emplace_back(enumerator_element(vl, sort_bool::true_()));
+  for (auto i = E.begin(sigma, P); i != E.end(); ++i)
+  {
+    i->add_assignments(vl, sigma, rewr);
+    result.push_back(sigma(v));
+  }
+  return result;
+}
 
 } // namespace data
 

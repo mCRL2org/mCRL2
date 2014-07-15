@@ -64,6 +64,7 @@ void test_pbesrewr2()
 // rewritten to false.
 void test_pbesrewr3()
 {
+  // Check that the empty sort D can be enumerated.
   std::string pbes_text =
     "sort D;\n"
     "map f:D -> Bool;\n"
@@ -75,16 +76,7 @@ void test_pbesrewr3()
   data::rewriter datar(p.data(), data::jitty);
   bool enumerate_infinite_sorts = true;
   enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
-  try
-  {
-    pbes_rewrite(p, pbesr); // we expect that an exception is raised because of the type D that cannot be enumerated
-  }
-  catch (mcrl2::runtime_error)
-  {
-    // this is OK
-    return;
-  }
-  BOOST_CHECK(false); // this point should not be reached
+  pbes_rewrite(p, pbesr);
 }
 
 int test_main(int argc, char* argv[])

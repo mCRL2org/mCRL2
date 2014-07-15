@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPS_STATE_H
 #define MCRL2_LPS_STATE_H
 
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2
@@ -20,24 +21,13 @@ namespace mcrl2
 namespace lps
 {
 
-
-/// \brief A state type of fixed length in which data expressions can be stored.
-//         The length is determined at runtime.
-class state: public std::vector < mcrl2::data::data_expression >
-{
-  public:
-    state()
-    {
-    }
-
-    state(data::data_expression_list arguments):
-      std::vector<mcrl2::data::data_expression>(arguments.begin(), arguments.end())
-    {
-    }
-};
+typedef atermpp::term_balanced_tree<data::data_expression> state;
 
 // template function overloads
-std::string pp(const lps::state& x);
+inline std::string pp(const lps::state& x)
+{
+  return atermpp::pp(x);
+}
 
 } // namespace lps
 } // namespace mcrl2

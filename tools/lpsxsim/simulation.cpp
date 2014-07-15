@@ -10,6 +10,7 @@
 #include <QMetaObject>
 #include "mcrl2/utilities/atermthread.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 Simulation::Simulation(QString filename, mcrl2::data::rewrite_strategy strategy, const bool do_not_use_dummies)
@@ -25,11 +26,11 @@ Simulation::Simulation(QString filename, mcrl2::data::rewrite_strategy strategy,
 
 void Simulation::init()
 {
-  mcrl2::lps::specification specification;
+  mcrl2::lps::specification spec;
   try
   {
-    specification.load(m_filename.toStdString());
-    m_simulation = new mcrl2::lps::simulation(specification, m_strategy);
+    load_lps(spec, m_filename.toStdString());
+    m_simulation = new mcrl2::lps::simulation(spec, m_strategy);
   }
   catch (mcrl2::runtime_error& e)
   {
@@ -44,10 +45,10 @@ void Simulation::init()
 
   if (!m_do_not_use_dummies)
   {
-    mcrl2::lps::detail::instantiate_global_variables(specification);
+    mcrl2::lps::detail::instantiate_global_variables(spec);
   }
 
-  for (mcrl2::data::variable_list::const_iterator i = specification.process().process_parameters().begin(); i != specification.process().process_parameters().end(); i++)
+  for (mcrl2::data::variable_list::const_iterator i = spec.process().process_parameters().begin(); i != spec.process().process_parameters().end(); i++)
   {
     m_parameters += QString::fromStdString(mcrl2::data::pp(*i));
   }

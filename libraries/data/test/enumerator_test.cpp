@@ -16,7 +16,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/enumerator_variable_limit.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/detail/enumerator.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/function_sort.h"

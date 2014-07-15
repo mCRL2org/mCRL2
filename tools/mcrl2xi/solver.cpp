@@ -12,6 +12,7 @@
 #include "solver.h"
 #include "parsing.h"
 
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/utilities/atermthread.h"
 
 const std::string Solver::className = "Solver";
@@ -30,6 +31,7 @@ void Solver::setRewriter(QString solver)
 
 void Solver::solve(QString specification, QString dataExpression)
 {
+  using namespace mcrl2::data;
   m_abort = false;
   if (m_specification != specification || !m_parsed)
   {
@@ -60,57 +62,57 @@ void Solver::solve(QString specification, QString dataExpression)
         throw mcrl2::runtime_error("Expected input of the shape 'x1:Type1,...,xn:Typen.b' where b is a boolean expression.");
       }
 
-      std::set <mcrl2::data::variable > m_vars=m_global_vars;
+      std::set <variable > m_vars=m_global_vars;
       parse_variables(std::string(stdDataExpression.substr(0, dotpos)
                                   ) + ";",std::inserter(m_vars,m_vars.begin()),m_data_spec);
 
-      mcrl2::data::data_expression term =
-          mcrl2::data::parse_data_expression(
+      data_expression term =
+          parse_data_expression(
             stdDataExpression.substr(dotpos+1, stdDataExpression.length()-1),
             m_vars.begin(), m_vars.end(),
             m_data_spec
             );
 
-      if (term.sort()!=mcrl2::data::sort_bool::bool_())
+      if (term.sort()!=sort_bool::bool_())
       {
         throw mcrl2::runtime_error("Expression is not of sort Bool.");
       }
 
-      std::set<mcrl2::data::sort_expression> all_sorts=find_sort_expressions(term);
+      std::set<sort_expression> all_sorts=find_sort_expressions(term);
       m_data_spec.add_context_sorts(all_sorts);
 
-      mcrl2::data::rewriter rewr(m_data_spec,m_rewrite_strategy);
+      rewriter rewr(m_data_spec,m_rewrite_strategy);
 
       term=rewr(term);
 
-      typedef mcrl2::data::classic_enumerator< mcrl2::data::rewriter > enumerator_type;
+      typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
+      typedef enumerator_list_element_with_substitution<> enumerator_element;
 
-      enumerator_type enumerator(m_data_spec,rewr);
-
-      mcrl2::data::mutable_indexed_substitution<> sigma;
       // Stop when more than 10000 internal variables are required.
-      for (enumerator_type::iterator i = enumerator.begin(mcrl2::data::variable_list(m_vars.begin(),m_vars.end()),term,sigma,10000); 
-           i != enumerator.end() && !m_abort; ++i)
+      enumerator_type enumerator(rewr, m_data_spec, rewr, 10000);
+
+      mutable_indexed_substitution<> sigma;
+      std::deque<enumerator_element> enumerator_deque(1, enumerator_element(variable_list(m_vars.begin(),m_vars.end()), term));
+      for (enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() && !m_abort; ++i)
       {
         mCRL2log(info) << "Solution found" << std::endl;
 
         QString s('[');
 
-        mcrl2::data::data_expression_list::const_iterator j=i->begin();
-        mcrl2::data::mutable_indexed_substitution<> sigma_i;
-        for (std::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v, ++j)
+        mutable_indexed_substitution<> sigma_i;
+        i->add_assignments(m_vars,sigma_i,rewr);
+        for (std::set< variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v)
         {
-          sigma_i[*v]=*j;
           if( v != m_vars.begin() )
           {
             s.append(", ");
           }
-          s.append(mcrl2::data::pp(*v).c_str());
+          s.append(pp(*v).c_str());
           s.append(" := ");
-          s.append(mcrl2::data::pp(*j).c_str());
+          s.append(pp(sigma_i(*v)).c_str());
         }
         s.append("] evaluates to ");
-        s.append(mcrl2::data::pp(rewr(term,sigma_i)).c_str());
+        s.append(pp(rewr(term,sigma_i)).c_str());
 
         emit solvedPart(s);
 

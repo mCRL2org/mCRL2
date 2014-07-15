@@ -95,7 +95,7 @@ struct add_simplify_quantifiers: public Builder<Derived>
     {
       auto const& left = core::down_cast<or_>(body).left();
       auto const& right = core::down_cast<or_>(body).right();
-      result = utilities::optimized_and(utilities::optimized_exists(variables, left, true), utilities::optimized_forall(variables, right, true));
+      result = utilities::optimized_or(utilities::optimized_exists(variables, left, true), utilities::optimized_exists(variables, right, true));
     }
     else if (tr::is_and(body))
     {
@@ -105,11 +105,11 @@ struct add_simplify_quantifiers: public Builder<Derived>
       data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
       if (lv.empty())
       {
-        result = utilities::optimized_or(left, utilities::optimized_exists_no_empty_domain(rv, right, true));
+        result = utilities::optimized_and(left, utilities::optimized_exists_no_empty_domain(rv, right, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_or(right, utilities::optimized_exists_no_empty_domain(lv, left, true));
+        result = utilities::optimized_and(right, utilities::optimized_exists_no_empty_domain(lv, left, true));
       }
       else
       {
@@ -175,7 +175,7 @@ struct simplify_quantifiers_data_rewriter
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    detail::NoSubst sigma;
+    data::no_substitution sigma;
     return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma)(x);
   }
 

@@ -12,14 +12,16 @@
 #ifndef MCRL2_ATERMPP_INDEXED_SET_H
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
-#include <stack>
 #include <vector>
-#include "mcrl2/atermpp/aterm_list.h"
+#include <deque>
+#include <cassert>
+#include "mcrl2/atermpp/detail/aterm_implementation.h"
 
 namespace atermpp
 {
 
 /// \brief Indexed set. 
+template <class ELEMENT>
 class indexed_set
 {
   protected:
@@ -27,19 +29,21 @@ class indexed_set
     unsigned int max_load;
     size_t max_entries;
     std::vector<size_t> hashtable;
-    std::vector < std::vector <aterm > > m_keys;
-    std::stack < size_t > free_positions;
-    std::size_t m_size;                   /**< the number of entries of the table */
+    std::deque <ELEMENT > m_keys;
 
     /* Find whether the key is already inserted in the hashtable.
        If no, insert n as the index for key. If yes return its already
        existing index */
-    size_t hashPut(const aterm &key, size_t n);
+    size_t hashPut(const ELEMENT& key, size_t n);
 
     /* Double the size of the hashtable. */
     void hashResizeSet();
 
   public:
+    /// \brief A constant that if returned as an index means that the index does not exist.
+    //         In general this means that a requested element is not in the set.
+    static const size_t npos=static_cast<size_t>(-1);
+
     /// Create a new indexed_set.
     /// \param initial_size The initial capacity of the set.
     /// \param max_load_pct The maximum load percentage.
@@ -60,29 +64,29 @@ class indexed_set
     /// \param elem A term.
     /// \return A pair denoting the index of the element in the set, and a boolean denoting whether the term
     /// was already contained in the set.
-    std::pair<size_t, bool> put(const aterm& elem);
+    std::pair<size_t, bool> put(const ELEMENT& elem);
 
     /// \brief Find the index of elem in set.
     /// The index assigned to elem is returned, except when elem is not in the set, in
-    /// which case the return value is atermpp::npos, i.e. the largest number in size_t.
+    /// which case the return value is indexed_set::npos, i.e. the largest number in size_t.
     /// \param elem An element of the set.
     /// \return The index of the element.
-    ssize_t index(const aterm& elem) const;
+    ssize_t index(const ELEMENT& elem) const;
 
     /// \brief Find the index of elem in set.
     /// The index assigned to elem is returned. When elem is not in the set, it
     /// will be added first.
     /// \param elem An element of the set.
     /// \return The index of the element.
-    size_t operator[](const aterm& elem)
+    size_t operator[](const ELEMENT& elem)
     {
       std::size_t result = index(elem);
-      if (result == atermpp::npos)
+      if (result == npos)
       {
         std::pair<size_t, bool> p=put(elem);
         if(!p.second)
         {
-          throw mcrl2::runtime_error("failed to add element to indexed set");
+          throw std::runtime_error("failed to add element to indexed set");
         }
         result = p.first;
       }
@@ -94,28 +98,18 @@ class indexed_set
     /// to this index. If it is invoked with an invalid index, effects are not predictable.
     /// \param index A positive number.
     /// \return The element in the set with the given index.
-    const aterm &get(size_t index) const;
+    const ELEMENT& get(size_t index) const;
 
-    /// \brief Remove elem from set.
-    /// The elem is removed from the indexed set, and if a number was assigned to elem,
-    /// it is freed to be reassigned to an element, that may be put into the set at some later instance.
-    /// \param elem An element of the set.
-    /// \return whether the element was successfully removed.
-    bool erase(const aterm& elem);
-
-    /// \brief Retrieve all elements in set.
-    /// A list with all valid elements stored in the indexed set is returned.  The list is
-    /// ordered from element with index 0 onwards.
-    /// \return An ordered list containing the elements of the set.
-    aterm_list keys() const; 
-    
     /// \brief Returns the size of the indexed set.
     std::size_t size() const
     {
-      return m_size;
+      return m_keys.size();
     }
 };
 
 } // namespace atermpp
+
+#include "mcrl2/atermpp/detail/indexed_set.h"
+
 
 #endif // MCRL2_ATERMPP_INDEXED_SET_H

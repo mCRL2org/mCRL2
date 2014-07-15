@@ -22,7 +22,6 @@
 #include <cstring>
 
 #include "boost/algorithm/string.hpp"
-#include "boost/type_traits/is_pod.hpp"
 #include "mcrl2/utilities/toolset_version.h"
 #include "mcrl2/utilities/exception.h"
 

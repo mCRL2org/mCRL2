@@ -229,16 +229,6 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     push(edge_condition(x, utilities::optimized_not(x)));
   }
 
-  void leave(const true_&)
-  {
-    push(edge_condition(tr::true_(), tr::false_()));
-  }
-
-  void leave(const false_&)
-  {
-    push(edge_condition(tr::false_(), tr::true_()));
-  }
-
   void leave(const not_&)
   {
     edge_condition ec = pop();

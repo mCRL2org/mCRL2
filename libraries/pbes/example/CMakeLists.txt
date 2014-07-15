@@ -26,7 +26,7 @@ foreach( OBJ ${TERM_OBJS} )
   project( ${PROJECT_NAME} )
 
   add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
-        ${OBJ} 
+     ${OBJ}
   )
   
   target_link_libraries(${PROJECT_NAME}
@@ -36,7 +36,7 @@ foreach( OBJ ${TERM_OBJS} )
      mcrl2_pbes
   )
 
-  build_and_run_test_example_target( ${PROJECT_NAME} )
+  build_and_run_test_example_target(${PROJECT_NAME} "-h")
 
 endforeach( OBJ )
 

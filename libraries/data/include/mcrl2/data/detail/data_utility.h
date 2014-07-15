@@ -17,7 +17,6 @@
 #include <set>
 #include <utility>
 #include "boost/bind.hpp"
-#include "boost/range/iterator_range.hpp"
 
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard_utility.h"
@@ -40,11 +39,12 @@ namespace detail
 /// \brief Returns true if the names of the given variables are unique.
 /// \param variables A sequence of data variables
 /// \return True if the names of the given variables are unique.
+template <class VariableContainer>
 inline
-bool unique_names(variable_list const& variables)
+bool unique_names(const VariableContainer& variables)
 {
   std::set<core::identifier_string> variable_names;
-  for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
+  for (typename VariableContainer::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     variable_names.insert(i->name());
   }

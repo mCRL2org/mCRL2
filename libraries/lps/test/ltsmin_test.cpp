@@ -94,7 +94,7 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   // create an input file
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   std::string abp_filename = "temporary_abp.lps";
-  spec.save(abp_filename);
+  save_lps(spec, abp_filename);
 
   lps::pins p(abp_filename, rewriter_strategy);
   std::size_t N = p.process_parameter_count();
@@ -238,7 +238,7 @@ void test_dependency_matrix()
 
   lps::specification spec = lps::parse_linear_process_specification(ONEBIT);
   std::string filename = "temporary_onebit.lps";
-  spec.save(filename);
+  save_lps(spec, filename);
   lps::pins p(filename, "jitty");
 
   for (std::size_t i = 0; i < p.group_count(); i++)

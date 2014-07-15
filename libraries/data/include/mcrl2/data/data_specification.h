@@ -19,7 +19,6 @@
 #include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/table.h"
 
 // utilities
 #include "mcrl2/atermpp/container_utility.h"
@@ -856,7 +855,7 @@ class data_specification
       }
       else if (is_function_sort(sort))
       {
-        const sort_expression t=function_sort(sort).codomain();
+        const sort_expression& t=function_sort(sort).codomain();
         import_system_defined_sort(t,sorts_already_added_to_m_normalised_sorts);
         const sort_expression_list& l=function_sort(sort).domain();
         for (sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -1264,6 +1263,67 @@ data_equation_vector find_equations(data_specification const& specification, con
     }
   }
   return result;
+}
+
+
+
+/// \brief Order the variables in a variable list such that enumeration over these variables becomes more efficient.
+//  \detail This routine is experimental, and may benefit from further investigation. The rule of thumb that is
+//          now used is that first variables of enumerated types are put in the variable list. These are sorts with
+//          constructors that have no arguments, typically resulting from declarations such as sort Enum = struct e1 | e2 | e3.
+//          The variables with the largest number of elements are put in front. 
+//          Subsequently, the other data types with a finite number of elements are listed, in arbitrary sequence. At the
+//          end all other variables are put in an arbitrary sequence.
+/// \param[in] l A list of variables that are to be sorted.
+/// \param[in] d A data specification containing the constructors that are used to determine efficiency.
+/// \return The same list of variables but ordered in such a way that 
+
+
+inline variable_list order_variables_to_optimise_enumeration(const variable_list& l, const data_specification& data_spec)
+{
+  // Put variables with enumerated types with the largest number of elements in front.
+  // Put variables of finite types as second. 
+  // Finally put the other variables in the list.
+  std::map < size_t,variable_list> vars_of_enumerated_type;
+  variable_list vars_of_finite_type;
+  variable_list rest_vars;
+  for(variable_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+  {
+    if (data_spec.is_certainly_finite(i->sort()))
+    {
+      function_symbol_vector constructors=data_spec.constructors(i->sort());
+      bool is_enumerated_type=true;
+      for(function_symbol_vector::const_iterator j=constructors.begin(); j!=constructors.end(); ++j)
+      {
+        if (is_function_sort(j->sort()) && function_sort(j->sort()).domain().size()>0)
+        {
+          is_enumerated_type=false;
+          break;
+        }
+      }
+      if (is_enumerated_type)
+      {
+        vars_of_enumerated_type[constructors.size()].push_front(*i);
+      }
+      else
+      {
+        vars_of_finite_type.push_front(*i);
+      }
+    }
+    else
+    {
+      // variable *i has no finite type
+      rest_vars.push_front(*i);
+    } 
+  }
+
+  // Accumulate the result in rest_vars
+  rest_vars=vars_of_finite_type + rest_vars;
+  for(std::map <size_t,variable_list>::const_reverse_iterator k=vars_of_enumerated_type.rbegin(); k!=vars_of_enumerated_type.rend(); ++k)
+  {
+    rest_vars = k->second + rest_vars;
+  }
+  return rest_vars;
 }
 
 } // namespace data

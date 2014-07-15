@@ -15,8 +15,6 @@
 #ifndef MCRL2_DATA_NAT_H
 #define MCRL2_DATA_NAT_H
 
-#include "boost/utility.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -93,6 +91,7 @@ namespace mcrl2 {
         return false;
       }
 
+
       /// \brief Generate identifier \@c0
       /// \return Identifier \@c0
       inline
@@ -103,14 +102,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@c0
+      
       /// \return Function symbol c0
       inline
       function_symbol const& c0()
       {
-        static function_symbol c0 = function_symbol(c0_name(), nat());
+        static function_symbol c0(c0_name(), nat());
         return c0;
       }
-
 
       /// \brief Recogniser for function \@c0
       /// \param e A data expression
@@ -135,14 +134,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@cNat
+      
       /// \return Function symbol cnat
       inline
       function_symbol const& cnat()
       {
-        static function_symbol cnat = function_symbol(cnat_name(), make_function_sort(sort_pos::pos(), nat()));
+        static function_symbol cnat(cnat_name(), make_function_sort(sort_pos::pos(), nat()));
         return cnat;
       }
-
 
       /// \brief Recogniser for function \@cNat
       /// \param e A data expression
@@ -158,6 +157,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@cNat
+      
       /// \param arg0 A data expression
       /// \return Application of \@cNat to a number of arguments
       inline
@@ -190,14 +190,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@cPair
+      
       /// \return Function symbol cpair
       inline
       function_symbol const& cpair()
       {
-        static function_symbol cpair = function_symbol(cpair_name(), make_function_sort(nat(), nat(), natpair()));
+        static function_symbol cpair(cpair_name(), make_function_sort(nat(), nat(), natpair()));
         return cpair;
       }
-
 
       /// \brief Recogniser for function \@cPair
       /// \param e A data expression
@@ -213,6 +213,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@cPair
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of \@cPair to a number of arguments
@@ -235,7 +236,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined constructors for nat
       /// \return All system defined constructors for nat
       inline
@@ -248,6 +248,7 @@ namespace mcrl2 {
 
         return result;
       }
+
       /// \brief Generate identifier Pos2Nat
       /// \return Identifier Pos2Nat
       inline
@@ -258,14 +259,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Pos2Nat
+      
       /// \return Function symbol pos2nat
       inline
       function_symbol const& pos2nat()
       {
-        static function_symbol pos2nat = function_symbol(pos2nat_name(), make_function_sort(sort_pos::pos(), nat()));
+        static function_symbol pos2nat(pos2nat_name(), make_function_sort(sort_pos::pos(), nat()));
         return pos2nat;
       }
-
 
       /// \brief Recogniser for function Pos2Nat
       /// \param e A data expression
@@ -281,6 +282,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol Pos2Nat
+      
       /// \param arg0 A data expression
       /// \return Application of Pos2Nat to a number of arguments
       inline
@@ -313,14 +315,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Nat2Pos
+      
       /// \return Function symbol nat2pos
       inline
       function_symbol const& nat2pos()
       {
-        static function_symbol nat2pos = function_symbol(nat2pos_name(), make_function_sort(nat(), sort_pos::pos()));
+        static function_symbol nat2pos(nat2pos_name(), make_function_sort(nat(), sort_pos::pos()));
         return nat2pos;
       }
-
 
       /// \brief Recogniser for function Nat2Pos
       /// \param e A data expression
@@ -336,6 +338,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol Nat2Pos
+      
       /// \param arg0 A data expression
       /// \return Application of Nat2Pos to a number of arguments
       inline
@@ -415,6 +418,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol max
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of max to a number of arguments
@@ -487,6 +491,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol min
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of min to a number of arguments
@@ -526,7 +531,6 @@ namespace mcrl2 {
       function_symbol succ(const sort_expression& s0)
       {
         sort_expression target_sort(sort_pos::pos());
-
         function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
         return succ;
       }
@@ -546,6 +550,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol succ
+      
       /// \param arg0 A data expression
       /// \return Application of succ to a number of arguments
       inline
@@ -578,14 +583,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol pred
+      
       /// \return Function symbol pred
       inline
       function_symbol const& pred()
       {
-        static function_symbol pred = function_symbol(pred_name(), make_function_sort(sort_pos::pos(), nat()));
+        static function_symbol pred(pred_name(), make_function_sort(sort_pos::pos(), nat()));
         return pred;
       }
-
 
       /// \brief Recogniser for function pred
       /// \param e A data expression
@@ -601,6 +606,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol pred
+      
       /// \param arg0 A data expression
       /// \return Application of pred to a number of arguments
       inline
@@ -633,14 +639,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@dub
+      
       /// \return Function symbol dub
       inline
       function_symbol const& dub()
       {
-        static function_symbol dub = function_symbol(dub_name(), make_function_sort(sort_bool::bool_(), nat(), nat()));
+        static function_symbol dub(dub_name(), make_function_sort(sort_bool::bool_(), nat(), nat()));
         return dub;
       }
-
 
       /// \brief Recogniser for function \@dub
       /// \param e A data expression
@@ -656,6 +662,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@dub
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of \@dub to a number of arguments
@@ -736,6 +743,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol +
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of + to a number of arguments
@@ -769,14 +777,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@gtesubtb
+      
       /// \return Function symbol gte_subtract_with_borrow
       inline
       function_symbol const& gte_subtract_with_borrow()
       {
-        static function_symbol gte_subtract_with_borrow = function_symbol(gte_subtract_with_borrow_name(), make_function_sort(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat()));
+        static function_symbol gte_subtract_with_borrow(gte_subtract_with_borrow_name(), make_function_sort(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat()));
         return gte_subtract_with_borrow;
       }
-
 
       /// \brief Recogniser for function \@gtesubtb
       /// \param e A data expression
@@ -792,6 +800,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@gtesubtb
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \param arg2 A data expression
@@ -865,6 +874,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol *
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of * to a number of arguments
@@ -898,14 +908,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol div
+      
       /// \return Function symbol div
       inline
       function_symbol const& div()
       {
-        static function_symbol div = function_symbol(div_name(), make_function_sort(nat(), sort_pos::pos(), nat()));
+        static function_symbol div(div_name(), make_function_sort(nat(), sort_pos::pos(), nat()));
         return div;
       }
-
 
       /// \brief Recogniser for function div
       /// \param e A data expression
@@ -921,6 +931,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol div
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of div to a number of arguments
@@ -954,14 +965,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol mod
+      
       /// \return Function symbol mod
       inline
       function_symbol const& mod()
       {
-        static function_symbol mod = function_symbol(mod_name(), make_function_sort(nat(), sort_pos::pos(), nat()));
+        static function_symbol mod(mod_name(), make_function_sort(nat(), sort_pos::pos(), nat()));
         return mod;
       }
-
 
       /// \brief Recogniser for function mod
       /// \param e A data expression
@@ -977,6 +988,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol mod
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of mod to a number of arguments
@@ -1049,6 +1061,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol exp
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of exp to a number of arguments
@@ -1082,14 +1095,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@even
+      
       /// \return Function symbol even
       inline
       function_symbol const& even()
       {
-        static function_symbol even = function_symbol(even_name(), make_function_sort(nat(), sort_bool::bool_()));
+        static function_symbol even(even_name(), make_function_sort(nat(), sort_bool::bool_()));
         return even;
       }
-
 
       /// \brief Recogniser for function \@even
       /// \param e A data expression
@@ -1105,6 +1118,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@even
+      
       /// \param arg0 A data expression
       /// \return Application of \@even to a number of arguments
       inline
@@ -1137,14 +1151,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@monus
+      
       /// \return Function symbol monus
       inline
       function_symbol const& monus()
       {
-        static function_symbol monus = function_symbol(monus_name(), make_function_sort(nat(), nat(), nat()));
+        static function_symbol monus(monus_name(), make_function_sort(nat(), nat(), nat()));
         return monus;
       }
-
 
       /// \brief Recogniser for function \@monus
       /// \param e A data expression
@@ -1160,6 +1174,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@monus
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of \@monus to a number of arguments
@@ -1193,14 +1208,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@swap_zero
+      
       /// \return Function symbol swap_zero
       inline
       function_symbol const& swap_zero()
       {
-        static function_symbol swap_zero = function_symbol(swap_zero_name(), make_function_sort(nat(), nat(), nat()));
+        static function_symbol swap_zero(swap_zero_name(), make_function_sort(nat(), nat(), nat()));
         return swap_zero;
       }
-
 
       /// \brief Recogniser for function \@swap_zero
       /// \param e A data expression
@@ -1216,6 +1231,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@swap_zero
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of \@swap_zero to a number of arguments
@@ -1249,14 +1265,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@swap_zero_add
+      
       /// \return Function symbol swap_zero_add
       inline
       function_symbol const& swap_zero_add()
       {
-        static function_symbol swap_zero_add = function_symbol(swap_zero_add_name(), make_function_sort(nat(), nat(), nat(), nat(), nat()));
+        static function_symbol swap_zero_add(swap_zero_add_name(), make_function_sort(nat(), nat(), nat(), nat(), nat()));
         return swap_zero_add;
       }
-
 
       /// \brief Recogniser for function \@swap_zero_add
       /// \param e A data expression
@@ -1272,6 +1288,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@swap_zero_add
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \param arg2 A data expression
@@ -1307,14 +1324,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@swap_zero_min
+      
       /// \return Function symbol swap_zero_min
       inline
       function_symbol const& swap_zero_min()
       {
-        static function_symbol swap_zero_min = function_symbol(swap_zero_min_name(), make_function_sort(nat(), nat(), nat(), nat(), nat()));
+        static function_symbol swap_zero_min(swap_zero_min_name(), make_function_sort(nat(), nat(), nat(), nat(), nat()));
         return swap_zero_min;
       }
-
 
       /// \brief Recogniser for function \@swap_zero_min
       /// \param e A data expression
@@ -1330,6 +1347,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@swap_zero_min
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \param arg2 A data expression
@@ -1365,14 +1383,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@swap_zero_monus
+      
       /// \return Function symbol swap_zero_monus
       inline
       function_symbol const& swap_zero_monus()
       {
-        static function_symbol swap_zero_monus = function_symbol(swap_zero_monus_name(), make_function_sort(nat(), nat(), nat(), nat(), nat()));
+        static function_symbol swap_zero_monus(swap_zero_monus_name(), make_function_sort(nat(), nat(), nat(), nat(), nat()));
         return swap_zero_monus;
       }
-
 
       /// \brief Recogniser for function \@swap_zero_monus
       /// \param e A data expression
@@ -1388,6 +1406,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@swap_zero_monus
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \param arg2 A data expression
@@ -1423,14 +1442,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol sqrt
+      
       /// \return Function symbol sqrt
       inline
       function_symbol const& sqrt()
       {
-        static function_symbol sqrt = function_symbol(sqrt_name(), make_function_sort(nat(), nat()));
+        static function_symbol sqrt(sqrt_name(), make_function_sort(nat(), nat()));
         return sqrt;
       }
-
 
       /// \brief Recogniser for function sqrt
       /// \param e A data expression
@@ -1446,6 +1465,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol sqrt
+      
       /// \param arg0 A data expression
       /// \return Application of sqrt to a number of arguments
       inline
@@ -1478,14 +1498,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@sqrt_nat
+      
       /// \return Function symbol sqrt_nat_aux_func
       inline
       function_symbol const& sqrt_nat_aux_func()
       {
-        static function_symbol sqrt_nat_aux_func = function_symbol(sqrt_nat_aux_func_name(), make_function_sort(nat(), nat(), sort_pos::pos(), nat()));
+        static function_symbol sqrt_nat_aux_func(sqrt_nat_aux_func_name(), make_function_sort(nat(), nat(), sort_pos::pos(), nat()));
         return sqrt_nat_aux_func;
       }
-
 
       /// \brief Recogniser for function \@sqrt_nat
       /// \param e A data expression
@@ -1501,6 +1521,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@sqrt_nat
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \param arg2 A data expression
@@ -1535,14 +1556,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@first
+      
       /// \return Function symbol first
       inline
       function_symbol const& first()
       {
-        static function_symbol first = function_symbol(first_name(), make_function_sort(natpair(), nat()));
+        static function_symbol first(first_name(), make_function_sort(natpair(), nat()));
         return first;
       }
-
 
       /// \brief Recogniser for function \@first
       /// \param e A data expression
@@ -1558,6 +1579,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@first
+      
       /// \param arg0 A data expression
       /// \return Application of \@first to a number of arguments
       inline
@@ -1590,14 +1612,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@last
+      
       /// \return Function symbol last
       inline
       function_symbol const& last()
       {
-        static function_symbol last = function_symbol(last_name(), make_function_sort(natpair(), nat()));
+        static function_symbol last(last_name(), make_function_sort(natpair(), nat()));
         return last;
       }
-
 
       /// \brief Recogniser for function \@last
       /// \param e A data expression
@@ -1613,6 +1635,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@last
+      
       /// \param arg0 A data expression
       /// \return Application of \@last to a number of arguments
       inline
@@ -1645,14 +1668,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@divmod
+      
       /// \return Function symbol divmod
       inline
       function_symbol const& divmod()
       {
-        static function_symbol divmod = function_symbol(divmod_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), natpair()));
+        static function_symbol divmod(divmod_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), natpair()));
         return divmod;
       }
-
 
       /// \brief Recogniser for function \@divmod
       /// \param e A data expression
@@ -1668,6 +1691,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@divmod
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of \@divmod to a number of arguments
@@ -1701,14 +1725,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@gdivmod
+      
       /// \return Function symbol generalised_divmod
       inline
       function_symbol const& generalised_divmod()
       {
-        static function_symbol generalised_divmod = function_symbol(generalised_divmod_name(), make_function_sort(natpair(), sort_bool::bool_(), sort_pos::pos(), natpair()));
+        static function_symbol generalised_divmod(generalised_divmod_name(), make_function_sort(natpair(), sort_bool::bool_(), sort_pos::pos(), natpair()));
         return generalised_divmod;
       }
-
 
       /// \brief Recogniser for function \@gdivmod
       /// \param e A data expression
@@ -1724,6 +1748,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@gdivmod
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \param arg2 A data expression
@@ -1758,14 +1783,14 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@ggdivmod
+      
       /// \return Function symbol doubly_generalised_divmod
       inline
       function_symbol const& doubly_generalised_divmod()
       {
-        static function_symbol doubly_generalised_divmod = function_symbol(doubly_generalised_divmod_name(), make_function_sort(nat(), nat(), sort_pos::pos(), natpair()));
+        static function_symbol doubly_generalised_divmod(doubly_generalised_divmod_name(), make_function_sort(nat(), nat(), sort_pos::pos(), natpair()));
         return doubly_generalised_divmod;
       }
-
 
       /// \brief Recogniser for function \@ggdivmod
       /// \param e A data expression
@@ -1781,6 +1806,7 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@ggdivmod
+      
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \param arg2 A data expression
@@ -1804,7 +1830,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined mappings for nat
       /// \return All system defined mappings for nat
       inline
@@ -1853,7 +1878,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::aterm_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1865,7 +1890,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1877,7 +1902,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::aterm_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1889,7 +1914,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
+        return atermpp::aterm_cast<const application >(e)[2];
       }
 
       ///\brief Function for projecting out argument
@@ -1901,7 +1926,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 3);
+        return atermpp::aterm_cast<const application >(e)[3];
       }
 
       ///\brief Function for projecting out argument
@@ -1913,7 +1938,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_even_application(e) || is_sqrt_application(e) || is_first_application(e) || is_last_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1925,7 +1950,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for nat

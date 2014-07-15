@@ -16,7 +16,7 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
@@ -39,7 +39,7 @@ class predicate_variable
     pbes_expression m_guard;
     data::rewriter::substitution_type m_sigma;
     std::map<std::size_t, data::data_expression> m_source; // source[j] = e <=> source(X, i, j) = e
-    std::map<std::size_t, data::data_expression> m_dest;   // dest[j] = c   <=> dest(X, i, j) = c
+    std::map<std::size_t, data::data_expression> m_target; // target[j] = c   <=> target(X, i, j) = c
     std::map<std::size_t, std::size_t> m_copy;             // copy[j] = k   <=> copy(X, i, j) = k
     std::set<std::size_t> m_used;                          // j \in used    <=> used(X, i, j)
     std::set<std::size_t> m_changed;                       // j \in changed <=> changed(X, i, j)
@@ -80,14 +80,35 @@ class predicate_variable
       return m_source;
     }
 
-    const std::map<std::size_t, data::data_expression>& dest() const
+    // Returns source(k), or data::undefined_data_expression() if source(k) does not exist.
+    data::data_expression source(std::size_t k) const
     {
-      return m_dest;
+      using utilities::detail::mapped_value;
+      return mapped_value(m_source, k, data::undefined_data_expression());
+    }
+
+    const std::map<std::size_t, data::data_expression>& target() const
+    {
+      return m_target;
+    }
+
+    // Returns target(k), or data::undefined_data_expression() if target(k) does not exist.
+    data::data_expression target(std::size_t k) const
+    {
+      using utilities::detail::mapped_value;
+      return mapped_value(m_target, k, data::undefined_data_expression());
     }
 
     const std::map<std::size_t, std::size_t>& copy() const
     {
       return m_copy;
+    }
+
+    // Returns copy(k), or data::undefined_index() if copy(k) does not exist.
+    std::size_t copy(std::size_t k) const
+    {
+      using utilities::detail::mapped_value;
+      return mapped_value(m_copy, k, data::undefined_index());
     }
 
     const std::set<std::size_t>& used() const
@@ -102,8 +123,8 @@ class predicate_variable
 
     void simplify_guard()
     {
-      data::detail::simplify_rewriter r;
-      stategraph_simplify_rewriter<data::detail::simplify_rewriter> R(r);
+      data::simplify_rewriter r;
+      stategraph_simplify_rewriter<data::simplify_rewriter> R(r);
       m_guard = R(m_guard);
     }
 };
@@ -120,6 +141,10 @@ class stategraph_equation: public pbes_equation
     std::vector<predicate_variable> m_predvars;
     std::vector<data::variable> m_parameters;
     pbes_expression m_condition;
+    mutable std::vector<std::size_t> m_control_flow_parameter_indices;
+    mutable data::variable_vector m_control_flow_parameters;
+    mutable std::vector<std::size_t> m_data_parameter_indices;
+    mutable data::variable_vector m_data_parameters;
 
     void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
     {
@@ -216,7 +241,7 @@ class stategraph_equation: public pbes_equation
           data::data_expression c = R(*j, m_predvars[i].sigma());
           if (is_constant(c))
           {
-            m_predvars[i].m_dest[j_index] = c;
+            m_predvars[i].m_target[j_index] = c;
           }
         }
       }
@@ -320,6 +345,48 @@ class stategraph_equation: public pbes_equation
       compute_changed();
     }
 
+    /// \brief Sets the control flow parameters of this equation
+    /// \param CFP contains the indices of the control flow parameters of this equation
+    void set_control_flow_parameters(const std::set<std::size_t>& CFP) const
+    {
+      m_control_flow_parameter_indices = std::vector<std::size_t>(CFP.begin(), CFP.end());
+      for (auto i = m_control_flow_parameter_indices.begin(); i != m_control_flow_parameter_indices.end(); ++i)
+      {
+        m_control_flow_parameters.push_back(m_parameters[*i]);
+      }
+    }
+
+    /// \brief Sets the data parameters of this equation
+    /// \param DP contains the indices of the control flow parameters of this equation
+    void set_data_parameters(const std::set<std::size_t>& DP) const
+    {
+      m_data_parameter_indices = std::vector<std::size_t>(DP.begin(), DP.end());
+      for (auto i = m_data_parameter_indices.begin(); i != m_data_parameter_indices.end(); ++i)
+      {
+        m_data_parameters.push_back(m_parameters[*i]);
+      }
+    }
+
+    const data::variable_vector& control_flow_parameters() const
+    {
+      return m_control_flow_parameters;
+    }
+
+    const std::vector<std::size_t>& control_flow_parameter_indices() const
+    {
+      return m_control_flow_parameter_indices;
+    }
+
+    const data::variable_vector& data_parameters() const
+    {
+      return m_data_parameters;
+    }
+
+    const std::vector<std::size_t>& data_parameter_indices() const
+    {
+      return m_data_parameter_indices;
+    }
+
     bool is_simple() const
     {
       for (auto i = m_predvars.begin(); i != m_predvars.end(); ++i)
@@ -384,11 +451,11 @@ class stategraph_equation: public pbes_equation
         // sigma
         out << "        sigma = " << m_predvars[i].sigma() << std::endl;
 
-        // dest
-        const std::map<std::size_t, data::data_expression>& dest = m_predvars[i].dest();
-        for (auto j = dest.begin(); j != dest.end(); ++j)
+        // target
+        const std::map<std::size_t, data::data_expression>& target = m_predvars[i].target();
+        for (auto j = target.begin(); j != target.end(); ++j)
         {
-          out << "        dest(" << X << ", " << i << ", " << j->first << ") = " << j->second << std::endl;
+          out << "        target(" << X << ", " << i << ", " << j->first << ") = " << j->second << std::endl;
         }
 
         // copy
@@ -401,6 +468,18 @@ class stategraph_equation: public pbes_equation
         out <<   "        changed = " << core::detail::print_set(m_predvars[i].changed()) << std::endl;
       }
       return out.str();
+    }
+
+    // Removes the values from e that correspond to a data parameter
+    data::data_expression_list project(const data::data_expression_list& e) const
+    {
+      assert(e.size() == m_parameters.size());
+      data::data_expression_vector result;
+      for (auto i = m_control_flow_parameter_indices.begin(); i != m_control_flow_parameter_indices.end(); ++i)
+      {
+        result.push_back(nth_element(e, *i));
+      }
+      return data::data_expression_list(result.begin(), result.end());
     }
 };
 

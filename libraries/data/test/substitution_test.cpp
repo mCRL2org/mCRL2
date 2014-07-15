@@ -411,6 +411,18 @@ void test_enumerator_substitution()
   test_enumerator_substitution(rho1, n, one);
 }
 
+void test_mutable_indexed_substitution()
+{
+  std::cout << "test_mutable_indexed_substitution" << std::endl;
+  mutable_indexed_substitution<> sigma;
+  variable b = parse_variable("b: Bool");
+  data_expression T = parse_data_expression("true");
+  sigma[b] = T;
+  std::string s = sigma.to_string();
+  std::cout << "s = " << s << std::endl;
+  BOOST_CHECK(s == "[b := true]");
+}
+
 int test_main(int /* a */, char**  /* aa */)
 {
   test_my_assignment_sequence_substitution();
@@ -422,6 +434,7 @@ int test_main(int /* a */, char**  /* aa */)
   test_sort_substitution();
   test_indexed_substitution();
   test_enumerator_substitution();
+  test_mutable_indexed_substitution();
 
   return EXIT_SUCCESS;
 }

@@ -53,17 +53,14 @@ struct func
 void test_aterm_list()
 {
   aterm_list q (read_term_from_string("[1,2,3,4]"));
-
   aterm_list r = reverse(q); // r == [4,3,2,1]
 
   BOOST_CHECK(r == read_term_from_string("[4,3,2,1]"));
 
   aterm_list r1 = q;
 
-/*
   r1=push_back<aterm>(r1,aterm_int(5));
   BOOST_CHECK(r1 == read_term_from_string("[1,2,3,4,5]"));
-*/
 
   atermpp::aterm f = q.front(); // f == 1
   BOOST_CHECK(f == aterm_int(1));

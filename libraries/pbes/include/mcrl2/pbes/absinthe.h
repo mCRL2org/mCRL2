@@ -325,10 +325,10 @@ struct absinthe_algorithm
     data::variable_list make_variables(const data::data_expression_list& x, const std::string& hint, sort_function sigma) const
     {
       std::vector<data::variable> result;
-      unsigned int i = 0;
-      for (data::data_expression_list::const_iterator j = x.begin(); j != x.end(); ++i, ++j)
+      std::size_t i = 0;
+      for (auto j = x.begin(); j != x.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), sigma(j->sort())));
+        result.push_back(data::variable(hint + utilities::number2string(i), sigma(j->sort())));
       }
       return data::variable_list(result.begin(), result.end());
     }
@@ -662,10 +662,10 @@ struct absinthe_algorithm
     std::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
       std::vector<data::variable> result;
-      unsigned int i = 0;
-      for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
+      std::size_t i = 0;
+      for (auto j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), sigma(*j)));
+        result.push_back(data::variable(hint + utilities::number2string(i), sigma(*j)));
       }
       return result;
     }
@@ -714,8 +714,8 @@ struct absinthe_algorithm
           throw std::runtime_error("can not generalize functions with abstraction sorts in the domain: " + data::pp(f1) + ": " + data::pp(s1));
         }
 
-        std::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
-        variables = atermpp::convert<data::variable_list>(x);
+        data::variable_vector x = make_variables(fs2.domain(), "x", sigma);
+        variables = data::variable_list(x.begin(),x.end());
         lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
         data::application f_x(f1, data::data_expression_list(x.begin(), x.end()));
 
@@ -770,10 +770,10 @@ struct absinthe_algorithm
     std::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
       std::vector<data::variable> result;
-      unsigned int i = 0;
-      for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
+      std::size_t i = 0;
+      for (auto j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), sigma(*j)));
+        result.push_back(data::variable(hint + utilities::number2string(i), sigma(*j)));
       }
       return result;
     }

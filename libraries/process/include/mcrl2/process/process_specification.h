@@ -65,7 +65,7 @@ class process_specification
       m_data            = data::data_specification(atermpp::aterm_appl(*i++));
       m_action_labels   = static_cast<process::action_label_list>(atermpp::aterm_appl(*i++)[0]);
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
-      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
+      m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
       process_equation_list l = static_cast<process_equation_list>(atermpp::aterm_appl(*i++)[0]);
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
       m_initial_process = process_expression(atermpp::aterm_appl(init[0]));
@@ -221,7 +221,7 @@ atermpp::aterm_appl process_specification_to_aterm(const process_specification& 
   return atermpp::aterm_appl(core::detail::function_symbol_ProcSpec(),
            data::detail::data_specification_to_aterm_data_spec(spec.data()),
            atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
-           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), atermpp::convert<data::variable_list>(spec.global_variables())),
+           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
            atermpp::aterm_appl(core::detail::function_symbol_ProcEqnSpec(), process_equation_list(spec.equations().begin(), spec.equations().end())),
            atermpp::aterm_appl(core::detail::function_symbol_ProcessInit(), spec.init())
          );

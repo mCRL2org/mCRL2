@@ -13,7 +13,6 @@
 #define MCRL2_DATA_FUNCTION_SORT_H
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
@@ -22,7 +21,6 @@
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2

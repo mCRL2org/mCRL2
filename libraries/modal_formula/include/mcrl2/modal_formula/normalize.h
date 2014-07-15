@@ -6,15 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/modal_formula/state_formula_normalize.h
+/// \file mcrl2/modal_formula/normalize.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 #define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/detail/state_variable_negator.h"
-#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
+#include "mcrl2/modal_formula/negate_variables.h"
 #include "mcrl2/data/bool.h"
 
 namespace mcrl2
@@ -59,10 +58,10 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
 /// \cond INTERNAL_DOCS
 
 template <typename T>
-void normalize(T& x, bool negated = false, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0);
+void normalize(T& x, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0);
 
 template <typename T>
-T normalize(const T& x, bool negated = false, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0);
+T normalize(const T& x, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0);
 
 // \brief Visitor for normalizing a state formula.
 struct normalize_builder: public state_formula_builder<normalize_builder>
@@ -211,7 +210,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   {
     if (negated)
     {
-      return nu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
+      return nu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
     }
     else
     {
@@ -223,7 +222,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   {
     if (negated)
     {
-      return mu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
+      return mu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
     }
     else
     {
@@ -268,7 +267,7 @@ bool is_normalized(const T& x)
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing state formulas
 template <typename T>
-void normalize(T& x, bool negated, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type*)
+void normalize(T& x, bool negated, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
   normalize_builder f(negated);
   f(x);
@@ -278,7 +277,7 @@ void normalize(T& x, bool negated, typename boost::disable_if<typename boost::is
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing state formulas
 template <typename T>
-T normalize(const T& x, bool negated, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type*)
+T normalize(const T& x, bool negated, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
   normalize_builder f(negated);
   return f(x);

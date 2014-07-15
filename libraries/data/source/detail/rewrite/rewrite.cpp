@@ -28,11 +28,8 @@
 
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
-// #include "mcrl2/data/detail/enum/standard.h" 
-#include "mcrl2/data/detail/rewriter_wrapper.h" 
-#include "mcrl2/data/classic_enumerator.h"
-
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/detail/rewriter_wrapper.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 using namespace mcrl2::core;
@@ -358,38 +355,44 @@ data_expression Rewriter::existential_quantifier_enumeration(
   }
 
   /* Find A solution*/
-  typedef classic_enumerator<rewriter_wrapper> enumerator_type;
   rewriter_wrapper wrapped_rewriter(this);
-  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
+  auto const throw_exceptions = true;
+  auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+
+  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_false, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
+  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
 
   /* Create a list to store solutions */
   data_expression partial_result=sort_bool::false_();
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, true);
-  for( ; loop_upperbound>0 && 
+  std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
+
+  enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
+  for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::true_() &&
-         sol!=enumerator.end(); 
+         sol!=enumerator.end() && sol->is_valid();
          ++sol)
   {
     if (partial_result==sort_bool::false_())
     {
-      partial_result=sol.resulting_condition();
+      partial_result=sol->expression();
     }
     else if (partial_result!=sort_bool::true_())
     {
-      partial_result=application(sort_bool::or_(), partial_result,sol.resulting_condition());
+      partial_result=application(sort_bool::or_(), partial_result,sol->expression());
     }
     loop_upperbound--;
   }
 
-  if (!sol.exception_occurred() && (loop_upperbound>0 || partial_result==sort_bool::true_()))
+  if ((sol==enumerator.end() && loop_upperbound>0) || partial_result==sort_bool::true_())
   {
     return partial_result;
   }
 
   // One can consider to replace the variables by their original, in order to not show
   // internally generated variables in the output.
+  assert(!sol->is_valid()||loop_upperbound==0);
   return abstraction(exists_binder(),vl_new_l,rewrite(t3,sigma));
 }
 
@@ -455,40 +458,43 @@ data_expression Rewriter::universal_quantifier_enumeration(
   }
 
   /* Find A solution*/
-
-  typedef classic_enumerator<rewriter_wrapper> enumerator_type;
   rewriter_wrapper wrapped_rewriter(this);
-  enumerator_type enumerator(m_data_specification_for_enumeration, wrapped_rewriter, (sorts_are_finite?npos():data::detail::get_enumerator_variable_limit()), true);
+  auto const throw_exceptions = true;
+  auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
+  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_true, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
+  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
 
   /* Create lists to store solutions */
   data_expression partial_result=sort_bool::true_();
 
   size_t loop_upperbound=(sorts_are_finite?npos():10);
-  enumerator_type::iterator sol=enumerator.begin(vl_new_l, t3, sigma, false);
+  std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
+
+  enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
   for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
-         sol!=enumerator.end();
+         sol!=enumerator.end() && sol->is_valid();
          ++sol)
   {
     if (partial_result==sort_bool::true_())
     {
-      partial_result=sol.resulting_condition();
+      partial_result=sol->expression();
     }
     else if (partial_result!=sort_bool::false_())
     {
-      partial_result=application(sort_bool::and_(), partial_result, sol.resulting_condition());
+      partial_result=application(sort_bool::and_(), partial_result, sol->expression());
     }
     loop_upperbound--;
   }
 
-  if (!sol.exception_occurred() && (loop_upperbound>0 || partial_result==sort_bool::false_()))
+  if ((sol==enumerator.end() && loop_upperbound>0) || partial_result==sort_bool::false_())
   {
     return partial_result;
   }
-
   // One can consider to replace the variables by their original, in order to not show
   // internally generated variables in the output.
+  assert(!sol->is_valid()||loop_upperbound==0);
   return abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
 }
 

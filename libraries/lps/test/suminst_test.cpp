@@ -176,7 +176,7 @@ void test_case_6()
   specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, atermpp::convert<std::set<data::sort_expression> >(s1.data().sorts())).run();
+  suminst_algorithm<rewriter>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -196,7 +196,7 @@ void test_case_7()
   specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, atermpp::convert<std::set<data::sort_expression> >(s1.data().sorts())).run();
+  suminst_algorithm<rewriter>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();
   int sum_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)

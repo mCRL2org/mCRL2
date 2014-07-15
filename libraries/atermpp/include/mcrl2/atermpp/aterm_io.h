@@ -12,9 +12,11 @@
 #ifndef MCRL2_ATERMPP_ATERM_IO_H
 #define MCRL2_ATERMPP_ATERM_IO_H
 
-
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/workarounds.h"
+
+#include <iomanip>
 
 namespace atermpp
 {
@@ -53,8 +55,9 @@ aterm read_term_from_string(const std::string& s);
 ///
 /// \brief Exception class for reporting an I/O error in the ATerm Library.
 ///
-struct aterm_io_error : public mcrl2::runtime_error
+class aterm_io_error : public mcrl2::runtime_error
 {
+public:
   /// \brief Constructor
   /// \param[in] message the exception message
   aterm_io_error(const std::string& message)
@@ -65,18 +68,28 @@ struct aterm_io_error : public mcrl2::runtime_error
 ///
 /// \brief Exception class for reporting a version error in the BAF file format.
 ///
-struct baf_version_error : public aterm_io_error
+class baf_version_error : public aterm_io_error
 {
+private:
   std::size_t version;
   std::size_t expected_version;
 
+public:
   /// \brief Constructor
   /// \param[in] message the exception message
-  baf_version_error(const std::string& message, std::size_t version_, std::size_t expected_version_)
-    : aterm_io_error(message),
+  baf_version_error(std::size_t version_, std::size_t expected_version_)
+    : aterm_io_error("Wrong BAF version"),
       version(version_),
       expected_version(expected_version_)
   { }
+
+  const char* what() const NOEXCEPT
+  {
+    std::stringstream ss;
+    ss << std::internal << std::showbase << std::hex << std::setfill('0') << std::setw(4)
+       << aterm_io_error::what() << " (got " << version << ", expected" << expected_version << ")";
+    return ss.str().c_str();
+  }
 };
 
 } // namespace atermpp

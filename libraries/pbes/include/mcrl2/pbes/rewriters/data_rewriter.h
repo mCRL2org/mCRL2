@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_REWRITERS_DATA_REWRITER_H
 #define MCRL2_PBES_REWRITERS_DATA_REWRITER_H
 
+#include "mcrl2/data/substitutions/no_substitution.h"
 #include "mcrl2/pbes/builder.h"
 
 namespace mcrl2 {
@@ -19,16 +20,6 @@ namespace mcrl2 {
 namespace pbes_system {
 
 namespace detail {
-
-struct NoSubst
-{
-};
-
-inline
-std::ostream& operator<<(std::ostream& out, const NoSubst&)
-{
-  return out << "[]";
-}
 
 template <typename DataRewriter, typename SubstitutionFunction>
 data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, SubstitutionFunction& sigma)
@@ -38,13 +29,13 @@ data::data_expression data_rewrite(const data::data_expression& x, const DataRew
 }
 
 template <typename DataRewriter>
-data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, NoSubst&)
+data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, data::no_substitution&)
 {
   mCRL2log(log::debug2) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
   return R(x);
 }
 
-template <template <class> class Builder, class Derived, class DataRewriter, class SubstitutionFunction = NoSubst>
+template <template <class> class Builder, class Derived, class DataRewriter, class SubstitutionFunction = data::no_substitution>
 struct add_data_rewriter: public Builder<Derived>
 {
   typedef Builder<Derived> super;
@@ -132,7 +123,7 @@ struct data_rewriter
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    detail::NoSubst sigma;
+    data::no_substitution sigma;
     return detail::make_apply_rewriter_builder<detail::data_rewriter_builder>(R, sigma)(x);
   }
 

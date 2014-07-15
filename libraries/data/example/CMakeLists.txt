@@ -32,23 +32,6 @@ set(PREFIX "example_data")
 # )
 
 ##---------------------------------------------------
-## Example enumerator 
-##--------------------------------------------------- 
-
-set(PROJECT_NAME "${PREFIX}_enumerator")
-project( ${PROJECT_NAME} )
-
-add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
-      enumerator.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}
-   mcrl2_data
-)
-
-build_and_run_test_example_target( ${PROJECT_NAME} )
-
-##---------------------------------------------------
 ## Example example[1..5]
 ##--------------------------------------------------- 
 

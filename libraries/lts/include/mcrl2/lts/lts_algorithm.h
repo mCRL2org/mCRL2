@@ -33,6 +33,8 @@
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
+#include "mcrl2/lts/detail/liblts_weak_bisim.h"
+#include "mcrl2/lts/detail/liblts_add_an_action_loop.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_sim.h"
 #include "mcrl2/lts/detail/liblts_tau_star_reduce.h"
@@ -103,11 +105,27 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
     }
+    case lts_eq_weak_bisim:
+    {
+      if (generate_counter_examples)
+      {
+        mCRL2log(log::warning) << "Cannot generate counter example traces for weak bisimulation\n";
+      }
+      return detail::destructive_weak_bisimulation_compare(l1,l2,false);
+    }
+    case lts_eq_divergence_preserving_weak_bisim:
+    {
+      if (generate_counter_examples)
+      {
+        mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence preserving weak bisimulation\n";
+      }
+      return detail::destructive_weak_bisimulation_compare(l1,l2, true);
+    }
     case lts_eq_sim:
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "cannot generate counter example traces for simulation equivalence\n";
+        mCRL2log(log::warning) << "Cannot generate counter example traces for simulation equivalence\n";
       }
       // Run the partitioning algorithm on this merged LTS
       size_t init_l2 = l2.initial_state() + l1.num_states();
@@ -380,6 +398,38 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     {
       sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s(l);
       s.run();
+      return;
+    }
+    case lts_eq_weak_bisim:
+    {
+      detail::weak_bisimulation_reduce(l,false);
+      return;
+    }
+    case lts_eq_weak_bisim_sigref:
+    {
+      sigref<LTS_TYPE, signature_branching_bisim<LTS_TYPE> > s1(l);
+      s1.run();
+      detail::reflexive_transitive_tau_closure(l); 
+      sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s2(l);
+      s2.run();
+      scc_reduce(l); // Remove tau loops
+      return;
+    }
+    case lts_eq_divergence_preserving_weak_bisim:
+    {
+      detail::weak_bisimulation_reduce(l,true);
+      return;
+    }
+    case lts_eq_divergence_preserving_weak_bisim_sigref:
+    {
+      sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s1(l);
+      s1.run();
+      size_t divergence_label=detail::mark_explicit_divergence_transitions(l);
+      detail::reflexive_transitive_tau_closure(l);  
+      sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s2(l);
+      s2.run();
+      scc_reduce(l); // Remove tau loops
+      detail::unmark_explicit_divergence_transitions(l,divergence_label);
       return;
     }
     case lts_eq_sim:

@@ -26,7 +26,6 @@ void ToolCatalog::generateFileTypes()
 #ifdef USE_BCG
   m_filetypes.insert("bcg", "lts");
 #endif
-  m_filetypes.insert("bes", "bes");
   m_filetypes.insert("gm",  "bes");
   m_filetypes.insert("cwi", "bes");
   m_filetypes.insert("bes", "pbes");
@@ -102,6 +101,7 @@ QList<ToolInformation> ToolCatalog::tools(QString category)
   return m_categories.value(category);
 }
 
+/*
 QList<ToolInformation> ToolCatalog::tools(QString category, QString extension)
 {
   QStringList inputTypes = fileTypes(extension);
@@ -119,3 +119,4 @@ QList<ToolInformation> ToolCatalog::tools(QString category, QString extension)
   }
   return ret;
 }
+*/

@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -24,6 +25,7 @@ namespace mcrl2
 
 namespace utilities
 {
+
 /// \brief Transform parameter into string.
 /// \param x Some expression
 /// \pre type T has operator <<
@@ -121,6 +123,48 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
 /// \param s A string of text.
 /// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const std::string& s);
+
+/// \brief Convert a number to a string in the buffer.
+/// \param A number.
+/// \param A buffer that is sufficiently large.
+/// \return A pointer to the end of the buffer, where the character '\0' is located.
+inline
+char* number2string(std::size_t number, char* buffer)
+{
+  // First calculate the number of digital digits of number;
+  size_t number_of_digits=0;
+  if (number==0)
+  {
+    number_of_digits=1;
+  }
+  else
+  {
+    for(size_t copy=number ; copy!=0; ++number_of_digits, copy=copy/10)
+    {}
+  }
+ 
+  // Put the number in the buffer at the right position.
+  size_t position=number_of_digits;
+  buffer[position] = '\0'; // end of string marker.
+  while (position>0)
+  {
+    --position;
+    buffer[position] = '0' + number % 10;
+    number = number/10;
+  }
+  return &buffer[number_of_digits];
+}
+
+/// \brief Convert a number to string.
+/// \param A number.
+inline
+std::string number2string(std::size_t number)
+{
+  char _buffer[std::numeric_limits<std::size_t>::digits10 + 1];
+  number2string(number, _buffer);
+  return std::string(_buffer);
+}
+
 
 } // namespace utilities
 

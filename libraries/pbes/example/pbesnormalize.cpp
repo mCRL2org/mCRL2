@@ -9,18 +9,24 @@
 /// \file pbesnormalize.cpp
 
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/normalize.h"
 
 using namespace mcrl2;
+using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class pbes_normalize_tool: public input_output_tool
+class pbes_normalize_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {
   public:
+    typedef pbes_input_tool<pbes_output_tool<input_output_tool> > super;
+
     pbes_normalize_tool()
-      : input_output_tool(
+      : super(
         "pbesnormalize",
         "Wieger Wesselink",
         "normalize a PBES",
@@ -36,14 +42,14 @@ class pbes_normalize_tool: public input_output_tool
       mCRL2log(log::verbose) << "  output file:        " << m_output_filename << std::endl;
 
       // load the pbes
-      pbes_system::pbes p;
-      p.load(input_filename());
+      pbes p;
+      load_pbes(p, input_filename(), pbes_input_format());
 
       // apply the algorithm
       normalize(p);
 
       // save the result
-      p.save(output_filename());
+      save_pbes(p, output_filename(), pbes_output_format());
 
       return true;
     }

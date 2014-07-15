@@ -14,10 +14,10 @@
 
 #include <cassert>
 #include <limits>
+#include <type_traits>
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_base_of.hpp>
-#include <boost/type_traits/is_convertible.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+
 #include "mcrl2/atermpp/detail/aterm_list.h"
 
 namespace atermpp
@@ -69,8 +69,8 @@ class term_list:public aterm
     /// \param t An aterm.
     explicit term_list(const aterm &t):aterm(t)
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
       // Term list can be undefined; Generally, this is used to indicate an error situation.
       // This use should be discouraged. For this purpose exceptions ought to be used.
       assert(!defined() || type_is_list());
@@ -81,9 +81,10 @@ class term_list:public aterm
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
-    term_list(Iter first, Iter last, typename boost::enable_if<
-              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-              boost::random_access_traversal_tag >::type >::type* = 0):
+    term_list(Iter first, Iter last, typename std::enable_if<std::is_convertible<
+                typename boost::iterator_traversal< Iter >::type,
+                boost::random_access_traversal_tag
+              >::value>::type* = 0):
         aterm(detail::make_list_backward<Term,Iter,
                   detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>()))
     {
@@ -97,9 +98,11 @@ class term_list:public aterm
     /// \param convert_to_aterm A class with a () operation, which is applied to each element
     ///                   before it is put into the list.
     template <class Iter, class ATermConverter>
-    term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm, typename boost::enable_if<
-              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-              boost::random_access_traversal_tag >::type >::type* = 0):
+    term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm,
+              typename std::enable_if<std::is_convertible<
+                typename boost::iterator_traversal< Iter >::type,
+                boost::random_access_traversal_tag
+              >::value>::type* = 0):
          aterm(detail::make_list_backward<Term,Iter,ATermConverter>(first, last, convert_to_aterm))
     {
       assert(!defined() || type_is_list());
@@ -112,9 +115,11 @@ class term_list:public aterm
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
-             term_list(Iter first, Iter last, typename boost::disable_if<
-             typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-             boost::random_access_traversal_tag >::type >::type* = 0):
+             term_list(Iter first, Iter last,
+                       typename std::enable_if< !std::is_convertible<
+                         typename boost::iterator_traversal< Iter >::type,
+                         boost::random_access_traversal_tag
+                       >::value>::type* = 0):
          aterm(detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
                                  (first, last, detail::do_not_convert_term<Term>()))
     {
@@ -130,9 +135,11 @@ class term_list:public aterm
     ///  \param convert_to_aterm A class with a () operation, whic is applied to each element
     ///                      before it is put into the list.
     template <class Iter, class  ATermConverter>
-             term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm, typename boost::disable_if<
-             typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-             boost::random_access_traversal_tag >::type >::type* = 0):
+             term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
+                       typename std::enable_if< !std::is_convertible<
+                         typename boost::iterator_traversal< Iter >::type,
+                         boost::random_access_traversal_tag
+                       >::value>::type* = 0):
          aterm(detail::make_list_forward<Term,Iter,ATermConverter>
                                  (first, last, convert_to_aterm))
     {

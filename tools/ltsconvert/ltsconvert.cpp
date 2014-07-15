@@ -15,7 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/lts_convert.h"
@@ -150,7 +150,7 @@ class ltsconvert_tool : public ltsconvert_base
       if (!tool_options.lpsfile.empty())
       {
         // No lpsfile is given. Only straightforward translations are possible.
-        spec.load(tool_options.lpsfile);
+        load_lps(spec, tool_options.lpsfile);
       }
 
 
@@ -264,6 +264,10 @@ class ltsconvert_tool : public ltsconvert_base
                       .add_value(lts_eq_branching_bisim_sigref)
                       .add_value(lts_eq_divergence_preserving_branching_bisim)
                       .add_value(lts_eq_divergence_preserving_branching_bisim_sigref)
+                      .add_value(lts_eq_weak_bisim)
+                      .add_value(lts_eq_weak_bisim_sigref)
+                      .add_value(lts_eq_divergence_preserving_weak_bisim)
+                      .add_value(lts_eq_divergence_preserving_weak_bisim_sigref)
                       .add_value(lts_eq_sim)
                       .add_value(lts_eq_trace)
                       .add_value(lts_eq_weak_trace)

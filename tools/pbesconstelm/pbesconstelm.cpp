@@ -17,6 +17,8 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -25,10 +27,10 @@ using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
+class pbes_constelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > >
 {
   protected:
-    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
+    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > > super;
 
     bool m_compute_conditions;
     bool m_remove_redundant_equations;
@@ -68,6 +70,8 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
 
       pbesconstelm(input_filename(),
                    output_filename(),
+                   pbes_input_format(),
+                   pbes_output_format(),
                    rewrite_strategy(),
                    rewriter_type(),
                    m_compute_conditions,

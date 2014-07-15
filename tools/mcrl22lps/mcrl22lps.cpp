@@ -17,7 +17,7 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -228,7 +228,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       {
         mCRL2log(verbose) << "writing LPS to file '" <<  m_linearisation_options.outfilename << "'..." << std::endl;
       }
-      linear_spec.save(m_linearisation_options.outfilename);
+      save_lps(linear_spec, m_linearisation_options.outfilename);
       return true;
     }
 };

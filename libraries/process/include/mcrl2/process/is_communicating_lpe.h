@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/detail/is_communicating_lpe.h
+/// \file mcrl2/process/is_communicating_lpe.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PROCESS_DETAIL_IS_COMMUNICATING_LPE_H
-#define MCRL2_PROCESS_DETAIL_IS_COMMUNICATING_LPE_H
+#ifndef MCRL2_PROCESS_IS_COMMUNICATING_LPE_H
+#define MCRL2_PROCESS_IS_COMMUNICATING_LPE_H
 
 #include "mcrl2/process/traverser.h"
 
@@ -112,18 +112,19 @@ struct communicating_lpe_traverser: public process_expression_traverser<communic
   }
 };
 
+} // namespace detail
+
+/// \brief Returns true if x is in communicating LPE format
 inline
 bool is_communicating_lpe(const process::process_expression& x)
 {
-  communicating_lpe_traverser f;
+  detail::communicating_lpe_traverser f;
   f(x);
   return f.result;
 }
-
-} // namespace detail
 
 } // namespace process
 
 } // namespace mcrl2
 
-#endif // MCRL2_PROCESS_DETAIL_IS_COMMUNICATING_LPE_H
+#endif // MCRL2_PROCESS_IS_COMMUNICATING_LPE_H

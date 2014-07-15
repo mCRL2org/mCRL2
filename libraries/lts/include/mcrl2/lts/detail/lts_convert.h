@@ -138,7 +138,6 @@ class lts_fsm_convertor
 
     state_label_fsm translate_state(const state_label_lts& l)
     {
-
       std::vector < size_t > result;
       for (size_t i=0; i<l.size(); ++i)
       {

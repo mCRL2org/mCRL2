@@ -17,8 +17,6 @@
 #include <string>
 #include <cctype>
 
-#include "boost/utility.hpp"
-
 #include <cstdio>
 #include <cerrno>
 #include <cstdlib>
@@ -26,15 +24,14 @@
 #include <cassert>
 
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/pbes/io.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -180,17 +177,17 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         {
           // Try to read a linear specification
           mcrl2::lps::specification p;
-          p.load(input_filename());
-          spec=p.data();
+          load_lps(p, input_filename());
+          spec = p.data();
           context_variables = p.global_variables();
         }
-        catch (mcrl2::runtime_error e)
+        catch (mcrl2::runtime_error)
         {
           try
           {
             // Try to read a pbes.
             mcrl2::pbes_system::pbes p;
-            p.load(input_filename());
+            load_pbes(p, input_filename());
             spec=p.data();
             context_variables = p.global_variables();
           }
@@ -298,27 +295,27 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             }
 
             term=rewr(term);
-            typedef classic_enumerator< rewriter > enumerator_type;
-            enumerator_type enumerator(spec,rewr);
+            typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
+            enumerator_type enumerator(rewr, spec, rewr, 10000);
 
             data::mutable_indexed_substitution<> sigma;
-            for (enumerator_type::iterator
-                      i=enumerator.begin(variable_list(vars.begin(),vars.end()),term,sigma, 10000); // Stop when more than 10000 internal variables are required
-                      i != enumerator.end() ; ++i)
+            std::deque<enumerator_list_element_with_substitution<> >
+                 enumerator_deque(1, enumerator_list_element_with_substitution<>(variable_list(vars.begin(), vars.end()), term));
+            for (enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end(); ++i)
             {
+              i->add_assignments(vars,sigma,rewr);
+
               cout << "[";
-              data::data_expression_list::const_iterator j=i->begin();
-              data::mutable_indexed_substitution<> sigma_i;
-              for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v, ++j)
+              for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
               {
-                cout << data::pp(*v) << " := " << data::pp(*j);
-                sigma_i[*v]=*j;
-                if (boost::next(v)!=vars.end())
+                if (v!=vars.begin())
                 {
                   cout << ", ";
                 }
+             
+                cout << data::pp(*v) << " := " << data::pp(sigma(*v));
               }
-              cout << "] evaluates to "<< data::pp(rewr(term,sigma_i)) << "\n";
+              cout << "] evaluates to "<< data::pp(rewr(term,sigma)) << "\n";
             }
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))

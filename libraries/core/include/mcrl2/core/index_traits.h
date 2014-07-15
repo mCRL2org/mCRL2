@@ -19,10 +19,8 @@
 #include <boost/config.hpp>
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/hash.h"
 
 #ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
-#include <boost/functional/hash.hpp>
 #include <unordered_map>
 #include <utility>
 #include "mcrl2/atermpp/aterm.h"

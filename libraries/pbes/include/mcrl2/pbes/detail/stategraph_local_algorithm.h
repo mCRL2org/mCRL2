@@ -238,7 +238,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
     template <typename RulesPredicate>
-    belongs_relation compute_belongs(const local_control_flow_graph& Vk, const std::set<data::data_expression>& values_k, RulesPredicate rules)
+    belongs_relation compute_belongs(const local_control_flow_graph& Vk, RulesPredicate rules)
     {
       using utilities::detail::contains;
 
@@ -260,7 +260,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
         }
         Bk[X]; // force the creation of an empty set corresponding to X
         auto const& eq_X = *find_equation(m_pbes, X);
-        std::set<std::size_t> belongs = data_parameter_indices(X);
+        auto const& dpX = eq_X.data_parameter_indices();
+        std::set<std::size_t> belongs(dpX.begin(), dpX.end());
         mCRL2log(log::debug1, "stategraph") << "  initial belong set for equation " << X << " = " << print_belong_set(eq_X, belongs) << std::endl;
 
         auto const& predvars = eq_X.predicate_variables();
@@ -300,8 +301,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         mCRL2log(log::debug, "stategraph") << "--- compute belongs for graph " << k << " ---" << std::endl;
         auto const& Vk = m_local_control_flow_graphs[k];
-        auto const& values_k = m_connected_components_values[k];
-        belongs_relation Bk = compute_belongs(Vk, values_k, default_rules_predicate(Vk));
+        belongs_relation Bk = compute_belongs(Vk, default_rules_predicate(Vk));
         m_belongs.push_back(Bk);
       }
     }
@@ -887,7 +887,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
         auto const& d_X = eq_X.parameters();
         B[X]; // force creation of empty set corresponding to X
-        std::set<std::size_t> I = data_parameter_indices(X);
+        auto const& I = eq_X.data_parameter_indices();
         for (auto i = I.begin(); i != I.end(); ++i)
         {
           B[X].insert(d_X[*i]);
@@ -998,11 +998,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
             if (q != component_index.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
-              auto e1 = mapped_value(i->dest(), k1, data::undefined_data_expression());
+              auto e1 = i->target(k1);
               if (e1 != data::undefined_data_expression())
               {
-                // dest(X, i, k') = e'
-                mCRL2log(log::debug1, "stategraph") << "case 1: (X, e) -> (Y, d', e') ; dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
+                // target(X, i, k') = e'
+                mCRL2log(log::debug1, "stategraph") << "case 1: (X, e) -> (Y, d', e') ; target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                 V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
               }
             }
@@ -1024,9 +1024,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
               std::size_t k1 = q->second;
               if (is_mapped_to(i->source(), k, e))
               {
-                // source(X, i, k) = e && dest(X, i, k') = e'
-                auto e1 = mapped_value(i->dest(), k1, data::undefined_data_expression());
-                mCRL2log(log::debug1, "stategraph") << "case 3a: (X, d, e) -> (Y, d', e') ; source(X, i, k) = e && dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
+                // source(X, i, k) = e && target(X, i, k') = e'
+                auto e1 = i->target(k1);
+                mCRL2log(log::debug1, "stategraph") << "case 3a: (X, d, e) -> (Y, d', e') ; source(X, i, k) = e && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                 if (e1 != data::undefined_data_expression())
                 {
                   V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
@@ -1034,16 +1034,16 @@ class stategraph_local_algorithm: public stategraph_algorithm
               }
               else if (Y != X && is_undefined(i->source(), k))
               {
-                // Y != X && undefined(source(X, i, k)) && dest(X, i, k') = e'
-                auto e1 = mapped_value(i->dest(), k1, data::undefined_data_expression());
+                // Y != X && undefined(source(X, i, k)) && target(X, i, k') = e'
+                auto e1 = i->target(k1);
                 if (e1 != data::undefined_data_expression())
                 {
-                  mCRL2log(log::debug1, "stategraph") << "case 3b: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
+                  mCRL2log(log::debug1, "stategraph") << "case 3b: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                   V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
                 }
 
                 // Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k'
-                if (mapped_value(i->copy(), k, data::undefined_index()) == k1)
+                if (i->copy(k) == k1)
                 {
                   mCRL2log(log::debug1, "stategraph") << "case 3c: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k' ; k' = " << print_index(k1) << std::endl;
                   V.insert_edge(todo, m_pbes, u, Y, k1, e, edge_label);
@@ -1053,7 +1053,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             // case 4: (X, d, e) -> (Y, ?)
             else
             {
-              auto e1 = mapped_value(i->source(), k, data::undefined_data_expression());
+              auto e1 = i->source(k);
               if (e1 == e || e1 == data::undefined_data_expression())
               {
                 std::size_t k1 = data::undefined_index();
@@ -1076,7 +1076,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       compute_local_control_flow_graph(U, component_index);
     }
 
-    // Computes a local control flow graph that corresponds to the given component in m_global_control_flow_graph_vertices.
+    // Computes a local control flow graph that corresponds to the given component in m_GCFP_graph.
     void compute_local_control_flow_graph(const std::set<std::size_t>& component, const std::set<data::data_expression>& component_values)
     {
       mCRL2log(log::debug, "stategraph") << "Compute local control flow graphs for component " << print_connected_component(component) << std::endl;
@@ -1085,14 +1085,14 @@ class stategraph_local_algorithm: public stategraph_algorithm
       std::map<core::identifier_string, std::size_t> component_index;
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& w = m_global_control_flow_graph_vertices[*p];
+        const GCFP_vertex& w = m_GCFP_graph.vertex(*p);
         component_index[w.name()] = w.index();
       }
 
       std::set<local_control_flow_graph_vertex> U;
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*p);
         for (auto q = component_values.begin(); q != component_values.end(); ++q)
         {
           U.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), *q));

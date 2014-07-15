@@ -358,9 +358,9 @@ struct lps_well_typed_checker
     }
 
     // check 3)
-    if (!data::detail::unique_names(atermpp::convert<data::variable_list>(spec.global_variables())))
+    if (!data::detail::unique_names(spec.global_variables()))
     {
-      mCRL2log(log::error) << "is_well_typed(specification) failed: global variables " << data::pp(atermpp::convert<data::variable_list>(spec.global_variables())) << " don't have unique names." << std::endl;
+      mCRL2log(log::error) << "is_well_typed(specification) failed: global variables " << data::pp(spec.global_variables()) << " don't have unique names." << std::endl;
       return false;
     }
 

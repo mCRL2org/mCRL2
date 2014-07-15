@@ -17,8 +17,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "boost/type_traits/add_reference.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/detail/rewrite.h"
@@ -49,11 +47,8 @@ class basic_rewriter
 
   public:
 
-    /// \brief The term type of the rewriter.
-    typedef Term term_type;
-
     /// \brief The type for expressions manipulated by the rewriter.
-    typedef Term expression_type;
+    typedef Term term_type;
 
     /// \brief The rewrite strategies of the rewriter.
     typedef rewrite_strategy strategy;
@@ -66,7 +61,6 @@ class basic_rewriter
     {
       return m_rewriter->identifier_generator();
     }
-
 
   protected:
 
@@ -82,61 +76,17 @@ class basic_rewriter
     {}
 
     /// \brief Constructor.
+    /// \param[in] d A data specification
+    /// \param[in] s A rewriter strategy.
+    basic_rewriter(const data_specification& d, const strategy s = jitty) :
+      m_rewriter(detail::createRewriter(d, used_data_equation_selector(d), static_cast< rewrite_strategy >(s)))
+    { }
+
+    /// \brief Constructor.
     basic_rewriter(const data_specification & d, const used_data_equation_selector &equation_selector, const strategy s = jitty) :
       m_rewriter(detail::createRewriter(d, equation_selector, static_cast< rewrite_strategy >(s)))
     {}
 
-};
-
-/// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
-/// and data_expression_with_variables.
-template <>
-class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm >
-{
-    template < typename CompatibleExpression >
-    friend class basic_rewriter;
-    friend class enumerator;
-
-  public:
-    /// \brief The term type of the rewriter.
-    typedef data_expression                                     expression_type;
-    /// \brief The variable type of the rewriter.
-    typedef core::term_traits< expression_type >::variable_type variable_type;
-
-
-    typedef basic_rewriter< data_expression >::substitution_type substitution_type;
-
-  protected:
-
-    /// \brief Copy constructor for conversion between derived types
-    template < typename CompatibleExpression >
-    basic_rewriter(const basic_rewriter< CompatibleExpression > & other) :
-      basic_rewriter< data_expression >(other)
-    { }
-
-  public:
-
-    /// \brief Constructor.
-    /// \param[in] other A rewriter
-    basic_rewriter(const basic_rewriter & other) :
-      basic_rewriter< atermpp::aterm >(other)
-    { }
-
-    /// \brief Constructor.
-    /// \param[in] d A data specification
-    /// \param[in] s A rewriter strategy.
-    basic_rewriter(const data_specification& d, const strategy s = jitty) :
-      basic_rewriter< atermpp::aterm >(d,used_data_equation_selector(d),s)
-    { }
-
-    /// \brief Constructor.
-    /// \param[in] d A data specification
-    /// \param[in] s A rewriter strategy.
-    /// \param[in] selector A component that selects the equations that are converted to rewrite rules
-    template < typename EquationSelector >
-    basic_rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
-      basic_rewriter< atermpp::aterm >(d,selector,s)
-    { }
 };
 
 /// \brief Rewriter that operates on data expressions.
@@ -242,26 +192,6 @@ class rewriter: public basic_rewriter<data_expression>
       return m_rewriter->rewrite(d,sigma);
 #endif
     }
-    /// \brief Rewrites the data expression d, and on the fly applies a substitution function
-    /// to data variables.
-    /// \param[in] d A data expression
-    /// \param[in] sigma A substitution function
-    /// \return The normal form of the term.
-    //  Added bij JFG, to avoid the use of find_free_variables in the function operator() with
-    //  an arbitrary SubstitionFunction, as this is prohibitively costly.
-
-    data_expression operator()(const data_expression& d, const substitution_type& sigma) const
-    {
-      substitution_type sigma1(sigma);
-# ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(log::debug) << "REWRITE " << d << "\n";
-      data_expression result(m_rewriter->rewrite(d,sigma1));
-      mCRL2log(log::debug) << " ------------> " << result << std::endl;
-      return result;
-#else
-      return m_rewriter->rewrite(d,sigma1);
-#endif
-    }
 };
 
 /// \brief Rewriter that operates on data expressions.
@@ -334,25 +264,6 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
 #endif
       return result;
     }
-};
-
-
-/// \brief Function object for converting a data rewriter into a rewriter that
-/// applies a substitution.
-template <typename DataRewriter, typename Substitution>
-struct rewriter_adapter
-{
-  const DataRewriter& R_;
-  const Substitution& sigma_;
-
-  rewriter_adapter(const DataRewriter& R, const Substitution& sigma)
-    : R_(R), sigma_(sigma)
-  {}
-
-  data::data_expression operator()(const data::data_expression& t) const
-  {
-    return R_(t, sigma_);
-  }
 };
 
 } // namespace data

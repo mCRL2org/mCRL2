@@ -17,6 +17,9 @@
 namespace atermpp
 {
 
+template <class Term>
+class term_appl;
+
 /// \cond INTERNAL_DOCS
 namespace detail
 {

@@ -22,7 +22,7 @@
 #include <QObject>
 #include <QPoint>
 #include "mcrl2/data/rewrite_strategy.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/data_specification.h"
 
 class Rewriter : public QObject
 {

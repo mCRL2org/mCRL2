@@ -21,10 +21,9 @@
 #include "mcrl2/utilities/input_output_tool.h"
 
 #include "mcrl2/data/parse.h"
-// #include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
-#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/lts_convert.h"
@@ -170,19 +169,19 @@ class lts2lps_tool : public input_output_tool
       bool extra_data_is_defined=false;
 
       /* Read data specification (if any) */
-      if (data_file_type==none_e)
+      if (data_file_type == none_e)
       {
         mCRL2log(warning) << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl;
       }
-      else if (data_file_type==lps_e)
+      else if (data_file_type == lps_e)
       {
         // First try to read the provided file as a .lps file.
         lps::specification spec;
-        spec.load(datafile.c_str());
-        data=spec.data();
-        action_labels=spec.action_labels();
-        process_parameters=spec.process().process_parameters();
-        extra_data_is_defined=true;
+        load_lps(spec, datafile);
+        data = spec.data();
+        action_labels = spec.action_labels();
+        process_parameters = spec.process().process_parameters();
+        extra_data_is_defined = true;
       }
       else
       {
@@ -216,9 +215,9 @@ class lts2lps_tool : public input_output_tool
           using namespace mcrl2::process;
           // The function below parses and typechecks the process specification.
           process_specification process_spec = parse_process_specification(lps.str(),false);
-          data=process_spec.data();
-          action_labels=process_spec.action_labels();
-          extra_data_is_defined=true;
+          data = process_spec.data();
+          action_labels = process_spec.action_labels();
+          extra_data_is_defined = true;
         }
       }
 
@@ -242,9 +241,7 @@ class lts2lps_tool : public input_output_tool
       const std::set< data::variable> global_variables;
       // Add a single delta.
       const deadlock_summand_vector deadlock_summands(1,deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
-      const linear_process lps(process_parameters,deadlock_summands,action_summand_vector());
       const process_initializer initial_process(make_list(assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
-      const lps::specification spec(l.data(),l.action_labels(),global_variables,lps,initial_process);
 
       const std::vector<transition> &trans=l.get_transitions();
       for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
@@ -266,10 +263,10 @@ class lts2lps_tool : public input_output_tool
       }
 
       const linear_process lps1(process_parameters,deadlock_summands,action_summands);
-      const lps::specification spec1(l.data(),l.action_labels(),global_variables,lps1,initial_process);
+      const specification spec(l.data(),l.action_labels(),global_variables,lps1,initial_process);
 
       mCRL2log(verbose) << "Start saving the linear process\n";
-      spec1.save(output_filename());
+      save_lps(spec, output_filename());
       return true;
     }
 

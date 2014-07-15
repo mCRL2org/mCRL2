@@ -14,7 +14,7 @@ ${declare longest_match}
 
 //--- Sort expressions and sort declarations
 
-SimpleSortExpr
+SortExpr
   : 'Bool'                                                       // Booleans
   | 'Pos'                                                        // Positive numbers
   | 'Nat'                                                        // Natural numbers
@@ -28,15 +28,14 @@ SimpleSortExpr
   | Id                                                           // Sort reference
   | '(' SortExpr ')'                                             // Sort expression with parentheses
   | 'struct' ConstrDeclList                                      // Structured sort
+  | SortProduct ('->' $binary_op_right 0) SortExpr;              // Function sort
   ;
 
-SortExpr
-  : SimpleSortExpr
-  | HashArgs '->' SortExpr ;                                     // Function sort
-
-SortExprList: (SortExpr '#')* SortExpr ;                         // Product sort
-
-HashArgs: SimpleSortExpr ('#' SimpleSortExpr)* ;                 // Simple product sort
+SortProduct                                                      // Product sort
+  : SortExpr $left 2
+  | SortProduct ('#' $binary_op_left 1) SortExpr
+  | SortProduct ('->' $binary_op_right 0) SortExpr
+  ;
 
 SortSpec: 'sort' SortDecl+ ;                                     // Sort specification
 
@@ -151,15 +150,15 @@ ActIdSet: '{' IdList '}' ;                                       // Action set
 
 MultActId: Id ( '|' Id )* ;                                      // Multi-action label
 
-MultActIdList: MultActId ( ',' MultActId )* ;                    // Multi-action labels 
+MultActIdList: MultActId ( ',' MultActId )* ;                    // Multi-action labels
 
 MultActIdSet: '{' MultActIdList? '}' ;                           // Multi-action label set
 
-CommExpr: Id '|' MultActId '->' Id ;                             // Action synchronisation
+CommExpr: Id '|' MultActId '->' Id ;                             // Action synchronization
 
-CommExprList: CommExpr ( ',' CommExpr )* ;                       // Action synchronisations
+CommExprList: CommExpr ( ',' CommExpr )* ;                       // Action synchronizations
 
-CommExprSet: '{' CommExprList? '}' ;                             // Action synchronisation set
+CommExprSet: '{' CommExprList? '}' ;                             // Action synchronization set
 
 RenExpr: Id '->' Id ;                                            // Action renaming
 
@@ -220,7 +219,7 @@ IfThen: '->' ProcExprNoIf '<>' $left 0 ;                         // Auxiliary if
 
 Action: Id ( '(' DataExprList ')' )? ;                           // Action, process instantiation
 
-ActDecl: IdList ( ':' SortExprList )? ';' ;                      // Declarations of actions
+ActDecl: IdList ( ':' SortProduct )? ';' ;                       // Declarations of actions
 
 ActSpec: 'act' ActDecl+ ;                                        // Action specification
 
@@ -257,13 +256,13 @@ mCRL2SpecElt
   | ProcSpec                                                     // Process specification
   ;
 
-//--- BES
+//--- Boolean equation system
 
 BesSpec: BesEqnSpec BesInit ;                                    // Boolean equation system
 
 BesEqnSpec: 'bes' BesEqnDecl+ ;                                  // Boolean equation declaration
 
-BesEqnDecl: FixedPointOperator BesVar '=' BesExpr ';' ;          // Boolean fixed poinst equation
+BesEqnDecl: FixedPointOperator BesVar '=' BesExpr ';' ;          // Boolean fixed point equation
 
 BesVar: Id ;                                                     // BES variable
 
@@ -280,11 +279,11 @@ BesExpr
 
 BesInit: 'init' BesVar ';' ;                                     // Initial BES variable
 
-//--- PBES
+//--- Parameterized Boolean equation systems
 
 PbesSpec: DataSpec? GlobVarSpec? PbesEqnSpec PbesInit ;          // PBES specification
 
-PbesEqnSpec: 'pbes' PbesEqnDecl+ ;                               // Declaratioin of PBES equations
+PbesEqnSpec: 'pbes' PbesEqnDecl+ ;                               // Declaration of PBES equations
 
 PbesEqnDecl: FixedPointOperator PropVarDecl '=' PbesExpr ';' ;   // PBES equation
 
@@ -341,7 +340,7 @@ RegFrm
   | RegFrm ('+' $binary_op_left 1) RegFrm                        // Alternative composition
   | RegFrm ('.' $binary_op_right 2) RegFrm                       // Sequential composition
   | RegFrm '*'                                 $unary_right  3   // Iteration
-  | RegFrm '+'                                 $unary_right  3   // Non-empty iteration
+  | RegFrm '+'                                 $unary_right  3   // Nonempty iteration
   ;
 
 //--- State formulas
@@ -368,7 +367,7 @@ StateFrm
 
 StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;           // PBES variable declaration
 
-StateVarAssignment: Id ':' SortExpr '=' DataExpr ;               // Typed variable with initial value 
+StateVarAssignment: Id ':' SortExpr '=' DataExpr ;               // Typed variable with initial value
 
 StateVarAssignmentList: StateVarAssignment ( ',' StateVarAssignment )* ;  // Typed variable list
 

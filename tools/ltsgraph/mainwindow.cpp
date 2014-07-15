@@ -54,7 +54,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
   // Connect signals & slots
   connect(m_glwidget, SIGNAL(widgetResized(const Graph::Coord3D&)), this, SLOT(onWidgetResized(const Graph::Coord3D&)));
-  connect(m_glwidget, SIGNAL(initialized()), this, SLOT(onOpenGLInitialized()));
   connect(m_ui.actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
   connect(m_ui.actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
   connect(m_ui.actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
@@ -91,7 +90,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
   QMainWindow::closeEvent(event);
 }
 
-void MainWindow::onOpenGLInitialized()
+void MainWindow::showEvent(QShowEvent*)
 {
   if (!m_delayedOpen.isEmpty())
   {
@@ -144,18 +143,19 @@ void MainWindow::openFile(QString fileName)
     try
     {
       m_ui.actLayout->setChecked(false);
-	  m_glwidget->pause();
+      m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
       m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
       m_glwidget->rebuild();
       m_glwidget->resume();
       m_information->update();
-	  setWindowTitle(QString("LTSGraph - ") + fileName);
+      setWindowTitle(QString("LTSGraph - ") + fileName);
     }
     catch (mcrl2::runtime_error e)
     {
       QMessageBox::critical(this, "Error opening file", e.what());
-	  setWindowTitle(QString("LTSGraph"));
+      mCRL2log(mcrl2::log::error) << "Error opening file: " << e.what() << std::endl;
+      setWindowTitle(QString("LTSGraph"));
     }
   }
 }

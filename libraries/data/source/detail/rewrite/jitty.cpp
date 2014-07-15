@@ -27,6 +27,10 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/replace.h"
 
+#ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
+#include "mcrl2/data/detail/rewrite_statistics.h"
+#endif
+
 using namespace mcrl2::log;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -654,7 +658,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         no_assignments=0; //subst.clear();
 
         bool matches = true;
-
         for (size_t i=1; i<rule_arity; i++)
         {
           assert(i<arity);
@@ -785,6 +788,9 @@ data_expression RewriterJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
+#ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
+  data::detail::increment_rewrite_count();
+#endif
   return rewrite_aux(term, sigma);
 }
 

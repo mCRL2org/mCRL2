@@ -319,9 +319,70 @@ $\qquad \text{\textbf{if }}\mathrm{dest}(X,i,p)\neq \bot $ \textbf{then} \\
 $\qquad \qquad e^{\prime }[j]:=\mathrm{dest}(X,i,p)$ \\ 
 $\text{\textbf{return} }Y(e^{\prime })$%
 \end{tabular}%
+\end{equation*}%
+\newpage 
+
+\subsubsection{Global control flow graph (2)}
+
+The following algorithm is an alternative for computing the global control
+flow graph.%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeGlobalControlflowGraphNew(}$\mathcal{E}$, $X_{init}(e_{init})$%
+\textsc{)} \\ 
+$V:=\emptyset $ \\ 
+$E:=\emptyset $ \\ 
+$todo:=\{(X_{init},e)\mid \forall k\leq \left\vert c_{X}\right\vert
+:e[k]=e_{init}[\downarrow _{X}k]\}$ \\ 
+\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad $\textbf{choose} $u\in todo$ \\ 
+$\qquad todo:=todo\setminus \{u\}$ \\ 
+$\qquad done:=done\cup \{u\}$ \\ 
+$\qquad V:=V\cup \{u\}$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
+do}}$ \\ 
+$\qquad \qquad \text{\textbf{if }\textsc{EnabledEdge}}(u,i)$ \\ 
+$\qquad \qquad \qquad v:=\text{\textsc{ComputeVertex}}(u,\mathrm{PVI}%
+(\varphi _{X},i))$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
+$\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
+$\qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
+$\qquad \qquad \qquad E:=E\cup \{(u,i,v)\}$ \\ 
+$\text{\textbf{return} }(V,E)$%
+\end{tabular}%
 \end{equation*}
 
-\newpage
+\begin{equation*}
+\begin{tabular}{l}
+$\text{\textsc{EnabledEdge}}$\textsc{(}$u,i$\textsc{)} \\ 
+\textbf{let }$u=(X,e)$ \\ 
+\textbf{for }$k=1\cdots \left\vert c_{X}\right\vert $ \textbf{do} \\ 
+$\qquad \text{\textbf{if }}\mathrm{source}(X,i,\downarrow _{X}k)\neq \bot
+\wedge \mathrm{source}(X,i,\downarrow _{X}k)\neq e_{k}$ \textbf{then} \\ 
+$\qquad \qquad \text{\textbf{return} }false$ \\ 
+$\text{\textbf{return} }true$%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+$\text{\textsc{ComputeVertex}}$\textsc{(}$u,i,Y(f)$\textsc{)} \\ 
+\textbf{let }$u=(X,e)$ \\ 
+\textbf{for }$l=1\cdots \left\vert c_{Y}\right\vert $ \textbf{do} \\ 
+$\qquad q:=$ $\mathrm{target}(X,i,\downarrow _{Y}l)$ \\ 
+$\qquad \text{\textbf{if }}q=\bot $ \textbf{then} \\ 
+$\qquad \qquad \text{\textbf{choose }}k$ \textbf{such that }$\mathrm{copy}%
+(X,i,\downarrow _{Y}l)=\downarrow _{X}k$ \\ 
+$\qquad \qquad v_{l}:=e_{k}$ \\ 
+$\qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad v_{l}:=q$ \\ 
+$\text{\textbf{return} }(Y,v)$%
+\end{tabular}%
+\end{equation*}%
+Note that $\mathrm{copy}(X,i,\downarrow _{Y}l)=\downarrow _{X}k$ implies
+that parameters $(X,\downarrow _{X}k)$ and $(Y,\downarrow _{Y}l)$ are
+related.
+
+\newpage 
 
 \subsubsection{Global control flow marking}
 

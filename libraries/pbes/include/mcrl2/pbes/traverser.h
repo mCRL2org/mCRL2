@@ -84,20 +84,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const pbes_system::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const pbes_system::false_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void operator()(const pbes_system::not_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -155,14 +141,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::propositional_variable_instantiation>(x));
-    }
-    else if (pbes_system::is_true(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::true_>(x));
-    }
-    else if (pbes_system::is_false(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::false_>(x));
     }
     else if (pbes_system::is_not(x))
     {
@@ -235,20 +213,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const pbes_system::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const pbes_system::false_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void operator()(const pbes_system::not_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -304,14 +268,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::propositional_variable_instantiation>(x));
-    }
-    else if (pbes_system::is_true(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::true_>(x));
-    }
-    else if (pbes_system::is_false(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::false_>(x));
     }
     else if (pbes_system::is_not(x))
     {
@@ -383,20 +339,6 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const pbes_system::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const pbes_system::false_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void operator()(const pbes_system::not_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -452,14 +394,6 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::propositional_variable_instantiation>(x));
-    }
-    else if (pbes_system::is_true(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::true_>(x));
-    }
-    else if (pbes_system::is_false(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::false_>(x));
     }
     else if (pbes_system::is_not(x))
     {
@@ -541,20 +475,6 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const pbes_system::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const pbes_system::false_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void operator()(const pbes_system::not_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -612,14 +532,6 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::propositional_variable_instantiation>(x));
-    }
-    else if (pbes_system::is_true(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::true_>(x));
-    }
-    else if (pbes_system::is_false(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::false_>(x));
     }
     else if (pbes_system::is_not(x))
     {
@@ -703,20 +615,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const pbes_system::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const pbes_system::false_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void operator()(const pbes_system::not_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -774,14 +672,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::propositional_variable_instantiation>(x));
-    }
-    else if (pbes_system::is_true(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::true_>(x));
-    }
-    else if (pbes_system::is_false(x))
-    {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::false_>(x));
     }
     else if (pbes_system::is_not(x))
     {

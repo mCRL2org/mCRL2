@@ -9,3 +9,4 @@
 --add-brackets
 --convert-tabs
 --align-pointer=type
+--align-reference=type

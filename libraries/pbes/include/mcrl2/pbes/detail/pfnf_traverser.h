@@ -361,16 +361,6 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     expression_stack.push_back(pfnf_traverser_expression(x));
   }
 
-  void enter(const true_& x)
-  {
-    expression_stack.push_back(pfnf_traverser_expression(x));
-  }
-
-  void enter(const false_& x)
-  {
-    expression_stack.push_back(pfnf_traverser_expression(x));
-  }
-
   void enter(const not_&)
   {
     throw std::runtime_error("operation not should not occur");

@@ -12,7 +12,6 @@
 #ifndef MCRL2_BES_PRINT_H
 #define MCRL2_BES_PRINT_H
 
-#include <boost/foreach.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/traverser.h"
 #include "mcrl2/core/print.h"

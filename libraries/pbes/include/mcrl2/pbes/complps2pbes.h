@@ -16,7 +16,7 @@
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/process_specification.h"
-#include "mcrl2/process/detail/is_communicating_lpe.h"
+#include "mcrl2/process/is_communicating_lpe.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -36,7 +36,7 @@ pbes_system::pbes complps2pbes(const process::process_specification& procspec, c
     }
   }
 
-  if (!process::detail::is_communicating_lpe(procspec.init()))
+  if (!process::is_communicating_lpe(procspec.init()))
   {
     throw mcrl2::runtime_error("the initial state " + process::pp(procspec.init()) + " is not in communicating LPE format!");
   }

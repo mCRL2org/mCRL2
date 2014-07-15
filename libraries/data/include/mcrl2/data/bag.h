@@ -15,8 +15,6 @@
 #ifndef MCRL2_DATA_BAG_H
 #define MCRL2_DATA_BAG_H
 
-#include "boost/utility.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -64,6 +62,7 @@ namespace mcrl2 {
         return false;
       }
 
+
       /// \brief Generate identifier \@bag
       /// \return Identifier \@bag
       inline
@@ -82,7 +81,6 @@ namespace mcrl2 {
         function_symbol constructor(constructor_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), sort_fbag::fbag(s), bag(s)));
         return constructor;
       }
-
 
       /// \brief Recogniser for function \@bag
       /// \param e A data expression
@@ -121,7 +119,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined constructors for bag
       /// \param s A sort expression
       /// \return All system defined constructors for bag
@@ -133,6 +130,7 @@ namespace mcrl2 {
 
         return result;
       }
+
       /// \brief Generate identifier \@bagfbag
       /// \return Identifier \@bagfbag
       inline
@@ -151,7 +149,6 @@ namespace mcrl2 {
         function_symbol bag_fbag(bag_fbag_name(), make_function_sort(sort_fbag::fbag(s), bag(s)));
         return bag_fbag;
       }
-
 
       /// \brief Recogniser for function \@bagfbag
       /// \param e A data expression
@@ -209,7 +206,6 @@ namespace mcrl2 {
         return bag_comprehension;
       }
 
-
       /// \brief Recogniser for function \@bagcomp
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@bagcomp
@@ -257,7 +253,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol count
-       /// \param s A sort expression
+      /// \param s A sort expression
       /// \param s0 A sort expression
       /// \param s1 A sort expression
       ///\return Function symbol count
@@ -265,7 +261,6 @@ namespace mcrl2 {
       function_symbol count(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort(sort_nat::nat());
-
         function_symbol count(count_name(), make_function_sort(s0, s1, target_sort));
         return count;
       }
@@ -319,7 +314,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol in
-       /// \param s A sort expression
+      /// \param s A sort expression
       /// \param s0 A sort expression
       /// \param s1 A sort expression
       ///\return Function symbol in
@@ -327,7 +322,6 @@ namespace mcrl2 {
       function_symbol in(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort(sort_bool::bool_());
-
         function_symbol in(in_name(), make_function_sort(s0, s1, target_sort));
         return in;
       }
@@ -381,7 +375,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol +
-       /// \param s A sort expression
+      /// \param s A sort expression
       /// \param s0 A sort expression
       /// \param s1 A sort expression
       ///\return Function symbol union_
@@ -463,7 +457,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol *
-       /// \param s A sort expression
+      /// \param s A sort expression
       /// \param s0 A sort expression
       /// \param s1 A sort expression
       ///\return Function symbol intersection
@@ -545,7 +539,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol -
-       /// \param s A sort expression
+      /// \param s A sort expression
       /// \param s0 A sort expression
       /// \param s1 A sort expression
       ///\return Function symbol difference
@@ -636,7 +630,6 @@ namespace mcrl2 {
         return bag2set;
       }
 
-
       /// \brief Recogniser for function Bag2Set
       /// \param e A data expression
       /// \return true iff e is the function symbol matching Bag2Set
@@ -692,7 +685,6 @@ namespace mcrl2 {
         function_symbol set2bag(set2bag_name(), make_function_sort(sort_set::set_(s), bag(s)));
         return set2bag;
       }
-
 
       /// \brief Recogniser for function Set2Bag
       /// \param e A data expression
@@ -750,7 +742,6 @@ namespace mcrl2 {
         return zero_function;
       }
 
-
       /// \brief Recogniser for function \@zero_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@zero_
@@ -807,7 +798,6 @@ namespace mcrl2 {
         return one_function;
       }
 
-
       /// \brief Recogniser for function \@one_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@one_
@@ -863,7 +853,6 @@ namespace mcrl2 {
         function_symbol add_function(add_function_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat())));
         return add_function;
       }
-
 
       /// \brief Recogniser for function \@add_
       /// \param e A data expression
@@ -922,7 +911,6 @@ namespace mcrl2 {
         return min_function;
       }
 
-
       /// \brief Recogniser for function \@min_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@min_
@@ -979,7 +967,6 @@ namespace mcrl2 {
         function_symbol monus_function(monus_function_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat())));
         return monus_function;
       }
-
 
       /// \brief Recogniser for function \@monus_
       /// \param e A data expression
@@ -1038,7 +1025,6 @@ namespace mcrl2 {
         return nat2bool_function;
       }
 
-
       /// \brief Recogniser for function \@Nat2Bool_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@Nat2Bool_
@@ -1095,7 +1081,6 @@ namespace mcrl2 {
         return bool2nat_function;
       }
 
-
       /// \brief Recogniser for function \@Bool2Nat_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@Bool2Nat_
@@ -1132,7 +1117,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined mappings for bag
       /// \param s A sort expression
       /// \return All system defined mappings for bag
@@ -1167,7 +1151,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::aterm_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1179,7 +1163,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_bag_fbag_application(e) || is_bag_comprehension_application(e) || is_bag2set_application(e) || is_set2bag_application(e) || is_zero_function_application(e) || is_one_function_application(e) || is_nat2bool_function_application(e) || is_bool2nat_function_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1191,7 +1175,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for bag

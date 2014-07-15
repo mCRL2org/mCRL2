@@ -18,7 +18,6 @@
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/hash.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/untyped_sort.h"
@@ -213,7 +212,7 @@ bool is_data_expression(const atermpp::aterm_appl& x)
 template < typename Container >
 inline data_expression_list make_data_expression_list(Container const& r, typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
 {
-  return atermpp::convert< data_expression_list >(r);
+  return data_expression_list(r.begin(),r.end());
 }
 
 class variable;

@@ -23,7 +23,6 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/lps/linear_process.h"
-#include <boost/range/iterator_range.hpp>
 #include "mcrl2/lps/specification.h"
 
 namespace lspparunfold

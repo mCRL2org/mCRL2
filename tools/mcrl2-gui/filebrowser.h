@@ -30,41 +30,68 @@ class FileBrowser : public QTreeView
     Q_OBJECT
   public:
     explicit FileBrowser(QWidget *parent = 0);
-    void setCatalog(ToolCatalog catalog) { m_catalog = catalog; }
+    ~FileBrowser();
+    void setCatalog(ToolCatalog catalog);
+    QMenu* menu() { return m_menu; }
 
   public slots:
     void onToolSelected();
     void onRemoveRequested(QString filename = QString());
 
+  protected slots:
     void onNewFile();
     void onNewFolder();
-    void onOpenFile();
-    void onDeleteFile();
+    void onOpenFiles();
+    void onDeleteFiles();
+    void onCutFiles();
+    void onCopyFiles();
+    void onPasteFiles();
+    void onRenameFile();
+    void onFileProperties();
+    void onContextMenu();
 
   signals:
     void openToolInstance(QString filename, ToolInformation tool);
     void openProperties(QString filename);
 
   protected:
-    void contextMenuEvent(QContextMenuEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
-    void keyPressEvent(QKeyEvent *event);
+    void contextMenuEvent(QContextMenuEvent* event);
+    void mouseDoubleClickEvent(QMouseEvent* event);
+    void keyPressEvent(QKeyEvent* event);
 
   private:
+    enum CopyMode { cm_none, cm_copy, cm_cut };
+
+    void freeToolActions();
+    void rememberSelection();
     QAction* addConditionalAction(QMenu* menu, QString action, bool condition);
     void createContextMenu(QList<QFileInfo> info);
     void copyDirectory(QString oldPath, QString newPath, bool move = false);
     bool askRemove(QModelIndexList files);
     bool askRemove(QString filename, bool copy = false);
 
-
     QFileSystemModel m_model;
-    QMenu *m_context;
+
+    QMenu* m_menu;
+    QAction* m_actOpenFiles;
+    QAction* m_sep1;
+    QAction* m_actNewFile;
+    QAction* m_actNewFolder;
+    QAction* m_sep2;
+    QList<QMenu*> m_categories;
+    QList<ToolAction*> m_toolActions;
+    QAction* m_sep3;
+    QAction* m_actDeleteFiles;
+    QAction* m_actCutFiles;
+    QAction* m_actCopyFiles;
+    QAction* m_actPasteFiles;
+    QAction* m_actRenameFile;
+    QAction* m_actFileProperties;
+
     ToolCatalog m_catalog;
 
-    QStringList m_pastefiles;
-    bool m_cut;
-    bool m_copy;
+    QStringList m_selectedFiles;
+    CopyMode m_copyMode;
 
     CopyThread m_copythread;
     CopyDialog m_copydialog;

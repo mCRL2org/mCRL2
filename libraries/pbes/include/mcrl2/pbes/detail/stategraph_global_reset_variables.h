@@ -52,7 +52,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       return std::set<data::variable>(d_X.begin(), d_X.end());
     }
 
-    void compute_global_control_flow_marking(control_flow_graph& G)
+    void compute_global_control_flow_marking(stategraph_global_graph& G)
     {
       mCRL2log(log::debug, "stategraph") << "--- compute initial marking ---" << std::endl;
       // initialization
@@ -131,8 +131,8 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         if (is_global_control_flow_parameter(Y, j))
         {
           const predicate_variable& X_i = eq_X.predicate_variables()[i];
-          std::map<std::size_t, data::data_expression>::const_iterator dest_j = X_i.dest().find(j);
-          if (dest_j != X_i.dest().end())
+          std::map<std::size_t, data::data_expression>::const_iterator dest_j = X_i.target().find(j);
+          if (dest_j != X_i.target().end())
           {
             data::data_expression f_k = *k;
             if(f_k != dest_j->second)
@@ -185,16 +185,16 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             mCRL2log(log::debug, "stategraph") << " CFP(Y, j) = true";
             data::data_expression f_k = *k++;
             const predicate_variable& X_i = eq_X.predicate_variables()[i];
-            if (X_i.dest().find(j) == X_i.dest().end() || !m_simplify)
+            if (X_i.target().find(j) == X_i.target().end() || !m_simplify)
             {
               condition = data::lazy::and_(condition, data::equal_to(e[j], f_k));
               r.push_back(e[j]);
-              mCRL2log(log::debug, "stategraph") << " dest(X, i, j) = false";
+              mCRL2log(log::debug, "stategraph") << " target(X, i, j) = false";
               mCRL2log(log::debug, "stategraph") << " c := c && " << data::pp(data::equal_to(e[j], f_k));
             }
             else
             {
-              r.push_back(X_i.dest().find(j)->second);
+              r.push_back(X_i.target().find(j)->second);
             }
             mCRL2log(log::debug, "stategraph") << " r := r <| " << data::pp(r.back());
 
@@ -331,16 +331,6 @@ struct reset_traverser: public pbes_expression_traverser<reset_traverser>
     mCRL2log(log::debug, "stategraph") << "reset variable " << pbes_system::pp(x) << " with index " << i << " to " << pbes_system::pp(result) << std::endl;
     i++;
     push(result);
-  }
-
-  void leave(const pbes_system::true_& x)
-  {
-    push(x);
-  }
-
-  void leave(const pbes_system::false_& x)
-  {
-    push(x);
   }
 
   void leave(const pbes_system::not_& /* x */)

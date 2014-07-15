@@ -15,8 +15,6 @@
 #ifndef MCRL2_DATA_SET_H
 #define MCRL2_DATA_SET_H
 
-#include "boost/utility.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -62,6 +60,7 @@ namespace mcrl2 {
         return false;
       }
 
+
       /// \brief Generate identifier \@set
       /// \return Identifier \@set
       inline
@@ -80,7 +79,6 @@ namespace mcrl2 {
         function_symbol constructor(constructor_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), sort_fset::fset(s), set_(s)));
         return constructor;
       }
-
 
       /// \brief Recogniser for function \@set
       /// \param e A data expression
@@ -119,7 +117,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined constructors for set_
       /// \param s A sort expression
       /// \return All system defined constructors for set_
@@ -131,6 +128,7 @@ namespace mcrl2 {
 
         return result;
       }
+
       /// \brief Generate identifier \@setfset
       /// \return Identifier \@setfset
       inline
@@ -149,7 +147,6 @@ namespace mcrl2 {
         function_symbol set_fset(set_fset_name(), make_function_sort(sort_fset::fset(s), set_(s)));
         return set_fset;
       }
-
 
       /// \brief Recogniser for function \@setfset
       /// \param e A data expression
@@ -207,7 +204,6 @@ namespace mcrl2 {
         return set_comprehension;
       }
 
-
       /// \brief Recogniser for function \@setcomp
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@setcomp
@@ -255,7 +251,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol in
-       /// \param s A sort expression
+      /// \param s A sort expression
       /// \param s0 A sort expression
       /// \param s1 A sort expression
       ///\return Function symbol in
@@ -263,7 +259,6 @@ namespace mcrl2 {
       function_symbol in(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort(sort_bool::bool_());
-
         function_symbol in(in_name(), make_function_sort(s0, s1, target_sort));
         return in;
       }
@@ -326,7 +321,6 @@ namespace mcrl2 {
         return complement;
       }
 
-
       /// \brief Recogniser for function !
       /// \param e A data expression
       /// \return true iff e is the function symbol matching !
@@ -374,7 +368,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol +
-       /// \param s A sort expression
+      /// \param s A sort expression
       /// \param s0 A sort expression
       /// \param s1 A sort expression
       ///\return Function symbol union_
@@ -448,7 +442,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol *
-       /// \param s A sort expression
+      /// \param s A sort expression
       /// \param s0 A sort expression
       /// \param s1 A sort expression
       ///\return Function symbol intersection
@@ -522,7 +516,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol -
-       /// \param s A sort expression
+      /// \param s A sort expression
       /// \param s0 A sort expression
       /// \param s1 A sort expression
       ///\return Function symbol difference
@@ -605,7 +599,6 @@ namespace mcrl2 {
         return false_function;
       }
 
-
       /// \brief Recogniser for function \@false_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@false_
@@ -661,7 +654,6 @@ namespace mcrl2 {
         function_symbol true_function(true_function_name(), make_function_sort(s, sort_bool::bool_()));
         return true_function;
       }
-
 
       /// \brief Recogniser for function \@true_
       /// \param e A data expression
@@ -719,7 +711,6 @@ namespace mcrl2 {
         return not_function;
       }
 
-
       /// \brief Recogniser for function \@not_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@not_
@@ -775,7 +766,6 @@ namespace mcrl2 {
         function_symbol and_function(and_function_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_())));
         return and_function;
       }
-
 
       /// \brief Recogniser for function \@and_
       /// \param e A data expression
@@ -834,7 +824,6 @@ namespace mcrl2 {
         return or_function;
       }
 
-
       /// \brief Recogniser for function \@or_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@or_
@@ -872,7 +861,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined mappings for set_
       /// \param s A sort expression
       /// \return All system defined mappings for set_
@@ -903,7 +891,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_and_function_application(e) || is_or_function_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::aterm_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -915,7 +903,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_set_fset_application(e) || is_set_comprehension_application(e) || is_complement_application(e) || is_false_function_application(e) || is_true_function_application(e) || is_not_function_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -927,7 +915,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_and_function_application(e) || is_or_function_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for set_

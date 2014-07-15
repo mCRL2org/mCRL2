@@ -76,13 +76,13 @@ class stategraph_algorithm
     // Keuze uit twee alternatieven voor de berekening van lokale CFPs.
     // <default>
     //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-    //          a. source(X,i,n) and dest(X,i,n) zijn beide defined, of
+    //          a. source(X,i,n) and target(X,i,n) zijn beide defined, of
     //          b. copy(X,i,n) is defined en gelijk aan n.
     //
     // <alternative>
     //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-    //          a. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
-    //          b. copy(X,i,n) is defined (en gelijk aan n) en source(X,i,n) en dest(X,i,n) zijn beide undefined.
+    //          a. copy(X,i,n) is undefined en source(X,i,n) and target(X,i,n) zijn beide defined, of
+    //          b. copy(X,i,n) is defined (en gelijk aan n) en source(X,i,n) en target(X,i,n) zijn beide undefined.
     //
     // De tweede definieert in feite een exclusive or, terwijl de eerste een standaard or is.
     bool m_use_alternative_lcfp_criterion;
@@ -97,10 +97,10 @@ class stategraph_algorithm
     //
     // <alternative>
     //  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
-    //         a. er is een i z.d.d. copy(X, i, n) = m, en dest(X, i, m) is ongedefinieerd, of
-    //         b. er is een i z.d.d. copy(Y, i, m) = n en dest(Y, i, n) is ongedefinieerd.
+    //         a. er is een i z.d.d. copy(X, i, n) = m, en target(X, i, m) is ongedefinieerd, of
+    //         b. er is een i z.d.d. copy(Y, i, m) = n en target(Y, i, n) is ongedefinieerd.
     // Hier zit het verschil er dus in dat we, in het tweede geval, parameters alleen relateren als er een copy is
-    // van de een naar de ander EN de dest in dat geval ongedefinieerd is.
+    // van de een naar de ander EN de target in dat geval ongedefinieerd is.
     bool m_use_alternative_gcfp_relation;
 
     // determines how global control flow parameters are selected
@@ -108,7 +108,7 @@ class stategraph_algorithm
     // Keuze voor de selectie van globale CFPs (of globale consistentie eisen).
     // <default>
     //  * Een set van CFPs is consistent als voor elke d^X[n], en voor alle Y in bnd(E)\{X} (dus in alle andere vergelijkingen), voor alle i waarvoor geldt pred(phi_Y, i) = X, danwel:
-    //         a. dest(Y, i, n) is gedefinieerd, of
+    //         a. target(Y, i, n) is gedefinieerd, of
     //         b. copy(Y, i, m) = n voor een of andere globale CFP d^Y[m]
     // Deze eis is in principe voldoende om globale CFPs te identificeren. Als we echter een strikte scheiding tussen control flow parameters en data parameters willen bewerkstelligen, dan moet hier optioneel de volgende eis aan toegevoegd worden:
     //
@@ -128,9 +128,9 @@ class stategraph_algorithm
     std::map<core::identifier_string, std::vector<bool> > m_is_GCFP;
 
     // the vertices of the control flow graph
-    std::vector<global_control_flow_graph_vertex> m_global_control_flow_graph_vertices;
+    GCFP_graph m_GCFP_graph;
 
-    // the connected components in the control flow graph; a component contains the indices in the vector m_global_control_flow_graph_vertices
+    // the connected components in the control flow graph; a component contains the indices of vertices in the graph m_GCFP_graph
     std::vector<std::set<std::size_t> > m_connected_components;
 
     // the possible values of the connected components in the control flow graph
@@ -172,9 +172,9 @@ class stategraph_algorithm
       compute_global_control_flow_parameters();
       finish_timer("compute_global_control_flow_parameters");
 
-      start_timer("compute_related_global_control_flow_parameters");
-      compute_related_global_control_flow_parameters();
-      finish_timer("compute_related_global_control_flow_parameters");
+      start_timer("compute_related_GCFP_parameters");
+      compute_related_GCFP_parameters();
+      finish_timer("compute_related_GCFP_parameters");
 
       start_timer("compute_connected_components");
       compute_connected_components();
@@ -228,18 +228,6 @@ class stategraph_algorithm
       return i != m.end() && i->second == value;
     }
 
-    // if key is in m, the corresponding value is returned, otherwise undefined_value
-    template <typename Map>
-    typename Map::mapped_type mapped_value(const Map& m, const typename Map::key_type& key, const typename Map::mapped_type& undefined_value) const
-    {
-      auto i = m.find(key);
-      if (i != m.end())
-      {
-        return i->second;
-      }
-      return undefined_value;
-    }
-
     bool maps_to_and_is_GFCP(const std::map<std::size_t, std::size_t>& m, std::size_t value, const core::identifier_string& X)
     {
       for (auto i = m.begin(); i != m.end(); ++i)
@@ -281,32 +269,32 @@ class stategraph_algorithm
               if (m_use_alternative_lcfp_criterion)
               {
                 // Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-                // 1. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
-                // 2. copy(X,i,n) is defined en source(X,i,n) en dest(X,i,n) zijn beide undefined.
+                // 1. copy(X,i,n) is undefined en source(X,i,n) and target(X,i,n) zijn beide defined, of
+                // 2. copy(X,i,n) is defined en source(X,i,n) en target(X,i,n) zijn beide undefined.
                 if (Ye.copy().find(n) == Ye.copy().end())
                 {
                   // copy(X,i,n) is undefined
-                  if (is_undefined(Ye.source(), n) || is_undefined(Ye.dest(), n))
+                  if (is_undefined(Ye.source(), n) || is_undefined(Ye.target(), n))
                   {
-                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy and source/dest undefined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy and source/target undefined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
                 else
                 {
                   // copy(X,i,n) is defined
-                  if (!is_undefined(Ye.source(), n) || !is_undefined(Ye.dest(), n))
+                  if (!is_undefined(Ye.source(), n) || !is_undefined(Ye.target(), n))
                   {
-                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy defined and source/dest defined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy defined and source/target defined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
               }
               else
               {
-                if ((is_undefined(Ye.source(), n) || is_undefined(Ye.dest(), n)) && !is_mapped_to(Ye.copy(), n, n))
+                if ((is_undefined(Ye.source(), n) || is_undefined(Ye.target(), n)) && !is_mapped_to(Ye.copy(), n, n))
                 {
-                  mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP due to " << Ye << "(source and dest undefined, and no copy to self)" << std::endl;
+                  mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP due to " << Ye << "(source and target undefined, and no copy to self)" << std::endl;
                   m_is_LCFP[X][n] = false;
                 }
               }
@@ -346,7 +334,7 @@ class stategraph_algorithm
               auto const& d_Y = eq_Y.parameters();
               for (std::size_t n = 0; n < d_Y.size(); n++)
               {
-                if (is_undefined(Ye.dest(), n) && (!maps_to_and_is_GFCP(Ye.copy(), n, X)))
+                if (is_undefined(Ye.target(), n) && (!maps_to_and_is_GFCP(Ye.copy(), n, X)))
                 {
                   if (m_is_GCFP[Y][n])
                   {
@@ -420,26 +408,12 @@ class stategraph_algorithm
       return cf[i];
     }
 
-    // returns an iterator to an element of m_global_control_flow_graph_vertices
-    std::vector<global_control_flow_graph_vertex>::iterator find_vertex(const core::identifier_string& X, std::size_t n)
-    {
-      for (auto i = m_global_control_flow_graph_vertices.begin(); i != m_global_control_flow_graph_vertices.end(); ++i)
-      {
-        if (i->name() == X && i->index() == n)
-        {
-          return i;
-        }
-      }
-      throw mcrl2::runtime_error("vertex not found in dependency graph");
-      return m_global_control_flow_graph_vertices.end();
-    }
-
     // relate (X, n) and (Y, m) in the dependency graph
     // \pre: the equation of X has a lower rank than the equation of Y
-    void relate_control_flow_graph_vertices(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y, std::size_t m)
+    void relate_GCFP_vertices(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y, std::size_t m)
     {
-      global_control_flow_graph_vertex& u = *find_vertex(X, n);
-      global_control_flow_graph_vertex& v = *find_vertex(Y, m);
+      GCFP_vertex& u = m_GCFP_graph.find_vertex(X, n);
+      GCFP_vertex& v = m_GCFP_graph.find_vertex(Y, m);
       u.neighbors().insert(&v);
       v.neighbors().insert(&u);
     }
@@ -470,13 +444,13 @@ class stategraph_algorithm
     }
 
     // Determines which control flow parameters are related. This is done by assigning neighbors to the
-    // vertices in m_global_control_flow_graph_vertices.
-    void compute_related_global_control_flow_parameters()
+    // vertices in m_GCFP_graph.
+    void compute_related_GCFP_parameters()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing related global control flow parameters ===" << std::endl;
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
 
-      // step 1: create vertices in m_global_control_flow_graph_vertices
+      // step 1: create vertices in m_GCFP_graph
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         auto const& X = k->variable().name();
@@ -485,12 +459,12 @@ class stategraph_algorithm
         {
           if (is_global_control_flow_parameter(X, n))
           {
-            m_global_control_flow_graph_vertices.push_back(global_control_flow_graph_vertex(X, n, d_X[n]));
+            m_GCFP_graph.add_vertex(GCFP_vertex(X, n, d_X[n]));
           }
         }
       }
 
-      // step 2: create edges between related vertices in m_global_control_flow_graph_vertices
+      // step 2: create edges between related vertices in m_GCFP_graph
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         auto const& X = k->variable().name();
@@ -509,18 +483,18 @@ class stategraph_algorithm
               if (m_use_alternative_gcfp_relation)
               {
                 // Twee parameters zijn alleen gerelateerd als er een copy is van de een naar de ander,
-                // EN dat de dest in dat geval ongedefinieerd is (dus we weten echt geen concrete waarde
+                // EN dat de target in dat geval ongedefinieerd is (dus we weten echt geen concrete waarde
                 // voor de parameter op dat punt).
-                if (is_undefined(Ye.dest(), m))
+                if (is_undefined(Ye.target(), m))
                 {
                   mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye) << std::endl;
-                  relate_control_flow_graph_vertices(X, n, Y, m);
+                  relate_GCFP_vertices(X, n, Y, m);
                 }
               }
               else
               {
-                mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye, " (dest is undefined)") << std::endl;
-                relate_control_flow_graph_vertices(X, n, Y, m);
+                mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye, " (target is undefined)") << std::endl;
+                relate_GCFP_vertices(X, n, Y, m);
               }
             }
           }
@@ -534,7 +508,7 @@ class stategraph_algorithm
       std::set<core::identifier_string> V;
       for (auto i = component.begin(); i != component.end(); ++i)
       {
-        auto const& X = m_global_control_flow_graph_vertices[*i].name();
+        auto const& X = m_GCFP_graph.vertex(*i).name();
         if (V.find(X) != V.end())
         {
           return false;
@@ -554,7 +528,7 @@ class stategraph_algorithm
         {
           out << ", ";
         }
-        out << m_global_control_flow_graph_vertices[*i];
+        out << m_GCFP_graph.vertex(*i);
       }
       out << "}";
       if (!is_valid_connected_component(component))
@@ -572,7 +546,7 @@ class stategraph_algorithm
       }
     }
 
-    // compute the connected component belonging to the vertex m_global_control_flow_graph_vertices[i]
+    // compute the connected component belonging to vertex i in m_GCFP_graph
     std::set<std::size_t> compute_connected_component(std::size_t i, std::vector<bool>& done) const
     {
       using utilities::detail::pick_element;
@@ -584,14 +558,14 @@ class stategraph_algorithm
       while (!todo.empty())
       {
         std::size_t u_index = pick_element(todo);
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[u_index];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(u_index);
         done[u_index] = true;
         component.insert(u_index);
 
         for (auto k = u.neighbors().begin(); k != u.neighbors().end(); ++k)
         {
-          const global_control_flow_graph_vertex* w = *k;
-          std::size_t w_index = w - &(m_global_control_flow_graph_vertices.front());
+          const GCFP_vertex* w = *k;
+          std::size_t w_index = m_GCFP_graph.index(*w);
           if (!done[w_index])
           {
             todo.insert(w_index);
@@ -605,8 +579,8 @@ class stategraph_algorithm
     {
       mCRL2log(log::debug, "stategraph") << "=== computing connected components ===" << std::endl;
 
-      // done[i] means that m_global_control_flow_graph_vertices[i] has been processed
-      std::vector<bool> done(m_global_control_flow_graph_vertices.size(), false);
+      // done[i] means that vertex i in m_GCFP_graph has been processed
+      std::vector<bool> done(m_GCFP_graph.vertices().size(), false);
 
       for (std::size_t i = 0; i < done.size(); i++)
       {
@@ -632,7 +606,7 @@ class stategraph_algorithm
     //
     // A CFP d_X[m] is not only copied if
     //    (1) for some i    : source(X, i, m) is defined
-    // or (2) for some Y, i : pred(phi_Y , i) = X and dest(Y, i, m) is defined
+    // or (2) for some Y, i : pred(phi_Y , i) = X and target(Y, i, m) is defined
     bool is_not_only_copied(const core::identifier_string& X, std::size_t m) const
     {
       // check (1)
@@ -653,7 +627,7 @@ class stategraph_algorithm
         auto const& predvars = k->predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          if (i->name() == X && !is_undefined(i->dest(), m))
+          if (i->name() == X && !is_undefined(i->target(), m))
           {
             return true;
           }
@@ -667,7 +641,7 @@ class stategraph_algorithm
     {
       for (auto i = component.begin(); i != component.end(); ++i)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*i];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*i);
         auto X = u.name();
         auto m = u.index();
         if (is_not_only_copied(X, m))
@@ -738,28 +712,53 @@ class stategraph_algorithm
       return out.str();
     }
 
-    // returns { n | !exists CFG with vertex (X, n) }
-    std::set<std::size_t> data_parameter_indices(const core::identifier_string& X) const
+    // set the control flow and data parameter information in p
+    void set_parameters(const stategraph_pbes& p)
     {
-      std::set<std::size_t> result;
-      auto const& eq_X = *find_equation(m_pbes, X);
-      for (std::size_t i = 0; i < eq_X.parameters().size(); ++i)
-      {
-        result.insert(i);
-      }
+      // set control flow parameters
+      std::map<core::identifier_string, std::set<std::size_t> > CFP; // CFP["X"] is the set of indices of control flow parameters of equation "X"
       for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
       {
         for (auto j = k->begin(); j != k->end(); ++j)
         {
-          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
-          if (u.name() == X && u.index() != data::undefined_index())
+          const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
+          if (u.has_variable())
           {
-            result.erase(u.index());
+            CFP[u.name()].insert(u.index());
           }
         }
       }
-      mCRL2log(log::debug1, "stategraph") << print_data_parameters(X, result) << std::endl;
-      return result;
+      for (auto i = CFP.begin(); i != CFP.end(); ++i)
+      {
+        auto const& X = i->first;
+        auto const& eqn = *find_equation(p, X);
+        eqn.set_control_flow_parameters(i->second);
+      }
+
+      // set data parameters
+      auto const& eqn = m_pbes.equations();
+      for (auto k = eqn.begin(); k != eqn.end(); ++k)
+      {
+        auto const& eq_X = *k;
+        auto const& X = eq_X.variable().name();
+        std::set<std::size_t> I; // data parameters of equation eq_X
+        for (std::size_t i = 0; i < eq_X.parameters().size(); ++i)
+        {
+          I.insert(i);
+        }
+        for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
+        {
+          for (auto j = k->begin(); j != k->end(); ++j)
+          {
+            const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
+            if (u.name() == X && u.index() != data::undefined_index())
+            {
+              I.erase(u.index());
+            }
+          }
+        }
+        eq_X.set_data_parameters(I);
+      }
     }
 
     // prints all vertices of the connected components
@@ -769,12 +768,12 @@ class stategraph_algorithm
       mCRL2log(log::verbose, "stategraph") << "--- computed control flow parameters ---" << std::endl;
 
       // collect the control flow points in the map CFP
-      std::map<core::identifier_string, std::set<const global_control_flow_graph_vertex*> > CFP;
+      std::map<core::identifier_string, std::set<const GCFP_vertex*> > CFP;
       for (auto k = m_connected_components.begin(); k != m_connected_components.end(); ++k)
       {
         for (auto j = k->begin(); j != k->end(); ++j)
         {
-          const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
+          const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
           if (u.has_variable())
           {
             CFP[u.name()].insert(&u);
@@ -812,19 +811,13 @@ class stategraph_algorithm
       m_pbes = stategraph_pbes(p);
     }
 
-    /// \brief Returns the vertices of the global control flow graph
-    const std::vector<global_control_flow_graph_vertex>& control_flow_graph_vertices() const
-    {
-      return m_global_control_flow_graph_vertices;
-    }
-
     /// \brief Returns the connected components of the global control flow graph.
     const std::vector<std::set<std::size_t> >& connected_components() const
     {
       return m_connected_components;
     }
 
-    std::string print(const global_control_flow_graph_vertex& u) const
+    std::string print(const GCFP_vertex& u) const
     {
       std::ostringstream out;
       out << '(' << u.name() << ", " << find_equation(m_pbes, u.name())->parameters()[u.index()].name() << ')';
@@ -842,7 +835,7 @@ class stategraph_algorithm
 
       for (auto j = component.begin(); j != component.end(); ++j)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*j];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
         if (u.name() == Xinit)
         {
           data::data_expression d = nth_element(init.parameters(), u.index());
@@ -853,7 +846,7 @@ class stategraph_algorithm
       // source(X, i, k) = v
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*p);
         auto const& X = u.name();
         std::size_t k = u.index();
         auto const& eq_X = *find_equation(m_pbes, X);
@@ -869,10 +862,10 @@ class stategraph_algorithm
         }
       }
 
-      // dest(X, i, k) = v
+      // target(X, i, k) = v
       for (auto p = component.begin(); p != component.end(); ++p)
       {
-        const global_control_flow_graph_vertex& u = m_global_control_flow_graph_vertices[*p];
+        const GCFP_vertex& u = m_GCFP_graph.vertex(*p);
         auto const& Y = u.name();
         std::size_t k = u.index();
         auto const& eq_Y = *find_equation(m_pbes, Y);
@@ -883,8 +876,8 @@ class stategraph_algorithm
           {
             continue;
           }
-          auto q = i->dest().find(k);
-          if (q != i->dest().end())
+          auto q = i->target().find(k);
+          if (q != i->target().end())
           {
             const data::data_expression& v = q->second;
             result.insert(v);
@@ -927,10 +920,12 @@ class stategraph_algorithm
     {
       simplify(m_pbes);
       m_pbes.compute_source_dest_copy();
-      mCRL2log(log::debug, "stategraph") << "--- source, dest, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
+      mCRL2log(log::debug, "stategraph") << "--- source, target, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
+      mCRL2log(log::debug, "stategraph") << "--- GCFP graph = ---\n" << m_GCFP_graph << std::endl;
+      set_parameters(m_pbes);
       print_final_control_flow_parameters();
 
       start_timer("compute_connected_component_values");

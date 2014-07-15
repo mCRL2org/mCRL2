@@ -10,65 +10,86 @@
 #include <assert.h>
 #include "optionvalue.h"
 
-OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled) :
-  m_option(option), m_enabled(cbEnabled)
+void OptionValue::onValueChange()
+{
+  if (m_enabled != NULL)
+  {
+    m_enabled->setChecked(true);
+  }
+  if (m_argEnabled != NULL)
+  {
+    m_argEnabled->setChecked(true);
+  }
+}
+
+OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QObject* parent) :
+  QObject(parent), m_option(option), m_enabled(cbEnabled), m_value(NULL), m_argEnabled(NULL)
 {
   assert(!option.hasArgument());
 }
 
-OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QButtonGroup *argValue) :
-  m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(NULL)
+OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QButtonGroup *argValue, QObject* parent) :
+  QObject(parent), m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(NULL)
 {
   assert(option.hasArgument());
   assert(option.argument.type == EnumArgument);
+  QWidget::connect(argValue, SIGNAL(buttonClicked(int)), this, SLOT(onValueChange()));
 }
 
-OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QLineEdit *argValue) :
-  m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(NULL)
+OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QLineEdit *argValue, QObject* parent) :
+  QObject(parent), m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(NULL)
 {
   assert(option.hasArgument());
   assert(option.argument.type == StringArgument || option.argument.type == LevelArgument);
+  QWidget::connect(argValue, SIGNAL(textChanged(QString)), this, SLOT(onValueChange()));
 }
 
-OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QSpinBox *argValue, QCheckBox *argEnabled) :
-  m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(argEnabled)
+OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QSpinBox *argValue, QCheckBox *argEnabled, QObject* parent) :
+  QObject(parent), m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(argEnabled)
 {
   assert(option.hasArgument());
   assert(option.argument.type == IntegerArgument);
   assert((argEnabled == NULL) != option.argument.optional);
+  QWidget::connect(argValue, SIGNAL(valueChanged(int)), this, SLOT(onValueChange()));
 }
 
-OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QDoubleSpinBox *argValue, QCheckBox *argEnabled) :
-  m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(argEnabled)
+OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QDoubleSpinBox *argValue, QCheckBox *argEnabled, QObject* parent) :
+  QObject(parent), m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(argEnabled)
 {
   assert(option.hasArgument());
   assert(option.argument.type == RealArgument);
   assert((argEnabled == NULL) != option.argument.optional);
+  QWidget::connect(argValue, SIGNAL(valueChanged(double)), this, SLOT(onValueChange()));
 }
 
-OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, FilePicker *argValue) :
-  m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(NULL)
+OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, FilePicker *argValue, QObject* parent) :
+  QObject(parent), m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(NULL)
 {
   assert(option.hasArgument());
   assert(option.argument.type == FileArgument);
+  QWidget::connect(argValue, SIGNAL(textChanged(QString)), this, SLOT(onValueChange()));
 }
 
-OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QCheckBox *argValue) :
-  m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(NULL)
+OptionValue::OptionValue(ToolOption option, QCheckBox *cbEnabled, QCheckBox *argValue, QObject* parent) :
+  QObject(parent), m_option(option), m_enabled(cbEnabled), m_value(argValue), m_argEnabled(NULL)
 {
   assert(option.hasArgument());
   assert(option.argument.type == BooleanArgument);
+  QWidget::connect(argValue, SIGNAL(stateChanged(int)), this, SLOT(onValueChange()));
 }
 
 QString OptionValue::value()
 {
   QString output("");
 
-  if (m_enabled == NULL || m_enabled->isChecked())
+  if ((m_enabled == NULL || m_enabled->isChecked()) &&
+      (m_option.argument.type != EnumArgument ||
+       dynamic_cast<QButtonGroup*>(m_value)->checkedButton() != NULL))
   {
     output.append("--").append(m_option.nameLong);
 
-    if (m_option.hasArgument() && (m_argEnabled == NULL || m_argEnabled->isChecked()))
+    if (m_option.hasArgument() &&
+        (m_argEnabled == NULL || m_argEnabled->isChecked()))
     {
       QString argValue;
 

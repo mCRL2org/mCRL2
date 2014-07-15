@@ -84,22 +84,6 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  pbes_system::pbes_expression operator()(const pbes_system::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  pbes_system::pbes_expression operator()(const pbes_system::false_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   pbes_system::pbes_expression operator()(const pbes_system::not_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -159,14 +143,6 @@ struct add_sort_expressions: public Builder<Derived>
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::propositional_variable_instantiation>(x));
-    }
-    else if (pbes_system::is_true(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::true_>(x));
-    }
-    else if (pbes_system::is_false(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::false_>(x));
     }
     else if (pbes_system::is_not(x))
     {
@@ -242,22 +218,6 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  pbes_system::pbes_expression operator()(const pbes_system::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  pbes_system::pbes_expression operator()(const pbes_system::false_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   pbes_system::pbes_expression operator()(const pbes_system::not_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -317,14 +277,6 @@ struct add_data_expressions: public Builder<Derived>
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::propositional_variable_instantiation>(x));
-    }
-    else if (pbes_system::is_true(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::true_>(x));
-    }
-    else if (pbes_system::is_false(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::false_>(x));
     }
     else if (pbes_system::is_not(x))
     {
@@ -409,22 +361,6 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
-  pbes_system::pbes_expression operator()(const pbes_system::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  pbes_system::pbes_expression operator()(const pbes_system::false_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   pbes_system::pbes_expression operator()(const pbes_system::not_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -484,14 +420,6 @@ struct add_variables: public Builder<Derived>
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::propositional_variable_instantiation>(x));
-    }
-    else if (pbes_system::is_true(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::true_>(x));
-    }
-    else if (pbes_system::is_false(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::false_>(x));
     }
     else if (pbes_system::is_not(x))
     {
@@ -566,22 +494,6 @@ struct add_pbes_expressions: public Builder<Derived>
     return x;
   }
 
-  pbes_system::pbes_expression operator()(const pbes_system::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
-  pbes_system::pbes_expression operator()(const pbes_system::false_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   pbes_system::pbes_expression operator()(const pbes_system::not_& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -641,14 +553,6 @@ struct add_pbes_expressions: public Builder<Derived>
     else if (pbes_system::is_propositional_variable_instantiation(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::propositional_variable_instantiation>(x));
-    }
-    else if (pbes_system::is_true(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::true_>(x));
-    }
-    else if (pbes_system::is_false(x))
-    {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<pbes_system::false_>(x));
     }
     else if (pbes_system::is_not(x))
     {

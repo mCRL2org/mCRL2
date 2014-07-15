@@ -83,16 +83,6 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
     return negated ? data::sort_bool::not_(x) : x;
   }
 
-  pbes_expression operator()(const true_&)
-  {
-    return negated ? tr::false_() : tr::true_();
-  }
-
-  pbes_expression operator()(const false_&)
-  {
-    return negated ? tr::true_() : tr::false_();
-  }
-
   pbes_expression operator()(const not_& x)
   {
     negated = !negated;
@@ -163,7 +153,7 @@ bool is_normalized(const T& x)
 /// \param x an object containing pbes expressions
 template <typename T>
 void normalize(T& x,
-               typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+               typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
               )
 {
   normalize_builder f;
@@ -175,7 +165,7 @@ void normalize(T& x,
 /// \param x an object containing pbes expressions
 template <typename T>
 T normalize(const T& x,
-            typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
            )
 {
   normalize_builder f;

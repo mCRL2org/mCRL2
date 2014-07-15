@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
@@ -85,9 +86,11 @@ class state_label_lts : public atermpp::aterm_appl
         \details The aterm a must have the shape "STATE(t1,...,tn).*/
     state_label_lts(const atermpp::aterm_appl& a):atermpp::aterm_appl(a)
     {
+      assert(a.function()== get_STATE_function_symbol(a.function().arity()));
+
       // Take care that the STATE function symbol with the desired arity exists.
-      const size_t arity=a.function().arity();
-      get_STATE_function_symbol(arity);
+      /* const size_t arity=a.function().arity();
+      get_STATE_function_symbol(arity); */
     }
 
     /** \brief Construct a state label out of a data_expression_list.
@@ -98,7 +101,13 @@ class state_label_lts : public atermpp::aterm_appl
 
     /** \brief Construct a state label out of a data_expression_vector.
     */
-    state_label_lts(const std::vector < mcrl2::data::data_expression > &l):
+    state_label_lts(const std::vector < mcrl2::data::data_expression >& l):
+      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
+    {}
+
+    /** \brief Construct a state label out of a balanced tree of data expressions, representing a state label.
+    */
+    state_label_lts(const atermpp::term_balanced_tree<mcrl2::data::data_expression>& l):
       atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
     {}
 
@@ -185,7 +194,7 @@ class action_label_lts:public mcrl2::lps::multi_action
     /** \brief Hide the actions with labels in tau_actions.
         \return Returns whether the hidden action becomes empty, i.e. a tau or hidden action.
     */
-    bool hide_actions(const std::vector<std::string> &tau_actions)
+    bool hide_actions(const std::vector<std::string>& tau_actions)
     {
       using namespace std;
       using namespace mcrl2::lps;
@@ -265,7 +274,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 
     /** \brief Creates an object containing a muCRL specification.
      * \param[in] t The muCRL specification that will be stored in the object. */
-    lts_lts_t(const atermpp::aterm &t);
+    lts_lts_t(const atermpp::aterm& t);
 
     /** \brief Creates an object containing an mCRL2 specification.
      * \param[in] spec The mCRL2 specification that will be stored in the object. */

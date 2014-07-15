@@ -64,7 +64,7 @@ namespace detail {
     /// \brief Rewrites and simplifies an expression.
     /// \param e a PBES expression.
     /// \return the result of the rewrite.
-    pbes_expression rewrite_and_simplify_expression(const pbes_expression& e, const bool convert_data_to_pbes = true)
+    pbes_expression rewrite_and_simplify_expression(const pbes_expression& e, const bool /* convert_data_to_pbes */ = true)
     {
       data::rewriter::substitution_type sigma;
       pbes_expression phi = pbes_rewriter(e, sigma);

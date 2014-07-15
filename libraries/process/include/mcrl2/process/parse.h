@@ -344,6 +344,19 @@ process_expression parse_process_expression(const std::string& text, const std::
   return spec.init();
 }
 
+/// \brief Parses and type checks a process expression. N.B. Very inefficient!
+template <typename VariableContainer>
+process_expression parse_process_expression(const std::string& text, const VariableContainer& variables, const process_specification& procspec)
+{
+  process_specification procspec1 = procspec;
+  auto& globvars = procspec1.global_variables();
+  globvars.insert(variables.begin(), variables.end());
+  std::string ptext = process::pp(procspec1);
+  ptext = utilities::regex_replace("\\binit.*;", "init " + text + ";", ptext);
+  process_specification procspec2 = parse_process_specification(ptext);
+  return procspec2.init();
+}
+
 } // namespace process
 
 } // namespace mcrl2

@@ -102,16 +102,6 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
     push(std::set<data::variable>());
   }
 
-  void leave(const true_&)
-  {
-    push(std::set<data::variable>());
-  }
-
-  void leave(const false_&)
-  {
-    push(std::set<data::variable>());
-  }
-
   void leave(const data::data_expression& x)
   {
     push(data::find_free_variables(x));

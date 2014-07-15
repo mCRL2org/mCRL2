@@ -12,14 +12,14 @@
 #ifndef MCRL2_LPS_BINARY_H
 #define MCRL2_LPS_BINARY_H
 
-// #include <cmath>
 #include <iterator>
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/math.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
@@ -31,21 +31,6 @@ namespace mcrl2
 namespace lps
 {
 
-// Compute base 2 logarithm of n, by checking which is the leftmost
-// bit that has been set.
-inline
-size_t ceil_log2(size_t n)
-{
-  assert(n>0);
-  size_t result = 0;
-  while(n != 0)
-  {
-    n = n >> 1;
-    ++result;
-  }
-  return result;
-}
-
 // Compute the number of booleans needed to represent a set of size n.
 inline
 size_t nr_of_booleans_for_elements(size_t n)
@@ -56,7 +41,7 @@ size_t nr_of_booleans_for_elements(size_t n)
   }
   else
   {
-    return ceil_log2(n-1);
+    return utilities::ceil_log2(n-1);
   }
 }
 
@@ -67,7 +52,8 @@ size_t nr_of_booleans_for_elements(size_t n)
 template<typename DataRewriter>
 class binary_algorithm: public lps::detail::lps_algorithm
 {
-    typedef data::classic_enumerator< data::rewriter > enumerator_type;
+  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+  typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
 
   protected:
     /// Rewriter
@@ -140,7 +126,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       data::set_identifier_generator generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
-      enumerator_type enumerator(m_spec.data(),m_rewriter);
+      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
@@ -152,14 +138,13 @@ class binary_algorithm: public lps::detail::lps_algorithm
           //Get all constructors for par
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
-          mcrl2::data::mutable_indexed_substitution<> local_sigma;
-          for (enumerator_type::iterator j=enumerator.begin(
-                           atermpp::make_list<data::variable>(par),
-                           data::sort_bool::true_(),
-                           local_sigma);
-                j != enumerator.end() ; ++j)
+          data::mutable_indexed_substitution<> local_sigma;
+          const data::variable_list vl=atermpp::make_list<data::variable>(par);
+          std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+          for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end() ; ++j)
           {
-            enumerated_elements.push_back(j->front());
+            j->add_assignments(vl, local_sigma,m_rewriter);
+            enumerated_elements.push_back(local_sigma(par));
           }
 
           m_enumerated_elements[par] = enumerated_elements;

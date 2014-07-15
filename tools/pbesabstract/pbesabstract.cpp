@@ -12,18 +12,20 @@
 #include <string>
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
-using utilities::tools::input_output_tool;
+using namespace mcrl2::utilities::tools;
 
-class pbes_abstract_tool: public input_output_tool
+class pbes_abstract_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {
   protected:
-    typedef input_output_tool super;
+    typedef pbes_input_tool<pbes_output_tool<input_output_tool> > super;
 
     std::string m_parameter_selection;
     bool m_value_true;
@@ -88,6 +90,8 @@ class pbes_abstract_tool: public input_output_tool
 
       pbesabstract(input_filename(),
                    output_filename(),
+                   pbes_input_format(),
+                   pbes_output_format(),
                    m_parameter_selection,
                    m_value_true
                  );

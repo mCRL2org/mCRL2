@@ -57,7 +57,7 @@ class parity_game_output: public parity_game_generator
     /// \return The quoted name of the vertex, for example "X1"
     std::string vertex(size_t i) const
     {
-      return "\"X" + boost::lexical_cast<std::string>(i+1) + "\"";
+      return "\"X" + utilities::number2string(i+1) + "\"";
     }
 
     /// \brief Returns a tuple representing an edge, for example ("X1", "X2")
@@ -73,7 +73,7 @@ class parity_game_output: public parity_game_generator
     /// \return A string representing a priority, for example "X1":0
     std::string priority(std::pair<size_t, size_t> p) const
     {
-      return vertex(p.first) + ":" + boost::lexical_cast<std::string>(p.second);
+      return vertex(p.first) + ":" + utilities::number2string(p.second);
     }
 
     /// \brief Applies a function to the elements of a container
@@ -167,14 +167,14 @@ class parity_game_output: public parity_game_generator
       for (std::set<size_t>::const_iterator i = V.begin(); i != V.end(); ++i)
       {
         size_t k = *i;
-        lines[k] = boost::lexical_cast<std::string>(k) + " " + boost::lexical_cast<std::string>(priorities[k]) + " " + (odd_vertices.find(*i) == odd_vertices.end() ? "0 " : "1 ");
+        lines[k] = utilities::number2string(k) + " " + utilities::number2string(priorities[k]) + " " + (odd_vertices.find(*i) == odd_vertices.end() ? "0 " : "1 ");
       }
       for (std::set<std::pair<size_t, size_t> >::const_iterator i = E.begin(); i != E.end(); ++i)
       {
         size_t k = i->first;
         size_t m = i->second;
         std::string& line = lines[k];
-        line += ((line[line.size()-1] == ' ' ? "" : ", ") + boost::lexical_cast<std::string>(m));
+        line += ((line[line.size()-1] == ' ' ? "" : ", ") + utilities::number2string(m));
       }
       return join(lines, ";\n") + ";";
     }

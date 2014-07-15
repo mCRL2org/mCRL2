@@ -104,6 +104,18 @@ void ToolInformation::load()
   }
 }
 
+bool ToolInformation::inputMatchesAny(QStringList filetypes)
+{
+  for (auto it = filetypes.begin(); it != filetypes.end(); ++it)
+  {
+    if (input.contains(*it))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 void ToolInformation::parseOptions(QDomElement optionsElement)
 {
   QDomElement optionElement = optionsElement.firstChildElement("option");

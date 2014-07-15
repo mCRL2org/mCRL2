@@ -39,18 +39,17 @@ class lps2lts_algorithm
   private:
     lts_generation_options m_options;
     next_state_generator *m_generator;
-    next_state_generator::substitution_t m_substitution;
     next_state_generator::summand_subset_t *m_main_subset;
 
     bool m_use_confluence_reduction;
     next_state_generator::summand_subset_t m_nonprioritized_subset;
     next_state_generator::summand_subset_t m_prioritized_subset;
 
-    atermpp::indexed_set m_state_numbers;
+    atermpp::indexed_set<storage_state_t> m_state_numbers;
     bit_hash_table m_bit_hash_table;
 
     lts_lts_t m_output_lts;
-    atermpp::indexed_set m_action_label_numbers;
+    atermpp::indexed_set<atermpp::aterm> m_action_label_numbers; // aterm should be replace by proper type.
     std::ofstream m_aut_file;
 
     bool m_maintain_traces;
@@ -100,22 +99,24 @@ class lps2lts_algorithm
   private:
     data::data_expression_vector generator_state(const storage_state_t& storage_state);
     storage_state_t storage_state(const data::data_expression_vector& generator_state);
-    data::data_expression_vector get_prioritised_representative(data::data_expression_vector state);
-    void value_prioritize(std::list<next_state_generator::transition_t>& transitions);
-    bool save_trace(const data::data_expression_vector& state, const std::string& filename);
-    bool search_divergence(const data::data_expression_vector& state, std::set<data::data_expression_vector>& current_path, std::set<data::data_expression_vector>& visited);
-    void check_divergence(const data::data_expression_vector& state);
-    void save_actions(const data::data_expression_vector& state, const next_state_generator::transition_t& transition);
-    void save_deadlock(const data::data_expression_vector& state);
-    void save_error(const data::data_expression_vector& state);
-    bool add_transition(const data::data_expression_vector& state, next_state_generator::transition_t& transition);
-    void get_transitions(const data::data_expression_vector& state,
-                         std::list<lps2lts_algorithm::next_state_generator::transition_t>& transitions);
-
-    void generate_lts_breadth();
-    void generate_lts_breadth_bithashing(const data::data_expression_vector& initial_state);
-    void generate_lts_depth(const data::data_expression_vector& initial_state);
-    void generate_lts_random(const data::data_expression_vector& initial_state);
+    storage_state_t get_prioritised_representative(const storage_state_t& state);
+    void value_prioritize(std::vector<next_state_generator::transition_t>& transitions);
+    bool save_trace(const storage_state_t& state, const std::string& filename);
+    bool search_divergence(const storage_state_t& state, std::set<storage_state_t>& current_path, std::set<storage_state_t>& visited);
+    void check_divergence(const storage_state_t& state);
+    void save_actions(const storage_state_t& state, const next_state_generator::transition_t& transition);
+    void save_deadlock(const storage_state_t& state);
+    void save_error(const storage_state_t& state);
+    bool add_transition(const storage_state_t& source_state, next_state_generator::transition_t& transition);
+    void get_transitions(const storage_state_t& state,
+                         std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
+                         next_state_generator::enumerator_queue_t& enumeration_queue
+    );
+    void generate_lts_breadth_todo_max_is_npos();
+    void generate_lts_breadth_todo_max_larger_than_0(const storage_state_t& initial_state);
+    void generate_lts_breadth_bithashing(const storage_state_t& initial_state);
+    void generate_lts_depth(const storage_state_t& initial_state);
+    void generate_lts_random(const storage_state_t& initial_state);
 };
 
 } // namespace lps

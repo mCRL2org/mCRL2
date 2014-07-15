@@ -16,6 +16,7 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/print.h"
+#include "mcrl2/bes/io.h"
 
 using namespace mcrl2;
 
@@ -40,9 +41,9 @@ void test_boolean_expressions()
   std::cout << bes::pp(p) << std::endl;
 
   std::string filename = "boolean_expression_test.out";
-  p.save(filename);
+  save_bes(p, filename);
   boolean_equation_system q;
-  q.load(filename);
+  load_bes(q, filename);
   BOOST_CHECK(p == q);
   remove(filename.c_str());
 }

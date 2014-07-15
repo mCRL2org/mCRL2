@@ -15,11 +15,9 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-// #include <vector>
+#include <functional>
 
-#include "boost/type_traits/is_base_of.hpp"
-#include "boost/static_assert.hpp"
-
+#include <type_traits>
 #include "mcrl2/atermpp/detail/aterm.h"
 
 /// \brief The main namespace for the aterm++ library.
@@ -269,8 +267,8 @@ class aterm
 template <class ATERM_TYPE_OUT>
 const ATERM_TYPE_OUT &aterm_cast(const aterm &t)
 {
-  BOOST_STATIC_ASSERT((boost::is_base_of<aterm, ATERM_TYPE_OUT>::value));
-  BOOST_STATIC_ASSERT((sizeof(ATERM_TYPE_OUT)==sizeof(aterm)));
+  static_assert(std::is_base_of<aterm, ATERM_TYPE_OUT>::value,"Aterm_cast must be applied on a term derived from aterm");
+  static_assert(sizeof(ATERM_TYPE_OUT)==sizeof(aterm),"Aterm_cast cannot be applied types derived from aterms where extra fields are added");
 #ifndef NDEBUG
   // This assignment checks whether e has the right type;
   ATERM_TYPE_OUT t0=(ATERM_TYPE_OUT &)t;
@@ -303,6 +301,29 @@ inline void swap(atermpp::aterm &t1, atermpp::aterm &t2)
 {
   t1.swap(t2);
 }
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<atermpp::aterm>
+{
+  std::size_t operator()(const atermpp::aterm& t) const
+  {
+    return std::hash<atermpp::detail::_aterm*>()(const_cast<atermpp::detail::_aterm*>(atermpp::detail::address(t)));
+  }
+};
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<std::pair<atermpp::aterm,atermpp::aterm> >
+{
+  std::size_t operator()(const std::pair<atermpp::aterm, atermpp::aterm>& x) const
+  {
+    // The hashing function below is taken from boost (http://www.boost.org/doc/libs/1_35_0/doc/html/boost/hash_combine_id241013.html).
+    size_t seed=std::hash<atermpp::aterm>()(x.first);
+    return std::hash<atermpp::aterm>()(x.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  }
+};
+
 } // namespace std
 
 

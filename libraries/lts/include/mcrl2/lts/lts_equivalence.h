@@ -36,10 +36,12 @@ enum lts_equivalence
   lts_eq_bisim_sigref,            /**< Strong bisimulation equivalence, using signature refinement */
   lts_eq_branching_bisim,  /**< Branching bisimulation equivalence */
   lts_eq_branching_bisim_sigref, /**< Branching bisimulation equivalence, using signature refinement */
-  lts_eq_divergence_preserving_branching_bisim,
-  /**< Divergence preserving branching bisimulation equivalence */
+  lts_eq_divergence_preserving_branching_bisim, /**< Divergence preserving branching bisimulation equivalence */
   lts_eq_divergence_preserving_branching_bisim_sigref,
-  /**< Divergence preserving branching bisimulation equivalence, using signature refinement */
+  lts_eq_weak_bisim,  /**< Weak bisimulation equivalence */
+  lts_eq_weak_bisim_sigref, /**< Weak bisimulation equivalence, using signature refinement */
+  lts_eq_divergence_preserving_weak_bisim, /**< Divergence preserving weak bisimulation equivalence */
+  lts_eq_divergence_preserving_weak_bisim_sigref, /**< Divergence preserving weak bisimulation equivalence, using signature refinement */
   lts_eq_sim,              /**< Strong simulation equivalence */
   lts_eq_trace,            /**< Strong trace equivalence*/
   lts_eq_weak_trace,       /**< Weak trace equivalence */
@@ -53,6 +55,8 @@ enum lts_equivalence
  * \li "bisim" for strong bisimilarity;
  * \li "branching-bisim" for branching bisimilarity;
  * \li "dpbranching-bisim" for divergence preserving branching bisimilarity;
+ * \li "weak-bisim" for weak bisimilarity;
+ * \li "dpweak-bisim" for divergence preserving weak bisimilarity;
  * \li "sim" for strong simulation equivalence;
  * \li "trace" for strong trace equivalence;
  * \li "weak-trace" for weak trace equivalence;
@@ -91,6 +95,22 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_eq_divergence_preserving_branching_bisim_sigref;
   }
+  else if (s == "weak-bisim")
+  {
+    return lts_eq_weak_bisim;
+  }
+  else if (s == "weak-bisim-sig")
+  {
+    return lts_eq_weak_bisim_sigref;
+  }
+  else if (s == "dpweak-bisim")
+  {
+    return lts_eq_divergence_preserving_weak_bisim;
+  }
+  else if (s == "dpweak-bisim-sig")
+  {
+    return lts_eq_divergence_preserving_weak_bisim_sigref;
+  }
   else if (s == "sim")
   {
     return lts_eq_sim;
@@ -113,7 +133,7 @@ lts_equivalence parse_equivalence(std::string const& s)
   }
   else
   {
-    throw mcrl2::runtime_error("unknown equivalence " + s);
+    throw mcrl2::runtime_error("Unknown equivalence " + s + ".");
   }
 }
 
@@ -157,6 +177,14 @@ inline std::string print_equivalence(const lts_equivalence eq)
       return "dpbranching-bisim";
     case lts_eq_divergence_preserving_branching_bisim_sigref:
       return "dpbranching-bisim-sig";
+    case lts_eq_weak_bisim:
+      return "weak-bisim";
+    case lts_eq_weak_bisim_sigref:
+      return "weak-bisim-sig";
+    case lts_eq_divergence_preserving_weak_bisim:
+      return "dpweak-bisim";
+    case lts_eq_divergence_preserving_weak_bisim_sigref:
+      return "dpweak-bisim-sig";
     case lts_eq_sim:
       return "sim";
     case lts_eq_trace:
@@ -168,7 +196,7 @@ inline std::string print_equivalence(const lts_equivalence eq)
     case lts_red_determinisation:
       return "deterministation";
     default:
-      throw mcrl2::runtime_error("unknown equivalence");
+      throw mcrl2::runtime_error("Unknown equivalence.");
   }
 }
 
@@ -202,6 +230,14 @@ inline std::string description(const lts_equivalence eq)
       return "divergence preserving branching bisimilarity";
     case lts_eq_divergence_preserving_branching_bisim_sigref:
       return "divergence preserving branching bisimilarity using signature refinement";
+    case lts_eq_weak_bisim:
+      return "weak bisimilarity";
+    case lts_eq_weak_bisim_sigref:
+      return "weak bisimilarity using signature refinement";
+    case lts_eq_divergence_preserving_weak_bisim:
+      return "divergence preserving weak bisimilarity";
+    case lts_eq_divergence_preserving_weak_bisim_sigref:
+      return "divergence preserving weak bisimilarity using signature refinement";
     case lts_eq_sim:
       return "strong simulation equivalence";
     case lts_eq_trace:
@@ -213,7 +249,7 @@ inline std::string description(const lts_equivalence eq)
     case lts_red_determinisation:
       return "determinisation reduction";
     default:
-      throw mcrl2::runtime_error("unknown equivalence");
+      throw mcrl2::runtime_error("Unknown equivalence.");
   }
 }
 

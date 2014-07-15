@@ -188,16 +188,16 @@ class GLWidget : public QGLWidget
     void savePixmap(const QString &filename, const int w = 1024, const int h = 768);
 
     /**
-	 * @brief Renders the current visualisation to a vector graphics file using gl2ps.
-	 * @param filename The filename for the output (extension determines file type).
-	 */
-	void saveVector(const QString &filename);
+         * @brief Renders the current visualisation to a vector graphics file using gl2ps.
+         * @param filename The filename for the output (extension determines file type).
+         */
+        void saveVector(const QString &filename);
 
     /**
-	 * @brief Renders the current visualisation to a LaTeX Tikz image.
-	 * @param filename The filename for the output.
-	 */
-	void saveTikz(const QString &filename, float aspectRatio);
+         * @brief Renders the current visualisation to a LaTeX Tikz image.
+         * @param filename The filename for the output.
+         */
+        void saveTikz(const QString &filename, float aspectRatio);
 
     /**
      * @brief Sets the paint color.
@@ -233,7 +233,6 @@ class GLWidget : public QGLWidget
     float fogDistance() { return m_scene->fogDistance(); }
   signals:
     void widgetResized(const Graph::Coord3D& newsize);
-    void initialized();
   public slots:
 
     /**

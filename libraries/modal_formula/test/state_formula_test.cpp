@@ -21,7 +21,7 @@
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
-#include "mcrl2/modal_formula/state_formula_normalize.h"
+#include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"

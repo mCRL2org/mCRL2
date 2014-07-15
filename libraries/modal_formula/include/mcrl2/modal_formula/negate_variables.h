@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/modal_formula/detail/state_variable_negator.h
+/// \file mcrl2/modal_formula/negate_variables.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_NEGATOR_H
-#define MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_NEGATOR_H
+#ifndef MCRL2_MODAL_FORMULA_NEGATE_VARIABLES_H
+#define MCRL2_MODAL_FORMULA_NEGATE_VARIABLES_H
 
 #include "mcrl2/core/builder.h"
 #include "mcrl2/modal_formula/state_formula.h"
@@ -54,18 +54,18 @@ struct state_variable_negator: public state_formulas::state_formula_builder<Deri
   }
 };
 
-inline
-/// \brief Negates propositional variable instantiations in a state formula.
-/// \param name The name of the variables that should be negated
-state_formula negate_propositional_variable(const core::identifier_string& name, const state_formula& x)
-{
-  return core::make_apply_builder_arg1<state_variable_negator>(name)(x);
-}
-
 } // namespace detail
+
+inline
+/// \brief Negates variable instantiations in a state formula with a given name.
+/// \param name The name of the variables that should be negated
+state_formula negate_variables(const core::identifier_string& name, const state_formula& x)
+{
+  return core::make_apply_builder_arg1<detail::state_variable_negator>(name)(x);
+}
 
 } // namespace state_formulas
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_NEGATOR_H
+#endif // MCRL2_MODAL_FORMULA_NEGATE_VARIABLES_H

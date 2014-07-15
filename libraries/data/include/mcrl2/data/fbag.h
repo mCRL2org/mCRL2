@@ -15,8 +15,6 @@
 #ifndef MCRL2_DATA_FBAG_H
 #define MCRL2_DATA_FBAG_H
 
-#include "boost/utility.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -79,6 +77,7 @@ namespace mcrl2 {
 
       } // namespace detail
 
+
       /// \brief Generate identifier {:}
       /// \return Identifier {:}
       inline
@@ -97,7 +96,6 @@ namespace mcrl2 {
         function_symbol empty(empty_name(), fbag(s));
         return empty;
       }
-
 
       /// \brief Recogniser for function {:}
       /// \param e A data expression
@@ -130,7 +128,6 @@ namespace mcrl2 {
         function_symbol cons_(cons_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
         return cons_;
       }
-
 
       /// \brief Recogniser for function \@fbag_cons
       /// \param e A data expression
@@ -170,7 +167,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined constructors for fbag
       /// \param s A sort expression
       /// \return All system defined constructors for fbag
@@ -183,6 +179,7 @@ namespace mcrl2 {
 
         return result;
       }
+
       /// \brief Generate identifier \@fbag_insert
       /// \return Identifier \@fbag_insert
       inline
@@ -201,7 +198,6 @@ namespace mcrl2 {
         function_symbol insert(insert_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
         return insert;
       }
-
 
       /// \brief Recogniser for function \@fbag_insert
       /// \param e A data expression
@@ -261,7 +257,6 @@ namespace mcrl2 {
         return cinsert;
       }
 
-
       /// \brief Recogniser for function \@fbag_cinsert
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fbag_cinsert
@@ -320,7 +315,6 @@ namespace mcrl2 {
         return count;
       }
 
-
       /// \brief Recogniser for function count
       /// \param e A data expression
       /// \return true iff e is the function symbol matching count
@@ -378,7 +372,6 @@ namespace mcrl2 {
         return in;
       }
 
-
       /// \brief Recogniser for function in
       /// \param e A data expression
       /// \return true iff e is the function symbol matching in
@@ -435,7 +428,6 @@ namespace mcrl2 {
         function_symbol join(join_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
         return join;
       }
-
 
       /// \brief Recogniser for function \@fbag_join
       /// \param e A data expression
@@ -496,7 +488,6 @@ namespace mcrl2 {
         return fbag_intersect;
       }
 
-
       /// \brief Recogniser for function \@fbag_inter
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fbag_inter
@@ -555,7 +546,6 @@ namespace mcrl2 {
         function_symbol fbag_difference(fbag_difference_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
         return fbag_difference;
       }
-
 
       /// \brief Recogniser for function \@fbag_diff
       /// \param e A data expression
@@ -616,7 +606,6 @@ namespace mcrl2 {
         return fbag2fset;
       }
 
-
       /// \brief Recogniser for function \@fbag2fset
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fbag2fset
@@ -674,7 +663,6 @@ namespace mcrl2 {
         return fset2fbag;
       }
 
-
       /// \brief Recogniser for function \@fset2fbag
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@fset2fbag
@@ -730,7 +718,6 @@ namespace mcrl2 {
         function_symbol union_(union_name(), make_function_sort(fbag(s), fbag(s), fbag(s)));
         return union_;
       }
-
 
       /// \brief Recogniser for function +
       /// \param e A data expression
@@ -789,7 +776,6 @@ namespace mcrl2 {
         return intersection;
       }
 
-
       /// \brief Recogniser for function *
       /// \param e A data expression
       /// \return true iff e is the function symbol matching *
@@ -846,7 +832,6 @@ namespace mcrl2 {
         function_symbol difference(difference_name(), make_function_sort(fbag(s), fbag(s), fbag(s)));
         return difference;
       }
-
 
       /// \brief Recogniser for function -
       /// \param e A data expression
@@ -905,7 +890,6 @@ namespace mcrl2 {
         return count_all;
       }
 
-
       /// \brief Recogniser for function #
       /// \param e A data expression
       /// \return true iff e is the function symbol matching #
@@ -942,7 +926,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined mappings for fbag
       /// \param s A sort expression
       /// \return All system defined mappings for fbag
@@ -976,7 +959,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_count_application(e) || is_in_application(e) || is_fbag2fset_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::aterm_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -988,7 +971,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1000,7 +983,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::aterm_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1012,7 +995,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
+        return atermpp::aterm_cast<const application >(e)[2];
       }
 
       ///\brief Function for projecting out argument
@@ -1024,7 +1007,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 3);
+        return atermpp::aterm_cast<const application >(e)[3];
       }
 
       ///\brief Function for projecting out argument
@@ -1036,7 +1019,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_fset2fbag_application(e) || is_count_all_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1048,7 +1031,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_count_application(e) || is_in_application(e) || is_fbag2fset_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::aterm_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for fbag

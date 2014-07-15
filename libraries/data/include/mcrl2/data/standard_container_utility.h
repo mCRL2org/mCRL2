@@ -12,12 +12,8 @@
 #ifndef MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 #define MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 
-#include "boost/utility.hpp"
-#include "boost/utility/enable_if.hpp"
-#include "boost/assert.hpp"
-#include "boost/type_traits/is_integral.hpp"
-#include "boost/type_traits/make_unsigned.hpp"
-#include "boost/type_traits/is_floating_point.hpp"
+#include <type_traits>
+#include <iterator>
 
 #include "mcrl2/utilities/detail/join.h"
 
@@ -54,8 +50,6 @@ application list(const sort_expression& s,
 
   for (std::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i)
   {
-    // BOOST_ASSERT(is_convertible(i->sort(), s)); This is not always true, due to type conversion.
-
     list_expression = sort_list::cons_(s, *i, list_expression);
   }
 
@@ -268,8 +262,6 @@ application fset(const sort_expression& s,
   // in the same order as the input
   for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i)
   {
-    // BOOST_ASSERT(is_convertible(i->sort(), s));
-
     fset_expression = sort_fset::insert(s, *i, fset_expression);
   }
 
@@ -282,9 +274,9 @@ application fset(const sort_expression& s,
 /// \param[in] range a sequence of elements
 inline
 application fset(const sort_expression& s,
-                 data_expression_list const& range)
+                 const data_expression_list& range)
 {
-  return fset(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
+  return fset(s, data_expression_vector(range.begin(),range.end()));
 }
 
 }
@@ -422,8 +414,7 @@ application fbag(const sort_expression& s, Sequence const& range,
   // in the same order as the input
   for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i, ++i)
   {
-    // BOOST_ASSERT(is_convertible(boost::next(i, 1)->sort(), s));
-    fbag_expression = sort_fbag::cinsert(s, *boost::next(i, 1), *i, fbag_expression);
+    fbag_expression = sort_fbag::cinsert(s, *std::next(i, 1), *i, fbag_expression);
   }
 
   return static_cast< application >(fbag_expression);
@@ -434,9 +425,9 @@ application fbag(const sort_expression& s, Sequence const& range,
 /// \param[in] s the sort of list elements
 /// \param[in] range a range of elements of sort s.
 inline
-application fbag(const sort_expression& s, data_expression_list const& range)
+application fbag(const sort_expression& s, const data_expression_list& range)
 {
-  return fbag(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
+  return fbag(s, data_expression_vector(range.begin(),range.end()));
 }
 }
 

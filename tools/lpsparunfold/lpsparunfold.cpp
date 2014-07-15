@@ -21,9 +21,8 @@
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 
-
 //LPS framework
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 
 //DATA
 #include "mcrl2/data/data_specification.h"
@@ -151,9 +150,8 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
         return false;
       }
 
-      lps::specification lps_specification;
-
-      lps_specification.load(m_input_filename);
+      lps::specification spec;
+      load_lps(spec, input_filename());
 
       /* lpsparunfold-cache is used to avoid the introduction of equations for already unfolded sorts */
       std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element  >  unfold_cache;
@@ -167,16 +165,16 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
         {
           m_set_index.clear();
 
-          data::sort_expression b_sort = mcrl2::data::parse_sort_expression( m_unfoldsort, lps_specification.data() );
-          mcrl2::data::sort_expression sort = normalize_sorts(b_sort, lps_specification.data());
+          data::sort_expression b_sort = mcrl2::data::parse_sort_expression( m_unfoldsort, spec.data() );
+          mcrl2::data::sort_expression sort = normalize_sorts(b_sort, spec.data());
 
 
-          if (!search_sort_expression(lps_specification.data().sorts(), sort))
+          if (!search_sort_expression(spec.data().sorts(), sort))
           {
             mCRL2log(warning) << "No sorts found of name " << m_unfoldsort << std::endl;
             break;
           }
-          mcrl2::data::assignment_list assignments = lps_specification.initial_process().assignments();
+          mcrl2::data::assignment_list assignments = spec.initial_process().assignments();
           for (mcrl2::data::assignment_list::iterator k = assignments.begin()
                ; k != assignments.end()
                ; ++k)
@@ -200,15 +198,13 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
         while (!h_set_index.empty())
         {
-          lpsparunfold lpsparunfold(lps_specification, &unfold_cache, m_add_distribution_laws);
+          lpsparunfold lpsparunfold(spec, &unfold_cache, m_add_distribution_laws);
           size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
-          lps_specification = lpsparunfold.algorithm(index);
+          spec = lpsparunfold.algorithm(index);
           h_set_index.erase(index);
         }
       }
-      lps_specification.save(m_output_filename);
-
-
+      save_lps(spec, output_filename());
 
       return true;
     }

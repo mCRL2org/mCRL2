@@ -18,6 +18,43 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
+// First we provide two classes, that represent lambdas.
+class rewriter_class
+{
+  protected:
+    const rewriter& m_r;
+    mutable_indexed_substitution<>& m_sigma;
+
+  public:
+    rewriter_class(const rewriter& r, mutable_indexed_substitution<>& sigma)
+      :  m_r(r),
+         m_sigma(sigma)
+    {}
+
+    const data_expression operator()(const data_expression& t) const
+    {
+      return m_r(t,m_sigma);
+    }
+};
+
+class state_applier
+{
+  protected:
+    const state& m_state;
+    const size_t m_size;
+
+  public:
+    state_applier(const state& state, const size_t size)
+      :  m_state(state),
+         m_size(size)
+    {}
+
+    const data_expression& operator()(const size_t n) const
+    {
+      return m_state.element_at(n,m_size);
+    }
+};
+
 next_state_generator::next_state_generator(
   const specification& spec,
   const data::rewriter& rewriter,
@@ -25,7 +62,7 @@ next_state_generator::next_state_generator(
   bool use_summand_pruning)
   : m_specification(spec),
     m_rewriter(rewriter),
-    m_enumerator(m_specification.data(), m_rewriter),
+    m_enumerator(m_rewriter, m_specification.data(), m_rewriter),
     m_use_enumeration_caching(use_enumeration_caching)
 {
   m_process_parameters = data::variable_vector(m_specification.process().process_parameters().begin(), m_specification.process().process_parameters().end());
@@ -39,9 +76,10 @@ next_state_generator::next_state_generator(
   {
     summand_t summand;
     summand.summand = &(*i);
-    summand.variables = i->summation_variables();
+    summand.variables =  order_variables_to_optimise_enumeration(i->summation_variables(),spec.data());
     summand.condition = i->condition();
-    summand.result_state = get_internal_state(i->next_state(m_specification.process().process_parameters()));
+    const data_expression_list& l=i->next_state(m_specification.process().process_parameters());
+    summand.result_state = data_expression_vector(l.begin(),l.end());
 
     for (auto j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
     {
@@ -70,43 +108,16 @@ next_state_generator::next_state_generator(
     m_summands.push_back(summand);
   }
 
-  state initial_state_raw = m_specification.initial_process().state(m_specification.process().process_parameters());
-  state initial_state;
-  for (size_t i = 0; i < initial_state_raw.size(); i++)
-  {
-    initial_state.push_back(m_rewriter(initial_state_raw[i]));
-  }
-  m_initial_state = get_internal_state(initial_state);
+  data::data_expression_list initial_state_raw = m_specification.initial_process().state(m_specification.process().process_parameters());
+
+  rewriter_class r(m_rewriter,m_substitution);
+  m_initial_state = state(initial_state_raw.begin(),initial_state_raw.size(),r);
 
   m_all_summands = summand_subset_t(this, use_summand_pruning);
 }
 
 next_state_generator::~next_state_generator()
 {}
-
-data_expression_vector next_state_generator::get_internal_state(const state& s) const
-{
-  const size_t len=s.size();
-  data_expression_vector arguments;
-  arguments.reserve(len);
-  for (size_t i = 0; i < len; i++)
-  {
-    arguments.push_back(s[i]);
-  }
-  return arguments; 
-
-}
-
-state next_state_generator::get_state(const data_expression_vector& internal_state) const
-{
-  state s;
-  for (data_expression_vector::const_iterator i = internal_state.begin(); i != internal_state.end(); i++)
-  {
-    s.push_back(*i);
-  }
-  return s; 
-}
-
 
 next_state_generator::summand_subset_t::summand_subset_t(next_state_generator *generator, bool use_summand_pruning)
   : m_generator(generator),
@@ -260,7 +271,7 @@ bool next_state_generator::summand_subset_t::is_not_false(const next_state_gener
   return m_generator->m_rewriter(summand.condition, m_pruning_substitution) != data::sort_bool::false_();
 }
 
-atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_generator::summand_subset_t::begin(const data_expression_vector& state)
+atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_generator::summand_subset_t::begin(const state& state)
 {
   assert(m_use_summand_pruning);
 
@@ -274,7 +285,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
   for (size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
     size_t parameter = m_pruning_parameters[i];
-    data_expression argument = state[parameter];
+    data_expression argument = state.element_at(parameter,m_generator->m_process_parameters.size());
     m_pruning_substitution[m_generator->m_process_parameters[parameter]] = argument;
     std::map<data_expression, pruning_tree_node_t>::iterator position = node->children.find(argument);
     if (position == node->children.end())
@@ -295,14 +306,15 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
 
 
 
-next_state_generator::iterator::iterator(next_state_generator *generator, const data_expression_vector& state, next_state_generator::substitution_t *substitution, summand_subset_t& summand_subset)
+next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue)
   : m_generator(generator),
     m_state(state),
     m_substitution(substitution),
     m_single_summand(false),
     m_use_summand_pruning(summand_subset.m_use_summand_pruning),
     m_summand(0),
-    m_caching(false)
+    m_caching(false),
+    m_enumeration_queue(enumeration_queue)
 {
   if (m_use_summand_pruning)
   {
@@ -316,15 +328,16 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
 
   m_transition.m_generator = m_generator;
 
-  for (size_t i = 0; i < generator->m_process_parameters.size(); i++)
+  size_t j=0;
+  for (state::iterator i = state.begin(); i!=state.end(); ++i, ++j)
   {
-    (*m_substitution)[generator->m_process_parameters[i]] = state[i];
+    (*m_substitution)[generator->m_process_parameters[j]] = *i;
   }
 
   increment();
 }
 
-next_state_generator::iterator::iterator(next_state_generator *generator, const data_expression_vector& state, next_state_generator::substitution_t *substitution, size_t summand_index)
+next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, size_t summand_index, enumerator_queue_t* enumeration_queue)
   : m_generator(generator),
     m_state(state),
     m_substitution(substitution),
@@ -332,69 +345,27 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_single_summand_index(summand_index),
     m_use_summand_pruning(false),
     m_summand(0),
-    m_caching(false)
+    m_caching(false),
+    m_enumeration_queue(enumeration_queue)
 {
   m_transition.m_generator = m_generator;
 
-  for (size_t i = 0; i < generator->m_process_parameters.size(); i++)
+  size_t j=0;
+  for (state::iterator i = state.begin(); i!=state.end(); ++i, ++j)
   {
-    (*m_substitution)[generator->m_process_parameters[i]] = state[i];
+    (*m_substitution)[generator->m_process_parameters[j]] = *i;
   }
 
   increment();
 }
 
-struct action_argument_converter
-{
-  const rewriter& m_rewriter;
-  next_state_generator::substitution_t *m_substitution;
-
-  action_argument_converter(const data::rewriter& rewriter, next_state_generator::substitution_t *substitution):
-        m_rewriter(rewriter),
-        m_substitution(substitution)
-  {}
-
-  data_expression operator()(const data_expression& t) const
-  {
-    return m_rewriter(t, *m_substitution);
-  }
-};
-
-struct state_argument_rewriter
-{
-  const data::rewriter& m_rewriter;
-  next_state_generator::substitution_t *m_substitution;
-
-  state_argument_rewriter(const data::rewriter& rewriter, next_state_generator::substitution_t *substitution):
-        m_rewriter(rewriter),
-        m_substitution(substitution)
-  {}
-
-  data_expression operator()(const data_expression& t) const
-  {
-    return m_rewriter(atermpp::aterm_cast<data_expression>(t), *m_substitution);
-  }
-};
-
-struct condition_converter
-{
-  const data_expression_vector& m_state;
-
-  condition_converter(const data_expression_vector& state):m_state(state)
-  {}
-
-  const data_expression& operator()(const size_t parameter) const
-  {
-    return m_state[parameter];
-  }
-};
 
 void next_state_generator::iterator::increment()
 {
-  data::data_expression_vector condition_arguments;
   while (!m_summand ||
-    (m_cached && m_enumeration_cache_iterator == m_enumeration_cache_end) ||
-    (!m_cached && m_enumeration_iterator == m_generator->m_enumerator.end()))
+         (m_cached && m_enumeration_cache_iterator == m_enumeration_cache_end) ||
+         (!m_cached && m_enumeration_iterator == m_generator->m_enumerator.end())
+        )
   {
     if (m_caching)
     {
@@ -431,13 +402,11 @@ void next_state_generator::iterator::increment()
 
     if (m_generator->m_use_enumeration_caching)
     {
-      condition_arguments.resize(m_summand->condition_parameters.size());
-
-      for (size_t i = 0; i < m_summand->condition_parameters.size(); i++)
-      {
-        condition_arguments[i] = m_state[m_summand->condition_parameters[i]];
-      }
-      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, condition_arguments.begin(), condition_arguments.end());
+      state_applier apply_m_state(m_state,m_generator->m_process_parameters.size());
+      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function,
+                                                      m_summand->condition_parameters.begin(),
+                                                      m_summand->condition_parameters.end(),
+                                                      apply_m_state);
 
       std::map<condition_arguments_t, summand_enumeration_t>::iterator position = m_summand->enumeration_cache.find(m_enumeration_cache_key);
       if (position == m_summand->enumeration_cache.end())
@@ -465,8 +434,7 @@ void next_state_generator::iterator::increment()
       {
         (*m_substitution)[*i] = *i;  // Reset the variable.
       }
-      // Apply an assignment move, as the right hand side is not used anymore, and this is far more efficient.
-      m_enumeration_iterator=m_generator->m_enumerator.begin(m_summand->variables, m_summand->condition, *m_substitution);
+      enumerate(m_summand->variables, m_summand->condition, *m_substitution);
     }
   }
 
@@ -475,21 +443,21 @@ void next_state_generator::iterator::increment()
   {
     valuation = *m_enumeration_cache_iterator;
     m_enumeration_cache_iterator++;
+    assert(valuation.size() == m_summand->variables.size());
+    data_expression_list::iterator v = valuation.begin();
+    for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)
+    {
+      (*m_substitution)[*i] = *v;
+    }
   }
   else
   {
-    valuation = *m_enumeration_iterator;
+    m_enumeration_iterator->add_assignments(m_summand->variables,*m_substitution,m_generator->m_rewriter);
 
     // If we failed to exactly rewrite the condition to true, nextstate generation fails.
-    if(m_enumeration_iterator.resulting_condition()!=sort_bool::true_())
+    if (m_enumeration_iterator->expression()!=sort_bool::true_())
     {
-      assert(m_enumeration_iterator.resulting_condition()!=sort_bool::false_());
-      // Integrate the valuation in the substitution, to generate a more meaningful error message.
-      data_expression_list::iterator v = valuation.begin();
-      for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)
-      {
-        (*m_substitution)[*i] = *v;
-      }
+      assert(m_enumeration_iterator->expression()!=sort_bool::false_());
 
       // Reduce condition as much as possible, and give a hint of the original condition in the error message.
       data_expression reduced_condition(m_generator->m_rewriter(m_summand->condition, *m_substitution));
@@ -502,6 +470,11 @@ void next_state_generator::iterator::increment()
     }
 
     m_enumeration_iterator++;
+    if (m_caching)
+    {
+      valuation=data_expression_list(m_summand->variables.begin(),m_summand->variables.end(),*m_substitution);
+      assert(valuation.size() == m_summand->variables.size());
+    }
   }
 
   if (m_caching)
@@ -509,20 +482,9 @@ void next_state_generator::iterator::increment()
     m_enumeration_log.push_back(valuation);
   }
 
-  assert(valuation.size() == m_summand->variables.size());
-  data_expression_list::iterator v = valuation.begin();
-  for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)
-  {
-    (*m_substitution)[*i] = *v;
-  }
-
-  const state_argument_rewriter sar(m_generator->m_rewriter,m_substitution);
-  const data_expression_vector &state_args=m_summand->result_state;
-  m_transition.m_state.clear();
-  for(data_expression_vector::const_iterator i=state_args.begin(); i!=state_args.end(); ++i)
-  {
-    m_transition.m_state.push_back(sar(*i));
-  }
+  const data_expression_vector& state_args=m_summand->result_state;
+  rewriter_class r(m_generator->m_rewriter,*m_substitution);
+  m_transition.m_state=lps::state(state_args.begin(),state_args.size(),r);
 
   std::vector <process::action> actions;
   actions.resize(m_summand->action_label.size());

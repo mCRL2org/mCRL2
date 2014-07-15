@@ -19,10 +19,10 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/detail/parse_substitutions.h"
+#include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
-#include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -154,10 +154,10 @@ void test3()
 }
 
 template <typename Rewriter>
-void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitutions)
+void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitution_text)
 {
   data::rewriter::substitution_type sigma;
-  data::detail::parse_substitutions(substitutions, data_spec, sigma);
+  data::detail::parse_substitution(substitution_text, sigma, data_spec);
   data_expression d1 = parse_data_expression(expr1, declarations, data_spec);
   data_expression d2 = parse_data_expression(expr2, declarations, data_spec);
   if (R(d1, sigma) != R(d2))
@@ -181,7 +181,7 @@ void test4()
   std::string expr1 = "exists b: Bool. if(c, c, b)";
 //  std::string expr2 = "true"; // rewriter cannot deal with abstraction yet
   std::string expr2 = "exists b: Bool. if(true, true, b)";
-  std::string sigma = "c: Bool := true";
+  std::string sigma = "[c: Bool := true]";
   test_expressions(R, expr1, expr2, "c: Bool;", data_spec, sigma);
 }
 
@@ -216,7 +216,7 @@ void one_point_rule_preprocessor_test()
 
 void simplify_rewriter_test()
 {
-  data::detail::simplify_rewriter R;
+  data::simplify_rewriter R;
   test_rewriters(N(R), N(I), "!(true && false)", "true");
   test_rewriters(N(R), N(I), "exists n:Nat, b:Bool. b", "exists b:Bool. b");
   test_rewriters(N(R), N(I), "forall b:Bool. !!b", "forall b:Bool. b");

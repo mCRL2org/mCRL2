@@ -71,13 +71,6 @@ struct is_container_impl< atermpp::term_list< T > >
     : public std::integral_constant<bool, true>
 {};
 
-/*
-template < typename T >
-struct is_container_impl< boost::iterator_range< T > >
-    : public std::integral_constant<bool, true>
-{};
-*/
-
 template < bool C, typename Container, typename Value >
 struct lazy_check_value_type
 {

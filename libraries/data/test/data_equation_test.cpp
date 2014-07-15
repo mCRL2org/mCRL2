@@ -10,7 +10,6 @@
 /// \brief Basic regression test for data equations.
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/container_utility.h"

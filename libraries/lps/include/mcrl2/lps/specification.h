@@ -22,8 +22,7 @@
 #include <cstring>
 #include <set>
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/core/detail/aterm_io.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/linear_process.h"
@@ -95,7 +94,7 @@ class specification
       m_data             = atermpp::aterm_appl(*i++);
       m_action_labels    = process::action_label_list(atermpp::aterm_appl(*i++)[0]);
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
-      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
+      m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
       m_process          = linear_process(atermpp::aterm_cast<atermpp::aterm_appl>(*i++));
       m_initial_process  = process_initializer(atermpp::aterm_cast<atermpp::aterm_appl>(*i));
       m_data.declare_data_specification_to_be_type_checked();
@@ -149,19 +148,18 @@ class specification
     /// \param filename A string
     /// If filename is nonempty, input is read from the file named filename.
     /// If filename is empty, input is read from standard input.
-    void load(const std::string& filename)
+    void load(std::istream& stream, bool binary=true)
     {
-      using namespace atermpp;
-      atermpp::aterm t = core::detail::load_aterm(filename);
+      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
+                                : atermpp::read_term_from_text_stream(stream);
       t = data::detail::add_index(t);
       if (!t.type_is_appl() || !is_specification(atermpp::aterm_cast<const atermpp::aterm_appl>(t)))
       {
-        throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
+        throw mcrl2::runtime_error("Input stream does not contain an LPS");
       }
-      //store the term locally
       construct_from_aterm(atermpp::aterm_appl(t));
-      // The well typedness check is only done in debug mode, since for large
-      // LPSs it takes too much time
+      // The well typedness check is only done in debug mode, since for large LPSs it takes too much
+      // time
       assert(is_well_typed(*this));
     }
 
@@ -173,14 +171,21 @@ class specification
     /// If binary is true the linear process is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    void save(const std::string& filename, bool binary = true) const
+    void save(std::ostream& stream, bool binary=true) const
     {
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time
       assert(is_well_typed(*this));
       atermpp::aterm t = specification_to_aterm(*this);
       t = data::detail::remove_index(t);
-      core::detail::save_aterm(t, filename, binary);
+      if (binary)
+      {
+        atermpp::write_term_to_binary_stream(t, stream);
+      }
+      else
+      {
+        atermpp::write_term_to_text_stream(t, stream);
+      }
     }
 
     /// \brief Returns the linear process of the specification.
@@ -299,7 +304,7 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec)
   return atermpp::aterm_appl(core::detail::function_symbol_LinProcSpec(),
            data::detail::data_specification_to_aterm_data_spec(spec.data()),
            atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
-           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), atermpp::convert<data::variable_list>(spec.global_variables())),
+           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
            linear_process_to_aterm(spec.process()),
            spec.initial_process()
          );

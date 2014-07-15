@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "mcrl2/data/rewriter.h"
 #include "rewriter.h"
 #include "parsing.h"
 

@@ -17,7 +17,7 @@
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/complps2pbes.h"
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -28,6 +28,7 @@ namespace pbes_system {
 
 void complps2pbes(const std::string& input_filename,
                   const std::string& output_filename,
+                  const utilities::file_format* output_format,
                   const std::string& formula_filename
                  )
 {
@@ -63,7 +64,7 @@ void complps2pbes(const std::string& input_filename,
   state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(instream, spec);
   instream.close();
 
-  pbes_system::pbes result = pbes_system::complps2pbes(procspec, formula);
+  pbes result = complps2pbes(procspec, formula);
 
   // save the result
   if (output_filename.empty())
@@ -74,7 +75,7 @@ void complps2pbes(const std::string& input_filename,
   {
     mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename << "'..." << std::endl;
   }
-  result.save(output_filename);
+  save_pbes(result, output_filename, output_format);
 }
 
 } // namespace pbes_system

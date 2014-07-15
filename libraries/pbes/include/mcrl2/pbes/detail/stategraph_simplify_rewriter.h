@@ -13,7 +13,7 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H
 
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
-#include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 
 namespace mcrl2 {
@@ -190,17 +190,7 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
 
   pbes_expression operator()(const data::data_expression& x)
   {
-    return post_process(super::operator()(data::detail::simplify(x)));
-  }
-
-  pbes_expression operator()(const true_& x)
-  {
-    return post_process(super::operator()(x));
-  }
-
-  pbes_expression operator()(const false_& x)
-  {
-    return post_process(super::operator()(x));
+    return post_process(super::operator()(data::simplify(x)));
   }
 
   pbes_expression operator()(const not_& x)
@@ -265,7 +255,7 @@ class stategraph_simplify_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      detail::NoSubst sigma;
+      data::no_substitution sigma;
       return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma)(x);
     }
 

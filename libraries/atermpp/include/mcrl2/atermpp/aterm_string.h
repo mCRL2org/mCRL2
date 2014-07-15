@@ -35,6 +35,15 @@ class aterm_string: public aterm_appl
       assert(size() == 0);
     }
 
+    /// \brief Constructor.
+    /// \param f A function symbol with arity 0.
+    aterm_string(const function_symbol& f)
+      : aterm_appl(f)
+    {
+      assert(f.arity() == 0);
+      assert(size() == 0);
+    }
+
     /// \brief Constructor that allows construction from a string.
     /// \param s A string.
     aterm_string(const std::string& s)

@@ -152,33 +152,32 @@ act  YellowMoves,RedMoves:Pos;
 proc FourInaRow(b:Board,WhoMoves:Piece)=
        sum x:Pos.(WhoMoves==Yellow && 
                   x<=N &&
-                  At(x,M,b)==None &&
-                  !Four_in_a_row(Red,b)) ->
+                  At(x,M,b)==None) ->
              YellowMoves(x).
                 FourInaRow(PutColumn(Yellow,x,b),Red)+
 
        sum x:Pos.(WhoMoves==Red && 
                   x<=N &&
-                  At(x,M,b)==None &&
-                  !Four_in_a_row(Yellow,b)) ->
+                  At(x,M,b)==None) ->
              RedMoves(x).
                 FourInaRow(PutColumn(Red,x,b),Yellow)+
 
        (WhoMoves==Yellow && Four_in_a_row(Red,b)) ->
              RedWins.
-                FourInaRow(initial_board,None)+
+                FourInaRow(b,None)+
 
        (WhoMoves==Red && Four_in_a_row(Yellow,b)) ->
              YellowWins.
-                FourInaRow(initial_board,None);
+                FourInaRow(b,None);
                   
+% Note that the board is reversed. The bottom row is drawn at the top.
 map initial_board:Board;
-eqn initial_board= [[None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None]];
+eqn initial_board= [[None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ]];
 
 
 init FourInaRow(initial_board,Red);

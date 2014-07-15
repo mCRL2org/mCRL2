@@ -18,12 +18,14 @@
 #include <set>
 #include <sstream>
 #include <utility>
+#include <type_traits>
+
 // #include <boost/algorithm/string/join.hpp> Don't use this, it leads to stack overflows with Visual C++ 9.0 express
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/bind.hpp>
-#include <boost/utility/enable_if.hpp>
 #include <boost/lexical_cast.hpp>
+
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
@@ -52,14 +54,14 @@ class data_property_map
 
     /// \brief Add start/end separators for non-set container types
     template < typename Container >
-    static std::string add_separators(std::string const& c, typename boost::enable_if< typename atermpp::detail::is_set< Container >::type >::type* = 0)
+    static std::string add_separators(std::string const& c, typename std::enable_if< atermpp::detail::is_set< Container >::value >::type* = 0)
     {
       return "[" + c + "]";
     }
 
     /// \brief Add start/end separators for set container types
     template < typename Container >
-    static std::string add_separators(std::string const& c, typename boost::disable_if< typename atermpp::detail::is_set< Container >::type >::type* = 0)
+    static std::string add_separators(std::string const& c, typename std::enable_if< !atermpp::detail::is_set< Container >::value >::type* = 0)
     {
       return "{" + c + "}";
     }
@@ -93,7 +95,7 @@ class data_property_map
     }
 
     template < typename Container >
-    std::string print(const Container& v, typename boost::enable_if< typename atermpp::detail::is_container< Container >::type >::type* = 0) const
+    std::string print(const Container& v, typename std::enable_if< atermpp::detail::is_container< Container >::value >::type* = 0) const
     {
       std::set<std::string> elements;
 
@@ -106,16 +108,16 @@ class data_property_map
     }
 
     template < typename Container >
-    std::string print(const Container& v, bool print_separators, typename boost::enable_if< typename atermpp::detail::is_container< Container >::type >::type* = 0) const
+    std::string print(const Container& v, bool print_separators, typename std::enable_if< atermpp::detail::is_container< Container >::value >::type* = 0) const
     {
       return (print_separators) ? add_separators< Container >(print(v)) : print(v);
     }
 
-    template < typename Expression >
+    /* template < typename Expression >
     std::string print(const atermpp::term_list< Expression >& v, bool print_separators = true) const
     {
       return print(boost::make_iterator_range(v), print_separators);
-    }
+    } */
 
     //--------------------------------------------//
     // parse functions

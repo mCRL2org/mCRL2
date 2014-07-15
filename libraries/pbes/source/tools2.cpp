@@ -9,5 +9,7 @@
 /// \file pbes/source/tools2.cpp
 /// \brief Tool implementations.
 
+#include "mcrl2/pbes/tools.h"
+
 #include "mcrl2/pbes/tools/lps2pbes.h"
 #include "mcrl2/pbes/tools/pbesparelm.h"

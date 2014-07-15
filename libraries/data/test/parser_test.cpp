@@ -10,7 +10,6 @@
 /// \brief Regression test for parsing a data specification.
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/pos.h"

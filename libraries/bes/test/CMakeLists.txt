@@ -20,10 +20,7 @@ foreach( OBJ ${TERM_OBJS} )
 
   add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
   target_link_libraries("${PREFIX}_${result}"
-    mcrl2_atermpp
-    mcrl2_lps
-    mcrl2_pbes
-    mcrl2_syntax
+    mcrl2_bes
     ${Boost_LIBRARIES}
   )
 

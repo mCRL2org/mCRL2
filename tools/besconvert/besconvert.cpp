@@ -241,7 +241,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       m_lts.set_num_states(statecount, false);
       m_lts.set_initial_state(initial_state);
 
-      atermpp::indexed_set labs(100,50);
+      atermpp::indexed_set<process::action> labs(100,50);
 
       for (auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
@@ -263,7 +263,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           size_t label_index = labs.index(t);
           if (label_index == atermpp::npos)
           {
-            std::pair<int, bool> put_result = labs.put(t);
+            std::pair<size_t, bool> put_result = labs.put(t);
             label_index = put_result.first;
             m_lts.add_action(mcrl2::lts::detail::action_label_string(t.label().name()),false);
           }

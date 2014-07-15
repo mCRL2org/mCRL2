@@ -217,7 +217,6 @@ void GLWidget::initializeGL()
 {
   m_scene->init(Qt::white);
   resizeGL(width(), height());
-  emit initialized();
 }
 
 void GLWidget::resizeGL(int width, int height)

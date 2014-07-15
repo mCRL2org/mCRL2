@@ -10,7 +10,7 @@
 #include <cassert>
 #include "mcrl2/utilities/logger.h"
 #include <mcrl2/data/rewrite_strategy.h>
-#include <mcrl2/pbes/pbes.h>
+#include <mcrl2/pbes/io.h>
 #include <mcrl2/pbes/parity_game_generator.h>
 #include "ParityGame.h"
 
@@ -177,7 +177,7 @@ void ParityGame::read_pbes( const std::string &file_path, verti *goal_vertex,
                             const std::string &rewrite_strategy )
 {
     mcrl2::pbes_system::pbes pbes;
-    pbes.load(file_path);  // TODO: handle exceptions raised here?
+    load_pbes(pbes, file_path);
     assign_pbes(pbes, goal_vertex, edge_dir, rewrite_strategy);
 }
 

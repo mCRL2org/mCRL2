@@ -9,6 +9,8 @@
 /// \file pbes/source/experimental_tools2.cpp
 /// \brief Experimental tool implementations.
 
+#include "mcrl2/pbes/tools.h"
+
 #include "mcrl2/pbes/tools/complps2pbes.h"
 #include "mcrl2/pbes/tools/pbesstategraph.h"
 #include "mcrl2/pbes/tools/pbesabstract.h"

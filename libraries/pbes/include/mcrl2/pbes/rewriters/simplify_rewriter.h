@@ -31,16 +31,6 @@ struct add_simplify: public Builder<Derived>
 
   typedef core::term_traits<pbes_expression> tr;
 
-  pbes_expression operator()(const true_&)
-  {
-    return tr::true_();
-  }
-
-  pbes_expression operator()(const false_&)
-  {
-    return tr::false_();
-  }
-
   pbes_expression operator()(const not_& x)
   {
     return utilities::optimized_not(super::operator()(x.operand()));
@@ -109,6 +99,7 @@ struct simplify_data_rewriter_builder: public add_data_rewriter<pbes_system::det
   using super::leave;
   using super::operator();
   using super::sigma;
+  using super::R;
 
   simplify_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma)
@@ -144,7 +135,7 @@ struct simplify_data_rewriter
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    detail::NoSubst sigma;
+    data::no_substitution sigma;
     return detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma)(x);
   }
 

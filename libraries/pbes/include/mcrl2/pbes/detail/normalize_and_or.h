@@ -95,7 +95,7 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
 
 template <typename T>
 T normalize_and_or(const T& x,
-                   typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                   )
 {
   return core::make_apply_builder<normalize_and_or_builder>()(x);
@@ -103,7 +103,7 @@ T normalize_and_or(const T& x,
 
 template <typename T>
 void normalize_and_or(T& x,
-                      typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+                      typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                      )
 {
   core::make_apply_builder<normalize_and_or_builder>()(x);

@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: svc1.cpp 11587 2013-02-23 15:44:02Z jkeiren $ */
+   $Id$ */
 
 // C includes
 #include <stdlib.h>

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file rewriter_test.cpp
-/// \brief Add your file description here.
+/// \brief Tests whether terms are correctly rewritten using various rewriters.
 
 #include <iostream>
 #include <string>
@@ -417,16 +417,16 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     data_expression p1(sort_nat::nat(1));
     data_expression p2(sort_nat::nat(2));
 
-    /* data_rewrite_test(R, normalize_sorts(equal_to(sort_set::true_function(sort_nat::nat()), sort_set::true_function(sort_nat::nat())),specification), sort_bool::true_());
+    data_rewrite_test(R, normalize_sorts(equal_to(sort_set::true_function(sort_nat::nat()), sort_set::true_function(sort_nat::nat())),specification), sort_bool::true_());
     data_rewrite_test(R, normalize_sorts(equal_to(sort_set::false_function(sort_nat::nat()), sort_set::false_function(sort_nat::nat())),specification), sort_bool::true_());
     data_rewrite_test(R, normalize_sorts(equal_to(sort_set::true_function(sort_nat::nat()), sort_set::false_function(sort_nat::nat())),specification), sort_bool::false_());
     data_rewrite_test(R, normalize_sorts(equal_to(sort_set::false_function(sort_nat::nat()), sort_set::true_function(sort_nat::nat())),specification), sort_bool::false_());
 
     data_expression s1(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p1, sort_fset::empty(sort_nat::nat()))),specification)));
-    data_expression s2(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat()))),specification))); */
+    data_expression s2(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat()))),specification))); 
     data_expression s(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p1, sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat())))),specification)));
 
-    /* data_expression empty_complement(normalize_sorts(sort_set::complement(sort_nat::nat(),
+    data_expression empty_complement(normalize_sorts(sort_set::complement(sort_nat::nat(),
                        sort_set::constructor(sort_nat::nat(),sort_set::false_function(sort_nat::nat()),sort_fset::empty(sort_nat::nat()))),specification));
     data_expression intersection(normalize_sorts(sort_set::intersection(sort_nat::nat(),sort_set::complement(sort_nat::nat(),
                   sort_set::constructor(sort_nat::nat(),sort_set::false_function(sort_nat::nat()), sort_fset::empty(sort_nat::nat()))),
@@ -438,10 +438,10 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
 
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p0, s),specification), sort_bool::false_());
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p1, s),specification), sort_bool::true_());
-    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p2, s),specification), sort_bool::true_()); */
+    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p2, s),specification), sort_bool::true_()); 
 
     data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s, empty_set),specification), s);
-    /* data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s1, s2),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s1, s2),specification), s);
 
     data_rewrite_test(R, normalize_sorts(sort_set::intersection(sort_nat::nat(), s, empty_set),specification), empty_set);
     data_rewrite_test(R, normalize_sorts(sort_set::intersection(sort_nat::nat(), s, s1),specification), s1);
@@ -466,7 +466,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     // see also set_bool_rewrite_test()
     x = sort_bool::not_(sort_fset::in(sort_nat::nat(), sort_nat::c0(), sort_fset::insert(sort_nat::nat(), sort_nat::cnat(sort_pos::c1()), sort_fset::cons_(sort_nat::nat(), sort_nat::c0(), sort_fset::empty(sort_nat::nat())))));
     x = normalize_sorts(x,specification);
-    data_rewrite_test(R, x, sort_bool::false_()); */
+    data_rewrite_test(R, x, sort_bool::false_()); 
   }
 }
 
@@ -558,14 +558,14 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
   // with arguments, without recogniser
   //  a(a0 : A)
   constructors.push_back(structured_sort_constructor("a",
-                         boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+                         structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1)));
   // two arguments, with recogniser
   //  b(B)?is_b
   constructors.push_back(structured_sort_constructor("b",
-                         boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
+                         structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
   //  c(n0 : Nat, n1 : Nat)?is_c
   constructors.push_back(structured_sort_constructor("c",
-                         boost::make_iterator_range(arguments.begin() + 2, arguments.end()), "is_c"));
+                         structured_sort_constructor_argument_list(arguments.begin() + 2, arguments.end()), "is_c"));
 
   data::structured_sort ls(constructors);
 
@@ -877,7 +877,7 @@ BOOST_AUTO_TEST_CASE(test_othello_condition)
     data::data_expression e(parse_data_expression("At(1, 2, [[None, None, None, None], [None, Red, White, None], [None, White, Red, None], [None, None, None, None]]) == None", specification));
     data_rewrite_test(R, e, sort_bool::true_());
   }
-}
+} 
 
 BOOST_AUTO_TEST_CASE(test_lambda_expression)
 {
@@ -994,30 +994,29 @@ BOOST_AUTO_TEST_CASE(lambda_predicate_matching)
 
 BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
 {
-  /* Taken from the specification:
-  ================================
-  map F1: List(Bool)#Bool#List(Bool)#Bag(Bool) -> List(Bool);
-      F2: List(Bool) -> Bag(Bool);
-      ELM: List(Bool)#Bool#List(Bool) -> List(Bool);
-  var ca: Bool;
-      cal: List(Bool);
-      b: Bool;
-      bs: List(Bool);
-      m: Bag(Bool);
-      a: Bool;
-  eqn
-      F1( cal, b, [] ,  m ) = [];
-      F1( cal, b, a |> bs, m ) = if( m <= {}, ELM( cal, b, a |> bs ) , [] );
-      ELM( [] , b, bs ) =  F1( [] , b, bs, { false:1 } );
-      ELM( ca |> cal, b, bs ) = ELM( cal, b , bs );
-
-  act a: List(Bool);
-
-  proc X = sum r: List(Bool). ( r in { a: List(Bool) | exists ac': List(Bool). a ==  F1( [false], false, ac', { false:1 })} )-> a(r) . X;
-
-  init X;
-  ================================
-  */
+//  Taken from the specification:
+//  ================================
+//  map F1: List(Bool)#Bool#List(Bool)#Bag(Bool) -> List(Bool);
+//      F2: List(Bool) -> Bag(Bool);
+//      ELM: List(Bool)#Bool#List(Bool) -> List(Bool);
+//  var ca: Bool;
+//      cal: List(Bool);
+//      b: Bool;
+//      bs: List(Bool);
+//      m: Bag(Bool);
+//      a: Bool;
+//  eqn
+//      F1( cal, b, [] ,  m ) = [];
+//      F1( cal, b, a |> bs, m ) = if( m <= {}, ELM( cal, b, a |> bs ) , [] );
+//      ELM( [] , b, bs ) =  F1( [] , b, bs, { false:1 } );
+//      ELM( ca |> cal, b, bs ) = ELM( cal, b , bs );
+//
+//  act a: List(Bool);
+//
+//  proc X = sum r: List(Bool). ( r in { a: List(Bool) | exists ac': List(Bool). a ==  F1( [false], false, ac', { false:1 })} )-> a(r) . X;
+//
+//  init X;
+//  ================================
 
   std::string s(
   "map F1: List(Bool)#Bool#List(Bool)#Bag(Bool) -> List(Bool);"
@@ -1054,39 +1053,38 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
 
 BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
 {
-  /* Taken from a pbes provided by Tim Willemse, showing a conflict of variable name x0
-  that are bound by different existential quantifiers of different type.
-  =====================================================================================
-  sort AbsNum = struct e0 | e1 | e2 | e3 | e4 ;
-
-  map
-       absplus: AbsNum # AbsNum -> Set(AbsNum);
-       absle: AbsNum # AbsNum -> Set(Bool);
-       Lifted_and: Set(Bool) # Set(Bool) -> Set(Bool);
-       Lifted_absle: Set(AbsNum) # Set(AbsNum) -> Set(Bool);
-       Lifted_absplus: Set(AbsNum) # Set(AbsNum) -> Set(AbsNum);
-
-  var
-       n,m: AbsNum;
-  eqn
-       absplus(e0, n)  =  {n};
-       absplus(e2, e2)  =  {e3};
-       absle(n,m) = {false};
-
-  var  X0,X1: Set(Bool);
-  eqn
-       Lifted_and(X0, X1)  =  { y: Bool | exists x0,x1: Bool. (x0 in X0) && (x1 in X1) && (y in {x0 && x1}) } ;
-
-  var  X0,X1: Set(AbsNum);
-  eqn  Lifted_absle(X0, X1)  =  { y: Bool | exists x0,x1: AbsNum. (x0 in X0) && (x1 in X1) && (y in absle(x0, x1)) };
-       Lifted_absplus(X0, X1)  =  { y: AbsNum | exists x0,x1: AbsNum. (x0 in X0) && (x1 in X1) && (y in absplus(x0, x1)) };
-
-
-  pbes
-       mu X(t_P: AbsNum) = val(false in (Lifted_and( Lifted_absle({e2}, Lifted_absplus({t_P}, {e2})) , {true}))) ;
-
-  init X(e0);
-  */
+//  Taken from a pbes provided by Tim Willemse, showing a conflict of variable name x0
+//  that are bound by different existential quantifiers of different type.
+//  =====================================================================================
+//  sort AbsNum = struct e0 | e1 | e2 | e3 | e4 ;
+//
+//  map
+//       absplus: AbsNum # AbsNum -> Set(AbsNum);
+//       absle: AbsNum # AbsNum -> Set(Bool);
+//       Lifted_and: Set(Bool) # Set(Bool) -> Set(Bool);
+//       Lifted_absle: Set(AbsNum) # Set(AbsNum) -> Set(Bool);
+//       Lifted_absplus: Set(AbsNum) # Set(AbsNum) -> Set(AbsNum);
+//
+//  var
+//       n,m: AbsNum;
+//  eqn
+//       absplus(e0, n)  =  {n};
+//       absplus(e2, e2)  =  {e3};
+//       absle(n,m) = {false};
+//
+//  var  X0,X1: Set(Bool);
+//  eqn
+//       Lifted_and(X0, X1)  =  { y: Bool | exists x0,x1: Bool. (x0 in X0) && (x1 in X1) && (y in {x0 && x1}) } ;
+//
+//  var  X0,X1: Set(AbsNum);
+//  eqn  Lifted_absle(X0, X1)  =  { y: Bool | exists x0,x1: AbsNum. (x0 in X0) && (x1 in X1) && (y in absle(x0, x1)) };
+//       Lifted_absplus(X0, X1)  =  { y: AbsNum | exists x0,x1: AbsNum. (x0 in X0) && (x1 in X1) && (y in absplus(x0, x1)) };
+//
+//
+//  pbes
+//       mu X(t_P: AbsNum) = val(false in (Lifted_and( Lifted_absle({e2}, Lifted_absplus({t_P}, {e2})) , {true}))) ;
+//
+//  init X(e0);
 
   std::string s(
   "sort AbsNum = struct e0 | e1 | e2 | e3 | e4 ;\n"
@@ -1198,6 +1196,7 @@ BOOST_AUTO_TEST_CASE(rewrite_rule_for_higher_order_functions)
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
+    std::cerr << "  Strategy24: " << *strat << std::endl;
     data::rewriter R(specification, *strat);
 
     data::data_expression e(parse_data_expression("c(0)", specification));
@@ -1218,18 +1217,19 @@ BOOST_AUTO_TEST_CASE(check_whether_counting_of_elements_in_an_FBag_works_properl
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
+    std::cerr << "  Strategy25: " << *strat << std::endl;
     data::rewriter R(specification, *strat);
 
     data::data_expression e(parse_data_expression("{true:7,false:8}-{true:4,false:4}", specification));
     data::data_expression f(parse_data_expression("{false:4,true:3}", specification));
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("{false:14,true:8}-{true:29,false:4}", specification));
-    f(parse_data_expression("{false:10}", specification));
+    e=parse_data_expression("{false:14,true:8}-{true:29,false:4}", specification);
+    f=parse_data_expression("{false:10}", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("{0:14,7:8}-{0:29,7:4}", specification));
-    f(parse_data_expression("{7:4}", specification));
+    e=parse_data_expression("{0:14,7:8}-{0:29,7:4}", specification);
+    f=parse_data_expression("{Pos2Nat(7):4}", specification);
     data_rewrite_test(R, e, R(f));
   }
 }  
@@ -1247,97 +1247,156 @@ BOOST_AUTO_TEST_CASE(square_root_test)
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
+    std::cerr << "  Strategy26: " << *strat << std::endl;
     data::rewriter R(specification, *strat);
 
     data::data_expression e(parse_data_expression("Nat2Pos(sqrt(2578))", specification));
     data::data_expression f(parse_data_expression("50", specification));
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(0)", specification));
-    f(parse_data_expression("0", specification));
+    e=parse_data_expression("sqrt(0)", specification);
+    f=parse_data_expression("0", specification);
     data_rewrite_test(R, e, f);
 
-    e(parse_data_expression("sqrt(1)", specification));
-    f(parse_data_expression("Pos2Nat(1)", specification));
+    e=parse_data_expression("sqrt(1)", specification);
+    f=parse_data_expression("Pos2Nat(1)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(2)", specification));
-    f(parse_data_expression("Pos2Nat(1)", specification));
+    e=parse_data_expression("sqrt(2)", specification);
+    f=parse_data_expression("Pos2Nat(1)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(3)", specification));
-    f(parse_data_expression("Pos2Nat(1)", specification));
+    e=parse_data_expression("sqrt(3)", specification);
+    f=parse_data_expression("Pos2Nat(1)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(4)", specification));
-    f(parse_data_expression("Pos2Nat(2)", specification));
+    e=parse_data_expression("sqrt(4)", specification);
+    f=parse_data_expression("Pos2Nat(2)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(5)", specification));
-    f(parse_data_expression("Pos2Nat(2)", specification));
+    e=parse_data_expression("sqrt(5)", specification);
+    f=parse_data_expression("Pos2Nat(2)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(6)", specification));
-    f(parse_data_expression("Pos2Nat(2)", specification));
+    e=parse_data_expression("sqrt(6)", specification);
+    f=parse_data_expression("Pos2Nat(2)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(7)", specification));
-    f(parse_data_expression("Pos2Nat(2)", specification));
+    e=parse_data_expression("sqrt(7)", specification);
+    f=parse_data_expression("Pos2Nat(2)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(8)", specification));
-    f(parse_data_expression("Pos2Nat(2)", specification));
+    e=parse_data_expression("sqrt(8)", specification);
+    f=parse_data_expression("Pos2Nat(2)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(9)", specification));
-    f(parse_data_expression("Pos2Nat(3)", specification));
+    e=parse_data_expression("sqrt(9)", specification);
+    f=parse_data_expression("Pos2Nat(3)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(10)", specification));
-    f(parse_data_expression("Pos2Nat(3)", specification));
+    e=parse_data_expression("sqrt(10)", specification);
+    f=parse_data_expression("Pos2Nat(3)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(11)", specification));
-    f(parse_data_expression("Pos2Nat(3)", specification));
+    e=parse_data_expression("sqrt(11)", specification);
+    f=parse_data_expression("Pos2Nat(3)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(12)", specification));
-    f(parse_data_expression("Pos2Nat(3)", specification));
+    e=parse_data_expression("sqrt(12)", specification);
+    f=parse_data_expression("Pos2Nat(3)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(13)", specification));
-    f(parse_data_expression("Pos2Nat(3)", specification));
+    e=parse_data_expression("sqrt(13)", specification);
+    f=parse_data_expression("Pos2Nat(3)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(14)", specification));
-    f(parse_data_expression("Pos2Nat(3)", specification));
+    e=parse_data_expression("sqrt(14)", specification);
+    f=parse_data_expression("Pos2Nat(3)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(15)", specification));
-    f(parse_data_expression("Pos2Nat(3)", specification));
+    e=parse_data_expression("sqrt(15)", specification);
+    f=parse_data_expression("Pos2Nat(3)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(16)", specification));
-    f(parse_data_expression("Pos2Nat(4)", specification));
+    e=parse_data_expression("sqrt(16)", specification);
+    f=parse_data_expression("Pos2Nat(4)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(17)", specification));
-    f(parse_data_expression("Pos2Nat(4)", specification));
+    e=parse_data_expression("sqrt(17)", specification);
+    f=parse_data_expression("Pos2Nat(4)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(18)", specification));
-    f(parse_data_expression("Pos2Nat(4)", specification));
+    e=parse_data_expression("sqrt(18)", specification);
+    f=parse_data_expression("Pos2Nat(4)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(19)", specification));
-    f(parse_data_expression("Pos2Nat(4)", specification));
+    e=parse_data_expression("sqrt(19)", specification);
+    f=parse_data_expression("Pos2Nat(4)", specification);
     data_rewrite_test(R, e, R(f));
 
-    e(parse_data_expression("sqrt(20)", specification));
-    f(parse_data_expression("Pos2Nat(4)", specification));
+    e=parse_data_expression("sqrt(20)", specification);
+    f=parse_data_expression("Pos2Nat(4)", specification);
     data_rewrite_test(R, e, R(f));
   }
 }
+
+BOOST_AUTO_TEST_CASE(check_whether_higher_order_function_are_dealt_with_appropriately)
+{
+  std::string s(
+  "map f:Pos->Pos->Pos->Pos->Pos->Pos;\n"
+  "    g:Pos->Pos->Pos->Pos->Pos->Pos;\n"
+  "    h:Pos->Pos->Pos->Pos->Pos->Pos;\n"
+  "    k:Pos->Pos->Pos->Pos->Pos->Pos;\n"
+  "var x,y,z,u,v:Pos;\n"
+  "eqn f(x)(2)(z)(u)(v)=1;\n"
+  "    g(3)(y)(z)(u)(v)=1;\n"
+  "    h(x)(y)(z)(u)(v)=x;\n"
+  "    k(x)(x)(z)(u)(v)=x;\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy27: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("f(1)(2)(1)(1)(1)", specification));
+    data::data_expression f(parse_data_expression("1", specification));
+    data_rewrite_test(R, e, f);
+
+    e=parse_data_expression("f(1)(1)(1)(1)(1)", specification);
+    f=parse_data_expression("f(1)(1)(1)(1)(1)", specification);
+    data_rewrite_test(R, e, f);
+
+    e=parse_data_expression("g(3)(1)(1)(1)(1)", specification);
+    f=parse_data_expression("1", specification);
+    data_rewrite_test(R, e, f);
+
+    e=parse_data_expression("g(1)(1)(1)(1)(1)", specification);
+    f=parse_data_expression("g(1)(1)(1)(1)(1)", specification);
+    data_rewrite_test(R, e, f);
+
+    e=parse_data_expression("h(1)(1)(1)(1)(1)", specification);
+    f=parse_data_expression("1", specification);
+    data_rewrite_test(R, e, f);
+
+    e=parse_data_expression("h(10)(1)(1)(1)(1)", specification);
+    f=parse_data_expression("10", specification);
+    data_rewrite_test(R, e, f);
+
+    e=parse_data_expression("k(1)(1)(1)(1)(1)", specification);
+    f=parse_data_expression("1", specification);
+    data_rewrite_test(R, e, f);
+
+    e=parse_data_expression("k(10)(1)(1)(1)(1)", specification);
+    f=parse_data_expression("k(10)(1)(1)(1)(1)", specification);
+    data_rewrite_test(R, e, f);
+
+  }
+} 
+
 
 
 

@@ -10,7 +10,6 @@
 /// \brief Regression test for replace functions
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/make_list.h"

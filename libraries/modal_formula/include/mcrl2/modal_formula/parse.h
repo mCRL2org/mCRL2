@@ -17,9 +17,9 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/detail/regfrmtrans.h"
-#include "mcrl2/modal_formula/detail/state_formula_name_clash_checker.h"
-#include "mcrl2/modal_formula/detail/state_formula_name_clash_resolver.h"
+#include "mcrl2/modal_formula/translate_regular_formulas.h"
+#include "mcrl2/modal_formula/has_name_clashes.h"
+#include "mcrl2/modal_formula/resolve_name_clashes.h"
 
 namespace mcrl2
 {
@@ -184,19 +184,6 @@ state_formula parse_state_formula_new(const std::string& text)
   return result;
 }
 
-/// \brief Translates regular formulas appearing in f into action formulas.
-/// \param f A state formula
-inline
-void translate_regular_formula(state_formula& f)
-{
-  atermpp::aterm_appl result = regular_formulas::detail::translate_reg_frms(f);
-  if (result == atermpp::aterm_appl())
-  {
-    throw mcrl2::runtime_error("formula translation error");
-  }
-  f = state_formula(result);
-}
-
 inline
 void complete_state_formula(state_formula& x, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true)
 {
@@ -204,16 +191,16 @@ void complete_state_formula(state_formula& x, lps::specification& spec, bool che
   if (translate_regular)
   {
     mCRL2log(log::debug) << "formula before translating regular formulas: " << x << std::endl;
-    translate_regular_formula(x);
+    x = translate_regular_formulas(x);
     mCRL2log(log::debug) << "formula after translating regular formulas: " << x << std::endl;
   }
   spec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
   x = state_formulas::translate_user_notation(x);
   x = state_formulas::normalize_sorts(x, spec.data());
-  if (check_monotonicity && state_formulas::detail::has_name_clashes(x))
+  if (check_monotonicity && state_formulas::has_name_clashes(x))
   {
     mCRL2log(log::debug) << "formula before resolving name clashes: " << x << std::endl;
-    x = state_formulas::detail::resolve_name_clashes(x);
+    x = state_formulas::resolve_name_clashes(x);
     mCRL2log(log::debug) << "formula after resolving name clashes: " << x << std::endl;
   }
 }

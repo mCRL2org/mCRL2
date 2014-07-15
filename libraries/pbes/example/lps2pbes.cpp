@@ -26,6 +26,7 @@ using namespace mcrl2::lps;
 using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
+using mcrl2::state_formulas::algorithms::parse_state_formula;
 
 int main(int argc, char* argv[])
 {
@@ -34,7 +35,6 @@ int main(int argc, char* argv[])
     std::cout << "Usage: lps2pbes FILENAME-INPUT-LPS FILENAME-INPUT-MCF FILENAME-OUTPUT-PBES" << std::endl;
     return 0;
   }
-  
 
   string spec_file(argv[1]); // specification file
   string mcf_file(argv[2]);  // modal formula file
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
   state_formula sf = parse_state_formula(utilities::read_text(mcf_file), spec);
   bool timed = false;
   pbes p = lps2pbes(spec, sf, timed);
-  p.save(pbes_file);
+  save_pbes(p, pbes_file);
 
   return 0;
 }

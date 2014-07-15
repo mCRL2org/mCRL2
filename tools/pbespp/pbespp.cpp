@@ -44,11 +44,11 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
 
     bool run()
     {
-      pbespp(input_filename(),
-             output_filename(),
-             pbes_input_format(),
-             format
-            );
+      pbes_system::pbespp(input_filename(),
+                          output_filename(),
+                          pbes_input_format(),
+                          format
+                         );
       return true;
     }
 
