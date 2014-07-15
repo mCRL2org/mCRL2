@@ -469,6 +469,12 @@ class enumerator_algorithm
       : R(R_), dataspec(dataspec_), datar(datar_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
     {}
 
+  private:
+    // enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
+    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&)
+    {}
+
+  public:
     /// \brief Enumerates the front element of the todo list P.
     /// \param P The todo list of the algorithm.
     /// \param sigma A mutable substitution that is applied by the rewriter.
