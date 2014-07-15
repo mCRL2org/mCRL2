@@ -460,14 +460,6 @@ class enumerator_algorithm
     }
 
   public:
-    enumerator_algorithm(const data::rewriter& R_,
-                         const data::data_specification& dataspec_,
-                         std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
-                         bool throw_exceptions = false
-                       )
-      : R(R_), dataspec(dataspec_), datar(R_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
-    {}
-
     enumerator_algorithm(const Rewriter& R_,
                          const data::data_specification& dataspec_,
                          const DataRewriter& datar_,
@@ -735,14 +727,6 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
           return P->front();
         }
     };
-
-    enumerator_algorithm_with_iterator(
-                const data::rewriter& R,
-                const data::data_specification& dataspec,
-                std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
-                bool throw_exceptions = false)
-      : super(R, dataspec, R, max_count, throw_exceptions)
-    {}
 
     enumerator_algorithm_with_iterator(
                 const Rewriter& R,

@@ -48,7 +48,7 @@ void enumerate(const data_specification& dataspec,
   typedef enumerator_algorithm_with_iterator<> enumerator_type;
 
   rewriter rewr(dataspec);
-  enumerator_type enumerator(rewr, dataspec);
+  enumerator_type enumerator(rewr, dataspec, rewr);
   size_t number_of_solutions = 0;
   mutable_indexed_substitution<> sigma;
   std::deque<enumerator_element> enumerator_deque(1, enumerator_element(variables, expression));
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(empty_test)
   size_t count = 0;
 
   // explicit with condition rewr and condition
-  enumerator_type enumerator(rewr, dataspec);
+  enumerator_type enumerator(rewr, dataspec, rewr);
 
   mutable_indexed_substitution<> sigma;
   std::deque<enumerator_element> enumerator_deque(1, enumerator_element(variables, sort_bool::true_()));
@@ -253,7 +253,7 @@ data_expression_vector generate_values(const data_specification& dataspec, const
   data_expression_vector result;
 
   rewriter rewr(dataspec);
-  enumerator_type enumerator(rewr, dataspec, max_internal_variables);
+  enumerator_type enumerator(rewr, dataspec, rewr, max_internal_variables);
   variable v("x", s);
   variable_list variables;
   variables.push_front(v);
