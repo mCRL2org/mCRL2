@@ -72,7 +72,7 @@ struct is_container;
 /// T is the container type
 template < typename T >
 struct is_container< T, void > : public
-    is_container_impl< typename std::remove_reference< typename boost::remove_const< T >::type >::type >
+    is_container_impl< typename std::remove_reference< typename std::remove_const< T >::type >::type >
   { };
 
 template < typename T, typename V >
@@ -110,7 +110,7 @@ struct is_set_impl< std::multiset< T > > :public std::true_type
 // type condition for use with std::enable_if
 template < typename T >
 struct is_set : public
-    is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
+    is_set_impl< typename std::remove_reference< typename std::remove_const< T >::type >::type >
   { };
 
 } // namespace detail
