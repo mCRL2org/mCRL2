@@ -32,13 +32,13 @@ inline sort_expression residual_sort(const sort_expression& s, size_t no_of_init
   // Remove no_of_initial_arguments sort from sort s.
 
   sort_expression result=s;
-  for( ;  no_of_initial_arguments>0 ; )
+  while (no_of_initial_arguments > 0)
   {
     assert(is_function_sort(result));
     const function_sort& sf = core::down_cast<function_sort>(result);
-    result=sf.codomain();
     assert(sf.domain().size()<=no_of_initial_arguments);
     no_of_initial_arguments=no_of_initial_arguments-sf.domain().size();
+    result=sf.codomain();
   }
 
   return result;
