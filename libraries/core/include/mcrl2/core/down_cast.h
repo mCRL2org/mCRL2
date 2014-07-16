@@ -23,27 +23,27 @@ namespace core
 {
 
 template <class Derived, class Base>
-Derived down_cast(Base t,
+const Derived& down_cast(const Base& t,
             typename std::enable_if< std::is_base_of<Base, Derived>::value >::type* = 0,
             typename std::enable_if< std::is_base_of<atermpp::aterm, Base>::value >::type* = 0)
 {
   static_assert(sizeof(Derived)==sizeof(atermpp::aterm),
                 "Size of types should be equal to the size of an atermpp::aterm");
-  return (Derived)t;
+  return atermpp::aterm_cast<Derived>(t);
 }
 
 template <class Derived, class Base>
-Derived down_cast(Base t,
+Derived down_cast(const Base& t,
             typename std::enable_if< std::is_base_of<Base, Derived>::value >::type* = 0,
             typename std::enable_if< !std::is_base_of<atermpp::aterm, Base>::value >::type* = 0,
             typename std::enable_if< std::is_convertible<Base, Derived>::value >::type* = 0)
 {
-  return (Derived)t;
+  return static_cast<Derived>(t);
 }
 
 
 template <class Derived, class Base>
-Derived down_cast(Base t,
+Derived down_cast(const Base& t,
             typename std::enable_if< std::is_base_of<Base, Derived>::value >::type* = 0,
             typename std::enable_if< !std::is_base_of<atermpp::aterm, Base>::value >::type* = 0,
             typename std::enable_if< !std::is_convertible<Base, Derived>::value >::type* = 0)
