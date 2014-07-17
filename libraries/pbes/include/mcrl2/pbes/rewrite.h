@@ -30,9 +30,9 @@ struct rewrite_pbes_expressions_builder: public Builder<rewrite_pbes_expressions
   using super::leave;
   using super::operator();
 
-  Rewriter R;
+  const Rewriter& R;
 
-  rewrite_pbes_expressions_builder(Rewriter R_)
+  rewrite_pbes_expressions_builder(const Rewriter& R_)
     : R(R_)
   {}
 
@@ -48,7 +48,7 @@ struct rewrite_pbes_expressions_builder: public Builder<rewrite_pbes_expressions
 
 template <template <class> class Builder, class Rewriter>
 rewrite_pbes_expressions_builder<Builder, Rewriter>
-make_rewrite_pbes_expressions_builder(Rewriter R)
+make_rewrite_pbes_expressions_builder(const Rewriter& R)
 {
   return rewrite_pbes_expressions_builder<Builder, Rewriter>(R);
 }
@@ -61,10 +61,10 @@ struct rewrite_pbes_expressions_with_substitution_builder: public Builder<rewrit
   using super::leave;
   using super::operator();
 
-  Rewriter R;
-  Substitution sigma;
+  const Rewriter& R;
+  Substitution& sigma;
 
-  rewrite_pbes_expressions_with_substitution_builder(Rewriter R_, Substitution sigma_)
+  rewrite_pbes_expressions_with_substitution_builder(const Rewriter& R_, Substitution& sigma_)
     : R(R_),
       sigma(sigma_)
   {}
@@ -81,7 +81,7 @@ struct rewrite_pbes_expressions_with_substitution_builder: public Builder<rewrit
 
 template <template <class> class Builder, class Rewriter, class Substitution>
 rewrite_pbes_expressions_with_substitution_builder<Builder, Rewriter, Substitution>
-make_rewrite_pbes_expressions_with_substitution_builder(Rewriter R, Substitution sigma)
+make_rewrite_pbes_expressions_with_substitution_builder(const Rewriter& R, Substitution sigma)
 {
   return rewrite_pbes_expressions_with_substitution_builder<Builder, Rewriter, Substitution>(R, sigma);
 }
@@ -95,7 +95,7 @@ make_rewrite_pbes_expressions_with_substitution_builder(Rewriter R, Substitution
 /// \param R a rewriter
 template <typename T, typename Rewriter>
 void rewrite(T& x,
-             Rewriter R,
+             const Rewriter& R,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
@@ -108,7 +108,7 @@ void rewrite(T& x,
 /// \return the rewrite result
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
-          Rewriter R,
+          const Rewriter& R,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
@@ -121,7 +121,7 @@ T rewrite(const T& x,
 /// \param sigma a substitution
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
-             Rewriter R,
+             const Rewriter& R,
              const Substitution& sigma,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
@@ -136,7 +136,7 @@ void rewrite(T& x,
 /// \return the rewrite result
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
-          Rewriter R,
+          const Rewriter& R,
           const Substitution& sigma,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
@@ -150,7 +150,7 @@ T rewrite(const T& x,
 /// \param R a pbes rewriter
 template <typename T, typename Rewriter>
 void pbes_rewrite(T& x,
-                  Rewriter R,
+                  const Rewriter& R,
                   typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                  )
 {
@@ -163,7 +163,7 @@ void pbes_rewrite(T& x,
 /// \return the rewrite result
 template <typename T, typename Rewriter>
 T pbes_rewrite(const T& x,
-               Rewriter R,
+               const Rewriter& R,
                typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
               )
 {
@@ -176,7 +176,7 @@ T pbes_rewrite(const T& x,
 /// \param sigma a substitution
 template <typename T, typename Rewriter, typename Substitution>
 void pbes_rewrite(T& x,
-                  Rewriter R,
+                  const Rewriter& R,
                   Substitution sigma,
                   typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                  )
@@ -191,7 +191,7 @@ void pbes_rewrite(T& x,
 /// \return the rewrite result
 template <typename T, typename Rewriter, typename Substitution>
 T pbes_rewrite(const T& x,
-               Rewriter R,
+               const Rewriter& R,
                Substitution sigma,
                typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
               )

@@ -19,7 +19,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -341,7 +341,12 @@ void test_cabp()
   pbes_expression t = parse_pbes_expression(expr, subst, p, sigma);
   pbesinst_algorithm algorithm(p.data());
   enumerate_quantifiers_rewriter& R = algorithm.rewriter();
-  pbes_expression z = R(t, sigma);
+  data::mutable_indexed_substitution<> sigma1;
+  for (auto i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    sigma1[i->first] = i->second;
+  }
+  pbes_expression z = R(t, sigma1);
 }
 
 // Note: this test takes a lot of time!

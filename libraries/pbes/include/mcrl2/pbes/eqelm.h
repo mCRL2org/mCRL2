@@ -68,10 +68,10 @@ class pbes_eqelm_algorithm
     typedef std::set<variable_type> equivalence_class;
 
     /// \brief Compares data expressions for equality.
-    DataRewriter m_data_rewriter;
+    const DataRewriter& m_data_rewriter;
 
     /// \brief Compares data expressions for equality.
-    PbesRewriter m_pbes_rewriter;
+    const PbesRewriter& m_pbes_rewriter;
 
     /// \brief The vertices of the grapth, i.e. the equivalence relations.
     /// It stores the equivalence sets for each propositional variable, for example
@@ -295,7 +295,7 @@ class pbes_eqelm_algorithm
     /// \brief Constructor.
     /// \param datar A data rewriter
     /// \param pbesr A PBES rewriter
-    pbes_eqelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
+    pbes_eqelm_algorithm(const DataRewriter& datar, const PbesRewriter& pbesr)
       : m_data_rewriter(datar),
         m_pbes_rewriter(pbesr)
     {}

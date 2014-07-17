@@ -25,6 +25,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/parse_substitution.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
@@ -99,7 +100,7 @@ class rewriter_with_substitution
 {
   protected:
     Rewriter& R;
-    data::mutable_map_substitution<> sigma;
+    data::mutable_indexed_substitution<> sigma;
 
   public:
     /// \brief The term type
@@ -556,7 +557,7 @@ void test_substitutions3()
   data::rewriter datar(data_spec);
   pbes_system::enumerate_quantifiers_rewriter r(datar, data_spec);
 
-  data::mutable_map_substitution<> sigma;
+  data::mutable_indexed_substitution<> sigma;
   sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");
