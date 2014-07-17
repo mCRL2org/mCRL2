@@ -129,6 +129,12 @@ class number_postfix_generator
     {
       return m_hint;
     }
+
+    /// \brief Clear the context of the generator
+    void clear()
+    {
+      m_index.clear();
+    }
 };
 
 } // namespace utilities

@@ -171,7 +171,7 @@ struct substitution_updater
 
   data::variable bind(const data::variable& v)
   {
-  	using utilities::detail::contains;
+    using utilities::detail::contains;
     if (!contains(V, v) && sigma(v) == v)
     {
       return v;
@@ -244,7 +244,7 @@ struct substitution_updater
 template <typename Substitution, typename IdentifierGenerator>
 data::variable update_substitution(Substitution& sigma, const data::variable& v, const std::multiset<data::variable>& V, IdentifierGenerator& id_generator)
 {
-	using utilities::detail::contains;
+  using utilities::detail::contains;
   if (!contains(V, v) && sigma(v) == v)
   {
     return v;
