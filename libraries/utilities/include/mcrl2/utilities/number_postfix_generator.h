@@ -30,7 +30,7 @@ class number_postfix_generator
 {
   protected:
     /// \brief A map that maintains the highest index for each prefix.
-    std::map<std::string, std::size_t> m_index;
+    mutable std::map<std::string, std::size_t> m_index;
 
     /// \brief The default hint.
     std::string m_hint;
@@ -90,7 +90,7 @@ class number_postfix_generator
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
-    std::string operator()(std::string hint, bool add_to_context = true)
+    std::string operator()(std::string hint, bool add_to_context = true) const
     {
       // remove digits at the end of hint
       if (std::isdigit(hint[hint.size() - 1]))
@@ -113,7 +113,7 @@ class number_postfix_generator
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
-    std::string operator()()
+    std::string operator()() const
     {
       return (*this)(m_hint, true);
     }

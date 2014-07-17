@@ -124,7 +124,7 @@ bool compute_finite_function_sorts(const function_sort& sort,
   {
     domain_expressions.push_back(enumerate_expressions(*i, dataspec, datar));
     total_domain_size = total_domain_size * domain_expressions.back().size();
-    function_parameters.push_back(variable(const_cast<IdentifierGenerator&>(id_generator)("x"), *i));
+    function_parameters.push_back(variable(id_generator("x"), *i));
   }
 
   if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
@@ -312,9 +312,9 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
 
 struct sort_name_generator
 {
-  utilities::number_postfix_generator& id_generator;
+  const utilities::number_postfix_generator& id_generator;
 
-  sort_name_generator(utilities::number_postfix_generator& id_generator_)
+  sort_name_generator(const utilities::number_postfix_generator& id_generator_)
     : id_generator(id_generator_)
   {}
 
@@ -339,7 +339,7 @@ class enumerator_algorithm
     const DataRewriter& datar;
 
     // A name generator
-    mutable utilities::number_postfix_generator id_generator;
+    utilities::number_postfix_generator id_generator;
 
     /// \brief max_count The enumeration is aborted after max_count iterations
     std::size_t m_max_count;
