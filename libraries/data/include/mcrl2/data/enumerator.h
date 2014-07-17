@@ -328,9 +328,6 @@ struct sort_name_generator
 template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter>
 class enumerator_algorithm
 {
-  /// \brief A map that caches the constructors corresponding to sort expressions.
-  typedef std::map<data::sort_expression, std::vector<data::function_symbol> > constructor_map;
-
   protected:
     // A rewriter
     const Rewriter& R;
@@ -344,28 +341,11 @@ class enumerator_algorithm
     // A name generator
     mutable utilities::number_postfix_generator id_generator;
 
-    /// \brief A mapping with constructors.
-    mutable constructor_map m_constructors;
-
     /// \brief max_count The enumeration is aborted after max_count iterations
     std::size_t m_max_count;
 
     /// \brief throw_exceptions If true, an exception is thrown when the enumeration is aborted.
     bool m_throw_exceptions;
-
-    /// \brief Returns the constructors with target s.
-    /// \param s A sort expression
-    /// \return The constructors corresponding to the sort expression.
-    const std::vector<data::function_symbol>& constructors(const data::sort_expression& s) const
-    {
-      auto i = m_constructors.find(s);
-      if (i != m_constructors.end())
-      {
-        return i->second;
-      }
-      m_constructors[s] = dataspec.constructors(s);
-      return m_constructors[s];
-    }
 
     std::string print(const data::variable& x) const
     {
@@ -582,7 +562,7 @@ class enumerator_algorithm
       }
       else
       {
-        auto const& C = constructors(sort);
+        auto const& C = dataspec.constructors(sort);
         if (!C.empty())
         {
           for (auto i = C.begin(); i != C.end(); ++i)
