@@ -14,7 +14,6 @@
 
 #include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/data_expression.h"
@@ -157,12 +156,12 @@ class action: public process_expression
 
     const action_label& label() const
     {
-      return atermpp::aterm_cast<const action_label>((*this)[0]);
+      return atermpp::down_cast<action_label>((*this)[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -224,12 +223,12 @@ class process_instance: public process_expression
 
     const process_identifier& identifier() const
     {
-      return atermpp::aterm_cast<const process_identifier>((*this)[0]);
+      return atermpp::down_cast<process_identifier>((*this)[0]);
     }
 
     const data::data_expression_list& actual_parameters() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -285,12 +284,12 @@ class process_instance_assignment: public process_expression
 
     const process_identifier& identifier() const
     {
-      return atermpp::aterm_cast<const process_identifier>((*this)[0]);
+      return atermpp::down_cast<process_identifier>((*this)[0]);
     }
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::assignment_list>((*this)[1]);
+      return atermpp::down_cast<data::assignment_list>((*this)[1]);
     }
 };
 
@@ -438,12 +437,12 @@ class sum: public process_expression
 
     const data::variable_list& bound_variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -499,12 +498,12 @@ class block: public process_expression
 
     const core::identifier_string_list& block_set() const
     {
-      return atermpp::aterm_cast<const core::identifier_string_list>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -560,12 +559,12 @@ class hide: public process_expression
 
     const core::identifier_string_list& hide_set() const
     {
-      return atermpp::aterm_cast<const core::identifier_string_list>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -621,12 +620,12 @@ class rename: public process_expression
 
     const rename_expression_list& rename_set() const
     {
-      return atermpp::aterm_cast<const rename_expression_list>((*this)[0]);
+      return atermpp::down_cast<rename_expression_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -682,12 +681,12 @@ class comm: public process_expression
 
     const communication_expression_list& comm_set() const
     {
-      return atermpp::aterm_cast<const communication_expression_list>((*this)[0]);
+      return atermpp::down_cast<communication_expression_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -743,12 +742,12 @@ class allow: public process_expression
 
     const action_name_multiset_list& allow_set() const
     {
-      return atermpp::aterm_cast<const action_name_multiset_list>((*this)[0]);
+      return atermpp::down_cast<action_name_multiset_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -804,12 +803,12 @@ class sync: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -865,12 +864,12 @@ class at: public process_expression
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::aterm_cast<const data::data_expression>((*this)[1]);
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
     }
 };
 
@@ -926,12 +925,12 @@ class seq: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -987,12 +986,12 @@ class if_then: public process_expression
 
     const data::data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data::data_expression>((*this)[0]);
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 
     const process_expression& then_case() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1048,17 +1047,17 @@ class if_then_else: public process_expression
 
     const data::data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data::data_expression>((*this)[0]);
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 
     const process_expression& then_case() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 
     const process_expression& else_case() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[2]);
+      return atermpp::down_cast<process_expression>((*this)[2]);
     }
 };
 
@@ -1114,12 +1113,12 @@ class bounded_init: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1175,12 +1174,12 @@ class merge: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1236,12 +1235,12 @@ class left_merge: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1297,12 +1296,12 @@ class choice: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1363,12 +1362,12 @@ class untyped_parameter_identifier: public process_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -1429,12 +1428,12 @@ class untyped_process_assignment: public process_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::untyped_identifier_assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::untyped_identifier_assignment_list>((*this)[1]);
+      return atermpp::down_cast<data::untyped_identifier_assignment_list>((*this)[1]);
     }
 };
 

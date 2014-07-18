@@ -316,7 +316,7 @@ void lpsparunfold::create_data_equations(
 
           /* Create additional case function */
 
-          generate_case_functions(elements_of_new_sorts, atermpp::aterm_cast<function_symbol>(application(e.rhs()).head()));
+          generate_case_functions(elements_of_new_sorts, atermpp::down_cast<function_symbol>(application(e.rhs()).head()));
 
         }
         ++f;

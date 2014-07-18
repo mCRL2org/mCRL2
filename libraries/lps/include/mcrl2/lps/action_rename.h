@@ -90,7 +90,7 @@ class action_rename_rule_rhs: public atermpp::aterm_appl
     const process::action &act() const
     {
       assert(!is_tau() && !is_delta());
-      return atermpp::aterm_cast<process::action>(*this);
+      return atermpp::deprecated_cast<process::action>(*this);
     }
 };
 
@@ -364,8 +364,8 @@ void rename_renamerule_variables(data::data_expression& rcond, process::action& 
 
   std::set<data::variable> renamings_variables = data::substitution_variables(renamings);
   rcond = data::replace_variables_capture_avoiding(rcond, renamings, renamings_variables);
-  rleft = atermpp::aterm_cast<process::action>(process::replace_variables_capture_avoiding(atermpp::aterm_cast<process::process_expression>(rleft), renamings, renamings_variables));
-  rright = atermpp::aterm_cast<process::action>(process::replace_variables_capture_avoiding(atermpp::aterm_cast<process::process_expression>(rright), renamings, renamings_variables));
+  rleft = process::replace_variables_capture_avoiding(rleft, renamings, renamings_variables);
+  rright = process::replace_variables_capture_avoiding(rright, renamings, renamings_variables);
 }
 
 inline
@@ -402,7 +402,7 @@ action_rename_specification translate_user_notation_and_normalise_sorts_action_r
   {
     *i = action_rename_rule(data::normalize_sorts(i->variables(),data_spec),
                             data::normalize_sorts(data::translate_user_notation(i->condition()),data_spec),
-                            translate_user_notation_and_normalise_sorts_action(atermpp::aterm_cast<const process::action>(i->lhs()), data_spec),
+                            translate_user_notation_and_normalise_sorts_action(atermpp::down_cast<const process::action>(i->lhs()), data_spec),
                             translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(i->rhs(),data_spec));
   }
 
@@ -451,7 +451,7 @@ lps::specification action_rename(
     action_summand_vector lps_new_action_summands;
 
     data_expression rule_condition = i->condition();
-    process::action rule_old_action = atermpp::aterm_cast<process::action>(i->lhs());
+    process::action rule_old_action = atermpp::down_cast<process::action>(i->lhs());
     process::action rule_new_action;
     action_rename_rule_rhs new_element = i->rhs();
     if (!new_element.is_tau() && !new_element.is_delta())
@@ -512,7 +512,7 @@ lps::specification action_rename(
     {
       if (is_variable(*i))
       {
-        const variable& v = core::static_down_cast<const variable&>(*i);
+        const variable& v = atermpp::down_cast<variable>(*i);
         if (variables_in_old_rule.find(v)==variables_in_old_rule.end())
         {
           throw mcrl2::runtime_error("Variable " + data::pp(v) + " occurs more than once in lhs " +

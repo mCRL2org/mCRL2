@@ -163,7 +163,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
   }
   else if (state_formulas::is_not(part))
   {
-    const not_& not_part = core::static_down_cast<const not_&>(part);
+    const not_& not_part = atermpp::down_cast<not_>(part);
     part = not_(translate_reg_frms_appl(not_part.operand(),xyz_generator));
   }
   else if (state_formulas::is_and(part))

@@ -77,7 +77,7 @@ struct remove_parameters_builder: public pbes_system::pbes_expression_builder<De
     return propositional_variable(x.name(), detail::remove_elements(x.parameters(), to_be_removed));
   }
 
-  pbes_expression operator()(const propositional_variable_instantiation& x)
+  propositional_variable_instantiation operator()(const propositional_variable_instantiation& x)
   {
     return propositional_variable_instantiation(x.name(), detail::remove_elements(x.parameters(), to_be_removed));
   }
@@ -110,7 +110,7 @@ T remove_parameters(const T& x,
                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                    )
 {
-  return core::static_down_cast<const T&>(core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed)(x));
+  return core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed)(x);
 }
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
@@ -160,7 +160,7 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
     return remove_parameters(x, i->second);
   }
 
-  pbes_expression operator()(const propositional_variable_instantiation& x)
+  propositional_variable_instantiation operator()(const propositional_variable_instantiation& x)
   {
     auto i = to_be_removed.find(x.name());
     if (i == to_be_removed.end())
@@ -182,7 +182,7 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
   void operator()(pbes& x)
   {
     static_cast<Derived&>(*this)(x.equations());
-    x.initial_state() = core::static_down_cast<const propositional_variable_instantiation&>(static_cast<Derived&>(*this)(x.initial_state()));
+    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
   }
 };
 } // namespace detail
@@ -276,7 +276,7 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
   void operator()(pbes& x)
   {
     static_cast<Derived&>(*this)(x.equations());
-    x.initial_state() = core::static_down_cast<const propositional_variable_instantiation&>(static_cast<Derived&>(*this)(x.initial_state()));
+    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
     remove_parameters(x.global_variables());
   }
 };

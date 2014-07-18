@@ -140,7 +140,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
           data::data_expression_list PV_args = put_dest(PV, eqn, i);
           propositional_variable_instantiation Ye = propositional_variable_instantiation(PV.variable().name(), data::data_expression_list(PV_args.begin(), PV_args.end()));
 
-          Ye = core::down_cast<propositional_variable_instantiation>(pbesr(Ye, sigma));
+          Ye = atermpp::down_cast<propositional_variable_instantiation>(pbesr(Ye, sigma));
           propositional_variable_instantiation Y = project(Ye);
 
           mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Y) << std::endl;

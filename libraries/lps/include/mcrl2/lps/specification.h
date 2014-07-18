@@ -95,8 +95,8 @@ class specification
       m_action_labels    = process::action_label_list(atermpp::aterm_appl(*i++)[0]);
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
       m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
-      m_process          = linear_process(atermpp::aterm_cast<atermpp::aterm_appl>(*i++));
-      m_initial_process  = process_initializer(atermpp::aterm_cast<atermpp::aterm_appl>(*i));
+      m_process          = linear_process(atermpp::down_cast<atermpp::aterm_appl>(*i++));
+      m_initial_process  = process_initializer(atermpp::down_cast<atermpp::aterm_appl>(*i));
       m_data.declare_data_specification_to_be_type_checked();
       complete_data_specification(*this);
     }
@@ -153,7 +153,7 @@ class specification
       atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
                                 : atermpp::read_term_from_text_stream(stream);
       t = data::detail::add_index(t);
-      if (!t.type_is_appl() || !is_specification(atermpp::aterm_cast<const atermpp::aterm_appl>(t)))
+      if (!t.type_is_appl() || !is_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
       {
         throw mcrl2::runtime_error("Input stream does not contain an LPS");
       }

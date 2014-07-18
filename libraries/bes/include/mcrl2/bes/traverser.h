@@ -106,31 +106,31 @@ struct add_traverser_boolean_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (bes::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::true_>(x));
     }
     else if (bes::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::false_>(x));
     }
     else if (bes::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::not_>(x));
     }
     else if (bes::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::and_>(x));
     }
     else if (bes::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::or_>(x));
     }
     else if (bes::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::imp>(x));
     }
     else if (bes::is_boolean_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::boolean_variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::boolean_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -230,31 +230,31 @@ struct add_traverser_boolean_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (bes::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::true_>(x));
     }
     else if (bes::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::false_>(x));
     }
     else if (bes::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::not_>(x));
     }
     else if (bes::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::and_>(x));
     }
     else if (bes::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::or_>(x));
     }
     else if (bes::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::imp>(x));
     }
     else if (bes::is_boolean_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::boolean_variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<bes::boolean_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

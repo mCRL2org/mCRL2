@@ -49,7 +49,7 @@ std::set<core::identifier_string> find_identifiers(const lps::specification& x) 
 
 data::data_expression_list action_summand::next_state(const data::variable_list& process_parameters) const
 {
-  return data::replace_variables(atermpp::aterm_cast<data::data_expression_list>(process_parameters), 
+  return data::replace_variables(atermpp::container_cast<data::data_expression_list>(process_parameters),
                                  data::assignment_sequence_substitution(assignments()));
 }
 

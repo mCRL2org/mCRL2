@@ -109,7 +109,7 @@ static void writeToStream(const aterm &t, std::ostream& os)
   else if (t.type_is_list())
   {
     os << "[";
-    const aterm_list& list = aterm_cast<aterm_list>(t);
+    const aterm_list& list = down_cast<aterm_list>(t);
     for(aterm_list::const_iterator i=list.begin(); i!=list.end(); ++i)
     {
       if (i!=list.begin())
@@ -122,7 +122,7 @@ static void writeToStream(const aterm &t, std::ostream& os)
   }
   else // t.type_is_appl()
   {
-    const aterm_appl &appl = aterm_cast<aterm_appl>(t);
+    const aterm_appl &appl = down_cast<aterm_appl>(t);
     const function_symbol sym = appl.function();
     write_string_with_escape_symbols(sym.name(),os);
     if (sym.arity() > 0)

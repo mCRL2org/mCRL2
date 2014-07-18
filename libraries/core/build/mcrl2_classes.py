@@ -227,8 +227,8 @@ boolean_variable(const core::identifier_string& name)                 : public b
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
   'state_formulas::state_formula'     : [ 'data::data_expression' ],
   'action_formulas::action_formula'   : [ 'data::data_expression' ],
-  'regular_formulas::regular_formula' : [ 'action_formulas::action_formula' ],
-  'pbes_system::pbes_expression'      : [ 'data::data_expression' ],
+  'regular_formulas::regular_formula' : [ 'action_formulas::action_formula', 'data::data_expression' ],
+  'pbes_system::pbes_expression'      : [ 'data::data_expression', 'data::variable' ],
 }
 
 # removes 'const' and '&' from a type
@@ -415,7 +415,7 @@ class MemberFunction:
     def inline_definition(self):
         text = '''    const <RETURN_TYPE>& <NAME>() const
     {
-      return atermpp::aterm_cast<const <RETURN_TYPE>>((*this)[<ARG>]);
+      return atermpp::down_cast<<RETURN_TYPE>>((*this)[<ARG>]);
     }'''
         return self.expand_text(text)
 
@@ -426,7 +426,7 @@ class MemberFunction:
     def definition(self, inline = False):
         text = '''    <INLINE> const<RETURN_TYPE>& <CLASSNAME>::<NAME>() const
     {
-      return atermpp::aterm_cast<const <RETURN_TYPE>>((*this)[<ARG>]);
+      return atermpp::down_cast<<RETURN_TYPE>>((*this)[<ARG>]);
     }'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)
@@ -768,7 +768,7 @@ class Class:
                     template_parameter = 'Container'
                 template_parameters.append(template_parameter)
                 arguments1.append('const %s& %s' % (template_parameter, p.name()))
-                arguments2.append('typename atermpp::detail::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)[:-5]))
+                arguments2.append('typename atermpp::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)[:-5]))
                 parameters1.append('%s(%s.begin(), %s.end())' % (p.type(False), p.name(),p.name()))
             else:
                 parameters1.append(p.name())
@@ -999,9 +999,9 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             for c in classes:
                 is_function = c.is_function_name(True)
                 if 'M' in c.modifiers():
-                    cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
+                    cast = '%s(atermpp::down_cast<atermpp::aterm_appl>(x))' % c.classname(True)
                 else:
-                    cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
+                    cast = 'atermpp::down_cast<%s>(x)' % c.classname(True)
                 updates.append('''if (%s(x))
 {
   static_cast<Derived&>(*this)(%s);
@@ -1068,7 +1068,16 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         classname = self.classname(True)
         visit_text = ''
         dependent = False
+
         return_type = self.builder_return_type(all_classes, modifiability_map)
+        if return_type == 'void':
+            const = ''
+        else:
+            const = 'const '
+            # We currently return the same class as we get passed as parameter.
+            # The following statement was not present in previous versions of this
+            # file.
+            return_type = classname
 
         if is_modifiable_type(classname, modifiability_map):
             return_statement = ''
@@ -1085,8 +1094,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     dependent = True
                     if is_modifiable_type(qtype, modifiability_map):
                         updates.append('static_cast<Derived&>(*this)(x.%s());' % p.name())
-                    elif pclass != None and 'E' in pclass.modifiers() and not 'X' in pclass.modifiers():
-                        updates.append('x.%s() = core::down_cast<%s>(static_cast<Derived&>(*this)(x.%s()));' % (p.name(), ptype, p.name()))
                     else:
                         updates.append('x.%s() = static_cast<Derived&>(*this)(x.%s());' % (p.name(), p.name()))
                 else:
@@ -1102,9 +1109,9 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 for c in classes:
                     is_function = c.is_function_name(True)
                     if 'M' in c.modifiers():
-                        cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
+                        cast = '%s(atermpp::down_cast<atermpp::aterm_appl>(x))' % c.classname(True)
                     else:
-                        cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
+                        cast = 'atermpp::down_cast<%s>(x)' % c.classname(True)
                     updates.append('''if (%s(x))
 {
   result = static_cast<Derived&>(*this)(%s);
@@ -1125,10 +1132,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                         pclass = all_classes[ptype]
                     if is_dependent_type(dependencies, ptype):
                         dependent = True
-                        if pclass != None and 'E' in pclass.modifiers() and not 'X' in pclass.modifiers():
-                            updates.append('core::static_down_cast<const %s&>(static_cast<Derived&>(*this)(x.%s()))' % (ptype, p.name()))
-                        else:
-                            updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
+                        updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
                     else:
                         updates.append('x.%s()' % p.name())
                 if dependent:
@@ -1136,23 +1140,18 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     if self.classname(True) == 'data::application' and p.name() == 'arguments':
                         visit_text = '''typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
 function_pointer fp = &Derived::operator();
-data::data_expression result = data::application(
+%s result = data::application(
    static_cast<Derived&>(*this)(x.head()),
    x.begin(),
    x.end(),
    boost::bind(fp, static_cast<Derived*>(this), _1)
-);'''
+);''' % return_type
                     else:
                         visit_text = '%s result = %s(%s);' % (return_type, classname, ', '.join(updates))
                     return_statement = 'return result;'
                 else:
                     visit_text = '// skip'
                     return_statement = 'return x;'
-
-        if return_type == 'void':
-            const = ''
-        else:
-            const = 'const '
 
         # fix the layout
         if return_statement != '':

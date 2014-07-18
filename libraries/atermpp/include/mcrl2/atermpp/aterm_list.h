@@ -159,7 +159,7 @@ class term_list:public aterm
     /// \return This list as an aterm_list.
     operator term_list<aterm>() const
     {
-      return atermpp::aterm_cast<term_list<aterm> >(*this);
+      return atermpp::down_cast<term_list<aterm> >(*this);
     }
 
     /// \brief Returns the tail of the list.
@@ -232,6 +232,13 @@ class term_list:public aterm
 /// \cond INTERNAL_DOCS
 namespace detail
 {
+
+/// \brief Template specialization to make a term_list recognizable as a container type (see
+///        type_traits.h and detail/type_traits_impl.h).
+template < typename T >
+struct is_container_impl< atermpp::term_list< T > > : public std::true_type
+{ };
+
 
 template <class Term>
 class _aterm_list:public _aterm

@@ -631,7 +631,7 @@ class data_specification
     /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
     /// the necessary constructors, mappings and equations are added to the data type.
     template <typename Container>
-    void add_context_sorts(const Container& c, typename atermpp::detail::enable_if_container<Container>::type* = 0) const
+    void add_context_sorts(const Container& c, typename atermpp::enable_if_container<Container>::type* = 0) const
     {
       std::for_each(c.begin(), c.end(),
                     boost::bind(&data_specification::add_context_sort, this, _1));
@@ -958,7 +958,7 @@ class data_specification
       }
       else if (is_structured_sort(sort))
       {
-        insert_mappings_constructors_for_structured_sort(core::static_down_cast<const structured_sort&>(sort));
+        insert_mappings_constructors_for_structured_sort(atermpp::down_cast<structured_sort>(sort));
       }
       const sort_expression normalised_sort=normalize_sorts(sort,*this);
       add_standard_mappings_and_equations(normalised_sort);
@@ -1249,14 +1249,14 @@ data_equation_vector find_equations(data_specification const& specification, con
     }
     else if (is_application(i->lhs()))
     {
-      if (atermpp::aterm_cast<application>(i->lhs()).head() == d)
+      if (atermpp::down_cast<application>(i->lhs()).head() == d)
       {
         result.push_back(*i);
       }
     }
     else if (is_application(i->rhs()))
     {
-      if (atermpp::aterm_cast<application>(i->rhs()).head() == d)
+      if (atermpp::down_cast<application>(i->rhs()).head() == d)
       {
         result.push_back(*i);
       }

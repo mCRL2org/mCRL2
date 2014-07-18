@@ -51,7 +51,7 @@ struct default_global_variable_solver
     data::data_expression r = R(g, sigma);
     if (is_variable(r))
     {
-      const data::variable& v = core::static_down_cast<const data::variable&>(r);
+      const data::variable& v = atermpp::down_cast<data::variable>(r);
       if (std::find(V.begin(), V.end(), v) != V.end())
       {
         result[v] = e;

@@ -128,7 +128,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     pbes_equation new_eqn = pbes_equation(symbol, fresh_var, x);
     (*this)(new_eqn);
     propositional_variable_instantiation fresh_var_instantiation =
-        propositional_variable_instantiation(fresh_varname, atermpp::aterm_cast<data::data_expression_list>(variable_parameters));
+        propositional_variable_instantiation(fresh_varname, atermpp::container_cast<data::data_expression_list>(variable_parameters));
     return fresh_var_instantiation;
   }
 

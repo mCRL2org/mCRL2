@@ -14,24 +14,14 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/function_symbol.h"
-
-#include "mcrl2/core/down_cast.h"
+#include "mcrl2/atermpp/aterm_list.h"
 
 using namespace std;
 
-class t1
+class t1 : public atermpp::aterm
 {
-protected:
-  int m;
-
 public:
-  t1(const int x)
-    : m(x)
-  {}
-  bool operator ==(const t1& other)
-  {
-    return m == other.m;
-  }
+  t1(const int x) {}
 };
 
 class t2 : public t1
@@ -50,19 +40,6 @@ public:
   {}
 };
 
-// atermpp::aterm cannot be downcasted to u.
-class u: public atermpp::aterm
-{
-protected:
-  int m;
-
-public:
-  u(const atermpp::aterm& x, const int y)
-    : atermpp::aterm(x),
-      m(y)
-  {}
-};
-
 inline
 void f(const t3& t)
 {
@@ -70,39 +47,28 @@ void f(const t3& t)
 
 BOOST_AUTO_TEST_CASE(aterm_down_cast)
 {
-  atermpp::function_symbol f("f",2);
+  atermpp::function_symbol fs("f",2);
   atermpp::function_symbol x("x",0);
   atermpp::function_symbol y("y",0);
-  atermpp::aterm_appl fxy(f,atermpp::aterm_appl(x),atermpp::aterm_appl(y));
+  atermpp::aterm_appl fxy(fs,atermpp::aterm_appl(x),atermpp::aterm_appl(y));
   atermpp::aterm fxy_term(fxy);
 
-  atermpp::aterm_appl test = mcrl2::core::down_cast<atermpp::aterm_appl>(fxy_term);
+  atermpp::aterm_appl test = atermpp::down_cast<atermpp::aterm_appl>(fxy_term);
   BOOST_CHECK(fxy_term == test);
   BOOST_CHECK(fxy == test);
   BOOST_CHECK(fxy == fxy_term);
 
-  u test2(fxy_term, 3);
-
   const atermpp::aterm& t1(fxy);
-  const atermpp::aterm_appl& t2 = mcrl2::core::static_down_cast<const atermpp::aterm_appl&>(t1);
+  const atermpp::aterm_appl& t2 = atermpp::down_cast<atermpp::aterm_appl>(t1);
+  f(atermpp::down_cast<t3>(t1));
 }
 
-// Uses the second definition of down_cast,
-// and will not be evaluated using the third definition of down_cast
-BOOST_AUTO_TEST_CASE(implicit_down_cast)
+BOOST_AUTO_TEST_CASE(aterm_container_cast)
 {
-  t1 x(1);
-  t2 test = mcrl2::core::down_cast<t2>(x);
-  BOOST_CHECK(x == static_cast<t1>(test));
-}
-
-// Uses the third definition of down_cast,
-// and will not be evaluated using the second definition of down_cast
-BOOST_AUTO_TEST_CASE(explicit_down_cast)
-{
-  t1 x(1);
-  t3 test = mcrl2::core::down_cast<t3>(x);
-  BOOST_CHECK(x == static_cast<t1>(test));
+  atermpp::term_list<t1> s1;
+  atermpp::term_list<t2> s2;
+  s2 = atermpp::container_cast< atermpp::term_list<t2> >(s1);
+  s1 = atermpp::container_cast< atermpp::term_list<t1> >(s2);
 }
 
 BOOST_AUTO_TEST_CASE(no_down_cast_needed)

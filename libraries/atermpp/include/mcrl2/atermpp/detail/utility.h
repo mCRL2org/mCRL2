@@ -29,6 +29,8 @@ std::string to_string(const T& t)
   return oss.str();
 }
 
+std::string to_string(const aterm& t);
+
 } // namespace atermpp
 
 #endif // ATERM_DETAIL_UTILITY_H

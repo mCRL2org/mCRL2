@@ -37,7 +37,7 @@ atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 template <typename T>
 void operator()(T& x,
                 typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0,
-                typename atermpp::detail::enable_if_container<T>::type* = 0
+                typename atermpp::enable_if_container<T>::type* = 0
                )
 {
   core::msg("container traversal");

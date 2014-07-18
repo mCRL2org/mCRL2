@@ -339,7 +339,7 @@ class Info
       {
          return a_term;
       }
-      const application& a = core::down_cast<application>(a_term);
+      const application& a = atermpp::down_cast<application>(a_term);
       return get_operator(a.head());
     }
 
@@ -357,7 +357,7 @@ class Info
          return false;
       }
 
-      const application& a = core::down_cast<application>(a_term);
+      const application& a = atermpp::down_cast<application>(a_term);
       if (a.size() != 2)
       {
         return false;
@@ -368,7 +368,7 @@ class Info
         return false;
       }
 
-      const data::function_symbol& f = core::down_cast<function_symbol>(a.head());
+      const data::function_symbol& f = atermpp::down_cast<function_symbol>(a.head());
       if (static_cast<const std::string&>(f.name())=="==")
       {
         return true;

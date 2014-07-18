@@ -50,12 +50,12 @@ class container_sort: public sort_expression
 
     const container_type& container_name() const
     {
-      return atermpp::aterm_cast<const container_type>((*this)[0]);
+      return atermpp::down_cast<container_type>((*this)[0]);
     }
 
     const sort_expression& element_sort() const
     {
-      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
+      return atermpp::down_cast<sort_expression>((*this)[1]);
     }
 };
 

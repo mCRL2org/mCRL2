@@ -17,7 +17,6 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/process/untyped_action.h"
@@ -227,7 +226,7 @@ class not_: public action_formula
 
     const action_formula& operand() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>((*this)[0]);
     }
 };
 
@@ -283,12 +282,12 @@ class and_: public action_formula
 
     const action_formula& left() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>((*this)[0]);
     }
 
     const action_formula& right() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>((*this)[1]);
     }
 };
 
@@ -344,12 +343,12 @@ class or_: public action_formula
 
     const action_formula& left() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>((*this)[0]);
     }
 
     const action_formula& right() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>((*this)[1]);
     }
 };
 
@@ -405,12 +404,12 @@ class imp: public action_formula
 
     const action_formula& left() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>((*this)[0]);
     }
 
     const action_formula& right() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>((*this)[1]);
     }
 };
 
@@ -466,12 +465,12 @@ class forall: public action_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const action_formula& body() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>((*this)[1]);
     }
 };
 
@@ -527,12 +526,12 @@ class exists: public action_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const action_formula& body() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>((*this)[1]);
     }
 };
 
@@ -588,12 +587,12 @@ class at: public action_formula
 
     const action_formula& operand() const
     {
-      return atermpp::aterm_cast<const action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>((*this)[0]);
     }
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::aterm_cast<const data::data_expression>((*this)[1]);
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
     }
 };
 
@@ -649,7 +648,7 @@ class multi_action: public action_formula
 
     const process::action_list& actions() const
     {
-      return atermpp::aterm_cast<const process::action_list>((*this)[0]);
+      return atermpp::down_cast<process::action_list>((*this)[0]);
     }
 };
 
@@ -705,7 +704,7 @@ class untyped_multi_action: public action_formula
 
     const process::untyped_action_list& arguments() const
     {
-      return atermpp::aterm_cast<const process::untyped_action_list>((*this)[0]);
+      return atermpp::down_cast<process::untyped_action_list>((*this)[0]);
     }
 };
 

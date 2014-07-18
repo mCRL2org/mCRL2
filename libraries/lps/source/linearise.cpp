@@ -387,7 +387,7 @@ class specification_basic_type:public boost::noncopyable
          can occur when linearising using regular2 */
         if (is_variable(*l1) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
         {
-          const variable& v = core::static_down_cast<const variable&>(*l1);
+          const variable& v = atermpp::down_cast<variable>(*l1);
           result.push_front(v);
           occurs_set.insert(v);
         }
@@ -636,7 +636,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_action(t))
       {
-        return RewriteAction(atermpp::aterm_cast<process::action>(t));
+        return RewriteAction(atermpp::down_cast<process::action>(t));
       }
 
       if (is_process_instance_assignment(t))
@@ -1213,7 +1213,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_variable(t))
       {
-        const variable& v = core::static_down_cast<const variable&>(t);
+        const variable& v = atermpp::down_cast<variable>(t);
         if (vars_set.find(v)!=vars_set.end())
         {
           vars_result_set.insert(v);
@@ -1245,7 +1245,7 @@ class specification_basic_type:public boost::noncopyable
 
       assert(is_application(t));
 
-      const application& a=atermpp::aterm_cast<const application>(t);
+      const application& a=atermpp::down_cast<const application>(t);
       filter_vars_by_term(a.head(),vars_set,vars_result_set);
       filter_vars_by_termlist(a.begin(),a.end(),vars_set,vars_result_set);
     }
@@ -1320,7 +1320,7 @@ class specification_basic_type:public boost::noncopyable
       const std::set < variable >& vars_set,
       std::set < variable >& vars_result_set)
     {
-      const data_expression_list& l=atermpp::aterm_cast<data_expression_list>(parameters);
+      const data_expression_list& l=atermpp::container_cast<data_expression_list>(parameters);
       filter_vars_by_termlist(l.begin(),l.end(),vars_set,vars_result_set);
       for (assignment_list::const_iterator i=assignments.begin();
            i!=assignments.end(); ++i)
@@ -1704,7 +1704,7 @@ class specification_basic_type:public boost::noncopyable
 
           if (replacelhs)
           {
-            lhs = core::static_down_cast<const variable&>(sigma(lhs));
+            lhs = atermpp::down_cast<variable>(sigma(lhs));
           }
           if (replacerhs)
           {
@@ -1735,7 +1735,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (replacelhs)
       {
-        lhs = core::static_down_cast<const data::variable&>(sigma(lhs));
+        lhs = atermpp::down_cast<data::variable>(sigma(lhs));
       }
       if (replacerhs)
       {
@@ -1894,7 +1894,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance(p))
       {
         assert(0);
-        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(p));
+        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(p));
 
         size_t n=objectIndex(q.identifier());
         const variable_list parameters=objectdata[n].parameters;
@@ -2548,7 +2548,7 @@ class specification_basic_type:public boost::noncopyable
       {
         assert(0);
         // return body;
-        return transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(body));
+        return transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(body));
       }
 
       if (is_process_instance_assignment(body))
@@ -2837,7 +2837,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_action(sequence)||is_process_instance_assignment(sequence))
       {
-        result.push_back(core::static_down_cast<const process_instance_assignment&>(sequence));
+        result.push_back(atermpp::down_cast<process_instance_assignment>(sequence));
         return;
       }
 
@@ -2846,8 +2846,8 @@ class specification_basic_type:public boost::noncopyable
         const process_expression first=seq(sequence).left();
         if (is_process_instance_assignment(first))
         {
-          result.push_back(core::static_down_cast<const process_instance_assignment&>(first));
-          size_t n=objectIndex(core::static_down_cast<const process_instance_assignment&>(first).identifier());
+          result.push_back(atermpp::down_cast<process_instance_assignment>(first));
+          size_t n=objectIndex(atermpp::down_cast<process_instance_assignment>(first).identifier());
           if (objectdata[n].canterminate)
           {
             extract_names(seq(sequence).right(),result);
@@ -2953,7 +2953,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_seq(t))
       {
-        const process_instance_assignment firstproc=core::static_down_cast<const process_instance_assignment&>(seq(t).left());
+        const process_instance_assignment firstproc=atermpp::down_cast<process_instance_assignment>(seq(t).left());
         size_t n=objectIndex(firstproc.identifier());
         const assignment_list first_assignment=argscollect_regular2(firstproc,vl);
         if (objectdata[n].canterminate)
@@ -3290,7 +3290,7 @@ class specification_basic_type:public boost::noncopyable
                single = in `mode=mCRL' is important, otherwise crash
                I do not understand the reason for this at this moment
                JFG (9/5/2000) */
-          return transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(body));
+          return transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(body));
         }
 
         const size_t n=objectIndex(t);
@@ -3609,7 +3609,7 @@ class specification_basic_type:public boost::noncopyable
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         sigma[var]=var2;
         variables_occurring_in_rhs_of_sigma.insert(var2);
-        data_expression_list templist=data::replace_free_variables(aterm_cast<data_expression_list>(objectdata[n].parameters), sigma);
+        data_expression_list templist=data::replace_free_variables(atermpp::container_cast<data_expression_list>(objectdata[n].parameters), sigma);
         objectdata[n].parameters=variable_list(templist);
         process_expression tempvar=substitute_pCRLproc(objectdata[n].processbody, sigma,variables_occurring_in_rhs_of_sigma);
         objectdata[n].processbody=tempvar;
@@ -3841,7 +3841,7 @@ class specification_basic_type:public boost::noncopyable
 
     bool is_global_variable(const data_expression& d) const
     {
-      return is_variable(d) && global_variables.count(core::static_down_cast<const variable&>(d)) > 0;
+      return is_variable(d) && global_variables.count(atermpp::down_cast<variable>(d)) > 0;
     }
 
     data_expression getvar(const variable var,
@@ -4056,13 +4056,13 @@ class specification_basic_type:public boost::noncopyable
         }
         else
         {
-          return getvar(core::static_down_cast<const variable&>(t), stack);
+          return getvar(atermpp::down_cast<variable>(t), stack);
         }
       }
 
       if (is_application(t))
       {
-        const application&a=atermpp::aterm_cast<const application>(t);
+        const application&a=atermpp::down_cast<application>(t);
         return application(
                  adapt_term_to_stack(a.head(),stack,vars),
                  adapt_termlist_to_stack(a.begin(),a.end(),stack,vars));
@@ -4328,7 +4328,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_seq(t))
       {
-        const process_instance_assignment process=core::static_down_cast<const process_instance_assignment&>(seq(t).left());
+        const process_instance_assignment process=atermpp::down_cast<process_instance_assignment>(seq(t).left());
         const process_expression process2=seq(t).right();
         const process_identifier procId=process.identifier();
         const assignment_list t1=process.assignments();
@@ -6584,7 +6584,7 @@ class specification_basic_type:public boost::noncopyable
 
 
         if ((is_allow && allow_(allowlist,multiaction)) ||
-             (!is_allow && !encap(aterm_cast<identifier_string_list>(allowlist),multiaction)))
+             (!is_allow && !encap(deprecated_cast<identifier_string_list>(allowlist),multiaction)))
         {
           action_summands.push_back(smmnd);
         }
@@ -7397,7 +7397,7 @@ class specification_basic_type:public boost::noncopyable
           {
             continue;
           }
-          if (is_block && encap(aterm_cast<identifier_string_list>(allowlist),multiaction))
+          if (is_block && encap(deprecated_cast<identifier_string_list>(allowlist),multiaction))
           {
             continue;
           }
@@ -7454,7 +7454,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_variable(actiontime))
       {
-        const variable& t = core::static_down_cast<const variable&>(actiontime);
+        const variable& t = atermpp::down_cast<variable>(actiontime);
         if (occursintermlist(t, data_expression_list(sumvars)) && !occursinterm(t, condition))
         {
           return true;
@@ -7590,7 +7590,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list condition_list;
       std::vector < variable_list> renamings_pars;
       std::vector < data_expression_list> renamings_args;
-      const variable& t = core::static_down_cast<const variable&>(timevariable); // why has timevariable the wrong type?
+      const variable& t = atermpp::down_cast<variable>(timevariable); // why has timevariable the wrong type?
       for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
            i!=deadlock_summands.end(); ++i)
       {
@@ -7883,7 +7883,7 @@ class specification_basic_type:public boost::noncopyable
           {
             continue;
           }
-          if (is_block && encap(aterm_cast<identifier_string_list>(allowlist),multiaction1))
+          if (is_block && encap(deprecated_cast<identifier_string_list>(allowlist),multiaction1))
           {
             continue;
           }
@@ -7988,7 +7988,7 @@ class specification_basic_type:public boost::noncopyable
           {
             continue;
           }
-          if (is_block && encap(aterm_cast<identifier_string_list>(allowlist),multiaction2))
+          if (is_block && encap(deprecated_cast<identifier_string_list>(allowlist),multiaction2))
           {
             continue;
           }
@@ -8067,7 +8067,7 @@ class specification_basic_type:public boost::noncopyable
             {
               continue;
             }
-            if (is_block && encap(aterm_cast<identifier_string_list>(allowlist),multiaction3))
+            if (is_block && encap(deprecated_cast<identifier_string_list>(allowlist),multiaction3))
             {
               continue;
             }
@@ -9019,7 +9019,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance(t))
       {
         transform_process_arguments(process_instance(t).identifier(),visited_processes);
-        return transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(t),bound_variables);
+        return transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(t),bound_variables);
       }
       if (is_process_instance_assignment(t))
       {
@@ -9035,7 +9035,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_hide(t))
       {
         return hide(hide(t).hide_set(),
-                    transform_process_arguments_body(core::static_down_cast<const process_instance&>(hide(t).operand()),bound_variables,visited_processes));
+                    transform_process_arguments_body(atermpp::down_cast<process_instance>(hide(t).operand()),bound_variables,visited_processes));
       }
       if (is_rename(t))
       {
@@ -9355,7 +9355,7 @@ class specification_basic_type:public boost::noncopyable
       else if (is_process_instance(t))
       {
         assert(0);
-        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(t));
+        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(t));
         assert(check_valid_process_instance_assignment(split_process(u.identifier(),visited_id,visited_proc),
                  u.assignments()));
         result=process_instance_assignment(
@@ -9598,7 +9598,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   s.insert(sort_real::real_());
   data_spec.add_context_sorts(s);
 
-  specification_basic_type spec(aterm_cast<process::action_label_list>(type_checked_spec.action_labels()),
+  specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
                                 data::variable_list(type_checked_spec.global_variables().begin(),type_checked_spec.global_variables().end()),
                                 data_spec,

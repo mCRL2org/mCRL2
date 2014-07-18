@@ -244,7 +244,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
       data::data_expression_list e_copy = e;
       data::detail::rewrite_container(e_copy, super::R, sigma);
 
-      data::data_expression_list di_copy = atermpp::aterm_cast<data::data_expression_list>(vl);
+      data::data_expression_list di_copy = atermpp::container_cast<data::data_expression_list>(vl);
       di_copy = data::replace_free_variables(di_copy, sigma_i);
 
       data::data_expression c = make_condition(di_copy, d_copy);

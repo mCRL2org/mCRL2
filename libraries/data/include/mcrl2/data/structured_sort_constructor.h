@@ -52,23 +52,23 @@ class structured_sort_constructor: public atermpp::aterm_appl
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
+    structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
     {}
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const structured_sort_constructor_argument_list& arguments() const
     {
-      return atermpp::aterm_cast<const structured_sort_constructor_argument_list>((*this)[1]);
+      return atermpp::down_cast<structured_sort_constructor_argument_list>((*this)[1]);
     }
 
     const core::identifier_string& recogniser() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[2]);
+      return atermpp::down_cast<core::identifier_string>((*this)[2]);
     }
 //--- start user section structured_sort_constructor ---//
     friend class structured_sort;
@@ -110,13 +110,13 @@ class structured_sort_constructor: public atermpp::aterm_appl
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort_constructor(const std::string& name, const structured_sort_constructor_argument_list& arguments, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
+    structured_sort_constructor(const std::string& name, const structured_sort_constructor_argument_list& arguments, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), arguments, core::empty_identifier_string())
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort_constructor(const std::string& name, const Container& arguments, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
+    structured_sort_constructor(const std::string& name, const Container& arguments, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::empty_identifier_string())
     {}
 
@@ -137,7 +137,7 @@ class structured_sort_constructor: public atermpp::aterm_appl
     structured_sort_constructor(const char(&name)[S],
                                 const Container& arguments,
                                 const char(&recogniser)[S0],
-                                typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+                                typename atermpp::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
     {}
 

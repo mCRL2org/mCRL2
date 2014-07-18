@@ -56,7 +56,7 @@ namespace detail {
     propositional_variable_instantiation get_initial_state()
     {
       //std::clog << "get_initial_state()" << std::endl;
-      propositional_variable_instantiation phi = core::static_down_cast<const propositional_variable_instantiation&>(rewrite_and_simplify_expression(m_pbes.initial_state()));
+      propositional_variable_instantiation phi = atermpp::down_cast<propositional_variable_instantiation>(rewrite_and_simplify_expression(m_pbes.initial_state()));
       //std::clog << "  phi = " << phi << std::endl;
       return phi;
     }

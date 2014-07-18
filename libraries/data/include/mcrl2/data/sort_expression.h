@@ -15,7 +15,6 @@
 #include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/function_symbols.h"
@@ -88,11 +87,11 @@ class sort_expression: public atermpp::aterm_appl
     {
       if (is_function_sort(*this))
       {
-        return atermpp::aterm_cast<const sort_expression>((*this)[1]);
+        return atermpp::down_cast<const sort_expression>((*this)[1]);
       }
       else
       {
-        return atermpp::aterm_cast<const sort_expression>(*this);
+        return *this;
       }
     }
 //--- end user section sort_expression ---//

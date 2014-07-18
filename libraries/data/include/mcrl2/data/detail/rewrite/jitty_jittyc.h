@@ -35,7 +35,7 @@ inline sort_expression residual_sort(const sort_expression& s, size_t no_of_init
   while (no_of_initial_arguments > 0)
   {
     assert(is_function_sort(result));
-    const function_sort& sf = core::down_cast<function_sort>(result);
+    const function_sort& sf = atermpp::down_cast<function_sort>(result);
     assert(sf.domain().size()<=no_of_initial_arguments);
     no_of_initial_arguments=no_of_initial_arguments-sf.domain().size();
     result=sf.codomain();
@@ -52,14 +52,14 @@ inline bool get_argument_of_higher_order_term_helper(const application& t, size_
     const size_t arity = t.size();
     if (arity>i)
     {
-      result=atermpp::aterm_cast<data_expression>(t[i]);
+      result=t[i];
       return true;
     }
     // arity <=i
     i=i-arity;
     return false;
   }
-  if (get_argument_of_higher_order_term_helper(core::down_cast<application>(t.head()),i,result))
+  if (get_argument_of_higher_order_term_helper(atermpp::down_cast<application>(t.head()),i,result))
   {
     return true;
   }
@@ -83,7 +83,7 @@ inline data_expression get_argument_of_higher_order_term(const data_expression& 
 #ifndef NDEBUG // avoid a warning.
   bool b=
 #endif
-          get_argument_of_higher_order_term_helper(core::down_cast<application>(t),i,result);
+          get_argument_of_higher_order_term_helper(atermpp::down_cast<application>(t),i,result);
   assert(b);
   return result;
 }
@@ -110,7 +110,7 @@ inline size_t recursive_number_of_args(const data_expression& t)
     return 0;
   }
 
-  const application& ta = core::down_cast<application>(t);
+  const application& ta = atermpp::down_cast<application>(t);
   const size_t result=ta.size()+recursive_number_of_args(ta.head());
   return result;
 }
@@ -120,11 +120,11 @@ inline const function_symbol& get_function_symbol_of_head(const data_expression&
 {
   if (is_function_symbol(t))
   {
-    return atermpp::aterm_cast<function_symbol>(t);
+    return atermpp::down_cast<function_symbol>(t);
   }
   assert(t.type_is_appl());
 
-  const application& ta = core::down_cast<application>(t);
+  const application& ta = atermpp::down_cast<application>(t);
   return get_function_symbol_of_head(ta.head());
 }
 
@@ -133,7 +133,7 @@ inline const data_expression& get_nested_head(const data_expression& t)
 {
   if (is_application(t))
   {
-    const application& ta = core::down_cast<application>(t);
+    const application& ta = atermpp::down_cast<application>(t);
     return get_nested_head(ta.head());
   }
 
@@ -145,7 +145,7 @@ inline const data_expression replace_nested_head(const data_expression& t, const
 {
   if (is_application(t))
   {
-    const application& ta = core::down_cast<application>(t);
+    const application& ta = atermpp::down_cast<application>(t);
     return application(replace_nested_head(ta.head(),head),ta.begin(),ta.end());
   }
 
@@ -163,11 +163,11 @@ inline const variable& get_variable_of_head(const data_expression& t)
 {
   if (is_variable(t))
   {
-    return atermpp::aterm_cast<variable>(t);
+    return atermpp::down_cast<variable>(t);
   }
   assert(t.type_is_appl());
 
-  return get_variable_of_head(atermpp::aterm_cast<data_expression>(t[0]));
+  return get_variable_of_head(atermpp::down_cast<data_expression>(t[0]));
 }
 
 inline bool head_is_variable(const data_expression& t)
@@ -180,7 +180,7 @@ inline bool head_is_variable(const data_expression& t)
   }
   if (is_variable(t))
   {
-    // v=atermpp::aterm_cast<variable>(t);
+    // v=atermpp::down_cast<variable>(t);
     return true;
   }
   if (is_abstraction(t))
@@ -188,7 +188,7 @@ inline bool head_is_variable(const data_expression& t)
     return false;
   }
   // shape is application(t1,...,tn)
-  const application& ta = core::down_cast<application>(t);
+  const application& ta = atermpp::down_cast<application>(t);
   return head_is_variable(ta.head());
 }
 
@@ -197,13 +197,13 @@ inline bool head_is_function_symbol(const data_expression& t, function_symbol& h
 {
   if (is_application(t))
   {
-    const application& ta = core::down_cast<application>(t);
+    const application& ta = atermpp::down_cast<application>(t);
     return head_is_function_symbol(ta.head(),head);
   }
 
   if (is_function_symbol(t))
   {
-    head=core::down_cast<function_symbol>(t);
+    head=atermpp::down_cast<function_symbol>(t);
     return true;
   }
 

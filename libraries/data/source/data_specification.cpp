@@ -489,21 +489,21 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   // specification cannot deal properly.
 
   // Note backwards compatibility measure: alias is no longer a sort_expression
-  atermpp::term_list<atermpp::aterm_appl> term_sorts(atermpp::aterm_cast<atermpp::aterm_appl>(term[0])[0]);
-  data::function_symbol_list              term_constructors(atermpp::aterm_cast<atermpp::aterm_appl>(term[1])[0]);
-  data::function_symbol_list              term_mappings(atermpp::aterm_cast<atermpp::aterm_appl>(term[2])[0]);
-  data::data_equation_list                term_equations(atermpp::aterm_cast<atermpp::aterm_appl>(term[3])[0]);
+  atermpp::term_list<atermpp::aterm_appl> term_sorts(atermpp::down_cast<atermpp::aterm_appl>(term[0])[0]);
+  data::function_symbol_list              term_constructors(atermpp::down_cast<atermpp::aterm_appl>(term[1])[0]);
+  data::function_symbol_list              term_mappings(atermpp::down_cast<atermpp::aterm_appl>(term[2])[0]);
+  data::data_equation_list                term_equations(atermpp::down_cast<atermpp::aterm_appl>(term[3])[0]);
 
   // Store the sorts and aliases.
   for (auto i = term_sorts.begin(); i != term_sorts.end(); ++i)
   {
     if (data::is_alias(*i)) // Compatibility with legacy code
     {
-      add_alias(atermpp::aterm_cast<data::alias>(*i));
+      add_alias(atermpp::down_cast<data::alias>(*i));
     }
     else
     {
-      add_sort(atermpp::aterm_cast<const sort_expression>(*i));
+      add_sort(atermpp::down_cast<const sort_expression>(*i));
     }
   }
 

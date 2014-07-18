@@ -479,7 +479,7 @@ class enumerator_algorithm
 
       if (data::is_function_sort(sort))
       {
-        const function_sort& function = atermpp::aterm_cast<function_sort>(sort);
+        const function_sort& function = atermpp::down_cast<function_sort>(sort);
         if (dataspec.is_certainly_finite(function))
         {
           data_expression_vector function_sorts;
@@ -526,7 +526,7 @@ class enumerator_algorithm
       }
       else if (sort_fset::is_fset(sort))
       {
-        const container_sort& fset = atermpp::aterm_cast<container_sort>(sort);
+        const container_sort& fset = atermpp::down_cast<container_sort>(sort);
         if (dataspec.is_certainly_finite(fset.element_sort()))
         {
           data_expression_vector set_elements;
@@ -572,7 +572,7 @@ class enumerator_algorithm
             auto const& constructor = *i;
             if (data::is_function_sort(constructor.sort()))
             {
-              auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
+              auto const& domain = atermpp::down_cast<data::function_sort>(constructor.sort()).domain();
               data::variable_list y(domain.begin(), domain.end(), sort_name_generator<IdentifierGenerator>(id_generator));
               // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
               data_expression cy = datar(application(constructor, y.begin(), y.end()), sigma);
@@ -725,7 +725,9 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
                 std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                 bool throw_exceptions = false)
       : super(R, dataspec, datar, id_generator, max_count, throw_exceptions)
-    {}
+    {
+      id_generator.clear();
+    }
 
     /// \brief Returns an iterator that enumerates solutions for variables that satisfy a condition
     /// \param E An enumerator

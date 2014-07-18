@@ -82,7 +82,7 @@ struct index_traits
   static inline
   std::size_t index(const Variable& x)
   {
-    const atermpp::aterm_int& i = atermpp::aterm_cast<const atermpp::aterm_int>(x[N]);
+    const atermpp::aterm_int& i = atermpp::down_cast<const atermpp::aterm_int>(x[N]);
     return i.value();
   }
 

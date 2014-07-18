@@ -383,7 +383,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -395,7 +395,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return atermpp::aterm_cast<const application >(e)[1];
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -407,7 +407,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_not_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for bool_

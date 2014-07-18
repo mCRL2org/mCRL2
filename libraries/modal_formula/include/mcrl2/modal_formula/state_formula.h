@@ -17,7 +17,6 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/function_symbols.h"
@@ -245,7 +244,7 @@ class not_: public state_formula
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[0]);
+      return atermpp::down_cast<state_formula>((*this)[0]);
     }
 };
 
@@ -301,12 +300,12 @@ class and_: public state_formula
 
     const state_formula& left() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[0]);
+      return atermpp::down_cast<state_formula>((*this)[0]);
     }
 
     const state_formula& right() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -362,12 +361,12 @@ class or_: public state_formula
 
     const state_formula& left() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[0]);
+      return atermpp::down_cast<state_formula>((*this)[0]);
     }
 
     const state_formula& right() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -423,12 +422,12 @@ class imp: public state_formula
 
     const state_formula& left() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[0]);
+      return atermpp::down_cast<state_formula>((*this)[0]);
     }
 
     const state_formula& right() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -484,12 +483,12 @@ class forall: public state_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const state_formula& body() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -545,12 +544,12 @@ class exists: public state_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const state_formula& body() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -606,12 +605,12 @@ class must: public state_formula
 
     const regular_formulas::regular_formula& formula() const
     {
-      return atermpp::aterm_cast<const regular_formulas::regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formulas::regular_formula>((*this)[0]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -667,12 +666,12 @@ class may: public state_formula
 
     const regular_formulas::regular_formula& formula() const
     {
-      return atermpp::aterm_cast<const regular_formulas::regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formulas::regular_formula>((*this)[0]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -774,7 +773,7 @@ class yaled_timed: public state_formula
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::aterm_cast<const data::data_expression>((*this)[0]);
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 };
 
@@ -876,7 +875,7 @@ class delay_timed: public state_formula
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::aterm_cast<const data::data_expression>((*this)[0]);
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 };
 
@@ -937,12 +936,12 @@ class variable: public state_formula
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -1003,17 +1002,17 @@ class nu: public state_formula
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::assignment_list>((*this)[1]);
+      return atermpp::down_cast<data::assignment_list>((*this)[1]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[2]);
+      return atermpp::down_cast<state_formula>((*this)[2]);
     }
 };
 
@@ -1074,17 +1073,17 @@ class mu: public state_formula
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::assignment_list>((*this)[1]);
+      return atermpp::down_cast<data::assignment_list>((*this)[1]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>((*this)[2]);
+      return atermpp::down_cast<state_formula>((*this)[2]);
     }
 };
 

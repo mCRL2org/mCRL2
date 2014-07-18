@@ -105,7 +105,7 @@ struct push_allow_map
 
   void insert(const process_expression& x, const allow_set& A, const process_instance& Q)
   {
-    data[atermpp::aterm_cast<process_instance>(x)].push_back(wnode(A, Q));
+    data[atermpp::down_cast<process_instance>(x)].push_back(wnode(A, Q));
   }
 
   void set_alphabet(const process_instance& x, const allow_set& A, const multi_action_name_set& alphabet)

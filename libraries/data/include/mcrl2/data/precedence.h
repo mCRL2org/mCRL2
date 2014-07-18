@@ -49,7 +49,7 @@ namespace detail {
   {
     while (is_numeric_cast(x))
     {
-    	x = *atermpp::aterm_cast<application>(x).begin();
+    	x = *atermpp::down_cast<application>(x).begin();
     }
     return x;
   }

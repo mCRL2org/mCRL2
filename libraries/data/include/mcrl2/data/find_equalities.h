@@ -44,7 +44,7 @@ struct find_equalities_expression
       equalities[lhs].insert(rhs);
       if (is_variable(rhs))
       {
-        equalities[lhs].insert(atermpp::aterm_cast<variable>(rhs));
+        equalities[lhs].insert(atermpp::down_cast<variable>(rhs));
       }
     }
     else
@@ -52,7 +52,7 @@ struct find_equalities_expression
       inequalities[lhs].insert(rhs);
       if (is_variable(rhs))
       {
-        inequalities[lhs].insert(atermpp::aterm_cast<variable>(rhs));
+        inequalities[lhs].insert(atermpp::down_cast<variable>(rhs));
       }
     }
   }
@@ -211,13 +211,13 @@ struct find_equalities_traverser: public Traverser<Derived>
     {
       auto const& left = binary_left(x);
       auto const& right = binary_right(x);
-      if (is_variable(left) && !search_free_variable(right, atermpp::aterm_cast<variable>(left)))
+      if (is_variable(left) && !search_free_variable(right, atermpp::down_cast<variable>(left)))
       {
-        push(find_equalities_expression(atermpp::aterm_cast<variable>(left), right, true));
+        push(find_equalities_expression(atermpp::down_cast<variable>(left), right, true));
       }
-      else if (is_variable(right) && !search_free_variable(left, atermpp::aterm_cast<variable>(right)))
+      else if (is_variable(right) && !search_free_variable(left, atermpp::down_cast<variable>(right)))
       {
-        push(find_equalities_expression(atermpp::aterm_cast<variable>(right), left, true));
+        push(find_equalities_expression(atermpp::down_cast<variable>(right), left, true));
       }
       else
       {
@@ -228,13 +228,13 @@ struct find_equalities_traverser: public Traverser<Derived>
     {
       auto const& left = binary_left(x);
       auto const& right = binary_right(x);
-      if (is_variable(left) && !search_free_variable(atermpp::aterm_cast<variable>(right), atermpp::aterm_cast<variable>(left)))
+      if (is_variable(left) && !search_free_variable(atermpp::down_cast<variable>(right), atermpp::down_cast<variable>(left)))
       {
-        push(find_equalities_expression(atermpp::aterm_cast<variable>(left), right, false));
+        push(find_equalities_expression(atermpp::down_cast<variable>(left), right, false));
       }
-      else if (is_variable(right) && !search_free_variable(left, atermpp::aterm_cast<variable>(right)))
+      else if (is_variable(right) && !search_free_variable(left, atermpp::down_cast<variable>(right)))
       {
-        push(find_equalities_expression(atermpp::aterm_cast<variable>(right), left, false));
+        push(find_equalities_expression(atermpp::down_cast<variable>(right), left, false));
       }
       else
       {

@@ -78,8 +78,15 @@ std::set<core::identifier_string> find_identifiers(const process::process_specif
 //--- end generated process overloads ---//
 
 // manually added template function overloads
-process::action normalize_sorts(const process::action& x, const data::data_specification& dataspec) { return atermpp::aterm_cast<process::action>(process::normalize_sorts<process::process_expression>(atermpp::aterm_cast<process::process_expression>(x), dataspec)); }
-process::action translate_user_notation(const process::action& x) { return atermpp::aterm_cast<process::action>(process::translate_user_notation<process::process_expression>(atermpp::aterm_cast<process::process_expression>(x))); }
+action normalize_sorts(const action& x, const data::data_specification& dataspec)
+{
+  return process::normalize_sorts<action>(x, dataspec);
+}
+
+process::action translate_user_notation(const action& x)
+{
+  return process::translate_user_notation<action>(x);
+}
 
 static bool register_hooks()
 {

@@ -322,7 +322,7 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
 
   data_expression operator()(const data::where_clause& x)
   {
-    data::assignment_list assignments = atermpp::aterm_cast<data::assignment_list>(x.declarations());
+    data::assignment_list assignments = atermpp::container_cast<data::assignment_list>(x.declarations());
     std::vector<data::variable> tmp;
     for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
     {
@@ -400,7 +400,7 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return core::static_down_cast<const T&>(data::detail::make_replace_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost)(x));
+  return data::detail::make_replace_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
@@ -420,7 +420,7 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return core::static_down_cast<const T&>(data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(sigma, innermost)(x));
+  return data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
@@ -480,7 +480,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x));
+  return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x);
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -506,7 +506,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables));
+  return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 //--- end generated data replace code ---//
 
@@ -542,7 +542,7 @@ T replace_variables_capture_avoiding(const T& x,
   std::multiset<data::variable> V;
   data::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  return core::static_down_cast<const T&>(data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma, V)(x));
+  return data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
 //--- end generated data replace_capture_avoiding code ---//
 

@@ -418,7 +418,7 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
   // For a function sort, add the equation f==g iff forall x.f(x)==g(x). This equation is not in the Specification and Analysis of Communicating Systems of 2014.
   if (is_function_sort(s))
   {
-    const function_sort& fs=core::down_cast<function_sort>(s);
+    const function_sort& fs = atermpp::down_cast<function_sort>(s);
     variable_vector xvars,yvars;
     data_expression rhs=sort_bool::true_();
     size_t index=0;

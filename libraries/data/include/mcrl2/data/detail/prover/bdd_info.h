@@ -29,7 +29,7 @@ class BDD_Info
   protected:
     const mcrl2::data::data_expression& argument(const mcrl2::data::data_expression& x, std::size_t n) const
     {
-      const mcrl2::data::application& a = atermpp::aterm_cast<mcrl2::data::application>(x);
+      const mcrl2::data::application& a = atermpp::down_cast<mcrl2::data::application>(x);
       mcrl2::data::application::const_iterator i = a.begin();
       std::advance(i, n);
       return *i;

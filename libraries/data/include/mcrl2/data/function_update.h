@@ -108,7 +108,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -120,7 +120,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return atermpp::aterm_cast<const application >(e)[1];
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -132,7 +132,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return atermpp::aterm_cast<const application >(e)[2];
+        return atermpp::down_cast<const application >(e)[2];
       }
 
       /// \brief Give all system defined equations for function_update

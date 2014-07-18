@@ -82,24 +82,24 @@ class linear_process
       assert(core::detail::check_term_LinearProcess(lps));
       atermpp::aterm_appl::iterator i = lps.begin();
       m_process_parameters = data::variable_list(*i++);
-      atermpp::aterm_list summands = atermpp::aterm_cast<atermpp::aterm_list>(*i);
+      atermpp::aterm_list summands = atermpp::down_cast<atermpp::aterm_list>(*i);
       for (atermpp::aterm_list::iterator j = summands.begin(); j != summands.end(); ++j)
       {
         assert(core::detail::check_rule_LinearProcessSummand(*j));
-        atermpp::aterm_appl t = atermpp::aterm_cast<atermpp::aterm_appl>(*j);
+        atermpp::aterm_appl t = atermpp::down_cast<atermpp::aterm_appl>(*j);
 
-        data::variable_list summation_variables(atermpp::aterm_cast<atermpp::aterm_list>(t[0]));
+        data::variable_list summation_variables(atermpp::down_cast<atermpp::aterm_list>(t[0]));
         data::data_expression condition         = data::data_expression(t[1]);
         data::data_expression time              = data::data_expression(t[3]);
-        data::assignment_list assignments(atermpp::aterm_cast<atermpp::aterm_list>(t[4]));
-        if (atermpp::aterm_cast<atermpp::aterm_appl>(t[2]).function() == core::detail::function_symbols::Delta)
+        data::assignment_list assignments(atermpp::down_cast<atermpp::aterm_list>(t[4]));
+        if (atermpp::down_cast<atermpp::aterm_appl>(t[2]).function() == core::detail::function_symbols::Delta)
         {
           m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));
         }
         else
         {
-          assert(lps::is_multi_action(atermpp::aterm_cast<const atermpp::aterm_appl>(t[2])));
-          process::action_list actions(atermpp::aterm_cast<atermpp::aterm_list>(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])[0]));
+          assert(lps::is_multi_action(atermpp::down_cast<const atermpp::aterm_appl>(t[2])));
+          process::action_list actions(atermpp::down_cast<atermpp::aterm_list>(atermpp::down_cast<atermpp::aterm_appl>(t[2])[0]));
           m_action_summands.push_back(action_summand(summation_variables, condition, multi_action(actions, time), assignments));
         }
       }

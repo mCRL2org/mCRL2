@@ -206,7 +206,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
     if (is_process_instance(x.right()))
     {
-      const process_instance& q = core::static_down_cast<const process_instance&>(x.right());
+      const process_instance& q = atermpp::down_cast<process_instance>(x.right());
       if (q.identifier() != eqn.identifier())
       {
         throw non_linear_process(process::pp(q) + " has an unexpected identifier");
@@ -214,7 +214,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
     else if (is_process_instance_assignment(x.right()))
     {
-      const process_instance_assignment& q = core::static_down_cast<const process_instance_assignment&>(x.right());
+      const process_instance_assignment& q = atermpp::down_cast<process_instance_assignment>(x.right());
       if (q.identifier() != eqn.identifier())
       {
         throw non_linear_process(process::pp(q) + " has an unexpected identifier");

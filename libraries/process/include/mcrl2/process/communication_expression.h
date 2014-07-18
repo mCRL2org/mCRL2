@@ -54,12 +54,12 @@ class communication_expression: public atermpp::aterm_appl
 
     const action_name_multiset& action_name() const
     {
-      return atermpp::aterm_cast<const action_name_multiset>((*this)[0]);
+      return atermpp::down_cast<action_name_multiset>((*this)[0]);
     }
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[1]);
+      return atermpp::down_cast<core::identifier_string>((*this)[1]);
     }
 };
 

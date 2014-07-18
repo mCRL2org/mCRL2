@@ -95,7 +95,7 @@ make_rewrite_pbes_expressions_with_substitution_builder(const Rewriter& R, Subst
 /// \param R a rewriter
 template <typename T, typename Rewriter>
 void rewrite(T& x,
-             const Rewriter& R,
+             Rewriter R,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
@@ -108,11 +108,11 @@ void rewrite(T& x,
 /// \return the rewrite result
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
-          const Rewriter& R,
+          Rewriter R,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return core::static_down_cast<const T&>(data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R)(x));
+  return data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R)(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -121,7 +121,7 @@ T rewrite(const T& x,
 /// \param sigma a substitution
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
-             const Rewriter& R,
+             Rewriter R,
              const Substitution& sigma,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
@@ -136,12 +136,12 @@ void rewrite(T& x,
 /// \return the rewrite result
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
-          const Rewriter& R,
+          Rewriter R,
           const Substitution& sigma,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return core::static_down_cast<const T&>(data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma)(x));
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma)(x);
 }
 //--- end generated pbes_system rewrite code ---//
 

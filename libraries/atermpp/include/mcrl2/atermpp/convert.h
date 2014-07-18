@@ -27,7 +27,7 @@ const TargetContainer& convert(const SourceContainer &l,
       typename std::enable_if<std::is_base_of<atermpp::aterm, TargetContainer>::value>::type* = 0,
       typename std::enable_if<std::is_base_of<atermpp::aterm, SourceContainer>::value>::type* = 0)
 {
-  return aterm_cast<const TargetContainer>(l);
+  return down_cast<const TargetContainer>(l);
 }
 
 /// \brief Convert container with expressions to a new container with expressions

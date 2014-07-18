@@ -39,37 +39,37 @@ inline bool is_abstraction(const atermpp::aterm_appl& x)
 /// \brief Returns true if the term t is a lambda abstraction
 inline bool is_lambda(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Lambda;
+  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Lambda;
 }
 
 /// \brief Returns true if the term t is a universal quantification
 inline bool is_forall(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Forall;
+  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Forall;
 }
 
 /// \brief Returns true if the term t is an existential quantification
 inline bool is_exists(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Exists;
+  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Exists;
 }
 
 /// \brief Returns true if the term t is a set comprehension
 inline bool is_set_comprehension(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::SetComp;
+  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::SetComp;
 }
 
 /// \brief Returns true if the term t is a bag comprehension
 inline bool is_bag_comprehension(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::BagComp;
+  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::BagComp;
 }
 
 /// \brief Returns true if the term t is a set/bag comprehension.
 inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm_appl& x)
 {
-  return is_abstraction(x) && atermpp::aterm_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::UntypedSetBagComp;
+  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::UntypedSetBagComp;
 }
 
 /// \brief Returns true if the term t is a function symbol
@@ -210,7 +210,7 @@ bool is_data_expression(const atermpp::aterm_appl& x)
 /// \note This function uses implementation details of the iterator type
 /// and hence is sometimes efficient than copying all elements of the list.
 template < typename Container >
-inline data_expression_list make_data_expression_list(Container const& r, typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
+inline data_expression_list make_data_expression_list(Container const& r, typename atermpp::enable_if_container< Container, data_expression >::type* = 0)
 {
   return data_expression_list(r.begin(),r.end());
 }

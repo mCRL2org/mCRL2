@@ -53,19 +53,19 @@ struct index_adder
   {
     if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())
     {
-      const data::variable& y = atermpp::aterm_cast<const data::variable>(x);
+      const data::variable& y = atermpp::down_cast<const data::variable>(x);
       std::size_t index = core::index_traits<data::variable, data::variable_key_type, 2>::insert(std::make_pair(y.name(), y.sort()));
       return atermpp::aterm_appl(core::detail::function_symbol_DataVarId(), x[0], x[1], atermpp::aterm_int(index));
     }
     else if (x.function() == core::detail::function_symbol_OpIdNoIndex())
     {
-      const data::function_symbol& y = atermpp::aterm_cast<const data::function_symbol>(x);
+      const data::function_symbol& y = atermpp::down_cast<const data::function_symbol>(x);
       std::size_t index = core::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::insert(std::make_pair(y.name(), y.sort()));
       return atermpp::aterm_appl(core::detail::function_symbol_OpId(), x[0], x[1], atermpp::aterm_int(index));
     }
     else if (x.function() == core::detail::function_symbol_PropVarInstNoIndex())
     {
-      const pbes_system::propositional_variable_instantiation& y = atermpp::aterm_cast<const pbes_system::propositional_variable_instantiation>(x);
+      const pbes_system::propositional_variable_instantiation& y = atermpp::down_cast<const pbes_system::propositional_variable_instantiation>(x);
       std::size_t index = core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(y.name(), y.parameters()));
       return atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(), x[0], x[1], atermpp::aterm_int(index));
     }

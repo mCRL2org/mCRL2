@@ -54,14 +54,14 @@ class data_property_map
 
     /// \brief Add start/end separators for non-set container types
     template < typename Container >
-    static std::string add_separators(std::string const& c, typename std::enable_if< atermpp::detail::is_set< Container >::value >::type* = 0)
+    static std::string add_separators(std::string const& c, typename std::enable_if< atermpp::is_set< Container >::value >::type* = 0)
     {
       return "[" + c + "]";
     }
 
     /// \brief Add start/end separators for set container types
     template < typename Container >
-    static std::string add_separators(std::string const& c, typename std::enable_if< !atermpp::detail::is_set< Container >::value >::type* = 0)
+    static std::string add_separators(std::string const& c, typename std::enable_if< !atermpp::is_set< Container >::value >::type* = 0)
     {
       return "{" + c + "}";
     }
@@ -95,7 +95,7 @@ class data_property_map
     }
 
     template < typename Container >
-    std::string print(const Container& v, typename std::enable_if< atermpp::detail::is_container< Container >::value >::type* = 0) const
+    std::string print(const Container& v, typename atermpp::enable_if_container< Container >::type* = 0) const
     {
       std::set<std::string> elements;
 
@@ -108,7 +108,7 @@ class data_property_map
     }
 
     template < typename Container >
-    std::string print(const Container& v, bool print_separators, typename std::enable_if< atermpp::detail::is_container< Container >::value >::type* = 0) const
+    std::string print(const Container& v, bool print_separators, typename atermpp::enable_if_container< Container >::type* = 0) const
     {
       return (print_separators) ? add_separators< Container >(print(v)) : print(v);
     }

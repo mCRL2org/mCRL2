@@ -160,7 +160,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
   {
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
-    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
+    const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
     state_formulas::state_formula phi = x.operand();
 
     // traverse all transitions s --a--> t
@@ -179,7 +179,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
   {
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
-    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
+    const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
     state_formulas::state_formula phi = x.operand();
 
     // traverse all transitions s --a--> t

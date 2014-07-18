@@ -56,7 +56,7 @@ class process_initializer: public atermpp::aterm_appl
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::assignment_list>((*this)[0]);
+      return atermpp::down_cast<data::assignment_list>((*this)[0]);
     }
 //--- start user section process_initializer ---//
     /// \brief Returns the initial state of the LPS.
@@ -64,7 +64,7 @@ class process_initializer: public atermpp::aterm_appl
     /// \return The initial state of the LPS.
     data::data_expression_list state(const data::variable_list& process_parameters) const
     {
-      return data::replace_variables(atermpp::aterm_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
+      return data::replace_variables(atermpp::container_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
 //--- end user section process_initializer ---//
 };

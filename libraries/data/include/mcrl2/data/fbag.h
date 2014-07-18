@@ -959,7 +959,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_count_application(e) || is_in_application(e) || is_fbag2fset_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
-        return atermpp::aterm_cast<const application >(e)[1];
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -971,7 +971,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -983,7 +983,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
-        return atermpp::aterm_cast<const application >(e)[1];
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -995,7 +995,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
-        return atermpp::aterm_cast<const application >(e)[2];
+        return atermpp::down_cast<const application >(e)[2];
       }
 
       ///\brief Function for projecting out argument
@@ -1007,7 +1007,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
-        return atermpp::aterm_cast<const application >(e)[3];
+        return atermpp::down_cast<const application >(e)[3];
       }
 
       ///\brief Function for projecting out argument
@@ -1019,7 +1019,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_fset2fbag_application(e) || is_count_all_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1031,7 +1031,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_count_application(e) || is_in_application(e) || is_fbag2fset_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for fbag

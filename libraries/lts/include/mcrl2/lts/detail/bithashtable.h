@@ -90,7 +90,7 @@ class bit_hash_table
       {
         calc_hash_add(0x13ad3780,sh_a,sh_b,sh_c,sh_i);
         {
-          size_t len = atermpp::aterm_cast<atermpp::aterm_appl>(t).function().arity();
+          size_t len = atermpp::down_cast<atermpp::aterm_appl>(t).function().arity();
           for (size_t i=0; i<len; i++)
           {
             calc_hash_aterm(((atermpp::aterm_appl) t)[i],sh_a,sh_b,sh_c,sh_i);

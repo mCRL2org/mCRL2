@@ -186,7 +186,7 @@ static
 inline bool is_pair(const atermpp::aterm& t)
 {
   using namespace atermpp;
-  return atermpp::aterm_cast<aterm_appl>(t).function()==PAIR();
+  return atermpp::down_cast<aterm_appl>(t).function()==PAIR();
 }
 
 static size_t largest_power_of_2_smaller_than(size_t i)
@@ -211,8 +211,8 @@ void assign_variables_in_tree(
   using namespace atermpp;
   if (is_pair(t))
   {
-    assign_variables_in_tree(aterm_cast<atermpp::aterm_appl>(t)[0],var_iter,rewriter,sigma);
-    assign_variables_in_tree(aterm_cast<atermpp::aterm_appl>(t)[1],var_iter,rewriter,sigma);
+    assign_variables_in_tree(down_cast<atermpp::aterm_appl>(t)[0],var_iter,rewriter,sigma);
+    assign_variables_in_tree(down_cast<atermpp::aterm_appl>(t)[1],var_iter,rewriter,sigma);
   }
   else
   {
@@ -503,26 +503,26 @@ const atermpp::aterm_appl& gsMakeBESDummy()
 inline
 const bes_expression& true_()
 {
-  return atermpp::aterm_cast<const bes_expression>(gsMakeBESTrue());
+  return atermpp::down_cast<const bes_expression>(gsMakeBESTrue());
 }
 
 /// \brief Returns the expression false
 inline
 const bes_expression& false_()
 {
-  return atermpp::aterm_cast<const bes_expression>(gsMakeBESFalse());
+  return atermpp::down_cast<const bes_expression>(gsMakeBESFalse());
 }
 
 /// \brief Returns the expression dummy (???)
 inline
 const bes_expression& dummy()
 {
-  return atermpp::aterm_cast<const bes_expression>(gsMakeBESDummy());
+  return atermpp::down_cast<const bes_expression>(gsMakeBESDummy());
 }
 
 inline bes_expression and_(const bes_expression& b1, const bes_expression& b2)
 {
-  return atermpp::aterm_cast<bes_expression>(atermpp::aterm_appl(AFunBESAnd(), b1, b2));
+  return atermpp::down_cast<bes_expression>(atermpp::aterm_appl(AFunBESAnd(), b1, b2));
 }
 
 inline bes_expression and_optimized(const bes_expression& b1, const bes_expression& b2)
@@ -552,7 +552,7 @@ inline bes_expression and_optimized(const bes_expression& b1, const bes_expressi
 
 inline bes_expression or_(const bes_expression& b1, const bes_expression& b2)
 {
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_appl(AFunBESOr(), b1, b2));
+  return atermpp::down_cast<const bes_expression>(atermpp::aterm_appl(AFunBESOr(), b1, b2));
 }
 
 inline bes_expression or_optimized(const bes_expression& b1, const bes_expression& b2)
@@ -588,7 +588,7 @@ inline bool is_variable(const bes_expression& b)
 
 inline bes_expression if_(const bes_expression& b1, const bes_expression& b2, const bes_expression& b3)
 {
-  return atermpp::aterm_cast<bes_expression>(atermpp::aterm_appl(AFunBESIf(), b1, b2,b3));
+  return atermpp::down_cast<bes_expression>(atermpp::aterm_appl(AFunBESIf(), b1, b2,b3));
 }
 
 inline bes_expression ifAUX_(const bes_expression& b1, const bes_expression& b2, const bes_expression& b3)
@@ -602,70 +602,70 @@ inline bes_expression ifAUX_(const bes_expression& b1, const bes_expression& b2,
 
 inline bes_expression variable(const variable_type& n)
 {
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_int(n));
+  return atermpp::down_cast<const bes_expression>(atermpp::aterm_int(n));
 }
 
 inline bool is_false(const bes_expression& b)
 {
-  return atermpp::aterm_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESFalse();
+  return atermpp::down_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESFalse();
 }
 
 inline bool is_true(const bes_expression& b)
 {
-  return atermpp::aterm_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESTrue();
+  return atermpp::down_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESTrue();
 }
 
 inline bool is_dummy(const bes_expression& b)
 {
-  return atermpp::aterm_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESDummy();
+  return atermpp::down_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESDummy();
 }
 
 inline bool is_and(const bes_expression& b)
 {
   using namespace atermpp;
-  return atermpp::aterm_cast<const aterm_appl>(b).function()==AFunBESAnd();
+  return atermpp::down_cast<const aterm_appl>(b).function()==AFunBESAnd();
 }
 
 inline bool is_or(const bes_expression& b)
 {
   using namespace atermpp;
-  return atermpp::aterm_cast<const aterm_appl>(b).function()==AFunBESOr();
+  return atermpp::down_cast<const aterm_appl>(b).function()==AFunBESOr();
 }
 
 inline bool is_if(const bes_expression& b)
 {
   using namespace atermpp;
-  return atermpp::aterm_cast<const aterm_appl>(b).function()==AFunBESIf();
+  return atermpp::down_cast<const aterm_appl>(b).function()==AFunBESIf();
 }
 
 inline const bes_expression& lhs(const bes_expression& b)
 {
   assert(is_and(b) || is_or(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[0]);
+  return atermpp::down_cast<const bes_expression>(atermpp::down_cast<const atermpp::aterm_appl>(b)[0]);
 }
 
 inline const bes_expression& rhs(const bes_expression& b)
 {
   assert(is_and(b) || is_or(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[1]);
+  return atermpp::down_cast<const bes_expression>(atermpp::down_cast<const atermpp::aterm_appl>(b)[1]);
 }
 
 inline const bes_expression& condition(const bes_expression& b)
 {
   assert(is_if(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[0]);
+  return atermpp::down_cast<const bes_expression>(atermpp::down_cast<const atermpp::aterm_appl>(b)[0]);
 }
 
 inline const bes_expression& then_branch(const bes_expression& b)
 {
   assert(is_if(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[1]);
+  return atermpp::down_cast<const bes_expression>(atermpp::down_cast<const atermpp::aterm_appl>(b)[1]);
 }
 
 inline const bes_expression& else_branch(const bes_expression& b)
 {
   assert(is_if(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[2]);
+  return atermpp::down_cast<const bes_expression>(atermpp::down_cast<const atermpp::aterm_appl>(b)[2]);
 }
 
 inline variable_type get_variable(const bes_expression& b)
@@ -1709,7 +1709,7 @@ class boolean_equation_system
       using namespace mcrl2::pbes_system;
       if (is_propositional_variable_instantiation(p))
       {
-        const propositional_variable_instantiation& p1 = mcrl2::core::static_down_cast<const propositional_variable_instantiation&>(p);
+        const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
         std::pair<size_t,bool> pr=variable_index.put((internal_opt_store_as_tree)? store_as_tree(p1) : atermpp::aterm_appl(p1));
 
         if (pr.second) /* p is added to the indexed set, so it is a new variable */
@@ -1870,13 +1870,13 @@ class boolean_equation_system
         }
         else
         {
-          return imp(pbes_expression(atermpp::aterm_cast<atermpp::aterm>(b1)), pbes_expression(atermpp::aterm_cast<atermpp::aterm>(b2)));
+          return imp(pbes_expression(b1), pbes_expression(b2));
         }
       }
       else if (mcrl2::pbes_system::is_not(p))
       {
         bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            atermpp::aterm_cast<mcrl2::pbes_system::not_>(p).operand(),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            atermpp::down_cast<mcrl2::pbes_system::not_>(p).operand(),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,current_variable);
         return BDDif(b1,false_(),true_());
       }
@@ -1984,7 +1984,7 @@ class boolean_equation_system
 #endif
       pbes_expression p=pbes_expression_order_quantified_variables(pbes_one_point_rule_rewriter(pbes_simplify_rewriter(pbes_spec.initial_state())),pbes_spec.data());
 
-      const propositional_variable_instantiation& p1 = mcrl2::core::static_down_cast<const propositional_variable_instantiation&>(p);
+      const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
       variable_index.put((internal_opt_store_as_tree)?store_as_tree(p1):atermpp::aterm_appl(p1));
 
       if (opt_strategy>=on_the_fly)
@@ -2084,16 +2084,16 @@ class boolean_equation_system
               // Then t is the name of the current_variable_instantiation, and it has
               // no arguments.
 
-              current_pbeq = pbes_equations[atermpp::aterm_cast<mcrl2::core::identifier_string>(t)];
+              current_pbeq = pbes_equations[atermpp::down_cast<mcrl2::core::identifier_string>(t)];
               assert(current_pbeq.variable().parameters().size()==0);
             }
             else
             {
               // t is a pair, with a name as its left hand side.
-              current_pbeq = pbes_equations[atermpp::aterm_cast<mcrl2::core::identifier_string>(atermpp::aterm_cast<atermpp::aterm_appl>(t)[0])];
+              current_pbeq = pbes_equations[atermpp::down_cast<mcrl2::core::identifier_string>(atermpp::down_cast<atermpp::aterm_appl>(t)[0])];
               // the right hand side of t are the parameters, in a tree structure.
 
-              t=atermpp::aterm_cast<atermpp::aterm_appl>(t)[1];
+              t=atermpp::down_cast<atermpp::aterm_appl>(t)[1];
               variable_list::iterator iter=current_pbeq.variable().parameters().begin();
               assign_variables_in_tree(t,iter,data_rewriter,sigma);
             }
@@ -2104,7 +2104,7 @@ class boolean_equation_system
             propositional_variable_instantiation current_variable_instantiation =
               propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
 
-            current_pbeq = pbes_equations[atermpp::aterm_cast<mcrl2::core::identifier_string>(current_variable_instantiation.name())];
+            current_pbeq = pbes_equations[current_variable_instantiation.name()];
             assert(current_pbeq!=pbes_equation());  // If this fails, a pbes variable is used in
             // a right hand side, and not in the left hand side
             // of an equation.
@@ -2294,8 +2294,8 @@ class boolean_equation_system
       using namespace mcrl2::data;
       if (is_pair(t))
       {
-        print_tree_rec(c,atermpp::aterm_cast<atermpp::aterm_appl>(t)[0],f);
-        print_tree_rec(',',atermpp::aterm_cast<atermpp::aterm_appl>(t)[1],f);
+        print_tree_rec(c,atermpp::down_cast<atermpp::aterm_appl>(t)[0],f);
+        print_tree_rec(',',atermpp::down_cast<atermpp::aterm_appl>(t)[1],f);
       }
       else
       {
@@ -2318,12 +2318,12 @@ class boolean_equation_system
         atermpp::aterm t=variable_index.get(current_var);
         if (!is_pair(t))
         {
-          f << atermpp::aterm_cast<aterm_appl>(t).function().name();
+          f << atermpp::down_cast<aterm_appl>(t).function().name();
         }
         else
         {
-          f << atermpp::aterm_cast<aterm_appl>(aterm_cast<atermpp::aterm_appl>(t)[0]).function().name();
-          print_tree_rec('(',aterm_cast<atermpp::aterm_appl>(t)[1],f);
+          f << atermpp::down_cast<aterm_appl>(down_cast<atermpp::aterm_appl>(t)[0]).function().name();
+          print_tree_rec('(',down_cast<atermpp::aterm_appl>(t)[1],f);
           f << ")";
         }
       }

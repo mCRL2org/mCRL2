@@ -194,7 +194,7 @@ bool mcrl2::process::process_type_checker::IsTypeAllowedA(const sort_expression 
   }
   if (is_untyped_possible_sorts(PosType))
   {
-    const untyped_possible_sorts& s=aterm_cast<untyped_possible_sorts>(PosType);
+    const untyped_possible_sorts& s=down_cast<untyped_possible_sorts>(PosType);
     return InTypesA(Type,s.sorts());
   }
 
@@ -352,8 +352,8 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
 
   //possible types for the arguments of the action. (not inferred if ambiguous action).
   sort_expression_list PosTypeList=is_action(Result)?
-                atermpp::aterm_cast<const process::action>(Result).label().sorts():
-                get_sorts(aterm_cast<const process_instance>(Result).identifier().variables());
+                atermpp::down_cast<const process::action>(Result).label().sorts():
+                get_sorts(down_cast<const process_instance>(Result).identifier().variables());
   data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
   for (data_expression_list Pars=pars; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
@@ -383,8 +383,8 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
   if (!p.first)
   {
     PosTypeList=is_action(Result)?
-                     atermpp::aterm_cast<const process::action>(Result).label().sorts():
-                     get_sorts(aterm_cast<const process_instance>(Result).identifier().variables());
+                     atermpp::down_cast<const process::action>(Result).label().sorts():
+                     get_sorts(down_cast<const process_instance>(Result).identifier().variables());
     data_expression_list Pars=NewPars;
     NewPars=data_expression_list();
     sort_expression_list CastedPosTypeList;
@@ -444,7 +444,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   //Here the code for short-hand assignments begins.
   if (is_untyped_process_assignment(ProcTerm))
   {
-    const untyped_process_assignment& t=aterm_cast<const untyped_process_assignment>(ProcTerm);
+    const untyped_process_assignment& t=down_cast<const untyped_process_assignment>(ProcTerm);
     mCRL2log(debug) << "typechecking a process call with short-hand assignments " << t << "" << std::endl;
     const core::identifier_string& Name=t.name();
     const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=processes.find(Name);
@@ -553,7 +553,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     As.clear();
     std::map <identifier_string,assignment> As_new;
     variable_list m=FormalPars;
-    data_expression_list l=aterm_cast<const process_instance>(TypeCheckedProcTerm).actual_parameters();
+    data_expression_list l=down_cast<const process_instance>(TypeCheckedProcTerm).actual_parameters();
     for ( ; !l.empty(); l=l.tail(),m=m.tail())
     {
       const data_expression act_par=l.front();
@@ -579,20 +579,20 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     }
     TypedAssignments=reverse(TypedAssignments);
 
-    return process_instance_assignment(aterm_cast<const process_instance>(TypeCheckedProcTerm).identifier(),TypedAssignments);
+    return process_instance_assignment(down_cast<const process_instance>(TypeCheckedProcTerm).identifier(),TypedAssignments);
   }
   //Here the section dealing with assignments ends.
 
   if (is_untyped_parameter_identifier(ProcTerm))
   {
-    const untyped_parameter_identifier& t=aterm_cast<const untyped_parameter_identifier>(ProcTerm);
+    const untyped_parameter_identifier& t=down_cast<const untyped_parameter_identifier>(ProcTerm);
     process_expression result= RewrActProc(Vars,t.name(), t.arguments());
     return result;
   }
 
   if (is_hide(ProcTerm))
   {
-    const hide& t=aterm_cast<const hide>(ProcTerm);
+    const hide& t=down_cast<const hide>(ProcTerm);
     const core::identifier_string_list& act_list=t.hide_set();
     if (act_list.empty())
     {
@@ -617,7 +617,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
   if (is_block(ProcTerm))
   {
-    const block& t=aterm_cast<const block>(ProcTerm);
+    const block& t=down_cast<const block>(ProcTerm);
     const identifier_string_list& act_list=t.block_set();
     if (act_list.empty())
     {
@@ -643,7 +643,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   //rename
   if (is_rename(ProcTerm))
   {
-    const rename& t=aterm_cast<const rename>(ProcTerm);
+    const rename& t=down_cast<const rename>(ProcTerm);
     const rename_expression_list& RenList=t.rename_set();
 
     if (RenList.empty())
@@ -696,7 +696,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   //comm: like renaming multiactions (with the same parameters) to action/tau
   if (is_comm(ProcTerm))
   {
-    const comm& t=aterm_cast<const comm>(ProcTerm);
+    const comm& t=down_cast<const comm>(ProcTerm);
     const communication_expression_list& CommList=t.comm_set();
 
     if (CommList.empty())
@@ -781,7 +781,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   //allow
   if (is_allow(ProcTerm))
   {
-    const allow& t=aterm_cast<const allow>(ProcTerm);
+    const allow& t=down_cast<const allow>(ProcTerm);
     const action_name_multiset_list& MActList=t.allow_set();
 
     if (MActList.empty())
@@ -821,43 +821,43 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
   if (is_sync(ProcTerm))
   {
-    const sync& t=aterm_cast<const sync>(ProcTerm);
+    const sync& t=down_cast<const sync>(ProcTerm);
     return sync(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
   }
 
   if (is_seq(ProcTerm))
   {
-    const seq& t=aterm_cast<const seq>(ProcTerm);
+    const seq& t=down_cast<const seq>(ProcTerm);
     return seq(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
   }
 
   if (is_bounded_init(ProcTerm))
   {
-    const bounded_init& t=aterm_cast<const bounded_init>(ProcTerm);
+    const bounded_init& t=down_cast<const bounded_init>(ProcTerm);
     return bounded_init(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
   }
 
   if (is_merge(ProcTerm))
   {
-    const merge& t=aterm_cast<const merge>(ProcTerm);
+    const merge& t=down_cast<const merge>(ProcTerm);
     return merge(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
   }
 
   if (is_left_merge(ProcTerm))
   {
-    const left_merge& t=aterm_cast<const left_merge>(ProcTerm);
+    const left_merge& t=down_cast<const left_merge>(ProcTerm);
     return left_merge(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
   }
 
   if (is_choice(ProcTerm))
   {
-    const choice& t=aterm_cast<const choice>(ProcTerm);
+    const choice& t=down_cast<const choice>(ProcTerm);
     return choice(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
   }
 
   if (is_at(ProcTerm))
   {
-    const at& t=aterm_cast<const at>(ProcTerm);
+    const at& t=down_cast<const at>(ProcTerm);
     const process_expression NewProc=TraverseActProcVarConstP(Vars,t.operand());
     data_expression Time=t.time_stamp();
     const sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
@@ -883,7 +883,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
   if (is_if_then(ProcTerm))
   {
-    const if_then& t=aterm_cast<const if_then>(ProcTerm);
+    const if_then& t=down_cast<const if_then>(ProcTerm);
     data_expression Cond=t.condition();
     TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
     const process_expression NewThen=TraverseActProcVarConstP(Vars,t.then_case());
@@ -892,7 +892,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
   if (is_if_then_else(ProcTerm))
   {
-    const if_then_else& t=aterm_cast<const if_then_else>(ProcTerm);
+    const if_then_else& t=down_cast<const if_then_else>(ProcTerm);
     data_expression Cond=t.condition();
     TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
     const process_expression NewThen=TraverseActProcVarConstP(Vars,t.then_case());
@@ -902,7 +902,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
   if (is_sum(ProcTerm))
   {
-    const sum& t=aterm_cast<const sum>(ProcTerm);
+    const sum& t=down_cast<const sum>(ProcTerm);
     std::map<identifier_string,sort_expression> CopyVars;
     CopyVars=Vars;
 

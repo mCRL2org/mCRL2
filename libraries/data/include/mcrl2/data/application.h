@@ -214,7 +214,7 @@ class application: public data_expression
     template <typename Container>
     application(const data_expression& head,
                 const Container& arguments,
-                typename atermpp::detail::enable_if_container<Container, data_expression>::type* = 0)
+                typename atermpp::enable_if_container<Container, data_expression>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
                                          term_appl_prepend_iterator<typename Container::const_iterator>(arguments.begin(), &head),
                                          term_appl_prepend_iterator<typename Container::const_iterator>(arguments.end())))
@@ -244,7 +244,7 @@ class application: public data_expression
         friend class boost::iterator_core_access;
         reference dereference() const
         {
-          return atermpp::aterm_cast<const data_expression>(*base_reference());
+          return atermpp::down_cast<const data_expression>(*base_reference());
         }
     };
 
@@ -295,14 +295,14 @@ class application: public data_expression
     /// \brief Get the function at the head of this expression.
     const data_expression& head() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::aterm_appl::operator[](0));
+      return atermpp::down_cast<const data_expression>(atermpp::aterm_appl::operator[](0));
     }
 
     /// \brief Get the i-th argument of this expression.
     const data_expression& operator[](size_t index) const
     {
       assert(index<size());
-      return atermpp::aterm_cast<const data_expression>(atermpp::aterm_appl::operator[](index+1));
+      return atermpp::down_cast<const data_expression>(atermpp::aterm_appl::operator[](index+1));
     }
 
     /// \brief Returns an iterator pointing to the first argument of the
@@ -378,21 +378,21 @@ const data_expression& binary_right(const application& x)
 inline
 const data_expression& unary_operand1(const data_expression& x)
 {
-  const application& y = core::static_down_cast<const application&>(x);
+  const application& y = atermpp::down_cast<application>(x);
   return y[0];
 }
 
 inline
 const data_expression& binary_left1(const data_expression& x)
 {
-  const application& y = core::static_down_cast<const application&>(x);
+  const application& y = atermpp::down_cast<application>(x);
   return y[0];
 }
 
 inline
 const data_expression& binary_right1(const data_expression & x)
 {
-  const application& y = core::static_down_cast<const application&>(x);
+  const application& y = atermpp::down_cast<application>(x);
   return y[1];
 }
 

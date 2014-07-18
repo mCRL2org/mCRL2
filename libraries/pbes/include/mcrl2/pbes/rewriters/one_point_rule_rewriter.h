@@ -39,8 +39,8 @@ namespace detail {
 inline
 void sort_variables(data::data_expression& left, data::data_expression& right, const std::set<data::variable>& preferred_left_hand_sides)
 {
-  if (!utilities::detail::contains(preferred_left_hand_sides, core::static_down_cast<const data::variable&>(left)) &&
-       utilities::detail::contains(preferred_left_hand_sides, core::static_down_cast<const data::variable&>(right)))
+  if (!utilities::detail::contains(preferred_left_hand_sides, atermpp::down_cast<data::variable>(left)) &&
+       utilities::detail::contains(preferred_left_hand_sides, atermpp::down_cast<data::variable>(right)))
   {
     std::swap(left, right);
   }
@@ -57,21 +57,21 @@ bool is_data_equality(const pbes_expression& x, const std::set<data::variable>& 
     // check if the term x corresponds to (v == e), with v a variable.
     if (data::is_equal_to_application(data::data_expression(x)))
     {
-      data::data_expression left = data::binary_left(atermpp::aterm_cast<data::application>(x));
-      data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(x));
+      data::data_expression left = data::binary_left(atermpp::down_cast<data::application>(x));
+      data::data_expression right = data::binary_right(atermpp::down_cast<data::application>(x));
       if (data::is_variable(left))
       {
         if (data::is_variable(right))
         {
           sort_variables(left, right, preferred_left_hand_sides);
         }
-        v = core::static_down_cast<const data::variable&>(left);
+        v = atermpp::down_cast<data::variable>(left);
         e = right;
         return true;
       }
       else if (data::is_variable(right))
       {
-        v = core::static_down_cast<const data::variable&>(right);
+        v = atermpp::down_cast<data::variable>(right);
         e = left;
         return true;
       }
@@ -79,7 +79,7 @@ bool is_data_equality(const pbes_expression& x, const std::set<data::variable>& 
     // check if the term x corresponds to v, with v a boolean variable.
     else if (data::is_variable(x))
     {
-      const data::variable& vx = atermpp::aterm_cast<const data::variable>(x);
+      const data::variable& vx = atermpp::down_cast<data::variable>(x);
       v = vx;
       e = data::sort_bool::true_();
       return true;
@@ -87,10 +87,11 @@ bool is_data_equality(const pbes_expression& x, const std::set<data::variable>& 
     // check if the term x corresponds to !v, with v a boolean variable.
     else if (data::sort_bool::is_not_application(x))
     {
-      const data::data_expression& operand = core::static_down_cast<const data::data_expression&>(data::application(x)[0]);
+      const data::application& appl = atermpp::down_cast<data::application>(x);
+      const data::data_expression& operand = appl[0];
       if (data::is_variable(operand))
       {
-        const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);
+        const data::variable& voperand = atermpp::down_cast<data::variable>(operand);
         v = voperand;
         e = data::sort_bool::false_();
         return true;
@@ -103,7 +104,7 @@ bool is_data_equality(const pbes_expression& x, const std::set<data::variable>& 
     pbes_expression operand = not_(atermpp::aterm_appl(x)).operand();
     if (data::is_variable(operand))
     {
-      const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);
+      const data::variable& voperand = atermpp::down_cast<data::variable>(operand);
       v = voperand;
       e = data::sort_bool::false_();
       return true;
@@ -122,21 +123,21 @@ bool is_data_inequality(const pbes_expression& x, const std::set<data::variable>
     // check if the term x corresponds to (v != e), with v a variable.
     if (data::is_not_equal_to_application(data::data_expression(x)))
     {
-      data::data_expression left = data::binary_left(atermpp::aterm_cast<data::application>(x));
-      data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(x));
+      data::data_expression left = data::binary_left(atermpp::down_cast<data::application>(x));
+      data::data_expression right = data::binary_right(atermpp::down_cast<data::application>(x));
       if (data::is_variable(left))
       {
         if (data::is_variable(right))
         {
           sort_variables(left, right, preferred_left_hand_sides);
         }
-        v = core::static_down_cast<const data::variable&>(left);
+        v = atermpp::down_cast<data::variable>(left);
         e = right;
         return true;
       }
       else if (data::is_variable(right))
       {
-        v = core::static_down_cast<const data::variable&>(right);
+        v = atermpp::down_cast<data::variable>(right);
         e = left;
         return true;
       }
@@ -144,7 +145,7 @@ bool is_data_inequality(const pbes_expression& x, const std::set<data::variable>
     // check if the term x corresponds to v, with v a boolean variable.
     else if (data::is_variable(x))
     {
-      const data::variable& vx = atermpp::aterm_cast<const data::variable>(x);
+      const data::variable& vx = atermpp::down_cast<const data::variable>(x);
       v = vx;
       e = data::sort_bool::false_();
       return true;
@@ -154,7 +155,7 @@ bool is_data_inequality(const pbes_expression& x, const std::set<data::variable>
       data::data_expression operand(x[0]);
       if (data::is_variable(operand))
       {
-        const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);
+        const data::variable& voperand = atermpp::down_cast<const data::variable>(operand);
         v = voperand;
         e = data::sort_bool::true_();
         return true;
@@ -166,7 +167,7 @@ bool is_data_inequality(const pbes_expression& x, const std::set<data::variable>
     pbes_expression operand = not_(atermpp::aterm_appl(x)).operand();
     if (data::is_variable(operand))
     {
-      const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);
+      const data::variable& voperand = atermpp::down_cast<const data::variable>(operand);
       v = voperand;
       e = data::sort_bool::true_();
       return true;
@@ -208,7 +209,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
   {
     if (is_data(x.operand()))
     {
-      const data::data_expression& d = atermpp::aterm_cast<data::data_expression>(x.operand());
+      const data::data_expression& d = atermpp::down_cast<data::data_expression>(x.operand());
       data::detail::one_point_rule_preprocessor R;
       return R(data::sort_bool::not_(d));
     }

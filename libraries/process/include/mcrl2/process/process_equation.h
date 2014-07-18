@@ -51,17 +51,17 @@ class process_equation: public atermpp::aterm_appl
 
     const process_identifier& identifier() const
     {
-      return atermpp::aterm_cast<const process_identifier>((*this)[0]);
+      return atermpp::down_cast<process_identifier>((*this)[0]);
     }
 
     const data::variable_list& formal_parameters() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
+      return atermpp::down_cast<data::variable_list>((*this)[1]);
     }
 
     const process_expression& expression() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[2]);
+      return atermpp::down_cast<process_expression>((*this)[2]);
     }
 };
 

@@ -432,7 +432,7 @@ static char tree_var_str[20];
 static variable createFreshVar(const sort_expression& sort, size_t* i)
 {
   sprintf(tree_var_str,"@var_%lu",(*i)++);
-  return data::variable(tree_var_str, atermpp::aterm_cast<const sort_expression>(sort));
+  return data::variable(tree_var_str, sort);
 }
 
 static match_tree_list subst_var(const match_tree_list& l,
@@ -517,7 +517,7 @@ static void inc_usedcnt(const variable_or_number_list& l)
   {
     if (i->type_is_int())
     {
-      treevars_usedcnt[aterm_cast<atermpp::aterm_int>(*i).value()]++;
+      treevars_usedcnt[deprecated_cast<atermpp::aterm_int>(*i).value()]++;
     }
   }
 }
@@ -919,7 +919,7 @@ static variable_list dep_vars(const data_equation& eqn)
   {
     if (bs[i] && is_variable(get_argument_of_higher_order_term(lhs_internal,i)))
     {
-      deps.push_front(down_cast<variable>(get_argument_of_higher_order_term(lhs_internal,i)));
+      deps.push_front(atermpp::down_cast<variable>(get_argument_of_higher_order_term(lhs_internal,i)));
     }
   }
 
@@ -1164,9 +1164,9 @@ match_tree_list RewriterCompilingJitty::create_strategy(
     atermpp::aterm_list has_deps;
     for (; !dep_list.empty(); dep_list=dep_list.tail())
     {
-      if (aterm_cast<atermpp::aterm_list>(aterm_cast<atermpp::aterm_list>(dep_list.front()).front()).empty())
+      if (down_cast<atermpp::aterm_list>(down_cast<atermpp::aterm_list>(dep_list.front()).front()).empty())
       {
-        no_deps.push_front(data_equation(aterm_cast<atermpp::aterm_list>(dep_list.front()).tail().front()));
+        no_deps.push_front(data_equation(down_cast<atermpp::aterm_list>(dep_list.front()).tail().front()));
       }
       else
       {
@@ -1212,8 +1212,8 @@ match_tree_list RewriterCompilingJitty::create_strategy(
       atermpp::aterm_list l;
       for (; !dep_list.empty(); dep_list=dep_list.tail())
       {
-        atermpp::aterm_list temp= atermpp::aterm_cast<atermpp::aterm_list>(dep_list.front()).tail();
-        temp.push_front(remove_one_element<aterm>(aterm_cast<atermpp::aterm_list>(aterm_cast<atermpp::aterm_list>(dep_list.front()).front()), rewr_arg));
+        atermpp::aterm_list temp= atermpp::down_cast<atermpp::aterm_list>(dep_list.front()).tail();
+        temp.push_front(remove_one_element<aterm>(down_cast<atermpp::aterm_list>(down_cast<atermpp::aterm_list>(dep_list.front()).front()), rewr_arg));
         l.push_front(temp);
       }
       dep_list = reverse(l);
@@ -1287,7 +1287,7 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_numb
 {
   if (is_function_symbol(t))
   {
-    return opid_is_nf(aterm_cast<function_symbol>(t),0);
+    return opid_is_nf(down_cast<function_symbol>(t),0);
   }
   else if (is_variable(t))
   {
@@ -1318,7 +1318,7 @@ bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_numb
   if (head_is_function_symbol(head,dummy))
   {
     assert(arity!=0);
-    if (opid_is_nf(aterm_cast<function_symbol>(head),arity))
+    if (opid_is_nf(down_cast<function_symbol>(head),arity))
     {
       nfs_array args(arity);
       calc_nfs_list(args,ta,nnfvars);
@@ -1421,7 +1421,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
   if (is_function_symbol(t))
   {
-    const function_symbol& f = core::down_cast<function_symbol>(t);
+    const function_symbol& f = atermpp::down_cast<function_symbol>(t);
     bool b = opid_is_nf(f,0);
 
     if (rewr && !b)
@@ -1430,7 +1430,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
     else
     {
-      ss << "atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(t) << ")))";
+      ss << "atermpp::down_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(t) << ")))";
     }
     return pair<bool,string>(rewr || b, ss.str());
 
@@ -1527,7 +1527,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else if (is_where_clause(t))
   {
-    const where_clause& w = core::down_cast<where_clause>(t);
+    const where_clause& w = atermpp::down_cast<where_clause>(t);
 
     if (rewr)
     {
@@ -1581,13 +1581,13 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
 
   // t has the shape application(head,t1,...,tn)
-  const application& ta = core::down_cast<application>(t);
+  const application& ta = atermpp::down_cast<application>(t);
   bool b;
   size_t arity = ta.size();
 
   if (is_function_symbol(ta.head()))  // Determine whether the topmost symbol is a function symbol.
   {
-    const function_symbol& headfs = core::down_cast<function_symbol>(ta.head());
+    const function_symbol& headfs = atermpp::down_cast<function_symbol>(ta.head());
     size_t cumulative_arity = ta.size();
     b = opid_is_nf(headfs,cumulative_arity+1); // b indicates that headfs is in normal form.
 
@@ -1602,7 +1602,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         // TODO: This expression might be costly with two increase/decreases of reference counting.
         // Should probably be resolved by a table of function symbols.
-        ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(headfs) << "))";
+        ss << "atermpp::down_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(headfs) << "))";
       }
       else
       {
@@ -1629,7 +1629,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         if (b || !rewr)
         {
-          ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(headfs) << "))";
+          ss << "atermpp::down_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(headfs) << "))";
         }
         else
         {
@@ -1653,7 +1653,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
               partially_rewritten_functions.insert(f);
             }
 
-            ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
+            ss << "atermpp::down_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
           }
         }
         else
@@ -1765,7 +1765,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       nfs_array tail_first(arity);
       const nfs_array dummy(arity);
       string tail_second = calc_inner_terms(tail_first,ta,startarg,nnfvars,dummy);
-      ss << "!is_variable(atermpp::aterm_cast<atermpp::aterm_appl>(" << head.second << "))?";
+      ss << "!is_variable(" << head.second << ")?";
       if (rewr)
       {
           ss << "rewrite(";
@@ -1906,7 +1906,7 @@ void RewriterCompilingJitty::implement_tree_aux(
     }
     else
     {
-      fprintf(f,"%sconst data_expression& %s = atermpp::aterm_cast<const data_expression>(%s%lu[%lu]); // S2\n",
+      fprintf(f,"%sconst data_expression& %s = atermpp::down_cast<data_expression>(%s%lu[%lu]); // S2\n",
               whitespace(d*2),
               string(treeS.target_variable().name()).c_str()+1,
               (level==1)?"arg":"t",
@@ -1930,7 +1930,7 @@ void RewriterCompilingJitty::implement_tree_aux(
     }
     else
     {
-      fprintf(f,"%sif (%s==static_cast<atermpp::aterm_appl>(%s%lu[%lu])) // M\n"
+      fprintf(f,"%sif (%s==%s%lu[%lu]) // M\n"
               "%s{\n",
               whitespace(d*2),
               string(treeM.match_variable().name()).c_str()+1,
@@ -1979,9 +1979,9 @@ void RewriterCompilingJitty::implement_tree_aux(
     {
       if (!is_function_sort(treeF.function().sort()))
       {
-        fprintf(f,"%sif (atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
+        fprintf(f,"%sif (atermpp::detail::address(down_cast<data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
               "%s{\n"
-              "%s  const data_expression& t%lu=atermpp::aterm_cast<const data_expression>(%s%lu[%lu]);\n",  // Should be a function symbol, not a data expression, but this has consequences elsewhere.
+              "%s  const data_expression& t%lu=atermpp::down_cast<data_expression>(%s%lu[%lu]);\n",  // Should be a function symbol, not a data expression, but this has consequences elsewhere.
               whitespace(d*2),
               // (level==1)?"arg":"t",parent,cur_arg,
               (level==1)?"arg":"t",parent,cur_arg,
@@ -1992,9 +1992,9 @@ void RewriterCompilingJitty::implement_tree_aux(
              );
       }
       else
-      { fprintf(f,"%sif (is_application_no_check(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2b %s\n"
+      { fprintf(f,"%sif (is_application_no_check(atermpp::down_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(down_cast<data_expression>(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2b %s\n"
               "%s{\n"
-              "%s  const data_expression& t%lu=atermpp::aterm_cast<const data_expression>(%s%lu[%lu]);\n",  // Should be an application, not a data expression, but this has consequences elsewhere.
+              "%s  const data_expression& t%lu=atermpp::down_cast<data_expression>(%s%lu[%lu]);\n",  // Should be an application, not a data expression, but this has consequences elsewhere.
               whitespace(d*2),
               (level==1)?"arg":"t",parent,cur_arg,
               (level==1)?"arg":"t",parent,cur_arg,
@@ -2209,7 +2209,7 @@ void RewriterCompilingJitty::finish_function(FILE* f,
     fprintf(f,"return ");
     size_t used_arguments=0;
     stringstream ss;
-    ss << "atermpp::aterm_cast<const data_expression>(aterm((const atermpp::detail::_aterm*)"
+    ss << "atermpp::down_cast<const data_expression>(aterm((const atermpp::detail::_aterm*)"
        << (void*)atermpp::detail::address(opid)
        << "))";
 
@@ -2292,7 +2292,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const data_ex
   }
 
   // expr has shape application(t,t1,...,tn);
-  const application& expra = core::down_cast<application>(expr);
+  const application& expra = atermpp::down_cast<application>(expr);
   function_symbol head;
   if (!head_is_function_symbol(expra,head))
   {
@@ -2332,7 +2332,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equatio
     function_symbol head;
     if (is_function_symbol(rhs))
     {
-      const size_t idx = ar_index(aterm_cast<function_symbol>(rhs),arity,arg);
+      const size_t idx = ar_index(down_cast<function_symbol>(rhs),arity,arg);
       assert(idx<ar.size());
       return make_ar_var(idx);
     }
@@ -2353,7 +2353,7 @@ atermpp::aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equatio
 
   // Here we know that eqn.lhs() must be an application. If it were a function symbol
   // it would have been dealt with above.
-  const application& lhs = core::down_cast<application>(eqn.lhs());
+  const application& lhs = atermpp::down_cast<application>(eqn.lhs());
   const data_expression& arg_term = get_argument_of_higher_order_term(lhs,arg);
   if (!is_variable(arg_term))
   {
@@ -2400,11 +2400,11 @@ bool RewriterCompilingJitty::calc_ar(const atermpp::aterm_appl& expr)
   }
   else if (is_ar_and(expr))
   {
-    return calc_ar(aterm_cast<atermpp::aterm_appl>(expr[0])) && calc_ar(aterm_cast<atermpp::aterm_appl>(expr[1]));
+    return calc_ar(down_cast<atermpp::aterm_appl>(expr[0])) && calc_ar(down_cast<atermpp::aterm_appl>(expr[1]));
   }
   else if (is_ar_or(expr))
   {
-    return calc_ar(aterm_cast<atermpp::aterm_appl>(expr[0])) || calc_ar(aterm_cast<atermpp::aterm_appl>(expr[1]));
+    return calc_ar(down_cast<atermpp::aterm_appl>(expr[0])) || calc_ar(down_cast<atermpp::aterm_appl>(expr[1]));
   }
   else     // is_ar_var(expr)
   {
@@ -2509,7 +2509,7 @@ static std::string get_heads(const sort_expression& s, const std::string& base_s
   if (is_function_sort(s) && number_of_arguments>0)
   {
     const function_sort fs(s);
-    ss << "atermpp::aterm_cast<const application>(" << get_heads(fs.codomain(),base_string,number_of_arguments-fs.domain().size()) << ".head())";
+    ss << "atermpp::down_cast<const application>(" << get_heads(fs.codomain(),base_string,number_of_arguments-fs.domain().size()) << ".head())";
     return ss.str();
   }
   return base_string;
@@ -2519,18 +2519,18 @@ static std::string get_recursive_argument(const sort_expression& s, const size_t
 {
   /* This function provides the index-th argument of an expression provided in base_string, given that its head
      symbol has type s and there are number_of_arguments arguments. Example: if f:D->E->F and index is 0, base_string
-     is "t", base_string is set to "atermpp::aterm_cast<application>(t[0])[0] */
+     is "t", base_string is set to "atermpp::down_cast<application>(t[0])[0] */
   assert(is_function_sort(s));
 
   std::stringstream ss;
-  const function_sort& fs = core::down_cast<function_sort>(s);
+  const function_sort& fs = atermpp::down_cast<function_sort>(s);
   const sort_expression_list& source_type=fs.domain();
   const sort_expression& target_type=fs.codomain();
   if (index>=source_type.size())
   {
     return get_recursive_argument(target_type, index-source_type.size(), base_string,number_of_arguments-source_type.size());
   }
-  // ss << "atermpp::aterm_cast<const application>(" << get_heads(target_type,base_string,number_of_arguments-source_type.size()) << ")[" << index << "]";
+  // ss << "atermpp::down_cast<application>(" << get_heads(target_type,base_string,number_of_arguments-source_type.size()) << ")[" << index << "]";
   ss << get_heads(target_type,base_string,number_of_arguments-source_type.size()) << "[" << index << "]";
   return ss.str();
 }
@@ -2661,7 +2661,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Make a functional push_front to be used in the where clause.
   fprintf(f,"static mcrl2::data::assignment_expression_list jittyc_local_push_front(mcrl2::data::assignment_expression_list l, const mcrl2::data::assignment& e)\n"
             "{\n"
-            "  l.push_front(atermpp::aterm_cast<assignment_expression>(e));\n"
+            "  l.push_front(atermpp::deprecated_cast<assignment_expression>(e));\n"
             "  return l;\n"
             "}\n");
 
@@ -2953,9 +2953,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  const data_expression& head0=get_nested_head(t);\n"
       "  const data_expression head=\n"
       "       (is_variable(head0)?\n"
-      "            (*(this_rewriter->global_sigma))(aterm_cast<const variable>(head0)):\n"
+      "            (*(this_rewriter->global_sigma))(down_cast<const variable>(head0)):\n"
       "       (is_where_clause(head0)?\n"
-      "            this_rewriter->rewrite_where(atermpp::aterm_cast<where_clause>(head0),*(this_rewriter->global_sigma)):\n"
+      "            this_rewriter->rewrite_where(atermpp::down_cast<where_clause>(head0),*(this_rewriter->global_sigma)):\n"
       "             head0));\n"
       "  \n"
       "  // Reconstruct term t.\n"
@@ -2989,7 +2989,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  // Here t1 has the shape application(u0,u1,...,un).\n"
       "  // Moreover, the head symbol of t1, head1, is a function symbol.\n"
-      "  const mcrl2::data::function_symbol& f=atermpp::aterm_cast<const mcrl2::data::function_symbol>(head1);\n"
+      "  const mcrl2::data::function_symbol& f=atermpp::down_cast<const mcrl2::data::function_symbol>(head1);\n"
       "  const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(f);\n"
       "  assert(function_index < %zu);\n"
       "  const size_t total_arity=recursive_number_of_args(t1);\n"
@@ -3017,7 +3017,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  // Term t does not have the shape application(t1,...,tn)\n"
       "  if (is_variable(t))\n"
       "  {\n"
-      "    const variable& v=atermpp::aterm_cast<const variable>(t);\n"
+      "    const variable& v=atermpp::down_cast<const variable>(t);\n"
       "    return (*(this_rewriter->global_sigma))(v);\n"
       "  }\n"
       "  if (mcrl2::data::is_abstraction(t))\n"
@@ -3037,7 +3037,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "               ta.variables(),ta.body(),false,*(this_rewriter->global_sigma));\n"
       "  }\n"
       "  assert(mcrl2::data::is_where_clause(t));\n"
-      "  const where_clause& tw=atermpp::aterm_cast<const where_clause>(t);\n"
+      "  const where_clause& tw=atermpp::down_cast<const where_clause>(t);\n"
       "  return this_rewriter->rewrite_where(tw,*(this_rewriter->global_sigma));\n"
       "}\n\n");
 
@@ -3046,10 +3046,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "{\n"
 // "std::cerr << \"REWRITE \" << t << \"\\n\";\n"
       "  using namespace mcrl2::data;\n"
-      "  if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(t).function())==%ld)\n" // if (is_function_symbol(t))
+      "  if (atermpp::detail::addressf(t.function())==%ld)\n" // if (is_function_symbol(t))
       "  {\n"
       "    // Term t is a function_symbol\n"
-      "    const mcrl2::data::function_symbol& f=atermpp::aterm_cast<const mcrl2::data::function_symbol>(t);\n"
+      "    const mcrl2::data::function_symbol& f=atermpp::down_cast<const mcrl2::data::function_symbol>(t);\n"
       "    const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(f);\n"
       "    if (function_index < %zu)\n"
       "    {\n"
@@ -3065,9 +3065,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  else if (is_application_no_check(t))\n"
       "  {\n"
-      "    const application& ta=atermpp::aterm_cast<const application>(t);\n"
-      "    const mcrl2::data::function_symbol& head=atermpp::aterm_cast<const mcrl2::data::function_symbol>(ta.head());\n"
-      " if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(head).function())==%ld)\n" // if (is_function_symbol(head))
+      "    const application& ta=atermpp::down_cast<const application>(t);\n"
+      "    const mcrl2::data::function_symbol& head=atermpp::down_cast<const mcrl2::data::function_symbol>(ta.head());\n"
+      " if (atermpp::detail::addressf(head.function())==%ld)\n" // if (is_function_symbol(head))
       "    {\n"
       "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(head);\n"
       "      const size_t total_arity=ta.size();\n"
@@ -3091,9 +3091,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  return rewrite_aux(t);\n"
       "}\n",
-      atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(sort_bool::true_()).function()),
+      atermpp::detail::addressf(sort_bool::true_().function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
-      atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(sort_bool::true_()).function()),
+      atermpp::detail::addressf(sort_bool::true_().function()),
       core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
       max_arity+1);
 

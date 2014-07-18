@@ -216,7 +216,7 @@ void lts_info::compute_lts_type()
                 //std::clog << "paramtypes[" << signature << "] = " << paramtypes[signature] << std::endl;
                 data_expression e(default_expression_generator(varparam.sort()));
                 pbes_expression e1 = pgg->rewrite_and_simplify_expression(e,false);
-                this->param_default_values.push_back(atermpp::aterm_cast<const data::data_expression>(e1));
+                this->param_default_values.push_back(atermpp::down_cast<const data::data_expression>(e1));
             }
         }
         //params.sort();
@@ -804,7 +804,7 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
             std::string param_signature = *param;
             if (tr::is_variable(*val))
             {
-                const variable& value = core::static_down_cast<const variable&>(*val);
+                const variable& value = atermpp::down_cast<variable>(*val);
                 std::string value_signature = get_param_signature(value);
                 if (param_signature != value_signature || L.find(value_signature) != L.end())
                 {
@@ -950,7 +950,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
             std::string param_signature = get_param_signature(parameter);
             if (tr::is_variable(*val))
             {
-                const variable& value = core::static_down_cast<const variable&>(*val);
+                const variable& value = atermpp::down_cast<variable>(*val);
                 std::string value_signature = get_param_signature(value);
                 if (param_signature != value_signature || L.find(value_signature) != L.end())
                 {
@@ -1322,7 +1322,7 @@ data::data_expression explorer::string_to_data(const std::string& s) {
     aterm t = atermpp::read_term_from_string(s);
     data::data_expression value(t);
     pbes_expression result = pgg->rewrite_and_simplify_expression(value);
-    return atermpp::aterm_cast<const data::data_expression>(result);
+    return atermpp::down_cast<const data::data_expression>(result);
 }
 
 
@@ -1584,7 +1584,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
         for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                 != successors.end(); ++expr) {
             if (tr::is_prop_var(*expr)) {
-                result.push_back(get_state(core::static_down_cast<const propositional_variable_instantiation&>(*expr)));
+                result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
             } else if (tr::is_true(*expr)) {
                 if (type != parity_game_generator::PGAME_AND)
                 {
@@ -1635,7 +1635,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
                     != successors.end(); ++expr) {
                 //std::clog << "* Successor: " << *expr << std::endl;
                 if (tr::is_prop_var(*expr)) {
-                    result.push_back(get_state(core::static_down_cast<const propositional_variable_instantiation&>(*expr)));
+                    result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
                 } else if (tr::is_true(*expr)) {
                     if (type != parity_game_generator::PGAME_AND)
                     {

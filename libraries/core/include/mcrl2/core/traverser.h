@@ -46,7 +46,7 @@ class traverser
 
     // traverse containers
     template <typename Container>
-    void operator()(Container const& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
+    void operator()(Container const& container, typename atermpp::enable_if_container<Container>::type* = 0)
     {
       for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
       {

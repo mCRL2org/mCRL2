@@ -73,8 +73,8 @@ void test_normalize1()
   x = data::variable("x", data::sort_bool::bool_());
   y = data::variable("y", data::sort_bool::bool_());
   z = data::variable("z", data::sort_bool::bool_());
-  const data::data_expression& x1 = atermpp::aterm_cast<data::data_expression>(x);
-  const data::data_expression& y1 = atermpp::aterm_cast<data::data_expression>(y);
+  const data::data_expression& x1 = atermpp::down_cast<data::data_expression>(x);
+  const data::data_expression& y1 = atermpp::down_cast<data::data_expression>(y);
 
   f  = not_(x);
   f1 = pbes_system::normalize(f);

@@ -82,7 +82,7 @@ class pbesinst_symbolic_algorithm
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     void run()
     {
-      init = atermpp::aterm_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
+      init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.insert(init);
       mCRL2log(log::debug, "symbolic") << "discovered vertex " << init << std::endl;
 

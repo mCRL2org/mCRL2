@@ -105,7 +105,7 @@ class pbes_eqelm_algorithm
         {
           out << ", ";
         }
-        out << print(atermpp::aterm_cast<core::identifier_string>(*i));
+        out << print(atermpp::deprecated_cast<core::identifier_string>(*i));
       }
       return out.str();
     }
@@ -218,7 +218,7 @@ class pbes_eqelm_algorithm
           size_t p = index_of(*k, m_parameters[Y]);
           pbes_system::data_rewriter<DataRewriter> rewr(m_data_rewriter);
           pbes_system::pbes_expression e_p = rewr(e[p], vX);
-          w[atermpp::aterm_cast<const data::data_expression>(e_p)].insert(*k);
+          w[atermpp::down_cast<const data::data_expression>(e_p)].insert(*k);
         }
         for (typename std::map<data_term_type, equivalence_class>::iterator i = w.begin(); i != w.end(); ++i)
         {

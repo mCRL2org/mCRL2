@@ -43,18 +43,18 @@ struct add_simplify_quantifiers: public Builder<Derived>
     }
     else if (tr::is_not(body))
     {
-      result = utilities::optimized_not(utilities::optimized_exists(variables, core::down_cast<not_>(body).operand(), true));
+      result = utilities::optimized_not(utilities::optimized_exists(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
     if (tr::is_and(body))
     {
-      auto const& left = core::down_cast<and_>(body).left();
-      auto const& right = core::down_cast<and_>(body).right();
+      auto const& left = atermpp::down_cast<and_>(body).left();
+      auto const& right = atermpp::down_cast<and_>(body).right();
       result = utilities::optimized_and(utilities::optimized_forall(variables, left, true), utilities::optimized_forall(variables, right, true));
     }
     else if (tr::is_or(body))
     {
-      auto const& left = core::down_cast<or_>(body).left();
-      auto const& right = core::down_cast<or_>(body).right();
+      auto const& left = atermpp::down_cast<or_>(body).left();
+      auto const& right = atermpp::down_cast<or_>(body).right();
       data::variable_list lv = tr::set_intersection(variables, tr::free_variables(left));
       data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
       if (lv.empty())
@@ -89,18 +89,18 @@ struct add_simplify_quantifiers: public Builder<Derived>
     }
     else if (tr::is_not(body))
     {
-      result = utilities::optimized_not(utilities::optimized_forall(variables, core::down_cast<not_>(body).operand(), true));
+      result = utilities::optimized_not(utilities::optimized_forall(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
     if (tr::is_or(body))
     {
-      auto const& left = core::down_cast<or_>(body).left();
-      auto const& right = core::down_cast<or_>(body).right();
+      auto const& left = atermpp::down_cast<or_>(body).left();
+      auto const& right = atermpp::down_cast<or_>(body).right();
       result = utilities::optimized_or(utilities::optimized_exists(variables, left, true), utilities::optimized_exists(variables, right, true));
     }
     else if (tr::is_and(body))
     {
-      auto const& left = core::down_cast<and_>(body).left();
-      auto const& right = core::down_cast<and_>(body).right();
+      auto const& left = atermpp::down_cast<and_>(body).left();
+      auto const& right = atermpp::down_cast<and_>(body).right();
       data::variable_list lv = tr::set_intersection(variables, tr::free_variables(left));
       data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
       if (lv.empty())

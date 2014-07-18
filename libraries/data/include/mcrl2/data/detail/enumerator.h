@@ -160,7 +160,7 @@ class data_enumerator
 
           variable_list w(variables.begin(),variables.end());
 
-          result.push_back(data_expression_with_variables(application(*i, atermpp::aterm_cast< data_expression_list >(w)), w));
+          result.push_back(data_expression_with_variables(application(*i, atermpp::container_cast< data_expression_list >(w)), w));
         }
         else
         {

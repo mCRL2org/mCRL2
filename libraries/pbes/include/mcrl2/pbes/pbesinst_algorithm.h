@@ -172,7 +172,7 @@ class pbesinst_algorithm
         equation_index[eqn.variable().name()] = eqn_index++;
         E.push_back(std::vector<pbes_equation>());
       }
-      init = atermpp::aterm_cast<propositional_variable_instantiation>(R(p.initial_state()));
+      init = atermpp::down_cast<propositional_variable_instantiation>(R(p.initial_state()));
       todo.insert(init);
       while (!todo.empty())
       {

@@ -386,7 +386,7 @@ pbes_expression parse_pbes_expression(std::string expr, std::string subst, const
   }
 
   pbes q = p;
-  q.initial_state() = core::static_down_cast<const propositional_variable_instantiation&>(tr::true_());
+  q.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(tr::true_());
   std::string pbesspec = pbes_system::pp(q);
   std::string init("init");
   // remove the init declaration

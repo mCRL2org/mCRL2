@@ -114,7 +114,7 @@ namespace detail {
       data::sort_expression s = i->reference();
       if (data::is_structured_sort(s))
       {
-        const data::structured_sort& ss = core::static_down_cast<const data::structured_sort&>(s);
+        const data::structured_sort& ss = atermpp::down_cast<data::structured_sort>(s);
         data::function_symbol_vector v = ss.constructor_functions();
         for (data::function_symbol_vector::iterator j = v.begin(); j != v.end(); ++j)
         {
@@ -150,7 +150,7 @@ namespace detail {
     }
     else if (data::is_function_sort(s))
     {
-      const data::function_sort& fs = core::static_down_cast<const data::function_sort&>(s);
+      const data::function_sort& fs = atermpp::down_cast<data::function_sort>(s);
       return fs.codomain();
     }
     else if (data::is_container_sort(s))
@@ -233,7 +233,7 @@ struct absinthe_algorithm
     {
       if (data::is_variable(x.head()))
       {
-        data::variable v = core::static_down_cast<const data::variable&>(x.head());
+        data::variable v = atermpp::down_cast<data::variable>(x.head());
         v = data::variable(v.name(), super::operator()(v.sort()));
         return data::detail::create_finite_set(data::application(v, x.begin(), x.end()));
       }
@@ -398,11 +398,11 @@ struct absinthe_algorithm
       data::data_expression q = data::lazy::join_and(z.begin(), z.end());
       if (m_is_over_approximation)
       {
-        result = make_exists(variables, and_(q, propositional_variable_instantiation(x.name(), atermpp::aterm_cast<data::data_expression_list>(variables))));
+        result = make_exists(variables, and_(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
       }
       else
       {
-        result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), atermpp::aterm_cast<data::data_expression_list>(variables))));
+        result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
       }
       return result;
     }
@@ -502,7 +502,7 @@ struct absinthe_algorithm
     const data::function_symbol_vector& m = dataspec.user_defined_mappings();
     for (data::function_symbol_vector::const_iterator i = m.begin(); i != m.end(); ++i)
     {
-      const data::function_sort& f = core::static_down_cast<const data::function_sort&>(i->sort());
+      const data::function_sort& f = atermpp::down_cast<data::function_sort>(i->sort());
       if (f.domain().size() != 1)
       {
         throw mcrl2::runtime_error("cannot abstract the function " + data::pp(*i) + " since the arity of the domain is not equal to one!");
@@ -611,7 +611,7 @@ struct absinthe_algorithm
         // Apply sigmaS recursively to s
         //   f:        tail:           List(Nat) -> List(Nat)
         //   result:   generated_tail: List(AbsNat) -> Set(List(AbsNat))
-        const data::function_sort& fs = core::static_down_cast<const data::function_sort&>(sigma(s));
+        const data::function_sort& fs = atermpp::down_cast<data::function_sort>(sigma(s));
         return data::function_symbol(name, data::function_sort(fs.domain(), make_set()(fs.codomain())));
       }
       else if (data::is_container_sort(s))
@@ -820,7 +820,7 @@ struct absinthe_algorithm
 
         variables = data::variable_list(X.begin(), X.end());
         lhs = data::application(f3, data::data_expression_list(X.begin(), X.end()));
-        data::variable y("y", data::detail::get_set_sort(core::static_down_cast<const data::container_sort&>(fs2.codomain())));
+        data::variable y("y", data::detail::get_set_sort(atermpp::down_cast<data::container_sort>(fs2.codomain())));
         data::data_expression Y = data::application(f2, data::data_expression_list(x.begin(), x.end()));
         data::data_expression body = data::sort_bool::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y));
         rhs = data::detail::create_set_comprehension(y, data::exists(x, body));
@@ -1065,7 +1065,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << f1 << " to sig
     for (abstraction_map::const_iterator i = sigmaH.begin(); i != sigmaH.end(); ++i)
     {
       data::function_symbol f = i->second;
-      const data::function_sort& fs = core::static_down_cast<const data::function_sort&>(f.sort());
+      const data::function_sort& fs = atermpp::down_cast<data::function_sort>(f.sort());
       sigmaS[i->first] = fs.codomain();
     }
     mCRL2log(log::debug, "absinthe") << "\n--- sort expression mapping ---\n" << print_mapping(sigmaS) << std::endl;

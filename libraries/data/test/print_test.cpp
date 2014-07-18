@@ -61,7 +61,7 @@ void test_term(const std::string& s)
   }
   else
   {
-    data_expression x = atermpp::aterm_cast<data_expression>(a);
+    data_expression x = atermpp::down_cast<data_expression>(a);
     test_term(s, x);
   }
 }
@@ -435,11 +435,11 @@ BOOST_AUTO_TEST_CASE(test_mod)
   data::data_expression x = parse_data_expression("(1 + 2) mod 3");
   BOOST_CHECK(sort_nat::is_mod_application(x));
 
-  application left = atermpp::aterm_cast<application>(sort_nat::left(x));
+  application left = atermpp::down_cast<application>(sort_nat::left(x));
   std::cout << "left = " << left << " " << data::pp(left) << std::endl;
   BOOST_CHECK(data::detail::is_plus(left));
 
-  application left1 = atermpp::aterm_cast<application>(detail::remove_numeric_casts(left));
+  application left1 = atermpp::down_cast<application>(detail::remove_numeric_casts(left));
   std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
   BOOST_CHECK(data::detail::is_plus(left1));
 
@@ -447,7 +447,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   std::cout << "x = " << x << " " << data::pp(x) << std::endl;
 
   x = parse_data_expression("(2 - 1) mod 3");
-  left = atermpp::aterm_cast<application>(sort_int::left(x));
+  left = atermpp::down_cast<application>(sort_int::left(x));
   std::cout << "left = " << left << " " << data::pp(left) << std::endl;
   BOOST_CHECK(data::detail::is_minus(left));
   std::cout << "left_precedence(left) = " << left_precedence(left) << std::endl;
@@ -455,7 +455,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   BOOST_CHECK(data::sort_nat::is_nat(x.sort()));
   BOOST_CHECK(data::sort_int::is_mod_application(x));
 
-  left1 = atermpp::aterm_cast<application>(detail::remove_numeric_casts(left));
+  left1 = atermpp::down_cast<application>(detail::remove_numeric_casts(left));
   std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
   BOOST_CHECK(data::detail::is_minus(left1));
   std::cout << "left_precedence(left1) = " << left_precedence(left1) << std::endl;

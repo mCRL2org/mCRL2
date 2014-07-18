@@ -63,7 +63,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     bool is_summand_variable(const summand_base& s, const data::data_expression& x)
     {
       const data::variable_list& l=s.summation_variables();
-      return data::is_variable(x) && std::find(l.begin(),l.end(),atermpp::aterm_cast<data::variable>(x))!=l.end();
+      return data::is_variable(x) && std::find(l.begin(),l.end(),atermpp::down_cast<data::variable>(x))!=l.end();
     }
 
     template <typename T>
@@ -122,8 +122,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
           //    for which there is no substitution yet -> add d := e, and x := e
           if (is_summand_variable(s, left) && !search_data_expression(right, left))
           {
-            const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
-            const data::variable& vright = core::static_down_cast<const data::variable&>(right);
+            const data::variable& vleft = atermpp::down_cast<data::variable>(left);
+            const data::variable& vright = atermpp::down_cast<data::variable>(right);
 
             // Check if we already have a substition with left as left hand side
             if (substitutions.find(vleft) == substitutions.end())
@@ -138,7 +138,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
             }
             else
             {
-              data::variable v = core::static_down_cast<const data::variable&>(substitutions(vleft));
+              const data::variable& v = atermpp::down_cast<data::variable>(substitutions(vleft));
               if (is_summand_variable(s, v) && substitutions.find(v) != substitutions.end())
               {
                 sumelm_add_replacement(substitutions, v, right);
