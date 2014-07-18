@@ -229,7 +229,7 @@ struct enumerate_quantifiers_rewriter
   /// \brief If true, quantifier variables of infinite sort are enumerated.
   bool m_enumerate_infinite_sorts;
 
-  utilities::number_postfix_generator m_id_generator;
+  mutable utilities::number_postfix_generator m_id_generator;
 
   typedef pbes_expression term_type;
   typedef data::variable variable_type;
@@ -241,13 +241,15 @@ struct enumerate_quantifiers_rewriter
   pbes_expression operator()(const pbes_expression& x) const
   {
     data::rewriter::substitution_type sigma;
-    return detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, m_dataspec, const_cast<utilities::number_postfix_generator&>(m_id_generator), m_enumerate_infinite_sorts)(x);
+    m_id_generator.clear();
+    return detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, m_dataspec, m_id_generator, m_enumerate_infinite_sorts)(x);
   }
 
   template <typename MutableSubstitution>
   pbes_expression operator()(const pbes_expression& x, MutableSubstitution& sigma) const
   {
-    return detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, m_dataspec, const_cast<utilities::number_postfix_generator&>(m_id_generator), m_enumerate_infinite_sorts)(x);
+    m_id_generator.clear();
+    return detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, m_dataspec, m_id_generator, m_enumerate_infinite_sorts)(x);
   }
 };
 

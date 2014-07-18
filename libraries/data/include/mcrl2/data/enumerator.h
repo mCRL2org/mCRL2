@@ -449,9 +449,7 @@ class enumerator_algorithm
                          bool throw_exceptions = false
                        )
       : R(R_), dataspec(dataspec_), datar(datar_), id_generator(id_generator_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
-    {
-      id_generator.clear();
-    }
+    {}
 
   private:
     // enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
