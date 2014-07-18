@@ -557,7 +557,9 @@ void test_substitutions3()
   data::rewriter datar(data_spec);
   pbes_system::enumerate_quantifiers_rewriter r(datar, data_spec);
 
-  data::mutable_indexed_substitution<> sigma;
+  // TODO: Find out why sigma gets corrupted with clang 3.5 in case of an indexed substitution
+  // data::mutable_indexed_substitution<> sigma;
+  data::mutable_map_substitution<> sigma;
   sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");
