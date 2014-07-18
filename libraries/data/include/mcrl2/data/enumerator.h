@@ -108,7 +108,7 @@ bool compute_finite_set_elements(const container_sort& sort, const data_specific
 /// \brief Computes the elements of a finite function sort, and puts them in result. If there are too many elements, false is returned.
 template <class IdentifierGenerator, class Rewriter>
 bool compute_finite_function_sorts(const function_sort& sort,
-                                   const IdentifierGenerator& id_generator,
+                                   IdentifierGenerator& id_generator,
                                    const data::data_specification& dataspec,
                                    Rewriter datar,
                                    data_expression_vector& result,
@@ -313,9 +313,9 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
 template <typename IdentifierGenerator>
 struct sort_name_generator
 {
-  const IdentifierGenerator& id_generator;
+  IdentifierGenerator& id_generator;
 
-  sort_name_generator(const IdentifierGenerator& id_generator_)
+  sort_name_generator(IdentifierGenerator& id_generator_)
     : id_generator(id_generator_)
   {}
 
@@ -340,7 +340,7 @@ class enumerator_algorithm
     const DataRewriter& datar;
 
     // A name generator
-    utilities::number_postfix_generator id_generator;
+    IdentifierGenerator& id_generator;
 
     /// \brief max_count The enumeration is aborted after max_count iterations
     std::size_t m_max_count;
@@ -449,7 +449,9 @@ class enumerator_algorithm
                          bool throw_exceptions = false
                        )
       : R(R_), dataspec(dataspec_), datar(datar_), id_generator(id_generator_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
-    {}
+    {
+      id_generator.clear();
+    }
 
   private:
     // enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
