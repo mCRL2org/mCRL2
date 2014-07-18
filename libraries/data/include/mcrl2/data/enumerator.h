@@ -310,11 +310,12 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
   return out << "{ variables = " << core::detail::print_list(p.variables()) << ", expression = " << p.expression() << " }";
 }
 
+template <typename IdentifierGenerator>
 struct sort_name_generator
 {
-  const utilities::number_postfix_generator& id_generator;
+  const IdentifierGenerator& id_generator;
 
-  sort_name_generator(const utilities::number_postfix_generator& id_generator_)
+  sort_name_generator(const IdentifierGenerator& id_generator_)
     : id_generator(id_generator_)
   {}
 
@@ -325,7 +326,7 @@ struct sort_name_generator
 };
 
 /// \brief An enumerator algorithm that generates solutions of a condition.
-template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter>
+template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter, typename IdentifierGenerator = utilities::number_postfix_generator>
 class enumerator_algorithm
 {
   protected:
@@ -443,15 +444,16 @@ class enumerator_algorithm
     enumerator_algorithm(const Rewriter& R_,
                          const data::data_specification& dataspec_,
                          const DataRewriter& datar_,
+                         IdentifierGenerator& id_generator_,
                          std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                          bool throw_exceptions = false
                        )
-      : R(R_), dataspec(dataspec_), datar(datar_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
+      : R(R_), dataspec(dataspec_), datar(datar_), id_generator(id_generator_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
     {}
 
   private:
     // enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
-    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&)
+    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter, IdentifierGenerator>&)
     {}
 
   public:
@@ -571,7 +573,7 @@ class enumerator_algorithm
             if (data::is_function_sort(constructor.sort()))
             {
               auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
-              data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
+              data::variable_list y(domain.begin(), domain.end(), sort_name_generator<IdentifierGenerator>(id_generator));
               // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
               data_expression cy = datar(application(constructor, y.begin(), y.end()), sigma);
               sigma[v1] = cy;
@@ -644,6 +646,8 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
 {
   public:
     typedef enumerator_algorithm<Rewriter, DataRewriter> super;
+
+    utilities::number_postfix_generator id_generator;
 
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
@@ -720,7 +724,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
                 const DataRewriter& datar,
                 std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                 bool throw_exceptions = false)
-      : super(R, dataspec, datar, max_count, throw_exceptions)
+      : super(R, dataspec, datar, id_generator, max_count, throw_exceptions)
     {}
 
     /// \brief Returns an iterator that enumerates solutions for variables that satisfy a condition

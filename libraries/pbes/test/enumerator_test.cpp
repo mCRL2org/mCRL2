@@ -46,7 +46,8 @@ void test_enumerator()
   v.push_front(data::variable("n", data::sort_nat::nat()));
   pbes_expression phi = parse_pbes_expression("val(n < 2)", VARSPEC);
   data::mutable_indexed_substitution<> sigma;
-  data::enumerator_algorithm<pbes_rewriter> E(R, data_spec, datar);
+  utilities::number_postfix_generator id_generator;
+  data::enumerator_algorithm<pbes_rewriter> E(R, data_spec, datar, id_generator);
   std::vector<pbes_system::pbes_expression> solutions;
   std::deque<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
