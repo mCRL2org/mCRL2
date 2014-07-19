@@ -28,7 +28,7 @@ atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
   std::vector<T> result;
   for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
   {
-    result.push_back(update_copy(*i));
+    result.push_back(atermpp::vertical_cast<T>(update_copy(*i)));
   }
   return atermpp::convert<atermpp::term_list<T> >(result);
 }
