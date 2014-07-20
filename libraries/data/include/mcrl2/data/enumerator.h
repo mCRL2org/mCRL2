@@ -18,6 +18,7 @@
 #include <sstream>
 #include <utility>
 #include <boost/iterator/iterator_facade.hpp>
+#include "mcrl2/atermpp/function_symbol_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
@@ -310,6 +311,35 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
   return out << "{ variables = " << core::detail::print_list(p.variables()) << ", expression = " << p.expression() << " }";
 }
 
+#ifdef MCRL2_NEW_IDENTIFIER_GENERATOR
+class enumerator_identifier_generator
+{
+  protected:
+    atermpp::function_symbol_generator f;
+
+  public:
+    /// \brief Constructor
+    /// \param The prefix of the generated generated strings
+    /// \pre The prefix may not be empty, and it may not have trailing digits
+    enumerator_identifier_generator(const std::string& prefix = "@x")
+      : f(prefix)
+    { }
+
+    /// \brief Generates a unique function symbol with the given prefix followed by a number.
+    core::identifier_string operator()(const std::string& = "", bool = false)
+    {
+      return core::identifier_string(f());
+    }
+
+   void clear()
+   {
+     f.clear();
+   }
+};
+#else
+typedef utilities::number_postfix_generator enumerator_identifier_generator;
+#endif
+
 template <typename IdentifierGenerator>
 struct sort_name_generator
 {
@@ -326,7 +356,7 @@ struct sort_name_generator
 };
 
 /// \brief An enumerator algorithm that generates solutions of a condition.
-template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter, typename IdentifierGenerator = utilities::number_postfix_generator>
+template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter, typename IdentifierGenerator = data::enumerator_identifier_generator>
 class enumerator_algorithm
 {
   protected:
@@ -647,7 +677,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
   public:
     typedef enumerator_algorithm<Rewriter, DataRewriter> super;
 
-    utilities::number_postfix_generator id_generator;
+    data::enumerator_identifier_generator id_generator;
 
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as

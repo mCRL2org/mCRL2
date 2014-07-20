@@ -61,7 +61,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   /// \param r A data rewriter
   /// \param dataspec A data specification
   /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well
-  enumerate_quantifiers_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, utilities::number_postfix_generator& id_generator, bool enumerate_infinite_sorts = true)
+  enumerate_quantifiers_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, data::enumerator_identifier_generator& id_generator, bool enumerate_infinite_sorts = true)
     : super(R, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec, R, id_generator)
   {
     id_generator.clear();
@@ -201,7 +201,7 @@ struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, 
   using super::leave;
   using super::operator();
 
-  apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, utilities::number_postfix_generator& id_generator, bool enumerate_infinite_sorts)
+  apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, data::enumerator_identifier_generator& id_generator, bool enumerate_infinite_sorts)
     : super(R, sigma, dataspec, id_generator, enumerate_infinite_sorts)
   {}
 
@@ -212,7 +212,7 @@ struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, 
 
 template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
 apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>
-make_apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, utilities::number_postfix_generator& id_generator, bool enumerate_infinite_sorts)
+make_apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, data::enumerator_identifier_generator& id_generator, bool enumerate_infinite_sorts)
 {
   return apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>(R, sigma, dataspec, id_generator, enumerate_infinite_sorts);
 }
@@ -231,7 +231,7 @@ struct enumerate_quantifiers_rewriter
   /// \brief If true, quantifier variables of infinite sort are enumerated.
   bool m_enumerate_infinite_sorts;
 
-  mutable utilities::number_postfix_generator m_id_generator;
+  mutable data::enumerator_identifier_generator m_id_generator;
 
   typedef pbes_expression term_type;
   typedef data::variable variable_type;

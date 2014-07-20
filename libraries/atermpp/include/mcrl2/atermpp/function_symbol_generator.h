@@ -28,6 +28,7 @@ class function_symbol_generator
     std::string m_prefix;
     size_t m_index;
     std::unique_ptr<char[]> m_string_buffer;
+    size_t m_initial_index; // cache the value that is set in the constructor
 
   public:
     /// \brief Constructor
@@ -47,6 +48,13 @@ class function_symbol_generator
       m_index = detail::get_sufficiently_large_postfix_index(prefix);
       detail::index_increaser increase_m_index(m_index);
       detail::register_function_symbol_prefix_string(prefix,increase_m_index);
+      m_initial_index = m_index;
+    }
+
+    /// \brief Restores the index back to the value that was initially assigned in the constructor.
+    void clear()
+    {
+      m_index = m_initial_index;
     }
 
     ~function_symbol_generator()
