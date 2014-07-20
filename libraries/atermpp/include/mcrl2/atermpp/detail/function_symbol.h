@@ -45,28 +45,32 @@ extern size_t get_sufficiently_large_postfix_index(const std::string& prefix_);
 // Ugly class, to be replaced by a lambda function.
 struct index_increaser
 {
+  size_t* m_initial_index;
   size_t* m_index;
 
   index_increaser()
    : m_index(NULL)
   {}
 
-  index_increaser(size_t& index)
-   : m_index(&index)
+  index_increaser(size_t& initial_index, size_t& index)
+   : m_initial_index(&initial_index), m_index(&index)
   {}
 
   index_increaser(const index_increaser& other)
-   : m_index(other.m_index)
+   : m_initial_index(other.m_initial_index),
+     m_index(other.m_index)
   {}
 
   index_increaser& operator=(const index_increaser& other)
   {
+    m_initial_index=other.m_initial_index;
     m_index=other.m_index;
     return *this;
   }
 
   void operator ()(size_t new_index)
   {
+    *m_initial_index=new_index;
     if (*m_index<new_index)
     {
       *m_index=new_index;
