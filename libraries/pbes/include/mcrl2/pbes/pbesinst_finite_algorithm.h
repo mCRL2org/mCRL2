@@ -273,6 +273,10 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     core::identifier_string X = m_rename(init.name(), finite_parameters);
     return propositional_variable_instantiation(X, infinite_parameters);
   }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
 };
 
 } // namespace detail
