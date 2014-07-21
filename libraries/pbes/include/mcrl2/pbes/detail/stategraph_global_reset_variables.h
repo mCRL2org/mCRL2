@@ -67,8 +67,8 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         auto const& v = i->second;
 #endif
         std::set<data::variable> dx = propvar_parameters(v.name());
-        v.set_marking(data::detail::set_intersection(v.sig, dx));
-        mCRL2log(log::debug, "stategraph") << "vertex " << v << " sig = " << core::detail::print_set(v.sig) << " dx = " << core::detail::print_set(dx) << "\n";
+        v.set_marking(data::detail::set_intersection(v.sig(), dx));
+        mCRL2log(log::debug, "stategraph") << "vertex " << v << " sig = " << core::detail::print_set(v.sig()) << " dx = " << core::detail::print_set(dx) << "\n";
       }
       mCRL2log(log::debug, "stategraph") << "--- initial control flow marking ---\n" << G.print_marking();
 
@@ -99,21 +99,21 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
           for (auto li = labels.begin(); li != labels.end(); ++li)
           {
             std::size_t i = *li;
-            std::size_t last_size = u.marking.size();
+            std::size_t last_size = u.marking().size();
             const stategraph_equation& eq_X = *find_equation(m_pbes, u.name());
             const propositional_variable_instantiation& Y = eq_X.predicate_variables()[i].variable();
             std::set<data::variable> dx = propvar_parameters(u.name());
-            mCRL2log(log::debug, "stategraph") << "  vertex u = " << v << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking) << std::endl;
+            mCRL2log(log::debug, "stategraph") << "  vertex u = " << v << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking()) << std::endl;
             for (auto j = I.begin(); j != I.end(); ++j)
             {
               std::size_t m = *j;
               data::data_expression_list e = Y.parameters();
               data::data_expression e_m = nth_element(e, m);
               std::set<data::variable> fv = data::find_free_variables(e_m);
-              u.set_marking(data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking));
+              u.set_marking(data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking()));
               mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << core::detail::print_set(fv) << " dx = " << core::detail::print_set(dx) << "\n";
             }
-            if (u.marking.size() > last_size)
+            if (u.marking().size() > last_size)
             {
               todo.insert(&u);
               mCRL2log(log::debug, "stategraph") << "updated marking " << u.print_marking() << " using edge " << pbes_system::pp(Y) << "\n";
@@ -125,21 +125,21 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         {
           stategraph_vertex& u = *(ei->source);
           std::size_t i = ei->label;
-          std::size_t last_size = u.marking.size();
+          std::size_t last_size = u.marking().size();
           const stategraph_equation& eq_X = *find_equation(m_pbes, u.name());
           const propositional_variable_instantiation& Y = eq_X.predicate_variables()[i].variable();
           std::set<data::variable> dx = propvar_parameters(u.name());
-          mCRL2log(log::debug, "stategraph") << "  vertex u = " << v << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking) << std::endl;
+          mCRL2log(log::debug, "stategraph") << "  vertex u = " << v << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking()) << std::endl;
           for (auto j = I.begin(); j != I.end(); ++j)
           {
             std::size_t m = *j;
             data::data_expression_list e = Y.parameters();
             data::data_expression e_m = nth_element(e, m);
             std::set<data::variable> fv = data::find_free_variables(e_m);
-            u.set_marking(data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking));
+            u.set_marking(data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking()));
             mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << core::detail::print_set(fv) << " dx = " << core::detail::print_set(dx) << "\n";
           }
-          if (u.marking.size() > last_size)
+          if (u.marking().size() > last_size)
           {
             todo.insert(&u);
             mCRL2log(log::debug, "stategraph") << "updated marking " << u.print_marking() << " using edge " << pbes_system::pp(Y) << "\n";
@@ -160,7 +160,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         const std::vector<data::variable>& d = eqn.parameters();
         for (auto j = d.begin(); j != d.end(); ++j)
         {
-          v.add_marked_parameter(v.marking.find(*j) != v.marking.end());
+          v.add_marked_parameter(v.marking().find(*j) != v.marking().end());
         }
       }
     }
@@ -218,8 +218,8 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
 
         // Now build the actual formula
         std::vector<data::data_expression> r;
-        std::size_t N = u.marked_parameters.size();
-        assert(e.size() == u.marked_parameters.size());
+        std::size_t N = u.marked_parameters().size();
+        assert(e.size() == u.marked_parameters().size());
         data::data_expression_list::const_iterator k = u.values().begin();
         data::data_expression condition = data::sort_bool::true_();
         for (std::size_t j = 0; j < N; ++j)
