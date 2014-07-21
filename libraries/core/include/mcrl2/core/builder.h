@@ -83,7 +83,7 @@ struct builder
                )
   {
     msg("aterm update copy");
-    return static_cast<Derived&>(*this)(x);
+    return atermpp::vertical_cast<T>(static_cast<Derived&>(*this)(x));
   }
 
   // non-aterm update copy
