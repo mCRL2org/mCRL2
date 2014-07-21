@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 
-// #define MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
+#define MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
 
 #include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
@@ -214,7 +214,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
       {
         if (cfp[k] == l)
         {
-          return l;
+          return k;
         }
       }
       throw mcrl2::runtime_error("no index found in stategraph_global_algorithm::unproject");
@@ -245,10 +245,6 @@ class stategraph_global_algorithm: public stategraph_algorithm
           auto p = Yf.copy(cfp_Y[l]);
           assert(p != data::undefined_index());
           std::size_t k = unproject(cfp_X, p);
-          if (!k < e.size())
-          {
-            std::cout << "p = " << p << ", k = " << k << ", e = " << core::detail::print_list(e) << ", d = " << core::detail::print_list(eq_X.control_flow_parameters()) << std::endl;
-          }
           assert(k < e.size());
           f.push_back(nth_element(e, k));
         }
