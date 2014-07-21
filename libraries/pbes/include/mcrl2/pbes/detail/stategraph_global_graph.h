@@ -72,6 +72,9 @@ struct stategraph_edge
   std::string print() const;
 };
 
+struct stategraph_vertex;
+std::ostream& operator<<(std::ostream& out, const stategraph_vertex& u);
+
 // vertex of the control flow graph
 struct stategraph_vertex
 {
@@ -79,8 +82,8 @@ struct stategraph_vertex
   std::set<stategraph_edge> incoming_edges;
   std::set<stategraph_edge> outgoing_edges;
   std::set<data::variable> sig;
-  std::set<data::variable> marking;    // used in the reset variables procedure
-  std::vector<bool> marked_parameters; // will be set after computing the marking
+  mutable std::set<data::variable> marking;    // used in the reset variables procedure
+  mutable std::vector<bool> marked_parameters; // will be set after computing the marking
 
   stategraph_vertex(const propositional_variable_instantiation& X_)
     : X(X_)
@@ -142,6 +145,16 @@ struct stategraph_vertex
     return marked_parameters[i];
   }
 
+  void add_marked_parameter(bool b) const
+  {
+    marked_parameters.push_back(b);
+  }
+
+  void set_marking(const std::set<data::variable>& marking) const
+  {
+    this->marking = marking;
+  }
+
   std::string print_marking() const
   {
     std::ostringstream out;
@@ -149,7 +162,22 @@ struct stategraph_vertex
     return out.str();
   }
 
+  const core::identifier_string& name() const
+  {
+    return X.name();
+  }
+
+  const data::data_expression_list& values() const
+  {
+    return X.parameters();
+  }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const stategraph_vertex& u)
+{
+  return out << u.X;
+}
 
 inline
 std::string stategraph_edge::print() const
@@ -169,6 +197,7 @@ struct stategraph_global_graph
 
   typedef std::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
   typedef std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator vertex_const_iterator;
+  typedef stategraph_vertex vertex_type;
 
   void create_index()
   {

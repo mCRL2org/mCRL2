@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 
+// #define MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
+
 #include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
@@ -29,6 +31,9 @@ class stategraph_global_algorithm: public stategraph_algorithm
 {
   public:
     typedef stategraph_algorithm super;
+
+//------------------------------------------------------------------------------------------------//
+#ifndef MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
     typedef stategraph_global_graph::vertex_iterator vertex_iterator;
 
   protected:
@@ -163,6 +168,8 @@ class stategraph_global_algorithm: public stategraph_algorithm
       }
 
       m_control_flow_graph.create_index();
+      mCRL2log(log::verbose) << "Computed global control flow graph" << std::endl;
+      mCRL2log(log::debug) << m_control_flow_graph.print(print_map());
     }
 
     // used for printing the control flow graph
@@ -177,6 +184,11 @@ class stategraph_global_algorithm: public stategraph_algorithm
       }
       return result;
     }
+//------------------------------------------------------------------------------------------------//
+#else
+  protected:
+    // the control flow graph
+    global_control_flow_graph m_control_flow_graph;
 
     // eq_X is the equation corresponding to u = (X, e)
     // eq_Y is the equation corresponding to Yf
@@ -233,20 +245,39 @@ class stategraph_global_algorithm: public stategraph_algorithm
           auto p = Yf.copy(cfp_Y[l]);
           assert(p != data::undefined_index());
           std::size_t k = unproject(cfp_X, p);
-
+          if (!k < e.size())
+          {
+            std::cout << "p = " << p << ", k = " << k << ", e = " << core::detail::print_list(e) << ", d = " << core::detail::print_list(eq_X.control_flow_parameters()) << std::endl;
+          }
+          assert(k < e.size());
           f.push_back(nth_element(e, k));
         }
       }
       return G.insert_vertex(global_control_flow_graph_vertex(Yf.variable().name(), data::data_expression_list(f.begin(), f.end())));
     }
 
-    void compute_global_control_flow_graph_new()
+    void compute_significant_variables()
+    {
+      pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
+      for (auto i = m_control_flow_graph.begin(); i != m_control_flow_graph.end(); ++i)
+      {
+        auto const& u = *i;
+        auto const& X = u.name();
+        auto const& eq_X = *find_equation(m_pbes, X);
+        auto const& d = eq_X.control_flow_parameters();
+        auto const& e = u.values();
+        assert(d.size() == e.size());
+        data::sequence_sequence_substitution<data::variable_vector, data::data_expression_list> sigma(d, e);
+        u.set_significant_variables(pbes_system::algorithms::significant_variables(pbesr(eq_X.formula(), sigma)));
+      }
+    }
+
+    void compute_global_control_flow_graph()
     {
       using utilities::detail::contains;
       using utilities::detail::pick_element;
 
-      mCRL2log(log::debug, "stategraph") << "--- compute_global_control_flow_graph_new" << std::endl;
-      global_control_flow_graph G;
+      mCRL2log(log::debug, "stategraph") << "=== compute control flow graph ===" << std::endl;
       std::set<const global_control_flow_graph_vertex*> todo;
       std::set<const global_control_flow_graph_vertex*> done;
 
@@ -254,7 +285,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
       auto const& Xinit = m_pbes.initial_state();
       auto const& eq_X = *find_equation(m_pbes, Xinit.name());
       auto einit = eq_X.project(Xinit.parameters());
-      auto const& u = G.insert_vertex(global_control_flow_graph_vertex(Xinit.name(), einit));
+      auto const& u = m_control_flow_graph.insert_vertex(global_control_flow_graph_vertex(Xinit.name(), einit));
       todo.insert(&u);
 
       while (!todo.empty())
@@ -274,8 +305,8 @@ class stategraph_global_algorithm: public stategraph_algorithm
           auto const& eq_Y = *find_equation(m_pbes, Y);
           if (enabled_edge(u, eq_X, Yf, eq_Y))
           {
-            const global_control_flow_graph_vertex& v = compute_vertex(G, u, eq_X, Yf, eq_Y);
-            G.insert_edge(u, i, v);
+            const global_control_flow_graph_vertex& v = compute_vertex(m_control_flow_graph, u, eq_X, Yf, eq_Y);
+            m_control_flow_graph.insert_edge(u, i, v);
             if (!contains(done, &v))
             {
               mCRL2log(log::debug1, "stategraph") << "insert todo element " << v << std::endl;
@@ -285,9 +316,12 @@ class stategraph_global_algorithm: public stategraph_algorithm
           }
         }
       }
-      mCRL2log(log::debug) << "--- new global control flow graph ---\n" << G << std::endl;
+      m_control_flow_graph.compute_index();
+      compute_significant_variables();
+      mCRL2log(log::debug) << "--- global control flow graph ---\n" << m_control_flow_graph << std::endl;
     }
-
+//------------------------------------------------------------------------------------------------//
+#endif
   public:
     stategraph_global_algorithm(const pbes& p, const pbesstategraph_options& options)
       : stategraph_algorithm(p, options)
@@ -300,9 +334,6 @@ class stategraph_global_algorithm: public stategraph_algorithm
       start_timer("compute_global_control_flow_graph");
       compute_global_control_flow_graph();
       finish_timer("compute_global_control_flow_graph");
-      mCRL2log(log::verbose) << "Computed global control flow graph" << std::endl;
-      mCRL2log(log::debug) << m_control_flow_graph.print(print_map());
-      compute_global_control_flow_graph_new();
     }
 };
 
