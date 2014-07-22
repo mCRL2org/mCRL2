@@ -42,6 +42,14 @@ void test_generator()
   function_symbol a100("a100", 0);
   g = agenerator();
   BOOST_CHECK(g.name() == "a101");
+
+  function_symbol_generator zgen("z");
+  function_symbol q1 = zgen();
+  zgen.clear();
+  function_symbol q2 = zgen();
+  BOOST_CHECK(q1 == q2);
+  std::cout << "q1 == " << q1 << std::endl;
+  std::cout << "q2 == " << q2 << std::endl;
 }
 
 int test_main(int argc, char* argv[])
