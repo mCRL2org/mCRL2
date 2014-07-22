@@ -48,8 +48,8 @@ void test_generator()
   zgen.clear();
   function_symbol q2 = zgen();
   BOOST_CHECK(q1 == q2);
-  std::cout << "q1 == " << q1 << std::endl;
-  std::cout << "q2 == " << q2 << std::endl;
+  std::cout << "q1 == " << q1 << " name = " << q1.name() << " arity = " << q1.arity() << " number = " << q1.number() << std::endl;
+  std::cout << "q2 == " << q2 << " name = " << q2.name() << " arity = " << q2.arity() << " number = " << q2.number() << std::endl;
 }
 
 int test_main(int argc, char* argv[])
