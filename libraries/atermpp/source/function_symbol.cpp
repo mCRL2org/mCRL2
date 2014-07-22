@@ -334,6 +334,21 @@ function_symbol::function_symbol(const char* name_begin, const char* name_end, c
 {
   initialize_function_symbol_administration();
   const HashNumber hnr = detail::calculate_hash_of_function_symbol(name_begin, name_end, arity_) & detail::function_symbol_table_mask;
+  /* Find symbol in table */
+  detail::_function_symbol* cur = detail::function_symbol_hashtable[hnr];
+  std::string name(name_begin);
+  while (cur!=detail::END_OF_LIST)
+  { 
+    if (cur->arity==arity_ && cur->name==name)
+    {
+      // The function_symbol was already present. Return it.
+      m_function_symbol=cur;
+      increase_reference_count<true>();
+      return;
+    }
+    cur = cur->next;
+  }
+
 
   // The function symbol does not exist. Make it.
   if (detail::function_symbol_free_list==detail::END_OF_LIST) // There is no free place in function_lookup_table() to store an function_symbol.
@@ -341,10 +356,10 @@ function_symbol::function_symbol(const char* name_begin, const char* name_end, c
     detail::create_new_function_symbol_block();
   }
 
-  detail::_function_symbol* cur=detail::function_symbol_free_list;
+  cur=detail::function_symbol_free_list;
   detail::function_symbol_free_list = cur->next;
   assert(cur->reference_count==0);
-  cur->name=std::string(name_begin);   
+  cur->name=name;
   cur->arity=arity_;
   cur->next=detail::function_symbol_hashtable[hnr];
   
