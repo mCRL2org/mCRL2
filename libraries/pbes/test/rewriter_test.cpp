@@ -557,20 +557,6 @@ void test_substitutions3()
   data::rewriter datar(data_spec);
   pbes_system::enumerate_quantifiers_rewriter r(datar, data_spec);
 
-  // TODO: Find out why sigma gets corrupted with clang 3.5 in case of an indexed substitution
-  data::mutable_indexed_substitution<> sigma;
-  // data::mutable_map_substitution<> sigma;
-  sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
-  sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
-  sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");
-  sigma[data::parse_variable("bst1_K:Bool")]         = data::parse_data_expression("false");
-  sigma[data::parse_variable("k_K:Nat")]             = data::parse_data_expression("0");
-  sigma[data::parse_variable("bst2_L:Bool")]         = data::parse_data_expression("false");
-  sigma[data::parse_variable("bst3_L:Bool")]         = data::parse_data_expression("false");
-  sigma[data::parse_variable("k_L:Nat")]             = data::parse_data_expression("0");
-  sigma[data::parse_variable("l'_R:Nat")]            = data::parse_data_expression("0");
-  sigma[data::parse_variable("b_R:BBuf", data_spec)] = data::normalize_sorts(data::parse_data_expression("[false, false]"),data_spec);
-
   std::string var_decl =
     "datavar                                                     \n"
     "  l_S:Nat    ;                                              \n"
@@ -588,19 +574,24 @@ void test_substitutions3()
     "  X: Nat, Nat, Bool, Bool, Nat, Bool, Bool, Nat, Nat, BBuf; \n"
     ;
 
-  std::ostringstream out1;
-  out1 << sigma;
   pbes_system::pbes_expression phi = pbes_system::parse_pbes_expression("forall k_S2_00: Nat. val(!(k_S2_00 < m_S && !bst_K && !bst1_K)) || X(l_S, m_S, false, true, (l_S + k_S2_00) mod 4, bst2_L, bst3_L, k_L, l'_R, b_R)", var_decl, DATA_SPEC);
-  std::ostringstream out2;
-  out2 << sigma;
-  if (out1.str() != out2.str())
-  {
-    std::cout << "ERROR: substitution got corrupted!" << std::endl;
-    std::cout << "out1.str() = " << out1.str() << std::endl;
-    std::cout << "out2.str() = " << out2.str() << std::endl;
-  }
-  BOOST_CHECK(out1.str() == out2.str());
-  // pbes_system::pbes_expression x = r(phi, sigma);
+
+  // Note: the variables below do not exist elsewhere. So if a mutable_indexed_substitution is used,
+  // they are immediately destroyed after parsing. The resulting substitution is not safe to use,
+  // since it refers to variables that no longer exist.
+  data::mutable_map_substitution<> sigma;
+  sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");
+  sigma[data::parse_variable("bst1_K:Bool")]         = data::parse_data_expression("false");
+  sigma[data::parse_variable("k_K:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_variable("bst2_L:Bool")]         = data::parse_data_expression("false");
+  sigma[data::parse_variable("bst3_L:Bool")]         = data::parse_data_expression("false");
+  sigma[data::parse_variable("k_L:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_variable("l'_R:Nat")]            = data::parse_data_expression("0");
+  sigma[data::parse_variable("b_R:BBuf", data_spec)] = data::normalize_sorts(data::parse_data_expression("[false, false]"),data_spec);
+
+  pbes_system::pbes_expression x = r(phi, sigma);
 }
 
 void test_substitutions4()
