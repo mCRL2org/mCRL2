@@ -261,14 +261,10 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   using super::print_abstraction;
   using super::print_variables;
   using super::print_expression;
+  using super::print_list;
 
   // Determines whether or not data expressions should be wrapped inside 'val'.
   std::vector<bool> val;
-
-  bool print_val() const
-  {
-    return val.empty();
-  }
 
   void disable_val()
   {
@@ -288,15 +284,18 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
 
   void operator()(const data::data_expression& x)
   {
+    bool print_val = val.empty();
     derived().enter(x);
-    if (print_val())
+    if (print_val)
     {
+      disable_val();
       derived().print("val(");
     }
     super::operator()(x);
-    if (print_val())
+    if (print_val)
     {
       derived().print(")");
+      enable_val();
     }
     derived().leave(x);
   }
@@ -345,20 +344,16 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
 
   void operator()(const state_formulas::forall& x)
   {
-    disable_val();
     derived().enter(x);
     print_abstraction(x, "forall");
     derived().leave(x);
-    enable_val();
   }
 
   void operator()(const state_formulas::exists& x)
   {
-    disable_val();
     derived().enter(x);
     print_abstraction(x, "exists");
     derived().leave(x);
-    enable_val();
   }
 
   void operator()(const state_formulas::must& x)
@@ -426,7 +421,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     disable_val();
     derived().enter(x);
     derived()(x.name());
-    print_variables(x.arguments(), false);
+    print_list(x.arguments(), "(", ")", ", ", false);
     derived().leave(x);
     enable_val();
   }

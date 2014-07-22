@@ -8,11 +8,11 @@
 
 
 # ########## Project setup ##########
-project(lps_tests)
+project(modal_formula_tests)
 cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
-set(PREFIX "lps")
+set(PREFIX "modal_formula")
 
 file(GLOB TERM_OBJS "*.cpp")
 

@@ -67,6 +67,7 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURR
   add_subdirectory( libraries/process/test )
   add_subdirectory( libraries/atermpp/test )
   add_subdirectory( libraries/trace/test )
+  add_subdirectory( libraries/modal_formula/test )
 
 ##---------------------------------------------------
 ## Experimental tool dependencies
