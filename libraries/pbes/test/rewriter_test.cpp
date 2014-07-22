@@ -558,8 +558,8 @@ void test_substitutions3()
   pbes_system::enumerate_quantifiers_rewriter r(datar, data_spec);
 
   // TODO: Find out why sigma gets corrupted with clang 3.5 in case of an indexed substitution
-  // data::mutable_indexed_substitution<> sigma;
-  data::mutable_map_substitution<> sigma;
+  data::mutable_indexed_substitution<> sigma;
+  // data::mutable_map_substitution<> sigma;
   sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");
@@ -588,10 +588,19 @@ void test_substitutions3()
     "  X: Nat, Nat, Bool, Bool, Nat, Bool, Bool, Nat, Nat, BBuf; \n"
     ;
 
-  std::cout << "sigma1 = " << sigma << std::endl;
+  std::ostringstream out1;
+  out1 << sigma;
   pbes_system::pbes_expression phi = pbes_system::parse_pbes_expression("forall k_S2_00: Nat. val(!(k_S2_00 < m_S && !bst_K && !bst1_K)) || X(l_S, m_S, false, true, (l_S + k_S2_00) mod 4, bst2_L, bst3_L, k_L, l'_R, b_R)", var_decl, DATA_SPEC);
-  std::cout << "sigma2 = " << sigma << std::endl;
-  pbes_system::pbes_expression x = r(phi, sigma);
+  std::ostringstream out2;
+  out2 << sigma;
+  if (out1.str() != out2.str())
+  {
+    std::cout << "ERROR: substitution got corrupted!" << std::endl;
+    std::cout << "out1.str() = " << out1.str() << std::endl;
+    std::cout << "out2.str() = " << out2.str() << std::endl;
+  }
+  BOOST_CHECK(out1.str() == out2.str());
+  // pbes_system::pbes_expression x = r(phi, sigma);
 }
 
 void test_substitutions4()
