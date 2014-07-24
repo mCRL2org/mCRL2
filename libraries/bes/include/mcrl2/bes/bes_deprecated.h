@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <deque>
 #include <map>
+#include <time.h>
 
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/utilities/logger.h"
@@ -1176,7 +1177,6 @@ class boolean_equation_system
     std::vector<bes_expression> right_hand_sides;
     bool variable_occurrences_are_stored;
     std::vector< std::set <variable_type> > variable_occurrence_sets;
-    atermpp::indexed_set<bes_expression> variable_relevance_indexed_set;
     bool count_variable_relevance;
     std::vector < std::deque < counter_example> > data_to_construct_counter_example;
     bool construct_counter_example;
@@ -1451,15 +1451,6 @@ class boolean_equation_system
         return;
       }
 
-      if (bes_global_variables<size_t>::opt_use_hashtables)
-      {
-        if (!(variable_relevance_indexed_set.put(b)).second)
-        {
-          /* The relevance for the variables in this term has already been set */
-          return;
-        }
-      }
-
       if (is_variable(b))
       {
         variable_type v=get_variable(b);
@@ -1508,10 +1499,6 @@ class boolean_equation_system
       if (count_variable_relevance)
       {
         reset_variable_relevance();
-        if (bes_global_variables<size_t>::opt_use_hashtables)
-        {
-          variable_relevance_indexed_set.clear();
-        }
         if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
         {
           todo.clear();
@@ -1910,7 +1897,6 @@ class boolean_equation_system
       right_hand_sides(1),
       variable_occurrences_are_stored(false),
       variable_occurrence_sets(1),
-      variable_relevance_indexed_set(10,50),
       count_variable_relevance(false),
       data_to_construct_counter_example(1),
       construct_counter_example(false),
@@ -2037,7 +2023,7 @@ class boolean_equation_system
 
       size_t relevance_counter=0;
       size_t relevance_counter_limit=100;
-#define RELEVANCE_DIVIDE_FACTOR 100
+#define RELEVANCE_DIVIDE_FACTOR 10
 
       mCRL2log(mcrl2::log::verbose) << "Computing a BES from the PBES...." << std::endl;
 
@@ -2051,6 +2037,7 @@ class boolean_equation_system
       // Variables used in whole function
       size_t nr_of_processed_variables = 1;
       size_t nr_of_generated_variables = 2;
+      time_t last_log_time = time(NULL) - 1;
 
       // As long as there are states to be explored
       while ((opt_strategy>=on_the_fly)
@@ -2236,7 +2223,6 @@ class boolean_equation_system
                 // Take the lowest element for substitution, to generate
                 // short counterexample.
 
-                // mCRL2log(mcrl2::log::verbose) << "------------------ " << (size_t)w << "" << std::endl;
                 to_set_to_true_or_false.erase(w);
                 for (std::set <variable_type>::iterator
                      v=variable_occurrence_set_begin(w);
@@ -2268,17 +2254,14 @@ class boolean_equation_system
           }
         }
         nr_of_processed_variables++;
-//Due to internal consistency checks, pbes2bool is slow in non NDEBUG mode.
-//More messages are therefore required.
-#ifdef NDEBUG
-        if (nr_of_processed_variables % 1000 == 0)
-#else
-        if (nr_of_processed_variables % 10 == 0)
-#endif
+
+        time_t new_log_time;
+        if (time(&new_log_time) > last_log_time)
         {
-          mCRL2log(mcrl2::log::verbose) << "Processed " << nr_of_processed_variables <<
-                      " and generated " << nr_of_generated_variables <<
-                      " boolean variables" << std::endl;
+          last_log_time = new_log_time;
+          mCRL2log(mcrl2::log::status) << "Processed " << nr_of_processed_variables <<
+                        " and generated " << nr_of_generated_variables <<
+                        " boolean variables" << std::endl;
         }
       }
       refresh_relevances();
