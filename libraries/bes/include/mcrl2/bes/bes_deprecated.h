@@ -94,7 +94,7 @@ enum transformation_strategy
 inline
 transformation_strategy parse_transformation_strategy(const std::string& s)
 {
-  if(s == "0") return lazy;
+  if (s == "0") return lazy;
   else if (s == "1") return optimize;
   else if (s == "2") return on_the_fly;
   else if (s == "3") return on_the_fly_with_fixed_points;
@@ -167,6 +167,80 @@ std::string description(const transformation_strategy s)
         " needed to generate an equation substantially.";
   }
   throw mcrl2::runtime_error("unknown transformation strategy");
+}
+
+
+/// \brief Search strategy when generating a BES from a PBES.
+enum search_strategy
+{
+  breadth_first, // Generate the rhs of the last generated BES variable last.
+  depth_first,   // Generate the rhs of the last generated BES variable first.
+  breadth_first_short,
+  depth_first_short
+};
+
+inline
+search_strategy parse_search_strategy(const std::string& s)
+{
+  if (s == "breadth-first") return breadth_first;
+  else if (s == "b") return breadth_first_short;
+  else if (s == "depth-first") return depth_first;
+  else if (s == "d") return depth_first_short;
+  else throw mcrl2::runtime_error("unknown search strategy " + s);
+}
+
+inline
+std::string print_search_strategy(const search_strategy s)
+{
+  switch(s)
+  {
+    case breadth_first: return "breadth-first";
+    case depth_first: return "depth-first";
+    case breadth_first_short: return "b";
+    case depth_first_short: return "d";
+  }
+  throw mcrl2::runtime_error("unknown search strategy");
+}
+
+inline
+std::istream& operator>>(std::istream& is, search_strategy& strategy)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    strategy = parse_search_strategy(s);
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const search_strategy s)
+{
+  os << print_search_strategy(s);
+  return os;
+}
+
+inline
+std::string description(const search_strategy s)
+{
+  switch(s)
+  {
+    case breadth_first: return "Compute the right hand side of the boolean variables"
+        " in a first come first served basis. This is comparable with a breadth-first search."
+        " This is good for generating counter examples. ";
+    case depth_first: return "Compute the right hand side of a boolean variables where "
+        " the last generated variable is investigated first. This corresponds to a depth-first "
+        " search. This can substantially outperform breadth-first search when the validity of a"
+        " formula is determined after a larger depths. ";
+    case breadth_first_short: return "Short hand for breadth-first.";
+    case depth_first_short: return "Short hand for depth-first.";
+  }
+  throw mcrl2::runtime_error("unknown search strategy");
 }
 
 
@@ -1889,7 +1963,8 @@ class boolean_equation_system
     boolean_equation_system(
       const mcrl2::pbes_system::pbes& pbes_spec,
       mcrl2::data::rewriter& data_rewriter,
-      const transformation_strategy opt_strategy=lazy,
+      const transformation_strategy opt_transformation_strategy=lazy,
+      const search_strategy opt_search_strategy=breadth_first,
       const bool opt_store_as_tree=false,
       const bool opt_construct_counter_example=false,
       const bool opt_use_hashtables=false):
@@ -1952,12 +2027,12 @@ class boolean_equation_system
                                            make space for a first equation of the shape X1=X2. */
 
       /* The following list contains that variables that need to be explored.
-         This list is only relevant if opt_strategy>=on_the_fly,
+         This list is only relevant if opt_transformation_strategy>=on_the_fly,
          as in the other case the variables to be investigated are those
          with indices between nre_of_processed_variables and nr_of_generated
          variables. */
       std::deque < variable_type> todo;
-      if (opt_strategy>=on_the_fly)
+      if (opt_transformation_strategy>=on_the_fly)
       {
         todo.push_front(2);
       }
@@ -1973,7 +2048,7 @@ class boolean_equation_system
       const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
       variable_index.put((internal_opt_store_as_tree)?store_as_tree(p1):atermpp::aterm_appl(p1));
 
-      if (opt_strategy>=on_the_fly)
+      if (opt_transformation_strategy>=on_the_fly)
       {
         store_variable_occurrences();
         count_variable_relevance_on();
@@ -2023,7 +2098,7 @@ class boolean_equation_system
 
       size_t relevance_counter=0;
       size_t relevance_counter_limit=100;
-#define RELEVANCE_DIVIDE_FACTOR 10
+#define RELEVANCE_DIVIDE_FACTOR 2
 
       mCRL2log(mcrl2::log::verbose) << "Computing a BES from the PBES...." << std::endl;
 
@@ -2040,15 +2115,25 @@ class boolean_equation_system
       time_t last_log_time = time(NULL) - 1;
 
       // As long as there are states to be explored
-      while ((opt_strategy>=on_the_fly)
+      while ((opt_transformation_strategy>=on_the_fly)
              ?todo.size()>0
              :(nr_of_processed_variables < nr_of_generated_variables))
       {
         variable_type variable_to_be_processed;
-        if (opt_strategy>=on_the_fly)
+        if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
         {
-          variable_to_be_processed=todo.front();
-          todo.pop_front();
+          if (opt_search_strategy==breadth_first)
+          { 
+            // Do a breadth-first search
+            variable_to_be_processed=todo.front();
+            todo.pop_front();
+          }
+          else 
+          {
+            // Do a depth-first search
+            variable_to_be_processed=todo.back();
+            todo.pop_back();
+          }
         }
         else
         {
@@ -2119,7 +2204,7 @@ class boolean_equation_system
                 variable_index,
                 nr_of_generated_variables,
                 opt_use_hashtables,
-                opt_strategy,
+                opt_transformation_strategy,
                 opt_construct_counter_example,
                 variable_to_be_processed);
           }
@@ -2137,7 +2222,7 @@ class boolean_equation_system
           }
 
 
-          if (opt_strategy>=on_the_fly_with_fixed_points)
+          if (opt_transformation_strategy>=on_the_fly_with_fixed_points)
           {
             // find a variable in the new_bes_expression from which `variable' to be
             // processed is reachable. If so, new_bes_expression can be set to
@@ -2175,7 +2260,7 @@ class boolean_equation_system
             }
           }
 
-          if ((opt_strategy>=on_the_fly))
+          if ((opt_transformation_strategy>=on_the_fly))
           {
             add_equation(
               variable_to_be_processed,
@@ -2206,11 +2291,11 @@ class boolean_equation_system
               new_bes_expression);
           }
 
-          if (opt_strategy>=on_the_fly)
+          if (opt_transformation_strategy>=on_the_fly)
           {
             if (is_true(new_bes_expression)||is_false(new_bes_expression))
             {
-              // new_bes_expression is true or false and opt_strategy is on the fly or higher.
+              // new_bes_expression is true or false and opt_transformation_strategy is on the fly or higher.
               // This means we must optimize the y substituting true/false for this variable
               // everywhere. For this we use the occurrence set.
 
@@ -2245,9 +2330,9 @@ class boolean_equation_system
                   {
                     to_set_to_true_or_false.insert(*v);
                   }
-                  relevance_counter++;
                   set_rhs(*v,b,w);
                 }
+                relevance_counter++;
                 clear_variable_occurrence_set(w);
               }
             }
@@ -2261,7 +2346,16 @@ class boolean_equation_system
           last_log_time = new_log_time;
           mCRL2log(mcrl2::log::status) << "Processed " << nr_of_processed_variables <<
                         " and generated " << nr_of_generated_variables <<
-                        " boolean variables" << std::endl;
+                        " boolean variables with a todo buffer of size ";
+          if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
+          {
+            mCRL2log(mcrl2::log::status) << todo.size();
+          }
+          else
+          {
+            mCRL2log(mcrl2::log::status) << nr_of_generated_variables-nr_of_processed_variables;
+          }
+          mCRL2log(mcrl2::log::status) << ".     " << std::endl;
         }
       }
       refresh_relevances();

@@ -74,7 +74,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
 {
   protected:
     // Tool options.
-    ::bes::transformation_strategy opt_strategy; // The strategy
+    ::bes::transformation_strategy opt_transformation_strategy; // The transformation strategy
+    ::bes::search_strategy opt_search_strategy;                 // The search strategy
     bool opt_use_hashtables;                   // The hashtable option
     bool opt_construct_counter_example;        // The counter example option
     bool opt_store_as_tree;                    // The tree storage option
@@ -102,7 +103,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
         "Generate a BES from a PBES and solve it. ",
         "Solves (P)BES from INFILE. "
         "If INFILE is not present, stdin is used. "),
-      opt_strategy(::bes::lazy),
+      opt_transformation_strategy(::bes::lazy),
+      opt_search_strategy(::bes::breadth_first),
       opt_use_hashtables(false),
       opt_construct_counter_example(false),
       opt_store_as_tree(false),
@@ -121,7 +123,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       opt_construct_counter_example = 0 < parser.options.count("counter");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
-      opt_strategy                  = parser.option_argument_as<transformation_strategy>("strategy");
+      opt_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
+      opt_search_strategy           = parser.option_argument_as<search_strategy>("search");
 
       if (parser.options.count("output")) // Output format is deprecated.
       {
@@ -140,6 +143,13 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
                  .add_value(::on_the_fly_with_fixed_points),
                  "use strategy STRAT:",
                  's').
+     add_option("search", make_enum_argument<search_strategy>("SEARCH")
+                 .add_value(breadth_first, true)
+                 .add_value(depth_first)
+                 .add_value(breadth_first_short)
+                 .add_value(depth_first_short),
+                 "use search strategy SEARCH:",
+                 'z').
       add_option("counter",
                  "print at the end a tree labelled with instantiations "
                  "of the left hand side of equations; this tree is an "
@@ -210,7 +220,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
         ::bes::boolean_equation_system(
           p,
           datar,
-          opt_strategy,
+          opt_transformation_strategy,
+          opt_search_strategy,
           opt_store_as_tree,
           opt_construct_counter_example,
           opt_use_hashtables);

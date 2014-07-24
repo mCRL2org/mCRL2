@@ -79,7 +79,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
   protected:
     // Tool options.
     /// The output file name
-    ::bes::transformation_strategy opt_strategy; // The strategy
+    ::bes::transformation_strategy opt_transformation_strategy; // The strategy to propagate true/false.
+    ::bes::search_strategy opt_search_strategy; // The search strategy (breadth or depth first).
     bool opt_use_hashtables;                   // The hashtable option
     bool opt_store_as_tree;                    // The tree storage option
     bool opt_data_elm;                         // The data elimination option
@@ -99,7 +100,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
         "Generate a BES from a PBES. ",
         "Reads the PBES from INFILE and writes an equivalent BES to OUTFILE. "
         "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
-      opt_strategy(::bes::lazy),
+      opt_transformation_strategy(::bes::lazy),
+      opt_search_strategy(::bes::breadth_first),
       opt_use_hashtables(false),
       opt_store_as_tree(false),
       opt_data_elm(true)
@@ -116,7 +118,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
-      opt_strategy                  = parser.option_argument_as<transformation_strategy>("strategy");
+      opt_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
+      opt_search_strategy           = parser.option_argument_as<search_strategy>("search");
     }
 
     void add_options(interface_description& desc)
@@ -130,6 +133,13 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
                  .add_value(on_the_fly_with_fixed_points),
                  "use strategy STRAT:",
                  's').
+      add_option("search", make_enum_argument<search_strategy>("SEARCH")
+                 .add_value(breadth_first, true)
+                 .add_value(depth_first)
+                 .add_value(breadth_first_short)
+                 .add_value(depth_first_short),
+                 "use search strategy SEARCH:",
+                 'z').
       add_option("hashtables",
                  "use hashtables when substituting in bes equations, "
                  "and translate internal expressions to binary decision "
@@ -173,7 +183,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
         ::bes::boolean_equation_system(
           p,
           datar,
-          opt_strategy,
+          opt_transformation_strategy,
+          opt_search_strategy,
           opt_store_as_tree,
           false,  // No counter example
           opt_use_hashtables);
@@ -193,7 +204,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
           bes_equations=::bes::boolean_equation_system(
                             p,
                             pbesr,
-                            opt_strategy,
+                            opt_transformation_strategy,
+                            opt_search_strategy,
                             opt_store_as_tree,
                             false,    // No counter example
                             opt_use_hashtables);
@@ -213,7 +225,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
           bes_equations=::bes::boolean_equation_system(
                             p,
                             pbesr,
-                            opt_strategy,
+                            opt_transformation_strategy,
+                            opt_search_strategy,
                             opt_store_as_tree,
                             false,    // No counter example
                             opt_use_hashtables);
@@ -238,7 +251,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
           bes_equations=::bes::boolean_equation_system(
                             p,
                             pbesr2,
-                            opt_strategy,
+                            opt_transformation_strategy,
+                            opt_search_strategy,
                             opt_store_as_tree,
                             false,  // No counter example
                             opt_use_hashtables);
