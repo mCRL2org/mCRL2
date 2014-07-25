@@ -118,84 +118,16 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
 ## Tool tests
 ##---------------------------------------
 
-
-  #-------------
-  # abp.mcrl2
-  #-------------
-
-  # Conversion tools
-  set(testdir "${CMAKE_CURRENT_BINARY_DIR}/mcrl2-testoutput")
-  file( REMOVE_RECURSE ${testdir} )
-  file( MAKE_DIRECTORY ${testdir} )
-  add_test(NAME mcrl22lps_version COMMAND mcrl22lps --version)
-  add_test(NAME mcrl22lps_abp COMMAND mcrl22lps -v -D ${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2 ${testdir}/abp.lps)
-  add_test(NAME lpsinfo_abp COMMAND lpsinfo ${testdir}/abp.lps)
-  set_tests_properties( lpsinfo_abp PROPERTIES DEPENDS mcrl22lps_abp )
-  add_test(NAME lpsconstelm_abp COMMAND lpsconstelm -v ${testdir}/abp.lps ${testdir}/abp_celm.lps)
-  set_tests_properties( lpsconstelm_abp PROPERTIES DEPENDS mcrl22lps_abp )
-  add_test(NAME lpsparelm_abp COMMAND lpsparelm -v ${testdir}/abp_celm.lps ${testdir}/abp_celm_pelm.lps)
-  set_tests_properties( lpsparelm_abp PROPERTIES DEPENDS lpsconstelm_abp )
-  add_test(NAME lpssuminst_abp COMMAND lpssuminst -v ${testdir}/abp_celm_pelm.lps ${testdir}/abp_celm_pelm_sinst.lps)
-  set_tests_properties( lpssuminst_abp PROPERTIES DEPENDS lpsparelm_abp )
-  add_test(NAME lps2lts_abp COMMAND lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.aut  )
-  set_tests_properties( lps2lts_abp PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(NAME lps2lts_abp_fsm COMMAND lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.fsm  )
-  set_tests_properties( lps2lts_abp_fsm PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(NAME lps2lts_abp_dot COMMAND lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.dot  )
-  set_tests_properties( lps2lts_abp_dot PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(NAME lps2lts_abp_lts COMMAND lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.lts  )
-  set_tests_properties( lps2lts_abp_lts PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(NAME ltsinfo_abp COMMAND ltsinfo ${testdir}/abp_celm_pelm_sinst.aut )
-  set_tests_properties( ltsinfo_abp PROPERTIES DEPENDS lps2lts_abp )
-  add_test(NAME ltsinfo_abp_fsm COMMAND ltsinfo ${testdir}/abp_celm_pelm_sinst.fsm )
-  set_tests_properties( ltsinfo_abp_fsm PROPERTIES DEPENDS lps2lts_abp_fsm )
-  add_test(NAME ltsinfo_abp_lts COMMAND ltsinfo ${testdir}/abp_celm_pelm_sinst.lts )
-  set_tests_properties( ltsinfo_abp_lts PROPERTIES DEPENDS lps2lts_abp_lts )
-  add_test(NAME lps2pbes_abp COMMAND lps2pbes -v -f${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.pbes)
-  set_tests_properties( lps2pbes_abp PROPERTIES DEPENDS lpssuminst_abp )
-  add_test(NAME pbes2bool_abp COMMAND pbes2bool -v ${testdir}/abp_celm_pelm_sinst.pbes)
-  set_tests_properties( pbes2bool_abp PROPERTIES DEPENDS lps2pbes_abp )
-  add_test(NAME tracepp_test COMMAND tracepp ${CMAKE_SOURCE_DIR}/examples/industrial/garage/movie.trc ${testdir}/movie.txt )
-  add_test(NAME lts2lps_test COMMAND lts2lps ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_lts.mcrl2)
-  set_tests_properties( lts2lps_test PROPERTIES DEPENDS lps2lts_abp_lts )
-  add_test(NAME ltsconvert_bisim_test COMMAND ltsconvert -ebisim ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_bisim.aut)
-  set_tests_properties( ltsconvert_bisim_test PROPERTIES DEPENDS lps2lts_abp_lts )
-
-  if( MCRL2_ENABLE_EXPERIMENTAL )
-    add_test(NAME pbesinst_abp COMMAND pbesinst -v ${testdir}/abp_celm_pelm_sinst.pbes ${testdir}/abp_celm_pelm_sinst_pinst.pbes)
-    set_tests_properties( pbesinst_abp PROPERTIES DEPENDS lps2pbes_abp )
-  endif( MCRL2_ENABLE_EXPERIMENTAL )
-
-  # Documentation tests
-  if (MCRL2_MAN_PAGES)
-    add_test(NAME mcrl22lps_generate-man-page COMMAND mcrl22lps --generate-man-page)
-    set_tests_properties(
-      mcrl22lps_generate-man-page
-    PROPERTIES
-      LABELS "${MCRL2_TEST_LABEL}"
-    )
-  endif(MCRL2_MAN_PAGES)
-  add_test(NAME mcrl22lps_generate-xml COMMAND mcrl22lps --generate-xml)
-
-
+# Documentation tests
+if (MCRL2_MAN_PAGES)
+  add_test(NAME mcrl22lps_generate-man-page COMMAND mcrl22lps --generate-man-page)
   set_tests_properties(
-    mcrl22lps_abp
-    mcrl22lps_generate-xml
-    lpsinfo_abp
-    lpsconstelm_abp
-    lpsparelm_abp
-    lpssuminst_abp
-    lps2lts_abp
-    ltsinfo_abp
-    pbes2bool_abp
-    lps2pbes_abp
-    tracepp_test
-    lts2lps_test
-    ltsconvert_bisim_test
+    mcrl22lps_generate-man-page
   PROPERTIES
     LABELS "${MCRL2_TEST_LABEL}"
   )
-
+endif(MCRL2_MAN_PAGES)
+add_test(NAME mcrl22lps_generate-xml COMMAND mcrl22lps --generate-xml)
 
 ##---------------------------------------
 ## Tool release tests
