@@ -139,7 +139,7 @@ if package == 'official-release-doc':
 #
 
 ctest_command = ['ctest', \
-                 '-T', 'Test', \
+                 # '-T', 'Test', \  # This seems to do something odd to the test dependencies
                  '--output-on-failure', \
                  '--no-compress-output', \
                  '-j{0}'.format(buildthreads)]
