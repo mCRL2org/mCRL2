@@ -41,8 +41,6 @@ struct t_lin_options
   bool add_delta;
   bool do_not_apply_constelm;
   mcrl2::data::rewriter::strategy rewrite_strategy;
-  std::string infilename;
-  std::string outfilename;
 
   t_lin_options()
     : lin_method(lmRegular),

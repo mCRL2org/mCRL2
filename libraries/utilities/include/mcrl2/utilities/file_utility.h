@@ -76,7 +76,14 @@ class stream_wrapper
 private:
   bool m_stdio;
   stream_type* m_stream;
+  stream_wrapper(const stream_wrapper&) {}
 public:
+  stream_wrapper(stream_wrapper&& other)
+    : m_stdio(other.m_stdio), m_stream(other.m_stream)
+  {
+    other.m_stream = NULL;
+  }
+
   stream_wrapper(const std::string& filename, bool text, stream_type* stdstream)
   {
     m_stdio = filename.empty() || filename == "-";
@@ -197,14 +204,6 @@ bool file_exists(const std::string& filename)
     return true;
   }
   return false;
-}
-
-inline
-std::string create_filename(const std::string& prefix = "file", const std::string& extension = ".txt")
-{
-  std::stringstream ss;
-  ss << prefix << time(nullptr) << extension;
-  return ss.str();
 }
 
 } // namespace utilities

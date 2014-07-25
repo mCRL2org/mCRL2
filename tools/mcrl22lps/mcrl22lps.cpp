@@ -26,38 +26,28 @@
 // #include "gc.h"  Required for ad hoc garbage collection. This is possible with ATcollect,
 // useful to find garbage collection problems.
 
-using namespace mcrl2::utilities;
-using namespace mcrl2::data::detail;
-using namespace mcrl2::process;
-using namespace mcrl2::log;
-
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
-using mcrl2::lps::t_lin_method;
-using mcrl2::lps::lmStack;
-using mcrl2::lps::lmRegular;
-using mcrl2::lps::lmRegular2;
-using mcrl2::lps::t_lin_options;
-using mcrl2::lps::linearise;
 
 class mcrl22lps_tool : public rewriter_tool< input_output_tool >
 {
     typedef rewriter_tool< input_output_tool > super;
 
   private:
-    t_lin_options m_linearisation_options;
+    mcrl2::lps::t_lin_options m_linearisation_options;
     bool noalpha;   // indicates whether alpha reduction is needed.
     bool opt_check_only;
 
   protected:
 
-    void add_options(interface_description& desc)
+    void add_options(mcrl2::utilities::interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("lin-method",make_enum_argument<t_lin_method>("NAME").
-                      add_value(lmRegular, true).
-                      add_value(lmRegular2).
-                      add_value(lmStack),
+      desc.add_option("lin-method",
+                      mcrl2::utilities::make_enum_argument<mcrl2::lps::t_lin_method>("NAME").
+                      add_value(mcrl2::lps::lmRegular, true).
+                      add_value(mcrl2::lps::lmRegular2).
+                      add_value(mcrl2::lps::lmStack),
                       "use linearisation method NAME:"
                       , 'l');
       desc.add_option("cluster",
@@ -140,7 +130,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
                       "check syntax and static semantics; do not linearise", 'e');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const mcrl2::utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
 
@@ -159,16 +149,14 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm") ||
                                                         0 < parser.options.count("no-rewrite");
 
-      m_linearisation_options.lin_method = parser.option_argument_as< t_lin_method >("lin-method");
+      m_linearisation_options.lin_method = parser.option_argument_as< mcrl2::lps::t_lin_method >("lin-method");
 
       //check for dangerous and illegal option combinations
-      if (m_linearisation_options.newstate && m_linearisation_options.lin_method == lmStack)
+      if (m_linearisation_options.newstate && m_linearisation_options.lin_method == mcrl2::lps::lmStack)
       {
         throw parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
       }
 
-      m_linearisation_options.infilename       = input_filename();
-      m_linearisation_options.outfilename      = output_filename();
       m_linearisation_options.rewrite_strategy = rewrite_strategy();
     }
 
@@ -186,49 +174,48 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
     bool run()
     {
       //linearise infilename with options
-      process_specification spec;
-      if (m_linearisation_options.infilename.empty())
+      mcrl2::process::process_specification spec;
+      if (input_filename().empty())
       {
         //parse specification from stdin
-        mCRL2log(verbose) << "reading input from stdin..." << std::endl;
-        spec = parse_process_specification(std::cin,!noalpha);
+        mCRL2log(mcrl2::log::verbose) << "reading input from stdin..." << std::endl;
+        spec = mcrl2::process::parse_process_specification(std::cin, !noalpha);
       }
       else
       {
         //parse specification from infilename
-        mCRL2log(verbose) << "reading input from file '" <<  m_linearisation_options.infilename << "'..." << std::endl;
-        std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
+        mCRL2log(mcrl2::log::verbose) << "reading input from file '"
+                                      <<  input_filename() << "'..." << std::endl;
+        std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
         if (!instream.is_open())
         {
-          throw mcrl2::runtime_error("cannot open input file: " + m_linearisation_options.infilename);
+          throw mcrl2::runtime_error("cannot open input file: " + input_filename());
         }
-        spec = parse_process_specification(instream,!noalpha);
+        spec = mcrl2::process::parse_process_specification(instream, !noalpha);
         instream.close();
       }
       //report on well-formedness (if needed)
       if (opt_check_only)
       {
-        if (m_linearisation_options.infilename.empty())
+        if (input_filename().empty())
         {
-          mCRL2log(info) << "stdin contains a well-formed mCRL2 specification" << std::endl;
+          mCRL2log(mcrl2::log::info) << "stdin contains a well-formed mCRL2 specification"
+                                     << std::endl;
         }
         else
         {
-          mCRL2log(info) << "the file '" << m_linearisation_options.infilename << "' contains a well-formed mCRL2 specification" << std::endl;
+          mCRL2log(mcrl2::log::info) << "the file '" << input_filename()
+                                     << "' contains a well-formed mCRL2 specification" << std::endl;
         }
         return true;
       }
       //store the result
-      mcrl2::lps::specification linear_spec(linearise(spec,m_linearisation_options));
-      if (m_linearisation_options.outfilename.empty())
-      {
-        mCRL2log(verbose) << "writing LPS to stdout..." << std::endl;
-      }
-      else
-      {
-        mCRL2log(verbose) << "writing LPS to file '" <<  m_linearisation_options.outfilename << "'..." << std::endl;
-      }
-      save_lps(linear_spec, m_linearisation_options.outfilename);
+      mcrl2::lps::specification linear_spec(mcrl2::lps::linearise(spec, m_linearisation_options));
+      mCRL2log(mcrl2::log::verbose) << "writing LPS to "
+                                    << (output_filename().empty() ? "stdout"
+                                                                  : "file" + output_filename())
+                                    << "..." << std::endl;
+      mcrl2::lps::save_lps(linear_spec, output_filename());
       return true;
     }
 };
