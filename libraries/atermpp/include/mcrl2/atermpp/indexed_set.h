@@ -13,7 +13,7 @@
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
 #include <vector>
-#include <deque>
+#include <stack>
 #include <cassert>
 #include "mcrl2/atermpp/detail/aterm_implementation.h"
 
@@ -30,6 +30,7 @@ class indexed_set
     size_t max_entries;
     std::vector<size_t> hashtable;
     std::deque <ELEMENT > m_keys;
+    std::stack < size_t > free_positions; 
 
     /* Find whether the key is already inserted in the hashtable.
        If no, insert n as the index for key. If yes return its already
@@ -100,10 +101,17 @@ class indexed_set
     /// \return The element in the set with the given index.
     const ELEMENT& get(size_t index) const;
 
+    /// \brief Remove elem from set. 
+    /// The elem is removed from the indexed set, and if a number was assigned to elem, 
+    /// it is freed to be reassigned to an element, that may be put into the set at some later instance. 
+    /// \param elem An element of the set. 
+    /// \return whether the element was successfully removed. 
+    bool erase(const ELEMENT& elem); 
+
     /// \brief Returns the size of the indexed set.
     std::size_t size() const
     {
-      return m_keys.size();
+      return m_keys.size()-free_positions.size();
     }
 };
 

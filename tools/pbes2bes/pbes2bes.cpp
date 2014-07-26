@@ -45,7 +45,6 @@
 #include "mcrl2/data/data_equation.h"
 
 //Boolean equation systems
-// #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"
@@ -74,7 +73,7 @@ using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > >
+class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > >
 {
   protected:
     // Tool options.
@@ -82,10 +81,11 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
     ::bes::transformation_strategy opt_transformation_strategy; // The strategy to propagate true/false.
     ::bes::search_strategy opt_search_strategy; // The search strategy (breadth or depth first).
     bool opt_use_hashtables;                   // The hashtable option
+    bool opt_erase_unused_bes_variables;       // Remove bes variables whenever they are not used anymore.
     bool opt_store_as_tree;                    // The tree storage option
     bool opt_data_elm;                         // The data elimination option
 
-    typedef pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > > super;
+    typedef rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > super;
 
     pbes_system::pbes_rewriter_type default_rewriter() const
     {
@@ -103,6 +103,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
       opt_transformation_strategy(::bes::lazy),
       opt_search_strategy(::bes::breadth_first),
       opt_use_hashtables(false),
+      opt_erase_unused_bes_variables(false),
       opt_store_as_tree(false),
       opt_data_elm(true)
     {}
@@ -116,6 +117,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
       input_output_tool::parse_options(parser);
 
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
+      opt_erase_unused_bes_variables= 0 < parser.options.count("erase");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
       opt_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
@@ -140,6 +142,11 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
                  .add_value(depth_first_short),
                  "use search strategy SEARCH:",
                  'z').
+      add_option("erase",
+                 "remove generated bes variables once they are not used anymore while they have a complex right hand side. "
+                 "The purpose is to free as much memory as possible, but this can come at the cost of generating "
+                 "certain boolean equations over and over again.\n",
+                 'e').
       add_option("hashtables",
                  "use hashtables when substituting in bes equations, "
                  "and translate internal expressions to binary decision "
@@ -164,7 +171,6 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
-      mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
       // load the pbes
       mcrl2::pbes_system::pbes p;
@@ -187,86 +193,9 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
           opt_search_strategy,
           opt_store_as_tree,
           false,  // No counter example
+          opt_erase_unused_bes_variables,
           opt_use_hashtables);
       timer().finish("instantiation");
-
-      // pbes rewriter
-      /* The code below can be reactivated, once the pbes_rewriters deliver acceptable performance.
-         As it stands their performance is so bad, that they cannot be used.
-
-      switch (rewriter_type())
-      {
-        case simplify:
-        {
-          simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
-          pbes_rewrite(p,pbesr); // Simplify p such that it does not have to be done
-                             // repeatedly.
-          bes_equations=::bes::boolean_equation_system(
-                            p,
-                            pbesr,
-                            opt_transformation_strategy,
-                            opt_search_strategy,
-                            opt_store_as_tree,
-                            false,    // No counter example
-                            opt_use_hashtables);
-          break;
-        }
-        case quantifier_finite:
-        {
-          data::number_postfix_generator generator("UNIQUE_PREFIX");
-          data::data_enumerator<> datae(p.data(), datar, generator);
-          data::rewriter_with_variables datarv(datar);
-          bool enumerate_infinite_sorts = false;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
-                                                             data::data_enumerator<> >
-                          pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbes_rewrite(p,pbesr);  // Simplify p such that this does not need to be done
-                              // repeatedly.
-          bes_equations=::bes::boolean_equation_system(
-                            p,
-                            pbesr,
-                            opt_transformation_strategy,
-                            opt_search_strategy,
-                            opt_store_as_tree,
-                            false,    // No counter example
-                            opt_use_hashtables);
-          break;
-        }
-        case quantifier_all:
-        {
-          data::number_postfix_generator generator("UNIQUE_PREFIX");
-          data::data_enumerator<> datae(p.data(), datar, generator);
-          data::rewriter_with_variables datarv(datar);
-          const bool enumerate_infinite_sorts1 = false;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
-                                                             data::data_enumerator<> >
-                          pbesr1(datarv, datae, enumerate_infinite_sorts1);
-          pbes_rewrite(p,pbesr1);  // Simplify p such that this does not need to be done
-                               // repeatedly, without expanding quantifiers over infinite
-                               // domains.
-          const bool enumerate_infinite_sorts2 = true;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
-                                                             data::data_enumerator<> >
-                          pbesr2(datarv, datae, enumerate_infinite_sorts2);
-          bes_equations=::bes::boolean_equation_system(
-                            p,
-                            pbesr2,
-                            opt_transformation_strategy,
-                            opt_search_strategy,
-                            opt_store_as_tree,
-                            false,  // No counter example
-                            opt_use_hashtables);
-          break;
-        }
-        case pfnf:
-        {
-          throw mcrl2::runtime_error("The pfnf boolean equation rewriter cannot be used\n");
-        }
-        case prover:
-        {
-          throw mcrl2::runtime_error("The prover based rewriter cannot be used\n");
-        }
-      } */
 
       mcrl2::bes::boolean_equation_system b(convert_to_bes(bes_equations));
       mcrl2::bes::save_bes(b, output_filename(), bes_output_format());

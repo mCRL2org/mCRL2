@@ -1185,6 +1185,7 @@ static bes_expression toBDD_rec(const bes_expression& b1,std::map< bes_expressio
 inline bes_expression toBDD(const bes_expression& b)
 {
   std::map <bes_expression, bes_expression > hashtable;
+// std::cerr << "EXPRESSION TO BDD " << b << "\n";
   return toBDD_rec(b,hashtable);
 }
 
@@ -1254,6 +1255,7 @@ class boolean_equation_system
     bool count_variable_relevance;
     std::vector < std::deque < counter_example> > data_to_construct_counter_example;
     bool construct_counter_example;
+    bool remove_unused_bes_variables;
     atermpp::indexed_set<atermpp::aterm> variable_index;  //Used for constructing counter examples
     typedef mcrl2::data::rewriter::substitution_type substitution_type;
 
@@ -1330,6 +1332,7 @@ class boolean_equation_system
       }
       if (count_variable_relevance)
       {
+ // std::cerr << "SET RELEVANCE ADD EQUATION " << v << " := " << rhs << "\n";
         set_variable_relevance_rec(rhs,todo);
       }
     }
@@ -1347,7 +1350,7 @@ class boolean_equation_system
 
       control_info[v]=control_info[v]|RELEVANCE_MASK;  // make this variable relevant.
       bes_expression old_rhs=right_hand_sides[v];
-      if ((variable_occurrences_are_stored)&& (old_rhs!=b))
+      if ((variable_occurrences_are_stored) && (old_rhs!=b))
       {
         remove_variables_from_occurrence_sets(v,old_rhs,v_except);
         add_variables_to_occurrence_sets(v,b);
@@ -1355,6 +1358,7 @@ class boolean_equation_system
       }
       if (count_variable_relevance)
       {
+ // std::cerr << "SET RELEVANCE RHS " << v << " := " << b << "\n";
         set_variable_relevance_rec(b,todo);
       }
 
@@ -1519,6 +1523,7 @@ class boolean_equation_system
       const bes_expression& b,
       std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
+ // std::cerr << "SET RELEVANCE " << b << "\n";
       assert(count_variable_relevance);
       if (is_true(b)||is_false(b)||is_dummy(b))
       {
@@ -1532,17 +1537,21 @@ class boolean_equation_system
         check_vector_sizes(v);
         if (!is_relevant(v))
         {
+ // std::cerr << "SET RELEVANCE MASK " << v << " := " << get_rhs(v) << "\n";
           control_info[v]=control_info[v]|RELEVANCE_MASK;  // Make relevant
-          if (get_rhs(v)==dummy()) // v is relevant an unprocessed. Put in on the todo stack.
+          if (get_rhs(v)==dummy()) // v is relevant and unprocessed. Put in on the todo stack.
           {
+// std::cerr << "RHS IS DUMMY \n";
             if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
             {
+ // std::cerr << "PUT ON TODO STACK " << v << "\n";
               todo.push_back(v);
             }
             return;
           }
           else
           {
+ // std::cerr << "SET VARIABLE RELEVANCE " << v << " := " << get_rhs(v) << "\n";
             set_variable_relevance_rec(get_rhs(v),todo);
             return;
           }
@@ -1558,25 +1567,24 @@ class boolean_equation_system
         return;
       }
 
-      if (is_and(b)||is_or(b))
-      {
-        set_variable_relevance_rec(lhs(b),todo);
-        set_variable_relevance_rec(rhs(b),todo);
-        return;
-      }
-
-      assert(0); // do not expect other term formats.
+      assert(is_and(b)||is_or(b));
+      set_variable_relevance_rec(lhs(b),todo);
+      set_variable_relevance_rec(rhs(b),todo);
+      return;
     }
 
     void refresh_relevances(std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
+// std::cerr << "REFRESH RELEVANCE START \n";
       if (count_variable_relevance)
       {
         reset_variable_relevance();
         if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
         {
           todo.clear();
+// std::cerr << "Clear todo "<< "\n";
         }
+// std::cerr << "SET RELEVANCE 1 " << variable(1) << "\n";
         set_variable_relevance_rec(variable(1),bes_global_variables<size_t>::TODO_NULL_QUEUE);
         if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
         {
@@ -1587,17 +1595,33 @@ class boolean_equation_system
           {
             if ((get_rhs(v)==dummy()) && is_relevant(v))
             {
+// std::cerr << "Add todo " << v << "\n";
               todo.push_back(v);
+            }
+            else if (remove_unused_bes_variables && 
+                     !construct_counter_example && 
+                     !is_relevant(v) && 
+                     !is_true(get_rhs(v)) && 
+                     !is_false(get_rhs(v)))
+            {
+// std::cerr << "Clear variable " << v << "\n";
+              set_rhs(v,dummy()); // Clear the rhs, to save space. This comes at the
+                                  // cost that the rhs must be recalculated later.
+              control_info[v] =control_info[v] & ~RELEVANCE_MASK; // Reset relevance, which is set in set_rhs.
+              variable_index.erase(variable_index.get(v));
+              assert(!variable_index.get(v).defined());
             }
           }
         }
       }
+// std::cerr << "REFRESH RELEVANCE END \n";
     }
 
     void count_variable_relevance_on(void)
     {
       assert(!count_variable_relevance);
       count_variable_relevance=true;
+// std::cerr << "REFRESH RELEVANCE ON \n";
       refresh_relevances();
     }
 
@@ -1655,7 +1679,7 @@ class boolean_equation_system
       const bes_expression& b,
       variable_type v,
       size_t rankv, // rank of v may not have been stored yet.
-      std::map < variable_type,bool >& visited_variables,
+      std::map < variable_type, bool >& visited_variables,
       bool is_mu)
     {
       if (is_false(b) || is_true(b) || is_dummy(b))
@@ -1679,10 +1703,10 @@ class boolean_equation_system
           return visited_variables[w];
         }
 
-        visited_variables.insert(std::make_pair(w,false));
+        visited_variables[w]=false;
         bool result;
         result=find_mu_nu_loop_rec(get_rhs(w),v,rankv,visited_variables,is_mu);
-        visited_variables.insert(std::make_pair(w,result));
+        visited_variables[w]=result;
         return result;
       }
 
@@ -1739,7 +1763,7 @@ class boolean_equation_system
       variable_type v,
       size_t rankv)
     {
-      std::map < variable_type, bool > visited_variables;
+      std::map < variable_type, bool > visited_variables; // Intentionally a map, and not a set.
       bool result=find_mu_nu_loop_rec(b,v,rankv,visited_variables,true);
       return result;
     }
@@ -1749,8 +1773,8 @@ class boolean_equation_system
       variable_type v,
       size_t rankv)
     {
-      std::map < variable_type, bool > visited_variables;
-      return find_mu_nu_loop_rec(b,v,rankv,visited_variables,false);
+      std::map < variable_type, bool > visited_variables; // Intentionally a map, and not a set.
+      return find_mu_nu_loop_rec(b,v,rankv,visited_variables,false); 
     }
 
 ////////////////////////////  Functions to generate a bes out of a pbes  /////////////////////////
@@ -1771,8 +1795,9 @@ class boolean_equation_system
       if (is_propositional_variable_instantiation(p))
       {
         const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
+//std::cerr << "ADD TO INDEX " << ((internal_opt_store_as_tree)? store_as_tree(p1) : atermpp::aterm_appl(p1)) << "\n";
         std::pair<size_t,bool> pr=variable_index.put((internal_opt_store_as_tree)? store_as_tree(p1) : atermpp::aterm_appl(p1));
-
+//std::cerr << "RESULT " << pr.first << "  " << pr.second << "\n";
         if (pr.second) /* p is added to the indexed set, so it is a new variable */
         {
           nr_of_generated_variables++;
@@ -1967,6 +1992,7 @@ class boolean_equation_system
       const search_strategy opt_search_strategy=breadth_first,
       const bool opt_store_as_tree=false,
       const bool opt_construct_counter_example=false,
+      const bool opt_remove_unused_bes_variables=false,
       const bool opt_use_hashtables=false):
       control_info(1),
       right_hand_sides(1),
@@ -1975,6 +2001,7 @@ class boolean_equation_system
       count_variable_relevance(false),
       data_to_construct_counter_example(1),
       construct_counter_example(false),
+      remove_unused_bes_variables(opt_remove_unused_bes_variables),
 #ifdef NDEBUG  // Only in non-debug mode we want highest performance.
       internal_opt_store_as_tree(opt_store_as_tree),
 #else
@@ -2027,12 +2054,13 @@ class boolean_equation_system
                                            make space for a first equation of the shape X1=X2. */
 
       /* The following list contains that variables that need to be explored.
-         This list is only relevant if opt_transformation_strategy>=on_the_fly,
+         This list is only relevant if opt_transformation_strategy>=on_the_fly 
+         or opt_search_strategy==depth_first,
          as in the other case the variables to be investigated are those
          with indices between nre_of_processed_variables and nr_of_generated
          variables. */
       std::deque < variable_type> todo;
-      if (opt_transformation_strategy>=on_the_fly)
+      if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
       {
         todo.push_front(2);
       }
@@ -2048,7 +2076,7 @@ class boolean_equation_system
       const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
       variable_index.put((internal_opt_store_as_tree)?store_as_tree(p1):atermpp::aterm_appl(p1));
 
-      if (opt_transformation_strategy>=on_the_fly)
+      if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
       {
         store_variable_occurrences();
         count_variable_relevance_on();
@@ -2115,7 +2143,7 @@ class boolean_equation_system
       time_t last_log_time = time(NULL) - 1;
 
       // As long as there are states to be explored
-      while ((opt_transformation_strategy>=on_the_fly)
+      while ((opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
              ?todo.size()>0
              :(nr_of_processed_variables < nr_of_generated_variables))
       {
@@ -2127,12 +2155,14 @@ class boolean_equation_system
             // Do a breadth-first search
             variable_to_be_processed=todo.front();
             todo.pop_front();
+//std::cerr << "Variable to be processed0 " << variable_to_be_processed << "\n";
           }
           else 
           {
             // Do a depth-first search
             variable_to_be_processed=todo.back();
             todo.pop_back();
+//std::cerr << "Variable to be processed1 " << variable_to_be_processed << "\n";
           }
         }
         else
@@ -2140,6 +2170,7 @@ class boolean_equation_system
           variable_to_be_processed=nr_of_processed_variables+1;
         }
 
+//std::cerr << "Variable to be processed2 " << variable_to_be_processed << "\n";
         if (is_relevant(variable_to_be_processed))
           // If v is not relevant, it does not need to be investigated.
         {
@@ -2173,6 +2204,8 @@ class boolean_equation_system
           }
           else // The current variable instantiation is a propositional_variable_instantiation
           {
+// std::cerr << "Variable to be processed3 " << variable_to_be_processed << "\n";
+// std::cerr << "Variable to be processed " << variable_index.get(variable_to_be_processed) << "\n";
             propositional_variable_instantiation current_variable_instantiation =
               propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
 
@@ -2260,7 +2293,7 @@ class boolean_equation_system
             }
           }
 
-          if ((opt_transformation_strategy>=on_the_fly))
+          if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
           {
             add_equation(
               variable_to_be_processed,
@@ -2275,12 +2308,6 @@ class boolean_equation_system
                from the initial variable 1, are always relevant. Furthermore, relevant
                variables that need to be investigated are always in the todo list */
             relevance_counter++;
-            if (relevance_counter>=relevance_counter_limit)
-            {
-              relevance_counter_limit=nr_of_variables()/RELEVANCE_DIVIDE_FACTOR;
-              relevance_counter=0;
-              refresh_relevances(todo);
-            }
           }
           else
           {
@@ -2338,6 +2365,13 @@ class boolean_equation_system
             }
           }
         }
+        if (relevance_counter>=relevance_counter_limit)
+        {
+          relevance_counter_limit=nr_of_variables()/RELEVANCE_DIVIDE_FACTOR;
+          relevance_counter=0;
+// std::cerr << "REFRESH RELEVANCE COUNTER REACHED \n";
+          refresh_relevances(todo);
+        }
         nr_of_processed_variables++;
 
         time_t new_log_time;
@@ -2358,6 +2392,7 @@ class boolean_equation_system
           mCRL2log(mcrl2::log::status) << ".     " << std::endl;
         }
       }
+// std::cerr << "REFRESH RELEVANCE AT END \n";
       refresh_relevances();
     }
 
@@ -2774,7 +2809,7 @@ static bes_expression evaluate_bex(
       return result;
     }
   }
-
+// std::cerr << "EVALUATE_BEX " << b << "\n";
   if (is_variable(b))
   {
     const bes::variable_type v=bes::get_variable(b);
@@ -2900,6 +2935,7 @@ static bes_expression evaluate_bex(
   {
     assert(0); //expect an if, true or false, and, variable or or;
   }
+// std::cerr << "END EVALUATE BEX " << b << " --> " << result << "\n";
 
   if (use_hashtable)
   {
@@ -2927,6 +2963,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
   /* Set the approximation to its initial value */
   for (bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
   {
+// std::cerr << "APPROXIMATE " << v << " = " << bes_equations.get_rhs(v) << "\n";
     bes_expression b=bes_equations.get_rhs(v);
     if (b!=bes::dummy())
     {
@@ -2964,6 +3001,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
     {
       if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
       {
+// std::cerr << "EVALUATE " << v << " = " << bes_equations.get_rhs(v) << "\n";
         bes_expression t=evaluate_bex(
                            bes_equations.get_rhs(v),
                            approximation,
@@ -2974,6 +3012,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
                            false,
                            v);
 
+// std::cerr << "BEFORE BDD " << t << " # " << approximation[v] << "\n";
         if (toBDD(t)!=toBDD(approximation[v]))
         {
           if (opt_use_hashtables)
