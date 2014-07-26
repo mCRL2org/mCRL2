@@ -170,7 +170,6 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
     v = hashtable[c];
     if (v == detail::EMPTY)
     {
-// std::cerr << "INDEXED SET ERASE FAIL " << key << "\n";
       return false;
     }
     if (v != detail::DELETED && key==m_keys[v])
@@ -187,7 +186,6 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
 
   hashtable[c] = detail::DELETED;
 
-// std::cerr << "INDEXED SET ERASE " << v << "   " << key << "\n";
   m_keys[v]=detail::static_undefined_aterm;
   free_positions.push(v);
   return true;
@@ -198,7 +196,6 @@ template <class ELEMENT>
 inline const ELEMENT& indexed_set<ELEMENT>::get(size_t index) const
 {
   assert(m_keys.size()>index);
-// std::cerr << "INDEXED SET GET " << index << m_keys[index] << "\n";
   return m_keys[index];
 }
 
@@ -219,7 +216,6 @@ inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
   const size_t n = hashPut(key,m);
   if (n != m) // Key already existed.
   {
- // std::cerr << "INDEXED SET INSERT EXISTED " << n << "   " << key << "\n";
     return std::make_pair(n,false);
   }
   
@@ -238,7 +234,6 @@ inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
     hashResizeSet(); 
   }
 
-// std::cerr << "INDEXED SET INSERT NEW " << n << "   " << key << "\n";
   return std::make_pair(n, true);
 }
 
