@@ -170,6 +170,77 @@ std::string description(const transformation_strategy s)
 }
 
 
+/// \brief BES variable remove level when generating a BES from a PBES.
+enum remove_level
+{
+  none,   // Do not remove bes variables.
+  some,   // Remove bes variables that are not used, and of which
+          // the rhs of its equation is not equal to true and false.
+  all     // Remove all bes variables whenever they are not used in
+          // any other equation.
+};
+
+inline
+remove_level parse_remove_level(const std::string& s)
+{
+  if (s == "none") return none;
+  else if (s == "some") return some;
+  else if (s == "all") return all;
+  else throw mcrl2::runtime_error("unknown bes variables remove level " + s);
+}
+
+inline
+std::string print_remove_level(const remove_level s)
+{
+  switch(s)
+  {
+    case none: return "none";
+    case some: return "some";
+    case all: return "all";
+  }
+  throw mcrl2::runtime_error("unknown remove_level");
+}
+
+inline
+std::istream& operator>>(std::istream& is, remove_level& level)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    level = parse_remove_level(s);
+  }
+  catch(mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, const remove_level s)
+{
+  os << print_remove_level(s);
+  return os;
+}
+
+inline
+std::string description(const remove_level s)
+{
+  switch(s)
+  {
+    case none: return "do not remove generated bes variables. This can lead to excessive"
+        " usage of memory.";
+    case some: return "remove generated bes variables that are not used, except if"
+        " the right hand side of its equation is true or false. The rhss of variables"
+        " must have to be recalculated, if encountered again, which is quite normal.";
+    case all: return "remove every bes variable that is not used anymore in any equation."
+        " This is quite memory efficient, but it can be very time consuming as the rhss of removed bes"
+        " variables may have to be recalculated quite often.";
+  }
+  throw mcrl2::runtime_error("unknown remove level");
+}
+
 /// \brief Search strategy when generating a BES from a PBES.
 enum search_strategy
 {
@@ -242,7 +313,6 @@ std::string description(const search_strategy s)
   }
   throw mcrl2::runtime_error("unknown search strategy");
 }
-
 
 /* Declare a protected PAIR symbol */
 inline atermpp::function_symbol PAIR()
@@ -1254,7 +1324,7 @@ class boolean_equation_system
     bool count_variable_relevance;
     std::vector < std::deque < counter_example> > data_to_construct_counter_example;
     bool construct_counter_example;
-    bool remove_unused_bes_variables;
+    remove_level remove_unused_bes_variables;
     atermpp::indexed_set<atermpp::aterm> variable_index;  //Used for constructing counter examples
     typedef mcrl2::data::rewriter::substitution_type substitution_type;
 
@@ -1586,16 +1656,19 @@ class boolean_equation_system
             {
               todo.push_back(v);
             }
-            else if (remove_unused_bes_variables && 
+            else if (remove_unused_bes_variables!=none && 
                      !construct_counter_example && 
+                     variable_index.get(v).defined() &&
                      !is_relevant(v) &&
-                     !is_true(get_rhs(v)) && 
-                     !is_false(get_rhs(v))
+                     ( remove_unused_bes_variables==all ||
+                       ( !is_true(get_rhs(v)) && 
+                         !is_false(get_rhs(v))
+                     ) )
                     )
             {
               set_rhs(v,dummy()); // Clear the rhs, to save space. This comes at the
                                   // cost that the rhs must be recalculated later.
-              control_info[v] =control_info[v] & ~RELEVANCE_MASK; // Reset relevance, which is set in set_rhs.
+              control_info[v] = control_info[v] & ~RELEVANCE_MASK; // Reset relevance, which is set in set_rhs.
               variable_index.erase(variable_index.get(v));
               assert(!variable_index.get(v).defined());
             }
@@ -1973,10 +2046,10 @@ class boolean_equation_system
       const mcrl2::pbes_system::pbes& pbes_spec,
       mcrl2::data::rewriter& data_rewriter,
       const transformation_strategy opt_transformation_strategy=lazy,
-      const search_strategy opt_search_strategy=breadth_first,
+      search_strategy opt_search_strategy=breadth_first,
       const bool opt_store_as_tree=false,
       const bool opt_construct_counter_example=false,
-      const bool opt_remove_unused_bes_variables=false,
+      const remove_level opt_remove_unused_bes_variables=none,
       const bool opt_use_hashtables=false):
       control_info(1),
       right_hand_sides(1),
@@ -1993,6 +2066,8 @@ class boolean_equation_system
 #endif
       max_rank(0)
     {
+      if (opt_search_strategy==breadth_first_short) opt_search_strategy=breadth_first;
+      if (opt_search_strategy==depth_first_short) opt_search_strategy=depth_first;
       const bool enumerate_infinite_sorts=true;
       mcrl2::pbes_system::enumerate_quantifiers_rewriter pbes_quantifier_eliminating_rewriter(data_rewriter, pbes_spec.data(), enumerate_infinite_sorts);
 

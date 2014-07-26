@@ -861,7 +861,9 @@ macro( gen_pbes2bool_release_tests )
 					add_pbes2bool_release_test( "-u" )
 					add_pbes2bool_release_test( "-zbreadth-first" )
 					add_pbes2bool_release_test( "-zdepth-first" )
-					add_pbes2bool_release_test( "--erase" )
+					add_pbes2bool_release_test( "--erase=none" )
+					add_pbes2bool_release_test( "--erase=some" )
+					add_pbes2bool_release_test( "--erase=all" )
     
 endmacro( gen_pbes2bool_release_tests )
 
@@ -963,7 +965,9 @@ macro( gen_pbes2bes_release_tests )
 	add_pbes2bes_release_test( "-u"  "")
 	add_pbes2bes_release_test( "-zb" "")
 	add_pbes2bes_release_test( "-zd" "")
-	add_pbes2bes_release_test( "--erase" "")
+	add_pbes2bes_release_test( "--erase=none" "")
+	add_pbes2bes_release_test( "--erase=some" "")
+	add_pbes2bes_release_test( "--erase=all" "")
 endmacro( gen_pbes2bes_release_tests )
 
 ######################

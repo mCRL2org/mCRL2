@@ -77,19 +77,37 @@ size_t indexed_set<ELEMENT>::hashPut(const ELEMENT& key, size_t n)
   /* Find a place to insert key,
      and find whether key already exists */
 
+  size_t deleted_position=detail::EMPTY;
   size_t c = hashcode(detail::address(key), sizeMinus1);
 
   while (1)
   {
+    assert(c!=detail::EMPTY);
     size_t v = hashtable[c];
-    if (v == detail::EMPTY || v == detail::DELETED)
+    if (v == detail::EMPTY)
     {
-      /* Found an empty spot, insert a new index belonging to key */
-      hashtable[c] = n;
+      /* Found an empty spot, insert a new index belonging to key, 
+         preferably at a deleted position, if that has been encountered. */
+      if (deleted_position==detail::EMPTY)
+      { 
+        hashtable[c] = n;
+      }
+      else
+      { 
+        hashtable[deleted_position] = n;
+      }
       return n;
     }
 
-    if (m_keys[v]==key)
+    if (v == detail::DELETED)
+    {
+      /* Recall this position to be used, in case the element is not found. */
+      if (deleted_position==detail::EMPTY)
+      { 
+        deleted_position=c;
+      }
+    }
+    else if (m_keys[v]==key)
     {
       /* key is already in the set, return position of key */
       return v;
@@ -170,6 +188,7 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
     v = hashtable[c];
     if (v == detail::EMPTY)
     {
+//std::cerr << "ERASE FAIL " << key << "\n";
       return false;
     }
     if (v != detail::DELETED && key==m_keys[v])
@@ -186,6 +205,7 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
 
   hashtable[c] = detail::DELETED;
 
+//std::cerr << "ERASE " << v << "  " << key << "\n";
   m_keys[v]=detail::static_undefined_aterm;
   free_positions.push(v);
   return true;
@@ -196,6 +216,7 @@ template <class ELEMENT>
 inline const ELEMENT& indexed_set<ELEMENT>::get(size_t index) const
 {
   assert(m_keys.size()>index);
+//std::cerr << "GET " << index << "  " << m_keys[index] << "\n";
   return m_keys[index];
 }
 
@@ -214,8 +235,9 @@ inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
 {
   const size_t m=(free_positions.empty()? m_keys.size() : free_positions.top());
   const size_t n = hashPut(key,m);
-  if (n != m) // Key already existed.
+  if (n != m) // Key already exists.
   {
+//std::cerr << "PUT OLD " << n << "  " << key << "\n";
     return std::make_pair(n,false);
   }
   
@@ -234,6 +256,7 @@ inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
     hashResizeSet(); 
   }
 
+//std::cerr << "PUT NEW " << n << "  " << key << "\n";
   return std::make_pair(n, true);
 }
 

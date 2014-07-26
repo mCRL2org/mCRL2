@@ -81,7 +81,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
     ::bes::transformation_strategy opt_transformation_strategy; // The strategy to propagate true/false.
     ::bes::search_strategy opt_search_strategy; // The search strategy (breadth or depth first).
     bool opt_use_hashtables;                   // The hashtable option
-    bool opt_erase_unused_bes_variables;       // Remove bes variables whenever they are not used anymore.
+    remove_level opt_erase_unused_bes_variables;       // Remove bes variables whenever they are not used anymore.
     bool opt_store_as_tree;                    // The tree storage option
     bool opt_data_elm;                         // The data elimination option
 
@@ -103,7 +103,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       opt_transformation_strategy(::bes::lazy),
       opt_search_strategy(::bes::breadth_first),
       opt_use_hashtables(false),
-      opt_erase_unused_bes_variables(false),
+      opt_erase_unused_bes_variables(none),
       opt_store_as_tree(false),
       opt_data_elm(true)
     {}
@@ -117,7 +117,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       input_output_tool::parse_options(parser);
 
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
-      opt_erase_unused_bes_variables= 0 < parser.options.count("erase");
+      opt_erase_unused_bes_variables= parser.option_argument_as<remove_level>("erase");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
       opt_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
@@ -142,10 +142,11 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
                  .add_value(depth_first_short),
                  "use search strategy SEARCH:",
                  'z').
-      add_option("erase",
-                 "remove generated bes variables once they are not used anymore while they have a complex right hand side. "
-                 "The purpose is to free as much memory as possible, but this can come at the cost of generating "
-                 "certain boolean equations over and over again.\n",
+      add_option("erase", make_enum_argument<remove_level>("LEVEL")
+                 .add_value(none, true)
+                 .add_value(some)
+                 .add_value(all),
+                 "use remove level LEVEL to remove bes variables",
                  'e').
       add_option("hashtables",
                  "use hashtables when substituting in bes equations, "
