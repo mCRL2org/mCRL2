@@ -1606,4 +1606,21 @@ std::string pp(const multi_action_name_set& A)
 
 } // namespace mcrl2
 
+namespace std
+{
+
+/// \brief Standard has function for actions.
+template <>
+struct std::hash<mcrl2::process::action>
+{
+  std::size_t operator()(const mcrl2::process::action& t) const
+  {
+    return std::hash<atermpp::aterm>()(t); 
+  }
+
+};
+
+
+} // namespace std;
+
 #endif // MCRL2_PROCESS_PROCESS_EXPRESSION_H

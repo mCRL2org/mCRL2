@@ -213,8 +213,7 @@ inline const ELEMENT& indexed_set<ELEMENT>::get(size_t index) const
 template <class ELEMENT>
 inline bool indexed_set<ELEMENT>::defined(size_t index) const
 {
-  assert(m_keys.size()>index);
-  return m_keys[index].defined();
+  return index<m_keys.size() && m_keys[index].defined();
 }
 
 template <class ELEMENT>

@@ -538,11 +538,6 @@ class bes_expression: public atermpp::aterm
       copy_term(t);
       return *this;
     }
-
-    atermpp::aterm aterm() const
-    {
-      return m_term;
-    }
 };
 
 inline
@@ -1313,7 +1308,6 @@ class boolean_equation_system
     std::vector < std::deque < counter_example> > data_to_construct_counter_example;
     bool construct_counter_example;
     remove_level remove_unused_bes_variables;
-    // atermpp::indexed_set<atermpp::aterm> variable_index;  //Used for constructing counter examples
     atermpp::indexed_set< propositional_variable_instantiation_as_tree > variable_index;  //Used for constructing counter examples
     typedef mcrl2::data::rewriter::substitution_type substitution_type;
 
