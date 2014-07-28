@@ -269,6 +269,10 @@ class term_appl:public aterm
 };
 
 typedef term_appl<aterm> aterm_appl;
+} // namespace atermpp
+
+namespace std
+{
 
 /// \brief Swaps two term_applss.
 /// \details This operation is more efficient than exchanging terms by an assignment,
@@ -281,7 +285,16 @@ inline void swap(atermpp::term_appl<T> &t1, atermpp::term_appl<T> &t2)
   t1.swap(t2);
 }
 
-} // namespace atermpp
+/// \brief Standard hash function.
+template<class T>
+struct hash<atermpp::term_appl<T> >
+{
+  std::size_t operator()(const atermpp::term_appl<T>& t) const
+  {
+    return std::hash<atermpp::aterm>()(t); 
+  }
+};
+} // namespace std
 
 #include "mcrl2/atermpp/detail/aterm_appl_implementation.h"
 

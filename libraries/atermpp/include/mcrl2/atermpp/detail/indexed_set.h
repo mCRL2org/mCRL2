@@ -26,21 +26,6 @@ static const size_t STEP = 1; /* The position on which the next hash entry //sea
 static const size_t EMPTY(-1);
 static const size_t DELETED(-2);
 
-static const size_t a_prime_number = 134217689;
-
-/* A very simple hashing function. */
-
-inline size_t hashcode(const void* a, const size_t sizeMinus1)
-{
-  return ((((size_t)(a) >> 3) * a_prime_number) & sizeMinus1);
-}
-
-
-/*static size_t approximatepowerof2(size_t n) 
- * return smallest 2^m-1 larger or equal than n, where
- * returned size must at least be 127
- */
-
 inline size_t approximatepowerof2(size_t n)
 {
   size_t mask = n;
@@ -78,7 +63,7 @@ size_t indexed_set<ELEMENT>::hashPut(const ELEMENT& key, size_t n)
      and find whether key already exists */
 
   size_t deleted_position=detail::EMPTY;
-  size_t c = hashcode(detail::address(key), sizeMinus1);
+  size_t c = std::hash<ELEMENT>()(key) & sizeMinus1;
 
   while (1)
   {
@@ -155,7 +140,7 @@ inline indexed_set<ELEMENT>::indexed_set(size_t initial_size /* = 100 */, unsign
 template <class ELEMENT>
 inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 {
-  size_t start = detail::hashcode(detail::address(elem), sizeMinus1);
+  size_t start = std::hash<ELEMENT>()(elem) & sizeMinus1;
   size_t c = start;
   do
   {
@@ -180,7 +165,7 @@ inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 template <class ELEMENT>
 bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
 {
-  size_t start = hashcode(detail::address(key),sizeMinus1);
+  size_t start = std::hash<ELEMENT>()(key) & sizeMinus1;
   size_t c = start;
   size_t v;
   while (1)
@@ -188,7 +173,6 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
     v = hashtable[c];
     if (v == detail::EMPTY)
     {
-//std::cerr << "ERASE FAIL " << key << "\n";
       return false;
     }
     if (v != detail::DELETED && key==m_keys[v])
@@ -205,9 +189,16 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
 
   hashtable[c] = detail::DELETED;
 
-//std::cerr << "ERASE " << v << "  " << key << "\n";
-  m_keys[v]=detail::static_undefined_aterm;
-  free_positions.push(v);
+  assert(m_keys.size()>v);
+  if (v==m_keys.size()-1)
+  {
+    m_keys.pop_back();
+  }
+  else
+  {
+    m_keys[v]=ELEMENT();
+    free_positions.push(v);
+  }
   return true;
 }
 
@@ -216,10 +207,15 @@ template <class ELEMENT>
 inline const ELEMENT& indexed_set<ELEMENT>::get(size_t index) const
 {
   assert(m_keys.size()>index);
-//std::cerr << "GET " << index << "  " << m_keys[index] << "\n";
   return m_keys[index];
 }
 
+template <class ELEMENT>
+inline bool indexed_set<ELEMENT>::defined(size_t index) const
+{
+  assert(m_keys.size()>index);
+  return m_keys[index].defined();
+}
 
 template <class ELEMENT>
 inline void indexed_set<ELEMENT>::clear()
@@ -237,7 +233,6 @@ inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
   const size_t n = hashPut(key,m);
   if (n != m) // Key already exists.
   {
-//std::cerr << "PUT OLD " << n << "  " << key << "\n";
     return std::make_pair(n,false);
   }
   
@@ -256,7 +251,6 @@ inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
     hashResizeSet(); 
   }
 
-//std::cerr << "PUT NEW " << n << "  " << key << "\n";
   return std::make_pair(n, true);
 }
 

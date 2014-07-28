@@ -23,6 +23,7 @@
 #include <time.h>
 
 #include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/core/print.h"
@@ -314,107 +315,65 @@ std::string description(const search_strategy s)
   throw mcrl2::runtime_error("unknown search strategy");
 }
 
-/* Declare a protected PAIR symbol */
-inline atermpp::function_symbol PAIR()
+// The class below contains a pbes_instantiation consisting of an identifier_string and the parameters,
+// where the parameters are stored as a tree.
+
+class propositional_variable_instantiation_as_tree
 {
-  static atermpp::function_symbol PAIR("PAIR", 2);
-  return PAIR;
-}
+  protected:
+    mcrl2::core::identifier_string m_name;
+    atermpp::term_balanced_tree<mcrl2::data::data_expression> m_arguments_tree;
 
-static
-inline atermpp::aterm_appl apply_pair_symbol(const atermpp::aterm& t1, const atermpp::aterm& t2)
-{
-  return atermpp::aterm_appl(PAIR(),t1,t2);
-}
+  public:
 
-static
-inline bool is_pair(const atermpp::aterm& t)
-{
-  using namespace atermpp;
-  return atermpp::down_cast<aterm_appl>(t).function()==PAIR();
-}
+    /// \brief Default constructor
+    propositional_variable_instantiation_as_tree()
+    {}
 
-static size_t largest_power_of_2_smaller_than(size_t i)
-{
-  size_t j=1;
-  i=i>>1;
-  while (i>0)
-  {
-    i=i>>1;
-    j=j*2;
-  };
-  return j;
-}
+    propositional_variable_instantiation_as_tree(const mcrl2::pbes_system::propositional_variable_instantiation& p)
+     : m_name(p.name()), 
+       m_arguments_tree(atermpp::term_balanced_tree<mcrl2::data::data_expression>(p.parameters().begin(),p.parameters().size()))
+    {}
 
-inline
-void assign_variables_in_tree(
-     atermpp::aterm t,
-     mcrl2::data::variable_list::iterator& var_iter,
-     mcrl2::data::rewriter& rewriter,
-     mcrl2::data::rewriter::substitution_type& sigma)
-{
-  using namespace atermpp;
-  if (is_pair(t))
-  {
-    assign_variables_in_tree(down_cast<atermpp::aterm_appl>(t)[0],var_iter,rewriter,sigma);
-    assign_variables_in_tree(down_cast<atermpp::aterm_appl>(t)[1],var_iter,rewriter,sigma);
-  }
-  else
-  {
-    sigma[*var_iter]=mcrl2::data::data_expression(t);
-    var_iter++;
-  }
-}
 
-// static atermpp::aterm_appl store_as_tree(pbes_expression p)
-static atermpp::aterm_appl store_as_tree(const mcrl2::pbes_system::propositional_variable_instantiation& p)
-/* We assume p is a propositional_variable_instantiation of the form B(x1,...,xn). If p has less than 3
- * arguments p is returned. Otherwise a term of the form B(pair(pair(...pair(x1,x2),...)))) is
- * returned, which is a balanced tree flushed to the right. For each input the resulting
- * tree is unique.
- */
-{
-  mcrl2::data::data_expression_list args=p.parameters();
+    propositional_variable_instantiation_as_tree(const mcrl2::core::identifier_string& t1,
+                                                 const mcrl2::data::data_expression_list& t2)
+     : m_name(t1), 
+       m_arguments_tree(t2)
+    {}
 
-  if (args.size() ==0)
-  {
-    return p.name();
-  }
-
-  size_t n=largest_power_of_2_smaller_than(args.size());
-
-  std::vector<atermpp::aterm_appl> tree_store(n);
-
-  /* put the arguments in the intermediate tree_store. The last elements are stored as
-   * pairs, such that the args.size() elements are stored in n positions. */
-  size_t i=0;
-  for (mcrl2::data::data_expression_list::const_iterator t=args.begin() ; t!=args.end(); t++)
-  {
-    if (i<2*n-args.size())
+    const mcrl2::core::identifier_string& name() const
     {
-      tree_store[i]= (*t);
-      i++;
+      return m_name;
     }
-    else
-    {
-      atermpp::aterm_appl t1(*t);
-      t++;
-      atermpp::aterm_appl t2(*t);
-      tree_store[i]= apply_pair_symbol(t1,t2);
-      i++;
-    }
-  }
 
-  while (n>1)
-  {
-    n=n>>1; // n=n/2;
-    for (size_t i=0; i<n; i++)
+    const atermpp::term_balanced_tree<mcrl2::data::data_expression>& arguments() const
     {
-      tree_store[i] = apply_pair_symbol(tree_store[2*i],tree_store[2*i+1]);
+      return m_arguments_tree;
     }
-  }
-  return apply_pair_symbol(p.name(),(atermpp::aterm_appl)tree_store[0]);
-} 
+
+    inline
+    void assign_variables_in_tree(
+         mcrl2::data::variable_list::iterator var_iter,
+         mcrl2::data::rewriter::substitution_type& sigma) const
+    {
+      for(atermpp::term_balanced_tree<mcrl2::data::data_expression>::iterator i=m_arguments_tree.begin(); i!=m_arguments_tree.end(); ++i,++var_iter)
+      {
+        sigma[*var_iter]= *i;
+      }
+    }
+  
+    bool defined() const
+    {
+      return m_name!=mcrl2::core::identifier_string();
+    }
+   
+    bool operator==(const propositional_variable_instantiation_as_tree& other) const
+    {
+      return m_name==other.m_name && m_arguments_tree==other.m_arguments_tree;
+    }
+
+};
 
 class counter_example
 {
@@ -572,10 +531,6 @@ class bes_expression: public atermpp::aterm
     bes_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {}
-
-    // bes_expression(atermpp::term_appl<atermpp::aterm>& term)
-    //    : atermpp::aterm_appl(term)
-    // {}
 
     // allow assignment from aterms
     bes_expression& operator=(const bes_expression& t)
@@ -1358,10 +1313,9 @@ class boolean_equation_system
     std::vector < std::deque < counter_example> > data_to_construct_counter_example;
     bool construct_counter_example;
     remove_level remove_unused_bes_variables;
-    atermpp::indexed_set<atermpp::aterm> variable_index;  //Used for constructing counter examples
+    // atermpp::indexed_set<atermpp::aterm> variable_index;  //Used for constructing counter examples
+    atermpp::indexed_set< propositional_variable_instantiation_as_tree > variable_index;  //Used for constructing counter examples
     typedef mcrl2::data::rewriter::substitution_type substitution_type;
-
-    const bool internal_opt_store_as_tree;
 
   protected:
     inline void check_vector_sizes(const variable_type v)
@@ -1691,7 +1645,7 @@ class boolean_equation_system
             }
             else if (remove_unused_bes_variables!=none && 
                      !construct_counter_example && 
-                     variable_index.get(v).defined() &&
+                     variable_index.defined(v) &&
                      !is_relevant(v) &&
                      ( remove_unused_bes_variables==all ||
                        ( !is_true(get_rhs(v)) && 
@@ -1703,7 +1657,7 @@ class boolean_equation_system
                                   // cost that the rhs must be recalculated later.
               control_info[v] = control_info[v] & ~RELEVANCE_MASK; // Reset relevance, which is set in set_rhs.
               variable_index.erase(variable_index.get(v));
-              assert(!variable_index.get(v).defined());
+              assert(!variable_index.defined(v));
             }
           }
         }
@@ -1876,7 +1830,7 @@ class boolean_equation_system
     //and translate to pbes expression to a bes_expression in BDD format.
     bes_expression add_propositional_variable_instantiations_to_indexed_set_and_translate(
       const mcrl2::pbes_system::pbes_expression& p,
-      atermpp::indexed_set<atermpp::aterm>& variable_index,
+      atermpp::indexed_set<propositional_variable_instantiation_as_tree>& variable_index,
       size_t& nr_of_generated_variables,
       const bool to_bdd,
       const transformation_strategy strategy,
@@ -1887,7 +1841,7 @@ class boolean_equation_system
       if (is_propositional_variable_instantiation(p))
       {
         const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
-        std::pair<size_t,bool> pr=variable_index.put((internal_opt_store_as_tree)? store_as_tree(p1) : atermpp::aterm_appl(p1));
+        std::pair<size_t,bool> pr=variable_index.put(propositional_variable_instantiation_as_tree(p1));
         if (pr.second) /* p is added to the indexed set, so it is a new variable */
         {
           nr_of_generated_variables++;
@@ -2080,7 +2034,6 @@ class boolean_equation_system
       mcrl2::data::rewriter& data_rewriter,
       const transformation_strategy opt_transformation_strategy=lazy,
       search_strategy opt_search_strategy=breadth_first,
-      const bool opt_store_as_tree=false,
       const bool opt_construct_counter_example=false,
       const remove_level opt_remove_unused_bes_variables=none,
       const bool opt_use_hashtables=false):
@@ -2092,11 +2045,6 @@ class boolean_equation_system
       data_to_construct_counter_example(1),
       construct_counter_example(false),
       remove_unused_bes_variables(opt_remove_unused_bes_variables),
-#ifdef NDEBUG  // Only in non-debug mode we want highest performance.
-      internal_opt_store_as_tree(opt_store_as_tree),
-#else
-      internal_opt_store_as_tree(false && opt_store_as_tree), // This avoids an unused variable warning....
-#endif
       max_rank(0)
     {
       if (opt_search_strategy==breadth_first_short) opt_search_strategy=breadth_first;
@@ -2139,8 +2087,11 @@ class boolean_equation_system
       // atermpp::indexed_set variable_index(10000, 50);
       // In order to generate a counterexample, this must also be known outside
       // this procedure.
-      variable_index.put(true_());
-      variable_index.put(false_()); /* Put first two dummy terms that
+      // variable_index.put(true_());
+      variable_index.put(propositional_variable_instantiation_as_tree(mcrl2::core::identifier_string("Initial_pbes1"),data_expression_list()));
+      variable_index.put(propositional_variable_instantiation_as_tree(mcrl2::core::identifier_string("Initial_pbes2"),data_expression_list()));
+      
+                                        /* Put first two dummy terms that
                                            gets index 0 and 1 in the indexed set, to
                                            take care that the first variable gets an index 2, to
                                            make space for a first equation of the shape X1=X2. */
@@ -2157,16 +2108,10 @@ class boolean_equation_system
         todo.push_front(2);
       }
       // Data rewriter
-#ifndef NDEBUG
-      if (internal_opt_store_as_tree)
-      {
-        mCRL2log(mcrl2::log::warning) << "Do not store pbes variables in a tree structure in a debug build of pbes2bool" << std::endl;
-      }
-#endif
       pbes_expression p=pbes_expression_order_quantified_variables(pbes_one_point_rule_rewriter(pbes_simplify_rewriter(pbes_spec.initial_state())),pbes_spec.data());
 
       const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
-      variable_index.put((internal_opt_store_as_tree)?store_as_tree(p1):atermpp::aterm_appl(p1));
+      variable_index.put(propositional_variable_instantiation_as_tree(p1));
 
       if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
       {
@@ -2267,52 +2212,11 @@ class boolean_equation_system
           pbes_equation current_pbeq;
 
           // Add the required substitutions
-          if (internal_opt_store_as_tree)
-          {
-            // The current variable instantiation is stored as a tree, and this tree must be unfolded.
-            atermpp::aterm t=variable_index.get(variable_to_be_processed);
-            if (!is_pair(t))
-            {
-              // Then t is the name of the current_variable_instantiation, and it has
-              // no arguments.
-
-              current_pbeq = pbes_equations[atermpp::down_cast<mcrl2::core::identifier_string>(t)];
-              assert(current_pbeq.variable().parameters().size()==0);
-            }
-            else
-            {
-              // t is a pair, with a name as its left hand side.
-              current_pbeq = pbes_equations[atermpp::down_cast<mcrl2::core::identifier_string>(atermpp::down_cast<atermpp::aterm_appl>(t)[0])];
-              // the right hand side of t are the parameters, in a tree structure.
-
-              t=atermpp::down_cast<atermpp::aterm_appl>(t)[1];
-              variable_list::iterator iter=current_pbeq.variable().parameters().begin();
-              assign_variables_in_tree(t,iter,data_rewriter,sigma);
-            }
-
-          }
-          else // The current variable instantiation is a propositional_variable_instantiation
-          {
-            propositional_variable_instantiation current_variable_instantiation =
-              propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
-
-            current_pbeq = pbes_equations[current_variable_instantiation.name()];
-            assert(current_pbeq!=pbes_equation());  // If this fails, a pbes variable is used in
-            // a right hand side, and not in the left hand side
-            // of an equation.
-
-            data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
-
-            for (variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
-                 vlist!=current_pbeq.variable().parameters().end() ; vlist++)
-            {
-              assert(elist!=current_variable_instantiation.parameters().end());
-              sigma[*vlist]=data_expression(*elist);
-
-              elist++;
-            }
-            assert(elist==current_variable_instantiation.parameters().end());
-          }
+          // The current variable instantiation is stored as a tree, and this tree must be unfolded.
+          const propositional_variable_instantiation_as_tree& t=variable_index.get(variable_to_be_processed);
+          current_pbeq = pbes_equations[t.name()];
+          variable_list::iterator iter=current_pbeq.variable().parameters().begin();
+          t.assign_variables_in_tree(iter,sigma);
 
           bes_expression new_bes_expression;
           try
@@ -2330,7 +2234,8 @@ class boolean_equation_system
           }
           catch (mcrl2::runtime_error& e)
           {
-            propositional_variable_instantiation prop_var=propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
+            const propositional_variable_instantiation_as_tree& t=variable_index.get(variable_to_be_processed);
+            propositional_variable_instantiation prop_var(t.name(),data_expression_list(t.arguments().begin(), t.arguments().end()));
             throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred when investigating " +
                   mcrl2::pbes_system::pp(prop_var));
           }
@@ -2484,24 +2389,6 @@ class boolean_equation_system
 
   private:
 
-    void print_tree_rec(const char c,
-                        const atermpp::aterm& t,
-                        std::ostream& f)
-    {
-      using namespace mcrl2::data;
-      if (is_pair(t))
-      {
-        print_tree_rec(c,atermpp::down_cast<atermpp::aterm_appl>(t)[0],f);
-        print_tree_rec(',',atermpp::down_cast<atermpp::aterm_appl>(t)[1],f);
-      }
-      else
-      {
-        data_expression t1(t);
-        f << c << mcrl2::data::pp(t1);
-      }
-    }
-
-
     void print_counter_example_rec(bes::variable_type current_var,
                                    std::string indent,
                                    std::vector<bool>& already_printed,
@@ -2511,36 +2398,19 @@ class boolean_equation_system
       using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
       using namespace atermpp;
-      if (internal_opt_store_as_tree)
+      const propositional_variable_instantiation_as_tree& t=variable_index.get(current_var);
+      f << t.name();
+      if (!t.arguments().empty())
       {
-        atermpp::aterm t=variable_index.get(current_var);
-        if (!is_pair(t))
+        f << "("; 
+        for(atermpp::term_balanced_tree<mcrl2::data::data_expression>::iterator i=t.arguments().begin(); i!=t.arguments().end(); ++i)
         {
-          f << atermpp::down_cast<aterm_appl>(t).function().name();
+          f << (i==t.arguments().begin()?"":",") << *i;
+         
         }
-        else
-        {
-          f << atermpp::down_cast<aterm_appl>(down_cast<atermpp::aterm_appl>(t)[0]).function().name();
-          print_tree_rec('(',down_cast<atermpp::aterm_appl>(t)[1],f);
-          f << ")";
-        }
+        f << ")";
       }
-      else
-      {
-        propositional_variable_instantiation X(variable_index.get(current_var));
-
-        data_expression_list tl=X.parameters();
-        std::string s=X.name();
-        f << s;
-        data_expression_list::iterator t=tl.begin();
-        for (     ; t!=tl.end(); ++t)
-        {
-          f << ((t==tl.begin())?"(":",");
-          f << *t;
-        }
-        f << ((t==tl.begin())?"":")"); // No closing bracket if there are tl.begin()==tl.end()
-      }
-
+     
       if (already_printed[current_var])
       {
         f << "*\n";
@@ -2593,6 +2463,23 @@ class boolean_equation_system
 
 
 } // namespace bes.
+
+
+namespace std
+{
+/// Template specialisation for 
+template<>
+struct hash<bes::propositional_variable_instantiation_as_tree >
+{
+  std::size_t operator()(const bes::propositional_variable_instantiation_as_tree& t) const
+  {
+    size_t seed=std::hash<atermpp::aterm>()(t.name());
+    return std::hash<atermpp::aterm>()(t.arguments()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  }
+};
+
+
+} // namespace std
 
 
 namespace bes

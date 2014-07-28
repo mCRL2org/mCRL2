@@ -362,7 +362,18 @@ inline void swap(atermpp::term_balanced_tree<T>& t1, atermpp::term_balanced_tree
 {
   t1.swap(t2);
 }
-} // namespace atermpp
+
+
+/// \brief Standard hash function.
+template<class T>
+struct hash<atermpp::term_balanced_tree<T> >
+{
+  std::size_t operator()(const atermpp::term_balanced_tree<T>& t) const
+  {
+    return std::hash<atermpp::aterm>()(t);
+  }
+};
+} // namespace std
 
 
 #endif // MCRL2_ATERMPP_ATERM_BALANCED_TREE_H

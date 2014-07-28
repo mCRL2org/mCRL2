@@ -101,6 +101,11 @@ class indexed_set
     /// \return The element in the set with the given index.
     const ELEMENT& get(size_t index) const;
 
+    /// \brief Indicates whether a certain index is defined.
+    /// \param index A positive number.
+    /// \return The element in the set with the given index.
+    bool defined(size_t index) const;
+
     /// \brief Remove elem from set. 
     /// The elem is removed from the indexed set, and if a number was assigned to elem, 
     /// it is freed to be reassigned to an element, that may be put into the set at some later instance. 

@@ -77,7 +77,6 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
     bool opt_use_hashtables;                   // The hashtable option
     bool opt_construct_counter_example;        // The counter example option
     remove_level opt_erase_unused_bes_variables;       // Remove unused bes variables if true
-    bool opt_store_as_tree;                    // The tree storage option
     bool opt_data_elm;                         // The data elimination option
     std::string opt_counter_example_file;      // The counter example file name
 
@@ -107,7 +106,6 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       opt_use_hashtables(false),
       opt_construct_counter_example(false),
       opt_erase_unused_bes_variables(none),
-      opt_store_as_tree(false),
       opt_data_elm(true),
       opt_counter_example_file("")
     {}
@@ -122,7 +120,6 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
       opt_construct_counter_example = 0 < parser.options.count("counter");
       opt_erase_unused_bes_variables= parser.option_argument_as<remove_level>("erase");
-      opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
       opt_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
       opt_search_strategy           = parser.option_argument_as<search_strategy>("search");
@@ -178,9 +175,6 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
                  make_mandatory_argument("FORMAT"),
                  "use output format FORMAT (this option is deprecated. Use the tool pbes2bes instead).\n",
                  'o').
-      add_option("tree",
-                 "store state in a tree (for memory efficiency)",
-                 't').
       add_option("unused_data",
                  "do not remove unused parts of the data specification",
                  'u');
@@ -237,7 +231,6 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
           datar,
           opt_transformation_strategy,
           opt_search_strategy,
-          opt_store_as_tree,
           opt_construct_counter_example,
           opt_erase_unused_bes_variables,
           opt_use_hashtables);
