@@ -1611,7 +1611,7 @@ namespace std
 
 /// \brief Standard has function for actions.
 template <>
-struct std::hash<mcrl2::process::action>
+struct hash<mcrl2::process::action>
 {
   std::size_t operator()(const mcrl2::process::action& t) const
   {
