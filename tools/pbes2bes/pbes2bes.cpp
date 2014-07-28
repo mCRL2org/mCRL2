@@ -122,6 +122,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       opt_data_elm                  = parser.options.count("unused-data") == 0;
       opt_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
       opt_search_strategy           = parser.option_argument_as<search_strategy>("search");
+
     }
 
     void add_options(interface_description& desc)
@@ -133,7 +134,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
                  .add_value(optimize)
                  .add_value(on_the_fly)
                  .add_value(on_the_fly_with_fixed_points),
-                 "use strategy STRAT:",
+                 "use substitution strategy STRAT:",
                  's').
       add_option("search", make_enum_argument<search_strategy>("SEARCH")
                  .add_value(breadth_first, true)
@@ -169,9 +170,12 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       using namespace utilities;
 
       mCRL2log(verbose) << "pbes2bes parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
+      mCRL2log(verbose) << "  input file:            " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:           " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  data rewriter:         " << m_rewrite_strategy << std::endl;
+      mCRL2log(verbose) << "  substitution strategy: " << opt_transformation_strategy << std::endl;
+      mCRL2log(verbose) << "  search strategy:       " << opt_search_strategy << std::endl;
+      mCRL2log(verbose) << "  erase level:           " << opt_erase_unused_bes_variables << std::endl;
 
       // load the pbes
       mcrl2::pbes_system::pbes p;

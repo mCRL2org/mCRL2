@@ -414,7 +414,7 @@ static atermpp::aterm_appl store_as_tree(const mcrl2::pbes_system::propositional
     }
   }
   return apply_pair_symbol(p.name(),(atermpp::aterm_appl)tree_store[0]);
-}
+} 
 
 class counter_example
 {
@@ -482,6 +482,39 @@ class counter_example
           return "Appr:true   ";
         case APPROXIMATION:
           return "Approxim    ";
+        default:
+          return "ERROR UNKNOWN CASE";
+      }
+    }
+
+    bool reason_indicates_that_formula_evaluated_to_given_truth_value(const bool truth_value)
+    {
+      switch (r)
+      {
+        case UNKNOWN:
+          return true; // This is not known. True is the safer answer.
+        case MU_CYCLE:
+          return !truth_value;
+        case NU_CYCLE:
+          return truth_value;
+        case SET_TO_FALSE:
+          return !truth_value;
+        case SET_TO_TRUE:
+          return truth_value;
+        case FORWARD_SUBSTITUTION_FALSE:
+          return !truth_value;
+        case FORWARD_SUBSTITUTION_TRUE:
+          return truth_value;
+        case SUBSTITUTION_FALSE:
+          return !truth_value;
+        case SUBSTITUTION_TRUE:
+          return truth_value;
+        case APPROXIMATION_FALSE:
+          return !truth_value;
+        case APPROXIMATION_TRUE:
+          return truth_value;
+        case APPROXIMATION:
+          return true; // This is not known. True is the safer answer.
         default:
           return "ERROR UNKNOWN CASE";
       }
@@ -2032,7 +2065,7 @@ class boolean_equation_system
         return false_();
       }
       throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::data::pp(mcrl2::data::data_expression(p)));
+                                   mcrl2::pbes_system::pp(p));
       return false_();
     }
 
@@ -2472,7 +2505,8 @@ class boolean_equation_system
     void print_counter_example_rec(bes::variable_type current_var,
                                    std::string indent,
                                    std::vector<bool>& already_printed,
-                                   std::ostream& f)
+                                   std::ostream& f,
+                                   const bool formula_is_valid)
     {
       using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
@@ -2519,29 +2553,34 @@ class boolean_equation_system
         for (std::deque < bes::counter_example>::iterator walker=counter_example_begin(current_var);
              walker!=counter_example_end(current_var) ; walker++)
         {
-          f << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ;
-          print_counter_example_rec((*walker).get_variable(),indent+"  ",
-                                    already_printed,
-                                    f);
+          if ((*walker).reason_indicates_that_formula_evaluated_to_given_truth_value(formula_is_valid))
+          {
+            f << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ;
+            print_counter_example_rec((*walker).get_variable(),indent+"  ",
+                                      already_printed,
+                                      f,
+                                      formula_is_valid);
+          }
         }
       }
     }
 
   public:
-    void print_counter_example(const std::string filename)
+    
+    void print_counter_example(const std::string filename, const bool formula_is_valid)
     {
       std::vector <bool> already_printed(nr_of_variables()+1,false);
       if (filename.empty())
       {
         // Print the counterexample to cout.
         std::cout << "Below the justification for this outcome is listed\n1: ";
-        print_counter_example_rec(2,"  ",already_printed,std::cout);
+        print_counter_example_rec(2,"  ",already_printed,std::cout,formula_is_valid);
       }
       try
       {
         std::ofstream f(filename.c_str());
         f << "Below the justification for this outcome is listed\n1: ";
-        print_counter_example_rec(2,"  ",already_printed,f);
+        print_counter_example_rec(2,"  ",already_printed,f,formula_is_valid);
         f.close();
       }
       catch (std::exception& e)

@@ -131,6 +131,12 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       {
         throw parser.error("the option --output or -o is deprecated. Use the tool pbes2bes for this functionality. ");
       }
+
+      if (opt_construct_counter_example && opt_erase_unused_bes_variables!=none)
+      {
+        throw parser.error("generating a counter example cannot be combined with erasing bes variables. ");
+      }
+   
     }
 
     void add_options(interface_description& desc)
@@ -142,7 +148,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
                  .add_value(::optimize)
                  .add_value(::on_the_fly)
                  .add_value(::on_the_fly_with_fixed_points),
-                 "use strategy STRAT:",
+                 "use substitution strategy STRAT:",
                  's').
      add_option("search", make_enum_argument<search_strategy>("SEARCH")
                  .add_value(breadth_first, true)
@@ -187,8 +193,11 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       using namespace utilities;
 
       mCRL2log(verbose) << "pbes2bool parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
+      mCRL2log(verbose) << "  input file:            " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  data rewriter:         " << m_rewrite_strategy << std::endl;
+      mCRL2log(verbose) << "  substitution strategy: " << opt_transformation_strategy << std::endl;
+      mCRL2log(verbose) << "  search strategy:       " << opt_search_strategy << std::endl;
+      mCRL2log(verbose) << "  erase level:           " << opt_erase_unused_bes_variables << std::endl;
 
       // load the pbes
       mcrl2::pbes_system::pbes p;
@@ -246,7 +255,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 
       if (opt_construct_counter_example)
       {
-        bes_equations.print_counter_example(opt_counter_example_file);
+        bes_equations.print_counter_example(opt_counter_example_file,result);
       }
       return true;
     }
