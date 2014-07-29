@@ -12,10 +12,12 @@
 #include <algorithm>
 #include <stdlib.h>
 
+#include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/enumerator.h"
 
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/print.h"
@@ -29,33 +31,35 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::log;
+using namespace mcrl2::utilities;
+
 
 
 static data_expression negate_inequality(const data_expression &e)
 {
   if (is_equal_to_application(e))
   {
-    return not_equal_to(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
+    return not_equal_to(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
   }
   if (is_not_equal_to_application(e))
   {
-    return equal_to(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
+    return equal_to(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
   }
   else if (is_less_application(e))
   {
-    return greater_equal(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
+    return greater_equal(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
   }
   else if (is_less_equal_application(e))
   {
-    return greater(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
+    return greater(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
   }
   else if (is_greater_application(e))
   {
-    return less_equal(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
+    return less_equal(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
   }
   else if (is_greater_equal_application(e))
   {
-    return less(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
+    return less(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
   }
   else
   {
@@ -157,7 +161,7 @@ assignment_list get_nonreal_assignments(const assignment_list& l)
 static const data_expression &condition_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  const data::application& a = aterm_cast<const application>(e);
+  const data::application& a = down_cast<const application>(e);
   data::application::const_iterator i = a.begin();
   return *i;
 }
@@ -165,7 +169,7 @@ static const data_expression &condition_part(const data_expression &e)
 static const data_expression &then_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  const data::application& a = aterm_cast<const application>(e);
+  const data::application& a = down_cast<const application>(e);
   data::application::const_iterator i = a.begin();
   return *(++i);
 }
@@ -173,15 +177,15 @@ static const data_expression &then_part(const data_expression &e)
 static const data_expression &else_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  const data::application& a = aterm_cast<const application>(e);
+  const data::application& a = down_cast<const application>(e);
   data::application::const_iterator i = a.begin();
   return *(++(++i));
 }
 
 
 /// \brief Splits a condition in expressions ranging over reals and the others
-/// \details Conceptually, the condition is first transformed to conjunctive
-///          normalform. For each conjunct, there will be an entry in both
+/// \details Conceptually, the condition is first transformed to dicjunctive
+///          normal form. For each disjunct, there will be an entry in both
 ///          resulting std::vectors, where the real conditions are in "real_conditions",
 ///          and the others in non_real_conditions. If there are conjuncts with
 ///          both real and non-real variables an exception is thrown. If negate
@@ -206,10 +210,10 @@ static void split_condition(
   {
     std::vector < data_expression_list >
     real_conditions_aux1, non_real_conditions_aux1;
-    split_condition(data::binary_left(atermpp::aterm_cast<application>(e)),real_conditions_aux1,non_real_conditions_aux1,negate);
+    split_condition(data::binary_left(atermpp::down_cast<application>(e)),real_conditions_aux1,non_real_conditions_aux1,negate);
     std::vector < data_expression_list >
     real_conditions_aux2, non_real_conditions_aux2;
-    split_condition(data::binary_right(atermpp::aterm_cast<application>(e)),real_conditions_aux2,non_real_conditions_aux2,negate);
+    split_condition(data::binary_right(atermpp::down_cast<application>(e)),real_conditions_aux2,non_real_conditions_aux2,negate);
     for (std::vector < data_expression_list >::const_iterator
          i1r=real_conditions_aux1.begin(), i1n=non_real_conditions_aux1.begin() ;
          i1r!=real_conditions_aux1.end(); ++i1r, ++i1n)
@@ -225,10 +229,10 @@ static void split_condition(
   }
   else if ((!negate && sort_bool::is_or_application(e))  || (negate && sort_bool::is_and_application(e)))
   {
-    split_condition(data::binary_left(atermpp::aterm_cast<application>(e)),real_conditions,non_real_conditions,negate);
+    split_condition(data::binary_left(atermpp::down_cast<application>(e)),real_conditions,non_real_conditions,negate);
     std::vector < data_expression_list >
     real_conditions_aux, non_real_conditions_aux;
-    split_condition(data::binary_right(atermpp::aterm_cast<application>(e)),real_conditions_aux,non_real_conditions_aux,negate);
+    split_condition(data::binary_right(atermpp::down_cast<application>(e)),real_conditions_aux,non_real_conditions_aux,negate);
     for (std::vector < data_expression_list >::const_iterator
          i_r=real_conditions_aux.begin(), i_n=non_real_conditions_aux.begin() ;
          i_r!=real_conditions_aux.end(); ++i_r, ++i_n)
@@ -245,9 +249,9 @@ static void split_condition(
   }
   else if (sort_bool::is_not_application(e))
   {
-    split_condition(unary_operand(atermpp::aterm_cast<application>(e)),real_conditions,non_real_conditions,!negate);
+    split_condition(unary_operand(atermpp::down_cast<application>(e)),real_conditions,non_real_conditions,!negate);
   }
-  else if (is_inequality(e) && (data::binary_left(atermpp::aterm_cast<application>(e)).sort() == sort_real::real_() || data::binary_right(atermpp::aterm_cast<application>(e)).sort() == sort_real::real_()))
+  else if (is_inequality(e) && (data::binary_left(atermpp::down_cast<application>(e)).sort() == sort_real::real_() || data::binary_right(atermpp::down_cast<application>(e)).sort() == sort_real::real_()))
   {
     std::set < variable > vars=data::find_all_variables(e);
     for (std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
@@ -294,6 +298,146 @@ static void split_condition(
   }
   assert(non_real_conditions.size()==real_conditions.size());
 }
+
+static size_t global_variable_counter=0;
+
+/// \brief Find each expression of the form x<y, x<=y, x==y, x>=y x>y in t that contain variables occurring in real_parameters
+///        and replace these by a boolean variable b. This variable is added to vars
+static data_expression replace_linear_inequalities_with_reals_by_variables(
+                  const data_expression& t,
+                  data_expression& condition, 
+                  variable_list& vars,
+                  const variable_list& real_parameters)
+{
+  if (is_function_symbol(t))
+  {
+    return t;
+  }
+  if (is_variable(t))
+  {
+    const variable v(t);
+    if (std::find(real_parameters.begin(),real_parameters.end(),v)!=real_parameters.end()) // found
+    {
+      throw mcrl2::runtime_error(std::string("Variable ") + data::pp(v) + ":" + data::pp(v.sort()) + " occurs in an action and cannot be removed"); 
+    }
+    return t;
+  }
+  if (is_abstraction(t))
+  {
+    const abstraction ta(t);
+    return abstraction(ta.binding_operator(),
+                       ta.variables(),
+                       replace_linear_inequalities_with_reals_by_variables(ta.body(),condition,vars,real_parameters));
+  }
+  if (is_where_clause(t))
+  {
+    const where_clause tw(t);
+    const assignment_expression_list& l=tw.declarations();
+    assignment_expression_vector new_l;
+    for(assignment_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    {
+      const assignment ass(*i);
+      new_l.push_back(assignment(ass.lhs(),replace_linear_inequalities_with_reals_by_variables(ass.rhs(),condition,vars,real_parameters)));
+    }
+    
+    return where_clause(replace_linear_inequalities_with_reals_by_variables(tw.body(),condition,vars,real_parameters),
+                        assignment_expression_list(new_l.begin(),new_l.end()));
+  }
+
+  assert(is_application(t));
+  const application ta(t);
+  if (is_inequality(ta))
+  {
+    std::stringstream ss;
+    ss << "v@@r" << global_variable_counter;
+    variable v(ss.str(),sort_bool::bool_());
+    global_variable_counter++;
+    condition=sort_bool::and_(condition,equal_to(v,ta)); 
+    vars.push_front(v);
+    return v;
+  }
+  
+  data_expression_vector new_args;
+  for(application::const_iterator a=ta.begin(); a!=ta.end(); ++a)
+  {
+    new_args.push_back(replace_linear_inequalities_with_reals_by_variables(*a,condition,vars,real_parameters));
+  }
+  return application(replace_linear_inequalities_with_reals_by_variables(ta.head(),condition,vars,real_parameters),
+                     new_args.begin(),new_args.end());
+  
+}
+
+/// \brief Remove references to variables in real_parameters from actions,
+///        if possible. In particular actions of the shape a(x<3).....
+///        are replaced by summands of the shape x<3 -> a(true) .... + !(x<3) -> a(false) ....
+/// \param s The specification s is changed in the sense that actions are removed.
+/// \param real_parameters are used to determine what the real parameters are.
+/// \detail This routine throws an exception if there is a real parameter in an 
+///         action that it fails to remove.
+
+static void move_real_parameters_out_of_actions(specification &s, 
+                                                const variable_list& real_parameters,
+                                                const rewriter &r)
+{
+  global_variable_counter=0;
+  const lps::action_summand_vector action_smds = s.process().action_summands();
+  lps::action_summand_vector new_action_summands;
+  enumerator_algorithm_with_iterator<> enumerator(r,s.data(),r);
+  for (lps::action_summand_vector::const_iterator i = action_smds.begin(); i != action_smds.end(); ++i)
+  {
+     const process::action_list ma=i->multi_action().actions();
+     variable_list replaced_variables;
+     data_expression new_condition=sort_bool::true_();
+     process::action_vector new_actions;
+     for(process::action_list::const_iterator a=ma.begin(); a!=ma.end(); ++a)
+     {
+       const data_expression_list l=a->arguments();
+       data_expression_vector resulting_data;
+       for(data_expression_list::const_iterator j=l.begin(); j!=l.end(); ++j)
+       {
+         resulting_data.push_back(replace_linear_inequalities_with_reals_by_variables(*j,new_condition,replaced_variables,real_parameters));
+       }
+       new_actions.push_back(process::action(a->label(),data_expression_list(resulting_data.begin(),resulting_data.end())));
+     }
+     
+     if (replaced_variables.empty())
+     {
+       new_action_summands.push_back(*i);
+     }
+     else 
+     {
+       mutable_indexed_substitution<> empty_sigma;
+       std::deque<enumerator_list_element_with_substitution<> > 
+               enumerator_deque(1, enumerator_list_element_with_substitution<>(replaced_variables,sort_bool::true_()));
+       for (auto tl = enumerator.begin(empty_sigma, enumerator_deque); tl!= enumerator.end(); ++tl)
+       { 
+         mutable_map_substitution<> sigma;
+         tl->add_assignments(replaced_variables,sigma,r);
+
+         process::action_vector new_replaced_actions;
+         for(process::action_vector::const_iterator j=new_actions.begin(); j!=new_actions.end(); ++j)
+         {
+           data_expression_vector new_replaced_args;
+           for(data_expression_list::const_iterator k=j->arguments().begin();k!=j->arguments().end(); ++k)
+           {
+             new_replaced_args.push_back(replace_free_variables(*k,sigma));
+           }
+           new_replaced_actions.push_back(process::action(j->label(),data_expression_list(new_replaced_args.begin(),new_replaced_args.end())));
+         }
+         const process::action_list new_action_list(new_replaced_actions.begin(),new_replaced_actions.end());
+         new_action_summands.push_back(action_summand(
+                                          i->summation_variables(), 
+                                          r(sort_bool::and_(data::replace_free_variables(new_condition,sigma),i->condition())), 
+                                          (i->has_time()?
+                                             multi_action(new_action_list,i->multi_action().time()):
+                                             multi_action(new_action_list)),
+                                          i->assignments()));
+       }
+     }
+  }
+  s.process().action_summands()=new_action_summands;
+}
+
 
 /// \brief Normalize all inequalities in the summands of the specification
 /// \details The parts of the
@@ -634,7 +778,7 @@ static void add_summand(summand_information& summand_info,
                         std::vector <linear_inequality> &nextstate_condition,
                         const context_type& complete_context,
                         const rewriter& r,
-                        action_label_list& a,
+                        process::action_label_list& a,
                         identifier_generator<>& variable_generator,
                         const comp_struct& cs,
                         const bool is_may_summand,
@@ -677,7 +821,7 @@ static void add_summand(summand_information& summand_info,
         if (negate)
         {
           nextstate.push_front(assignment(c_complete->get_variable(),
-                               make_application(negate_function_symbol(cs.sort()),c->get_variable())));
+                               application(negate_function_symbol(cs.sort()),c->get_variable())));
         }
         else
         {
@@ -721,13 +865,12 @@ static void add_summand(summand_information& summand_info,
 
   nextstate = reverse(nextstate);
 
-  action_list new_actions=summand_info.get_multi_action().actions();
+  process::action_list new_actions=summand_info.get_multi_action().actions();
   if (!summand_info.is_delta_summand() && is_may_summand)
   {
     new_actions=reinterpret_cast<const action_summand&>(s).multi_action().actions();
-    action_list resulting_actions;
-    for (action_list::const_iterator i=new_actions.begin();
-         i!=new_actions.end(); i++)
+    process::action_list resulting_actions;
+    for (auto i=new_actions.begin(); i!=new_actions.end(); i++)
     {
       // put "_MAY" behind each action, and add its declaration to the action declarations.
       data_expression_list args=i->arguments();
@@ -743,12 +886,12 @@ static void add_summand(summand_information& summand_info,
         action_label_it=(action_label_map.insert(
                            std::pair< std::pair< std::string, sort_expression_list >,std::string>
                            (p,may_action_label))).first;
-        a.push_front(action_label(may_action_label,sorts));
+        a.push_front(process::action_label(may_action_label,sorts));
         protect_against_garbage_collect.push_back(sorts);
       }
 
-      action_label may_action_label(action_label_it->second,sorts);
-      resulting_actions.push_front(action(may_action_label,args));
+      process::action_label may_action_label(action_label_it->second,sorts);
+      resulting_actions.push_front(process::action(may_action_label,args));
     }
     new_actions=reverse(resulting_actions);
   }
@@ -823,7 +966,7 @@ assignment_list determine_process_initialization(
 /// \param max_iterations The maximal number of iterations the algorithm should
 ///        perform
 /// \param strategy The rewrite strategy that should be used.
-specification realelm(specification s, int max_iterations, const rewriter& r)
+specification realelm(specification s, int max_iterations, const rewrite_strategy strat)
 {
   if (s.process().has_time())
   {
@@ -838,17 +981,17 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   ds.add_equation(data_equation(  // negate(larger)=smaller;
                     std::vector <variable>(),
                     sort_bool::true_(),
-                    make_application(negate_function_symbol(c.sort()),c.larger()),
+                    application(negate_function_symbol(c.sort()),c.larger()),
                     c.smaller()));
   ds.add_equation(data_equation(  // negate(smaller)=larger;
                     std::vector <variable>(),
                     sort_bool::true_(),
-                    make_application(negate_function_symbol(c.sort()),c.smaller()),
+                    application(negate_function_symbol(c.sort()),c.smaller()),
                     c.larger()));
   ds.add_equation(data_equation(  // negate(equal)=equal;
                     std::vector <variable>(),
                     sort_bool::true_(),
-                    make_application(negate_function_symbol(c.sort()),c.equal()),
+                    application(negate_function_symbol(c.sort()),c.equal()),
                     c.equal()));
   variable v("x",c.sort());
   std::vector <variable> vars;
@@ -856,19 +999,20 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   ds.add_equation(data_equation(  // negate(negate(x))=x;
                     vars,
                     sort_bool::true_(),
-                    make_application(negate_function_symbol(c.sort()),make_application(negate_function_symbol(c.sort()),v)),
+                    application(negate_function_symbol(c.sort()),application(negate_function_symbol(c.sort()),v)),
                     v));
 
   s.data() = ds;
+  rewriter r(s.data(),strat);
   set_identifier_generator variable_generator;
   variable_generator.add_identifiers(lps::find_identifiers((s)));
   linear_process lps=s.process();
   const variable_list real_parameters = get_real_variables(lps.process_parameters());
   const variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
   std::vector < summand_information > summand_info;
-  // mCRL2log(debug) << "Normalize specification in\n";
+
+  move_real_parameters_out_of_actions(s,real_parameters,r);
   normalize_specification(s, real_parameters, r, summand_info);
-  // mCRL2log(debug) << "Normalize specification out\n";
 
   context_type context; // Contains introduced variables
 
@@ -969,7 +1113,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   // std::vector < data_expression_list > nextstate_context_combinations;
   lps::action_summand_vector action_summands;
   lps::deadlock_summand_vector deadlock_summands;
-  action_label_list new_act_declarations;
+  process::action_label_list new_act_declarations;
   for (std::vector < summand_information >::iterator i = summand_info.begin();
        i != summand_info.end(); ++i)
   {

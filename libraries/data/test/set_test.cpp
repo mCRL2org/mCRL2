@@ -9,7 +9,6 @@
 /// \file set_test.cpp
 /// \brief Basic regression test for set expressions.
 
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/standard.h"
@@ -49,6 +48,7 @@ void set_expression_test()
 
   specification.add_context_sort(sort_pos::pos());
   specification.add_context_sort(sort_set::set_(sort_pos::pos()));
+  specification.add_context_sort(sort_set::set_(sort_bool::bool_()));
 
   data::rewriter normaliser(specification);
 
@@ -56,36 +56,61 @@ void set_expression_test()
   v.push_back(parse_variable("s:Set(Nat)"));
 
   test_data_expression("{x : Nat | x < 10}", v, sort_set::is_constructor_application);
-  test_data_expression("!s", v, sort_set::is_complement_application);
-  test_data_expression("s * {1,2,3}", v, sort_set::is_intersection_application);
+  test_data_expression("!s", v, sort_set::is_complement_application); 
+  test_data_expression("s * {}", v, sort_set::is_intersection_application); 
+  test_data_expression("s * {1,2,3}", v, sort_set::is_intersection_application); 
   test_data_expression("s - {3,1,2}", v, sort_set::is_difference_application);
   test_data_expression("1 in s", v, sort_set::is_in_application);
   test_data_expression("{} + s", v, sort_set::is_union_application);
-  test_data_expression("(({} + s) - {20}) * {40}", v, sort_set::is_intersection_application);
+  test_data_expression("(({} + s) - {20}) * {40}", v, sort_set::is_intersection_application); 
   test_data_expression("{10} < s", v, is_less_application<data_expression>);
   test_data_expression("s <= {10}", v, is_less_equal_application<data_expression>);
   test_data_expression("{20} + {30}", v, sort_set::is_union_application);
 
   data_expression t1d1 = parse_data_expression("{1,2}");
   data_expression t1d2 = parse_data_expression("{2,1}");
-std::cerr << "T1 " << pp(t1d1) << "   " << pp(t1d2) << "\n";
-std::cerr << "T1 " << t1d1 << "   " << t1d2 << "\n";
-std::cerr << "T1norm " << pp(normaliser(t1d1)) << "   " << pp(normaliser(t1d2)) << "\n";
   BOOST_CHECK(normaliser(t1d1) == normaliser(t1d2));
+
+  data_expression t1d1a = parse_data_expression("{1,2,3}");
+  data_expression t1d2a = parse_data_expression("{2,1}");
+  BOOST_CHECK(normaliser(t1d1a) != normaliser(t1d2a));
 
   data_expression t2d1 = parse_data_expression("{1,2} == {1,2}");
   data_expression t2d2 = parse_data_expression("true");
   BOOST_CHECK(normaliser(t2d1) == normaliser(t2d2));
 
+  data_expression t2d1a = parse_data_expression("{1,2,3} == {1,2,1}");
+  data_expression t2d2a = parse_data_expression("false");
+  BOOST_CHECK(normaliser(t2d1a) == normaliser(t2d2a));
+
   data_expression t3d1 = parse_data_expression("({1,2} != {2,3})");
   data_expression t3d2 = parse_data_expression("true");
-  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d2));
+  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d2)); 
+
+  data_expression t4d1 = parse_data_expression("(!{1,2}) == {1,2}");
+  data_expression t4d2 = parse_data_expression("false"); 
+  BOOST_CHECK(normaliser(t4d1) == normaliser(t4d2));
+
+  data_expression t5d1 = parse_data_expression("(!!{1,2}) == {2,1}");
+  data_expression t5d2 = parse_data_expression("true");
+  BOOST_CHECK(normaliser(t5d1) == normaliser(t5d2));
+
 
   data_expression e = parse_data_expression("{20}", v.begin(), v.end());
-  BOOST_CHECK(sort_set::is_constructor_application(normaliser(e)));
+  BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));
 
   e = parse_data_expression("{20, 30, 40}", v.begin(), v.end());
-  BOOST_CHECK(sort_set::is_constructor_application(normaliser(e)));
+  BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));   
+
+  data_expression t6d1 = parse_data_expression("{} == { b: Bool | true } - { true, false }");
+  data_expression t6d2 = parse_data_expression("true");
+
+  BOOST_CHECK(normaliser(t6d1) == normaliser(t6d2));
+
+  data_expression t7d1 = parse_data_expression("{ b: Bool | true } - { true, false } == {}");
+  data_expression t7d2 = parse_data_expression("true");
+  BOOST_CHECK(normaliser(t7d1) == normaliser(t7d2));
+
 }
 
 int test_main(int argc, char** argv)

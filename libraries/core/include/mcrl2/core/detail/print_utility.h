@@ -27,23 +27,12 @@ namespace core
 namespace detail
 {
 
-struct default_printer
-{
-  template <typename T>
-  std::string operator()(const T& x) const
-  {
-    std::ostringstream out;
-    out << x;
-    return out.str();
-  }
-};
-
 /// \brief Creates a string representation of a container using the pp pretty print function.
 /// \param v A container
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
-template <typename Container, typename Printer>
-std::string print_container(const Container& v, Printer print = default_printer(), std::string begin_marker = "(", std::string end_marker = ")", std::string message = "", bool print_index = false, bool boundary_spaces = true)
+template <typename Container>
+std::string print_container(const Container& v, std::string begin_marker = "(", std::string end_marker = ")", std::string message = "", bool print_index = false, bool boundary_spaces = true)
 {
   std::ostringstream out;
   if (!message.empty())
@@ -61,7 +50,7 @@ std::string print_container(const Container& v, Printer print = default_printer(
     if (print_index)
     {
       out << index++ << " ";
-      out << print(*i);
+      out << *i;
       out << std::endl;
     }
     else
@@ -70,7 +59,7 @@ std::string print_container(const Container& v, Printer print = default_printer(
       {
         out << ", ";
       }
-      out << print(*i);
+      out << *i;
     }
   }
   if (boundary_spaces)
@@ -85,20 +74,45 @@ std::string print_container(const Container& v, Printer print = default_printer(
 /// \param v A container
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
-template <typename Container, typename Printer>
-std::string print_list(const Container& v, Printer print = default_printer(), std::string message = "", bool print_index = false, bool boundary_spaces = true)
+template <typename Container>
+std::string print_list(const Container& v, std::string message = "", bool print_index = false, bool boundary_spaces = true)
 {
-  return print_container(v, print, "[", "]", message, print_index, boundary_spaces);
+  return print_container(v, "[", "]", message, print_index, boundary_spaces);
 }
 
 /// \brief Creates a string representation of a container.
 /// \param v A container
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
-template <typename Container, typename Printer>
-std::string print_set(const Container& v, Printer print = default_printer(), std::string message = "", bool print_index = false, bool boundary_spaces = true)
+template <typename Container>
+std::string print_set(const Container& v, std::string message = "", bool print_index = false, bool boundary_spaces = true)
 {
-  return print_container(v, print, "{", "}", message, print_index, boundary_spaces);
+  return print_container(v, "{", "}", message, print_index, boundary_spaces);
+}
+
+/// \brief Creates a string representation of a map
+/// \param v A map container
+/// \param message A string
+/// \param print_index If true, an index is written in front of each term
+template <typename MapContainer>
+std::string print_map(const MapContainer& v, std::string message = "")
+{
+  std::ostringstream out;
+  if (!message.empty())
+  {
+    out << "--- " << message << "---" << std::endl;
+  }
+  out << "{";
+  for (auto i = v.begin(); i != v.end(); ++i)
+  {
+    if (i != v.begin())
+    {
+      out << ", ";
+    }
+    out << i->first << " -> " << i->second;
+  }
+  out << "}";
+  return out.str();
 }
 
 } // namespace detail

@@ -12,14 +12,16 @@
 #ifndef MCRL2_LPS_BINARY_H
 #define MCRL2_LPS_BINARY_H
 
-#include <cmath>
 #include <iterator>
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/math.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/replace.h"
 
@@ -28,21 +30,6 @@ namespace mcrl2
 
 namespace lps
 {
-
-// Compute base 2 logarithm of n, by checking which is the leftmost
-// bit that has been set.
-inline
-size_t ceil_log2(size_t n)
-{
-  assert(n>0);
-  size_t result = 0;
-  while(n != 0)
-  {
-    n = n >> 1;
-    ++result;
-  }
-  return result;
-}
 
 // Compute the number of booleans needed to represent a set of size n.
 inline
@@ -54,7 +41,7 @@ size_t nr_of_booleans_for_elements(size_t n)
   }
   else
   {
-    return ceil_log2(n-1);
+    return utilities::ceil_log2(n-1);
   }
 }
 
@@ -65,7 +52,8 @@ size_t nr_of_booleans_for_elements(size_t n)
 template<typename DataRewriter>
 class binary_algorithm: public lps::detail::lps_algorithm
 {
-    typedef data::classic_enumerator< data::rewriter > enumerator_type;
+  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+  typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
 
   protected:
     /// Rewriter
@@ -96,9 +84,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
       else
       {
         size_t n = enumerated_elements.size();
-        size_t m = static_cast< size_t >(pow(static_cast< double >(2), static_cast< int >(new_parameters.size()) - 1));
-
-        //m == 2^(new_parameters.size() - 1)
+        size_t m = 1 << (new_parameters.size() - 1);  //m == 2^(new_parameters.size() - 1)
 
         if (m > n)
         {
@@ -116,8 +102,8 @@ class binary_algorithm: public lps::detail::lps_algorithm
           right_list = data::data_expression_vector(enumerated_elements.begin() + m, enumerated_elements.end());
         }
 
-        data::data_expression condition = new_parameters.front();
-        new_parameters.erase(new_parameters.begin());
+        data::data_expression condition = new_parameters.back();
+        new_parameters.pop_back();
         result = if_(condition,
                      make_if_tree(new_parameters, right_list),
                      make_if_tree(new_parameters, left_list));
@@ -140,7 +126,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       data::set_identifier_generator generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
-      enumerator_type enumerator(m_spec.data(),m_rewriter);
+      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
@@ -152,20 +138,18 @@ class binary_algorithm: public lps::detail::lps_algorithm
           //Get all constructors for par
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
-          // for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
-          for (enumerator_type::iterator j=enumerator.begin(
-                           atermpp::make_list<data::variable>(par),
-                           data::data_expression(data::sort_bool::true_()));
-                j != enumerator.end() ; ++j)
+          data::mutable_indexed_substitution<> local_sigma;
+          const data::variable_list vl=atermpp::make_list<data::variable>(par);
+          std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+          for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end() ; ++j)
           {
-            enumerated_elements.push_back((*j)(par));
+            j->add_assignments(vl, local_sigma,m_rewriter);
+            enumerated_elements.push_back(local_sigma(par));
           }
 
           m_enumerated_elements[par] = enumerated_elements;
 
           //Calculate the number of booleans needed to encode par
-          //The first variation is not accurate!
-          //int n = static_cast< int >(ceil(::log(static_cast< double >(enumerated_elements.size())) / ::log(static_cast< double >(2))));
           size_t n = nr_of_booleans_for_elements(enumerated_elements.size());
 
           //Set hint for fresh variable names
@@ -232,10 +216,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
             while (k != elements.end())
             {
               // Elements that get boolean value false
-              int count(static_cast< int >(pow(static_cast< double >(2), static_cast< int >(j))));
-              // TODO: Why doesn't just std::advance(k,count) work?, i.e. if
-              // distance(k, elements.end()) > count, advance(k, count)
-              // entails k != elements.end().
+              ssize_t count(1 << j);
               if (std::distance(k, elements.end()) < count)
               {
                 k = elements.end();
@@ -246,7 +227,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
               }
 
               // Elements that get value true
-              for (int l = 0; l < count && k != elements.end(); ++l)
+              for (ssize_t l = 0; l < count && k != elements.end(); ++l)
               {
                 disjuncts.push_back(data::equal_to(i->rhs(), *k++));
               }

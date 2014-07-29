@@ -1,0 +1,3 @@
+act a;
+proc P = ( tau || tau ). P;
+init allow( {a} , P);

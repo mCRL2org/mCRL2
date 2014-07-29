@@ -1,7 +1,6 @@
 #ifndef _MCRL2_DATA_CONCEPTS__HPP_
 #define _MCRL2_DATA_CONCEPTS__HPP_
 
-#include "boost/assert.hpp"
 #include "boost/concept_check.hpp"
 #include "boost/type_traits/is_convertible.hpp"
 #include "boost/iterator/iterator_concepts.hpp"
@@ -29,7 +28,7 @@ BOOST_concept(Substitution,(S)) :
 
   BOOST_CONCEPT_USAGE(Substitution)
   {
-    BOOST_ASSERT((boost::is_convertible< variable_type, expression_type >::value));
+    static_assert(std::is_convertible< variable_type, expression_type >::value,"variable_type and expression_type must be convertible");
 
     s(static_cast< expression_type const& >(e)) == e;
     s(static_cast< variable_type const& >(v)) == v;

@@ -145,7 +145,7 @@ class data_type_checker:public sort_type_checker
                         std::map<core::identifier_string,sort_expression> &FreeVars,
                         const bool strictly_ambiguous=true,
                         const bool warn_upcasting=false,
-                        const bool print_cast_errori=true);
+                        const bool print_cast_error=true);
     sort_expression TraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression> &DeclaredVars,
                                          const std::map<core::identifier_string,sort_expression> &AllowedVars,
                                          data_expression &t1,
@@ -174,10 +174,13 @@ class data_type_checker:public sort_type_checker
     bool EqTypesL(sort_expression_list Type1, sort_expression_list Type2);
     bool MaximumType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result);
     sort_expression ExpandNumTypesUp(sort_expression Type);
+    sort_expression_list ExpandNumTypesUpL(const sort_expression_list& type_list);
     sort_expression ExpandNumTypesDown(sort_expression Type);
     bool UnifyMinType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result);
+    sort_expression determine_allowed_type(const data_expression &d, const sort_expression &proposed_type);
     bool MatchIf(const function_sort &type, sort_expression &result);
     bool MatchEqNeqComparison(const function_sort &type, sort_expression &result);
+    bool MatchSqrt(const function_sort &type, sort_expression &result);
     bool MatchListOpCons(const function_sort &type, sort_expression &result);
     bool MatchListOpSnoc(const function_sort &type, sort_expression &result);
     bool MatchListOpConcat(const function_sort &type, sort_expression &result);
@@ -185,18 +188,32 @@ class data_type_checker:public sort_type_checker
     bool MatchListOpHead(const function_sort &type, sort_expression &result);
     bool MatchListOpTail(const function_sort &type, sort_expression &result);
     bool MatchSetOpSet2Bag(const function_sort &type, sort_expression &result);
+    bool MatchFalseFunction(const function_sort &type, sort_expression &result);
     bool MatchListSetBagOpIn(const function_sort &type, sort_expression &result);
+    bool match_fset_insert(const function_sort &type, sort_expression &result);
+    bool match_fbag_cinsert(const function_sort &type, sort_expression &result);
     bool MatchSetBagOpUnionDiffIntersect(const function_sort &type, sort_expression &result);
     bool MatchSetOpSetCompl(const function_sort &type, sort_expression &result);
     bool MatchBagOpBag2Set(const function_sort &type, sort_expression &result);
     bool MatchBagOpBagCount(const function_sort &type, sort_expression &result);
     bool MatchFuncUpdate(const function_sort &type, sort_expression &result);
+    bool MatchSetConstructor(const function_sort &type, sort_expression &result);
+    bool MatchBagConstructor(const function_sort &type, sort_expression &result);
     bool UnArrowProd(sort_expression_list ArgTypes, sort_expression PosType, sort_expression &result);
-    bool UnSet(sort_expression PosType, sort_expression &result);
-    bool UnBag(sort_expression PosType, sort_expression &result);
+    bool UnFSet(sort_expression PosType, sort_expression &result);
+    bool UnFBag(sort_expression PosType, sort_expression &result);
     bool UnList(sort_expression PosType, sort_expression &result);
     void ErrorMsgCannotCast(sort_expression CandidateType, data_expression_list Arguments, sort_expression_list ArgumentTypes,std::string previous_reason);
-    sort_expression UpCastNumericType(sort_expression NeededType, sort_expression Type, data_expression &Par, bool warn_upcasting=false);
+    sort_expression UpCastNumericType(
+                    sort_expression NeededType, 
+                    sort_expression Type, 
+                    data_expression &Par, 
+                    const std::map<core::identifier_string,sort_expression> &DeclaredVars,
+                    const std::map<core::identifier_string,sort_expression> &AllowedVars,
+                    std::map<core::identifier_string,sort_expression> &FreeVars,
+                    const bool strictly_ambiguous,
+                    bool warn_upcasting=false,
+                    const bool print_cast_error=false);
     bool VarsUnique(const variable_list &VarDecls);
     void TransformVarConsTypeData(data_specification &data_spec);
     sort_expression_list GetNotInferredList(const atermpp::term_list<sort_expression_list> &TypeListList);
@@ -207,6 +224,7 @@ class data_type_checker:public sort_type_checker
     bool IsTypeAllowedA(const sort_expression &Type, const sort_expression &PosType);
     bool IsTypeAllowedL(const sort_expression_list &TypeList, const sort_expression_list PosTypeList);
     bool IsNotInferredL(sort_expression_list TypeList);
+    bool strict_type_check(const data_expression& d);
 };
 
 

@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,23 +12,16 @@
 #include <queue>
 #include <stack>
 
-static int sign(int i)
-{
-    if (i < 0) return -1;
-    if (i > 0) return +1;
-    return 0;
-}
-
 edgei count_ordered_edges(const StaticGraph &g, int dir)
 {
-    dir = sign(dir);
     edgei res = 0;
     for (verti v = 0; v < g.V(); ++v)
     {
         for ( StaticGraph::const_iterator it = g.succ_begin(v);
               it != g.succ_end(v); ++it )
         {
-            res += (sign(*it - v) == dir);
+            res += (dir < 0) ? (*it < v) :
+                   (dir > 0) ? (*it > v) : (*it == v);
         }
     }
     return res;
@@ -36,14 +29,13 @@ edgei count_ordered_edges(const StaticGraph &g, int dir)
 
 void get_bfs_order(const StaticGraph &graph, std::vector<verti> &perm)
 {
-    assert(perm.empty());
-    perm.resize(graph.V(), (verti)-1);
+    perm.assign(graph.V(), NO_VERTEX);
 
     std::queue<verti> queue;
     verti new_v = 0;
     for (verti root = 0; root < graph.V(); ++root)
     {
-        if (perm[root] != (verti)-1) continue;
+        if (perm[root] != NO_VERTEX) continue;
         perm[root] = new_v++;
         queue.push(root);
         while (!queue.empty())
@@ -54,7 +46,7 @@ void get_bfs_order(const StaticGraph &graph, std::vector<verti> &perm)
             while (it != graph.succ_end(v))
             {
                 verti w = *it++;
-                if (perm[w] == (verti)-1)
+                if (perm[w] == NO_VERTEX)
                 {
                     perm[w] = new_v++;
                     queue.push(w);
@@ -67,14 +59,13 @@ void get_bfs_order(const StaticGraph &graph, std::vector<verti> &perm)
 
 void get_dfs_order(const StaticGraph &graph, std::vector<verti> &perm)
 {
-    assert(perm.empty());
-    perm.resize(graph.V(), (verti)-1);
+    perm.assign(graph.V(), NO_VERTEX);
 
     std::stack<std::pair<verti, StaticGraph::const_iterator> > stack;
     verti new_v = 0;
     for (verti root = 0; root < graph.V(); ++root)
     {
-        if (perm[root] != (verti)-1) continue;
+        if (perm[root] != NO_VERTEX) continue;
         perm[root] = new_v++;
         stack.push(std::make_pair(root, graph.succ_begin(root)));
         while (!stack.empty())
@@ -88,7 +79,7 @@ void get_dfs_order(const StaticGraph &graph, std::vector<verti> &perm)
             else
             {
                 verti w = *it++;
-                if (perm[w] == (verti)-1)
+                if (perm[w] == NO_VERTEX)
                 {
                     perm[w] = new_v++;
                     stack.push(std::make_pair(w, graph.succ_begin(w)));

@@ -6,41 +6,28 @@
 
 import re
 import sys
-from optparse import OptionParser
 from mcrl2_parser import *
 from mcrl2_utility import *
 from path import *
 
-LIBSTRUCT_SYMBOL_FUNCTIONS = '''// %(name)s
+#---------------------------------------------------------------#
+#            generate_function_symbol_constructors
+#---------------------------------------------------------------#
+#
+def generate_function_symbol_constructors(rules, declaration_filename, definition_filename, skip_list):
+    CODE = '''// %(name)s
 inline
 const atermpp::function_symbol& function_symbol_%(name)s()
 {
-  static atermpp::function_symbol function_symbol_%(name)s = atermpp::function_symbol("%(name)s", %(arity)d);
+  static const atermpp::function_symbol function_symbol_%(name)s = atermpp::function_symbol("%(name)s", %(arity)d);
   return function_symbol_%(name)s;
 }
 
-inline
-bool gsIs%(name)s(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_%(name)s();
-}
-
 '''
 
-LIBSTRUCT_MAKE_FUNCTION = '''inline
-aterm_appl gsMake%(name)s(%(parameters)s)
-{
-  return term_appl<aterm>(function_symbol_%(name)s()%(arguments)s);
-}
-
-'''
-
-#---------------------------------------------------------------#
-#                      generate_libstruct_functions
-#---------------------------------------------------------------#
-# generates C++ code for libstruct functions
-#
-def generate_libstruct_functions(rules, filename):
+    ctext = '' # constructors
+    dtext = '' # definitions
+    vtext = '' # variables
     names = {}
     calls = {}
     decls = {}
@@ -49,18 +36,22 @@ def generate_libstruct_functions(rules, filename):
 
     for f in functions:
         name = f.name()
+        if name in skip_list:
+            continue
         names[name] = f.arity()
         calls[name] = f.default_call()
         decls[name] = f.default_declaration()
 
-    text = ''
-    mtext = '' # gsMake functions
+        dtext = dtext + '  const atermpp::function_symbol core::detail::function_symbols::%s = core::detail::function_symbol_%s();\n' % (name, name)
+        vtext = vtext + '  static const atermpp::function_symbol %s;\n' % name
 
     name_keys = names.keys()
     name_keys.sort()
     for name in name_keys:
+        if name in skip_list:
+            continue
         arity = names[name]
-        text = text + LIBSTRUCT_SYMBOL_FUNCTIONS % {
+        ctext = ctext + CODE % {
             'name'  : name,
             'name'  : name,
             'name'  : name,
@@ -76,17 +67,126 @@ def generate_libstruct_functions(rules, filename):
         comma = ''
         if calls[name] != "":
             comma = ', '
-        mtext = mtext + LIBSTRUCT_MAKE_FUNCTION % {
+
+    result = insert_text_in_file(declaration_filename, ctext, 'generated constructors')
+    result = result and insert_text_in_file(definition_filename, dtext, 'generated function symbol definitions')
+    result = result and insert_text_in_file(declaration_filename, vtext, 'generated variables')
+    return result
+
+#---------------------------------------------------------------#
+#                      generate_default_values
+#---------------------------------------------------------------#
+#
+def generate_default_values(rules, declaration_filename, definition_filename, skip_list):
+    TERM_FUNCTION = '''// %(name)s
+inline
+const atermpp::aterm_appl& default_value_%(name)s()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_%(name)s()%(arguments)s);
+  return t;
+}
+
+'''
+
+    RULE_FUNCTION = '''// %(name)s
+inline
+const atermpp::aterm_appl& default_value_%(name)s()
+{
+  return default_value_%(fname)s();
+}
+
+'''
+    ptext = '' # constructor prototypes
+    ctext = '' # constructors
+    dtext = '' # definitions
+    vtext = '' # variables
+
+    functions = find_functions(rules)
+
+    for f in functions:
+        name  = f.name()
+        if name in skip_list:
+            continue
+        ptext = ptext + 'const atermpp::aterm_appl& default_value_%s();\n' % f.name()
+        arity = f.arity()
+        args = []
+        for x in f.arguments:
+            if x.repetitions == '':
+                args.append('default_value_%s()' % x.name())
+            elif x.repetitions == '*':
+                args.append('default_value_List()')
+            else:
+                args.append('default_value_List(default_value_%s())' % x.name())
+
+        if len(args) > 0:
+            arguments = ', ' + ', '.join(args)
+        else:
+            arguments = ''
+        ctext = ctext + TERM_FUNCTION % {
+            'name'       : name,
             'name'       : name,
             'arity'      : arity,
-            'parameters' : decls[name],
-            'arguments'  : comma + calls[name]
+            'name'       : name,
+            'arguments'  : arguments,
+            'name'       : name,
+            'name'       : name
         }
-    text = string.strip(text + mtext)
-    text = text + '\n'
-    return insert_text_in_file(filename, text, 'generated code')
+        dtext = dtext + '  const atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
+        vtext = vtext + '  static const atermpp::aterm_appl %s;\n' % name
 
-CHECK_RULE = '''template <typename Term>
+    function_names = map(lambda x: x.name(), functions)
+    for rule in rules:
+        if not rule.name() in function_names:
+            name = rule.name()
+            if name in skip_list:
+                continue
+            for f in rule.rhs:
+                if f.phase == None or not f.phase.startswith('-') or not f.phase.startswith('.'):
+                    fname = f.name()
+                    break
+            ptext = ptext + 'const atermpp::aterm_appl& default_value_%s();\n' % name
+            ctext = ctext + RULE_FUNCTION % {
+                'name'       : name,
+                'name'       : name,
+                'fname'      : fname
+            }
+            dtext = dtext + '  const atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
+            vtext = vtext + '  static const atermpp::aterm_appl %s;\n' % name
+
+    ctext = ptext + '\n' + ctext
+    result = insert_text_in_file(declaration_filename, ctext, 'generated constructors')
+    result = result and insert_text_in_file(definition_filename, dtext, 'generated default value definitions')
+    result = result and insert_text_in_file(declaration_filename, vtext, 'generated variables')
+    return result
+
+#---------------------------------------------------------------#
+#                          find_functions
+#---------------------------------------------------------------#
+# find all functions that appear in the rhs of a rule
+def find_functions(rules):
+    function_map = {}
+    for rule in rules:
+        for f in rule.functions():
+            if not f.is_rule():
+                function_map[f.name()] = f
+
+    # do a recursion step to find additional functions (no longer necessary?)
+    functions = map(lambda x: function_map[x], function_map.keys())
+    for f in functions:
+        for arg in f.arguments:
+            for e in arg.expressions:
+                if not e.is_rule():
+                    function_map[e.name()] = e
+
+    return map(lambda x: function_map[x], function_map.keys())
+
+#---------------------------------------------------------------#
+#                      generate_soundness_check_functions
+#---------------------------------------------------------------#
+# generates C++ code for checking if terms are in the right format
+#
+def generate_soundness_check_functions(rules, filename, skip_list):
+    CHECK_RULE = '''template <typename Term>
 bool check_rule_%(name)s(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -98,7 +198,7 @@ bool check_rule_%(name)s(Term t)
 
 '''
 
-CHECK_TERM = '''// %(name)s(%(arguments)s)
+    CHECK_TERM = '''// %(name)s(%(arguments)s)
 template <typename Term>
 bool %(check_name)s(Term t)
 {
@@ -109,33 +209,27 @@ bool %(check_name)s(Term t)
 }
 
 '''
-CHECK_TERM_TYPE = '''  // check the type of the term
+    CHECK_TERM_TYPE = '''  // check the type of the term
   atermpp::aterm term(t);
   if (!term.type_is_appl())
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIs%(name)s(a))
+  const atermpp::aterm_appl& a = atermpp::aterm_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::%(name)s)
   {
     return false;
   }
 
 '''
 
-CHECK_TERM_CHILDREN = '''  // check the children
+    CHECK_TERM_CHILDREN = '''  // check the children
   if (a.size() != %(arity)d)
   {
     return false;
   }
 '''
 
-#---------------------------------------------------------------#
-#                      generate_soundness_check_functions
-#---------------------------------------------------------------#
-# generates C++ code for checking if terms are in the right format
-#
-def generate_soundness_check_functions(rules, filename):
     text  = '' # function definitions
     ptext = '' # function declarations (prototypes)
 
@@ -143,6 +237,8 @@ def generate_soundness_check_functions(rules, filename):
 
     for rule in rules:
         name = rule.name()
+        if name in skip_list:
+            continue
         rhs_functions = rule.functions()
         body = '  return ' + '\n         || '.join(map(lambda x: x.check_name() + '(t)', rhs_functions)) + ';'
         text = text + CHECK_RULE % {
@@ -152,8 +248,10 @@ def generate_soundness_check_functions(rules, filename):
         ptext = ptext + 'template <typename Term> bool check_rule_%s(Term t);\n' % rule.name()
 
     for f in functions:
-        arguments = ', '.join(map(lambda x: x.full_name(), f.arguments))
         name = f.name()
+        if name in skip_list:
+            continue
+        arguments = ', '.join(map(lambda x: x.full_name(), f.arguments))
         arity = len(f.arguments)
 
         body = CHECK_TERM_TYPE % {
@@ -189,102 +287,6 @@ def generate_soundness_check_functions(rules, filename):
     text = string.strip(ptext + '\n' + text)
     text = text + '\n'
     return insert_text_in_file(filename, text, 'generated code')
-
-CONSTRUCTOR_FUNCTIONS = '''// %(name)s
-inline
-const atermpp::aterm_appl& construct%(name)s()
-{
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_%(name)s()%(arguments)s));
-  return t;
-}
-
-'''
-
-CONSTRUCTOR_RULE = '''// %(name)s
-inline
-const atermpp::aterm_appl& construct%(name)s()
-{
-  return construct%(fname)s();
-}
-
-'''
-
-#---------------------------------------------------------------#
-#                      generate_constructor_functions
-#---------------------------------------------------------------#
-# generates C++ code for constructor functions
-#
-def generate_constructor_functions(rules, filename):
-    text  = ''
-    ptext = '' # function declarations (prototypes)
-
-    functions = find_functions(rules)
-
-    for f in functions:
-        ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % f.name()
-        name  = f.name()
-        arity = f.arity()
-        args = []
-        for x in f.arguments:
-            if x.repetitions == '':
-                args.append('construct%s()' % x.name())
-            elif x.repetitions == '*':
-                args.append('constructList()')
-            else:
-                args.append('constructList(construct%s())' % x.name())
-
-        if len(args) > 0:
-            arguments = ', ' + ', '.join(args)
-        else:
-            arguments = ''
-        text = text + CONSTRUCTOR_FUNCTIONS % {
-            'name'       : name,
-            'name'       : name,
-            'arity'      : arity,
-            'name'       : name,
-            'arguments'  : arguments,
-            'name'       : name,
-            'name'       : name
-        }
-
-    function_names = map(lambda x: x.name(), functions)
-    for rule in rules:
-        if not rule.name() in function_names:
-            name = rule.name()
-            for f in rule.rhs:
-                if f.phase == None or not f.phase.startswith('-') or not f.phase.startswith('.'):
-                    fname = f.name()
-                    break
-            ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % name
-            text = text + CONSTRUCTOR_RULE % {
-                'name'       : name,
-                'name'       : name,
-                'fname'      : fname
-            }
-
-    text = ptext + '\n' + text
-    return insert_text_in_file(filename, text, 'generated code')
-
-#---------------------------------------------------------------#
-#                          find_functions
-#---------------------------------------------------------------#
-# find all functions that appear in the rhs of a rule
-def find_functions(rules):
-    function_map = {}
-    for rule in rules:
-        for f in rule.functions():
-            if not f.is_rule():
-                function_map[f.name()] = f
-
-    # do a recursion step to find additional functions (no longer necessary?)
-    functions = map(lambda x: function_map[x], function_map.keys())
-    for f in functions:
-        for arg in f.arguments:
-            for e in arg.expressions:
-                if not e.is_rule():
-                    function_map[e.name()] = e
-
-    return map(lambda x: function_map[x], function_map.keys())
 
 #---------------------------------------------------------------#
 #                          parse_ebnf
@@ -330,61 +332,25 @@ def parse_ebnf(filename):
     return rules
 
 #---------------------------------------------------------------#
-#                          postprocess_libstruct
-#---------------------------------------------------------------#
-def postprocess_libstruct(filename):
-    src = '''inline
-aterm_appl gsMakeProcess\(aterm_appl ProcVarId_0, aterm_list DataExpr_1\)
-\{
-  return aterm_appl\(gsAFunProcess\(\), \(aterm\) ProcVarId_0, \(aterm\) DataExpr_1\);
-\}
-'''
-    dest = '''inline
-aterm_appl gsMakeProcess(aterm_appl ProcVarId_0, aterm_list DataExpr_1)
-{
-  // Check whether lengths of process type and its arguments match.
-  // Could be replaced by at test for equal types.
-
-  assert(ATgetLength((aterm_list)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  return term_appl<aterm>(gsAFunProcess(), (aterm) ProcVarId_0, (aterm) DataExpr_1);
-}
-'''
-    text = path(filename).text()
-    text = re.sub(re.compile(src, re.M), dest, text)
-    path(filename).write_text(text)
-
-#---------------------------------------------------------------#
 #                          main
 #---------------------------------------------------------------#
 def main():
-    usage = "usage: %prog [options]"
-    parser = OptionParser(usage)
-    parser.add_option("-s", "--soundness-checks", action="store_true", help="generate soundness check functions from internal mcrl2 format")
-    parser.add_option("-l", "--libstruct", action="store_true", help="generate libstruct functions from internal mcrl2 format")
-    parser.add_option("-c", "--constructors", action="store_true", help="generate constructor functions from internal mcrl2 format")
-    (options, args) = parser.parse_args()
-
     result = True
     filename = '../../../doc/specs/mcrl2.internal.txt'
     rules = parse_ebnf(filename)
 
-    if not options.soundness_checks and not options.libstruct and not options.constructors:
-        options.soundness_checks = True
-        options.libstruct = True
-        options.constructors = True
+    # elements in this list are skipped during generation
+    skip_list = ['DataAppl']
 
-    if options.soundness_checks:
-        filename = '../include/mcrl2/core/detail/soundness_checks.h'
-        result = generate_soundness_check_functions(rules, filename) and result
+    result = generate_soundness_check_functions(rules, '../include/mcrl2/core/detail/soundness_checks.h', skip_list) and result
 
-    if options.libstruct:
-        filename = '../include/mcrl2/core/detail/struct_core.h'
-        result = generate_libstruct_functions(rules, filename) and result
-        postprocess_libstruct(filename)
+    declaration_filename = '../include/mcrl2/core/detail/function_symbols.h'
+    definition_filename = '../source/core.cpp'
+    result = generate_function_symbol_constructors(rules, declaration_filename, definition_filename, skip_list) and result
 
-    if options.constructors:
-        filename = '../include/mcrl2/core/detail/constructors.h'
-        result = generate_constructor_functions(rules, filename) and result
+    declaration_filename = '../include/mcrl2/core/detail/default_values.h'
+    definition_filename = '../source/core.cpp'
+    result = generate_default_values(rules, declaration_filename, definition_filename, skip_list) and result
 
     return result
 

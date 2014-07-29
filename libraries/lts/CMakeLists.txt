@@ -17,17 +17,6 @@ add_custom_target(${PROJECT_NAME}_headers
 
 # ######### General setup ##########
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-
 set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmparser.cpp
@@ -56,10 +45,6 @@ add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/libraries/lts/source/fsm_syntax.c
   COMMAND make_dparser -A -H0 -ifsm -o${CMAKE_BINARY_DIR}/libraries/lts/source/fsm_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/fsm-syntax.g
   DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/fsm-syntax.g
-)
-
-include_directories(
-  ${CMAKE_SOURCE_DIR}/3rd-party/dparser
 )
 
 add_library(mcrl2_fsm_syntax

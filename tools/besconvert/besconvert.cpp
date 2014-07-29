@@ -25,7 +25,7 @@
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/io.h"
-#include "mcrl2/lps/action.h"
+#include "mcrl2/process/process_expression.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 
@@ -241,7 +241,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       m_lts.set_num_states(statecount, false);
       m_lts.set_initial_state(initial_state);
 
-      atermpp::indexed_set labs(100,50);
+      atermpp::indexed_set<process::action> labs(100,50);
 
       for (auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
@@ -259,11 +259,11 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         {
           std::stringstream label;
           label << "self:block(" << info.first << "),op(" << info.second << ")";
-          lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
+          process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
           if (label_index == atermpp::npos)
           {
-            std::pair<int, bool> put_result = labs.put(t);
+            std::pair<size_t, bool> put_result = labs.put(t);
             label_index = put_result.first;
             m_lts.add_action(mcrl2::lts::detail::action_label_string(t.label().name()),false);
           }
@@ -317,7 +317,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
             label << "block(" << info_target.first << "),op(" << info_target.second << ")";
           }
           size_t to = indices[*j];
-          lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
+          process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
           if (label_index == atermpp::npos)
           {

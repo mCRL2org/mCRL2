@@ -12,11 +12,11 @@
 #ifndef MCRL2_BES_GAUSS_ELIMINATION_H
 #define MCRL2_BES_GAUSS_ELIMINATION_H
 
-#include "mcrl2/pbes/rewriters/boolean_expression_rewriter.h"
-#include "mcrl2/pbes/gauss_elimination.h"
+#include "mcrl2/bes/boolean_expression_rewriter.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/bes/replace.h"
+#include "mcrl2/pbes/gauss_elimination.h"
 
 namespace mcrl2
 {
@@ -124,7 +124,7 @@ inline
 bool gauss_elimination(boolean_equation_system& p)
 {
   typedef core::term_traits<boolean_expression> tr;
-  typedef pbes_system::boolean_expression_rewriter<boolean_expression> bes_rewriter;
+  typedef boolean_expression_rewriter<boolean_expression> bes_rewriter;
 
   pbes_system::gauss_elimination_algorithm<bes_traits> algorithm;
   bes_rewriter besr;

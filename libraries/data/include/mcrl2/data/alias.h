@@ -13,7 +13,6 @@
 #define MCRL2_DATA_ALIAS_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/basic_sort.h"
 
@@ -30,7 +29,7 @@ class alias: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     alias()
-      : atermpp::aterm_appl(core::detail::constructSortRef())
+      : atermpp::aterm_appl(core::detail::default_values::SortRef)
     {}
 
     /// \brief Constructor.
@@ -43,17 +42,17 @@ class alias: public atermpp::aterm_appl
 
     /// \brief Constructor.
     alias(const basic_sort& name, const sort_expression& reference)
-      : atermpp::aterm_appl(core::detail::gsMakeSortRef(name, reference))
+      : atermpp::aterm_appl(core::detail::function_symbol_SortRef(), name, reference)
     {}
 
     const basic_sort& name() const
     {
-      return atermpp::aterm_cast<const basic_sort>(atermpp::arg1(*this));
+      return atermpp::down_cast<basic_sort>((*this)[0]);
     }
 
     const sort_expression& reference() const
     {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<sort_expression>((*this)[1]);
     }
 };
 
@@ -63,31 +62,37 @@ typedef atermpp::term_list<alias> alias_list;
 /// \brief vector of aliass
 typedef std::vector<alias>    alias_vector;
 
-
 /// \brief Test for a alias expression
 /// \param x A term
 /// \return True if \a x is a alias expression
 inline
 bool is_alias(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortRef(x);
+  return x.function() == core::detail::function_symbols::SortRef;
 }
 
+// prototype declaration
+std::string pp(const alias& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const alias& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(alias& t1, alias& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class alias ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::alias& t1, mcrl2::data::alias& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

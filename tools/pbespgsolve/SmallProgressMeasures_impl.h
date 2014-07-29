@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,18 +12,18 @@
 #include <vector>
 #include <deque>
 
-inline int SmallProgressMeasures::vector_cmp(verti v, verti w, size_t N) const
+inline int SmallProgressMeasures::vector_cmp(verti v, verti w, int N) const
 {
     return vector_cmp(vec(v), vec(w), N);
 }
 
 inline int SmallProgressMeasures::vector_cmp( const verti vec1[],
-                                              const verti vec2[], size_t N ) const
+                                              const verti vec2[], int N ) const
 {
     if (is_top(vec1)) return is_top(vec2) ? 0 : +1;  // v is top
     if (is_top(vec2)) return -1;                     // w is top, but v isn't
 
-    for (size_t n = 0; n < N; ++n)
+    for (int n = 0; n < N; ++n)
     {
         if (vec1[n] < vec2[n]) return -1;
         if (vec1[n] > vec2[n]) return +1;
@@ -37,9 +37,9 @@ inline verti SmallProgressMeasures::get_ext_succ(verti v, bool take_max) const
     const verti *it  = game_.graph().succ_begin(v),
                 *end = game_.graph().succ_end(v);
 
-    assert(it != end);  /* assume we have at least one successor */
+    assert(it < end);  /* assume we have at least one successor */
 
-    size_t N = len(v);
+    int N = len(v);
     verti res = *it++;
     for ( ; it != end; ++it)
     {
@@ -61,7 +61,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
         // Conservatively estimate vertices won by player.
         std::vector<char> marked(V, 0);
         std::vector<char> queued(V, 0);
-        std::deque<verti> dirty;
+        std::deque<int> dirty;
         for (verti v = 0; v < V; ++v)
         {
             if (is_top(v))
@@ -89,7 +89,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
                       it != graph.succ_end(v); ++it )
                 {
                     if ( !marked[*it] && vector_cmp(v, *it, len(v))
-                            >= static_cast<int>(static_cast<int>(game_.priority(v)%2) != p_) )
+                            >= (game_.priority(v)%2 != p_) )
                     {
                         mark = false;
                         break;
@@ -107,7 +107,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
                 {
                     const verti w = *it;
                     if ( marked[*it] || vector_cmp(v, w, len(v))
-                            < static_cast<int>(static_cast<int>(game_.priority(v)%2) != p_) )
+                            < (game_.priority(v)%2 != p_) )
                     {
                         marked[v] = true;
                         break;
@@ -148,14 +148,13 @@ bool SmallProgressMeasures::lift_to_top(verti v)
 {
     if (is_top(v)) return false;
     set_top(v);
-    ls_->lifted(v);
     return true;
 }
 
 void SmallProgressMeasures::set_top(verti v)
 {
     assert(!is_top(v));
-    vec(v)[0] = NO_VERTEX;
-    size_t prio = game_.priority(v);
-    if (static_cast<int>(prio%2) != p_) decr_M(prio/2);
+    set_vec_to_top(v);
+    int prio = game_.priority(v);
+    if (prio%2 != p_) decr_M(prio/2);
 }

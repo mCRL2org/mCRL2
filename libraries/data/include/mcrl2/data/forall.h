@@ -47,13 +47,33 @@ class forall: public abstraction
     template < typename Container >
     forall(const Container& variables,
            const data_expression& body,
-           typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = 0)
       : abstraction(forall_binder(), variables, body)
     {
       assert(!variables.empty());
     }
 
 }; // class forall
+
+//--- start generated class forall ---//
+// prototype declaration
+std::string pp(const forall& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const forall& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(forall& t1, forall& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated class forall ---//
 
 } // namespace data
 

@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,8 +10,8 @@
 #ifndef MPI_RECURSIVE_SOLVER_H_INCLUDED
 #define MPI_RECURSIVE_SOLVER_H_INCLUDED
 
-#include "GamePartition.h"
-#include "mcrl2/utilities/logger.h"
+#include "GamePart.h"
+#include "Logger.h"
 #include "MpiAttractorAlgorithm.h"
 #include "MpiUtils.h"
 #include "RecursiveSolver.h"
@@ -26,7 +26,7 @@
 class MpiRecursiveSolver : public ParityGameSolver, public virtual Logger
 {
 public:
-    // N.B. takes ownership of `attr_algo'!
+    // N.B. takes ownership of `attr_algo`!
     MpiRecursiveSolver( const ParityGame &game, const VertexPartition *vpart,
                         MpiAttractorAlgorithm *attr_algo );
     ~MpiRecursiveSolver();
@@ -35,15 +35,15 @@ public:
 
 protected:
     /*! Solves the game for the internal vertex set of the given game partition
-        and updates `strategy_' so that it is valid for all global indices
+        and updates `strategy_` so that it is valid for all global indices
         corresponding with internal vertices of the partition.
 
         After returning, the game partition has been reduced to the winning set
-        for the player corresponding to the minimum priority used in `part'.
+        for the player corresponding to the minimum priority used in `part`.
         Since it's not a priori clear which player this is, it is usually best
-        to ignore `part' after the call.
+        to ignore `part` after the call.
     */
-    void solve(GamePartition &part);
+    void solve(GamePart &part);
 
 protected:
     //! Vertex partition used to partition the game over MPI worker processes.
@@ -58,25 +58,23 @@ protected:
     ParityGame::Strategy strategy_;
 };
 
-/*! A solver factory for MpiRecursiveSolvers. */
+//! A factory class for MpiRecursiveSolvers.
 class MpiRecursiveSolverFactory : public ParityGameSolverFactory
 {
 public:
-    /*! Construct a new solver factory. `async' determines which
-        MpiAttractorAlgorithm is used during solving. `chunk_size' specifies
-        the chunk sized used to partition the graph; if it is 0, then the
-        chunk size is chosen such that every worker has a single (approximately
-        equal size) chunk to work with. */
     MpiRecursiveSolverFactory(bool async, const VertexPartition *vpart);
 
     ~MpiRecursiveSolverFactory();
 
+    //! Create a new MpiRecursiveSolver instance.
     ParityGameSolver *create( const ParityGame &game,
         const verti *vertex_map, verti vertex_map_size );
 
 private:
+    //! determines the MpiAttractorAlgorithm to be used
     bool async_;
-    verti chunk_size_;
+
+    //! describes the vertex partition to be used
     const VertexPartition *vpart_;
 };
 

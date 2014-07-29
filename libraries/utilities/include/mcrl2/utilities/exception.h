@@ -25,12 +25,12 @@ namespace mcrl2
  **/
 class runtime_error : public std::runtime_error
 {
-  public:
-    /// \brief Constructor
-    /// \param[in] message the exception message
-    runtime_error(const std::string& message) : std::runtime_error(message)
-    {
-    }
+public:
+  /// \brief Constructor
+  /// \param[in] message the exception message
+  runtime_error(const std::string& message) : std::runtime_error(message)
+  {
+  }
 };
 
 /**
@@ -58,26 +58,9 @@ public:
     return m_msg.c_str();
   }
   virtual ~command_line_error() throw()
-  {};
+  {}
 };
 
-/**
- * \brief Standard exception class for reporting runtime errors.
- **/
-class logic_error : public std::logic_error
-{
-  public:
-    /// \brief Constructor
-    /// \param[in] message the exception message
-    logic_error(std::string const& message) : std::logic_error(message)
-    {
-    }
-    /// \brief error: to message
-    const char* what() const throw()
-    {
-      return (std::string("error: ") + std::logic_error::what()).c_str();
-    }
-};
 }
 
 #endif

@@ -22,8 +22,6 @@
 #include <cstring>
 
 #include "boost/algorithm/string.hpp"
-#include "boost/type_traits/is_pod.hpp"
-#include "boost/shared_ptr.hpp"
 #include "mcrl2/utilities/toolset_version.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -282,7 +280,7 @@ class interface_description
         std::string                         m_description;
 
         /// Option argument
-        boost::shared_ptr< basic_argument > m_argument;
+        std::shared_ptr< basic_argument > m_argument;
 
         /// Short representation for the option or 0
         char                                m_short;

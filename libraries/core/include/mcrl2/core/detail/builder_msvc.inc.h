@@ -12,7 +12,7 @@
 // aterm traversal
 template <typename T>
 T operator()(const T& x,
-             typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+             typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
             )
 {
   core::msg("aterm traversal");
@@ -28,7 +28,7 @@ atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
   std::vector<T> result;
   for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
   {
-    result.push_back(update_copy(*i));
+    result.push_back(atermpp::vertical_cast<T>(update_copy(*i)));
   }
   return atermpp::convert<atermpp::term_list<T> >(result);
 }
@@ -36,8 +36,8 @@ atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 // Container traversal
 template <typename T>
 void operator()(T& x,
-                typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0,
-                typename atermpp::detail::enable_if_container<T>::type* = 0
+                typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0,
+                typename atermpp::enable_if_container<T>::type* = 0
                )
 {
   core::msg("container traversal");
@@ -57,5 +57,6 @@ void operator()(std::set<T>& x)
   {
     result.insert(update_copy(*i));
   }
-  std::swap(x, result);
+  using std::swap;
+  swap(x, result);
 }

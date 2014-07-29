@@ -12,14 +12,12 @@
 #ifndef MCRL2_DATA_VARIABLE_H
 #define MCRL2_DATA_VARIABLE_H
 
-#include "boost/range/iterator_range.hpp"
-
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/application.h"
 
 namespace mcrl2
 {
@@ -27,14 +25,28 @@ namespace mcrl2
 namespace data
 {
 
+typedef std::pair<atermpp::aterm, atermpp::aterm> variable_key_type;
+
 //--- start generated class variable ---//
 /// \brief A data variable
 class variable: public data_expression
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+    }
+
+    const sort_expression& sort() const
+    {
+      return atermpp::down_cast<sort_expression>((*this)[1]);
+    }
+//--- start user section variable ---//
     /// \brief Default constructor.
     variable()
-      : data_expression(core::detail::constructDataVarId())
+      : data_expression(core::detail::default_values::DataVarId)
     {}
 
     /// \brief Constructor.
@@ -47,23 +59,22 @@ class variable: public data_expression
 
     /// \brief Constructor.
     variable(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(name, sort))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarId(),
+          name,
+          sort,
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(name, sort))
+        )))
     {}
 
     /// \brief Constructor.
     variable(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(core::identifier_string(name), sort))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarId(),
+          core::identifier_string(name),
+          sort,
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort))
+        )))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
-    }
-
-    const sort_expression& sort() const
-    {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
-    }
+//--- end user section variable ---//
 };
 
 /// \brief list of variables
@@ -72,10 +83,27 @@ typedef atermpp::term_list<variable> variable_list;
 /// \brief vector of variables
 typedef std::vector<variable>    variable_vector;
 
+// prototype declaration
+std::string pp(const variable& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const variable& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(variable& t1, variable& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class variable ---//
 
+
 // template function overloads
-std::string pp(const variable& x);
 std::string pp(const variable_list& x);
 std::string pp(const variable_vector& x);
 std::string pp(const std::set<variable>& x);
@@ -87,16 +115,6 @@ std::set<core::identifier_string> find_identifiers(const data::variable_list& x)
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::variable& t1, mcrl2::data::variable& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_VARIABLE_H
 

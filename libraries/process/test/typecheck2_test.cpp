@@ -34,8 +34,11 @@ void test_process_specification(const std::string& ps_in, bool const expected_re
     {
       process::type_check(ps);
       ps_out = process::pp(ps);
-      //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in  << std::endl << "and" << std::endl << ps_out << std::endl;
-      BOOST_CHECK_EQUAL(ps_in, ps_out);
+      if (ps_in != ps_out)
+      {
+        std::cerr << "--- failed test ---" << std::endl << "ps_in =\n" << ps_in << std::endl << std::endl << "ps_out =\n" <<  ps_out << std::endl;
+        BOOST_CHECK_EQUAL(ps_in, ps_out);
+      }
     }
     else
     {

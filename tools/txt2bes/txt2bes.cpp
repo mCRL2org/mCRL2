@@ -20,16 +20,18 @@
 //mCRL2 specific
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/pbesinstconversion.h"
+#include "mcrl2/bes/pbesinst_conversion.h"
+#include "mcrl2/bes/io.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class txt2bes_tool: public input_output_tool
+class txt2bes_tool: public bes_output_tool<input_output_tool>
 {
-    typedef input_output_tool super;
+    typedef bes_output_tool<input_output_tool> super;
 
   public:
     txt2bes_tool()
@@ -52,8 +54,8 @@ class txt2bes_tool: public input_output_tool
         std::ifstream from(input_filename().c_str());
         p = pbes_system::txt2pbes(from);
       }
-      bes::boolean_equation_system b = pbes_system::pbesinstconversion(p);
-      b.save(output_filename());
+      bes::boolean_equation_system b = bes::pbesinst_conversion(p);
+      bes::save_bes(b, output_filename(), bes_output_format());
       return true;
     }
 };

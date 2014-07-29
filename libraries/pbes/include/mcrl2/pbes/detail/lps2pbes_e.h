@@ -87,7 +87,7 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
 
   bool is_timed() const
   {
-    return T != data::variable();
+    return T != data::undefined_real_variable();
   }
 
   // the empty equation list
@@ -199,11 +199,13 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
   void operator()(const state_formulas::nu& x)
   {
     handle_mu_nu(x, fixpoint_symbol::nu());
+    mCRL2log(log::debug1, "lps2pbes") << "E(" << x << ") = " << core::detail::print_list(top()) << std::endl;
   }
 
   void operator()(const state_formulas::mu& x)
   {
     handle_mu_nu(x, fixpoint_symbol::mu());
+    mCRL2log(log::debug1, "lps2pbes") << "E(" << x << ") = " << core::detail::print_list(top()) << std::endl;
   }
 };
 

@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -14,7 +14,9 @@
 #include <deque>
 #include <vector>
 
-/*! A simple lifting strategy that puts all nodes in a queue, then takes them
+/*! \ingroup LiftingStrategies
+ 
+    A simple lifting strategy that puts all nodes in a queue, then takes them
     out one at a time; whenever a node is successfully lifted, its predecessors
     are put back in the queue as they may need to be lifted too.
 
@@ -28,50 +30,54 @@
      a "work list approach" that is similar.)
 */
 
-class PredecessorLiftingStrategy : public LiftingStrategy
+class PredecessorLiftingStrategy : virtual public LiftingStrategy,
+                                   virtual public LiftingStrategy2
 {
 public:
     /*! Construct a new predecessor lifting strategy instance.
 
         If `stack` is set to true, vertices are removed in last-in-first-out
         order (instead of the default first-in-first-out order).
-
-        If `backward` is set to true, initial nodes are pushed in the queue
-        backward (for a stack, this actually causes the nodes to be extracted
-        in forward order instead of in reverse).
     */
-    PredecessorLiftingStrategy( const ParityGame &game,
-                                const SmallProgressMeasures &spm,
-                                bool backward, bool stack );
+    PredecessorLiftingStrategy(
+        const ParityGame &game, const SmallProgressMeasures &spm, bool stack,
+        int version );
     ~PredecessorLiftingStrategy();
+
+    bool stack() const { return stack_; }
+
+    // v1 API
     void lifted(verti v);
     verti next();
-    size_t memory_use() const;
 
-    bool backward() const { return backward_; }
-    bool stack() const { return stack_; }
+    // v2 API
+    void push(verti v);
+    verti pop();
+    void bump(verti /*vertex*/) { }
 
 private:
     const SmallProgressMeasures &spm_;
-    const bool backward_;
     const bool stack_;
     bool *queued_;
     verti *queue_;
     size_t queue_size_, queue_capacity_, queue_begin_, queue_end_;
 };
 
-
+/*! \ingroup LiftingStrategies
+    Factory class for PredecessorLiftingStrategy instances. */
 class PredecessorLiftingStrategyFactory : public LiftingStrategyFactory
 {
 public:
-    PredecessorLiftingStrategyFactory(bool backward = false, bool stack = false)
-        : backward_(backward), stack_(stack) { };
+    PredecessorLiftingStrategyFactory(bool stack = false) : stack_(stack) { };
 
+    bool supports_version(int version);
     LiftingStrategy *create( const ParityGame &game,
                              const SmallProgressMeasures &spm );
+    LiftingStrategy2 *create2( const ParityGame &game,
+                               const SmallProgressMeasures &spm );
 
 private:
-    const bool backward_, stack_;
+    const bool stack_;
 };
 
 #endif /* ndef PREDECESSOR_LIFTING_STRATEGY_H_INCLUDED */

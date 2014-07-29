@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_LPS2PBES_UTILITY_H
 #define MCRL2_PBES_DETAIL_LPS2PBES_UTILITY_H
 
-#include "mcrl2/data/substitutions.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/pbes.h"
@@ -59,7 +59,7 @@ namespace detail {
 inline
 data::variable_list mu_variables(state_formulas::state_formula f)
 {
-  assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
+  assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
   data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::variable_list result;
   for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
@@ -75,7 +75,7 @@ data::variable_list mu_variables(state_formulas::state_formula f)
 inline
 data::data_expression_list mu_expressions(state_formulas::state_formula f)
 {
-  assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
+  assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
   data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::data_expression_list result;
   for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)

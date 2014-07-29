@@ -2,7 +2,7 @@ class base {
 public:
     virtual int foo(int a)
      { return 4 + a; }
-    int bar(int a) final
+    virtual int bar(int a) final
      { return a - 2; }
 };
 

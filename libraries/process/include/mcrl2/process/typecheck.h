@@ -12,7 +12,7 @@
 #ifndef MCRL2_PROCESS_TYPECHECK_H
 #define MCRL2_PROCESS_TYPECHECK_H
 
-#include "mcrl2/lps/typecheck.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2
@@ -46,7 +46,7 @@ class process_type_checker:public data::data_type_checker
     process_specification operator()();
 
   protected:
-    void ReadInActs(const lps::action_label_list &Acts);
+    void ReadInActs(const process::action_label_list &Acts);
     void ReadInProcsAndInit(const std::vector<process_equation>& Procs, const process_expression &Init);
     const process_identifier initial_process(void)
     {
@@ -79,27 +79,6 @@ class process_type_checker:public data::data_type_checker
                                         const data::data_expression_list FactParList);
 
 };
-
-
-/** \brief     Type check a process expression.
- *  Throws an exception if something went wrong.
- *  \param[in] proc_expr A process expression that has not been type checked.
- *  \param[in] proc_spec A process specification used as context.
- *  \post      proc_expr is type checked.
- **/
-inline
-void type_check(process_expression& proc_expr, const process_specification& proc_spec)
-{
-  try
-  {
-    process_type_checker type_checker(proc_spec);
-    proc_expr=type_checker(proc_expr);
-  }
-  catch (mcrl2::runtime_error &e)
-  {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pp(proc_expr));
-  }
-}
 
 /** \brief     Type check a parsed mCRL2 process specification.
  *  Throws an exception if something went wrong.

@@ -96,12 +96,10 @@ private:
     HASH_MAP(verti, verti) local_;  //! Global to local vertex index map
 };
 
-namespace std
+inline
+void swap(GamePartition &a, GamePartition &b)
 {
-    template<> inline void swap<GamePartition>(GamePartition &a, GamePartition &b)
-    {
-        a.swap(b);
-    }
+    a.swap(b);
 }
 
 #endif /* ndef GAME_PARTITION_H_INCLUDED */

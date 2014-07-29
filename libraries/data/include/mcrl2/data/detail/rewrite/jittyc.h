@@ -13,6 +13,8 @@
 
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/rewrite/jitty.h"
+#include "mcrl2/data/detail/rewrite/match_tree.h"
 #include "mcrl2/utilities/uncompiledlibrary.h"
 #include "mcrl2/utilities/toolset_version.h"
 #include "nfs_array.h"
@@ -31,11 +33,12 @@ namespace detail
 
 struct rewriter_interface;
 
+typedef std::vector < sort_expression_list> sort_list_vector;
+
 class RewriterCompilingJitty: public Rewriter
 {
   public:
     typedef Rewriter::substitution_type substitution_type;
-    typedef Rewriter::internal_substitution_type internal_substitution_type;
 
     RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &);
     virtual ~RewriterCompilingJitty();
@@ -44,15 +47,7 @@ class RewriterCompilingJitty: public Rewriter
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
-    atermpp::aterm_appl rewrite_internal(
-         const atermpp::aterm_appl &term,
-         internal_substitution_type &sigma);
-
-    atermpp::aterm_appl toRewriteFormat(const data_expression &term);
-    // data_expression fromRewriteFormat(const atermpp::aterm_appl term);
-    bool addRewriteRule(const data_equation &rule);
-    bool removeRewriteRule(const data_equation &rule);
-    internal_substitution_type *global_sigma;
+    substitution_type *global_sigma;
 
     // The data structures below are used to store the variable lists2
     // that are used in the compiling rewriter in forall, where and exists.
@@ -69,7 +64,12 @@ class RewriterCompilingJitty: public Rewriter
     // known that some of the arguments are in normal form. These are
     // used inside the compiling rewriter, but should never be returned
     // and show up in any normal form being returned from the rewriter.
+    // The arity is given by a separate map, and represents
+    // the total number of arguments that the function has,
+    // after currying. So, f(x,y)(z) typically has three arguments.
+    
     std::set < function_symbol > partially_rewritten_functions;
+    std::map < function_symbol, size_t > total_arity_of_partially_rewritten_functions;
 
     // The data structures below are used to store single variables
     // that are bound in lambda, forall and exist operators. When required
@@ -85,23 +85,19 @@ class RewriterCompilingJitty: public Rewriter
     }
 
   private:
+    RewriterJitty jitty_rewriter;
     std::set < data_equation > rewrite_rules;
-    // used_data_equation_selector data_equation_selector;
-    bool need_rebuild;
     bool made_files;
 
-    atermpp::aterm_int true_inner;
-    size_t true_num;
+    std::map < function_symbol, data_equation_list >  jittyc_eqns;
 
-    std::vector < data_equation_list >  jittyc_eqns;
-
-    std::map <size_t,size_t> int2ar_idx;
+    std::map <mcrl2::data::function_symbol,size_t> int2ar_idx;
     size_t ar_size;
     std::vector<atermpp::aterm_appl> ar;
-    atermpp::aterm_appl build_ar_expr(const atermpp::aterm &expr, const atermpp::aterm_appl &var);
-    atermpp::aterm_appl build_ar_expr_aux(const data_equation &eqn, const size_t arg, const size_t arity);
-    atermpp::aterm_appl build_ar_expr(const data_equation_list &eqns, const size_t arg, const size_t arity);
-    bool always_rewrite_argument(const atermpp::aterm_int &opid, const size_t arity, const size_t arg);
+    atermpp::aterm_appl build_ar_expr_internal(const data_expression& expr, const variable& var);
+    atermpp::aterm_appl build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity);
+    atermpp::aterm_appl build_ar_expr(const data_equation_list& eqns, const size_t arg, const size_t arity);
+    bool always_rewrite_argument(const function_symbol& opid, const size_t arity, const size_t arg);
     bool calc_ar(const atermpp::aterm_appl &expr);
     void fill_always_rewrite_array();
 
@@ -109,24 +105,33 @@ class RewriterCompilingJitty: public Rewriter
     uncompiled_library *rewriter_so;
 
     void (*so_rewr_cleanup)();
-    atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl&);
+    data_expression(*so_rewr)(const data_expression&);
 
-    void add_base_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
-    void extend_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
-    bool opid_is_nf(const atermpp::aterm_int &opid, size_t num_args);
-    void calc_nfs_list(nfs_array &a, size_t arity, atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars);
-    bool calc_nfs(atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars);
-    std::string calc_inner_terms(nfs_array &nfs, size_t arity,atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars, nfs_array *rewr);
-    std::pair<bool,std::string> calc_inner_term(atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, const bool rewr, const size_t total_arity);
-    void calcTerm(FILE* f, atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, bool rewr = true);
-    void implement_tree_aux(FILE* f, atermpp::aterm_appl tree, size_t cur_arg, size_t parent, size_t level, size_t cnt, size_t d, const size_t arity, 
-               const std::vector<bool> &used, atermpp::aterm_list nnfvars);
-    void implement_tree(FILE* f, atermpp::aterm_appl tree, const size_t arity, size_t d, size_t opid, const std::vector<bool> &used);
-    void implement_strategy(FILE* f, atermpp::aterm_list strat, size_t arity, size_t d, size_t opid, size_t nf_args);
-    void CompileRewriteSystem(const data_specification& DataSpec);
+    void add_base_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
+    void extend_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
+    bool opid_is_nf(const function_symbol &opid, size_t num_args);
+    void calc_nfs_list(nfs_array &a, const application& args, variable_or_number_list nnfvars);
+    bool calc_nfs(const data_expression& t, variable_or_number_list nnfvars);
+    std::string calc_inner_terms(nfs_array &nfs, const application& args, const size_t startarg, variable_or_number_list nnfvars, const nfs_array& rewr);
+    std::pair<bool,std::string> calc_inner_term(const data_expression &t, 
+                const size_t startarg, variable_or_number_list nnfvars, const bool rewr);
+    void calcTerm(FILE* f, const data_expression& t, const size_t startarg, variable_or_number_list nnfvars, bool rewr = true);
+    void implement_tree_aux(FILE* f, const match_tree& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt, size_t d, const size_t arity, 
+               const std::vector<bool> &used, variable_or_number_list nnfvars);
+    void implement_tree(FILE* f, const match_tree& tree, const size_t arity, size_t d, 
+                        const std::vector<bool> &used);
+    void implement_strategy(FILE* f, match_tree_list strat, size_t arity, size_t d, const mcrl2::data::function_symbol& opid, const nfs_array& nf_args);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
     FILE* MakeTempFiles();
+    void finish_function(FILE* f, size_t arity, const data::function_symbol& opid, const std::vector<bool>& used);
+    bool lift_rewrite_rule_to_right_arity(data_equation& e, const size_t requested_arity);
+    sort_list_vector get_residual_sorts(const sort_expression& s, const size_t actual_arity, const size_t requested_arity);
+    data_equation_list lift_rewrite_rules_to_right_arity(const data_equation_list& eqns,const size_t arity);
+    match_tree_list create_strategy(const data_equation_list& rules, const size_t arity, nfs_array& nfs);
+    size_t ar_index( const data::function_symbol& f, const size_t arity, const size_t arg);
+    atermpp::aterm_appl get_ar_array( const data::function_symbol& f, const size_t arity, const size_t arg);
+    void set_ar_array( const data::function_symbol& f, const size_t arity, const size_t index, const atermpp::aterm_appl ar_expression);
 
 };
 
@@ -135,17 +140,13 @@ struct rewriter_interface
   std::string caller_toolset_version;
   std::string status;
   RewriterCompilingJitty* rewriter;
-  atermpp::aterm_appl (*rewrite_external)(const atermpp::aterm_appl &t);
+  data_expression (*rewrite_external)(const data_expression &t);
   void (*rewrite_cleanup)();
 };
 
-extern std::vector <atermpp::aterm_appl> rewr_appls;
-
-inline const atermpp::aterm_appl &get_rewrappl_value_without_check(const size_t i)
-{
-  assert(i<rewr_appls.size());
-  return rewr_appls[i];
-}
+// Declare as a global array. Should be moved into the jittyc rewriter class,
+// along with all the functions in the compiling rewriter.
+extern std::vector <data_expression> prepared_normal_forms;
 
 }
 }

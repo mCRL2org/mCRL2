@@ -13,32 +13,23 @@
 #define MCRL2_PROCESS_PROCESS_EXPRESSION_H
 
 #include <set>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/down_cast.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/precedence.h"
-#include "mcrl2/lps/action.h"
-#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/process/action_label.h"
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
 #include "mcrl2/process/communication_expression.h"
+#include "mcrl2/process/untyped_action.h"
 
 namespace mcrl2
 {
 
 namespace process
 {
-
-// Make some LPS types visible. These should become part of the process library.
-using lps::action;
-using lps::action_name_set;
-using lps::multi_action;
-using lps::multi_action_name;
-using lps::multi_action_name_set;
 
 // Needed for argument dependent lookup (?)
 using namespace core::detail::precedences;
@@ -50,7 +41,7 @@ class process_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     process_expression()
-      : atermpp::aterm_appl(core::detail::constructProcExpr())
+      : atermpp::aterm_appl(core::detail::default_values::ProcExpr)
     {}
 
     /// \brief Constructor.
@@ -60,11 +51,6 @@ class process_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_ProcExpr(*this));
     }
-
-    /// \brief Constructor.
-    process_expression(const lps::action& x)
-      : atermpp::aterm_appl(x)
-    {}
 };
 
 /// \brief list of process_expressions
@@ -73,8 +59,8 @@ typedef atermpp::term_list<process_expression> process_expression_list;
 /// \brief vector of process_expressions
 typedef std::vector<process_expression>    process_expression_vector;
 
-
 // prototypes
+inline bool is_action(const atermpp::aterm_appl& x);
 inline bool is_process_instance(const atermpp::aterm_appl& x);
 inline bool is_process_instance_assignment(const atermpp::aterm_appl& x);
 inline bool is_delta(const atermpp::aterm_appl& x);
@@ -103,7 +89,8 @@ inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
 inline
 bool is_process_expression(const atermpp::aterm_appl& x)
 {
-  return process::is_process_instance(x) ||
+  return process::is_action(x) ||
+         process::is_process_instance(x) ||
          process::is_process_instance_assignment(x) ||
          process::is_delta(x) ||
          process::is_tau(x) ||
@@ -123,8 +110,92 @@ bool is_process_expression(const atermpp::aterm_appl& x)
          process::is_left_merge(x) ||
          process::is_choice(x) ||
          process::is_untyped_parameter_identifier(x) ||
-         process::is_untyped_process_assignment(x) ||
-         lps::is_action(x);
+         process::is_untyped_process_assignment(x);
+}
+
+// prototype declaration
+std::string pp(const process_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_expression& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(process_expression& t1, process_expression& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \brief An action
+class action: public process_expression
+{
+  public:
+    /// \brief Default constructor.
+    action()
+      : process_expression(core::detail::default_values::Action)
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit action(const atermpp::aterm& term)
+      : process_expression(term)
+    {
+      assert(core::detail::check_term_Action(*this));
+    }
+
+    /// \brief Constructor.
+    action(const action_label& label, const data::data_expression_list& arguments)
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Action(), label, arguments))
+    {}
+
+    const action_label& label() const
+    {
+      return atermpp::down_cast<action_label>((*this)[0]);
+    }
+
+    const data::data_expression_list& arguments() const
+    {
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
+    }
+};
+
+/// \brief list of actions
+typedef atermpp::term_list<action> action_list;
+
+/// \brief vector of actions
+typedef std::vector<action>    action_vector;
+
+/// \brief Test for a action expression
+/// \param x A term
+/// \return True if \a x is a action expression
+inline
+bool is_action(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::Action;
+}
+
+// prototype declaration
+std::string pp(const action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const action& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(action& t1, action& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -134,7 +205,7 @@ class process_instance: public process_expression
   public:
     /// \brief Default constructor.
     process_instance()
-      : process_expression(core::detail::constructProcess())
+      : process_expression(core::detail::default_values::Process)
     {}
 
     /// \brief Constructor.
@@ -147,17 +218,17 @@ class process_instance: public process_expression
 
     /// \brief Constructor.
     process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)
-      : process_expression(core::detail::gsMakeProcess(identifier, actual_parameters))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Process(), identifier, actual_parameters))
     {}
 
     const process_identifier& identifier() const
     {
-      return atermpp::aterm_cast<const process_identifier>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_identifier>((*this)[0]);
     }
 
     const data::data_expression_list& actual_parameters() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -167,7 +238,25 @@ class process_instance: public process_expression
 inline
 bool is_process_instance(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcess(x);
+  return x.function() == core::detail::function_symbols::Process;
+}
+
+// prototype declaration
+std::string pp(const process_instance& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_instance& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(process_instance& t1, process_instance& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -177,7 +266,7 @@ class process_instance_assignment: public process_expression
   public:
     /// \brief Default constructor.
     process_instance_assignment()
-      : process_expression(core::detail::constructProcessAssignment())
+      : process_expression(core::detail::default_values::ProcessAssignment)
     {}
 
     /// \brief Constructor.
@@ -190,17 +279,17 @@ class process_instance_assignment: public process_expression
 
     /// \brief Constructor.
     process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)
-      : process_expression(core::detail::gsMakeProcessAssignment(identifier, assignments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_ProcessAssignment(), identifier, assignments))
     {}
 
     const process_identifier& identifier() const
     {
-      return atermpp::aterm_cast<const process_identifier>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_identifier>((*this)[0]);
     }
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::assignment_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<data::assignment_list>((*this)[1]);
     }
 };
 
@@ -210,7 +299,25 @@ class process_instance_assignment: public process_expression
 inline
 bool is_process_instance_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcessAssignment(x);
+  return x.function() == core::detail::function_symbols::ProcessAssignment;
+}
+
+// prototype declaration
+std::string pp(const process_instance_assignment& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_instance_assignment& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(process_instance_assignment& t1, process_instance_assignment& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -220,7 +327,7 @@ class delta: public process_expression
   public:
     /// \brief Default constructor.
     delta()
-      : process_expression(core::detail::constructDelta())
+      : process_expression(core::detail::default_values::Delta)
     {}
 
     /// \brief Constructor.
@@ -238,7 +345,25 @@ class delta: public process_expression
 inline
 bool is_delta(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsDelta(x);
+  return x.function() == core::detail::function_symbols::Delta;
+}
+
+// prototype declaration
+std::string pp(const delta& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const delta& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(delta& t1, delta& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -248,7 +373,7 @@ class tau: public process_expression
   public:
     /// \brief Default constructor.
     tau()
-      : process_expression(core::detail::constructTau())
+      : process_expression(core::detail::default_values::Tau)
     {}
 
     /// \brief Constructor.
@@ -266,7 +391,25 @@ class tau: public process_expression
 inline
 bool is_tau(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsTau(x);
+  return x.function() == core::detail::function_symbols::Tau;
+}
+
+// prototype declaration
+std::string pp(const tau& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const tau& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(tau& t1, tau& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -276,7 +419,7 @@ class sum: public process_expression
   public:
     /// \brief Default constructor.
     sum()
-      : process_expression(core::detail::constructSum())
+      : process_expression(core::detail::default_values::Sum)
     {}
 
     /// \brief Constructor.
@@ -289,17 +432,17 @@ class sum: public process_expression
 
     /// \brief Constructor.
     sum(const data::variable_list& bound_variables, const process_expression& operand)
-      : process_expression(core::detail::gsMakeSum(bound_variables, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), bound_variables, operand))
     {}
 
     const data::variable_list& bound_variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -309,7 +452,25 @@ class sum: public process_expression
 inline
 bool is_sum(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSum(x);
+  return x.function() == core::detail::function_symbols::Sum;
+}
+
+// prototype declaration
+std::string pp(const sum& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const sum& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(sum& t1, sum& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -319,7 +480,7 @@ class block: public process_expression
   public:
     /// \brief Default constructor.
     block()
-      : process_expression(core::detail::constructBlock())
+      : process_expression(core::detail::default_values::Block)
     {}
 
     /// \brief Constructor.
@@ -332,17 +493,17 @@ class block: public process_expression
 
     /// \brief Constructor.
     block(const core::identifier_string_list& block_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeBlock(block_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Block(), block_set, operand))
     {}
 
     const core::identifier_string_list& block_set() const
     {
-      return atermpp::aterm_cast<const core::identifier_string_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<core::identifier_string_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -352,7 +513,25 @@ class block: public process_expression
 inline
 bool is_block(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBlock(x);
+  return x.function() == core::detail::function_symbols::Block;
+}
+
+// prototype declaration
+std::string pp(const block& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const block& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(block& t1, block& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -362,7 +541,7 @@ class hide: public process_expression
   public:
     /// \brief Default constructor.
     hide()
-      : process_expression(core::detail::constructHide())
+      : process_expression(core::detail::default_values::Hide)
     {}
 
     /// \brief Constructor.
@@ -375,17 +554,17 @@ class hide: public process_expression
 
     /// \brief Constructor.
     hide(const core::identifier_string_list& hide_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeHide(hide_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Hide(), hide_set, operand))
     {}
 
     const core::identifier_string_list& hide_set() const
     {
-      return atermpp::aterm_cast<const core::identifier_string_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<core::identifier_string_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -395,7 +574,25 @@ class hide: public process_expression
 inline
 bool is_hide(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsHide(x);
+  return x.function() == core::detail::function_symbols::Hide;
+}
+
+// prototype declaration
+std::string pp(const hide& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const hide& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(hide& t1, hide& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -405,7 +602,7 @@ class rename: public process_expression
   public:
     /// \brief Default constructor.
     rename()
-      : process_expression(core::detail::constructRename())
+      : process_expression(core::detail::default_values::Rename)
     {}
 
     /// \brief Constructor.
@@ -418,17 +615,17 @@ class rename: public process_expression
 
     /// \brief Constructor.
     rename(const rename_expression_list& rename_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeRename(rename_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Rename(), rename_set, operand))
     {}
 
     const rename_expression_list& rename_set() const
     {
-      return atermpp::aterm_cast<const rename_expression_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<rename_expression_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -438,7 +635,25 @@ class rename: public process_expression
 inline
 bool is_rename(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRename(x);
+  return x.function() == core::detail::function_symbols::Rename;
+}
+
+// prototype declaration
+std::string pp(const rename& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const rename& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(rename& t1, rename& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -448,7 +663,7 @@ class comm: public process_expression
   public:
     /// \brief Default constructor.
     comm()
-      : process_expression(core::detail::constructComm())
+      : process_expression(core::detail::default_values::Comm)
     {}
 
     /// \brief Constructor.
@@ -461,17 +676,17 @@ class comm: public process_expression
 
     /// \brief Constructor.
     comm(const communication_expression_list& comm_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeComm(comm_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Comm(), comm_set, operand))
     {}
 
     const communication_expression_list& comm_set() const
     {
-      return atermpp::aterm_cast<const communication_expression_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<communication_expression_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -481,7 +696,25 @@ class comm: public process_expression
 inline
 bool is_comm(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsComm(x);
+  return x.function() == core::detail::function_symbols::Comm;
+}
+
+// prototype declaration
+std::string pp(const comm& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const comm& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(comm& t1, comm& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -491,7 +724,7 @@ class allow: public process_expression
   public:
     /// \brief Default constructor.
     allow()
-      : process_expression(core::detail::constructAllow())
+      : process_expression(core::detail::default_values::Allow)
     {}
 
     /// \brief Constructor.
@@ -504,17 +737,17 @@ class allow: public process_expression
 
     /// \brief Constructor.
     allow(const action_name_multiset_list& allow_set, const process_expression& operand)
-      : process_expression(core::detail::gsMakeAllow(allow_set, operand))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Allow(), allow_set, operand))
     {}
 
     const action_name_multiset_list& allow_set() const
     {
-      return atermpp::aterm_cast<const action_name_multiset_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<action_name_multiset_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -524,7 +757,25 @@ class allow: public process_expression
 inline
 bool is_allow(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAllow(x);
+  return x.function() == core::detail::function_symbols::Allow;
+}
+
+// prototype declaration
+std::string pp(const allow& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const allow& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(allow& t1, allow& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -534,7 +785,7 @@ class sync: public process_expression
   public:
     /// \brief Default constructor.
     sync()
-      : process_expression(core::detail::constructSync())
+      : process_expression(core::detail::default_values::Sync)
     {}
 
     /// \brief Constructor.
@@ -547,17 +798,17 @@ class sync: public process_expression
 
     /// \brief Constructor.
     sync(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeSync(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sync(), left, right))
     {}
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -567,7 +818,25 @@ class sync: public process_expression
 inline
 bool is_sync(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSync(x);
+  return x.function() == core::detail::function_symbols::Sync;
+}
+
+// prototype declaration
+std::string pp(const sync& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const sync& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(sync& t1, sync& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -577,7 +846,7 @@ class at: public process_expression
   public:
     /// \brief Default constructor.
     at()
-      : process_expression(core::detail::constructAtTime())
+      : process_expression(core::detail::default_values::AtTime)
     {}
 
     /// \brief Constructor.
@@ -590,17 +859,17 @@ class at: public process_expression
 
     /// \brief Constructor.
     at(const process_expression& operand, const data::data_expression& time_stamp)
-      : process_expression(core::detail::gsMakeAtTime(operand, time_stamp))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_AtTime(), operand, time_stamp))
     {}
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
     }
 };
 
@@ -610,7 +879,25 @@ class at: public process_expression
 inline
 bool is_at(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAtTime(x);
+  return x.function() == core::detail::function_symbols::AtTime;
+}
+
+// prototype declaration
+std::string pp(const at& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const at& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(at& t1, at& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -620,7 +907,7 @@ class seq: public process_expression
   public:
     /// \brief Default constructor.
     seq()
-      : process_expression(core::detail::constructSeq())
+      : process_expression(core::detail::default_values::Seq)
     {}
 
     /// \brief Constructor.
@@ -633,17 +920,17 @@ class seq: public process_expression
 
     /// \brief Constructor.
     seq(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeSeq(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Seq(), left, right))
     {}
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -653,7 +940,25 @@ class seq: public process_expression
 inline
 bool is_seq(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSeq(x);
+  return x.function() == core::detail::function_symbols::Seq;
+}
+
+// prototype declaration
+std::string pp(const seq& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const seq& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(seq& t1, seq& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -663,7 +968,7 @@ class if_then: public process_expression
   public:
     /// \brief Default constructor.
     if_then()
-      : process_expression(core::detail::constructIfThen())
+      : process_expression(core::detail::default_values::IfThen)
     {}
 
     /// \brief Constructor.
@@ -676,17 +981,17 @@ class if_then: public process_expression
 
     /// \brief Constructor.
     if_then(const data::data_expression& condition, const process_expression& then_case)
-      : process_expression(core::detail::gsMakeIfThen(condition, then_case))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThen(), condition, then_case))
     {}
 
     const data::data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 
     const process_expression& then_case() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -696,7 +1001,25 @@ class if_then: public process_expression
 inline
 bool is_if_then(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIfThen(x);
+  return x.function() == core::detail::function_symbols::IfThen;
+}
+
+// prototype declaration
+std::string pp(const if_then& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const if_then& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(if_then& t1, if_then& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -706,7 +1029,7 @@ class if_then_else: public process_expression
   public:
     /// \brief Default constructor.
     if_then_else()
-      : process_expression(core::detail::constructIfThenElse())
+      : process_expression(core::detail::default_values::IfThenElse)
     {}
 
     /// \brief Constructor.
@@ -719,22 +1042,22 @@ class if_then_else: public process_expression
 
     /// \brief Constructor.
     if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case)
-      : process_expression(core::detail::gsMakeIfThenElse(condition, then_case, else_case))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThenElse(), condition, then_case, else_case))
     {}
 
     const data::data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 
     const process_expression& then_case() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 
     const process_expression& else_case() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg3(*this));
+      return atermpp::down_cast<process_expression>((*this)[2]);
     }
 };
 
@@ -744,7 +1067,25 @@ class if_then_else: public process_expression
 inline
 bool is_if_then_else(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIfThenElse(x);
+  return x.function() == core::detail::function_symbols::IfThenElse;
+}
+
+// prototype declaration
+std::string pp(const if_then_else& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const if_then_else& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(if_then_else& t1, if_then_else& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -754,7 +1095,7 @@ class bounded_init: public process_expression
   public:
     /// \brief Default constructor.
     bounded_init()
-      : process_expression(core::detail::constructBInit())
+      : process_expression(core::detail::default_values::BInit)
     {}
 
     /// \brief Constructor.
@@ -767,17 +1108,17 @@ class bounded_init: public process_expression
 
     /// \brief Constructor.
     bounded_init(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeBInit(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_BInit(), left, right))
     {}
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -787,7 +1128,25 @@ class bounded_init: public process_expression
 inline
 bool is_bounded_init(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBInit(x);
+  return x.function() == core::detail::function_symbols::BInit;
+}
+
+// prototype declaration
+std::string pp(const bounded_init& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const bounded_init& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(bounded_init& t1, bounded_init& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -797,7 +1156,7 @@ class merge: public process_expression
   public:
     /// \brief Default constructor.
     merge()
-      : process_expression(core::detail::constructMerge())
+      : process_expression(core::detail::default_values::Merge)
     {}
 
     /// \brief Constructor.
@@ -810,17 +1169,17 @@ class merge: public process_expression
 
     /// \brief Constructor.
     merge(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeMerge(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Merge(), left, right))
     {}
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -830,7 +1189,25 @@ class merge: public process_expression
 inline
 bool is_merge(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsMerge(x);
+  return x.function() == core::detail::function_symbols::Merge;
+}
+
+// prototype declaration
+std::string pp(const merge& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const merge& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(merge& t1, merge& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -840,7 +1217,7 @@ class left_merge: public process_expression
   public:
     /// \brief Default constructor.
     left_merge()
-      : process_expression(core::detail::constructLMerge())
+      : process_expression(core::detail::default_values::LMerge)
     {}
 
     /// \brief Constructor.
@@ -853,17 +1230,17 @@ class left_merge: public process_expression
 
     /// \brief Constructor.
     left_merge(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeLMerge(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_LMerge(), left, right))
     {}
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -873,7 +1250,25 @@ class left_merge: public process_expression
 inline
 bool is_left_merge(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsLMerge(x);
+  return x.function() == core::detail::function_symbols::LMerge;
+}
+
+// prototype declaration
+std::string pp(const left_merge& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const left_merge& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(left_merge& t1, left_merge& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -883,7 +1278,7 @@ class choice: public process_expression
   public:
     /// \brief Default constructor.
     choice()
-      : process_expression(core::detail::constructChoice())
+      : process_expression(core::detail::default_values::Choice)
     {}
 
     /// \brief Constructor.
@@ -896,17 +1291,17 @@ class choice: public process_expression
 
     /// \brief Constructor.
     choice(const process_expression& left, const process_expression& right)
-      : process_expression(core::detail::gsMakeChoice(left, right))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Choice(), left, right))
     {}
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -916,7 +1311,25 @@ class choice: public process_expression
 inline
 bool is_choice(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsChoice(x);
+  return x.function() == core::detail::function_symbols::Choice;
+}
+
+// prototype declaration
+std::string pp(const choice& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const choice& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(choice& t1, choice& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -926,7 +1339,7 @@ class untyped_parameter_identifier: public process_expression
   public:
     /// \brief Default constructor.
     untyped_parameter_identifier()
-      : process_expression(core::detail::constructUntypedParamId())
+      : process_expression(core::detail::default_values::UntypedParamId)
     {}
 
     /// \brief Constructor.
@@ -939,22 +1352,22 @@ class untyped_parameter_identifier: public process_expression
 
     /// \brief Constructor.
     untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : process_expression(core::detail::gsMakeUntypedParamId(name, arguments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedParamId(), name, arguments))
     {}
 
     /// \brief Constructor.
     untyped_parameter_identifier(const std::string& name, const data::data_expression_list& arguments)
-      : process_expression(core::detail::gsMakeUntypedParamId(core::identifier_string(name), arguments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedParamId(), core::identifier_string(name), arguments))
     {}
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -964,7 +1377,25 @@ class untyped_parameter_identifier: public process_expression
 inline
 bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedParamId(x);
+  return x.function() == core::detail::function_symbols::UntypedParamId;
+}
+
+// prototype declaration
+std::string pp(const untyped_parameter_identifier& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_parameter_identifier& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_parameter_identifier& t1, untyped_parameter_identifier& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -974,7 +1405,7 @@ class untyped_process_assignment: public process_expression
   public:
     /// \brief Default constructor.
     untyped_process_assignment()
-      : process_expression(core::detail::constructUntypedProcessAssignment())
+      : process_expression(core::detail::default_values::UntypedProcessAssignment)
     {}
 
     /// \brief Constructor.
@@ -987,22 +1418,22 @@ class untyped_process_assignment: public process_expression
 
     /// \brief Constructor.
     untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)
-      : process_expression(core::detail::gsMakeUntypedProcessAssignment(name, assignments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), name, assignments))
     {}
 
     /// \brief Constructor.
     untyped_process_assignment(const std::string& name, const data::untyped_identifier_assignment_list& assignments)
-      : process_expression(core::detail::gsMakeUntypedProcessAssignment(core::identifier_string(name), assignments))
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), core::identifier_string(name), assignments))
     {}
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::untyped_identifier_assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::untyped_identifier_assignment_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<data::untyped_identifier_assignment_list>((*this)[1]);
     }
 };
 
@@ -1012,67 +1443,58 @@ class untyped_process_assignment: public process_expression
 inline
 bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedProcessAssignment(x);
+  return x.function() == core::detail::function_symbols::UntypedProcessAssignment;
 }
 
+// prototype declaration
+std::string pp(const untyped_process_assignment& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_process_assignment& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated classes ---//
 
 // From the documentation:
 // The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
 
 /// \brief Defines a precedence relation on process expressions
-inline
-int precedence(const process_expression& x)
+inline int left_precedence(const choice&)       { return 1; }
+inline int left_precedence(const sum&)          { return 2; }
+inline int left_precedence(const merge&)        { return 3; }
+inline int left_precedence(const left_merge&)   { return 4; }
+inline int left_precedence(const if_then&)      { return 5; }
+inline int left_precedence(const if_then_else&) { return 5; }
+inline int left_precedence(const bounded_init&) { return 6; }
+inline int left_precedence(const seq&)          { return 7; }
+inline int left_precedence(const at&)           { return 8; }
+inline int left_precedence(const sync&)         { return 9; }
+inline int left_precedence(const process_expression& x)
 {
-  if (is_choice(x))
-  {
-    return 1;
-  }
-  else if (is_sum(x))
-  {
-    return 2;
-  }
-  else if (is_merge(x))
-  {
-    return 3;
-  }
-  else if (is_left_merge(x))
-  {
-    return 4;
-  }
-  else if (is_if_then(x) || is_if_then_else(x))
-  {
-    return 5;
-  }
-  else if (is_bounded_init(x))
-  {
-    return 6;
-  }
-  else if (is_seq(x))
-  {
-    return 7;
-  }
-  else if (is_at(x))
-  {
-    return 8;
-  }
-  else if (is_sync(x))
-  {
-    return 9;
-  }
-  return max_precedence;
+       if (is_choice(x))       { return left_precedence(static_cast<const choice&>(x)); }
+  else if (is_sum(x))          { return left_precedence(static_cast<const sum&>(x)); }
+  else if (is_merge(x))        { return left_precedence(static_cast<const merge&>(x)); }
+  else if (is_left_merge(x))   { return left_precedence(static_cast<const left_merge>(x)); }
+  else if (is_if_then(x))      { return left_precedence(static_cast<const if_then&>(x)); }
+  else if (is_if_then_else(x)) { return left_precedence(static_cast<const if_then_else&>(x)); }
+  else if (is_bounded_init(x)) { return left_precedence(static_cast<const bounded_init&>(x)); }
+  else if (is_seq(x))          { return left_precedence(static_cast<const seq&>(x)); }
+  else if (is_at(x))           { return left_precedence(static_cast<const at&>(x)); }
+  else if (is_sync(x))         { return left_precedence(static_cast<const sync&>(x)); }
+  return core::detail::precedences::max_precedence;
 }
 
-inline int precedence(const choice& x)       { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const sum& x)          { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const merge& x)        { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const left_merge& x)   { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const if_then& x)      { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const if_then_else& x) { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const bounded_init& x) { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const seq& x)          { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const at& x)           { return precedence(static_cast<const process_expression&>(x)); }
-inline int precedence(const sync& x)         { return precedence(static_cast<const process_expression&>(x)); }
+inline int right_precedence(const process_expression& x) { return left_precedence(x); }
 
 inline const process_expression& unary_operand(const sum& x)         { return x.operand(); }
 inline const process_expression& unary_operand(const block& x)       { return x.operand(); }
@@ -1096,162 +1518,109 @@ inline const process_expression& binary_left(const left_merge& x)    { return x.
 inline const process_expression& binary_right(const left_merge& x)   { return x.right(); }
 
 // template function overloads
-std::string pp(const process_expression& x);
 std::string pp(const process_expression_list& x);
 std::string pp(const process_expression_vector& x);
-std::string pp(const process_instance& x);
-std::string pp(const process_instance_assignment& x);
-std::string pp(const delta& x);
-std::string pp(const tau& x);
-std::string pp(const sum& x);
-std::string pp(const block& x);
-std::string pp(const hide& x);
-std::string pp(const rename& x);
-std::string pp(const comm& x);
-std::string pp(const allow& x);
-std::string pp(const sync& x);
-std::string pp(const at& x);
-std::string pp(const seq& x);
-std::string pp(const if_then& x);
-std::string pp(const if_then_else& x);
-std::string pp(const bounded_init& x);
-std::string pp(const merge& x);
-std::string pp(const left_merge& x);
-std::string pp(const choice& x);
-std::string pp(const process::untyped_process_assignment& x);
-std::string pp(const process::untyped_parameter_identifier& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
+std::string pp(const action_list& x);
+std::string pp(const action_vector& x);
+action normalize_sorts(const action& x, const data::data_specification& dataspec);
+action translate_user_notation(const action& x);
+std::set<data::variable> find_all_variables(const action& x);
+std::set<data::variable> find_free_variables(const action& x);
 
-// TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x);
-std::string pp(const atermpp::aterm_appl& x);
+/// \brief Compares the signatures of two actions
+/// \param a An action
+/// \param b An action
+/// \return Returns true if the actions a and b have the same label, and
+/// the sorts of the arguments of a and b are equal.
+inline
+bool equal_signatures(const action& a, const action& b)
+{
+  if (a.label() != b.label())
+  {
+    return false;
+  }
+
+  const data::data_expression_list& a_args = a.arguments();
+  const data::data_expression_list& b_args = b.arguments();
+
+  if (a_args.size() != b_args.size())
+  {
+    return false;
+  }
+
+  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
+}
+
+/// \brief Represents the name of a multi action
+typedef std::multiset<core::identifier_string> multi_action_name;
+
+/// \brief Represents a set of multi action names
+typedef std::set<multi_action_name> multi_action_name_set;
+
+/// \brief Represents a set of action names
+typedef std::set<core::identifier_string> action_name_set;
+
+/// \brief Pretty print function for a multi action name
+inline
+std::string pp(const multi_action_name& x)
+{
+  std::ostringstream out;
+  if (x.empty())
+  {
+    out << "tau";
+  }
+  else
+  {
+    for (auto i = x.begin(); i != x.end(); ++i)
+    {
+      if (i != x.begin())
+      {
+        out << " | ";
+      }
+      out << core::pp(*i);
+    }
+  }
+  return out.str();
+}
+
+/// \brief Pretty print function for a set of multi action names
+inline
+std::string pp(const multi_action_name_set& A)
+{
+  std::ostringstream out;
+  out << "{";
+  for (auto i = A.begin(); i != A.end(); ++i)
+  {
+    if (i != A.begin())
+    {
+      out << ", ";
+    }
+    out << pp(*i);
+  }
+  out << "}";
+  return out.str();
+}
 
 } // namespace process
 
 } // namespace mcrl2
 
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::process::process_expression& t1, mcrl2::process::process_expression& t2)
+namespace std
 {
-  t1.swap(t2);
-}
 
+/// \brief Standard has function for actions.
 template <>
-inline void swap(mcrl2::process::process_instance& t1, mcrl2::process::process_instance& t2)
+struct hash<mcrl2::process::action>
 {
-  t1.swap(t2);
-}
+  std::size_t operator()(const mcrl2::process::action& t) const
+  {
+    return std::hash<atermpp::aterm>()(t); 
+  }
 
-template <>
-inline void swap(mcrl2::process::process_instance_assignment& t1, mcrl2::process::process_instance_assignment& t2)
-{
-  t1.swap(t2);
-}
+};
 
-template <>
-inline void swap(mcrl2::process::delta& t1, mcrl2::process::delta& t2)
-{
-  t1.swap(t2);
-}
 
-template <>
-inline void swap(mcrl2::process::tau& t1, mcrl2::process::tau& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::sum& t1, mcrl2::process::sum& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::block& t1, mcrl2::process::block& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::hide& t1, mcrl2::process::hide& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::rename& t1, mcrl2::process::rename& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::comm& t1, mcrl2::process::comm& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::allow& t1, mcrl2::process::allow& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::sync& t1, mcrl2::process::sync& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::at& t1, mcrl2::process::at& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::seq& t1, mcrl2::process::seq& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::if_then& t1, mcrl2::process::if_then& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::if_then_else& t1, mcrl2::process::if_then_else& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::bounded_init& t1, mcrl2::process::bounded_init& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::merge& t1, mcrl2::process::merge& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::left_merge& t1, mcrl2::process::left_merge& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::choice& t1, mcrl2::process::choice& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
+} // namespace std;
 
 #endif // MCRL2_PROCESS_PROCESS_EXPRESSION_H

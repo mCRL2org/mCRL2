@@ -13,8 +13,10 @@
 #define MCRL2_LPS_REMOVE_H
 
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/detail/lps_parameter_remover.h"
 #include "mcrl2/lps/replace.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -47,13 +49,12 @@ struct is_singleton_sort
 
   bool operator()(const data::sort_expression& s) const
   {
-    data::function_symbol_vector c(m_data_spec.constructors(s));
-    if (boost::distance(c) != 1)
+    auto const& constructors = m_data_spec.constructors(s);
+    if (constructors.size() != 1)
     {
       return false;
     }
-    data::function_symbol f = *c.begin();
-    return !is_function_sort(f.sort());
+    return !is_function_sort(constructors.front().sort());
   }
 };
 
@@ -87,7 +88,7 @@ void remove_singleton_sorts(specification& spec)
   data::mutable_map_substitution<> sigma;
   std::set<data::variable> to_be_removed;
   const data::variable_list& p = spec.process().process_parameters();
-  for (data::variable_list::const_iterator i = p.begin(); i != p.end(); ++i)
+  for (auto i = p.begin(); i != p.end(); ++i)
   {
     if (lps::detail::is_singleton_sort(spec.data())(i->sort()))
     {
@@ -97,6 +98,35 @@ void remove_singleton_sorts(specification& spec)
   }
   lps::replace_variables(spec, sigma);
   lps::remove_parameters(spec, to_be_removed);
+}
+
+/// \brief Removes assignments of the form x := x from v for variables x that are not contained in do_not_remove.
+inline
+data::assignment_list remove_redundant_assignments(const data::assignment_list& v, const data::variable_list& do_not_remove)
+{
+  using utilities::detail::contains;
+
+  std::vector<data::assignment> result;
+  for (auto i = v.begin(); i != v.end(); ++i)
+  {
+    if (i->lhs() != i->rhs() || contains(do_not_remove, i->lhs()))
+    {
+      result.push_back(*i);
+    }
+  }
+  return data::assignment_list(result.begin(), result.end());
+}
+
+/// \brief Removes redundant assignments of the form x = x from an LPS specification
+/// \param spec A linear process specification
+inline
+void remove_redundant_assignments(specification& lpsspec)
+{
+  auto& summands = lpsspec.process().action_summands();
+  for (auto i = summands.begin(); i != summands.end(); ++i)
+  {
+    i->assignments() = remove_redundant_assignments(i->assignments(), i->summation_variables());
+  }
 }
 
 } // namespace lps

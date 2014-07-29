@@ -15,8 +15,6 @@
 #ifndef MCRL2_DATA_BAG_H
 #define MCRL2_DATA_BAG_H
 
-#include "boost/utility.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -64,6 +62,7 @@ namespace mcrl2 {
         return false;
       }
 
+
       /// \brief Generate identifier \@bag
       /// \return Identifier \@bag
       inline
@@ -82,7 +81,6 @@ namespace mcrl2 {
         function_symbol constructor(constructor_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), sort_fbag::fbag(s), bag(s)));
         return constructor;
       }
-
 
       /// \brief Recogniser for function \@bag
       /// \param e A data expression
@@ -121,7 +119,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined constructors for bag
       /// \param s A sort expression
       /// \return All system defined constructors for bag
@@ -132,38 +129,6 @@ namespace mcrl2 {
         result.push_back(sort_bag::constructor(s));
 
         return result;
-      }
-      /// \brief Generate identifier {}
-      /// \return Identifier {}
-      inline
-      core::identifier_string const& empty_name()
-      {
-        static core::identifier_string empty_name = core::identifier_string("{:}");
-        return empty_name;
-      }
-
-      /// \brief Constructor for function symbol {}
-      /// \param s A sort expression
-      /// \return Function symbol empty
-      inline
-      function_symbol empty(const sort_expression& s)
-      {
-        function_symbol empty(empty_name(), bag(s));
-        return empty;
-      }
-
-
-      /// \brief Recogniser for function {}
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching {}
-      inline
-      bool is_empty_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e).name() == empty_name();
-        }
-        return false;
       }
 
       /// \brief Generate identifier \@bagfbag
@@ -184,7 +149,6 @@ namespace mcrl2 {
         function_symbol bag_fbag(bag_fbag_name(), make_function_sort(sort_fbag::fbag(s), bag(s)));
         return bag_fbag;
       }
-
 
       /// \brief Recogniser for function \@bagfbag
       /// \param e A data expression
@@ -242,7 +206,6 @@ namespace mcrl2 {
         return bag_comprehension;
       }
 
-
       /// \brief Recogniser for function \@bagcomp
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@bagcomp
@@ -289,16 +252,18 @@ namespace mcrl2 {
         return count_name;
       }
 
-      /// \brief Constructor for function symbol count
+      ///\brief Constructor for function symbol count
       /// \param s A sort expression
-      /// \return Function symbol count
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
+      ///\return Function symbol count
       inline
-      function_symbol count(const sort_expression& s)
+      function_symbol count(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
-        function_symbol count(count_name(), make_function_sort(s, bag(s), sort_nat::nat()));
+        sort_expression target_sort(sort_nat::nat());
+        function_symbol count(count_name(), make_function_sort(s0, s1, target_sort));
         return count;
       }
-
 
       /// \brief Recogniser for function count
       /// \param e A data expression
@@ -308,7 +273,8 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == count_name();
+          function_symbol f(e);
+          return f.name() == count_name();
         }
         return false;
       }
@@ -321,7 +287,7 @@ namespace mcrl2 {
       inline
       application count(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_bag::count(s)(arg0, arg1);
+        return sort_bag::count(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of count
@@ -347,16 +313,18 @@ namespace mcrl2 {
         return in_name;
       }
 
-      /// \brief Constructor for function symbol in
+      ///\brief Constructor for function symbol in
       /// \param s A sort expression
-      /// \return Function symbol in
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
+      ///\return Function symbol in
       inline
-      function_symbol in(const sort_expression& s)
+      function_symbol in(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
-        function_symbol in(in_name(), make_function_sort(s, bag(s), sort_bool::bool_()));
+        sort_expression target_sort(sort_bool::bool_());
+        function_symbol in(in_name(), make_function_sort(s0, s1, target_sort));
         return in;
       }
-
 
       /// \brief Recogniser for function in
       /// \param e A data expression
@@ -366,7 +334,8 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == in_name();
+          function_symbol f(e);
+          return f.name() == in_name();
         }
         return false;
       }
@@ -379,7 +348,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_bag::in(s)(arg0, arg1);
+        return sort_bag::in(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -399,32 +368,56 @@ namespace mcrl2 {
       /// \brief Generate identifier +
       /// \return Identifier +
       inline
-      core::identifier_string const& join_name()
+      core::identifier_string const& union_name()
       {
-        static core::identifier_string join_name = core::identifier_string("+");
-        return join_name;
+        static core::identifier_string union_name = core::identifier_string("+");
+        return union_name;
       }
 
-      /// \brief Constructor for function symbol +
+      ///\brief Constructor for function symbol +
       /// \param s A sort expression
-      /// \return Function symbol join
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
+      ///\return Function symbol union_
       inline
-      function_symbol join(const sort_expression& s)
+      function_symbol union_(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
-        function_symbol join(join_name(), make_function_sort(bag(s), bag(s), bag(s)));
-        return join;
-      }
+        sort_expression target_sort;
+        if (s0 == bag(s) && s1 == bag(s))
+        {
+          target_sort = bag(s);
+        }
+        else if (s0 == sort_set::set_(s) && s1 == sort_set::set_(s))
+        {
+          target_sort = sort_set::set_(s);
+        }
+        else if (s0 == sort_fset::fset(s) && s1 == sort_fset::fset(s))
+        {
+          target_sort = sort_fset::fset(s);
+        }
+        else if (s0 == sort_fbag::fbag(s) && s1 == sort_fbag::fbag(s))
+        {
+          target_sort = sort_fbag::fbag(s);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for union_ with domain sorts " + to_string(s0) + ", " + to_string(s1));
+        }
 
+        function_symbol union_(union_name(), make_function_sort(s0, s1, target_sort));
+        return union_;
+      }
 
       /// \brief Recogniser for function +
       /// \param e A data expression
       /// \return true iff e is the function symbol matching +
       inline
-      bool is_join_function_symbol(const atermpp::aterm_appl& e)
+      bool is_union_function_symbol(const atermpp::aterm_appl& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == join_name();
+          function_symbol f(e);
+          return f.name() == union_name();
         }
         return false;
       }
@@ -435,21 +428,21 @@ namespace mcrl2 {
       /// \param arg1 A data expression
       /// \return Application of + to a number of arguments
       inline
-      application join(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      application union_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_bag::join(s)(arg0, arg1);
+        return sort_bag::union_(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
       /// \param e A data expression
-      /// \return true iff e is an application of function symbol join to a
+      /// \return true iff e is an application of function symbol union_ to a
       ///     number of arguments
       inline
-      bool is_join_application(const atermpp::aterm_appl& e)
+      bool is_union_application(const atermpp::aterm_appl& e)
       {
         if (is_application(e))
         {
-          return is_join_function_symbol(application(e).head());
+          return is_union_function_symbol(application(e).head());
         }
         return false;
       }
@@ -463,16 +456,39 @@ namespace mcrl2 {
         return intersection_name;
       }
 
-      /// \brief Constructor for function symbol *
+      ///\brief Constructor for function symbol *
       /// \param s A sort expression
-      /// \return Function symbol intersection
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
+      ///\return Function symbol intersection
       inline
-      function_symbol intersection(const sort_expression& s)
+      function_symbol intersection(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
-        function_symbol intersection(intersection_name(), make_function_sort(bag(s), bag(s), bag(s)));
+        sort_expression target_sort;
+        if (s0 == bag(s) && s1 == bag(s))
+        {
+          target_sort = bag(s);
+        }
+        else if (s0 == sort_set::set_(s) && s1 == sort_set::set_(s))
+        {
+          target_sort = sort_set::set_(s);
+        }
+        else if (s0 == sort_fset::fset(s) && s1 == sort_fset::fset(s))
+        {
+          target_sort = sort_fset::fset(s);
+        }
+        else if (s0 == sort_fbag::fbag(s) && s1 == sort_fbag::fbag(s))
+        {
+          target_sort = sort_fbag::fbag(s);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for intersection with domain sorts " + to_string(s0) + ", " + to_string(s1));
+        }
+
+        function_symbol intersection(intersection_name(), make_function_sort(s0, s1, target_sort));
         return intersection;
       }
-
 
       /// \brief Recogniser for function *
       /// \param e A data expression
@@ -482,7 +498,8 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == intersection_name();
+          function_symbol f(e);
+          return f.name() == intersection_name();
         }
         return false;
       }
@@ -495,7 +512,7 @@ namespace mcrl2 {
       inline
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_bag::intersection(s)(arg0, arg1);
+        return sort_bag::intersection(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -521,16 +538,39 @@ namespace mcrl2 {
         return difference_name;
       }
 
-      /// \brief Constructor for function symbol -
+      ///\brief Constructor for function symbol -
       /// \param s A sort expression
-      /// \return Function symbol difference
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
+      ///\return Function symbol difference
       inline
-      function_symbol difference(const sort_expression& s)
+      function_symbol difference(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
-        function_symbol difference(difference_name(), make_function_sort(bag(s), bag(s), bag(s)));
+        sort_expression target_sort;
+        if (s0 == bag(s) && s1 == bag(s))
+        {
+          target_sort = bag(s);
+        }
+        else if (s0 == sort_set::set_(s) && s1 == sort_set::set_(s))
+        {
+          target_sort = sort_set::set_(s);
+        }
+        else if (s0 == sort_fset::fset(s) && s1 == sort_fset::fset(s))
+        {
+          target_sort = sort_fset::fset(s);
+        }
+        else if (s0 == sort_fbag::fbag(s) && s1 == sort_fbag::fbag(s))
+        {
+          target_sort = sort_fbag::fbag(s);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for difference with domain sorts " + to_string(s0) + ", " + to_string(s1));
+        }
+
+        function_symbol difference(difference_name(), make_function_sort(s0, s1, target_sort));
         return difference;
       }
-
 
       /// \brief Recogniser for function -
       /// \param e A data expression
@@ -540,7 +580,8 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == difference_name();
+          function_symbol f(e);
+          return f.name() == difference_name();
         }
         return false;
       }
@@ -553,7 +594,7 @@ namespace mcrl2 {
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_bag::difference(s)(arg0, arg1);
+        return sort_bag::difference(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -588,7 +629,6 @@ namespace mcrl2 {
         function_symbol bag2set(bag2set_name(), make_function_sort(bag(s), sort_set::set_(s)));
         return bag2set;
       }
-
 
       /// \brief Recogniser for function Bag2Set
       /// \param e A data expression
@@ -646,7 +686,6 @@ namespace mcrl2 {
         return set2bag;
       }
 
-
       /// \brief Recogniser for function Set2Bag
       /// \param e A data expression
       /// \return true iff e is the function symbol matching Set2Bag
@@ -702,7 +741,6 @@ namespace mcrl2 {
         function_symbol zero_function(zero_function_name(), make_function_sort(s, sort_nat::nat()));
         return zero_function;
       }
-
 
       /// \brief Recogniser for function \@zero_
       /// \param e A data expression
@@ -760,7 +798,6 @@ namespace mcrl2 {
         return one_function;
       }
 
-
       /// \brief Recogniser for function \@one_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@one_
@@ -816,7 +853,6 @@ namespace mcrl2 {
         function_symbol add_function(add_function_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat())));
         return add_function;
       }
-
 
       /// \brief Recogniser for function \@add_
       /// \param e A data expression
@@ -875,7 +911,6 @@ namespace mcrl2 {
         return min_function;
       }
 
-
       /// \brief Recogniser for function \@min_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@min_
@@ -932,7 +967,6 @@ namespace mcrl2 {
         function_symbol monus_function(monus_function_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat())));
         return monus_function;
       }
-
 
       /// \brief Recogniser for function \@monus_
       /// \param e A data expression
@@ -991,7 +1025,6 @@ namespace mcrl2 {
         return nat2bool_function;
       }
 
-
       /// \brief Recogniser for function \@Nat2Bool_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@Nat2Bool_
@@ -1048,7 +1081,6 @@ namespace mcrl2 {
         return bool2nat_function;
       }
 
-
       /// \brief Recogniser for function \@Bool2Nat_
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@Bool2Nat_
@@ -1085,7 +1117,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined mappings for bag
       /// \param s A sort expression
       /// \return All system defined mappings for bag
@@ -1093,14 +1124,13 @@ namespace mcrl2 {
       function_symbol_vector bag_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(sort_bag::empty(s));
         result.push_back(sort_bag::bag_fbag(s));
         result.push_back(sort_bag::bag_comprehension(s));
-        result.push_back(sort_bag::count(s));
-        result.push_back(sort_bag::in(s));
-        result.push_back(sort_bag::join(s));
-        result.push_back(sort_bag::intersection(s));
-        result.push_back(sort_bag::difference(s));
+        result.push_back(sort_bag::count(s, s, bag(s)));
+        result.push_back(sort_bag::in(s, s, bag(s)));
+        result.push_back(sort_bag::union_(s, bag(s), bag(s)));
+        result.push_back(sort_bag::intersection(s, bag(s), bag(s)));
+        result.push_back(sort_bag::difference(s, bag(s), bag(s)));
         result.push_back(sort_bag::bag2set(s));
         result.push_back(sort_bag::set2bag(s));
         result.push_back(sort_bag::zero_function(s));
@@ -1120,8 +1150,8 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_join_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1133,7 +1163,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_bag_fbag_application(e) || is_bag_comprehension_application(e) || is_bag2set_application(e) || is_set2bag_application(e) || is_zero_function_application(e) || is_one_function_application(e) || is_nat2bool_function_application(e) || is_bool2nat_function_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1144,8 +1174,8 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_join_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for bag
@@ -1166,27 +1196,26 @@ namespace mcrl2 {
         variable vd("d",s);
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list(), empty(s), constructor(s, zero_function(s), sort_fbag::empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vb), bag_fbag(s, vb), constructor(s, zero_function(s), vb)));
         result.push_back(data_equation(atermpp::make_vector(vf), sort_bag::bag_comprehension(s, vf), constructor(s, vf, sort_fbag::empty(s))));
-        result.push_back(data_equation(atermpp::make_vector(vb, ve, vf), count(s, ve, constructor(s, vf, vb)), sort_nat::swap_zero(vf(ve), sort_fbag::count(s, ve, vb))));
+        result.push_back(data_equation(atermpp::make_vector(vb, ve, vf), count(s, ve, constructor(s, vf, vb)), sort_nat::swap_zero(vf(ve), count(s, ve, vb))));
         result.push_back(data_equation(atermpp::make_vector(ve, vx), in(s, ve, vx), greater(count(s, ve, vx), sort_nat::c0())));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), equal_to(constructor(s, vf, vb), constructor(s, vg, vc)), if_(equal_to(vf, vg), equal_to(vb, vc), forall(atermpp::make_vector(vd), equal_to(count(s, vd, constructor(s, vf, vb)), count(s, vd, constructor(s, vg, vc)))))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
-        result.push_back(data_equation(atermpp::make_vector(vx), join(s, vx, vx), vx));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), join(s, vx, join(s, vx, vy)), join(s, vx, vy)));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), join(s, vx, join(s, vy, vx)), join(s, vy, vx)));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), join(s, join(s, vx, vy), vx), join(s, vx, vy)));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), join(s, join(s, vy, vx), vx), join(s, vy, vx)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), join(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, add_function(s, vf, vg), sort_fbag::join(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vx), union_(s, vx, vx), vx));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, vx, union_(s, vx, vy)), union_(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, vx, union_(s, vy, vx)), union_(s, vy, vx)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, union_(s, vx, vy), vx), union_(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, union_(s, vy, vx), vx), union_(s, vy, vx)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), union_(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, add_function(s, vf, vg), sort_fbag::join(s, vf, vg, vb, vc))));
         result.push_back(data_equation(atermpp::make_vector(vx), intersection(s, vx, vx), vx));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx)));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, min_function(s, vf, vg), sort_fbag::intersect(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), difference(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, monus_function(s, vf, vg), sort_fbag::difference(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, min_function(s, vf, vg), sort_fbag::fbag_intersect(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), difference(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, monus_function(s, vf, vg), sort_fbag::fbag_difference(s, vf, vg, vb, vc))));
         result.push_back(data_equation(atermpp::make_vector(vb, vf), bag2set(s, constructor(s, vf, vb)), sort_set::constructor(s, nat2bool_function(s, vf), sort_fbag::fbag2fset(s, vf, vb))));
         result.push_back(data_equation(atermpp::make_vector(vh, vs), set2bag(s, sort_set::constructor(s, vh, vs)), constructor(s, bool2nat_function(s, vh), sort_fbag::fset2fbag(s, vs))));
         result.push_back(data_equation(atermpp::make_vector(ve), zero_function(s, ve), sort_nat::c0()));

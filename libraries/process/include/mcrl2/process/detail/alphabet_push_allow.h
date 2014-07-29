@@ -14,7 +14,6 @@
 
 #include <sstream>
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/process/detail/allow_set.h"
 #include "mcrl2/process/detail/alphabet_traverser.h"
 #include "mcrl2/process/find.h"
@@ -106,7 +105,7 @@ struct push_allow_map
 
   void insert(const process_expression& x, const allow_set& A, const process_instance& Q)
   {
-    data[atermpp::aterm_cast<process_instance>(x)].push_back(wnode(A, Q));
+    data[atermpp::down_cast<process_instance>(x)].push_back(wnode(A, Q));
   }
 
   void set_alphabet(const process_instance& x, const allow_set& A, const multi_action_name_set& alphabet)
@@ -156,7 +155,7 @@ std::ostream& operator<<(std::ostream& out, const push_allow_map& W)
 inline
 std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
 {
-  return out << "alphabet = " << lps::pp(x.alphabet) << " expression = " << process::pp(x.m_expression) << std::endl;
+  return out << "alphabet = " << pp(x.alphabet) << " expression = " << process::pp(x.m_expression) << std::endl;
 }
 
 push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, push_allow_map& W, data::set_identifier_generator& id_generator);
@@ -229,7 +228,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     }
     mCRL2log(log::debug) << msg << "push(" << A << ", " << process::pp(x) << ", " << W << ") = "
       << text1
-      << process::pp(result.m_expression) << " with alphabet(" << process::pp(result.m_expression) << ") = " << lps::pp(result.alphabet) << std::endl;
+      << process::pp(result.m_expression) << " with alphabet(" << process::pp(result.m_expression) << ") = " << pp(result.alphabet) << std::endl;
   }
 
   void log(const process_expression& x, const std::string& text = "")
@@ -242,7 +241,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return !is_merge(x) && !is_left_merge(x) && !is_sync(x) && !is_hide(x) && !is_rename(x) && !is_block(x) && !is_allow(x) && !is_comm(x);
   }
 
-  void leave(const lps::action& x)
+  void leave(const process::action& x)
   {
     multi_action_name alpha;
     alpha.insert(x.label().name());

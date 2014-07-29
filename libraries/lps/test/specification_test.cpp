@@ -30,7 +30,7 @@ void test_find_sort_expressions()
   specification spec = linearise(lps::detail::ABP_SPECIFICATION());
   std::set<sort_expression> s;
   lps::find_sort_expressions(spec, std::inserter(s, s.end()));
-  std::cout << data::detail::print_set(s) << std::endl;
+  std::cout << core::detail::print_set(s) << std::endl;
 }
 
 void test_system_defined_sorts()

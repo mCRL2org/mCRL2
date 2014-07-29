@@ -1,0 +1,32 @@
+sort Policy = struct FIFO | LIFO;
+     Floor = Pos;
+     Requests = List(Pos);
+
+map  policy: Policy;
+     storeys: Pos;
+     addRequest,addRequestFIFO,addRequestLIFO,remove: Requests # Pos -> Requests;
+     newPosition: Pos # Pos -> Pos;
+
+var  r: Requests;
+     f,g,f1,f2: Pos;
+eqn  policy  =  LIFO;
+     storeys  =  4;
+     policy == FIFO  ->  addRequest(r, f)  =  addRequestFIFO(r, f);
+     policy == LIFO  ->  addRequest(r, f)  =  addRequestLIFO(r, f);
+     addRequestFIFO([], f)  =  [f];
+     addRequestFIFO(g |> r, f)  =  g |> r;
+     addRequestFIFO(g |> r, f)  =  g |> addRequest(r, f);
+     addRequestLIFO(r, f)  =  f |> remove(r, f);
+     remove([], f)  =  [];
+     f == g  ->  remove(g |> r, f)  =  remove(r, f);
+     f != g  ->  remove(g |> r, f)  =  g |> remove(r, f);
+     f1 < f2  ->  newPosition(f1, f2)  =  f1 + 1;
+     f1 > f2  ->  newPosition(f1, f2)  =  Int2Pos(f1 - 1);
+     f1 == f2  ->  newPosition(f1, f2)  =  f1;
+
+pbes nu X(p: Pos, d: Bool, r: List(Pos)) =
+  forall b3: Bool, f4, newp3: Pos, r3: List(Pos).
+     val(!(r3 == if(b3, f4 |> remove(r, f4), r)))
+  ;
+
+init X(1, true, []);

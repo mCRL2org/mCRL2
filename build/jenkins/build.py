@@ -12,18 +12,8 @@ from util import *
 print "Building job {0} with label {1}, using compiler {2} and buildtype {3}".format(jobname, label, compiler, buildtype)
 
 #
-# Try to remove CMake cache. We can wait the extra few minutes if it means we don't
-# get weird errors all the time.
-#
-try:
-  os.remove(os.path.join(builddir, 'CMakeCache.txt'))
-except:
-  pass
-
-#
 # Configuration axis: compiler
 #
-
 compilerflags = []
 if compiler == 'clang':
   cc = which('clang')
@@ -62,13 +52,26 @@ if label.startswith('macosx') and package in ['nightly', 'official-release']:
   packageflags += ['-DMCRL2_OSX_PACKAGE=ON'] # Needed for packaging relevant Boost headers (for compiling rewriter)
 
 #
-# Do not run long tests, unless we're doing the ubuntu-amd64 maintainer build
+# Enable random tests for all builds.
 #
-testflags = []
-if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer'):
+testflags = ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
+
+#
+# Do not run long tests if we're doing the ubuntu-amd64 clang maintainer 
+# build (these time out because profiling is on in Clang).
+#
+if (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
   testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
-else:
-  testflags += ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
+
+#
+# For Windows, explicitly tell CMake which generator to use to avoid trouble
+# with x86/x64 incompatibilities
+#
+generator = []
+if label == 'windows-amd64':
+  generator += ['-GNMake Makefiles']
+elif label == 'windows-x86':
+  generator += ['-GNMake Makefiles']
 
 #
 # If we are building the mCRL2-release job, run all tests
@@ -84,14 +87,21 @@ if jobname.split('/')[0].lower().find("release") <> -1:
 if not os.path.exists(builddir):
   os.mkdir(builddir)
 os.chdir(builddir)
+
+# Using a stage dir breaks packaging for MacOSX. Ideally, we'd have a stage
+# dir though, for easy debugging when something goes wrong during testing.
+# To do so, re-add the following option:
+#
+# '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(builddir)
+
 cmake_command = ['cmake', 
                  srcdir, 
-                 '-DCMAKE_BUILD_TYPE={0}'.format(buildtype), 
-                 '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(builddir)] \
-                 + targetflags \
-                 + compilerflags \
-                 + testflags \
-                 + packageflags 
+                 '-DCMAKE_BUILD_TYPE={0}'.format(buildtype)] \
+                + targetflags \
+                + compilerflags \
+                + testflags \
+                + packageflags \
+                + generator
 if call('CMake', cmake_command):
   log('CMake failed.')
   sys.exit(1)
@@ -109,9 +119,11 @@ if not buildthreads:
 #
 
 extraoptions = []
-if platform.system() == 'Linux':
-  extraoptions =  ['-j{0}'.format(buildthreads)]
-make_command = ['cmake', '--build', builddir, '--'] + extraoptions
+if label in ["windows-x86", "windows-amd64"]:
+  extraoptions = ['--config', buildtype]
+else:
+  extraoptions =  ['--', '-j{0}'.format(buildthreads)]
+make_command = ['cmake', '--build', builddir] + extraoptions
 if call('CMake --build', make_command):
   log('Build failed.')
   sys.exit(1)
@@ -126,12 +138,17 @@ if package == 'official-release-doc':
 # Test
 #
 
-ctest_command = ['ctest', \
-                 '-T', 'Test', \
-                 '--output-on-failure', \
-                 '--no-compress-output', \
+ctest_command = ['ctest', 
+                 '-T', 'Test', 
+                 '--output-on-failure', 
+                 '--no-compress-output', 
                  '-j{0}'.format(buildthreads)]
-ctest_result = call('CTest', ctest_command)
+if label in ["windows-x86", "windows-amd64"]:
+  ctest_command += ['--build-config', buildtype]
+env = {}
+env.update(os.environ)
+env['MCRL2_COMPILEREWRITER'] = os.path.abspath(os.path.join('.', 'mcrl2compilerewriter_ctest'))
+ctest_result = call('CTest', ctest_command, env=env)
 if ctest_result:
   log('CTest returned ' + str(ctest_result))
 

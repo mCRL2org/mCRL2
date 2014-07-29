@@ -16,21 +16,10 @@
 #include <list>
 #include <set>
 #include <vector>
-
-#include "boost/assert.hpp"
-#include "boost/static_assert.hpp"
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits/is_convertible.hpp"
-#include "boost/call_traits.hpp"
-#include "boost/type_traits/remove_reference.hpp"
-#include "boost/type_traits/add_reference.hpp"
-#include "boost/range/iterator_range.hpp"
-#include "boost/iterator/iterator_adaptor.hpp"
-#include "boost/iterator/iterator_facade.hpp"
+#include <type_traits>
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-// #include "mcrl2/atermpp/aterm_list_iterator.h"
 
 namespace atermpp
 {
@@ -39,138 +28,7 @@ namespace atermpp
 namespace detail
 {
 
-// Condition for recognising types that represent containers
-template < typename T >
-struct is_container_impl
-{
-  typedef boost::false_type type;
-};
 
-template < typename T >
-struct is_container_impl<std::list<T> >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< std::set< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< std::multiset< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< std::vector< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< atermpp::term_list< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_container_impl< boost::iterator_range< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < bool C, typename Container, typename Value >
-struct lazy_check_value_type
-{
-  typedef boost::false_type type;
-};
-
-template < typename Container, typename ValueType >
-struct lazy_check_value_type< true, Container, ValueType >
-{
-  typedef typename boost::is_convertible< typename Container::value_type, ValueType >::type type;
-};
-
-/// type condition for use with boost::enable_if
-/// T the type to be tested
-/// \pre V is void or T::value_type convertible to V
-template < typename T, typename V = void >
-struct is_container;
-
-/// type condition for use with boost::enable_if
-/// T is the container type
-template < typename T >
-struct is_container< T, void > : public
-    is_container_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
-  { };
-
-template < typename T, typename V >
-struct is_container
-{
-  typedef typename lazy_check_value_type< is_container< T, void >::type::value, T, V >::type type;
-};
-
-/// type condition for use with boost::enable_if
-/// T the type to be tested
-/// \pre V is void or T::value_type convertible to V
-template < typename T, typename V = void >
-struct enable_if_container : public
-    boost::enable_if< typename atermpp::detail::is_container< T, V >::type >
-  {};
-
-/// type condition for use with boost::enable_if
-/// T the type to be tested
-/// \pre V is void or T::value_type convertible to V
-template < typename T, typename V = void >
-struct disable_if_container : public
-    boost::disable_if< typename atermpp::detail::is_container< T, V >::type >
-  {};
-
-template < typename T >
-struct is_set_impl
-{
-  typedef boost::false_type type;
-};
-
-template < typename T >
-struct is_set_impl< std::set< T > >
-{
-  typedef boost::true_type type;
-};
-
-template < typename T >
-struct is_set_impl< std::multiset< T > >
-{
-  typedef boost::true_type type;
-};
-
-// type condition for use with boost::enable_if
-template < typename T >
-struct is_set : public is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
-  { };
-
-/// The Boost.phoenix library has a nice implementation that can also be used...
-/// For our limited purposes this is enough though
-template < typename Result >
-struct construct
-{
-  typedef Result result_type;
-
-  template < typename A >
-  Result operator()(typename boost::call_traits< A >::param_type a) const
-  {
-    return Result(a);
-  }
-
-  template < typename A, typename A1 >
-  Result operator()(A a, A1 a1) const
-  {
-    return Result(a, a1);
-  }
-};
 
 } // namespace detail
 

@@ -14,6 +14,8 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -23,24 +25,10 @@ using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 
-class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
+class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > >
 {
   protected:
-    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
-
-    bool m_skip_data;
-
-    void parse_options(const command_line_parser& parser)
-    {
-      super::parse_options(parser);
-      m_skip_data = parser.options.count("skip-data") > 0;
-    }
-
-    void add_options(interface_description& desc)
-    {
-      super::add_options(desc);
-      desc.add_option("skip-data", "do not rewrite data expressions", 's');
-    }
+    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > > super;
 
     /// \brief Returns the types of rewriters that are available for this tool.
     std::set<pbes_system::pbes_rewriter_type> available_rewriters() const
@@ -58,8 +46,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         "rewrite and simplify a PBES",
         "Rewrite the PBES in INFILE, remove quantified variables and write the resulting PBES to OUTFILE. "
         "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."
-      ),
-      m_skip_data(false)
+      )
     {}
 
     bool run()
@@ -72,12 +59,13 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
-      pbesrewr(input_filename(),
-               output_filename(),
-               rewrite_strategy(),
-               rewriter_type(),
-               m_skip_data
-             );
+      pbes_system::pbesrewr(input_filename(),
+                            output_filename(),
+                            pbes_input_format(),
+                            pbes_output_format(),
+                            rewrite_strategy(),
+                            rewriter_type()
+                           );
       return true;
     }
 

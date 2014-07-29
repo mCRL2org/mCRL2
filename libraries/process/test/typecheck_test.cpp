@@ -11,9 +11,8 @@
 
 #include <iostream>
 #include <boost/test/included/unit_test_framework.hpp>
-#include <mcrl2/lps/parse.h>
-#include <mcrl2/lps/parelm.h>
-#include <mcrl2/lps/specification.h>
+#include "mcrl2/process/parse.h"
+#include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -344,6 +343,19 @@ BOOST_AUTO_TEST_CASE(test_double_variable_assignment_in_process)
     false);
 }
 
+BOOST_AUTO_TEST_CASE(test_typecheck)
+{
+  std::string text =
+    "act  a;\n"
+    "glob d,c,b: Bool;\n"
+         "n,m: Nat;\n"
+         "p: Pos;\n"
+    "proc P(b,c: Bool) = a . P(c = true);\n"
+    "init delta;\n"
+    ;
+  process::process_specification procspec = process::parse_process_specification_new(text);
+  process::type_check(procspec);
+}
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

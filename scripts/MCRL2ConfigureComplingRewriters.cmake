@@ -32,6 +32,13 @@ else()
   set(R_CXXFLAGS "${R_CXXFLAGS} -DMCRL2_BUILD_TYPE=\"\\\"${CMAKE_CFG_INTDIR}\\\"\"")
 endif()
 
+# Add the other definitions that were added using add_definitions to build flags
+# It seems that, in good old CMake style, there is no nice way to do this...
+get_directory_property( R_COMPILER_DEFINITIONS COMPILE_DEFINITIONS )
+foreach( d ${R_COMPILER_DEFINITIONS} )
+    set(R_CXXFLAGS "${R_CXXFLAGS} -D${d}")
+endforeach()
+
 # Make sure the shared library for the rewriter is build using position
 # independent code, if we were configured as static build ourselves, otherwise
 # use the defaults.
@@ -93,6 +100,17 @@ endif()
 
 # Finally, include all the information in the mcrl2compilerewriter script
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/mcrl2compilerewriter.in" "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}" @ONLY )
+
+if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/aterm/include\"" )
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/atermpp/include\"" )
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/utilities/include\"" )
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_CURRENT_BINARY_DIR}/libraries/utilities/include\"" )
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/core/include\"" )
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/data/include\"" )
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/mcrl2compilerewriter.in" "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}_ctest" @ONLY )
+  add_executable(mcrl2compilerewriter_ctest IMPORTED IMPORTED_LOCATION "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}_ctest")
+endif()
 
 # Mark the script as executable, and install it to the bianry directory.
 add_executable( mcrl2compilerewriter IMPORTED IMPORTED_LOCATION "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}" )

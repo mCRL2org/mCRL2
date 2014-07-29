@@ -9,6 +9,7 @@
 /// \file algorithm_test.cpp
 /// \brief Add your file description here.
 
+#include <vector>
 #include <iostream>
 #include <iterator>
 #include <set>
@@ -61,7 +62,7 @@ struct for_each_proc
   {
     if(t.type_is_appl())
     {
-      return (*this)(aterm_cast<aterm_appl>(t));
+      return (*this)(down_cast<aterm_appl>(t));
     }
     else
     {

@@ -40,9 +40,7 @@ struct t_lin_options
   bool nodeltaelimination;
   bool add_delta;
   bool do_not_apply_constelm;
-  mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
-  std::string infilename;
-  std::string outfilename;
+  mcrl2::data::rewriter::strategy rewrite_strategy;
 
   t_lin_options()
     : lin_method(lmRegular),

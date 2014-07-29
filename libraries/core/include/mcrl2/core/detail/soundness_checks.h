@@ -17,11 +17,11 @@
 
 #include <iostream>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-
+#include "mcrl2/atermpp/aterm_string.h"
 
 namespace mcrl2
 {
@@ -104,18 +104,42 @@ bool check_rule_StringOrEmpty(Term t)
 }
 
 template <typename Term>
-bool check_rule_NumberString(Term t)
+bool check_rule_Number(Term t)
 {
+  atermpp::aterm term(t);
+  return term.type_is_int();
+}
+
+template <typename Term> bool check_rule_DataExpr(Term t);
+
+// DataAppl(DataExpr, DataExpr+)
+template <typename Term>
+bool check_term_DataAppl(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
   atermpp::aterm term(t);
   if (!term.type_is_appl())
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (a.size() > 0)
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (!gsIsDataAppl(a))
   {
     return false;
   }
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  for (atermpp::aterm_appl::const_iterator child = a.begin(); child != a.end(); ++child)
+  {
+    if (!check_term_argument(*child, check_rule_DataExpr<atermpp::aterm>))
+    {
+      mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+      return false;
+    }
+  }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
 }
 
@@ -254,7 +278,6 @@ template <typename Term> bool check_term_PBESForall(Term t);
 template <typename Term> bool check_term_StateTrue(Term t);
 template <typename Term> bool check_term_BInit(Term t);
 template <typename Term> bool check_term_UntypedSortUnknown(Term t);
-template <typename Term> bool check_term_DataAppl(Term t);
 template <typename Term> bool check_term_RegTrans(Term t);
 template <typename Term> bool check_term_StateDelayTimed(Term t);
 template <typename Term> bool check_term_Nu(Term t);
@@ -1036,8 +1059,8 @@ bool check_term_BooleanOr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBooleanOr(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanOr)
   {
     return false;
   }
@@ -1075,8 +1098,8 @@ bool check_term_StateOr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateOr(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateOr)
   {
     return false;
   }
@@ -1114,8 +1137,8 @@ bool check_term_Hide(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsHide(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Hide)
   {
     return false;
   }
@@ -1153,8 +1176,8 @@ bool check_term_SortArrow(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortArrow(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortArrow)
   {
     return false;
   }
@@ -1192,8 +1215,8 @@ bool check_term_ProcessAssignment(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsProcessAssignment(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcessAssignment)
   {
     return false;
   }
@@ -1231,8 +1254,8 @@ bool check_term_Forall(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsForall(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Forall)
   {
     return false;
   }
@@ -1258,8 +1281,8 @@ bool check_term_CommExpr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsCommExpr(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::CommExpr)
   {
     return false;
   }
@@ -1297,8 +1320,8 @@ bool check_term_StateNot(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateNot(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateNot)
   {
     return false;
   }
@@ -1331,8 +1354,8 @@ bool check_term_UntypedSetBagComp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedSetBagComp(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedSetBagComp)
   {
     return false;
   }
@@ -1358,8 +1381,8 @@ bool check_term_SortFSet(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortFSet(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortFSet)
   {
     return false;
   }
@@ -1385,8 +1408,8 @@ bool check_term_StateImp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateImp(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateImp)
   {
     return false;
   }
@@ -1424,8 +1447,8 @@ bool check_term_PBESExists(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBESExists(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESExists)
   {
     return false;
   }
@@ -1463,8 +1486,8 @@ bool check_term_PBESImp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBESImp(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESImp)
   {
     return false;
   }
@@ -1502,8 +1525,8 @@ bool check_term_Binder(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBinder(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Binder)
   {
     return false;
   }
@@ -1546,8 +1569,8 @@ bool check_term_SortRef(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortRef(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortRef)
   {
     return false;
   }
@@ -1585,8 +1608,8 @@ bool check_term_ProcEqnSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsProcEqnSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcEqnSpec)
   {
     return false;
   }
@@ -1619,8 +1642,8 @@ bool check_term_StateForall(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateForall(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateForall)
   {
     return false;
   }
@@ -1658,8 +1681,8 @@ bool check_term_BooleanImp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBooleanImp(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanImp)
   {
     return false;
   }
@@ -1697,8 +1720,8 @@ bool check_term_SortId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortId(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortId)
   {
     return false;
   }
@@ -1731,8 +1754,8 @@ bool check_term_UntypedAction(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedAction(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedAction)
   {
     return false;
   }
@@ -1770,8 +1793,8 @@ bool check_term_StateNu(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateNu(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateNu)
   {
     return false;
   }
@@ -1814,8 +1837,8 @@ bool check_term_RegNil(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsRegNil(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RegNil)
   {
     return false;
   }
@@ -1841,8 +1864,8 @@ bool check_term_DataSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsDataSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::DataSpec)
   {
     return false;
   }
@@ -1890,8 +1913,8 @@ bool check_term_UntypedActMultAct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedActMultAct(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedActMultAct)
   {
     return false;
   }
@@ -1924,8 +1947,8 @@ bool check_term_Tau(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsTau(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Tau)
   {
     return false;
   }
@@ -1951,8 +1974,8 @@ bool check_term_StateYaledTimed(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateYaledTimed(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateYaledTimed)
   {
     return false;
   }
@@ -1985,8 +2008,8 @@ bool check_term_SortCons(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortCons(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortCons)
   {
     return false;
   }
@@ -2024,8 +2047,8 @@ bool check_term_DataEqnSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsDataEqnSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::DataEqnSpec)
   {
     return false;
   }
@@ -2058,8 +2081,8 @@ bool check_term_LinearProcessSummand(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsLinearProcessSummand(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::LinearProcessSummand)
   {
     return false;
   }
@@ -2112,8 +2135,8 @@ bool check_term_SortSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortSpec)
   {
     return false;
   }
@@ -2146,8 +2169,8 @@ bool check_term_ActionRenameRules(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActionRenameRules(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActionRenameRules)
   {
     return false;
   }
@@ -2180,8 +2203,8 @@ bool check_term_UntypedParamId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedParamId(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedParamId)
   {
     return false;
   }
@@ -2219,8 +2242,8 @@ bool check_term_BooleanEquation(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBooleanEquation(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanEquation)
   {
     return false;
   }
@@ -2263,8 +2286,8 @@ bool check_term_ConsSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsConsSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ConsSpec)
   {
     return false;
   }
@@ -2297,8 +2320,8 @@ bool check_term_SortList(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortList(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortList)
   {
     return false;
   }
@@ -2324,8 +2347,8 @@ bool check_term_Sum(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSum(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Sum)
   {
     return false;
   }
@@ -2352,7 +2375,7 @@ bool check_term_Sum(Term t)
   return true;
 }
 
-// DataVarId(String, SortExpr)
+// DataVarId(String, SortExpr, Number)
 template <typename Term>
 bool check_term_DataVarId(Term t)
 {
@@ -2363,14 +2386,14 @@ bool check_term_DataVarId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsDataVarId(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::DataVarId)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
   {
     return false;
   }
@@ -2385,13 +2408,18 @@ bool check_term_DataVarId(Term t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
     return false;
   }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    return false;
+  }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
 }
 
-// ProcVarId(String, DataVarId*)
+// ProcVarId(String, DataVarId*, Number)
 template <typename Term>
 bool check_term_ProcVarId(Term t)
 {
@@ -2402,14 +2430,14 @@ bool check_term_ProcVarId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsProcVarId(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcVarId)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
   {
     return false;
   }
@@ -2422,6 +2450,11 @@ bool check_term_ProcVarId(Term t)
   if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2441,8 +2474,8 @@ bool check_term_ProcessInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsProcessInit(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcessInit)
   {
     return false;
   }
@@ -2475,8 +2508,8 @@ bool check_term_UntypedIdentifier(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedIdentifier(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedIdentifier)
   {
     return false;
   }
@@ -2509,8 +2542,8 @@ bool check_term_BooleanFalse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBooleanFalse(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanFalse)
   {
     return false;
   }
@@ -2536,8 +2569,8 @@ bool check_term_BES(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBES(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BES)
   {
     return false;
   }
@@ -2575,8 +2608,8 @@ bool check_term_MapSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsMapSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::MapSpec)
   {
     return false;
   }
@@ -2609,8 +2642,8 @@ bool check_term_IfThen(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsIfThen(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::IfThen)
   {
     return false;
   }
@@ -2648,8 +2681,8 @@ bool check_term_BooleanAnd(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBooleanAnd(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanAnd)
   {
     return false;
   }
@@ -2687,8 +2720,8 @@ bool check_term_LinProcSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsLinProcSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::LinProcSpec)
   {
     return false;
   }
@@ -2741,8 +2774,8 @@ bool check_term_Choice(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsChoice(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Choice)
   {
     return false;
   }
@@ -2780,8 +2813,8 @@ bool check_term_LinearProcessInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsLinearProcessInit(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::LinearProcessInit)
   {
     return false;
   }
@@ -2814,8 +2847,8 @@ bool check_term_MultAct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsMultAct(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::MultAct)
   {
     return false;
   }
@@ -2837,7 +2870,7 @@ bool check_term_MultAct(Term t)
   return true;
 }
 
-// PropVarInst(String, DataExpr*)
+// PropVarInst(String, DataExpr*, Number)
 template <typename Term>
 bool check_term_PropVarInst(Term t)
 {
@@ -2848,14 +2881,14 @@ bool check_term_PropVarInst(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPropVarInst(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PropVarInst)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
   {
     return false;
   }
@@ -2868,6 +2901,11 @@ bool check_term_PropVarInst(Term t)
   if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2887,8 +2925,8 @@ bool check_term_BagComp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBagComp(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BagComp)
   {
     return false;
   }
@@ -2914,8 +2952,8 @@ bool check_term_StateDelay(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateDelay(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateDelay)
   {
     return false;
   }
@@ -2941,8 +2979,8 @@ bool check_term_RegAlt(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsRegAlt(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RegAlt)
   {
     return false;
   }
@@ -2980,8 +3018,8 @@ bool check_term_UntypedMultAct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedMultAct(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedMultAct)
   {
     return false;
   }
@@ -3014,8 +3052,8 @@ bool check_term_StructCons(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStructCons(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StructCons)
   {
     return false;
   }
@@ -3058,8 +3096,8 @@ bool check_term_Mu(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsMu(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Mu)
   {
     return false;
   }
@@ -3085,8 +3123,8 @@ bool check_term_PBEqnSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBEqnSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBEqnSpec)
   {
     return false;
   }
@@ -3119,8 +3157,8 @@ bool check_term_ActNot(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActNot(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActNot)
   {
     return false;
   }
@@ -3153,8 +3191,8 @@ bool check_term_BooleanTrue(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBooleanTrue(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanTrue)
   {
     return false;
   }
@@ -3180,8 +3218,8 @@ bool check_term_Block(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBlock(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Block)
   {
     return false;
   }
@@ -3219,8 +3257,8 @@ bool check_term_Rename(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsRename(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Rename)
   {
     return false;
   }
@@ -3258,8 +3296,8 @@ bool check_term_Exists(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsExists(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Exists)
   {
     return false;
   }
@@ -3285,8 +3323,8 @@ bool check_term_Sync(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSync(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Sync)
   {
     return false;
   }
@@ -3324,8 +3362,8 @@ bool check_term_ActExists(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActExists(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActExists)
   {
     return false;
   }
@@ -3363,8 +3401,8 @@ bool check_term_ProcSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsProcSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcSpec)
   {
     return false;
   }
@@ -3417,8 +3455,8 @@ bool check_term_UntypedSortsPossible(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedSortsPossible(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedSortsPossible)
   {
     return false;
   }
@@ -3451,8 +3489,8 @@ bool check_term_StateMu(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateMu(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateMu)
   {
     return false;
   }
@@ -3495,8 +3533,8 @@ bool check_term_StateFalse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateFalse(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateFalse)
   {
     return false;
   }
@@ -3522,8 +3560,8 @@ bool check_term_PBESFalse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBESFalse(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESFalse)
   {
     return false;
   }
@@ -3549,8 +3587,8 @@ bool check_term_PBESForall(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBESForall(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESForall)
   {
     return false;
   }
@@ -3588,8 +3626,8 @@ bool check_term_StateTrue(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateTrue(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateTrue)
   {
     return false;
   }
@@ -3615,8 +3653,8 @@ bool check_term_BInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBInit(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BInit)
   {
     return false;
   }
@@ -3654,8 +3692,8 @@ bool check_term_UntypedSortUnknown(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedSortUnknown(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedSortUnknown)
   {
     return false;
   }
@@ -3665,45 +3703,6 @@ bool check_term_UntypedSortUnknown(Term t)
   {
     return false;
   }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// DataAppl(DataExpr, DataExpr+)
-template <typename Term>
-bool check_term_DataAppl(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  atermpp::aterm_appl a(term);
-  if (!gsIsDataAppl(a))
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
@@ -3720,8 +3719,8 @@ bool check_term_RegTrans(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsRegTrans(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RegTrans)
   {
     return false;
   }
@@ -3754,8 +3753,8 @@ bool check_term_StateDelayTimed(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateDelayTimed(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateDelayTimed)
   {
     return false;
   }
@@ -3788,8 +3787,8 @@ bool check_term_Nu(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsNu(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Nu)
   {
     return false;
   }
@@ -3815,8 +3814,8 @@ bool check_term_SortStruct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortStruct(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortStruct)
   {
     return false;
   }
@@ -3849,8 +3848,8 @@ bool check_term_AtTime(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsAtTime(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::AtTime)
   {
     return false;
   }
@@ -3888,8 +3887,8 @@ bool check_term_ActOr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActOr(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActOr)
   {
     return false;
   }
@@ -3927,8 +3926,8 @@ bool check_term_Comm(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsComm(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Comm)
   {
     return false;
   }
@@ -3966,8 +3965,8 @@ bool check_term_BooleanNot(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBooleanNot(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanNot)
   {
     return false;
   }
@@ -4000,8 +3999,8 @@ bool check_term_Delta(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsDelta(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Delta)
   {
     return false;
   }
@@ -4027,8 +4026,8 @@ bool check_term_ActMultAct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActMultAct(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActMultAct)
   {
     return false;
   }
@@ -4061,8 +4060,8 @@ bool check_term_StateAnd(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateAnd(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateAnd)
   {
     return false;
   }
@@ -4100,8 +4099,8 @@ bool check_term_LMerge(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsLMerge(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::LMerge)
   {
     return false;
   }
@@ -4139,8 +4138,8 @@ bool check_term_SetComp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSetComp(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SetComp)
   {
     return false;
   }
@@ -4166,8 +4165,8 @@ bool check_term_ActForall(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActForall(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActForall)
   {
     return false;
   }
@@ -4205,8 +4204,8 @@ bool check_term_RenameExpr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsRenameExpr(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RenameExpr)
   {
     return false;
   }
@@ -4244,8 +4243,8 @@ bool check_term_Merge(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsMerge(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Merge)
   {
     return false;
   }
@@ -4283,8 +4282,8 @@ bool check_term_ActSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActSpec)
   {
     return false;
   }
@@ -4306,7 +4305,7 @@ bool check_term_ActSpec(Term t)
   return true;
 }
 
-// BooleanVariable(String)
+// BooleanVariable(String, Number)
 template <typename Term>
 bool check_term_BooleanVariable(Term t)
 {
@@ -4317,14 +4316,14 @@ bool check_term_BooleanVariable(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsBooleanVariable(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BooleanVariable)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 1)
+  if (a.size() != 2)
   {
     return false;
   }
@@ -4332,6 +4331,11 @@ bool check_term_BooleanVariable(Term t)
   if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4351,8 +4355,8 @@ bool check_term_Action(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsAction(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Action)
   {
     return false;
   }
@@ -4390,8 +4394,8 @@ bool check_term_PBESAnd(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBESAnd(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESAnd)
   {
     return false;
   }
@@ -4429,8 +4433,8 @@ bool check_term_Lambda(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsLambda(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Lambda)
   {
     return false;
   }
@@ -4456,8 +4460,8 @@ bool check_term_StateMust(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateMust(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateMust)
   {
     return false;
   }
@@ -4495,8 +4499,8 @@ bool check_term_Seq(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSeq(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Seq)
   {
     return false;
   }
@@ -4534,8 +4538,8 @@ bool check_term_DataVarIdInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsDataVarIdInit(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::DataVarIdInit)
   {
     return false;
   }
@@ -4573,8 +4577,8 @@ bool check_term_Process(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsProcess(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Process)
   {
     return false;
   }
@@ -4612,8 +4616,8 @@ bool check_term_ActAnd(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActAnd(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActAnd)
   {
     return false;
   }
@@ -4651,8 +4655,8 @@ bool check_term_ActionRenameSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActionRenameSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActionRenameSpec)
   {
     return false;
   }
@@ -4695,8 +4699,8 @@ bool check_term_PBES(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBES(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBES)
   {
     return false;
   }
@@ -4744,8 +4748,8 @@ bool check_term_StateVar(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateVar(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateVar)
   {
     return false;
   }
@@ -4783,8 +4787,8 @@ bool check_term_ActionRenameRule(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActionRenameRule(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActionRenameRule)
   {
     return false;
   }
@@ -4832,8 +4836,8 @@ bool check_term_RegSeq(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsRegSeq(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RegSeq)
   {
     return false;
   }
@@ -4871,8 +4875,8 @@ bool check_term_LinearProcess(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsLinearProcess(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::LinearProcess)
   {
     return false;
   }
@@ -4910,8 +4914,8 @@ bool check_term_ActAt(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActAt(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActAt)
   {
     return false;
   }
@@ -4949,8 +4953,8 @@ bool check_term_DataEqn(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsDataEqn(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::DataEqn)
   {
     return false;
   }
@@ -4998,8 +5002,8 @@ bool check_term_PBESNot(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBESNot(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESNot)
   {
     return false;
   }
@@ -5032,8 +5036,8 @@ bool check_term_StateExists(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateExists(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateExists)
   {
     return false;
   }
@@ -5071,8 +5075,8 @@ bool check_term_StateMay(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateMay(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateMay)
   {
     return false;
   }
@@ -5110,8 +5114,8 @@ bool check_term_PBESTrue(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBESTrue(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESTrue)
   {
     return false;
   }
@@ -5137,8 +5141,8 @@ bool check_term_MultActName(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsMultActName(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::MultActName)
   {
     return false;
   }
@@ -5171,8 +5175,8 @@ bool check_term_IfThenElse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsIfThenElse(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::IfThenElse)
   {
     return false;
   }
@@ -5215,8 +5219,8 @@ bool check_term_Nil(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsNil(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Nil)
   {
     return false;
   }
@@ -5242,8 +5246,8 @@ bool check_term_ProcEqn(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsProcEqn(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ProcEqn)
   {
     return false;
   }
@@ -5286,8 +5290,8 @@ bool check_term_StructProj(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStructProj(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StructProj)
   {
     return false;
   }
@@ -5325,8 +5329,8 @@ bool check_term_PBEqn(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBEqn(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBEqn)
   {
     return false;
   }
@@ -5369,8 +5373,8 @@ bool check_term_Whr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsWhr(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Whr)
   {
     return false;
   }
@@ -5397,7 +5401,7 @@ bool check_term_Whr(Term t)
   return true;
 }
 
-// OpId(String, SortExpr)
+// OpId(String, SortExpr, Number)
 template <typename Term>
 bool check_term_OpId(Term t)
 {
@@ -5408,14 +5412,14 @@ bool check_term_OpId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsOpId(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::OpId)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
   {
     return false;
   }
@@ -5428,6 +5432,11 @@ bool check_term_OpId(Term t)
   if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5447,8 +5456,8 @@ bool check_term_SortSet(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortSet(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortSet)
   {
     return false;
   }
@@ -5474,8 +5483,8 @@ bool check_term_ActFalse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActFalse(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActFalse)
   {
     return false;
   }
@@ -5501,8 +5510,8 @@ bool check_term_ActId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActId(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActId)
   {
     return false;
   }
@@ -5540,8 +5549,8 @@ bool check_term_StateYaled(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsStateYaled(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateYaled)
   {
     return false;
   }
@@ -5567,8 +5576,8 @@ bool check_term_PBESOr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBESOr(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBESOr)
   {
     return false;
   }
@@ -5606,8 +5615,8 @@ bool check_term_UntypedProcessAssignment(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedProcessAssignment(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedProcessAssignment)
   {
     return false;
   }
@@ -5645,8 +5654,8 @@ bool check_term_SortFBag(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortFBag(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortFBag)
   {
     return false;
   }
@@ -5672,8 +5681,8 @@ bool check_term_Allow(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsAllow(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::Allow)
   {
     return false;
   }
@@ -5711,8 +5720,8 @@ bool check_term_PropVarDecl(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPropVarDecl(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PropVarDecl)
   {
     return false;
   }
@@ -5750,8 +5759,8 @@ bool check_term_ActImp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActImp(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActImp)
   {
     return false;
   }
@@ -5789,8 +5798,8 @@ bool check_term_SortBag(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsSortBag(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::SortBag)
   {
     return false;
   }
@@ -5816,8 +5825,8 @@ bool check_term_PBInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsPBInit(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::PBInit)
   {
     return false;
   }
@@ -5850,8 +5859,8 @@ bool check_term_ActTrue(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsActTrue(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::ActTrue)
   {
     return false;
   }
@@ -5877,8 +5886,8 @@ bool check_term_RegTransOrNil(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsRegTransOrNil(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::RegTransOrNil)
   {
     return false;
   }
@@ -5911,8 +5920,8 @@ bool check_term_GlobVarSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsGlobVarSpec(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::GlobVarSpec)
   {
     return false;
   }
@@ -5945,8 +5954,8 @@ bool check_term_UntypedIdentifierAssignment(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
-  if (!gsIsUntypedIdentifierAssignment(a))
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedIdentifierAssignment)
   {
     return false;
   }

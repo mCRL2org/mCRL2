@@ -14,8 +14,8 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2
@@ -31,7 +31,7 @@ class communication_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     communication_expression()
-      : atermpp::aterm_appl(core::detail::constructCommExpr())
+      : atermpp::aterm_appl(core::detail::default_values::CommExpr)
     {}
 
     /// \brief Constructor.
@@ -44,22 +44,22 @@ class communication_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)
-      : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
+      : atermpp::aterm_appl(core::detail::function_symbol_CommExpr(), action_name, name)
     {}
 
     /// \brief Constructor.
     communication_expression(const action_name_multiset& action_name, const std::string& name)
-      : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, core::identifier_string(name)))
+      : atermpp::aterm_appl(core::detail::function_symbol_CommExpr(), action_name, core::identifier_string(name))
     {}
 
     const action_name_multiset& action_name() const
     {
-      return atermpp::aterm_cast<const action_name_multiset>(atermpp::arg1(*this));
+      return atermpp::down_cast<action_name_multiset>((*this)[0]);
     }
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg2(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[1]);
     }
 };
 
@@ -69,30 +69,36 @@ typedef atermpp::term_list<communication_expression> communication_expression_li
 /// \brief vector of communication_expressions
 typedef std::vector<communication_expression>    communication_expression_vector;
 
-
 /// \brief Test for a communication_expression expression
 /// \param x A term
 /// \return True if \a x is a communication_expression expression
 inline
 bool is_communication_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsCommExpr(x);
+  return x.function() == core::detail::function_symbols::CommExpr;
 }
 
+// prototype declaration
+std::string pp(const communication_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const communication_expression& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(communication_expression& t1, communication_expression& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class communication_expression ---//
 
 } // namespace process
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::process::communication_expression& t1, mcrl2::process::communication_expression& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PROCESS_COMMUNICATION_EXPRESSION_H

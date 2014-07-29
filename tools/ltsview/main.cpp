@@ -45,7 +45,8 @@ class ltsview_tool : public ltsview_base
 
       if (!m_input_filename.empty())
       {
-        window->open(QString::fromStdString(m_input_filename));
+        QMetaObject::invokeMethod(window, "open", Qt::QueuedConnection,
+                           Q_ARG(QString, QString::fromStdString(m_input_filename)));
       }
 
       return show_main_window(window);

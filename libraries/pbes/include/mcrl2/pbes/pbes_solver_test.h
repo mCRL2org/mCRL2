@@ -17,7 +17,6 @@
 
 //Rewriters
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/algorithms.h"
 
 //Data framework
@@ -26,7 +25,6 @@
 
 
 //Boolean equation systems
-// #include "mcrl2/pbes/utility.h"
 #include "mcrl2/bes/bes_deprecated.h"
 
 namespace mcrl2
@@ -58,15 +56,12 @@ bool pbes2_bool_test(pbes &pbes_spec, data::rewriter::strategy rewrite_strategy 
 std::clog << "--- rewrite rule selection specification ---\n";
 std::clog << pbes_system::pp(pbes_spec) << std::endl;
 std::clog << "--- rewrite rule selection function symbols ---\n";
-std::clog << core::detail::print_set(pbes_system::find_function_symbols(pbes_spec), data::stream_printer()) << std::endl;
+std::clog << core::detail::print_set(pbes_system::find_function_symbols(pbes_spec)) << std::endl;
 #endif
 
   // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());
-  data::rewriter_with_variables datarv(datar);
-  data::data_enumerator datae(pbes_spec.data(), datar);
-  const bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator>
-  pbesr(datarv, datae, enumerate_infinite_sorts);
+  // const bool enumerate_infinite_sorts = true;
+  // enumerate_quantifiers_rewriter pbesr(datar, datae, enumerate_infinite_sorts);
   // The use of a pbesrewriter is switched off, because the pbesrewriter is too slow for the time being.
   // ::bes::boolean_equation_system bes_equations(pbes_spec, pbesr);
   ::bes::boolean_equation_system bes_equations(pbes_spec, datar);

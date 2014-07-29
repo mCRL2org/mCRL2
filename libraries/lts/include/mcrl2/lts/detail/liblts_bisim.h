@@ -10,7 +10,7 @@
 
 #ifndef _LIBLTS_BISIM_H
 #define _LIBLTS_BISIM_H
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <map>
 #include "mcrl2/utilities/logger.h"
@@ -31,32 +31,6 @@ namespace lts
 {
 namespace detail
 {
-
-template < class LTS_TYPE>
-size_t determine_tau_label(const LTS_TYPE& l)
-{
-  // Set the tau_label to an existing label, if possible.
-  // If nothing is found the tau label becomes l.num_action_labels, 
-  // but there will not be a tau anyhow in this case.
-  size_t tau_label=l.num_action_labels();
-  for (size_t i=0; i<l.num_action_labels(); ++i)
-  {
-    if (l.is_tau(i))
-    {
-      tau_label=i;
-      break;
-    }
-  }
-  if (tau_label==l.num_action_labels())
-  {
-    mCRL2log(mcrl2::log::debug) << "Note that there is no tau action\n";
-  }
-  else
-  {
-    mCRL2log(mcrl2::log::debug) << "Using <" << pp(l.action_label(tau_label)) << "> as tau label.\n";
-  }
-  return tau_label;
-}
 
 template < class LTS_TYPE>
 class bisim_partitioner
@@ -287,13 +261,13 @@ class bisim_partitioner
       {
         // Reserve enough space, such that no reallocations of the vector are required when adding transitions.
         // For this purpose, first the number of inert transitions must be counted, to avoid reserving too much
-        // space. This for instance leads to a waste of memory (terabytes for reducing 30M states), especially, 
+        // space. This for instance leads to a waste of memory (terabytes for reducing 30M states), especially,
         // when calculating ia strong bisimulation reduction.
         size_t initial_partition_non_inert_counter=0;
         size_t current_inert_transition_counter=0;
         const std::vector<transition> & trans=aut.get_transitions();
         for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
-        { 
+        {
           const transition t= *r;
           if (branching && aut.is_tau(t.label()))
           {
@@ -311,10 +285,10 @@ class bisim_partitioner
         initial_partition.non_inert_transitions.reserve(current_inert_transition_counter);
       }
 
-      const std::vector<transition> & trans=aut.get_transitions();
+      const std::vector<transition>& trans=aut.get_transitions();
       for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
       {
-        const transition t= *r;
+        const transition t=* r;
 
         if (branching && aut.is_tau(t.label()))
         {
@@ -393,7 +367,11 @@ class bisim_partitioner
     } // end create_initial_partition
 
 // Refine the partition until the partition has become stable
+#ifndef NDEBUG
     void refine_partition_until_it_becomes_stable(const bool branching, const bool preserve_divergence)
+#else
+    void refine_partition_until_it_becomes_stable(const bool, const bool)
+#endif
     {
 #ifndef NDEBUG
       size_t consistency_check_counter=1;
@@ -518,7 +496,7 @@ class bisim_partitioner
 
           if (mCRL2logEnabled(log::debug))
           {
-            const size_t m=static_cast<size_t>(pow(10,floor(log10(static_cast<double>((blocks.size()+1)/2)))));
+            const size_t m = static_cast<size_t>(std::pow(10.0, std::floor(std::log10(static_cast<double>((blocks.size()+1)/2)))));
             if ((blocks.size()+1)/2 % m==0)
             {
               mCRL2log(log::debug) << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << std::endl;
@@ -869,9 +847,9 @@ class bisim_partitioner
       {
         // The counter trace is simply the label l.
         mcrl2::trace::Trace counter_trace;
-        counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::lps::action(
-                                mcrl2::lps::action_label(core::identifier_string(mcrl2::lts::detail::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
-                                mcrl2::data::data_expression_list()))); 
+        counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
+                                mcrl2::process::action_label(core::identifier_string(mcrl2::lts::detail::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
+                                mcrl2::data::data_expression_list())));
         resulting_counter_traces.insert(counter_trace);
       }
       else
@@ -889,9 +867,9 @@ class bisim_partitioner
                  j!=counter_traces.end(); ++j)
             {
                mcrl2::trace::Trace new_counter_trace;
-              new_counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::lps::action(
-                                mcrl2::lps::action_label(core::identifier_string(mcrl2::lts::detail::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
-                                mcrl2::data::data_expression_list()))); 
+              new_counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
+                                mcrl2::process::action_label(core::identifier_string(mcrl2::lts::detail::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
+                                mcrl2::data::data_expression_list())));
               mcrl2::trace::Trace old_counter_trace=*j;
               old_counter_trace.resetPosition();
               for (size_t k=0 ; k< old_counter_trace.number_of_actions(); k++)

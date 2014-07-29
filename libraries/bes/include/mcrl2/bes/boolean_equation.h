@@ -15,8 +15,8 @@
 #include <cassert>
 #include <string>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
@@ -137,8 +137,38 @@ class boolean_equation
     {
       return m_formula;
     }
+
+    /// \brief Swaps the contents
+    void swap(boolean_equation& other)
+    {
+      using std::swap;
+      swap(m_symbol, other.m_symbol);
+      swap(m_variable, other.m_variable);
+      swap(m_formula, other.m_formula);
+    }
 };
 
+//--- start generated class boolean_equation ---//
+// prototype declaration
+std::string pp(const boolean_equation& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const boolean_equation& x)
+{
+  return out << bes::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(boolean_equation& t1, boolean_equation& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated class boolean_equation ---//
+
+/// \brief equality operator
 inline bool
 operator==(const boolean_equation& x, const boolean_equation& y)
 {
@@ -147,12 +177,14 @@ operator==(const boolean_equation& x, const boolean_equation& y)
          x.formula() == y.formula();
 }
 
+/// \brief inequality operator
 inline bool
 operator!=(const boolean_equation& x, const boolean_equation& y)
 {
   return !(x == y);
 }
 
+/// \brief less operator
 inline bool
 operator<(const boolean_equation& x, const boolean_equation& y)
 {
@@ -164,7 +196,7 @@ operator<(const boolean_equation& x, const boolean_equation& y)
 inline
 atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
 {
-  return core::detail::gsMakeBooleanEquation(eqn.symbol(), eqn.variable(), eqn.formula());
+  return atermpp::aterm_appl(core::detail::function_symbol_BooleanEquation(), eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
 } // namespace bes

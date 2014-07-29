@@ -16,8 +16,7 @@
 #include <sstream>
 #include <list>
 #include <iterator>
-
-#include "boost/utility/enable_if.hpp"
+#include <type_traits>
 
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/print.h"
@@ -38,6 +37,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/detail/is_untyped.h"
 #include "mcrl2/data/traverser.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -68,9 +68,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     return static_cast<Derived&>(*this);
   }
 
-  bool is_infix_operation(const application& x)
+  // TODO: check if this test is precise enough
+  bool is_one(const data_expression& x) const
   {
-    if (x.arguments().size() != 2)
+    return sort_pos::is_c1_function_symbol(x);
+  }
+
+  bool is_infix_operation(const application& x) const
+  {
+    if (x.size() != 2)
     {
       return false;
     }
@@ -104,9 +110,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       (name == data::sort_real::plus_name())          ||
       (name == data::sort_real::minus_name())         ||
       (name == data::sort_set::union_name())     ||
+      (name == data::sort_fset::union_name())     ||
       (name == data::sort_set::difference_name())      ||
-      (name == data::sort_bag::join_name())      ||
+      (name == data::sort_fset::difference_name())      ||
+      (name == data::sort_bag::union_name())      ||
+      (name == data::sort_fbag::union_name())      ||
       (name == data::sort_bag::difference_name())      ||
+      (name == data::sort_fbag::difference_name())      ||
       (name == data::sort_int::div_name())          ||
       (name == data::sort_int::mod_name())          ||
       (name == data::sort_real::divides_name())       ||
@@ -114,68 +124,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       (name == data::sort_list::element_at_name())        ||
       (name == data::sort_set::intersection_name()) ||
       (name == data::sort_bag::intersection_name());
-  }
-
-  void print_sort(const application& x)
-  {
-    std::cout << "<value>" << x << " ";
-    if (is_numeric_expression(x))
-    {
-      std::cout << "<numeric value>";
-    }
-    else if (sort_bool::is_bool(x.sort()))
-    {
-      std::cout << "<bool>";
-    }
-    else if (sort_pos::is_pos(x.sort()))
-    {
-      std::cout << "<pos>";
-    }
-    else if (sort_nat::is_nat(x.sort()))
-    {
-      std::cout << "<nat>";
-    }
-    else if (sort_int::is_int(x.sort()))
-    {
-      std::cout << "<int>";
-    }
-    else if (sort_real::is_real(x.sort()))
-    {
-      std::cout << "<real>";
-    }
-    else if (sort_list::is_list(x.sort()))
-    {
-      std::cout << "<list>";
-    }
-    else if (sort_set::is_set(x.sort()))
-    {
-      std::cout << "<set>";
-    }
-    else if (sort_fset::is_fset(x.sort()))
-    {
-      std::cout << "<fset>";
-    }
-    else if (sort_bag::is_bag(x.sort()))
-    {
-      std::cout << "<bag>";
-    }
-    else if (sort_fbag::is_fbag(x.sort()))
-    {
-      std::cout << "<fbag>";
-    }
-    else if (is_function_update_application(x))
-    {
-      std::cout << "<function_update>";
-    }
-    else if (is_abstraction_application(x))
-    {
-      std::cout << "<abstraction>";
-    }
-    else // function application
-    {
-      std::cout << "<other>";
-    }
-    std::cout << std::endl;
   }
 
   core::identifier_string generate_identifier(const std::string& prefix, const data_expression& context) const
@@ -203,7 +151,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         derived().print(separator);
       }
-      bool print_brackets = (container.size() > 1) && (precedence(*i) < container_precedence);
+      bool print_brackets = (container.size() > 1) && (left_precedence(*i) < container_precedence);
       if (print_brackets)
       {
         derived().print(open_bracket);
@@ -220,7 +168,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   inline
   bool is_same_different_precedence(const application& x, const application& y)
   {
-    return precedence(x) == precedence(y) && x.head() != y.head();
+    return left_precedence(x) == left_precedence(y) && x.head() != y.head();
   }
 
   template <typename Variable>
@@ -445,21 +393,21 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_list_enumeration(const application& x)
   {
     derived().print("[");
-    print_container(x.arguments(), precedence(x));
+    print_container(x, left_precedence(x));
     derived().print("]");
   }
 
   void print_set_enumeration(const application& x)
   {
     derived().print("{ ");
-    print_container(x.arguments(), precedence(x));
+    print_container(x, left_precedence(x));
     derived().print(" }");
   }
 
   void print_bag_enumeration(const application& x)
   {
     derived().print("{ ");
-    data_expression_list::const_iterator i = x.begin();
+    application::const_iterator i = x.begin();
     while (i != x.end())
     {
       if (i != x.begin())
@@ -522,17 +470,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       x = sort_fbag::arg3(x);
     }
     return sort_fbag::is_empty_function_symbol(x);
-  }
-
-  bool is_numeric_cast(const data_expression& x)
-  {
-    return data::sort_nat::is_pos2nat_application(x)
-           || data::sort_int::is_pos2int_application(x)
-           || data::sort_real::is_pos2real_application(x)
-           || data::sort_int::is_nat2int_application(x)
-           || data::sort_real::is_nat2real_application(x)
-           || data::sort_real::is_int2real_application(x)
-           ;
   }
 
   bool is_numeric_expression(const application& x)
@@ -865,14 +802,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     if (is_infix_operation(x))
     {
-      data_expression_list::const_iterator i = x.arguments().begin();
+      assert(detail::is_untyped(x));
+      auto i = x.begin();
       data_expression left = *i++;
       data_expression right = *i;
-      print_expression(left, infix_precedence_left(left));
+      print_expression(left, 0); // always print parentheses
       derived().print(" ");
       derived()(x.head());
       derived().print(" ");
-      print_expression(right, infix_precedence_right(right));
+      print_expression(right, 0);
       return;
     }
 
@@ -889,20 +827,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
 
     // print the arguments
-    print_parentheses = x.arguments().size() > 0;
-    if (is_function_symbol(x.head()) && x.arguments().size() == 1)
+    print_parentheses = x.size() > 0;
+    if (is_function_symbol(x.head()) && x.size() == 1)
     {
       std::string name(function_symbol(x.head()).name());
       if (name == "!" || name == "#")
       {
-        print_parentheses = precedence(x.arguments().front()) < max_precedence;
+        print_parentheses = left_precedence(*x.begin()) < max_precedence;
       }
     }
     if (print_parentheses)
     {
       derived().print("(");
     }
-    print_container(x.arguments());
+    print_container(x);
     if (print_parentheses)
     {
       derived().print(")");
@@ -1064,14 +1002,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::fset_container& x)
   {
     derived().enter(x);
-    derived().print("@FSet");
+    derived().print("FSet");
     derived().leave(x);
   }
 
   void operator()(const data::fbag_container& x)
   {
     derived().enter(x);
-    derived().print("@FBag");
+    derived().print("FBag");
     derived().leave(x);
   }
 
@@ -1117,7 +1055,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::untyped_possible_sorts& x)
   {
     derived().enter(x);
+    derived().print("@untyped_possible_sorts[");
     derived()(x.sorts());
+    derived().print("]");
     derived().leave(x);
   }
 
@@ -1161,513 +1101,562 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  void operator()(const data::application& y)
+  void operator()(const data::application& x)
   {
-    // TODO: this copy is done because of the "numeric reconstruction", which
-    // will hopefully be removed in the future.
-    data::application x = y;
-
-#ifdef MCRL2_DEBUG_PRINT
-    print_sort(x);
-#endif
     derived().enter(x);
-
-    //-------------------------------------------------------------------//
-    //                            numeric values
-    //-------------------------------------------------------------------//
-    if (is_numeric_expression(x))
-    {
-      data_expression z = detail::reconstruct_numeric_expression(x);
-      if (is_function_symbol(z))
-      {
-        derived().print(function_symbol(z).name());
-        return;
-      }
-      else
-      {
-        x = atermpp::aterm_cast<data::application>(z);
-      }
-    }
-
-    // TODO: can these be moved to int/pos/nat/real?
-    if (is_numeric_cast(x))
-    {
-      // ignore numeric casts like Pos2Nat
-      derived()(x.arguments().front());
-    }
 
     //-------------------------------------------------------------------//
     //                            bool
     //-------------------------------------------------------------------//
-    else if (sort_bool::is_bool(x.sort()))
+
+    if (sort_bool::is_not_application(x))
     {
-      if (data::is_equal_to_application(x))
-      {
-        print_binary_operation(x, " == ");
-      }
-      else if (data::is_not_equal_to_application(x))
-      {
-        print_binary_operation(x, " != ");
-      }
-      else if (data::is_less_application(x))
-      {
-        print_binary_operation(x, " < ");
-      }
-      else if (data::is_less_equal_application(x))
-      {
-        print_binary_operation(x, " <= ");
-      }
-      else if (data::is_greater_application(x))
-      {
-        print_binary_operation(x, " > ");
-      }
-      else if (data::is_greater_equal_application(x))
-      {
-        print_binary_operation(x, " >= ");
-      }
-      else if (sort_bool::is_implies_application(x))
-      {
-        print_binary_operation(x, " => ");
-      }
-      else if (sort_bool::is_and_application(x))
-      {
-        print_binary_operation(x, " && ");
-      }
-      else if (sort_bool::is_or_application(x))
-      {
-        print_binary_operation(x, " || ");
-      }
-      else if (sort_list::is_in_application(x))
-      {
-        print_binary_operation(x, " in ");
-      }
-      else if (sort_list::is_element_at_application(x))
-      {
-        print_binary_operation(x, " . ");
-      }
-      else if (sort_fset::is_in_application(x))
-      {
-        print_binary_operation(x, " in ");
-      }
-      else if (sort_fbag::is_in_application(x))
-      {
-        print_binary_operation(x, " in ");
-      }
-      else
-      {
-        print_function_application(x);
-      }
+      print_unary_operation(x, "!");
+    }
+    else if (sort_bool::is_and_application(x))
+    {
+      print_binary_operation(x, " && ");
+    }
+    else if (sort_bool::is_or_application(x))
+    {
+      print_binary_operation(x, " || ");
+    }
+    else if (sort_bool::is_implies_application(x))
+    {
+      print_binary_operation(x, " => ");
+    }
+
+    //-------------------------------------------------------------------//
+    //                            data
+    //-------------------------------------------------------------------//
+
+    else if (data::is_equal_to_application(x))
+    {
+      print_binary_operation(x, " == ");
+    }
+    else if (data::is_not_equal_to_application(x))
+    {
+      print_binary_operation(x, " != ");
+    }
+    else if (data::is_if_application(x))
+    {
+      // TODO: is this correct?
+      print_function_application(x);
+    }
+    else if (data::is_less_application(x))
+    {
+      print_binary_operation(x, " < ");
+    }
+    else if (data::is_less_equal_application(x))
+    {
+      print_binary_operation(x, " <= ");
+    }
+    else if (data::is_greater_application(x))
+    {
+      print_binary_operation(x, " > ");
+    }
+    else if (data::is_greater_equal_application(x))
+    {
+      print_binary_operation(x, " >= ");
     }
 
     //-------------------------------------------------------------------//
     //                            pos
     //-------------------------------------------------------------------//
-    else if (sort_pos::is_pos(x.sort()))
+
+    else if (sort_pos::is_cdub_application(x))
     {
-      if (   sort_pos::is_plus_application(x)
-          || sort_nat::is_plus_application(x)
-         )
+      if (data::sort_pos::is_positive_constant(x))
       {
-        print_binary_operation(x, " + ");
-      }
-      else if (sort_pos::is_times_application(x))
-      {
-        print_binary_operation(x, " * ");
+        derived().print(data::sort_pos::positive_constant_as_string(x));
       }
       else
       {
+        std::vector<char> number = data::detail::string_to_vector_number("1");
+        derived()(detail::reconstruct_pos_mult(x, number));
+      }
+    }
+    // TODO: handle @pospred
+    else if (sort_pos::is_plus_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
+    else if (sort_pos::is_add_with_carry_application(x))
+    {
+      auto b = sort_pos::arg1(x);
+      auto x1 = sort_pos::arg2(x);
+      auto x2 = sort_pos::arg3(x);
+      if (b == data::sort_bool::true_())
+      {
+        derived()(sort_pos::succ(sort_pos::plus(x1, x2)));
+      }
+      else if (b == sort_bool::false_())
+      {
+        derived()(sort_pos::plus(x1, x2));
+      }
+      else
+      {
+        derived()(if_(b, x1, x2));
+      }
+    }
+    else if (sort_pos::is_times_application(x))
+    {
+      print_binary_operation(x, " * ");
+    }
+    // TODO: handle @powerlog2
+
+    //-------------------------------------------------------------------//
+    //                            natpair
+    //-------------------------------------------------------------------//
+
+    else if (sort_nat::is_first_application(x))
+    {
+    	// TODO: verify if this is the correct way of dealing with first/divmod
+    	data_expression y = sort_nat::arg(x);
+    	if (!sort_nat::is_divmod_application(y))
+      {
         print_function_application(x);
+      }
+      else
+      {
+        print_expression(sort_nat::left(y), left_precedence(y));
+        derived().print(" div ");
+        print_expression(sort_nat::right(y), right_precedence(y));
+      }
+    }
+    else if (sort_nat::is_last_application(x))
+    {
+      // TODO: verify if this is the correct way of dealing with last/divmod
+      data_expression y = sort_nat::arg(x);
+    	if (!sort_nat::is_divmod_application(y))
+      {
+        print_function_application(x);
+      }
+      else
+      {
+        print_expression(sort_nat::left(y), left_precedence(y));
+        derived().print(" mod ");
+        print_expression(sort_nat::right(y), right_precedence(y));
       }
     }
 
     //-------------------------------------------------------------------//
     //                            nat
     //-------------------------------------------------------------------//
-    else if (sort_nat::is_nat(x.sort()))
+
+    else if (sort_nat::is_cnat_application(x))
     {
-      if (sort_nat::is_plus_application(x))
-      {
-        print_binary_operation(x, " + ");
-      }
-      else if (sort_nat::is_times_application(x))
-      {
-        print_binary_operation(x, " * ");
-      }
-      else if (sort_nat::is_div_application(x))
-      {
-        // TODO: make a proper binary operation of div
-        print_expression(sort_nat::left(x), precedence(x));
-        derived().print(" div ");
-        print_expression(sort_nat::right(x), precedence(x));
-      }
-      else if (sort_nat::is_mod_application(x))
-      {
-        // TODO: make a proper binary operation of mod
-        print_expression(sort_nat::left(x), precedence(x));
-        derived().print(" mod ");
-        print_expression(sort_nat::right(x), precedence(x));
-      }
-      else if (sort_int::is_mod_application(x))
-      {
-        // TODO: make a proper binary operation of mod
-        print_expression(sort_int::left(x), precedence(x));
-        derived().print(" mod ");
-        print_expression(sort_int::right(x), precedence(x));
-      }
-      else if (sort_nat::is_first_application(x))
-      {
-      	// TODO: verify if this is the correct way of dealing with first/divmod
-      	data_expression y = sort_nat::arg(x);
-      	if (!sort_nat::is_divmod_application(y))
-        {
-          print_function_application(x);
-        }
-        else
-        {
-          print_expression(sort_nat::left(y), precedence(y));
-          derived().print(" div ");
-          print_expression(sort_nat::right(y), precedence(y));
-        }
-      }
-      else if (sort_nat::is_last_application(x))
-      {
-      	// TODO: verify if this is the correct way of dealing with last/divmod
-        data_expression y = sort_nat::arg(x);
-      	if (!sort_nat::is_divmod_application(y))
-        {
-          print_function_application(x);
-        }
-        else
-        {
-          print_expression(sort_nat::left(y), precedence(y));
-          derived().print(" mod ");
-          print_expression(sort_nat::right(y), precedence(y));
-        }
-      }
-      else if (sort_nat::is_exp_application(x))
-      {
-        // print_binary_operation(x, " ^ ");
-        print_function_application(x);
-      }
-      else if (sort_nat::is_cnat_application(x))
-      {
-        derived()(sort_nat::arg(x));
-      }
-      else
-      {
-        print_function_application(x);
-      }
+      derived()(sort_nat::arg(x));
     }
+    else if (sort_nat::is_pos2nat_application(x))
+    {
+      derived()(*x.begin());
+    }
+    // TODO: handle @dub
+    else if (sort_nat::is_plus_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
+    // TODO: handle @gtesubtb
+    else if (sort_nat::is_times_application(x))
+    {
+      print_binary_operation(x, " * ");
+    }
+    else if (sort_nat::is_div_application(x))
+    {
+      // print_binary_operation(x, " div ");
+      print_expression(sort_nat::left(x), left_precedence(x));
+      derived().print(" div ");
+      print_expression(sort_nat::right(x), right_precedence(x));
+    }
+    else if (sort_nat::is_mod_application(x))
+    {
+      // print_binary_operation(x, " mod ");
+      print_expression(sort_nat::left(x), left_precedence(x));
+      derived().print(" mod ");
+      print_expression(sort_nat::right(x), right_precedence(x));
+    }
+    // TODO: handle @monus
+    // TODO: handle @swap_zero*
+    // TODO: handle @sqrt_nat
 
     //-------------------------------------------------------------------//
     //                            int
     //-------------------------------------------------------------------//
-    else if (sort_int::is_int(x.sort()))
+
+    else if (sort_int::is_cint_application(x))
     {
-      if (sort_int::is_negate_application(x))
-      {
-        derived().print("-");
-        derived()(x.arguments().front());
-      }
-      else if (sort_int::is_plus_application(x))
-      {
-        print_binary_operation(x, " + ");
-      }
-      else if (sort_int::is_minus_application(x))
-      {
-        print_binary_operation(x, " - ");
-      }
-      else if (sort_int::is_times_application(x))
-      {
-        print_binary_operation(x, " * ");
-      }
-      else if (sort_int::is_div_application(x))
-      {
-        // TODO: make a proper binary operation of div
-        print_expression(sort_int::left(x), precedence(x));
-        derived().print(" div ");
-        print_expression(sort_int::right(x), precedence(x));
-      }
-      else if (sort_int::is_cint_application(x))
-      {
-        derived()(sort_int::arg(x));
-      }
-      else
-      {
-        print_function_application(x);
-      }
+      derived()(sort_int::arg(x));
+    }
+    else if (sort_int::is_cneg_application(x))
+    {
+      derived()(sort_int::negate(sort_int::arg(x)));
+    }
+    else if (sort_int::is_nat2int_application(x))
+    {
+      derived()(*x.begin());
+    }
+    else if (sort_int::is_pos2int_application(x))
+    {
+      derived()(*x.begin());
+    }
+    else if (sort_int::is_negate_application(x))
+    {
+      print_unary_operation(x, "-");
+    }
+    // TODO: handle @dub
+    else if (sort_int::is_plus_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
+    else if (sort_int::is_minus_application(x))
+    {
+      print_binary_operation(x, " - ");
+    }
+    else if (sort_int::is_times_application(x))
+    {
+      print_binary_operation(x, " * ");
+    }
+    else if (sort_int::is_div_application(x))
+    {
+      // TODO: make a proper binary operation of div
+      print_expression(sort_int::left(x), left_precedence(x));
+      derived().print(" div ");
+      print_expression(sort_int::right(x), right_precedence(x));
+    }
+    else if (sort_int::is_mod_application(x))
+    {
+      // print_binary_operation(x, " mod ");
+      print_expression(sort_int::left(x), left_precedence(x));
+      derived().print(" mod ");
+      print_expression(sort_int::right(x), right_precedence(x));
     }
 
     //-------------------------------------------------------------------//
     //                            real
     //-------------------------------------------------------------------//
-    else if (sort_real::is_real(x.sort()))
+
+    else if (sort_real::is_creal_application(x))
     {
-      if (sort_real::is_negate_application(x))
+      data_expression numerator = sort_real::left(x);
+      data_expression denominator = sort_real::right(x);
+      if (is_one(denominator))
       {
-        derived().print("-");
-        derived()(x.arguments().front());
-      }
-      else if (sort_real::is_plus_application(x))
-      {
-        print_binary_operation(x, " + ");
-      }
-      else if (sort_real::is_minus_application(x))
-      {
-        print_binary_operation(x, " - ");
-      }
-      else if (sort_real::is_times_application(x))
-      {
-        print_binary_operation(x, " * ");
-      }
-      else if (sort_real::is_divides_application(x))
-      {
-        print_binary_operation(x, " / ");
-      }
-      else if (sort_real::is_creal_application(x)) // TODO: fix this!!!
-      {
-        derived()(sort_real::arg(x));
+        derived()(numerator);
       }
       else
       {
-        print_function_application(x);
+        derived()(sort_real::divides(numerator, sort_int::pos2int(denominator)));
       }
     }
+    else if (sort_real::is_pos2real_application(x))
+    {
+      derived()(*x.begin());
+    }
+    else if (sort_real::is_nat2real_application(x))
+    {
+      derived()(*x.begin());
+    }
+    else if (sort_real::is_int2real_application(x))
+    {
+      derived()(*x.begin());
+    }
+    else if (sort_real::is_negate_application(x))
+    {
+      print_unary_operation(x, "-");
+    }
+    else if (sort_real::is_plus_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
+    else if (sort_real::is_minus_application(x))
+    {
+      print_binary_operation(x, " - ");
+    }
+    else if (sort_real::is_times_application(x))
+    {
+      print_binary_operation(x, " * ");
+    }
+    else if (sort_real::is_divides_application(x))
+    {
+      print_binary_operation(x, " / ");
+    }
+    else if (sort_real::is_reduce_fraction_application(x))
+    {
+      derived()(sort_real::divides(sort_real::left(x),sort_real::right(x)));
+    }
+    else if (sort_real::is_reduce_fraction_where_application(x))
+    {
+      derived()(sort_real::plus(sort_real::int2real(sort_real::arg2(x)), sort_real::divides(sort_real::arg3(x), sort_nat::pos2nat(sort_real::arg1(x)))));
+    }
+    // TODO: handle @redfrachlp
 
     //-------------------------------------------------------------------//
     //                            list
     //-------------------------------------------------------------------//
-    else if (sort_list::is_list(x.sort()))
+
+    else if (sort_list::is_list_enumeration_application(x))
     {
-      if (sort_list::is_concat_application(x))
+      print_list_enumeration(x);
+    }
+    else if (sort_list::is_cons_application(x))
+    {
+      if (is_cons_list(x))
       {
-        print_binary_operation(x, " ++ ");
-      }
-      else if (sort_list::is_cons_application(x))
-      {
-        if (is_cons_list(x))
-        {
-          print_cons_list(x);
-        }
-        else
-        {
-          print_binary_operation(x, " |> ");
-        }
-      }
-      else if (sort_list::is_snoc_application(x))
-      {
-        if (is_snoc_list(x))
-        {
-          print_snoc_list(x);
-        }
-        else
-        {
-          print_binary_operation(x, " <| ");
-        }
-      }
-      else if (sort_list::is_list_enumeration_application(x))
-      {
-        print_list_enumeration(x);
+        print_cons_list(x);
       }
       else
       {
-        print_function_application(x);
+        print_binary_operation(x, " |> ");
       }
+    }
+    else if (sort_list::is_in_application(x))
+    {
+      print_binary_operation(x, " in ");
+    }
+    else if (sort_list::is_count_application(x))
+    {
+      derived().print("#");
+      print_expression(sort_list::arg(x), right_precedence(x));
+    }
+    else if (sort_list::is_snoc_application(x))
+    {
+      if (is_snoc_list(x))
+      {
+        print_snoc_list(x);
+      }
+      else
+      {
+        print_binary_operation(x, " <| ");
+      }
+    }
+    else if (sort_list::is_concat_application(x))
+    {
+      print_binary_operation(x, " ++ ");
+    }
+    else if (sort_list::is_element_at_application(x))
+    {
+      print_binary_operation(x, " . ");
     }
 
     //-------------------------------------------------------------------//
     //                            set
     //-------------------------------------------------------------------//
-    else if (sort_set::is_set(x.sort()))
+
+    else if (sort_set::is_constructor_application(x))
     {
-      if (sort_set::is_complement_application(x))
+      if (is_fset_true(x))
       {
-        derived().print("!");
-        derived()(x.arguments().front());
+        print_fset_true(x);
       }
-      else if (sort_set::is_union_application(x))
+      else if (is_fset_false(x))
       {
-        print_binary_operation(x, " + ");
+        print_fset_false(x);
       }
-      else if (sort_set::is_intersection_application(x))
+      else if (is_fset_lambda(x))
       {
-        print_binary_operation(x, " * ");
-      }
-      else if (sort_set::is_difference_application(x))
-      {
-        print_binary_operation(x, " - ");
-      }
-      else if (sort_set::is_constructor_application(x))
-      {
-        if (is_fset_true(x))
-        {
-          print_fset_true(x);
-        }
-        else if (is_fset_false(x))
-        {
-          print_fset_false(x);
-        }
-        else if (is_fset_lambda(x))
-        {
-          print_fset_lambda(x);
-        }
-        else
-        {
-          print_fset_default(x);
-        }
-      }
-      else if (sort_set::is_set_comprehension_application(x))
-      {
-        sort_expression s = function_sort(sort_set::arg(x).sort()).domain().front();
-        core::identifier_string name = generate_identifier("x", x);
-        variable var(name, s);
-        data_expression body(sort_set::arg(x)(var));
-        derived().print("{ ");
-        print_variable(var, true);
-        derived().print(" | ");
-        derived()(body);
-        derived().print(" }");
-      }
-      else if (sort_set::is_set_fset_application(x))
-      {
-        data_expression y = sort_set::arg(x);
-        if (sort_fset::is_empty_function_symbol(y))
-        {
-          derived().print("{}");
-        }
-        else if (data::is_variable(y))
-        {
-          derived().print("@setfset(");
-          derived()(variable(y).name());
-          derived().print(")");
-        }
-        else
-        {
-          derived()(y);
-        }
+        print_fset_lambda(x);
       }
       else
       {
-        print_function_application(x);
+        print_fset_default(x);
       }
+    }
+    else if (sort_set::is_set_fset_application(x))
+    {
+      data_expression y = sort_set::arg(x);
+      if (sort_fset::is_empty_function_symbol(y))
+      {
+        derived().print("{}");
+      }
+      else if (data::is_variable(y))
+      {
+        derived().print("@setfset(");
+        derived()(variable(y).name());
+        derived().print(")");
+      }
+      else
+      {
+        derived()(y);
+      }
+    }
+    else if (sort_set::is_set_comprehension_application(x))
+    {
+      sort_expression s = function_sort(sort_set::arg(x).sort()).domain().front();
+      core::identifier_string name = generate_identifier("x", x);
+      variable var(name, s);
+      data_expression body(sort_set::arg(x)(var));
+      derived().print("{ ");
+      print_variable(var, true);
+      derived().print(" | ");
+      derived()(body);
+      derived().print(" }");
+    }
+    else if (sort_set::is_in_application(x))
+    {
+      print_binary_operation(x, " in ");
+    }
+    else if (sort_set::is_complement_application(x))
+    {
+      print_unary_operation(x, "!");
+    }
+    else if (sort_set::is_union_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
+    else if (sort_set::is_intersection_application(x))
+    {
+      print_binary_operation(x, " * ");
+    }
+    else if (sort_set::is_difference_application(x))
+    {
+      print_binary_operation(x, " - ");
     }
 
     //-------------------------------------------------------------------//
     //                            fset
     //-------------------------------------------------------------------//
-    else if (sort_fset::is_fset(x.sort()))
+
+    else if (is_fset_cons_list(x))
     {
-      if (is_fset_cons_list(x))
-      {
-        print_fset_cons_list(x);
-      }
-      else if (sort_fset::is_union_application(x))
-      {
-        print_fset_set_operation(x, " + ");
-      }
-      else if (sort_fset::is_intersection_application(x))
-      {
-        print_fset_set_operation(x, " * ");
-      }
-      else if (sort_fset::is_difference_application(x))
-      {
-        derived()(sort_fset::arg1(x));
-        derived().print(" - ");
-        derived()(sort_fset::arg2(x));
-      }
-      else
-      {
-        print_function_application(x);
-      }
+      print_fset_cons_list(x);
+    }
+    else if (sort_fset::is_in_application(x))
+    {
+      print_binary_operation(x, " in ");
+    }
+    else if (sort_fset::is_fset_union_application(x))
+    {
+      print_fset_set_operation(x, " + ");
+    }
+    else if (sort_fset::is_fset_intersection_application(x))
+    {
+      print_fset_set_operation(x, " * ");
+    }
+    else if (sort_fset::is_difference_application(x))
+    {
+      derived()(sort_fset::left(x));
+      derived().print(" - ");
+      derived()(sort_fset::right(x));
+    }
+    else if (sort_fset::is_union_application(x))
+    {
+      derived()(sort_fset::left(x));
+      derived().print(" + ");
+      derived()(sort_fset::right(x));
+    }
+    else if (sort_fset::is_intersection_application(x))
+    {
+      derived()(sort_fset::left(x));
+      derived().print(" * ");
+      derived()(sort_fset::right(x));
+    }
+    else if (sort_fset::is_count_application(x))
+    {
+      derived().print("#");
+      derived()(sort_fset::arg(x));
     }
 
     //-------------------------------------------------------------------//
     //                            bag
     //-------------------------------------------------------------------//
-    else if (sort_bag::is_bag(x.sort()))
-    {
-      if (sort_bag::is_join_application(x))
-      {
-        print_binary_operation(x, " + ");
-      }
-      else if (sort_bag::is_intersection_application(x))
-      {
-        print_binary_operation(x, " * ");
-      }
-      else if (sort_bag::is_difference_application(x))
-      {
-        print_binary_operation(x, " - ");
-      }
 
-      else if (sort_bag::is_constructor_application(x))
+    else if (sort_bag::is_constructor_application(x))
+    {
+      if (is_fbag_zero(x))
       {
-        if (is_fbag_zero(x))
-        {
-          print_fbag_zero(x);
-        }
-        else if (is_fbag_one(x))
-        {
-          print_fbag_one(x);
-        }
-        else if (is_fbag_lambda(x))
-        {
-          print_fbag_lambda(x);
-        }
-        else
-        {
-          print_fbag_default(x);
-        }
+        print_fbag_zero(x);
       }
-      else if (sort_bag::is_bag_comprehension_application(x))
+      else if (is_fbag_one(x))
       {
-        sort_expression s = function_sort(sort_bag::arg(x).sort()).domain().front();
-        core::identifier_string name = generate_identifier("x", x);
-        variable var(name, s);
-        data_expression body(sort_bag::arg(x)(var));
-        derived().print("{ ");
-        print_variable(var, true);
-        derived().print(" | ");
-        derived()(body);
-        derived().print(" }");
+        print_fbag_one(x);
       }
-      else if (sort_bag::is_bag_fbag_application(x))
+      else if (is_fbag_lambda(x))
       {
-        data_expression y = sort_bag::arg(x);
-        if (sort_fbag::is_empty_function_symbol(y))
-        {
-          derived().print("{:}");
-        }
-        else if (data::is_variable(y))
-        {
-          derived().print("@bagfbag(");
-          derived()(variable(y).name());
-          derived().print(")");
-        }
-        else
-        {
-          derived()(y);
-        }
+        print_fbag_lambda(x);
       }
       else
       {
-        print_function_application(x);
+        print_fbag_default(x);
       }
+    }
+    else if (sort_bag::is_bag_fbag_application(x))
+    {
+      data_expression y = sort_bag::arg(x);
+      if (sort_fbag::is_empty_function_symbol(y))
+      {
+        derived().print("{:}");
+      }
+      else if (data::is_variable(y))
+      {
+        derived().print("@bagfbag(");
+        derived()(variable(y).name());
+        derived().print(")");
+      }
+      else
+      {
+        derived()(y);
+      }
+    }
+    else if (sort_bag::is_bag_comprehension_application(x))
+    {
+      sort_expression s = function_sort(sort_bag::arg(x).sort()).domain().front();
+      core::identifier_string name = generate_identifier("x", x);
+      variable var(name, s);
+      data_expression body(sort_bag::arg(x)(var));
+      derived().print("{ ");
+      print_variable(var, true);
+      derived().print(" | ");
+      derived()(body);
+      derived().print(" }");
+    }
+    else if (sort_bag::is_in_application(x))
+    {
+      print_binary_operation(x, " in ");
+    }
+    else if (sort_bag::is_union_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
+    else if (sort_bag::is_intersection_application(x))
+    {
+      print_binary_operation(x, " * ");
+    }
+    else if (sort_bag::is_difference_application(x))
+    {
+      print_binary_operation(x, " - ");
     }
 
     //-------------------------------------------------------------------//
     //                            fbag
     //-------------------------------------------------------------------//
-    else if (sort_fbag::is_fbag(x.sort()))
+
+    // cons / insert / cinsert
+    else if (is_fbag_cons_list(x))
     {
-      // cons / insert / cinsert
-      if (is_fbag_cons_list(x))
-      {
-        print_fbag_cons_list(x);
-      }
-      else
-      {
-        print_function_application(x);
-      }
+      print_fbag_cons_list(x);
+    }
+    else if (sort_fbag::is_in_application(x))
+    {
+      print_binary_operation(x, " in ");
+    }
+    else if (sort_fbag::is_union_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
+    else if (sort_fbag::is_intersection_application(x))
+    {
+      print_binary_operation(x, " * ");
+    }
+
+    else if (sort_fbag::is_difference_application(x))
+    {
+      print_binary_operation(x, " - ");
+    }
+    else if (sort_fbag::is_count_all_application(x))
+    {
+      derived().print("#");
+      derived()(sort_fbag::arg(x));
     }
 
     //-------------------------------------------------------------------//
@@ -1700,16 +1689,16 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (is_abstraction_application(x))
     {
-      if (x.arguments().size() > 0) {
+      if (x.size() > 0) {
         derived().print("(");
       }
       derived()(x.head());
-      if (x.arguments().size() > 0)
+      if (x.size() > 0)
       {
         derived().print(")(");
       }
-      print_container(x.arguments());
-      if (x.arguments().size() > 0)
+      print_container(x);
+      if (x.size() > 0)
       {
         derived().print(")");
       }
@@ -1925,15 +1914,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     data::abstraction result;
     if (data::is_forall(x))
     {
-      derived()(atermpp::aterm_cast<data::forall>(x));
+      derived()(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      derived()(atermpp::aterm_cast<data::exists>(x));
+      derived()(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      derived()(atermpp::aterm_cast<data::lambda>(x));
+      derived()(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {

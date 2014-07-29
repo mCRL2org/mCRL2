@@ -13,11 +13,11 @@
 #define MCRL2_PBES_TOOLS_LPS2PBES_H
 
 #include <fstream>
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -26,6 +26,7 @@ namespace pbes_system {
 
 void lps2pbes(const std::string& input_filename,
               const std::string& output_filename,
+              const utilities::file_format* output_format,
               const std::string& formula_filename,
               bool timed,
               bool structured,
@@ -47,7 +48,7 @@ void lps2pbes(const std::string& input_filename,
     mCRL2log(log::verbose) << "reading LPS from file '" <<  input_filename << "'..." << std::endl;
   }
   lps::specification spec;
-  spec.load(input_filename);
+  load_lps(spec, input_filename);
   //load formula file
   mCRL2log(log::verbose) << "reading input from file '" <<  formula_filename << "'..." << std::endl;
   std::ifstream instream(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
@@ -69,7 +70,7 @@ void lps2pbes(const std::string& input_filename,
   {
     mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename << "'..." << std::endl;
   }
-  result.save(output_filename);
+  save_pbes(result, output_filename, output_format);
 }
 
 } // namespace pbes_system

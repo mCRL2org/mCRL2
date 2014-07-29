@@ -1,0 +1,29 @@
+options:
+  version: -mcrl2.201202.0
+  path: C:\Program Files\mCRL2\bin
+  platform: win32
+nodes: {l1: BesSpec, l2: BES, l3: BesSpec, l4: BES, l5: Bool, l6: Bool}
+tools:
+  - input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes.exe
+  - input: [l2]
+    output: [l3]
+    args: []
+    name: bespp.exe
+  - input: [l3]
+    output: [l4]
+    args: []
+    name: txt2pbes.exe
+  - input: [l2]
+    output: [l5]
+    args: []
+    name: pbes2bool.exe
+  - input: [l4]
+    output: [l6]
+    args: []
+    name: pbes2bool.exe
+result: |
+  result = value(l5) == value(l6)
+

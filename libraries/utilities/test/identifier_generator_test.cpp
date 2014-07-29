@@ -12,21 +12,20 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/test/minimal.hpp>
-
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 
-void identifier_generator_test()
+BOOST_AUTO_TEST_CASE(identifier_generator_test)
 {
   number_postfix_generator generator;
   generator.add_identifier("c6");
   std::string s;
 
   s = generator("c");
-  BOOST_CHECK(s == "c7");
+  BOOST_CHECK_EQUAL(s, "c7");
 
   std::vector<std::string> v;
   v.push_back("a1");
@@ -34,28 +33,41 @@ void identifier_generator_test()
   generator.add_identifiers(v.begin(), v.end());
 
   s = generator("c");
-  BOOST_CHECK(s == "c13");
+  BOOST_CHECK_EQUAL(s, "c13");
 
   s = generator("a");
-  BOOST_CHECK(s == "a2");
+  BOOST_CHECK_EQUAL(s, "a2");
 
   s = generator("a");
-  BOOST_CHECK(s == "a3");
+  BOOST_CHECK_EQUAL(s, "a3");
 
   s = generator("a2");
-  BOOST_CHECK(s == "a4");
+  BOOST_CHECK_EQUAL(s, "a4");
 
   s = generator();
-  BOOST_CHECK(s == "FRESH_VAR1");
+  BOOST_CHECK_EQUAL(s, "FRESH_VAR");
+
+  s = generator();
+  BOOST_CHECK_EQUAL(s, "FRESH_VAR1");
+
+  s = generator("b", false);
+  BOOST_CHECK_EQUAL(s, "b");
+
+  s = generator("b", false);
+  BOOST_CHECK_EQUAL(s, "b");
+
+  s = generator("b");
+  BOOST_CHECK_EQUAL(s, "b");
+
+  s = generator("b", false);
+  BOOST_CHECK_EQUAL(s, "b1");
 
   generator.add_identifier("a0");
   s = generator("a2");
-  BOOST_CHECK(s == "a5");
+  BOOST_CHECK_EQUAL(s, "a5");
 }
 
-int test_main(int argc, char** argv)
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  identifier_generator_test();
-
-  return EXIT_SUCCESS;
+  return 0;
 }

@@ -14,10 +14,11 @@
 
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/constelm.h"
-#include "mcrl2/pbes/rewriters/simplifying_rewriter.h"
+#include "mcrl2/pbes/pbes_rewriter_type.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -26,6 +27,8 @@ namespace pbes_system {
 
 void pbesconstelm(const std::string& input_filename,
                   const std::string& output_filename,
+                  const utilities::file_format* input_format,
+                  const utilities::file_format* output_format,
                   data::rewrite_strategy rewrite_strategy,
                   pbes_rewriter_type rewriter_type,
                   bool compute_conditions,
@@ -34,7 +37,7 @@ void pbesconstelm(const std::string& input_filename,
 {
   // load the pbes
   pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename);
+  load_pbes(p, input_filename, input_format);
 
   // data rewriter
   data::rewriter datar(p.data(), rewrite_strategy);
@@ -44,31 +47,28 @@ void pbesconstelm(const std::string& input_filename,
   {
     case simplify:
     {
-      typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
-      my_pbes_rewriter pbesr(datar);
-      pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+      typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
+      pbes_rewriter pbesr(datar);
+      pbes_constelm_algorithm<pbes_expression, data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, compute_conditions);
       if (remove_redundant_equations)
       {
-        std::vector<propositional_variable> V = pbes_system::algorithms::remove_unreachable_variables(p);
-        mCRL2log(log::verbose) << pbes_system::algorithms::print_removed_equations(V);
+        std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
+        mCRL2log(log::verbose) << algorithms::print_removed_equations(V);
       }
       break;
     }
     case quantifier_all:
     case quantifier_finite:
     {
-      typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator> my_pbes_rewriter;
       bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
-      data::data_enumerator datae(p.data(), datar);
-      data::rewriter_with_variables datarv(datar);
-      my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
-      pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
+      pbes_constelm_algorithm<pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, compute_conditions);
       if (remove_redundant_equations)
       {
-        std::vector<propositional_variable> V = pbes_system::algorithms::remove_unreachable_variables(p);
-        mCRL2log(log::verbose) << pbes_system::algorithms::print_removed_equations(V);
+        std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
+        mCRL2log(log::verbose) << algorithms::print_removed_equations(V);
       }
       break;
     }
@@ -77,7 +77,7 @@ void pbesconstelm(const std::string& input_filename,
   }
 
   // save the result
-  p.save(output_filename);
+  save_pbes(p, output_filename, output_format);
 }
 
 } // namespace pbes_system

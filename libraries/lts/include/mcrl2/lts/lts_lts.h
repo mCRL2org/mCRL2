@@ -22,17 +22,18 @@
 #include <string>
 #include <vector>
 #include "mcrl2/atermpp/aterm_appl.h"
-// #include "mcrl2/atermpp/aterm_balanced_tree.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/lps/detail/multi_action_print.h"
 
 namespace mcrl2
 {
@@ -85,9 +86,11 @@ class state_label_lts : public atermpp::aterm_appl
         \details The aterm a must have the shape "STATE(t1,...,tn).*/
     state_label_lts(const atermpp::aterm_appl& a):atermpp::aterm_appl(a)
     {
+      assert(a.function()== get_STATE_function_symbol(a.function().arity()));
+
       // Take care that the STATE function symbol with the desired arity exists.
-      const size_t arity=a.function().arity();
-      get_STATE_function_symbol(arity);
+      /* const size_t arity=a.function().arity();
+      get_STATE_function_symbol(arity); */
     }
 
     /** \brief Construct a state label out of a data_expression_list.
@@ -98,7 +101,13 @@ class state_label_lts : public atermpp::aterm_appl
 
     /** \brief Construct a state label out of a data_expression_vector.
     */
-    state_label_lts(const std::vector < mcrl2::data::data_expression > &l):
+    state_label_lts(const std::vector < mcrl2::data::data_expression >& l):
+      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
+    {}
+
+    /** \brief Construct a state label out of a balanced tree of data expressions, representing a state label.
+    */
+    state_label_lts(const atermpp::term_balanced_tree<mcrl2::data::data_expression>& l):
       atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
     {}
 
@@ -106,10 +115,10 @@ class state_label_lts : public atermpp::aterm_appl
         \param[in] i The index of the state label. Must be smaller than the length of this state label.
         \return The data expression at position i of this state label.
     */
-    mcrl2::data::data_expression operator [](const size_t i) const
+    const mcrl2::data::data_expression& operator [](const size_t i) const
     {
       assert(i<size());
-      return mcrl2::data::data_expression(atermpp::aterm_cast<atermpp::aterm_appl>(*this)[i]);
+      return atermpp::down_cast<mcrl2::data::data_expression>(atermpp::aterm_appl::operator[](i));
     }
 
     /** \brief Set the i-th element of this state label to the indicated value.
@@ -161,7 +170,7 @@ class action_label_lts:public mcrl2::lps::multi_action
     }
 
     /** \brief Constructor. Transforms action label a to form a multi_action a. */
-    action_label_lts(const lps::action a):mcrl2::lps::multi_action(a)
+    action_label_lts(const process::action a):mcrl2::lps::multi_action(a)
     {
     }
 
@@ -177,24 +186,24 @@ class action_label_lts:public mcrl2::lps::multi_action
       if (this->has_time())
       {
         throw mcrl2::runtime_error("Cannot transform multi action " +
-                                   lps::detail::multi_action_print(*this) + " to an atermpp::aterm as it contains time.");
+                                   lps::pp(*this) + " to an atermpp::aterm as it contains time.");
       }
-      return mcrl2::core::detail::gsMakeMultAct(this->actions());
+      return atermpp::aterm_appl(core::detail::function_symbol_MultAct(), this->actions());
     }
 
     /** \brief Hide the actions with labels in tau_actions.
         \return Returns whether the hidden action becomes empty, i.e. a tau or hidden action.
     */
-    bool hide_actions(const std::vector<std::string> &tau_actions)
+    bool hide_actions(const std::vector<std::string>& tau_actions)
     {
       using namespace std;
       using namespace mcrl2::lps;
 
-      const action_list mas = this->actions();
-      action_list new_action_list;
-      for (action_list:: const_iterator i=mas.begin(); i!=mas.end(); ++i)
+      const process::action_list mas = this->actions();
+      process::action_list new_action_list;
+      for (process::action_list:: const_iterator i=mas.begin(); i!=mas.end(); ++i)
       {
-        const action a=*i;
+        const process::action a=*i;
 
         if (std::find(tau_actions.begin(),tau_actions.end(),
                       string(a.label().name()))==tau_actions.end())  // this action must not be hidden.
@@ -213,7 +222,7 @@ class action_label_lts:public mcrl2::lps::multi_action
 /** \brief Print the action label to string. */
 inline std::string pp(const action_label_lts l)
 {
-  return lps::detail::multi_action_print(mcrl2::lps::multi_action(l));
+  return lps::pp(mcrl2::lps::multi_action(l));
 }
 
 /** \brief Parse a string into an action label.
@@ -227,10 +236,10 @@ inline std::string pp(const action_label_lts l)
 inline action_label_lts parse_lts_action(
   const std::string& multi_action_string,
   const data::data_specification& data_spec,
-  const lps::action_list& act_decls)
+  const process::action_label_list& act_decls)
 {
-  lps::multi_action ma = lps::parse_multi_action(multi_action_string, atermpp::aterm_cast<lps::action_label_list>(act_decls), data_spec);
-  return action_label_lts(mcrl2::core::detail::gsMakeMultAct(ma.actions()));
+  lps::multi_action ma = lps::parse_multi_action(multi_action_string, act_decls, data_spec);
+  return action_label_lts(atermpp::aterm_appl(core::detail::function_symbol_MultAct(), ma.actions()));
 }
 
 
@@ -251,7 +260,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     bool m_has_valid_parameters;
     data::variable_list m_parameters;
     bool m_has_valid_action_decls;
-    lps::action_label_list m_action_decls;
+    process::action_label_list m_action_decls;
 
   public:
 
@@ -265,7 +274,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 
     /** \brief Creates an object containing a muCRL specification.
      * \param[in] t The muCRL specification that will be stored in the object. */
-    lts_lts_t(const atermpp::aterm &t);
+    lts_lts_t(const atermpp::aterm& t);
 
     /** \brief Creates an object containing an mCRL2 specification.
      * \param[in] spec The mCRL2 specification that will be stored in the object. */
@@ -318,7 +327,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
         l.m_has_valid_action_decls=aux;
       }
       {
-        const lps::action_label_list aux=m_action_decls;
+        const process::action_label_list aux=m_action_decls;
         m_action_decls=l.m_action_decls;
         l.m_action_decls=aux;
       }
@@ -347,7 +356,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 
     /** \brief Return action label declarations stored in this LTS.
     */
-    lps::action_label_list action_labels() const
+    process::action_label_list action_labels() const
     {
       assert(m_has_valid_action_decls);
       return m_action_decls;
@@ -356,7 +365,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     /** \brief Set the action label information for this LTS.
      * \param[in] decls  The action labels to be set in this lts.
     */
-    void set_action_labels(const lps::action_label_list& decls)
+    void set_action_labels(const process::action_label_list& decls)
     {
       m_has_valid_action_decls=true;
       m_action_decls=decls;

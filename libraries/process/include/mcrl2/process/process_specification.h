@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/action_label.h"
+#include "mcrl2/process/action_label.h"
 #include "mcrl2/process/process_equation.h"
 #include "mcrl2/process/process_expression.h"
 
@@ -46,7 +46,7 @@ class process_specification
     data::data_specification m_data;
 
     /// \brief The action specification of the specification
-    lps::action_label_list m_action_labels;
+    process::action_label_list m_action_labels;
 
     /// \brief The set of global variables
     std::set<data::variable> m_global_variables;
@@ -63,9 +63,9 @@ class process_specification
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data            = data::data_specification(atermpp::aterm_appl(*i++));
-      m_action_labels   = static_cast<lps::action_label_list>(atermpp::aterm_appl(*i++)[0]);
+      m_action_labels   = static_cast<process::action_label_list>(atermpp::aterm_appl(*i++)[0]);
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
-      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
+      m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
       process_equation_list l = static_cast<process_equation_list>(atermpp::aterm_appl(*i++)[0]);
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
       m_initial_process = process_expression(atermpp::aterm_appl(init[0]));
@@ -96,7 +96,7 @@ class process_specification
     }
 
     /// \brief Constructor that sets the global variables to empty;
-    process_specification(data::data_specification data, lps::action_label_list action_labels, process_equation_list equations, process_expression init)
+    process_specification(data::data_specification data, process::action_label_list action_labels, process_equation_list equations, process_expression init)
       : m_data(data),
         m_action_labels(action_labels),
         m_equations(equations.begin(), equations.end()),
@@ -106,7 +106,7 @@ class process_specification
     /// \brief Constructor of a process specification.
     process_specification(
       data::data_specification data,
-      lps::action_label_list action_labels,
+      process::action_label_list action_labels,
       data::variable_list global_variables,
       process_equation_list equations,
       process_expression init)
@@ -133,14 +133,14 @@ class process_specification
 
     /// \brief Returns the action label specification
     /// \return The action label specification
-    const lps::action_label_list& action_labels() const
+    const process::action_label_list& action_labels() const
     {
       return m_action_labels;
     }
 
     /// \brief Returns the action label specification
     /// \return The action label specification
-    lps::action_label_list& action_labels()
+    process::action_label_list& action_labels()
     {
       return m_action_labels;
     }
@@ -188,6 +188,20 @@ class process_specification
     }
 };
 
+//--- start generated class process_specification ---//
+// prototype declaration
+std::string pp(const process_specification& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_specification& x)
+{
+  return out << process::pp(x);
+}
+//--- end generated class process_specification ---//
+
 /// \brief Adds all sorts that appear in the process specification spec
 ///  to the data specification of spec.
 /// \param spec A process specification
@@ -204,12 +218,12 @@ void complete_data_specification(process_specification& spec)
 inline
 atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec)
 {
-  return core::detail::gsMakeProcSpec(
+  return atermpp::aterm_appl(core::detail::function_symbol_ProcSpec(),
            data::detail::data_specification_to_aterm_data_spec(spec.data()),
-           core::detail::gsMakeActSpec(spec.action_labels()),
-           core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(spec.global_variables())),
-           core::detail::gsMakeProcEqnSpec(process_equation_list(spec.equations().begin(), spec.equations().end())),
-           core::detail::gsMakeProcessInit(spec.init())
+           atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
+           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
+           atermpp::aterm_appl(core::detail::function_symbol_ProcEqnSpec(), process_equation_list(spec.equations().begin(), spec.equations().end())),
+           atermpp::aterm_appl(core::detail::function_symbol_ProcessInit(), spec.init())
          );
 }
 

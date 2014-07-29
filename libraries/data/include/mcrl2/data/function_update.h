@@ -15,8 +15,6 @@
 #ifndef MCRL2_DATA_FUNCTION_UPDATE_H
 #define MCRL2_DATA_FUNCTION_UPDATE_H
 
-#include "boost/utility.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -29,6 +27,7 @@
 namespace mcrl2 {
 
   namespace data {
+
 
       /// \brief Generate identifier \@func_update
       /// \return Identifier \@func_update
@@ -49,7 +48,6 @@ namespace mcrl2 {
         function_symbol function_update(function_update_name(), make_function_sort(make_function_sort(s, t), s, t, make_function_sort(s, t)));
         return function_update;
       }
-
 
       /// \brief Recogniser for function \@func_update
       /// \param e A data expression
@@ -90,7 +88,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined mappings for function_update
       /// \param s A sort expression
       /// \param t A sort expression
@@ -111,7 +108,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -123,7 +120,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -135,7 +132,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
+        return atermpp::down_cast<const application >(e)[2];
       }
 
       /// \brief Give all system defined equations for function_update

@@ -45,7 +45,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   template <typename T>
   void print_pbes_expression(const T& x, int prec = 5)
   {
-    bool print_parens = (precedence(x) < prec);
+    bool print_parens = (left_precedence(x) < prec);
     bool is_data_expr = is_data(x);
     if (print_parens)
     {
@@ -72,7 +72,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   void print_pbes_unary_operation(const T& x, const std::string& op)
   {
     derived().print(op);
-    print_pbes_expression(x.operand(), precedence(x));
+    print_pbes_expression(x.operand(), left_precedence(x));
   }
 
   // N.B. We need a special version due to the "val" operator that needs to be
@@ -80,9 +80,9 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   template <typename T>
   void print_pbes_binary_operation(const T& x, const std::string& op)
   {
-    print_pbes_expression(x.left(), pbes_system::is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
+    print_pbes_expression(x.left(), pbes_system::is_same_different_precedence(x, x.left()) ? left_precedence(x) + 1 : left_precedence(x));
     derived().print(op);
-    print_pbes_expression(x.right(), pbes_system::is_same_different_precedence(x, x.right()) ? precedence(x) + 1 : precedence(x));
+    print_pbes_expression(x.right(), pbes_system::is_same_different_precedence(x, x.right()) ? right_precedence(x) + 1 : right_precedence(x));
   }
 
   // N.B. We need a special version due to the "val" operator that needs to be
@@ -94,7 +94,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().print(op + " ");
     print_variables(x.variables(), true, true, false, "", "", ", ");
     derived().print(". ");
-    print_pbes_expression(x.body(), precedence(x));
+    print_pbes_expression(x.body(), left_precedence(x));
     derived().leave(x);
   }
 
@@ -149,20 +149,6 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().enter(x);
     derived()(x.name());
     print_list(x.parameters(), "(", ")", ", ", false);
-    derived().leave(x);
-  }
-
-  void operator()(const pbes_system::true_& x)
-  {
-    derived().enter(x);
-    derived().print("true");
-    derived().leave(x);
-  }
-
-  void operator()(const pbes_system::false_& x)
-  {
-    derived().enter(x);
-    derived().print("false");
     derived().leave(x);
   }
 

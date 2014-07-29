@@ -118,50 +118,31 @@ void simulation::save(const std::string &filename)
 
 void simulation::load(const std::string &filename)
 {
+  // Load the trace from file
   trace::Trace trace(filename, m_specification.data(), m_specification.action_labels());
   trace.resetPosition();
 
-  state initial_state;
-  if (trace.current_state_exists())
+  // Get the first state from the generator
+  m_full_trace.clear();
+  push_back(m_generator.initial_state());
+
+  // Check that the first state (if given) matches the first state of our generator
+  if (trace.current_state_exists() && trace.currentState() != m_full_trace.back().source_state)
   {
-    initial_state = trace.currentState();
+    throw mcrl2::runtime_error("The initial state of the trace does not match the initial state "
+                               "of this specification");
   }
 
-  std::vector<transition_t> transitions;
-  for (size_t i = 0; i < trace.number_of_actions(); i++)
-  {
-    transition_t transition;
-    transition.action = trace.currentAction();
-    trace.increasePosition();
-    if (trace.current_state_exists())
-    {
-      transition.destination = trace.currentState();
-    }
-    transitions.push_back(transition);
-  }
-
-  std::deque<state_t> target_trace;
-  state_t initial;
-  initial.source_state = m_generator.initial_state();
-  if (!initial_state.empty())
-  {
-    if (!match(initial_state, initial.source_state))
-    {
-      throw mcrl2::runtime_error("The initial state of the trace is not equal to the initial state of this specification");
-    }
-  }
-  initial.transitions = simulation::transitions(initial.source_state);
-  target_trace.push_back(initial);
-
-  target_trace = match_trace(target_trace, transitions, 0);
-  if (target_trace.size() < transitions.size() + 1)
+  // Replay the trace using the generator.
+  if (!match_trace(trace))
   {
     std::stringstream ss;
-    ss << "could not perform action " << (target_trace.size() - 1) << " (" << pp(transitions[target_trace.size() - 1].action) << ") from trace";
+    ss << "could not perform action " << (m_full_trace.size() - 1) << " ("
+       << pp(trace.currentAction()) << ") from trace";
     throw mcrl2::runtime_error(ss.str());
   }
 
-  m_full_trace = target_trace;
+  // Perform tau-prioritization if necessary
   if (m_tau_prioritization)
   {
     m_prioritized_trace.clear();
@@ -175,7 +156,8 @@ std::vector<simulation::transition_t> simulation::transitions(state source_state
   try
   {
     std::vector<simulation::transition_t> output;
-    for (next_state_generator::iterator i = m_generator.begin(source_state, &m_substitution); i != m_generator.end(); i++)
+    next_state_generator::enumerator_queue_t enumeration_queue;
+    for (next_state_generator::iterator i = m_generator.begin(source_state, &enumeration_queue); i != m_generator.end(); i++)
     {
       transition_t transition;
       transition.destination = i->state();
@@ -256,43 +238,36 @@ void simulation::prioritize_trace()
   }
 }
 
-/// Tries to match the transitions from \a transition_number onwards to the end of \a trace. Returns the most complete match found.
-/// WARNING: This has exponential worst-case running time when state labels are missing!
-std::deque<simulation::state_t> simulation::match_trace(std::deque<simulation::state_t> trace, const std::vector<simulation::transition_t> &transitions, size_t transition_number)
+void simulation::push_back(const lps::state& lps_state)
 {
-  if (transition_number >= transitions.size())
-  {
-    return trace;
-  }
+  state_t state;
+  state.source_state = lps_state;
+  state.transitions = transitions(lps_state);
+  state.transition_number = 0;
+  m_full_trace.push_back(state);
+}
 
-  std::deque<simulation::state_t> best_trace = trace;
-  state_t &base_state = trace.back();
-  for (size_t i = 0; i < base_state.transitions.size(); i++)
+bool simulation::match_trace(trace::Trace& trace)
+{
+  state_t& current = m_full_trace.back();
+  lps::multi_action action = trace.currentAction();
+  trace.increasePosition();
+  for (size_t i = 0; i < current.transitions.size(); ++i)
   {
-    if (base_state.transitions[i].action == transitions[transition_number].action &&
-      (transitions[transition_number].destination.empty() || match(base_state.transitions[i].destination, transitions[transition_number].destination)))
+    if (current.transitions[i].action == action &&
+        (!trace.current_state_exists() ||
+         current.transitions[i].destination == trace.currentState()))
     {
-      base_state.transition_number = i;
-      state_t s;
-      s.source_state = base_state.transitions[i].destination;
-      s.transitions = simulation::transitions(s.source_state);
-      trace.push_back(s);
-
-      std::deque<simulation::state_t> recursive_trace = match_trace(trace, transitions, transition_number + 1);
-      if (recursive_trace.size() > best_trace.size())
+      current.transition_number = i;
+      push_back(trace.currentState());
+      if (trace.getPosition() == trace.number_of_actions() || match_trace(trace))
       {
-        best_trace = recursive_trace;
-        // Early exit
-        if (best_trace.size() == transitions.size() + 1)
-        {
-          return best_trace;
-        }
+        return true;
       }
-
-      trace.pop_back();
+      m_full_trace.pop_back();
     }
   }
-  return best_trace;
+  return false;
 }
 
 bool simulation::match(const state &left, const state &right)

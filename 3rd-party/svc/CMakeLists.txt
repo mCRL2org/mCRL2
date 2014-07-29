@@ -25,10 +25,7 @@ add_library(${PROJECT_NAME}
   source/hashtable.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/3rd-party/svc/include/svc)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_atermpp

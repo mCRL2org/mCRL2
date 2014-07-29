@@ -74,7 +74,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         std::clog << "parelm removed " << to_be_removed.size() << " process parameters: " <<std::endl;
         for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
         {
-          std::clog << data::pp(*i) << ":" << data::pp(i->sort()) << std::endl;
+          std::clog << *i << ":" << i->sort() << std::endl;
         }
       }
     }
@@ -95,7 +95,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       std::clog << "initial significant variables: ";
       for (std::set<data::variable>::iterator i = significant_variables.begin(); i != significant_variables.end(); ++i)
       {
-        std::clog << core::pp(*i) << " ";
+        std::clog << *i << " ";
       }
       std::clog << std::endl;
 #endif
@@ -121,7 +121,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #ifdef MCRL2_LPS_PARELM_DEBUG
             for (std::set<data::variable>::iterator k = new_variables.begin(); k != new_variables.end(); ++k)
             {
-              std::clog << "found dependency " << data::pp(x) << " -> " << data::pp(*k) << std::endl;
+              std::clog << "found dependency " << x << " -> " << *k << std::endl;
             }
 #endif
           }
@@ -166,7 +166,6 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
       // compute the dependency graph G
       typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> graph;
-      typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
       graph G(process_parameters.size());
       for (action_summand_vector::const_iterator i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
       {

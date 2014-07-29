@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_WHERE_CLAUSE_H
 #define MCRL2_DATA_WHERE_CLAUSE_H
 
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
 
@@ -29,7 +29,7 @@ class where_clause: public data_expression
   public:
     /// \brief Default constructor.
     where_clause()
-      : data_expression(core::detail::constructWhr())
+      : data_expression(core::detail::default_values::Whr)
     {}
 
     /// \brief Constructor.
@@ -42,46 +42,54 @@ class where_clause: public data_expression
 
     /// \brief Constructor.
     where_clause(const data_expression& body, const assignment_expression_list& declarations)
-      : data_expression(core::detail::gsMakeWhr(body, declarations))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, declarations))
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    where_clause(const data_expression& body, const Container& declarations, typename atermpp::detail::enable_if_container<Container, assignment_expression>::type* = 0)
-      : data_expression(core::detail::gsMakeWhr(body, assignment_expression_list(declarations.begin(), declarations.end())))
+    where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = 0)
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
     {}
 
     const data_expression& body() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<data_expression>((*this)[0]);
     }
 
     const assignment_expression_list& declarations() const
     {
-      return atermpp::aterm_cast<const assignment_expression_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<assignment_expression_list>((*this)[1]);
     }
 //--- start user section where_clause ---//
     const assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const assignment_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<const assignment_list>((*this)[1]);
     }
 //--- end user section where_clause ---//
 };
+
+// prototype declaration
+std::string pp(const where_clause& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const where_clause& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(where_clause& t1, where_clause& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class where_clause ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::where_clause& t1, mcrl2::data::where_clause& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_WHERE_CLAUSE_H
 

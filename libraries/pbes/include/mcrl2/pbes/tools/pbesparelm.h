@@ -12,28 +12,29 @@
 #ifndef MCRL2_PBES_TOOLS_PBESPARELM_H
 #define MCRL2_PBES_TOOLS_PBESPARELM_H
 
-#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/parelm.h"
-#include "mcrl2/pbes/tools.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
 void pbesparelm(const std::string& input_filename,
-                const std::string& output_filename
+                const std::string& output_filename,
+                const utilities::file_format* input_format,
+                const utilities::file_format* output_format
                )
 {
   // load the pbes
   pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename);
+  load_pbes(p, input_filename, input_format);
 
   // apply the algorithm
-  pbes_system::pbes_parelm_algorithm algorithm;
+  pbes_parelm_algorithm algorithm;
   algorithm.run(p);
 
   // save the result
-  p.save(output_filename);
+  save_pbes(p, output_filename, output_format);
 }
 
 } // namespace pbes_system

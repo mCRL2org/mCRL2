@@ -12,12 +12,8 @@
 #ifndef MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 #define MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 
-#include "boost/utility.hpp"
-#include "boost/utility/enable_if.hpp"
-#include "boost/assert.hpp"
-#include "boost/type_traits/is_integral.hpp"
-#include "boost/type_traits/make_unsigned.hpp"
-#include "boost/type_traits/is_floating_point.hpp"
+#include <type_traits>
+#include <iterator>
 
 #include "mcrl2/utilities/detail/join.h"
 
@@ -47,15 +43,13 @@ template < typename Sequence >
 inline
 application list(const sort_expression& s,
                  Sequence const& range,
-                 typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
 {
   data_expression                list_expression(empty(s));
   std::vector< data_expression > elements(range.begin(), range.end());
 
   for (std::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i)
   {
-    // BOOST_ASSERT(is_convertible(i->sort(), s)); This is not always true, due to type conversion.
-
     list_expression = sort_list::cons_(s, *i, list_expression);
   }
 
@@ -105,7 +99,7 @@ template <typename Sequence>
 inline
 data_expression list_enumeration(const sort_expression& s,
                                  Sequence const& range,
-                                 typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
 {
   if (range.empty())
   {
@@ -198,17 +192,17 @@ template <typename Sequence>
 inline
 data_expression set_enumeration(const sort_expression& s,
                                 Sequence const& range,
-                                typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                                typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
 {
   if (range.empty())
   {
-    return set_enumeration(s);
+    return set_enumeration(sort_fset::fset(s));
   }
   else
   {
     sort_expression_vector v(range.size(), range.begin()->sort());
 
-    return application(set_enumeration(function_sort(v,s)), range);
+    return application(set_enumeration(function_sort(v,sort_fset::fset(s))), range);
   }
 }
 
@@ -222,13 +216,13 @@ data_expression set_enumeration(const sort_expression& s,
 {
   if (range.empty())
   {
-    return set_enumeration(s);
+    return set_enumeration(sort_fset::fset(s));
   }
   else
   {
     sort_expression_vector v(range.size(), range.begin()->sort());
 
-    return application(set_enumeration(function_sort(v,s)), range);
+    return application(set_enumeration(function_sort(v,sort_fset::fset(s))), range);
   }
 }
 
@@ -260,7 +254,7 @@ template < typename Sequence >
 inline
 application fset(const sort_expression& s,
                  Sequence const& range,
-                 typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
 {
   data_expression fset_expression(sort_fset::empty(s));
 
@@ -268,8 +262,6 @@ application fset(const sort_expression& s,
   // in the same order as the input
   for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i)
   {
-    // BOOST_ASSERT(is_convertible(i->sort(), s));
-
     fset_expression = sort_fset::insert(s, *i, fset_expression);
   }
 
@@ -282,9 +274,9 @@ application fset(const sort_expression& s,
 /// \param[in] range a sequence of elements
 inline
 application fset(const sort_expression& s,
-                 data_expression_list const& range)
+                 const data_expression_list& range)
 {
-  return fset(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
+  return fset(s, data_expression_vector(range.begin(),range.end()));
 }
 
 }
@@ -334,11 +326,11 @@ template <typename Sequence>
 inline
 data_expression bag_enumeration(const sort_expression& s,
                                 Sequence const& range,
-                                typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                                typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
 {
   if (range.empty())
   {
-    return bag_enumeration(s);
+    return bag_enumeration(sort_fbag::fbag(s));
   }
   else
   {
@@ -353,7 +345,7 @@ data_expression bag_enumeration(const sort_expression& s,
       v.push_back(sort_nat::nat());
     }
 
-    return application(bag_enumeration(function_sort(v,s)), range);
+    return application(bag_enumeration(function_sort(v,sort_fbag::fbag(s))), range);
   }
 }
 
@@ -367,7 +359,7 @@ data_expression bag_enumeration(const sort_expression& s,
 {
   if (range.empty())
   {
-    return bag_enumeration(s);
+    return bag_enumeration(sort_fbag::fbag(s));
   }
   else
   {
@@ -381,7 +373,7 @@ data_expression bag_enumeration(const sort_expression& s,
       v.push_back(sort_nat::nat());
     }
 
-    return application(bag_enumeration(function_sort(v,s)), range);
+    return application(bag_enumeration(function_sort(v,sort_fbag::fbag(s))), range);
   }
 }
 
@@ -412,7 +404,7 @@ namespace sort_fbag
 template < typename Sequence >
 inline
 application fbag(const sort_expression& s, Sequence const& range,
-                 typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
 {
   data_expression fbag_expression(sort_fbag::empty(s));
 
@@ -422,8 +414,7 @@ application fbag(const sort_expression& s, Sequence const& range,
   // in the same order as the input
   for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i, ++i)
   {
-    // BOOST_ASSERT(is_convertible(boost::next(i, 1)->sort(), s));
-    fbag_expression = sort_fbag::cinsert(s, *boost::next(i, 1), *i, fbag_expression);
+    fbag_expression = sort_fbag::cinsert(s, *std::next(i, 1), *i, fbag_expression);
   }
 
   return static_cast< application >(fbag_expression);
@@ -434,9 +425,9 @@ application fbag(const sort_expression& s, Sequence const& range,
 /// \param[in] s the sort of list elements
 /// \param[in] range a range of elements of sort s.
 inline
-application fbag(const sort_expression& s, data_expression_list const& range)
+application fbag(const sort_expression& s, const data_expression_list& range)
 {
-  return fbag(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
+  return fbag(s, data_expression_vector(range.begin(),range.end()));
 }
 }
 

@@ -14,7 +14,6 @@
 #ifndef _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
 #define _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
 
-#include <boost/bind.hpp>
 #include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
@@ -26,65 +25,31 @@ namespace data
 namespace detail
 {
 
-struct legacy_rewriter : public mcrl2::data::rewriter
+struct rewriter_wrapper
 {
   public:
+    typedef Rewriter::substitution_type substitution_type;
 
-    typedef mcrl2::data::rewriter::substitution_type substitution_type;
-    typedef mcrl2::data::rewriter::internal_substitution_type internal_substitution_type;
+    typedef data_expression term_type;
 
-    template < typename EquationSelector >
-    legacy_rewriter(mcrl2::data::data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
-        mcrl2::data::rewriter(d, selector, s)
-    { 
-    } 
-  
-    legacy_rewriter(const mcrl2::data::rewriter &other) :
-      mcrl2::data::rewriter(other)
-    { 
+    rewriter_wrapper(Rewriter* r):
+      m_rewriter(r)
+    {}
+
+    data_expression operator()(const data_expression& t, Rewriter::substitution_type& sigma) const
+    {
+      return m_rewriter->rewrite(t,sigma);
     }
 
-    legacy_rewriter(const legacy_rewriter &other) :
-      mcrl2::data::rewriter(other)
-    { 
+    data_expression operator()(const data_expression& t) const
+    {
+      Rewriter::substitution_type sigma;
+      return m_rewriter->rewrite(t,sigma);
     }
 
-    ~legacy_rewriter()
-    {
-    }
-
-    atermpp::aterm_appl convert_to(const data_expression &t) const
-    {
-      return convert_expression_to(t);
-    } 
-
-    internal_substitution_type convert_to(const substitution_type& sigma) const
-    {
-      return convert_substitution_to(sigma);
-    }
-
-    data_expression convert_from(const atermpp::aterm_appl t) const
-    {
-      return m_rewriter->fromRewriteFormat(t);
-    } 
-  
-    atermpp::aterm_appl rewrite_internal(const atermpp::aterm_appl &t, internal_substitution_type &sigma) const
-    {
-      return m_rewriter->rewrite_internal(t,sigma);
-    } 
-  
-    atermpp::term_list <atermpp::aterm_appl> rewrite_internal_list(
-         const atermpp::term_list<atermpp::aterm_appl> & t,
-         internal_substitution_type &sigma) const
-    {
-      return m_rewriter->rewrite_internal_list(t,sigma);
-    } 
-  
-    mcrl2::data::detail::Rewriter& get_rewriter() const
-    {
-      return *const_cast< mcrl2::data::detail::Rewriter* >(m_rewriter.get());
-    }
-}; 
+  protected:
+    Rewriter* m_rewriter;
+};
 
 
 } // namespace detail

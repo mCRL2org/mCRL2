@@ -22,12 +22,12 @@
 #include <cstring>
 #include <set>
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/action.h"
-#include "mcrl2/lps/process_initializer.h"
+#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/process_initializer.h"
+#include "mcrl2/process/process_expression.h"
 
 namespace mcrl2
 {
@@ -43,6 +43,15 @@ class specification;
 atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
 bool is_well_typed(const specification& spec);
+
+/// \brief Test for a specification expression
+/// \param x A term
+/// \return True if \a x is a specification expression
+inline
+bool is_specification(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::LinProcSpec;
+}
 
 /// \brief Linear process specification.
 // sort ...;
@@ -66,7 +75,7 @@ class specification
     data::data_specification m_data;
 
     /// \brief The action specification of the specification
-    action_label_list m_action_labels;
+    process::action_label_list m_action_labels;
 
     /// \brief The set of global variables
     std::set<data::variable> m_global_variables;
@@ -83,11 +92,11 @@ class specification
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data             = atermpp::aterm_appl(*i++);
-      m_action_labels    = action_label_list(atermpp::aterm_appl(*i++)[0]);
+      m_action_labels    = process::action_label_list(atermpp::aterm_appl(*i++)[0]);
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
-      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
-      m_process          = linear_process(atermpp::aterm_cast<atermpp::aterm_appl>(*i++));
-      m_initial_process  = process_initializer(atermpp::aterm_cast<atermpp::aterm_appl>(*i));
+      m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
+      m_process          = linear_process(atermpp::down_cast<atermpp::aterm_appl>(*i++));
+      m_initial_process  = process_initializer(atermpp::down_cast<atermpp::aterm_appl>(*i));
       m_data.declare_data_specification_to_be_type_checked();
       complete_data_specification(*this);
     }
@@ -122,7 +131,7 @@ class specification
     /// \param lps A linear process
     /// \param initial_process A process initializer
     specification(const data::data_specification& data,
-                  const action_label_list& action_labels,
+                  const process::action_label_list& action_labels,
                   const std::set<data::variable>& global_variables,
                   const linear_process& lps,
                   const process_initializer& initial_process)
@@ -139,18 +148,18 @@ class specification
     /// \param filename A string
     /// If filename is nonempty, input is read from the file named filename.
     /// If filename is empty, input is read from standard input.
-    void load(const std::string& filename)
+    void load(std::istream& stream, bool binary=true)
     {
-      using namespace atermpp;
-      atermpp::aterm t = core::detail::load_aterm(filename);
-      if (!t.type_is_appl() || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
+      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
+                                : atermpp::read_term_from_text_stream(stream);
+      t = data::detail::add_index(t);
+      if (!t.type_is_appl() || !is_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
       {
-        throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
+        throw mcrl2::runtime_error("Input stream does not contain an LPS");
       }
-      //store the term locally
       construct_from_aterm(atermpp::aterm_appl(t));
-      // The well typedness check is only done in debug mode, since for large
-      // LPSs it takes too much time
+      // The well typedness check is only done in debug mode, since for large LPSs it takes too much
+      // time
       assert(is_well_typed(*this));
     }
 
@@ -162,13 +171,21 @@ class specification
     /// If binary is true the linear process is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    void save(const std::string& filename, bool binary = true) const
+    void save(std::ostream& stream, bool binary=true) const
     {
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time
       assert(is_well_typed(*this));
-      specification tmp(*this);
-      core::detail::save_aterm(specification_to_aterm(tmp), filename, binary);
+      atermpp::aterm t = specification_to_aterm(*this);
+      t = data::detail::remove_index(t);
+      if (binary)
+      {
+        atermpp::write_term_to_binary_stream(t, stream);
+      }
+      else
+      {
+        atermpp::write_term_to_text_stream(t, stream);
+      }
     }
 
     /// \brief Returns the linear process of the specification.
@@ -202,7 +219,7 @@ class specification
     /// \brief Returns a sequence of action labels.
     /// This sequence contains all action labels occurring in the specification (but it can have more).
     /// \return A sequence of action labels.
-    const action_label_list& action_labels() const
+    const process::action_label_list& action_labels() const
     {
       return m_action_labels;
     }
@@ -210,7 +227,7 @@ class specification
     /// \brief Returns a sequence of action labels.
     /// This sequence contains all action labels occurring in the specification (but it can have more).
     /// \return A sequence of action labels.
-    action_label_list& action_labels()
+    process::action_label_list& action_labels()
     {
       return m_action_labels;
     }
@@ -248,8 +265,21 @@ class specification
     }
 };
 
-// template function overloads
+//--- start generated class specification ---//
+// prototype declaration
 std::string pp(const specification& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const specification& x)
+{
+  return out << lps::pp(x);
+}
+//--- end generated class specification ---//
+
+// template function overloads
 std::string pp_with_summand_numbers(const specification& x);
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x);
 std::set<data::variable> find_all_variables(const lps::specification& x);
@@ -271,10 +301,10 @@ void complete_data_specification(lps::specification& spec)
 inline
 atermpp::aterm_appl specification_to_aterm(const specification& spec)
 {
-  return core::detail::gsMakeLinProcSpec(
+  return atermpp::aterm_appl(core::detail::function_symbol_LinProcSpec(),
            data::detail::data_specification_to_aterm_data_spec(spec.data()),
-           core::detail::gsMakeActSpec(spec.action_labels()),
-           core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(spec.global_variables())),
+           atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
+           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
            linear_process_to_aterm(spec.process()),
            spec.initial_process()
          );

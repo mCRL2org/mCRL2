@@ -1,11 +1,16 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
+
+/*! \file Graph.h
+
+    Data structures to define vertices, edges and graphs.
+*/
 
 #ifndef GRAPH_H_INCLUDED
 #define GRAPH_H_INCLUDED
@@ -18,49 +23,54 @@
 #include "compatibility.h"
 
 // Note: these should be unsigned types; some algorithms depend on it!
-typedef compat_uint64_t verti;    //!< type used to number vertices
-typedef compat_uint64_t edgei;    //!< type used to number edges
+typedef size_t verti;    //!< type used to number vertices
+typedef size_t edgei;    //!< type used to number edges
 
 #define NO_VERTEX ((verti)-1)
 
 class StaticGraph;
 
-//! A not-completely-standard-compliant class to iterate over a graph's edges.
-class EdgeIterator
-{
-public:
-    EdgeIterator() { }
-    EdgeIterator(const EdgeIterator &ei) : g(ei.g), v(ei.v), e(ei.e) { }
-    inline EdgeIterator &operator=(const EdgeIterator &ei);
-    inline std::pair<verti, verti> operator*();
-    inline std::pair<verti, verti> operator++();
-    inline std::pair<verti, verti> operator++(int);
-
-    typedef edgei Distance;
-    Distance operator-(const EdgeIterator &ei) { return e - ei.e; }
-
-protected:
-    EdgeIterator(const StaticGraph *g, verti v, edgei e) : g(g), v(v), e(e) { }
-
-private:
-    const StaticGraph *g;  //! underlying graph whose edges are being iterated
-    verti v;               //! current vertex index
-    edgei e;               //! current edge index
-
-    friend class StaticGraph;
-};
-
-
-/*! A static graph consists of V vertices (numbered from 0 to V, exclusive)
+/*! \ingroup ParityGameData
+ 
+    A static graph consists of V vertices (numbered from 0 to V, exclusive)
     and E edges, and can store either edge successors, predecessors, or both. */
 class StaticGraph
 {
+#if 0
+public:
+    //! A not-completely-standard-compliant class to iterate over a graph's edges.
+    class EdgeIterator
+    {
+    public:
+        EdgeIterator() { }
+        EdgeIterator(const EdgeIterator &ei) : g(ei.g), v(ei.v), e(ei.e) { }
+        inline EdgeIterator &operator=(const EdgeIterator &ei);
+        inline std::pair<verti, verti> operator*();
+        inline std::pair<verti, verti> operator++();
+        inline std::pair<verti, verti> operator++(int);
+
+        edgei operator-(const EdgeIterator &ei) { return e - ei.e; }
+
+    protected:
+        EdgeIterator(const StaticGraph *g, verti v, edgei e) : g(g), v(v), e(e) { }
+
+    private:
+        const StaticGraph *g;  //! underlying graph whose edges are being iterated
+        verti v;               //! current vertex index
+        edgei e;               //! current edge index
+
+        friend class StaticGraph;
+    };
+#endif
+
 public:
     /*! Iterator used to iterate over predecessor/successor vertices. */
     typedef const verti *const_iterator;
 
+#if 0
     /*! Iterator used to iterate over edges. */
     typedef EdgeIterator const_edge_iterator;
+#endif
 
     /*! A list of edges */
     typedef std::vector<std::pair<verti, verti> > edge_list;
@@ -86,24 +96,70 @@ public:
     /*! Reset to an empty graph. */
     void clear();
 
-    /*! Generate a random graph with `V` vertices and an average out-degree of
-        `out_deg` (minimum out degree is 1). This replaces any old data stored.
-        \param V        number of vertices to generate
-        \param out_deg  desired average out degree (at least 1)
-        \param edge_dir which parts of edges to store */
-    void make_random(verti V, unsigned out_deg, EdgeDirection edge_dir);
+    /*! Generate a random graph (replacing the old contents).
+        The resulting game does not contain loops.
 
-    /*! Reset the graph to a copy of `graph'. */
+        \param V        number of vertices to generate
+        \param outdeg   desired average outdegree (at least 1)
+        \param edge_dir which parts of edges to store
+        \param scc      create a single strongly-connected component */
+    void make_random(verti V, unsigned outdeg, EdgeDirection edge_dir,
+                     bool scc);
+
+    /*! Generate a random clustered game, which is based on random games of
+        size `cluster_size` each, which are connected recursively by being
+        substituting for the vertices of another game of size `cluster_size`,
+        repeatedly, until a single game remains.
+
+        The resulting game is always a single connected component without loops.
+
+        Passing `V` <= `cluster_size` is equivalent to calling make_random()
+        with `scc` = true. Choosing `V` = `cluster_size`<sup>d</sup>
+        creates a game with recursion depth <em>d</em>.
+
+        @param cluster_size number of vertices per cluster
+        @param V            total number of vertices to generate
+        @param outdeg       average outdegree (at least 1)
+        @param edge_dir     which parts of the edges to store 
+
+        \see make_random
+    */
+    void make_random_clustered(verti cluster_size, verti V,
+                               unsigned outdeg, EdgeDirection edge_dir);
+
+    /*! Randomly shuffles vertex indices.  This is useful to obfuscate some of
+        the structure remaining after make_random_clustered(). */
+    void shuffle_vertices();
+
+    /*! Shuffle vertex indices by the given permutation.
+        Vertex v becomes perm[v], for all v.
+
+        \see ParityGame::shuffle
+    */
+    void shuffle_vertices(const std::vector<verti> &perm);
+
+    /*! Reset the graph to a copy of `graph`. */
     void assign(const StaticGraph &graph);
 
     /*! Reset the graph based on the given edge structure. */
     void assign(edge_list edges, EdgeDirection edge_dir);
 
-    /*! Reset the graph to the subgraph induced by the given vertex set: */
+    /*! Convert the graph into a list of edges. */
+    edge_list get_edges() const;
+
+    /*! Reset the graph to the subgraph induced by the given vertex set. */
     template<class ForwardIterator>
     void make_subgraph( const StaticGraph &graph,
                         ForwardIterator vertices_begin,
-                        ForwardIterator vertices_end );
+                        ForwardIterator vertices_end,
+                        bool proper,
+                        EdgeDirection edge_dir = EDGE_NONE );
+
+    void make_subgraph_threads( const StaticGraph &graph,
+                                const verti *verts,
+                                const verti nvert,
+                                bool proper,
+                                EdgeDirection edge_dir = EDGE_NONE );
 
     /*! Removes the given edges from the graph. The contents of the edge list
         may be reordered by this function! */
@@ -114,9 +170,6 @@ public:
 
     /*! Read raw graph data from input stream */
     void read_raw(std::istream &is);
-
-    /*! Returns the memory used to store the graph data. */
-    size_t memory_use() const;
 
     /*! Swaps the contents of this graph with another one. */
     void swap(StaticGraph &g);
@@ -153,31 +206,32 @@ public:
         return &predecessors_[predecessor_index_[v + 1]];
     }
 
-    /*! Returns whether `v' has a successor `w'. */
+    /*! Returns whether `v` has a successor `w`. */
     bool has_succ(verti v, verti w) const {
         return std::binary_search(succ_begin(v), succ_end(v), w);
     }
 
-    /*! Returns whether `w' has a predecessor `v'. */
+    /*! Returns whether `w` has a predecessor `v`. */
     bool has_pred(verti w, verti v) const {
         return std::binary_search(pred_begin(w), pred_end(w), v);
     }
 
-    /*! Returns the degree for vertex `v'. */
+    /*! Returns the degree for vertex `v`. */
     edgei degree(verti v) const {
         return indegree(v) + outdegree(v);
     }
 
-    /*! Returns the outdegree for vertex `v'. */
+    /*! Returns the outdegree for vertex `v`. */
     edgei outdegree(verti v) const {
         return succ_end(v) - succ_begin(v);
     }
 
-    /*! Returns the indegree for vertex `v'. */
+    /*! Returns the indegree for vertex `v`. */
     edgei indegree(verti v) const {
         return pred_end(v) - pred_begin(v);
     }
 
+#if 0
     /*! Returns an edge iterator starting at the given vertex.
         Currently, this requires the graph to store successors. */
     const_edge_iterator edges_begin(verti v = 0) const {
@@ -189,8 +243,14 @@ public:
     const_edge_iterator edges_end() const {
         return EdgeIterator(this, V_, E_);
     }
+#endif
 
 protected:
+    /*! Turn the current graph (with current edge list passed in `edges`) into
+        a strongly connected component by randomly adding edges where necessary.
+    */
+    void make_random_scc(edge_list &edges);
+
     /*! Frees allocated memory and then reallocates memory to store a graph
         with `V` vertices and `E` edges. */
     void reset(verti V, edgei E, EdgeDirection edge_dir);
@@ -201,7 +261,9 @@ protected:
     void make_subgraph( const StaticGraph &graph,
                         ForwardIterator vertices_begin,
                         ForwardIterator vertices_end,
-                        VertexMapT &vertex_map );
+                        VertexMapT &vertex_map,
+                        bool proper,
+                        EdgeDirection edge_dir = EDGE_NONE );
 
 private:
     explicit StaticGraph(const StaticGraph &graph);
@@ -233,12 +295,10 @@ private:
     friend class EdgeIterator;
 };
 
-namespace std
+
+inline void swap(StaticGraph &a, StaticGraph &b)
 {
-    template<> inline void swap<StaticGraph>(StaticGraph &a, StaticGraph &b)
-    {
-        a.swap(b);
-    }
+    a.swap(b);
 }
 
 #include "Graph_impl.h"

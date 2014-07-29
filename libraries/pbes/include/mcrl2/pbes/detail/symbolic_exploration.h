@@ -199,17 +199,17 @@ class symbolic_exploration_algorithm
       }
       else if (is_or(x))
       {
-        const pbes_system::or_& y = core::static_down_cast<const pbes_system::or_&>(x);
+        const pbes_system::or_& y = atermpp::down_cast<pbes_system::or_>(x);
         result = or_(expr_or(y.left()), expr_or(y.right()));
       }
       else if (is_forall(x))
       {
-        const pbes_system::forall& y = core::static_down_cast<const pbes_system::forall&>(x);
+        const pbes_system::forall& y = atermpp::down_cast<pbes_system::forall>(x);
         result = forall(y.variables(), expr_or(y.body(), y.variables()));
       }
       else if (is_exists(x))
       {
-        const pbes_system::exists& y = core::static_down_cast<const pbes_system::exists&>(x);
+        const pbes_system::exists& y = atermpp::down_cast<pbes_system::exists>(x);
         result = exists(y.variables(), expr_or(y.body(), y.variables()));
       }
       else
@@ -235,17 +235,17 @@ class symbolic_exploration_algorithm
       }
       else if (is_and(x))
       {
-        const pbes_system::and_& y = core::static_down_cast<const pbes_system::and_&>(x);
+        const pbes_system::and_& y = atermpp::down_cast<pbes_system::and_>(x);
         result = and_(expr_and(y.left()), expr_and(y.right()));
       }
       else if (is_forall(x))
       {
-        const pbes_system::forall& y = core::static_down_cast<const pbes_system::forall&>(x);
+        const pbes_system::forall& y = atermpp::down_cast<pbes_system::forall>(x);
         result = forall(y.variables(), expr_and(y.body(), y.variables()));
       }
       else if (is_exists(x))
       {
-        const pbes_system::exists& y = core::static_down_cast<const pbes_system::exists&>(x);
+        const pbes_system::exists& y = atermpp::down_cast<pbes_system::exists>(x);
         result = exists(y.variables(), expr_and(y.body(), y.variables()));
       }
       else
@@ -407,6 +407,8 @@ class symbolic_exploration_algorithm
 inline
 void symbolic_exploration(const std::string& input_filename,
                           const std::string& output_filename,
+                          const utilities::file_format* input_format,
+                          const utilities::file_format* output_format,
                           bool optimized = true,
                           bool clustered = false,
                           bool instantiate = false
@@ -414,14 +416,14 @@ void symbolic_exploration(const std::string& input_filename,
 {
   // load the pbes
   pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename);
+  load_pbes(p, input_filename, input_format);
 
   // apply the algorithm
   symbolic_exploration_algorithm algorithm(p, optimized, clustered);
   algorithm.run();
 
   // save the result
-  p.save(output_filename);
+  save_pbes(p, output_filename, output_format);
 
   if (instantiate)
   {

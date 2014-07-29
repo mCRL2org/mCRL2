@@ -18,6 +18,8 @@
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/is_well_typed.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
+#include "mcrl2/pbes/index_traits.h"
+#include "mcrl2/pbes/detail/has_propositional_variables.h"
 
 namespace mcrl2
 {
@@ -26,19 +28,25 @@ namespace pbes_system
 {
 
 //--- start generated pbes_system overloads ---//
-std::string pp(const pbes_system::fixpoint_symbol& x) { return pbes_system::pp< pbes_system::fixpoint_symbol >(x); }
-std::string pp(const pbes_system::pbes& x) { return pbes_system::pp< pbes_system::pbes >(x); }
-std::string pp(const pbes_system::pbes_equation& x) { return pbes_system::pp< pbes_system::pbes_equation >(x); }
 std::string pp(const pbes_system::pbes_equation_vector& x) { return pbes_system::pp< pbes_system::pbes_equation_vector >(x); }
-std::string pp(const pbes_system::pbes_expression& x) { return pbes_system::pp< pbes_system::pbes_expression >(x); }
 std::string pp(const pbes_system::pbes_expression_list& x) { return pbes_system::pp< pbes_system::pbes_expression_list >(x); }
 std::string pp(const pbes_system::pbes_expression_vector& x) { return pbes_system::pp< pbes_system::pbes_expression_vector >(x); }
-std::string pp(const pbes_system::propositional_variable& x) { return pbes_system::pp< pbes_system::propositional_variable >(x); }
 std::string pp(const pbes_system::propositional_variable_list& x) { return pbes_system::pp< pbes_system::propositional_variable_list >(x); }
 std::string pp(const pbes_system::propositional_variable_vector& x) { return pbes_system::pp< pbes_system::propositional_variable_vector >(x); }
-std::string pp(const pbes_system::propositional_variable_instantiation& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation >(x); }
 std::string pp(const pbes_system::propositional_variable_instantiation_list& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation_list >(x); }
 std::string pp(const pbes_system::propositional_variable_instantiation_vector& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation_vector >(x); }
+std::string pp(const pbes_system::and_& x) { return pbes_system::pp< pbes_system::and_ >(x); }
+std::string pp(const pbes_system::exists& x) { return pbes_system::pp< pbes_system::exists >(x); }
+std::string pp(const pbes_system::fixpoint_symbol& x) { return pbes_system::pp< pbes_system::fixpoint_symbol >(x); }
+std::string pp(const pbes_system::forall& x) { return pbes_system::pp< pbes_system::forall >(x); }
+std::string pp(const pbes_system::imp& x) { return pbes_system::pp< pbes_system::imp >(x); }
+std::string pp(const pbes_system::not_& x) { return pbes_system::pp< pbes_system::not_ >(x); }
+std::string pp(const pbes_system::or_& x) { return pbes_system::pp< pbes_system::or_ >(x); }
+std::string pp(const pbes_system::pbes& x) { return pbes_system::pp< pbes_system::pbes >(x); }
+std::string pp(const pbes_system::pbes_equation& x) { return pbes_system::pp< pbes_system::pbes_equation >(x); }
+std::string pp(const pbes_system::pbes_expression& x) { return pbes_system::pp< pbes_system::pbes_expression >(x); }
+std::string pp(const pbes_system::propositional_variable& x) { return pbes_system::pp< pbes_system::propositional_variable >(x); }
+std::string pp(const pbes_system::propositional_variable_instantiation& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation >(x); }
 void normalize_sorts(pbes_system::pbes_equation_vector& x, const data::data_specification& dataspec) { pbes_system::normalize_sorts< pbes_system::pbes_equation_vector >(x, dataspec); }
 void normalize_sorts(pbes_system::pbes& x, const data::data_specification& /* dataspec */) { pbes_system::normalize_sorts< pbes_system::pbes >(x, x.data()); }
 void translate_user_notation(pbes_system::pbes& x) { pbes_system::translate_user_notation< pbes_system::pbes >(x); }
@@ -53,31 +61,11 @@ std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expre
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v) { return pbes_system::search_variable< pbes_system::pbes_expression >(x, v); }
 //--- end generated pbes_system overloads ---//
 
-// TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return to_string(x); }
-std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
-std::string pp(const core::identifier_string& x) { return core::pp(x); }
-
 namespace algorithms {
 
 void instantiate_global_variables(pbes& p)
 {
   pbes_system::detail::instantiate_global_variables(p);
-}
-
-void save_pbes(const pbes& pbes_spec, const std::string& outfilename, pbes_file_format output_format, bool aterm_ascii)
-{
-  pbes_system::save_pbes(pbes_spec, outfilename, output_format, aterm_ascii);
-}
-
-void load_pbes(pbes& p, const std::string& infilename, const pbes_file_format f)
-{
-  pbes_system::load_pbes(p, infilename, f);
-}
-
-void load_pbes(pbes& p, const std::string& infilename)
-{
-  pbes_system::load_pbes(p, infilename);
 }
 
 bool is_bes(const pbes& x)
@@ -113,17 +101,29 @@ bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
   return pbes_system::detail::is_well_typed_pbes(declared_sorts, declared_global_variables, occurring_global_variables, declared_variables, occ, init, data_spec);
 }
 
+bool pbes_equation::is_solved() const
+{
+  return !detail::has_propositional_variables(formula());
+}
+
 std::set<propositional_variable_instantiation> pbes::occurring_variable_instantiations() const
 {
   std::set<propositional_variable_instantiation> result;
   for (auto i = equations().begin(); i != equations().end(); ++i)
   {
-    detail::occurring_variable_visitor visitor;
-    visitor.visit(i->formula());
-    result.insert(visitor.variables.begin(), visitor.variables.end());
+    detail::occurring_variable_visitor f;
+    f(i->formula());
+    result.insert(f.variables.begin(), f.variables.end());
   }
   return result;
 }
+
+static bool register_hooks()
+{
+  register_propositional_variable_instantiation_hooks();
+  return true;
+}
+static bool mcrl2_register_pbes(register_hooks());
 
 } // namespace pbes_system
 

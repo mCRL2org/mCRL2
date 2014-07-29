@@ -26,7 +26,7 @@ namespace data
 
 /** \brief Component for selecting a subset of equations that are actually used in an encompassing specification
  *
- * This component can be used with the constructor of data::basic_rewriter
+ * This component can be used with the constructor of data::rewriter
  * derived classes to select a smaller set of equations that are used as
  * rewrite rules. This limited set of rewrite rules should be enough for the
  * purpose of rewriting objects that occur in the encompassing
@@ -43,6 +43,11 @@ class used_data_equation_selector
 
     bool add_all;
 
+    void add_symbol(const function_symbol &f)
+    {
+      m_used_symbols.insert(f);
+    }
+
     template < typename Range >
     void add_symbols(Range const& r)
     {
@@ -53,16 +58,30 @@ class used_data_equation_selector
     void add_data_specification_symbols(const data_specification& specification)
     {
       // Always add if:Bool#Bool#Bool->Bool; This symbol is used in the prover.
-      m_used_symbols.insert(if_(sort_bool::bool_()));
+      add_symbol(if_(sort_bool::bool_()));
+      // Always add and,or:Bool#Bool->Bool and not:Bool->Bool; This symbol is generated when eliminating quantifiers
+      add_symbol(sort_bool::and_());
+      add_symbol(sort_bool::or_());
+      add_symbol(sort_bool::not_());
 
       // Add all constructors of all sorts as they may be used when enumerating over these sorts
-      std::set< sort_expression > sorts(boost::copy_range< std::set< sort_expression > >(specification.sorts()));
+      std::set< sort_expression > sorts(specification.sorts().begin(),specification.sorts().end());
       for (std::set< sort_expression>::const_iterator j = sorts.begin(); j != sorts.end(); ++j)
       {
         add_symbols(specification.constructors(*j));
+        // Always add equality and inequality of each sort. The one point rewriter is using this for instance.
+        add_symbol(equal_to(*j));
+        add_symbol(not_equal_to(*j));
+
+        // Always add insert for an FSet(S) function, as it is used when enumerating the elements of an FSet.
+        if (sort_fset::is_fset(*j))
+        {
+          const container_sort &s = atermpp::down_cast<container_sort>(*j);
+          add_symbol(sort_fset::insert(s.element_sort()));
+        }
       }
 
-      std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
+      std::set< data_equation > equations(specification.equations().begin(),specification.equations().end());
 
       std::map< data_equation, std::set< function_symbol > > symbols_for_equation;
 
@@ -81,8 +100,6 @@ class used_data_equation_selector
         {
           if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
           {
-            // data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
-            // data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
             add_function_symbols(i->rhs());
             add_function_symbols(i->condition());
             equations.erase(i++);

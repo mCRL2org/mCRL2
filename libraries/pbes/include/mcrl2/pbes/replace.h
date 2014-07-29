@@ -117,9 +117,9 @@ make_replace_pbes_expressions_builder(Substitution sigma, bool innermost)
 //--- start generated pbes_system replace code ---//
 template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
-                              Substitution sigma,
+                              const Substitution& sigma,
                               bool innermost,
-                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                              )
 {
   data::detail::make_replace_sort_expressions_builder<pbes_system::sort_expression_builder>(sigma, innermost)(x);
@@ -127,19 +127,19 @@ void replace_sort_expressions(T& x,
 
 template <typename T, typename Substitution>
 T replace_sort_expressions(const T& x,
-                           Substitution sigma,
+                           const Substitution& sigma,
                            bool innermost,
-                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return core::static_down_cast<const T&>(data::detail::make_replace_sort_expressions_builder<pbes_system::sort_expression_builder>(sigma, innermost)(x));
+  return data::detail::make_replace_sort_expressions_builder<pbes_system::sort_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
 void replace_data_expressions(T& x,
-                              Substitution sigma,
+                              const Substitution& sigma,
                               bool innermost,
-                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                              )
 {
   data::detail::make_replace_data_expressions_builder<pbes_system::data_expression_builder>(sigma, innermost)(x);
@@ -147,18 +147,18 @@ void replace_data_expressions(T& x,
 
 template <typename T, typename Substitution>
 T replace_data_expressions(const T& x,
-                           Substitution sigma,
+                           const Substitution& sigma,
                            bool innermost,
-                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return core::static_down_cast<const T&>(data::detail::make_replace_data_expressions_builder<pbes_system::data_expression_builder>(sigma, innermost)(x));
+  return data::detail::make_replace_data_expressions_builder<pbes_system::data_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
-                       Substitution sigma,
-                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                       const Substitution& sigma,
+                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                       )
 {
   core::make_update_apply_builder<pbes_system::data_expression_builder>(sigma)(x);
@@ -166,8 +166,8 @@ void replace_variables(T& x,
 
 template <typename T, typename Substitution>
 T replace_variables(const T& x,
-                    Substitution sigma,
-                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                    const Substitution& sigma,
+                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                    )
 {
   return core::make_update_apply_builder<pbes_system::data_expression_builder>(sigma)(x);
@@ -175,8 +175,8 @@ T replace_variables(const T& x,
 
 template <typename T, typename Substitution>
 void replace_all_variables(T& x,
-                           Substitution sigma,
-                           typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                           const Substitution& sigma,
+                           typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
   core::make_update_apply_builder<pbes_system::variable_builder>(sigma)(x);
@@ -184,8 +184,8 @@ void replace_all_variables(T& x,
 
 template <typename T, typename Substitution>
 T replace_all_variables(const T& x,
-                        Substitution sigma,
-                        typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                        const Substitution& sigma,
+                        typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                        )
 {
   return core::make_update_apply_builder<pbes_system::variable_builder>(sigma)(x);
@@ -195,8 +195,8 @@ T replace_all_variables(const T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 void replace_free_variables(T& x,
-                            Substitution sigma,
-                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                            const Substitution& sigma,
+                            typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                            )
 {
   assert(data::is_simple_substitution(sigma));
@@ -207,21 +207,21 @@ void replace_free_variables(T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 T replace_free_variables(const T& x,
-                         Substitution sigma,
-                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                         const Substitution& sigma,
+                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x));
+  return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x);
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_free_variables(T& x,
-                            Substitution sigma,
+                            const Substitution& sigma,
                             const VariableContainer& bound_variables,
-                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                            typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                            )
 {
   assert(data::is_simple_substitution(sigma));
@@ -232,13 +232,13 @@ void replace_free_variables(T& x,
 /// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_free_variables(const T& x,
-                         Substitution sigma,
+                         const Substitution& sigma,
                          const VariableContainer& bound_variables,
-                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables));
+  return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 //--- end generated pbes_system replace code ---//
 
@@ -251,7 +251,7 @@ template <typename T, typename Substitution, typename VariableContainer>
 void replace_variables_capture_avoiding(T& x,
                        Substitution& sigma,
                        const VariableContainer& sigma_variables,
-                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                       )
 {
   std::multiset<data::variable> V;
@@ -268,22 +268,22 @@ template <typename T, typename Substitution, typename VariableContainer>
 T replace_variables_capture_avoiding(const T& x,
                     Substitution& sigma,
                     const VariableContainer& sigma_variables,
-                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                    )
 {
   std::multiset<data::variable> V;
   pbes_system::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  return core::static_down_cast<const T&>(data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma, V)(x));
+  return data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
 //--- end generated pbes_system replace_capture_avoiding code ---//
 
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
 void replace_propositional_variables(T& x,
-                                        Substitution sigma,
-                                        typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
-                                       )
+                                     Substitution sigma,
+                                     typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                                    )
 {
   core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
 }
@@ -291,9 +291,9 @@ void replace_propositional_variables(T& x,
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
 T replace_propositional_variables(const T& x,
-                                     Substitution sigma,
-                                     typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
-                                    )
+                                  Substitution sigma,
+                                  typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                                 )
 {
   return core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
 }
@@ -302,7 +302,7 @@ template <typename T, typename Substitution>
 void replace_pbes_expressions(T& x,
                               Substitution sigma,
                               bool innermost = true,
-                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                              typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                              )
 {
   pbes_system::detail::make_replace_pbes_expressions_builder<pbes_system::pbes_expression_builder>(sigma, innermost)(x);
@@ -312,7 +312,7 @@ template <typename T, typename Substitution>
 T replace_pbes_expressions(const T& x,
                            Substitution sigma,
                            bool innermost = true,
-                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                           typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                           )
 {
   return pbes_system::detail::make_replace_pbes_expressions_builder<pbes_system::pbes_expression_builder>(sigma, innermost)(x);

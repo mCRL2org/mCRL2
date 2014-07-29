@@ -13,6 +13,7 @@
 #define MCRL2_CORE_TRAVERSER_H
 
 #include <set>
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/nil.h"
@@ -45,7 +46,7 @@ class traverser
 
     // traverse containers
     template <typename Container>
-    void operator()(Container const& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
+    void operator()(Container const& container, typename atermpp::enable_if_container<Container>::type* = 0)
     {
       for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
       {

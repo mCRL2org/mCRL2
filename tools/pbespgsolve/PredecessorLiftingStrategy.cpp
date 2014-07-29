@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,45 +12,53 @@
 
 PredecessorLiftingStrategy::PredecessorLiftingStrategy(
     const ParityGame &game, const SmallProgressMeasures &spm,
-    bool backward, bool stack )
-    : LiftingStrategy(game), spm_(spm), backward_(backward), stack_(stack)
+    bool stack, int version )
+    : LiftingStrategy(), LiftingStrategy2(), spm_(spm), stack_(stack)
 {
-    assert(graph_.edge_dir() & StaticGraph::EDGE_PREDECESSOR);
+    assert(game.graph().edge_dir() & StaticGraph::EDGE_PREDECESSOR);
 
     // Initialize data
-    verti V = game.graph().V();
-    queued_ = new bool[V];
-    std::fill(queued_, queued_ + V, true);
+    const verti V = game.graph().V();
     queue_ = new verti[V];
-    queue_size_ = queue_capacity_ = V;
-    queue_begin_ = queue_end_ = 0;
-    for (verti v = 0; v < V; ++v) queue_[v] = backward ? V - 1 - v : v;
+    queue_capacity_ = V;
+    queue_begin_ = queue_end_ = queue_size_ = 0;
+
+    if (version == 1)
+    {
+        // v1 API requires explicit tracking of queued vertices.
+        queued_ = new bool[V]();
+        for (verti v = 0; v < V; ++v)
+        {
+            if (!spm_.is_top(v))
+            {
+                queued_[v] = true;
+                push(v);
+            }
+        }
+    }
+    else  // version != 1
+    {
+        assert(version == 2);
+        queued_ = NULL;
+    }
 }
 
 PredecessorLiftingStrategy::~PredecessorLiftingStrategy()
 {
-    delete[] queued_;
     delete[] queue_;
+    delete[] queued_;
 }
 
-void PredecessorLiftingStrategy::lifted(verti v)
+void PredecessorLiftingStrategy::push(verti v)
 {
-    for ( StaticGraph::const_iterator it = graph_.pred_begin(v);
-          it != graph_.pred_end(v); ++it )
-    {
-        if (!queued_[*it] && !spm_.is_top(*it))
-        {
-            // Add predecessor to the queue
-            queued_[*it] = true;
-            queue_[queue_end_++] = *it;
-            if (queue_end_ == queue_capacity_) queue_end_ = 0;
-            ++queue_size_;
-            assert(queue_size_ <= queue_capacity_);
-        }
-    }
+    mCRL2log(mcrl2::log::debug) << "push(" << v << ")" << std::endl;
+    queue_[queue_end_++] = v;
+    if (queue_end_ == queue_capacity_) queue_end_ = 0;
+    ++queue_size_;
+    assert(queue_size_ <= queue_capacity_);
 }
 
-verti PredecessorLiftingStrategy::next()
+verti PredecessorLiftingStrategy::pop()
 {
     if (queue_size_ == 0) return NO_VERTEX;
 
@@ -69,17 +77,45 @@ verti PredecessorLiftingStrategy::next()
         if (queue_begin_ == queue_capacity_) queue_begin_ = 0;
     }
     --queue_size_;
-    queued_[res] = false;
+    mCRL2log(mcrl2::log::debug) << "pop() -> " << res << std::endl;
     return res;
 }
 
-size_t PredecessorLiftingStrategy::memory_use() const
+void PredecessorLiftingStrategy::lifted(verti v)
 {
-    return queue_capacity_*(sizeof(verti) + sizeof(char));
+    const StaticGraph &graph = spm_.game().graph();
+    for ( StaticGraph::const_iterator it = graph.pred_begin(v);
+          it != graph.pred_end(v); ++it )
+    {
+        verti u = *it;
+        if (!queued_[u] && !spm_.is_top(u))
+        {
+            queued_[u] = true;
+            push(u);
+        }
+    }
+}
+
+verti PredecessorLiftingStrategy::next()
+{
+    verti res = pop();
+    if (res != NO_VERTEX) queued_[res] = false;
+    return res;
+}
+
+bool PredecessorLiftingStrategyFactory::supports_version(int version)
+{
+    return version == 1 || version == 2;
 }
 
 LiftingStrategy *PredecessorLiftingStrategyFactory::create(
     const ParityGame &game, const SmallProgressMeasures &spm )
 {
-    return new PredecessorLiftingStrategy(game, spm, backward_, stack_);
+    return new PredecessorLiftingStrategy(game, spm, stack_, 1);
+}
+
+LiftingStrategy2 *PredecessorLiftingStrategyFactory::create2(
+    const ParityGame &game, const SmallProgressMeasures &spm )
+{
+    return new PredecessorLiftingStrategy(game, spm, stack_, 2);
 }

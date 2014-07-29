@@ -29,7 +29,7 @@
 
   typedef struct
   {
-    atermpp::indexed_set terms;
+    atermpp::indexed_set<atermpp::aterm> terms;
     PTable pointers;
   } HTable;
 

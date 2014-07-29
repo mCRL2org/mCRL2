@@ -13,7 +13,7 @@
 #include <QMessageBox>
 
 FileBrowser::FileBrowser(QWidget *parent) :
-  QTreeView(parent), m_model(this), m_context(NULL), m_cut(false), m_copy(false), m_copydialog(parent)
+  QTreeView(parent), m_model(this), m_menu(NULL), m_copyMode(cm_none), m_copydialog(parent)
 {
   connect(&m_copydialog, SIGNAL(rejected()), &m_copythread, SLOT(cancel()));
   connect(&m_copythread, SIGNAL(started()), &m_copydialog, SLOT(open()));
@@ -36,18 +36,153 @@ FileBrowser::FileBrowser(QWidget *parent) :
   setColumnHidden( 1, true );
   setColumnHidden( 2, true );
   setColumnHidden( 3, true );
-
   setSortingEnabled(true);
   sortByColumn(0, Qt::AscendingOrder);
 
   setCurrentIndex(m_model.index(QDir::currentPath()));
+
+  m_menu = new QMenu("&File", this);
+  m_actOpenFiles = m_menu->addAction("Open");
+  m_sep1 = m_menu->addSeparator();
+  m_actNewFile = m_menu->addAction("&New file...");
+  m_actNewFolder = m_menu->addAction("New &folder...");
+  m_sep2 = m_menu->addSeparator();
+  m_sep3 = m_menu->addSeparator();
+  m_actDeleteFiles = m_menu->addAction("&Delete");
+  m_actDeleteFiles->setShortcut(QKeySequence::Delete);
+  m_actCutFiles = m_menu->addAction("Cu&t");
+  m_actCutFiles->setShortcut(QKeySequence::Cut);
+  m_actCopyFiles = m_menu->addAction("&Copy");
+  m_actCopyFiles->setShortcut(QKeySequence::Copy);
+  m_actPasteFiles = m_menu->addAction("&Paste");
+  m_actPasteFiles->setShortcut(QKeySequence::Paste);
+  m_actRenameFile = m_menu->addAction("&Rename...");
+  m_actFileProperties = m_menu->addAction("Pr&operties...");
+
+  connect(m_actNewFile, SIGNAL(triggered()), this, SLOT(onNewFile()));
+  connect(m_actNewFolder, SIGNAL(triggered()), this, SLOT(onNewFolder()));
+  connect(m_actOpenFiles, SIGNAL(triggered()), this, SLOT(onOpenFiles()));
+  connect(m_actDeleteFiles, SIGNAL(triggered()), this, SLOT(onDeleteFiles()));
+  connect(m_actCutFiles, SIGNAL(triggered()), this, SLOT(onCutFiles()));
+  connect(m_actCopyFiles, SIGNAL(triggered()), this, SLOT(onCopyFiles()));
+  connect(m_actPasteFiles, SIGNAL(triggered()), this, SLOT(onPasteFiles()));
+  connect(m_actRenameFile, SIGNAL(triggered()), this, SLOT(onRenameFile()));
+  connect(m_actFileProperties, SIGNAL(triggered()), this, SLOT(onFileProperties()));
+  connect(m_menu, SIGNAL(aboutToShow()), this, SLOT(onContextMenu()));
+}
+
+FileBrowser::~FileBrowser()
+{
+  freeToolActions();
+  delete m_menu;
+  delete m_actOpenFiles;
+  delete m_sep1;
+  delete m_actNewFile;
+  delete m_actNewFolder;
+  delete m_sep2;
+  delete m_sep3;
+  delete m_actCopyFiles;
+  delete m_actCutFiles;
+  delete m_actPasteFiles;
+  delete m_actRenameFile;
+  delete m_actFileProperties;
+}
+
+void FileBrowser::freeToolActions()
+{
+  for (auto cat = m_categories.begin(); cat != m_categories.end(); ++cat)
+  {
+    m_menu->removeAction((*cat)->menuAction());
+    QList<QAction*> actions = (*cat)->actions();
+    for (auto action = actions.begin(); action != actions.end(); ++action)
+    {
+      delete *action;
+    }
+    delete *cat;
+  }
+}
+
+void FileBrowser::setCatalog(ToolCatalog catalog)
+{
+  freeToolActions();
+  m_catalog = catalog;
+  QStringList categories = m_catalog.categories();
+  for (auto cat = categories.begin(); cat != categories.end(); ++cat)
+  {
+    QMenu* catMenu = new QMenu(*cat, m_menu);
+    m_menu->insertMenu(m_sep3, catMenu);
+    QList<ToolInformation> tools = m_catalog.tools(*cat);
+    for (auto tool = tools.begin(); tool != tools.end(); ++tool)
+    {
+      catMenu->addAction(new ToolAction(*tool, catMenu));
+      connect(catMenu->actions().back(), SIGNAL(triggered()), this, SLOT(onToolSelected()));
+    }
+    m_categories.append(catMenu);
+  }
+}
+
+void FileBrowser::rememberSelection()
+{
+  QModelIndexList indexes = selectedIndexes();
+  m_selectedFiles.clear();
+  for (int i = 0; i < selectedIndexes().size(); i++)
+  {
+    m_selectedFiles.append(m_model.filePath(indexes[i]));
+  }
+}
+
+void FileBrowser::contextMenuEvent(QContextMenuEvent *event)
+{
+  m_menu->popup(event->globalPos());
+}
+
+void FileBrowser::onContextMenu()
+{
+  bool selection = !selectedIndexes().empty();
+  bool singleton = selectedIndexes().size() == 1;
+
+  m_actOpenFiles->setVisible(selection);
+  m_sep1->setVisible(selection);
+
+  bool toolsVisible = false;
+  if (singleton)
+  {
+    QString ext = QFileInfo(m_model.filePath(selectedIndexes()[0])).suffix();
+    for (auto cat = m_categories.begin(); cat != m_categories.end(); ++cat)
+    {
+      bool catVisible = false;
+      QList<QAction*> actions = (*cat)->actions();
+      for (auto tool = actions.begin(); tool != actions.end(); ++tool)
+      {
+        if (dynamic_cast<ToolAction*>(*tool)->information().inputMatchesAny(m_catalog.fileTypes(ext)))
+        {
+          (*tool)->setVisible(true);
+          catVisible = true;
+        }
+        else
+        {
+          (*tool)->setVisible(false);
+        }
+      }
+      toolsVisible = toolsVisible || catVisible;
+      (*cat)->menuAction()->setVisible(catVisible);
+    }
+  }
+  m_sep2->setVisible(toolsVisible);
+
+  m_actDeleteFiles->setVisible(selection);
+  m_actCutFiles->setVisible(selection);
+  m_actCopyFiles->setVisible(selection);
+  m_actPasteFiles->setVisible(selection);
+  m_actRenameFile->setVisible(singleton);
+  m_actFileProperties->setVisible(singleton);
 }
 
 
 void FileBrowser::onToolSelected()
 {
   QModelIndexList indexes = selectedIndexes();
-  if (indexes.size() == 1)
+  if (!indexes.empty())
   {
     ToolAction* act = dynamic_cast<ToolAction*>(QObject::sender());
     emit(openToolInstance(m_model.filePath(indexes[0]), act->information()));
@@ -71,6 +206,10 @@ void FileBrowser::onNewFile()
   if (indexes.size() == 1)
   {
     QDir dir = QDir(m_model.filePath(indexes[0]));
+    if (!dir.exists())
+    {
+      dir = QFileInfo(m_model.filePath(indexes[0])).absoluteDir();
+    }
     QString newfile("new");
     int filenr = 0;
     while(dir.exists(newfile))
@@ -93,6 +232,10 @@ void FileBrowser::onNewFolder()
   if (indexes.size() == 1)
   {
     QDir dir = QDir(m_model.filePath(indexes[0]));
+    if (!dir.exists())
+    {
+      dir = QFileInfo(m_model.filePath(indexes[0])).absoluteDir();
+    }
     QString newfile("new");
     int filenr = 0;
     while(dir.exists(newfile))
@@ -109,119 +252,91 @@ void FileBrowser::onNewFolder()
 }
 
 
-void FileBrowser::onOpenFile()
+void FileBrowser::onOpenFiles()
 {
   QModelIndexList indexes = selectedIndexes();
-  if (indexes.size() == 1)
+  for (auto i = indexes.begin(); i != indexes.end(); ++i)
   {
-    QString file = m_model.filePath(indexes[0]);
-    if (QFileInfo(file).isFile())
+    QDesktopServices::openUrl(QUrl::fromLocalFile(m_model.filePath(*i)));
+  }
+}
+
+void FileBrowser::onDeleteFiles()
+{
+  QModelIndexList indexes = selectedIndexes();
+  if (askRemove(indexes))
+  {
+    for (auto i = indexes.begin(); i != indexes.end(); ++i)
     {
-      QDesktopServices::openUrl(QUrl::fromLocalFile(file));
+      m_model.remove(*i);
     }
   }
 }
 
-
-void FileBrowser::onDeleteFile()
+void FileBrowser::onCutFiles()
 {
-  QModelIndexList indexes = selectedIndexes();
-  if (indexes.size() > 0 && askRemove(indexes))
-  {
-    for (int i = 0; i < indexes.size(); i++)
-    {
-        m_model.remove(indexes[i]);
-    }
-  }
+  rememberSelection();
+  m_copyMode = cm_cut;
 }
 
-
-void FileBrowser::contextMenuEvent(QContextMenuEvent *event)
+void FileBrowser::onCopyFiles()
 {
-  QModelIndexList indexes = selectedIndexes();
-  if (indexes.size() > 0)
+  rememberSelection();
+  m_copyMode = cm_copy;
+}
+
+void FileBrowser::onPasteFiles()
+{
+  if (selectedIndexes().empty())
   {
-    event->accept();
+    return;
+  }
 
-    QStringList files;
-    QList<QFileInfo> fileinfos;
-    for (int i = 0; i < indexes.size(); i++)
+  QDir targetDir = QDir(m_model.filePath(selectedIndexes()[0]));
+  m_copyMode = cm_none;
+  for (auto file = m_selectedFiles.begin(); file != m_selectedFiles.end(); ++file)
+  {
+    QModelIndex pastefile = m_model.index(*file);
+    if (pastefile.isValid())
     {
-      files.append(m_model.filePath(indexes[i]));
-      fileinfos.append(QFileInfo(files.last()));
-    }
-    createContextMenu(fileinfos);
-    QAction* act = m_context->exec(event->globalPos());
-
-    if (act != NULL)
-    {
-      if (act->text() == "Open" && indexes.size() == 1)
+      QString newName = targetDir.absoluteFilePath(m_model.fileName(pastefile));
+      if (askRemove(newName, true))
       {
-        QDesktopServices::openUrl(QUrl(files[0]));
-      }
-      if (act->text() == "New File" && indexes.size() == 1)
-      {
-        onNewFile();
-      }
-      if (act->text() == "New Directory" && indexes.size() == 1)
-      {
-        onNewFolder();
-      }
-      if (act->text() == "Cut")
-      {
-        m_cut = true; m_copy = false;
-        m_pastefiles = files;
-      }
-      if (act->text() == "Copy")
-      {
-        m_cut = false; m_copy = true;
-        m_pastefiles = files;
-      }
-      if (act->text() == "Paste" && indexes.size() == 1)
-      {
-        for (int i = 0; i < m_pastefiles.size(); i++)
+        switch (m_copyMode)
         {
-          QModelIndex m_pastefile = m_model.index(m_pastefiles[i]);
-          if (m_pastefile.isValid())
-          {
-            QString newName = QDir(m_model.filePath(indexes[0])).absoluteFilePath(m_model.fileName(m_pastefile));
-            if (m_cut)
-            {
-              if (askRemove(newName, true))
-              {
-                QFile::remove(newName);
-                if (!QFile::rename(m_model.filePath(m_pastefile), newName)) // Quick rename failed
-                  copyDirectory(m_model.filePath(m_pastefile), newName, true);
-                m_cut = false;
-                m_pastefile = QModelIndex();
-              }
-            }
-            else if (m_copy)
-            {
-              if (askRemove(newName, true))
-              {
-                copyDirectory(m_model.filePath(m_pastefile), newName);
-              }
-            }
-          }
+        case cm_cut:
+            QFile::remove(newName);
+            if (!QFile::rename(*file, newName))
+              copyDirectory(*file, newName, true);
+            break;
+        case cm_copy:
+            copyDirectory(*file, newName);
+            break;
+        default:
+            break;
         }
       }
-      if (act->text() == "Rename" && indexes.size() == 1)
-      {
-        edit(indexes[0]);
-      }
-      if (act->text() == "Delete")
-      {
-        onDeleteFile();
-      }
-      if (act->text() == "Properties" && indexes.size() == 1)
-      {
-        emit(openProperties(m_model.filePath(indexes[0])));
-      }
     }
   }
 }
 
+void FileBrowser::onRenameFile()
+{
+  QModelIndexList indexes = selectedIndexes();
+  if (!indexes.empty())
+  {
+    edit(indexes[0]);
+  }
+}
+
+void FileBrowser::onFileProperties()
+{
+  QModelIndexList indexes = selectedIndexes();
+  if (!indexes.empty())
+  {
+    emit(openProperties(m_model.filePath(indexes[0])));
+  }
+}
 
 void FileBrowser::mouseDoubleClickEvent(QMouseEvent *event)
 {
@@ -231,7 +346,7 @@ void FileBrowser::mouseDoubleClickEvent(QMouseEvent *event)
     QString file = m_model.filePath(indexes[0]);
     if (QFileInfo(file).isFile())
     {
-      onOpenFile();
+      onOpenFiles();
       event->accept();
     }
     else
@@ -245,74 +360,13 @@ void FileBrowser::keyPressEvent(QKeyEvent *event)
 {
     if (event->matches(QKeySequence::Delete))
     {
-        onDeleteFile();
+        onDeleteFiles();
     }
     else
     {
         QTreeView::keyPressEvent(event);
     }
 }
-
-
-QAction *FileBrowser::addConditionalAction(QMenu *menu, QString action, bool condition)
-{
-  QAction* act = menu->addAction(action);
-  act->setEnabled(condition);
-  return act;
-}
-
-
-void FileBrowser::createContextMenu(QList<QFileInfo> info)
-{
-  delete m_context;
-  m_context = new QMenu(this);
-  if (info[0].isFile())
-  {
-    addConditionalAction(m_context, "Open", info.size() == 1);
-    m_context->addSeparator();
-
-    QStringList cats = m_catalog.categories();
-    for (int i = 0; i < cats.size(); i++)
-    {
-      QMenu *menuCat = new QMenu(m_context);
-      menuCat->setTitle(cats.at(i));
-      m_context->addMenu(menuCat);
-      QList<ToolInformation> tools = m_catalog.tools(cats.at(i), info[0].suffix());
-      for (int i = 0; i < tools.count(); i++)
-      {
-        ToolInformation tool = tools.at(i);
-        ToolAction* actTool = new ToolAction(tool, menuCat);
-        menuCat->addAction(actTool);
-        connect(actTool, SIGNAL(triggered()), this, SLOT(onToolSelected()));
-      }
-      menuCat->setEnabled(tools.count() > 0 && info.size() == 1);
-    }
-
-    m_context->addSeparator();
-  }
-  if (info[0].isDir())
-  {
-    addConditionalAction(m_context, "New File", info.size() == 1);
-    addConditionalAction(m_context, "New Directory", info.size() == 1);
-    m_context->addSeparator();
-  }
-  bool drives = false;
-  for (int i = 0; i < info.size(); i++)
-  {
-    drives = drives || QDir::drives().contains(info[i].absoluteFilePath());
-  }
-  addConditionalAction(m_context, "Cut", !drives);
-  addConditionalAction(m_context, "Copy", !drives);
-  addConditionalAction(m_context, "Paste", info.size() == 1 && info[0].isDir() && (m_cut || m_copy));
-
-  m_context->addSeparator();
-  addConditionalAction(m_context, "Rename", info.size() == 1);
-  m_context->addAction("Delete");
-  m_context->addSeparator();
-  addConditionalAction(m_context, "Properties", info.size() == 1);
-
-}
-
 
 void FileBrowser::copyDirectory(QString oldPath, QString newPath, bool move)
 {

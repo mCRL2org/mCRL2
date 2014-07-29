@@ -19,7 +19,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/parse.h"
@@ -38,12 +38,12 @@ class propositional_variable: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     propositional_variable()
-      : atermpp::aterm_appl(core::detail::constructPropVarDecl())
+      : atermpp::aterm_appl(core::detail::default_values::PropVarDecl)
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    propositional_variable(const atermpp::aterm& term)
+    explicit propositional_variable(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_PropVarDecl(*this));
@@ -51,22 +51,22 @@ class propositional_variable: public atermpp::aterm_appl
 
     /// \brief Constructor.
     propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)
-      : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, parameters))
+      : atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), name, parameters)
     {}
 
     /// \brief Constructor.
     propositional_variable(const std::string& name, const data::variable_list& parameters)
-      : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(core::identifier_string(name), parameters))
+      : atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), core::identifier_string(name), parameters)
     {}
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::variable_list& parameters() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<data::variable_list>((*this)[1]);
     }
 //--- start user section propositional_variable ---//
     /// \brief Type of the parameters.
@@ -77,7 +77,7 @@ class propositional_variable: public atermpp::aterm_appl
     propositional_variable(const std::string& s)
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
-      copy_term(core::detail::gsMakePropVarDecl(core::identifier_string(p.first), atermpp::convert< data::variable_list >(p.second)));
+      copy_term(atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), core::identifier_string(p.first), atermpp::container_cast< data::variable_list >(p.second)));
     }
 //--- end user section propositional_variable ---//
 };
@@ -88,130 +88,40 @@ typedef atermpp::term_list<propositional_variable> propositional_variable_list;
 /// \brief vector of propositional_variables
 typedef std::vector<propositional_variable>    propositional_variable_vector;
 
-
 /// \brief Test for a propositional_variable expression
-/// \param t A term
-/// \return True if it is a propositional_variable expression
+/// \param x A term
+/// \return True if \a x is a propositional_variable expression
 inline
-bool is_propositional_variable(const atermpp::aterm_appl& t)
+bool is_propositional_variable(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsPropVarDecl(t);
+  return x.function() == core::detail::function_symbols::PropVarDecl;
 }
 
+// prototype declaration
+std::string pp(const propositional_variable& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const propositional_variable& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(propositional_variable& t1, propositional_variable& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class propositional_variable ---//
 
-/*
-/// \brief A propositional variable declaration.
-// <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
-class propositional_variable: public atermpp::aterm_appl
-{
-  protected:
-    /// \brief The name of the propositional variable
-    core::identifier_string m_name;
-
-    /// \brief The parameters of the propositional variable
-    data::variable_list m_parameters;
-
-  public:
-    /// \brief Type of the parameters.
-    typedef data::variable parameter_type;
-
-    /// \brief Constructor.
-    propositional_variable()
-      : atermpp::aterm_appl(core::detail::constructPropVarDecl())
-    {}
-
-    /// \brief Constructor.
-    /// \param s A string
-    propositional_variable(std::string s)
-    {
-      std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
-      m_name      = core::identifier_string(p.first);
-      m_parameters = atermpp::convert< data::variable_list >(p.second);
-      copy_term(core::detail::gsMakePropVarDecl(m_name, m_parameters));
-    }
-
-    /// \brief Constructor.
-    /// \param t A term
-    propositional_variable(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(core::detail::check_rule_PropVarDecl(*this));
-      iterator i = t.begin();
-      m_name = atermpp::aterm_cast<atermpp::aterm_string>(*i++);
-      m_parameters = data::variable_list(*i);
-    }
-
-    /// \brief Constructor.
-    /// \param t A term
-    explicit propositional_variable(const atermpp::aterm &t1)
-      : atermpp::aterm_appl(t1)
-    {
-      const atermpp::aterm_appl t(t1);
-      assert(core::detail::check_rule_PropVarDecl(*this));
-      iterator i = t.begin();
-      m_name = atermpp::aterm_cast<atermpp::aterm_string>(*i++);
-      m_parameters = data::variable_list(*i);
-    }
-
-    /// \brief Constructor.
-    /// \param name A
-    /// \param parameters A sequence of data variables
-    propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)
-      : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, parameters)),
-        m_name(name),
-        m_parameters(parameters)
-    {
-    }
-
-    /// \brief Returns the name of the propositional variable.
-    /// \return The name of the propositional variable.
-    core::identifier_string name() const
-    {
-      return m_name;
-    }
-
-    /// \brief Returns the parameters of the propositional variable.
-    /// \return The parameters of the propositional variable.
-    data::variable_list parameters() const
-    {
-      return m_parameters;
-    }
-};
-
-/// \brief Read-only singly linked list of propositional variable declarations
-typedef atermpp::term_list<propositional_variable> propositional_variable_list;
-
-/// \brief Vector of propositional variable declarations
-typedef std::vector<propositional_variable> propositional_variable_vector;
-
-/// \brief Returns true if the term t is a propositional variable declaration
-/// \param t A term
-/// \return True if the term t is a propositional variable declaration
-inline
-bool is_propositional_variable(atermpp::aterm_appl t)
-{
-  return core::detail::gsIsPropVarDecl(t);
-}
-*/
-
 // template function overloads
-std::string pp(const propositional_variable& x);
 std::string pp(const propositional_variable_list& x);
 std::string pp(const propositional_variable_vector& x);
 
 } // namespace pbes_system
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::pbes_system::propositional_variable& t1, mcrl2::pbes_system::propositional_variable& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PBES_PROPOSITIONAL_VARIABLE_H

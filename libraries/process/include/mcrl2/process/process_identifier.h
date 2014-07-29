@@ -14,9 +14,11 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/hash.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2
@@ -25,14 +27,28 @@ namespace mcrl2
 namespace process
 {
 
+typedef std::pair<core::identifier_string, data::variable_list> process_identifier_key_type;
+
 //--- start generated class process_identifier ---//
 /// \brief A process identifier
 class process_identifier: public atermpp::aterm_appl
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+    }
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[1]);
+    }
+//--- start user section process_identifier ---//
     /// \brief Default constructor.
     process_identifier()
-      : atermpp::aterm_appl(core::detail::constructProcVarId())
+      : atermpp::aterm_appl(core::detail::default_values::ProcVarId)
     {}
 
     /// \brief Constructor.
@@ -45,23 +61,22 @@ class process_identifier: public atermpp::aterm_appl
 
     /// \brief Constructor.
     process_identifier(const core::identifier_string& name, const data::variable_list& variables)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, variables))
+      : atermpp::aterm_appl(atermpp::aterm_appl(core::detail::function_symbol_ProcVarId(),
+          name,
+          variables,
+          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type, 2>::insert(std::make_pair(name, variables)))
+        ))
     {}
 
     /// \brief Constructor.
     process_identifier(const std::string& name, const data::variable_list& variables)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(core::identifier_string(name), variables))
+      : atermpp::aterm_appl(atermpp::aterm_appl(core::detail::function_symbol_ProcVarId(),
+          core::identifier_string(name),
+          variables,
+          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type, 2>::insert(std::make_pair(name, variables)))
+        ))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
-    }
-
-    const data::variable_list& variables() const
-    {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg2(*this));
-    }
+//--- end user section process_identifier ---//
 };
 
 /// \brief list of process_identifiers
@@ -70,20 +85,35 @@ typedef atermpp::term_list<process_identifier> process_identifier_list;
 /// \brief vector of process_identifiers
 typedef std::vector<process_identifier>    process_identifier_vector;
 
-
 /// \brief Test for a process_identifier expression
 /// \param x A term
 /// \return True if \a x is a process_identifier expression
 inline
 bool is_process_identifier(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcVarId(x);
+  return x.function() == core::detail::function_symbols::ProcVarId;
 }
 
+// prototype declaration
+std::string pp(const process_identifier& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_identifier& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(process_identifier& t1, process_identifier& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class process_identifier ---//
 
 // template function overloads
-std::string pp(const process_identifier& x);
 std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
 void normalize_sorts(process_identifier_vector& x, const data::data_specification& dataspec);
@@ -92,14 +122,6 @@ void normalize_sorts(process_identifier_vector& x, const data::data_specificatio
 
 } // namespace mcrl2
 
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::process::process_identifier& t1, mcrl2::process::process_identifier& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
+#include "mcrl2/process/index_traits.h"
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

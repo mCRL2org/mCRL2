@@ -23,6 +23,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/pbes/pbes.h"
@@ -62,10 +63,10 @@ class bisimulation_algorithm
     /// \brief Generates a name for an action_list.
     /// \param l A sequence of actions
     /// \return A string representation of the list \p l
-    std::string action_list_name(action_list l) const
+    std::string action_list_name(const process::action_list& l) const
     {
       std::ostringstream out;
-      for (action_list::iterator i = l.begin(); i != l.end(); ++i)
+      for (auto i = l.begin(); i != l.end(); ++i)
       {
         out << (i != l.begin() ? "-" : "") << std::string(i->label().name());
       }
@@ -738,7 +739,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
         variable_list e1_new = fresh_variables(e1, used_names);
         data::mutable_map_substitution<> sigma1;
-        make_substitution(e1, atermpp::aterm_cast<data::data_expression_list>(e1_new), sigma1);
+        make_substitution(e1, atermpp::container_cast<data::data_expression_list>(e1_new), sigma1);
         std::set<data::variable> sigma1_variables(e1_new.begin(), e1_new.end());
         data_expression      cj_new = data::replace_variables_capture_avoiding(cj, sigma1, sigma1_variables);
         data_expression_list gj_new = data::replace_variables_capture_avoiding(gj, sigma1, sigma1_variables);

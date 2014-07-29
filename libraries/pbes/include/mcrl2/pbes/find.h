@@ -18,8 +18,6 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/detail/pbes_free_variable_finder.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/add_binding.h"
 #include "mcrl2/utilities/exception.h"
@@ -223,14 +221,15 @@ std::set<propositional_variable_instantiation> find_propositional_variable_insta
 }
 
 /// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] x an expression in which to search
-/// \param[in] v the variable to search for
-/// \return True if the term has a given variable as subterm.
+/// \param[in] x an expression
+/// \param[in] v a variable
+/// \return True if v occurs in x.
 template <typename T>
 bool search_variable(const T& x, const data::variable& v)
 {
-  std::set<data::variable> variables = pbes_system::find_all_variables(x);
-  return variables.find(v) != variables.end();
+  data::detail::search_variable_traverser<pbes_system::variable_traverser> f(v);
+  f(x);
+  return f.found;
 }
 
 } // namespace pbes_system

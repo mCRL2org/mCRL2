@@ -15,17 +15,20 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include <vector>
-#include <assert.h>
+#include <functional>
 
-#include "boost/type_traits/is_base_of.hpp"
-#include "boost/static_assert.hpp"
-
-#include "mcrl2/atermpp/detail/aterm.h"
+#include <type_traits>
+#include "detail/aterm.h"
+#include "type_traits.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
 {
+
+typedef void(*term_callback)(const aterm&);
+
+void add_creation_hook(const function_symbol&, term_callback);
+void add_deletion_hook(const function_symbol&, term_callback);
 
 class aterm
 {
@@ -36,15 +39,15 @@ class aterm
     template < typename T >
     friend class term_list;
 
-    friend void detail::simple_free_term(const detail::_aterm *t, const size_t arity);
-
-    // friend void detail::free_term(const detail::_aterm* t);
     friend void detail::free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed);
 
     friend void detail::initialise_aterm_administration();
 
     template <class Term, class Iter, class ATermConverter>
     friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+
+    template <class Term, class Iter, class ATermConverter>
+    friend const detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
 
     friend const detail::_aterm* detail::address(const aterm &t);
   protected:
@@ -83,15 +86,6 @@ class aterm
       return m_term->function();
     }
 
-    /// \brief Constructor.
-    /// \details The function symbol must have arity 0. This function
-    /// is for internal use only. Use term_appl(sym) in applications.
-    /// \param sym A function symbol.
-    aterm(const function_symbol &sym):m_term(detail::aterm0(sym))
-    {
-      increase_reference_count<false>();
-    }
-
   public: // Should be protected, but this cannot yet be done due to a problem
           // in the compiling rewriter.
     aterm (const detail::_aterm *t):m_term(t)
@@ -123,6 +117,14 @@ class aterm
       return *this;
     }
 
+    /// \brief Move assignment operator.
+    /// \param t a term to be assigned.
+    aterm& operator=(aterm &&t)
+    {
+      swap(t);
+      return *this;
+    }
+
     /// \brief Destructor.
     ~aterm ()
     {
@@ -130,14 +132,14 @@ class aterm
     }
 
     /// \brief Returns whether this term is a term_appl.
-    /// \details This function has constant complexity. 
+    /// \details This function has constant complexity.
     ///          It is defined as !type_is_int() && !type_is_list().
     /// \return True iff term is an term_appl.
     bool type_is_appl() const
     {
       return !type_is_int() && !type_is_list();
     }
-    
+
     /// \brief Returns whether this term has the internal structure of an aterm_int.
     /// \details This function has constant complexity.
     /// \return True iff term is an term_int.
@@ -247,32 +249,85 @@ class aterm
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
-      std::swap(m_term,t.m_term);
+      using std::swap;
+      swap(m_term,t.m_term);
     }
 };
 
+template <class Term1, class Term2>
+struct is_convertible : public
+    std::conditional<std::is_base_of<aterm, Term1>::value &&
+                     std::is_base_of<aterm, Term2>::value && (
+                     std::is_convertible<Term1, Term2>::value ||
+                     std::is_convertible<Term2, Term1>::value),
+                     std::true_type, std::false_type>::type
+{ };
+
 /// \brief A cheap cast from one aterm based type to another
-/// \details When casting one aterm based type into another, generally
-///          a new aterm is constructed, and the old one is destroyed.
-///          This can cause undesired overhead, for instance due to
-///          increasing and decreasing of reference counts. This
-///          cast changes the type, without changing the aterm itself.
-///          It can only be used if the input and output types inherit
-///          from aterms, and contain no additional information than a
+///        When casting one aterm based type into another, generally  a new aterm is constructed,
+///        and the old one is destroyed. This can cause undesired overhead, for instance due to
+///        increasing and decreasing of reference counts. This cast changes the type, without
+///        changing the aterm itself. It can only be used if Base and Derived inherit from aterm,
+///        and contain no additional information than a
 ///          single aterm.
 /// \param   t A term of a type inheriting from an aterm.
-/// \return  A term of type ATERM_TYPE_OUT.
-template <class ATERM_TYPE_OUT>
-const ATERM_TYPE_OUT &aterm_cast(const aterm &t)
+/// \return  A term of type Derived.
+template <class Derived, class Base>
+const Derived& down_cast(const Base& t,
+                          typename std::enable_if<is_convertible<Base, Derived>::value &&
+                                                  !std::is_base_of<Derived, Base>::value>::type* = NULL)
 {
-  BOOST_STATIC_ASSERT((boost::is_base_of<aterm, ATERM_TYPE_OUT>::value));
-  BOOST_STATIC_ASSERT((sizeof(ATERM_TYPE_OUT)==sizeof(aterm)));
-#ifndef NDEBUG
-  // This assignment checks whether e has the right type;
-  ATERM_TYPE_OUT t0=(ATERM_TYPE_OUT &)t;
-  // assert(t0); // Prevent warning for not using t;
-#endif
-  return (ATERM_TYPE_OUT &)t;
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const Derived&>(t);
+}
+
+template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
+const DerivedCont& container_cast(const Cont<Base>& t,
+                              typename std::enable_if<
+                                is_container<DerivedCont>::value &&
+                                std::is_same<Cont<typename DerivedCont::value_type>, DerivedCont>::value &&
+                                !std::is_base_of<DerivedCont, Cont<Base> >::value &&
+                                is_convertible<Base, typename DerivedCont::value_type>::value
+                              >::type* = NULL)
+{
+  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const DerivedCont&>(t);
+}
+
+template <class Derived, class Base>
+const Derived& vertical_cast(const Base& t,
+                          typename std::enable_if<is_convertible<Base, Derived>::value>::type* = NULL)
+{
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const Derived&>(t);
+}
+
+template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
+const DerivedCont& vertical_cast(const Cont<Base>& t,
+                              typename std::enable_if<
+                                is_container<DerivedCont>::value &&
+                                std::is_same<Cont<typename DerivedCont::value_type>, DerivedCont>::value &&
+                                is_convertible<Base, typename DerivedCont::value_type>::value
+                              >::type* = NULL)
+{
+  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const DerivedCont&>(t);
+}
+
+template <class Derived, class Base>
+const Derived& deprecated_cast(const Base& t,
+                          typename std::enable_if<
+                             std::is_base_of<aterm, Base>::value &&
+                             std::is_base_of<aterm, Derived>::value
+                          >::type* = NULL)
+{
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const Derived&>(t);
 }
 
 /// \brief Send the term in textual form to the ostream.
@@ -299,6 +354,30 @@ inline void swap(atermpp::aterm &t1, atermpp::aterm &t2)
 {
   t1.swap(t2);
 }
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<atermpp::aterm>
+{
+  std::size_t operator()(const atermpp::aterm& t) const
+  {
+    static const size_t a_prime_number = 134217689;
+    return (reinterpret_cast<size_t>(atermpp::detail::address(t))>>3) * a_prime_number;
+  }
+};
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<std::pair<atermpp::aterm,atermpp::aterm> >
+{
+  std::size_t operator()(const std::pair<atermpp::aterm, atermpp::aterm>& x) const
+  {
+    // The hashing function below is taken from boost (http://www.boost.org/doc/libs/1_35_0/doc/html/boost/hash_combine_id241013.html).
+    size_t seed=std::hash<atermpp::aterm>()(x.first);
+    return std::hash<atermpp::aterm>()(x.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  }
+};
+
 } // namespace std
 
 

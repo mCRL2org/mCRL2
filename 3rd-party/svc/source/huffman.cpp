@@ -24,6 +24,7 @@
 #include <limits.h>
 #include <svc/huffman.h>
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 
 using namespace atermpp;
 
@@ -51,8 +52,8 @@ int HFinit(HFtree* tree, HTable* terms)
   NO_ATERM=aterm();
   // ATprotect(&ESCAPE_SEQUENCE);
   // ATprotect(&NO_ATERM);
-  ESCAPE_SEQUENCE=aterm_appl(function_symbol("ESC",1),aterm_appl(function_symbol("NEW",0)));
-  NO_ATERM       =aterm_appl(function_symbol("ESC",1),aterm_appl(function_symbol("NIL",0)));
+  ESCAPE_SEQUENCE=aterm_appl(function_symbol(std::string("ESC"),1),aterm_appl(function_symbol(std::string("NEW"),0)));
+  NO_ATERM       =aterm_appl(function_symbol(std::string("ESC"),1),aterm_appl(function_symbol(std::string("NIL"),0)));
 
   /* Init LZ buffer */
 

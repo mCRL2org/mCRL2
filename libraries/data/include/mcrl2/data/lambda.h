@@ -46,7 +46,7 @@ class lambda: public abstraction
     /// \pre variables is not empty.
     lambda(const variable& variable,
            const data_expression& body)
-      : abstraction(lambda_binder(), atermpp::aterm_cast<variable_list>(make_list(variable)), body)
+      : abstraction(lambda_binder(), make_list(variable), body)
     {
     }
 
@@ -58,13 +58,33 @@ class lambda: public abstraction
     template < typename Container >
     lambda(const Container& variables,
            const data_expression& body,
-           typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = 0)
       : abstraction(lambda_binder(), variables, body)
     {
       assert(!variables.empty());
     }
 
 }; // class lambda
+
+//--- start generated class lambda ---//
+// prototype declaration
+std::string pp(const lambda& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const lambda& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(lambda& t1, lambda& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated class lambda ---//
 
 } // namespace data
 

@@ -46,9 +46,9 @@ def set_mcrl2_tooldir(tooldir):
 
 def add_tool_dir(toolname):
     if mcrl2_tool_options.tooldir != '':
-        guess = path(mcrl2_tool_options.tooldir) / toolname / toolname
-        if os.path.isfile(guess):
-          return guess
+        guess = path(mcrl2_tool_options.tooldir) / toolname
+        if os.path.isdir(guess):
+          return guess / toolname
         return path(mcrl2_tool_options.tooldir) / 'bin' / toolname
     return toolname
 
@@ -77,19 +77,21 @@ def timeout_command(program, options, timeout = -1):
 
     cmd = re.split('\s+', command)
     start = datetime.datetime.now()
+    print 'Starting "{0}" with timeout {1}'.format(' '.join('"{0}"'.format(arg) if ' ' in arg else arg for arg in cmd), timeout)
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     while process.poll() is None:
         time.sleep(0.1)
         now = datetime.datetime.now()
         if (now - start).seconds > timeout:
-            if platform.system() == 'Windows':
-                #os.kill(process.pid, signal.CTRL_C_EVENT)
-                #os.kill(process.pid, signal.CTRL_BREAK_EVENT)
-                os.kill(process.pid, signal.SIGABRT)
-            else:
-                os.kill(process.pid, signal.SIGKILL)
-                os.waitpid(-1, os.WNOHANG)
+            try:
+                process.kill()
+                process.wait()
+            except WindowsError:
+                # We might be trying to kill a process that just terminated
+                # of its own accord, or maybe Windows just doesn't like us
+                # enough. In either case, there's nothing we can do about it
+                pass
             return None, None
 
     return (process.stdout.read(), process.stderr.read())

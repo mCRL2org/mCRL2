@@ -18,7 +18,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/exploration_strategy.h"
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 
 namespace mcrl2
 {
@@ -41,7 +41,6 @@ struct lts_generation_options
     max_states(DEFAULT_MAX_STATES),
     initial_table_size(DEFAULT_INIT_TSIZE),
     suppress_progress_messages(false),
-    stateformat(lps::GS_STATE_TREE),
     bithashing(false),
     bithashsize(DEFAULT_BITHASHSIZE),
     outformat(mcrl2::lts::lts_none),
@@ -86,7 +85,7 @@ struct lts_generation_options
     {
       for (std::set<mcrl2::core::identifier_string>::iterator ta = trace_actions.begin(); ta != trace_actions.end(); ++ta)
       {
-        mcrl2::lps::action_label_list::iterator it = specification.action_labels().begin();
+        mcrl2::process::action_label_list::iterator it = specification.action_labels().begin();
         bool found = (std::string(*ta) == "tau");
         while (!found && it != specification.action_labels().end())
         {
@@ -112,7 +111,6 @@ struct lts_generation_options
   size_t initial_table_size;
   bool suppress_progress_messages;
 
-  int stateformat;
   bool bithashing;
   size_t bithashsize;
 

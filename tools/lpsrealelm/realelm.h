@@ -13,6 +13,7 @@
 #define MCRL2_LPSREALELM_REALELM_H
 
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 
 #include "comp.h"
@@ -20,9 +21,9 @@
 
 
 
-mcrl2::lps::specification realelm(mcrl2::lps::specification s,
+mcrl2::lps::specification realelm(mcrl2::lps::specification s, 
                                   int max_iterations = 5,
-                                  const rewriter& r = rewriter());
+                                  const rewrite_strategy strat=jitty);
 
 template <typename Term, typename MapContainer>
 Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements);

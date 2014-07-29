@@ -18,13 +18,14 @@
 #include <set>
 #include <sstream>
 #include <utility>
+#include <type_traits>
+
 // #include <boost/algorithm/string/join.hpp> Don't use this, it leads to stack overflows with Visual C++ 9.0 express
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/bind.hpp>
-#include <boost/utility/enable_if.hpp>
 #include <boost/lexical_cast.hpp>
-#include "mcrl2/atermpp/aterm_access.h"
+
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
@@ -53,14 +54,14 @@ class data_property_map
 
     /// \brief Add start/end separators for non-set container types
     template < typename Container >
-    static std::string add_separators(std::string const& c, typename boost::enable_if< typename atermpp::detail::is_set< Container >::type >::type* = 0)
+    static std::string add_separators(std::string const& c, typename std::enable_if< atermpp::is_set< Container >::value >::type* = 0)
     {
       return "[" + c + "]";
     }
 
     /// \brief Add start/end separators for set container types
     template < typename Container >
-    static std::string add_separators(std::string const& c, typename boost::disable_if< typename atermpp::detail::is_set< Container >::type >::type* = 0)
+    static std::string add_separators(std::string const& c, typename std::enable_if< !atermpp::is_set< Container >::value >::type* = 0)
     {
       return "{" + c + "}";
     }
@@ -94,7 +95,7 @@ class data_property_map
     }
 
     template < typename Container >
-    std::string print(const Container& v, typename boost::enable_if< typename atermpp::detail::is_container< Container >::type >::type* = 0) const
+    std::string print(const Container& v, typename atermpp::enable_if_container< Container >::type* = 0) const
     {
       std::set<std::string> elements;
 
@@ -107,16 +108,16 @@ class data_property_map
     }
 
     template < typename Container >
-    std::string print(const Container& v, bool print_separators, typename boost::enable_if< typename atermpp::detail::is_container< Container >::type >::type* = 0) const
+    std::string print(const Container& v, bool print_separators, typename atermpp::enable_if_container< Container >::type* = 0) const
     {
       return (print_separators) ? add_separators< Container >(print(v)) : print(v);
     }
 
-    template < typename Expression >
+    /* template < typename Expression >
     std::string print(const atermpp::term_list< Expression >& v, bool print_separators = true) const
     {
       return print(boost::make_iterator_range(v), print_separators);
-    }
+    } */
 
     //--------------------------------------------//
     // parse functions
@@ -299,7 +300,7 @@ class data_property_map
     /// Throws an exception if the key is not found.
     std::string operator[](const std::string& key) const
     {
-      std::map<std::string, std::string>::const_iterator i = m_data.find(key);
+      auto i = m_data.find(key);
       if (i == m_data.end())
       {
         throw mcrl2::runtime_error("property_map: could not find key " + key);
@@ -314,9 +315,9 @@ class data_property_map
     std::string compare(const data_property_map& other) const
     {
       std::ostringstream out;
-      for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
+      for (auto i = m_data.begin(); i != m_data.end(); ++i)
       {
-        std::map<std::string, std::string>::const_iterator j = other.data().find(i->first);
+        auto j = other.data().find(i->first);
         if (j != other.data().end())
         {
           out << static_cast< Derived const& >(*this).compare_property(i->first, i->second, j->second);

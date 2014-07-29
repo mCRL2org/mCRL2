@@ -20,6 +20,7 @@
 
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/join.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/decluster.h"
@@ -62,7 +63,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     bool is_summand_variable(const summand_base& s, const data::data_expression& x)
     {
       const data::variable_list& l=s.summation_variables();
-      return data::is_variable(x) && std::find(l.begin(),l.end(),atermpp::aterm_cast<data::variable>(x))!=l.end();
+      return data::is_variable(x) && std::find(l.begin(),l.end(),atermpp::down_cast<data::variable>(x))!=l.end();
     }
 
     template <typename T>
@@ -121,8 +122,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
           //    for which there is no substitution yet -> add d := e, and x := e
           if (is_summand_variable(s, left) && !search_data_expression(right, left))
           {
-            const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
-            const data::variable& vright = core::static_down_cast<const data::variable&>(right);
+            const data::variable& vleft = atermpp::down_cast<data::variable>(left);
+            const data::variable& vright = atermpp::down_cast<data::variable>(right);
 
             // Check if we already have a substition with left as left hand side
             if (substitutions.find(vleft) == substitutions.end())
@@ -137,7 +138,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
             }
             else
             {
-              data::variable v = core::static_down_cast<const data::variable&>(substitutions(vleft));
+              const data::variable& v = atermpp::down_cast<data::variable>(substitutions(vleft));
               if (is_summand_variable(s, v) && substitutions.find(v) != substitutions.end())
               {
                 sumelm_add_replacement(substitutions, v, right);
@@ -234,28 +235,36 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
       remove_unused_summand_variables(s);
       m_removed += var_count - s.summation_variables().size();
     }
+
+    /// \brief Returns the amount of removed summation variables.
+    size_t removed() const
+    {
+      return m_removed;
+    }
 };
 
 /// \brief Apply the sum elimination lemma to summand s.
 /// \param s an action summand
-/// \return s to which the sum elimination lemma has been applied.
+/// \return \c true if any summation variables have been removed, or \c false otherwise.
 inline
-void sumelm(action_summand& s)
+bool sumelm(action_summand& s)
 {
   specification spec;
   sumelm_algorithm algorithm(spec);
   algorithm(s);
+  return algorithm.removed() > 0;
 }
 
 /// \brief Apply the sum elimination lemma to summand s.
 /// \param s a deadlock summand
-/// \return s to which the sum elimination lemma has been applied.
+/// \return \c true if any summation variables have been removed, or \c false otherwise.
 inline
-void sumelm(deadlock_summand& s)
+bool sumelm(deadlock_summand& s)
 {
   specification spec;
   sumelm_algorithm algorithm(spec);
   algorithm(s);
+  return algorithm.removed() > 0;
 }
 
 } // namespace lps

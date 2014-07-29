@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,15 +10,16 @@
 #ifndef MPI_SPM_SOLVER_H_INCLUDED
 #define MPI_SPM_SOLVER_H_INCLUDED
 
-#include "GamePartition.h"
-#include "mcrl2/utilities/logger.h"
+#include "GamePart.h"
+#include "Logger.h"
 #include "MpiUtils.h"
 #include "SmallProgressMeasures.h"
 #include "VertexPartition.h"
 
-/*! A parity game solver based on Marcin Jurdzinski's small progress measures
-    algorithm, with pluggable lifting heuristics. Implements the two-way solving
-    approach due to Friedmann, and allows distributed computation using MPI. */
+/*! A distributed parity game solver using MPI.
+
+    Implements Marcin Jurdzinski's small progress measures algorithm, with
+    pluggable lifting heuristics. */
 class MpiSpmSolver : public ParityGameSolver, public virtual Logger
 {
 public:
@@ -35,15 +36,17 @@ protected:
         the SmallProgressMeasures instance to reflect it. */
     void set_vector_space(SmallProgressMeasures &spm);
 
-    //! Helper function to lifts the given global vertex `v' to `vec' in `spm'.
-    void update(SmallProgressMeasures &spm, verti global_v, const verti vec[]);
+    /*! Helper function to lift the given global vertex `v` to `vec` in
+        local `spm` and update lifting strategy `ls` if necessary. */
+    void update( SmallProgressMeasures &spm, LiftingStrategy &ls,
+                 verti global_v, const verti vec[] );
 
-    /*! Lifts vertices in `spm' until globally no more vertices can be lifted
+    /*! Lifts vertices in `spm` until globally no more vertices can be lifted
         (at which point, the game is solved for one player). */
     void solve_all(SmallProgressMeasures &spm);
 
-    /*! Propagates information about stable vertices in `src' to `dst', by
-        setting vertices which stable and non-top in `src' to top in `dst'.
+    /*! Propagates information about stable vertices in `src` to `dst`, by
+        setting vertices which are stable and non-top in `src` to top in `dst`.
         This is a purely local operation. */
     void propagate_solved( SmallProgressMeasures &src,
                            SmallProgressMeasures &dst );
@@ -62,13 +65,14 @@ private:
 
 protected:
     const VertexPartition   *vpart_;      //!< the current vertex partition
-    const GamePartition     part_;        //!< the game partition being solved
+    const GamePart          part_;        //!< the game part being solved
     LiftingStrategyFactory  *lsf_;        //!< used to create lifting strategies
     LiftingStatistics       *stats_;      //!< global lifting statistics
     const verti             *vmap_;       //!< current global vertex map
-    const verti             vmap_size_;   //!< size of globalvertex map
+    const verti             vmap_size_;   //!< size of global vertex map
 };
 
+//! Factory class for MpiSpmSolver instances.
 class MpiSpmSolverFactory : public ParityGameSolverFactory
 {
 public:
@@ -77,6 +81,7 @@ public:
                          LiftingStatistics *stats = 0 );
     ~MpiSpmSolverFactory();
 
+    //! Return a new MpiSpmSolver instance.
     ParityGameSolver *create( const ParityGame &game,
                               const verti *vertex_map,
                               verti vertex_map_size );

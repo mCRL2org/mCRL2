@@ -20,6 +20,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
@@ -50,7 +51,7 @@ struct default_global_variable_solver
     data::data_expression r = R(g, sigma);
     if (is_variable(r))
     {
-      const data::variable& v = core::static_down_cast<const data::variable&>(r);
+      const data::variable& v = atermpp::down_cast<data::variable>(r);
       if (std::find(V.begin(), V.end(), v) != V.end())
       {
         result[v] = e;
@@ -103,9 +104,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       {
         mCRL2log(log::debug) << msg
                         << data::pp(d_j) << "\n"
-                        << "      value before: " << data::pp(Rd_j) << "\n"
-                        << "      value after:  " << data::pp(Rg_ij) << "\n"
-                        << "      replacements: " << data::print_substitution(sigma) << std::endl;
+                        << "      value before: " << Rd_j << "\n"
+                        << "      value after:  " << Rg_ij << "\n"
+                        << "      replacements: " << sigma << std::endl;
       }
     }
 
@@ -119,10 +120,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       if (mCRL2logEnabled(log::debug))
       {
         mCRL2log(log::debug) << msg
-                        << data::pp(cond)
-                        << data::print_substitution(sigma)
+                        << cond
+                        << sigma
                         << " -> "
-                        << data::pp(c_i) << std::endl;
+                        << c_i << std::endl;
       }
     }
 

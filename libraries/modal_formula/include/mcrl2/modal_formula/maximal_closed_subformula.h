@@ -52,8 +52,8 @@ template <template <class> class Traverser, class Node, class Derived>
 struct bottom_up_traverser: public Traverser<Derived>
 {
   typedef Traverser<Derived> super;
-  using super::enter;   
-#ifndef BOOST_MSVC  
+  using super::enter;
+#ifndef BOOST_MSVC
   using super::leave;
 #endif
   using super::operator();
@@ -144,12 +144,12 @@ std::ostream& operator<<(std::ostream& out, const maximal_closed_subformula_node
   out << "<node>variables = ";
   for (std::set<data::variable>::const_iterator i = node.variables.begin(); i != node.variables.end(); ++i)
   {
-    out << data::pp(*i) << " ";
+    out << *i << " ";
   }
   out << " formulas = ";
-  for (std::set<state_formulas::state_formula>::const_iterator i = node.formulas.begin(); i != node.formulas.end(); ++i)
+  for (auto i = node.formulas.begin(); i != node.formulas.end(); ++i)
   {
-    out << state_formulas::pp(*i) << " ";
+    out << *i << " ";
   }
   return out;
 }

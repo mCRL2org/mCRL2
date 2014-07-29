@@ -24,6 +24,7 @@ class ToolInstance : public QWidget
     
   public:
     explicit ToolInstance(QString filename, ToolInformation information, mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0);
+    ~ToolInstance();
 
     ToolInformation information() { return m_info; }
     QString executable();
@@ -44,7 +45,7 @@ class ToolInstance : public QWidget
     ToolInformation m_info;
     Ui::ToolInstance m_ui;
 
-    QList<OptionValue> m_optionValues;
+    QList<OptionValue*> m_optionValues;
     QProcess m_process;
 
     FilePicker* m_pckFileOut;

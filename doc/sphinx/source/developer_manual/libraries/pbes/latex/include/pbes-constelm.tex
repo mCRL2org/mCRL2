@@ -15,7 +15,7 @@ as follows:$\qquad \qquad $%
 \text{\textsc{PbesConstelm(}}\mathcal{E}\text{, }\kappa \text{, }\mathsf{eval%
 }\text{\textsc{)}} \\ 
 \text{\textbf{for }}X\in \mathsf{occ}(\mathcal{E)}\text{ \textbf{do }}%
-c_{X}:=\emptyset \\ 
+c_{X}:=\emptyset  \\ 
 \text{\textbf{for }}X(e)\in \mathsf{iocc}(\kappa \mathcal{)}\text{ \textbf{%
 do }}c_{X}:=update(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
 todo:=\mathsf{occ}(\kappa \mathcal{)} \\ 
@@ -43,11 +43,12 @@ where $update_{X}$ is defined as follows:%
 \begin{equation*}
 update(c,e)=_{def}c^{\prime },\text{ with }c^{\prime }[i]=\left\{ 
 \begin{array}{ll}
+\bot  & \text{if }c=\emptyset \text{ and }e=[] \\ 
 e[i] & \text{if }c=\emptyset \text{ and }e[i]\text{ is constant} \\ 
 c[i] & \text{if }e[i]=c[i] \\ 
 d_{X}[i] & \text{otherwise}%
 \end{array}%
-\right.
+\right. 
 \end{equation*}
 
 and where $needs\_update$ is a boolean function that determines whether an
@@ -123,5 +124,5 @@ needs\_update(X(e),\varphi )=\dbigwedge\limits_{c\in cond_{T}(X(e),\varphi
 
 \begin{remark}
 Note that a direct implementation of this function is extremely inefficient.
-It is expected that a more suitable representation can be found.\newpage 
+It is expected that a more suitable representation can be found.\newpage
 \end{remark}

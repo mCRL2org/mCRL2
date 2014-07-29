@@ -42,7 +42,7 @@ proc S(l,m:Nat,q:DBuf) =
 
      R(l':Nat,q':DBuf,b:BBuf) =
         sum d:D,k:Nat. r3(d,k).(((k-l') mod (2*n) < n)
-                  -> R(l',q'[(k mod n)->d],b[k->true])
+                  -> R(l',q'[(k mod n)->d],b[(k mod n)->true])
                   <> R(l',q',b))+
         b(l' mod n) -> s4(q'(l' mod n)).
                           R((l'+1) mod 2*n,q',b[(l' mod n)->false])<>delta+

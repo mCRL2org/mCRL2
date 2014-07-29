@@ -13,11 +13,6 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 set(PREFIX "example_atermpp")
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-
 ##---------------------------------------------------
 ## Example algorithm 
 ##--------------------------------------------------- 
@@ -26,10 +21,11 @@ set(PROJECT_NAME "${PREFIX}_algorithm")
 project( ${PROJECT_NAME} )
 
 add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
-      algorithm.cpp 
+  algorithm.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
+  mcrl2_atermpp
 )
 
 build_and_run_test_example_target( ${PROJECT_NAME} )

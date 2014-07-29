@@ -17,10 +17,10 @@
 #include <map>
 #include <set>
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/core/down_cast.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/pbes/detail/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
 namespace mcrl2
@@ -64,6 +64,9 @@ atermpp::aterm_appl pbes_to_aterm(const pbes& p);
 // <PBEqnSpec>    ::= PBEqnSpec(<PBEqn>*)
 class pbes
 {
+  public:
+    typedef pbes_equation equation_type;
+
   protected:
     /// \brief The data specification
     data::data_specification m_data;
@@ -85,7 +88,7 @@ class pbes
       m_data = atermpp::aterm_appl(*i++);
 
       data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
-      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
+      m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
 
       atermpp::aterm_appl eqn_spec = atermpp::aterm_appl(*i++);
       atermpp::aterm_list eqn = static_cast<atermpp::aterm_list>(eqn_spec[0]);
@@ -96,7 +99,7 @@ class pbes
       }
 
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
-      m_initial_state = core::down_cast<propositional_variable_instantiation>(init[0]);
+      m_initial_state = atermpp::down_cast<propositional_variable_instantiation>(init[0]);
     }
 
     /// \brief Returns the predicate variables appearing in the left hand side of an equation.
@@ -245,16 +248,14 @@ class pbes
       return m_initial_state;
     }
 
-    /// \brief Reads the pbes from file.
-    /// \param filename A string
-    /// If filename is nonempty, input is read from the file named filename.
-    /// If filename is empty, input is read from standard input.
-    void load(const std::string& filename)
+    void load(std::istream& stream, bool binary=true)
     {
-      atermpp::aterm t = core::detail::load_aterm(filename);
+      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
+                                : atermpp::read_term_from_text_stream(stream);
+      t = pbes_system::detail::add_index(t);
       if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
       {
-        throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a PBES");
+        throw mcrl2::runtime_error("The loaded ATerm is not a PBES.");
       }
       init_term(atermpp::aterm_appl(t));
       m_data.declare_data_specification_to_be_type_checked();
@@ -274,20 +275,17 @@ class pbes
     /// much more compact than the ascii representation.
     /// \param filename A string
     /// \param no_well_typedness_check If true the well typedness check is skipped.
-#ifndef NDEBUG
-    void save(const std::string& filename, bool binary = true, bool no_well_typedness_check = false) const
-#else
-    void save(const std::string& filename, bool binary = true, bool = false) const
-#endif
+    void save(std::ostream& stream, bool binary = true) const
     {
-      // The well typedness check is only done in debug mode, since for large
-      // PBESs it takes too much time
-      assert(no_well_typedness_check || is_well_typed());
-
-      pbes tmp(*this);
-      // tmp.data() = data::remove_all_system_defined(tmp.data());
-      atermpp::aterm_appl t = pbes_to_aterm(tmp);
-      core::detail::save_aterm(t, filename, binary);
+      atermpp::aterm term = pbes_system::detail::remove_index(pbes_to_aterm(*this));
+      if (binary)
+      {
+        write_term_to_binary_stream(term, stream);
+      }
+      else
+      {
+        write_term_to_text_stream(term, stream);
+      }
     }
 
     /// \brief Returns the set of binding variables of the pbes.
@@ -386,12 +384,28 @@ class pbes
     }
 };
 
+//--- start generated class pbes ---//
+// prototype declaration
+std::string pp(const pbes& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const pbes& x)
+{
+  return out << pbes_system::pp(x);
+}
+//--- end generated class pbes ---//
+
 /// \brief Conversion to atermappl.
 /// \return The PBES converted to aterm format.
 inline
 atermpp::aterm_appl pbes_to_aterm(const pbes& p)
 {
-  atermpp::aterm_appl global_variables = core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(p.global_variables()));
+  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), 
+                                                             data::variable_list(p.global_variables().begin(),
+                                                                                 p.global_variables().end()));
 
   atermpp::aterm_list eqn_list;
   const std::vector<pbes_equation>& eqn = p.equations();
@@ -400,11 +414,11 @@ atermpp::aterm_appl pbes_to_aterm(const pbes& p)
     atermpp::aterm a = pbes_equation_to_aterm(*i);
     eqn_list.push_front(a);
   }
-  atermpp::aterm_appl equations = core::detail::gsMakePBEqnSpec(eqn_list);
-  atermpp::aterm_appl initial_state = core::detail::gsMakePBInit(p.initial_state());
+  atermpp::aterm_appl equations = atermpp::aterm_appl(core::detail::function_symbol_PBEqnSpec(), eqn_list);
+  atermpp::aterm_appl initial_state = atermpp::aterm_appl(core::detail::function_symbol_PBInit(), p.initial_state());
   atermpp::aterm_appl result;
 
-  result = core::detail::gsMakePBES(
+  result = atermpp::aterm_appl(core::detail::function_symbol_PBES(),
              data::detail::data_specification_to_aterm_data_spec(p.data()),
              global_variables,
              equations,

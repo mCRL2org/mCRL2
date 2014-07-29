@@ -13,10 +13,10 @@
 #define MCRL2_BES_PARSE_H
 
 #include "mcrl2/core/parser_utility.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/detail/pbes_expression2boolean_expression_traverser.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/pbes/detail/pbes_expression2boolean_expression_visitor.h"
 
 namespace mcrl2
 {
@@ -109,16 +109,6 @@ boolean_equation_system parse_boolean_equation_system_new(const std::string& tex
   return result;
 }
 
-/// \brief Converts a pbes expression to a boolean expression.
-/// Throws an mcrl2_error if it is not a valid boolean expression.
-inline
-boolean_expression pbes_expression2boolean_expression(const pbes_system::pbes_expression& x)
-{
-  pbes_system::detail::pbes_expression2boolean_expression_visitor<pbes_system::pbes_expression> visitor;
-  visitor.visit(x);
-  return visitor.result();
-}
-
 /// \brief Reads a boolean equation system from an input stream.
 /// \param from An input stream
 /// \param b A boolean equation system
@@ -137,11 +127,11 @@ std::istream& operator>>(std::istream& from, boolean_equation_system& b)
   for (std::vector<pbes_system::pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     boolean_variable v(i->variable().name());
-    boolean_expression rhs = pbes_expression2boolean_expression(i->formula());
+    boolean_expression rhs = bes::pbes_expression2boolean_expression(i->formula());
     equations.push_back(boolean_equation(i->symbol(), v, rhs));
   }
 
-  boolean_expression init = pbes_expression2boolean_expression(p.initial_state());
+  boolean_expression init = bes::pbes_expression2boolean_expression(p.initial_state());
   b = boolean_equation_system(equations, init);
   return from;
 }

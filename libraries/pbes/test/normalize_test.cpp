@@ -73,9 +73,8 @@ void test_normalize1()
   x = data::variable("x", data::sort_bool::bool_());
   y = data::variable("y", data::sort_bool::bool_());
   z = data::variable("z", data::sort_bool::bool_());
-  const data::data_expression& x1 = atermpp::aterm_cast<data::data_expression>(x);
-  const data::data_expression& y1 = atermpp::aterm_cast<data::data_expression>(y);
-  const data::data_expression& z1 = atermpp::aterm_cast<data::data_expression>(z);
+  const data::data_expression& x1 = atermpp::down_cast<data::data_expression>(x);
+  const data::data_expression& y1 = atermpp::down_cast<data::data_expression>(y);
 
   f  = not_(x);
   f1 = pbes_system::normalize(f);
@@ -95,14 +94,14 @@ void test_normalize1()
 
   pbes_expression T = p::true_();
   pbes_expression F = p::false_();
-  x = pbes_expression(mcrl2::core::detail::gsMakePBESImp(T, F));
+  x = pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), T, F));
   y = pbes_system::normalize(x);
   std::cout << "x = " << x << std::endl;
   std::cout << "y = " << y << std::endl;
 
   data::variable_list ab = make_list(data::variable("s", data::basic_sort("S")));
   x = propositional_variable_instantiation("x:X");
-  y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(p::false_(), p::false_())), p::false_()));
+  y = and_(x, imp(pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p::false_(), p::false_())), p::false_()));
   z = pbes_system::normalize(y);
   std::cout << "y = " << y << std::endl;
   std::cout << "z = " << z << std::endl;
@@ -179,12 +178,6 @@ pbes_expression parse(const std::string& expr)
 }
 
 inline
-std::string printer(const pbes_expression& x)
-{
-  return pbes_system::pp(x);
-}
-
-inline
 pbes_expression norm(const pbes_expression& x)
 {
   return pbes_system::detail::normalize_and_or(x);
@@ -196,7 +189,6 @@ void test_normalize_and_or_equality(std::string expr1, std::string expr2)
     expr1,
     expr2,
     parse,
-    printer,
     std::equal_to<pbes_expression>(),
     norm,
     "normalize_and_or",

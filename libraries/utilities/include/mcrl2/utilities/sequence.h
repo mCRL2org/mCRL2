@@ -14,7 +14,6 @@
 
 #include <iterator>
 #include <vector>
-#include <boost/utility.hpp> // next()
 
 namespace mcrl2
 {
@@ -54,10 +53,10 @@ void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f,
   }
   else
   {
-    for (typename std::iterator_traits<Iter1>::value_type::const_iterator j = first->begin(); j != first->end(); ++j)
+    for (auto j = first->begin(); j != first->end(); ++j)
     {
       assign(*i, *j);
-      foreach_sequence_impl(boost::next(first), last, boost::next(i), f, assign);
+      foreach_sequence_impl(std::next(first), last, std::next(i), f, assign);
     }
   }
 }

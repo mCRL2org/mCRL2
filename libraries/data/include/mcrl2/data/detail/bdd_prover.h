@@ -85,7 +85,6 @@ class BDD_Prover: public Prover
 {
   public:
     typedef Prover::substitution_type substitution_type;
-    typedef Prover::internal_substitution_type internal_substitution_type;
 
   private:
 
@@ -106,11 +105,11 @@ class BDD_Prover: public Prover
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
-    std::map < atermpp::aterm_appl, atermpp::aterm_appl > f_formula_to_bdd;
+    std::map < data_expression, data_expression > f_formula_to_bdd;
 
     /// \brief A hashtable that maps formulas to the smallest guard occuring in those formulas.
     /// \brief If the smallest guard of a formula is unknown, it maps this formula to 0.
-    std::map < atermpp::aterm_appl, atermpp::aterm_appl > f_smallest;
+    std::map < data_expression, data_expression > f_smallest;
 
     /// \brief Class that provides information about the structure of BDDs.
     BDD_Info f_bdd_info;
@@ -126,17 +125,17 @@ class BDD_Prover: public Prover
     {
       f_deadline = time(0) + f_time_limit;
 
-      atermpp::aterm_appl v_previous_1;
-      atermpp::aterm_appl v_previous_2;
+      data_expression v_previous_1;
+      data_expression v_previous_2;
 
-      mCRL2log(log::debug) << "Formula: " << data::pp( f_formula) << std::endl;
+      mCRL2log(log::debug) << "Formula: " << f_formula << std::endl;
 
-      f_internal_bdd = m_rewriter->toRewriteFormat(f_formula);
+      f_internal_bdd = f_formula;
 
-      f_internal_bdd = m_rewriter->rewrite_internal(f_internal_bdd,bdd_sigma);
+      f_internal_bdd = m_rewriter->rewrite(f_internal_bdd,bdd_sigma);
       f_internal_bdd = f_manipulator.orient(f_internal_bdd);
 
-      mCRL2log(log::debug) << "Formula rewritten and oriented: " << data::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
+      mCRL2log(log::debug) << "Formula rewritten and oriented: " << f_internal_bdd << std::endl;
 
       while (v_previous_1 != f_internal_bdd && v_previous_2 != f_internal_bdd)
       {
@@ -144,16 +143,16 @@ class BDD_Prover: public Prover
         v_previous_1 = f_internal_bdd;
         f_internal_bdd = bdd_down(f_internal_bdd);
         mCRL2log(log::debug) << "End of iteration." << std::endl;
-        mCRL2log(log::debug) << "Intermediate BDD: " << data::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
+        mCRL2log(log::debug) << "Intermediate BDD: " << f_internal_bdd << std::endl;
       }
 
-      f_bdd = m_rewriter->fromRewriteFormat(f_internal_bdd);
-      mCRL2log(log::debug) << "Resulting BDD: " << data::pp( f_bdd) << std::endl;
+      f_bdd = f_internal_bdd;
+      mCRL2log(log::debug) << "Resulting BDD: " << f_bdd << std::endl;
 
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    atermpp::aterm_appl bdd_down(atermpp::aterm_appl a_formula)
+    data_expression bdd_down(data_expression a_formula)
     {
       std::string indent;
 
@@ -161,7 +160,7 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    atermpp::aterm_appl bdd_down(atermpp::aterm_appl a_formula, std::string& a_indent)
+    data_expression bdd_down(data_expression a_formula, std::string& a_indent)
     {
       using namespace atermpp;
       a_indent.append("  ");
@@ -172,48 +171,46 @@ class BDD_Prover: public Prover
         return a_formula;
       }
 
-      if (f_info.is_true(a_formula))
+      if (a_formula==sort_bool::true_())
       {
         return a_formula;
       }
-      if (f_info.is_false(a_formula))
+      if (a_formula==sort_bool::false_())
       {
         return a_formula;
       }
 
-      const std::map < aterm_appl, aterm_appl >::const_iterator i = f_formula_to_bdd.find(a_formula);
+      const std::map < data_expression, data_expression >::const_iterator i = f_formula_to_bdd.find(a_formula);
       if (i!=f_formula_to_bdd.end()) // found
       {
         return i->second;
       }
 
-      aterm_appl v_guard = smallest(a_formula);
+      data_expression v_guard = smallest(a_formula);
       if (!v_guard.defined())
       {
         return a_formula;
       }
       else
       {
-        mCRL2log(log::debug) << a_indent << "Smallest guard: " << data::pp(m_rewriter->fromRewriteFormat(v_guard)) << std::endl;
+        mCRL2log(log::debug) << a_indent << "Smallest guard: " << v_guard << std::endl;
       }
 
-      aterm_appl v_term1, v_term2;
-
-      v_term1 = f_manipulator.set_true(a_formula, v_guard);
-      v_term1 = m_rewriter->rewrite_internal(v_term1,bdd_sigma);
+      data_expression v_term1 = f_manipulator.set_true(a_formula, v_guard);
+      v_term1 = m_rewriter->rewrite(v_term1,bdd_sigma);
       v_term1 = f_manipulator.orient(v_term1);
-      mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << data::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
+      mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
       v_term1 = bdd_down(v_term1, a_indent);
-      mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << data::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
+      mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << v_term1 << std::endl;
 
-      v_term2 = f_manipulator.set_false(a_formula, v_guard);
-      v_term2 = m_rewriter->rewrite_internal(aterm_appl(v_term2),bdd_sigma);
+      data_expression v_term2 = f_manipulator.set_false(a_formula, v_guard);
+      v_term2 = m_rewriter->rewrite(data_expression(v_term2),bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
-      mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << data::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
+      mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
-      mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << data::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
+      mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << v_term2 << std::endl;
 
-      aterm_appl v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
+      data_expression v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[a_formula]=v_bdd;
 
       a_indent.erase(a_indent.size() - 2);
@@ -232,7 +229,7 @@ class BDD_Prover: public Prover
         mCRL2log(log::debug) << "Simplifying the BDD:" << std::endl;
         f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, time(0)));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
-        mCRL2log(log::debug) << "Resulting BDD: " << data::pp( f_bdd) << std::endl;
+        mCRL2log(log::debug) << "Resulting BDD: " << f_bdd << std::endl;
       }
     }
 
@@ -309,42 +306,40 @@ class BDD_Prover: public Prover
     };
 
     /// \brief Returns the smallest guard in the formula a_formula.
-    atermpp::aterm_appl smallest(atermpp::aterm_appl a_formula)
+    data_expression smallest(data_expression a_formula)
     {
-      if (f_info.is_variable(a_formula))
+      if (is_variable(a_formula))
       {
-        if (f_info.has_type_bool(a_formula))
+        if (a_formula.sort()==sort_bool::bool_())
         {
           return a_formula;
         }
         else
         {
-          return atermpp::aterm_appl();
+          return data_expression();
         }
       }
-      if (f_info.is_true(a_formula) || f_info.is_false(a_formula))
+      if (a_formula==sort_bool::true_() || a_formula==sort_bool::false_())
       {
-        return atermpp::aterm_appl();
+        return data_expression();
       }
 
-      const std::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_smallest.find(a_formula);
+      const std::map < data_expression, data_expression >::const_iterator i = f_smallest.find(a_formula);
       if (i!=f_smallest.end()) //found
       {
         return i->second;
       }
 
-      size_t s;
-      size_t v_length;
-      atermpp::aterm_appl v_small,v_result;
+      data_expression v_result;
 
-      v_length = f_info.get_number_of_arguments(a_formula);
+      size_t v_length = f_info.get_number_of_arguments(a_formula);
 
-      for (s = 0; s < v_length; s++)
+      for (size_t s = 0; s < v_length; s++)
       {
-        v_small = smallest(f_info.get_argument(a_formula, s));
-        if (v_small!=atermpp::aterm_appl())
+        const data_expression v_small = smallest(f_info.get_argument(a_formula, s));
+        if (v_small!=data_expression())
         {
-          if (v_result!=atermpp::aterm_appl())
+          if (v_result!=data_expression())
           {
             if (f_info.lpo1(v_result, v_small))
             {
@@ -357,11 +352,11 @@ class BDD_Prover: public Prover
           }
         }
       }
-      if (v_result==atermpp::aterm_appl() && f_info.has_type_bool(a_formula))
+      if (v_result==data_expression() && a_formula.sort()==sort_bool::bool_())
       {
         v_result = a_formula;
       }
-      if (v_result!=atermpp::aterm_appl())
+      if (v_result!=data_expression())
       {
         f_smallest[a_formula]=v_result;
       }
@@ -415,8 +410,8 @@ class BDD_Prover: public Prover
   protected:
 
     /// \brief A binary decision diagram in the internal representation of the rewriter.
-    atermpp::aterm_appl f_internal_bdd;
-    internal_substitution_type bdd_sigma;
+    data_expression f_internal_bdd;
+    substitution_type bdd_sigma;
 
     /// \brief A binary decision diagram in the internal representation of mCRL2.
     data_expression f_bdd;
@@ -476,11 +471,11 @@ class BDD_Prover: public Prover
     /// \brief Set the substitution to be used to construct the BDD
     void set_substitution(substitution_type &sigma)
     {
-      bdd_sigma = convert_substitution_to(sigma);
+      bdd_sigma = sigma;
     }
 
     /// \brief Set the substitution in internal format to be used to construct the BDD
-    void set_substitution_internal(internal_substitution_type &sigma)
+    void set_substitution_internal(substitution_type &sigma)
     {
       bdd_sigma = sigma;
     }

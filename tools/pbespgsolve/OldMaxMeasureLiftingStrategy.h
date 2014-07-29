@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -15,6 +15,17 @@
 #include <set>
 #include <utility>
 
+/*! \ingroup LiftingStrategies
+
+    Old implementation of MaxMeasureLiftingStrategy.
+
+    This is strategy is rather inefficient (in time and space) because it stores
+    both vertex indices and a copy of the highest successor's progress measure
+    in a std::set.
+
+    This class is basically obsolete, but retained in order to be able to test
+    for regressions.
+*/
 class OldMaxMeasureLiftingStrategy : public LiftingStrategy
 {
 public:
@@ -24,7 +35,6 @@ public:
 
     void lifted(verti v);
     verti next();
-    size_t memory_use() const;
 
 protected:
     std::vector<verti> vec(verti v) {
@@ -42,7 +52,8 @@ private:
     std::vector<queue_t::iterator> queue_pos_;
 };
 
-
+/*! \ingroup LiftingStrategies
+    A factory class for OldMaxMeasureLiftingStrategy instances. */
 class OldMaxMeasureLiftingStrategyFactory : public LiftingStrategyFactory
 {
 public:

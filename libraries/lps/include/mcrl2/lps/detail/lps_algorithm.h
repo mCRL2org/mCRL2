@@ -73,12 +73,12 @@ class lps_algorithm
       std::set<data::variable> occurring_vars;
       sumelm_find_variables(summand_, occurring_vars);
 
-      std::set<data::variable> summation_variables(atermpp::convert<std::set<data::variable> >(summand_.summation_variables()));
+      std::set<data::variable> summation_variables(summand_.summation_variables().begin(),summand_.summation_variables().end());
       std::set_intersection(summation_variables.begin(), summation_variables.end(),
                             occurring_vars.begin(), occurring_vars.end(),
                             std::inserter(new_summation_variables, new_summation_variables.end()));
 
-      summand_.summation_variables() = atermpp::convert<data::variable_list>(new_summation_variables);
+      summand_.summation_variables() = data::variable_list(new_summation_variables.begin(),new_summation_variables.end());
     }
 
   public:

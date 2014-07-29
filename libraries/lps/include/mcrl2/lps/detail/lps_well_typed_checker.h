@@ -123,14 +123,14 @@ struct lps_well_typed_checker
   }
 
   /// \brief Traverses an action label
-  bool is_well_typed(const action_label&) const
+  bool is_well_typed(const process::action_label&) const
   {
     return true;
   }
 
   /// \brief Traverses an action
   /// \param a An action
-  bool is_well_typed(const action&) const
+  bool is_well_typed(const process::action&) const
   {
     return true;
   }
@@ -292,11 +292,11 @@ struct lps_well_typed_checker
   bool is_well_typed(const specification& spec) const
   {
     std::set<data::sort_expression> declared_sorts = data::detail::make_set(spec.data().sorts());
-    std::set<action_label> declared_labels = data::detail::make_set(spec.action_labels());
+    std::set<process::action_label> declared_labels = data::detail::make_set(spec.action_labels());
     const action_summand_vector& action_summands = spec.process().action_summands();
 
     // check 1)
-    for (action_summand_vector::const_iterator i = action_summands.begin(); i != action_summands.end(); ++i)
+    for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
     {
       if (!(data::detail::check_variable_sorts(i->summation_variables(), declared_sorts)))
       {
@@ -358,9 +358,9 @@ struct lps_well_typed_checker
     }
 
     // check 3)
-    if (!data::detail::unique_names(atermpp::convert<data::variable_list>(spec.global_variables())))
+    if (!data::detail::unique_names(spec.global_variables()))
     {
-      mCRL2log(log::error) << "is_well_typed(specification) failed: global variables " << data::pp(atermpp::convert<data::variable_list>(spec.global_variables())) << " don't have unique names." << std::endl;
+      mCRL2log(log::error) << "is_well_typed(specification) failed: global variables " << data::pp(spec.global_variables()) << " don't have unique names." << std::endl;
       return false;
     }
 

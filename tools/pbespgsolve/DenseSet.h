@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,21 +10,30 @@
 #ifndef DENSE_SET_H_INCLUDED
 #define DENSE_SET_H_INCLUDED
 
+#include <cstddef>
 #include <cstdlib>
 #include <memory>
 #include <utility>
 
-/* ssize_t is not defined on windows, define it here. */
-#ifdef _MSC_VER
-#if !defined(ssize_t) && !defined(HAVE_SSIZE_T)
-#ifdef _WIN64
-typedef __int64 ssize_t;
-#else
-typedef _W64 int ssize_t;
-#endif // _WIN64
-#define HAVE_SSIZE_T
-#endif // !defined(ssize_t) && !defined(HAVE_SSIZE_T)
-#endif // _MSC_VER
+/*! \defgroup Containers
+
+    Custom container data structures.
+*/
+
+/*! \ingroup Containers
+
+    A set-like data structure that stores values from a dense integer range.
+
+    Each set instance has a fixed range of possible values; elements stored are
+    integers that must lie within this range.  Memory used and time required to
+    iterate over the set is proportional to the size of the range (*not* the 
+    size of the set, i.e. the number of elements).
+
+    Internally, the DenseSet uses an array of bools to note the presence/absence
+    of elements, which typically requires one byte per value in range.
+
+    \see DenseMap
+*/
 
 // N.B. this class is far from finished!
 
@@ -38,7 +47,7 @@ public:
         Key key_;
 
     public:
-        typedef ssize_t                    difference_type;
+        typedef ptrdiff_t                  difference_type;
         typedef std::forward_iterator_tag  iterator_category;
         typedef Key                        value_type;
         typedef Key*                       pointer;
@@ -183,8 +192,6 @@ public:
             used_[k - range_begin] = true;
         }
     }
-
-    size_t memory_use() { return sizeof(*used_)*range_size_ + sizeof(*this); }
 
 public:
     const Key range_begin, range_end;

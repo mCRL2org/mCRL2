@@ -80,6 +80,29 @@ class pbes_type_checker:public data::data_type_checker
       normalize_sorts(type_checked_pbes_spec,type_checked_data_spec);
     }
 
+
+    template <typename VariableContainer, typename PropositionalVariableContainer>
+    pbes_type_checker(const data::data_specification& dataspec, const VariableContainer& variables, const PropositionalVariableContainer& propositional_variables)
+    : data::data_type_checker(dataspec)
+    {
+      for (auto i = variables.begin(); i != variables.end(); ++i)
+      {
+        glob_vars[i->name()] = i->sort();
+      }
+      for (auto i = propositional_variables.begin(); i != propositional_variables.end(); ++i)
+      {
+        const data::variable_list& PBVars = i->parameters();
+        data::sort_expression_list PBType;
+        for (auto l = PBVars.begin(); l != PBVars.end(); ++l)
+        {
+          PBType.push_front(l->sort());
+        }
+        PBType = atermpp::reverse(PBType);
+        IsSortExprListDeclared(PBType);
+        PBs[i->name()] = atermpp::make_list<data::sort_expression_list>(PBType);
+      }
+    }
+
      /** \brief     Type check a process expression.
       * Throws a mcrl2::runtime_error exception if the expression is not well typed.
       *  \param[in] d A process expression that has not been type checked.
@@ -182,14 +205,14 @@ class pbes_type_checker:public data::data_type_checker
           {
             Types=i->second;
             // temporarily prohibit overloading here
-            throw mcrl2::runtime_error("attempt to overload propositional variable " + pp(PBName));
+            throw mcrl2::runtime_error("attempt to overload propositional variable " + core::pp(PBName));
 
             // the table PBs contains a list of types for each
             // PBES name. We need to check if there is already such a type
             // in the list. If so -- error, otherwise -- add
             if (InTypesL(PBType, Types))
             {
-              throw mcrl2::runtime_error("double declaration of propositional variable " + pp(PBName));
+              throw mcrl2::runtime_error("double declaration of propositional variable " + core::pp(PBName));
             }
             else
             {
@@ -209,7 +232,7 @@ class pbes_type_checker:public data::data_type_checker
       pbes_expression TraversePBESVarConstPB(const std::map<core::identifier_string,data::sort_expression> &Vars, const pbes_expression &PBESTerm)
       {
         using namespace data;
-        using namespace core::detail;
+        using namespace atermpp;
         if (is_data_expression(PBESTerm))
         {
           data_expression d(PBESTerm);
@@ -217,38 +240,33 @@ class pbes_type_checker:public data::data_type_checker
           return d;
         }
 
-        if (is_pbes_true(PBESTerm) || is_pbes_false(PBESTerm))
-        {
-          return PBESTerm;
-        }
-
         if (is_pbes_not(PBESTerm))
         {
-          const not_& argument=aterm_cast<const not_>(PBESTerm);
+          const not_& argument=down_cast<const not_>(PBESTerm);
           return not_(TraversePBESVarConstPB(Vars,argument.operand()));
         }
 
         if (is_pbes_and(PBESTerm))
         {
-          const and_& t=aterm_cast<const and_>(PBESTerm);
+          const and_& t=down_cast<const and_>(PBESTerm);
           return and_(TraversePBESVarConstPB(Vars,t.left()),TraversePBESVarConstPB(Vars,t.right()));
         }
 
         if (is_pbes_or(PBESTerm))
         {
-          const or_& t=aterm_cast<const or_>(PBESTerm);
+          const or_& t=down_cast<const or_>(PBESTerm);
           return or_(TraversePBESVarConstPB(Vars,t.left()),TraversePBESVarConstPB(Vars,t.right()));
         }
 
         if (is_pbes_imp(PBESTerm))
         {
-          const imp& t=aterm_cast<const imp>(PBESTerm);
+          const imp& t=down_cast<const imp>(PBESTerm);
           return imp(TraversePBESVarConstPB(Vars,t.left()),TraversePBESVarConstPB(Vars,t.right()));
         }
 
         if (is_pbes_forall(PBESTerm))
         {
-          const forall& t=aterm_cast<const forall>(PBESTerm);
+          const forall& t=down_cast<const forall>(PBESTerm);
           std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
           std::map<core::identifier_string,sort_expression> NewVars;
@@ -258,7 +276,7 @@ class pbes_type_checker:public data::data_type_checker
           }
           catch (mcrl2::runtime_error &e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + pp(PBESTerm));
+            throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + pbes_system::pp(PBESTerm));
           }
           try
           {
@@ -266,13 +284,13 @@ class pbes_type_checker:public data::data_type_checker
           }
           catch (mcrl2::runtime_error &e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pp(PBESTerm));
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pbes_system::pp(PBESTerm));
           }
         }
 
         if (is_pbes_exists(PBESTerm))
         {
-          const exists& t=aterm_cast<const exists>(PBESTerm);
+          const exists& t=down_cast<const exists>(PBESTerm);
           std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
           std::map<core::identifier_string,sort_expression> NewVars;
@@ -282,7 +300,7 @@ class pbes_type_checker:public data::data_type_checker
           }
           catch (mcrl2::runtime_error &e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + pp(PBESTerm));
+            throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + pbes_system::pp(PBESTerm));
           }
           try
           {
@@ -290,16 +308,16 @@ class pbes_type_checker:public data::data_type_checker
           }
           catch (mcrl2::runtime_error &e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pp(PBESTerm));
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pbes_system::pp(PBESTerm));
           }
         }
 
         if (is_propositional_variable_instantiation(PBESTerm))
         {
-          const propositional_variable_instantiation& var=aterm_cast<const propositional_variable_instantiation>(PBESTerm);
+          const propositional_variable_instantiation& var=down_cast<const propositional_variable_instantiation>(PBESTerm);
           return RewrPbes(Vars, var);
         }
-        throw mcrl2::runtime_error("Internal error. The pbes term " + pp(PBESTerm) + " fails to match any known form in typechecking case analysis");
+        throw mcrl2::runtime_error("Internal error. The pbes term " + pbes_system::pp(PBESTerm) + " fails to match any known form in typechecking case analysis");
       }
 
 
@@ -316,7 +334,7 @@ class pbes_type_checker:public data::data_type_checker
         const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=PBs.find(Name);
         if (j==PBs.end())
         {
-          throw mcrl2::runtime_error("propositional variable " + pp(Name) + " not declared");
+          throw mcrl2::runtime_error("propositional variable " + core::pp(Name) + " not declared");
         }
         term_list<sort_expression_list> ParList=j->second;
 
@@ -340,9 +358,9 @@ class pbes_type_checker:public data::data_type_checker
 
         if (ParList.empty())
         {
-          throw mcrl2::runtime_error("no propositional variable " + pp(Name)
+          throw mcrl2::runtime_error("no propositional variable " + core::pp(Name)
                           + " with " + mcrl2::utilities::to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":"")
-                          + " is declared (while typechecking " + pp(ProcTerm) + ")");
+                          + " is declared (while typechecking " + pbes_system::pp(ProcTerm) + ")");
         }
 
         sort_expression_list Result;
@@ -376,7 +394,7 @@ class pbes_type_checker:public data::data_type_checker
           }
           catch (mcrl2::runtime_error &e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + pp(Par) + " as type " + pp(ExpandNumTypesDown(PosType)) + " (while typechecking " + pp(ProcTerm) + ")");
+            throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(Par) + " as type " + data::pp(ExpandNumTypesDown(PosType)) + " (while typechecking " + pbes_system::pp(ProcTerm) + ")");
           }
           NewPars.push_front(Par);
           NewPosTypeList.push_front(NewPosType);
@@ -402,11 +420,12 @@ class pbes_type_checker:public data::data_type_checker
             sort_expression CastedNewPosType;
             try
             {
-              CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par);
+              std::map<core::identifier_string,sort_expression> dummy_table;
+              CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par,Vars,Vars,dummy_table,false);
             }
             catch (mcrl2::runtime_error &e)
             {
-              throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + pp(NewPosType) + " to " + pp(PosType) + "(while typechecking " + pp(Par) + " in " + pp(ProcTerm));
+              throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + data::pp(NewPosType) + " to " + data::pp(PosType) + "(while typechecking " + data::pp(Par) + " in " + pbes_system::pp(ProcTerm));
             }
 
             NewPars.push_front(Par);
@@ -420,13 +439,13 @@ class pbes_type_checker:public data::data_type_checker
 
           if (!p.first)
           {
-            throw mcrl2::runtime_error("no propositional variable " + pp(Name) + "with type " + pp(NewPosTypeList) + " is declared (while typechecking " + pp(ProcTerm) + ")");
+            throw mcrl2::runtime_error("no propositional variable " + core::pp(Name) + "with type " + data::pp(NewPosTypeList) + " is declared (while typechecking " + pbes_system::pp(ProcTerm) + ")");
           }
         }
 
         if (IsNotInferredL(PosTypeList))
         {
-          throw mcrl2::runtime_error("ambiguous propositional variable " + pp(Name));
+          throw mcrl2::runtime_error("ambiguous propositional variable " + core::pp(Name));
         }
 
         return propositional_variable_instantiation(Name,NewPars);
@@ -451,7 +470,56 @@ void type_check(pbes& pbes_spec)
   }
   catch (mcrl2::runtime_error &e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pp(pbes_spec));
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pbes_system::pp(pbes_spec));
+  }
+}
+
+/** \brief     Type check a parsed mCRL2 propositional variable.
+ *  Throws an exception if something went wrong.
+ *  \param[in] dataspec A data specification.
+ *  \param[in] variables A sequence of data variables that may appear in x.
+ *  \return    the type checked expression
+ **/
+template <typename VariableContainer>
+propositional_variable type_check(const propositional_variable& x, const VariableContainer& variables, const data::data_specification& dataspec = data::data_specification())
+{
+  // This function should be implemented using the PBES type checker, but it is not immediately clear how to do that.
+  try
+  {
+    const data::variable_list& parameters = x.parameters();
+    std::vector<data::variable> typed_parameters;
+    for (auto i = parameters.begin(); i != parameters.end(); ++i)
+    {
+      data::variable d = *i;
+      data::type_check(d, variables.begin(), variables.end(), dataspec);
+      typed_parameters.push_back(d);
+    }
+    return propositional_variable(x.name(), data::variable_list(typed_parameters.begin(), typed_parameters.end()));
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pbes_system::pp(x));
+  }
+}
+
+/** \brief     Type check a parsed mCRL2 pbes expression.
+ *  Throws an exception if something went wrong.
+ *  \param[in] dataspec A data specification.
+ *  \param[in] variables A sequence of data variables that may appear in x.
+ *  \param[in] propositional_variables A sequence of propositional variables that may appear in x.
+ *  \return    the type checked expression
+ **/
+template <typename VariableContainer, typename PropositionalVariableContainer>
+pbes_expression type_check(pbes_expression& x, const VariableContainer& variables, const PropositionalVariableContainer& propositional_variables, const data::data_specification& dataspec = data::data_specification())
+{
+  try
+  {
+    pbes_type_checker type_checker(dataspec, variables, propositional_variables);
+    return type_checker(x);
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pbes_system::pp(x));
   }
 }
 

@@ -12,11 +12,10 @@
 #ifndef MCRL2_PROCESS_RENAME_EXPRESSION_H
 #define MCRL2_PROCESS_RENAME_EXPRESSION_H
 
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2
@@ -32,7 +31,7 @@ class rename_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     rename_expression()
-      : atermpp::aterm_appl(core::detail::constructRenameExpr())
+      : atermpp::aterm_appl(core::detail::default_values::RenameExpr)
     {}
 
     /// \brief Constructor.
@@ -45,22 +44,22 @@ class rename_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     rename_expression(core::identifier_string& source, core::identifier_string& target)
-      : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
+      : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), source, target)
     {}
 
     /// \brief Constructor.
     rename_expression(const std::string& source, const std::string& target)
-      : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(core::identifier_string(source), core::identifier_string(target)))
+      : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), core::identifier_string(source), core::identifier_string(target))
     {}
 
     const core::identifier_string& source() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const core::identifier_string& target() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg2(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[1]);
     }
 };
 
@@ -70,82 +69,36 @@ typedef atermpp::term_list<rename_expression> rename_expression_list;
 /// \brief vector of rename_expressions
 typedef std::vector<rename_expression>    rename_expression_vector;
 
-
 /// \brief Test for a rename_expression expression
 /// \param x A term
 /// \return True if \a x is a rename_expression expression
 inline
 bool is_rename_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRenameExpr(x);
+  return x.function() == core::detail::function_symbols::RenameExpr;
 }
 
-//--- end generated class rename_expression ---//
+// prototype declaration
+std::string pp(const rename_expression& x);
 
-/*
-/// \brief Rename expression
-//<RenameExpr>   ::= RenameExpr(<String>, <String>)
-class rename_expression: public atermpp::aterm_appl
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const rename_expression& x)
 {
-  public:
-    /// \brief Constructor.
-    /// \param term A term
-    rename_expression()
-      : atermpp::aterm_appl(core::detail::constructRenameExpr())
-    {}
+  return out << process::pp(x);
+}
 
-    /// \brief Constructor.
-    /// \param term A term
-    rename_expression(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_term_RenameExpr(*this));
-    }
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit rename_expression(const atermpp::aterm &term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_term_RenameExpr(*this));
-    }
-
-    /// \brief Constructor.
-    rename_expression(core::identifier_string source, core::identifier_string target)
-      : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
-    {}
-
-    /// \brief Returns the source of the rename rule
-    /// \return The source of the rename rule
-    const core::identifier_string &source() const
-    {
-      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
-    }
-
-    /// \brief Returns the target of the rename rule
-    /// \return The target of the rename rule
-    const core::identifier_string &target() const
-    {
-      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg2(*this));
-    }
-};
-
-/// \brief Read-only singly linked list of rename expressions
-typedef atermpp::term_list<rename_expression> rename_expression_list;
-*/
+/// \brief swap overload
+inline void swap(rename_expression& t1, rename_expression& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated class rename_expression ---//
 
 } // namespace process
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::process::rename_expression& t1, mcrl2::process::rename_expression& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PROCESS_RENAME_EXPRESSION_H

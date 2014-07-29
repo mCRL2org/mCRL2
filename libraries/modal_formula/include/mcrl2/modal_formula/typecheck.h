@@ -28,7 +28,7 @@ class state_formula_type_checker : lps::action_type_checker
 {
 
   public:
-    state_formula_type_checker(const data::data_specification &data_spec, const lps::action_label_list& action_decls);
+    state_formula_type_checker(const data::data_specification &data_spec, const process::action_label_list& action_decls);
         /** \brief     Type check a state formula.
          *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
          *  \param[in] d A state formula that has not been type checked.
@@ -67,8 +67,8 @@ void type_check(state_formula& formula, const lps::specification& lps_spec, bool
   }
   catch (mcrl2::runtime_error &e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula TEMPORARILY IN ATERM FORMAT" +  
-                             mcrl2::utilities::to_string(formula) /* pp(formula)*/);
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula " +  
+                             mcrl2::utilities::to_string(formula));
   }
 }
 

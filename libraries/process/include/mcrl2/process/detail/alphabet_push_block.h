@@ -13,10 +13,11 @@
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H
 
 #include <map>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/utility.h"
-#include "mcrl2/process/detail/print_utility.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -73,14 +74,14 @@ namespace detail {
 struct push_block_printer
 {
   const std::set<core::identifier_string>& B;
-  
+
   push_block_printer(const std::set<core::identifier_string>& B_)
     : B(B_)
   {}
 
   std::string print(const std::set<core::identifier_string>& x) const
   {
-    return detail::print_set(x);
+    return core::detail::print_set(x);
   }
 
   template <typename T>
@@ -142,7 +143,7 @@ std::string print_B(const std::set<core::identifier_string>& B)
     {
       out << ", ";
     }
-    out << core::pp(*i);
+    out << *i;
   }
   out << "}";
   return out.str();
@@ -181,9 +182,10 @@ struct push_block_builder: public process_expression_builder<Derived>
     return static_cast<Derived&>(*this);
   }
 
-  process::process_expression operator()(const lps::action& x)
+  process::process_expression operator()(const process::action& x)
   {
-    if (B.find(x.label().name()) != B.end())
+    using utilities::detail::contains;
+    if (contains(B, x.label().name()))
     {
       return delta();
     }
@@ -260,11 +262,12 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   bool restrict(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
   {
-    for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+    using utilities::detail::contains;
+    for (auto i = C.begin(); i != C.end(); ++i)
     {
       core::identifier_string_list gamma = i->action_name().names();
       core::identifier_string c = i->name();
-      if (std::find(gamma.begin(), gamma.end(), b) != gamma.end() && B.find(c) == B.end())
+      if (contains(gamma, b) && !contains(B, c))
       {
         return true;
       }
@@ -275,7 +278,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   std::set<core::identifier_string> restrict_block(const std::set<core::identifier_string>& B, const communication_expression_list& C) const
   {
     std::set<core::identifier_string> result;
-    for (std::set<core::identifier_string>::const_iterator i = B.begin(); i != B.end(); ++i)
+    for (auto i = B.begin(); i != B.end(); ++i)
     {
       if (!restrict(*i, B, C))
       {

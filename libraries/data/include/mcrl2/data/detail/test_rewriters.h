@@ -79,7 +79,7 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
 
 template <typename T>
 T normalize_and_or(const T& x,
-                   typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                   )
 {
   return core::make_apply_builder<normalize_and_or_builder>()(x);
@@ -87,7 +87,7 @@ T normalize_and_or(const T& x,
 
 template <typename T>
 void normalize_and_or(T& x,
-                      typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+                      typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                      )
 {
   core::make_apply_builder<normalize_and_or_builder>()(x);
@@ -137,7 +137,7 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
 
 template <typename T>
 T normalize_equality(const T& x,
-                     typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                     )
 {
   return core::make_apply_builder<normalize_equality_builder>()(x);
@@ -145,7 +145,7 @@ T normalize_equality(const T& x,
 
 template <typename T>
 void normalize_equality(T& x,
-                        typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+                        typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                        )
 {
   core::make_apply_builder<normalize_equality_builder>()(x);
@@ -221,7 +221,6 @@ void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string e
     expr1,
     expr2,
     parser(var_decl, data_spec),
-    data::detail::data_printer(),
     std::equal_to<data_expression>(),
     R1,
     "R1",

@@ -27,6 +27,7 @@
 
 #include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/pg_parse.h"
@@ -117,7 +118,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       mCRL2log(verbose) << "  only generate:   " << std::boolalpha << m_options.only_generate << std::endl;
 
       bool value;
-      if(pbes_input_format() == pbes_file_pgsolver)
+      if(pbes_input_format() == bes::bes_format_pgsolver())
       {
         pbespgsolve_algorithm algorithm(timer(), m_options);
         ParityGame pg;

@@ -23,14 +23,13 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
@@ -86,18 +85,6 @@ class parser
     }
 };
 
-// PBES expression printer (pretty print + ascii representation)
-template <typename Term>
-std::string printer(const Term& x)
-{
-  std::ostringstream out;
-  out << pbes_system::pp(x);
-#ifdef PBES_REWRITE_TEST_DEBUG
-  out << " " << x;
-#endif
-  return out.str();
-}
-
 void test_one_point_rule_rewriter(const std::string& expr1, const std::string& expr2)
 {
   one_point_rule_rewriter R;
@@ -105,7 +92,6 @@ void test_one_point_rule_rewriter(const std::string& expr1, const std::string& e
     expr1,
     expr2,
     parser(),
-    printer<pbes_expression>,
     std::equal_to<pbes_expression>(),
     R,
     "R1",
@@ -135,6 +121,10 @@ void test_one_point_rule_rewriter()
 
   test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "val(!false)");
   test_one_point_rule_rewriter("forall d:Nat. val(d == 1) => Y(d)", "Y(1)");
+  test_one_point_rule_rewriter("forall m:Nat. exists n:Nat. val(m == n) && Y(n)", "forall m: Nat. Y(m)");
+  test_one_point_rule_rewriter("forall m:Nat. exists n:Nat. val(n == m) && Y(n)", "forall m: Nat. Y(m)");
+  test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(m != n) || Y(n)", "exists m: Nat. Y(m)");
+  test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(n != m) || Y(n)", "exists m: Nat. Y(m)");
 
   // N.B. The result of this test depends on the order of the clauses.
   // test_one_point_rule_rewriter("forall p: Bool, q: Bool. val(!(p == q)) || val(!q) || val(!(p == true))", "val(false)");

@@ -26,7 +26,7 @@ add_definitions(
 endif(MSVC)
 
 # ######### General setup ##########
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 # actual target:
 add_library(dparser STATIC

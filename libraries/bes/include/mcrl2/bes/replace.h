@@ -49,6 +49,24 @@ boolean_expression replace_boolean_variables(const boolean_expression& x, Substi
   return core::make_update_apply_builder<boolean_expression_builder>(sigma)(x);
 }
 
+template <typename T, typename Substitution>
+void replace_all_boolean_variables(T& x,
+                                   Substitution sigma,
+                                   typename std::enable_if< !std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+                                  )
+{
+  core::make_update_apply_builder<bes::boolean_variable_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_all_boolean_variables(const T& x,
+                                Substitution sigma,
+                                typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+                               )
+{
+  return core::make_update_apply_builder<bes::boolean_variable_builder>(sigma)(x);
+}
+
 } // namespace bes
 
 } // namespace mcrl2

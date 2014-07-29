@@ -16,22 +16,8 @@ add_executable(${PROJECT_NAME}
   lps2pbes.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/modal_formula/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-
 target_link_libraries(${PROJECT_NAME}
-  mcrl2_lps
-  mcrl2_modal_formula
-  mcrl2_pbes
-  mcrl2_utilities
-  mcrl2_syntax
+  mcrl2_bes
 )
 
 # install target:

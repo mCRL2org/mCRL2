@@ -19,11 +19,14 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_expression_visitor.h"
+#include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -35,6 +38,15 @@ namespace pbes_system
 
 namespace detail
 {
+
+inline
+void make_constelm_substitution(const std::map<data::variable, data::data_expression>& m, data::rewriter::substitution_type& result)
+{
+  for (auto i = m.begin(); i != m.end(); ++i)
+  {
+    result[i->first] = i->second;
+  }
+}
 
 template <typename Term>
 struct true_false_pair
@@ -133,6 +145,10 @@ struct constelm_edge_condition
   term_type FC;
   condition_map condition;  // condT + condF
 
+  constelm_edge_condition(const term_type& tc, const term_type& fc)
+    : TC(tc), FC(fc)
+  {}
+
   /// \brief Returns the true-false pair corresponding to the edge condition
   /// \return The true-false pair corresponding to the edge condition
   true_false_pair<Term> TCFC() const
@@ -146,7 +162,7 @@ struct constelm_edge_condition
   term_type compute_condition(const std::vector<true_false_pair<Term> >& c) const
   {
     term_type result = tr::true_();
-    for (typename std::vector<true_false_pair<Term> >::const_iterator i = c.begin(); i != c.end(); ++i)
+    for (auto i = c.begin(); i != c.end(); ++i)
     {
       result = utilities::optimized_and(result, utilities::optimized_not(i->TC));
       result = utilities::optimized_and(result, utilities::optimized_not(i->FC));
@@ -155,18 +171,40 @@ struct constelm_edge_condition
   }
 };
 
-template <typename Term>
-struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edge_condition<Term> >
+struct edge_condition_traverser: public pbes_expression_traverser<edge_condition_traverser>
 {
-  typedef pbes_expression_visitor<Term, constelm_edge_condition<Term> > super;
-  typedef typename core::term_traits<Term>::term_type term_type;
-  typedef typename core::term_traits<Term>::variable_type variable_type;
-  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
-  typedef typename core::term_traits<Term>::data_term_type data_term_type;
-  typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
-  typedef constelm_edge_condition<Term> edge_condition;
-  typedef typename edge_condition::condition_map condition_map;
-  typedef typename core::term_traits<Term> tr;
+  typedef pbes_expression_traverser<edge_condition_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  typedef constelm_edge_condition<pbes_expression> edge_condition;
+  typedef edge_condition::condition_map condition_map;
+  typedef core::term_traits<pbes_expression> tr;
+
+  std::vector<edge_condition> condition_stack;
+
+  void push(const edge_condition& x)
+  {
+    condition_stack.push_back(x);
+  }
+
+  edge_condition& top()
+  {
+    return condition_stack.back();
+  }
+
+  const edge_condition& top() const
+  {
+    return condition_stack.back();
+  }
+
+  edge_condition pop()
+  {
+    edge_condition result = top();
+    condition_stack.pop_back();
+    return result;
+  }
 
   // N.B. As a side effect ec1 and ec2 are changed!!!
   void merge_conditions(edge_condition& ec1,
@@ -174,168 +212,92 @@ struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edg
                         edge_condition& ec
                        )
   {
-    for (typename condition_map::iterator i = ec1.condition.begin(); i != ec1.condition.end(); ++i)
+    for (auto i = ec1.condition.begin(); i != ec1.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
       ec.condition.insert(*i);
     }
-    for (typename condition_map::iterator i = ec2.condition.begin(); i != ec2.condition.end(); ++i)
+    for (auto i = ec2.condition.begin(); i != ec2.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
       ec.condition.insert(*i);
     }
   }
 
-  /// \brief Visit data_expression node
-  /// \param e A term
-  /// \param d A data term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_data_expression(const term_type& /* e */, const data_term_type& d, edge_condition& ec)
+  void leave(const data::data_expression& x)
   {
-    ec.TC = d;
-    ec.FC = utilities::optimized_not(d);
-    return this->stop_recursion;
+    push(edge_condition(x, utilities::optimized_not(x)));
   }
 
-  /// \brief Visit true node
-  /// \param e A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_true(const term_type& /* e */, edge_condition& ec)
+  void leave(const not_&)
   {
-    ec.TC = tr::true_();
-    ec.FC = tr::false_();
-    return this->stop_recursion;
+    edge_condition ec = pop();
+    std::swap(ec.TC, ec.FC);
+    push(ec);
   }
 
-  /// \brief Visit false node
-  /// \param e A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_false(const term_type& /* e */, edge_condition& ec)
+  void leave(const and_&)
   {
-    ec.TC = tr::false_();
-    ec.FC = tr::true_();
-    return this->stop_recursion;
-  }
-
-  /// \brief Visit not node
-  /// \param e A term
-  /// \param arg A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_not(const term_type& /* e */, const term_type& arg, edge_condition& ec)
-  {
-    edge_condition ec_arg;
-    super::visit(arg, ec_arg);
-    ec.TC = ec_arg.FC;
-    ec.FC = ec_arg.TC;
-    ec.condition = ec_arg.condition;
-    return this->stop_recursion;
-  }
-
-  /// \brief Visit and node
-  /// \param e A term
-  /// \param left A term
-  /// \param right A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_and(const term_type& /* e */, const term_type& left, const term_type&  right, edge_condition& ec)
-  {
-    edge_condition ec_left;
-    super::visit(left, ec_left);
-    edge_condition ec_right;
-    super::visit(right, ec_right);
-    ec.TC = utilities::optimized_and(ec_left.TC, ec_right.TC);
-    ec.FC = utilities::optimized_or(ec_left.FC, ec_right.FC);
+    edge_condition ec_right = pop();
+    edge_condition ec_left = pop();
+    edge_condition ec(utilities::optimized_and(ec_left.TC, ec_right.TC), utilities::optimized_or(ec_left.FC, ec_right.FC));
     merge_conditions(ec_left, ec_right, ec);
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit or node
-  /// \param e A term
-  /// \param left A term
-  /// \param right A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_or(const term_type& /* e */, const term_type&  left, const term_type&  right, edge_condition& ec)
+  void leave(const or_&)
   {
-    edge_condition ec_left;
-    super::visit(left, ec_left);
-    edge_condition ec_right;
-    super::visit(right, ec_right);
-    ec.TC = utilities::optimized_or(ec_left.TC, ec_right.TC);
-    ec.FC = utilities::optimized_and(ec_left.FC, ec_right.FC);
+    edge_condition ec_right = pop();
+    edge_condition ec_left = pop();
+    edge_condition ec(utilities::optimized_or(ec_left.TC, ec_right.TC), utilities::optimized_and(ec_left.FC, ec_right.FC));
     merge_conditions(ec_left, ec_right, ec);
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit imp node
-  /// \param e A term
-  /// \param left A term
-  /// \param right A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_imp(const term_type& /* e */, const term_type&  left, const term_type&  right, edge_condition& ec)
+  void leave(const imp&)
   {
-    edge_condition ec_left;
-    super::visit(left, ec_left);
-    edge_condition ec_right;
-    super::visit(right, ec_right);
-    ec.TC = utilities::optimized_or(ec_left.FC, ec_right.TC);
-    ec.FC = utilities::optimized_and(ec_left.TC, ec_right.FC);
+    edge_condition ec_right = pop();
+    edge_condition ec_left = pop();
+    edge_condition ec(utilities::optimized_or(ec_left.FC, ec_right.TC), utilities::optimized_and(ec_left.TC, ec_right.FC));
     merge_conditions(ec_left, ec_right, ec);
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit forall node
-  /// \param e A term
-  /// \param variables A sequence of variables
-  /// \param expr A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_forall(const term_type& /* e */, const variable_sequence_type& variables, const term_type& expr, edge_condition& ec)
+  void leave(const forall& x)
   {
-    super::visit(expr, ec);
-    for (typename condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
+    edge_condition ec = pop();
+    for (auto i = ec.condition.begin(); i != ec.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
-      std::for_each(i->second.begin(), i->second.end(), apply_forall<Term>(variables));
+      std::for_each(i->second.begin(), i->second.end(), apply_forall<pbes_expression>(x.variables()));
     }
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit exists node
-  /// \param e A term
-  /// \param variables A sequence of variables
-  /// \param expr A term
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_exists(const term_type& /* e */, const variable_sequence_type&  variables, const term_type& expr, edge_condition& ec)
+  void leave(const exists& x)
   {
-    super::visit(expr, ec);
-    for (typename condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
+    edge_condition ec = pop();
+    for (auto i = ec.condition.begin(); i != ec.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
-      std::for_each(i->second.begin(), i->second.end(), apply_exists<Term>(variables));
+      std::for_each(i->second.begin(), i->second.end(), apply_exists<pbes_expression>(x.variables()));
     }
-    return this->stop_recursion;
+    push(ec);
   }
 
-  /// \brief Visit propositional_variable node
-  /// \param e A term
-  /// \param v A propositional variable
-  /// \param ec An edge condition
-  /// \return The result of visiting the node
-  bool visit_propositional_variable(const term_type& /* e */, const propositional_variable_type& v, edge_condition& ec)
+  void leave(const propositional_variable_instantiation& x)
   {
-    ec.TC = tr::false_();
-    ec.FC = tr::false_();
-    std::vector<true_false_pair<Term> > c;
-    c.push_back(true_false_pair<Term>(tr::false_(), tr::false_()));
-    ec.condition.insert(std::make_pair(v, c));
-    return this->stop_recursion;
+    edge_condition ec(tr::false_(), tr::false_());
+    std::vector<true_false_pair<pbes_expression> > c;
+    c.push_back(true_false_pair<pbes_expression>(tr::false_(), tr::false_()));
+    ec.condition.insert(std::make_pair(x, c));
+    push(ec);
+  }
+
+  const edge_condition& result() const
+  {
+    assert(condition_stack.size() == 1);
+    return top();
   }
 };
 
@@ -416,14 +378,11 @@ class pbes_constelm_algorithm
     /// \brief The propositional variable instantiation type
     typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
-    /// \brief The visitor type for edge conditions
-    typedef typename detail::edge_condition_visitor<Term> edge_condition_visitor;
-
     /// \brief The edge condition type
-    typedef typename edge_condition_visitor::edge_condition edge_condition;
+    typedef detail::edge_condition_traverser::edge_condition edge_condition;
 
     /// \brief The edge condition map type
-    typedef typename edge_condition_visitor::condition_map condition_map;
+    typedef detail::edge_condition_traverser::condition_map condition_map;
 
     /// \brief The term traits
     typedef typename core::term_traits<Term> tr;
@@ -433,10 +392,10 @@ class pbes_constelm_algorithm
     typedef std::map<variable_type, data_term_type> constraint_map;
 
     /// \brief Compares data expressions for equality.
-    DataRewriter m_data_rewriter;
+    const DataRewriter& m_data_rewriter;
 
     /// \brief Compares data expressions for equality.
-    PbesRewriter m_pbes_rewriter;
+    const PbesRewriter& m_pbes_rewriter;
 
     /// \brief Represents an edge of the dependency graph. The assignments are stored
     /// implicitly using the 'right' parameter. The condition determines under
@@ -474,7 +433,7 @@ class pbes_constelm_algorithm
         std::string to_string() const
         {
           std::ostringstream out;
-          out << "(" << mcrl2::core::pp(m_source.name()) << ", " << mcrl2::core::pp(m_target.name()) << ")  label = " << pbes_system::pp(m_target) << "  condition = " << mcrl2::data::pp(condition());
+          out << "(" << m_source.name() << ", " << m_target.name() << ")  label = " << m_target << "  condition = " << condition();
           return out.str();
         }
 
@@ -535,10 +494,18 @@ class pbes_constelm_algorithm
         /// \brief Returns true if the data variable v has been assigned a constant expression.
         /// \param v A variable
         /// \return True if the data variable v has been assigned a constant expression.
-        bool is_constant(variable_type v) const
+        bool is_constant(const variable_type& v) const
         {
-          typename constraint_map::const_iterator i = m_constraints.find(v);
+          auto i = m_constraints.find(v);
           return i != m_constraints.end() && !core::term_traits<data_term_type>::is_variable(i->second);
+        }
+
+        /// \brief Returns true if the expression x has the value undefined_data_expression or if x is a constant data expression.
+        /// \param x A
+        /// \return True if the data variable v has been assigned a constant expression.
+        bool is_constant_expression(const data_term_type& x) const
+        {
+          return x == data::undefined_data_expression() || core::term_traits<data_term_type>::is_constant(x);
         }
 
         /// \brief Returns the constant parameters of this vertex.
@@ -579,60 +546,63 @@ class pbes_constelm_algorithm
         std::string to_string() const
         {
           std::ostringstream out;
-          out << mcrl2::data::pp(m_variable) << "  assertions = ";
+          out << m_variable << "  assertions = ";
           for (typename constraint_map::const_iterator i = m_constraints.begin(); i != m_constraints.end(); ++i)
           {
-            std::string lhs = mcrl2::data::pp(i->first);
-            std::string rhs = mcrl2::data::pp(i->second);
-            out << "{" << lhs << " := " << rhs << "} ";
+            out << "{" << i->first << " := " << i->second << "} ";
           }
           return out.str();
         }
 
         /// \brief Assign new values to the parameters of this vertex, and update the constraints accordingly.
         /// The new values have a number of constraints.
-        bool update(data_term_sequence_type e, const constraint_map& e_constraints, DataRewriter datar)
+        bool update(data_term_sequence_type e, const constraint_map& e_constraints, const DataRewriter& datar)
         {
-          if (e.empty())
-          {
-            return false;
-          }
-
           bool changed = false;
 
           variable_sequence_type params = m_variable.parameters();
 
           if (m_constraints.empty())
           {
-            typename variable_sequence_type::iterator j = params.begin();
-            for (typename data_term_sequence_type::iterator i = e.begin(); i != e.end(); ++i, ++j)
+            if (e.empty())
             {
-              data_term_type e1 = datar(*i, data::make_map_substitution(e_constraints));
-              if (core::term_traits<data_term_type>::is_constant(e1))
+              m_constraints[data::undefined_variable()] = data::undefined_data_expression();
+            }
+            else
+            {
+              auto j = params.begin();
+              for (auto i = e.begin(); i != e.end(); ++i, ++j)
               {
-                m_constraints[*j] = e1;
-              }
-              else
-              {
-                m_constraints[*j] = *j;
+                data::rewriter::substitution_type sigma;
+                detail::make_constelm_substitution(e_constraints, sigma);
+                data_term_type e1 = datar(*i, sigma);
+                if (is_constant_expression(e1))
+                {
+                  m_constraints[*j] = e1;
+                }
+                else
+                {
+                  m_constraints[*j] = *j;
+                }
               }
             }
             changed = true;
           }
           else
           {
-            typename variable_sequence_type::iterator j = params.begin();
-            for (typename data_term_sequence_type::iterator i = e.begin(); i != e.end(); ++i, ++j)
+            auto j = params.begin();
+            for (auto i = e.begin(); i != e.end(); ++i, ++j)
             {
-              typename constraint_map::iterator k = m_constraints.find(*j);
+              auto k = m_constraints.find(*j);
               assert(k != m_constraints.end());
               data_term_type& ci = k->second;
               if (ci == *j)
               {
                 continue;
               }
-              // TODO: why not use R(t, sigma) interface here?
-              data_term_type ei = datar(*i, data::make_map_substitution(e_constraints));
+              data::rewriter::substitution_type sigma;
+              detail::make_constelm_substitution(e_constraints, sigma);
+              data_term_type ei = datar(*i, sigma);
               if (ci != ei)
               {
                 ci = *j;
@@ -641,6 +611,16 @@ class pbes_constelm_algorithm
             }
           }
           return changed;
+        }
+
+        // Removes assignments to undefined_variable() from constraints()
+        void remove_undefined_values()
+        {
+          auto i = m_constraints.find(data::undefined_variable());
+          if (i != m_constraints.end())
+          {
+            m_constraints.erase(i);
+          }
         }
     };
 
@@ -714,14 +694,18 @@ class pbes_constelm_algorithm
     std::string print_condition(const edge& e, const vertex& u, const term_type& value)
     {
       std::ostringstream out;
-      out << "\nEvaluated condition " << pbes_system::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << data::pp(value) << std::endl;
+      data::rewriter::substitution_type sigma;
+      detail::make_constelm_substitution(u.constraints(), sigma);
+      out << "\nEvaluated condition " << e.condition() << sigma << " to " << value << std::endl;
       return out.str();
     }
 
     std::string print_evaluation_failure(const edge& e, const vertex& u)
     {
       std::ostringstream out;
-      out << "\nCould not evaluate condition " << pbes_system::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
+      data::rewriter::substitution_type sigma;
+      detail::make_constelm_substitution(u.constraints(), sigma);
+      out << "\nCould not evaluate condition " << e.condition() << sigma << " to true or false";
       return out.str();
     }
 
@@ -730,7 +714,7 @@ class pbes_constelm_algorithm
     /// \brief Constructor.
     /// \param datar A data rewriter
     /// \param pbesr A PBES rewriter
-    pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
+    pbes_constelm_algorithm(const DataRewriter& datar, const PbesRewriter& pbesr)
       : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
     {}
 
@@ -739,11 +723,11 @@ class pbes_constelm_algorithm
     std::map<propositional_variable_decl_type, std::vector<variable_type> > redundant_parameters() const
     {
       std::map<propositional_variable_decl_type, std::vector<variable_type> > result;
-      for (typename std::map<string_type, std::vector<size_t> >::const_iterator i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
+      for (auto i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
       {
         const vertex& v = m_vertices.find(i->first)->second;
         std::vector<variable_type>& variables = result[v.variable()];
-        for (std::vector<size_t>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+        for (auto j = i->second.begin(); j != i->second.end(); ++j)
         {
           // std::advance doesn't work for aterm lists :-(
           variable_sequence_type parameters(v.variable().parameters());
@@ -776,14 +760,14 @@ class pbes_constelm_algorithm
 
         if (compute_conditions)
         {
-          // use an edge_condition_visitor to compute the edges
-          edge_condition ec;
-          edge_condition_visitor visitor;
-          visitor.visit(i->formula(), ec);
+          // use an edge_condition_traverser to compute the edges
+          detail::edge_condition_traverser f;
+          f(i->formula());
+          edge_condition ec = f.result();
           if (!ec.condition.empty())
           {
             std::vector<edge>& edges = m_edges[name];
-            for (typename condition_map::iterator j = ec.condition.begin(); j != ec.condition.end(); ++j)
+            for (auto j = ec.condition.begin(); j != ec.condition.end(); ++j)
             {
               propositional_variable_type X = j->first;
               term_type condition = ec.compute_condition(j->second);
@@ -835,7 +819,9 @@ class pbes_constelm_algorithm
           vertex& v = m_vertices[e.target().name()];
           mCRL2log(log::debug) << print_edge_update(e, u, v);
 
-          term_type value = m_pbes_rewriter(e.condition(), data::make_map_substitution(u.constraints()));
+          data::rewriter::substitution_type sigma;
+          detail::make_constelm_substitution(u.constraints(), sigma);
+          term_type value = m_pbes_rewriter(e.condition(), sigma);
           mCRL2log(log::debug) << print_condition(e, u, value);
 
           if (!tr::is_false(value) && !tr::is_true(value))
@@ -852,6 +838,12 @@ class pbes_constelm_algorithm
           }
           mCRL2log(log::debug) << "  <target vertex after >" << v.to_string() << "\n";
         }
+      }
+
+      // remove undefined values from constraints
+      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      {
+        i->second.remove_undefined_values();
       }
 
       mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
@@ -879,10 +871,12 @@ class pbes_constelm_algorithm
 
         if (!v.constraints().empty())
         {
+          data::rewriter::substitution_type sigma;
+          detail::make_constelm_substitution(v.constraints(), sigma);
           *i = pbes_equation(
                  i->symbol(),
                  i->variable(),
-                 pbes_system::replace_free_variables(i->formula(), data::make_map_substitution(v.constraints()))
+                 pbes_system::replace_free_variables(i->formula(), sigma)
                );
         }
       }

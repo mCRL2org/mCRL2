@@ -12,7 +12,6 @@
 #define MCRL2_DEBUG_EXPRESSION_BUILDER
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/process/parse.h"
@@ -35,16 +34,17 @@ std::string PROC_DECL =
 void test_parse_process_specification()
 {
   std::string text =
-    "act  a: Nat;                                   \n"
-    "                                               \n"
-    "glob v: Nat;                                   \n"
-    "                                               \n"
-    "proc P(i,j: Nat) = P(1, 1); \n"
-    "                                               \n"
-    "init P(i = 1, j = v);                          \n"
+    "act  a: Nat;                     \n"
+    "                                 \n"
+    "glob v: Nat;                     \n"
+    "                                 \n"
+    "proc P(i,j: Nat) = a(i).P(1, 1); \n"
+    "                                 \n"
+    "init P(i = 1, j = v);            \n"
     ;
 
   process_specification p = parse_process_specification(text);
+  std::cout << p << std::endl;
 }
 
 void test_parse()
@@ -54,10 +54,17 @@ void test_parse()
   test_parse_process_specification();
 }
 
+void test_actdecl()
+{
+  std::string text = "a: Bool -> Bool;";
+  action_label_list l = parse_action_declaration(text);
+}
+
 int test_main(int argc, char** argv)
 {
   test_parse_process_specification();
   test_parse();
+  test_actdecl();
 
   return EXIT_SUCCESS;
 }

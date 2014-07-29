@@ -10,15 +10,15 @@
 /// \brief The pbes_greybox_interface class provides a wrapper for the
 /// parity_game_generator classes, for use in the PBES explorer.
 
+#ifndef MCRL2_PBES_DETAIL_PBES_GAME_GREYBOX_INTERFACE_H
+#define MCRL2_PBES_DETAIL_PBES_GAME_GREYBOX_INTERFACE_H
+
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/parity_game_generator_deprecated.h"
-
-#ifndef MCRL2_PBES_DETAIL_PBES_GAME_GREYBOX_INTERFACE_H
-#define MCRL2_PBES_DETAIL_PBES_GAME_GREYBOX_INTERFACE_H
+#include "mcrl2/pbes/parity_game_generator.h"
 
 namespace mcrl2 {
 
@@ -29,8 +29,12 @@ namespace detail {
   /// A class that provides initial state and successors functions for PBESs,
   /// allowing to explore the PBES as a transition system, where states are
   /// instantiated propositional variables.
-  class pbes_greybox_interface: public parity_game_generator_deprecated
+  class pbes_greybox_interface: public parity_game_generator
   {
+    protected:
+      data::rewriter datar;
+      pbes_system::enumerate_quantifiers_rewriter pbes_rewriter;
+
     public:
     /// \brief Constructor.
     /// \param p A PBES
@@ -38,7 +42,9 @@ namespace detail {
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
     /// \param rewrite_strategy The rewrite engine to use. (Default: jitty)
     pbes_greybox_interface(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
-      : parity_game_generator_deprecated(p, true_false_dependencies, is_min_parity, rewrite_strategy)
+      : parity_game_generator(p, true_false_dependencies, is_min_parity, rewrite_strategy),
+      	datar(p.data()),
+        pbes_rewriter(datar, p.data(), true)
     {
       initialize_generation();
     }
@@ -50,19 +56,18 @@ namespace detail {
     propositional_variable_instantiation get_initial_state()
     {
       //std::clog << "get_initial_state()" << std::endl;
-      propositional_variable_instantiation phi = core::static_down_cast<const propositional_variable_instantiation&>(rewrite_and_simplify_expression(m_pbes.initial_state()));
-      //std::clog << "  phi = " << print(phi) << std::endl;
+      propositional_variable_instantiation phi = atermpp::down_cast<propositional_variable_instantiation>(rewrite_and_simplify_expression(m_pbes.initial_state()));
+      //std::clog << "  phi = " << phi << std::endl;
       return phi;
     }
 
     /// \brief Rewrites and simplifies an expression.
     /// \param e a PBES expression.
     /// \return the result of the rewrite.
-    pbes_expression rewrite_and_simplify_expression(const pbes_expression& e, const bool convert_data_to_pbes = true)
+    pbes_expression rewrite_and_simplify_expression(const pbes_expression& e, const bool /* convert_data_to_pbes */ = true)
     {
-      data::detail::legacy_rewriter::substitution_type sigma;
-      data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-      pbes_expression phi = rewrite_and_simplify(e,sigma,sigma_internal, convert_data_to_pbes);
+      data::rewriter::substitution_type sigma;
+      pbes_expression phi = pbes_rewriter(e, sigma);
       return phi;
     }
 
@@ -88,7 +93,7 @@ namespace detail {
       initialize_generation();
 
       std::set<pbes_expression> result;
-      mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression " << print(phi) << std::endl;
+      mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression " << phi << std::endl;
 
       // expand the right hand side if needed
       pbes_expression psi = expand_rhs(phi);
@@ -114,14 +119,14 @@ namespace detail {
           result.insert(*i);
         }
       }
-      else if (is_true(psi))
+      else if (tr::is_true(psi))
       {
         if (m_true_false_dependencies)
         {
           result.insert(tr::true_());
         }
       }
-      else if (is_false(psi))
+      else if (tr::is_false(psi))
       {
         if (m_true_false_dependencies)
         {
@@ -130,7 +135,7 @@ namespace detail {
       }
       else
       {
-        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + print(psi) + "\n" + to_string(psi)));
+        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + pbes_system::pp(psi) + "\n" + to_string(psi)));
       }
       mCRL2log(log::debug, "pbes_greybox_interface") << print_successors(result);
       return result;
@@ -150,16 +155,15 @@ namespace detail {
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
 
-        mCRL2log(log::debug2, "pbes_greybox_interface") << "Expanding right hand side of formula " << print(psi) << std::endl << "  rhs: " << print(expr) << " into ";
+        mCRL2log(log::debug2, "pbes_greybox_interface") << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << expr << " into ";
 
         pbes_expression result;
 
-        data::detail::legacy_rewriter::substitution_type sigma;
-        data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-        make_substitution_internal(pbes_eqn.variable().parameters(), tr::param(psi),sigma,sigma_internal);
-        result = substitute_and_rewrite(expr,sigma,sigma_internal);
+        data::rewriter::substitution_type sigma;
+        make_substitution(pbes_eqn.variable().parameters(), tr::param(psi),sigma);
+        result = pbes_rewriter(expr,sigma);
 
-        mCRL2log(log::debug2, "pbes_greybox_interface") << print(result) << std::endl;
+        mCRL2log(log::debug2, "pbes_greybox_interface") << result << std::endl;
         return result;
       }
       return psi;
@@ -175,7 +179,7 @@ namespace detail {
       out << "-- print_successors --" << std::endl;
       for (std::set<pbes_expression>::const_iterator s = successors.begin(); s != successors.end(); ++s)
       {
-        out << " * " << print(*s) << std::endl;
+        out << " * " << *s << std::endl;
       }
       return out.str();
     }
@@ -195,8 +199,8 @@ namespace detail {
       initialize_generation();
 
       std::set<pbes_expression> result;
-      mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression "  << print(phi) << " (var = " << var
-                                                                                               << ", expr = " << print(expr) << ")" <<std::endl;
+      mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression "  << phi << " (var = " << var
+                                                                                               << ", expr = " << expr << ")" <<std::endl;
 
       assert(tr::is_prop_var(phi));
       std::string varname = tr::name(phi);
@@ -227,14 +231,14 @@ namespace detail {
             result.insert(*i);
           }
         }
-        else if (is_true(psi))
+        else if (tr::is_true(psi))
         {
           if (m_true_false_dependencies)
           {
             result.insert(tr::true_());
           }
         }
-        else if (is_false(psi))
+        else if (tr::is_false(psi))
         {
           if (m_true_false_dependencies)
           {
@@ -243,7 +247,7 @@ namespace detail {
         }
         else
         {
-          throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + print(psi)));
+          throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + pbes_system::pp(psi)));
         }
       }
       mCRL2log(log::debug, "pbes_greybox_interface") << print_successors(result);

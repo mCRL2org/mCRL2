@@ -125,6 +125,20 @@ BOOST_AUTO_TEST_CASE(ticket_1208)
   }
 }
 
+BOOST_AUTO_TEST_CASE(ticket_1267)
+{
+  std::string text =
+    "act a: Nat;                                      \n"
+    "proc loop(n: Nat) = a(n) . loop((n + 1) mod 10); \n"
+    "init loop(0);                                    \n"
+    ;
+  specification x = parse_linear_process_specification(text);
+  auto const& a = x.process().action_summands().front().multi_action();
+  std::string s = lps::pp(a);
+  std::cout << "s = " << s << std::endl;
+  BOOST_CHECK(s == "a(n)");
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;

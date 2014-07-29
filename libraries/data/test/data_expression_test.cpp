@@ -10,7 +10,6 @@
 /// \brief Basic regression test for data expressions.
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/core/identifier_string.h"
@@ -116,7 +115,7 @@ void application_test()
   application fxy(f, xy);
   BOOST_CHECK(fxy.sort() == s);
   BOOST_CHECK(fxy.head() == f);
-  BOOST_CHECK(fxy.arguments() == xy);
+  BOOST_CHECK(data_expression_list(fxy.begin(), fxy.end()) == xy);
   BOOST_CHECK(*(fxy.begin()) == x);
   BOOST_CHECK(*(++fxy.begin()) == y);
 
@@ -125,10 +124,7 @@ void application_test()
   BOOST_CHECK(fxy == fxy_e_);
   BOOST_CHECK(fxy.sort() == fxy_e_.sort());
   BOOST_CHECK(fxy.head() == fxy_e_.head());
-  BOOST_CHECK(fxy.arguments() == fxy_e_.arguments());
-
   BOOST_CHECK(fxy == f(x,y));
-
 }
 
 void abstraction_test()

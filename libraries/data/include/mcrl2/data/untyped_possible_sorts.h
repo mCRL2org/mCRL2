@@ -27,7 +27,7 @@ class untyped_possible_sorts: public sort_expression
   public:
     /// \brief Default constructor.
     untyped_possible_sorts()
-      : sort_expression(core::detail::constructUntypedSortsPossible())
+      : sort_expression(core::detail::default_values::UntypedSortsPossible)
     {}
 
     /// \brief Constructor.
@@ -40,20 +40,38 @@ class untyped_possible_sorts: public sort_expression
 
     /// \brief Constructor.
     untyped_possible_sorts(const sort_expression_list& sorts)
-      : sort_expression(core::detail::gsMakeUntypedSortsPossible(sorts))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sorts))
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    untyped_possible_sorts(const Container& sorts, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
-      : sort_expression(core::detail::gsMakeUntypedSortsPossible(sort_expression_list(sorts.begin(), sorts.end())))
+    untyped_possible_sorts(const Container& sorts, typename atermpp::enable_if_container<Container, sort_expression>::type* = 0)
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sort_expression_list(sorts.begin(), sorts.end())))
     {}
 
     const sort_expression_list& sorts() const
     {
-      return atermpp::aterm_cast<const sort_expression_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<sort_expression_list>((*this)[0]);
     }
 };
+
+// prototype declaration
+std::string pp(const untyped_possible_sorts& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_possible_sorts& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_possible_sorts& t1, untyped_possible_sorts& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class untyped_possible_sorts ---//
 
 } // namespace data

@@ -15,9 +15,10 @@
 #include <stdexcept>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/data/untyped_identifier.h"
 #include "mcrl2/data/variable.h"
 
@@ -34,7 +35,7 @@ class assignment_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     assignment_expression()
-      : atermpp::aterm_appl(core::detail::constructWhrDecl())
+      : atermpp::aterm_appl(core::detail::default_values::WhrDecl)
     {}
 
     /// \brief Constructor.
@@ -52,7 +53,6 @@ typedef atermpp::term_list<assignment_expression> assignment_expression_list;
 /// \brief vector of assignment_expressions
 typedef std::vector<assignment_expression>    assignment_expression_vector;
 
-
 // prototypes
 inline bool is_assignment(const atermpp::aterm_appl& x);
 inline bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x);
@@ -67,6 +67,24 @@ bool is_assignment_expression(const atermpp::aterm_appl& x)
          data::is_untyped_identifier_assignment(x);
 }
 
+// prototype declaration
+std::string pp(const assignment_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const assignment_expression& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(assignment_expression& t1, assignment_expression& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief Assignment of a data expression to a variable
 class assignment: public assignment_expression
@@ -74,7 +92,7 @@ class assignment: public assignment_expression
   public:
     /// \brief Default constructor.
     assignment()
-      : assignment_expression(core::detail::constructDataVarIdInit())
+      : assignment_expression(core::detail::default_values::DataVarIdInit)
     {}
 
     /// \brief Constructor.
@@ -87,17 +105,17 @@ class assignment: public assignment_expression
 
     /// \brief Constructor.
     assignment(const variable& lhs, const data_expression& rhs)
-      : assignment_expression(core::detail::gsMakeDataVarIdInit(lhs, rhs))
+      : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), lhs, rhs))
     {}
 
     const variable& lhs() const
     {
-      return atermpp::aterm_cast<const variable>(atermpp::arg1(*this));
+      return atermpp::down_cast<variable>((*this)[0]);
     }
 
     const data_expression& rhs() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<data_expression>((*this)[1]);
     }
 //--- start user section assignment ---//
     /// \brief Applies the assignment to a variable
@@ -105,7 +123,7 @@ class assignment: public assignment_expression
     /// \return The value <tt>x[lhs() := rhs()]</tt>.
     const data_expression &operator()(const variable& x) const
     {
-      return x == lhs() ? rhs() : atermpp::aterm_cast<const data_expression>(x);
+      return x == lhs() ? rhs() : x;
     }
 
     /// \brief Applies the assignment to a term
@@ -114,7 +132,7 @@ class assignment: public assignment_expression
     data_expression operator()(const Expression& /*x*/) const
     {
       throw std::runtime_error("data::assignment::operator(const Expression&) is a deprecated interface!");
-      return data_expression();
+      return data::undefined_data_expression();
     }
 //--- end user section assignment ---//
 };
@@ -125,14 +143,31 @@ typedef atermpp::term_list<assignment> assignment_list;
 /// \brief vector of assignments
 typedef std::vector<assignment>    assignment_vector;
 
-
 /// \brief Test for a assignment expression
 /// \param x A term
 /// \return True if \a x is a assignment expression
 inline
 bool is_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsDataVarIdInit(x);
+  return x.function() == core::detail::function_symbols::DataVarIdInit;
+}
+
+// prototype declaration
+std::string pp(const assignment& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const assignment& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(assignment& t1, assignment& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -142,7 +177,7 @@ class untyped_identifier_assignment: public assignment_expression
   public:
     /// \brief Default constructor.
     untyped_identifier_assignment()
-      : assignment_expression(core::detail::constructUntypedIdentifierAssignment())
+      : assignment_expression(core::detail::default_values::UntypedIdentifierAssignment)
     {}
 
     /// \brief Constructor.
@@ -155,22 +190,22 @@ class untyped_identifier_assignment: public assignment_expression
 
     /// \brief Constructor.
     untyped_identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs)
-      : assignment_expression(core::detail::gsMakeUntypedIdentifierAssignment(lhs, rhs))
+      : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), lhs, rhs))
     {}
 
     /// \brief Constructor.
     untyped_identifier_assignment(const std::string& lhs, const data_expression& rhs)
-      : assignment_expression(core::detail::gsMakeUntypedIdentifierAssignment(core::identifier_string(lhs), rhs))
+      : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), core::identifier_string(lhs), rhs))
     {}
 
     const core::identifier_string& lhs() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data_expression& rhs() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<data_expression>((*this)[1]);
     }
 //--- start user section untyped_identifier_assignment ---//
     /// \brief Applies the assignment to a variable
@@ -189,16 +224,32 @@ typedef atermpp::term_list<untyped_identifier_assignment> untyped_identifier_ass
 /// \brief vector of untyped_identifier_assignments
 typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignment_vector;
 
-
 /// \brief Test for a untyped_identifier_assignment expression
 /// \param x A term
 /// \return True if \a x is a untyped_identifier_assignment expression
 inline
 bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedIdentifierAssignment(x);
+  return x.function() == core::detail::function_symbols::UntypedIdentifierAssignment;
 }
 
+// prototype declaration
+std::string pp(const untyped_identifier_assignment& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_identifier_assignment& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignment& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated classes ---//
 
 /// \brief Selects the right-hand side of an assignment
@@ -264,35 +315,12 @@ variable_list left_hand_sides(const assignment_list& x)
 }
 
 // template function overloads
-std::string pp(const assignment& x);
 std::string pp(const assignment_list& x);
 std::string pp(const assignment_vector& x);
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::assignment_expression& t1, mcrl2::data::assignment_expression& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::assignment& t1, mcrl2::data::assignment& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::untyped_identifier_assignment& t1, mcrl2::data::untyped_identifier_assignment& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_ASSIGNMENT_H
 

@@ -15,7 +15,7 @@
 #include <sstream>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/lps/action_parse.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/specification.h"
@@ -29,17 +29,59 @@ namespace mcrl2
 namespace lps
 {
 
-struct action_rename_actions: public lps::action_actions
+namespace detail
+{
+
+struct multi_action_actions: public process::action_actions
+{
+  multi_action_actions(const core::parser_table& table_)
+    : process::action_actions(table_)
+  {}
+
+  lps::untyped_multi_action parse_MultAct(const core::parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::untyped_multi_action(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList"))
+    {
+      return lps::untyped_multi_action(parse_ActionList(node.child(0)));
+    }
+    report_unexpected_node(node);
+    return lps::untyped_multi_action();
+  }
+};
+
+inline
+lps::untyped_multi_action parse_multi_action_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("MultAct");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  lps::untyped_multi_action result = multi_action_actions(parser_tables_mcrl2).parse_MultAct(node);
+  p.destroy_parse_node(node);
+  return result;
+}
+
+inline
+multi_action complete_multi_action(untyped_multi_action& x, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  multi_action result = lps::type_check(x, data_spec, action_decls);
+  lps::translate_user_notation(result);
+  lps::normalize_sorts(result, data_spec);
+  return result;
+}
+
+struct action_rename_actions: public process::action_actions
 {
   action_rename_actions(const core::parser_table& table_)
-    : lps::action_actions(table_)
+    : process::action_actions(table_)
   {}
 
   lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return action_rename_rule_rhs(parse_Action(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return action_rename_rule_rhs(core::detail::gsMakeTau()); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return action_rename_rule_rhs(core::detail::gsMakeDelta()); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Tau())); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Delta())); }
     report_unexpected_node(node);
     return lps::action_rename_rule_rhs();
   }
@@ -51,7 +93,7 @@ struct action_rename_actions: public lps::action_actions
     {
       condition = parse_DataExpr(node.child(0).child(0).child(0));
     }
-    return action_rename_rule(core::detail::gsMakeActionRenameRule(data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
+    return action_rename_rule(atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRule(), data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
   }
 
   std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)
@@ -135,6 +177,35 @@ void complete_action_rename_specification(action_rename_specification& x, const 
   x = detail::translate_user_notation_and_normalise_sorts_action_rename_spec(x);
 }
 
+} // namespace detail
+
+/// \brief Parses a multi_action from an input stream
+/// \param in An input stream containing a multi_action
+/// \param[in] action_decls A list of allowed action labels that is used for type checking.
+/// \param[in] data_spec The data specification that is used for type checking.
+/// \return The parsed multi_action
+/// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
+inline
+multi_action parse_multi_action(std::stringstream& in, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  std::string text = utilities::read_text(in);
+  untyped_multi_action u = detail::parse_multi_action_new(text);
+  return detail::complete_multi_action(u, action_decls, data_spec);
+}
+
+/// \brief Parses a multi_action from a string
+/// \param text A string containing a multi_action
+/// \param[in] action_decls A list of allowed action labels that is used for type checking.
+/// \param[in] data_spec The data specification that is used for type checking.
+/// \return The parsed multi_action
+/// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
+inline
+multi_action parse_multi_action(const std::string& text, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  std::stringstream ma_stream(text);
+  return parse_multi_action(ma_stream, action_decls, data_spec);
+}
+
 /// \brief Parses a process specification from an input stream
 /// \param in An input stream
 /// \param spec A linear process specification.
@@ -143,8 +214,8 @@ inline
 action_rename_specification parse_action_rename_specification(std::istream& in, const lps::specification& spec)
 {
   std::string text = utilities::read_text(in);
-  action_rename_specification result = parse_action_rename_specification_new(text);
-  complete_action_rename_specification(result, spec);
+  action_rename_specification result = detail::parse_action_rename_specification_new(text);
+  detail::complete_action_rename_specification(result, spec);
   return result;
 }
 
@@ -198,6 +269,24 @@ specification parse_linear_process_specification(const std::string& text)
 {
   std::istringstream stream(text);
   return parse_linear_process_specification(stream);
+}
+
+/// \brief Parses an action from a string
+/// \param text A string containing an action
+/// \param action_decls An action declaration
+/// \param[in] data_spec A data specification used for sort normalization
+/// \return An action
+/// \exception mcrl2::runtime_error when the input does not match the syntax of an action.
+// TODO: implement this function in the Process Library
+inline
+process::action parse_action(const std::string& text, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  multi_action result = parse_multi_action(text, action_decls, data_spec);
+  if (result.actions().size() != 1)
+  {
+    throw mcrl2::runtime_error("cannot parse '" + text + " as an action!");
+  }
+  return result.actions().front();
 }
 
 } // namespace lps

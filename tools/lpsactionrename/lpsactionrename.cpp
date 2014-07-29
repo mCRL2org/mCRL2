@@ -20,7 +20,7 @@
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/action_rename.h"
-#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 
@@ -132,8 +132,8 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       {
         mCRL2log(verbose) << "reading LPS from file '" <<  input_filename() << "'..." << std::endl;
       }
-      specification lps_old_spec;
-      lps_old_spec.load(input_filename());
+      specification old_spec;
+      load_lps(old_spec, input_filename());
 
       //load action rename file
       mCRL2log(verbose) << "reading input from file '" <<  m_action_rename_filename << "'..." << std::endl;
@@ -147,29 +147,29 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       // Note that all parsed data and action declarations in rename_stream are
       // added to lps_old_spec.
       action_rename_specification action_rename_spec =
-        lps::parse_action_rename_specification(rename_stream,lps_old_spec);
+        lps::parse_action_rename_specification(rename_stream,old_spec);
       rename_stream.close();
 
       //rename all assigned actions
       mCRL2log(verbose) << "renaming actions in LPS..." << std::endl;
-      specification lps_new_spec = action_rename(action_rename_spec, lps_old_spec);
+      specification new_spec = action_rename(action_rename_spec, old_spec);
       data::rewriter datar;
       if (m_rewrite)
       {
         mCRL2log(verbose) << "rewriting data expressions in LPS..." << std::endl;
-        datar = create_rewriter(lps_new_spec.data());
-        lps::rewrite(lps_new_spec, datar);
-        lps::remove_trivial_summands(lps_new_spec);
+        datar = create_rewriter(new_spec.data());
+        lps::rewrite(new_spec, datar);
+        lps::remove_trivial_summands(new_spec);
       }
       if (m_sumelm)
       {
         mCRL2log(verbose) << "applying sum elimination..." << std::endl;
-        sumelm_algorithm(lps_new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
+        sumelm_algorithm(new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
         if (m_rewrite)
         {
           mCRL2log(verbose) << "rewriting data expressions in LPS again..." << std::endl;
-          lps::rewrite(lps_new_spec, datar);
-          lps::remove_trivial_summands(lps_new_spec);
+          lps::rewrite(new_spec, datar);
+          lps::remove_trivial_summands(new_spec);
         }
       }
       //save the result
@@ -181,7 +181,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       {
         mCRL2log(verbose) << "writing LPS to file '" <<  output_filename() << "'..." << std::endl;
       }
-      lps_new_spec.save(output_filename());
+      save_lps(new_spec, output_filename());
 
       return true;
     }

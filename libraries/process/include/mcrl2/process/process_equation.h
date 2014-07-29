@@ -12,11 +12,10 @@
 #ifndef MCRL2_PROCESS_PROCESS_EQUATION_H
 #define MCRL2_PROCESS_PROCESS_EQUATION_H
 
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/process_identifier.h"
@@ -34,7 +33,7 @@ class process_equation: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     process_equation()
-      : atermpp::aterm_appl(core::detail::constructProcEqn())
+      : atermpp::aterm_appl(core::detail::default_values::ProcEqn)
     {}
 
     /// \brief Constructor.
@@ -47,22 +46,22 @@ class process_equation: public atermpp::aterm_appl
 
     /// \brief Constructor.
     process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)
-      : atermpp::aterm_appl(core::detail::gsMakeProcEqn(identifier, formal_parameters, expression))
+      : atermpp::aterm_appl(core::detail::function_symbol_ProcEqn(), identifier, formal_parameters, expression)
     {}
 
     const process_identifier& identifier() const
     {
-      return atermpp::aterm_cast<const process_identifier>(atermpp::arg1(*this));
+      return atermpp::down_cast<process_identifier>((*this)[0]);
     }
 
     const data::variable_list& formal_parameters() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<data::variable_list>((*this)[1]);
     }
 
     const process_expression& expression() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg3(*this));
+      return atermpp::down_cast<process_expression>((*this)[2]);
     }
 };
 
@@ -72,20 +71,35 @@ typedef atermpp::term_list<process_equation> process_equation_list;
 /// \brief vector of process_equations
 typedef std::vector<process_equation>    process_equation_vector;
 
-
 /// \brief Test for a process_equation expression
 /// \param x A term
 /// \return True if \a x is a process_equation expression
 inline
 bool is_process_equation(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcEqn(x);
+  return x.function() == core::detail::function_symbols::ProcEqn;
 }
 
+// prototype declaration
+std::string pp(const process_equation& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_equation& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(process_equation& t1, process_equation& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class process_equation ---//
 
 // template function overloads
-std::string pp(const process_equation& x);
 std::string pp(const process_equation_list& x);
 std::string pp(const process_equation_vector& x);
 void normalize_sorts(process_equation_vector& x, const data::data_specification& dataspec);

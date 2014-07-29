@@ -14,9 +14,8 @@
 
 #include <iostream>
 
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/container_type.h"
 #include "mcrl2/data/sort_expression.h"
 
@@ -33,7 +32,7 @@ class container_sort: public sort_expression
   public:
     /// \brief Default constructor.
     container_sort()
-      : sort_expression(core::detail::constructSortCons())
+      : sort_expression(core::detail::default_values::SortCons)
     {}
 
     /// \brief Constructor.
@@ -46,19 +45,37 @@ class container_sort: public sort_expression
 
     /// \brief Constructor.
     container_sort(const container_type& container_name, const sort_expression& element_sort)
-      : sort_expression(core::detail::gsMakeSortCons(container_name, element_sort))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortCons(), container_name, element_sort))
     {}
 
     const container_type& container_name() const
     {
-      return atermpp::aterm_cast<const container_type>(atermpp::arg1(*this));
+      return atermpp::down_cast<container_type>((*this)[0]);
     }
 
     const sort_expression& element_sort() const
     {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<sort_expression>((*this)[1]);
     }
 };
+
+// prototype declaration
+std::string pp(const container_sort& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const container_sort& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(container_sort& t1, container_sort& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class container_sort ---//
 
 /// \brief list of function sorts
@@ -72,16 +89,6 @@ typedef std::vector<container_sort> container_sort_vector;
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::container_sort& t1, mcrl2::data::container_sort& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_CONTAINER_SORT_H
 

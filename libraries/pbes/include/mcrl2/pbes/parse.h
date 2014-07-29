@@ -19,14 +19,15 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/join.hpp>
-#include <boost/lexical_cast.hpp>
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
-#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/typecheck.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {
@@ -163,6 +164,47 @@ pbes parse_pbes(const std::string& text)
   return parse_pbes(in);
 }
 
+
+template <typename VariableContainer>
+propositional_variable parse_propositional_variable(const std::string& text,
+                                                    const VariableContainer& variables,
+                                                    const data::data_specification& dataspec = data::data_specification()
+                                                   )
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PropVarDecl");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  propositional_variable result = pbes_actions(parser_tables_mcrl2).parse_PropVarDecl(node);
+  p.destroy_parse_node(node);
+  return type_check(result, variables, dataspec);
+}
+
+/** \brief     Type check a pbes expression.
+ *  Throws an exception if something went wrong.
+ *  \param[in] text A string containing a pbes expression.
+ *  \param[in] dataspec A data specification.
+ *  \param[in] variables A sequence of data variables that may appear in x.
+ *  \param[in] propositional_variables A sequence of propositional variables that may appear in x.
+ *  \return    the type checked expression
+ **/
+template <typename VariableContainer, typename PropositionalVariableContainer>
+pbes_expression parse_pbes_expression(const std::string& text,
+                                      const VariableContainer& variables,
+                                      const PropositionalVariableContainer& propositional_variables,
+                                      const data::data_specification& dataspec = data::data_specification()
+                                     )
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  pbes_expression result = pbes_actions(parser_tables_mcrl2).parse_PbesExpr(node);
+  p.destroy_parse_node(node);
+  return type_check(result, variables, propositional_variables, dataspec);
+}
+
 /// \brief Parses a sequence of pbes expressions. The format of the text is as
 /// follows:
 /// <ul>
@@ -187,7 +229,7 @@ inline
 std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
 {
   std::string unique_prefix("UNIQUE_PREFIX");
-  int unique_prefix_index = 0;
+  std::size_t unique_prefix_index = 0;
 
   text = utilities::remove_comments(text);
   const std::string separator1 = "datavar";
@@ -236,7 +278,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
       std::vector<std::string> w = utilities::split(*j, ",");
       for (std::vector<std::string>::iterator k = w.begin(); k != w.end(); ++k)
       {
-        *k = unique_prefix + boost::lexical_cast<std::string>(unique_prefix_index++) + ": " + *k;
+        *k = unique_prefix + utilities::number2string(unique_prefix_index++) + ": " + *k;
       }
       *j = boost::algorithm::join(w, ", ");
     }
@@ -269,7 +311,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
     pbesspec = pbesspec
                + "\nmu "
                + unique_prefix
-               + boost::lexical_cast<std::string>(unique_prefix_index++)
+               + utilities::number2string(unique_prefix_index++)
                + (datavar_text.empty() ? "" : "(")
                + datavar_text
                + (datavar_text.empty() ? "" : ")")
@@ -323,28 +365,6 @@ pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "
   return parse_pbes_expressions(var_decl + "\nexpressions\n" + text, data_spec).first.front();
 }
 
-/// \brief Parses a string with substitutions and adds them to a substition function
-/// \param text A string
-/// \param data_spec A data specification
-/// \param sigma A substitution function
-template <typename SubstitutionFunction>
-void parse_substitutions(std::string text, data::data_specification const& data_spec, SubstitutionFunction& sigma)
-{
-  //mCRL2log(log::verbose) << "SSSSWWW" << text << std::endl;
-  std::vector<std::string> substitutions = utilities::split(text, ";");
-  for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
-  {
-    std::vector<std::string> words = utilities::regex_split(*i, ":=");
-    if (words.size() != 2)
-    {
-      continue;
-    }
-    data::variable v = data::parse_variable(words[0], data_spec);
-    data::data_expression e = data::parse_data_expression(words[1], "", data_spec);
-    sigma[v] = e;
-  }
-}
-
 /// \brief Parses a pbes expression.
 /// \param expr A string
 /// \param subst A string
@@ -356,7 +376,7 @@ pbes_expression parse_pbes_expression(std::string expr, std::string subst, const
 {
   typedef core::term_traits<pbes_expression> tr;
 
-  parse_substitutions(subst, p.data(), sigma);
+  data::detail::parse_substitution(subst, sigma, p.data());
 
   std::string datavar_text;
   for (typename SubstitutionFunction::iterator i = sigma.begin(); i != sigma.end(); ++i)
@@ -366,7 +386,7 @@ pbes_expression parse_pbes_expression(std::string expr, std::string subst, const
   }
 
   pbes q = p;
-  q.initial_state() = core::static_down_cast<const propositional_variable_instantiation&>(tr::true_());
+  q.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(tr::true_());
   std::string pbesspec = pbes_system::pp(q);
   std::string init("init");
   // remove the init declaration

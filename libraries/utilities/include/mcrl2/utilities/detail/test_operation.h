@@ -32,12 +32,11 @@ T identity(T t)
 }
 
 /// \brief Generic function that applies two operations to two objects, and compares the results.
-template <typename Parser, typename Printer, typename Operation1, typename Operation2, typename Compare>
+template <typename Parser, typename Operation1, typename Operation2, typename Compare>
 bool test_operation(
   const std::string& expr1,
   const std::string& expr2,
   Parser parse,
-  Printer print,
   Compare comp,
   Operation1 op1,
   const std::string& opname1,
@@ -59,34 +58,33 @@ bool test_operation(
   {
     std::cout << "--- TEST FAILED --- " << std::endl;
   }
-  std::cout << "x"               << " = " << print(x1) << std::endl;
-  std::cout << "y"               << " = " << print(x2) << std::endl;
+  std::cout << "x"               << " = " << x1 << std::endl;
+  std::cout << "y"               << " = " << x2 << std::endl;
   if (!opname1.empty())
   {
-    std::cout << (opname1 + "(x)") << " = " << print(f1) << std::endl;
+    std::cout << (opname1 + "(x)") << " = " << f1 << std::endl;
   }
   if (!opname2.empty())
   {
-    std::cout << (opname2 + "(y)") << " = " << print(f2) << std::endl;
+    std::cout << (opname2 + "(y)") << " = " << f2 << std::endl;
   }
   return success;
 }
 
 /// \brief Generic function that applies an operation to an object, and compares it
 /// with another object.
-template <typename Parser, typename Printer, typename Operation, typename Compare>
+template <typename Parser, typename Operation, typename Compare>
 bool test_operation(
   const std::string& expr1,
   const std::string& expr2,
   Parser parse,
-  Printer print,
   Compare comp,
   Operation op,
   const std::string& opname
 )
 {
   typedef typename Compare::first_argument_type T;
-  return test_operation(expr1, expr2, parse, print, comp, op, opname, identity<T>, "");
+  return test_operation(expr1, expr2, parse, comp, op, opname, identity<T>, "");
 }
 
 } // namespace detail

@@ -14,8 +14,9 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/parse_substitutions.h"
+#include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/parse.h"
@@ -164,8 +165,8 @@ void test_lps_rewriter(std::string src_text, std::string dest_text, std::string 
 
   // rewrite the specification src
   data::rewriter R(src.data());
-  data::mutable_map_substitution< > sigma;
-  data::detail::parse_substitutions(sigma_text, src.data(), sigma);
+  data::mutable_map_substitution<> sigma;
+  data::detail::parse_substitution(sigma_text, sigma, src.data());
   lps::rewrite(src, R, sigma);
 
   if (src != dest)

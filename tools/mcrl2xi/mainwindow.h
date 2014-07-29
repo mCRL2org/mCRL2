@@ -117,6 +117,8 @@ class MainWindow : public QMainWindow
     void onSelectAll();
 
     void onFind();
+    void onZoomIn();
+    void onZoomOut();
     void onWrapMode();
     void onResetPerspective();
 
@@ -141,7 +143,8 @@ class MainWindow : public QMainWindow
     void solveError(QString err);
     void solverFinished();
 
-  private:
+
+private:
     /**
      * @brief Tries to find a row and column number in an error message
      */

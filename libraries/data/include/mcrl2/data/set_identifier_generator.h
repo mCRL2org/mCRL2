@@ -13,6 +13,7 @@
 #define MCRL2_DATA_SET_IDENTIFIER_GENERATOR_H
 
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -40,7 +41,7 @@ class set_identifier_generator: public identifier_generator<>
     void clear_context()
     {
       m_identifiers.clear();
-      m_generator = utilities::number_postfix_generator();
+      m_generator.clear();
     }
 
     /// \brief Adds the identifier s to the context.
@@ -62,7 +63,8 @@ class set_identifier_generator: public identifier_generator<>
     /// \return True if the identifier s appears in the context.
     bool has_identifier(const core::identifier_string& s) const
     {
-      return m_identifiers.find(s) != m_identifiers.end();
+    	using utilities::detail::contains;
+      return contains(m_identifiers, s);
     }
 
     /// \brief Returns the context.
@@ -96,7 +98,7 @@ class multiset_identifier_generator: public identifier_generator<>
     void clear_context()
     {
       m_identifiers.clear();
-      m_generator = utilities::number_postfix_generator();
+      m_generator.clear();
     }
 
     /// \brief Adds the identifier s to the context.
@@ -110,7 +112,7 @@ class multiset_identifier_generator: public identifier_generator<>
     /// \param s A
     void remove_identifier(const core::identifier_string& s)
     {
-      std::multiset<core::identifier_string>::iterator i = m_identifiers.find(s);
+      auto i = m_identifiers.find(s);
       if (i != m_identifiers.end())
       {
         m_identifiers.erase(i);
@@ -122,7 +124,8 @@ class multiset_identifier_generator: public identifier_generator<>
     /// \return True if the identifier s appears in the context.
     bool has_identifier(const core::identifier_string& s) const
     {
-      return m_identifiers.find(s) != m_identifiers.end();
+    	using utilities::detail::contains;
+      return contains(m_identifiers, s);
     }
 
     /// \brief Returns the context.

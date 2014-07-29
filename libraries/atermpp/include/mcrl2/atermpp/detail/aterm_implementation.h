@@ -33,7 +33,7 @@ struct Block
 
     // The assignment operator is made private to indicate that
     // assigning a Block is also not allowed.
-    Block& operator=(const Block &/*other*/)
+    Block& operator=(const Block& /*other*/)
     {
       assert(0);
       return *this;
@@ -58,7 +58,7 @@ extern aterm static_undefined_aterm;  // detail/aterm_implementation.h
 extern aterm static_empty_aterm_list;
 
 extern size_t terminfo_size;
-extern size_t total_nodes;
+extern size_t total_nodes_in_hashtable;
 extern TermInfo *terminfo;
 
 extern size_t garbage_collect_count_down;
@@ -70,25 +70,27 @@ void resize_aterm_hashtable();
 void allocate_block(const size_t size);
 void collect_terms_with_reference_count_0();
 
+void call_creation_hook(const _aterm*);
+
 inline size_t SHIFT(const size_t w)
 {
-  return w>>4;
+  return w>>3;
 }
 
 inline
 size_t COMBINE(const HashNumber hnr, const size_t w)
 {
-  return (hnr>>1) ^ hnr ^ w;
+  return (w>>3) + (hnr>>1) + (hnr<<1);
 }
 
 inline
-size_t COMBINE(const HashNumber hnr, const aterm &w)
+size_t COMBINE(const HashNumber hnr, const aterm& w)
 {
   return COMBINE(hnr,reinterpret_cast<size_t>(address(w)));
 }
 
 inline
-void CHECK_TERM(const aterm &
+void CHECK_TERM(const aterm&
 #ifndef NDEBUG
 t
 #endif
@@ -101,7 +103,7 @@ t
 
 inline HashNumber hash_number(const detail::_aterm *t)
 {
-  const function_symbol &f=t->function();
+  const function_symbol& f=t->function();
   HashNumber hnr = SHIFT(addressf(f));
 
   const size_t* begin=reinterpret_cast<const size_t*>(t)+TERM_SIZE;
@@ -138,7 +140,7 @@ inline const _aterm* allocate_term(const size_t size)
     assert(size<terminfo_size);
   }
 
-  if (total_nodes>=(aterm_table_size))
+  if (total_nodes_in_hashtable>=aterm_table_size)
   {
     // The hashtable is not big enough to hold nr_of_nodes_for_the_next_garbage_collect. So, resizing
     // is wise (although not necessary, due to the structure of the hastable, which allows is to contain
@@ -146,8 +148,7 @@ inline const _aterm* allocate_term(const size_t size)
     resize_aterm_hashtable();
   }
 
-  total_nodes++;
-  TermInfo &ti = terminfo[size];
+  TermInfo& ti = terminfo[size];
   if (garbage_collect_count_down>0)
   {
     garbage_collect_count_down--;
@@ -194,7 +195,7 @@ inline void remove_from_hashtable(const _aterm *t)
         aterm_hashtable[hnr] = cur->next();
       }
       /* Put the node in the appropriate free list */
-      total_nodes--;
+      total_nodes_in_hashtable--;
       return;
     }
   }
@@ -202,36 +203,15 @@ inline void remove_from_hashtable(const _aterm *t)
   assert(0);
 }
 
-
-inline const _aterm* aterm0(const function_symbol &sym)
+inline void insert_in_hashtable(const _aterm *t, const size_t hnr)
 {
-  assert(sym.arity()==0);
 
-  HashNumber hnr = SHIFT(addressf(sym));
-
-  const detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
-
-  while (cur)
-  {
-    if (cur->function()==sym)
-    {
-      return cur;
-    }
-    cur = cur->next();
-  }
-
-  cur = detail::allocate_term(detail::TERM_SIZE);
-  /* Delay masking until after allocate */
-  hnr &= detail::aterm_table_mask;
-  new (&const_cast<detail::_aterm*>(cur)->function()) function_symbol(sym);
-
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
-
-  return cur;
+  t->set_next(detail::aterm_hashtable[hnr]);
+  detail::aterm_hashtable[hnr] = t;
+  total_nodes_in_hashtable++;
 }
 
-inline const _aterm* address(const aterm &t)
+inline const _aterm* address(const aterm& t)
 {
   return t.m_term;
 }

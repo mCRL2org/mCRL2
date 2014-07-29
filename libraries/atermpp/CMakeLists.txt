@@ -9,8 +9,6 @@
 project(mcrl2_atermpp)
 cmake_minimum_required(VERSION 2.6)
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-
 # Trick to add header files to projects in IDEs like Visual Studio and XCode
 FILE(GLOB_RECURSE HEADERS "include" "*.h")
 add_custom_target(${PROJECT_NAME}_headers
@@ -23,12 +21,7 @@ add_library(${PROJECT_NAME}
   source/aterm_implementation.cpp
   source/aterm_io_text.cpp
   source/aterm_io_binary.cpp
-  source/table.cpp
-  source/indexed_set.cpp
 )
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
 target_link_libraries( ${PROJECT_NAME}
   mcrl2_utilities

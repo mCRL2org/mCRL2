@@ -15,8 +15,6 @@
 #ifndef MCRL2_DATA_LIST_H
 #define MCRL2_DATA_LIST_H
 
-#include "boost/utility.hpp"
-
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -61,6 +59,7 @@ namespace mcrl2 {
         return false;
       }
 
+
       /// \brief Generate identifier []
       /// \return Identifier []
       inline
@@ -79,7 +78,6 @@ namespace mcrl2 {
         function_symbol empty(empty_name(), list(s));
         return empty;
       }
-
 
       /// \brief Recogniser for function []
       /// \param e A data expression
@@ -112,7 +110,6 @@ namespace mcrl2 {
         function_symbol cons_(cons_name(), make_function_sort(s, list(s), list(s)));
         return cons_;
       }
-
 
       /// \brief Recogniser for function |>
       /// \param e A data expression
@@ -151,7 +148,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined constructors for list
       /// \param s A sort expression
       /// \return All system defined constructors for list
@@ -164,6 +160,7 @@ namespace mcrl2 {
 
         return result;
       }
+
       /// \brief Generate identifier in
       /// \return Identifier in
       inline
@@ -182,7 +179,6 @@ namespace mcrl2 {
         function_symbol in(in_name(), make_function_sort(s, list(s), sort_bool::bool_()));
         return in;
       }
-
 
       /// \brief Recogniser for function in
       /// \param e A data expression
@@ -241,7 +237,6 @@ namespace mcrl2 {
         return count;
       }
 
-
       /// \brief Recogniser for function #
       /// \param e A data expression
       /// \return true iff e is the function symbol matching #
@@ -297,7 +292,6 @@ namespace mcrl2 {
         function_symbol snoc(snoc_name(), make_function_sort(list(s), s, list(s)));
         return snoc;
       }
-
 
       /// \brief Recogniser for function <|
       /// \param e A data expression
@@ -356,7 +350,6 @@ namespace mcrl2 {
         return concat;
       }
 
-
       /// \brief Recogniser for function ++
       /// \param e A data expression
       /// \return true iff e is the function symbol matching ++
@@ -413,7 +406,6 @@ namespace mcrl2 {
         function_symbol element_at(element_at_name(), make_function_sort(list(s), sort_nat::nat(), s));
         return element_at;
       }
-
 
       /// \brief Recogniser for function .
       /// \param e A data expression
@@ -472,7 +464,6 @@ namespace mcrl2 {
         return head;
       }
 
-
       /// \brief Recogniser for function head
       /// \param e A data expression
       /// \return true iff e is the function symbol matching head
@@ -528,7 +519,6 @@ namespace mcrl2 {
         function_symbol tail(tail_name(), make_function_sort(list(s), list(s)));
         return tail;
       }
-
 
       /// \brief Recogniser for function tail
       /// \param e A data expression
@@ -586,7 +576,6 @@ namespace mcrl2 {
         return rhead;
       }
 
-
       /// \brief Recogniser for function rhead
       /// \param e A data expression
       /// \return true iff e is the function symbol matching rhead
@@ -643,7 +632,6 @@ namespace mcrl2 {
         return rtail;
       }
 
-
       /// \brief Recogniser for function rtail
       /// \param e A data expression
       /// \return true iff e is the function symbol matching rtail
@@ -680,7 +668,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
       /// \brief Give all system defined mappings for list
       /// \param s A sort expression
       /// \return All system defined mappings for list
@@ -708,7 +695,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -720,7 +707,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_count_application(e) || is_head_application(e) || is_tail_application(e) || is_rhead_application(e) || is_rtail_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -732,7 +719,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
-        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for list

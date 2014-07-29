@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_ALGORITHM_H
 #define MCRL2_ATERMPP_ALGORITHM_H
 
-#include "boost/type_traits/add_reference.hpp"
+#include <type_traits>
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -30,7 +30,7 @@ namespace atermpp
 template <typename UnaryFunction, typename Term>
 UnaryFunction for_each(Term t, UnaryFunction op)
 {
-  return detail::for_each_impl< typename boost::add_reference< UnaryFunction >::type >(t, op);
+  return detail::for_each_impl< typename std::add_lvalue_reference< UnaryFunction >::type >(t, op);
 }
 
 /// \brief Finds a subterm of t that matches a given predicate.
@@ -41,7 +41,7 @@ template <typename Term, typename MatchPredicate>
 aterm_appl find_if(const Term &t, MatchPredicate match)
 {
   aterm_appl output;
-  detail::find_if_impl< typename boost::add_reference< MatchPredicate >::type >(t, match, output);
+  detail::find_if_impl< typename std::add_lvalue_reference< MatchPredicate >::type >(t, match, output);
   return output;
 }
 
@@ -55,7 +55,7 @@ aterm_appl find_if(const Term &t, MatchPredicate match)
 template <typename Term, typename MatchPredicate, typename StopPredicate>
 aterm_appl partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
 {
-  return detail::partial_find_if_impl<typename boost::add_reference<MatchPredicate>::type>(t, match, stop);
+  return detail::partial_find_if_impl<typename std::add_lvalue_reference<MatchPredicate>::type>(t, match, stop);
 }
 
 /// \brief Finds all subterms of t that match a given predicate, and writes the found terms
@@ -67,7 +67,7 @@ template <typename Term, typename MatchPredicate, typename OutputIterator>
 void find_all_if(const Term &t, MatchPredicate match, OutputIterator destBegin)
 {
   OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
-  detail::find_all_if_impl< typename boost::add_reference< MatchPredicate >::type >(t, match, i);
+  detail::find_all_if_impl< typename std::add_lvalue_reference< MatchPredicate >::type >(t, match, i);
 }
 
 /// \brief Finds all subterms of t that match a given predicate, and writes the found terms
@@ -82,8 +82,8 @@ template <typename Term, typename MatchPredicate, typename StopPredicate, typena
 void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, OutputIterator destBegin)
 {
   OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
-  detail::partial_find_all_if_impl< typename boost::add_reference< MatchPredicate >::type,
-         typename boost::add_reference< StopPredicate >::type >(t, match, stop, i);
+  detail::partial_find_all_if_impl< typename std::add_lvalue_reference< MatchPredicate >::type,
+         typename std::add_lvalue_reference< StopPredicate >::type >(t, match, stop, i);
 }
 
 /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
@@ -97,7 +97,7 @@ void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, Outpu
 template <typename Term, typename ReplaceFunction>
 Term replace(const Term &t, ReplaceFunction r)
 {
-  return aterm_cast<Term>(detail::replace_impl< typename boost::add_reference< ReplaceFunction >::type >(t, r));
+  return vertical_cast<Term>(detail::replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -125,8 +125,8 @@ Term replace(const Term &t, const aterm &old_value, const aterm &new_value)
 template <typename Term, typename ReplaceFunction>
 Term bottom_up_replace(Term t, ReplaceFunction r)
 {
-  aterm x = detail::bottom_up_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(t, r);
-  return Term(aterm_cast<aterm_appl>(x));
+  aterm x = detail::bottom_up_replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r);
+  return Term(down_cast<aterm_appl>(x));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -156,8 +156,8 @@ Term bottom_up_replace(Term t, aterm_appl old_value, aterm_appl new_value)
 template <typename Term, typename ReplaceFunction>
 Term partial_replace(Term t, ReplaceFunction r)
 {
-  aterm x = detail::partial_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(t, r);
-  return Term(aterm_cast<aterm_appl>(x));
+  aterm x = detail::partial_replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r);
+  return Term(down_cast<aterm_appl>(x));
 }
 
 } // namespace atermpp

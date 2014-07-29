@@ -13,8 +13,7 @@
 #ifndef MCRL2_ATERMPP_CONVERT_H
 #define MCRL2_ATERMPP_CONVERT_H
 
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_base_of.hpp>
+#include <type_traits>
 
 #include "mcrl2/atermpp/container_utility.h"
 
@@ -25,17 +24,17 @@ namespace atermpp
 
 template < typename TargetContainer, typename SourceContainer >
 const TargetContainer& convert(const SourceContainer &l,
-      typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, TargetContainer>::type>::type* = 0,
-      typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, SourceContainer>::type>::type* = 0)
+      typename std::enable_if<std::is_base_of<atermpp::aterm, TargetContainer>::value>::type* = 0,
+      typename std::enable_if<std::is_base_of<atermpp::aterm, SourceContainer>::value>::type* = 0)
 {
-  return aterm_cast<const TargetContainer>(l);
+  return down_cast<const TargetContainer>(l);
 }
 
 /// \brief Convert container with expressions to a new container with expressions
 template < typename TargetContainer, typename SourceContainer >
 TargetContainer convert(const SourceContainer& l,
-      typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, TargetContainer>::type>::type* = 0,
-      typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, SourceContainer>::type>::type* = 0)
+      typename std::enable_if<std::is_base_of<atermpp::aterm, TargetContainer>::value>::type* = 0,
+      typename std::enable_if< !std::is_base_of<atermpp::aterm, SourceContainer>::value>::type* = 0)
 {
   return TargetContainer(l.begin(), l.end());
 }
@@ -43,7 +42,7 @@ TargetContainer convert(const SourceContainer& l,
 /// \brief Convert container with expressions to a new container with expressions
 template < typename TargetContainer, typename SourceContainer >
 TargetContainer convert(const SourceContainer& l,
-      typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, TargetContainer>::type>::type* = 0)
+      typename std::enable_if< !std::is_base_of<atermpp::aterm, TargetContainer>::value>::type* = 0)
 {
   return TargetContainer(l.begin(), l.end());
 }

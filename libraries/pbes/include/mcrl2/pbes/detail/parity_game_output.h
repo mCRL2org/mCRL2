@@ -57,7 +57,7 @@ class parity_game_output: public parity_game_generator
     /// \return The quoted name of the vertex, for example "X1"
     std::string vertex(size_t i) const
     {
-      return "\"X" + boost::lexical_cast<std::string>(i+1) + "\"";
+      return "\"X" + utilities::number2string(i+1) + "\"";
     }
 
     /// \brief Returns a tuple representing an edge, for example ("X1", "X2")
@@ -73,7 +73,7 @@ class parity_game_output: public parity_game_generator
     /// \return A string representing a priority, for example "X1":0
     std::string priority(std::pair<size_t, size_t> p) const
     {
-      return vertex(p.first) + ":" + boost::lexical_cast<std::string>(p.second);
+      return vertex(p.first) + ":" + utilities::number2string(p.second);
     }
 
     /// \brief Applies a function to the elements of a container
@@ -81,7 +81,7 @@ class parity_game_output: public parity_game_generator
     /// \param f A function
     /// \return The transformed container
     template <typename Container, typename Function>
-    std::vector<std::string> apply(const Container& c, Function f) const
+    std::vector<std::string> apply(const Container& c, const Function& f) const
     {
       std::vector<std::string> result;
       for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
@@ -151,11 +151,12 @@ class parity_game_output: public parity_game_generator
     std::string python_graph()
     {
       std::string result;
-      result = result + python_set(apply(V, boost::bind(&parity_game_output::vertex, *this, _1))) + "\n";
-      result = result + python_set(apply(E, boost::bind(&parity_game_output::edge, *this, _1))) + "\n";
-      result = result + "{" + join(apply(priorities, boost::bind(&parity_game_output::priority, *this, _1)), ", ") + "}\n";
-      result = result + python_set(apply(even_vertices, boost::bind(&parity_game_output::vertex, *this, _1))) + "\n";
-      result = result + python_set(apply(odd_vertices, boost::bind(&parity_game_output::vertex, *this, _1)));
+      // boost::ref is needed to prevent copying of *this
+      result = result + python_set(apply(V, boost::bind(&parity_game_output::vertex, boost::ref(*this), _1))) + "\n";
+      result = result + python_set(apply(E, boost::bind(&parity_game_output::edge, boost::ref(*this), _1))) + "\n";
+      result = result + "{" + join(apply(priorities, boost::bind(&parity_game_output::priority, boost::ref(*this), _1)), ", ") + "}\n";
+      result = result + python_set(apply(even_vertices, boost::bind(&parity_game_output::vertex, boost::ref(*this), _1))) + "\n";
+      result = result + python_set(apply(odd_vertices, boost::bind(&parity_game_output::vertex, boost::ref(*this), _1)));
       return result;
     }
 
@@ -167,14 +168,14 @@ class parity_game_output: public parity_game_generator
       for (std::set<size_t>::const_iterator i = V.begin(); i != V.end(); ++i)
       {
         size_t k = *i;
-        lines[k] = boost::lexical_cast<std::string>(k) + " " + boost::lexical_cast<std::string>(priorities[k]) + " " + (odd_vertices.find(*i) == odd_vertices.end() ? "0 " : "1 ");
+        lines[k] = utilities::number2string(k) + " " + utilities::number2string(priorities[k]) + " " + (odd_vertices.find(*i) == odd_vertices.end() ? "0 " : "1 ");
       }
       for (std::set<std::pair<size_t, size_t> >::const_iterator i = E.begin(); i != E.end(); ++i)
       {
         size_t k = i->first;
         size_t m = i->second;
         std::string& line = lines[k];
-        line += ((line[line.size()-1] == ' ' ? "" : ", ") + boost::lexical_cast<std::string>(m));
+        line += ((line[line.size()-1] == ' ' ? "" : ", ") + utilities::number2string(m));
       }
       return join(lines, ";\n") + ";";
     }

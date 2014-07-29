@@ -10,16 +10,15 @@
 /// \brief Regression test for replace functions
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/replace.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -125,8 +124,7 @@ void test_replace_variables_capture_avoiding(const std::string& x_text, const st
   process_expression x = parse_expression(x_text);
   data::mutable_map_substitution<> sigma = parse_substitution(sigma_text);
   std::set<data::variable> sv = sigma_variables(sigma);
-  std::vector<process::process_equation> equations;
-  std::string result = process::pp(process::replace_variables_capture_avoiding(x, sigma, sv, equations));
+  std::string result = process::pp(process::replace_variables_capture_avoiding(x, sigma, sv));
   check_result(x_text + " sigma = " + sigma_text, result, expected_result, "replace_variables_capture_avoiding");
 }
 
@@ -150,12 +148,12 @@ void test_process_instance_assignment()
   sigma[c] = data::sort_bool::false_();
 
   process_expression x = p.equations().front().expression();
-  process_expression x1 = process::replace_variables_capture_avoiding(x, sigma, data::substitution_variables(sigma), p.equations());
+  process_expression x1 = process::replace_variables_capture_avoiding(x, sigma, data::substitution_variables(sigma));
   std::cerr << process::pp(x1) << std::endl;
   BOOST_CHECK(process::pp(x1) == "P(c = true)");
 
   sigma[b] = data::sort_bool::false_();
-  process_expression x2 = process::replace_variables_capture_avoiding(x, sigma, data::substitution_variables(sigma), p.equations());
+  process_expression x2 = process::replace_variables_capture_avoiding(x, sigma, data::substitution_variables(sigma));
   std::cerr << process::pp(x2) << std::endl;
   BOOST_CHECK(process::pp(x2) == "P(b = false, c = true)");
 }

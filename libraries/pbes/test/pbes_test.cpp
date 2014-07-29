@@ -30,7 +30,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/complement.h"
@@ -48,7 +47,6 @@ using lps::linearise;
 using lps::specification;
 using pbes_system::pbes;
 using pbes_system::pbes_expression;
-using pbes_system::pbes_expr_builder;
 using pbes_system::pbes_equation;
 using pbes_system::lps2pbes;
 using pbes_system::propositional_variable_instantiation;
@@ -140,7 +138,7 @@ void test_pbes()
 
   try
   {
-    p.load("non-existing file");
+    load_pbes(p, "non-existing file");
     BOOST_CHECK(false); // loading is expected to fail
   }
   catch (mcrl2::runtime_error e)
@@ -155,7 +153,7 @@ void test_pbes()
     os.open(filename.c_str());
     atermpp::write_term_to_text_stream(t, os);
     os.close();
-    p.load(filename);
+    load_pbes(p, filename);
     BOOST_CHECK(false); // loading is expected to fail
   }
   catch (mcrl2::runtime_error e)
@@ -163,8 +161,8 @@ void test_pbes()
     remove(filename.c_str());
   }
   filename = "pbes_test_file.pbes";
-  p.save(filename);
-  p.load(filename);
+  save_pbes(p, filename);
+  load_pbes(p, filename);
   remove(filename.c_str());
 }
 
@@ -253,10 +251,9 @@ void test_find_sort_expressions()
   pbes p = lps2pbes(spec, formula, timed);
   std::set<sort_expression> s;
   pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
-  std::cout << data::detail::print_set(s) << std::endl;
+  std::cout << core::detail::print_set(s) << std::endl;
 }
 
-#ifdef MCRL2_ENABLE_IO_TEST
 void test_io()
 {
   using namespace pbes_system;
@@ -268,13 +265,13 @@ void test_io()
     "init X1;         \n"
     ;
   pbes p = txt2pbes(PBES_SPEC);
-  save_pbes(p, "pbes_binary.pbes", pbes_output_pbes, false);
-  save_pbes(p, "pbes_ascii.txt",   pbes_output_pbes, true);
-  save_pbes(p, "pbes_binary.bes",  pbes_output_bes,  false);
-  save_pbes(p, "pbes_ascii.bes",   pbes_output_bes,  true);
-  save_pbes(p, "pbes.cwi",         pbes_output_cwi);
+  save_pbes(p, "pbes.pbes",  pbes_format_internal());
+  load_pbes(p, "pbes.pbes",  pbes_format_internal());
+  save_pbes(p, "pbes.aterm", pbes_format_internal_text());
+  load_pbes(p, "pbes.aterm", pbes_format_internal_text());
+  save_pbes(p, "pbes.txt",   pbes_format_text());
+  load_pbes(p, "pbes.txt",   pbes_format_text());
 }
-#endif // MCRL2_ENABLE_IO_TEST
 
 void test_is_bes()
 {
@@ -300,10 +297,7 @@ int test_main(int argc, char** argv)
   test_instantiate_global_variables();
   test_find_sort_expressions();
   test_is_bes();
-
-#ifdef MCRL2_ENABLE_IO_TEST
   test_io();
-#endif // MCRL2_ENABLE_IO_TEST
 
   return 0;
 }

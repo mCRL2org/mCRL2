@@ -12,7 +12,6 @@
 // #define MCRL2_PBES_CONSTELM_DEBUG
 
 #include <string>
-#include <boost/foreach.hpp>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/pbes/eqelm.h"
@@ -20,8 +19,6 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
-#include "mcrl2/pbes/pbespgsolve.h"
-
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -53,7 +50,7 @@ void test_pbes(const std::string& pbes_spec,
                bool /* remove_equations = true */,
                std::string msg = "")
 {
-  typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
+  typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
 
   pbes p = txt2pbes(pbes_spec);
   pbes q = p;
@@ -94,7 +91,7 @@ void test_pbes(const std::string& pbes_spec,
 
 void test_eqelm(const std::string& pbes_spec)
 {
-  typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
+  typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
 
   pbes p = txt2pbes(pbes_spec);
   pbes q = p;
@@ -121,6 +118,8 @@ std::string random1 =
 
 int test_main(int argc, char** argv)
 {
+  log::mcrl2_logger::set_reporting_level(log::debug);
+
   bool compute_conditions = false;
   bool remove_equations = true;
   test_pbes(t1 , x1, compute_conditions, remove_equations, "test 1");

@@ -19,8 +19,8 @@
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/formula_checker.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
@@ -161,7 +161,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
         try
         {
           lps::specification s;
-          s.load(infilename);
+          load_lps(s, infilename);
           return s.data();
         }
         catch (mcrl2::runtime_error&)
@@ -170,7 +170,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
         try
         {
           mcrl2::pbes_system::pbes p;
-          p.load(infilename);
+          load_pbes(p, infilename);
           return p.data();
         }
         catch (mcrl2::runtime_error&)

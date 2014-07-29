@@ -41,17 +41,15 @@ template <class LTS_TYPE>
 LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
                               mcrl2::data::rewrite_strategy const rewrite_strategy = mcrl2::data::jitty,
-                              NextStateFormat format = GS_STATE_VECTOR,
                               std::string priority_action = "")
 {
-  std::clog << "Translating LPS to LTS with exploration strategy " << strategy << ", rewrite strategy " << rewrite_strategy << ", and state format " << format << "." << std::endl;
+  std::clog << "Translating LPS to LTS with exploration strategy " << strategy << ", rewrite strategy " << rewrite_strategy << "." << std::endl;
   lts::lts_generation_options options;
   options.trace_prefix = "lps2lts_test";
   options.specification = specification;
   options.priority_action = priority_action;
   options.strat = rewrite_strategy;
   options.expl_strat = strategy;
-  options.stateformat = format;
 
   options.lts = utilities::temporary_filename("lps2lts_test_file");
 
@@ -92,25 +90,6 @@ exploration_strategy_vector exploration_strategies()
   return exploration_strategies;
 }
 
-// State formats to be tested;
-typedef std::vector< NextStateFormat > nextstate_format_vector;
-
-static inline
-nextstate_format_vector initialise_nextstate_formats()
-{
-  nextstate_format_vector result;
-  result.push_back(GS_STATE_VECTOR);
-  result.push_back(GS_STATE_TREE);
-  return result;
-}
-
-static inline
-nextstate_format_vector nextstate_formats()
-{
-  static nextstate_format_vector nextstate_formats = initialise_nextstate_formats();
-  return nextstate_formats;
-}
-
 static void check_lps2lts_specification(std::string const& specification,
                                  const size_t expected_states,
                                  const size_t expected_transitions,
@@ -126,39 +105,36 @@ static void check_lps2lts_specification(std::string const& specification,
     exploration_strategy_vector estrategies(exploration_strategies());
     for (exploration_strategy_vector::const_iterator expl_strategy = estrategies.begin(); expl_strategy != estrategies.end(); ++expl_strategy)
     {
-      nextstate_format_vector nsformats(nextstate_formats());
-      for (nextstate_format_vector::const_iterator state_format = nsformats.begin(); state_format != nsformats.end(); ++state_format)
-      {
-        std::cerr << "AUT FORMAT\n";
-        lts::lts_aut_t result1 = translate_lps_to_lts<lts::lts_aut_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+      std::cerr << "AUT FORMAT\n";
+      lts::lts_aut_t result1 = translate_lps_to_lts<lts::lts_aut_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
 
 
-        BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
-        BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
-        BOOST_CHECK_EQUAL(result1.num_action_labels(), expected_labels);
+      BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
+      BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
+      BOOST_CHECK_EQUAL(result1.num_action_labels(), expected_labels);
 
-        std::cerr << "LTS FORMAT\n";
-        lts::lts_lts_t result2 = translate_lps_to_lts<lts::lts_lts_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
-
-
-        BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
-        BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
-        BOOST_CHECK_EQUAL(result2.num_action_labels(), expected_labels);
-
-        std::cerr << "FSM FORMAT\n";
-        lts::lts_fsm_t result3 = translate_lps_to_lts<lts::lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+      std::cerr << "LTS FORMAT\n";
+      lts::lts_lts_t result2 = translate_lps_to_lts<lts::lts_lts_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
 
 
-        BOOST_CHECK_EQUAL(result3.num_states(), expected_states);
-        BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
-        BOOST_CHECK_EQUAL(result3.num_action_labels(), expected_labels);
+      BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
+      BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
+      BOOST_CHECK_EQUAL(result2.num_action_labels(), expected_labels);
+
+      std::cerr << "FSM FORMAT\n";
+      lts::lts_fsm_t result3 = translate_lps_to_lts<lts::lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
+
+
+      BOOST_CHECK_EQUAL(result3.num_states(), expected_states);
+      BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
+      BOOST_CHECK_EQUAL(result3.num_action_labels(), expected_labels);
 
 #ifdef USE_BCG
-        lts::lts_bcg_t result6 = translate_lps_to_lts<lts::lts_bcg_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+      lts::lts_bcg_t result6 = translate_lps_to_lts<lts::lts_bcg_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
 
 //	bool has_i_label = false;
 //	bool has_tau = false;
-//        for( lps::action_label_list::iterator i = lps.action_labels().begin(); i != lps.action_labels().end(); ++i )
+//        for( process::action_label_list::iterator i = lps.action_labels().begin(); i != lps.action_labels().end(); ++i )
 //	{
 //                has_i_label = has_i_label || ( i -> name() == atermpp::aterm_string( "i" ) );
 //	}
@@ -171,9 +147,9 @@ static void check_lps2lts_specification(std::string const& specification,
  //       }
 
 
-        std::cerr << "BCG FORMAT\n";
-        BOOST_CHECK_EQUAL(result6.num_states(), expected_states);
-        BOOST_CHECK_EQUAL(result6.num_transitions(), expected_transitions);
+      std::cerr << "BCG FORMAT\n";
+      BOOST_CHECK_EQUAL(result6.num_states(), expected_states);
+      BOOST_CHECK_EQUAL(result6.num_transitions(), expected_transitions);
 //        if( has_i_label )
 //        {
 //          BOOST_CHECK_EQUAL(result6.num_action_labels(), expected_labels );
@@ -183,7 +159,6 @@ static void check_lps2lts_specification(std::string const& specification,
 //            BOOST_CHECK_EQUAL(result6.num_action_labels() , expected_labels + 1 );
 //        }
 #endif
-      }
     }
   }
 }
@@ -497,6 +472,128 @@ BOOST_AUTO_TEST_CASE(test_interaction_sum_and_assignment_notation2)
   );
   check_lps2lts_specification(spec, 2, 4, 1);
 }
+
+BOOST_AUTO_TEST_CASE(test_whether_function_update_is_declared)
+{
+  std::string spec(
+    "sort  T = struct a|b;\n"
+    "act int;\n"
+    "map g: Bool -> T;\n"
+    "var y: Bool;\n"
+    "eqn g(y) = a;\n"
+    "act d: Bool -> T;\n"
+    "proc P(f: Bool -> T) = int . P(f[true->b]);\n"
+    "init P(g) ;\n"
+  );
+  check_lps2lts_specification(spec, 2, 2, 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_whether_bag_enumeration_with_similar_elements_is_allowed)
+{
+  std::string spec(
+    "sort S = struct s1 | s2;\n"
+    "act int;\n"
+    "proc P(b: Bag(S)) = (count(s1, b) < 3) -> int.P();\n"
+    "init P({s1: 1, s1: 1});\n"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_functions_to_functions_are_causing_problems)
+{
+  std::string spec(
+    "map f:Nat->Nat->Nat->Nat;\n"
+    "    g:Nat->Nat;\n"
+    "var x,y,z:Nat;"
+    "eqn f(x)(y)(z)=x+y+z;\n"
+    "    f(x)(y)=g;\n"
+    "act int:Nat;\n"
+    "proc P = int(f(1)(2)(3)).P();\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_functions_can_be_enumerated)
+{
+  std::string spec(
+    "act int:Bool->Bool;\n"
+    "proc P = sum f:Bool->Bool.int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 4, 4);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_functions_with_more_arguments_can_be_enumerated)
+{
+  std::string spec(
+    "act int:Bool#Bool#Bool->Bool;\n"
+    "proc P = sum f:Bool#Bool#Bool->Bool.f(true,true,true)->int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 128, 128);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_finite_sets_can_be_enumerated)
+{
+  std::string spec(
+    "act int:FSet(Bool);\n"
+    "proc P = sum f:FSet(Bool).int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 4, 4);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_sets_can_be_enumerated)
+{
+  std::string spec(
+    "act int:FSet(Bool);\n"
+    "proc P = sum f:FSet(Bool).int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 4, 4);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_finite_sets_with_conditions_can_be_enumerated)
+{
+  std::string spec(
+    "act int:FSet(Bool);\n"
+    "proc P = sum f:FSet(Bool).(true in f) -> int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 2, 2);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_sets_with_conditions_can_be_enumerated)
+{
+  std::string spec(
+    "act int:Set(Bool);\n"
+    "proc P = sum f:Set(Bool).(true in f) -> int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 2, 2);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_finite_sets_of_functions_can_be_enumerated)
+{
+  std::string spec(
+    "act int:FSet(Bool->Bool);\n"
+    "proc P = sum f:FSet(Bool->Bool).((lambda x:Bool.true) in f) -> int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 8, 8);
+}
+  
+BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
+{
+  std::string spec(
+    "act int:Set(Bool->Bool);\n"
+    "proc P = sum f:Set(Bool->Bool).((lambda x:Bool.true) in f) -> int(f).P;\n"
+    "init P;\n"
+  );
+  check_lps2lts_specification(spec, 1, 8, 8);
+}
+  
 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

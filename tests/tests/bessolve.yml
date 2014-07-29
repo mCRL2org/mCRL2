@@ -1,0 +1,29 @@
+options:
+  grammar:
+    - grammars\bes.g
+  constraints:
+    - constraints\bes-attrs.yml
+  #path: C:\Program Files\mCRL2\bin
+  path: D:\mcrl2okt2012\mCRL2\bin
+  platform: windows
+nodes: {l1: BesSpec, l2: BES, l3: Bool, l4: Bool, l5: Bool}
+tools:
+  - input: [l1]
+    output: [l2]
+    args: []
+    name: txt2bes
+  - input: [l2]
+    output: [l3]
+    args: [-sgauss]
+    name: bessolve
+  - input: [l2]
+    output: [l4]
+    args: [-sspm]
+    name: bessolve
+  - input: [l2]
+    output: [l5]
+    args: []
+    name: pbes2bool
+result: |
+  result =  last_word(value(l3)) == last_word(value(l4)) and last_word(value(l4)) == last_word(value(l5))
+

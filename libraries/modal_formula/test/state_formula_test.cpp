@@ -21,7 +21,7 @@
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
-#include "mcrl2/modal_formula/state_formula_normalize.h"
+#include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
@@ -63,7 +63,8 @@ BOOST_AUTO_TEST_CASE(test_rename)
   generator.add_identifiers(lps::find_identifiers(spec));
   formula = rename_predicate_variables(formula, generator);
 
-  BOOST_CHECK(pp(formula) == "(mu X1. X1) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X1. X1)");
+  std::cout << "pp(formula) == " << pp(formula) << std::endl;
+  BOOST_CHECK(pp(formula) == "(mu X1. X1) && mu X. X" || pp(formula) == "(mu X. X) && mu X1. X1");
 
   generator = data::set_identifier_generator();
   generator.add_identifiers(lps::find_identifiers(spec));
@@ -300,7 +301,7 @@ std::cerr << "FORMULA " << f << "\n";
   v = maximal_closed_subformulas(g);
   for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
-    std::cout << "element " << state_formulas::pp(*i) << std::endl;
+    std::cout << "element " << *i << std::endl;
   }
   BOOST_CHECK(v.size() == 2);
   BOOST_CHECK(contains(v, "true"));
@@ -311,7 +312,7 @@ std::cerr << "FORMULA " << f << "\n";
   std::cout << "h = " << state_formulas::pp(h) << std::endl;
   for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
-    std::cout << "element " << state_formulas::pp(*i) << std::endl;
+    std::cout << "element " << *i << std::endl;
   }
   BOOST_CHECK(v.size() == 2);
   BOOST_CHECK(contains(v, "true"));

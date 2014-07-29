@@ -12,6 +12,9 @@
 #ifndef MCRL2_DATA_IS_SIMPLE_SUBSTITUTION_H
 #define MCRL2_DATA_IS_SIMPLE_SUBSTITUTION_H
 
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
+
 namespace mcrl2 {
 
 namespace data {
@@ -25,6 +28,22 @@ template <typename Substitution>
 bool is_simple_substitution(const Substitution& /*sigma*/)
 {
   return true;
+}
+
+/// \brief Returns true if FV(rhs) is included in {lhs}.
+inline
+bool is_simple_substitution(const data::variable& lhs, const data::data_expression& rhs)
+{
+  std::set<data::variable> v = data::find_free_variables(rhs);
+  if (v.empty())
+  {
+    return true;
+  }
+  if (v.size() == 1)
+  {
+    return *(v.begin()) == lhs;
+  }
+  return false;
 }
 
 } // namespace data

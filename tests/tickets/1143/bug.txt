@@ -1,0 +1,34 @@
+sort Policy = struct FIFO | LIFO;
+     Floor = Pos;
+     Requests = List(Pos);
+
+map  policy: Policy;
+     storeys: Pos;
+     addRequest,addRequestFIFO,addRequestLIFO,remove: Requests # Pos -> Requests;
+     newPosition: Pos # Pos -> Pos;
+
+var  r: Requests;
+     f,g,f1,f2: Pos;
+eqn  policy  =  LIFO;
+     storeys  =  4;
+     policy == FIFO  ->  addRequest(r, f)  =  addRequestFIFO(r, f);
+     policy == LIFO  ->  addRequest(r, f)  =  addRequestLIFO(r, f);
+     addRequestFIFO([], f)  =  [f];
+     addRequestFIFO(g |> r, f)  =  g |> r;
+     addRequestFIFO(g |> r, f)  =  g |> addRequest(r, f);
+     addRequestLIFO(r, f)  =  f |> remove(r, f);
+     remove([], f)  =  [];
+     f == g  ->  remove(g |> r, f)  =  remove(r, f);
+     f != g  ->  remove(g |> r, f)  =  g |> remove(r, f);
+     f1 < f2  ->  newPosition(f1, f2)  =  f1 + 1;
+     f1 > f2  ->  newPosition(f1, f2)  =  Int2Pos(f1 - 1);
+     f1 == f2  ->  newPosition(f1, f2)  =  f1;
+
+pbes nu X(position_Elevator: Pos, dooropen_Elevator: Bool, requests_Elevator: List(Pos)) =
+       Y(position_Elevator, dooropen_Elevator, requests_Elevator);
+     mu Y(position_Elevator: Pos, dooropen_Elevator: Bool, requests_Elevator: List(Pos)) =
+       Z(position_Elevator, dooropen_Elevator, requests_Elevator);
+     nu Z(position_Elevator: Pos, dooropen_Elevator: Bool, requests_Elevator: List(Pos)) =
+       (forall b_Elevator2: Bool, f_Elevator3,newposition_Elevator2: Pos, r_Elevator2: List(Pos). val(!false) && val(!true) || val(!(dooropen_Elevator && !(newposition_Elevator2 == newPosition(position_Elevator, head(r_Elevator2)) && !(r_Elevator2 == []) && !dooropen_Elevator) && f_Elevator3 <= 4 && r_Elevator2 == if(b_Elevator2, f_Elevator3 |> remove(requests_Elevator, f_Elevator3), requests_Elevator) && newposition_Elevator2 <= 4)) || X(position_Elevator, false, requests_Elevator)) && (forall b_Elevator3: Bool, f_Elevator4,newposition_Elevator3: Pos, r_Elevator3: List(Pos). val(!true) && val(!false) || val(!(newposition_Elevator3 == newPosition(position_Elevator, head(r_Elevator3)) && !(r_Elevator3 == []) && !dooropen_Elevator && f_Elevator4 <= 4 && r_Elevator3 == if(b_Elevator3, f_Elevator4 |> remove(requests_Elevator, f_Elevator4), requests_Elevator) && newposition_Elevator3 <= 4)) || X(newposition_Elevator3, newposition_Elevator3 == head(r_Elevator3), if(newposition_Elevator3 == head(r_Elevator3), tail(r_Elevator3), r_Elevator3))) && (forall f_Elevator5: Pos. val(!false) && val(!false) || val(!(f_Elevator5 <= 4 && f_Elevator5 in requests_Elevator)) || X(position_Elevator, dooropen_Elevator, requests_Elevator)) && (val(!false) && val(!false) || X(position_Elevator, dooropen_Elevator, requests_Elevator)) && (false || false || false || val(position_Elevator == storeys) || (forall b_Elevator6: Bool, f_Elevator9,newposition_Elevator6: Pos, r_Elevator6: List(Pos). val(!false) && val(!true) || val(!(dooropen_Elevator && !(newposition_Elevator6 == newPosition(position_Elevator, head(r_Elevator6)) && !(r_Elevator6 == []) && !dooropen_Elevator) && f_Elevator9 <= 4 && r_Elevator6 == if(b_Elevator6, f_Elevator9 |> remove(requests_Elevator, f_Elevator9), requests_Elevator) && newposition_Elevator6 <= 4)) || Z(position_Elevator, false, requests_Elevator)) && (forall b_Elevator7: Bool, f_Elevator10,newposition_Elevator7: Pos, r_Elevator7: List(Pos). val(!true) && val(!false) || val(!(newposition_Elevator7 == newPosition(position_Elevator, head(r_Elevator7)) && !(r_Elevator7 == []) && !dooropen_Elevator && f_Elevator10 <= 4 && r_Elevator7 == if(b_Elevator7, f_Elevator10 |> remove(requests_Elevator, f_Elevator10), requests_Elevator) && newposition_Elevator7 <= 4)) || Z(newposition_Elevator7, newposition_Elevator7 == head(r_Elevator7), if(newposition_Elevator7 == head(r_Elevator7), tail(r_Elevator7), r_Elevator7))) && (forall f_Elevator11: Pos. val(!false) && val(!false) || val(!(f_Elevator11 <= 4 && f_Elevator11 in requests_Elevator)) || Z(position_Elevator, dooropen_Elevator, requests_Elevator)) && (val(!false) && val(!false) || Z(position_Elevator, dooropen_Elevator, requests_Elevator)) && (false || false || false || false || (forall b_Elevator10: Bool, f_Elevator15,newposition_Elevator10: Pos, r_Elevator10: List(Pos). val(!false) && val(!true) || val(!(dooropen_Elevator && !(newposition_Elevator10 == newPosition(position_Elevator, head(r_Elevator10)) && !(r_Elevator10 == []) && !dooropen_Elevator) && f_Elevator15 <= 4 && r_Elevator10 == if(b_Elevator10, f_Elevator15 |> remove(requests_Elevator, f_Elevator15), requests_Elevator) && newposition_Elevator10 <= 4)) || Y(position_Elevator, false, requests_Elevator)) && (forall b_Elevator11: Bool, f_Elevator16,newposition_Elevator11: Pos, r_Elevator11: List(Pos). val(!true) && val(!false) || val(!(newposition_Elevator11 == newPosition(position_Elevator, head(r_Elevator11)) && !(r_Elevator11 == []) && !dooropen_Elevator && f_Elevator16 <= 4 && r_Elevator11 == if(b_Elevator11, f_Elevator16 |> remove(requests_Elevator, f_Elevator16), requests_Elevator) && newposition_Elevator11 <= 4)) || Y(newposition_Elevator11, newposition_Elevator11 == head(r_Elevator11), if(newposition_Elevator11 == head(r_Elevator11), tail(r_Elevator11), r_Elevator11))) && (forall f_Elevator17: Pos. val(!false) && val(!false) || val(!(f_Elevator17 <= 4 && f_Elevator17 in requests_Elevator)) || Y(position_Elevator, dooropen_Elevator, requests_Elevator)) && (val(!false) && val(!false) || Y(position_Elevator, dooropen_Elevator, requests_Elevator))));
+
+init X(1, true, []);

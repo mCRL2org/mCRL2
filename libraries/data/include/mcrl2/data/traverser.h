@@ -17,8 +17,7 @@
 #ifndef MCRL2_DATA_TRAVERSER_H
 #define MCRL2_DATA_TRAVERSER_H
 
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits/is_base_of.hpp"
+#include <type_traits>
 
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/data/assignment.h"
@@ -66,7 +65,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.head());
-    static_cast<Derived&>(*this)(x.arguments());
+    for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -225,30 +224,29 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
     if (data::is_abstraction(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::abstraction>(x));
     }
     else if (data::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_function_symbol(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_symbol>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::function_symbol>(x));
     }
     else if (data::is_application(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::application>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::application>(x));
     }
     else if (data::is_where_clause(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::where_clause>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::where_clause>(x));
     }
     else if (data::is_untyped_identifier(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -256,14 +254,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const data::assignment_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result;
     if (data::is_assignment(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::assignment>(x));
     }
     else if (data::is_untyped_identifier_assignment(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier_assignment>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier_assignment>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -271,30 +268,29 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const data::sort_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::sort_expression result;
     if (data::is_basic_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::basic_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::basic_sort>(x));
     }
     else if (data::is_container_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::container_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::container_sort>(x));
     }
     else if (data::is_structured_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::structured_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::structured_sort>(x));
     }
     else if (data::is_function_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::function_sort>(x));
     }
     else if (data::is_untyped_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_sort>(x));
     }
     else if (data::is_untyped_possible_sorts(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_possible_sorts>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_possible_sorts>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -302,30 +298,29 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
     if (data::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::set_comprehension>(x));
     }
     else if (data::is_bag_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::bag_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::bag_comprehension>(x));
     }
     else if (data::is_untyped_set_or_bag_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_set_or_bag_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_set_or_bag_comprehension>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -370,7 +365,7 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.head());
-    static_cast<Derived&>(*this)(x.arguments());
+    for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -457,30 +452,29 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
     if (data::is_abstraction(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::abstraction>(x));
     }
     else if (data::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_function_symbol(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_symbol>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::function_symbol>(x));
     }
     else if (data::is_application(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::application>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::application>(x));
     }
     else if (data::is_where_clause(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::where_clause>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::where_clause>(x));
     }
     else if (data::is_untyped_identifier(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -488,14 +482,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const data::assignment_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result;
     if (data::is_assignment(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::assignment>(x));
     }
     else if (data::is_untyped_identifier_assignment(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier_assignment>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier_assignment>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -503,30 +496,29 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
     if (data::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::set_comprehension>(x));
     }
     else if (data::is_bag_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::bag_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::bag_comprehension>(x));
     }
     else if (data::is_untyped_set_or_bag_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_set_or_bag_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_set_or_bag_comprehension>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -571,7 +563,7 @@ struct add_traverser_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.head());
-    static_cast<Derived&>(*this)(x.arguments());
+    for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -666,30 +658,29 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
     if (data::is_abstraction(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::abstraction>(x));
     }
     else if (data::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_function_symbol(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_symbol>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::function_symbol>(x));
     }
     else if (data::is_application(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::application>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::application>(x));
     }
     else if (data::is_where_clause(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::where_clause>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::where_clause>(x));
     }
     else if (data::is_untyped_identifier(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -697,14 +688,13 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const data::assignment_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result;
     if (data::is_assignment(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::assignment>(x));
     }
     else if (data::is_untyped_identifier_assignment(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier_assignment>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier_assignment>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -712,30 +702,29 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
     if (data::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::set_comprehension>(x));
     }
     else if (data::is_bag_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::bag_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::bag_comprehension>(x));
     }
     else if (data::is_untyped_set_or_bag_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_set_or_bag_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_set_or_bag_comprehension>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -782,7 +771,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.head());
-    static_cast<Derived&>(*this)(x.arguments());
+    for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -946,30 +935,29 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
     if (data::is_abstraction(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::abstraction>(x));
     }
     else if (data::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_function_symbol(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_symbol>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::function_symbol>(x));
     }
     else if (data::is_application(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::application>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::application>(x));
     }
     else if (data::is_where_clause(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::where_clause>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::where_clause>(x));
     }
     else if (data::is_untyped_identifier(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -977,14 +965,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const data::assignment_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result;
     if (data::is_assignment(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::assignment>(x));
     }
     else if (data::is_untyped_identifier_assignment(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier_assignment>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier_assignment>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -992,30 +979,29 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const data::sort_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::sort_expression result;
     if (data::is_basic_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::basic_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::basic_sort>(x));
     }
     else if (data::is_container_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::container_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::container_sort>(x));
     }
     else if (data::is_structured_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::structured_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::structured_sort>(x));
     }
     else if (data::is_function_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::function_sort>(x));
     }
     else if (data::is_untyped_sort(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_sort>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_sort>(x));
     }
     else if (data::is_untyped_possible_sorts(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_possible_sorts>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_possible_sorts>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1023,30 +1009,29 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
     if (data::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::set_comprehension>(x));
     }
     else if (data::is_bag_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::bag_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::bag_comprehension>(x));
     }
     else if (data::is_untyped_set_or_bag_comprehension(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_set_or_bag_comprehension>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_set_or_bag_comprehension>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

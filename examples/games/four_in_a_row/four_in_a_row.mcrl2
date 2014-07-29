@@ -26,14 +26,33 @@
 % mcrl22lps -vD four_in_a_row.mcrl2 temp.lps &&
 % lpssuminst -v temp.lps | lpsparunfold -l -sBoard -v -n5 | lpsparunfold -l -sRow -v -n7 | lpsrewr -v > temp1.lps &&
 % lpsconstelm -v -c -rjittyc temp1.lps temp2.lps &&
-% lps2lts -v -ftree -rjittyc temp2.lps 
+% lps2lts -v -rjittyc temp2.lps 
+%
+% Using the following formula, it can be determined whether red has 
+% winning strategy.
+%
+%    mu X.(exists x:Pos.<RedMoves(x)>
+%            (<RedWins>true || 
+%             ((exists y:Pos.<YellowMoves(y)>true) && forall y:Pos.[YellowMoves(y)](X && [YellowWins]false))))
+%
+% Using pbes2bool this formula can be verified on smaller than the full board.
+% The table below shows on which boards red has a winning strategy.
+%
+%       Columns
+% Rows    1     2     3     4     5     6     7
+%   1
+%   2
+%   3
+%   4
+%   5     No    No    No    No
+%   6     
 %
 % Jan Friso Groote, April 6, 2010
 
 sort Piece = struct Red | Yellow | None;
 map N,M,R:Pos;
-eqn N=7;     %Number of columns (default 7)
-    M=6;     %Number of rows (default 6)
+eqn N=5;     %Number of columns (default 7)
+    M=5;     %Number of rows (default 6)
     R=4;     %Length of a winning sequence of the same color (default 4)
 
 sort Row=List(Piece);
@@ -68,12 +87,15 @@ map  At:Nat#Nat#Board->Piece;                       % At(x,y,b) give the piece a
 
 var  b,b':Board;
      r:Row;
-     p,p':Piece;
+     p,p',p'':Piece;
      x,y:Nat;
      c:Bool;
      z:Pos;
 
-eqn  y==1 -> At(x,y,r|>b)=At(x,r);
+eqn  if(c,true,false)=c;
+     if(c,false,true)=!c;
+     if(c,p,p')==p'' = if(c,p==p'',p'==p'');
+     y==1 -> At(x,y,r|>b)=At(x,r);
      1<y && y<=M -> At(x,y,r|>b)=At(x,Int2Nat(y-1),b);
      y==0 || y>M || x==0 || x>N -> At(x,y,b)=None;
      At(x,y,if(c,b,b'))=if(c,At(x,y,b),At(x,y,b'));  % This rewrite rule is instrumental to let lpsconstelm 
@@ -152,33 +174,32 @@ act  YellowMoves,RedMoves:Pos;
 proc FourInaRow(b:Board,WhoMoves:Piece)=
        sum x:Pos.(WhoMoves==Yellow && 
                   x<=N &&
-                  At(x,M,b)==None &&
-                  !Four_in_a_row(Red,b)) ->
+                  At(x,M,b)==None) ->
              YellowMoves(x).
                 FourInaRow(PutColumn(Yellow,x,b),Red)+
 
        sum x:Pos.(WhoMoves==Red && 
                   x<=N &&
-                  At(x,M,b)==None &&
-                  !Four_in_a_row(Yellow,b)) ->
+                  At(x,M,b)==None) ->
              RedMoves(x).
                 FourInaRow(PutColumn(Red,x,b),Yellow)+
 
        (WhoMoves==Yellow && Four_in_a_row(Red,b)) ->
              RedWins.
-                FourInaRow(initial_board,None)+
+                FourInaRow(b,None)+
 
        (WhoMoves==Red && Four_in_a_row(Yellow,b)) ->
              YellowWins.
-                FourInaRow(initial_board,None);
+                FourInaRow(b,None);
                   
+% Note that the board is reversed. The bottom row is drawn at the top.
 map initial_board:Board;
-eqn initial_board= [[None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None]];
+eqn initial_board= [[None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ],
+                    [None,  None,  None,  None,  None,  None,  None  ]];
 
 
 init FourInaRow(initial_board,Red);

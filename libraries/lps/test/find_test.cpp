@@ -57,7 +57,7 @@ void test_find()
   specification spec = parse_linear_process_specification(SPEC);
   std::cout << spec.process().action_summands().size() << std::endl;
   action_summand s = spec.process().action_summands().front();
-  action a = s.multi_action().actions().front();
+  process::action a = s.multi_action().actions().front();
 
   //--- find_all_variables ---//
   data::variable m = nat("m");
@@ -107,12 +107,19 @@ void test_free_variables()
 void test_search()
 {
   lps::specification spec(parse_linear_process_specification(
+                            "glob dc: Nat;\n"
                             "act a : Bool;\n"
-                            "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
+                            "proc X = a((forall x : Nat. exists y : Nat. (x < y) && (y < dc))).X;\n"
                             "init X;\n"
                           ));
-  data::variable d("x", data::sort_nat::nat());
-  lps::search_free_variable(spec.process().action_summands(), d);
+  data::variable x("x", data::sort_nat::nat());
+  BOOST_CHECK(lps::search_free_variable(spec.process().action_summands(), x) == false);
+
+  data::variable y("y", data::sort_nat::nat());
+  BOOST_CHECK(lps::search_free_variable(spec.process().action_summands(), y) == false);
+
+  data::variable dc("dc", data::sort_nat::nat());
+  BOOST_CHECK(lps::search_free_variable(spec.process().action_summands(), dc) == true);
 }
 
 void test_search_sort_expression()

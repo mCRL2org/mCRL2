@@ -23,7 +23,7 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/linearise.h"
 
 using namespace mcrl2;
@@ -195,12 +195,11 @@ int test_main(int argc, char** argv)
 
   if (1 < argc)
   {
-    model.load(argv[1]);
+    load_lps(model, argv[1]);
 
     model.process().deadlock_summands().clear();
 
     data::rewriter        rewriter(model.data());
-    next_state_generator::substitution_t dummy;
 
     next_state_generator explorer(model, rewriter);
 
@@ -217,11 +216,12 @@ int test_main(int argc, char** argv)
 
       for (size_t i = 0; i < model.process().summand_count(); ++i)
       {
-        for(next_state_generator::iterator j = explorer.begin(current, &dummy, i); j != explorer.end(); ++j)
+        next_state_generator::enumerator_queue_t enumeration_queue;
+        for(next_state_generator::iterator j = explorer.begin(current, i, &enumeration_queue); j != explorer.end(); ++j)
         {
           if (known.find(j->state()) == known.end())
           {
-            std::cerr << pp(j->state()) << std::endl;
+            std::cerr << atermpp::pp(j->state()) << std::endl;
             known.insert(j->state());
             stack.push(j->state());
           }

@@ -49,7 +49,7 @@ namespace detail {
   {
     while (is_numeric_cast(x))
     {
-    	x = *atermpp::aterm_cast<application>(x).begin();
+    	x = *atermpp::down_cast<application>(x).begin();
     }
     return x;
   }
@@ -117,7 +117,7 @@ namespace detail {
   inline
   bool is_bag_join(const application& x)
   {
-    return sort_bag::is_join_application(x);
+    return sort_bag::is_union_application(x);
   }
 
   inline
@@ -245,12 +245,12 @@ namespace detail {
 } // namespace detail
 
 inline
-int precedence(const application& x)
+int left_precedence(const application& x)
 {
   // TODO: this is unexpected, what to do???
   if (sort_real::is_creal_application(x))
   {
-    return precedence(sort_real::left(x));
+    return left_precedence(sort_real::left(x));
   }
   else if (detail::is_implies(x))
   {
@@ -321,161 +321,11 @@ int precedence(const application& x)
 }
 
 inline
-int infix_precedence_left(const application& x)
-{
-  // TODO: this is unexpected, what to do???
-  if (sort_real::is_creal_application(x))
-  {
-    return infix_precedence_left(atermpp::aterm_cast<application>(sort_real::arg(x)));
-  }
-  else if (detail::is_implies(x))
-  {
-    return 3;
-  }
-  else if (detail::is_or(x))
-  {
-    return 4;
-  }
-  else if (detail::is_and(x))
-  {
-    return 5;
-  }
-  else if (detail::is_equal_to(x) ||
-           detail::is_not_equal_to(x)
-          )
-  {
-    return 6;
-  }
-  else if (   detail::is_less(x)
-           || detail::is_less_equal(x)
-           || detail::is_greater(x)
-           || detail::is_greater_equal(x)
-           || detail::is_in(x)
-          )
-  {
-    return 7;
-  }
-  else if (detail::is_cons(x))
-  {
-    return 10;
-  }
-  else if (detail::is_snoc(x))
-  {
-    return 8;
-  }
-  else if (detail::is_concat(x))
-  {
-    return 9;
-  }
-  else if (   detail::is_plus(x)
-           || detail::is_minus(x)
-           || detail::is_set_union(x)
-           || detail::is_set_difference(x)
-           || detail::is_bag_join(x)
-           || detail::is_bag_difference(x)
-          )
-  {
-    return 10;
-  }
-  else if (   detail::is_div(x)
-           || detail::is_mod(x)
-           || detail::is_divides(x)
-          )
-  {
-    return 11;
-  }
-  else if (   detail::is_times(x)
-           || detail::is_element_at(x)
-           || detail::is_set_intersection(x)
-           || detail::is_bag_intersection(x)
-          )
-  {
-    return 12;
-  }
-  return max_precedence;
-}
-
-inline
-int infix_precedence_right(const application& x)
-{
-  // TODO: this is unexpected, what to do???
-  if (sort_real::is_creal_application(x))
-  {
-    return infix_precedence_right(atermpp::aterm_cast<application>(sort_real::arg(x)));
-  }
-  else if (detail::is_implies(x))
-  {
-    return 2;
-  }
-  else if (detail::is_or(x))
-  {
-    return 3;
-  }
-  else if (detail::is_and(x))
-  {
-    return 4;
-  }
-  else if (detail::is_equal_to(x) ||
-           detail::is_not_equal_to(x)
-          )
-  {
-    return 5;
-  }
-  else if (   detail::is_less(x)
-           || detail::is_less_equal(x)
-           || detail::is_greater(x)
-           || detail::is_greater_equal(x)
-           || detail::is_in(x)
-          )
-  {
-    return 7;
-  }
-  else if (detail::is_cons(x))
-  {
-    return 8;
-  }
-  else if (detail::is_snoc(x))
-  {
-    return 10;
-  }
-  else if (detail::is_concat(x))
-  {
-    return 10;
-  }
-  else if (   detail::is_plus(x)
-           || detail::is_minus(x)
-           || detail::is_set_union(x)
-           || detail::is_set_difference(x)
-           || detail::is_bag_join(x)
-           || detail::is_bag_difference(x)
-          )
-  {
-    return 11;
-  }
-  else if (   detail::is_div(x)
-           || detail::is_mod(x)
-           || detail::is_divides(x)
-          )
-  {
-    return 12;
-  }
-  else if (   detail::is_times(x)
-           || detail::is_element_at(x)
-           || detail::is_set_intersection(x)
-           || detail::is_bag_intersection(x)
-          )
-  {
-    return 13;
-  }
-  return max_precedence;
-}
-
-inline
-int precedence(const data_expression& x)
+int left_precedence(const data_expression& x)
 {
   if (is_application(x))
   {
-    return precedence(application(x));
+    return left_precedence(application(x));
   }
   else if (is_abstraction(x))
   {
@@ -485,31 +335,15 @@ int precedence(const data_expression& x)
 }
 
 inline
-int infix_precedence_left(const data_expression& x)
+int right_precedence(const application& x)
 {
-  if (is_application(x))
-  {
-    return infix_precedence_left(application(x));
-  }
-  else if (is_abstraction(x))
-  {
-    return 2;
-  } 
-  return max_precedence;
+  return left_precedence(x);
 }
 
 inline
-int infix_precedence_right(const data_expression& x)
+int right_precedence(const data_expression& x)
 {
-  if (is_application(x))
-  {
-    return infix_precedence_right(application(x));
-  }
-  else if (is_abstraction(x))
-  {
-    return 1;
-  }
-  return max_precedence;
+  return left_precedence(x);
 }
 
 } // namespace data

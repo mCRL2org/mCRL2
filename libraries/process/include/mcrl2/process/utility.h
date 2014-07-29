@@ -12,12 +12,15 @@
 #ifndef MCRL2_PROCESS_UTILITY_H
 #define MCRL2_PROCESS_UTILITY_H
 
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/print.h"
 #include "mcrl2/process/replace.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/sequence.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -35,7 +38,7 @@ process_expression expand_rhs(const process::process_instance_assignment& x, con
     sigma[i->lhs()] = i->rhs();
   }
   std::set<data::variable> v = process::find_free_variables(x);
-  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v, equations);
+  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
   return result;
 }
 
@@ -54,7 +57,7 @@ process_expression expand_rhs(const process::process_instance& x, const std::vec
     sigma[*di] = *ei;
   }
   std::set<data::variable> v = process::find_free_variables(x);
-  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v, equations);
+  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
   return result;
 }
 
@@ -93,7 +96,7 @@ bool contains_tau(const multi_action_name_set& A)
 inline
 process_expression make_sync(const process_expression x, const process_expression& y)
 {
-  if (is_delta(x) && is_delta(y))
+  if (is_delta(x) || is_delta(y))
   {
     return delta();
   }
@@ -113,7 +116,7 @@ process_expression make_merge(const process_expression x, const process_expressi
 inline
 process_expression make_left_merge(const process_expression x, const process_expression& y)
 {
-  if (is_delta(x) && is_delta(y))
+  if (is_delta(y))
   {
     return delta();
   }
@@ -217,7 +220,7 @@ std::string print_rename_inverse_map(const rename_inverse_map& m)
       {
         out << ", ";
       }
-      out << core::pp(*j);
+      out << *j;
     }
     out << "]";
   }
@@ -308,28 +311,6 @@ bool includes(const multi_action_name_set& A, const multi_action_name& y)
     }
   }
   return false;
-}
-
-// checks if the sorted ranges [first1, ..., last1) and [first2, ..., last2) have an empty intersection
-template <typename InputIterator1, typename InputIterator2>
-bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2)
-{
-  while (first1 != last1 && first2 != last2)
-  {
-    if (*first1 < *first2)
-    {
-      ++first1;
-    }
-    else if (*first2 < *first1)
-    {
-      ++first2;
-    }
-    else
-    {
-      return false;
-    }
-  }
-  return true;
 }
 
 inline
@@ -498,7 +479,7 @@ multi_action_name_set left_arrow(const multi_action_name_set& A1, bool A1_includ
   {
     result = set_union(A1, left_arrow1(A1, A2));
   }
-  mCRL2log(log::debug) << "<left_arrow>" << lps::pp(A1) << (A1_includes_subsets ? "*" : "") << " <- " << lps::pp(A2) << " = " << lps::pp(result) << (A1_includes_subsets ? "*" : "") << std::endl;
+  mCRL2log(log::debug) << "<left_arrow>" << process::pp(A1) << (A1_includes_subsets ? "*" : "") << " <- " << process::pp(A2) << " = " << process::pp(result) << (A1_includes_subsets ? "*" : "") << std::endl;
   return result;
 }
 
@@ -604,11 +585,11 @@ inline
 multi_action_name_set comm_inverse(const communication_expression_list& C, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   multi_action_name_set result = A;
-  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  for (auto i = C.begin(); i != C.end(); ++i)
   {
     detail::apply_comm_inverse(*i, result);
   }
-  mCRL2log(log::debug) << "<comm_inverse>" << process::pp(C) << ": " << lps::pp(A) << " -> " << lps::pp(result) << std::endl;
+  mCRL2log(log::debug) << "<comm_inverse>" << process::pp(C) << ": " << process::pp(A) << " -> " << process::pp(result) << std::endl;
   return result;
 }
 
@@ -702,7 +683,7 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
   {
     for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
     {
-      if (detail::has_empty_intersection(beta.begin(), beta.end(), i->begin(), i->end()))
+      if (utilities::detail::has_empty_intersection(beta.begin(), beta.end(), i->begin(), i->end()))
       {
         result.insert(*i);
       }

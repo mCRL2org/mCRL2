@@ -19,7 +19,6 @@
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
-#include "mcrl2/pbes/pbes_expression_visitor.h"
 
 namespace mcrl2
 {
@@ -27,43 +26,10 @@ namespace mcrl2
 namespace pbes_system
 {
 
-namespace detail
-{
-
-struct propositional_variable_visitor: public pbes_expression_visitor<pbes_expression>
-{
-  struct found_propositional_variable
-    {};
-
-  /// \brief Visit propositional_variable node
-  /// \return The result of visiting the node
-  bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& /* v */)
-  {
-    throw found_propositional_variable();
-    return true;
-  }
-};
-
-inline
-bool has_propositional_variables(const pbes_expression& t)
-{
-  propositional_variable_visitor visitor;
-  try
-  {
-    visitor.visit(t);
-  }
-  catch (propositional_variable_visitor::found_propositional_variable&)
-  {
-    return true;
-  }
-  return false;
-}
-
-} // namespace detail
-
 class pbes_equation;
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
 bool is_well_typed(const pbes_equation& eqn);
+bool has_propositional_variables(const pbes_expression& x);
 
 /// \brief pbes equation.
 class pbes_equation
@@ -94,7 +60,7 @@ class pbes_equation
 
     /// \brief Constructor.
     /// \param t A term
-    pbes_equation(atermpp::aterm_appl t)
+    pbes_equation(const atermpp::aterm_appl& t)
     {
       assert(core::detail::check_rule_PBEqn(t));
       atermpp::aterm_appl::iterator i = t.begin();
@@ -105,7 +71,7 @@ class pbes_equation
 
     /// \brief Constructor.
     /// \param t1 A term
-    explicit pbes_equation(const atermpp::aterm & t1)
+    explicit pbes_equation(const atermpp::aterm& t1)
     {
       atermpp::aterm_appl t(t1);
       assert(core::detail::check_rule_PBEqn(t));
@@ -172,11 +138,43 @@ class pbes_equation
     /// \brief Returns true if the predicate formula on the right hand side contains no predicate variables.
     // (Comment Wieger: is_const would be a better name)
     /// \return True if the predicate formula on the right hand side contains no predicate variables.
-    bool is_solved() const
+    bool is_solved() const;
+
+    /// \brief Swaps the contents
+    void swap(pbes_equation& other)
     {
-      return !detail::has_propositional_variables(formula());
+      using std::swap;
+      swap(m_symbol, other.m_symbol);
+      swap(m_variable, other.m_variable);
+      swap(m_formula, other.m_formula);
     }
 };
+
+//--- start generated class pbes_equation ---//
+/// \brief list of pbes_equations
+typedef atermpp::term_list<pbes_equation> pbes_equation_list;
+
+/// \brief vector of pbes_equations
+typedef std::vector<pbes_equation>    pbes_equation_vector;
+
+// prototype declaration
+std::string pp(const pbes_equation& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const pbes_equation& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(pbes_equation& t1, pbes_equation& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated class pbes_equation ---//
 
 inline bool
 operator==(const pbes_equation& x, const pbes_equation& y)
@@ -197,14 +195,10 @@ operator!=(const pbes_equation& x, const pbes_equation& y)
 inline
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 {
-  return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
+  return atermpp::aterm_appl(core::detail::function_symbol_PBEqn(), eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
-/// \brief vector of process equations
-typedef std::vector<pbes_equation> pbes_equation_vector;
-
 // template function overloads
-std::string pp(const pbes_equation& x);
 std::string pp(const pbes_equation_vector& x);
 void normalize_sorts(pbes_equation_vector& x, const data::data_specification& dataspec);
 std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x);

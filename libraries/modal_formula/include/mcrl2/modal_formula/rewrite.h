@@ -26,7 +26,7 @@ namespace action_formulas {
 template <typename T, typename Rewriter>
 void rewrite(T& x,
              Rewriter R,
-             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
   data::detail::make_rewrite_data_expressions_builder<action_formulas::data_expression_builder>(R)(x);
@@ -39,10 +39,10 @@ void rewrite(T& x,
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
           Rewriter R,
-          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return core::static_down_cast<const T&>(data::detail::make_rewrite_data_expressions_builder<action_formulas::data_expression_builder>(R)(x));
+  return data::detail::make_rewrite_data_expressions_builder<action_formulas::data_expression_builder>(R)(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -52,8 +52,8 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
-             Substitution sigma,
-             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+             const Substitution& sigma,
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<action_formulas::data_expression_builder>(R, sigma)(x);
@@ -67,11 +67,11 @@ void rewrite(T& x,
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
-          Substitution sigma,
-          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+          const Substitution& sigma,
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return core::static_down_cast<const T&>(data::detail::make_rewrite_data_expressions_with_substitution_builder<action_formulas::data_expression_builder>(R, sigma)(x));
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<action_formulas::data_expression_builder>(R, sigma)(x);
 }
 //--- end generated action_formulas rewrite code ---//
 
@@ -86,7 +86,7 @@ namespace regular_formulas {
 template <typename T, typename Rewriter>
 void rewrite(T& x,
              Rewriter R,
-             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
   data::detail::make_rewrite_data_expressions_builder<regular_formulas::data_expression_builder>(R)(x);
@@ -99,10 +99,10 @@ void rewrite(T& x,
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
           Rewriter R,
-          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return core::static_down_cast<const T&>(data::detail::make_rewrite_data_expressions_builder<regular_formulas::data_expression_builder>(R)(x));
+  return data::detail::make_rewrite_data_expressions_builder<regular_formulas::data_expression_builder>(R)(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -112,8 +112,8 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
-             Substitution sigma,
-             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+             const Substitution& sigma,
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<regular_formulas::data_expression_builder>(R, sigma)(x);
@@ -127,11 +127,11 @@ void rewrite(T& x,
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
-          Substitution sigma,
-          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+          const Substitution& sigma,
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return core::static_down_cast<const T&>(data::detail::make_rewrite_data_expressions_with_substitution_builder<regular_formulas::data_expression_builder>(R, sigma)(x));
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<regular_formulas::data_expression_builder>(R, sigma)(x);
 }
 //--- end generated regular_formulas rewrite code ---//
 
@@ -146,7 +146,7 @@ namespace state_formulas {
 template <typename T, typename Rewriter>
 void rewrite(T& x,
              Rewriter R,
-             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
   data::detail::make_rewrite_data_expressions_builder<state_formulas::data_expression_builder>(R)(x);
@@ -159,10 +159,10 @@ void rewrite(T& x,
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
           Rewriter R,
-          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return core::static_down_cast<const T&>(data::detail::make_rewrite_data_expressions_builder<state_formulas::data_expression_builder>(R)(x));
+  return data::detail::make_rewrite_data_expressions_builder<state_formulas::data_expression_builder>(R)(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -172,8 +172,8 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
-             Substitution sigma,
-             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+             const Substitution& sigma,
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<state_formulas::data_expression_builder>(R, sigma)(x);
@@ -187,11 +187,11 @@ void rewrite(T& x,
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
-          Substitution sigma,
-          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+          const Substitution& sigma,
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return core::static_down_cast<const T&>(data::detail::make_rewrite_data_expressions_with_substitution_builder<state_formulas::data_expression_builder>(R, sigma)(x));
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<state_formulas::data_expression_builder>(R, sigma)(x);
 }
 //--- end generated state_formulas rewrite code ---//
 

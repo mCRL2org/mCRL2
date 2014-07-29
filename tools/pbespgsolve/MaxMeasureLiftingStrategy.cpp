@@ -1,11 +1,13 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
+
+#include "mcrl2/utilities/workarounds.h" // nullptr
 
 #include "MaxMeasureLiftingStrategy.h"
 #include <algorithm>
@@ -13,53 +15,34 @@
 
 #include <stdio.h>  /* debug */
 
-/* Updated implementation:
+/* TODO: write short description of how this works! */
 
-    Whenever a vertex is lifted, it is pushed into a priority queue (with its
-    own progress measure vector as a priority) and its predecessors are marked
-    candidates for lifting.
-
-    Then, to select a next vertex to be lifted, the predecessors of the top node
-    in the priority queue are examined, and the first one marked for lifting is
-    returned. If there is no such predecessor, the top node is popped, and the
-    process is repeated, until the queue is empty.
-
-    (Initially, all vertices are pushed into the queue, and all vertices are
-    marked candidates for lifting.)
-*/
-
-MaxMeasureLiftingStrategy::MaxMeasureLiftingStrategy(
-    const ParityGame &game, const SmallProgressMeasures &spm )
-        : LiftingStrategy(game), spm_(spm), queued_(new bool[graph_.V()]),
-          pq_pos_(new verti[graph_.V()]), pq_(new verti[graph_.V()])
+MaxMeasureLiftingStrategy2::MaxMeasureLiftingStrategy2(
+    const ParityGame &game, const SmallProgressMeasures &spm,
+    Order order, Metric metric )
+        : LiftingStrategy2(), spm_(spm), order_(order), metric_(metric),
+          next_id_(0),
+          insert_id_(order < HEAP ? new uint64_t[game.graph().V()] : 0),
+          pq_pos_(new verti[game.graph().V()]),
+          pq_(new verti[game.graph().V()]), pq_size_(0)
 {
-    // Initialize queue
-    pq_size_ = 0;
-    for (verti v = 0; v < graph_.V(); ++v)
-    {
-        queued_[v] = true;
-        pq_pos_[v] = (verti)-1;
-        push(v);
-    }
-    /* FIXME: pushing everything takes O(V log V) time; we can sort the
-              queue array faster than that by using our knowledge that
-              all progress measures are either zero or top. */
+    std::fill(&pq_pos_[0], &pq_pos_[game.graph().V()], NO_VERTEX);
 }
 
-MaxMeasureLiftingStrategy::~MaxMeasureLiftingStrategy()
+MaxMeasureLiftingStrategy2::~MaxMeasureLiftingStrategy2()
 {
-    delete[] queued_;
+    delete[] insert_id_;
     delete[] pq_pos_;
     delete[] pq_;
 }
 
-void MaxMeasureLiftingStrategy::move_up(verti i)
+void MaxMeasureLiftingStrategy2::move_up(verti i)
 {
     // FIXME: this can be implemented with less swapping if I think harder.
-    for (verti  j; i > 0 && cmp(i, j = (i - 1)/2) > 0; i = j) swap(i, j);
+    for (verti j; i > 0 && cmp(i, j = (i - 1)/2) > 0; i = j) swap(i, j);
 }
 
-void MaxMeasureLiftingStrategy::move_down(verti i)
+void MaxMeasureLiftingStrategy2::move_down(verti i)
 {
     // FIXME: this can be implemented with less swapping if I think harder.
     for (;;)
@@ -107,7 +90,7 @@ void MaxMeasureLiftingStrategy::move_down(verti i)
     }
 }
 
-void MaxMeasureLiftingStrategy::swap(verti i, verti j)
+void MaxMeasureLiftingStrategy2::swap(verti i, verti j)
 {
     verti v = pq_[i], w = pq_[j];
     pq_[i] = w;
@@ -116,51 +99,166 @@ void MaxMeasureLiftingStrategy::swap(verti i, verti j)
     pq_pos_[v] = j;
 }
 
-void MaxMeasureLiftingStrategy::push(verti v)
+void MaxMeasureLiftingStrategy2::push(verti v)
 {
-    verti i = pq_pos_[v];
-    if (i == (verti)-1)
-    {
-        i = pq_size_++;
-        pq_[i] = v;
-        pq_pos_[v] = i;
-    }
-    move_up(i);
+    mCRL2log(mcrl2::log::debug) <<"push(" << v << ")" << std::endl;
+    assert(pq_pos_[v] == NO_VERTEX);
+    pq_[pq_size_] = v;
+    pq_pos_[v] = pq_size_;
+    ++pq_size_;
+    if (insert_id_) insert_id_[v] = next_id_++;
+    bumped_.push_back(pq_pos_[v]);
 }
 
-void MaxMeasureLiftingStrategy::remove(verti v)
+void MaxMeasureLiftingStrategy2::bump(verti v)
 {
-    verti i = pq_pos_[v];
-    if (i != (verti)-1)
+    mCRL2log(mcrl2::log::debug) << "bump(" << v << ")" << std::endl;
+    bumped_.push_back(pq_pos_[v]);
+}
+
+verti MaxMeasureLiftingStrategy2::pop()
+{
+#ifdef DEBUG
+    static long long ops;
+    ops += bumped_.size() + 1;
+#endif
+
+    if (!bumped_.empty())
     {
-        pq_pos_[v] = (verti)-1;
-        if (i < --pq_size_)
+        // Move bumped vertices up the heap.
+        std::sort(bumped_.begin(), bumped_.end());
+        bumped_.erase( std::unique(bumped_.begin(), bumped_.end()),
+                       bumped_.end() );
+        for (std::vector<verti>::iterator it = bumped_.begin();
+             it != bumped_.end(); ++it) move_up(*it);
+
+        // CHECKME: why is this necessary for MAX_STEP too?
+        //          shouldn't this just be for MIN_STEP?
+        if (metric_ != MAX_VALUE)
         {
-            pq_[i] = pq_[pq_size_];
-            pq_pos_[pq_[i]] = i;
-            move_down(i);
-        }
-    }
-}
+            /* Note: minimization is a bit trickier than maximization, since
+               we need to move bumped vertices down the heap (rather than up
+               when maximizing) but pushed vertices still need to move up.
 
-void MaxMeasureLiftingStrategy::pop()
-{
-    assert(pq_size_ > 0);
-    pq_pos_[pq_[0]] = (verti)-1;
-    if (0 < --pq_size_)
+               Unfortunately, we can't easily distinguish between bumped or
+               pushed or pushed-and-then-bumped vertices, so the easiest safe
+               way to handle the situation is to move up first, and then down.
+
+               FIXME: optimize this?
+            */
+
+            // Move bumped vertices down the heap.
+            for (std::vector<verti>::reverse_iterator it = bumped_.rbegin();
+                 it != bumped_.rend(); ++it) move_down(*it);
+        }
+        bumped_.clear();
+    }
+
+    if (pq_size_ == 0) return NO_VERTEX;
+
+#ifdef DEBUG
+    if (ops >= pq_size_)
+    {
+        Logger::debug("checking heap integrity");
+        assert(check());
+        ops -= pq_size_;
+    }
+#endif
+
+    // Extract top element from the heap.
+    verti v = pq_[0];
+    mCRL2log(mcrl2::log::debug) << "pop() -> " << v << std::endl;
+    pq_pos_[v] = NO_VERTEX;
+    if (--pq_size_ > 0)
     {
         pq_[0] = pq_[pq_size_];
         pq_pos_[pq_[0]] = 0;
         move_down(0);
     }
+    return v;
 }
 
-int MaxMeasureLiftingStrategy::cmp(verti i, verti j)
+static int cmp_ids(uint64_t x, uint64_t y)
 {
-    return spm_.vector_cmp(pq_[i], pq_[j], spm_.len_);
+    return (x > y) - (x < y);
 }
 
-bool MaxMeasureLiftingStrategy::check()
+/* This returns +1 if lifting v1 to v2 would increase the progress measure
+   by a larger difference than lifting w1 to w2.
+
+   Assumes v1 >= v2 and w1 >= w2 (for the first v_len and w_len elements
+   respectively) and that all vectors are within bounds.  (If they are not,
+   the results are still somewhat sensible, but it may be possible that two
+   vectors compare unequal even though their steps are equally large.)
+*/
+static int cmp_step( const verti *v1, const verti *v2, int v_len, bool v_carry,
+                     const verti *w1, const verti *w2, int w_len, bool w_carry )
+{
+    for (int i = 0; i < v_len || i < w_len; ++i)
+    {
+        int a = i < v_len ? v2[i] - v1[i] : 0;
+        int b = i < w_len ? w2[i] - w1[i] : 0;
+        if (a != b) return (a > b) - (a < b);
+    }
+    if (v_carry || w_carry)
+    {
+        if (!w_carry) return +1;
+        if (!v_carry) return -1;
+        if (v_len < w_len) return +1;
+        if (v_len > w_len) return -1;
+    }
+    return 0;
+}
+
+int MaxMeasureLiftingStrategy2::cmp(verti i, verti j)
+{
+    verti v = pq_[i], w = pq_[j];
+    int d = 0;
+
+    switch (metric_)
+    {
+    case MAX_VALUE:
+        d = spm_.vector_cmp( spm_.get_successor(v),
+                             spm_.get_successor(w), spm_.len_ );
+        break;
+
+    case MIN_VALUE:
+        d = -spm_.vector_cmp( spm_.get_successor(v),
+                              spm_.get_successor(w), spm_.len_ );
+        break;
+
+    case MAX_STEP:
+#ifdef DEBUG
+        // We assume vertices are only queued when they can be lifted;
+        // i.e. their value is less than (or equal to) their successor:
+        assert(spm_.vector_cmp(v, spm_.get_successor(v), spm_.len(v))
+                    < spm_.compare_strict(v));
+        assert(spm_.vector_cmp(w, spm_.get_successor(w), spm_.len(w))
+                    < spm_.compare_strict(w));
+#endif
+        d = cmp_step( spm_.vec(v), spm_.vec(spm_.get_successor(v)),
+                      spm_.len(v), spm_.compare_strict(v),
+                      spm_.vec(w), spm_.vec(spm_.get_successor(w)),
+                      spm_.len(w), spm_.compare_strict(w) );
+        break;
+    }
+
+    if (d == 0)
+    {
+        // Tie-break on insertion order: smallest insert-id first in queue
+        // mode, or largest insert-id first in stack mode.
+        switch (order_)
+        {
+        case QUEUE: d = cmp_ids(insert_id_[w], insert_id_[v]); break;
+        case STACK: d = cmp_ids(insert_id_[v], insert_id_[w]); break;
+        default:    break;
+        }
+    }
+
+    return d;
+}
+
+bool MaxMeasureLiftingStrategy2::check()
 {
     for (verti i = 1; i < pq_size_; ++i)
     {
@@ -172,9 +270,10 @@ bool MaxMeasureLiftingStrategy::check()
         if (pq_pos_[pq_[i]] != i) return false;
     }
 
-    for (verti v = 0; v < graph_.V(); ++v)
+    const verti V = spm_.game().graph().V();
+    for (verti v = 0; v < V; ++v)
     {
-        if (pq_pos_[v] != (verti)-1)
+        if (pq_pos_[v] != NO_VERTEX)
         {
             if (pq_[pq_pos_[v]] != v) return false;
         }
@@ -183,67 +282,19 @@ bool MaxMeasureLiftingStrategy::check()
     return true;
 }
 
-void MaxMeasureLiftingStrategy::lifted(verti v)
+bool MaxMeasureLiftingStrategyFactory::supports_version(int version)
 {
-    bool queued_any = false;
-
-    // Queue predecessors with measure less than top:
-    for ( StaticGraph::const_iterator it = graph_.pred_begin(v);
-          it != graph_.pred_end(v); ++it )
-    {
-        if (!spm_.is_top(*it))
-        {
-            queued_any = true;
-            queued_[*it] = true;
-        }
-    }
-
-    if (queued_any)
-    {
-        // Add to (or move up in) queue
-        push(v);
-    }
-    else
-    {
-        // No eligible predecessors, remove from queue:
-        remove(v);
-    }
-}
-
-verti MaxMeasureLiftingStrategy::next()
-{
-    // assert(check());  // debug
-
-    // Find a predecessor to lift
-    while (pq_size_ > 0)
-    {
-        verti w = top();
-        for (StaticGraph::const_iterator it = graph_.pred_begin(w);
-             it != graph_.pred_end(w); ++it)
-        {
-            verti v = *it;
-            if (queued_[v])
-            {
-                queued_[v] = false;
-                return v;
-            }
-        }
-
-        // None of the predecessors of w are queued anymore; remove it.
-        pop();
-        // assert(check());  // debug
-    }
-
-    return NO_VERTEX;
-}
-
-size_t MaxMeasureLiftingStrategy::memory_use() const
-{
-    return graph_.V()*(sizeof(bool) + 2*sizeof(verti));
+    return version == 2;
 }
 
 LiftingStrategy *MaxMeasureLiftingStrategyFactory::create(
+    const ParityGame& /*game*/, const SmallProgressMeasures &/*spm*/ )
+{
+    return nullptr;
+}
+
+LiftingStrategy2 *MaxMeasureLiftingStrategyFactory::create2(
     const ParityGame &game, const SmallProgressMeasures &spm )
 {
-    return new MaxMeasureLiftingStrategy(game, spm);
+    return new MaxMeasureLiftingStrategy2(game, spm, order_, metric_);
 }

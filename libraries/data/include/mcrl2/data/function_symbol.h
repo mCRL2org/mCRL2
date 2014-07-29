@@ -13,7 +13,8 @@
 #define MCRL2_DATA_FUNCTION_SYMBOL_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/sort_expression.h"
@@ -24,14 +25,28 @@ namespace mcrl2
 namespace data
 {
 
+typedef std::pair<atermpp::aterm, atermpp::aterm> function_symbol_key_type;
+
 //--- start generated class function_symbol ---//
 /// \brief A function symbol
 class function_symbol: public data_expression
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+    }
+
+    const sort_expression& sort() const
+    {
+      return atermpp::down_cast<sort_expression>((*this)[1]);
+    }
+//--- start user section function_symbol ---//
     /// \brief Default constructor.
     function_symbol()
-      : data_expression(core::detail::constructOpId())
+      : data_expression(core::detail::default_values::OpId)
     {}
 
     /// \brief Constructor.
@@ -44,34 +59,42 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     function_symbol(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(name, sort))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_OpId(), name, sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(name, sort)))))
     {}
 
     /// \brief Constructor.
     function_symbol(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_OpId(), core::identifier_string(name), sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type, 2>::insert(std::make_pair(core::identifier_string(name), sort)))))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
-    }
-
-    const sort_expression& sort() const
-    {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
-    }
+//--- end user section function_symbol ---//
 };
+
+/// \brief list of function_symbols
+typedef atermpp::term_list<function_symbol> function_symbol_list;
+
+/// \brief vector of function_symbols
+typedef std::vector<function_symbol>    function_symbol_vector;
+
+// prototype declaration
+std::string pp(const function_symbol& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const function_symbol& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(function_symbol& t1, function_symbol& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class function_symbol ---//
 
-/// \brief list of function symbols
-typedef atermpp::term_list< function_symbol > function_symbol_list;
-
-/// \brief vector of function symbols
-typedef std::vector< function_symbol >    function_symbol_vector;
-
 // template function overloads
-std::string pp(const function_symbol& x);
 std::string pp(const function_symbol_list& x);
 std::string pp(const function_symbol_vector& x);
 std::set<data::variable> find_all_variables(const data::function_symbol& x);
@@ -79,16 +102,6 @@ std::set<data::variable> find_all_variables(const data::function_symbol& x);
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::function_symbol& t1, mcrl2::data::function_symbol& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_FUNCTION_SYMBOL_H
 

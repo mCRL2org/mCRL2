@@ -51,7 +51,7 @@ void test_bes()
   bes_stream >> b;
 
   std::stringstream out;
-  bes::bes2cwi(b.equations().begin(), b.equations().end(), out);
+  bes::save_bes_cwi(b, out);
 }
 
 void test_pbes()
@@ -61,7 +61,7 @@ void test_pbes()
   bes_stream >> b;
 
   std::stringstream out;
-  bes::bes2cwi(b.equations().begin(), b.equations().end(), out);
+  bes::save_bes_cwi(b, out);
 }
 
 void test_pgsolver()
@@ -71,7 +71,7 @@ void test_pgsolver()
   bes_stream >> b;
 
   std::stringstream out;
-  bes::bes2pgsolver(b.equations().begin(), b.equations().end(), out);
+  bes::save_bes_pgsolver(b, out);
 
   std::clog << out.str() << std::endl;
 }

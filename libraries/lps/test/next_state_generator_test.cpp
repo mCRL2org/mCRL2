@@ -28,11 +28,11 @@ void test_initial_state_successors(const specification& lps_spec)
 {
   data::rewriter rewriter(lps_spec.data());
   next_state_generator generator(lps_spec, rewriter);
-  next_state_generator::substitution_t sigma;
 
-  for (next_state_generator::iterator it = generator.begin(generator.initial_state(), &sigma); it != generator.end(); it++)
+  next_state_generator::enumerator_queue_t enumeration_queue;
+  for (next_state_generator::iterator it = generator.begin(generator.initial_state(), &enumeration_queue); it != generator.end(); it++)
   {
-    std::cout << lps::pp(it->state()) << std::endl;
+    std::cout << atermpp::pp(it->state()) << std::endl;
   }
 }
 
@@ -40,7 +40,6 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
 {
   data::rewriter rewriter(lps_spec.data());
   next_state_generator generator(lps_spec, rewriter, enumeration_caching, summand_pruning);
-  next_state_generator::substitution_t sigma;
 
   state initial_state = generator.initial_state();
 
@@ -59,9 +58,10 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
 
     if (per_summand)
     {
+      next_state_generator::enumerator_queue_t enumeration_queue;
       for (size_t i = 0; i < lps_spec.process().action_summands().size(); ++i)
       {
-        for (next_state_generator::iterator it = generator.begin(q.front(), &sigma, i); it != generator.end(); it++)
+        for (next_state_generator::iterator it = generator.begin(q.front(), i, &enumeration_queue); it != generator.end(); it++)
         {
           transition_labels.insert(it->action());
           ++transitions;
@@ -75,7 +75,8 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
     }
     else
     {
-      for (next_state_generator::iterator it = generator.begin(q.front(), &sigma); it != generator.end(); it++)
+      next_state_generator::enumerator_queue_t enumeration_queue;
+      for (next_state_generator::iterator it = generator.begin(q.front(), &enumeration_queue); it != generator.end(); it++)
       {
         transition_labels.insert(it->action());
         ++transitions;

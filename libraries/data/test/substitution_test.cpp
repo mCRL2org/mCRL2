@@ -1,4 +1,4 @@
-// Author(s): Jeroen van der Wulp
+// Author(s): Jeroen van der Wulp, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -13,6 +13,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
@@ -21,6 +22,12 @@
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
+#include "mcrl2/data/substitutions/enumerator_substitution.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/mutable_substitution_composer.h"
+#include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -63,11 +70,9 @@ void test_basic()
 
   s[y] = c;
 
-  BOOST_CHECK(data::replace_free_variables(x, s) == x);
-#ifdef MCRL2_NEW_REPLACE_VARIABLES
-// in the old version this fails due to the unfortunate interface of replace_free_variables
-  BOOST_CHECK(data::replace_free_variables(y, s) == c);
-#endif
+  BOOST_CHECK(data::replace_free_variables(static_cast<const data_expression&>(x), s) == x);
+  BOOST_CHECK(data::replace_free_variables(static_cast<const data_expression&>(y), s) == c);
+
   BOOST_CHECK(data::replace_free_variables(c + x * y, s) == c + x * c);
   BOOST_CHECK(data::replace_free_variables(lambda(x,x), s) == lambda(x,x));
   BOOST_CHECK(data::replace_free_variables(lambda(x,y), s) == lambda(x,c));
@@ -343,17 +348,91 @@ void test_sort_substitution()
 
 }
 
+// returns the function composition f o g
+inline
+enumerator_substitution compose(const enumerator_substitution& f, const enumerator_substitution& g)
+{
+  return enumerator_substitution(g.variables + f.variables, g.expressions + f.expressions);
+}
+
+void test_enumerator_substitution(const enumerator_substitution& sigma, const variable& x, const data_expression& expected_result)
+{
+  data_expression result = sigma(x);
+  if (result != expected_result)
+  {
+    std::cerr << "ERROR: sigma = " << sigma << "(" << x << ") = " << result << " expected_result = " << expected_result << std::endl;
+  }
+  BOOST_CHECK(result == expected_result);
+}
+
+void test_enumerator_substitution()
+{
+  typedef core::term_traits<data_expression> tr;
+
+  variable x = parse_variable("x: Bool");
+  variable y = parse_variable("y: Bool");
+  variable z = parse_variable("z: Bool");
+  data_expression x_and_y = tr::and_(x, y);
+  data_expression y_and_y = tr::and_(y, y);
+
+  enumerator_substitution sigma1;
+  sigma1.add_assignment(x, y);
+
+  enumerator_substitution sigma2;
+  sigma2.add_assignment(y, z);
+
+  enumerator_substitution sigma3;
+  sigma3.add_assignment(z, x_and_y);
+
+  enumerator_substitution sigma;
+  data::data_expression expected_result;
+
+  sigma = compose(sigma1, sigma2);
+  expected_result = y;
+  test_enumerator_substitution(sigma, x, expected_result);
+
+  sigma = compose(sigma2, sigma1);
+  expected_result = z;
+  test_enumerator_substitution(sigma, x, expected_result);
+
+  sigma = compose(sigma1, sigma3);
+  expected_result = y_and_y;
+  test_enumerator_substitution(sigma, z, expected_result);
+
+  variable n = parse_variable("n: Nat");
+  variable q = parse_variable("q: Pos");
+  data_expression one = parse_data_expression("1");
+  enumerator_substitution rho1;
+  rho1.add_assignment(n, q);
+  rho1.add_assignment(q, one);
+  rho1.revert();
+  test_enumerator_substitution(rho1, n, one);
+}
+
+void test_mutable_indexed_substitution()
+{
+  std::cout << "test_mutable_indexed_substitution" << std::endl;
+  mutable_indexed_substitution<> sigma;
+  variable b = parse_variable("b: Bool");
+  data_expression T = parse_data_expression("true");
+  sigma[b] = T;
+  std::string s = sigma.to_string();
+  std::cout << "s = " << s << std::endl;
+  BOOST_CHECK(s == "[b := true]");
+}
+
 int test_main(int /* a */, char**  /* aa */)
 {
   test_my_assignment_sequence_substitution();
   test_my_list_substitution();
-
   test_basic();
   test_assignment_sequence_substitution();
   test_list_substitution();
   test_mutable_substitution();
   test_sort_substitution();
   test_indexed_substitution();
+  test_enumerator_substitution();
+  test_mutable_indexed_substitution();
 
   return EXIT_SUCCESS;
 }

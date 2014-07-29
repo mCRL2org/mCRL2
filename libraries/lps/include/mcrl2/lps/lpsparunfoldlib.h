@@ -23,7 +23,6 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/lps/linear_process.h"
-#include <boost/range/iterator_range.hpp>
 #include "mcrl2/lps/specification.h"
 
 namespace lspparunfold
@@ -69,6 +68,8 @@ class lpsparunfold
     mcrl2::lps::specification algorithm(size_t parameter_at_index);
 
   private:
+    /// set of identifiers to use during fresh variable generation
+    mcrl2::data::set_identifier_generator m_identifier_generator;
 
     std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element >* m_cache;
 
@@ -91,7 +92,7 @@ class lpsparunfold
     mcrl2::lps::process_initializer m_init_process;
 
     /// \brief The initialization of a linear process
-    mcrl2::lps::action_label_list m_action_label_list;
+    mcrl2::process::action_label_list m_action_label_list;
 
     /// \brief The fresh sort of the unfolded process parameter used the case function.
     mcrl2::data::basic_sort fresh_basic_sort;

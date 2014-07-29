@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_UNTYPED_MULTI_ACTION_H
 #define MCRL2_LPS_UNTYPED_MULTI_ACTION_H
 
-#include "mcrl2/lps/untyped_action.h"
+#include "mcrl2/process/untyped_action.h"
 
 namespace mcrl2 {
 
@@ -25,7 +25,7 @@ class untyped_multi_action: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     untyped_multi_action()
-      : atermpp::aterm_appl(core::detail::constructUntypedMultAct())
+      : atermpp::aterm_appl(core::detail::default_values::UntypedMultAct)
     {}
 
     /// \brief Constructor.
@@ -37,13 +37,13 @@ class untyped_multi_action: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    untyped_multi_action(const untyped_action_list& actions)
-      : atermpp::aterm_appl(core::detail::gsMakeUntypedMultAct(actions))
+    untyped_multi_action(const process::untyped_action_list& actions)
+      : atermpp::aterm_appl(core::detail::function_symbol_UntypedMultAct(), actions)
     {}
 
-    const untyped_action_list& actions() const
+    const process::untyped_action_list& actions() const
     {
-      return atermpp::aterm_cast<const untyped_action_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<process::untyped_action_list>((*this)[0]);
     }
 };
 
@@ -53,6 +53,23 @@ typedef atermpp::term_list<untyped_multi_action> untyped_multi_action_list;
 /// \brief vector of untyped_multi_actions
 typedef std::vector<untyped_multi_action>    untyped_multi_action_vector;
 
+// prototype declaration
+std::string pp(const untyped_multi_action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_multi_action& x)
+{
+  return out << lps::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class untyped_multi_action ---//
 
 } // namespace lps

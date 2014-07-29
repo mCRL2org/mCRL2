@@ -14,7 +14,7 @@
 
 #include <cmath>
 
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 
 namespace mcrl2
 {

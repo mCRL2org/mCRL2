@@ -378,15 +378,15 @@ struct CameraView
     void applyTranslation()
     {
       float viewdepth = world.size() + 2 * pixelsize * 10;
-      glTranslatef(0, 0, -500.0005 - 0.5 * viewdepth);
+      glTranslatef(0, 0, -5000.0005 - 0.5 * viewdepth);
       glTranslatef(translation.x, translation.y, translation.z);
     }
 
     void applyFrustum()
     {
       float viewdepth = world.size() + 2 * pixelsize * 10;
-      float f = zoom * (1000.0 + (viewdepth - world.z)) / 1000.0;
-      glFrustum(-world.x / (2 * f), world.x / (2 * f), -world.y / (2 * f), world.y / (2 * f), 500, viewdepth + 500.001);
+      float f = 2 * zoom * (10000.0 + (viewdepth - world.z)) / 10000.0;
+      glFrustum(-world.x / f, world.x / f, -world.y / f, world.y / f, 5000, viewdepth + 5000.001);
     }
 
     void applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)
@@ -884,7 +884,7 @@ void GLScene::renderHandle(size_t i)
 GLScene::GLScene(Graph::Graph &g)
   : m_graph(g),
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
-    m_size_node(20), m_drawfog(true), m_fogdistance(1000.0)
+    m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
 {
   m_camera = new CameraAnimation();
   m_texturedata = new TextureData;

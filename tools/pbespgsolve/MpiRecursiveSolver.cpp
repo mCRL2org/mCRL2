@@ -1,25 +1,26 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "AsyncMpiAttractorAlgorithm.h"
-#include "SyncMpiAttractorAlgorithm.h"
-#include "MpiRecursiveSolver.h"
-#include "GamePartition.h"
-#include "DenseSet.h"
-#include <assert.h>
+#include <cassert>
 #include <algorithm>
 #include <set>
 #include <utility>
 #include <vector>
 #include <deque>
+#include "mcrl2/utilities/logger.h"
+#include "AsyncMpiAttractorAlgorithm.h"
+#include "SyncMpiAttractorAlgorithm.h"
+#include "MpiRecursiveSolver.h"
+#include "GamePart.h"
+#include "DenseSet.h"
 
-//! Returns a list of indices at which `incl' is zero.
+//! Returns a list of indices at which `incl` is zero.
 static std::vector<verti> collect_complement(const DenseSet<verti> &incl)
 {
     std::vector<verti> res;
@@ -58,7 +59,7 @@ ParityGame::Strategy MpiRecursiveSolver::solve()
     strategy_ = ParityGame::Strategy(V, NO_VERTEX);
 
     // Solve the game:
-    GamePartition gpart(game(), *vpart_, mpi_rank);
+    GamePart gpart(game(), *vpart_, mpi_rank);
     solve(gpart);
 
     // Collect resulting strategy
@@ -71,7 +72,7 @@ ParityGame::Strategy MpiRecursiveSolver::solve()
     else
     if (mpi_rank == 0)
     {
-        info("Combining strategy...");
+        mCRL2log(mcrl2::log::verbose) << "Combining strategy..." << std::endl;
         for (verti v = 0; v < V; ++v)
         {
             int i = (*vpart_)(v);
@@ -121,7 +122,7 @@ static int mpi_first_inversion(const ParityGame &local_game)
     return p;
 }
 
-void MpiRecursiveSolver::solve(GamePartition &part)
+void MpiRecursiveSolver::solve(GamePart &part)
 {
     int prio;
     while ((prio = mpi_first_inversion(part.game())) < part.game().d())
@@ -155,13 +156,13 @@ void MpiRecursiveSolver::solve(GamePartition &part)
         if (mpi_and(unsolved.empty())) break;
 
         // Solve subgame with remaining vertices and fewer priorities:
-        GamePartition subpart(part, unsolved);
+        GamePart subpart(part, unsolved);
         solve(subpart);
 
         // Find attractor set of vertices lost to opponent in subgame:
         DenseSet<verti> lost_attr(0, V);
         std::deque<verti> lost_attr_queue;
-        for ( GamePartition::const_iterator it = part.begin();
+        for ( GamePart::const_iterator it = part.begin();
                it != part.end(); ++it )
         {
             const verti v = *it;
@@ -182,14 +183,14 @@ void MpiRecursiveSolver::solve(GamePartition &part)
             lost_attr, lost_attr_queue, false, strategy_ );
 
         std::vector<verti> not_lost = collect_complement(lost_attr);
-        GamePartition(part, not_lost).swap(part);
+        GamePart(part, not_lost).swap(part);
     }
 
     // If we get here, then the opponent's winning set was empty; the strategy
     // for most vertices has already been initialized, except for those with
     // minimum priority. Since the whole game is won by the current player, it
     // suffices to pick an arbitrary successor for these vertices:
-    for (GamePartition::const_iterator it = part.begin(); it != part.end(); ++it)
+    for (GamePart::const_iterator it = part.begin(); it != part.end(); ++it)
     {
         const verti v = part.global(*it);
         if (game_.priority(v) < prio)
@@ -237,6 +238,6 @@ ParityGameSolver *MpiRecursiveSolverFactory::create(
         "Constructing %s MpiRecursiveSolver with %ld vertices per chunk.",
         async_ ? "asynchronous" : "synchronized", (long)vpart_->chunk_size() );
 
-    // N.B. MpiRecursiveSolver takes ownership of `attr_algo'
+    // N.B. MpiRecursiveSolver takes ownership of `attr_algo`
     return new MpiRecursiveSolver(game, vpart_, attr_algo);
 }

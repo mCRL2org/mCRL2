@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(function_sort_test)
   basic_sort s1("S1");
   basic_sort s("S");
 
-  sort_expression_list s01 = atermpp::aterm_cast<sort_expression_list>(atermpp::make_list(s0, s1));
+  sort_expression_list s01 = atermpp::make_list<sort_expression>(s0, s1);
   function_sort fs(s01, s);
   BOOST_CHECK(!is_basic_sort(fs));
   BOOST_CHECK(is_function_sort(fs));
@@ -123,10 +123,10 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
   structured_sort_constructor c1("c1", a1, "is_c1");
   structured_sort_constructor c2("c2", a2);
   BOOST_CHECK_EQUAL(to_string(c1.name()), "c1");
-  BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c1.arguments()) == a1);
+  BOOST_CHECK(structured_sort_constructor_argument_vector(c1.arguments().begin(),c1.arguments().end()) == a1);
   BOOST_CHECK_EQUAL(to_string(c1.recogniser()), "is_c1");
   BOOST_CHECK_EQUAL(to_string(c2.name()), "c2");
-  BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c2.arguments()) == a2);
+  BOOST_CHECK(structured_sort_constructor_argument_vector(c2.arguments().begin(),c2.arguments().end()) == a2);
   BOOST_CHECK_EQUAL(c2.recogniser(), core::empty_identifier_string());
 
   structured_sort_constructor_list cs = atermpp::make_list(c1, c2);
@@ -148,8 +148,8 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
 
   structured_sort_constructor_argument_vector nv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_nat::nat()))));
   structured_sort_constructor_argument_vector bv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_bool::bool_()))));
-  structured_sort_constructor b("B", boost::make_iterator_range(nv));
-  structured_sort_constructor c("C", boost::make_iterator_range(bv));
+  structured_sort_constructor b("B", nv);
+  structured_sort_constructor c("C", bv);
   structured_sort bc(atermpp::make_vector(b,c));
 
   BOOST_CHECK_EQUAL(bc.constructors(), structured_sort_constructor_list(atermpp::make_list(b,c)));

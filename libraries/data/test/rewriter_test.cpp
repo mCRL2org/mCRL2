@@ -19,10 +19,11 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/detail/parse_substitutions.h"
+#include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
-#include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/data/rewriters/simplify_rewriter.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
@@ -100,9 +101,9 @@ void test2()
   BOOST_CHECK(r(d1) == r(d2));
 
   std::string var_decl = "m, n: Pos;\n";
-  mutable_map_substitution<> sigma;
-  sigma[atermpp::aterm_cast<variable>(parse_data_expression("m", var_decl))] = r(parse_data_expression("3"));
-  sigma[atermpp::aterm_cast<variable>(parse_data_expression("n", var_decl))] = r(parse_data_expression("4"));
+  data::rewriter::substitution_type sigma;
+  sigma[atermpp::down_cast<variable>(parse_data_expression("m", var_decl))] = r(parse_data_expression("3"));
+  sigma[atermpp::down_cast<variable>(parse_data_expression("n", var_decl))] = r(parse_data_expression("4"));
 
   // Rewrite two data expressions, and check if they are the same
   d1 = parse_data_expression("m+n", var_decl);
@@ -112,7 +113,7 @@ void test2()
 
 void test3()
 {
-  typedef mutable_map_substitution< std::map< variable, data_expression_with_variables > > substitution_function;
+  typedef data::rewriter::substitution_type substitution_function;
 
   data_specification data_spec = parse_data_specification(
                                    "map dummy1:Pos;  \n"
@@ -153,21 +154,21 @@ void test3()
 }
 
 template <typename Rewriter>
-void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitutions)
+void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitution_text)
 {
-  mutable_map_substitution< std::map< variable, data_expression > > sigma;
-  data::detail::parse_substitutions(substitutions, data_spec, sigma);
+  data::rewriter::substitution_type sigma;
+  data::detail::parse_substitution(substitution_text, sigma, data_spec);
   data_expression d1 = parse_data_expression(expr1, declarations, data_spec);
   data_expression d2 = parse_data_expression(expr2, declarations, data_spec);
   if (R(d1, sigma) != R(d2))
   {
     BOOST_CHECK(R(d1, sigma) == R(d2));
     std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
-    std::cout << "d1           " << data::pp(d1) << std::endl;
-    std::cout << "d2           " << data::pp(d2) << std::endl;
-    std::cout << "sigma\n      " << data::print_substitution(sigma) << std::endl;
-    std::cout << "R(d1, sigma) " << data::pp(R(d1, sigma)) << std::endl;
-    std::cout << "R(d2)        " << data::pp(R(d2)) << std::endl;
+    std::cout << "d1           " << d1 << std::endl;
+    std::cout << "d2           " << d2 << std::endl;
+    std::cout << "sigma\n      " << sigma << std::endl;
+    std::cout << "R(d1, sigma) " << R(d1, sigma) << std::endl;
+    std::cout << "R(d2)        " << R(d2) << std::endl;
   }
 }
 
@@ -180,7 +181,7 @@ void test4()
   std::string expr1 = "exists b: Bool. if(c, c, b)";
 //  std::string expr2 = "true"; // rewriter cannot deal with abstraction yet
   std::string expr2 = "exists b: Bool. if(true, true, b)";
-  std::string sigma = "c: Bool := true";
+  std::string sigma = "[c: Bool := true]";
   test_expressions(R, expr1, expr2, "c: Bool;", data_spec, sigma);
 }
 
@@ -215,7 +216,7 @@ void one_point_rule_preprocessor_test()
 
 void simplify_rewriter_test()
 {
-  data::detail::simplify_rewriter R;
+  data::simplify_rewriter R;
   test_rewriters(N(R), N(I), "!(true && false)", "true");
   test_rewriters(N(R), N(I), "exists n:Nat, b:Bool. b", "exists b:Bool. b");
   test_rewriters(N(R), N(I), "forall b:Bool. !!b", "forall b:Bool. b");

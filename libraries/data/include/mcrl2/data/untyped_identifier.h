@@ -25,7 +25,7 @@ class untyped_identifier: public data_expression
   public:
     /// \brief Default constructor.
     untyped_identifier()
-      : data_expression(core::detail::constructUntypedIdentifier())
+      : data_expression(core::detail::default_values::UntypedIdentifier)
     {}
 
     /// \brief Constructor.
@@ -38,19 +38,37 @@ class untyped_identifier: public data_expression
 
     /// \brief Constructor.
     untyped_identifier(const core::identifier_string& name)
-      : data_expression(core::detail::gsMakeUntypedIdentifier(name))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), name))
     {}
 
     /// \brief Constructor.
     untyped_identifier(const std::string& name)
-      : data_expression(core::detail::gsMakeUntypedIdentifier(core::identifier_string(name)))
+      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), core::identifier_string(name)))
     {}
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 };
+
+// prototype declaration
+std::string pp(const untyped_identifier& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_identifier& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_identifier& t1, untyped_identifier& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class untyped_identifier ---//
 
 } // namespace data

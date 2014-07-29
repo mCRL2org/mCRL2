@@ -12,9 +12,13 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 
-#include "mcrl2/utilities/sequence.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
+#include "mcrl2/utilities/sequence.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -26,13 +30,13 @@ template <typename Container>
 std::string print_vector(const Container& v, const std::string& delim)
 {
   std::ostringstream os;
-  for(typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (auto i = v.begin(); i != v.end(); ++i)
   {
     if(i != v.begin())
     {
       os << delim;
     }
-    os << data::pp(*i);
+    os << *i;
   }
   return os.str();
 }
@@ -52,246 +56,51 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // if true, the resulting PBES is simplified
     bool m_simplify;
 
-    // if true, an optimization will be applied in the reset_variable procedure
-    bool m_use_marking_optimization;
+    // m_occurring_data_parameters[X] contains the indices of data parameters that occur in at least one local control flow graph
+    std::map<core::identifier_string, std::set<std::size_t> > m_occurring_data_parameters;
 
-    data::data_expression default_value(const data::sort_expression& x)
+    // returns a default value for the given sort, that corresponds to parameter d_X[j]
+    data::data_expression default_value(const core::identifier_string& X, std::size_t j, const data::sort_expression& x)
     {
+      auto const& Xinit = m_pbes.initial_state();
+      if (X == Xinit.name())
+      {
+        return nth_element(Xinit.parameters(), j);
+      }
+
       // TODO: make this an attribute
       data::representative_generator f(m_pbes.data());
       return f(x);
     }
 
-    // computes the possible values of d_X[j]
-    std::vector<data::data_expression> compute_values(const core::identifier_string& X, std::size_t j)
+    void compute_occurring_data_parameters()
     {
-      std::vector<data::data_expression> result;
+      m_occurring_data_parameters.clear();
 
-      std::size_t k = control_flow_index(X, j);
-      if (k != (std::numeric_limits<std::size_t>::max)())
+      // first collect all parameters (X, p) that are being used in a local control flow graph
+      for (auto k = m_local_control_flow_graphs.begin(); k != m_local_control_flow_graphs.end(); ++k)
       {
-        // find vertices X(e) in Gk
-        control_flow_graph& Gk = m_control_flow_graphs[k];
-        const std::set<stategraph_vertex*>& inst = Gk.index(X);
-        for (std::set<stategraph_vertex*>::const_iterator vi = inst.begin(); vi != inst.end(); ++vi)
+        auto const& V = k->vertices;
+        for (auto j = V.begin(); j != V.end(); ++j)
         {
-          const stategraph_vertex& u = **vi;
-          result.push_back(u.X.parameters().front());
+          auto const& u = *j;
+          auto const& X = u.name();
+          auto p = u.index();
+          m_occurring_data_parameters[X].insert(p);
         }
       }
 
-      if(mCRL2logEnabled(log::debug1, "stategraph"))
+      // then intersect them with the data parameter indices
+      for (auto i = m_occurring_data_parameters.begin(); i != m_occurring_data_parameters.end(); ++i)
       {
-        mCRL2log(log::debug1, "stategraph") << "Possible values of " << X << "," << j << " are: ";
-        for(std::vector<data::data_expression>::const_iterator it = result.begin() ; it != result.end(); ++it)
-        {
-          if(it != result.begin())
-          {
-            mCRL2log(log::debug1, "stategraph") << ", ";
-          }
-          mCRL2log(log::debug1, "stategraph") << data::pp(*it);
-        }
-        mCRL2log(log::debug1, "stategraph") << std::endl;
+        auto const& X = i->first;
+        auto const& eq_X = *find_equation(m_pbes, X);
+        auto const& dp_X = eq_X.data_parameter_indices();
+        i->second = data::detail::set_intersection(i->second, std::set<std::size_t>(dp_X.begin(), dp_X.end()));
       }
-      return result;
-    }
-
-    bool is_relevant(const core::identifier_string& X,
-                     const predicate_variable& X_i,
-                     const data::variable& d,
-                     const std::vector<data::data_expression>& v) const
-    {
-      mCRL2log(log::debug1) << "  checking whether " << data::pp(d) << " is relevant for location " << X << "(" << print_vector(v, ", ") << ")" << std::endl;
-      assert(X == X_i.X.name());
-      // TODO: Ugly, v only contains control flow parameters, but the analysis
-      // below gives indices into the list of parameters, so we need to map this
-      std::vector<size_t> index_to_cfp_index;
-      std::size_t idx = 0;
-      for (std::size_t j = 0; j < X_i.X.parameters().size(); ++j)
-      {
-        if(is_control_flow_parameter(X, j))
-        {
-          index_to_cfp_index.push_back(idx);
-          idx++;
-        }
-        else
-        {
-          index_to_cfp_index.push_back((std::numeric_limits<std::size_t>::max)());
-        }
-      }
-
-      bool result = true;
-      std::size_t K = m_control_flow_graphs.size();
-      for (std::size_t k = 0; k < K && result; k++)
-      {
-        const control_flow_graph& Gk = m_control_flow_graphs[k];
-        const std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
-        std::map<core::identifier_string, std::set<data::variable> >::const_iterator i = Bk.find(X);
-        if (i == Bk.end())
-        {
-          mCRL2log(log::debug1, "stategraph") << X << " " << d << " not found in graph " << k << std::endl;
-          continue;
-        }
-        const std::set<data::variable>& V = i->second;
-        if (contains(V, d))
-        {
-          mCRL2log(log::debug1) << "    " << data::pp(d) << " belongs to graph " << k << std::endl;
-          // determine m such that m_control_flow_index[X][m] == k
-          // TODO: this information is not readily available, resulting in very ugly code...
-          std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator ci = m_control_flow_index.find(X);
-          assert(ci != m_control_flow_index.end());
-#ifndef NDEBUG
-          bool found = false;
-#endif
-          std::size_t m = (std::numeric_limits<std::size_t>::max)();
-          const std::map<std::size_t, std::size_t>& M = ci->second;
-          for (std::map<std::size_t, std::size_t>::const_iterator mi = M.begin(); mi != M.end(); ++mi)
-          {
-            if (mi->second == k)
-            {
-              assert(!found);
-#ifndef NDEBUG
-              found = true;
-#endif
-              m = mi->first;
-            }
-          }
-          mCRL2log(log::debug1) << "    with parameter index " << m << " (CFP index " << index_to_cfp_index[m] << ")" << std::endl;
-          assert(found);
-          assert(m != (std::numeric_limits<std::size_t>::max)());
-          assert(index_to_cfp_index[m] < v.size());
-
-          control_flow_graph::vertex_const_iterator vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[index_to_cfp_index[m]])));
-          assert(vi != Gk.end());
-          const stategraph_vertex& u = vi->second;
-          mCRL2log(log::debug1) << "      found vertex " << pp(u.X) << " with marking " << print_vector(u.marking, ", ") << std::endl;
-
-          result = result && contains(u.marking, d);
-          if(!result)
-          {
-            mCRL2log(log::debug1) << "    " << data::pp(d) << " is not contained in the marking for " << pp(u.X) << " so it is not relevant" << std::endl;
-          }
-        }
-      }
-      if(result)
-      {
-        mCRL2log(log::debug1) << "  " << data::pp(d) << " is relevant for location " << X << "(" << print_vector(v, ", ") << ")" << std::endl;
-      }
-      return result;
-    }
-
-    // returns true if in the control flow graph corresponding to d_X[j] there is a vertex u = X(e) such that
-    // marking(u) is not empty
-    bool has_non_empty_marking(const core::identifier_string& X, std::size_t j) const
-    {
-      std::size_t k = control_flow_index(X, j);
-      if (k == (std::numeric_limits<std::size_t>::max)())
-      {
-        return false;
-      }
-      const control_flow_graph& Gk = m_control_flow_graphs[k];
-      const std::set<stategraph_vertex*>& inst = Gk.index(X);
-      for (std::set<stategraph_vertex*>::const_iterator i = inst.begin(); i != inst.end(); ++i)
-      {
-        stategraph_vertex& u = **i;
-        if (!u.marking.empty())
-        {
-          return true;
-        }
-      }
-      return false;
     }
 
   public:
-
-    pbes_expression reset(const std::vector<data::data_expression>& v_prime,
-                          const core::identifier_string& Y,
-                          const predicate_variable& X_i,
-                          const std::vector<std::size_t>& /* I */,
-                          const std::vector<data::variable>& d_Y
-                         )
-    {
-      data::data_expression c = data::sort_bool::true_();
-      std::vector<data::data_expression> e_X(X_i.X.parameters().begin(), X_i.X.parameters().end());
-      std::size_t k = 0;
-      std::vector<data::data_expression> v;
-      // Note that v needs to be built first, since it is used in its entirety
-      // in the next loop!
-      for (std::size_t j = 0; j < d_Y.size(); j++)
-      {
-        if (is_control_flow_parameter(Y, j))
-        {
-          if (X_i.dest.find(j) != X_i.dest.end())
-          {
-            v.push_back(X_i.dest.find(j)->second);
-          }
-          else if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
-          {
-            assert(k < v_prime.size());
-            v.push_back(v_prime[k]);
-            k++;
-          }
-          else
-          {
-            v.push_back(e_X[j]);
-          }
-        }
-      }
-
-      std::vector<data::data_expression> r;
-      k = 0;
-      for (std::size_t j = 0; j < d_Y.size(); j++)
-      {
-        if (is_control_flow_parameter(Y, j))
-        {
-          if (X_i.dest.find(j) != X_i.dest.end())
-          {
-            c = data::lazy::and_(c, data::equal_to(e_X[j], X_i.dest.find(j)->second));
-          }
-          else if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
-          {
-            // find the index that is copied to j
-            c = data::lazy::and_(c, data::equal_to(e_X[j], v_prime[k]));
-            k++;
-          }
-          r.push_back(e_X[j]);
-        }
-        else if (is_relevant(Y, X_i, d_Y[j], v))
-        {
-          r.push_back(e_X[j]);
-        }
-        else
-        {
-          r.push_back(default_value(e_X[j].sort()));
-          //r.push_back(e_X[j]);
-        }
-      }
-
-      propositional_variable_instantiation Yr(Y, atermpp::convert<data::data_expression_list>(r));
-      pbes_expression result = Yr;
-      if (m_simplify)
-      {
-        c = m_datar(c);
-        if (c == data::sort_bool::true_())
-        {
-          result = Yr;
-        }
-        else if (c != data::sort_bool::false_())
-        {
-          result = imp(c, Yr);
-        }
-        else
-        {
-          result = data::sort_bool::true_();
-        }
-      }
-      else
-      {
-        result = imp(c, Yr);
-      }
-      mCRL2log(log::debug1, "stategraph") << "Resetting " << pbes_system::pp(X_i.X) << " to " << pbes_system::pp(result) << std::endl;
-      return result;
-    }
 
     // expands a propositional variable instantiation using the control flow graph
     // x = Y(e)
@@ -301,7 +110,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // Applies resetting of variables to the original PBES p.
     void reset_variables_to_original(pbes& p)
     {
-      mCRL2log(log::debug, "stategraph") << "--- resetting variables to the original PBES ---" << std::endl;
+      mCRL2log(log::debug, "stategraph") << "=== resetting variables to the original PBES ---" << std::endl;
 
       // apply the reset variable procedure to all propositional variable instantiations
       std::vector<pbes_equation>& p_eqn = p.equations();
@@ -309,36 +118,37 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 
       for (std::size_t k = 0; k < p_eqn.size(); k++)
       {
+        mCRL2log(log::debug1, "stategraph") << "--- resetting equation " << p_eqn[k] << std::endl;
         p_eqn[k].formula() = local_reset_variables(*this, p_eqn[k].formula(), s_eqn[k]);
       }
 
       // TODO: merge the two rewriters?
       if (m_simplify)
       {
-        pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
+        pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
         pbes_system::pbes_rewrite(p, pbesr);
       }
     }
 
-    local_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
-                                    bool use_alternative_lcfp_criterion = false,
-                                    bool use_alternative_gcfp_relation = false,
-                                    bool use_alternative_gcfp_consistency = false
-                                   )
-      : stategraph_local_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency),
-        m_original_pbes(p)
+    local_reset_variables_algorithm(const pbes& p, const pbesstategraph_options& options)
+      : stategraph_local_algorithm(p, options),
+        m_original_pbes(p),
+        m_simplify(options.simplify)
     {}
 
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes run(bool simplify = true, bool use_marking_optimization = false)
+    pbes run()
     {
       super::run();
-      m_simplify = simplify;
-      m_use_marking_optimization = use_marking_optimization;
       pbes result = m_original_pbes;
+      compute_occurring_data_parameters();
+
+      start_timer("reset_variables_to_original");
       reset_variables_to_original(result);
+      finish_timer("reset_variables_to_original");
+
       return result;
     }
 };
@@ -365,7 +175,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
 
   void push(const pbes_expression& x)
   {
-    mCRL2log(log::debug1) << "<push>" << "\n" << x << std::endl;
+    mCRL2log(log::debug2) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 
@@ -394,25 +204,15 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
   void leave(const pbes_system::propositional_variable_instantiation& x)
   {
     pbes_expression result = algorithm.reset_variable(x, eq_X, i);
-    mCRL2log(log::debug1, "stategraph") << "reset variable " << pbes_system::pp(x) << " with index " << i << " to " << pbes_system::pp(result) << std::endl;
+    mCRL2log(log::debug1, "stategraph") << "reset variable " << x << " with index " << i << " to " << result << std::endl;
     i++;
     push(result);
-  }
-
-  void leave(const pbes_system::true_& x)
-  {
-    push(x);
-  }
-
-  void leave(const pbes_system::false_& x)
-  {
-    push(x);
   }
 
   void leave(const pbes_system::not_& /* x */)
   {
     pbes_expression operand = pop();
-    push(not_(atermpp::aterm_cast<atermpp::aterm_appl>(operand)));
+    push(not_(atermpp::deprecated_cast<atermpp::aterm_appl>(operand)));
   }
 
   void leave(const pbes_system::and_& /* x */)
@@ -458,85 +258,106 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
   return f.top();
 }
 
-struct reset_variable_helper
-{
-  local_reset_variables_algorithm& algorithm;
-  std::vector<pbes_expression>& phi;
-  std::vector<data::data_expression>& v_prime;
-  const core::identifier_string& Y;
-  const predicate_variable& X_i;
-  const std::vector<std::size_t>& I;
-  const std::vector<data::variable>& d_Y;
-
-  reset_variable_helper(local_reset_variables_algorithm& algorithm_,
-                        std::vector<pbes_expression>& phi_,
-                        std::vector<data::data_expression>& v_prime_,
-                        const core::identifier_string& Y_,
-                        const predicate_variable& X_i_,
-                        const std::vector<std::size_t>& I_,
-                        const std::vector<data::variable>& d_Y_
-                       )
-   : algorithm (algorithm_),
-     phi       (phi_),
-     v_prime   (v_prime_),
-     Y         (Y_),
-     X_i       (X_i_),
-     I         (I_),
-     d_Y       (d_Y_)
-   {}
-
-   void operator()()
-   {
-     phi.push_back(algorithm.reset(v_prime, Y, X_i, I, d_Y));
-   }
-};
-
-inline
 pbes_expression local_reset_variables_algorithm::reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
 {
-  mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
+  using utilities::detail::contains;
+
+  // mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << x << " with index " << i << std::endl;
   assert(i < eq_X.predicate_variables().size());
-  const predicate_variable& X_i = eq_X.predicate_variables()[i];
-  assert(X_i.X == x);
+  const predicate_variable& Ye = eq_X.predicate_variables()[i];
+  assert(Ye.variable() == x);
 
-  std::vector<pbes_expression> phi;
-  core::identifier_string Y = x.name();
+  const core::identifier_string& X = eq_X.variable().name();
+  const core::identifier_string& Y = Ye.name();
   const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+  auto const& e = x.parameters();
+  std::vector<data::data_expression> e1(e.begin(), e.end());
   const std::vector<data::variable>& d_Y = eq_Y.parameters();
-  assert(d_Y.size() == X_i.X.parameters().size());
+  assert(d_Y.size() == Ye.parameters().size());
+  const std::size_t J = m_local_control_flow_graphs.size();
 
-  std::vector<std::size_t> I;
-  for (std::size_t j = 0; j < d_Y.size(); j++)
+  auto const& dp_Y = eq_Y.data_parameter_indices();
+  for (auto dpi = dp_Y.begin(); dpi != dp_Y.end(); ++dpi)
   {
-    if (is_control_flow_parameter(X_i.X.name(), j) && X_i.dest.find(j) == X_i.dest.end())
+    std::size_t k = *dpi;
+    bool relevant = true;
+    std::set<data::data_expression> condition;
+    for (std::size_t j = 0; j < J; j++)
     {
-      if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
+      auto const& Vj = m_local_control_flow_graphs[j];
+      auto& Bj = m_belongs[j];
+      default_rules_predicate rules(Vj);
+      if (rules(X, i))
       {
-        I.push_back(j);
+        auto const& v = Vj.find_vertex(Y); // v = (Y, p, q)
+        std::size_t p = v.index();
+        auto di = Ye.target().find(p);
+        if (di != Ye.target().end())
+        {
+          auto const& q1 = di->second; // q1 = target(X, i, p)
+          auto const& u = Vj.find_vertex(local_control_flow_graph_vertex(Y, p, data::undefined_variable(), q1));
+          if (contains(Bj[Y], d_Y[k]) && !contains(u.marking(), d_Y[k]))
+          {
+            relevant = false;
+            break;
+          }
+        }
+        else if(!v.has_variable())
+        {
+          if (contains(Bj[Y], d_Y[k]) && !contains(v.marking(), d_Y[k]))
+          {
+            relevant = false;
+            break;
+          }
+        }
+        else
+        {
+          // update relevant and condition
+          if (contains(Bj[Y], d_Y[k]))
+          {
+            bool found = false;
+            for (auto wi = Vj.vertices.begin(); wi != Vj.vertices.end(); ++wi)
+            {
+              auto const& w = *wi;
+              if (w.name() == Y && w.index() == p)  // w = (Y, p, d_Y[p]=r)
+              {
+                if (contains(w.marking(), d_Y[k]))
+                {
+                  found = true;
+                }
+                else
+                {
+                  if  (w.has_variable())
+                  {
+                    auto const& r = w.value();
+                    condition.insert(data::equal_to(d_Y[p], r));
+                  }
+                }
+              }
+            }
+            if (!found)
+            {
+              relevant = false;
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (!relevant)
+    {
+      e1[k] = default_value(Y, k, e1[k].sort());
+    }
+    else
+    {
+      if (!condition.empty())
+      {
+        e1[k] = data::if_(data::lazy::join_or(condition.begin(), condition.end()), default_value(Y, k, e1[k].sort()), nth_element(e, k));
+        mCRL2log(log::debug1, "stategraph") << "  reset copy Y = " << Y << " k = " << k << " e'[k] = " << e1[k] << std::endl;
       }
     }
   }
-
-  std::vector<std::vector<data::data_expression> > values;
-  for (std::vector<std::size_t>::const_iterator ii = I.begin(); ii != I.end(); ++ii)
-  {
-    values.push_back(compute_values(Y, *ii));
-  }
-  std::vector<data::data_expression> v_prime;
-  for (std::vector<std::vector<data::data_expression> >::const_iterator vi = values.begin(); vi != values.end(); ++vi)
-  {
-    assert(!vi->empty());
-    v_prime.push_back(vi->front());
-  }
-  utilities::foreach_sequence(values, v_prime.begin(),
-    // N.B. clang 3.0 segfaults on this lambda expression, so use a function object instead...
-    // [&]()
-    // {
-    //   phi.push_back(reset(v_prime, Y, X_i, I, d_Y));
-    // }
-    reset_variable_helper(*this, phi, v_prime, Y, X_i, I, d_Y)
-  );
-  return pbes_expr::join_and(phi.begin(), phi.end());
+  return propositional_variable_instantiation(Y, data::data_expression_list(e1.begin(), e1.end()));
 }
 
 

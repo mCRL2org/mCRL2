@@ -46,7 +46,7 @@ class lps2pbes_algorithm
     /// \param unoptimized do not optimize the resulting PBES.
     /// \param T The time parameter. If T == data::variable() the untimed version of lps2pbes is applied.
     /// \return A PBES that encodes the property applied to the given specification
-    pbes run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, data::variable T = data::variable())
+    pbes run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, data::variable T = data::undefined_real_variable())
     {
       using namespace state_formulas::detail::accessors;
       using atermpp::detail::operator+;
@@ -117,7 +117,7 @@ class lps2pbes_algorithm
       data::data_expression_list fi = detail::mu_expressions(f);
       data::data_expression_list pi = spec.initial_process().state(spec.process().process_parameters());
       data::data_expression_list e = fi + pi + detail::Par(Xf, data::variable_list(), f);
-      if (T != data::variable())
+      if (T != data::undefined_real_variable())
       {
         e = data::sort_real::real_(0) + e;
       }

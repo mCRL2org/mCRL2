@@ -1,0 +1,15 @@
+map  invert: List(Bool) -> List(Bool);
+
+var  b: Bool;
+     l: List(Bool);
+eqn  invert([])  =  [];
+     invert(b |> l)  =  !b |> invert(l);
+
+act  a: Bool;
+
+proc P(b: List(Bool)) =
+       a(b . 0) .
+         P(b = invert(b))
+     + delta;
+
+init P([true]);

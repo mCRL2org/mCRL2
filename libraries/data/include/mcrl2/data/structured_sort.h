@@ -14,11 +14,10 @@
 
 #include <string>
 #include <iterator>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -73,7 +72,7 @@ class structured_sort: public sort_expression
   public:
     /// \brief Default constructor.
     structured_sort()
-      : sort_expression(core::detail::constructSortStruct())
+      : sort_expression(core::detail::default_values::SortStruct)
     {}
 
     /// \brief Constructor.
@@ -86,18 +85,18 @@ class structured_sort: public sort_expression
 
     /// \brief Constructor.
     structured_sort(const structured_sort_constructor_list& constructors)
-      : sort_expression(core::detail::gsMakeSortStruct(constructors))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), constructors))
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort(const Container& constructors, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor>::type* = 0)
-      : sort_expression(core::detail::gsMakeSortStruct(structured_sort_constructor_list(constructors.begin(), constructors.end())))
+    structured_sort(const Container& constructors, typename atermpp::enable_if_container<Container, structured_sort_constructor>::type* = 0)
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
     {}
 
     const structured_sort_constructor_list& constructors() const
     {
-      return atermpp::aterm_cast<const structured_sort_constructor_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<structured_sort_constructor_list>((*this)[0]);
     }
 //--- start user section structured_sort ---//
 
@@ -253,9 +252,9 @@ class structured_sort: public sort_expression
                                                  sort_bool::and_(equal_to(*k, *l), right_smaller_equal));
           }
 
-          application left_equal = make_application(equal_arguments_function(s), instance1, instance2);
-          application left_smaller = make_application(smaller_arguments_function(s), instance1, instance2);
-          application left_smaller_equal = make_application(smaller_equal_arguments_function(s), instance1, instance2);
+          application left_equal = application(equal_arguments_function(s), instance1, instance2);
+          application left_smaller = application(smaller_arguments_function(s), instance1, instance2);
+          application left_smaller_equal = application(smaller_equal_arguments_function(s), instance1, instance2);
           variables1.insert(variables1.end(),variables2.begin(),variables2.end());
           result.push_back(data_equation(variables1, sort_bool::true_(),left_equal, right_equal));
           result.push_back(data_equation(variables1, sort_bool::true_(),left_smaller, right_smaller));
@@ -272,11 +271,11 @@ class structured_sort: public sort_expression
       variable x("x", s);
       variable y("y", s);
       variable_list xy = make_list(x,y);
-      application to_pos_x = make_application(to_pos_function(s), x);
-      application to_pos_y = make_application(to_pos_function(s), y);
-      application equal_arguments_xy         = make_application(equal_arguments_function(s), x, y);
-      application smaller_arguments_xy       = make_application(smaller_arguments_function(s), x, y);
-      application smaller_equal_arguments_xy = make_application(smaller_equal_arguments_function(s), x, y);
+      application to_pos_x = application(to_pos_function(s), x);
+      application to_pos_y = application(to_pos_function(s), y);
+      application equal_arguments_xy         = application(equal_arguments_function(s), x, y);
+      application smaller_arguments_xy       = application(smaller_arguments_function(s), x, y);
+      application smaller_equal_arguments_xy = application(smaller_equal_arguments_function(s), x, y);
       result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     equal_to(x,y), equal_arguments_xy));
       result.push_back(data_equation(xy, not_equal_to(to_pos_x, to_pos_y), equal_to(x,y), sort_bool::false_()));
       result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),         less(x,y), sort_bool::true_()));
@@ -444,21 +443,28 @@ typedef atermpp::term_list<structured_sort> structured_sort_list;
 /// \brief vector of structured_sorts
 typedef std::vector<structured_sort>    structured_sort_vector;
 
+// prototype declaration
+std::string pp(const structured_sort& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const structured_sort& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(structured_sort& t1, structured_sort& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class structured_sort ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::structured_sort& t1, mcrl2::data::structured_sort& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

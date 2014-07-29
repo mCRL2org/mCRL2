@@ -13,19 +13,6 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 set(PREFIX "example_bes")
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/ )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include/)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
-
 ##---------------------------------------------------
 ## Example *.cpp 
 ##--------------------------------------------------- 
@@ -43,13 +30,10 @@ foreach( OBJ ${TERM_OBJS} )
   )
   
   target_link_libraries(${PROJECT_NAME}
-     mcrl2_lps
-     mcrl2_lts
-     mcrl2_utilities
-     mcrl2_pbes
+     mcrl2_bes
   )
 
-  build_and_run_test_example_target( ${PROJECT_NAME} )
+  build_and_run_test_example_target( ${PROJECT_NAME} "-h" )
 
 endforeach( OBJ )
 

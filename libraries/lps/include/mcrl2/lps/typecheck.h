@@ -15,8 +15,8 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/action_rename.h"
-#include "mcrl2/lps/untyped_action.h"
 #include "mcrl2/lps/untyped_multi_action.h"
+#include "mcrl2/process/untyped_action.h"
 
 namespace mcrl2
 {
@@ -37,7 +37,7 @@ class action_type_checker:public data::data_type_checker
     *  \param[in] action_decls A list of action declarations
     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
     **/
-    action_type_checker(const data::data_specification &data_spec, const action_label_list& action_decls);
+    action_type_checker(const data::data_specification &data_spec, const process::action_label_list& action_decls);
 
     /** \brief     Type check a multi action.
     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -54,9 +54,9 @@ class action_type_checker:public data::data_type_checker
     action_rename_specification operator()(const action_rename_specification &ars);
 
   protected:
-    void ReadInActs(const lps::action_label_list &Acts);
-    action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const lps::untyped_action &ma);
-    action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const lps::untyped_action &ma);
+    void ReadInActs(const process::action_label_list &Acts);
+    process::action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::untyped_action &ma);
+    process::action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::untyped_action &ma);
 };
 
 
@@ -71,7 +71,7 @@ inline
 multi_action type_check(
   untyped_multi_action& mult_act,
   const data::data_specification& data_spec,
-  const action_label_list& action_decls)
+  const process::action_label_list& action_decls)
 {
   multi_action result;
   action_type_checker type_checker(data_spec,action_decls);

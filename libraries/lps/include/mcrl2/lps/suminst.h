@@ -16,7 +16,8 @@
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/utilities/logger.h"
 
-#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/replace.h"
@@ -47,8 +48,8 @@ std::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 template<typename DataRewriter>
 class suminst_algorithm: public lps::detail::lps_algorithm
 {
-
-    typedef data::classic_enumerator< data::rewriter > enumerator_type;
+  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+  typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
 
   protected:
     /// Sorts to be instantiated
@@ -61,11 +62,16 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     DataRewriter m_rewriter;
     enumerator_type m_enumerator;
 
+    /// Statistiscs for verbose output
+    size_t m_processed;
+    size_t m_deleted;
+    size_t m_added;
+
     template <typename SummandType, typename Container>
-    void instantiate_summand(const SummandType& s, Container& result)
+    size_t instantiate_summand(const SummandType& s, Container& result)
     {
       using namespace data;
-      int nr_summands = 0; // Counter for the number of new summands, used for verbose output
+      size_t nr_summands = 0; // Counter for the number of new summands, used for verbose output
       std::deque< variable > variables; // The variables we need to consider in instantiating
 
       // partition such that variables with finite sort precede those that do not
@@ -89,34 +95,38 @@ class suminst_algorithm: public lps::detail::lps_algorithm
       {
         // Nothing to be done, return original summand
         result.push_back(s);
+        nr_summands = 1;
       }
       else
       {
         // List of variables with the instantiated variables removed (can be done upfront, which is more efficient,
         // because we only need to calculate it once.
-        variable_list new_summation_variables = term_list_difference(s.summation_variables(), atermpp::convert< variable_list >(variables));
+        const variable_list vl(variables.begin(),variables.end());
+        variable_list new_summation_variables = term_list_difference(s.summation_variables(), vl);
 
         try
         {
-          mCRL2log(log::debug, "suminst") << "enumerating condition: " << data::pp(s.condition()) << std::endl;
+          mCRL2log(log::debug, "suminst") << "enumerating variables " << vl << " in condition: " << data::pp(s.condition()) << std::endl;
 
-          for (enumerator_type::iterator i=m_enumerator.begin(boost::make_iterator_range(variables), s.condition());
-                  i != m_enumerator.end(); ++i)
+          mcrl2::data::mutable_indexed_substitution<> local_sigma;
+          std::deque <enumerator_element> enumerator_deque(1, enumerator_element(vl, s.condition()));
+          for (auto i = m_enumerator.begin(local_sigma, enumerator_deque); i != m_enumerator.end(); ++i)
           {
-            mCRL2log(log::debug, "suminst") << "substitutions: " << data::print_substitution(*i) << std::endl;
+            mutable_indexed_substitution<> sigma;
+            i->add_assignments(vl,sigma,m_rewriter);
+            /* data_expression_list::const_iterator k=i->begin();
+            for(auto j=vl.begin(); j!=vl.end(); ++j, ++k)
+            {
+              sigma[*j]=*k;
+            } */
+            mCRL2log(log::debug, "suminst") << "substitutions: " << sigma << std::endl;
 
             SummandType t(s);
             t.summation_variables() = new_summation_variables;
-            lps::rewrite(t, m_rewriter, *i);
+            lps::rewrite(t, m_rewriter, sigma);
             result.push_back(t);
             ++nr_summands;
           }
-
-          if (nr_summands == 0)
-          {
-            mCRL2log(log::verbose, "suminst") << "all valuations for the variables in the condition of this summand reduce to false; removing this summand" << std::endl;
-          }
-          mCRL2log(log::verbose, "suminst") << "replaced a summand with " << nr_summands << " summand" << (nr_summands == 1?"":"s") << std::endl;
         }
         catch (mcrl2::runtime_error const& e)
         {
@@ -128,7 +138,46 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
           result.resize(result.size() - nr_summands);
           result.push_back(s);
+          nr_summands = 1;
         }
+      }
+      return nr_summands;
+    }
+
+    bool must_instantiate(const action_summand& summand)
+    {
+      return !m_tau_summands_only || summand.is_tau();
+    }
+
+    bool must_instantiate(const deadlock_summand& )
+    {
+      return !m_tau_summands_only;
+    }
+
+    template <typename SummandListType, typename Container>
+    void run(const SummandListType& list, Container& result)
+    {
+      for (typename SummandListType::const_iterator i = list.begin(); i != list.end(); ++i)
+      {
+        if (must_instantiate(*i))
+        {
+          size_t newsummands = instantiate_summand(*i, result);
+          if (newsummands > 0)
+          {
+            m_added += newsummands - 1;
+          }
+          else
+          {
+            ++m_deleted;
+          }
+        }
+        else
+        {
+          result.push_back(*i);
+        }
+        ++m_processed;
+        mCRL2log(log::status) << "Replaced " << m_processed << " summands by " << (m_processed + m_added - m_deleted)
+                              << " summands (" << m_deleted << " were deleted)" << std::endl;
       }
     }
 
@@ -141,7 +190,10 @@ class suminst_algorithm: public lps::detail::lps_algorithm
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
-        m_enumerator(spec.data(),r)
+        m_enumerator(r, spec.data(), r),
+        m_processed(0),
+        m_deleted(0),
+        m_added(0)
     {
       if(sorts.empty())
       {
@@ -153,33 +205,15 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     void run()
     {
       action_summand_vector action_summands;
-      for (action_summand_vector::iterator i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
-      {
-        if (!m_tau_summands_only || i->is_tau())
-        {
-          instantiate_summand(*i, action_summands);
-        }
-        else
-        {
-          action_summands.push_back(*i);
-        }
-      }
-
       deadlock_summand_vector deadlock_summands;
-      for (deadlock_summand_vector::iterator i = m_spec.process().deadlock_summands().begin(); i != m_spec.process().deadlock_summands().end(); ++i)
-      {
-        if (!m_tau_summands_only)
-        {
-          instantiate_summand(*i, deadlock_summands);
-        }
-        else
-        {
-          deadlock_summands.push_back(*i);
-        }
-      }
-
-      m_spec.process().action_summands() = action_summands;
-      m_spec.process().deadlock_summands() = deadlock_summands;
+      m_added = 0;
+      m_deleted = 0;
+      m_processed = 0;
+      run(m_spec.process().action_summands(), action_summands);
+      run(m_spec.process().deadlock_summands(), deadlock_summands);
+      m_spec.process().action_summands().swap(action_summands);
+      m_spec.process().deadlock_summands().swap(deadlock_summands);
+      mCRL2log(log::status) << std::endl;
     }
 
 }; // suminst_algorithm

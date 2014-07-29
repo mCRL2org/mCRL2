@@ -56,8 +56,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   };
 
   /// \brief Returns true if the argument is a process instance
-  /// \param x A process expression
-  /// \return True if the argument is a process instance
   bool is_process(const process_expression& x)
   {
     return is_process_instance(x)
@@ -66,8 +64,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   }
 
   /// \brief Returns true if the argument is a deadlock
-  /// \param x A process expression
-  /// \return True if the argument is a deadlock
   bool is_timed_deadlock(const process_expression& x)
   {
     return is_delta(x)
@@ -76,19 +72,15 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   }
 
   /// \brief Returns true if the argument is a multi-action
-  /// \param x A process expression
-  /// \return True if the argument is a multi-action
   bool is_multiaction(const process_expression& x)
   {
     return is_tau(x)
            || is_sync(x)
-           || lps::is_action(x)
+           || is_action(x)
            ;
   }
 
   /// \brief Returns true if the argument is a multi-action
-  /// \param x A process expression
-  /// \return True if the argument is a multi-action
   bool is_timed_multiaction(const process_expression& x)
   {
     return is_at(x)
@@ -96,8 +88,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   }
 
   /// \brief Returns true if the argument is an action prefix
-  /// \param x A process expression
-  /// \return True if the argument is an action prefix
   bool is_action_prefix(const process_expression& x)
   {
     return is_seq(x)
@@ -105,8 +95,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   }
 
   /// \brief Returns true if the argument is a conditional deadlock
-  /// \param x A process expression
-  /// \return True if the argument is a conditional deadlock
   bool is_conditional_deadlock(const process_expression& x)
   {
     return is_if_then(x)
@@ -114,8 +102,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   }
 
   /// \brief Returns true if the argument is a conditional action prefix.
-  /// \param x A process expression
-  /// \return True if the argument is a conditional action prefix.
   bool is_conditional_action_prefix(const process_expression& x)
   {
     return is_if_then(x)
@@ -123,8 +109,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   }
 
   /// \brief Returns true if the argument is an alternative composition
-  /// \param x A process expression
-  /// \return True if the argument is an alternative composition
   bool is_alternative(const process_expression& x)
   {
     return is_sum(x)
@@ -134,8 +118,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   }
 
   /// \brief Returns true if the argument is a linear process
-  /// \param x A process expression
-  /// \return True if the argument is a linear process
   bool is_linear_process_term(const process_expression& x)
   {
     return is_choice(x)
@@ -144,9 +126,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   }
 
   // TODO: check if this function is needed
-  /// \brief Visit process_instance node
-  /// \return The result of visiting the node
-  /// \param x A process instance
   void enter(const process::process_instance& x)
   {
     if (!detail::check_process_instance(eqn, x))
@@ -155,11 +134,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
   }
 
-  /// \brief Visit process_instance_assignment node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param pi A process identifier
-  /// \param v A sequence of assignments to data variables
   void enter(const process::process_instance_assignment& x)
   {
     if (!detail::check_process_instance_assignment(eqn, x))
@@ -168,11 +142,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
   }
 
-  /// \brief Visit sum node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param v A sequence of data variables
-  /// \param right A process expression
   void enter(const process::sum& x)
   {
     if (!is_alternative(x.operand()))
@@ -181,61 +150,31 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
   }
 
-  /// \brief Visit block node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param s A sequence of identifiers
-  /// \param right A process expression
   void enter(const process::block& x)
   {
     throw non_linear_process("block expression " + process::pp(x) + " encountered");
   }
 
-  /// \brief Visit hide node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param s A sequence of identifiers
-  /// \param right A process expression
   void enter(const process::hide& x)
   {
     throw non_linear_process("hide expression " + process::pp(x) + " encountered");
   }
 
-  /// \brief Visit rename node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param r A sequence of rename expressions
-  /// \param right A process expression
   void enter(const process::rename& x)
   {
     throw non_linear_process("rename expression " + process::pp(x) + " encountered");
   }
 
-  /// \brief Visit comm node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param c A sequence of communication expressions
-  /// \param right A process expression
   void enter(const process::comm& x)
   {
     throw non_linear_process("comm expression " + process::pp(x) + " encountered");
   }
 
-  /// \brief Visit allow node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param s A sequence of multi-action names
-  /// \param right A process expression
   void enter(const process::allow& x)
   {
     throw non_linear_process("allow expression " + process::pp(x) + " encountered");
   }
 
-  /// \brief Visit sync node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   void enter(const process::sync& x)
   {
     if (!is_multiaction(x.left()) || !is_multiaction(x.right()))
@@ -251,11 +190,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
   }
 
-  /// \brief Visit at node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param d A data expression
   void enter(const process::at& x)
   {
     if (!is_multiaction(x.operand()) && !is_delta(x.operand()))
@@ -264,11 +198,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
   }
 
-  /// \brief Visit seq node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   void enter(const process::seq& x)
   {
     if (!is_timed_multiaction(x.left()) || !is_process(x.right()))
@@ -277,7 +206,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
     if (is_process_instance(x.right()))
     {
-      const process_instance& q = core::static_down_cast<const process_instance&>(x.right());
+      const process_instance& q = atermpp::down_cast<process_instance>(x.right());
       if (q.identifier() != eqn.identifier())
       {
         throw non_linear_process(process::pp(q) + " has an unexpected identifier");
@@ -285,7 +214,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
     else if (is_process_instance_assignment(x.right()))
     {
-      const process_instance_assignment& q = core::static_down_cast<const process_instance_assignment&>(x.right());
+      const process_instance_assignment& q = atermpp::down_cast<process_instance_assignment>(x.right());
       if (q.identifier() != eqn.identifier())
       {
         throw non_linear_process(process::pp(q) + " has an unexpected identifier");
@@ -298,11 +227,6 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
   }
 
-  /// \brief Visit if_then node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param d A data expression
-  /// \param right A process expression
   void enter(const process::if_then& x)
   {
     if (!is_action_prefix(x.then_case()) && !is_timed_deadlock(x.then_case()))
@@ -311,50 +235,27 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
   }
 
-  /// \brief Visit if_then_else node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param d A data expression
-  /// \param left A process expression
-  /// \param right A process expression
   void enter(const process::if_then_else& x)
   {
     throw non_linear_process("if then else expression " + process::pp(x) + " encountered");
   }
 
-  /// \brief Visit bounded_init node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   void enter(const process::bounded_init& x)
   {
     throw non_linear_process("bounded init expression " + process::pp(x) + " encountered");
   }
 
-  /// \brief Visit merge node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   void enter(const process::merge& x)
   {
     throw non_linear_process("merge expression " + process::pp(x) + " encountered");
   }
 
-  /// \brief Visit left_merge node
-  /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   void enter(const process::left_merge& x)
   {
     throw non_linear_process("left merge expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Returns true if the process equation e is linear.
-  /// \param e A process equation
-  /// \return True if the process equation e is linear.
   bool is_linear(const process_equation& e, bool verbose = false)
   {
     eqn = e;

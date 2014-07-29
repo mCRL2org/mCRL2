@@ -23,7 +23,6 @@
 #include <map>
 #include <stdio.h>
 #include "mcrl2/lts/transition.h"
-#include "mcrl2/utilities/exception.h"
 
 
 namespace mcrl2
@@ -319,12 +318,17 @@ class lts
     }
 
     /** \brief Clear the transitions of an lts.
+     *  \param[n] An optional parameter that indicates how
+     *            many transitions are to be expected. This is
+     *            used to set the reserved size of a vector, to
+     *            prevent unnecessary resizing.
      *  \details This resets the transition vector in an lts, but
      *          leaves other related items, such as state or
      *          action labels untouched. */
-    void clear_transitions()
+    void clear_transitions(const size_t n=0)
     {
       m_transitions = std::vector<transition>();
+      m_transitions.reserve(n);
     }
 
     /** \brief Clear the action labels of an lts.
@@ -363,7 +367,7 @@ class lts
      *  \details As this vector can be huge, it is adviced to avoid
      *           to copy this vector.
      * \return   A const reference to the vector. */
-    const std::vector<transition> &get_transitions() const
+    const std::vector<transition>& get_transitions() const
     {
       return m_transitions;
     }
@@ -372,7 +376,7 @@ class lts
      *  \details As this vector can be huge, it is adviced to avoid
      *           to copy this vector.
      * \return   A reference to the vector. */
-    std::vector<transition> &get_transitions()
+    std::vector<transition>& get_transitions()
     {
       return m_transitions;
     }
@@ -410,7 +414,7 @@ class lts
      *           equal and merges actions with the same labels in the lts.
      *  \param[in] tau_actions Vector with strings indicating which actions must be
      *       transformed to tau's */
-    void hide_actions(const std::vector<std::string> &tau_actions)
+    void hide_actions(const std::vector<std::string>& tau_actions)
     {
       using namespace std;
 
@@ -483,35 +487,6 @@ class lts
       }
     }
 
-    /** \brief Gets the outgoing transitions for each state.
-     * \details Gets an array specifying for each state, the range of
-     * transitions of which that state is the source state.
-     * \pre The transitions are sorted on source state number.
-     * \return An array \e A of size \ref num_states()+1 such that
-     * for every state <em>s</em>:
-     * [ \e A[\e s] .. \e A[<em>s</em>+1] )
-     * are all transitions of which \e s is the source state.
-     * \note Deprecated */
-    size_t*
-    get_transition_indices()
-    {
-      size_t* A = (size_t*)malloc((m_nstates+1)*sizeof(size_t));
-      if (A == NULL)
-      {
-        throw mcrl2::runtime_error("Out of memory.");
-      }
-      size_t t = 0;
-      A[0] = 0;
-      for (size_t s = 1; s <= m_nstates; ++s)
-      {
-        while (t < num_transitions() && m_transitions[t].from() == s-1)
-        {
-          ++t;
-        }
-        A[s] = t;
-      }
-      return A;
-    }
 };
 
 }

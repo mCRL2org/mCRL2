@@ -12,12 +12,13 @@
 #ifndef MCRL2_UTILITIES_NUMBER_POSTFIX_GENERATOR_H
 #define MCRL2_UTILITIES_NUMBER_POSTFIX_GENERATOR_H
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <map>
 #include <string>
-#include <sstream>
 #include <boost/lexical_cast.hpp>
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 
@@ -29,7 +30,7 @@ class number_postfix_generator
 {
   protected:
     /// \brief A map that maintains the highest index for each prefix.
-    std::map<std::string, std::size_t> m_index;
+    mutable std::map<std::string, std::size_t> m_index;
 
     /// \brief The default hint.
     std::string m_hint;
@@ -89,25 +90,32 @@ class number_postfix_generator
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
-    std::string operator()(std::string hint)
+    std::string operator()(std::string hint, bool add_to_context = true) const
     {
-      // make sure there are no digits at the end of hint
+      // remove digits at the end of hint
       if (std::isdigit(hint[hint.size() - 1]))
       {
         std::string::size_type i = hint.find_last_not_of("0123456789");
         hint = hint.substr(0, i + 1);
       }
 
-      std::ostringstream out;
-      out << hint << ++m_index[hint];
-      return out.str();
+      auto j = m_index.find(hint);
+      if (j == m_index.end())
+      {
+        if (add_to_context)
+        {
+          m_index[hint] = 0;
+        }
+        return hint;
+      }
+      return hint + utilities::number2string(add_to_context ? ++(j->second) : j->second + 1);
     }
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
-    std::string operator()()
+    std::string operator()() const
     {
-      return (*this)(m_hint);
+      return (*this)(m_hint, true);
     }
 
     /// \brief Returns the default hint.
@@ -120,6 +128,12 @@ class number_postfix_generator
     std::string& hint()
     {
       return m_hint;
+    }
+
+    /// \brief Clear the context of the generator
+    void clear()
+    {
+      m_index.clear();
     }
 };
 

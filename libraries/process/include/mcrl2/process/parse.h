@@ -12,21 +12,16 @@
 #ifndef MCRL2_PROCESS_PARSE_H
 #define MCRL2_PROCESS_PARSE_H
 
-#define MCRL2_NEW_ALPHABET_REDUCE
-
 #include <iostream>
 #include <string>
 #include <sstream>
 #include "mcrl2/core/parser_utility.h"
-#include "mcrl2/lps/action_parse.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
-#include "mcrl2/process/alphabet_reduction.h"
-#ifdef MCRL2_NEW_ALPHABET_REDUCE
 #include "mcrl2/process/alphabet.h"
-#endif
 
 namespace mcrl2
 {
@@ -34,10 +29,10 @@ namespace mcrl2
 namespace process
 {
 
-struct process_actions: public lps::action_actions
+struct process_actions: public process::action_actions
 {
   process_actions(const core::parser_table& table_)
-    : lps::action_actions(table_)
+    : process::action_actions(table_)
   {}
 
   core::identifier_string_list parse_ActIdSet(const core::parse_node& node)
@@ -100,6 +95,11 @@ struct process_actions: public lps::action_actions
     return parse_ProcExprNoIf(node.child(1));
   }
 
+  bool is_proc_expr_sum(const core::parse_node& node) const
+  {
+    return (symbol_name(node).find("ProcExpr") == 0) && (node.child_count() == 3) && (symbol_name(node.child(0)) == "sum") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".");
+  }
+
   bool is_proc_expr_if_then(const core::parse_node& node) const
   {
     return (symbol_name(node).find("ProcExpr") == 0) && (node.child_count() == 2) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "->");
@@ -135,7 +135,7 @@ struct process_actions: public lps::action_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "<<") && (symbol_name(node.child(2)) == "ProcExpr")) { return bounded_init(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExpr(node.child(0)), parse_DataExprUnit(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "|") && (symbol_name(node.child(2)) == "ProcExpr")) { return sync(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "sum") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ProcExpr")) { return sum(parse_VarsDeclList(node.child(1)), parse_ProcExpr(node.child(3))); }
+    else if ((node.child_count() == 2) && is_proc_expr_sum(node.child(0)) && (symbol_name(node.child(1)) == "ProcExpr")) { return sum(parse_VarsDeclList(node.child(0).child(1)), parse_ProcExpr(node.child(1))); }
     else if ((node.child_count() == 2) && is_proc_expr_if_then(node.child(0)) && (symbol_name(node.child(1)) == "ProcExpr")) { return if_then(parse_DataExprUnit(node.child(0).child(0)), parse_ProcExpr(node.child(1))); }
     else if ((node.child_count() == 2) && is_proc_expr_if_then_else(node.child(0)) && (symbol_name(node.child(1)) == "ProcExpr")) { return if_then_else(parse_DataExprUnit(node.child(0).child(0)), parse_IfThen(node.child(0).child(1)), parse_ProcExpr(node.child(1))); }
     report_unexpected_node(node);
@@ -161,7 +161,7 @@ struct process_actions: public lps::action_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == "<<") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return bounded_init(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExprNoIf(node.child(0)), parse_DataExprUnit(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExprNoIf") && (node.child(1).string() == "|") && (symbol_name(node.child(2)) == "ProcExprNoIf")) { return sync(parse_ProcExprNoIf(node.child(0)), parse_ProcExprNoIf(node.child(2))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "sum") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ProcExprNoIf")) { return sum(parse_VarsDeclList(node.child(1)), parse_ProcExprNoIf(node.child(3))); }
+    else if ((node.child_count() == 2) && is_proc_expr_sum(node.child(0)) && (symbol_name(node.child(1)) == "ProcExprNoIf")) { return sum(parse_VarsDeclList(node.child(0).child(1)), parse_ProcExprNoIf(node.child(1))); }
     else if ((node.child_count() == 2) && is_proc_expr_if_then_else(node.child(0)) && (symbol_name(node.child(1)) == "ProcExprNoIf")) { return if_then_else(parse_DataExprUnit(node.child(0).child(0)), parse_IfThen(node.child(0).child(1)), parse_ProcExprNoIf(node.child(1))); }
     report_unexpected_node(node);
     return process::process_expression();
@@ -274,12 +274,7 @@ void complete_process_specification(process_specification& x, bool alpha_reduce 
   type_check(x);
   if (alpha_reduce)
   {
-#ifdef MCRL2_NEW_ALPHABET_REDUCE
     alphabet_reduce(x);
-#else
-    alphabet_reduction reduce;
-    reduce(x);
-#endif
   }
   process::translate_user_notation(x);
   process::normalize_sorts(x, x.data());
@@ -347,6 +342,19 @@ process_expression parse_process_expression(const std::string& text, const std::
   std::string ptext = result.second + init_text;
   process_specification spec = parse_process_specification(ptext);
   return spec.init();
+}
+
+/// \brief Parses and type checks a process expression. N.B. Very inefficient!
+template <typename VariableContainer>
+process_expression parse_process_expression(const std::string& text, const VariableContainer& variables, const process_specification& procspec)
+{
+  process_specification procspec1 = procspec;
+  auto& globvars = procspec1.global_variables();
+  globvars.insert(variables.begin(), variables.end());
+  std::string ptext = process::pp(procspec1);
+  ptext = utilities::regex_replace("\\binit.*;", "init " + text + ";", ptext);
+  process_specification procspec2 = parse_process_specification(ptext);
+  return procspec2.init();
 }
 
 } // namespace process

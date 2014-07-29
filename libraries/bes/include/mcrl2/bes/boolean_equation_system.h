@@ -18,14 +18,14 @@
 #include <iterator>
 #include <sstream>
 #include <string>
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/bes/boolean_equation.h"
+#include "mcrl2/bes/detail/io.h"
+#include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/bes/boolean_equation.h"
 
 namespace mcrl2
 {
@@ -45,6 +45,9 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
 // <BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
 class boolean_equation_system
 {
+  public:
+    typedef boolean_equation equation_type;
+
   protected:
     /// \brief The equations
     std::vector<boolean_equation> m_equations;
@@ -119,16 +122,16 @@ class boolean_equation_system
       return true;
     }
 
-    /// \brief Reads the boolean equation system from file.
-    /// \param filename A string
-    /// If filename is nonempty, input is read from the file named filename.
-    /// If filename is empty, input is read from standard input.
-    void load(const std::string& filename)
+    /// \brief Reads the boolean equation system from a stream.
+    /// \param stream The stream to read from.
+    void load(std::istream& stream, bool binary = true)
     {
-      atermpp::aterm t = core::detail::load_aterm(filename);
+      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
+                                : atermpp::read_term_from_text_stream(stream);
+      t = bes::detail::add_index(t);
       if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
-        throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a boolean equation system");
+        throw mcrl2::runtime_error("The loaded ATerm is not a BES.");
       }
       init_term(atermpp::aterm_appl(t));
       if (!is_well_typed())
@@ -137,20 +140,23 @@ class boolean_equation_system
       }
     }
 
-    /// \brief Writes the boolean equation system to file.
+    /// \brief Writes the boolean equation system to a stream.
     /// \param binary If binary is true the boolean equation system is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    /// \param filename A string
+    /// \param stream An output stream
     /// \param binary If true, the file is saved in binary format
-    void save(const std::string& filename, bool binary = true) const
+    void save(std::ostream& stream, bool binary = true) const
     {
-      if (!is_well_typed())
+      assert(is_well_typed());
+      if (binary)
       {
-        throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::save())");
+        atermpp::write_term_to_binary_stream(bes::detail::remove_index(boolean_equation_system_to_aterm(*this)), stream);
       }
-      atermpp::aterm_appl t = boolean_equation_system_to_aterm(*this);
-      core::detail::save_aterm(t, filename, binary);
+      else
+      {
+        atermpp::write_term_to_text_stream(bes::detail::remove_index(boolean_equation_system_to_aterm(*this)), stream);
+      }
     }
 
     /// \brief Returns the set of binding variables of the boolean_equation_system, i.e. the
@@ -191,6 +197,20 @@ class boolean_equation_system
     }
 };
 
+//--- start generated class boolean_equation_system ---//
+// prototype declaration
+std::string pp(const boolean_equation_system& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const boolean_equation_system& x)
+{
+  return out << bes::pp(x);
+}
+//--- end generated class boolean_equation_system ---//
+
 inline
 bool operator==(const boolean_equation_system& x, const boolean_equation_system& y)
 {
@@ -209,7 +229,7 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
     atermpp::aterm a = boolean_equation_to_aterm(*i);
     eqn_list.push_front(a);
   }
-  return core::detail::gsMakeBES(eqn_list, p.initial_state());
+  return atermpp::aterm_appl(core::detail::function_symbol_BES(), eqn_list, p.initial_state());
 }
 
 } // namespace bes

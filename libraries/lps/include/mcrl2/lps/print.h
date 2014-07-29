@@ -12,13 +12,10 @@
 #ifndef MCRL2_LPS_PRINT_H
 #define MCRL2_LPS_PRINT_H
 
-#include <boost/lexical_cast.hpp>
-
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/print.h"
+#include "mcrl2/process/print.h"
 #include "mcrl2/lps/traverser.h"
-#include "mcrl2/lps/state.h"
 
 namespace mcrl2
 {
@@ -32,13 +29,14 @@ namespace detail
 {
 
 template <typename Derived>
-struct printer: public lps::add_traverser_sort_expressions<data::detail::printer, Derived>
+struct printer: public lps::add_traverser_sort_expressions<process::detail::printer, Derived>
 {
-  typedef lps::add_traverser_sort_expressions<data::detail::printer, Derived> super;
+  typedef lps::add_traverser_sort_expressions<process::detail::printer, Derived> super;
 
   using super::enter;
   using super::leave;
   using super::operator();
+  using super::print_action_declarations;
   using super::print_assignments;
   using super::print_condition;
   using super::print_expression;
@@ -74,12 +72,12 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     {
       return;
     }
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       derived().print("\n");
       derived().print(number_separator);
       derived().print("%");
-      derived().print(boost::lexical_cast<std::string>(index++));
+      derived().print(utilities::number2string(index++));
 
       derived().print("\n");
       if (i == container.begin() && !print_start_separator)
@@ -92,127 +90,6 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
       }
       derived()(*i);
     }
-  }
-
-  // Container contains elements of type T such that t.sort() is a sort_expression.
-  template <typename Container>
-  void print_action_declarations(const Container& container,
-                                 const std::string& opener = "(",
-                                 const std::string& closer = ")",
-                                 const std::string& separator = ", "
-                                )
-  {
-    typedef typename Container::value_type T;
-
-    // print nothing if the container is empty
-    if (container.empty())
-    {
-      return;
-    }
-
-    typename Container::const_iterator first = container.begin();
-    typename Container::const_iterator last = container.end();
-
-    derived().print(opener);
-
-    while (first != last)
-    {
-      if (first != container.begin())
-      {
-        derived().print(separator);
-      }
-
-      typename Container::const_iterator i = first;
-      do
-      {
-        ++i;
-      }
-      while (i != last && first->sorts() == i->sorts());
-
-      print_list(std::vector<action_label>(first, i), "", "", ",");
-      if (!first->sorts().empty())
-      {
-        derived().print(": ");
-        print_list(first->sorts(), "", "", " # ");
-      }
-
-      first = i;
-    }
-    derived().print(closer);
-  }
-
-  // Container contains elements of type T such that t.sort() is a sort_expression.
-  template <typename Container>
-  void print_action_declarations_maximally_shared(const Container& container,
-                                                  const std::string& opener = "(",
-                                                  const std::string& closer = ")",
-                                                  const std::string& separator = ", "
-                                                 )
-  {
-    typedef typename Container::value_type T;
-
-    // print nothing if the container is empty
-    if (container.empty())
-    {
-      return;
-    }
-
-    // sort_map[s] will contain all elements t of container with t.sorts() == s.
-    std::map<data::sort_expression_list, std::vector<T> > sort_map;
-
-    // sort_lists will contain all sort expression lists s that appear as a key in sort_map,
-    // in the order they are encountered in container
-    std::vector<data::sort_expression_list> sort_lists;
-
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-    {
-      if (sort_map.find(i->sorts()) == sort_map.end())
-      {
-        sort_lists.push_back(i->sorts());
-      }
-      sort_map[i->sorts()].push_back(*i);
-    }
-
-    // do the actual printing
-    derived().print(opener);
-    for (std::vector<data::sort_expression_list>::iterator i = sort_lists.begin(); i != sort_lists.end(); ++i)
-    {
-      if (i != sort_lists.begin())
-      {
-        derived().print(separator);
-      }
-      const std::vector<T>& v = sort_map[*i];
-      print_list(v, "", "", ",");
-      if (!i->empty())
-      {
-        derived().print(": ");
-        print_list(*i, "", "", " # ");
-      }
-    }
-    derived().print(closer);
-  }
-
-  void operator()(const lps::action_label& x)
-  {
-    derived().enter(x);
-    derived()(x.name());
-    derived().leave(x);
-  }
-
-  void operator()(const lps::action& x)
-  {
-    derived().enter(x);
-    derived()(x.label());
-    print_list(x.arguments(), "(", ")", ", ");
-    derived().leave(x);
-  }
-
-  void operator()(const lps::untyped_action& x)
-  {
-    derived().enter(x);
-    derived()(x.name());
-    print_list(x.arguments(), "(", ")", ", ");
-    derived().leave(x);
   }
 
   void operator()(const lps::deadlock& x)
@@ -347,7 +224,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().leave(x);
   }
 
-  void operator()(const lps::state &x)
+  /* void operator()(const lps::state &x)
   {
     derived().enter(x);
     derived().print("state(");
@@ -363,7 +240,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     }
     derived().print(")");
     derived().leave(x);
-  }
+  } */
 };
 
 } // namespace detail

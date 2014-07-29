@@ -9,24 +9,20 @@
 /// \file mcrl2/pbes/pbes_expression.h
 /// \brief The class pbes_expression.
 
-#define MCRL2_SMART_ARGUMENT_SORTING
-
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
 #include <iterator>
 #include <stdexcept>
-#include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/down_cast.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/core/detail/precedence.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/expression_traits.h"
+#include "mcrl2/data/hash.h"
 #include "mcrl2/pbes/propositional_variable.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
-#include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -35,6 +31,8 @@ namespace mcrl2
 
 namespace pbes_system
 {
+
+typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
 
 using namespace core::detail::precedences;
 
@@ -45,7 +43,7 @@ class pbes_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     pbes_expression()
-      : atermpp::aterm_appl(core::detail::constructPBExpr())
+      : atermpp::aterm_appl(core::detail::default_values::PBExpr)
     {}
 
     /// \brief Constructor.
@@ -60,6 +58,11 @@ class pbes_expression: public atermpp::aterm_appl
     pbes_expression(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// \brief Constructor.
+    pbes_expression(const data::variable& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of pbes_expressions
@@ -68,14 +71,70 @@ typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 /// \brief vector of pbes_expressions
 typedef std::vector<pbes_expression>    pbes_expression_vector;
 
+// prototypes
+inline bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x);
+inline bool is_not(const atermpp::aterm_appl& x);
+inline bool is_and(const atermpp::aterm_appl& x);
+inline bool is_or(const atermpp::aterm_appl& x);
+inline bool is_imp(const atermpp::aterm_appl& x);
+inline bool is_forall(const atermpp::aterm_appl& x);
+inline bool is_exists(const atermpp::aterm_appl& x);
+
+/// \brief Test for a pbes_expression expression
+/// \param x A term
+/// \return True if \a x is a pbes_expression expression
+inline
+bool is_pbes_expression(const atermpp::aterm_appl& x)
+{
+  return data::is_data_expression(x) ||
+         pbes_system::is_propositional_variable_instantiation(x) ||
+         pbes_system::is_not(x) ||
+         pbes_system::is_and(x) ||
+         pbes_system::is_or(x) ||
+         pbes_system::is_imp(x) ||
+         pbes_system::is_forall(x) ||
+         pbes_system::is_exists(x) ||
+         data::is_variable(x);
+}
+
+// prototype declaration
+std::string pp(const pbes_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const pbes_expression& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(pbes_expression& t1, pbes_expression& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief A propositional variable instantiation
 class propositional_variable_instantiation: public pbes_expression
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+    }
+
+    const data::data_expression_list& parameters() const
+    {
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
+    }
+//--- start user section propositional_variable_instantiation ---//
     /// \brief Default constructor.
     propositional_variable_instantiation()
-      : pbes_expression(core::detail::constructPropVarInst())
+      : pbes_expression(core::detail::default_values::PropVarInst)
     {}
 
     /// \brief Constructor.
@@ -88,24 +147,22 @@ class propositional_variable_instantiation: public pbes_expression
 
     /// \brief Constructor.
     propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
-      : pbes_expression(core::detail::gsMakePropVarInst(name, parameters))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
+          name,
+          parameters,
+          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
+       ))
     {}
 
     /// \brief Constructor.
     propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
-      : pbes_expression(core::detail::gsMakePropVarInst(core::identifier_string(name), parameters))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
+          core::identifier_string(name),
+          parameters,
+          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
+        ))
     {}
 
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
-    }
-
-    const data::data_expression_list& parameters() const
-    {
-      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
-    }
-//--- start user section propositional_variable_instantiation ---//
     /// \brief Type of the parameters.
     typedef data::data_expression parameter_type;
 
@@ -115,8 +172,12 @@ class propositional_variable_instantiation: public pbes_expression
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       core::identifier_string name(p.first);
-      data::variable_list parameters = atermpp::convert<data::variable_list>(p.second);
-      copy_term(core::detail::gsMakePropVarInst(name, parameters));
+      data::data_expression_list parameters = p.second;
+      copy_term(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
+        name,
+        parameters,
+        atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
+      ));
     }
 //--- end user section propositional_variable_instantiation ---//
 };
@@ -127,42 +188,33 @@ typedef atermpp::term_list<propositional_variable_instantiation> propositional_v
 /// \brief vector of propositional_variable_instantiations
 typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
 
-
-/// \brief The value true for pbes expressions
-class true_: public pbes_expression
+/// \brief Test for a propositional_variable_instantiation expression
+/// \param x A term
+/// \return True if \a x is a propositional_variable_instantiation expression
+inline
+bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x)
 {
-  public:
-    /// \brief Default constructor.
-    true_()
-      : pbes_expression(core::detail::constructPBESTrue())
-    {}
+  return x.function() == core::detail::function_symbols::PropVarInst;
+}
 
-    /// \brief Constructor.
-    /// \param term A term
-    explicit true_(const atermpp::aterm& term)
-      : pbes_expression(term)
-    {
-      assert(core::detail::check_term_PBESTrue(*this));
-    }
-};
+// prototype declaration
+std::string pp(const propositional_variable_instantiation& x);
 
-/// \brief The value false for pbes expressions
-class false_: public pbes_expression
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const propositional_variable_instantiation& x)
 {
-  public:
-    /// \brief Default constructor.
-    false_()
-      : pbes_expression(core::detail::constructPBESFalse())
-    {}
+  return out << pbes_system::pp(x);
+}
 
-    /// \brief Constructor.
-    /// \param term A term
-    explicit false_(const atermpp::aterm& term)
-      : pbes_expression(term)
-    {
-      assert(core::detail::check_term_PBESFalse(*this));
-    }
-};
+/// \brief swap overload
+inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The not operator for pbes expressions
 class not_: public pbes_expression
@@ -170,7 +222,7 @@ class not_: public pbes_expression
   public:
     /// \brief Default constructor.
     not_()
-      : pbes_expression(core::detail::constructPBESNot())
+      : pbes_expression(core::detail::default_values::PBESNot)
     {}
 
     /// \brief Constructor.
@@ -183,14 +235,42 @@ class not_: public pbes_expression
 
     /// \brief Constructor.
     not_(const pbes_expression& operand)
-      : pbes_expression(core::detail::gsMakePBESNot(operand))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), operand))
     {}
 
     const pbes_expression& operand() const
     {
-      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<pbes_expression>((*this)[0]);
     }
 };
+
+/// \brief Test for a not expression
+/// \param x A term
+/// \return True if \a x is a not expression
+inline
+bool is_not(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PBESNot;
+}
+
+// prototype declaration
+std::string pp(const not_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const not_& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(not_& t1, not_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The and operator for pbes expressions
 class and_: public pbes_expression
@@ -198,7 +278,7 @@ class and_: public pbes_expression
   public:
     /// \brief Default constructor.
     and_()
-      : pbes_expression(core::detail::constructPBESAnd())
+      : pbes_expression(core::detail::default_values::PBESAnd)
     {}
 
     /// \brief Constructor.
@@ -211,19 +291,47 @@ class and_: public pbes_expression
 
     /// \brief Constructor.
     and_(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(core::detail::gsMakePBESAnd(left, right))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), left, right))
     {}
 
     const pbes_expression& left() const
     {
-      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<pbes_expression>((*this)[0]);
     }
 
     const pbes_expression& right() const
     {
-      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Test for a and expression
+/// \param x A term
+/// \return True if \a x is a and expression
+inline
+bool is_and(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PBESAnd;
+}
+
+// prototype declaration
+std::string pp(const and_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const and_& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(and_& t1, and_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The or operator for pbes expressions
 class or_: public pbes_expression
@@ -231,7 +339,7 @@ class or_: public pbes_expression
   public:
     /// \brief Default constructor.
     or_()
-      : pbes_expression(core::detail::constructPBESOr())
+      : pbes_expression(core::detail::default_values::PBESOr)
     {}
 
     /// \brief Constructor.
@@ -244,19 +352,47 @@ class or_: public pbes_expression
 
     /// \brief Constructor.
     or_(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(core::detail::gsMakePBESOr(left, right))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), left, right))
     {}
 
     const pbes_expression& left() const
     {
-      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<pbes_expression>((*this)[0]);
     }
 
     const pbes_expression& right() const
     {
-      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Test for a or expression
+/// \param x A term
+/// \return True if \a x is a or expression
+inline
+bool is_or(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PBESOr;
+}
+
+// prototype declaration
+std::string pp(const or_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const or_& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(or_& t1, or_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The implication operator for pbes expressions
 class imp: public pbes_expression
@@ -264,7 +400,7 @@ class imp: public pbes_expression
   public:
     /// \brief Default constructor.
     imp()
-      : pbes_expression(core::detail::constructPBESImp())
+      : pbes_expression(core::detail::default_values::PBESImp)
     {}
 
     /// \brief Constructor.
@@ -277,19 +413,47 @@ class imp: public pbes_expression
 
     /// \brief Constructor.
     imp(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(core::detail::gsMakePBESImp(left, right))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), left, right))
     {}
 
     const pbes_expression& left() const
     {
-      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<pbes_expression>((*this)[0]);
     }
 
     const pbes_expression& right() const
     {
-      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Test for a imp expression
+/// \param x A term
+/// \return True if \a x is a imp expression
+inline
+bool is_imp(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PBESImp;
+}
+
+// prototype declaration
+std::string pp(const imp& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const imp& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(imp& t1, imp& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The universal quantification operator for pbes expressions
 class forall: public pbes_expression
@@ -297,7 +461,7 @@ class forall: public pbes_expression
   public:
     /// \brief Default constructor.
     forall()
-      : pbes_expression(core::detail::constructPBESForall())
+      : pbes_expression(core::detail::default_values::PBESForall)
     {}
 
     /// \brief Constructor.
@@ -310,19 +474,47 @@ class forall: public pbes_expression
 
     /// \brief Constructor.
     forall(const data::variable_list& variables, const pbes_expression& body)
-      : pbes_expression(core::detail::gsMakePBESForall(variables, body))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), variables, body))
     {}
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const pbes_expression& body() const
     {
-      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Test for a forall expression
+/// \param x A term
+/// \return True if \a x is a forall expression
+inline
+bool is_forall(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PBESForall;
+}
+
+// prototype declaration
+std::string pp(const forall& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const forall& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(forall& t1, forall& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The existential quantification operator for pbes expressions
 class exists: public pbes_expression
@@ -330,7 +522,7 @@ class exists: public pbes_expression
   public:
     /// \brief Default constructor.
     exists()
-      : pbes_expression(core::detail::constructPBESExists())
+      : pbes_expression(core::detail::default_values::PBESExists)
     {}
 
     /// \brief Constructor.
@@ -343,27 +535,51 @@ class exists: public pbes_expression
 
     /// \brief Constructor.
     exists(const data::variable_list& variables, const pbes_expression& body)
-      : pbes_expression(core::detail::gsMakePBESExists(variables, body))
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), variables, body))
     {}
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const pbes_expression& body() const
     {
-      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
+
+/// \brief Test for a exists expression
+/// \param x A term
+/// \return True if \a x is a exists expression
+inline
+bool is_exists(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::PBESExists;
+}
+
+// prototype declaration
+std::string pp(const exists& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const exists& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(exists& t1, exists& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated classes ---//
 
 // template function overloads
-std::string pp(const core::identifier_string& x);
-std::string pp(const pbes_expression& x);
 std::string pp(const pbes_expression_list& x);
 std::string pp(const pbes_expression_vector& x);
-std::string pp(const propositional_variable_instantiation& x);
 std::string pp(const propositional_variable_instantiation_list& x);
 std::string pp(const propositional_variable_instantiation_vector& x);
 std::set<pbes_system::propositional_variable_instantiation> find_propositional_variable_instantiations(const pbes_system::pbes_expression& x);
@@ -371,73 +587,18 @@ std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expre
 std::set<data::variable> find_free_variables(const pbes_system::pbes_expression& x);
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v);
 
-// TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x);
-std::string pp(const atermpp::aterm_appl& x);
-
-/// \brief Returns true if the term t is equal to true
-/// \param t A PBES expression
-/// \return True if the term t is equal to true
-inline bool is_pbes_true(const pbes_expression& t)
+/// \return Returns the value true
+inline
+pbes_expression true_()
 {
-  return core::detail::gsIsPBESTrue(t);
+  return data::sort_bool::true_();
 }
 
-/// \brief Returns true if the term t is equal to false
-/// \param t A PBES expression
-/// \return True if the term t is equal to false
-inline bool is_pbes_false(const pbes_expression& t)
+/// \return Returns the value false
+inline
+pbes_expression false_()
 {
-  return core::detail::gsIsPBESFalse(t);
-}
-
-/// \brief Returns true if the term t is a not expression
-/// \param t A PBES expression
-/// \return True if the term t is a not expression
-inline bool is_pbes_not(const pbes_expression& t)
-{
-  return core::detail::gsIsPBESNot(t);
-}
-
-
-/// \brief Returns true if the term t is an and expression
-/// \param t A PBES expression
-/// \return True if the term t is an and expression
-inline bool is_pbes_and(const pbes_expression& t)
-{
-  return core::detail::gsIsPBESAnd(t);
-}
-
-/// \brief Returns true if the term t is an or expression
-/// \param t A PBES expression
-/// \return True if the term t is an or expression
-inline bool is_pbes_or(const pbes_expression& t)
-{
-  return core::detail::gsIsPBESOr(t);
-}
-
-/// \brief Returns true if the term t is an imp expression
-/// \param t A PBES expression
-/// \return True if the term t is an imp expression
-inline bool is_pbes_imp(const pbes_expression& t)
-{
-  return core::detail::gsIsPBESImp(t);
-}
-
-/// \brief Returns true if the term t is a universal quantification
-/// \param t A PBES expression
-/// \return True if the term t is a universal quantification
-inline bool is_pbes_forall(const pbes_expression& t)
-{
-  return core::detail::gsIsPBESForall(t);
-}
-
-/// \brief Returns true if the term t is an existential quantification
-/// \param t A PBES expression
-/// \return True if the term t is an existential quantification
-inline bool is_pbes_exists(const pbes_expression& t)
-{
-  return core::detail::gsIsPBESExists(t);
+  return data::sort_bool::false_();
 }
 
 /// \brief Test for the value true
@@ -445,7 +606,7 @@ inline bool is_pbes_exists(const pbes_expression& t)
 /// \return True if it is the value \p true
 inline bool is_true(const pbes_expression& t)
 {
-  return is_pbes_true(t) || data::sort_bool::is_true_function_symbol(t);
+  return data::sort_bool::is_true_function_symbol(t);
 }
 
 /// \brief Test for the value false
@@ -453,72 +614,79 @@ inline bool is_true(const pbes_expression& t)
 /// \return True if it is the value \p false
 inline bool is_false(const pbes_expression& t)
 {
-  return is_pbes_false(t) || data::sort_bool::is_false_function_symbol(t);
+  return data::sort_bool::is_false_function_symbol(t);
 }
 
-/// \brief Test for a negation
+/// \brief Returns true if the term t is a not expression
 /// \param t A PBES expression
-/// \return True if it is a negation
-inline bool is_not(const pbes_expression& t)
+/// \return True if the term t is a not expression
+inline bool is_pbes_not(const pbes_expression& t)
 {
-  return is_pbes_not(t);
+  return pbes_system::is_not(t);
 }
 
-/// \brief Test for a conjunction
+/// \brief Returns true if the term t is an and expression
 /// \param t A PBES expression
-/// \return True if it is a conjunction
-inline bool is_and(const pbes_expression& t)
+/// \return True if the term t is an and expression
+inline bool is_pbes_and(const pbes_expression& t)
 {
-  return is_pbes_and(t);
+  return pbes_system::is_and(t);
 }
 
+/// \brief Returns true if the term t is an or expression
+/// \param t A PBES expression
+/// \return True if the term t is an or expression
+inline bool is_pbes_or(const pbes_expression& t)
+{
+  return pbes_system::is_or(t);
+}
+
+/// \brief Returns true if the term t is an imp expression
+/// \param t A PBES expression
+/// \return True if the term t is an imp expression
+inline bool is_pbes_imp(const pbes_expression& t)
+{
+  return pbes_system::is_imp(t);
+}
+
+/// \brief Returns true if the term t is a universal quantification
+/// \param t A PBES expression
+/// \return True if the term t is a universal quantification
+inline bool is_pbes_forall(const pbes_expression& t)
+{
+  return pbes_system::is_forall(t);
+}
+
+/// \brief Returns true if the term t is an existential quantification
+/// \param t A PBES expression
+/// \return True if the term t is an existential quantification
+inline bool is_pbes_exists(const pbes_expression& t)
+{
+  return pbes_system::is_exists(t);
+}
 
 /// \brief Test for a conjunction
 /// \param t A PBES expression or a data expression
 /// \return True if it is a conjunction
-inline bool data_is_and(const pbes_expression& t)
+inline bool is_universal_not(const pbes_expression& t)
+{
+  return is_pbes_not(t) || data::sort_bool::is_not_application(t);
+}
+
+/// \brief Test for a conjunction
+/// \param t A PBES expression or a data expression
+/// \return True if it is a conjunction
+inline bool is_universal_and(const pbes_expression& t)
 {
   return is_pbes_and(t) || data::sort_bool::is_and_application(t);
 }
 
 /// \brief Test for a disjunction
-/// \param t A PBES expression
-/// \return True if it is a disjunction
-inline bool is_or(const pbes_expression& t)
-{
-  return is_pbes_or(t);
-}
-
-/// \brief Test for a disjunction
 /// \param t A PBES expression or a data expression
 /// \return True if it is a disjunction
-inline bool data_is_or(const pbes_expression& t)
+inline bool is_universal_or(const pbes_expression& t)
 {
   return is_pbes_or(t) || data::sort_bool::is_or_application(t);
-}
-
-/// \brief Test for an implication
-/// \param t A PBES expression
-/// \return True if it is an implication
-inline bool is_imp(const pbes_expression& t)
-{
-  return is_pbes_imp(t);
-}
-
-/// \brief Test for an universal quantification
-/// \param t A PBES expression
-/// \return True if it is a universal quantification
-inline bool is_forall(const pbes_expression& t)
-{
-  return is_pbes_forall(t);
-}
-
-/// \brief Test for an existential quantification
-/// \param t A PBES expression
-/// \return True if it is an existential quantification
-inline bool is_exists(const pbes_expression& t)
-{
-  return is_pbes_exists(t);
 }
 
 /// \brief Returns true if the term t is a data expression
@@ -529,61 +697,31 @@ inline bool is_data(const pbes_expression& t)
   return data::is_data_expression(t);
 }
 
-/// \brief Returns true if the term t is a propositional variable expression
-/// \param t A PBES expression
-/// \return True if the term t is a propositional variable expression
-inline bool is_propositional_variable_instantiation(const pbes_expression& t)
+inline int left_precedence(const forall&) { return 0; }
+inline int left_precedence(const exists&) { return 0; }
+inline int left_precedence(const imp&)    { return 2; }
+inline int left_precedence(const or_&)    { return 3; }
+inline int left_precedence(const and_&)   { return 4; }
+inline int left_precedence(const not_&)   { return 5; }
+inline int left_precedence(const pbes_expression& x)
 {
-  return core::detail::gsIsPropVarInst(t);
-}
-
-// From the documentation:
-// The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>", followed by "forall" and "exists".
-// The infix operators "&&", "||" and "=>" associate to the right.
-/// \brief Returns the precedence of pbes expressions
-inline
-int precedence(const pbes_expression& x)
-{
-  if (is_forall(x) || is_exists(x))
-  {
-    return 0;
-  }
-  else if (is_imp(x))
-  {
-    return 2;
-  }
-  else if (is_or(x))
-  {
-    return 3;
-  }
-  else if (is_and(x))
-  {
-    return 4;
-  }
-  else if (is_not(x))
-  {
-    return 5;
-  }
+  if      (is_forall(x)) { return left_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return left_precedence(static_cast<const exists&>(x)); }
+  else if (is_imp(x))    { return left_precedence(static_cast<const imp&>(x)); }
+  else if (is_or(x))     { return left_precedence(static_cast<const or_&>(x)); }
+  else if (is_and(x))    { return left_precedence(static_cast<const and_&>(x)); }
+  else if (is_not(x))    { return left_precedence(static_cast<const not_&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
-// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
-inline int precedence(const forall & x)  { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const exists & x)  { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const imp& x)      { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const and_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const or_& x)      { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const not_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const data::data_expression & x)               { return precedence(static_cast<const pbes_expression&>(x)); }
-inline int precedence(const propositional_variable_instantiation& x) { return precedence(static_cast<const pbes_expression&>(x)); }
-
-inline const pbes_expression& unary_operand(const not_& x) { return x.operand(); }
-inline const pbes_expression& binary_left(const and_& x)   { return x.left(); }
-inline const pbes_expression& binary_right(const and_& x)  { return x.right(); }
-inline const pbes_expression& binary_left(const or_& x)    { return x.left(); }
-inline const pbes_expression& binary_right(const or_& x)   { return x.right(); }
-inline const pbes_expression& binary_left(const imp& x)    { return x.left(); }
-inline const pbes_expression& binary_right(const imp& x)   { return x.right(); }
+inline int right_precedence(const forall& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const forall&>(x).body())); }
+inline int right_precedence(const exists& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const exists&>(x).body())); }
+inline int right_precedence(const pbes_expression& x)
+{
+  if      (is_forall(x)) { return right_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return right_precedence(static_cast<const exists&>(x)); }
+  else return left_precedence(x);
+}
 
 /// \brief Returns true if the operations have the same precedence, but are different
 template <typename T1, typename T2>
@@ -625,17 +763,16 @@ data::data_expression val(const pbes_expression& t)
 /// \param t A PBES expression
 /// \return The pbes expression argument of expressions of type not, exists and forall.
 inline
-pbes_expression arg(const pbes_expression& t)
+const pbes_expression& arg(const pbes_expression& t)
 {
   if (is_pbes_not(t))
   {
-//    return atermpp::arg1(t);
-    return pbes_expression(t[0]);
+    return atermpp::down_cast<const pbes_expression>(t[0]);
   }
   else
   {
     assert(is_forall(t) || is_exists(t));
-    return pbes_expression(t[1]);
+    return atermpp::down_cast<const pbes_expression>(t[1]);
   }
 }
 
@@ -648,7 +785,7 @@ pbes_expression data_arg(const pbes_expression& t)
   if (data::is_data_expression(t))
   {
     assert(data::is_application(t));
-    const data::application &a=atermpp::aterm_cast<const data::application>(t);
+    const data::application &a=atermpp::down_cast<const data::application>(t);
     return *(a.begin());
   }
   else
@@ -664,8 +801,7 @@ inline
 const pbes_expression& left(const pbes_expression& t)
 {
   assert(is_and(t) || is_or(t) || is_imp(t));
-//  return atermpp::arg1(t);
-  return core::static_down_cast<const pbes_expression&>(t[0]);
+  return atermpp::down_cast<pbes_expression>(t[0]);
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -676,7 +812,7 @@ pbes_expression data_left(const pbes_expression& x)
 {
   if (data::is_data_expression(x))
   {
-    return data::binary_left(atermpp::aterm_cast<data::application>(x));
+    return data::binary_left(atermpp::down_cast<data::application>(x));
   }
   else
   {
@@ -690,8 +826,7 @@ pbes_expression data_left(const pbes_expression& x)
 inline
 const pbes_expression& right(const pbes_expression& t)
 {
-//  return atermpp::arg2(t);
-  return core::static_down_cast<const pbes_expression&>(t[1]);
+  return atermpp::down_cast<pbes_expression>(t[1]);
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -702,7 +837,7 @@ pbes_expression data_right(const pbes_expression& x)
 {
   if (data::is_data_expression(x))
   {
-    return data::binary_right(atermpp::aterm_cast<data::application>(x));
+    return data::binary_right(atermpp::down_cast<data::application>(x));
   }
   else
   {
@@ -717,7 +852,7 @@ inline
 const data::variable_list& var(const pbes_expression& t)
 {
   assert(is_forall(t) || is_exists(t));
-  return atermpp::aterm_cast<data::variable_list>(t[0]);
+  return atermpp::down_cast<data::variable_list>(t[0]);
 }
 
 /// \brief Returns the name of a propositional variable expression
@@ -727,8 +862,7 @@ inline
 const core::identifier_string& name(const pbes_expression& t)
 {
   assert(is_propositional_variable_instantiation(t));
-//  return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(t));
-  return atermpp::aterm_cast<core::identifier_string>(t[0]);
+  return atermpp::down_cast<core::identifier_string>(t[0]);
 }
 
 /// \brief Returns the parameters of a propositional variable instantiation.
@@ -738,7 +872,7 @@ inline
 const data::data_expression_list& param(const pbes_expression& t)
 {
   assert(is_propositional_variable_instantiation(t));
-  return core::static_down_cast<const data::data_expression_list&>(t[1]);
+  return atermpp::down_cast<data::data_expression_list>(t[1]);
 }
 } // accessors
 
@@ -751,7 +885,7 @@ namespace pbes_expr
 inline
 pbes_expression true_()
 {
-  return pbes_expression(core::detail::gsMakePBESTrue());
+  return pbes_system::true_();
 }
 
 /// \brief Make the value false
@@ -759,7 +893,7 @@ pbes_expression true_()
 inline
 pbes_expression false_()
 {
-  return pbes_expression(core::detail::gsMakePBESFalse());
+  return pbes_system::false_();
 }
 
 /// \brief Make a negation
@@ -768,7 +902,7 @@ pbes_expression false_()
 inline
 pbes_expression not_(const pbes_expression& p)
 {
-  return pbes_expression(core::detail::gsMakePBESNot(p));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), p));
 }
 
 /// \brief Make a conjunction
@@ -778,7 +912,7 @@ pbes_expression not_(const pbes_expression& p)
 inline
 pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 {
-  return pbes_expression(core::detail::gsMakePBESAnd(p,q));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q));
 }
 
 /// \brief Make a disjunction
@@ -788,7 +922,7 @@ pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 {
-  return pbes_expression(core::detail::gsMakePBESOr(p,q));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p,q));
 }
 
 /// \brief Make an implication
@@ -798,7 +932,7 @@ pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression imp(const pbes_expression& p, const pbes_expression& q)
 {
-  return pbes_expression(core::detail::gsMakePBESImp(p,q));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), p,q));
 }
 
 /// \brief Make a universal quantification
@@ -812,7 +946,7 @@ pbes_expression forall(const data::variable_list& l, const pbes_expression& p)
   {
     return p;
   }
-  return pbes_expression(core::detail::gsMakePBESForall(l, p));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), l, p));
 }
 
 /// \brief Make an existential quantification
@@ -826,7 +960,7 @@ pbes_expression exists(const data::variable_list& l, const pbes_expression& p)
   {
     return p;
   }
-  return pbes_expression(core::detail::gsMakePBESExists(l, p));
+  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), l, p));
 }
 
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)
@@ -865,11 +999,11 @@ std::set<pbes_expression> split_or(const pbes_expression& expr, bool split_data_
 
   if (split_data_expressions)
   {
-    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), data_is_or, data_left, data_right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_universal_or, data_left, data_right);
   }
   else
   {
-    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_or, left, right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_pbes_or, left, right);
   }
 
   return result;
@@ -891,11 +1025,11 @@ std::set<pbes_expression> split_and(const pbes_expression& expr, bool split_data
 
   if (split_data_expressions)
   {
-    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), data_is_and, data_left, data_right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_universal_and, data_left, data_right);
   }
   else
   {
-    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_and, left, right);
+    utilities::detail::split(expr, std::insert_iterator<std::set<pbes_expression> >(result, result.begin()), is_pbes_and, left, right);
   }
 
   return result;
@@ -1027,7 +1161,7 @@ namespace combined_access
 /// \return True if it is the value \p true
 inline bool is_true(const pbes_expression& t)
 {
-  return is_pbes_true(t) || data::sort_bool::is_true_function_symbol(t);
+  return data::sort_bool::is_true_function_symbol(t);
 }
 
 /// \brief Test for the value false
@@ -1035,7 +1169,7 @@ inline bool is_true(const pbes_expression& t)
 /// \return True if it is the value \p false
 inline bool is_false(const pbes_expression& t)
 {
-  return is_pbes_false(t) || data::sort_bool::is_false_function_symbol(t);
+  return data::sort_bool::is_false_function_symbol(t);
 }
 
 /// \brief Test for a negation
@@ -1091,7 +1225,7 @@ inline bool is_exists(const pbes_expression& t)
 /// \return True if the term t is a propositional variable expression
 inline bool is_propositional_variable_instantiation(const pbes_expression& t)
 {
-  return core::detail::gsIsPropVarInst(t);
+  return pbes_system::is_propositional_variable_instantiation(t);
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -1157,7 +1291,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type true_()
   {
-    return term_type(core::detail::gsMakePBESTrue());
+    return pbes_system::true_();
   }
 
   /// \brief Make the value false
@@ -1165,7 +1299,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type false_()
   {
-    return term_type(core::detail::gsMakePBESFalse());
+    return pbes_system::false_();
   }
 
   /// \brief Make a negation
@@ -1174,29 +1308,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type not_(const term_type& p)
   {
-    return term_type(core::detail::gsMakePBESNot(p));
-  }
-
-  static inline
-  bool is_sorted(const term_type& p, const term_type& q)
-  {
-    pbes_system::detail::compare_pbes_expression_visitor<term_type> pvisitor;
-    pvisitor.visit(p);
-    pbes_system::detail::compare_pbes_expression_visitor<term_type> qvisitor;
-    qvisitor.visit(q);
-    if (pvisitor.has_predicate_variables != qvisitor.has_predicate_variables)
-    {
-      return qvisitor.has_predicate_variables;
-    }
-    if (pvisitor.has_quantifiers != qvisitor.has_quantifiers)
-    {
-      return qvisitor.has_quantifiers;
-    }
-    if (pvisitor.result.size() != qvisitor.result.size())
-    {
-      return pvisitor.result.size() < qvisitor.result.size();
-    }
-    return p < q;
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), p));
   }
 
   /// \brief Make a conjunction
@@ -1206,7 +1318,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type and_(const term_type& p, const term_type& q)
   {
-    return term_type(core::detail::gsMakePBESAnd(p,q));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q));
   }
 
   /// \brief Make a disjunction
@@ -1216,7 +1328,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type or_(const term_type& p, const term_type& q)
   {
-    return term_type(core::detail::gsMakePBESOr(p,q));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p,q));
   }
 
   template <typename FwdIt>
@@ -1233,36 +1345,6 @@ struct term_traits<pbes_system::pbes_expression>
     return utilities::detail::join(first, last, and_, true_());
   }
 
-  /// \brief Make a sorted conjunction
-  /// \param p A term
-  /// \param q A term
-  /// \return The value <tt>p && q</tt>, or <tt>q && p</tt>
-  static inline
-  term_type sorted_and(const term_type& p, const term_type& q)
-  {
-#ifdef MCRL2_SMART_ARGUMENT_SORTING
-    bool sorted = is_sorted(p, q);
-#else
-    bool sorted = p < q;
-#endif
-    return sorted ? term_type(core::detail::gsMakePBESAnd(p,q)) : term_type(core::detail::gsMakePBESAnd(q,p));
-  }
-
-  /// \brief Make a sorted disjunction
-  /// \param p A term
-  /// \param q A term
-  /// \return The value <tt>p || q</tt>
-  static inline
-  term_type sorted_or(const term_type& p, const term_type& q)
-  {
-#ifdef MCRL2_SMART_ARGUMENT_SORTING
-    bool sorted = is_sorted(p, q);
-#else
-    bool sorted = p < q;
-#endif
-    return sorted ? term_type(core::detail::gsMakePBESOr(p,q)) : term_type(core::detail::gsMakePBESOr(q,p));
-  }
-
   /// \brief Make an implication
   /// \param p A term
   /// \param q A term
@@ -1270,7 +1352,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   term_type imp(const term_type& p, const term_type& q)
   {
-    return term_type(core::detail::gsMakePBESImp(p,q));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), p, q));
   }
 
   /// \brief Make a universal quantification
@@ -1284,7 +1366,7 @@ struct term_traits<pbes_system::pbes_expression>
     {
       return p;
     }
-    return term_type(core::detail::gsMakePBESForall(l, p));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), l, p));
   }
 
   /// \brief Make an existential quantification
@@ -1298,7 +1380,7 @@ struct term_traits<pbes_system::pbes_expression>
     {
       return p;
     }
-    return term_type(core::detail::gsMakePBESExists(l, p));
+    return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), l, p));
   }
 
   /// \brief Propositional variable instantiation
@@ -1319,7 +1401,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_true(const term_type& t)
   {
-    return core::detail::gsIsPBESTrue(t) || data::sort_bool::is_true_function_symbol(t);
+    return data::sort_bool::is_true_function_symbol(t);
   }
 
   /// \brief Test for the value false
@@ -1328,7 +1410,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_false(const term_type& t)
   {
-    return core::detail::gsIsPBESFalse(t) || data::sort_bool::is_false_function_symbol(t);
+    return data::sort_bool::is_false_function_symbol(t);
   }
 
   /// \brief Test for a negation
@@ -1337,7 +1419,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_not(const term_type& t)
   {
-    return core::detail::gsIsPBESNot(t);
+    return pbes_system::is_not(t);
   }
 
   /// \brief Test for a conjunction
@@ -1400,7 +1482,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   bool is_prop_var(const term_type& t)
   {
-    return core::detail::gsIsPropVarInst(t);
+    return pbes_system::is_propositional_variable_instantiation(t);
   }
 
   /// \brief Returns the argument of a term of type not, exists or forall
@@ -1436,8 +1518,7 @@ struct term_traits<pbes_system::pbes_expression>
   const term_type& not_arg(const term_type& t)
   {
     assert(is_pbes_not(t));
-//    return atermpp::arg1(t);
-    return core::static_down_cast<const term_type&>(t[0]);
+    return atermpp::down_cast<term_type>(t[0]);
   }
 
   /// \brief Returns the quantifier variables of a quantifier expression
@@ -1451,7 +1532,7 @@ struct term_traits<pbes_system::pbes_expression>
                                             || (!data::is_forall(data::abstraction(t)) && !data::is_exists(data::abstraction(t)))));
     assert(is_exists(t) || is_forall(t));
 
-    return atermpp::aterm_cast<variable_sequence_type>(atermpp::list_arg1(t));
+    return atermpp::down_cast<variable_sequence_type>(t[0]);
   }
 
   /// \brief Returns the name of a propositional variable instantiation
@@ -1461,8 +1542,7 @@ struct term_traits<pbes_system::pbes_expression>
   const string_type &name(const term_type& t)
   {
     assert(is_prop_var(t));
-//    return atermpp::aterm_cast<string_type>(atermpp::arg1(t));
-    return atermpp::aterm_cast<string_type>(t[0]);
+    return atermpp::down_cast<string_type>(t[0]);
   }
 
   /// \brief Returns the parameter list of a propositional variable instantiation
@@ -1472,7 +1552,7 @@ struct term_traits<pbes_system::pbes_expression>
   const data_term_sequence_type &param(const term_type& t)
   {
     assert(is_prop_var(t));
-    return atermpp::aterm_cast<data_term_sequence_type>(atermpp::list_arg2(t));
+    return atermpp::down_cast<data_term_sequence_type>(t[1]);
   }
 
   /// \brief Conversion from variable to term
@@ -1481,7 +1561,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   const term_type &variable2term(const variable_type& v)
   {
-    return atermpp::aterm_cast<term_type>(v);
+    return atermpp::down_cast<term_type>(v);
   }
 
   /// \brief Test if a term is a variable
@@ -1499,9 +1579,8 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   variable_sequence_type free_variables(const term_type& t)
   {
-    pbes_system::detail::free_variable_visitor<term_type> visitor;
-    visitor.visit(t);
-    return variable_sequence_type(visitor.result.begin(), visitor.result.end());
+    std::set<data::variable> v = find_free_variables(t);
+    return variable_sequence_type(v.begin(), v.end());
   }
 
   /// \brief Conversion from data term to term
@@ -1528,7 +1607,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   const propositional_variable_type& term2propvar(const term_type& t)
   {
-    return core::static_down_cast<const propositional_variable_type&>(t);
+    return atermpp::down_cast<propositional_variable_type>(t);
   }
 
   /// \brief Returns the difference of two unordered sets of variables
@@ -1544,9 +1623,9 @@ struct term_traits<pbes_system::pbes_expression>
   /// \brief Test if a term is constant
   /// \return True if the term is constant
   static inline
-  bool is_constant(const term_type& /* t */)
+  bool is_constant(const term_type& t)
   {
-    return false;
+    return pbes_system::find_free_variables(t).empty();
   }
 
   /// \brief Pretty print function
@@ -1563,68 +1642,6 @@ struct term_traits<pbes_system::pbes_expression>
 
 } // namespace mcrl2
 
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::pbes_system::pbes_expression& t1, mcrl2::pbes_system::pbes_expression& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::propositional_variable_instantiation& t1, mcrl2::pbes_system::propositional_variable_instantiation& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::true_& t1, mcrl2::pbes_system::true_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::false_& t1, mcrl2::pbes_system::false_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::not_& t1, mcrl2::pbes_system::not_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::and_& t1, mcrl2::pbes_system::and_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::or_& t1, mcrl2::pbes_system::or_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::imp& t1, mcrl2::pbes_system::imp& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::forall& t1, mcrl2::pbes_system::forall& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::exists& t1, mcrl2::pbes_system::exists& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
+#include "mcrl2/pbes/index_traits.h"
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_H

@@ -15,7 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/find.h"
+#include "mcrl2/process/find.h"
 #include "mcrl2/lps/traverser.h"
 #include "mcrl2/lps/add_binding.h"
 
@@ -24,43 +24,6 @@ namespace mcrl2
 
 namespace lps
 {
-
-namespace detail
-{
-/// \cond INTERNAL_DOCS
-template <template <class> class Traverser, class OutputIterator>
-struct find_action_labels_traverser: public Traverser<find_action_labels_traverser<Traverser, OutputIterator> >
-{
-  typedef Traverser<find_action_labels_traverser<Traverser, OutputIterator> > super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-  OutputIterator out;
-
-  find_action_labels_traverser(OutputIterator out_)
-    : out(out_)
-  {}
-
-  void operator()(const lps::action_label& x)
-  {
-    *out = x;
-  }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
-};
-
-template <template <class> class Traverser, class OutputIterator>
-find_action_labels_traverser<Traverser, OutputIterator>
-make_find_action_labels_traverser(OutputIterator out)
-{
-  return find_action_labels_traverser<Traverser, OutputIterator>(out);
-}
-/// \endcond
-
-} // namespace detail
 
 //--- start generated lps find code ---//
 /// \brief Returns all variables that occur in an object
@@ -192,16 +155,16 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 }
 //--- end generated lps find code ---//
 
-/// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] container an expression or container with expressions
-/// \param d A data variable
-/// \return True if the term has a given variable as subterm.
-template <typename Container>
-bool search_free_variable(const Container& container, const data::variable& d)
+/// \brief Returns true if the term has a given free variable as subterm.
+/// \param[in] x an expression
+/// \param[in] v a variable
+/// \return True if v occurs free in x.
+template <typename T>
+bool search_free_variable(const T& x, const data::variable& v)
 {
-  // TODO: replace this by a more efficient implementation
-  std::set<data::variable> variables = lps::find_free_variables(container);
-  return variables.find(d) != variables.end();
+  data::detail::search_free_variable_traverser<lps::data_expression_traverser, lps::add_data_variable_binding> f(v);
+  f(x);
+  return f.found;
 }
 
 /// \brief Returns all action labels that occur in an object
@@ -211,16 +174,16 @@ bool search_free_variable(const Container& container, const data::variable& d)
 template <typename T, typename OutputIterator>
 void find_action_labels(const T& x, OutputIterator o)
 {
-  lps::detail::make_find_action_labels_traverser<lps::action_label_traverser>(o)(x);
+  process::detail::make_find_action_labels_traverser<lps::action_label_traverser>(o)(x);
 }
 
 /// \brief Returns all action labels that occur in an object
 /// \param[in] x an object containing action labels
 /// \return All action labels that occur in the object x
 template <typename T>
-std::set<lps::action_label> find_action_labels(const T& x)
+std::set<process::action_label> find_action_labels(const T& x)
 {
-  std::set<lps::action_label> result;
+  std::set<process::action_label> result;
   lps::find_action_labels(x, std::inserter(result, result.end()));
   return result;
 }

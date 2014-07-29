@@ -19,7 +19,6 @@
 #include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/table.h"
 
 // utilities
 #include "mcrl2/atermpp/container_utility.h"
@@ -273,7 +272,10 @@ class data_specification
     void add_system_defined_constructor(const function_symbol& f) const
     {
       function_symbol g(normalize_sorts(f, *this));
-      m_normalised_constructors.push_back(g);
+      if (std::find(m_normalised_constructors.begin(),m_normalised_constructors.end(),g)==m_normalised_constructors.end()) // not found
+      {
+        m_normalised_constructors.push_back(g);
+      }
     }
 
     /// \brief Adds a mapping to this specification, and marks it as system
@@ -286,7 +288,10 @@ class data_specification
     void add_system_defined_mapping(const function_symbol& f) const
     {
       function_symbol g(normalize_sorts(f, *this));
-      m_normalised_mappings.push_back(g);
+      if (std::find(m_normalised_mappings.begin(),m_normalised_mappings.end(),g)==m_normalised_mappings.end()) // not found
+      {
+        m_normalised_mappings.push_back(g);
+      }
     }
 
     /// \brief Adds an equation to this specification, and marks it as system
@@ -335,7 +340,10 @@ class data_specification
 
       for (function_symbol_vector::const_iterator i = symbols.begin(); i != symbols.end(); ++i)
       {
-        m_normalised_mappings.push_back(*i);
+        if (std::find(m_normalised_mappings.begin(),m_normalised_mappings.end(),*i)==m_normalised_mappings.end()) // not found
+        {
+          m_normalised_mappings.push_back(*i);
+        }
       }
 
       data_equation_vector equations(standard_generate_equations_code(sort));
@@ -565,8 +573,11 @@ class data_specification
     void add_constructor(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      m_constructors.push_back(f);
-      data_is_not_necessarily_normalised_anymore();
+      if (std::find(m_constructors.begin(),m_constructors.end(),f)==m_constructors.end())
+      {
+        m_constructors.push_back(f);
+        data_is_not_necessarily_normalised_anymore();
+      }
     }
 
     /// \brief Adds a mapping to this specification
@@ -577,8 +588,11 @@ class data_specification
     void add_mapping(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      m_mappings.push_back(f);
-      data_is_not_necessarily_normalised_anymore();
+      if (std::find(m_mappings.begin(),m_mappings.end(),f)==m_mappings.end())
+      { 
+        m_mappings.push_back(f);
+        data_is_not_necessarily_normalised_anymore();
+      }
     }
 
     /// \brief Adds an equation to this specification
@@ -617,7 +631,7 @@ class data_specification
     /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
     /// the necessary constructors, mappings and equations are added to the data type.
     template <typename Container>
-    void add_context_sorts(const Container& c, typename atermpp::detail::enable_if_container<Container>::type* = 0) const
+    void add_context_sorts(const Container& c, typename atermpp::enable_if_container<Container>::type* = 0) const
     {
       std::for_each(c.begin(), c.end(),
                     boost::bind(&data_specification::add_context_sort, this, _1));
@@ -705,7 +719,10 @@ class data_specification
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
         function_symbol normalised_constructor(normalize_sorts(*i, *this));
 
-        m_normalised_constructors.push_back(normalised_constructor);
+        if (std::find(m_normalised_constructors.begin(),m_normalised_constructors.end(),*i)==m_normalised_constructors.end()) // not found
+        {
+          m_normalised_constructors.push_back(*i);
+        }
         add_system_defined_sort(normalised_sort);
       }
 
@@ -716,7 +733,10 @@ class data_specification
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
         function_symbol normalised_mapping(normalize_sorts(*i, *this));
 
-        m_normalised_mappings.push_back(normalised_mapping);
+        if (std::find(m_normalised_mappings.begin(),m_normalised_mappings.end(),normalised_mapping)==m_normalised_mappings.end())
+        {
+          m_normalised_mappings.push_back(normalised_mapping);
+        }
 
         add_system_defined_sort(normalised_sort);
       }
@@ -835,7 +855,7 @@ class data_specification
       }
       else if (is_function_sort(sort))
       {
-        const sort_expression t=function_sort(sort).codomain();
+        const sort_expression& t=function_sort(sort).codomain();
         import_system_defined_sort(t,sorts_already_added_to_m_normalised_sorts);
         const sort_expression_list& l=function_sort(sort).domain();
         for (sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -844,6 +864,9 @@ class data_specification
         }
         if (l.size()==1)
         {
+          const function_symbol_vector f = function_update_generate_functions_code(l.front(),t);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+ 
           data_equation_vector e(function_update_generate_equations_code(l.front(),t));
           std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
         }
@@ -867,7 +890,7 @@ class data_specification
           data_equation_vector e(sort_list::list_generate_equations_code(element_sort));
           std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
         }
-        else if (sort_set::is_set(sort)||sort_fset::is_fset(sort))
+        else if (sort_set::is_set(sort))
         {
           // Add the function sort element_sort->Bool to the specification
           // const sort_expression_list l(element_sort);
@@ -875,6 +898,7 @@ class data_specification
           element_sorts.push_front(element_sort);
           import_system_defined_sort(function_sort(element_sorts,sort_bool::bool_()),
                                      sorts_already_added_to_m_normalised_sorts);
+          import_system_defined_sort(sort_fset::fset(element_sort),sorts_already_added_to_m_normalised_sorts);
 
           // Add a set to the specification.
           add_system_defined_sort(sort_set::set_(element_sort));
@@ -884,21 +908,23 @@ class data_specification
           std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
           data_equation_vector e(sort_set::set_generate_equations_code(element_sort));
           std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
-
-          // Add also the finite set specification.
+        }
+        else if (sort_fset::is_fset(sort))
+        {
           add_system_defined_sort(sort_fset::fset(element_sort));
-          f = sort_fset::fset_generate_constructors_code(element_sort);
+          function_symbol_vector f = sort_fset::fset_generate_constructors_code(element_sort);
           std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
           f = sort_fset::fset_generate_functions_code(element_sort);
           std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
-          e = sort_fset::fset_generate_equations_code(element_sort);
+          data_equation_vector e = sort_fset::fset_generate_equations_code(element_sort);
           std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
         }
-        else if (sort_bag::is_bag(sort)||sort_fbag::is_fbag(sort))
+        else if (sort_bag::is_bag(sort))
         {
           // Add the sorts Nat and set_(element_sort) to the specification.
           import_system_defined_sort(sort_nat::nat(),sorts_already_added_to_m_normalised_sorts); // Required for bags.
           import_system_defined_sort(sort_set::set_(element_sort),sorts_already_added_to_m_normalised_sorts);
+          import_system_defined_sort(sort_fbag::fbag(element_sort),sorts_already_added_to_m_normalised_sorts);
 
           // Add the function sort element_sort->Nat to the specification
           sort_expression_list element_sorts;
@@ -914,20 +940,25 @@ class data_specification
           std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
           data_equation_vector e(sort_bag::bag_generate_equations_code(element_sort));
           std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+        }
+        else if (sort_fbag::is_fbag(sort))
+        {
+          // Add the sorts Nat and set_(element_sort) to the specification.
+          import_system_defined_sort(sort_nat::nat(),sorts_already_added_to_m_normalised_sorts); // Required for bags.
 
           // Also add a finite bag to the specification
           add_system_defined_sort(sort_fbag::fbag(element_sort));
-          f = sort_fbag::fbag_generate_constructors_code(element_sort);
+          function_symbol_vector f = sort_fbag::fbag_generate_constructors_code(element_sort);
           std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
           f = sort_fbag::fbag_generate_functions_code(element_sort);
           std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
-          e = sort_fbag::fbag_generate_equations_code(element_sort);
+          data_equation_vector e = sort_fbag::fbag_generate_equations_code(element_sort);
           std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
         }
       }
       else if (is_structured_sort(sort))
       {
-        insert_mappings_constructors_for_structured_sort(core::static_down_cast<const structured_sort&>(sort));
+        insert_mappings_constructors_for_structured_sort(atermpp::down_cast<structured_sort>(sort));
       }
       const sort_expression normalised_sort=normalize_sorts(sort,*this);
       add_standard_mappings_and_equations(normalised_sort);
@@ -1098,6 +1129,19 @@ class data_specification
 
 }; // class data_specification
 
+//--- start generated class data_specification ---//
+// prototype declaration
+std::string pp(const data_specification& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const data_specification& x)
+{
+  return out << data::pp(x);
+}
+//--- end generated class data_specification ---//
 
 /// \brief Merges two data specifications into one.
 /// \details It is assumed that the two specs can be merged. I.e.
@@ -1205,20 +1249,81 @@ data_equation_vector find_equations(data_specification const& specification, con
     }
     else if (is_application(i->lhs()))
     {
-      if (atermpp::aterm_cast<application>(i->lhs()).head() == d)
+      if (atermpp::down_cast<application>(i->lhs()).head() == d)
       {
         result.push_back(*i);
       }
     }
     else if (is_application(i->rhs()))
     {
-      if (atermpp::aterm_cast<application>(i->rhs()).head() == d)
+      if (atermpp::down_cast<application>(i->rhs()).head() == d)
       {
         result.push_back(*i);
       }
     }
   }
   return result;
+}
+
+
+
+/// \brief Order the variables in a variable list such that enumeration over these variables becomes more efficient.
+//  \detail This routine is experimental, and may benefit from further investigation. The rule of thumb that is
+//          now used is that first variables of enumerated types are put in the variable list. These are sorts with
+//          constructors that have no arguments, typically resulting from declarations such as sort Enum = struct e1 | e2 | e3.
+//          The variables with the largest number of elements are put in front. 
+//          Subsequently, the other data types with a finite number of elements are listed, in arbitrary sequence. At the
+//          end all other variables are put in an arbitrary sequence.
+/// \param[in] l A list of variables that are to be sorted.
+/// \param[in] d A data specification containing the constructors that are used to determine efficiency.
+/// \return The same list of variables but ordered in such a way that 
+
+
+inline variable_list order_variables_to_optimise_enumeration(const variable_list& l, const data_specification& data_spec)
+{
+  // Put variables with enumerated types with the largest number of elements in front.
+  // Put variables of finite types as second. 
+  // Finally put the other variables in the list.
+  std::map < size_t,variable_list> vars_of_enumerated_type;
+  variable_list vars_of_finite_type;
+  variable_list rest_vars;
+  for(variable_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+  {
+    if (data_spec.is_certainly_finite(i->sort()))
+    {
+      function_symbol_vector constructors=data_spec.constructors(i->sort());
+      bool is_enumerated_type=true;
+      for(function_symbol_vector::const_iterator j=constructors.begin(); j!=constructors.end(); ++j)
+      {
+        if (is_function_sort(j->sort()) && function_sort(j->sort()).domain().size()>0)
+        {
+          is_enumerated_type=false;
+          break;
+        }
+      }
+      if (is_enumerated_type)
+      {
+        vars_of_enumerated_type[constructors.size()].push_front(*i);
+      }
+      else
+      {
+        vars_of_finite_type.push_front(*i);
+      }
+    }
+    else
+    {
+      // variable *i has no finite type
+      rest_vars.push_front(*i);
+    } 
+  }
+
+  // Accumulate the result in rest_vars
+  rest_vars=vars_of_finite_type + rest_vars;
+  for(std::map <size_t,variable_list>::const_reverse_iterator k=vars_of_enumerated_type.rbegin(); k!=vars_of_enumerated_type.rend(); ++k)
+  {
+    rest_vars = k->second + rest_vars;
+  }
+  return rest_vars;
 }
 
 } // namespace data

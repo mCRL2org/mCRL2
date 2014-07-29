@@ -46,7 +46,7 @@ struct term_traits<data::data_expression>
   static inline
   const term_type& true_()
   {
-    return core::static_down_cast<const term_type&>(data::sort_bool::true_());
+    return data::sort_bool::true_();
   }
 
   /// \brief The value false
@@ -54,7 +54,7 @@ struct term_traits<data::data_expression>
   static inline
   const term_type& false_()
   {
-    return core::static_down_cast<const term_type&>(data::sort_bool::false_());
+    return data::sort_bool::false_();
   }
 
   /// \brief Operator not
@@ -264,7 +264,7 @@ struct term_traits<data::data_expression>
   const term_type& argument(const term_type& t, const size_t n)
   {
     assert(data::is_application(t));
-    const data::application &a=atermpp::aterm_cast<data::application>(t);
+    const data::application &a=atermpp::down_cast<data::application>(t);
     assert(a.size()>n);
     data::application::const_iterator i=a.begin();
     for(size_t j=0; j<n; ++j, ++i)
@@ -279,7 +279,7 @@ struct term_traits<data::data_expression>
   const term_type& left(const term_type& t)
   {
     assert(data::is_application(t));
-    const data::application &a=atermpp::aterm_cast<data::application>(t);
+    const data::application &a=atermpp::down_cast<data::application>(t);
     assert(a.size() == 2);
     return *(a.begin());
   }
@@ -288,7 +288,7 @@ struct term_traits<data::data_expression>
   const term_type& right(const term_type& t)
   {
     assert(data::is_application(t));
-    const data::application &a=atermpp::aterm_cast<data::application>(t);
+    const data::application &a=atermpp::down_cast<data::application>(t);
     assert(a.size() == 2);
     return *(++(a.begin()));
   }
@@ -298,7 +298,7 @@ struct term_traits<data::data_expression>
   {
     assert(is_not(t));
     assert(data::is_application(t));
-    const data::application &a=atermpp::aterm_cast<data::application>(t);
+    const data::application &a=atermpp::down_cast<data::application>(t);
     assert(a.size() == 1);
     return *(a.begin());
   }
@@ -346,32 +346,27 @@ struct expression_traits : public core::term_traits< Expression >
 
   static const data_expression& head(const data_expression& e)
   {
-    return atermpp::aterm_cast<application>(e).head();
+    return atermpp::down_cast<application>(e).head();
   }
-
-  /* static const data_expression_list& arguments(const data_expression& e)
-  {
-    return atermpp::aterm_cast<data::data_expression_list>(atermpp::list_arg2(e));
-  } */
 
   static const data_expression_list &variables(const data_expression& a)
   {
-    return atermpp::aterm_cast<data_expression_list>(atermpp::aterm_cast<abstraction>(a).variables());
+    return atermpp::container_cast<data_expression_list>(atermpp::down_cast<abstraction>(a).variables());
   }
 
   static const data_expression& body(const data_expression& a)
   {
-    return atermpp::aterm_cast<const abstraction>(a).body();
+    return atermpp::down_cast<const abstraction>(a).body();
   }
 
   static data_expression replace_body(const data_expression& variable_binder, const data_expression& new_body)
   {
-    const abstraction &a=atermpp::aterm_cast<const abstraction>(variable_binder);
+    const abstraction &a=atermpp::down_cast<const abstraction>(variable_binder);
     return abstraction(a.binding_operator(), a.variables(), new_body);
   }
 
   template < typename Container >
-  static application make_application(const data_expression& e, const Container& arguments)
+  static application application(const data_expression& e, const Container& arguments)
   {
     return application(e, arguments);
   }

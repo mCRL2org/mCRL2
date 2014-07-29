@@ -47,7 +47,7 @@ void test_aterm_io()
   std::ostringstream out;
   write_term_to_text_stream(empty, out);
   std::istringstream in(out.str());
-  aterm_string empty2 = aterm_cast<aterm_string>(read_term_from_text_stream(in));
+  aterm_string empty2 = down_cast<aterm_string>(read_term_from_text_stream(in));
   BOOST_CHECK(empty == empty2);
 }
 

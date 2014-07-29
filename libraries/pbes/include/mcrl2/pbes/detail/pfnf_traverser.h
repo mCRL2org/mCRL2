@@ -225,7 +225,7 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
     }
 
 #ifdef MCRL2_PFNF_VISITOR_DEBUG
-std::cout << "NAME CLASHES: " << core::detail::print_set(name_clashes, data::stream_printer()) << std::endl;
+std::cout << "NAME CLASHES: " << core::detail::print_set(name_clashes) << std::endl;
 #endif
 
     if (!name_clashes.empty())
@@ -357,16 +357,6 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
   }
 
   void enter(const data::data_expression& x)
-  {
-    expression_stack.push_back(pfnf_traverser_expression(x));
-  }
-
-  void enter(const true_& x)
-  {
-    expression_stack.push_back(pfnf_traverser_expression(x));
-  }
-
-  void enter(const false_& x)
   {
     expression_stack.push_back(pfnf_traverser_expression(x));
   }

@@ -15,7 +15,8 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -24,48 +25,41 @@ namespace pbes_system {
 
 void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
-                    data::rewrite_strategy rewrite_strategy,
-                    bool simplify,
-                    bool /* apply_to_original */,
-                    bool use_local_variant,
-                    bool print_influence_graph,
-                    bool use_marking_optimization,
-                    bool use_alternative_lcfp_criterion,
-                    bool use_alternative_gcfp_relation,
-                    bool use_alternative_gcfp_consistency
-                   )
+                    const utilities::file_format* input_format,
+                    const utilities::file_format* output_format,
+                    const pbesstategraph_options& options)
 {
   pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename);
-  pbes_system::algorithms::normalize(p);
+  load_pbes(p, input_filename, input_format);
+  algorithms::normalize(p);
   pbes q;
 
-  if (use_local_variant)
+  if (options.use_local_variant)
   {
-    pbes_system::detail::local_reset_variables_algorithm algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency);
-    q = algorithm.run(simplify, use_marking_optimization);
-    if (print_influence_graph)
+    detail::local_reset_variables_algorithm algorithm(p, options);
+    q = algorithm.run();
+    if (options.print_influence_graph)
     {
-      pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
+      detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
       ialgo.run();
     }
   }
   else
   {
-    pbes_system::detail::global_reset_variables_algorithm algorithm(p, rewrite_strategy);
-    q = algorithm.run(simplify);
-    if (print_influence_graph)
+    detail::global_reset_variables_algorithm algorithm(p, options);
+    q = algorithm.run();
+    if (options.print_influence_graph)
     {
-      pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
+      detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
       ialgo.run();
     }
   }
 
-  q.save(output_filename, true, true);
+  save_pbes(q, output_filename, output_format, false);
   if (!q.is_well_typed())
   {
     mCRL2log(log::error) << "pbesstategraph error: not well typed!" << std::endl;
-    mCRL2log(log::error) << pbes_system::pp(q) << std::endl;
+    mCRL2log(log::error) << pp(q) << std::endl;
   }
 }
 

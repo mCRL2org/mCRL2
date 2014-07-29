@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -11,16 +11,30 @@
 #include "SCC.h"
 #include <assert.h>
 
-struct VerifySCC  // used by ParityGame::verify
+/*! \file ParityGame_verify.cc
+
+    Implementation of parity game solution verification algorithm.
+*/
+
+
+/*! A functor that is used to verify the solution for a strongly-connected
+    component of the game graph.
+
+    This is a separate class because the SCC decomposition algorithm expects
+    a functor which is called for every component found.
+
+    \see ParityGame::verify
+*/
+struct VerifySCC  // used by ParityGame::verify()
 {
     const ParityGame    &game;
     const StaticGraph   &graph;
-    const size_t           prio;
+    const int           prio;
     verti * const       error;
 
     int operator() (const verti *scc, size_t scc_size)
     {
-        // Search vertices in this SCC for a vertex with priority `prio':
+        // Search vertices in this SCC for a vertex with priority `prio`:
         for (size_t i = 0; i < scc_size; ++i)
         {
             verti v = scc[i];
@@ -84,7 +98,7 @@ bool ParityGame::verify(const Strategy &s, verti *error) const
     }
 
     // Verify absence of cycles owned by opponent in winning sets
-    for (size_t prio = 0; prio < d_; ++prio)
+    for (int prio = 0; prio < d_; ++prio)
     {
         /* Create set of edges incident with vertices in the winning set of
            player (1 - prio%2) consistent with strategy s and incident with
@@ -92,7 +106,7 @@ bool ParityGame::verify(const Strategy &s, verti *error) const
         StaticGraph::edge_list edges;
         for (verti v = 0; v < graph_.V(); ++v)
         {
-            if (priority(v) >= prio && (winner(s, v) == 1 - static_cast<int>(prio%2)))
+            if (priority(v) >= prio && (int)winner(s, v) == (1 - prio%2))
             {
                 if (s[v] != NO_VERTEX)
                 {

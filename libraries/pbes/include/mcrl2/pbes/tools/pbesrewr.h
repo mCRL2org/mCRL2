@@ -16,10 +16,12 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/pbes_rewriter_type.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/detail/bqnf_traverser.h"
 #include "mcrl2/pbes/detail/ppg_traverser.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
@@ -31,14 +33,14 @@ namespace pbes_system {
 
 void pbesrewr(const std::string& input_filename,
               const std::string& output_filename,
+              const utilities::file_format* input_format,
+              const utilities::file_format* output_format,
               const data::rewrite_strategy rewrite_strategy,
-              pbes_rewriter_type rewriter_type,
-              bool skip_data
-             )
+              pbes_rewriter_type rewriter_type)
 {
   // load the pbes
   pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename);
+  load_pbes(p, input_filename, input_format);
 
   // data rewriter
   data::rewriter datar(p.data(), rewrite_strategy);
@@ -48,25 +50,22 @@ void pbesrewr(const std::string& input_filename,
   {
     case simplify:
     {
-      simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
+      simplify_quantifiers_data_rewriter<data::rewriter> pbesr(datar);
+      //simplify_data_rewriter<data::rewriter> pbesr(datar);
       pbes_rewrite(p, pbesr);
       break;
     }
     case quantifier_all:
     {
-      data::data_enumerator datae(p.data(), datar);
-      data::rewriter_with_variables datarv(datar);
       bool enumerate_infinite_sorts = true;
-      enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts, skip_data);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_rewrite(p, pbesr);
       break;
     }
     case quantifier_finite:
     {
-      data::data_enumerator datae(p.data(), datar);
-      data::rewriter_with_variables datarv(datar);
       bool enumerate_infinite_sorts = false;
-      enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts, skip_data);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_rewrite(p, pbesr);
       break;
     }
@@ -74,7 +73,7 @@ void pbesrewr(const std::string& input_filename,
     {
       // first preprocess data expressions
       data::detail::one_point_rule_preprocessor one_point_processor;
-      data_rewriter<pbes_expression, data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
+      data_rewriter<data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
       pbes_rewrite(p, datar_onepoint);
 
       // apply the one point rule rewriter
@@ -82,13 +81,14 @@ void pbesrewr(const std::string& input_filename,
       pbes_rewrite(p, pbesr);
 
       // post processing: apply the simplifying rewriter
-      simplifying_rewriter<pbes_expression, data::rewriter> simp(datar);
+      simplify_data_rewriter<data::rewriter> simp(datar);
       pbes_rewrite(p, simp);
       break;
     }
     case pfnf:
     {
       pfnf_rewriter pbesr;
+      pbes_system::normalize(p);
       pbes_rewrite(p, pbesr);
       break;
     }
@@ -130,7 +130,7 @@ void pbesrewr(const std::string& input_filename,
       break;
     }
   }
-  p.save(output_filename);
+  save_pbes(p, output_filename, output_format);
 }
 
 } // namespace pbes_system

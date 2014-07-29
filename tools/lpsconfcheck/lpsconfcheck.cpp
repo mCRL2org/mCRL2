@@ -13,7 +13,7 @@
 
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -189,9 +189,8 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
 
-      lps::specification specification;
-
-      specification.load(m_input_filename);
+      lps::specification spec;
+      load_lps(spec, input_filename());
 
       if (!m_invariant_filename.empty())
       {
@@ -204,22 +203,21 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
         mCRL2log(verbose) << "parsing input file '" <<  m_invariant_filename << "'..." << std::endl;
 
-        m_invariant = parse_data_expression(instream, specification.data());
+        m_invariant = parse_data_expression(instream, spec.data());
 
         instream.close();
       }
 
-      if (check_invariant(specification))
+      if (check_invariant(spec))
       {
         Confluence_Checker v_confluence_checker(
-          specification, rewrite_strategy(),
+          spec, rewrite_strategy(),
           m_time_limit, m_path_eliminator, solver_type(),
           m_apply_induction, m_check_all,
           m_counter_example, m_generate_invariants, m_dot_file_name);
 
-        specification = lps::specification(v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number));
-
-        specification.save(m_output_filename);
+        spec = lps::specification(v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number));
+        save_lps(spec, output_filename());
       }
 
       return true;

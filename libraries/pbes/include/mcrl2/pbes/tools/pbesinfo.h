@@ -12,9 +12,8 @@
 #ifndef MCRL2_PBES_TOOLS_PBESINFO_H
 #define MCRL2_PBES_TOOLS_PBESINFO_H
 
-#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
-#include "mcrl2/pbes/tools.h"
 
 namespace mcrl2 {
 
@@ -22,13 +21,14 @@ namespace pbes_system {
 
 void pbesinfo(const std::string& input_filename,
               const std::string& input_file_message,
-              pbes_file_format file_format, bool opt_full
+              const utilities::file_format* file_format,
+              bool opt_full
              )
 {
   pbes p;
-  pbes_system::algorithms::load_pbes(p, input_filename, file_format);
+  load_pbes(p, input_filename, file_format);
 
-  pbes_system::detail::pbes_property_map info(p);
+  detail::pbes_property_map info(p);
 
   // Show file from which PBES was read
   std::cout << input_file_message << "\n\n";
@@ -54,7 +54,7 @@ void pbesinfo(const std::string& input_filename,
     std::cout << "Predicate variables:\n";
     for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
     {
-      std::cout << core::pp(i->symbol()) << "." << pbes_system::pp(i->variable()) << std::endl;
+      std::cout << core::pp(i->symbol()) << "." << pp(i->variable()) << std::endl;
     }
   }
 }

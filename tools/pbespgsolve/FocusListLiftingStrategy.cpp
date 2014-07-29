@@ -1,14 +1,15 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <cassert>
+#include "mcrl2/utilities/logger.h"
 #include "FocusListLiftingStrategy.h"
-#include <assert.h>
 
 /*! Credit for a vertex when it is put on the focus list. */
 static const unsigned initial_credit  = 2;
@@ -18,9 +19,9 @@ static const unsigned credit_increase = 2;
 
 
 FocusListLiftingStrategy::FocusListLiftingStrategy( const ParityGame &game,
-    bool backward, bool alternate, verti max_size, long long max_lifts )
-    : LiftingStrategy(game), max_lift_attempts_(max_lifts),
-      phase_(1), num_lift_attempts_(0), lls_(game, backward, alternate)
+    bool alternate, verti max_size, long long max_lifts )
+    : LiftingStrategy(), V_(game.graph().V()), max_lift_attempts_(max_lifts),
+      phase_(1), num_lift_attempts_(0), lls_(game, alternate)
 {
     focus_list_.reserve(max_size);
 }
@@ -51,11 +52,11 @@ verti FocusListLiftingStrategy::next()
 verti FocusListLiftingStrategy::phase1()
 {
     if (focus_list_.size() == focus_list_.capacity() ||
-        num_lift_attempts_ >= graph_.V())
+        num_lift_attempts_ >= V_)
     {
         if (focus_list_.empty())
         {
-            /* This can only happen if lls_.num_failed >= graph_.V() too */
+            /* This can only happen if lls_.num_failed >= V too */
             assert(lls_.next() == NO_VERTEX);
             return NO_VERTEX;
         }
@@ -121,11 +122,6 @@ verti FocusListLiftingStrategy::phase2()
     return read_pos_->first;
 }
 
-size_t FocusListLiftingStrategy::memory_use() const
-{
-    return sizeof(*this) + sizeof(focus_list_[0])*focus_list_.capacity();
-}
-
 LiftingStrategy *FocusListLiftingStrategyFactory::create(
     const ParityGame &game, const SmallProgressMeasures &spm )
 {
@@ -139,5 +135,5 @@ LiftingStrategy *FocusListLiftingStrategyFactory::create(
     if (max_size >  V) max_size = V;
     verti max_lifts = (verti)(lift_ratio_ * max_size);
     return new FocusListLiftingStrategy(
-        game, backward_, alternate_, max_size, max_lifts );
+        game, alternate_, max_size, max_lifts );
 }

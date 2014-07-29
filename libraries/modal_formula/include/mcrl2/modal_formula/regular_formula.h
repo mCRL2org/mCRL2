@@ -16,9 +16,8 @@
 
 #include <string>
 #include <cassert>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
@@ -37,7 +36,7 @@ class regular_formula: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     regular_formula()
-      : atermpp::aterm_appl(core::detail::constructRegFrm())
+      : atermpp::aterm_appl(core::detail::default_values::RegFrm)
     {}
 
     /// \brief Constructor.
@@ -52,6 +51,11 @@ class regular_formula: public atermpp::aterm_appl
     regular_formula(const action_formulas::action_formula& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// \brief Constructor.
+    regular_formula(const data::data_expression& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of regular_formulas
@@ -59,7 +63,6 @@ typedef atermpp::term_list<regular_formula> regular_formula_list;
 
 /// \brief vector of regular_formulas
 typedef std::vector<regular_formula>    regular_formula_vector;
-
 
 // prototypes
 inline bool is_nil(const atermpp::aterm_appl& x);
@@ -75,11 +78,30 @@ inline
 bool is_regular_formula(const atermpp::aterm_appl& x)
 {
   return action_formulas::is_action_formula(x) ||
+         data::is_data_expression(x) ||
          regular_formulas::is_nil(x) ||
          regular_formulas::is_seq(x) ||
          regular_formulas::is_alt(x) ||
          regular_formulas::is_trans(x) ||
          regular_formulas::is_trans_or_nil(x);
+}
+
+// prototype declaration
+std::string pp(const regular_formula& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const regular_formula& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(regular_formula& t1, regular_formula& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -89,7 +111,7 @@ class nil: public regular_formula
   public:
     /// \brief Default constructor.
     nil()
-      : regular_formula(core::detail::constructRegNil())
+      : regular_formula(core::detail::default_values::RegNil)
     {}
 
     /// \brief Constructor.
@@ -107,7 +129,25 @@ class nil: public regular_formula
 inline
 bool is_nil(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegNil(x);
+  return x.function() == core::detail::function_symbols::RegNil;
+}
+
+// prototype declaration
+std::string pp(const nil& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const nil& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(nil& t1, nil& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -117,7 +157,7 @@ class seq: public regular_formula
   public:
     /// \brief Default constructor.
     seq()
-      : regular_formula(core::detail::constructRegSeq())
+      : regular_formula(core::detail::default_values::RegSeq)
     {}
 
     /// \brief Constructor.
@@ -130,17 +170,17 @@ class seq: public regular_formula
 
     /// \brief Constructor.
     seq(const regular_formula& left, const regular_formula& right)
-      : regular_formula(core::detail::gsMakeRegSeq(left, right))
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegSeq(), left, right))
     {}
 
     const regular_formula& left() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<regular_formula>((*this)[0]);
     }
 
     const regular_formula& right() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg2(*this));
+      return atermpp::down_cast<regular_formula>((*this)[1]);
     }
 };
 
@@ -150,7 +190,25 @@ class seq: public regular_formula
 inline
 bool is_seq(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegSeq(x);
+  return x.function() == core::detail::function_symbols::RegSeq;
+}
+
+// prototype declaration
+std::string pp(const seq& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const seq& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(seq& t1, seq& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -160,7 +218,7 @@ class alt: public regular_formula
   public:
     /// \brief Default constructor.
     alt()
-      : regular_formula(core::detail::constructRegAlt())
+      : regular_formula(core::detail::default_values::RegAlt)
     {}
 
     /// \brief Constructor.
@@ -173,17 +231,17 @@ class alt: public regular_formula
 
     /// \brief Constructor.
     alt(const regular_formula& left, const regular_formula& right)
-      : regular_formula(core::detail::gsMakeRegAlt(left, right))
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegAlt(), left, right))
     {}
 
     const regular_formula& left() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<regular_formula>((*this)[0]);
     }
 
     const regular_formula& right() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg2(*this));
+      return atermpp::down_cast<regular_formula>((*this)[1]);
     }
 };
 
@@ -193,7 +251,25 @@ class alt: public regular_formula
 inline
 bool is_alt(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegAlt(x);
+  return x.function() == core::detail::function_symbols::RegAlt;
+}
+
+// prototype declaration
+std::string pp(const alt& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const alt& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(alt& t1, alt& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -203,7 +279,7 @@ class trans: public regular_formula
   public:
     /// \brief Default constructor.
     trans()
-      : regular_formula(core::detail::constructRegTrans())
+      : regular_formula(core::detail::default_values::RegTrans)
     {}
 
     /// \brief Constructor.
@@ -216,12 +292,12 @@ class trans: public regular_formula
 
     /// \brief Constructor.
     trans(const regular_formula& operand)
-      : regular_formula(core::detail::gsMakeRegTrans(operand))
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTrans(), operand))
     {}
 
     const regular_formula& operand() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<regular_formula>((*this)[0]);
     }
 };
 
@@ -231,7 +307,25 @@ class trans: public regular_formula
 inline
 bool is_trans(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegTrans(x);
+  return x.function() == core::detail::function_symbols::RegTrans;
+}
+
+// prototype declaration
+std::string pp(const trans& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const trans& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(trans& t1, trans& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -241,7 +335,7 @@ class trans_or_nil: public regular_formula
   public:
     /// \brief Default constructor.
     trans_or_nil()
-      : regular_formula(core::detail::constructRegTransOrNil())
+      : regular_formula(core::detail::default_values::RegTransOrNil)
     {}
 
     /// \brief Constructor.
@@ -254,12 +348,12 @@ class trans_or_nil: public regular_formula
 
     /// \brief Constructor.
     trans_or_nil(const regular_formula& operand)
-      : regular_formula(core::detail::gsMakeRegTransOrNil(operand))
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTransOrNil(), operand))
     {}
 
     const regular_formula& operand() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<regular_formula>((*this)[0]);
     }
 };
 
@@ -269,34 +363,45 @@ class trans_or_nil: public regular_formula
 inline
 bool is_trans_or_nil(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegTransOrNil(x);
+  return x.function() == core::detail::function_symbols::RegTransOrNil;
 }
 
+// prototype declaration
+std::string pp(const trans_or_nil& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const trans_or_nil& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(trans_or_nil& t1, trans_or_nil& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated classes ---//
 
-inline
-int precedence(const regular_formula& x)
+inline int left_precedence(const seq&)            { return 1; }
+inline int left_precedence(const alt&)            { return 2; }
+inline int left_precedence(const trans&)          { return 3; }
+inline int left_precedence(const trans_or_nil&)   { return 3; }
+inline int left_precedence(const regular_formula& x)
 {
-  if (is_seq(x))
-  {
-    return 1;
-  }
-  else if (is_alt(x))
-  {
-    return 2;
-  }
-  else if (is_trans(x) || is_trans_or_nil(x))
-  {
-    return 3;
-  }
+  if      (is_seq(x))          { return left_precedence(static_cast<const seq&>(x)); }
+  else if (is_alt(x))          { return left_precedence(static_cast<const alt&>(x)); }
+  else if (is_trans(x))        { return left_precedence(static_cast<const trans&>(x)); }
+  else if (is_trans_or_nil(x)) { return left_precedence(static_cast<const trans_or_nil&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
-// TODO: is there a cleaner way to make the precedence function work for derived classes?
-inline int precedence(const seq& x) { return precedence(static_cast<const regular_formula&>(x)); }
-inline int precedence(const alt& x) { return precedence(static_cast<const regular_formula&>(x)); }
-inline int precedence(const trans& x) { return precedence(static_cast<const regular_formula&>(x)); }
-inline int precedence(const trans_or_nil& x) { return precedence(static_cast<const regular_formula&>(x)); }
+inline int right_precedence(const regular_formula& x)
+{
+  return left_precedence(x);
+}
 
 inline const regular_formula& unary_operand(const trans& x)        { return x.operand(); }
 inline const regular_formula& unary_operand(const trans_or_nil& x) { return x.operand(); }
@@ -305,51 +410,8 @@ inline const regular_formula& binary_right(const seq& x)           { return x.ri
 inline const regular_formula& binary_left(const alt& x)            { return x.left(); }
 inline const regular_formula& binary_right(const alt& x)           { return x.right(); }
 
-// template function overloads
-std::string pp(const regular_formula& x);
-
 } // namespace regular_formulas
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::regular_formulas::regular_formula& t1, mcrl2::regular_formulas::regular_formula& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::nil& t1, mcrl2::regular_formulas::nil& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::seq& t1, mcrl2::regular_formulas::seq& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::alt& t1, mcrl2::regular_formulas::alt& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::trans& t1, mcrl2::regular_formulas::trans& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::trans_or_nil& t1, mcrl2::regular_formulas::trans_or_nil& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H

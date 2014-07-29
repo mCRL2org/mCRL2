@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -15,15 +15,15 @@
 #include "RefCounted.h"
 #include <vector>
 
-/*! Merges a substrategy into a main strategy, overwriting the existing strategy
+/*! Merge a substrategy into a main strategy. Overwrites the existing strategy
     for all vertices with indices in vertex_map. */
 void merge_strategies( std::vector<verti> &strategy,
                        const std::vector<verti> &substrat,
                        const std::vector<verti> &vertex_map );
 
-/*! Merges two vertex maps, by translating the indices from begin to end using
-    old_map, such that new_map[i] == old_map[new_map[i]] or NO_VERTEX if
-    new_map[i] >= old_map_size. */
+/*! Merge two vertex maps. Values from begin to end are remapped using old_map,
+    creating a new map, such that new_map[i] becomes old_map[new_map[i]] if
+    new_map[i] < old_map_size or NO_VERTEX otherwise. */
 template<class ForwardIterator>
 void merge_vertex_maps( ForwardIterator begin, ForwardIterator end,
                         const verti *old_map, verti old_map_size );
@@ -34,26 +34,17 @@ class ParityGameSolver : public Abortable, RefCounted
 {
 public:
     ParityGameSolver(const ParityGame &game)
-        : game_(game), max_memory_size(0) { };
+        : game_(game) { };
     virtual ~ParityGameSolver() { };
 
     /*! Solve the game and return the strategies for both players. */
     virtual ParityGame::Strategy solve() = 0;
 
-    /*! Returns an estimation of the peak memory use for this solver. */
-    size_t memory_use() const { return max_memory_size; }
-
-    /*! Returns the parity game for this solver instance. */
+    /*! Return the parity game for this solver instance. */
     const ParityGame &game() const { return game_; }
 
 protected:
-    void update_memory_use(size_t current_size) {
-        if (current_size > max_memory_size) max_memory_size = current_size;
-    }
-
-protected:
     const ParityGame &game_;           //!< Game being solved
-    size_t           max_memory_size;  //!< Max. amount of memory used
 };
 
 /*! Abstract base class for parity game solver factories. */

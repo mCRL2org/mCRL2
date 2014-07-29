@@ -13,6 +13,8 @@
 
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -21,9 +23,9 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
 //[pbes_parelm_tool
-class pbes_parelm_tool: public input_output_tool
+class pbes_parelm_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {
-    typedef input_output_tool super;
+    typedef pbes_input_tool<pbes_output_tool<input_output_tool> > super;
 
   public:
     pbes_parelm_tool()
@@ -44,7 +46,9 @@ class pbes_parelm_tool: public input_output_tool
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
       pbesparelm(input_filename(),
-                 output_filename()
+                 output_filename(),
+                 pbes_input_format(),
+                 pbes_output_format()
                 );
 
       return true;

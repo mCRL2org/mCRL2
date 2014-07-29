@@ -94,9 +94,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
   mcrl2_lts
-  mcrl2_utilities
   mcrl2_utilities_qt
-  mcrl2_syntax
   tr
 )
 
@@ -113,24 +111,7 @@ endif(GL2PS_FOUND)
 
 # Don't forget to include output directory, otherwise
 # the UI file won't be wrapped!
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-#include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/tr/include)
-if(GL2PS_FOUND)
-  include_directories(${GL2PS_INCLUDE_DIRS})
-else(GL2PS_FOUND)
-  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
-endif(GL2PS_FOUND)
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Applications)

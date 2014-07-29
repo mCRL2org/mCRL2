@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_LPS2PBES_RHS_H
 
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/traverser.h"
@@ -111,7 +112,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   bool is_timed() const
   {
-    return T != data::variable();
+    return T != data::undefined_real_variable();
   }
 
   void leave(const data::data_expression& x)
@@ -177,7 +178,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     std::vector<pbes_expression> v;
     pbes_expression rhs0 = RHS(phi0, x.operand(), lps, id_generator, T, TermTraits());
     assert(action_formulas::is_action_formula(x.formula()));
-    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
+    const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
 
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
@@ -208,6 +209,8 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
         data::mutable_map_substitution<> sigma_ti;
         sigma_ti[T] = ti;
         rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_ti, data::substitution_variables(sigma_ti));
+std::cout << "ti = " << ti << std::endl;
+std::cout << "T  = " << T << std::endl;
         p = tr::and_(p, data::greater(ti, T));
       }
       data::variable_list y = data::replace_variables(yi, sigma_yi);
@@ -468,7 +471,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
 
     pbes_expression rhs0 = RHS_structured(phi0, x.operand(), lps, id_generator, propvar_generator, vars, sigma, Z, T, TermTraits());
     assert(action_formulas::is_action_formula(x.formula()));
-    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
+    const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
 
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)

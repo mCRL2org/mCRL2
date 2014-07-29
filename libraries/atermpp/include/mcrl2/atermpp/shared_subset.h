@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
-#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
@@ -168,8 +167,7 @@ class shared_subset
 
         void find_next_index()
         {
-          typedef boost::signals2::detail::auto_buffer<bdd_node, boost::signals2::detail::store_n_objects<64> > vector_t;
-          vector_t path_stack;
+          std::vector<bdd_node> path_stack;
           bdd_node node = m_subset->m_bdd_root;
 
           while (true)
@@ -281,8 +279,7 @@ class shared_subset
       : m_set(set.m_set),
         m_bits(set.m_bits)
     {
-      typedef boost::signals2::detail::auto_buffer<bdd_node, boost::signals2::detail::store_n_objects<64> > vector_t;
-      vector_t trees;
+      std::vector<bdd_node> trees;
       std::fill_n(std::back_inserter(trees), m_bits + 1, bdd_node());
       size_t completed = 0;
       for (iterator i = set.begin(); i != set.end(); i++)

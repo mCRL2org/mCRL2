@@ -141,6 +141,7 @@ bool LtsManager::openLts(QString filename)
   if (!lts)
   {
     emit stopStructuring();
+    emit errorLoadingLts();
     return false;
   }
 

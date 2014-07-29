@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -14,34 +14,56 @@
 #include <iterator>
 #include <assert.h>
 
-template<class It, class Cmp>
-bool is_sorted(It i, It j, Cmp cmp)
+// Note: code below is not currently used and has not been properly tested.
+#if 0
+EdgeIterator &EdgeIterator::operator=(const EdgeIterator &ei)
 {
-    if (i == j) return true;
-    for (;;)
-    {
-        It k = i;
-        if (++k == j) return true;
-        if (cmp(*k, *i)) return false; // *(i+1) > *i
-        i = k;
-    }
+    g = ei.g;
+    v = ei.v;
+    e = ei.e;
+    return *this;
 }
+
+std::pair<verti, verti> EdgeIterator::operator*()
+{
+    return std::pair<verti, verti>(v, g->successors_[e]);
+}
+
+std::pair<verti, verti> EdgeIterator::operator++()
+{
+    if (++e < g->E_) while (g->successor_index_[v + 1] < e) ++v;
+    return **this;
+}
+
+std::pair<verti, verti> EdgeIterator::operator++(int)
+{
+    std::pair<verti, verti> result = **this;
+    ++*this;
+    return result;
+}
+#endif
 
 template<class ForwardIterator>
 void StaticGraph::make_subgraph( const StaticGraph &graph,
                                  ForwardIterator vertices_begin,
-                                 ForwardIterator vertices_end )
+                                 ForwardIterator vertices_end,
+                                 bool proper,
+                                 StaticGraph::EdgeDirection edge_dir )
 {
+    assert(vertices_begin <= vertices_end);
+
     // FIXME: determine which cut-off value works best:
-    if (static_cast<size_t>(std::distance(vertices_begin, vertices_end)) < graph.V()/static_cast<verti>(3))
+    if (static_cast<verti>(std::distance(vertices_begin, vertices_end)) < graph.V()/3)
     {
         HASH_MAP(verti, verti) map;
-        return make_subgraph(graph, vertices_begin, vertices_end, map);
+        return make_subgraph(graph, vertices_begin,
+                             vertices_end, map, proper, edge_dir);
     }
     else
     {
         DenseMap<verti, verti> map(0, graph.V());
-        return make_subgraph(graph, vertices_begin, vertices_end, map);
+        return make_subgraph(graph, vertices_begin, vertices_end,
+                             map, proper, edge_dir);
     }
 }
 
@@ -49,7 +71,9 @@ template<class ForwardIterator, class VertexMapT>
 void StaticGraph::make_subgraph( const StaticGraph &graph,
                                  ForwardIterator vertices_begin,
                                  ForwardIterator vertices_end,
-                                 VertexMapT &vertex_map )
+                                 VertexMapT &vertex_map,
+                                 bool proper,
+                                 EdgeDirection edge_dir )
 {
     assert(this != &graph);
 
@@ -80,7 +104,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
     }
 
     // Allocate memory:
-    reset(num_vertices, num_edges, graph.edge_dir());
+    reset(num_vertices, num_edges, edge_dir ? edge_dir : graph.edge_dir());
 
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
@@ -99,10 +123,11 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
                 if (it != vertex_map.end()) successors_[e++] = (*it).second;
             }
             verti *end = &successors_[e];
-            if (!::is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<verti>()))
             {
                 std::sort(begin, end);
             }
+            if (proper) assert(begin != end);  /* proper parity game graph */
         }
         assert(v == V_ && e == E_);
         successor_index_[v] = e;
@@ -125,7 +150,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
                 if (it != vertex_map.end()) predecessors_[e++] = it->second;
             }
             verti *end = &predecessors_[e];
-            if (!::is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<verti>()))
             {
                 std::sort(begin, end);
             }

@@ -16,7 +16,7 @@
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/rewriters/simplifying_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -181,7 +181,7 @@ struct guard_expression
     }
     else
     {
-      for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::iterator i = guards.begin(); i != guards.end(); ++i)
+      for (auto i = guards.begin(); i != guards.end(); ++i)
       {
         i->second = utilities::optimized_not(i->second);
       }
@@ -199,7 +199,7 @@ struct guard_expression
   {
     mCRL2log(log::debug, "stategraph") << "check_guards: x = " << pbes_system::pp(x) << std::endl;
     bool result = true;
-    for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = guards.begin(); i != guards.end(); ++i)
+    for (auto i = guards.begin(); i != guards.end(); ++i)
     {
       try
       {
@@ -209,7 +209,8 @@ struct guard_expression
         if (pbes_rewrite(g1, R) != pbes_rewrite(g2, R))
         {
           result = false;
-          mCRL2log(log::debug, "stategraph") << "guard error: X = " << pbes_system::pp(X) << " g1 = " << pbes_system::pp(pbes_rewrite(g1, R)) << " g2 = " << pbes_system::pp(pbes_rewrite(g2, R)) << std::endl;
+mCRL2log(log::debug, "stategraph") << " g1 = " << g1 << " g2 = " << g2 << std::endl;
+          mCRL2log(log::debug, "stategraph") << "guard error: X = " << X << " g1 = " << pbes_rewrite(g1, R) << " g2 = " << pbes_rewrite(g2, R) << std::endl;
         }
       }
       catch (mcrl2::runtime_error&)
@@ -254,16 +255,16 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   using super::leave;
   using super::operator();
 
+  simplify_data_rewriter<data::rewriter> R;
+  std::vector<guard_expression> expression_stack;
+
   guard_traverser(const data::rewriter& r)
     : R(r)
   {}
 
-  simplifying_rewriter<pbes_expression, data::rewriter> R;
-  std::vector<guard_expression> expression_stack;
-
   void push(const guard_expression& x)
   {
-    mCRL2log(log::debug1) << "<push>" << "\n" << x << std::endl;
+    mCRL2log(log::debug2) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 
@@ -295,18 +296,6 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     guard_expression node;
     node.guards.push_back(std::make_pair(x, pbes_system::true_()));
     push(node);
-    assert(top().check_guards(x, R));
-  }
-
-  void leave(const pbes_system::true_& x)
-  {
-    push(guard_expression(x));
-    assert(top().check_guards(x, R));
-  }
-
-  void leave(const pbes_system::false_& x)
-  {
-    push(guard_expression(x));
     assert(top().check_guards(x, R));
   }
 

@@ -13,7 +13,7 @@
 #define MCRL2_DATA_BINDER_TYPE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2
@@ -29,7 +29,7 @@ class binder_type: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     binder_type()
-      : atermpp::aterm_appl(core::detail::constructBindingOperator())
+      : atermpp::aterm_appl(core::detail::default_values::BindingOperator)
     {}
 
     /// \brief Constructor.
@@ -47,6 +47,24 @@ typedef atermpp::term_list<binder_type> binder_type_list;
 /// \brief vector of binder_types
 typedef std::vector<binder_type>    binder_type_vector;
 
+// prototype declaration
+std::string pp(const binder_type& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const binder_type& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(binder_type& t1, binder_type& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief Binder for untyped set or bag comprehension
 class untyped_set_or_bag_comprehension_binder: public binder_type
@@ -54,7 +72,7 @@ class untyped_set_or_bag_comprehension_binder: public binder_type
   public:
     /// \brief Default constructor.
     untyped_set_or_bag_comprehension_binder()
-      : binder_type(core::detail::constructUntypedSetBagComp())
+      : binder_type(core::detail::default_values::UntypedSetBagComp)
     {}
 
     /// \brief Constructor.
@@ -72,7 +90,25 @@ class untyped_set_or_bag_comprehension_binder: public binder_type
 inline
 bool is_untyped_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedSetBagComp(x);
+  return x.function() == core::detail::function_symbols::UntypedSetBagComp;
+}
+
+// prototype declaration
+std::string pp(const untyped_set_or_bag_comprehension_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_set_or_bag_comprehension_binder& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_set_or_bag_comprehension_binder& t1, untyped_set_or_bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -82,7 +118,7 @@ class set_comprehension_binder: public binder_type
   public:
     /// \brief Default constructor.
     set_comprehension_binder()
-      : binder_type(core::detail::constructSetComp())
+      : binder_type(core::detail::default_values::SetComp)
     {}
 
     /// \brief Constructor.
@@ -100,7 +136,25 @@ class set_comprehension_binder: public binder_type
 inline
 bool is_set_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSetComp(x);
+  return x.function() == core::detail::function_symbols::SetComp;
+}
+
+// prototype declaration
+std::string pp(const set_comprehension_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const set_comprehension_binder& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(set_comprehension_binder& t1, set_comprehension_binder& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -110,7 +164,7 @@ class bag_comprehension_binder: public binder_type
   public:
     /// \brief Default constructor.
     bag_comprehension_binder()
-      : binder_type(core::detail::constructBagComp())
+      : binder_type(core::detail::default_values::BagComp)
     {}
 
     /// \brief Constructor.
@@ -128,7 +182,25 @@ class bag_comprehension_binder: public binder_type
 inline
 bool is_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBagComp(x);
+  return x.function() == core::detail::function_symbols::BagComp;
+}
+
+// prototype declaration
+std::string pp(const bag_comprehension_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const bag_comprehension_binder& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(bag_comprehension_binder& t1, bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -138,7 +210,7 @@ class forall_binder: public binder_type
   public:
     /// \brief Default constructor.
     forall_binder()
-      : binder_type(core::detail::constructForall())
+      : binder_type(core::detail::default_values::Forall)
     {}
 
     /// \brief Constructor.
@@ -156,7 +228,25 @@ class forall_binder: public binder_type
 inline
 bool is_forall_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsForall(x);
+  return x.function() == core::detail::function_symbols::Forall;
+}
+
+// prototype declaration
+std::string pp(const forall_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const forall_binder& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(forall_binder& t1, forall_binder& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -166,7 +256,7 @@ class exists_binder: public binder_type
   public:
     /// \brief Default constructor.
     exists_binder()
-      : binder_type(core::detail::constructExists())
+      : binder_type(core::detail::default_values::Exists)
     {}
 
     /// \brief Constructor.
@@ -184,7 +274,25 @@ class exists_binder: public binder_type
 inline
 bool is_exists_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsExists(x);
+  return x.function() == core::detail::function_symbols::Exists;
+}
+
+// prototype declaration
+std::string pp(const exists_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const exists_binder& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(exists_binder& t1, exists_binder& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -194,7 +302,7 @@ class lambda_binder: public binder_type
   public:
     /// \brief Default constructor.
     lambda_binder()
-      : binder_type(core::detail::constructLambda())
+      : binder_type(core::detail::default_values::Lambda)
     {}
 
     /// \brief Constructor.
@@ -212,59 +320,30 @@ class lambda_binder: public binder_type
 inline
 bool is_lambda_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsLambda(x);
+  return x.function() == core::detail::function_symbols::Lambda;
 }
 
+// prototype declaration
+std::string pp(const lambda_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const lambda_binder& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(lambda_binder& t1, lambda_binder& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated classes ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::binder_type& t1, mcrl2::data::binder_type& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::untyped_set_or_bag_comprehension_binder& t1, mcrl2::data::untyped_set_or_bag_comprehension_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::set_comprehension_binder& t1, mcrl2::data::set_comprehension_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::bag_comprehension_binder& t1, mcrl2::data::bag_comprehension_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::forall_binder& t1, mcrl2::data::forall_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::exists_binder& t1, mcrl2::data::exists_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::lambda_binder& t1, mcrl2::data::lambda_binder& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_BINDER_TYPE_H

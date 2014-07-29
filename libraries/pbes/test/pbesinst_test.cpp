@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -336,11 +337,16 @@ void test_cabp()
   std::string expr = "(exists d_RM_00: DATA. (val(d_RM_00 == d1) && val(s31_RM == 1)) && X(2, bit0, frame(d_RM_00, b_RM), s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || (((((((((((exists d_RM_00: DATA. (val(!(d_RM_00 == d1)) && val(s31_RM == 1)) && Y(2, bit0, frame(d_RM_00, b_RM), s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || (exists e4_RF1_00: Bool, d4_RF1_00: DATA. val((s32_K == 3 && s33_RF1 == 1) && if(e4_RF1_00, frame(d4_RF1_00, invert(b_RF1)), frame(d4_RF1_00, b_RF1)) == f_K) && Y(s31_RM, b_RM, f_RM, 1, frame(d1, bit0), if(e4_RF1_00, 1, 2), if(e4_RF1_00, d1, d4_RF1_00), b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1))) || val(s32_K == 4 && s33_RF1 == 1) && Y(s31_RM, b_RM, f_RM, 1, frame(d1, bit0), 1, d1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || val(s33_RF1 == 2) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, 3, d1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || val(s35_L == 1) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, 2, b_AS1, s36_AR1, b_AR1)) || (exists e5_L_00: Enum3. val(C3_fun2(e5_L_00, true, true, true) && s35_L == 2) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, C3_fun(e5_L_00, 1, 3, 4), C3_fun3(e5_L_00, bit0, b_L, bit0), s36_AR1, b_AR1))) || val(s35_L == 4 && s36_AR1 == 1) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, 1, bit0, 1, b_AR1)) || (exists e7_AR1_00: Bool. val((s35_L == 3 && s36_AR1 == 1) && if(e7_AR1_00, b_AR1, invert(b_AR1)) == b_L) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, 1, bit0, if(e7_AR1_00, 2, 1), b_AR1))) || val(s33_RF1 == 3) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, 1, d1, invert(b_RF1), invert(b_AS1), s35_L, b_L, s36_AR1, b_AR1)) || (exists e_K_00: Enum3. val(C3_fun2(e_K_00, true, true, true) && s32_K == 2) && Y(s31_RM, b_RM, f_RM, C3_fun(e_K_00, 1, 3, 4), C3_fun1(e_K_00, frame(d1, bit0), f_K, frame(d1, bit0)), s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1))) || val(s31_RM == 2 && s32_K == 1) && Y(2, bit0, f_RM, 2, f_RM, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || val(s31_RM == 2 && s36_AR1 == 2) && Y(1, invert(getb(f_RM)), frame(d1, bit0), s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, 1, invert(b_AR1))";
   std::string subst = "s31_RM:Pos := 2; b_RM:bit := bit0; f_RM:Frame := frame(d2, bit0); s32_K:Pos := 3; f_K:Frame := frame(d2, bit0); s33_RF1:Pos := 1; d_RF1:DATA := d1; b_RF1:bit := bit0; b_AS1:bit := bit1; s35_L:Pos := 1; b_L:bit := bit0; s36_AR1:Pos := 1; b_AR1:bit := bit0";
 
-  pbesinst_substitution_function sigma;
+  data::mutable_map_substitution<> sigma;
   pbes_expression t = parse_pbes_expression(expr, subst, p, sigma);
   pbesinst_algorithm algorithm(p.data());
-  pbesinst_rewriter& R = algorithm.rewriter();
-  pbes_expression z = R(t, sigma);
+  enumerate_quantifiers_rewriter& R = algorithm.rewriter();
+  data::mutable_indexed_substitution<> sigma1;
+  for (auto i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    sigma1[i->first] = i->second;
+  }
+  pbes_expression z = R(t, sigma1);
 }
 
 // Note: this test takes a lot of time!
@@ -483,8 +489,7 @@ void test_abp_no_deadlock()
   pbes p = lps2pbes(spec, formula, timed);
   data::rewriter::strategy rewriter_strategy = data::jitty;
   bool print_equations = true;
-  bool print_rewriter_output = true;
-  pbes_system::pbesinst_algorithm algorithm(p.data(), rewriter_strategy, print_equations, print_rewriter_output);
+  pbes_system::pbesinst_algorithm algorithm(p.data(), rewriter_strategy, print_equations);
   algorithm.run(p);
   pbes q = algorithm.get_result();
   std::cout << "--- ABP ---" << std::endl;
@@ -533,6 +538,7 @@ void test_pbesinst_symbolic()
 int test_main(int argc, char** argv)
 {
   mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug, "symbolic");
+  mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug);
 
   test_pbesinst_symbolic();
   pbes_system::detail::set_bes_equation_limit(100000);

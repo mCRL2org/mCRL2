@@ -16,6 +16,8 @@
 #ifndef MCRL2_LTS_LTS_PREORDER_H
 #define MCRL2_LTS_LTS_PREORDER_H
 
+#include <string>
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

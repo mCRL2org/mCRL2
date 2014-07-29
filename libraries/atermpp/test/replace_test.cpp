@@ -9,6 +9,7 @@
 /// \file replace_test.cpp
 /// \brief Add your file description here.
 
+#include <vector>
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
@@ -142,10 +143,133 @@ void test_replace()
   BOOST_CHECK(z == read_term_from_string("f(f(x),f(y),h(f(x)))"));
 }
 
-int test_main(int argc, char* argv[])
+inline
+const atermpp::function_symbol& f2()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("f", 2);
+  return f;
+}
+
+inline
+const atermpp::function_symbol& f3()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("f", 3);
+  return f;
+}
+
+struct replace_f
+{
+  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  {
+    if (x.function() == f3())
+    {
+      return atermpp::aterm_appl(f2(), x.begin(), --x.end());
+    }
+    return x;
+  }
+};
+
+// DataVarId
+inline
+const atermpp::function_symbol& function_symbol_DataVarId()
+{
+  static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 3);
+  return function_symbol_DataVarId;
+}
+
+// DataVarIdNoIndex
+inline
+const atermpp::function_symbol& function_symbol_DataVarIdNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("DataVarIdNoIndex", 2);
+  return f;
+}
+
+// OpId
+inline
+const atermpp::function_symbol& function_symbol_OpId()
+{
+  static atermpp::function_symbol function_symbol_OpId = atermpp::function_symbol("OpId", 3);
+  return function_symbol_OpId;
+}
+
+// OpIdIndex
+inline
+const atermpp::function_symbol& function_symbol_OpIdNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("OpIdNoIndex", 2);
+  return f;
+}
+
+// PropVarInst
+inline
+const atermpp::function_symbol& function_symbol_PropVarInst()
+{
+  static atermpp::function_symbol function_symbol_PropVarInst = atermpp::function_symbol("PropVarInst", 3);
+  return function_symbol_PropVarInst;
+}
+
+// PropVarInstNoIndex
+inline
+const atermpp::function_symbol& function_symbol_PropVarInstNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("PropVarInstNoIndex", 2);
+  return f;
+}
+
+struct index_remover
+{
+  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  {
+    if (x.function() == function_symbol_DataVarId())
+    {
+      return atermpp::aterm_appl(function_symbol_DataVarIdNoIndex(), x.begin(), --x.end());
+    }
+    else if (x.function() == function_symbol_OpId())
+    {
+      return atermpp::aterm_appl(function_symbol_OpIdNoIndex(), x.begin(), --x.end());
+    }
+    else if (x.function() == function_symbol_PropVarInst())
+    {
+      return atermpp::aterm_appl(function_symbol_PropVarInstNoIndex(), x.begin(), --x.end());
+    }
+    return x;
+  }
+};
+
+void test1()
+{
+  atermpp::aterm t = atermpp::read_term_from_string("g(h(x,[f(y,p(q),1)]))");
+  t = atermpp::replace(t, replace_f());
+  BOOST_CHECK(t == atermpp::read_term_from_string("g(h(x,[f(y,p(q))]))"));
+}
+
+void test2()
+{
+  atermpp::aterm t  = atermpp::read_term_from_string("g(h(z(x,[f(y,p(q),1)],0)))");
+  atermpp::aterm t1 = atermpp::replace(t, replace_f());
+  atermpp::aterm t2 = atermpp::read_term_from_string("g(h(z(x,[f(y,p(q))],0)))");
+  BOOST_CHECK(t1 == t2);
+}
+
+void test3()
+{
+  atermpp::aterm t = atermpp::read_term_from_string("PBES(PBInit(PropVarInst(X,[OpId(@c0,SortId(Nat),131)],0)))");
+  atermpp::aterm t1 = atermpp::replace(t, index_remover());
+  atermpp::aterm t2 = atermpp::read_term_from_string("PBES(PBInit(PropVarInstNoIndex(X,[OpId(@c0,SortId(Nat),131)])))");
+  atermpp::aterm t3 = atermpp::bottom_up_replace(t, index_remover());
+  atermpp::aterm t4 = atermpp::read_term_from_string("PBES(PBInit(PropVarInstNoIndex(X,[OpIdNoIndex(@c0,SortId(Nat))])))");
+  BOOST_CHECK(t1 == t2);
+  BOOST_CHECK(t3 == t4);
+}
+
+int test_main(int argc, char** argv)
 {
   test_find();
   test_replace();
+  test1();
+  test2();
+  test3();
 
   return 0;
 }

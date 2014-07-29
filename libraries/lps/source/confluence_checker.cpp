@@ -14,9 +14,9 @@
 #include <algorithm>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/data/substitutions.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -164,12 +164,12 @@ data_expression get_equation_from_assignments(
 // ----------------------------------------------------------------------------------------------
 static
 data_expression get_subst_equation_from_actions(
-  const action_list a_actions,
+  const process::action_list a_actions,
   data::mutable_map_substitution<>& a_substitutions)
 {
   data_expression v_result = sort_bool::true_();
 
-  for (action_list::const_iterator i=a_actions.begin(); i!=a_actions.end(); ++i)
+  for (auto i=a_actions.begin(); i!=a_actions.end(); ++i)
   {
     const data_expression_list v_expressions = i->arguments();
     for (data_expression_list::const_iterator j=v_expressions.begin(); j!=v_expressions.end(); ++j)
@@ -206,7 +206,7 @@ data_expression get_confluence_condition(
 
   const data_expression v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
 
-  const action_list v_actions =a_summand_2.multi_action().actions();
+  const process::action_list v_actions =a_summand_2.multi_action().actions();
   data_expression v_rhs;
 
   if (v_actions.empty())
@@ -233,7 +233,7 @@ data_expression get_confluence_condition(
 static
 bool has_ctau_action(const specification& a_lps)
 {
-  const action_label_list v_action_specification = a_lps.action_labels();
+  const process::action_label_list v_action_specification = a_lps.action_labels();
   return std::find(v_action_specification.begin(),v_action_specification.end(),make_ctau_act_id())!=v_action_specification.end();
 }
 
@@ -502,7 +502,7 @@ specification Confluence_Checker::check_confluence_and_mark(const data_expressio
     v_process_equation.deadlock_summands(),
     v_summands);
 
-  action_label_list v_act_decls=f_lps.action_labels();
+  process::action_label_list v_act_decls=f_lps.action_labels();
   if (v_is_marked && !has_ctau_action(f_lps))
   {
     v_act_decls.push_front(make_ctau_act_id());

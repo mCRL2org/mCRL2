@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -15,10 +15,11 @@
 template<class ForwardIterator>
 void ParityGame::make_subgame( const ParityGame &game,
                                ForwardIterator vertices_begin,
-                               ForwardIterator vertices_end )
+                               ForwardIterator vertices_end,
+                               bool proper,
+                               StaticGraph::EdgeDirection edge_dir )
 {
     assert(this != &game);
-	  assert(vertices_end >= vertices_begin);
 
     const verti num_vertices = std::distance(vertices_begin, vertices_end);
     ForwardIterator it;
@@ -29,7 +30,8 @@ void ParityGame::make_subgame( const ParityGame &game,
     {
         vertex_[v] = game.vertex_[*it];
     }
-    graph_.make_subgraph(game.graph_, vertices_begin, vertices_end);
+    graph_.make_subgraph(game.graph_, vertices_begin, vertices_end,
+                         proper, edge_dir);
     recalculate_cardinalities(num_vertices);
 }
 

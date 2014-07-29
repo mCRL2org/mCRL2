@@ -24,6 +24,7 @@
 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/specification.h"
@@ -78,15 +79,15 @@ class torx_tool : public rewriter_tool< input_tool >
       }
 
       std::string result;
-      for (action_list::const_iterator i = ma.actions().begin(); i != ma.actions().end(); i++)
+      for (auto i = ma.actions().begin(); i != ma.actions().end(); i++)
       {
-        result += lps::pp(i->label());
+        result += process::pp(i->label());
         for (data::data_expression_list::const_iterator j = i->arguments().begin(); j != i->arguments().end(); j++)
         {
           result += "!" + data::pp(*j);
         }
 
-        action_list::const_iterator next = i;
+        auto next = i;
         next++;
         if (next != ma.actions().end())
         {
@@ -110,11 +111,10 @@ class torx_tool : public rewriter_tool< input_tool >
 
     bool run()
     {
-      specification lps_specification;
-      lps_specification.load(m_input_filename);
+      specification spec;
+      load_lps(spec, m_input_filename);
 
-      next_state_generator generator(lps_specification, data::rewriter(lps_specification.data(), rewrite_strategy()));
-      next_state_generator::substitution_t substitution;
+      next_state_generator generator(spec, data::rewriter(spec.data(), rewrite_strategy()));
 
       state current = generator.initial_state();
       std::deque<state> states;
@@ -187,9 +187,10 @@ class torx_tool : public rewriter_tool< input_tool >
               std::cout << "EB" << std::endl;
               current = states[index];
 
-              for(size_t summand_index = 0; summand_index < lps_specification.process().action_summands().size(); ++summand_index)
+              for(size_t summand_index = 0; summand_index < spec.process().action_summands().size(); ++summand_index)
               {
-                for (next_state_generator::iterator i = generator.begin(current, &substitution, summand_index); i != generator.end(); i++)
+                next_state_generator::enumerator_queue_t enumeration_queue;
+                for (next_state_generator::iterator i = generator.begin(current, summand_index, &enumeration_queue); i != generator.end(); i++)
                 {
                   /* Rebuild transition string in Torx format*/
                   std::cout << "Ee " << "_e" << summand_index << "." << states.size() << "\t" << (i->action().actions().empty() ? 0 : 1) << "\t" << 1 << "\t" << print_torx_action(i->action()) << "\t\t\t";

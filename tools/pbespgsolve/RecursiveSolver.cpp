@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -13,15 +13,44 @@
 #include <set>
 #include <assert.h>
 
-size_t first_inversion(const ParityGame &game)
+/*! Returns the complement of a vertex set.
+
+    This function returns a vector of increasing vertex indices between 0 and
+    V (exclusive) where 0 <= v < V is in the result iff. it is not included in
+    the set s.
+*/
+static std::vector<verti> get_complement(verti V, const DenseSet<verti> &s)
 {
-    size_t d = game.d();
-    size_t q = 0;
+    std::vector<verti> res;
+    verti n = V - s.size();
+    res.reserve(n);
+    DenseSet<verti>::const_iterator it = s.begin(), end = s.end();
+    verti v = 0;
+    while (it != end)
+    {
+        verti w = *it;
+        while (v < w) res.push_back(v++);
+        ++v;
+        ++it;
+    }
+    while (v < V) res.push_back(v++);
+    assert(n == (verti)res.size());
+    return res;
+}
+
+/*! Returns the first inversion in parity for priorities occurring in the given
+    game; i.e. the least value 'p` such that there is a priority `q` such that
+    cardinality(q) > 0 && cardinality(p) > 0 && q < p && q%2 != p%2.
+
+    If there are no inversions, the priority limit, d, is returned instead. */
+int first_inversion(const ParityGame &game)
+{
+    int d = game.d();
+    int q = 0;
     while (q < d && game.cardinality(q) == 0) ++q;
-    size_t p = q + 1;
+    int p = q + 1;
     while (p < d && game.cardinality(p) == 0) p += 2;
-    if (p > d) p = d;
-    return p;
+    return p < d ? p : d;
 }
 
 RecursiveSolver::RecursiveSolver(const ParityGame &game)
@@ -59,10 +88,10 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
 {
     if (aborted()) return false;
 
-    size_t prio;
+    int prio;
     while ((prio = first_inversion(game)) < game.d())
     {
-        mCRL2log(mcrl2::log::debug) << "prio=" << prio << std::endl;
+        mCRL2log(mcrl2::log::debug) <<"prio=" << prio << std::endl;
 
         const StaticGraph &graph = game.graph();
         const verti V = graph.V();
@@ -77,19 +106,19 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
             {
                 if (game.priority(v) < prio) min_prio_attr.insert(v);
             }
-            mCRL2log(mcrl2::log::debug) << "|min_prio|=" << min_prio_attr.size() << std::endl;
+            mCRL2log(mcrl2::log::debug) <<"|min_prio|=" << min_prio_attr.size() << std::endl;
             assert(!min_prio_attr.empty());
-            make_attractor_set(game, player, min_prio_attr, strat);
+            make_attractor_set_2(game, player, min_prio_attr, strat);
             mCRL2log(mcrl2::log::debug) << "|min_prio_attr|=" << min_prio_attr.size() << std::endl;
             if (min_prio_attr.size() == V) break;
-            get_complement(V, min_prio_attr.begin(), min_prio_attr.end())
-                .swap(unsolved);
+            get_complement(V, min_prio_attr).swap(unsolved);
         }
 
         // Solve vertices not in the minimum priority attractor set:
         {
             ParityGame subgame;
-            subgame.make_subgame(game, unsolved.begin(), unsolved.end());
+            subgame.make_subgame(game, unsolved.begin(), unsolved.end(),
+                                 true, StaticGraph::EDGE_PREDECESSOR);
             Substrategy substrat(strat, unsolved);
             if (!solve(subgame, substrat)) return false;
 
@@ -107,16 +136,16 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
             }
             mCRL2log(mcrl2::log::debug) << "|lost|=" << lost_attr.size() << std::endl;
             if (lost_attr.empty()) break;
-            make_attractor_set(game, opponent, lost_attr, strat);
+            make_attractor_set_2(game, opponent, lost_attr, strat);
             mCRL2log(mcrl2::log::debug) << "|lost_attr|=" << lost_attr.size() << std::endl;
-            get_complement(V, lost_attr.begin(), lost_attr.end())
-                .swap(unsolved);
+            get_complement(V, lost_attr).swap(unsolved);
         }
 
         // Repeat with subgame of which vertices won by odd have been removed:
         {
             ParityGame subgame;
-            subgame.make_subgame(game, unsolved.begin(), unsolved.end());
+            subgame.make_subgame(game, unsolved.begin(), unsolved.end(),
+                                 true, StaticGraph::EDGE_PREDECESSOR);
             Substrategy substrat(strat, unsolved);
             strat.swap(substrat);
             game.swap(subgame);
@@ -129,17 +158,46 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
     // suffices to pick an arbitrary successor for these vertices:
     const StaticGraph &graph = game.graph();
     const verti V = graph.V();
-    for (verti v = 0; v < V; ++v)
+    if (graph.edge_dir() & StaticGraph::EDGE_SUCCESSOR)
     {
-        if (game.priority(v) < prio)
+        for (verti v = 0; v < V; ++v)
         {
-            if (game.player(v) == static_cast<int>(game.priority(v)%2))
+            if (game.priority(v) < prio)
             {
-                strat[v] = *graph.succ_begin(v);
+                if (game.player(v) == game.priority(v)%2)
+                {
+                    strat[v] = *graph.succ_begin(v);
+                }
+                else
+                {
+                    strat[v] = NO_VERTEX;
+                }
             }
-            else
+        }
+    }
+    else
+    {
+        // NOTE: this assumes the graph is a proper game graph!
+        // If there are min. priority vertices without any successors, we won't
+        // be able to find them this way!
+        for (verti w = 0; w < V; ++w)
+        {
+            for (StaticGraph::const_iterator it = graph.pred_begin(w);
+                it != graph.pred_end(w); ++it)
             {
-                strat[v] = NO_VERTEX;
+                const verti v = *it;
+
+                if (game.priority(v) < prio)
+                {
+                    if (game.player(v) == game.priority(v)%2)
+                    {
+                        strat[v] = w;
+                    }
+                    else
+                    {
+                        strat[v] = NO_VERTEX;
+                    }
+                }
             }
         }
     }

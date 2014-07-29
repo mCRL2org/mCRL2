@@ -16,12 +16,10 @@
 
 #include <string>
 #include <cassert>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/precedence.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
 
@@ -38,7 +36,7 @@ class state_formula: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     state_formula()
-      : atermpp::aterm_appl(core::detail::constructStateFrm())
+      : atermpp::aterm_appl(core::detail::default_values::StateFrm)
     {}
 
     /// \brief Constructor.
@@ -65,7 +63,6 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 
 /// \brief vector of state_formulas
 typedef std::vector<state_formula>    state_formula_vector;
-
 
 // prototypes
 inline bool is_true(const atermpp::aterm_appl& x);
@@ -112,6 +109,24 @@ bool is_state_formula(const atermpp::aterm_appl& x)
          state_formulas::is_mu(x);
 }
 
+// prototype declaration
+std::string pp(const state_formula& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const state_formula& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(state_formula& t1, state_formula& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value true for state formulas
 class true_: public state_formula
@@ -119,7 +134,7 @@ class true_: public state_formula
   public:
     /// \brief Default constructor.
     true_()
-      : state_formula(core::detail::constructStateTrue())
+      : state_formula(core::detail::default_values::StateTrue)
     {}
 
     /// \brief Constructor.
@@ -137,7 +152,25 @@ class true_: public state_formula
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateTrue(x);
+  return x.function() == core::detail::function_symbols::StateTrue;
+}
+
+// prototype declaration
+std::string pp(const true_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const true_& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(true_& t1, true_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -147,7 +180,7 @@ class false_: public state_formula
   public:
     /// \brief Default constructor.
     false_()
-      : state_formula(core::detail::constructStateFalse())
+      : state_formula(core::detail::default_values::StateFalse)
     {}
 
     /// \brief Constructor.
@@ -165,7 +198,25 @@ class false_: public state_formula
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateFalse(x);
+  return x.function() == core::detail::function_symbols::StateFalse;
+}
+
+// prototype declaration
+std::string pp(const false_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const false_& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(false_& t1, false_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -175,7 +226,7 @@ class not_: public state_formula
   public:
     /// \brief Default constructor.
     not_()
-      : state_formula(core::detail::constructStateNot())
+      : state_formula(core::detail::default_values::StateNot)
     {}
 
     /// \brief Constructor.
@@ -188,12 +239,12 @@ class not_: public state_formula
 
     /// \brief Constructor.
     not_(const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateNot(operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNot(), operand))
     {}
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<state_formula>((*this)[0]);
     }
 };
 
@@ -203,7 +254,25 @@ class not_: public state_formula
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateNot(x);
+  return x.function() == core::detail::function_symbols::StateNot;
+}
+
+// prototype declaration
+std::string pp(const not_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const not_& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(not_& t1, not_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -213,7 +282,7 @@ class and_: public state_formula
   public:
     /// \brief Default constructor.
     and_()
-      : state_formula(core::detail::constructStateAnd())
+      : state_formula(core::detail::default_values::StateAnd)
     {}
 
     /// \brief Constructor.
@@ -226,17 +295,17 @@ class and_: public state_formula
 
     /// \brief Constructor.
     and_(const state_formula& left, const state_formula& right)
-      : state_formula(core::detail::gsMakeStateAnd(left, right))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateAnd(), left, right))
     {}
 
     const state_formula& left() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<state_formula>((*this)[0]);
     }
 
     const state_formula& right() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -246,7 +315,25 @@ class and_: public state_formula
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateAnd(x);
+  return x.function() == core::detail::function_symbols::StateAnd;
+}
+
+// prototype declaration
+std::string pp(const and_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const and_& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(and_& t1, and_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -256,7 +343,7 @@ class or_: public state_formula
   public:
     /// \brief Default constructor.
     or_()
-      : state_formula(core::detail::constructStateOr())
+      : state_formula(core::detail::default_values::StateOr)
     {}
 
     /// \brief Constructor.
@@ -269,17 +356,17 @@ class or_: public state_formula
 
     /// \brief Constructor.
     or_(const state_formula& left, const state_formula& right)
-      : state_formula(core::detail::gsMakeStateOr(left, right))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateOr(), left, right))
     {}
 
     const state_formula& left() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<state_formula>((*this)[0]);
     }
 
     const state_formula& right() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -289,7 +376,25 @@ class or_: public state_formula
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateOr(x);
+  return x.function() == core::detail::function_symbols::StateOr;
+}
+
+// prototype declaration
+std::string pp(const or_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const or_& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(or_& t1, or_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -299,7 +404,7 @@ class imp: public state_formula
   public:
     /// \brief Default constructor.
     imp()
-      : state_formula(core::detail::constructStateImp())
+      : state_formula(core::detail::default_values::StateImp)
     {}
 
     /// \brief Constructor.
@@ -312,17 +417,17 @@ class imp: public state_formula
 
     /// \brief Constructor.
     imp(const state_formula& left, const state_formula& right)
-      : state_formula(core::detail::gsMakeStateImp(left, right))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateImp(), left, right))
     {}
 
     const state_formula& left() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<state_formula>((*this)[0]);
     }
 
     const state_formula& right() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -332,7 +437,25 @@ class imp: public state_formula
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateImp(x);
+  return x.function() == core::detail::function_symbols::StateImp;
+}
+
+// prototype declaration
+std::string pp(const imp& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const imp& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(imp& t1, imp& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -342,7 +465,7 @@ class forall: public state_formula
   public:
     /// \brief Default constructor.
     forall()
-      : state_formula(core::detail::constructStateForall())
+      : state_formula(core::detail::default_values::StateForall)
     {}
 
     /// \brief Constructor.
@@ -355,17 +478,17 @@ class forall: public state_formula
 
     /// \brief Constructor.
     forall(const data::variable_list& variables, const state_formula& body)
-      : state_formula(core::detail::gsMakeStateForall(variables, body))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateForall(), variables, body))
     {}
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const state_formula& body() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -375,7 +498,25 @@ class forall: public state_formula
 inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateForall(x);
+  return x.function() == core::detail::function_symbols::StateForall;
+}
+
+// prototype declaration
+std::string pp(const forall& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const forall& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(forall& t1, forall& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -385,7 +526,7 @@ class exists: public state_formula
   public:
     /// \brief Default constructor.
     exists()
-      : state_formula(core::detail::constructStateExists())
+      : state_formula(core::detail::default_values::StateExists)
     {}
 
     /// \brief Constructor.
@@ -398,17 +539,17 @@ class exists: public state_formula
 
     /// \brief Constructor.
     exists(const data::variable_list& variables, const state_formula& body)
-      : state_formula(core::detail::gsMakeStateExists(variables, body))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateExists(), variables, body))
     {}
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const state_formula& body() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -418,7 +559,25 @@ class exists: public state_formula
 inline
 bool is_exists(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateExists(x);
+  return x.function() == core::detail::function_symbols::StateExists;
+}
+
+// prototype declaration
+std::string pp(const exists& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const exists& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(exists& t1, exists& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -428,7 +587,7 @@ class must: public state_formula
   public:
     /// \brief Default constructor.
     must()
-      : state_formula(core::detail::constructStateMust())
+      : state_formula(core::detail::default_values::StateMust)
     {}
 
     /// \brief Constructor.
@@ -441,17 +600,17 @@ class must: public state_formula
 
     /// \brief Constructor.
     must(const regular_formulas::regular_formula& formula, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateMust(formula, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMust(), formula, operand))
     {}
 
     const regular_formulas::regular_formula& formula() const
     {
-      return atermpp::aterm_cast<const regular_formulas::regular_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<regular_formulas::regular_formula>((*this)[0]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -461,7 +620,25 @@ class must: public state_formula
 inline
 bool is_must(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateMust(x);
+  return x.function() == core::detail::function_symbols::StateMust;
+}
+
+// prototype declaration
+std::string pp(const must& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const must& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(must& t1, must& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -471,7 +648,7 @@ class may: public state_formula
   public:
     /// \brief Default constructor.
     may()
-      : state_formula(core::detail::constructStateMay())
+      : state_formula(core::detail::default_values::StateMay)
     {}
 
     /// \brief Constructor.
@@ -484,17 +661,17 @@ class may: public state_formula
 
     /// \brief Constructor.
     may(const regular_formulas::regular_formula& formula, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateMay(formula, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMay(), formula, operand))
     {}
 
     const regular_formulas::regular_formula& formula() const
     {
-      return atermpp::aterm_cast<const regular_formulas::regular_formula>(atermpp::arg1(*this));
+      return atermpp::down_cast<regular_formulas::regular_formula>((*this)[0]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
+      return atermpp::down_cast<state_formula>((*this)[1]);
     }
 };
 
@@ -504,7 +681,25 @@ class may: public state_formula
 inline
 bool is_may(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateMay(x);
+  return x.function() == core::detail::function_symbols::StateMay;
+}
+
+// prototype declaration
+std::string pp(const may& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const may& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(may& t1, may& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -514,7 +709,7 @@ class yaled: public state_formula
   public:
     /// \brief Default constructor.
     yaled()
-      : state_formula(core::detail::constructStateYaled())
+      : state_formula(core::detail::default_values::StateYaled)
     {}
 
     /// \brief Constructor.
@@ -532,7 +727,25 @@ class yaled: public state_formula
 inline
 bool is_yaled(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateYaled(x);
+  return x.function() == core::detail::function_symbols::StateYaled;
+}
+
+// prototype declaration
+std::string pp(const yaled& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const yaled& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(yaled& t1, yaled& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -542,7 +755,7 @@ class yaled_timed: public state_formula
   public:
     /// \brief Default constructor.
     yaled_timed()
-      : state_formula(core::detail::constructStateYaledTimed())
+      : state_formula(core::detail::default_values::StateYaledTimed)
     {}
 
     /// \brief Constructor.
@@ -555,12 +768,12 @@ class yaled_timed: public state_formula
 
     /// \brief Constructor.
     yaled_timed(const data::data_expression& time_stamp)
-      : state_formula(core::detail::gsMakeStateYaledTimed(time_stamp))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateYaledTimed(), time_stamp))
     {}
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 };
 
@@ -570,7 +783,25 @@ class yaled_timed: public state_formula
 inline
 bool is_yaled_timed(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateYaledTimed(x);
+  return x.function() == core::detail::function_symbols::StateYaledTimed;
+}
+
+// prototype declaration
+std::string pp(const yaled_timed& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const yaled_timed& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(yaled_timed& t1, yaled_timed& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -580,7 +811,7 @@ class delay: public state_formula
   public:
     /// \brief Default constructor.
     delay()
-      : state_formula(core::detail::constructStateDelay())
+      : state_formula(core::detail::default_values::StateDelay)
     {}
 
     /// \brief Constructor.
@@ -598,7 +829,25 @@ class delay: public state_formula
 inline
 bool is_delay(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateDelay(x);
+  return x.function() == core::detail::function_symbols::StateDelay;
+}
+
+// prototype declaration
+std::string pp(const delay& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const delay& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(delay& t1, delay& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -608,7 +857,7 @@ class delay_timed: public state_formula
   public:
     /// \brief Default constructor.
     delay_timed()
-      : state_formula(core::detail::constructStateDelayTimed())
+      : state_formula(core::detail::default_values::StateDelayTimed)
     {}
 
     /// \brief Constructor.
@@ -621,12 +870,12 @@ class delay_timed: public state_formula
 
     /// \brief Constructor.
     delay_timed(const data::data_expression& time_stamp)
-      : state_formula(core::detail::gsMakeStateDelayTimed(time_stamp))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateDelayTimed(), time_stamp))
     {}
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg1(*this));
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 };
 
@@ -636,7 +885,25 @@ class delay_timed: public state_formula
 inline
 bool is_delay_timed(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateDelayTimed(x);
+  return x.function() == core::detail::function_symbols::StateDelayTimed;
+}
+
+// prototype declaration
+std::string pp(const delay_timed& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const delay_timed& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(delay_timed& t1, delay_timed& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -646,7 +913,7 @@ class variable: public state_formula
   public:
     /// \brief Default constructor.
     variable()
-      : state_formula(core::detail::constructStateVar())
+      : state_formula(core::detail::default_values::StateVar)
     {}
 
     /// \brief Constructor.
@@ -659,22 +926,22 @@ class variable: public state_formula
 
     /// \brief Constructor.
     variable(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : state_formula(core::detail::gsMakeStateVar(name, arguments))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), name, arguments))
     {}
 
     /// \brief Constructor.
     variable(const std::string& name, const data::data_expression_list& arguments)
-      : state_formula(core::detail::gsMakeStateVar(core::identifier_string(name), arguments))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), core::identifier_string(name), arguments))
     {}
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -684,7 +951,25 @@ class variable: public state_formula
 inline
 bool is_variable(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateVar(x);
+  return x.function() == core::detail::function_symbols::StateVar;
+}
+
+// prototype declaration
+std::string pp(const variable& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const variable& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(variable& t1, variable& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -694,7 +979,7 @@ class nu: public state_formula
   public:
     /// \brief Default constructor.
     nu()
-      : state_formula(core::detail::constructStateNu())
+      : state_formula(core::detail::default_values::StateNu)
     {}
 
     /// \brief Constructor.
@@ -707,27 +992,27 @@ class nu: public state_formula
 
     /// \brief Constructor.
     nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateNu(name, assignments, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), name, assignments, operand))
     {}
 
     /// \brief Constructor.
     nu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateNu(core::identifier_string(name), assignments, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), core::identifier_string(name), assignments, operand))
     {}
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::assignment_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<data::assignment_list>((*this)[1]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg3(*this));
+      return atermpp::down_cast<state_formula>((*this)[2]);
     }
 };
 
@@ -737,7 +1022,25 @@ class nu: public state_formula
 inline
 bool is_nu(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateNu(x);
+  return x.function() == core::detail::function_symbols::StateNu;
+}
+
+// prototype declaration
+std::string pp(const nu& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const nu& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(nu& t1, nu& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -747,7 +1050,7 @@ class mu: public state_formula
   public:
     /// \brief Default constructor.
     mu()
-      : state_formula(core::detail::constructStateMu())
+      : state_formula(core::detail::default_values::StateMu)
     {}
 
     /// \brief Constructor.
@@ -760,27 +1063,27 @@ class mu: public state_formula
 
     /// \brief Constructor.
     mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateMu(name, assignments, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), name, assignments, operand))
     {}
 
     /// \brief Constructor.
     mu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateMu(core::identifier_string(name), assignments, operand))
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), core::identifier_string(name), assignments, operand))
     {}
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::assignment_list>(atermpp::list_arg2(*this));
+      return atermpp::down_cast<data::assignment_list>((*this)[1]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::aterm_cast<const state_formula>(atermpp::arg3(*this));
+      return atermpp::down_cast<state_formula>((*this)[2]);
     }
 };
 
@@ -790,56 +1093,65 @@ class mu: public state_formula
 inline
 bool is_mu(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateMu(x);
+  return x.function() == core::detail::function_symbols::StateMu;
 }
 
+// prototype declaration
+std::string pp(const mu& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const mu& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(mu& t1, mu& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated classes ---//
 
-inline
-int precedence(const state_formula& x)
+inline int left_precedence(const mu&)     { return 1; }
+inline int left_precedence(const nu&)     { return 1; }
+inline int left_precedence(const forall&) { return 2; }
+inline int left_precedence(const exists&) { return 2; }
+inline int left_precedence(const imp&)    { return 3; }
+inline int left_precedence(const or_&)    { return 4; }
+inline int left_precedence(const and_&)   { return 5; }
+inline int left_precedence(const must&)   { return 6; }
+inline int left_precedence(const may&)    { return 6; }
+inline int left_precedence(const not_&)   { return 7; }
+inline int left_precedence(const state_formula& x)
 {
-  if (is_mu(x) || is_nu(x))
-  {
-    return 1;
-  }
-  else if (is_forall(x) || is_exists(x))
-  {
-    return 2;
-  }
-  else if (is_imp(x))
-  {
-    return 3;
-  }
-  else if (is_or(x))
-  {
-    return 4;
-  }
-  else if (is_and(x))
-  {
-    return 5;
-  }
-  else if (is_must(x) || is_may(x))
-  {
-    return 6;
-  }
-  else if (is_not(x))
-  {
-    return 7;
-  }
+  if      (is_mu(x))     { return left_precedence(static_cast<const mu&>(x)); }
+  else if (is_nu(x))     { return left_precedence(static_cast<const nu&>(x)); }
+  else if (is_forall(x)) { return left_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return left_precedence(static_cast<const exists&>(x)); }
+  else if (is_imp(x))    { return left_precedence(static_cast<const imp&>(x)); }
+  else if (is_or(x))     { return left_precedence(static_cast<const or_&>(x)); }
+  else if (is_and(x))    { return left_precedence(static_cast<const and_&>(x)); }
+  else if (is_must(x))   { return left_precedence(static_cast<const must&>(x)); }
+  else if (is_may(x))    { return left_precedence(static_cast<const may&>(x)); }
+  else if (is_not(x))    { return left_precedence(static_cast<const not_&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
-// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
-inline int precedence(const mu& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const nu& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const forall& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const exists& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const imp& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const and_& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const or_& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const must& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const may& x) { return precedence(static_cast<const state_formula&>(x)); }
-inline int precedence(const not_& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int right_precedence(const mu& x)     { return (std::max)(left_precedence(x), left_precedence(static_cast<const mu&>(x).operand())); }
+inline int right_precedence(const nu& x)     { return (std::max)(left_precedence(x), left_precedence(static_cast<const nu&>(x).operand())); }
+inline int right_precedence(const forall& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const forall&>(x).body())); }
+inline int right_precedence(const exists& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const exists&>(x).body())); }
+inline int right_precedence(const state_formula& x)
+{
+       if (is_mu(x)    ) { return right_precedence(static_cast<const mu&>(x)); }
+  else if (is_nu(x)    ) { return right_precedence(static_cast<const nu&>(x)); }
+  else if (is_forall(x)) { return right_precedence(static_cast<const forall&>(x)); }
+  else if (is_exists(x)) { return right_precedence(static_cast<const exists&>(x)); }
+  return left_precedence(x);
+}
 
 inline const state_formula& unary_operand(const not_& x) { return x.operand(); }
 inline const state_formula& unary_operand(const must& x) { return x.operand(); }
@@ -902,7 +1214,12 @@ struct is_timed_traverser: public state_formula_traverser<is_timed_traverser>
   {
     result = true;
   }
-};
+};//
+//
+//
+//
+//
+
 /// \endcond
 
 /// \brief Checks if a state formula is timed
@@ -925,7 +1242,6 @@ bool state_formula::has_time() const
 }
 
 // template function overloads
-std::string pp(const state_formula& x);
 state_formula normalize_sorts(const state_formula& x, const data::data_specification& dataspec);
 state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x);
 std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x);
@@ -937,117 +1253,5 @@ bool find_nil(const state_formulas::state_formula& x);
 } // namespace state_formulas
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::state_formulas::state_formula& t1, mcrl2::state_formulas::state_formula& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::true_& t1, mcrl2::state_formulas::true_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::false_& t1, mcrl2::state_formulas::false_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::not_& t1, mcrl2::state_formulas::not_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::and_& t1, mcrl2::state_formulas::and_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::or_& t1, mcrl2::state_formulas::or_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::imp& t1, mcrl2::state_formulas::imp& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::forall& t1, mcrl2::state_formulas::forall& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::exists& t1, mcrl2::state_formulas::exists& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::must& t1, mcrl2::state_formulas::must& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::may& t1, mcrl2::state_formulas::may& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::yaled& t1, mcrl2::state_formulas::yaled& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::yaled_timed& t1, mcrl2::state_formulas::yaled_timed& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::delay& t1, mcrl2::state_formulas::delay& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::delay_timed& t1, mcrl2::state_formulas::delay_timed& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::variable& t1, mcrl2::state_formulas::variable& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::nu& t1, mcrl2::state_formulas::nu& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::mu& t1, mcrl2::state_formulas::mu& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_MODAL_STATE_FORMULA_H

@@ -19,7 +19,8 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/summand.h"
+#include "mcrl2/lps/action_summand.h"
+#include "mcrl2/lps/deadlock_summand.h"
 #include "mcrl2/lps/process_initializer.h"
 
 namespace mcrl2
@@ -81,24 +82,24 @@ class linear_process
       assert(core::detail::check_term_LinearProcess(lps));
       atermpp::aterm_appl::iterator i = lps.begin();
       m_process_parameters = data::variable_list(*i++);
-      atermpp::aterm_list summands = atermpp::aterm_cast<atermpp::aterm_list>(*i);
+      atermpp::aterm_list summands = atermpp::down_cast<atermpp::aterm_list>(*i);
       for (atermpp::aterm_list::iterator j = summands.begin(); j != summands.end(); ++j)
       {
         assert(core::detail::check_rule_LinearProcessSummand(*j));
-        atermpp::aterm_appl t = atermpp::aterm_cast<atermpp::aterm_appl>(*j);
-        
-        data::variable_list summation_variables(atermpp::aterm_cast<atermpp::aterm_list>(t[0]));
+        atermpp::aterm_appl t = atermpp::down_cast<atermpp::aterm_appl>(*j);
+
+        data::variable_list summation_variables(atermpp::down_cast<atermpp::aterm_list>(t[0]));
         data::data_expression condition         = data::data_expression(t[1]);
         data::data_expression time              = data::data_expression(t[3]);
-        data::assignment_list assignments(atermpp::aterm_cast<atermpp::aterm_list>(t[4]));
-        if (core::detail::gsIsDelta(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])))
+        data::assignment_list assignments(atermpp::down_cast<atermpp::aterm_list>(t[4]));
+        if (atermpp::down_cast<atermpp::aterm_appl>(t[2]).function() == core::detail::function_symbols::Delta)
         {
           m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));
         }
         else
         {
-          assert(core::detail::gsIsMultAct(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])));
-          action_list actions(atermpp::aterm_cast<atermpp::aterm_list>(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])[0]));
+          assert(lps::is_multi_action(atermpp::down_cast<const atermpp::aterm_appl>(t[2])));
+          process::action_list actions(atermpp::down_cast<atermpp::aterm_list>(atermpp::down_cast<atermpp::aterm_appl>(t[2])[0]));
           m_action_summands.push_back(action_summand(summation_variables, condition, multi_action(actions, time), assignments));
         }
       }
@@ -197,14 +198,36 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
     summands.push_front(s);
   }
 
-  return core::detail::gsMakeLinearProcess(
+  return atermpp::aterm_appl(core::detail::function_symbol_LinearProcess(),
            p.process_parameters(),
            summands
          );
 }
 
-// template function overloads
+//--- start generated class linear_process ---//
+// prototype declaration
 std::string pp(const linear_process& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const linear_process& x)
+{
+  return out << lps::pp(x);
+}
+//--- end generated class linear_process ---//
+
+/// \brief Test for a linear_process expression
+/// \param x A term
+/// \return True if \a x is a linear process expression
+inline
+bool is_linear_process(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::LinearProcess;
+}
+
+// template function overloads
 std::set<data::variable> find_all_variables(const lps::linear_process& x);
 std::set<data::variable> find_free_variables(const lps::linear_process& x);
 

@@ -15,9 +15,9 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
@@ -33,12 +33,12 @@ class fixpoint_symbol: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     fixpoint_symbol()
-      : atermpp::aterm_appl(core::detail::constructFixPoint())
+      : atermpp::aterm_appl(core::detail::default_values::FixPoint)
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    fixpoint_symbol(const atermpp::aterm& term)
+    explicit fixpoint_symbol(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_FixPoint(*this));
@@ -48,28 +48,28 @@ class fixpoint_symbol: public atermpp::aterm_appl
     /// \return The mu symbol.
     static fixpoint_symbol mu()
     {
-      return fixpoint_symbol(core::detail::gsMakeMu());
+      return fixpoint_symbol(atermpp::aterm_appl(core::detail::function_symbol_Mu()));
     }
 
     /// \brief Returns the nu symbol.
     /// \return The nu symbol.
     static fixpoint_symbol nu()
     {
-      return fixpoint_symbol(core::detail::gsMakeNu());
+      return fixpoint_symbol(atermpp::aterm_appl(core::detail::function_symbol_Nu()));
     }
 
     /// \brief Returns true if the symbol is mu.
     /// \return True if the symbol is mu.
     bool is_mu() const
     {
-      return core::detail::gsIsMu(*this);
+      return function() == core::detail::function_symbols::Mu;
     }
 
     /// \brief Returns true if the symbol is nu.
     /// \return True if the symbol is nu.
     bool is_nu() const
     {
-      return core::detail::gsIsNu(*this);
+      return function() == core::detail::function_symbols::Nu;
     }
 //--- end user section fixpoint_symbol ---//
 };
@@ -80,88 +80,27 @@ typedef atermpp::term_list<fixpoint_symbol> fixpoint_symbol_list;
 /// \brief vector of fixpoint_symbols
 typedef std::vector<fixpoint_symbol>    fixpoint_symbol_vector;
 
-//--- end generated class fixpoint_symbol ---//
-
-/*
-/// \brief Pbes fixpoint symbol (mu or nu).
-// <FixPoint>     ::= Mu
-//                  | Nu
-class fixpoint_symbol: public atermpp::aterm_appl
-{
-  public:
-    /// \brief Constructor.
-    fixpoint_symbol()
-      : atermpp::aterm_appl(core::detail::constructFixPoint())
-    {}
-
-    /// \brief Constructor.
-    /// \param t A term
-    fixpoint_symbol(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(core::detail::check_rule_FixPoint(*this));
-    }
-
-    /// \brief Constructor.
-    /// \param t A term
-    explicit fixpoint_symbol(const aterm &t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(core::detail::check_rule_FixPoint(*this));
-    }
-
-    /// \brief Assignment operator.
-    fixpoint_symbol& operator=(atermpp::aterm t)
-    {
-      this->copy_term(t);
-      return *this;
-    }
-
-    /// \brief Returns the mu symbol.
-    /// \return The mu symbol.
-    static fixpoint_symbol mu()
-    {
-      return fixpoint_symbol(core::detail::gsMakeMu());
-    }
-
-    /// \brief Returns the nu symbol.
-    /// \return The nu symbol.
-    static fixpoint_symbol nu()
-    {
-      return fixpoint_symbol(core::detail::gsMakeNu());
-    }
-
-    /// \brief Returns true if the symbol is mu.
-    /// \return True if the symbol is mu.
-    bool is_mu() const
-    {
-      return core::detail::gsIsMu(*this);
-    }
-
-    /// \brief Returns true if the symbol is nu.
-    /// \return True if the symbol is nu.
-    bool is_nu() const
-    {
-      return core::detail::gsIsNu(*this);
-    }
-};
-*/
-
-// template function overloads
+// prototype declaration
 std::string pp(const fixpoint_symbol& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const fixpoint_symbol& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(fixpoint_symbol& t1, fixpoint_symbol& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated class fixpoint_symbol ---//
 
 } // namespace pbes_system
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::pbes_system::fixpoint_symbol& t1, mcrl2::pbes_system::fixpoint_symbol& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PBES_FIXPOINT_SYMBOL_H

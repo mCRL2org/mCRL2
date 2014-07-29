@@ -61,7 +61,14 @@ class data_expression_with_variables: public data_expression
     /// \param variables A sequence of data variables
     template < typename Container >
     data_expression_with_variables(data_expression expression, const Container& variables)
-      : data_expression(expression), m_variables(atermpp::convert< variable_list >(variables))
+      : data_expression(expression), m_variables(variable_list(variables.begin(),variables.end()))
+    {}
+
+    /// \brief Constructor.
+    /// \param expression A data expression
+    /// \param variables A sequence of data variables
+    data_expression_with_variables(data_expression expression, const variable_list& variables)
+      : data_expression(expression), m_variables(variables)
     {}
 
     /// \brief Return the variables.

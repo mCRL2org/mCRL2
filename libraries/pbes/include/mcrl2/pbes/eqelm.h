@@ -19,6 +19,7 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
@@ -67,10 +68,10 @@ class pbes_eqelm_algorithm
     typedef std::set<variable_type> equivalence_class;
 
     /// \brief Compares data expressions for equality.
-    DataRewriter m_data_rewriter;
+    const DataRewriter& m_data_rewriter;
 
     /// \brief Compares data expressions for equality.
-    PbesRewriter m_pbes_rewriter;
+    const PbesRewriter& m_pbes_rewriter;
 
     /// \brief The vertices of the grapth, i.e. the equivalence relations.
     /// It stores the equivalence sets for each propositional variable, for example
@@ -104,7 +105,7 @@ class pbes_eqelm_algorithm
         {
           out << ", ";
         }
-        out << print(atermpp::aterm_cast<core::identifier_string>(*i));
+        out << print(atermpp::deprecated_cast<core::identifier_string>(*i));
       }
       return out.str();
     }
@@ -134,7 +135,7 @@ class pbes_eqelm_algorithm
       std::ostringstream out;
       for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
-        out << data::pp(i->first) << " -> [ ";
+        out << i->first << " -> [ ";
         const std::vector<equivalence_class>& v = i->second;
         for (typename std::vector<equivalence_class>::const_iterator j = v.begin(); j != v.end(); ++j)
         {
@@ -155,7 +156,7 @@ class pbes_eqelm_algorithm
       std::ostringstream out;
       for (typename std::map<string_type, std::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
       {
-        out << data::pp(i->first) << " -> " << print_set(i->second) << std::endl;
+        out << i->first << " -> " << print_set(i->second) << std::endl;
       }
       return out.str();
     }
@@ -166,7 +167,7 @@ class pbes_eqelm_algorithm
       std::ostringstream out;
       for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
-        out << "  vertex " << data::pp(i->first) << ": ";
+        out << "  vertex " << i->first << ": ";
         for (typename std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
         {
           out << print_set(*j) << " ";
@@ -215,9 +216,9 @@ class pbes_eqelm_algorithm
         for (typename equivalence_class::iterator k = equiv.begin(); k != equiv.end(); ++k)
         {
           size_t p = index_of(*k, m_parameters[Y]);
-          pbes_system::data_rewriter<Term, DataRewriter> rewr(m_data_rewriter);
+          pbes_system::data_rewriter<DataRewriter> rewr(m_data_rewriter);
           pbes_system::pbes_expression e_p = rewr(e[p], vX);
-          w[atermpp::aterm_cast<const data::data_expression>(e_p)].insert(*k);
+          w[atermpp::down_cast<const data::data_expression>(e_p)].insert(*k);
         }
         for (typename std::map<data_term_type, equivalence_class>::iterator i = w.begin(); i != w.end(); ++i)
         {
@@ -294,7 +295,7 @@ class pbes_eqelm_algorithm
     /// \brief Constructor.
     /// \param datar A data rewriter
     /// \param pbesr A PBES rewriter
-    pbes_eqelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
+    pbes_eqelm_algorithm(const DataRewriter& datar, const PbesRewriter& pbesr)
       : m_data_rewriter(datar),
         m_pbes_rewriter(pbesr)
     {}
@@ -333,7 +334,7 @@ class pbes_eqelm_algorithm
           todo.insert(X);
           m_discovered[X] = true;
           update_equivalence_classes(kappa, vX, todo);
-          mCRL2log(log::debug) << "updated equivalence classes using initial state " << pbes_system::pp(kappa) << "\n" << print_equivalence_classes();
+          mCRL2log(log::debug) << "updated equivalence classes using initial state " << kappa << "\n" << print_equivalence_classes();
         }
       }
 
@@ -349,7 +350,7 @@ class pbes_eqelm_algorithm
 
         string_type X = *todo.begin();
         todo.erase(X);
-        mCRL2log(log::debug) << "choose todo element " << core::pp(X) << "\n";
+        mCRL2log(log::debug) << "choose todo element " << X << "\n";
 
         // create a substitution function that corresponds to cX
         data::mutable_map_substitution<> vX = compute_substitution(X);
@@ -361,7 +362,7 @@ class pbes_eqelm_algorithm
           if (evaluate_guard(X, Ye))
           {
             update_equivalence_classes(Ye, vX, todo);
-            mCRL2log(log::debug) << "updated equivalence classes using edge " << pbes_system::pp(Ye) << "\n" << print_equivalence_classes();
+            mCRL2log(log::debug) << "updated equivalence classes using edge " << Ye << "\n" << print_equivalence_classes();
           }
         }
       }

@@ -9,7 +9,6 @@
 /// \file bag_test.cpp
 /// \brief Basic regression test for bag expressions.
 
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/bag.h"
@@ -28,7 +27,7 @@ void test_data_expression(const std::string& s, variable_vector v, Predicate p, 
 {
   std::cerr << "testing data expression " << s << std::endl;
   data_expression e = parse_data_expression(s, v.begin(), v.end());
-  std::cerr << "parsed expression " << data::pp(e) << "   " << e << "\n";
+  std::cerr << "parsed expression " << e << "\n";
   BOOST_CHECK(p(e));
   BOOST_CHECK(!q(e));
 }
@@ -58,23 +57,25 @@ void bag_expression_test()
   BOOST_CHECK(!sort_bag::is_bag(sort_nat::nat()));
 
   test_data_expression("{x : Nat | x}", v, sort_bag::is_constructor_application, sort_bag::is_in_application);
-  test_data_expression("1 in b", v, sort_bag::is_in_application, sort_bag::is_join_application);
-  test_data_expression("{:} + b", v, sort_bag::is_join_application, sort_bag::is_intersection_application);
+  test_data_expression("1 in b", v, sort_bag::is_in_application, sort_bag::is_union_application);
+  test_data_expression("{:} + b", v, sort_bag::is_union_application, sort_bag::is_intersection_application);
   test_data_expression("(({:} + b) - {20:1}) * {40:5}", v, sort_bag::is_intersection_application, is_less_application<data_expression>);
   test_data_expression("{10:count(20,b)} < b", v, is_less_application<data_expression>, sort_bag::is_bag_comprehension_application);
   test_data_expression("b <= {20:2}", v, is_less_equal_application<data_expression>, sort_bag::is_set2bag_application);
-  test_data_expression("Set2Bag({20,30,40})", v, sort_bag::is_set2bag_application, sort_bag::is_join_application);
-  test_data_expression("{20:2} + Set2Bag({20,30,40})", v, sort_bag::is_join_application, is_less_equal_application<data_expression>);
+  test_data_expression("Set2Bag({20,30,40})", v, sort_bag::is_set2bag_application, sort_bag::is_union_application);
+  test_data_expression("{20:2} + Set2Bag({20,30,40})", v, sort_bag::is_union_application, is_less_equal_application<data_expression>);
+  test_data_expression("b <= Set2Bag({20,30,40})", v, is_less_equal_application<data_expression>, sort_bag::is_constructor_application);
+
   test_data_expression("b <= {20:2} + Set2Bag({20,30,40})", v, is_less_equal_application<data_expression>, sort_bag::is_constructor_application);
 
   data_expression e = parse_data_expression("{20:1}", v.begin(), v.end());
-  BOOST_CHECK(sort_bag::is_constructor_application(normaliser(e)));
+  BOOST_CHECK(sort_fbag::is_cons_application(normaliser(e)));
 
   e = parse_data_expression("{20:4, 30:3, 40:2}", v.begin(), v.end());
-  BOOST_CHECK(sort_bag::is_constructor_application(normaliser(e)));
+  BOOST_CHECK(sort_fbag::is_cons_application(normaliser(e)));
 
   e = parse_data_expression("{10:count(20,b)}", v.begin(), v.end());
-  BOOST_CHECK(sort_bag::is_constructor_application(normaliser(e)));
+  BOOST_CHECK(sort_fbag::is_cinsert_application(normaliser(e)));
 }
 
 int test_main(int argc, char** argv)

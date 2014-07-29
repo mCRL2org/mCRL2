@@ -161,6 +161,26 @@ include(MCRL2MacOSXBundleInformation)
 ##---------------------------------------------------
 include(PrintBuildInfo)
 
+## Set base include directories
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
+
+include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/modal_formula/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+
+
 ##---------------------------------------------------
 ## Find dependencies (Boost, OpenGL, [CVC3, gl2ps])
 ##---------------------------------------------------
@@ -192,6 +212,9 @@ if( MCRL2_ENABLE_GUI_TOOLS )
 
   message(STATUS "QT Version: ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}")
 
+  # Work around a Qt bug where moc errors out on a certain boost construct.
+  set(QT_MOC_EXECUTABLE ${QT_MOC_EXECUTABLE} -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
+
 endif( MCRL2_ENABLE_GUI_TOOLS )
 
 ##---------------------------------------------------
@@ -200,11 +223,14 @@ endif( MCRL2_ENABLE_GUI_TOOLS )
 
 if(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( 3rd-party/tr)
+  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/tr/include)
   if( GL2PS_FOUND )
     message(STATUS "Using system gl2ps library.")
+    include_directories(${GL2PS_INCLUDE_DIRS})
   else( GL2PS_FOUND )
     message(STATUS "Using gl2ps library provided by mCRL2.")
     add_subdirectory ( 3rd-party/gl2ps )
+    include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
   endif( GL2PS_FOUND)
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
@@ -234,6 +260,7 @@ add_subdirectory ( libraries/utilities )
 add_subdirectory ( tools/besinfo )
 add_subdirectory ( tools/bespp )
 add_subdirectory ( tools/lps2lts )
+# add_subdirectory ( tools/lts2mathematica )    # developer tool for JFG, with as only purpose to solve the Royal Game of Goose.
 add_subdirectory ( tools/lps2pbes )
 add_subdirectory ( tools/lps2torx )
 add_subdirectory ( tools/lpsactionrename )

@@ -12,8 +12,8 @@
 #ifndef MCRL2_PROCESS_REMOVE_EQUATIONS_H
 #define MCRL2_PROCESS_REMOVE_EQUATIONS_H
 
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/replace.h"
 

@@ -13,17 +13,14 @@
 #define MCRL2_DATA_FUNCTION_SORT_H
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2
@@ -39,7 +36,7 @@ class function_sort: public sort_expression
   public:
     /// \brief Default constructor.
     function_sort()
-      : sort_expression(core::detail::constructSortArrow())
+      : sort_expression(core::detail::default_values::SortArrow)
     {}
 
     /// \brief Constructor.
@@ -52,25 +49,43 @@ class function_sort: public sort_expression
 
     /// \brief Constructor.
     function_sort(const sort_expression_list& domain, const sort_expression& codomain)
-      : sort_expression(core::detail::gsMakeSortArrow(domain, codomain))
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), domain, codomain))
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
-      : sort_expression(core::detail::gsMakeSortArrow(sort_expression_list(domain.begin(), domain.end()), codomain))
+    function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::enable_if_container<Container, sort_expression>::type* = 0)
+      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))
     {}
 
     const sort_expression_list& domain() const
     {
-      return atermpp::aterm_cast<const sort_expression_list>(atermpp::list_arg1(*this));
+      return atermpp::down_cast<sort_expression_list>((*this)[0]);
     }
 
     const sort_expression& codomain() const
     {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+      return atermpp::down_cast<sort_expression>((*this)[1]);
     }
 };
+
+// prototype declaration
+std::string pp(const function_sort& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const function_sort& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(function_sort& t1, function_sort& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class function_sort ---//
 
 /// \brief list of function sorts
@@ -137,16 +152,6 @@ inline function_sort make_function_sort(const sort_expression& dom1,
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::function_sort& t1, mcrl2::data::function_sort& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_FUNCTION_SORT_H
 

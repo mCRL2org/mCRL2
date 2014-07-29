@@ -16,6 +16,7 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/print.h"
+#include "mcrl2/bes/io.h"
 
 using namespace mcrl2;
 
@@ -40,9 +41,9 @@ void test_boolean_expressions()
   std::cout << bes::pp(p) << std::endl;
 
   std::string filename = "boolean_expression_test.out";
-  p.save(filename);
+  save_bes(p, filename);
   boolean_equation_system q;
-  q.load(filename);
+  load_bes(q, filename);
   BOOST_CHECK(p == q);
   remove(filename.c_str());
 }
@@ -73,8 +74,7 @@ void test_bes2pbes()
 
   pbes_system::pbes q = bes2pbes(p);
   std::cout << "----------------" << std::endl;
-  std::cout << pbes_system::pp(q) << std::endl;
-
+  std::cout << q << std::endl;
 }
 
 void test_precedence()
@@ -85,7 +85,7 @@ void test_precedence()
   boolean_variable X1("X1");
   boolean_variable X2("X2");
   boolean_expression t = tr::and_(X1, X2);
-  BOOST_CHECK(precedence(t) == 4);
+  BOOST_CHECK(left_precedence(t) == 4);
 
   std::string s = bes::pp(t);
   BOOST_CHECK(s == "X1 && X2");

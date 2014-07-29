@@ -1,7 +1,7 @@
-// Copyright (c) 2009-2011 University of Twente
-// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009-2011 Eindhoven University of Technology
+// Copyright (c) 2009-2013 University of Twente
+// Copyright (c) 2009-2013 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2013 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2013 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -14,7 +14,9 @@
 #include "RefCounted.h"
 #include <assert.h>
 
-/*! A vertex partition is a functor that maps vertices onto worker processes.
+/*! \ingroup ParityGameData
+
+    A vertex partition is a functor that maps vertices onto worker processes.
 
     Currently one type of partition is supported, that assigns fixed-size chunks
     of consecutive vertices onto increasing worker processes, wrapping around
@@ -36,19 +38,19 @@ public:
         assert(verti(chunk_size*num_procs)/chunk_size == verti(num_procs));
     }
 
-    //! Returns to which process vertex `v' is assigned
+    //! Returns to which process vertex `v` is assigned
     int operator()(verti v) const
     {
         return v/chunk_size_%num_procs_;
     }
 
-    //! Returns the first vertex assigned to `proc'
+    //! Returns the first vertex assigned to `proc`
     verti first(int proc) const
     {
         return chunk_size_*proc;
     }
 
-    /*! Given a vertex `v' assigned to `proc', returns the next vertex assigned
+    /*! Given a vertex `v` assigned to `proc`, returns the next vertex assigned
         to the same process. */
     verti next(int proc, verti v) const
     {
@@ -57,7 +59,7 @@ public:
         return v;
     }
 
-    //! Returns how many of the vertices in range [0..V) are assigned to `proc'.
+    //! Returns how many of the vertices in range [0..V) are assigned to `proc`.
     verti num_assigned(verti V, int proc) const
     {
         verti x = chunk_size_ * num_procs_;
@@ -72,12 +74,17 @@ public:
         return res;
     }
 
+    //! Returns the number of processes.
     int num_procs() const { return num_procs_; }
+
+    /*! Returns the vertex chunk size.
+        A chunk is a range of consecutive vertices assigned to the same process.
+    */
     verti chunk_size() const { return chunk_size_; }
 
 private:
-    int num_procs_;
-    verti chunk_size_;
+    int num_procs_;         //! Number of processes.
+    verti chunk_size_;      //! Size of vertex chunks.
 };
 
 #endif /* ndef VERTEX_PARTITION_H_INCLUDED */

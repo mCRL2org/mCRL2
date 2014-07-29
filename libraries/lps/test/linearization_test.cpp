@@ -9,10 +9,12 @@
 /// \file linearization_test.cpp
 /// \brief Add your file description here.
 
+#include <boost/test/included/unit_test_framework.hpp>
+
+#ifndef MCRL2_SKIP_LONG_TESTS
+
 #include <iostream>
 #include <string>
-
-#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/logger.h"
@@ -21,7 +23,7 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-typedef data::basic_rewriter<data::data_expression>::strategy rewrite_strategy;
+typedef data::rewriter::strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy> rewrite_strategy_vector;
 
 void run_linearisation_instance(const std::string& spec, const t_lin_options& options, bool expect_success)
@@ -44,7 +46,7 @@ void run_linearisation_test_case(const std::string& spec, const bool expect_succ
 
   for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {
-    std::clog << std::endl << "Testing with rewrite strategy " << data::pp(*i) << std::endl;
+    std::clog << std::endl << "Testing with rewrite strategy " << *i << std::endl;
 
     t_lin_options options;
     options.rewrite_strategy=*i;
@@ -839,7 +841,7 @@ BOOST_AUTO_TEST_CASE(bug_978)
      "        rd(a) . R() +\n"
      "        rd(b) . R() + \n"
      "        sum b:Bool. wr(b) . R(a=b);\n"
-     "init R(true,true);\n"; 
+     "init R(true,true);\n";
   run_linearisation_test_case(spec);
 }
 
@@ -849,7 +851,7 @@ BOOST_AUTO_TEST_CASE(not_properly_ordered_assignments)
      "proc R(a,b : Bool) = \n"
      "        tau . R(a=true,b=false) +\n"
      "        tau . R(b=false,a=false); \n"
-     "init R(true,true);\n"; 
+     "init R(true,true);\n";
   run_linearisation_test_case(spec);
 }
 
@@ -905,7 +907,33 @@ BOOST_AUTO_TEST_CASE(unguarded_recursion_with_parallel_operator)
   run_linearisation_test_case(spec,false);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(The_unreachability_of_tau_is_not_properly_recognized)
+{
+  const std::string spec =
+     "init (true -> delta <> delta) . tau;";
+
+  run_linearisation_test_case(spec,true);
+}
+
+BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
+{
+  const std::string spec =
+     "sort  State = struct S;\n"
+     "proc X = ((lambda x: Nat. S)(3) == S)->tau.X;\n"
+     "init X;\n";
+
+  run_linearisation_test_case(spec,true);
+}
+
+#else // ndef MCRL2_SKIP_LONG_TESTS
+
+BOOST_AUTO_TEST_CASE(skip_linearization_test)
+{
+}
+
+#endif // ndef MCRL2_SKIP_LONG_TESTS
+
+boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
 {
   return 0;
 }
