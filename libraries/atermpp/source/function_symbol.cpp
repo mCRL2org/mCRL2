@@ -269,7 +269,6 @@ static void initialize_function_symbol_administration()
 function_symbol::function_symbol(const std::string& name, const size_t arity_)
 {
   initialize_function_symbol_administration();
-
   const HashNumber hnr = detail::calculate_hash_of_function_symbol(name.begin(), name.end(), arity_) & detail::function_symbol_table_mask;
   /* Find symbol in table */
   detail::_function_symbol* cur = detail::function_symbol_hashtable[hnr];

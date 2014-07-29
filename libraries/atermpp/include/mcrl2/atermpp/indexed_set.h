@@ -27,7 +27,7 @@ class indexed_set
   protected:
     size_t sizeMinus1;
     unsigned int max_load;
-    size_t max_entries;
+    size_t nr_of_insertions_until_next_rehash;
     std::vector<size_t> hashtable;
     std::deque <ELEMENT > m_keys;
     std::stack < size_t > free_positions; 
@@ -35,10 +35,10 @@ class indexed_set
     /* Find whether the key is already inserted in the hashtable.
        If no, insert n as the index for key. If yes return its already
        existing index */
-    size_t hashPut(const ELEMENT& key, size_t n);
+    size_t put_in_hashtable(const ELEMENT& key, size_t n);
 
     /* Double the size of the hashtable. */
-    void hashResizeSet();
+    void resize_hashtable();
 
   public:
     /// \brief A constant that if returned as an index means that the index does not exist.

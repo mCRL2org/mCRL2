@@ -42,9 +42,9 @@ inline size_t approximatepowerof2(size_t n)
   return n;
 }
 
-static inline size_t calculateNewSize(size_t sizeMinus1, size_t nr_deletions, size_t nr_entries)
+static inline size_t calculateNewSize(size_t sizeMinus1, size_t nr_entries, size_t max_load)
 {
-  if (nr_deletions >= nr_entries/2)
+  if ((nr_entries*200)/max_load < sizeMinus1)
   {
     return sizeMinus1;
   }
@@ -57,24 +57,28 @@ static inline size_t calculateNewSize(size_t sizeMinus1, size_t nr_deletions, si
 
 template <class ELEMENT>
 inline
-size_t indexed_set<ELEMENT>::hashPut(const ELEMENT& key, size_t n)
+size_t indexed_set<ELEMENT>::put_in_hashtable(const ELEMENT& key, size_t n)
 {
   /* Find a place to insert key,
      and find whether key already exists */
 
-  size_t deleted_position=detail::EMPTY;
-  size_t c = std::hash<ELEMENT>()(key) & sizeMinus1;
+  size_t deleted_position=detail::EMPTY; // This variable recalls a proper deleted position to insert n. EMPTY means not yet found.
+  size_t start = std::hash<ELEMENT>()(key) & sizeMinus1;
+  size_t c = start;
 
-  while (1)
+  while (true)
   {
     assert(c!=detail::EMPTY);
     size_t v = hashtable[c];
+    assert(v==detail::EMPTY || v == detail::DELETED || v<m_keys.size());
     if (v == detail::EMPTY)
     {
       /* Found an empty spot, insert a new index belonging to key, 
          preferably at a deleted position, if that has been encountered. */
       if (deleted_position==detail::EMPTY)
       { 
+        --nr_of_insertions_until_next_rehash;
+        assert(nr_of_insertions_until_next_rehash!=npos);
         hashtable[c] = n;
       }
       else
@@ -98,40 +102,62 @@ size_t indexed_set<ELEMENT>::hashPut(const ELEMENT& key, size_t n)
       return v;
     }
     c = (c + detail::STEP) & sizeMinus1;
+    assert(c!=start); // In this case the hashtable is full, which should never happen.
   }
   return c;
 }
 
 
 template <class ELEMENT>
-inline void indexed_set<ELEMENT>::hashResizeSet()
+inline void indexed_set<ELEMENT>::resize_hashtable()
 {
-  size_t newsizeMinus1 = detail::calculateNewSize(sizeMinus1,
-                                   free_positions.size(), m_keys.size());
+  /* First determine the largest index in use */
+  size_t largest_used_index=0;
+  for (size_t i=0; i<m_keys.size(); i++)
+  {
+    ELEMENT t = m_keys[i];
+    if (t.defined() && i>largest_used_index)
+    {
+      largest_used_index=i;
+    }
+  }
+  m_keys.resize(largest_used_index+1);
+
+  size_t newsizeMinus1 = detail::calculateNewSize(sizeMinus1,largest_used_index, max_load);
 
   hashtable.clear();
   hashtable.resize(newsizeMinus1+1,detail::EMPTY); 
 
   sizeMinus1=newsizeMinus1;
-  max_entries = ((sizeMinus1/100)*max_load);
+  nr_of_insertions_until_next_rehash = ((sizeMinus1/100)*max_load);
 
-  /* rebuild the hashtable again */
-  for (size_t i=0; i<m_keys.size(); i++)
+
+
+
+  free_positions=std::stack < size_t >();
+  /* rebuild the hashtable again, and put free indices in the free_position stack.
+     Count down, such that the lowest indices are highest in the stack, to be 
+     re-used first. */
+  for (size_t i=m_keys.size(); i>0 ; )
   {
+     --i;
     ELEMENT t = m_keys[i];
     if (t.defined())
     {
-      hashPut(t, i);
+      put_in_hashtable(t, i);
+    }
+    else
+    {
+      free_positions.push(i);
     }
   }
-  free_positions=std::stack < size_t >();
 }
 
 template <class ELEMENT>
 inline indexed_set<ELEMENT>::indexed_set(size_t initial_size /* = 100 */, unsigned int max_load_pct /* = 75 */)
       : sizeMinus1(detail::approximatepowerof2(initial_size)),
         max_load(max_load_pct),
-        max_entries(((sizeMinus1/100)*max_load)),
+        nr_of_insertions_until_next_rehash(((sizeMinus1/100)*max_load)),
         hashtable(std::vector<size_t>(1+sizeMinus1,detail::EMPTY))
 {
 }
@@ -149,15 +175,16 @@ inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
     {
       return npos; /* Not found. */
     }
-
+    assert(v == detail::DELETED || v<m_keys.size());
     if (v != detail::DELETED && elem==m_keys[v])
     {
       return v;
     }
 
     c = (c+detail::STEP) & sizeMinus1;
+    assert(c!=start);   // The hashtable is full. This should never happen.
   }
-  while (c != start);
+  while (true);
 
   return npos; /* Not found. */
 }
@@ -168,13 +195,14 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
   size_t start = std::hash<ELEMENT>()(key) & sizeMinus1;
   size_t c = start;
   size_t v;
-  while (1)
+  while (true)
   {
     v = hashtable[c];
     if (v == detail::EMPTY)
     {
       return false;
     }
+    assert(v == detail::DELETED || v<m_keys.size());
     if (v != detail::DELETED && key==m_keys[v])
     {
       break;
@@ -183,6 +211,7 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
     c = (c + detail::STEP) & sizeMinus1;
     if (c == start)
     {
+      assert(0);  // The hashtable is full. This should never happen.
       return false;
     }
   }
@@ -190,15 +219,11 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
   hashtable[c] = detail::DELETED;
 
   assert(m_keys.size()>v);
-  if (v==m_keys.size()-1)
-  {
-    m_keys.pop_back();
-  }
-  else
-  {
-    m_keys[v]=ELEMENT();
-    free_positions.push(v);
-  }
+  assert(!ELEMENT().defined());
+  assert(v<m_keys.size());
+  m_keys[v]=ELEMENT();
+  free_positions.push(v);
+
   return true;
 }
 
@@ -229,7 +254,7 @@ template <class ELEMENT>
 inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
 {
   const size_t m=(free_positions.empty()? m_keys.size() : free_positions.top());
-  const size_t n = hashPut(key,m);
+  const size_t n = put_in_hashtable(key,m);
   if (n != m) // Key already exists.
   {
     return std::make_pair(n,false);
@@ -245,9 +270,9 @@ inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
   }
   assert(m_keys.size()>n);
   m_keys[n]=key;
-  if (m_keys.size() >= max_entries)
+  if (nr_of_insertions_until_next_rehash==0)
   {
-    hashResizeSet(); 
+    resize_hashtable(); 
   }
 
   return std::make_pair(n, true);

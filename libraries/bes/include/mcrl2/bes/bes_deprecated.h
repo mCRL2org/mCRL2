@@ -375,6 +375,18 @@ class propositional_variable_instantiation_as_tree
 
 };
 
+/// \brief Streaming operator for a propositional_variable_instantiation_as_tree.
+inline
+std::ostream& operator<<(std::ostream& os, const propositional_variable_instantiation_as_tree s)
+{
+  os << s.name();
+  if (!s.arguments().empty())
+  { 
+    os << "(" << s.arguments() << ")" << "\n";
+  }
+  return os;
+}
+
 class counter_example
 {
   private:
@@ -2358,8 +2370,7 @@ class boolean_equation_system
           refresh_relevances(todo);
         }
         nr_of_processed_variables++;
-
-        time_t new_log_time;
+        time_t new_log_time=0;
         if (time(&new_log_time) > last_log_time)
         {
           last_log_time = new_log_time;
@@ -2368,7 +2379,7 @@ class boolean_equation_system
                         " boolean variables with a todo buffer of size ";
           if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
           {
-            mCRL2log(mcrl2::log::status) << todo.size();
+            mCRL2log(mcrl2::log::status) << todo.size() << " and " << variable_index.size() << " stored bes variables";;
           }
           else
           {
