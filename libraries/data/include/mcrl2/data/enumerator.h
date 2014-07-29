@@ -725,7 +725,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
             if (E->throw_exceptions())
             {
               std::ostringstream out;
-              out << "enumeration was aborted, since it did complete within " << E->max_count() << " iterations";
+              out << "enumeration was aborted, since it did not complete within " << E->max_count() << " iterations";
               throw mcrl2::runtime_error(out.str());
             }
             else
