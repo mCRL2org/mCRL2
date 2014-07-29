@@ -79,7 +79,8 @@ Applications
 Course material
 ---------------
 
-.. [GMPR06] J.F. Groote, A. Mathijssen, B. Ploeger, M.A. Reniers, M.J. van Weerdenburg, Jeroen van der Wulp. Process Algebra and mCRL2 , IPA Basic Course on Formal Methods 2006.
+.. [GM13] J.F. Groote, M.R. Mousavi. Modelling and Analysis of Communicating Systems, Lecture notes for System Validation course 2013. `(PDF) <http://www.mcrl2.org/download/mcrl2-lecture-notes.pdf>`_
+.. [GMPR06] J.F. Groote, A. Mathijssen, B. Ploeger, M.A. Reniers, M.J. van Weerdenburg, J. van der Wulp. Process Algebra and mCRL2 , IPA Basic Course on Formal Methods 2006.
 
 Presentations
 -------------
