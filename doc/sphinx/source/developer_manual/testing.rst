@@ -239,11 +239,44 @@ Finally, create a directory in which Jenkins is run::
 Also save the script :download:`start-jenkins-slave <jenkins/macosx/start-jenkins-slave>`
 to ``/opt/local/bin``.
 
-.. warning::
+To install the jenkins slave as a daemon that automatically starts when OSX boots, create
+a launchd configuration file called ``jenkins-slave.plist`` with the following contents::
 
-  Currently, this script needs to be started manually upon boot.
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+  <dict>
+    <key>UserName</key>
+    <string>jenkins</string>
+	  <key>Label</key>
+	  <string>jenkins-slave</string>
+	  <key>LastExitStatus</key>
+	  <integer>15</integer>
+	  <key>LimitLoadToSessionType</key>
+	  <string>System</string>
+	  <key>OnDemand</key>
+	  <false/>
+	  <key>PID</key>
+	  <integer>37852</integer>
+	  <key>Program</key>
+	  <string>/opt/local/bin/start-jenkins-slave</string>
+	  <key>StandardOutPath</key>
+	  <string>/scratch/jenkins.log</string>
+	  <key>TimeOut</key>
+	  <integer>30</integer>
+  </dict>
+  </plist>
 
-.. note::
+Make sure the ``UserName`` corresponds to an existing user on the system. The jenkins-slave
+service can now be started by running (as root)::
 
-  This should probably be made into a `launchd <https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man8/launchd.8.html>`_
-  solution to start the Jenkins slave automatically at boot.
+  launchctl load jenkins-slave.plist
+
+The service can be stopped and started by::
+
+  launchctl stop jenkins-slave
+  launchctl start jenkins-slave
+
+To remove the job altogether, use::
+
+  launchctl remove jenkins-slave
