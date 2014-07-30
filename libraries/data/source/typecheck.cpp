@@ -505,6 +505,12 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
   {
     return Type;
   }
+
+  // Added to make sure that the types are sufficiently unrolled, because this function is not always called
+  // with unrolled types.
+  NeededType=UnwindType(NeededType);
+  Type=UnwindType(Type);
+
   if (EqTypesA(NeededType,Type))
   {
     return Type;
