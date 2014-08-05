@@ -107,6 +107,22 @@ BOOST_AUTO_TEST_CASE(test_type_checking)
   using namespace state_formulas::detail::accessors;
 
   specification context = linearise(
+                            "sort CPU = struct p1;"
+                            "sort CPUs = Set(CPU);"
+                            "init delta;"
+                          );
+
+  state_formula formula = parse_state_formula("nu X (P : CPUs = {p1}) . val(P != {})", context);
+
+  // BOOST_CHECK(is_may(formula));
+  // BOOST_CHECK(is_regular_formula(act(formula)));
+}
+
+BOOST_AUTO_TEST_CASE(test_type_checking_conversion_of_arguments)
+{
+  using namespace state_formulas::detail::accessors;
+
+  specification context = linearise(
                             "sort B = struct d;"
                             "act a: List(B);"
                             "init a([d]);"
@@ -117,6 +133,7 @@ BOOST_AUTO_TEST_CASE(test_type_checking)
   BOOST_CHECK(is_may(formula));
   BOOST_CHECK(is_regular_formula(act(formula)));
 }
+
 
 static inline
 state_formula negate_variable(const variable& x)

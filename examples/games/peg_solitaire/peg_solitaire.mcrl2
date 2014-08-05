@@ -78,7 +78,7 @@
 % mcrl22lps -n peg_solitaire.mcrl2 temps1.lps
 % lpssuminst temps1.lps temps2.lps
 % lpsrewr temps2.lps temps3.lps
-% lps2lts -vrjittyc -t -aready temps3.lps
+% lps2lts -vrjittyc -aready temps3.lps
 %
 % It is expected that the speed of state space generation will
 % increase a factor 10, after applying lpsstructelm to replace
@@ -87,10 +87,9 @@
 % this will yield 47 variables, but I expect that the 16 `unused'
 % variables representing the corners, can be removed using
 % lpsconstelm. This would generate an additional speedup.
-% The use of lpsstructelm is also expected to reduce the memory
+% The use of lpsparunfold is also expected to reduce the memory
 % footprint of the generation of the state space with a factor
-% of at least 2, provided the flag -t (store states as trees) is
-% used.
+% of at least 2.
 %
 % Jan Friso Groote, 4/1/2007. 
 %

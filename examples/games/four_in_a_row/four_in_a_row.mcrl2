@@ -37,22 +37,24 @@
 %
 % Using pbes2bool this formula can be verified on smaller than the full board.
 % The table below shows on which boards red has a winning strategy.
+% This has been verified using pbes2bool -rjittyc -v -s2 -zd temp1.pbes --erase=some
+% For 7x4 and 5x6 boards typically 40Gbyte memory was required.
 %
 %       Columns
 % Rows    1     2     3     4     5     6     7
-%   1
-%   2
-%   3
-%   4
-%   5     No    No    No    No
-%   6     
+%   1     No    No    No    No    No    No    No  
+%   2     No    No    No    No    No    No    No
+%   3     No    No    No    No    No    No    No
+%   4     No    No    No    No    No    No    No
+%   5     No    No    No    No    No    No
+%   6     No    No    No    No    No
 %
-% Jan Friso Groote, April 6, 2010
+% Jan Friso Groote, April 6, 2010/Juli 28, 2014
 
 sort Piece = struct Red | Yellow | None;
 map N,M,R:Pos;
-eqn N=5;     %Number of columns (default 7)
-    M=5;     %Number of rows (default 6)
+eqn N=7;     %Number of columns (default 7)
+    M=6;     %Number of rows (default 6)
     R=4;     %Length of a winning sequence of the same color (default 4)
 
 sort Row=List(Piece);
@@ -156,7 +158,7 @@ eqn  y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
      y<M -> Four_in_a_row_diagonally_column(p,y,b)=Count_rows_diagonally(p,1,y,b,0) ||
                                                    Count_rows_diagonally'(p,N,y,b,0) ||
                                                    Four_in_a_row_diagonally_column(p,y+1,b);
-     y==M -> Four_in_a_row_diagonally_column(p,y,b)=false;
+     y>=M -> Four_in_a_row_diagonally_column(p,y,b)=false;
      x<N && y<M ->  Count_rows_diagonally(p,x,y,b,count)=
                                        if(At(x,y,b)==p,
                                          count>=R-1 || Count_rows_diagonally(p,x+1,y+1,b,count+1),

@@ -505,6 +505,12 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
   {
     return Type;
   }
+
+  // Added to make sure that the types are sufficiently unrolled, because this function is not always called
+  // with unrolled types.
+  NeededType=UnwindType(NeededType);
+  Type=UnwindType(Type);
+
   if (EqTypesA(NeededType,Type))
   {
     return Type;
@@ -658,6 +664,10 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       needed_argument_type=argument_type;
     }
     const sort_expression needed_similar_container_type=container_sort(container_type.container_name(),needed_argument_type);
+    if (needed_similar_container_type==NeededType)
+    {
+      throw mcrl2::runtime_error("Cannot typecast " + data::pp(Type) + " into " + data::pp(NeededType) + " for data expression " + data::pp(Par));
+    }
     try
     {
       Type=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Par,
