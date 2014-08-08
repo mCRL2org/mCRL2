@@ -1371,6 +1371,9 @@ class boolean_equation_system
                       mcrl2::pbes_system::fixpoint_symbol sigma,
                       size_t rank,
                       const bes_expression& rhs,
+                      const size_t maximal_todo_size,
+                      size_t& queue_put_count_extra,
+                      const bool approximate_true,
                       std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
       assert(rank>0);  // rank must be positive.
@@ -1394,12 +1397,15 @@ class boolean_equation_system
       }
       if (count_variable_relevance)
       {
-        set_variable_relevance_rec(rhs,todo);
+        set_variable_relevance_rec(rhs,maximal_todo_size,queue_put_count_extra,approximate_true,todo);
       }
     }
 
     inline void set_rhs(variable_type v,
                         const bes_expression& b,
+                        const size_t maximal_todo_size,
+                        size_t& queue_put_count_extra,
+                        const bool approximate_true,
                         variable_type v_except=0,
                         std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
@@ -1419,7 +1425,7 @@ class boolean_equation_system
       }
       if (count_variable_relevance)
       {
-        set_variable_relevance_rec(b,todo);
+        set_variable_relevance_rec(b,maximal_todo_size,queue_put_count_extra,approximate_true,todo);
       }
 
     }
@@ -1578,10 +1584,57 @@ class boolean_equation_system
       }
     }
 
+    // Insert the element v in the queue. If the queue exceeds its maximal size
+    // remove a random element. Return true if the element is successfully inserted
+    // in the queue.
+    void insert_element_in_queue(std::deque<size_t>& todo, 
+                                 size_t v, 
+                                 const size_t maximal_todo_size,
+                                 size_t& queue_put_count_extra,
+                                 const bool approximate_true)
+    {
+      if (todo.size()<maximal_todo_size)
+      {
+        todo.push_back(v);
+      }
+      else
+      {
+        /* Insert this state such that each state has equal probability to remain
+           in the queue. See libraries/lts/include/mcrl2/lts/detail/queue.h or the article
+           on high_way search for an explanation */
+
+        ++queue_put_count_extra;
+        if ((rand() % (todo.size() + queue_put_count_extra)) < todo.size())
+        {
+          // Replace a random existing element in the queue by this one.
+          size_t pos = rand() % todo.size();
+          size_t old_bes_variable = todo[pos];
+          todo[pos] = v;
+          add_equation(old_bes_variable,
+                       mcrl2::pbes_system::fixpoint_symbol::mu(),
+                       1,
+                       approximate_true?bes::false_():bes::true_(),
+                       maximal_todo_size,queue_put_count_extra,approximate_true,
+                       todo);//Counterexample TODO??.
+        }
+        // Do not add the element v to the todo queue, and set its rhs to an approximate value.
+        add_equation(v,
+                     mcrl2::pbes_system::fixpoint_symbol::mu(),
+                     1,
+                     approximate_true?bes::false_():bes::true_(),
+                     maximal_todo_size,queue_put_count_extra,approximate_true,
+                     todo);//Counterexample TODO??.
+      }
+    }
+
+
 
     void set_variable_relevance_rec(
-      const bes_expression& b,
-      std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
+                        const bes_expression& b,
+                        const size_t maximal_todo_size,
+                        size_t& queue_put_count_extra,
+                        const bool approximate_true,
+                        std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
       assert(count_variable_relevance);
       if (is_true(b)||is_false(b)||is_dummy(b))
@@ -1601,13 +1654,13 @@ class boolean_equation_system
           {
             if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
             {
-              todo.push_back(v);
+              insert_element_in_queue(todo,v,maximal_todo_size,queue_put_count_extra,approximate_true);
             }
             return;
           }
           else
           {
-            set_variable_relevance_rec(get_rhs(v),todo);
+            set_variable_relevance_rec(get_rhs(v),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
             return;
           }
         }
@@ -1616,19 +1669,22 @@ class boolean_equation_system
 
       if (is_if(b))
       {
-        set_variable_relevance_rec(condition(b),todo);
-        set_variable_relevance_rec(then_branch(b),todo);
-        set_variable_relevance_rec(else_branch(b),todo);
+        set_variable_relevance_rec(condition(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
+        set_variable_relevance_rec(then_branch(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
+        set_variable_relevance_rec(else_branch(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
         return;
       }
 
       assert(is_and(b)||is_or(b));
-      set_variable_relevance_rec(lhs(b),todo);
-      set_variable_relevance_rec(rhs(b),todo);
+      set_variable_relevance_rec(lhs(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
+      set_variable_relevance_rec(rhs(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
       return;
     }
 
-    void refresh_relevances(std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
+    void refresh_relevances(const size_t maximal_todo_size,
+                            size_t& queue_put_count_extra,
+                            const bool approximate_true,
+                            std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
       if (count_variable_relevance)
       {
@@ -1637,7 +1693,7 @@ class boolean_equation_system
         {
           todo.clear();
         }
-        set_variable_relevance_rec(variable(1),bes_global_variables<size_t>::TODO_NULL_QUEUE);
+        set_variable_relevance_rec(variable(1),maximal_todo_size,queue_put_count_extra,approximate_true,bes_global_variables<size_t>::TODO_NULL_QUEUE);
         if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
         {
           // We add the variables to the todo queue separately,
@@ -1647,7 +1703,7 @@ class boolean_equation_system
           {
             if ((get_rhs(v)==dummy()) && is_relevant(v))
             {
-              todo.push_back(v);
+              insert_element_in_queue(todo,v,maximal_todo_size,queue_put_count_extra,approximate_true);
             }
             else if (remove_unused_bes_variables!=none && 
                      !construct_counter_example && 
@@ -1659,7 +1715,7 @@ class boolean_equation_system
                      ) )
                     )
             {
-              set_rhs(v,dummy()); // Clear the rhs, to save space. This comes at the
+              set_rhs(v,dummy(),maximal_todo_size,queue_put_count_extra,approximate_true); // Clear the rhs, to save space. This comes at the
                                   // cost that the rhs must be recalculated later.
               control_info[v] = control_info[v] & ~RELEVANCE_MASK; // Reset relevance, which is set in set_rhs.
               variable_index.erase(variable_index.get(v));
@@ -1670,11 +1726,13 @@ class boolean_equation_system
       }
     }
 
-    void count_variable_relevance_on(void)
+    void count_variable_relevance_on(const size_t maximal_todo_size,                      
+                                     size_t& queue_put_count_extra,
+                                     const bool approximate_true)
     {
       assert(!count_variable_relevance);
       count_variable_relevance=true;
-      refresh_relevances();
+      refresh_relevances(maximal_todo_size,queue_put_count_extra,approximate_true);
     }
 
     bool is_relevant(const variable_type v)
@@ -2042,7 +2100,9 @@ class boolean_equation_system
       search_strategy opt_search_strategy=breadth_first,
       const bool opt_construct_counter_example=false,
       const remove_level opt_remove_unused_bes_variables=none,
-      const bool opt_use_hashtables=false):
+      const bool opt_use_hashtables=false,
+      const size_t maximal_todo_size=atermpp::npos,
+      const bool approximate_true=true):
       control_info(1),
       right_hand_sides(1),
       variable_occurrences_are_stored(false),
@@ -2109,9 +2169,10 @@ class boolean_equation_system
          with indices between nre_of_processed_variables and nr_of_generated
          variables. */
       std::deque < variable_type> todo;
-      if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
+      size_t queue_put_count_extra=0;
+      if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first || maximal_todo_size!=atermpp::npos)
       {
-        todo.push_front(2);
+        insert_element_in_queue(todo,2,maximal_todo_size,queue_put_count_extra,approximate_true);
       }
       // Data rewriter
       pbes_expression p=pbes_expression_order_quantified_variables(pbes_one_point_rule_rewriter(pbes_simplify_rewriter(pbes_spec.initial_state())),pbes_spec.data());
@@ -2119,10 +2180,10 @@ class boolean_equation_system
       const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
       variable_index.put(propositional_variable_instantiation_as_tree(p1));
 
-      if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
+      if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first || maximal_todo_size!=atermpp::npos)
       {
         store_variable_occurrences();
-        count_variable_relevance_on();
+        count_variable_relevance_on(maximal_todo_size,queue_put_count_extra,approximate_true);
       }
 
       if (opt_construct_counter_example)
@@ -2178,7 +2239,8 @@ class boolean_equation_system
         1,
         eqsys.begin()->symbol(),
         1,
-        variable(2));
+        variable(2),
+        maximal_todo_size,queue_put_count_extra,approximate_true);
 
       // Variables used in whole function
       size_t nr_of_processed_variables = 1;
@@ -2186,12 +2248,12 @@ class boolean_equation_system
       time_t last_log_time = time(NULL) - 1;
 
       // As long as there are states to be explored
-      while ((opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
+      while ((opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first || maximal_todo_size!=atermpp::npos)
              ?todo.size()>0
              :(nr_of_processed_variables < nr_of_generated_variables))
       {
         variable_type variable_to_be_processed;
-        if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
+        if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first || maximal_todo_size!=atermpp::npos)
         {
           if (opt_search_strategy==breadth_first)
           { 
@@ -2291,13 +2353,14 @@ class boolean_equation_system
             }
           }
 
-          if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
+          if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first || maximal_todo_size!=atermpp::npos)
           {
             add_equation(
               variable_to_be_processed,
               current_pbeq.symbol(),
               variable_rank[current_pbeq.variable().name()],
               new_bes_expression,
+              maximal_todo_size,queue_put_count_extra,approximate_true,
               todo);
 
             /* So now and then (after doing as many operations on the size of bes_equations,
@@ -2313,7 +2376,8 @@ class boolean_equation_system
               variable_to_be_processed,
               current_pbeq.symbol(),
               variable_rank[current_pbeq.variable().name()],
-              new_bes_expression);
+              new_bes_expression,
+              maximal_todo_size,queue_put_count_extra,approximate_true);
           }
 
           if (opt_transformation_strategy>=on_the_fly)
@@ -2355,7 +2419,7 @@ class boolean_equation_system
                   {
                     to_set_to_true_or_false.insert(*v);
                   }
-                  set_rhs(*v,b,w);
+                  set_rhs(*v,b,maximal_todo_size,queue_put_count_extra,approximate_true,w);
                 }
                 relevance_counter++;
                 clear_variable_occurrence_set(w);
@@ -2367,7 +2431,7 @@ class boolean_equation_system
         {
           relevance_counter_limit=nr_of_variables()/RELEVANCE_DIVIDE_FACTOR;
           relevance_counter=0;
-          refresh_relevances(todo);
+          refresh_relevances(maximal_todo_size,queue_put_count_extra,approximate_true,todo);
         }
         nr_of_processed_variables++;
         time_t new_log_time=0;
@@ -2377,7 +2441,7 @@ class boolean_equation_system
           mCRL2log(mcrl2::log::status) << "Processed " << nr_of_processed_variables <<
                         " and generated " << nr_of_generated_variables <<
                         " boolean variables with a todo buffer of size ";
-          if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first)
+          if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first || maximal_todo_size!=atermpp::npos)
           {
             mCRL2log(mcrl2::log::status) << todo.size() << " and " << variable_index.size() << " stored bes variables";;
           }
@@ -2388,7 +2452,7 @@ class boolean_equation_system
           mCRL2log(mcrl2::log::status) << ".     " << std::endl;
         }
       }
-      refresh_relevances();
+      refresh_relevances(maximal_todo_size,queue_put_count_extra,approximate_true);
     }
 
 
@@ -2937,6 +3001,9 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
   mCRL2log(mcrl2::log::verbose) << "Solving a BES with " << bes_equations.nr_of_variables() <<
               " equations." << std::endl;
 
+  const size_t maximal_todo_size=atermpp::npos;
+  size_t queue_put_count_extra=0;
+  const bool approximate_true=true;
   std::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
 
   std::map<bes_expression, bes_expression> bex_hashtable;
@@ -3107,11 +3174,12 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
                 bes_equations,
                 opt_use_hashtables,
                 bex_hashtable,
-                true,v));
+                true,v),
+                maximal_todo_size,queue_put_count_extra,approximate_true);
           }
           else
           {
-            bes_equations.set_rhs(v,approximation[v]);
+            bes_equations.set_rhs(v,approximation[v],maximal_todo_size,queue_put_count_extra,approximate_true);
           }
         }
         else
@@ -3125,7 +3193,8 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
               bes_equations,
               opt_use_hashtables,
               bex_hashtable,
-              opt_construct_counter_example,v));
+              opt_construct_counter_example,v),
+              maximal_todo_size,queue_put_count_extra,approximate_true);
         }
       }
     }

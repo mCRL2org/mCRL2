@@ -79,6 +79,13 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
     remove_level opt_erase_unused_bes_variables;       // Remove unused bes variables if true
     bool opt_data_elm;                         // The data elimination option
     std::string opt_counter_example_file;      // The counter example file name
+    size_t opt_maximal_todo_size;              // The maximal size of the todo queue when generating a bes
+    bool opt_approximate_true;                 // If approximate_true holds, rhs's of variables that cannot
+                                               // be put in the todo queue are set to false, assuring that 
+                                               // a true answer is correct, but false might be incorrect.
+                                               // If approximate_true is false, true is used, meaning that
+                                               // the answer false is correct, and true might be incorrect.
+
 
     typedef rewriter_tool<pbes_input_tool<input_tool> > super;
 
@@ -107,7 +114,9 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       opt_construct_counter_example(false),
       opt_erase_unused_bes_variables(none),
       opt_data_elm(true),
-      opt_counter_example_file("")
+      opt_counter_example_file(""),
+      opt_maximal_todo_size(atermpp::npos),
+      opt_approximate_true(true)
     {}
 
   protected:
@@ -123,6 +132,11 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       opt_data_elm                  = parser.options.count("unused-data") == 0;
       opt_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
       opt_search_strategy           = parser.option_argument_as<search_strategy>("search");
+      if (parser.options.count("todo-max"))
+      {
+        opt_maximal_todo_size         = parser.option_argument_as< unsigned long >("todo-max"); 
+      }
+      opt_approximate_true          = 0 == parser.options.count("approximate-false");
 
       if (parser.options.count("output")) // Output format is deprecated.
       {
@@ -175,6 +189,16 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
                  make_mandatory_argument("FORMAT"),
                  "use output format FORMAT (this option is deprecated. Use the tool pbes2bes instead).\n",
                  'o').
+      add_option("todo-max", make_mandatory_argument("NUM"),
+                 "limit the number of boolean variables that can reside in the todo buffer. If the todo "
+                 "stack is full, a random element in the buffer is removed and the rhs of this variable is "
+                 "set to false (or true if --approximate-false is used). In this case the result true is reliable, "
+                 "and a result false could mean that the formula is valid (or vice versa, if --approximate-false is used). "
+                 "By replacing the variables in the queue at random, the breadth/depth-first structure is mixed up. ").
+      add_option("approximate-false",
+                 "If set, variables that are removed from the todo buffer are set to true. This means that the result "
+                 "false is reliable, and the result true can still mean that the formula is false. Without this flag "
+                 "true is appromated, meaning that true is the reliable answer, and false is not.").
       add_option("unused_data",
                  "do not remove unused parts of the data specification",
                  'u');
@@ -192,6 +216,11 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       mCRL2log(verbose) << "  substitution strategy: " << opt_transformation_strategy << std::endl;
       mCRL2log(verbose) << "  search strategy:       " << opt_search_strategy << std::endl;
       mCRL2log(verbose) << "  erase level:           " << opt_erase_unused_bes_variables << std::endl;
+      if (opt_maximal_todo_size!=atermpp::npos)
+      { 
+        mCRL2log(verbose) << "  limit the todo buffer to " << opt_maximal_todo_size << " bes variables and replace removed variables by " <<
+               (opt_approximate_true?"false":"true") << std::endl;
+      }
 
       // load the pbes
       mcrl2::pbes_system::pbes p;
@@ -233,7 +262,9 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
           opt_search_strategy,
           opt_construct_counter_example,
           opt_erase_unused_bes_variables,
-          opt_use_hashtables);
+          opt_use_hashtables,
+          opt_maximal_todo_size,
+          opt_approximate_true);
       timer().finish("instantiation");
 
       timer().start("solving");
