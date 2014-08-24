@@ -1630,56 +1630,58 @@ class boolean_equation_system
 
 
     void set_variable_relevance_rec(
-                        const bes_expression& b,
+                        const bes_expression& bes,
                         const size_t maximal_todo_size,
                         size_t& queue_put_count_extra,
                         const bool approximate_true,
                         std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
       assert(count_variable_relevance);
-      if (is_true(b)||is_false(b)||is_dummy(b))
+      for ( std::deque<bes_expression> boolean_expressions_to_be_investigated(1,bes); 
+                 !boolean_expressions_to_be_investigated.empty();
+                 boolean_expressions_to_be_investigated.pop_front() )
       {
-        return;
-      }
-
-      if (is_variable(b))
-      {
-        variable_type v=get_variable(b);
-        assert(v>0);
-        check_vector_sizes(v);
-        if (!is_relevant(v))
+        const bes_expression& b=boolean_expressions_to_be_investigated.front();
+        if (is_true(b)||is_false(b)||is_dummy(b))
         {
-          control_info[v]=control_info[v]|RELEVANCE_MASK;  // Make relevant
-          if (get_rhs(v)==dummy()) // v is relevant and unprocessed. Put in on the todo stack.
+          /* noting needs to be done */
+        }
+        else if (is_variable(b))
+        {
+          variable_type v=get_variable(b);
+          assert(v>0);
+          check_vector_sizes(v);
+          if (!is_relevant(v))
           {
-            if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
+            control_info[v]=control_info[v]|RELEVANCE_MASK;  // Make relevant
+            if (get_rhs(v)==dummy()) // v is relevant and unprocessed. Put in on the todo stack.
             {
-              insert_element_in_queue(todo,v,maximal_todo_size,queue_put_count_extra,approximate_true);
+              if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
+              {
+                insert_element_in_queue(todo,v,maximal_todo_size,queue_put_count_extra,approximate_true);
+              }
             }
-            return;
-          }
-          else
-          {
-            set_variable_relevance_rec(get_rhs(v),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
-            return;
+            else
+            {
+              boolean_expressions_to_be_investigated.push_back(get_rhs(v));
+            }
           }
         }
-        return;
+        else if (is_if(b))
+        {
+          boolean_expressions_to_be_investigated.push_back(condition(b));
+          boolean_expressions_to_be_investigated.push_back(then_branch(b));
+          boolean_expressions_to_be_investigated.push_back(else_branch(b));
+        }
+        else 
+        { 
+          assert(is_and(b)||is_or(b));
+          boolean_expressions_to_be_investigated.push_back(lhs(b));
+          boolean_expressions_to_be_investigated.push_back(rhs(b));
+        }
       }
-
-      if (is_if(b))
-      {
-        set_variable_relevance_rec(condition(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
-        set_variable_relevance_rec(then_branch(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
-        set_variable_relevance_rec(else_branch(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
-        return;
-      }
-
-      assert(is_and(b)||is_or(b));
-      set_variable_relevance_rec(lhs(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
-      set_variable_relevance_rec(rhs(b),maximal_todo_size,queue_put_count_extra,approximate_true,todo);
-      return;
     }
+
 
     void refresh_relevances(const size_t maximal_todo_size,
                             size_t& queue_put_count_extra,
