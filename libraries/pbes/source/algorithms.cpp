@@ -35,7 +35,14 @@ void remove_parameters(pbes& x, const std::map<core::identifier_string, std::vec
 
 void normalize(pbes& x)
 {
-  pbes_system::normalize(x);
+  try
+  {
+    pbes_system::normalize(x);
+  }
+  catch (const mcrl2::runtime_error&)
+  {
+    throw mcrl2::runtime_error("The PBES is not monotonic!");
+  }
 }
 
 bool is_normalized(const pbes& x)

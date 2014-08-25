@@ -35,15 +35,8 @@ pbes txt2pbes(std::istream& spec_stream, bool normalize = true)
   spec_stream >> result;
   if (normalize)
   {
-    try
-    {
-      mCRL2log(log::verbose) << "checking monotonicity..." << std::endl;
-      pbes_system::algorithms::normalize(result);
-    }
-    catch (std::exception& /* e */)
-    {
-      throw mcrl2::runtime_error("PBES is not monotonic");
-    }
+    mCRL2log(log::verbose) << "normalizing the PBES ..." << std::endl;
+    pbes_system::algorithms::normalize(result);
   }
   return result;
 }
