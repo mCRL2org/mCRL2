@@ -36,7 +36,10 @@ endif()
 # It seems that, in good old CMake style, there is no nice way to do this...
 get_directory_property( R_COMPILER_DEFINITIONS COMPILE_DEFINITIONS )
 foreach( d ${R_COMPILER_DEFINITIONS} )
+  if(NOT d MATCHES ".*\$.*")
+    message(INFO "Adding parameter ${d}")
     set(R_CXXFLAGS "${R_CXXFLAGS} -D${d}")
+  endif()
 endforeach()
 
 # Make sure the shared library for the rewriter is build using position
