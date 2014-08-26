@@ -43,7 +43,7 @@
 #include "mcrl2/data/data_equation.h"
 
 //Boolean equation systems
-#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"
@@ -68,7 +68,7 @@ using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> > 
+class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 {
   protected:
     // Tool options.
@@ -81,7 +81,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
     std::string opt_counter_example_file;      // The counter example file name
     size_t opt_maximal_todo_size;              // The maximal size of the todo queue when generating a bes
     bool opt_approximate_true;                 // If approximate_true holds, rhs's of variables that cannot
-                                               // be put in the todo queue are set to false, assuring that 
+                                               // be put in the todo queue are set to false, assuring that
                                                // a true answer is correct, but false might be incorrect.
                                                // If approximate_true is false, true is used, meaning that
                                                // the answer false is correct, and true might be incorrect.
@@ -134,7 +134,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       opt_search_strategy           = parser.option_argument_as<search_strategy>("search");
       if (parser.options.count("todo-max"))
       {
-        opt_maximal_todo_size         = parser.option_argument_as< unsigned long >("todo-max"); 
+        opt_maximal_todo_size         = parser.option_argument_as< unsigned long >("todo-max");
       }
       opt_approximate_true          = 0 == parser.options.count("approximate-false");
 
@@ -147,7 +147,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       {
         throw parser.error("generating a counter example cannot be combined with erasing bes variables. ");
       }
-   
+
     }
 
     void add_options(interface_description& desc)
@@ -217,7 +217,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       mCRL2log(verbose) << "  search strategy:       " << opt_search_strategy << std::endl;
       mCRL2log(verbose) << "  erase level:           " << opt_erase_unused_bes_variables << std::endl;
       if (opt_maximal_todo_size!=atermpp::npos)
-      { 
+      {
         mCRL2log(verbose) << "  limit the todo buffer to " << opt_maximal_todo_size << " bes variables and replace removed variables by " <<
                (opt_approximate_true?"false":"true") << std::endl;
       }
@@ -226,7 +226,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       mcrl2::pbes_system::pbes p;
       mcrl2::bes::load_pbes(p, input_filename(), pbes_input_format());
 
-      pbes_system::normalize(p);
+      pbes_system::algorithms::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
 
