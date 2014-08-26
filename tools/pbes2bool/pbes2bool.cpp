@@ -43,7 +43,7 @@
 #include "mcrl2/data/data_equation.h"
 
 //Boolean equation systems
-#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"
@@ -68,7 +68,7 @@ using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> > 
+class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 {
   protected:
     // Tool options.
@@ -133,7 +133,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       {
         throw parser.error("generating a counter example cannot be combined with erasing bes variables. ");
       }
-   
+
     }
 
     void add_options(interface_description& desc)
@@ -192,12 +192,11 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       mCRL2log(verbose) << "  substitution strategy: " << opt_transformation_strategy << std::endl;
       mCRL2log(verbose) << "  search strategy:       " << opt_search_strategy << std::endl;
       mCRL2log(verbose) << "  erase level:           " << opt_erase_unused_bes_variables << std::endl;
-
       // load the pbes
       mcrl2::pbes_system::pbes p;
       mcrl2::bes::load_pbes(p, input_filename(), pbes_input_format());
 
-      pbes_system::normalize(p);
+      pbes_system::algorithms::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
 

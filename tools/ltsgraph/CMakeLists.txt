@@ -20,9 +20,6 @@ else(APPLE)
   set(MCRL2gl ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY})
 endif(APPLE)
 
-# ########## Create MacOSX Bundle Information ######### 
-macosx_set_packaging_info("mcrl2-orange" Resources)
-
 # ######### General setup ##########
 set(LTSGRAPH_RCC_SRCS ltsgraph.qrc)
 
@@ -67,7 +64,11 @@ if(WIN32)
   set(LTSGRAPH_SRC_FILES ${LTSGRAPH_SRC_FILES} ltsgraph.rc)
 endif(WIN32)
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${LTSGRAPH_SRC_FILES})
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_ICON_PATH} ${LTSGRAPH_SRC_FILES})
+
+if(APPLE)
+  set_source_files_properties(${MACOSX_ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif()
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
@@ -92,3 +93,6 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
+
+# Create MacOSX Bundle Information
+macosx_set_packaging_info("mcrl2-orange")

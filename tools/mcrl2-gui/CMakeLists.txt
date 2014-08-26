@@ -10,8 +10,8 @@
 project(mcrl2-gui)
 cmake_minimum_required(VERSION 2.6)
 
-# ########## Create MacOSX Bundle Information #########
-macosx_set_packaging_info("mcrl2-green" Resources)
+# Create MacOSX Bundle Information
+macosx_set_packaging_info("mcrl2-green")
 
 # ######### General setup ##########
 set(MCRL2_GUI_RCC_SRCS mcrl2-gui.qrc)
@@ -84,7 +84,11 @@ if(WIN32)
   set(MCRL2_GUI_SRC_FILES ${MCRL2_GUI_SRC_FILES} mcrl2-gui.rc)
 endif(WIN32)
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${MCRL2_GUI_SRC_FILES})
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_ICON_PATH} ${MCRL2_GUI_SRC_FILES})
+
+if(APPLE)
+  set_source_files_properties(${MACOSX_ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif()
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}

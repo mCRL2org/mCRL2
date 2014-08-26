@@ -10,6 +10,9 @@
 project(diagraphica)
 cmake_minimum_required(VERSION 2.6)
 
+# Create MacOSX Bundle Information
+macosx_set_packaging_info("mcrl2-orange")
+
 if(APPLE)
   include_directories(/System/Library/Frameworks)
   find_library(GLUT_LIBRARY GLUT )
@@ -19,9 +22,6 @@ else(APPLE)
   find_library(OpenGL_LIBRARY OpenGL )
   set(MCRL2gl ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY})
 endif(APPLE)
-
-# ########## Create MacOSX Bundle Information #########
-macosx_set_packaging_info("mcrl2-orange" Resources)
 
 # ######### General setup ##########
 set(DIAGRAPHICA_RCC_SRCS icons.qrc)
@@ -91,13 +91,17 @@ set(DIAGRAPHICA_SRC_FILES
   visutils.cpp
 )
 
-# ######### Create Windows Icon ##########
+# ######### Create Icon ##########
 if(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
   set(DIAGRAPHICA_SRC_FILES ${DIAGRAPHICA_SRC_FILES} diagraphica.rc)
-endif(WIN32)
+endif()
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${DIAGRAPHICA_SRC_FILES})
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_ICON_PATH} ${DIAGRAPHICA_SRC_FILES})
+
+if(APPLE)
+  set_source_files_properties(${MACOSX_ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif()
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
