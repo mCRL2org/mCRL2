@@ -19,6 +19,7 @@
 #include <string>
 #include <algorithm>
 #include <deque>
+#include <stack>
 #include <map>
 #include <time.h>
 
@@ -1627,57 +1628,58 @@ class boolean_equation_system
       }
     }
 
-
-
+    /**
+     * @brief set_variable_relevance_rec implements a depth-first search for all variables occuring
+     *        in expr, and adjusts their relevance administration. The depth-first search is not
+     *        implemented by recursive calls to save on stack usage, as bes_expressions can become
+     *        rather large.
+     */
     void set_variable_relevance_rec(
-                        const bes_expression& bes,
+                        const bes_expression& expr,
                         const size_t maximal_todo_size,
                         size_t& queue_put_count_extra,
                         const bool approximate_true,
-                        std::deque <variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
+                        std::deque<variable_type>& todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
       assert(count_variable_relevance);
-      for ( std::deque<bes_expression> boolean_expressions_to_be_investigated(1,bes); 
-                 !boolean_expressions_to_be_investigated.empty();
-                 boolean_expressions_to_be_investigated.pop_front() )
+      std::stack<bes_expression> stack;
+      stack.push(expr);
+      while (!stack.empty())
       {
-        const bes_expression& b=boolean_expressions_to_be_investigated.front();
-        if (is_true(b)||is_false(b)||is_dummy(b))
+        const bes_expression b = stack.top();
+        stack.pop();
+
+        if (is_variable(b))
         {
-          /* noting needs to be done */
-        }
-        else if (is_variable(b))
-        {
-          variable_type v=get_variable(b);
-          assert(v>0);
+          variable_type v = get_variable(b);
+          assert(v > 0);
           check_vector_sizes(v);
           if (!is_relevant(v))
           {
-            control_info[v]=control_info[v]|RELEVANCE_MASK;  // Make relevant
-            if (get_rhs(v)==dummy()) // v is relevant and unprocessed. Put in on the todo stack.
+            control_info[v] = control_info[v] | RELEVANCE_MASK;  // Make relevant
+            if (get_rhs(v) == dummy()) // v is relevant and unprocessed. Put in on the todo stack.
             {
-              if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
+              if (&todo != &bes_global_variables<size_t>::TODO_NULL_QUEUE)
               {
-                insert_element_in_queue(todo,v,maximal_todo_size,queue_put_count_extra,approximate_true);
+                insert_element_in_queue(todo, v, maximal_todo_size, queue_put_count_extra, approximate_true);
               }
             }
             else
             {
-              boolean_expressions_to_be_investigated.push_back(get_rhs(v));
+              stack.push(get_rhs(v));
             }
           }
         }
         else if (is_if(b))
         {
-          boolean_expressions_to_be_investigated.push_back(condition(b));
-          boolean_expressions_to_be_investigated.push_back(then_branch(b));
-          boolean_expressions_to_be_investigated.push_back(else_branch(b));
+          stack.push(condition(b));
+          stack.push(then_branch(b));
+          stack.push(else_branch(b));
         }
-        else 
-        { 
-          assert(is_and(b)||is_or(b));
-          boolean_expressions_to_be_investigated.push_back(lhs(b));
-          boolean_expressions_to_be_investigated.push_back(rhs(b));
+        else if (is_and(b) || is_or(b))
+        {
+          stack.push(lhs(b));
+          stack.push(rhs(b));
         }
       }
     }
