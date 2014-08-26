@@ -10,8 +10,8 @@
 project(mcrl2xi)
 cmake_minimum_required(VERSION 2.6)
 
-# ########## Create MacOSX Bundle Information #########
-macosx_set_packaging_info("mcrl2-red" Resources)
+# Create MacOSX Bundle Information
+macosx_set_packaging_info("mcrl2-red")
 
 # ######### General setup ##########
 set(MCRL2XI_RCC_SRCS mcrl2xi.qrc)
@@ -60,7 +60,11 @@ if(WIN32)
   set(MCRL2XI_SRC_FILES ${MCRL2XI_SRC_FILES} mcrl2xi.rc)
 endif(WIN32)
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${MCRL2XI_SRC_FILES})
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_ICON_PATH} ${MCRL2XI_SRC_FILES})
+
+if(APPLE)
+  set_source_files_properties(${MACOSX_ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif()
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
@@ -82,4 +86,3 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
-

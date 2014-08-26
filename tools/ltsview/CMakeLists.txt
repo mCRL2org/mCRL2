@@ -10,8 +10,8 @@
 project(ltsview)
 cmake_minimum_required(VERSION 2.6)
 
-# ########## Create MacOSX Bundle Information #########
-macosx_set_packaging_info("mcrl2-orange" Resources)
+# Create MacOSX Bundle Information
+macosx_set_packaging_info("mcrl2-orange")
 
 # ######### General setup ##########
 set(LTSVIEW_RCC_SRCS ltsview.qrc)
@@ -89,7 +89,11 @@ IF(WIN32)
   SET(LTSVIEW_SRC_FILES ${LTSVIEW_SRC_FILES} ltsview.rc)
 ENDIF(WIN32)
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${LTSVIEW_SRC_FILES})
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_ICON_PATH} ${LTSVIEW_SRC_FILES})
+
+if(APPLE)
+  set_source_files_properties(${MACOSX_ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif()
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
@@ -121,4 +125,3 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
-

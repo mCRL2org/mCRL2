@@ -10,8 +10,8 @@
 project(lpsxsim)
 cmake_minimum_required(VERSION 2.6)
 
-# ########## Create MacOSX Bundle Information ######### 
-macosx_set_packaging_info("mcrl2-blue" Resources)
+# Create MacOSX Bundle Information
+macosx_set_packaging_info("mcrl2-blue")
 
 # ######### General setup ##########
 set(LPSXSIM_RCC_SRCS lpsxsim.qrc)
@@ -44,7 +44,11 @@ IF(WIN32)
   SET(LPSXSIM_SRC_FILES ${LPSXSIM_SRC_FILES} lpsxsim.rc)
 ENDIF(WIN32)
 
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE} ${LPSXSIM_SRC_FILES})
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_ICON_PATH} ${LPSXSIM_SRC_FILES})
+
+if(APPLE)
+  set_source_files_properties(${MACOSX_ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif()
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
