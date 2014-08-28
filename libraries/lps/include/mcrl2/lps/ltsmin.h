@@ -241,9 +241,11 @@ class state_data_type: public pins_data_type
       m_name = data::pp(m_sort);
     }
 
+    // prints the expression as an ATerm string
     std::string serialize(int i) const
     {
-      return to_string(index2expression(i));
+      data::data_expression e = index2expression(i);
+      return to_string(static_cast<atermpp::aterm>(e));
     }
 
     std::size_t deserialize(const std::string& s)
