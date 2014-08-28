@@ -34,9 +34,9 @@ void pbesstategraph(const std::string& input_filename,
   algorithms::normalize(p);
   pbes q;
 
-  if (options.use_local_variant)
+  if (options.use_global_variant)
   {
-    detail::local_reset_variables_algorithm algorithm(p, options);
+    detail::global_reset_variables_algorithm algorithm(p, options);
     q = algorithm.run();
     if (options.print_influence_graph)
     {
@@ -46,7 +46,7 @@ void pbesstategraph(const std::string& input_filename,
   }
   else
   {
-    detail::global_reset_variables_algorithm algorithm(p, options);
+    detail::local_reset_variables_algorithm algorithm(p, options);
     q = algorithm.run();
     if (options.print_influence_graph)
     {
