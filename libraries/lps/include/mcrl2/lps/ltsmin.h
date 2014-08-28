@@ -32,6 +32,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/next_state_generator.h"
@@ -241,14 +242,18 @@ class state_data_type: public pins_data_type
       m_name = data::pp(m_sort);
     }
 
+    // prints the expression as an ATerm string
     std::string serialize(int i) const
     {
-      return to_string(index2expression(i));
+      data::data_expression e = index2expression(i);
+      atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm>(e));
+      return to_string(t);
     }
 
     std::size_t deserialize(const std::string& s)
     {
-      return expression2index(data::data_expression(atermpp::read_term_from_string(s)));
+      atermpp::aterm t = data::detail::add_index(atermpp::read_term_from_string(s));
+      return expression2index(atermpp::down_cast<data::data_expression>(t));
     }
 
     std::string print(int i) const
