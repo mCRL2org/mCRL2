@@ -401,11 +401,10 @@ class stategraph_algorithm
 
     bool is_global_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
     {
-      auto j = m_is_GCFP.find(X);
-      assert(j != m_is_GCFP.end());
-      const std::vector<bool>& cf = j->second;
-      assert(i < cf.size());
-      return cf[i];
+      using utilities::detail::contains;
+      auto const& eq_X = *find_equation(m_pbes, X);
+      const std::vector<std::size_t>& I = eq_X.control_flow_parameter_indices();
+      return contains(I, i);
     }
 
     // relate (X, n) and (Y, m) in the dependency graph
