@@ -26,11 +26,11 @@
 #include "mcrl2/utilities/execution_timer.h"
 
 #include "mcrl2/pbes/pbespgsolve.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/pg_parse.h"
+#include "mcrl2/bes/io.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -123,14 +123,17 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
         pbespgsolve_algorithm algorithm(timer(), m_options);
         ParityGame pg;
         std::ifstream is(input_filename().c_str());
+        timer().start("load");
         pg.read_pgsolver(is);
+        timer().finish("load");
+
         value = algorithm.run(pg, 0);
       }
       else
       {
         pbes p;
         timer().start("load");
-        load_pbes(p, input_filename(), pbes_input_format());
+        mcrl2::bes::load_pbes(p, input_filename(), pbes_input_format());
         timer().finish("load");
 
         value = pbespgsolve(p, timer(), m_options);
