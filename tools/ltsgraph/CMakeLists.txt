@@ -10,6 +10,9 @@
 project(ltsgraph)
 cmake_minimum_required(VERSION 2.6)
 
+# Create MacOSX Bundle Information
+macosx_set_packaging_info("mcrl2-orange")
+
 if(APPLE)
   INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
   find_library(GLUT_LIBRARY GLUT )
@@ -93,6 +96,3 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
-
-# Create MacOSX Bundle Information
-macosx_set_packaging_info("mcrl2-orange")
