@@ -19,9 +19,7 @@
 #include <string>
 #include <utility>
 
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
