@@ -45,16 +45,12 @@ class stategraph_global_algorithm: public stategraph_algorithm
     {
       auto const& X = x.name();
       auto const& d_X = x.parameters();
-      const std::vector<bool>& b = is_GCFP(X);
-      std::size_t index = 0;
-      std::vector<data::data_expression> d;
-      for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
+      auto const& eq_X = *find_equation(m_pbes, X);
+      const std::vector<std::size_t>& I = eq_X.control_flow_parameter_indices();
+      data::data_expression_vector d;
+      for (auto i = I.begin(); i != I.end(); ++i)
       {
-        assert(index < b.size());
-        if (b[index])
-        {
-          d.push_back(*i);
-        }
+        d.push_back(nth_element(d_X, *i));
       }
       return propositional_variable_instantiation(X, data::data_expression_list(d.begin(), d.end()));
     }
@@ -63,17 +59,8 @@ class stategraph_global_algorithm: public stategraph_algorithm
     propositional_variable project_variable(const propositional_variable& x) const
     {
       auto const& X = x.name();
-      auto const& d_X = x.parameters();
-      const std::vector<bool>& b = is_GCFP(X);
-      std::size_t index = 0;
-      std::vector<data::variable> d;
-      for (auto i = d_X.begin(); i != d_X.end(); ++i, index++)
-      {
-        if (b[index])
-        {
-          d.push_back(*i);
-        }
-      }
+      auto const& eq_X = *find_equation(m_pbes, X);
+      const data::variable_vector& d = eq_X.control_flow_parameters();
       return propositional_variable(X, data::variable_list(d.begin(), d.end()));
     }
 

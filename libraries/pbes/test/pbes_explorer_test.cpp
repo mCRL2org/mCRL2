@@ -39,7 +39,11 @@ private:
     size_t transition_count;
 
 public:
+#ifdef MCRL2_JITTYC_AVAILABLE
     explorer(const pbes& p, const std::string& rewrite_strategy = "jittyc", bool reset = false, bool always_split = false) :
+#else
+    explorer(const pbes& p, const std::string& rewrite_strategy = "jitty", bool reset = false, bool always_split = false) :
+#endif
         mcrl2::pbes_system::explorer(p, rewrite_strategy, reset, always_split),
         transition_count(0)
     {}
