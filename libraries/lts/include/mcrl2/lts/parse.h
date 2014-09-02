@@ -172,8 +172,8 @@ typedef std::vector<std::size_t> fsm_state;
 /// \brief Parse actions for FSM format
 struct fsm_actions: public core::default_parser_actions
 {
-  fsm_actions(const core::parser_table& table_, lts_fsm_t& fsm_)
-    : core::default_parser_actions(table_),
+  fsm_actions(const core::parser& parser_, lts_fsm_t& fsm_)
+    : core::default_parser_actions(parser_),
       fsm(fsm_)
   {}
 
@@ -190,7 +190,7 @@ struct fsm_actions: public core::default_parser_actions
   std::vector<T> parse_vector(const core::parse_node& node, const std::string& type, Function f)
   {
     std::vector<T> result;
-    traverse(node, make_collector(table, type, result, f));
+    traverse(node, make_collector(m_parser.symbol_table(), type, result, f));
     return result;
   }
 
@@ -257,7 +257,7 @@ struct fsm_actions: public core::default_parser_actions
 
   void parse_ParameterList(const core::parse_node& node)
   {
-    traverse(node, make_visitor(table, "Parameter", boost::bind(&fsm_actions::parse_Parameter, this, _1)));
+    traverse(node, make_visitor(m_parser.symbol_table(), "Parameter", boost::bind(&fsm_actions::parse_Parameter, this, _1)));
   }
 
   void parse_State(const core::parse_node& node)
@@ -280,7 +280,7 @@ struct fsm_actions: public core::default_parser_actions
 
   void parse_StateList(const core::parse_node& node)
   {
-    traverse(node, make_visitor(table, "State", boost::bind(&fsm_actions::parse_State, this, _1)));
+    traverse(node, make_visitor(m_parser.symbol_table(), "State", boost::bind(&fsm_actions::parse_State, this, _1)));
   }
 
   void add_transition(const fsm_transition& t)
@@ -311,7 +311,7 @@ struct fsm_actions: public core::default_parser_actions
 
   void parse_TransitionList(const core::parse_node& node)
   {
-    traverse(node, make_visitor(table, "Transition", boost::bind(&fsm_actions::parse_Transition, this, _1)));
+    traverse(node, make_visitor(m_parser.symbol_table(), "Transition", boost::bind(&fsm_actions::parse_Transition, this, _1)));
   }
 
   std::string parse_Source(const core::parse_node& node)
@@ -368,7 +368,7 @@ void parse_fsm_specification(const std::string& text, lts_fsm_t& result)
   unsigned int start_symbol_index = p.start_symbol_index("FSM");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  fsm_actions(parser_tables_fsm, result).parse_FSM(node);
+  fsm_actions(p, result).parse_FSM(node);
   p.destroy_parse_node(node);
 }
 

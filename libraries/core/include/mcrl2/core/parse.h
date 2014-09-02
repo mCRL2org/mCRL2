@@ -38,12 +38,69 @@ namespace mcrl2
 namespace core
 {
 
+class parse_node_exception : public mcrl2::runtime_error
+{
+protected:
+  static std::string get_error_message(const parse_node& node, const std::string& user_message)
+  {
+    try
+    {
+      return node.add_context(user_message);
+    }
+    catch (...)
+    {
+      return user_message;
+    }
+  }
+
+  parse_node_exception(const std::string& message)
+    : mcrl2::runtime_error(message)
+  { }
+
+public:
+  parse_node_exception(const parse_node& node, const std::string& message)
+    : mcrl2::runtime_error(get_error_message(node, message))
+  { }
+};
+
+class parse_node_unexpected_exception : public parse_node_exception
+{
+private:
+  static std::string get_error_message(const parser& p, const parse_node& node)
+  {
+    std::string inherited = parse_node_exception::get_error_message(node, "unexpected parse node!");
+    try
+    {
+      std::stringstream s;
+      s << inherited << std::endl
+        << "symbol      = " << p.symbol_table().symbol_name(node) << std::endl
+        << "string      = " << node.string() << std::endl
+        << "child_count = " << node.child_count();
+      for (int i = 0; i < node.child_count(); i++)
+      {
+        s << std::endl
+          << "child " << i << " = " << p.symbol_table().symbol_name(node.child(i))
+          << " " << node.child(i).string();
+      }
+      return s.str();
+    }
+    catch (...)
+    {
+      return inherited;
+    }
+  }
+public:
+  parse_node_unexpected_exception(const parser& p, const parse_node& node)
+    : parse_node_exception(get_error_message(p, node))
+  { }
+};
+
 struct parser_actions
 {
-  const parser_table& table;
+  const parser& m_parser;
 
-  parser_actions(const parser_table& table_)
-    : table(table_)
+  parser_actions(const parser& parser_)
+    : m_parser(parser_)
   {}
 
   // starts a traversal in node, and calls the function f to each subnode of the given type
@@ -162,40 +219,21 @@ struct parser_actions
 
   std::string symbol_name(const parse_node& node) const
   {
-    return table.symbol_name(node.symbol());
-  }
-
-  std::string print_node(const parse_node& node)
-  {
-    std::ostringstream out;
-    out << "symbol      = " << symbol_name(node) << std::endl;
-    out << "string      = " << node.string() << std::endl;
-    out << "child_count = " << node.child_count() << std::endl;
-    for (int i = 0; i < node.child_count(); i++)
-    {
-      out << "child " << i << " = " << symbol_name(node.child(i)) << " " << node.child(i).string() << std::endl;
-    }
-    return out.str();
-  }
-
-  void report_unexpected_node(const parse_node& node)
-  {
-    std::cout << "--- unexpected node ---\n" << print_node(node);
-    throw mcrl2::runtime_error("unexpected node detected!");
+    return m_parser.symbol_table().symbol_name(node.symbol());
   }
 };
 
 struct default_parser_actions: public parser_actions
 {
-  default_parser_actions(const parser_table& table_)
-    : parser_actions(table_)
+  default_parser_actions(const parser& parser_)
+    : parser_actions(parser_)
   {}
 
   template <typename T, typename Function>
   atermpp::term_list<T> parse_list(const parse_node& node, const std::string& type, Function f)
   {
     std::vector<T> result;
-    traverse(node, make_collector(table, type, result, f));
+    traverse(node, make_collector(m_parser.symbol_table(), type, result, f));
     return atermpp::term_list<T>(result.begin(), result.end());
   }
 
@@ -203,7 +241,7 @@ struct default_parser_actions: public parser_actions
   std::vector<T> parse_vector(const parse_node& node, const std::string& type, Function f)
   {
     std::vector<T> result;
-    traverse(node, make_collector(table, type, result, f));
+    traverse(node, make_collector(m_parser.symbol_table(), type, result, f));
     return result;
   }
 
@@ -243,7 +281,7 @@ identifier_string parse_identifier(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("Id");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  identifier_string result = default_parser_actions(parser_tables_mcrl2).parse_Id(node);
+  identifier_string result = default_parser_actions(p).parse_Id(node);
   p.destroy_parse_node(node);
   return result;
 }

@@ -37,8 +37,8 @@ namespace pbes_system
 
 struct pbes_actions: public data::data_specification_actions
 {
-  pbes_actions(const core::parser_table& table_)
-    : data::data_specification_actions(table_)
+  pbes_actions(const core::parser& parser_)
+    : data::data_specification_actions(parser_)
   {}
 
   pbes_system::pbes_expression parse_PbesExpr(const core::parse_node& node)
@@ -54,8 +54,7 @@ struct pbes_actions: public data::data_specification_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "PbesExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "PbesExpr")) { return pbes_system::or_(parse_PbesExpr(node.child(0)), parse_PbesExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "PbesExpr") && (symbol_name(node.child(2)) == ")")) { return parse_PbesExpr(node.child(1)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "PropVarInst")) { return parse_PropVarInst(node.child(0)); }
-    report_unexpected_node(node);
-    return pbes_system::pbes_expression();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
   pbes_system::propositional_variable parse_PropVarDecl(const core::parse_node& node)
@@ -77,8 +76,7 @@ struct pbes_actions: public data::data_specification_actions
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "mu")) { return fixpoint_symbol::mu(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nu")) { return fixpoint_symbol::nu(); }
-    report_unexpected_node(node);
-    return pbes_system::fixpoint_symbol();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
   pbes_equation parse_PbesEqnDecl(const core::parse_node& node)
@@ -110,7 +108,7 @@ pbes_expression parse_pbes_expression_new(const std::string& text)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  pbes_expression result = pbes_actions(parser_tables_mcrl2).parse_PbesExpr(node);
+  pbes_expression result = pbes_actions(p).parse_PbesExpr(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -123,7 +121,7 @@ pbes parse_pbes_new(const std::string& text)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  pbes result = pbes_actions(parser_tables_mcrl2).parse_PbesSpec(node);
+  pbes result = pbes_actions(p).parse_PbesSpec(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -175,7 +173,7 @@ propositional_variable parse_propositional_variable(const std::string& text,
   unsigned int start_symbol_index = p.start_symbol_index("PropVarDecl");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  propositional_variable result = pbes_actions(parser_tables_mcrl2).parse_PropVarDecl(node);
+  propositional_variable result = pbes_actions(p).parse_PropVarDecl(node);
   p.destroy_parse_node(node);
   return type_check(result, variables, dataspec);
 }
@@ -200,7 +198,7 @@ pbes_expression parse_pbes_expression(const std::string& text,
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  pbes_expression result = pbes_actions(parser_tables_mcrl2).parse_PbesExpr(node);
+  pbes_expression result = pbes_actions(p).parse_PbesExpr(node);
   p.destroy_parse_node(node);
   return type_check(result, variables, propositional_variables, dataspec);
 }

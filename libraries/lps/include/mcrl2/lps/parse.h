@@ -34,8 +34,8 @@ namespace detail
 
 struct multi_action_actions: public process::action_actions
 {
-  multi_action_actions(const core::parser_table& table_)
-    : process::action_actions(table_)
+  multi_action_actions(const core::parser& parser_)
+    : process::action_actions(parser_)
   {}
 
   lps::untyped_multi_action parse_MultAct(const core::parse_node& node)
@@ -45,8 +45,7 @@ struct multi_action_actions: public process::action_actions
     {
       return lps::untyped_multi_action(parse_ActionList(node.child(0)));
     }
-    report_unexpected_node(node);
-    return lps::untyped_multi_action();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
 
@@ -57,7 +56,7 @@ lps::untyped_multi_action parse_multi_action_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("MultAct");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  lps::untyped_multi_action result = multi_action_actions(parser_tables_mcrl2).parse_MultAct(node);
+  lps::untyped_multi_action result = multi_action_actions(p).parse_MultAct(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -73,8 +72,8 @@ multi_action complete_multi_action(untyped_multi_action& x, const process::actio
 
 struct action_rename_actions: public process::action_actions
 {
-  action_rename_actions(const core::parser_table& table_)
-    : process::action_actions(table_)
+  action_rename_actions(const core::parser& parser_)
+    : process::action_actions(parser_)
   {}
 
   lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node)
@@ -82,8 +81,7 @@ struct action_rename_actions: public process::action_actions
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return action_rename_rule_rhs(parse_Action(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Tau())); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Delta())); }
-    report_unexpected_node(node);
-    return lps::action_rename_rule_rhs();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
   lps::action_rename_rule parse_ActionRenameRule(const core::parse_node& node)
@@ -159,7 +157,7 @@ action_rename_specification parse_action_rename_specification_new(const std::str
   unsigned int start_symbol_index = p.start_symbol_index("ActionRenameSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  action_rename_specification result = action_rename_actions(parser_tables_mcrl2).parse_ActionRenameSpec(node);
+  action_rename_specification result = action_rename_actions(p).parse_ActionRenameSpec(node);
   p.destroy_parse_node(node);
   return result;
 }
