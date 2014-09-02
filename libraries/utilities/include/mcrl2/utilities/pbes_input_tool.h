@@ -63,6 +63,8 @@ class pbes_input_tool: public Tool
       const file_format* result = pbes_system::guess_format(Tool::input_filename());
       if (result == file_format::unknown())
         result = bes::guess_format(Tool::input_filename());
+      if (result == file_format::unknown())
+        result = pbes_system::pbes_format_internal();
       return result;
     }
 
