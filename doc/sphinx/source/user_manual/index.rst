@@ -38,8 +38,10 @@
    :class: frontpage-table
    :widths: 40,60
 
-   * - .. image:: statespace.*
+   * - .. image:: book.*
           :align: left
+          :alt: Modeling and analysis of communicating systems (book)
+          :target: http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems
      - mCRL2 is a formal specification language with an associated toolset. The
        toolset can be used for modelling, validation and verification of
        concurrent systems and protocols. It can be run on Windows, Linux, Apple
