@@ -65,9 +65,9 @@ def generate_rst(binpath, temppath, outpath, version):
                '-D', 'version={0}'.format('.'.join(version)), 
                '-D', 'release={0}'.format(version[0]),
                '-D', 'html_theme_options.relbarbgcolor={0}'.format(color)]
-  if _LOG.getEffectiveLevel > logging.WARNING:
+  if _LOG.getEffectiveLevel() > logging.WARNING:
     shared_opts += ['-Q']
-  elif _LOG.getEffectiveLevel >= logging.WARNING:
+  elif _LOG.getEffectiveLevel() >= logging.WARNING:
     shared_opts += ['-q']
   
   sphinx.main( shared_opts +

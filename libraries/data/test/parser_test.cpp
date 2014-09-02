@@ -91,9 +91,9 @@ void test_ticket_1267()
   test_sort_expression(data_spec, "(A -> A) # A", false);
   test_sort_expression(data_spec, "A # A", false);
   test_sort_expression(data_spec, "(A # A)", false);
-  test_sort_expression(data_spec, "(A # A) -> A", false);
-  test_sort_expression(data_spec, "A -> ((A # A) -> (A -> A))", false);
 
+  test_sort_expression(data_spec, "(A # A) -> A", true);
+  test_sort_expression(data_spec, "A -> ((A # A) -> (A -> A))", true);
   test_sort_expression(data_spec, "A", true);
   test_sort_expression(data_spec, "A # A -> A", true);
   test_sort_expression(data_spec, "A -> A # A -> A -> A", true);

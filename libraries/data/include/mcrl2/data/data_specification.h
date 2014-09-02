@@ -23,6 +23,7 @@
 // utilities
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/data_functional.h"
 
 // data expressions
 #include "mcrl2/data/data_expression.h"

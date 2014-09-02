@@ -54,8 +54,9 @@ def d_parse_production(t):
   '''production : identifier ':' rules ';' 
                 | identifier '::=' rules ';'
                 | ';' '''
-  global _PROD
-  _PROD[t[0][0]] = Production(t[0][0], t[2])
+  if len(t) == 4:
+    global _PROD
+    _PROD[t[0][0]] = Production(t[0][0], t[2])
 
 def getGrammar(filename):
   from dparser import Parser
@@ -92,9 +93,12 @@ def setup(app):
   try:
     getGrammar(os.path.join(os.path.dirname(__file__), 
                                   '..', '..', '..', 'specs', 'mcrl2-syntax.g'))
-  except:
+  except Exception as e:
     app.warn('DParser Python module not found. The dparser RST directive will '
              'not be processed correctly.')
+    app.warn('While loading {}'.format(os.path.join(os.path.dirname(__file__),
+                                  '..', '..', '..', 'specs', 'mcrl2-syntax.g')))
+    app.warn('Exception: {}'.format(e))
 
 if __name__ == '__main__':
   g = getGrammar(os.path.join(os.path.dirname(__file__), 

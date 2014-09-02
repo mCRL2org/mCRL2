@@ -80,8 +80,8 @@ struct pg_actions: public core::default_parser_actions
   std::map<identifier_t, node_t> game;
   identifier_t initial_node;
 
-  pg_actions(const core::parser_table& table_)
-    : core::default_parser_actions(table_),
+  pg_actions(const core::parser& parser_)
+    : core::default_parser_actions(parser_),
       initial_node((std::numeric_limits<identifier_t>::max)())
   {}
 
@@ -89,7 +89,7 @@ struct pg_actions: public core::default_parser_actions
   std::set<T> parse_set(const core::parse_node& node, const std::string& type, Function f)
   {
     std::set<T> result;
-    traverse(node, make_set_collector(table, type, result, f));
+    traverse(node, make_set_collector(m_parser, type, result, f));
     return result;
   }
 
@@ -171,7 +171,7 @@ struct pg_actions: public core::default_parser_actions
 
   void parse_NodeSpecList(const core::parse_node& node)
   {
-    traverse(node, make_visitor(table, "NodeSpec", boost::bind(&pg_actions::parse_NodeSpec, this, _1)));
+    traverse(node, make_visitor(m_parser.symbol_table(), "NodeSpec", boost::bind(&pg_actions::parse_NodeSpec, this, _1)));
   }
 
   identifier_t parse_Id(const core::parse_node& node)
@@ -192,7 +192,7 @@ struct pg_actions: public core::default_parser_actions
   std::set<identifier_t> parse_Successors(const core::parse_node& node)
   {
     std::set<identifier_t> result;
-    traverse(node, make_set_collector(table, "Id", result, boost::bind(&pg_actions::parse_Id, this, _1)));
+    traverse(node, make_set_collector(m_parser.symbol_table(), "Id", result, boost::bind(&pg_actions::parse_Id, this, _1)));
     return result;
   }
 
@@ -218,7 +218,7 @@ void parse_pgsolver_string(const std::string& text, boolean_equation_system& res
   unsigned int start_symbol_index = p.start_symbol_index("ParityGame");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  pg_actions(parser_tables_pg).parse_ParityGame(node, result, maxpg);
+  pg_actions(p).parse_ParityGame(node, result, maxpg);
   p.destroy_parse_node(node);
 }
 

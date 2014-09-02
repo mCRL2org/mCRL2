@@ -40,11 +40,11 @@ namespace data
 
 struct sort_expression_actions: public core::default_parser_actions
 {
-  sort_expression_actions(const core::parser_table& table_)
-    : core::default_parser_actions(table_)
+  sort_expression_actions(const core::parser& parser_)
+    : core::default_parser_actions(parser_)
   {}
 
-  data::sort_expression parse_SortExpr(const core::parse_node& node)
+  data::sort_expression parse_SortExpr(const core::parse_node& node, data::sort_expression_list* product=NULL)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Bool")) { return sort_bool::bool_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Pos")) { return sort_pos::pos(); }
@@ -57,32 +57,52 @@ struct sort_expression_actions: public core::default_parser_actions
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Bag") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ")")) { return sort_bag::bag(parse_SortExpr(node.child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "FBag") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ")")) { return sort_fbag::fbag(parse_SortExpr(node.child(2))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return basic_sort(parse_Id(node.child(0))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "SortExpr") && (symbol_name(node.child(2)) == ")")) { return parse_SortExpr(node.child(1)); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "SortExpr") && (symbol_name(node.child(2)) == ")")) { return parse_SortExpr(node.child(1), product); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "struct") && (symbol_name(node.child(1)) == "ConstrDeclList")) { return structured_sort(parse_ConstrDeclList(node.child(1))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortProduct") && (node.child(1).string() == "->") && (symbol_name(node.child(2)) == "SortExpr")) { return function_sort(parse_SortProduct(node.child(0)), parse_SortExpr(node.child(2))); }
-    report_unexpected_node(node);
-    return data::sort_expression();
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortExpr") && (node.child(1).string() == "->") && (symbol_name(node.child(2)) == "SortExpr")) { return function_sort(parse_SortExpr_as_SortProduct(node.child(0)), parse_SortExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortExpr") && (node.child(1).string() == "#") && (symbol_name(node.child(2)) == "SortExpr"))
+    {
+      if (product != NULL)
+      {
+        data::sort_expression new_element = parse_SortExpr(node.child(2), product);
+        if (new_element != data::sort_expression())
+        {
+          product->push_front(new_element);
+        }
+        new_element = parse_SortExpr(node.child(0), product);
+        if (new_element != data::sort_expression())
+        {
+          product->push_front(new_element);
+        }
+        return data::sort_expression();
+      }
+      else
+      {
+        throw core::parse_node_exception(node.child(1), "Sort product is only allowed on the left "
+                                         "hand side of ->, and when declaring actions.");
+      }
+    }
+    throw core::parse_node_unexpected_exception(m_parser, node);
+  }
+
+  data::sort_expression_list parse_SortExpr_as_SortProduct(const core::parse_node& node)
+  {
+    data::sort_expression_list result;
+    data::sort_expression new_element = parse_SortExpr(node, &result);
+    if (new_element != data::sort_expression())
+    {
+      result.push_front(new_element);
+    }
+    return result;
   }
 
   data::sort_expression_list parse_SortProduct(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "SortExpr"))
     {
-      sort_expression s = parse_SortExpr(node.child(0));
-      data::sort_expression_list result;
-      result.push_front(s);
-      return result;
+      return parse_SortExpr_as_SortProduct(node.child(0));
     }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortProduct") && (node.child(1).string() == "#") && (symbol_name(node.child(2)) == "SortExpr")) { return parse_list<data::sort_expression>(node, "SortExpr", boost::bind(&sort_expression_actions::parse_SortExpr, this, _1)); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortProduct") && (node.child(1).string() == "->") && (symbol_name(node.child(2)) == "SortExpr"))
-    {
-      function_sort fs(parse_SortProduct(node.child(0)), parse_SortExpr(node.child(2)));
-      data::sort_expression_list result;
-      result.push_front(fs);
-      return result;
-    }
-    report_unexpected_node(node);
-    return data::sort_expression_list();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
   data::structured_sort_constructor parse_ConstrDecl(const core::parse_node& node)
@@ -130,8 +150,8 @@ struct sort_expression_actions: public core::default_parser_actions
 
 struct data_expression_actions: public sort_expression_actions
 {
-  data_expression_actions(const core::parser_table& table_)
-    : sort_expression_actions(table_)
+  data_expression_actions(const core::parser& parser_)
+    : sort_expression_actions(parser_)
   {}
 
   data_expression make_untyped_set_or_bag_comprehension(const variable& v, const data_expression& x)
@@ -244,8 +264,7 @@ struct data_expression_actions: public sort_expression_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "*") && (symbol_name(node.child(2)) == "DataExpr")) { return application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "DataExpr")) { return application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "whr") && (symbol_name(node.child(2)) == "AssignmentList") && (symbol_name(node.child(3)) == "end")) { return where_clause(parse_DataExpr(node.child(0)), parse_AssignmentList(node.child(2))); }
-    report_unexpected_node(node);
-    return data::undefined_data_expression();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
   data::data_expression parse_DataExprUnit(const core::parse_node& node)
@@ -259,8 +278,7 @@ struct data_expression_actions: public sort_expression_actions
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "DataExprUnit")) { return application(untyped_identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "-") && (symbol_name(node.child(1)) == "DataExprUnit")) { return application(untyped_identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "#") && (symbol_name(node.child(1)) == "DataExprUnit")) { return application(untyped_identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
-    report_unexpected_node(node);
-    return data::undefined_data_expression();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
   data::data_expression parse_DataValExpr(const core::parse_node& node)
@@ -291,8 +309,8 @@ struct data_expression_actions: public sort_expression_actions
 
 struct data_specification_actions: public data_expression_actions
 {
-  data_specification_actions(const core::parser_table& table_)
-    : data_expression_actions(table_)
+  data_specification_actions(const core::parser& parser_)
+    : data_expression_actions(parser_)
   {}
 
   bool callback_SortDecl(const core::parse_node& node, std::vector<atermpp::aterm_appl>& result)
@@ -313,12 +331,12 @@ struct data_specification_actions: public data_expression_actions
       }
       else
       {
-        report_unexpected_node(node);
+        throw core::parse_node_unexpected_exception(m_parser, node);
       }
       return true;
     }
     return false;
-  };
+  }
 
   std::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node)
   {
@@ -345,7 +363,7 @@ struct data_specification_actions: public data_expression_actions
       return true;
     }
     return false;
-  };
+  }
 
   data::function_symbol_vector parse_IdsDeclList(const core::parse_node& node)
   {
@@ -388,7 +406,7 @@ struct data_specification_actions: public data_expression_actions
       return true;
     }
     return false;
-  };
+  }
 
   data::data_equation_vector parse_EqnDeclList(const core::parse_node& node, const variable_list& variables)
   {
@@ -467,7 +485,7 @@ sort_expression parse_sort_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("SortExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  sort_expression result = data_expression_actions(parser_tables_mcrl2).parse_SortExpr(node);
+  sort_expression result = data_expression_actions(p).parse_SortExpr(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -480,7 +498,7 @@ variable_list parse_variables_new(const std::string& text)
   bool partial_parses = false;
   std::string var_text("var " + text);
   core::parse_node node = p.parse(var_text, start_symbol_index, partial_parses);
-  variable_list result = data_specification_actions(parser_tables_mcrl2).parse_VarSpec(node);
+  variable_list result = data_specification_actions(p).parse_VarSpec(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -493,7 +511,7 @@ data_expression parse_data_expression_new(const std::string& text)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  data_expression result = data_expression_actions(parser_tables_mcrl2).parse_DataExpr(node);
+  data_expression result = data_expression_actions(p).parse_DataExpr(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -505,7 +523,7 @@ data_specification parse_data_specification_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("DataSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  data_specification result = data_specification_actions(parser_tables_mcrl2).parse_DataSpec(node);
+  data_specification result = data_specification_actions(p).parse_DataSpec(node);
   p.destroy_parse_node(node);
   return result;
 }
