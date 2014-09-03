@@ -15,6 +15,7 @@
 
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
+#include "mcrl2/trace/trace.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/bithashtable.h"
@@ -102,6 +103,8 @@ class lps2lts_algorithm
     storage_state_t get_prioritised_representative(const storage_state_t& state);
     void value_prioritize(std::vector<next_state_generator::transition_t>& transitions);
     bool save_trace(const storage_state_t& state, const std::string& filename);
+    bool save_trace(const storage_state_t& state, const next_state_generator::transition_t& transition, const std::string& filename);
+    void construct_trace(const storage_state_t& state1, mcrl2::trace::Trace& trace);
     bool search_divergence(const storage_state_t& state, std::set<storage_state_t>& current_path, std::set<storage_state_t>& visited);
     void check_divergence(const storage_state_t& state);
     void save_actions(const storage_state_t& state, const next_state_generator::transition_t& transition);
