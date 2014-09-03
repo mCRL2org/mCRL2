@@ -27,9 +27,7 @@ In mCRL2, a sort is either a :ref:`predefined sort <predefinedsorts>`, a
 :ref:`sort specification <sortspec>`. The grammar of a sort description is given
 by the non-terminal :token:`SortExpr`. 
 
-.. dparser:: ProjDecl ProjDeclList ConstrDecl ConstrDeclList SortExprList 
-             SortExpr
-
+.. dparser:: ProjDecl ProjDeclList ConstrDecl ConstrDeclList SortExpr
 
 .. _sortspec:
 
@@ -295,7 +293,7 @@ user-defined sorts.
    * - :samp:`{a} > {b}`
      - :samp:`{S} # {S} -> Bool`
      - Greater than, always equivalent to :samp:`{b} < {a}`
-   * - :samp:`{a} <= {b}``
+   * - :samp:`{a} <= {b}`
      - :samp:`{S} # {S} -> Bool`
      - Less than or equal to, always equivalent to :samp:`{a} < {b} || {a} == {b}`.
    * - :samp:`{a} >= {b}`
@@ -581,6 +579,8 @@ To enable users to quickly specify more complicated sorts without having to
 resort to manually specifying constructors and operations on those sorts, mCRL2
 provides some standard constructs to build new sorts out of existing ones. 
 
+.. dparser:: SortExpr
+
 .. index:: ->, #, lambda, ();function application, function application
 
 Mapping sorts
@@ -588,7 +588,13 @@ Mapping sorts
 
 If ``D1``, ``D2``, ..., ``DN`` are sorts, and ``I`` is a sort, then ``D1 # D2
 # ... # DN -> I`` is the sort of a mapping from the carthesian product of
-``D1`` through ``DN`` to ``I``.
+``D1`` through ``DN`` to ``I``. Note that ``#`` and ``->`` are distinct operators,
+the first creating the carthesian product of two sorts, and the second creating
+a sort that represents the mapping of one sort to another. The use of carthesian
+products as sorts is however limited in mCRL2: they may only occur as the domain
+of mapping sorts. One further exception will be made later, when we look at the
+process language, where we will see that also actions are allowed to have a sort
+that is a carthesian product.
 
 .. list-table:: Predefined operations on mapping sorts
    :header-rows: 1

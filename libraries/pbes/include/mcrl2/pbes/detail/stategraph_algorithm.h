@@ -399,6 +399,15 @@ class stategraph_algorithm
       return cf[i];
     }
 
+    bool is_GCFP_parameter(const core::identifier_string& X, std::size_t i) const
+    {
+      auto j = m_is_GCFP.find(X);
+      assert(j != m_is_GCFP.end());
+      const std::vector<bool>& cf = j->second;
+      assert(i < cf.size());
+      return cf[i];
+    }
+
     bool is_global_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
     {
       using utilities::detail::contains;
@@ -456,7 +465,7 @@ class stategraph_algorithm
         auto const& d_X = k->parameters();
         for (std::size_t n = 0; n < d_X.size(); n++)
         {
-          if (is_global_control_flow_parameter(X, n))
+          if (is_GCFP_parameter(X, n))
           {
             m_GCFP_graph.add_vertex(GCFP_vertex(X, n, d_X[n]));
           }
@@ -477,7 +486,7 @@ class stategraph_algorithm
           {
             std::size_t n = j->first;
             std::size_t m = j->second;
-            if (is_global_control_flow_parameter(X, n) && is_global_control_flow_parameter(Y, m))
+            if (is_GCFP_parameter(X, n) && is_GCFP_parameter(Y, m))
             {
               if (m_use_alternative_gcfp_relation)
               {

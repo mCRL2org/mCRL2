@@ -60,7 +60,12 @@ class pbes_input_tool: public Tool
     /// \return The string "pbes"
     virtual const file_format* default_input_format() const
     {
-      return pbes_system::guess_format(Tool::input_filename());
+      const file_format* result = pbes_system::guess_format(Tool::input_filename());
+      if (result == file_format::unknown())
+        result = bes::guess_format(Tool::input_filename());
+      if (result == file_format::unknown())
+        result = pbes_system::pbes_format_internal();
+      return result;
     }
 
     /// \brief Add options to an interface description. Also includes
