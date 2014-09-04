@@ -14,7 +14,6 @@
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/trace/trace.h"
 #include <iomanip>
 
 using namespace mcrl2;
@@ -486,7 +485,7 @@ void lps2lts_algorithm::value_prioritize(std::vector<next_state_generator::trans
   transitions.resize(new_position);
 }
 
-bool lps2lts_algorithm::save_trace(const storage_state_t& state1, const std::string& filename)
+void lps2lts_algorithm::construct_trace(const storage_state_t& state1, mcrl2::trace::Trace& trace)
 {
   storage_state_t state=state1;
   std::deque<storage_state_t> states;
@@ -497,7 +496,6 @@ bool lps2lts_algorithm::save_trace(const storage_state_t& state1, const std::str
     state = source->second;
   }
 
-  mcrl2::trace::Trace trace;
   trace.setState(state);
   next_state_generator::enumerator_queue_t enumeration_queue;
   for (std::deque<storage_state_t>::iterator i = states.begin(); i != states.end(); i++)
@@ -520,6 +518,13 @@ bool lps2lts_algorithm::save_trace(const storage_state_t& state1, const std::str
     trace.setState(state);
   }
 
+}
+
+// Contruct a trace to state1 and store in in filename.
+bool lps2lts_algorithm::save_trace(const storage_state_t& state1, const std::string& filename)
+{
+  mcrl2::trace::Trace trace;
+  lps2lts_algorithm::construct_trace(state1, trace);
   m_traces_saved++;
 
   try
@@ -532,6 +537,29 @@ bool lps2lts_algorithm::save_trace(const storage_state_t& state1, const std::str
     return false;
   }
 }
+
+// Contruct a trace to state1, then add transition to it and store in in filename.
+bool lps2lts_algorithm::save_trace(const storage_state_t& state1, const next_state_generator::transition_t& transition, const std::string& filename)
+{
+  mcrl2::trace::Trace trace;
+  lps2lts_algorithm::construct_trace(state1, trace);
+  trace.addAction(transition.action());
+  trace.setState(transition.internal_state());
+  m_traces_saved++;
+
+  try
+  {
+    trace.save(filename);
+    return true;
+  }
+  catch(...)
+  {
+    return false;
+  }
+}
+
+
+
 
 bool lps2lts_algorithm::search_divergence(
               const storage_state_t& state,
@@ -580,9 +608,9 @@ void lps2lts_algorithm::check_divergence(const storage_state_t& state)
     size_t state_number = m_state_numbers.index(state);
     if (m_options.trace && m_traces_saved < m_options.max_traces)
     {
-      std::ostringstream reason;
-      reason << "divergence_" << m_traces_saved;
-      std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, reason.str(), "trc");
+      std::ostringstream filename_stream;
+      filename_stream << "divergence_" << m_traces_saved;
+      std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, filename_stream.str(), "trc");
       if (save_trace(state, filename))
       {
         mCRL2log(info) << "divergence-detect: divergence found and saved to '" << filename
@@ -607,21 +635,21 @@ void lps2lts_algorithm::save_actions(const storage_state_t& state, const next_st
   mCRL2log(info) << "Detected action '" << pp(transition.action()) << "' (state index " << state_number << ")";
   if (m_options.trace && m_traces_saved < m_options.max_traces)
   {
-    std::ostringstream reason;
-    reason << "act_" << m_traces_saved;
+    std::ostringstream filename_stream;
+    filename_stream << "act_" << m_traces_saved;
     if (m_options.trace_multiactions.find(transition.action()) != m_options.trace_multiactions.end())
     {
-      reason << "_" << pp(transition.action());
+      filename_stream << "_" << pp(transition.action());
     }
-    for (auto i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
+    for (process::action_list::const_iterator i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
     {
       if (m_options.trace_actions.count(i->label().name()) > 0)
       {
-        reason << "_" << i->label().name();
+        filename_stream << "_" << i->label().name();
       }
     }
-    std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, reason.str(), "trc");
-    if (save_trace(transition.internal_state(), filename))
+    std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, filename_stream.str(), "trc");
+    if (save_trace(state,transition, filename))
       mCRL2log(info) << " and saved to '" << filename << "'";
     else
       mCRL2log(info) << " but could not saved to '" << filename << "'";
@@ -634,9 +662,9 @@ void lps2lts_algorithm::save_deadlock(const storage_state_t& state)
   size_t state_number = m_state_numbers.index(state);
   if (m_options.trace && m_traces_saved < m_options.max_traces)
   {
-    std::ostringstream reason;
-    reason << "dlk_" << m_traces_saved;
-    std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, reason.str(), "trc");
+    std::ostringstream filename_stream;
+    filename_stream << "dlk_" << m_traces_saved;
+    std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, filename_stream.str(), "trc");
     if (save_trace(state, filename))
     {
       mCRL2log(verbose) << "deadlock-detect: deadlock found and saved to '" << filename

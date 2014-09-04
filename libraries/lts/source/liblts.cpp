@@ -109,7 +109,7 @@ static std::string type_desc_strings[] = { "unknown LTS format",
     "mCRL2 LTS format",
     "Aldebaran format (CADP)",
     "Finite State Machine format",
-    "GraphViz format",
+    "GraphViz format (no longer supported as input format)",
     "SVC format",
     "Binary Coded Graph format (CADP)"
                                          };
