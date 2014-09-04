@@ -153,6 +153,10 @@ set(CPACK_COMPONENT_EXAMPLES_INSTALL_TYPES Full Default)
 # Linux
 # -----
 
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST
+    /usr /usr/bin /usr/lib /usr/share
+    /usr/share/applications /usr/share/icons)
+
 #Variables for RPM packaging
 set(CPACK_RPM_PACKAGE_LICENSE "Boost Software License, Version 1.0")
 set(CPACK_RPM_PACKAGE_GROUP "Productivity/Scientific/Other")

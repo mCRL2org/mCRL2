@@ -33,6 +33,6 @@ message(STATUS "MCRL2_MAN_PAGES: ${MCRL2_MAN_PAGES}")
 ## Install application icons
 ##---------------------------------------------------
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/build/packaging/icons/hicolor DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/build/packaging/icons/hicolor DESTINATION share/icons)
 
 set(MCRL2_BIN_DIR "bin")
