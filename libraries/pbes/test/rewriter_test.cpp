@@ -311,7 +311,7 @@ void test_enumerate_quantifiers_rewriter()
   test_rewriters(N(R), N(r),  "forall m:Nat. false"                                             , "false");
   test_rewriters(N(R), N(r),  "X && X"                                                          , "X");
   test_rewriters(N(R), N(r),  "val(true)"                                                       , "true");
-  // test_rewriters(N(R), N(r),  "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
+  test_rewriters(N(R), N(r),  "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
   test_rewriters(N(R), N(r),  "exists m:Nat.true"                                               , "true");
   test_rewriters(N(R), N(r),  "forall m:Nat.val(m < 3)"                                         , "false");
   test_rewriters(N(R), N(r),  "exists m:Nat.val(m > 3)"                                         , "true");
