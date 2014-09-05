@@ -22,10 +22,23 @@
 # executable. All files listed in the output are deleted
 # once the rewriter library is no longer needed.
 
+if [ -z "$CXX" ]; then  # Let user choose via $CXX
+  CXX=`which c++`       # Then test for c++
+  if [ $? -ne 0 ]; then
+    CXX=`which clang++` # Then prefer clang over gcc
+  fi
+  if [ $? -ne 0 ]; then
+    CXX=`which g++`     # Test for gcc
+  fi
+  if [ $? -ne 0 ]; then
+    CXX="@CXX@"         # Last resort: use compiler from build.
+  fi
+fi
+
 (echo $1 &&
-@CXX@ -c @R_CXXFLAGS@ -o $1.o $1 > $1.log 2>&1 &&
+$CXX -c @R_CXXFLAGS@ -o $1.o $1 > $1.log 2>&1 &&
 echo $1.o &&
-@CXX@ @R_LDFLAGS@ -o $1.bin $1.o >> $1.log 2>&1 &&
+$CXX @R_LDFLAGS@ -o $1.bin $1.o >> $1.log 2>&1 &&
 echo $1.log &&
 echo $1.bin) || (
 echo "Compile script was:" &&
