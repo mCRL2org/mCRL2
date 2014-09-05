@@ -153,6 +153,10 @@ set(CPACK_COMPONENT_EXAMPLES_INSTALL_TYPES Full Default)
 # Linux
 # -----
 
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST
+    /usr /usr/bin /usr/lib /usr/share
+    /usr/share/applications /usr/share/icons)
+
 #Variables for RPM packaging
 set(CPACK_RPM_PACKAGE_LICENSE "Boost Software License, Version 1.0")
 set(CPACK_RPM_PACKAGE_GROUP "Productivity/Scientific/Other")
@@ -173,13 +177,13 @@ set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
 # OpenSuSE RPM dependencies
 if(EXISTS /etc/SuSE-release )
 	message(STATUS "Distribution: OpenSuSE" )
-  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, mesa-libGLU, boost-devel >= ${MCRL2_BOOST_VER}")
+  set(CPACK_RPM_PACKAGE_REQUIRES "gcc-c++, boost-devel >= ${MCRL2_BOOST_VER}")
 endif(EXISTS /etc/SuSE-release )
 
 # Fedora/RedHat RPM dependencies
 if(EXISTS /etc/redhat-release )
 	message(STATUS "Distribution: RedHat/Fedora" )
-  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, mesa-libGLU, boost-system >= ${MCRL2_BOOST_VER}")
+  set(CPACK_RPM_PACKAGE_REQUIRES "gcc-c++, boost-devel >= ${MCRL2_BOOST_VER}")
 endif(EXISTS /etc/redhat-release )
 
 # Debian/Ubuntu dependencies
