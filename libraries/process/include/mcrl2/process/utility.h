@@ -26,6 +26,14 @@ namespace mcrl2 {
 
 namespace process {
 
+/// \brief Returns true if x is a pCRL expression. N.B. This test depends on the assumption that
+/// in mCRL2 a top level pCRL expression may never contain a non-pCRL expression.
+inline
+bool is_pcrl(const process_expression& x)
+{
+  return !is_merge(x) && !is_left_merge(x) && !is_sync(x) && !is_hide(x) && !is_rename(x) && !is_block(x) && !is_allow(x) && !is_comm(x);
+}
+
 inline
 process_expression expand_rhs(const process::process_instance_assignment& x, const std::vector<process_equation>& equations)
 {

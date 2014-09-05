@@ -38,22 +38,24 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
     : equations(equations_)
   {}
 
+  process_expression operator()(const process::process_instance& x)
+  {
+    return expand_rhs(x, equations);
+  }
+
   process_expression operator()(const process::process_instance_assignment& x)
   {
-    const process_equation& equation = find_equation(equations, x.identifier());
-    data::data_expression_list e = data::make_data_expression_list(equation.formal_parameters());
-    e = data::replace_variables(e, data::assignment_sequence_substitution(x.assignments()));
-    return process_instance(x.identifier(), e);
+    return expand_rhs(x, equations);
   }
 };
 
 } // detail
 
 inline
-void expand_process_instance_assignments(process_specification& procspec)
+process_expression expand_process_instance_assignments(const process_expression& x, const std::vector<process_equation>& equations)
 {
-  detail::expand_process_instance_assignments_builder f(procspec.equations());
-  f(procspec);
+  detail::expand_process_instance_assignments_builder f(equations);
+  return f(x);
 }
 
 } // namespace process

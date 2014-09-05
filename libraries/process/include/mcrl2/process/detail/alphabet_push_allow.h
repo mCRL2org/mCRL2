@@ -18,6 +18,7 @@
 #include "mcrl2/process/detail/alphabet_traverser.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/replace.h"
+#include "mcrl2/process/utility.h"
 
 namespace mcrl2 {
 
@@ -234,11 +235,6 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void log(const process_expression& x, const std::string& text = "")
   {
     log_push_result(x, A, W, top(), "", text);
-  }
-
-  bool is_pcrl(const process_expression& x) const
-  {
-    return !is_merge(x) && !is_left_merge(x) && !is_sync(x) && !is_hide(x) && !is_rename(x) && !is_block(x) && !is_allow(x) && !is_comm(x);
   }
 
   void leave(const process::action& x)
