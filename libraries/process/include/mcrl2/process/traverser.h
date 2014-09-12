@@ -230,6 +230,15 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.bound_variables());
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -326,6 +335,10 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {
@@ -532,6 +545,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -628,6 +649,10 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {
@@ -824,6 +849,13 @@ struct add_traverser_process_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -920,6 +952,10 @@ struct add_traverser_process_expressions: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {
@@ -1139,6 +1175,15 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.bound_variables());
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1235,6 +1280,10 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {
@@ -1494,6 +1543,15 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.bound_variables());
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1592,6 +1650,10 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {
@@ -1796,6 +1858,13 @@ struct add_traverser_action_labels: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1892,6 +1961,10 @@ struct add_traverser_action_labels: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {

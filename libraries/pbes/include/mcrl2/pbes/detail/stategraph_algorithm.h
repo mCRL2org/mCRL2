@@ -390,7 +390,7 @@ class stategraph_algorithm
       mCRL2log(log::debug, "stategraph") << print_GCFP();
     }
 
-    bool is_local_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
+    bool is_LCFP_parameter(const core::identifier_string& X, std::size_t i) const
     {
       auto j = m_is_LCFP.find(X);
       assert(j != m_is_LCFP.end());

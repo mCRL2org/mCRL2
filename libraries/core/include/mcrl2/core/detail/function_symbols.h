@@ -1068,6 +1068,14 @@ const atermpp::function_symbol& function_symbol_StateYaledTimed()
   return function_symbol_StateYaledTimed;
 }
 
+// StochasticOperator
+inline
+const atermpp::function_symbol& function_symbol_StochasticOperator()
+{
+  static const atermpp::function_symbol function_symbol_StochasticOperator = atermpp::function_symbol("StochasticOperator", 3);
+  return function_symbol_StochasticOperator;
+}
+
 // StructCons
 inline
 const atermpp::function_symbol& function_symbol_StructCons()
@@ -1218,6 +1226,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol PBESExists;
   static const atermpp::function_symbol PBESImp;
   static const atermpp::function_symbol Binder;
+  static const atermpp::function_symbol StochasticOperator;
   static const atermpp::function_symbol SortRef;
   static const atermpp::function_symbol ProcEqnSpec;
   static const atermpp::function_symbol StateForall;

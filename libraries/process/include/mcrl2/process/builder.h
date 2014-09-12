@@ -234,6 +234,14 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
+  process::stochastic_operator operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::stochastic_operator result = process::stochastic_operator(static_cast<Derived&>(*this)(x.bound_variables()), static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.operand()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   process::untyped_parameter_identifier operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -333,6 +341,10 @@ struct add_sort_expressions: public Builder<Derived>
     else if (process::is_choice(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {
@@ -553,6 +565,14 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
+  process::stochastic_operator operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::stochastic_operator result = process::stochastic_operator(x.bound_variables(), static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.operand()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   process::untyped_parameter_identifier operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -652,6 +672,10 @@ struct add_data_expressions: public Builder<Derived>
     else if (process::is_choice(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {
@@ -880,6 +904,14 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
+  process::stochastic_operator operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::stochastic_operator result = process::stochastic_operator(static_cast<Derived&>(*this)(x.bound_variables()), static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.operand()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   process::untyped_parameter_identifier operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -979,6 +1011,10 @@ struct add_variables: public Builder<Derived>
     else if (process::is_choice(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {
@@ -1191,6 +1227,14 @@ struct add_process_expressions: public Builder<Derived>
     return result;
   }
 
+  process::stochastic_operator operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::stochastic_operator result = process::stochastic_operator(x.bound_variables(), x.distribution(), static_cast<Derived&>(*this)(x.operand()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   process::untyped_parameter_identifier operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1290,6 +1334,10 @@ struct add_process_expressions: public Builder<Derived>
     else if (process::is_choice(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {
@@ -1509,6 +1557,14 @@ struct add_process_identifiers: public Builder<Derived>
     return result;
   }
 
+  process::stochastic_operator operator()(const process::stochastic_operator& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::stochastic_operator result = process::stochastic_operator(x.bound_variables(), x.distribution(), static_cast<Derived&>(*this)(x.operand()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   process::untyped_parameter_identifier operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1608,6 +1664,10 @@ struct add_process_identifiers: public Builder<Derived>
     else if (process::is_choice(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::down_cast<process::choice>(x));
+    }
+    else if (process::is_stochastic_operator(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<process::stochastic_operator>(x));
     }
     else if (process::is_untyped_parameter_identifier(x))
     {

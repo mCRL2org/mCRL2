@@ -78,6 +78,7 @@ const atermpp::aterm_appl& default_value_StateImp();
 const atermpp::aterm_appl& default_value_PBESExists();
 const atermpp::aterm_appl& default_value_PBESImp();
 const atermpp::aterm_appl& default_value_Binder();
+const atermpp::aterm_appl& default_value_StochasticOperator();
 const atermpp::aterm_appl& default_value_SortRef();
 const atermpp::aterm_appl& default_value_ProcEqnSpec();
 const atermpp::aterm_appl& default_value_StateForall();
@@ -327,6 +328,14 @@ inline
 const atermpp::aterm_appl& default_value_Binder()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_Binder(), default_value_BindingOperator(), default_value_List(default_value_DataVarId()), default_value_DataExpr());
+  return t;
+}
+
+// StochasticOperator
+inline
+const atermpp::aterm_appl& default_value_StochasticOperator()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StochasticOperator(), default_value_List(default_value_DataVarId()), default_value_DataExpr(), default_value_ProcExpr());
   return t;
 }
 
@@ -1446,6 +1455,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl PBESExists;
   static const atermpp::aterm_appl PBESImp;
   static const atermpp::aterm_appl Binder;
+  static const atermpp::aterm_appl StochasticOperator;
   static const atermpp::aterm_appl SortRef;
   static const atermpp::aterm_appl ProcEqnSpec;
   static const atermpp::aterm_appl StateForall;

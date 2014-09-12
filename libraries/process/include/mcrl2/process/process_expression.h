@@ -80,6 +80,7 @@ inline bool is_bounded_init(const atermpp::aterm_appl& x);
 inline bool is_merge(const atermpp::aterm_appl& x);
 inline bool is_left_merge(const atermpp::aterm_appl& x);
 inline bool is_choice(const atermpp::aterm_appl& x);
+inline bool is_stochastic_operator(const atermpp::aterm_appl& x);
 inline bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x);
 inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
 
@@ -109,6 +110,7 @@ bool is_process_expression(const atermpp::aterm_appl& x)
          process::is_merge(x) ||
          process::is_left_merge(x) ||
          process::is_choice(x) ||
+         process::is_stochastic_operator(x) ||
          process::is_untyped_parameter_identifier(x) ||
          process::is_untyped_process_assignment(x);
 }
@@ -1328,6 +1330,72 @@ std::ostream& operator<<(std::ostream& out, const choice& x)
 
 /// \brief swap overload
 inline void swap(choice& t1, choice& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \brief The distribution operator
+class stochastic_operator: public process_expression
+{
+  public:
+    /// \brief Default constructor.
+    stochastic_operator()
+      : process_expression(core::detail::default_values::StochasticOperator)
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit stochastic_operator(const atermpp::aterm& term)
+      : process_expression(term)
+    {
+      assert(core::detail::check_term_StochasticOperator(*this));
+    }
+
+    /// \brief Constructor.
+    stochastic_operator(const data::variable_list& bound_variables, const data::data_expression& distribution, const process_expression& operand)
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_StochasticOperator(), bound_variables, distribution, operand))
+    {}
+
+    const data::variable_list& bound_variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const data::data_expression& distribution() const
+    {
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
+    }
+
+    const process_expression& operand() const
+    {
+      return atermpp::down_cast<process_expression>((*this)[2]);
+    }
+};
+
+/// \brief Test for a stochastic_operator expression
+/// \param x A term
+/// \return True if \a x is a stochastic_operator expression
+inline
+bool is_stochastic_operator(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StochasticOperator;
+}
+
+// prototype declaration
+std::string pp(const stochastic_operator& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const stochastic_operator& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(stochastic_operator& t1, stochastic_operator& t2)
 {
   t1.swap(t2);
 }

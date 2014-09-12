@@ -215,7 +215,7 @@ bool %(check_name)s(Term t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::aterm_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
   if (a.function() != core::detail::function_symbols::%(name)s)
   {
     return false;

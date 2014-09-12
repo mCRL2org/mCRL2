@@ -154,6 +154,7 @@
                  | Merge(<ProcExpr>, <ProcExpr>)
                  | LMerge(<ProcExpr>, <ProcExpr>)
                  | Choice(<ProcExpr>, <ProcExpr>)
+                 | StochasticOperator(<DataVarId>+, <DataExpr>, <ProcExpr>)
                  | UntypedParamId(<String>, <DataExpr>*)
                  | UntypedProcessAssignment(<String>, <UntypedIdentifierAssignment>*)
 
