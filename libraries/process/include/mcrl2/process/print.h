@@ -251,6 +251,18 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().leave(x);
   }
 
+  void operator()(const process::stochastic_operator& x)
+  {
+    derived().enter(x);
+    derived().print("dist ");
+    print_variables(x.variables(), true, true, false, "", "");
+    derived().print("[");
+    derived()(x.distribution());
+    derived().print("] . ");
+    print_expression(x.operand(), left_precedence(x));
+    derived().leave(x);
+  }
+
   void operator()(const process::block& x)
   {
     derived().enter(x);
