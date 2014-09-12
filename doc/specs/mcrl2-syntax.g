@@ -187,6 +187,8 @@ ProcExpr
   | ProcExpr ('.' $binary_op_right 9) ProcExpr                   // Sequential composition operator
   | ProcExpr ('@' $binary_op_left 10) DataExprUnit               // At operator
   | ProcExpr ('|' $binary_op_left 11) ProcExpr                   // Communication merge
+  | ('dist' VarsDeclList '[' DataExpr ']'
+              '.' $unary_op_right 2) ProcExpr                    // Distribution operator
   ;
 
 //--- Actions
