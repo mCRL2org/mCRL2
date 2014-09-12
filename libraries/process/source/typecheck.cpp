@@ -909,7 +909,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     std::map<identifier_string,sort_expression> NewVars;
     try
     {
-      AddVars2Table(CopyVars,t.bound_variables(),NewVars);
+      AddVars2Table(CopyVars,t.variables(),NewVars);
     }
     catch (mcrl2::runtime_error &e)
     {
@@ -924,7 +924,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + process::pp(ProcTerm));
     }
-    return sum(t.bound_variables(),NewProc);
+    return sum(t.variables(),NewProc);
   }
 
   throw mcrl2::runtime_error("Internal error. Process " + process::pp(ProcTerm) + " fails to match known processes.");

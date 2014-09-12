@@ -40,12 +40,12 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
 
   void enter(const process::sum& x)
   {
-    increase_bind_count(x.bound_variables());
+    increase_bind_count(x.variables());
   }
 
   void leave(const process::sum& x)
   {
-    decrease_bind_count(x.bound_variables());
+    decrease_bind_count(x.variables());
   }
 };
 

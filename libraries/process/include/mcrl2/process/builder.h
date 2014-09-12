@@ -117,7 +117,7 @@ struct add_sort_expressions: public Builder<Derived>
   process::sum operator()(const process::sum& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(static_cast<Derived&>(*this)(x.bound_variables()), static_cast<Derived&>(*this)(x.operand()));
+    process::sum result = process::sum(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -237,7 +237,7 @@ struct add_sort_expressions: public Builder<Derived>
   process::stochastic_operator operator()(const process::stochastic_operator& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(static_cast<Derived&>(*this)(x.bound_variables()), static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.operand()));
+    process::stochastic_operator result = process::stochastic_operator(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -448,7 +448,7 @@ struct add_data_expressions: public Builder<Derived>
   process::sum operator()(const process::sum& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(x.bound_variables(), static_cast<Derived&>(*this)(x.operand()));
+    process::sum result = process::sum(x.variables(), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -568,7 +568,7 @@ struct add_data_expressions: public Builder<Derived>
   process::stochastic_operator operator()(const process::stochastic_operator& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(x.bound_variables(), static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.operand()));
+    process::stochastic_operator result = process::stochastic_operator(x.variables(), static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -787,7 +787,7 @@ struct add_variables: public Builder<Derived>
   process::sum operator()(const process::sum& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(static_cast<Derived&>(*this)(x.bound_variables()), static_cast<Derived&>(*this)(x.operand()));
+    process::sum result = process::sum(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -907,7 +907,7 @@ struct add_variables: public Builder<Derived>
   process::stochastic_operator operator()(const process::stochastic_operator& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(static_cast<Derived&>(*this)(x.bound_variables()), static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.operand()));
+    process::stochastic_operator result = process::stochastic_operator(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1110,7 +1110,7 @@ struct add_process_expressions: public Builder<Derived>
   process::sum operator()(const process::sum& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(x.bound_variables(), static_cast<Derived&>(*this)(x.operand()));
+    process::sum result = process::sum(x.variables(), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1230,7 +1230,7 @@ struct add_process_expressions: public Builder<Derived>
   process::stochastic_operator operator()(const process::stochastic_operator& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(x.bound_variables(), x.distribution(), static_cast<Derived&>(*this)(x.operand()));
+    process::stochastic_operator result = process::stochastic_operator(x.variables(), x.distribution(), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1440,7 +1440,7 @@ struct add_process_identifiers: public Builder<Derived>
   process::sum operator()(const process::sum& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::sum result = process::sum(x.bound_variables(), static_cast<Derived&>(*this)(x.operand()));
+    process::sum result = process::sum(x.variables(), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1560,7 +1560,7 @@ struct add_process_identifiers: public Builder<Derived>
   process::stochastic_operator operator()(const process::stochastic_operator& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::stochastic_operator result = process::stochastic_operator(x.bound_variables(), x.distribution(), static_cast<Derived&>(*this)(x.operand()));
+    process::stochastic_operator result = process::stochastic_operator(x.variables(), x.distribution(), static_cast<Derived&>(*this)(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

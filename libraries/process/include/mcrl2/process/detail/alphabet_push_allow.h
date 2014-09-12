@@ -312,7 +312,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void leave(const process::sum& x)
   {
-    top().m_expression = process::sum(x.bound_variables(), top().m_expression);
+    top().m_expression = process::sum(x.variables(), top().m_expression);
     log(x);
   }
 

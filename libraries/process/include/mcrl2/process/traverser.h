@@ -117,7 +117,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const process::sum& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.bound_variables());
+    static_cast<Derived&>(*this)(x.variables());
     static_cast<Derived&>(*this)(x.operand());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -233,7 +233,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const process::stochastic_operator& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.bound_variables());
+    static_cast<Derived&>(*this)(x.variables());
     static_cast<Derived&>(*this)(x.distribution());
     static_cast<Derived&>(*this)(x.operand());
     static_cast<Derived&>(*this).leave(x);
@@ -1062,7 +1062,7 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const process::sum& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.bound_variables());
+    static_cast<Derived&>(*this)(x.variables());
     static_cast<Derived&>(*this)(x.operand());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1178,7 +1178,7 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const process::stochastic_operator& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.bound_variables());
+    static_cast<Derived&>(*this)(x.variables());
     static_cast<Derived&>(*this)(x.distribution());
     static_cast<Derived&>(*this)(x.operand());
     static_cast<Derived&>(*this).leave(x);
@@ -1425,7 +1425,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const process::sum& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.bound_variables());
+    static_cast<Derived&>(*this)(x.variables());
     static_cast<Derived&>(*this)(x.operand());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1546,7 +1546,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const process::stochastic_operator& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.bound_variables());
+    static_cast<Derived&>(*this)(x.variables());
     static_cast<Derived&>(*this)(x.distribution());
     static_cast<Derived&>(*this)(x.operand());
     static_cast<Derived&>(*this).leave(x);

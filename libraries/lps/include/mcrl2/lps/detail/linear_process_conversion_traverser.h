@@ -171,7 +171,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param right A process expression
   void leave(const process::sum& x)
   {
-    m_sum_variables = m_sum_variables + x.bound_variables();
+    m_sum_variables = m_sum_variables + x.variables();
 // std::cout << "adding sum variables\n" << data::pp(v) << std::endl;
   }
 

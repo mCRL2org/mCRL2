@@ -82,7 +82,7 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
 
   process_expression operator()(const sum& x)
   {
-    data::variable_list v = update_sigma.push(x.bound_variables());
+    data::variable_list v = update_sigma.push(x.variables());
     process_expression result = sum(v, (*this)(x.operand()));
     update_sigma.pop(v);
     return result;

@@ -433,11 +433,11 @@ class sum: public process_expression
     }
 
     /// \brief Constructor.
-    sum(const data::variable_list& bound_variables, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), bound_variables, operand))
+    sum(const data::variable_list& variables, const process_expression& operand)
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), variables, operand))
     {}
 
-    const data::variable_list& bound_variables() const
+    const data::variable_list& variables() const
     {
       return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
@@ -1353,11 +1353,11 @@ class stochastic_operator: public process_expression
     }
 
     /// \brief Constructor.
-    stochastic_operator(const data::variable_list& bound_variables, const data::data_expression& distribution, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_StochasticOperator(), bound_variables, distribution, operand))
+    stochastic_operator(const data::variable_list& variables, const data::data_expression& distribution, const process_expression& operand)
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_StochasticOperator(), variables, distribution, operand))
     {}
 
-    const data::variable_list& bound_variables() const
+    const data::variable_list& variables() const
     {
       return atermpp::down_cast<data::variable_list>((*this)[0]);
     }

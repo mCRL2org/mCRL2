@@ -900,7 +900,7 @@ class specification_basic_type:public boost::noncopyable
       {
         /* insert the variable names of variables, to avoid
            that this variable name will be reused later on */
-        insertvariables(sum(body).bound_variables(),false);
+        insertvariables(sum(body).variables(),false);
         if (status==multiAction)
         {
           throw mcrl2::runtime_error("Sum operator occurs within a multi-action in " + process::pp(body) +".");
@@ -1353,13 +1353,13 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(p))
       {
         if (strict)
-          return occursintermlist(var,data_expression_list(sum(p).bound_variables()))||
+          return occursintermlist(var,data_expression_list(sum(p).variables()))||
                  occursinpCRLterm(var,sum(p).operand(),strict);
         /* below appears better? , but leads
            to errors. Should be investigated. */
         else
           return
-            (!occursintermlist(var,data_expression_list(sum(p).bound_variables()))) &&
+            (!occursintermlist(var,data_expression_list(sum(p).variables()))) &&
             occursinpCRLterm(var,sum(p).operand(),strict);
       }
       if (is_process_instance(p))
@@ -1519,7 +1519,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(p))
       {
         find_free_variables_process(sum(p).operand(),free_variables_in_p);
-        const variable_list& sumargs=sum(p).bound_variables();
+        const variable_list& sumargs=sum(p).variables();
 
         for(variable_list::const_iterator i=sumargs.begin(); i!=sumargs.end(); ++i)
         {
@@ -1872,7 +1872,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(p))
       {
-        variable_list sumargs=sum(p).bound_variables();
+        variable_list sumargs=sum(p).variables();
         variable_list vars;
         data_expression_list terms;
 
@@ -2074,7 +2074,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(body))
       {
-        variable_list sumvars=sum(body).bound_variables();
+        variable_list sumvars=sum(body).variables();
         process_expression body1=sum(body).operand();
 
         mutable_map_substitution<> sigma;
@@ -2298,7 +2298,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (sum_state>=s)
         {
-          variable_list sumvars=sum(body).bound_variables();
+          variable_list sumvars=sum(body).variables();
           process_expression body1=sum(body).operand();
 
           mutable_map_substitution<> sigma;
@@ -2632,7 +2632,7 @@ class specification_basic_type:public boost::noncopyable
       {
         /* we must take care that no variables in body2 are
             inadvertently bound */
-        variable_list sumvars=sum(body1).bound_variables();
+        variable_list sumvars=sum(body1).variables();
 
         mutable_map_substitution<> sigma;
         std::set < variable > lhs_variables_in_sigma;
@@ -2704,7 +2704,7 @@ class specification_basic_type:public boost::noncopyable
       {
         /* we must take care that no variables in condition are
             inadvertently bound */
-        variable_list sumvars=sum(body1).bound_variables();
+        variable_list sumvars=sum(body1).variables();
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,variable_list(), make_list(condition),variables_occurring_in_rhs_of_sigma);
@@ -2756,7 +2756,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(body1))
       {
         return sum(
-                 sumvars+sum(body1).bound_variables(),
+                 sumvars+sum(body1).variables(),
                  sum(body1).operand());
       }
 
@@ -3094,7 +3094,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(t))
       {
-        variable_list sumvars=sum(t).bound_variables();
+        variable_list sumvars=sum(t).variables();
 
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
@@ -3135,7 +3135,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(body))
       {
-        variable_list sumvars=sum(body).bound_variables();
+        variable_list sumvars=sum(body).variables();
         process_expression body1=sum(body).operand();
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
@@ -3255,7 +3255,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(body))
       {
-        const variable_list sumvars=sum(body).bound_variables();
+        const variable_list sumvars=sum(body).variables();
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
         return distribute_sum(sumvars,
@@ -4582,7 +4582,7 @@ class specification_basic_type:public boost::noncopyable
       variable_list sumvars;
       for (; is_sum(summandterm) ;)
       {
-        sumvars=sum(summandterm).bound_variables() + sumvars;
+        sumvars=sum(summandterm).variables() + sumvars;
         summandterm=sum(summandterm).operand();
       }
 
@@ -8482,7 +8482,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(t))
       {
-        variable_list sumvars=sum(t).bound_variables();
+        variable_list sumvars=sum(t).variables();
         mutable_map_substitution<> local_sigma=sigma;
         std::set<variable> variables_occurring_in_rhs_of_local_sigma=variables_occurring_in_rhs_of_sigma;
 
@@ -9092,7 +9092,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(t))
       {
         std::set<variable> bound_variables1=bound_variables;
-        const variable_list sum_vars=sum(t).bound_variables();
+        const variable_list sum_vars=sum(t).variables();
         bound_variables1.insert(sum_vars.begin(),sum_vars.end());
         return sum(
                  sum_vars,
@@ -9268,7 +9268,7 @@ class specification_basic_type:public boost::noncopyable
         // Also rename bound variables in a sum, such that there are no two variables with
         // the same name, but different types. We do the renaming globally, i.e. all occurrences of variables
         // x:D that require renaming are renamed to x':D.
-        const variable_list parameters=sum(t).bound_variables();
+        const variable_list parameters=sum(t).variables();
         for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
         {
           if (used_variable_names.count(i->name())==0)
@@ -9293,7 +9293,7 @@ class specification_basic_type:public boost::noncopyable
           }
         }
         return sum(
-                 data::replace_variables(sum(t).bound_variables(),parameter_mapping),
+                 data::replace_variables(sum(t).variables(),parameter_mapping),
                  guarantee_that_parameters_have_unique_type_body(sum(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
       }
       if (is_action(t))

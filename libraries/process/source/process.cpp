@@ -58,6 +58,7 @@ std::string pp(const process::process_specification& x) { return process::pp< pr
 std::string pp(const process::rename& x) { return process::pp< process::rename >(x); }
 std::string pp(const process::rename_expression& x) { return process::pp< process::rename_expression >(x); }
 std::string pp(const process::seq& x) { return process::pp< process::seq >(x); }
+std::string pp(const process::stochastic_operator& x) { return process::pp< process::stochastic_operator >(x); }
 std::string pp(const process::sum& x) { return process::pp< process::sum >(x); }
 std::string pp(const process::sync& x) { return process::pp< process::sync >(x); }
 std::string pp(const process::tau& x) { return process::pp< process::tau >(x); }
