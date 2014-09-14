@@ -1086,7 +1086,6 @@ class specification_basic_type:public boost::noncopyable
                                    std::vector <process_identifier>& pcrlprocesses,
                                    std::set <process_identifier>& visited)
     {
-std::cerr << "Collect PCRL processes " << body << "\n";
       if (is_if_then(body))
       {
         collectPcrlProcesses_term(if_then(body).then_case(),pcrlprocesses,visited);
@@ -1206,7 +1205,6 @@ std::cerr << "Collect PCRL processes " << body << "\n";
     {
       if (visited.count(procDecl)==0)
       {
-std::cerr << "INSERT PROC " << procDecl << "\n";
         visited.insert(procDecl);
         size_t n=objectIndex(procDecl);
         if (objectdata[n].processstatus==pCRL)
@@ -4622,7 +4620,6 @@ std::cerr << "INSERT PROC " << procDecl << "\n";
       const bool regular,
       const bool singlecontrolstate)
     {
-std::cerr << "Make initialstate " << initialProcId << "\n";
       int i;
       for (i=1 ; pcrlprcs[i-1]!=initialProcId ; ++i) {};
       /* i is the index of the initial state */
@@ -8985,7 +8982,7 @@ std::cerr << "Make initialstate " << initialProcId << "\n";
         {
           // Remove the initial stochastic_distribution.
           const stochastic_operator& sto=down_cast<const stochastic_operator>(new_process);
-std::cerr << "Warning: variables of stoch.operator and process can clash\n";
+std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n";
           process_identifier new_identifier=
                                newprocess(objectdata[n].parameters + sto.variables(),
                                           sto.operand(),
