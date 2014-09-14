@@ -926,6 +926,35 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     }
     return sum(t.variables(),NewProc);
   }
+  if (is_stochastic_operator(ProcTerm))
+  {
+    const stochastic_operator& t=down_cast<const stochastic_operator>(ProcTerm);
+    std::map<identifier_string,sort_expression> CopyVars;
+    CopyVars=Vars;
+
+    std::map<identifier_string,sort_expression> NewVars;
+    try
+    {
+      AddVars2Table(CopyVars,t.variables(),NewVars);
+    }
+    catch (mcrl2::runtime_error &e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + process::pp(ProcTerm));
+    }
+    data_expression distribution=t.distribution();
+    TraverseVarConsTypeD(Vars,Vars,distribution,sort_real::real_());
+
+    process_expression NewProc;
+    try
+    {
+      NewProc=TraverseActProcVarConstP(NewVars,t.operand());
+    }
+    catch (mcrl2::runtime_error &e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + process::pp(ProcTerm));
+    }
+    return stochastic_operator(t.variables(),distribution,NewProc);
+  }
 
   throw mcrl2::runtime_error("Internal error. Process " + process::pp(ProcTerm) + " fails to match known processes.");
 }

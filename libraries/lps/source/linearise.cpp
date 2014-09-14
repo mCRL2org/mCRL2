@@ -913,6 +913,24 @@ class specification_basic_type:public boost::noncopyable
         return pCRL;
       }
 
+      if (is_stochastic_operator(body))
+      {
+        /* insert the variable names of variables, to avoid
+           that this variable name will be reused later on */
+        const stochastic_operator& sto=down_cast<const stochastic_operator>(body);
+        insertvariables(sto.variables(),false);
+        if (status==multiAction)
+        {
+          throw mcrl2::runtime_error("Stochastic operator occurs within a multi-action in " + process::pp(body) +".");
+        }
+        const processstatustype s1=determine_process_statusterm(sto.operand(),pCRL);
+        if (s1==mCRL)
+        {
+          throw mcrl2::runtime_error("mCRL operators occur in the scope of the stochastic operator in " + process::pp(body) +".");
+        }
+        return pCRL;
+      }
+
       if (is_comm(body))
       {
         if (status!=mCRL)
@@ -1068,6 +1086,7 @@ class specification_basic_type:public boost::noncopyable
                                    std::vector <process_identifier>& pcrlprocesses,
                                    std::set <process_identifier>& visited)
     {
+std::cerr << "Collect PCRL processes " << body << "\n";
       if (is_if_then(body))
       {
         collectPcrlProcesses_term(if_then(body).then_case(),pcrlprocesses,visited);
@@ -1112,6 +1131,12 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(body))
       {
         collectPcrlProcesses_term(sum(body).operand(),pcrlprocesses,visited);
+        return;
+      }
+
+      if (is_stochastic_operator(body))
+      {
+        collectPcrlProcesses_term(stochastic_operator(body).operand(),pcrlprocesses,visited);
         return;
       }
 
@@ -1181,6 +1206,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (visited.count(procDecl)==0)
       {
+std::cerr << "INSERT PROC " << procDecl << "\n";
         visited.insert(procDecl);
         size_t n=objectIndex(procDecl);
         if (objectdata[n].processstatus==pCRL)
@@ -1528,6 +1554,24 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
+      if (is_stochastic_operator(p))
+      {
+        const stochastic_operator& sto=down_cast<const stochastic_operator>(p);
+        find_free_variables_process(sto.operand(),free_variables_in_p);
+        std::set<variable> s=find_free_variables(sto.distribution());
+        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        {
+          free_variables_in_p.insert(*i);
+        }
+
+        const variable_list& sumargs=sto.variables();
+        for(variable_list::const_iterator i=sumargs.begin(); i!=sumargs.end(); ++i)
+        {
+          free_variables_in_p.erase(*i);
+        }
+        return;
+      }
+
       if (is_process_instance(p))
       {
         const process_instance q(p);
@@ -1644,7 +1688,7 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
-      throw mcrl2::runtime_error("expected a pCRL process " + process::pp(p));
+      throw mcrl2::runtime_error("expected a pCRL process (1) " + process::pp(p));
     }
 
     std::set< variable > find_free_variables_process(const process_expression& p)
@@ -1886,9 +1930,31 @@ class specification_basic_type:public boost::noncopyable
         std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
         alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma);
 
-        const process_expression result=sum(sumargs,
-                                            substitute_pCRLproc(sum(p).operand(),local_sigma,local_rhs_variables_in_sigma));
-        return result;
+        return sum(sumargs,
+                   substitute_pCRLproc(sum(p).operand(),local_sigma,local_rhs_variables_in_sigma));
+      }
+
+      if (is_stochastic_operator(p))
+      {
+        const stochastic_operator& sto=down_cast<const stochastic_operator>(p);
+        variable_list sumargs=sto.variables();
+        variable_list vars;
+        data_expression_list terms;
+
+        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+        {
+          vars=push_back(vars,i->first);
+          terms=push_back(terms,i->second);
+        }
+
+        mutable_map_substitution<> local_sigma=sigma;
+        std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
+        alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma);
+
+        return stochastic_operator(
+                            sumargs,
+                            data::replace_variables_capture_avoiding(sto.distribution(),sigma,rhs_variables_in_sigma),
+                            substitute_pCRLproc(sto.operand(),local_sigma,local_rhs_variables_in_sigma));
       }
 
       if (is_process_instance(p))
@@ -1942,7 +2008,7 @@ class specification_basic_type:public boost::noncopyable
                  substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma));
       }
 
-      throw mcrl2::runtime_error("expected a pCRL process " + process::pp(p));
+      throw mcrl2::runtime_error("expected a pCRL process (2) " + process::pp(p));
       return process_expression();
     }
 
@@ -2124,7 +2190,7 @@ class specification_basic_type:public boost::noncopyable
       return process_expression();
     }
 
-    typedef enum { alt_state, sum_state, /* cond,*/ seq_state, name_state, multiaction_state } state;
+    typedef enum { alt_state, sum_state, /* cond,*/ seq_state, name_state, multiaction_state, stochastic_state } state;
 
     variable get_fresh_variable(const std::string& s, const sort_expression sort, const int reuse_index=-1)
     {
@@ -2262,13 +2328,13 @@ class specification_basic_type:public boost::noncopyable
 
     process_expression bodytovarheadGNF(
       const process_expression body, // intentionally not a reference.
-      state s,
+      const state s,
       const variable_list freevars, // intentionally not a reference.
       const variableposition v,
       const std::set<variable>& variables_bound_in_sum)
     {
       /* it is assumed that we only receive processes with
-         operators alt, seq, sum_state, cond, name, delta, tau, sync, AtTime in it */
+         operators alt, seq, sum_state, cond, name, delta, tau, sync, at and stochastic operator in it */
 
       if (is_choice(body))
       {
@@ -2319,6 +2385,36 @@ class specification_basic_type:public boost::noncopyable
           return sum(sumvars,body1);
         }
         const process_expression body1=bodytovarheadGNF(body,alt_state,freevars,first,variables_bound_in_sum);
+        const process_identifier newproc=newprocess(freevars,body1,pCRL,
+                                         canterminatebody(body1),
+                                         containstimebody(body1));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
+      }
+
+      if (is_stochastic_operator(body))
+      {
+        if (stochastic_state>=s)
+        {
+          const stochastic_operator& sto=down_cast<const stochastic_operator>(body);
+          variable_list sumvars=sto.variables();
+          data_expression distribution=sto.distribution();
+          process_expression body1=sto.operand();
+
+          mutable_map_substitution<> sigma;
+          std::set<variable> variables_occurring_in_rhs_of_sigma;
+          alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
+          distribution=data::replace_variables_capture_avoiding(distribution,sigma,variables_occurring_in_rhs_of_sigma);
+          body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
+          std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
+          variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
+          body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first,variables_bound_in_sum1);
+          /* Due to the optimisation below, suggested by Yaroslav Usenko, bodytovarheadGNF(...,sum_state,...)
+             can deliver a process of the form c -> x + !c -> y. In this case, the
+             sumvars must be distributed over both summands. */
+          return stochastic_operator(sumvars,distribution,body1);
+        }
+        const process_expression body1=bodytovarheadGNF(body,stochastic_state,freevars,first,variables_bound_in_sum);
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
@@ -3111,6 +3207,32 @@ class specification_basic_type:public boost::noncopyable
                      variables_bound_in_sum1));
       }
 
+      if (is_stochastic_operator(t))
+      {
+        const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
+        variable_list sumvars=sto.variables();
+
+        mutable_map_substitution<> sigma;
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
+        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
+        const data_expression distribution=data::replace_variables_capture_avoiding(
+                                               sto.distribution(),
+                                               sigma,
+                                               variables_occurring_in_rhs_of_sigma);
+        const process_expression body=substitute_pCRLproc(sto.operand(),sigma,variables_occurring_in_rhs_of_sigma);
+
+        std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
+        variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
+        return stochastic_operator(
+                   sumvars,
+                   distribution,
+                   to_regular_form(
+                     body,
+                     todo,
+                     sumvars+freevars,
+                     variables_bound_in_sum1));
+      }
+
       if (is_sync(t)||is_action(t)||is_delta(t)||is_tau(t)||is_at(t))
       {
         return t;
@@ -3260,6 +3382,19 @@ class specification_basic_type:public boost::noncopyable
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
         return distribute_sum(sumvars,
                               procstorealGNFbody(sum(body).operand(),first,
+                                  todo,regular,mode,sumvars+freevars,variables_bound_in_sum1));
+      }
+
+      if (is_stochastic_operator(body))
+      {
+        const stochastic_operator& sto=down_cast<const stochastic_operator>(body);
+        const variable_list sumvars=sto.variables();
+        std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
+        variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
+        return stochastic_operator(
+                              sumvars,
+                              sto.distribution(),
+                              procstorealGNFbody(sto.operand(),first,
                                   todo,regular,mode,sumvars+freevars,variables_bound_in_sum1));
       }
 
@@ -3550,6 +3685,12 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(t))
       {
         makepCRLprocs(sum(t).operand(),pCRLprocs);
+        return;
+      }
+
+      if (is_stochastic_operator(t))
+      {
+        makepCRLprocs(stochastic_operator(t).operand(),pCRLprocs);
         return;
       }
 
@@ -4481,6 +4622,7 @@ class specification_basic_type:public boost::noncopyable
       const bool regular,
       const bool singlecontrolstate)
     {
+std::cerr << "Make initialstate " << initialProcId << "\n";
       int i;
       for (i=1 ; pcrlprcs[i-1]!=initialProcId ; ++i) {};
       /* i is the index of the initial state */
@@ -8470,13 +8612,13 @@ class specification_basic_type:public boost::noncopyable
       if (is_at(t))
       {
         return at(alphaconversionterm(at(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
-                  data::replace_variables_capture_avoiding(data_expression(at(t).time_stamp()),sigma,variables_occurring_in_rhs_of_sigma));
+                  data::replace_variables_capture_avoiding(at(t).time_stamp(),sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_if_then(t))
       {
         return if_then(
-                 data::replace_variables_capture_avoiding(data_expression(if_then(t).condition()), sigma, variables_occurring_in_rhs_of_sigma),
+                 data::replace_variables_capture_avoiding(if_then(t).condition(), sigma, variables_occurring_in_rhs_of_sigma),
                  alphaconversionterm(if_then(t).then_case(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
       }
 
@@ -8487,9 +8629,24 @@ class specification_basic_type:public boost::noncopyable
         std::set<variable> variables_occurring_in_rhs_of_local_sigma=variables_occurring_in_rhs_of_sigma;
 
         alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters),variables_occurring_in_rhs_of_local_sigma);
-        const process_expression result=sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,
+        return sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,
                                                    local_sigma,variables_occurring_in_rhs_of_local_sigma));
-        return result;
+      }
+
+      if (is_stochastic_operator(t))
+      {
+        const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
+        variable_list sumvars=sto.variables();
+        mutable_map_substitution<> local_sigma=sigma;
+        std::set<variable> variables_occurring_in_rhs_of_local_sigma=variables_occurring_in_rhs_of_sigma;
+
+        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters),variables_occurring_in_rhs_of_local_sigma);
+        return stochastic_operator(
+                       sumvars,
+                       data::replace_variables_capture_avoiding(sto.distribution(), 
+                                                                sigma, variables_occurring_in_rhs_of_sigma),
+                       alphaconversionterm(sto.operand(), sumvars+parameters,
+                                                   local_sigma,variables_occurring_in_rhs_of_local_sigma));
       }
 
       if (is_process_instance_assignment(t))
@@ -8682,6 +8839,10 @@ class specification_basic_type:public boost::noncopyable
       {
         return containstimebody(sum(t).operand(),stable,visited,allowrecursion,contains_if_then);
       }
+      if (is_stochastic_operator(t))
+      {
+        return containstimebody(stochastic_operator(t).operand(),stable,visited,allowrecursion,contains_if_then);
+      }
 
       if (is_action(t)||
           is_delta(t)||
@@ -8756,6 +8917,7 @@ class specification_basic_type:public boost::noncopyable
          to an if-then-else with an delta@0 in the else branch, introducing time */
       bool stable=0;
       bool contains_if_then=false;
+      
       while (!stable)
       {
         std::set < process_identifier > visited;
@@ -8764,6 +8926,334 @@ class specification_basic_type:public boost::noncopyable
       }
       return contains_if_then;
     }
+    /***** obtain_initial_distribution **********/
+
+    process_expression obtain_initial_distribution_term(
+                            const process_expression& t)
+    {
+      if (is_merge(t))
+      {
+        const process_expression r1_=obtain_initial_distribution_term(process::merge(t).left());
+        const process_expression r2_=obtain_initial_distribution_term(process::merge(t).right());
+
+        if (is_stochastic_operator(r1_))
+        {
+          const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);
+          if (is_stochastic_operator(r2_))
+          {
+            const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
+            process_expression new_body1=r1.operand();
+            process_expression new_body2=r2.operand();
+            std::set<variable> variables_occurring_in_rhs_of_sigma;
+            variable_list stochvars=r2.variables();
+            mutable_map_substitution<> local_sigma;
+            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
+            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            const data_expression new_distribution=
+                   process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
+
+            return stochastic_operator(r1.variables() + stochvars, 
+                                       sort_real::times(r1.distribution(),new_distribution),
+                                       merge(new_body1,new_body2));
+          }
+          /* r1 is and r2_ is not a stochastic operator */
+          return stochastic_operator(r1.variables(),r1.distribution(),merge(r1.operand(),r2_));
+        }
+        if (is_stochastic_operator(r2_))
+        {
+          /* r1_ is not and r2_ is a stochastic operator */
+          const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
+          return stochastic_operator(r2.variables(),r2.distribution(),merge(r1_,r2.operand()));
+        }
+        /* neither r1_ nor r2_ is stochastic */
+        return t;
+      }
+
+      if (is_process_instance(t))
+      {
+        assert(0);
+      }
+
+      if (is_process_instance_assignment(t))
+      {
+        const process_instance_assignment u(t);
+        const process_identifier old_identifier=u.identifier();
+        
+        size_t n=objectIndex(old_identifier);
+        const process_expression new_process=obtain_initial_distribution(old_identifier);
+        if (is_stochastic_operator(new_process))
+        {
+          // Remove the initial stochastic_distribution.
+          const stochastic_operator& sto=down_cast<const stochastic_operator>(new_process);
+std::cerr << "Warning: variables of stoch.operator and process can clash\n";
+          process_identifier new_identifier=
+                               newprocess(objectdata[n].parameters + sto.variables(),
+                                          sto.operand(),
+                                          objectdata[n].processstatus,
+                                          objectdata[n].canterminate,
+                                          objectdata[n].containstime);
+          return stochastic_operator(sto.variables(),
+                                     sto.distribution(),
+                                     process_instance_assignment(new_identifier,u.assignments())); 
+        }
+        return t;
+        
+      }
+
+      if (is_hide(t))
+      {
+        const process_expression r_=obtain_initial_distribution_term(hide(t).operand());
+        if (is_stochastic_operator(r_))
+        {
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
+          return stochastic_operator(r.variables(),r.distribution(),hide(hide(t).hide_set(),r.operand()));
+        }
+        return t;
+      }
+
+      if (is_rename(t))
+      {
+        const process_expression r_=obtain_initial_distribution_term(process::rename(t).operand());
+        if (is_stochastic_operator(r_))
+        {
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
+          return stochastic_operator(r.variables(),
+                                     r.distribution(),
+                                     process::rename(process::rename(t).rename_set(),r.operand()));
+        }
+        return t;
+      }
+
+      if (is_allow(t))
+      {
+        const process_expression r_=obtain_initial_distribution_term(allow(t).operand());
+        if (is_stochastic_operator(r_))
+        {
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
+          return stochastic_operator(r.variables(),r.distribution(),allow(allow(t).allow_set(),r.operand()));
+        }
+        return t;
+      }
+
+      if (is_block(t))
+      {
+        const process_expression r_=obtain_initial_distribution_term(block(t).operand());
+        if (is_stochastic_operator(r_))
+        {
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
+          return stochastic_operator(r.variables(),r.distribution(),block(block(t).block_set(),r.operand()));
+        }
+        return t;
+      }
+
+      if (is_comm(t))
+      {
+        const process_expression r_=obtain_initial_distribution_term(comm(t).operand());
+        if (is_stochastic_operator(r_))
+        {
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
+          return stochastic_operator(r.variables(),r.distribution(),comm(comm(t).comm_set(),r.operand()));
+        }
+        return t;
+      }
+
+      if (is_choice(t))
+      {
+        const process_expression r1_=obtain_initial_distribution_term(choice(t).left());
+        const process_expression r2_=obtain_initial_distribution_term(choice(t).right());
+        if (is_stochastic_operator(r1_))
+        {
+          const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);
+          if (is_stochastic_operator(r2_))
+          {
+            /* both r1_ and r2_ are stochastic */
+            const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
+            process_expression new_body1=r1.operand();
+            process_expression new_body2=r2.operand();
+            std::set<variable> variables_occurring_in_rhs_of_sigma;
+            variable_list stochvars=r2.variables();
+            mutable_map_substitution<> local_sigma;
+            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
+            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            const data_expression new_distribution=
+                   process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
+
+            return stochastic_operator(r1.variables() + stochvars, 
+                                       sort_real::times(r1.distribution(),new_distribution),
+                                       choice(new_body1,new_body2));
+          }
+          /* r1 is and r2_ is not a stochastic operator */
+          return stochastic_operator(r1.variables(),r1.distribution(),choice(r1.operand(),r2_));
+        }
+        if (is_stochastic_operator(r2_))
+        {
+          /* r1_ is not and r2_ is a stochastic operator */
+          const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
+          return stochastic_operator(r2.variables(),r2.distribution(),choice(r1_,r2.operand()));
+        }
+        /* neither r1_ nor r2_ is stochastic */
+        return t;
+      }
+
+      if (is_seq(t))
+      {
+        const process_expression r_=obtain_initial_distribution_term(seq(t).left());
+        if (is_stochastic_operator(r_))
+        {
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
+          return stochastic_operator(r.variables(),r.distribution(),seq(r.operand(),seq(t).right()));
+        }
+        return t;
+      }
+
+      if (is_if_then(t))
+      {
+        const process_expression r_=obtain_initial_distribution_term(if_then(t).then_case());
+        if (is_stochastic_operator(r_))
+        {
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
+          return stochastic_operator(r.variables(),r.distribution(),if_then(if_then(t).condition(),r.operand()));
+        }
+        return t;
+      }
+
+      if (is_if_then_else(t))
+      {
+        const process_expression r1_=obtain_initial_distribution_term(if_then_else(t).then_case());
+        const process_expression r2_=obtain_initial_distribution_term(if_then_else(t).else_case());
+        if (is_stochastic_operator(r1_))
+        {
+          const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);
+          if (is_stochastic_operator(r2_))
+          {
+            /* both r1_ and r2_ are stochastic */
+
+            const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
+            process_expression new_body1=r1.operand();
+            process_expression new_body2=r2.operand();
+            std::set<variable> variables_occurring_in_rhs_of_sigma;
+            variable_list stochvars=r2.variables();
+            mutable_map_substitution<> local_sigma;
+            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
+            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            const data_expression new_distribution=
+                   process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
+
+            return stochastic_operator(r1.variables() + stochvars,
+                                       sort_real::times(r1.distribution(),new_distribution),
+                                       if_then_else(if_then_else(t).condition(),new_body1,new_body2));
+          }
+          /* r1 is and r2_ is not a stochastic operator */
+          return stochastic_operator(r1.variables(),r1.distribution(),if_then_else(if_then_else(t).condition(),r1.operand(),r2_));
+        }
+        if (is_stochastic_operator(r2_))
+        {
+          /* r1_ is not and r2_ is a stochastic operator */
+          const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
+          return stochastic_operator(r2.variables(),r2.distribution(),if_then_else(if_then_else(t).condition(),r1_,r2.operand()));
+        }
+        /* neither r1_ nor r2_ is stochastic */
+        return t;
+
+      }
+
+      if (is_sum(t))
+      {
+        const sum& s=down_cast<const sum>(t);
+        const process_expression r_= obtain_initial_distribution_term(s.operand());
+        if (is_stochastic_operator(r_))
+        {
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
+          std::set <variable> variables_in_distribution=find_all_variables(r.distribution());
+          for(variable_list::const_iterator i=s.variables().begin(); i!=s.variables().end(); ++i)
+          {
+            if (variables_in_distribution.count(*i)>0)
+            { 
+              throw mcrl2::runtime_error("Cannot commute a sum operator over a stochastic operator in " + 
+                                                   process::pp(t) + ".\n" + 
+                                         "The problematic variable is " + pp(*i) + ":" + pp(i->sort()) + ".");
+            }
+          }
+std::cerr << "TODO: Warning: variables of stoch.operator and sum operator can clash\n";
+          return stochastic_operator(r.variables(),
+                                     r.distribution(),
+                                     sum(s.variables(),r.operand()));
+         }
+        return t;
+      }
+
+      if (is_stochastic_operator(t))
+      {
+        const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
+        const process_expression r_= obtain_initial_distribution_term(sto.operand());
+        
+        if (is_stochastic_operator(r_))
+        {
+std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
+          return stochastic_operator(sto.variables()+r.variables(),
+                                     sort_real::times(sto.distribution(),r.distribution()),
+                                     r.operand());
+        }
+        return stochastic_operator(sto.variables(),sto.distribution(),r_);
+      }
+
+      if (is_action(t))
+      {
+        return t;
+      }
+
+      if (is_delta(t))
+      {
+        return t;
+      }
+
+      if (is_tau(t))
+      {
+        return t;
+      }
+
+      if (is_at(t))
+      {
+        const process_expression r_=obtain_initial_distribution_term(at(t).operand());
+        if (is_stochastic_operator(r_))
+        {
+          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
+          return stochastic_operator(r.variables(),r.distribution(),at(r.operand(),at(t).time_stamp()));
+        }
+        return t;
+      }
+
+      if (is_sync(t))
+      {
+        return t;
+      }
+
+      throw mcrl2::runtime_error("unexpected process format in canterminate " + process::pp(t) +".");
+    }
+
+    process_expression obtain_initial_distribution(const process_identifier& procId)
+    {
+      size_t n=objectIndex(procId);
+      const process_expression initial_distribution_=
+             obtain_initial_distribution_term(objectdata[n].processbody);
+      if (!is_stochastic_operator(initial_distribution_))
+      {
+        return process_instance(procId,data_expression_list());
+      }
+      const stochastic_operator& initial_distribution=down_cast<const stochastic_operator>(initial_distribution_);
+      const process_identifier new_procId=
+                 newprocess(initial_distribution.variables(),
+                            initial_distribution.operand(),
+                            pCRL, 0, true);
+      return stochastic_operator(initial_distribution.variables(),
+                                 initial_distribution.distribution(),
+                                 process_instance(new_procId,
+                                     (data_expression_list)(initial_distribution.variables())));
+    }
+      
+
+
     /***** determinewhetherprocessescanterminate(init); **********/
 
     bool canterminatebody(
@@ -8855,6 +9345,11 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(t))
       {
         return (canterminatebody(sum(t).operand(),stable,visited,allowrecursion));
+      }
+
+      if (is_stochastic_operator(t))
+      {
+        return (canterminatebody(stochastic_operator(t).operand(),stable,visited,allowrecursion));
       }
 
       if (is_action(t))
@@ -9122,6 +9617,14 @@ class specification_basic_type:public boost::noncopyable
                  transform_process_arguments_body(process::sync(t).left(),bound_variables,visited_processes),
                  transform_process_arguments_body(process::sync(t).right(),bound_variables,visited_processes));
       }
+      if (is_stochastic_operator(t))
+      {
+        const stochastic_operator tso=down_cast<const stochastic_operator>(t);
+        return stochastic_operator(
+                 tso.variables(),
+                 tso.distribution(),
+                 transform_process_arguments_body(tso.operand(),bound_variables,visited_processes));
+      }
       throw mcrl2::runtime_error("unexpected process format in transform_process_arguments_body " + process::pp(t) +".");
     }
 
@@ -9319,6 +9822,42 @@ class specification_basic_type:public boost::noncopyable
         return process::sync(
                  guarantee_that_parameters_have_unique_type_body(process::sync(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
                  guarantee_that_parameters_have_unique_type_body(process::sync(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_stochastic_operator(t))
+      {
+        const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
+        // Also rename bound variables in a stochastic operator, such that there are no two variables with
+        // the same name, but different types. We do the renaming globally, i.e. all occurrences of variables
+        // x:D that require renaming are renamed to x':D.
+        const variable_list parameters=sto.variables();
+        for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+        {
+          if (used_variable_names.count(i->name())==0)
+          {
+            used_variable_names.insert(i->name());
+            parameter_mapping[*i]=*i;  // This is the first parameter with this name. Map it to itself.
+            variables_in_lhs_of_parameter_mapping.insert(*i);
+            variables_in_rhs_of_parameter_mapping.insert(*i);
+          }
+          else
+          {
+            // A variable already exists with this name.
+            if (variables_in_lhs_of_parameter_mapping.count(*i)==0) // The variables must be separately stored, as the parameter_mapping
+                                                                    // forgets variables mapped to itself.
+            {
+              // This parameter needs a fresh name.
+              const variable fresh_var(fresh_identifier_generator(i->name()),i->sort());
+              parameter_mapping[*i]=fresh_var;
+              variables_in_lhs_of_parameter_mapping.insert(*i);
+              variables_in_rhs_of_parameter_mapping.insert(fresh_var);
+            }
+          }
+        }
+        return stochastic_operator(
+                   data::replace_variables(sto.variables(),parameter_mapping),
+                   data::replace_variables_capture_avoiding(sto.distribution(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                   guarantee_that_parameters_have_unique_type_body(sto.operand(),visited_processes,
+                           used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
       }
       throw mcrl2::runtime_error("unexpected process format in guarantee_that_parameters_have_unique_type_body " + process::pp(t) +".");
     }
@@ -9551,14 +10090,19 @@ class specification_basic_type:public boost::noncopyable
       guarantee_that_parameters_have_unique_type(init);
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
-      const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
+      const process_identifier init_=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
+      const process_expression init_distribution=obtain_initial_distribution(init_);
+      const process_identifier init1=
+               process_instance(is_stochastic_operator(init_distribution)?
+                                    stochastic_operator(init_distribution).operand():
+                                    init_distribution).identifier();
       determinewhetherprocessescontaintime(init1);
 
       std::vector <process_identifier> pcrlprocesslist;
       collectPcrlProcesses(init1,pcrlprocesslist);
       if (pcrlprocesslist.size()==0)
       {
-        throw mcrl2::runtime_error("There are no pCRL processes to be linearized. This is most likely due to the use of unguarde recursion in process equations");
+        throw mcrl2::runtime_error("There are no pCRL processes to be linearized. This is most likely due to the use of unguarded recursion in process equations");
         // Note that this can occur with a specification
         // proc P(x:Int) = P(x); init P(1);
       }
