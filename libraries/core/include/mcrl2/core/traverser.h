@@ -13,7 +13,6 @@
 #define MCRL2_CORE_TRAVERSER_H
 
 #include <set>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/nil.h"

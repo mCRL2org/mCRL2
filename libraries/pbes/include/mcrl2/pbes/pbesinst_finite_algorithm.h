@@ -369,7 +369,7 @@ class pbesinst_finite_algorithm
         std::vector<data::variable> finite_parameters;
         std::vector<data::variable> infinite_parameters;
         detail::split_parameters(i->variable(), index_map, finite_parameters, infinite_parameters);
-        data::variable_list infinite = atermpp::convert<data::variable_list>(infinite_parameters);
+        data::variable_list infinite(infinite_parameters.begin(), infinite_parameters.end());
 
         typedef data::enumerator_list_element_with_substitution<> enumerator_element;
         data::enumerator_algorithm_with_iterator<> enumerator(rewr, p.data(), rewr);

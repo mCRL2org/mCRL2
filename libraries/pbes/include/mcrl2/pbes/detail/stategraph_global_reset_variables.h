@@ -202,7 +202,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
 
       std::vector<pbes_expression> phi;
       core::identifier_string Y = x.name();
-      std::vector<data::data_expression> e = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
+      std::vector<data::data_expression> e(x.parameters().begin(),x.parameters().end());
 
       // iterate over the alternatives as defined by the control flow graph
       auto const& inst = m_control_flow_graph.index(Y);
@@ -258,7 +258,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
           }
           mCRL2log(log::debug, "stategraph") << std::endl;
         }
-        propositional_variable_instantiation Yr(Y, atermpp::convert<data::data_expression_list>(r));
+        propositional_variable_instantiation Yr(Y, data::data_expression_list(r.begin(),r.end()));
         if (m_simplify)
         {
           condition = m_datar(condition);

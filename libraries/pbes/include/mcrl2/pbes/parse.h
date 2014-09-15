@@ -19,7 +19,6 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/join.hpp>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/parse.h"
@@ -96,7 +95,8 @@ struct pbes_actions: public data::data_specification_actions
 
   pbes_system::pbes parse_PbesSpec(const core::parse_node& node)
   {
-    return pbes(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), atermpp::convert<std::set<data::variable> >(parse_GlobVarSpec(node.child(1))), parse_PbesInit(node.child(3)));
+    const data::variable_list l=parse_GlobVarSpec(node.child(1));
+    return pbes(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), std::set<data::variable>(l.begin(),l.end()), parse_PbesInit(node.child(3)));
   }
 };
 
