@@ -26,11 +26,11 @@ atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 {
   core::msg("aterm list traversal");
   std::vector<T> result;
-  for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+  for (auto i = x.begin(); i != x.end(); ++i)
   {
     result.push_back(atermpp::vertical_cast<T>(update_copy(*i)));
   }
-  return atermpp::convert<atermpp::term_list<T> >(result);
+  return atermpp::term_list<T>(result.begin(), result.end());
 }
 
 // Container traversal
@@ -41,7 +41,7 @@ void operator()(T& x,
                )
 {
   core::msg("container traversal");
-  for (typename T::iterator i = x.begin(); i != x.end(); ++i)
+  for (auto i = x.begin(); i != x.end(); ++i)
   {
     update(*i);
   }
@@ -53,7 +53,7 @@ void operator()(std::set<T>& x)
 {
   core::msg("aterm set traversal");
   std::set<T> result;
-  for (typename std::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+  for (auto i = x.begin(); i != x.end(); ++i)
   {
     result.insert(update_copy(*i));
   }
