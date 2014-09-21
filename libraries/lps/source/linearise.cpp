@@ -8926,12 +8926,13 @@ class specification_basic_type:public boost::noncopyable
     /***** obtain_initial_distribution **********/
 
     process_expression obtain_initial_distribution_term(
-                            const process_expression& t)
+                            const process_expression& t,
+                            std::set<process_identifier>& visited)
     {
       if (is_merge(t))
       {
-        const process_expression r1_=obtain_initial_distribution_term(process::merge(t).left());
-        const process_expression r2_=obtain_initial_distribution_term(process::merge(t).right());
+        const process_expression r1_=obtain_initial_distribution_term(process::merge(t).left(),visited);
+        const process_expression r2_=obtain_initial_distribution_term(process::merge(t).right(),visited);
 
         if (is_stochastic_operator(r1_))
         {
@@ -8977,7 +8978,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier old_identifier=u.identifier();
         
         size_t n=objectIndex(old_identifier);
-        const process_expression new_process=obtain_initial_distribution(old_identifier);
+        const process_expression new_process=obtain_initial_distribution(old_identifier,visited);
         if (is_stochastic_operator(new_process))
         {
           // Remove the initial stochastic_distribution.
@@ -8999,7 +9000,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
 
       if (is_hide(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(hide(t).operand());
+        const process_expression r_=obtain_initial_distribution_term(hide(t).operand(),visited);
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
@@ -9010,7 +9011,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
 
       if (is_rename(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(process::rename(t).operand());
+        const process_expression r_=obtain_initial_distribution_term(process::rename(t).operand(),visited);
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
@@ -9023,7 +9024,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
 
       if (is_allow(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(allow(t).operand());
+        const process_expression r_=obtain_initial_distribution_term(allow(t).operand(),visited);
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
@@ -9034,7 +9035,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
 
       if (is_block(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(block(t).operand());
+        const process_expression r_=obtain_initial_distribution_term(block(t).operand(),visited);
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
@@ -9045,7 +9046,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
 
       if (is_comm(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(comm(t).operand());
+        const process_expression r_=obtain_initial_distribution_term(comm(t).operand(),visited);
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_); 
@@ -9056,8 +9057,8 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
 
       if (is_choice(t))
       {
-        const process_expression r1_=obtain_initial_distribution_term(choice(t).left());
-        const process_expression r2_=obtain_initial_distribution_term(choice(t).right());
+        const process_expression r1_=obtain_initial_distribution_term(choice(t).left(),visited);
+        const process_expression r2_=obtain_initial_distribution_term(choice(t).right(),visited);
         if (is_stochastic_operator(r1_))
         {
           const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);
@@ -9094,7 +9095,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
 
       if (is_seq(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(seq(t).left());
+        const process_expression r_=obtain_initial_distribution_term(seq(t).left(),visited);
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
@@ -9105,7 +9106,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
 
       if (is_if_then(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(if_then(t).then_case());
+        const process_expression r_=obtain_initial_distribution_term(if_then(t).then_case(),visited);
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
@@ -9116,8 +9117,8 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
 
       if (is_if_then_else(t))
       {
-        const process_expression r1_=obtain_initial_distribution_term(if_then_else(t).then_case());
-        const process_expression r2_=obtain_initial_distribution_term(if_then_else(t).else_case());
+        const process_expression r1_=obtain_initial_distribution_term(if_then_else(t).then_case(),visited);
+        const process_expression r2_=obtain_initial_distribution_term(if_then_else(t).else_case(),visited);
         if (is_stochastic_operator(r1_))
         {
           const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);
@@ -9157,7 +9158,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
       if (is_sum(t))
       {
         const sum& s=down_cast<const sum>(t);
-        const process_expression r_= obtain_initial_distribution_term(s.operand());
+        const process_expression r_= obtain_initial_distribution_term(s.operand(),visited);
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
@@ -9182,7 +9183,7 @@ std::cerr << "TODO: Warning: variables of stoch.operator and sum operator can cl
       if (is_stochastic_operator(t))
       {
         const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
-        const process_expression r_= obtain_initial_distribution_term(sto.operand());
+        const process_expression r_= obtain_initial_distribution_term(sto.operand(),visited);
         
         if (is_stochastic_operator(r_))
         {
@@ -9212,7 +9213,7 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
 
       if (is_at(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(at(t).operand());
+        const process_expression r_=obtain_initial_distribution_term(at(t).operand(),visited);
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
@@ -9229,14 +9230,21 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
       throw mcrl2::runtime_error("unexpected process format in canterminate " + process::pp(t) +".");
     }
 
-    process_expression obtain_initial_distribution(const process_identifier& procId)
+    process_expression obtain_initial_distribution(const process_identifier& procId,
+                                                   std::set < process_identifier >& visited)
     {
+      if (visited.count(procId)>0)
+      {
+        throw mcrl2::runtime_error("Unguarded recursion in process " + process::pp(procId));
+      }
+      visited.insert(procId);
       size_t n=objectIndex(procId);
       const process_expression initial_distribution_=
-             obtain_initial_distribution_term(objectdata[n].processbody);
+             obtain_initial_distribution_term(objectdata[n].processbody,visited);
+      visited.erase(procId);
       if (!is_stochastic_operator(initial_distribution_))
       {
-        return process_instance(procId,data_expression_list());
+        return process_instance_assignment(procId,assignment_list());
       }
       const stochastic_operator& initial_distribution=down_cast<const stochastic_operator>(initial_distribution_);
       const process_identifier new_procId=
@@ -9245,12 +9253,9 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
                             pCRL, 0, true);
       return stochastic_operator(initial_distribution.variables(),
                                  initial_distribution.distribution(),
-                                 process_instance(new_procId,
-                                     (data_expression_list)(initial_distribution.variables())));
+                                 process_instance_assignment(new_procId,assignment_list())); // TODO add correct assignment here.
     }
       
-
-
     /***** determinewhetherprocessescanterminate(init); **********/
 
     bool canterminatebody(
@@ -10088,9 +10093,11 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
       const process_identifier init_=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
-      const process_expression init_distribution=obtain_initial_distribution(init_);
+      std::set<process_identifier> visited;
+      const process_expression init_distribution=obtain_initial_distribution(init_,visited);
       const process_identifier init1=
-               process_instance(is_stochastic_operator(init_distribution)?
+               process_instance_assignment(
+                                    is_stochastic_operator(init_distribution)?
                                     stochastic_operator(init_distribution).operand():
                                     init_distribution).identifier();
       determinewhetherprocessescontaintime(init1);
