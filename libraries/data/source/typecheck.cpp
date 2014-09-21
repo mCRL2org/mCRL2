@@ -3427,8 +3427,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       {
         was_ambiguous=false;
       }
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " +
-                            data::pp(application(Data,Arguments)) + " to type " + data::pp(PosType));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast an application of " +
+                            data::pp(Data) + " to arguments " + data::pp(Arguments) + " to type " + data::pp(PosType));
     }
 
     //it is possible that:
