@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 #define MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 
+#include "boost/lexical_cast.hpp"
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/traverser.h"

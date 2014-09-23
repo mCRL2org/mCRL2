@@ -11,6 +11,7 @@
 #include <queue>
 #include <set>
 
+#include "boost/lexical_cast.hpp"
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/representative_generator.h"
