@@ -17,7 +17,6 @@
 #include <cctype>
 #include <map>
 #include <string>
-#include <boost/lexical_cast.hpp>
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
@@ -57,10 +56,10 @@ class number_postfix_generator
       {
         name = id.substr(0, i + 1);
         std::string num = id.substr(i + 1);
-        new_index = boost::lexical_cast<int>(num);
+        new_index = atoi(num.c_str());
       }
       std::size_t old_index = m_index.find(name) == m_index.end() ? 0 : m_index[name];
-      m_index[name] = (std::max)(old_index, new_index);
+      m_index[name] = std::max(old_index, new_index);
     }
 
     /// \brief Adds the strings in the range [first, last) to the context.
