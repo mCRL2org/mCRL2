@@ -59,7 +59,7 @@ class number_postfix_generator
         new_index = atoi(num.c_str());
       }
       std::size_t old_index = m_index.find(name) == m_index.end() ? 0 : m_index[name];
-      m_index[name] = std::max(old_index, new_index);
+      m_index[name] = (std::max)(old_index, new_index); // Windows requires brackets around std::max. 
     }
 
     /// \brief Adds the strings in the range [first, last) to the context.
