@@ -151,7 +151,7 @@ action_summand(const data::variable_list& summation_variables, const data::data_
 process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | CIU  | LinearProcessInit | A process initializer
 linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MSW  | LinearProcess     | A linear process
 specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                                  | MSW  | LinProcSpec       | A linear process specification
-stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)                                                                         : public atermpp::aterm_appl | CI   | Distribution | A stochastic distribution
+stochastic_distribution(const data::data_expression& distribution, const data::variable_list& variables)                                                                         : public atermpp::aterm_appl | CIU  | Distribution | A stochastic distribution
 '''
 
 PROCESS_CLASSES = r'''

@@ -92,6 +92,7 @@ class linear_process
         data::data_expression condition         = data::data_expression(t[1]);
         data::data_expression time              = data::data_expression(t[3]);
         data::assignment_list assignments(atermpp::down_cast<atermpp::aterm_list>(t[4]));
+        assert(atermpp::down_cast<lps::stochastic_distribution>(t[5]).is_undefined());
         if (atermpp::down_cast<atermpp::aterm_appl>(t[2]).function() == core::detail::function_symbols::Delta)
         {
           m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));

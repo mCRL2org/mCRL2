@@ -45,11 +45,18 @@ void test_system_defined_sorts()
   BOOST_CHECK(r.size() != 0);
 }
 
+void test_empty_distribution()
+{
+  stochastic_distribution dist;
+  std::cout << "empty dist = " << dist << std::endl;
+  BOOST_CHECK(dist.is_undefined());
+}
+
 int test_main(int argc, char* argv[])
 {
   test_find_sort_expressions();
-
   test_system_defined_sorts();
+  test_empty_distribution();
 
   return 0;
 }
