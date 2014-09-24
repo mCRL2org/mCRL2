@@ -151,17 +151,18 @@ action_summand(const data::variable_list& summation_variables, const data::data_
 process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | CIU  | LinearProcessInit | A process initializer
 linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MSW  | LinearProcess     | A linear process
 specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                                  | MSW  | LinProcSpec       | A linear process specification
+stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)                                                                         : public atermpp::aterm_appl | CI   | Distribution | A stochastic distribution
 '''
 
 PROCESS_CLASSES = r'''
 action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                       : public atermpp::aterm_appl | CI   | ActId         | An action label
 untyped_action(const core::identifier_string& name, const data::data_expression_list& arguments)                                                                                 : public atermpp::aterm_appl | CI   | UntypedAction | An untyped action
 process_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SMW | ProcSpec    | A process specification
-process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CIUs | ProcVarId   | A process identifier
-process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI   | ProcEqn     | A process equation
-rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI   | RenameExpr  | A rename expression
-communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI   | CommExpr    | A communication expression
-action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI   | MultActName | A multiset of action names
+process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CIUs | ProcVarId    | A process identifier
+process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI   | ProcEqn      | A process equation
+rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI   | RenameExpr   | A rename expression
+communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI   | CommExpr     | A communication expression
+action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI   | MultActName  | A multiset of action names
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''

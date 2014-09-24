@@ -224,6 +224,21 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
+  void operator()(const lps::stochastic_distribution& x)
+  {
+    derived().enter(x);
+    if (x.variables().empty()) // do not print the empty distribution
+    {
+      return;
+    }
+    derived().print("dist ");
+    print_variables(x.variables(), true, true, false, "", "");
+    derived().print("[");
+    derived()(x.distribution());
+    derived().print("]");
+    derived().leave(x);
+  }
+
   /* void operator()(const lps::state &x)
   {
     derived().enter(x);

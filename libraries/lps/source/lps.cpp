@@ -30,6 +30,7 @@ std::string pp(const lps::linear_process& x) { return lps::pp< lps::linear_proce
 std::string pp(const lps::multi_action& x) { return lps::pp< lps::multi_action >(x); }
 std::string pp(const lps::process_initializer& x) { return lps::pp< lps::process_initializer >(x); }
 std::string pp(const lps::specification& x) { return lps::pp< lps::specification >(x); }
+std::string pp(const lps::stochastic_distribution& x) { return lps::pp< lps::stochastic_distribution >(x); }
 std::string pp(const lps::untyped_multi_action& x) { return lps::pp< lps::untyped_multi_action >(x); }
 void normalize_sorts(lps::multi_action& x, const data::data_specification& dataspec) { lps::normalize_sorts< lps::multi_action >(x, dataspec); }
 void translate_user_notation(lps::multi_action& x) { lps::translate_user_notation< lps::multi_action >(x); }

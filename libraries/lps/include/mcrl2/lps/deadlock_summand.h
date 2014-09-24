@@ -13,6 +13,7 @@
 #define MCRL2_LPS_DEADLOCK_SUMMAND_H
 
 #include "mcrl2/lps/deadlock.h"
+#include "mcrl2/lps/stochastic_distribution.h"
 #include "mcrl2/lps/summand.h"
 
 namespace mcrl2 {
@@ -105,7 +106,8 @@ atermpp::aterm_appl deadlock_summand_to_aterm(const deadlock_summand& s)
                        s.condition(),
                        atermpp::aterm_appl(core::detail::function_symbol_Delta()),
                        s.deadlock().time(),
-                       data::assignment_list()
+                       data::assignment_list(),
+                       stochastic_distribution()
                      );
   return result;
 }

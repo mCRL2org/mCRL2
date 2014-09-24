@@ -83,7 +83,7 @@ class linear_process
       atermpp::aterm_appl::iterator i = lps.begin();
       m_process_parameters = data::variable_list(*i++);
       atermpp::aterm_list summands = atermpp::down_cast<atermpp::aterm_list>(*i);
-      for (atermpp::aterm_list::iterator j = summands.begin(); j != summands.end(); ++j)
+      for (auto j = summands.begin(); j != summands.end(); ++j)
       {
         assert(core::detail::check_rule_LinearProcessSummand(*j));
         atermpp::aterm_appl t = atermpp::down_cast<atermpp::aterm_appl>(*j);
@@ -163,14 +163,14 @@ class linear_process
     /// \return True if time is available in at least one of the summands.
     bool has_time() const
     {
-      for (action_summand_vector::const_iterator i = m_action_summands.begin(); i != m_action_summands.end(); ++i)
+      for (auto i = m_action_summands.begin(); i != m_action_summands.end(); ++i)
       {
         if (i->has_time())
         {
           return true;
         }
       }
-      for (deadlock_summand_vector::const_iterator i = m_deadlock_summands.begin(); i != m_deadlock_summands.end(); ++i)
+      for (auto i = m_deadlock_summands.begin(); i != m_deadlock_summands.end(); ++i)
       {
         if (i->deadlock().has_time())
         {
@@ -187,12 +187,12 @@ inline
 atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
 {
   atermpp::term_list<atermpp::aterm_appl> summands;
-  for (deadlock_summand_vector::const_reverse_iterator i = p.deadlock_summands().rbegin(); i != p.deadlock_summands().rend(); ++i)
+  for (auto i = p.deadlock_summands().rbegin(); i != p.deadlock_summands().rend(); ++i)
   {
     atermpp::aterm_appl s = deadlock_summand_to_aterm(*i);
     summands.push_front(s);
   }
-  for (action_summand_vector::const_reverse_iterator i = p.action_summands().rbegin(); i != p.action_summands().rend(); ++i)
+  for (auto i = p.action_summands().rbegin(); i != p.action_summands().rend(); ++i)
   {
     atermpp::aterm_appl s = action_summand_to_aterm(*i);
     summands.push_front(s);

@@ -202,6 +202,9 @@
 //Linear process specifications
 //-----------------------------
 
+//distribution
+<Distribution>  ::= Distribution(<DataExpr>, <DataVarId>*)
+
 //process specification
 <LinProcSpec>   ::= LinProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,
                       <LinearProcess>, <LinearProcessInit>)
@@ -212,7 +215,7 @@
 //Linear process summand
 <LinearProcessSummand>
                 ::= LinearProcessSummand(<DataVarId>*, <DataExpr>,
-                      <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*)
+                      <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*, <Distribution>)
 
 //process initialisation
 <LinearProcessInit>

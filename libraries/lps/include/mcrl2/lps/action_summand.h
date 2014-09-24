@@ -14,6 +14,7 @@
 
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/stochastic_distribution.h"
 #include "mcrl2/process/process_expression.h"
 
 namespace mcrl2 {
@@ -168,7 +169,8 @@ atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
                        s.condition(),
                        lps::detail::multi_action_to_aterm(s.multi_action()),
                        s.multi_action().time(),
-                       s.assignments()
+                       s.assignments(),
+                       stochastic_distribution()
                      );
   return result;
 }

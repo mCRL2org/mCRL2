@@ -146,11 +146,12 @@ static const size_t BAF_MAGIC = 0xbaf;
 //
 // History:
 //
-// before 2013      : version 0x0300
-// 29 August 2013   : version changed to 0x0301
-// 23 November 2013 : version changed to 0x0302 (introduction of index for variable types)
+// before 2013       : version 0x0300
+// 29 August 2013    : version changed to 0x0301
+// 23 November 2013  : version changed to 0x0302 (introduction of index for variable types)
+// 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
 
-static const size_t BAF_VERSION = 0x0302;
+static const size_t BAF_VERSION = 0x0303;
 
 typedef struct _trm_bucket
 {
@@ -939,7 +940,7 @@ static aterm read_term(sym_read_entry* sym, istream &is)
   aterm result;
   size_t value;
   std::stack<read_todo> stack;
-  
+
   read_todo item = { sym, 0, std::vector<aterm>(sym->arity), &result, NULL };
   stack.push(item);
 
