@@ -258,10 +258,10 @@ BOOST_AUTO_TEST_CASE(bug_623)
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
   action_summand_vector summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (auto i = summands1.begin(); i != summands1.end(); ++i)
   {
     data_expression_list next_state = i->next_state(s1.process().process_parameters());
-    BOOST_CHECK_EQUAL(next_state.size(), 2);
+    BOOST_CHECK_EQUAL(next_state.size(), 2u);
     BOOST_CHECK_NE(*next_state.begin(), *(++next_state.begin()));
     std::clog << "erroneous next state " << data::pp(next_state) << std::endl;
   }

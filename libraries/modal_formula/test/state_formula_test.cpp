@@ -195,10 +195,10 @@ BOOST_AUTO_TEST_CASE(test_count_fixpoints)
   specification spec;
 
   formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
-  BOOST_CHECK_EQUAL(count_fixpoints(formula), 2);
+  BOOST_CHECK_EQUAL(count_fixpoints(formula), 2u);
 
   formula = parse_state_formula("exists b:Bool. (mu X. X) || forall b:Bool. (nu X. mu Y. (X || Y))", spec);
-  BOOST_CHECK_EQUAL(count_fixpoints(formula), 3);
+  BOOST_CHECK_EQUAL(count_fixpoints(formula), 3u);
 }
 
 // Test case for bug #1094.

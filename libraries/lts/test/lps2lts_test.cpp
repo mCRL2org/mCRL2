@@ -452,7 +452,7 @@ BOOST_AUTO_TEST_CASE(test_max_states)
   result.load(options.lts);
   remove(options.lts.c_str()); // Clean up after ourselves
 
-  BOOST_CHECK_LT(result.num_states(), 10);
+  BOOST_CHECK_LT(result.num_states(), 10u);
 }
 
 BOOST_AUTO_TEST_CASE(test_interaction_sum_and_assignment_notation1)
@@ -498,7 +498,7 @@ BOOST_AUTO_TEST_CASE(test_whether_bag_enumeration_with_similar_elements_is_allow
   );
   check_lps2lts_specification(spec, 1, 1, 1);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_functions_to_functions_are_causing_problems)
 {
   std::string spec(
@@ -513,7 +513,7 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_to_functions_are_causing_problems)
   );
   check_lps2lts_specification(spec, 1, 1, 1);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_functions_can_be_enumerated)
 {
   std::string spec(
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_can_be_enumerated)
   );
   check_lps2lts_specification(spec, 1, 4, 4);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_functions_with_more_arguments_can_be_enumerated)
 {
   std::string spec(
@@ -533,7 +533,7 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_with_more_arguments_can_be_enumerate
   );
   check_lps2lts_specification(spec, 1, 128, 128);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_can_be_enumerated)
 {
   std::string spec(
@@ -543,7 +543,7 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_can_be_enumerated)
   );
   check_lps2lts_specification(spec, 1, 4, 4);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_sets_can_be_enumerated)
 {
   std::string spec(
@@ -553,7 +553,7 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_can_be_enumerated)
   );
   check_lps2lts_specification(spec, 1, 4, 4);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_with_conditions_can_be_enumerated)
 {
   std::string spec(
@@ -563,7 +563,7 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_with_conditions_can_be_enumerated)
   );
   check_lps2lts_specification(spec, 1, 2, 2);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_sets_with_conditions_can_be_enumerated)
 {
   std::string spec(
@@ -573,7 +573,7 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_with_conditions_can_be_enumerated)
   );
   check_lps2lts_specification(spec, 1, 2, 2);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_of_functions_can_be_enumerated)
 {
   std::string spec(
@@ -583,7 +583,7 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_of_functions_can_be_enumerated)
   );
   check_lps2lts_specification(spec, 1, 8, 8);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
 {
   std::string spec(
@@ -593,7 +593,7 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
   );
   check_lps2lts_specification(spec, 1, 8, 8);
 }
-  
+
 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

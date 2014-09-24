@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE(test_boolean_variables)
   action_summand_vector v(s1.process().action_summands());
   for(action_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
   {
-    BOOST_CHECK_EQUAL(i->summation_variables().size(), 0);
+    BOOST_CHECK_EQUAL(i->summation_variables().size(), 0u);
   }
 
   print_specifications(s0, s1);
