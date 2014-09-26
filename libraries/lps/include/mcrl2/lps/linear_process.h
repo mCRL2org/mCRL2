@@ -80,9 +80,8 @@ class linear_process
     linear_process(const atermpp::aterm_appl& lps)
     {
       assert(core::detail::check_term_LinearProcess(lps));
-      atermpp::aterm_appl::iterator i = lps.begin();
-      m_process_parameters = data::variable_list(*i++);
-      atermpp::aterm_list summands = atermpp::down_cast<atermpp::aterm_list>(*i);
+      m_process_parameters = atermpp::down_cast<data::variable_list>(lps[0]);
+      atermpp::aterm_list summands = atermpp::down_cast<atermpp::aterm_list>(lps[1]);
       for (auto j = summands.begin(); j != summands.end(); ++j)
       {
         assert(core::detail::check_rule_LinearProcessSummand(*j));
@@ -104,11 +103,6 @@ class linear_process
           m_action_summands.push_back(action_summand(summation_variables, condition, multi_action(actions, time), assignments));
         }
       }
-    }
-
-    /// \brief Destructor
-    ~linear_process()
-    {
     }
 
     /// \brief Returns the number of LPS summands.
