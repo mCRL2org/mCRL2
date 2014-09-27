@@ -136,7 +136,7 @@ class GLScene
      * @brief Constructor.
      * @param g The graph that is to be visualised by this object.
      */
-    GLScene(Graph::Graph& g);
+    GLScene(Graph::Graph& g, float device_pixel_ratio);
 
     /**
      * @brief Destructor.
