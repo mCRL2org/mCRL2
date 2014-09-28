@@ -17,7 +17,7 @@
 #ifndef MCRL2_DATA_APPLICATION_H
 #define MCRL2_DATA_APPLICATION_H
 
-#include "boost/iterator/iterator_adaptor.hpp"
+#include "boost/iterator/iterator_facade.hpp"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/utilities/workarounds.h" // for nullptr on older compilers
@@ -230,22 +230,22 @@ class application: public data_expression
 
   public:
 
-    class const_iterator : public boost::iterator_adaptor<
-            const_iterator                     // Derived
-          , data_expression::const_iterator    // Base
-          , const data_expression              // Value
-          , boost::random_access_traversal_tag // CategoryOrTraversal
-        >
+    /// \brief An iterator to traverse the arguments of an application.
+    /// \details There is a subtle difference with the arguments of an iterator on
+    ///          the arguments of an aterm_appl from which an application is derived.
+    ///          As an application has a head as its first argument, the iterator
+    ///          of the aterm_appl starts at this head, where the iterator of the
+    ///          application starts at the first argument. This also means that 
+    ///          t[n] for t an application is equal to t[n+1] if t is interpreted as an
+    ///          aterm_appl.
+    class const_iterator : public atermpp::term_appl_iterator<const data_expression>
     {
       public:
+        /// \brief Constructor from a data_expression::const_iterator
         explicit const_iterator(const data_expression::const_iterator& p)
-          : const_iterator::iterator_adaptor_(p) {}
-      private:
-        friend class boost::iterator_core_access;
-        reference dereference() const
-        {
-          return atermpp::down_cast<const data_expression>(*base_reference());
-        }
+          : atermpp::term_appl_iterator<const data_expression>(static_cast<const data_expression*>(&*p)) 
+        {}
+
     };
 
     /// \brief Constructor.
@@ -309,7 +309,8 @@ class application: public data_expression
     ///        application.
     const_iterator begin() const
     {
-      return ++const_iterator(data_expression::begin());
+      return const_iterator(data_expression::begin()+1);
+      // return ++const_iterator(data_expression::begin());
     }
 
     /// \brief Returns an iterator pointing past the last argument of the
