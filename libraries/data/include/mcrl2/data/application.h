@@ -28,49 +28,96 @@ namespace mcrl2
 namespace data
 {
 
-/// \brief Iterator for term_appl which prepends a single term to the list.
-template <typename ForwardIterator >
-class term_appl_prepend_iterator: public boost::iterator_facade<
-  term_appl_prepend_iterator<ForwardIterator>,    // Derived
-  data_expression,                                // Value
-  boost::forward_traversal_tag,                   // CategoryOrTraversal
-  const data_expression&                          // Reference
-  >
+namespace detail
 {
+
+/// \brief Iterator for term_appl which prepends a data_expression to a list convertible to data_expressions.
+template <class ForwardIterator >
+class term_appl_prepend_iterator
+{
+  public:
+    /// \brief The value_type.
+    typedef data_expression value_type;
+    /// \brief The reference type.
+    typedef const data_expression& reference;
+    /// \brief The pointer type.
+    typedef const data_expression* pointer;
+    /// \brief Difference type
+    typedef ptrdiff_t difference_type;
+    /// \brief The iterator category.
+    typedef std::forward_iterator_tag iterator_category;
+
+  protected:
+    ForwardIterator m_it;
+    pointer m_prepend;
+
+  private:
+    // Prevent the use of the following operators in this class, including the
+    // postfix increment.
+    reference operator[](difference_type n) const;
+    term_appl_prepend_iterator operator++(int);
+    term_appl_prepend_iterator& operator--();
+    term_appl_prepend_iterator& operator--(int);
+    term_appl_prepend_iterator& operator+=(difference_type n);
+    term_appl_prepend_iterator& operator-=(difference_type n);
+    term_appl_prepend_iterator operator+(difference_type n) const;
+    term_appl_prepend_iterator operator-(difference_type n) const;
+    difference_type operator-(const term_appl_prepend_iterator& other) const;
+    difference_type distance_to(const term_appl_prepend_iterator& other) const;
+
   public:
 
     /// \brief Constructor.
     /// \param t A term
     term_appl_prepend_iterator(ForwardIterator it,
-                               const data_expression* prepend=nullptr)
+                               pointer prepend=nullptr)
       : m_it(it), m_prepend(prepend)
     {}
 
-  private:
-    friend class boost::iterator_core_access;
 
-    /// \brief Equality check
-    /// \param other An iterator
-    /// \return True if the iterators are equal
-    bool equal(term_appl_prepend_iterator const& other) const
+    /// \brief The copy constructor.
+    /// \param other The iterator that is copy constructed.
+    term_appl_prepend_iterator(const term_appl_prepend_iterator& other)
+      : m_it(other.m_it),
+        m_prepend(other.m_prepend)
     {
-      return this->m_prepend == other.m_prepend && this->m_it == other.m_it;
     }
 
-    /// \brief Dereference operator
-    /// \return The value that the iterator references
-    const data_expression &dereference() const
+    /// \brief The assignment operator.
+    /// \param other The term to be assigned.
+    /// \return A reference to the assigned iterator.
+    term_appl_prepend_iterator& operator=(const term_appl_prepend_iterator& other)
+    {
+      m_it=other.m_it;
+      m_prepend=other.m_prepend;
+      return *this;
+    }
+    
+    /// \brief The dereference operator.
+    /// \return The dereferenced term.
+    reference operator*() const
     {
       if (m_prepend)
       {
         return *m_prepend;
       }
-
-      return *m_it;
+      return *(this->m_it);
     }
 
-    /// \brief Increments the iterator
-    void increment()
+    /// \brief Dereference the current iterator.
+    /// \return The dereference term.
+    pointer operator->() const
+    {
+      if (m_prepend)
+      {
+        return m_prepend;
+      }
+      return &*(this->m_it);
+    }
+
+    /// \brief Prefix increment.
+    /// \return The iterator after it is incremented.
+    term_appl_prepend_iterator& operator++()
     {
       if (m_prepend)
       {
@@ -78,12 +125,58 @@ class term_appl_prepend_iterator: public boost::iterator_facade<
       }
       else
       {
-        ++m_it;
+        ++(this->m_it); 
       }
+      return *this;
     }
 
-    ForwardIterator m_it;
-    const data_expression *m_prepend;
+    /// \brief Equality of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_list.
+    bool operator ==(const term_appl_prepend_iterator& other) const
+    {
+      return m_prepend==other.m_prepend && this->m_it==other.m_it;
+    }
+
+    /// \brief Inequality of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators do not point to the same term_appl.
+    bool operator !=(const term_appl_prepend_iterator& other) const
+    {
+      return !(*this==other);
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the pointer to this termterm is smaller than the other pointer.
+    bool operator <(const term_appl_prepend_iterator& other) const
+    {
+      return m_prepend < other.m_prepend || (m_prepend==other.m_prepend && this->m_it<other.m_it);
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_appl.
+    bool operator <=(const term_appl_prepend_iterator& other) const
+    {
+      return m_prepend < other.m_prepend || (m_prepend==other.m_prepend && this->m_it<=other.m_it);
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_appl.
+    bool operator >(const term_appl_prepend_iterator& other) const
+    {
+      return other<*this;
+    }
+
+    /// \brief Comparison of iterators.
+    /// \param other The iterator with which this iterator is compared.
+    /// \return true if the iterators point to the same term_appl.
+    bool operator >=(const term_appl_prepend_iterator& other) const
+    {
+      return other<=*this;
+    }
 };
 
 /// \brief Iterator for term_appl which prepends a single term to the list.
@@ -147,6 +240,8 @@ class transforming_term_appl_prepend_iterator: public boost::iterator_facade<
     const data_expression *m_prepend;
     ArgumentConverter m_argument_converter;
 };
+
+} // namespace detail
 
 /// \brief An application of a data expression to a number of arguments
 class application: public data_expression
@@ -216,8 +311,8 @@ class application: public data_expression
                 const Container& arguments,
                 typename atermpp::enable_if_container<Container, data_expression>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
-                                         term_appl_prepend_iterator<typename Container::const_iterator>(arguments.begin(), &head),
-                                         term_appl_prepend_iterator<typename Container::const_iterator>(arguments.end())))
+                                         detail::term_appl_prepend_iterator<typename Container::const_iterator>(arguments.begin(), &head),
+                                         detail::term_appl_prepend_iterator<typename Container::const_iterator>(arguments.end())))
     {
       assert(arguments.size()>0);
     }
@@ -255,8 +350,8 @@ class application: public data_expression
                 FwdIter last,
                 typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
-                                         term_appl_prepend_iterator<FwdIter>(first, &head),
-                                         term_appl_prepend_iterator<FwdIter>(last)))
+                                         detail::term_appl_prepend_iterator<FwdIter>(first, &head),
+                                         detail::term_appl_prepend_iterator<FwdIter>(last)))
     {
       assert(first!=last);
     }
@@ -269,8 +364,8 @@ class application: public data_expression
                 FwdIter last,
                 typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arity + 1),
-                                         term_appl_prepend_iterator<FwdIter>(first, &head),
-                                         term_appl_prepend_iterator<FwdIter>(last)))
+                                         detail::term_appl_prepend_iterator<FwdIter>(first, &head),
+                                         detail::term_appl_prepend_iterator<FwdIter>(last)))
     {
       assert(arity>0);
       assert(std::distance(first, last)==arity);
@@ -286,8 +381,8 @@ class application: public data_expression
                 typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0,
                 typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
-                                         transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(first, &head, convert_arguments),
-                                         transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(last,nullptr,convert_arguments)))
+                                         detail::transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(first, &head, convert_arguments),
+                                         detail::transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(last,nullptr,convert_arguments)))
     {
       assert(first!=last);
     }
