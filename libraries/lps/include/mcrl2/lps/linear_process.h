@@ -205,6 +205,8 @@ class linear_process: public linear_process_base<action_summand>
 {
   friend atermpp::aterm_appl linear_process_to_aterm(const linear_process& p);
 
+  typedef linear_process_base<action_summand> super;
+
   public:
     /// \brief Constructor.
     linear_process()
@@ -212,7 +214,7 @@ class linear_process: public linear_process_base<action_summand>
 
     /// \brief Copy constructor.
     linear_process(const linear_process& other)
-      : linear_process_base(other)
+      : super(other)
     { }
 
     /// \brief Constructor.
@@ -220,13 +222,13 @@ class linear_process: public linear_process_base<action_summand>
                    const deadlock_summand_vector& deadlock_summands,
                    const action_summand_vector& action_summands
                   )
-      : linear_process_base(process_parameters, deadlock_summands, action_summands)
+      : super(process_parameters, deadlock_summands, action_summands)
     { }
 
     /// \brief Constructor.
     /// \param lps A term
     linear_process(const atermpp::aterm_appl& lps)
-      : linear_process_base(lps)
+      : super(lps)
     { }
 };
 
