@@ -15,6 +15,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
+//#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/detail/action_utility.h"
 
 namespace mcrl2
@@ -227,7 +228,8 @@ struct lps_well_typed_checker
   /// <li>the left hand sides of the assignments of summands are contained in the process parameters</li>
   /// <li>the summands are well typed</li>
   /// </ul>
-  bool is_well_typed(const linear_process& p) const
+  template <typename ActionSummand>
+  bool is_well_typed(const linear_process_base<ActionSummand>& p) const
   {
     // check 2)
     if (!data::detail::unique_names(p.process_parameters()))
@@ -238,11 +240,11 @@ struct lps_well_typed_checker
 
     // check 4)
     std::set<core::identifier_string> names;
-    for (data::variable_list::const_iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i)
+    for (auto i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i)
     {
       names.insert(i->name());
     }
-    for (action_summand_vector::const_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
+    for (auto i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
     {
       if (!data::detail::check_variable_names(i->summation_variables(), names))
       {
@@ -252,7 +254,7 @@ struct lps_well_typed_checker
     }
 
     // check 5)
-    for (action_summand_vector::const_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
+    for (auto i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
     {
       if (!data::detail::check_assignment_variables(i->assignments(), p.process_parameters()))
       {
@@ -289,7 +291,8 @@ struct lps_well_typed_checker
   /// <li>the free variables occurring in the initial process are declared in the global variable specification</li>
   /// <li>the global variables have unique names</li>
   /// </ul>
-  bool is_well_typed(const specification& spec) const
+  template <typename LinearProcess, typename InitialProcessExpression>
+  bool is_well_typed(const specification_base<LinearProcess, InitialProcessExpression>& spec, const std::set<data::variable>& free_variables) const
   {
     std::set<data::sort_expression> declared_sorts = data::detail::make_set(spec.data().sorts());
     std::set<process::action_label> declared_labels = data::detail::make_set(spec.action_labels());
@@ -327,7 +330,7 @@ struct lps_well_typed_checker
     }
 
     // check 5)
-    for (action_summand_vector::const_iterator i = action_summands.begin(); i != action_summands.end(); ++i)
+    for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
     {
       if (!(detail::check_action_labels(i->multi_action().actions(), declared_labels)))
       {
@@ -348,7 +351,6 @@ struct lps_well_typed_checker
       return false;
     }
 
-    std::set<data::variable> free_variables = lps::find_free_variables(spec);
     if (!free_variables.empty())
     {
       mCRL2log(log::error) << "is_well_typed(specification) failed: some of the free variables were not declared\n";
@@ -366,6 +368,18 @@ struct lps_well_typed_checker
 
     return true;
   }
+
+  bool is_well_typed(const specification& spec) const
+  {
+    std::set<data::variable> free_variables = lps::find_free_variables(spec);
+    return is_well_typed(spec, free_variables);
+  }
+
+//  bool is_well_typed(const stochastic_specification& spec) const
+//  {
+//    std::set<data::variable> free_variables = lps::find_free_variables(spec);
+//    return is_well_typed(spec, free_variables);
+//  }
 
   template <typename Term>
   bool operator()(const Term& t) const

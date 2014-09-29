@@ -36,7 +36,6 @@ class action_summand: public summand_base
 
   public:
     /// \brief Constructor.
-    // TODO: check if the default constructor results in a deadlock summand
     action_summand()
     {}
 
@@ -133,9 +132,27 @@ inline void swap(action_summand& t1, action_summand& t2)
 }
 //--- end generated class action_summand ---//
 
+namespace detail {
+
+/// \brief Conversion to atermAppl.
+/// \return The action summand converted to aterm format.
+inline
+atermpp::aterm_appl action_summand_to_aterm(const action_summand& s, const atermpp::aterm_appl& dist = stochastic_distribution())
+{
+  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
+                       s.summation_variables(),
+                       s.condition(),
+                       lps::detail::multi_action_to_aterm(s.multi_action()),
+                       s.multi_action().time(),
+                       s.assignments(),
+                       stochastic_distribution()
+                     );
+  return result;
+}
+
 /// \brief Comparison operator for action summands.
 inline
-bool operator<(const action_summand& x, const action_summand& y)
+bool less(const action_summand& x, const action_summand& y, bool default_result = false)
 {
   if (x.summation_variables() != y.summation_variables())
   {
@@ -149,7 +166,20 @@ bool operator<(const action_summand& x, const action_summand& y)
   {
     return x.assignments() < y.assignments();
   }
-  return x.multi_action() < y.multi_action();
+  if (x.multi_action() != y.multi_action())
+  {
+    return x.multi_action() < y.multi_action();
+  }
+  return default_result;
+}
+
+} // namespace detail
+
+/// \brief Comparison operator for action summands.
+inline
+bool operator<(const action_summand& x, const action_summand& y)
+{
+  return detail::less(x, y);
 }
 
 /// \brief Equality operator of action summands
@@ -159,20 +189,11 @@ bool operator==(const action_summand& x, const action_summand& y)
   return x.condition() == y.condition() && x.multi_action() == y.multi_action() && x.assignments() == y.assignments();
 }
 
-/// \brief Conversion to atermAppl.
-/// \return The action summand converted to aterm format.
+/// \brief Conversion to aterm_appl.
 inline
 atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
 {
-  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
-                       s.summation_variables(),
-                       s.condition(),
-                       lps::detail::multi_action_to_aterm(s.multi_action()),
-                       s.multi_action().time(),
-                       s.assignments(),
-                       stochastic_distribution()
-                     );
-  return result;
+  return detail::action_summand_to_aterm(s);
 }
 
 } // namespace lps

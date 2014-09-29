@@ -166,10 +166,7 @@ inline
 void complete_action_rename_specification(action_rename_specification& x, const lps::specification& spec)
 {
   using namespace mcrl2::data;
-  // atermpp::aterm_appl result = lps::action_rename_specification_to_aterm(x);
-  // atermpp::aterm_appl lps_spec = lps::specification_to_aterm(spec);
   x = lps::type_check_action_rename_specification(x, spec);
-  // x = action_rename_specification(result);
   x.data().declare_data_specification_to_be_type_checked();
   x = action_rename_specification(x.data()+spec.data(),x.action_labels(),x.rules());
   x = detail::translate_user_notation_and_normalise_sorts_action_rename_spec(x);
