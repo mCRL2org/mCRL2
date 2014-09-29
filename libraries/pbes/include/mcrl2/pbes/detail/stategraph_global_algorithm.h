@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 
-// #define MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
+#define MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
 
 #include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
