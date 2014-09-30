@@ -48,13 +48,13 @@ class stochastic_specification: public specification_base<linear_process, proces
     { }
 
     stochastic_specification(const specification &other)
-      : specification_base(other)
+      : super(other)
     { }
 
     /// \brief Constructor.
     /// \param t A term
     stochastic_specification(const atermpp::aterm_appl &t)
-      : specification_base(t)
+      : super(t)
     {
       complete_data_specification();
     }
@@ -70,7 +70,7 @@ class stochastic_specification: public specification_base<linear_process, proces
                              const std::set<data::variable>& global_variables,
                              const linear_process& lps,
                              const process_initializer& initial_process)
-      : specification_base(data, action_labels, global_variables, lps, initial_process)
+      : super(data, action_labels, global_variables, lps, initial_process)
     { }
 
     void save(std::ostream& stream, bool binary=true) const
