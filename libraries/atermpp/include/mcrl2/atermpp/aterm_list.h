@@ -16,7 +16,6 @@
 #include <limits>
 #include <type_traits>
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
-#include <boost/iterator/iterator_facade.hpp>
 
 #include "mcrl2/atermpp/detail/aterm_list.h"
 
@@ -81,9 +80,9 @@ class term_list:public aterm
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
-    term_list(Iter first, Iter last, typename std::enable_if<std::is_convertible<
-                typename boost::iterator_traversal< Iter >::type,
-                boost::random_access_traversal_tag
+    term_list(Iter first, Iter last, typename std::enable_if<std::is_base_of<
+                  std::bidirectional_iterator_tag,
+                  typename std::iterator_traits<Iter>::iterator_category
               >::value>::type* = 0):
         aterm(detail::make_list_backward<Term,Iter,
                   detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>()))
@@ -99,9 +98,9 @@ class term_list:public aterm
     ///                   before it is put into the list.
     template <class Iter, class ATermConverter>
     term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm,
-              typename std::enable_if<std::is_convertible<
-                typename boost::iterator_traversal< Iter >::type,
-                boost::random_access_traversal_tag
+              typename std::enable_if<std::is_base_of<
+                std::bidirectional_iterator_tag,
+                typename std::iterator_traits<Iter>::iterator_category
               >::value>::type* = 0):
          aterm(detail::make_list_backward<Term,Iter,ATermConverter>(first, last, convert_to_aterm))
     {
@@ -116,9 +115,9 @@ class term_list:public aterm
     /// \param last The end of a range of elements.
     template <class Iter>
              term_list(Iter first, Iter last,
-                       typename std::enable_if< !std::is_convertible<
-                         typename boost::iterator_traversal< Iter >::type,
-                         boost::random_access_traversal_tag
+                       typename std::enable_if< !std::is_base_of<
+                         std::bidirectional_iterator_tag,
+                         typename std::iterator_traits<Iter>::iterator_category
                        >::value>::type* = 0):
          aterm(detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
                                  (first, last, detail::do_not_convert_term<Term>()))
@@ -136,9 +135,9 @@ class term_list:public aterm
     ///                      before it is put into the list.
     template <class Iter, class  ATermConverter>
              term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
-                       typename std::enable_if< !std::is_convertible<
-                         typename boost::iterator_traversal< Iter >::type,
-                         boost::random_access_traversal_tag
+                       typename std::enable_if< !std::is_base_of<
+                         std::random_access_iterator_tag,
+                         typename std::iterator_traits<Iter>::iterator_category
                        >::value>::type* = 0):
          aterm(detail::make_list_forward<Term,Iter,ATermConverter>
                                  (first, last, convert_to_aterm))
