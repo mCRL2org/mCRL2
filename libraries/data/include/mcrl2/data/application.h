@@ -17,7 +17,6 @@
 #ifndef MCRL2_DATA_APPLICATION_H
 #define MCRL2_DATA_APPLICATION_H
 
-#include "boost/iterator/iterator_facade.hpp"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/utilities/workarounds.h" // for nullptr on older compilers
@@ -179,15 +178,16 @@ class term_appl_prepend_iterator
     }
 };
 
-/// \brief Iterator for term_appl which prepends a single term to the list.
+/// \brief Iterator for term_appl which prepends a single term to the list, applying ArgumentConvertor to all arguments.
 template <typename ForwardIterator, class ArgumentConverter>
-class transforming_term_appl_prepend_iterator: public boost::iterator_facade<
-  transforming_term_appl_prepend_iterator<ForwardIterator, ArgumentConverter>, // Derived
-  data_expression,                                                // Value
-  boost::forward_traversal_tag,                                   // CategoryOrTraversal
-  const data_expression&                                          // Reference
-  >
+class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator<ForwardIterator>
 {
+  protected:
+    mutable data_expression m_stable_store;
+    // ForwardIterator m_it;
+    // const data_expression *m_prepend;
+    ArgumentConverter m_argument_converter;
+
   public:
 
     /// \brief Constructor.
@@ -195,50 +195,53 @@ class transforming_term_appl_prepend_iterator: public boost::iterator_facade<
     transforming_term_appl_prepend_iterator(ForwardIterator it,
                                             const data_expression* prepend,
                                             const ArgumentConverter arg_convert)
-      : m_it(it), m_prepend(prepend), m_argument_converter(arg_convert)
+      : term_appl_prepend_iterator<ForwardIterator>(it,prepend), 
+        m_argument_converter(arg_convert)
     {}
 
-  private:
-    friend class boost::iterator_core_access;
-
-    /// \brief Equality check
-    /// \param other An iterator
-    /// \return True if the iterators are equal
-    bool equal(const transforming_term_appl_prepend_iterator& other) const
+    /// \brief The copy constructor.
+    /// \param other The iterator that is copy constructed.
+    transforming_term_appl_prepend_iterator(const transforming_term_appl_prepend_iterator& other)
+      : term_appl_prepend_iterator<ForwardIterator>(other),
+        m_stable_store(other.m_stable_store),
+        m_argument_converter(other.m_argument_converter)
     {
-      return this->m_prepend == other.m_prepend && this->m_it == other.m_it;
     }
 
-    /// \brief Dereference operator
-    /// \return The value that the iterator references
-    const data_expression& dereference() const
+    /// \brief The assignment operator.
+    /// \param other The term to be assigned.
+    /// \return A reference to the assigned iterator.
+    transforming_term_appl_prepend_iterator& operator=(const transforming_term_appl_prepend_iterator& other)
     {
-      if (m_prepend)
+      term_appl_prepend_iterator<ForwardIterator>::operator=(other);
+      m_stable_store=other.m_stable_store;
+      m_argument_converter=other.m_argument_converter;
+      return *this;
+    }
+    
+    /// \brief The dereference operator.
+    /// \return The dereferenced term.
+    typename term_appl_prepend_iterator<ForwardIterator>::reference operator*() const
+    {
+      if (term_appl_prepend_iterator<ForwardIterator>::m_prepend)
       {
-        return *m_prepend;
+        return *term_appl_prepend_iterator<ForwardIterator>::m_prepend;
       }
-
-      m_stable_store=m_argument_converter(*m_it);
+      m_stable_store=m_argument_converter(*term_appl_prepend_iterator<ForwardIterator>::m_it);
       return m_stable_store;
     }
 
-    /// \brief Increments the iterator
-    void increment()
+    /// \brief Dereference the current iterator.
+    /// \return The dereference term.
+    typename term_appl_prepend_iterator<ForwardIterator>::pointer operator->() const
     {
-      if (m_prepend)
+      if (term_appl_prepend_iterator<ForwardIterator>::m_prepend)
       {
-        m_prepend = nullptr;
+        return term_appl_prepend_iterator<ForwardIterator>::m_prepend;
       }
-      else
-      {
-        ++m_it;
-      }
+      m_stable_store=m_argument_converter(*term_appl_prepend_iterator<ForwardIterator>::m_it);
+      return &m_stable_store;
     }
-
-    mutable data_expression m_stable_store;
-    ForwardIterator m_it;
-    const data_expression *m_prepend;
-    ArgumentConverter m_argument_converter;
 };
 
 } // namespace detail
