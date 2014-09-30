@@ -34,11 +34,11 @@ namespace detail
 
 // helper function for linear_process_base::linear_process_base(const atermpp::aterm_appl& lps)
 template <typename Summand>
-Summand make_action_summand(const data::variable_list& summation_variables,
-                            const data::data_expression& condition,
-                            const multi_action& a,
-                            const data::assignment_list& assignments,
-                            const stochastic_distribution& distribution
+Summand make_action_summand(const data::variable_list&,
+                            const data::data_expression&,
+                            const multi_action&,
+                            const data::assignment_list&,
+                            const stochastic_distribution&
                            )
 {
   throw mcrl2::runtime_error("make_action_summand is not defined!");
