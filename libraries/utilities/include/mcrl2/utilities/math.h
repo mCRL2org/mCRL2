@@ -12,6 +12,10 @@
 #ifndef MCRL2_MATH_UTILITIES_H
 #define MCRL2_MATH_UTILITIES_H
 
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
+
 namespace mcrl2
 {
 namespace utilities
