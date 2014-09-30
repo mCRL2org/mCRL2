@@ -175,8 +175,7 @@
 //----------------------
 
 //process specification
-<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,
-                     <ProcEqnSpec>, <ProcInit>)
+<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>, <ProcEqnSpec>, <ProcInit>)
 
 //action specification
 <ActSpec>      ::= ActSpec(<ActId>*)
@@ -219,7 +218,7 @@
 
 //process initialisation
 <LinearProcessInit>
-                ::= LinearProcessInit(<DataVarIdInit>*)
+                ::= LinearProcessInit(<DataVarIdInit>*, <Distribution>)
 
 
 //Mu-calculus formulas

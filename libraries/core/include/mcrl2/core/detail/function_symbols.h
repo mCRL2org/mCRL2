@@ -536,7 +536,7 @@ const atermpp::function_symbol& function_symbol_LinearProcess()
 inline
 const atermpp::function_symbol& function_symbol_LinearProcessInit()
 {
-  static const atermpp::function_symbol function_symbol_LinearProcessInit = atermpp::function_symbol("LinearProcessInit", 1);
+  static const atermpp::function_symbol function_symbol_LinearProcessInit = atermpp::function_symbol("LinearProcessInit", 2);
   return function_symbol_LinearProcessInit;
 }
 

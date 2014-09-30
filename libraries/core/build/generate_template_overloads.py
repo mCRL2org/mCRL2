@@ -84,6 +84,7 @@ data::data_equation
 data::data_expression
 data::sort_expression
 lps::specification
+lps::stochastic_specification
 pbes_system::pbes
 process::action_label_list
 process::process_equation_vector
@@ -100,7 +101,9 @@ data::function_symbol
 data::variable
 data::variable_list
 lps::linear_process
+lps::stochastic_linear_process
 lps::specification
+lps::stochastic_specification
 lps::deadlock
 lps::multi_action
 pbes_system::pbes
@@ -112,10 +115,13 @@ FIND_FREE_VARIABLES_CLASSNAMES = '''
 data::data_expression
 data::data_expression_list
 lps::linear_process
+lps::stochastic_linear_process
 lps::specification
+lps::stochastic_specification
 lps::deadlock
 lps::multi_action
 lps::process_initializer
+lps::stochastic_process_initializer
 pbes_system::pbes
 pbes_system::pbes_expression
 pbes_system::pbes_equation
@@ -126,6 +132,7 @@ state_formulas::state_formula
 FIND_FUNCTION_SYMBOLS_CLASSNAMES = '''
 data::data_equation
 lps::specification
+lps::stochastic_specification
 pbes_system::pbes
 '''
 
@@ -136,6 +143,7 @@ pbes_system::pbes_expression
 FIND_IDENTIFIERS_CLASSNAMES = '''
 data::variable_list
 lps::specification
+lps::stochastic_specification
 process::process_specification
 pbes_system::pbes_expression
 state_formulas::state_formula

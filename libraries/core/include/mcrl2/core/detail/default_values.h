@@ -608,7 +608,7 @@ const atermpp::aterm_appl& default_value_Choice()
 inline
 const atermpp::aterm_appl& default_value_LinearProcessInit()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_LinearProcessInit(), default_value_List());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_LinearProcessInit(), default_value_List(), default_value_Distribution());
   return t;
 }
 

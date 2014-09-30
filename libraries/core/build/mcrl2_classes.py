@@ -148,13 +148,14 @@ multi_action(const process::action_list& actions, const data::data_expression& t
 untyped_multi_action(const process::untyped_action_list& actions)                                                                                                                                                                                             | CM   | UntypedMultAct    | An untyped multi-action
 deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                       | CMS  | None              | A deadlock summand
 action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                       | CMS  | None              | An action summand
-process_initializer(const data::assignment_list& assignments)                                                                                                                                                                    : public atermpp::aterm_appl | CIU  | LinearProcessInit | A process initializer
+process_initializer(const data::assignment_list& assignments)                                                                                                                                                                    : public atermpp::aterm_appl | CIUS | LinearProcessInit | A process initializer
 linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                                 | MSW  | LinearProcess     | A linear process
 specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | MSW  | LinProcSpec       | A linear process specification
 stochastic_distribution(const data::data_expression& distribution, const data::variable_list& variables)                                                                                                                         : public atermpp::aterm_appl | CIU  | Distribution | A stochastic distribution
-stochastic_action_summand(const stochastic_distribution& distribution)                                                                                                                                                           : public action_summand      | CMS  | None              | A stochastic action summand
-stochastic_linear_process()                                                                                                                                                                                                      : public linear_process      | MSW  | LinearProcess     | A stochastic linear process
-stochastic_specification()                                                                                                                                                                                                       : public specification       | MSW  | LinProcSpec       | A stochastic linear process specification
+stochastic_action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments, const stochastic_distribution& distribution) : public lps::action_summand | CMS  | None              | A stochastic action summand
+stochastic_linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const stochastic_action_summand_vector& action_summands) : public linear_process      | MSW  | LinearProcess     | A stochastic linear process
+stochastic_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const stochastic_linear_process& process, const process_initializer& initial_process) : public lps::specification       | MSW  | LinProcSpec       | A stochastic linear process specification
+stochastic_process_initializer(const data::assignment_list& assignments, const stochastic_distribution& distribution)                                                          : public lps::process_initializer | CI   | LinearProcessInit | A stochastic process initializer
 '''
 
 PROCESS_CLASSES = r'''
@@ -814,8 +815,24 @@ class Class:
 '''
         return self.expand_text(text, parameters = '', constructors = '', member_functions = '', namespace = self.namespace())
 
+    # Returns the member functions of the super class.
+    # If the super class is atermpp::aterm_appl or None, the empty list is returned
+    def superclass_member_functions(self, all_classes):
+        result = []
+        if self.superclass() != None:
+            name = self.superclass(include_namespace = True)
+            if not name in ['atermpp::aterm_appl']:
+                c = all_classes[name]
+                result = c.member_functions(all_classes, False)
+                result = [f.name for f in result]
+        return result
+
     # Returns the member functions of the class
-    def member_functions(self):
+    def member_functions(self, all_classes, exclude_superclass_member_functions = True):
+        if exclude_superclass_member_functions:
+            skip = self.superclass_member_functions(all_classes)
+        else:
+            skip = []
         result = []
         index = 1
         for p in self.constructor.parameters():
@@ -825,7 +842,8 @@ class Class:
             return_type = extract_type(p[0].strip())
             name = p[2].strip()
             arg = str(n - 1)
-            result.append(MemberFunction(self.classname(), return_type, name, arg))
+            if not name in skip:
+                result.append(MemberFunction(self.classname(), return_type, name, arg))
         return result
 
     def expand_text(self, text, parameters = '', constructors = '', member_functions = '', namespace = None):
@@ -905,7 +923,7 @@ bool is_%s(const %s& x)
                 ctext = ''
             else:
                 ctext = '\n\n'.join([x.inline_definition() for x in self.constructors()])
-            mtext = ''.join(['\n\n' + x.inline_definition() for x in self.member_functions()])
+            mtext = ''.join(['\n\n' + x.inline_definition() for x in self.member_functions(all_classes)])
 
             text = r'''/// \\brief <DESCRIPTION>
 class <CLASSNAME><SUPERCLASS_DECLARATION>
@@ -949,7 +967,7 @@ std::ostream& operator<<(std::ostream& out, const <CLASSNAME>& x)
     def class_declaration(self, all_classes, namespace = 'core'):
         ptext = ', '.join([p.name() for p in self.constructor.parameters()])
         ctext = '\n\n'.join([x.declaration() for x in self.constructors(namespace)])
-        mtext = ''.join(['\n\n' + x.declaration() for x in self.member_functions()])
+        mtext = ''.join(['\n\n' + x.declaration() for x in self.member_functions(all_classes)])
 
         text = r'''/// \\brief <DESCRIPTION>
 class <CLASSNAME><SUPERCLASS_DECLARATION>
@@ -976,17 +994,17 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         return classes
 
     # Returns the member function definitions
-    def class_member_function_definitions(self, namespace = 'core'):
-        ptext = ', '.join([p.name() for p in self.constructor.parameters()])
-        ctext = '\n\n'.join([x.definition() for x in self.constructors(namespace)])
-        mtext = ''.join(['\n\n' + x.definition() for x in self.member_functions()])
-
-        text = r'''<CONSTRUCTORS><MEMBER_FUNCTIONS>'''
-        text = self.expand_text(text, ptext, ctext, mtext, namespace)
-
-        if 'X' in self.modifiers():
-            text = re.sub('check_term', 'check_rule', text)
-        return text + '\n'
+    # def class_member_function_definitions(self, all_classes, namespace = 'core'):
+    #     ptext = ', '.join([p.name() for p in self.constructor.parameters()])
+    #     ctext = '\n\n'.join([x.definition() for x in self.constructors(namespace)])
+    #     mtext = ''.join(['\n\n' + x.definition() for x in self.member_functions(all_classes)])
+    #
+    #     text = r'''<CONSTRUCTORS><MEMBER_FUNCTIONS>'''
+    #     text = self.expand_text(text, ptext, ctext, mtext, namespace)
+    #
+    #     if 'X' in self.modifiers():
+    #         text = re.sub('check_term', 'check_rule', text)
+    #     return text + '\n'
 
     def traverser_function(self, all_classes, dependencies):
         text = r'''void operator()(const <CLASS_NAME>& x)

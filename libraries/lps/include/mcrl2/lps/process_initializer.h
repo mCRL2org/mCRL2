@@ -24,6 +24,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
+#include "mcrl2/lps/stochastic_distribution.h"
 
 namespace mcrl2
 {
@@ -31,7 +32,6 @@ namespace mcrl2
 namespace lps
 {
 
-//--- start generated class process_initializer ---//
 /// \brief A process initializer
 class process_initializer: public atermpp::aterm_appl
 {
@@ -51,14 +51,14 @@ class process_initializer: public atermpp::aterm_appl
 
     /// \brief Constructor.
     process_initializer(const data::assignment_list& assignments)
-      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments)
+      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, stochastic_distribution())
     {}
 
     const data::assignment_list& assignments() const
     {
       return atermpp::down_cast<data::assignment_list>((*this)[0]);
     }
-//--- start user section process_initializer ---//
+
     /// \brief Returns the initial state of the LPS.
     /// \param process_parameters The parameters of the correponding linear process
     /// \return The initial state of the LPS.
@@ -66,9 +66,9 @@ class process_initializer: public atermpp::aterm_appl
     {
       return data::replace_variables(atermpp::container_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
-//--- end user section process_initializer ---//
 };
 
+//--- start generated class process_initializer ---//
 /// \brief list of process_initializers
 typedef atermpp::term_list<process_initializer> process_initializer_list;
 

@@ -10,6 +10,7 @@
 /// \brief add your file description here.
 
 // To avoid circular inclusion problems
+
 #ifndef MCRL2_LPS_SPECIFICATION_H
 #include "mcrl2/lps/specification.h"
 #endif
@@ -21,6 +22,7 @@
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/untyped_action.h"
 #include "mcrl2/lps/untyped_multi_action.h"
+#include "mcrl2/lps/stochastic_specification.h"
 
 namespace mcrl2
 {
@@ -107,6 +109,52 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.process());
     static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_distribution& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this)(x.variables());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.summation_variables());
+    static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.multi_action());
+    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.process_parameters());
+    static_cast<Derived&>(*this)(x.deadlock_summands());
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this)(x.process());
+    static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this)(x.distribution());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -197,6 +245,47 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.process());
     static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_distribution& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.multi_action());
+    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.deadlock_summands());
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.process());
+    static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this)(x.distribution());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -291,6 +380,51 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.process());
     static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_distribution& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this)(x.variables());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.summation_variables());
+    static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.multi_action());
+    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.process_parameters());
+    static_cast<Derived&>(*this)(x.deadlock_summands());
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this)(x.process());
+    static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this)(x.distribution());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -389,6 +523,52 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const lps::stochastic_distribution& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this)(x.variables());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.summation_variables());
+    static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.multi_action());
+    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.process_parameters());
+    static_cast<Derived&>(*this)(x.deadlock_summands());
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this)(x.process());
+    static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
 };
 
 /// \brief Traverser class
@@ -433,6 +613,28 @@ struct add_traverser_action_labels: public Traverser<Derived>
   }
 
   void operator()(const lps::specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.multi_action());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::stochastic_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.action_labels());

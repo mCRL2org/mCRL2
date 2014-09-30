@@ -33,7 +33,7 @@ class stochastic_action_summand: public action_summand
     /// \brief Constructor.
     stochastic_action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& action,
           const data::assignment_list& assignments, const stochastic_distribution& distribution)
-      : action_summand(summation_variables, condition, action, assignments, distribution)
+      : action_summand(summation_variables, condition, action, assignments), m_distribution(distribution)
     {}
 
     /// \brief Returns the distribution of this summand.
@@ -79,7 +79,7 @@ inline void swap(stochastic_action_summand& t1, stochastic_action_summand& t2)
 
 /// \brief Comparison operator for action summands.
 inline
-bool operator<(const action_summand& x, const action_summand& y)
+bool operator<(const stochastic_action_summand& x, const stochastic_action_summand& y)
 {
   return detail::less(static_cast<const action_summand&>(x), static_cast<const action_summand&>(y), x.distribution() < y.distribution());
 }

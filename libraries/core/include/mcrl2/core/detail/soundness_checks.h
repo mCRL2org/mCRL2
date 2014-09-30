@@ -2865,7 +2865,7 @@ bool check_term_Choice(Term t)
   return true;
 }
 
-// LinearProcessInit(DataVarIdInit*)
+// LinearProcessInit(DataVarIdInit*, Distribution)
 template <typename Term>
 bool check_term_LinearProcessInit(Term t)
 {
@@ -2883,7 +2883,7 @@ bool check_term_LinearProcessInit(Term t)
   }
 
   // check the children
-  if (a.size() != 1)
+  if (a.size() != 2)
   {
     return false;
   }
@@ -2891,6 +2891,11 @@ bool check_term_LinearProcessInit(Term t)
   if (!check_list_argument(a[0], check_rule_DataVarIdInit<atermpp::aterm>, 0))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarIdInit" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_Distribution<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Distribution" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

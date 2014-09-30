@@ -13,10 +13,20 @@
 #define MCRL2_LPS_STOCHASTIC_SPECIFICATION_H
 
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_linear_process.h"
 
 namespace mcrl2 {
 
 namespace lps {
+
+class stochastic_specification;
+
+// template function overloads
+std::set<data::sort_expression> find_sort_expressions(const lps::stochastic_specification& x);
+std::set<data::variable> find_all_variables(const lps::stochastic_specification& x);
+std::set<data::variable> find_free_variables(const lps::stochastic_specification& x);
+std::set<data::function_symbol> find_function_symbols(const lps::stochastic_specification& x);
+std::set<core::identifier_string> find_identifiers(const lps::stochastic_specification& x);
 
 /// \brief Linear process specification.
 class stochastic_specification: public specification_base<linear_process, process_initializer>
@@ -63,10 +73,17 @@ class stochastic_specification: public specification_base<linear_process, proces
       : specification_base(data, action_labels, global_variables, lps, initial_process)
     { }
 
+    void save(std::ostream& stream, bool binary=true) const
+    {
+      assert(is_well_typed(*this));
+      super::save(stream, binary);
+    }
+
     void load(std::istream& stream, bool binary=true)
     {
       super::load(stream, binary);
       complete_data_specification();
+      assert(is_well_typed(*this));
     }
 };
 

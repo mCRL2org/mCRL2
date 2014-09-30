@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPS_STOCHASTIC_DISTRIBUTION_H
 #define MCRL2_LPS_STOCHASTIC_DISTRIBUTION_H
 
+#include "mcrl2/data/variable.h"
+
 namespace mcrl2 {
 
 namespace lps {

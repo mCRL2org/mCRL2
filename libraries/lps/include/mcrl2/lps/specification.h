@@ -262,13 +262,13 @@ class specification: public specification_base<linear_process, process_initializ
     { }
 
     specification(const specification &other)
-      : specification_base(other)
+      : super(other)
     { }
 
     /// \brief Constructor.
     /// \param t A term
     specification(const atermpp::aterm_appl &t)
-      : specification_base(t)
+      : super(t)
     {
       complete_data_specification(*this);
     }
@@ -284,7 +284,7 @@ class specification: public specification_base<linear_process, process_initializ
                   const std::set<data::variable>& global_variables,
                   const linear_process& lps,
                   const process_initializer& initial_process)
-      : specification_base(data, action_labels, global_variables, lps, initial_process)
+      : super(data, action_labels, global_variables, lps, initial_process)
     { }
 
     void save(std::ostream& stream, bool binary=true) const
