@@ -82,6 +82,9 @@ inline void swap(stochastic_process_initializer& t1, stochastic_process_initiali
 }
 //--- end generated class stochastic_process_initializer ---//
 
+// template function overloads
+std::set<data::variable> find_free_variables(const lps::stochastic_process_initializer& x);
+
 } // namespace lps
 
 } // namespace mcrl2
