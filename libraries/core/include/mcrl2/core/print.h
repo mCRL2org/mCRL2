@@ -208,7 +208,12 @@ struct apply_printer: public Traverser<apply_printer<Traverser> >
 
   using super::enter;
   using super::leave;
+
+#ifdef _MSC_VER
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#else
   using super::operator();
+#endif
 
   apply_printer(std::ostream& out)
   {
@@ -216,9 +221,6 @@ struct apply_printer: public Traverser<apply_printer<Traverser> >
     static_cast<Super&>(*this).m_out = &out;
   }
 
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 } // namespace detail
