@@ -13,6 +13,22 @@
 #ifndef WORKAROUNDS_H__
 #define WORKAROUNDS_H__
 
+#ifndef GL_BGRA
+#  define GL_BGRA 0x80E1
+#endif
+#ifndef GL_UNSIGNED_INT_8_8_8_8_REV
+#  define GL_UNSIGNED_INT_8_8_8_8_REV 0x8367
+#endif
+#ifndef GL_FOG_COORD_SRC
+#  define GL_FOG_COORD_SRC 0x8450
+#endif
+#ifndef GL_FRAGMENT_DEPTH
+#  define GL_FRAGMENT_DEPTH 0x8452
+#endif
+#ifndef GL_CLAMP_TO_EDGE
+#  define GL_CLAMP_TO_EDGE 0x812F
+#endif
+
 /*
 Workaround for compilers that do not support C++11 nullptr. Especially,
 GCC 4.4 and older do not yet have this keyword. File is included by passing

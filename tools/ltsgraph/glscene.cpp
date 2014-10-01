@@ -7,6 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <QtOpenGL>
 #include <assert.h>
 #include <cstdio>
