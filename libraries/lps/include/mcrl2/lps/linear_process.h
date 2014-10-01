@@ -53,7 +53,7 @@ action_summand make_action_summand<action_summand>(const data::variable_list& su
                                                    const stochastic_distribution& distribution
                                                   )
 {
-  assert(distribution.is_undefined());
+  assert(!distribution.is_defined());
   return action_summand(summation_variables, condition, a, assignments);
 }
 

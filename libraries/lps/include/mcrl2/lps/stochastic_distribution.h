@@ -51,11 +51,11 @@ class stochastic_distribution: public atermpp::aterm_appl
       return atermpp::down_cast<data::variable_list>((*this)[1]);
     }
 //--- start user section stochastic_distribution ---//
-    /// \brief Returns true if the distribution is undefined, i.e. it contains no valid distribution.
-    /// This is encoded by an empty list of variables.
-    bool is_undefined() const
+    /// \brief Returns true if the distribution is defined, i.e. it contains a valid distribution.
+    /// This is encoded by a non-empty list of variables.
+    bool is_defined() const
     {
-      return variables().empty();
+      return !variables().empty();
     }
 //--- end user section stochastic_distribution ---//
 };

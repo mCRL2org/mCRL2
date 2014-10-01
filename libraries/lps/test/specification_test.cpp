@@ -49,7 +49,7 @@ void test_empty_distribution()
 {
   stochastic_distribution dist;
   std::cout << "empty dist = " << dist << std::endl;
-  BOOST_CHECK(dist.is_undefined());
+  BOOST_CHECK(!dist.is_defined());
 }
 
 int test_main(int argc, char* argv[])
