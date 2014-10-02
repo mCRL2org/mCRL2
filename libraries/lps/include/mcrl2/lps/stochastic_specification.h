@@ -27,20 +27,13 @@ std::set<data::variable> find_all_variables(const lps::stochastic_specification&
 std::set<data::variable> find_free_variables(const lps::stochastic_specification& x);
 std::set<data::function_symbol> find_function_symbols(const lps::stochastic_specification& x);
 std::set<core::identifier_string> find_identifiers(const lps::stochastic_specification& x);
+bool is_well_typed(const stochastic_specification& spec);
 
 /// \brief Linear process specification.
 class stochastic_specification: public specification_base<stochastic_linear_process, stochastic_process_initializer>
 {
   protected:
     typedef specification_base<stochastic_linear_process, stochastic_process_initializer> super;
-
-    /// \brief Adds all sorts that appear in the process to the data specification.
-    inline
-    void complete_data_specification()
-    {
-      std::set<data::sort_expression> s = lps::find_sort_expressions(*this);
-      data().add_context_sorts(s);
-    }
 
   public:
     /// \brief Constructor.
@@ -55,9 +48,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     /// \param t A term
     stochastic_specification(const atermpp::aterm_appl &t)
       : super(t)
-    {
-      complete_data_specification();
-    }
+    { }
 
     /// \brief Constructor.
     /// \param data A data specification
@@ -82,7 +73,6 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     void load(std::istream& stream, bool binary=true)
     {
       super::load(stream, binary);
-      complete_data_specification();
       assert(is_well_typed(*this));
     }
 };

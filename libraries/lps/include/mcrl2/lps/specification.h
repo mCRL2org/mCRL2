@@ -41,6 +41,8 @@ template <typename Object> bool is_well_typed(const Object& o);
 template <typename LinearProcess, typename InitialProcessExpression> class specification_base;
 template <typename LinearProcess, typename InitialProcessExpression> atermpp::aterm_appl specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec);
 class specification;
+
+// template function overloads
 bool is_well_typed(const specification& spec);
 
 /// \brief Test for a specification expression

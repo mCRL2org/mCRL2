@@ -15,7 +15,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
-//#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/detail/action_utility.h"
 
 namespace mcrl2
@@ -79,7 +79,7 @@ struct lps_well_typed_checker
   template <typename Container>
   bool is_well_typed_container(const Container& c) const
   {
-    for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+    for (auto i = c.begin(); i != c.end(); ++i)
     {
       if (!is_well_typed(*i))
       {
@@ -296,7 +296,7 @@ struct lps_well_typed_checker
   {
     std::set<data::sort_expression> declared_sorts = data::detail::make_set(spec.data().sorts());
     std::set<process::action_label> declared_labels = data::detail::make_set(spec.action_labels());
-    const action_summand_vector& action_summands = spec.process().action_summands();
+    auto const& action_summands = spec.process().action_summands();
 
     // check 1)
     for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
@@ -375,11 +375,11 @@ struct lps_well_typed_checker
     return is_well_typed(spec, free_variables);
   }
 
-//  bool is_well_typed(const stochastic_specification& spec) const
-//  {
-//    std::set<data::variable> free_variables = lps::find_free_variables(spec);
-//    return is_well_typed(spec, free_variables);
-//  }
+  bool is_well_typed(const stochastic_specification& spec) const
+  {
+    std::set<data::variable> free_variables = lps::find_free_variables(spec);
+    return is_well_typed(spec, free_variables);
+  }
 
   template <typename Term>
   bool operator()(const Term& t) const

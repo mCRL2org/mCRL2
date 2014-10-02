@@ -85,6 +85,11 @@ bool is_well_typed(const specification& x)
   return lps::detail::is_well_typed(x);
 }
 
+bool is_well_typed(const stochastic_specification& x)
+{
+  return lps::detail::is_well_typed(x);
+}
+
 } // namespace lps
 
 } // namespace mcrl2
