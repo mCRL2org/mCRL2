@@ -268,7 +268,7 @@ specification parse_linear_process_specification(const std::string& text)
 }
 
 template <typename Specification>
-void parse_lps(std::istream& from, Specification& result)
+void parse_lps(std::istream&, Specification&)
 {
   throw mcrl2::runtime_error("parse_lps not implemented yet!");
 }
