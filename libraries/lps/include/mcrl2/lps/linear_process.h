@@ -124,7 +124,7 @@ class linear_process_base
         {
           assert(lps::is_multi_action(down_cast<atermpp::aterm_appl>(t[2])));
           process::action_list actions(down_cast<atermpp::aterm_list>(down_cast<atermpp::aterm_appl>(t[2])[0]));
-          m_action_summands.push_back(detail::make_action_summand<action_summand>(summation_variables, condition, multi_action(actions, time), assignments, distribution));
+          m_action_summands.push_back(detail::make_action_summand<ActionSummand>(summation_variables, condition, multi_action(actions, time), assignments, distribution));
         }
       }
     }
@@ -203,8 +203,6 @@ class linear_process_base
 /// \brief linear process.
 class linear_process: public linear_process_base<action_summand>
 {
-  friend atermpp::aterm_appl linear_process_to_aterm(const linear_process& p);
-
   typedef linear_process_base<action_summand> super;
 
   public:
@@ -234,8 +232,8 @@ class linear_process: public linear_process_base<action_summand>
 
 /// \brief Conversion to aterm_appl.
 /// \return The action summand converted to aterm format.
-inline
-atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
+template <typename ActionSummand>
+atermpp::aterm_appl linear_process_to_aterm(const linear_process_base<ActionSummand>& p)
 {
   atermpp::term_list<atermpp::aterm_appl> summands;
   for (auto i = p.deadlock_summands().rbegin(); i != p.deadlock_summands().rend(); ++i)

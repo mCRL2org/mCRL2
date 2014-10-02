@@ -39,7 +39,6 @@ stochastic_action_summand make_action_summand<stochastic_action_summand>(const d
 /// \brief linear process.
 class stochastic_linear_process: public linear_process_base<stochastic_action_summand>
 {
-  friend atermpp::aterm_appl linear_process_to_aterm(const stochastic_linear_process& p);
   typedef linear_process_base<stochastic_action_summand> super;
 
   public:
@@ -50,6 +49,10 @@ class stochastic_linear_process: public linear_process_base<stochastic_action_su
     /// \brief Copy constructor.
     stochastic_linear_process(const stochastic_linear_process& other)
       : super(other)
+    { }
+
+    stochastic_linear_process(const atermpp::aterm_appl& t)
+      : super(t)
     { }
 
     /// \brief Constructor.

@@ -41,7 +41,6 @@ template <typename Object> bool is_well_typed(const Object& o);
 template <typename LinearProcess, typename InitialProcessExpression> class specification_base;
 template <typename LinearProcess, typename InitialProcessExpression> atermpp::aterm_appl specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec);
 class specification;
-void complete_data_specification(lps::specification&);
 bool is_well_typed(const specification& spec);
 
 /// \brief Test for a specification expression
@@ -80,7 +79,7 @@ class specification_base
 
     /// \brief Initializes the specification with an aterm.
     /// \param t A term
-    void construct_from_aterm(const atermpp::aterm_appl &t)
+    void construct_from_aterm(const atermpp::aterm_appl& t)
     {
       using atermpp::down_cast;
       assert(core::detail::check_term_LinProcSpec(t));
@@ -124,8 +123,8 @@ class specification_base
     specification_base(const data::data_specification& data,
                        const process::action_label_list& action_labels,
                        const std::set<data::variable>& global_variables,
-                       const linear_process& lps,
-                       const process_initializer& initial_process)
+                       const LinearProcess& lps,
+                       const InitialProcessExpression& initial_process)
        :
       m_data(data),
       m_action_labels(action_labels),
@@ -179,14 +178,14 @@ class specification_base
 
     /// \brief Returns the linear process of the specification.
     /// \return The linear process of the specification.
-    const linear_process& process() const
+    const LinearProcess& process() const
     {
       return m_process;
     }
 
     /// \brief Returns a reference to the linear process of the specification.
     /// \return The linear process of the specification.
-    linear_process& process()
+    LinearProcess& process()
     {
       return m_process;
     }
@@ -269,9 +268,7 @@ class specification: public specification_base<linear_process, process_initializ
     /// \param t A term
     specification(const atermpp::aterm_appl &t)
       : super(t)
-    {
-      complete_data_specification(*this);
-    }
+    { }
 
     /// \brief Constructor.
     /// \param data A data specification
@@ -296,7 +293,6 @@ class specification: public specification_base<linear_process, process_initializ
     void load(std::istream& stream, bool binary=true)
     {
       super::load(stream, binary);
-      complete_data_specification(*this);
       assert(is_well_typed(*this));
     }
 };
@@ -322,15 +318,6 @@ std::set<data::variable> find_all_variables(const lps::specification& x);
 std::set<data::variable> find_free_variables(const lps::specification& x);
 std::set<data::function_symbol> find_function_symbols(const lps::specification& x);
 std::set<core::identifier_string> find_identifiers(const lps::specification& x);
-
-/// \brief Adds all sorts that appear in the process of l to the data specification of l.
-/// \param spec A linear process specification
-inline
-void complete_data_specification(lps::specification& spec)
-{
-  std::set<data::sort_expression> s = lps::find_sort_expressions(spec);
-  spec.data().add_context_sorts(s);
-}
 
 /// \brief Conversion to aterm_appl.
 /// \return The specification converted to aterm format.
@@ -358,6 +345,15 @@ inline
 bool operator!=(const specification& spec1, const specification& spec2)
 {
   return !(spec1 == spec2);
+}
+
+/// \brief Adds all sorts that appear in the process of l to the data specification of l.
+/// \param spec A linear process specification
+inline
+void complete_data_specification(specification& spec)
+{
+  std::set<data::sort_expression> s = lps::find_sort_expressions(spec);
+  spec.data().add_context_sorts(s);
 }
 
 } // namespace lps

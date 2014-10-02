@@ -303,9 +303,7 @@ void lpsuntime(const std::string& input_filename,
 {
   lps::specification spec;
   load_lps(spec, input_filename);
-
   lps::untime_algorithm(spec).run();
-
   save_lps(spec, output_filename);
 }
 
@@ -313,7 +311,7 @@ void txt2lps(const std::string& input_filename,
              const std::string& output_filename
             )
 {
-  lps::specification spec;
+  lps::stochastic_specification spec;
   load_lps(spec, input_filename, lps_format_text());
   save_lps(spec, output_filename);
 }

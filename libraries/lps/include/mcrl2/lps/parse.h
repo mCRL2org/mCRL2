@@ -18,7 +18,7 @@
 #include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/action_rename.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
@@ -250,6 +250,7 @@ specification parse_linear_process_specification(std::istream& spec_stream)
   complete_data_specification(result);
   return result;
 }
+
 /// \brief Parses a linear process specification from a string
 /// \param text A string containing a linear process specification
 /// \return The parsed specification
@@ -264,6 +265,49 @@ specification parse_linear_process_specification(const std::string& text)
 {
   std::istringstream stream(text);
   return parse_linear_process_specification(stream);
+}
+
+template <typename Specification>
+void parse_lps(std::istream& from, Specification& result)
+{
+  throw mcrl2::runtime_error("parse_lps not implemented yet!");
+}
+
+template <>
+inline
+void parse_lps<specification>(std::istream& from, specification& result)
+{
+  result = parse_linear_process_specification(from);
+}
+
+/// \brief Parses a stochastic linear process specification from an input stream
+/// \param spec_stream An input stream containing a linear process specification
+/// \return The parsed specification
+/// \exception non_linear_process if a non-linear sub-expression is encountered.
+/// \exception mcrl2::runtime_error in the following cases:
+/// \li The number of equations is not equal to one
+/// \li The initial process is not a process instance, or it does not match with the equation
+/// \li A sequential process is found with a right hand side that is not a process instance,
+/// or it doesn't match the equation
+template <>
+inline
+void parse_lps<stochastic_specification>(std::istream& from, stochastic_specification& result)
+{
+  process::process_specification pspec = mcrl2::process::parse_process_specification(from);
+  if (!process::is_linear(pspec, true))
+  {
+    throw mcrl2::runtime_error("the process specification is not linear!");
+  }
+  process::detail::stochastic_linear_process_conversion_traverser visitor;
+  result = visitor.convert(pspec);
+  complete_data_specification(result);
+}
+
+template <typename Specification>
+void parse_lps(const std::string& text, Specification& result)
+{
+  std::istringstream stream(text);
+  parse_lps(stream, result);
 }
 
 /// \brief Parses an action from a string
