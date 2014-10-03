@@ -47,6 +47,18 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
     decrease_bind_count(x.summation_variables());
   }
 
+  void enter(const stochastic_action_summand& x)
+  {
+    increase_bind_count(x.summation_variables());
+    increase_bind_count(x.distribution().variables());
+  }
+
+  void leave(const stochastic_action_summand& x)
+  {
+    decrease_bind_count(x.summation_variables());
+    decrease_bind_count(x.distribution().variables());
+  }
+
   void enter(const deadlock_summand& x)
   {
     increase_bind_count(x.summation_variables());
@@ -63,6 +75,16 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
   }
 
   void leave(const linear_process& x)
+  {
+    decrease_bind_count(x.process_parameters());
+  }
+
+  void enter(const stochastic_linear_process& x)
+  {
+    increase_bind_count(x.process_parameters());
+  }
+
+  void leave(const stochastic_linear_process& x)
   {
     decrease_bind_count(x.process_parameters());
   }
@@ -93,16 +115,6 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
   }
 
   void leave(const stochastic_process_initializer& x)
-  {
-    decrease_bind_count(x.distribution().variables());
-  }
-
-  void enter(const stochastic_action_summand& x)
-  {
-    increase_bind_count(x.distribution().variables());
-  }
-
-  void leave(const stochastic_action_summand& x)
   {
     decrease_bind_count(x.distribution().variables());
   }
