@@ -41,7 +41,7 @@ template <typename Object> bool is_well_typed(const Object& o);
 template <typename LinearProcess, typename InitialProcessExpression> class specification_base;
 template <typename LinearProcess, typename InitialProcessExpression> atermpp::aterm_appl specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec);
 class specification;
-// void complete_data_specification(specification& spec);
+void complete_data_specification(specification& spec);
 
 // template function overloads
 bool is_well_typed(const specification& spec);
@@ -272,7 +272,7 @@ class specification: public specification_base<linear_process, process_initializ
     specification(const atermpp::aterm_appl &t)
       : super(t)
     {
-      // complete_data_specification(*this);
+      complete_data_specification(*this);
     }
 
     /// \brief Constructor.
@@ -287,7 +287,9 @@ class specification: public specification_base<linear_process, process_initializ
                   const linear_process& lps,
                   const process_initializer& initial_process)
       : super(data, action_labels, global_variables, lps, initial_process)
-    { }
+    {
+      complete_data_specification(*this);
+    }
 
     void save(std::ostream& stream, bool binary=true) const
     {
@@ -298,7 +300,7 @@ class specification: public specification_base<linear_process, process_initializ
     void load(std::istream& stream, bool binary=true)
     {
       super::load(stream, binary);
-      // complete_data_specification(*this);
+      complete_data_specification(*this);
       assert(is_well_typed(*this));
     }
 };
@@ -317,8 +319,9 @@ std::ostream& operator<<(std::ostream& out, const specification& x)
 }
 //--- end generated class specification ---//
 
-// template function overloads
 std::string pp_with_summand_numbers(const specification& x);
+
+// template function overloads
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x);
 std::set<data::variable> find_all_variables(const lps::specification& x);
 std::set<data::variable> find_free_variables(const lps::specification& x);

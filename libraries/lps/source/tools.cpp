@@ -23,7 +23,7 @@
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/suminst.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/untime.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/logger.h"
@@ -180,7 +180,7 @@ void lpspp(const std::string& input_filename,
            core::print_format_type format
           )
 {
-  lps::specification spec;
+  lps::stochastic_specification spec;
   load_lps(spec, input_filename);
 
   mCRL2log(log::verbose) << "printing LPS from "

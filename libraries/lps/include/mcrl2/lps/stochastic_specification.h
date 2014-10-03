@@ -20,7 +20,7 @@ namespace mcrl2 {
 namespace lps {
 
 class stochastic_specification;
-// void complete_data_specification(stochastic_specification& spec);
+void complete_data_specification(stochastic_specification& spec);
 
 // template function overloads
 std::set<data::sort_expression> find_sort_expressions(const lps::stochastic_specification& x);
@@ -52,7 +52,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     stochastic_specification(const atermpp::aterm_appl &t)
       : super(t)
     {
-      // complete_data_specification(*this);
+      complete_data_specification(*this);
     }
 
     /// \brief Constructor.
@@ -67,7 +67,9 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
                              const stochastic_linear_process& lps,
                              const stochastic_process_initializer& initial_process)
       : super(data, action_labels, global_variables, lps, initial_process)
-    { }
+    {
+      complete_data_specification(*this);
+    }
 
     void save(std::ostream& stream, bool binary=true) const
     {
@@ -78,7 +80,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     void load(std::istream& stream, bool binary=true)
     {
       super::load(stream, binary);
-      // complete_data_specification(*this);
+      complete_data_specification(*this);
       assert(is_well_typed(*this));
     }
 };
@@ -96,6 +98,8 @@ std::ostream& operator<<(std::ostream& out, const stochastic_specification& x)
   return out << lps::pp(x);
 }
 //--- end generated class stochastic_specification ---//
+
+std::string pp_with_summand_numbers(const stochastic_specification& x);
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param spec A linear process specification
