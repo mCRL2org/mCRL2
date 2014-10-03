@@ -132,7 +132,8 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const lps::action_summand& x)
+  template <typename ActionSummand>
+  void print_action_summand(const ActionSummand& x)
   {
     derived().enter(x);
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
@@ -145,6 +146,16 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
+  void operator()(const lps::action_summand& x)
+  {
+    print_action_summand(x);
+  }
+
+  void operator()(const lps::stochastic_action_summand& x)
+  {
+    print_action_summand(x);
+  }
+
   void operator()(const lps::process_initializer& x)
   {
     derived().enter(x);
@@ -154,7 +165,19 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const lps::linear_process& x)
+  void operator()(const lps::stochastic_process_initializer& x)
+  {
+    derived().enter(x);
+    derived()(x.distribution());
+    derived().print("init P");
+    print_assignments(x.assignments(), false, "(", ")", ", ");
+    derived().print(";");
+    derived().leave(x);
+  }
+
+  // this overload is enabled for linear_process and stochastic_linear_process
+  template <typename LinearProcess>
+  void print_linear_process(const LinearProcess& x)
   {
     derived().enter(x);
     derived().print("proc P");
@@ -211,7 +234,18 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const lps::specification& x)
+  void operator()(const linear_process& x)
+  {
+    print_linear_process(x);
+  }
+
+  void operator()(const stochastic_linear_process& x)
+  {
+    print_linear_process(x);
+  }
+
+  template <typename Specification>
+  void print_specification(const Specification& x)
   {
     derived().enter(x);
     derived()(x.data());
@@ -222,6 +256,16 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived()(x.initial_process());
     derived().print("\n");
     derived().leave(x);
+  }
+
+  void operator()(const specification& x)
+  {
+    print_specification(x);
+  }
+
+  void operator()(const stochastic_specification& x)
+  {
+    print_specification(x);
   }
 
   void operator()(const lps::stochastic_distribution& x)

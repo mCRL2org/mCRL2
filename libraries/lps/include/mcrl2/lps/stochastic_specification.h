@@ -20,6 +20,7 @@ namespace mcrl2 {
 namespace lps {
 
 class stochastic_specification;
+// void complete_data_specification(stochastic_specification& spec);
 
 // template function overloads
 std::set<data::sort_expression> find_sort_expressions(const lps::stochastic_specification& x);
@@ -27,6 +28,8 @@ std::set<data::variable> find_all_variables(const lps::stochastic_specification&
 std::set<data::variable> find_free_variables(const lps::stochastic_specification& x);
 std::set<data::function_symbol> find_function_symbols(const lps::stochastic_specification& x);
 std::set<core::identifier_string> find_identifiers(const lps::stochastic_specification& x);
+
+// template function overloads
 bool is_well_typed(const stochastic_specification& spec);
 
 /// \brief Linear process specification.
@@ -48,7 +51,9 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     /// \param t A term
     stochastic_specification(const atermpp::aterm_appl &t)
       : super(t)
-    { }
+    {
+      // complete_data_specification(*this);
+    }
 
     /// \brief Constructor.
     /// \param data A data specification
@@ -73,6 +78,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     void load(std::istream& stream, bool binary=true)
     {
       super::load(stream, binary);
+      // complete_data_specification(*this);
       assert(is_well_typed(*this));
     }
 };

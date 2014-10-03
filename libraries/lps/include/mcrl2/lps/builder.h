@@ -114,7 +114,7 @@ struct add_sort_expressions: public Builder<Derived>
   lps::stochastic_distribution operator()(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::stochastic_distribution result = lps::stochastic_distribution(static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.variables()));
+    lps::stochastic_distribution result = x; if (x.is_defined()) { result = lps::stochastic_distribution(static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.variables())); }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -252,7 +252,7 @@ struct add_data_expressions: public Builder<Derived>
   lps::stochastic_distribution operator()(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::stochastic_distribution result = lps::stochastic_distribution(static_cast<Derived&>(*this)(x.distribution()), x.variables());
+    lps::stochastic_distribution result = x; if (x.is_defined()) { result = lps::stochastic_distribution(static_cast<Derived&>(*this)(x.distribution()), x.variables()); }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -389,7 +389,7 @@ struct add_variables: public Builder<Derived>
   lps::stochastic_distribution operator()(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    lps::stochastic_distribution result = lps::stochastic_distribution(static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.variables()));
+    lps::stochastic_distribution result = x; if (x.is_defined()) { result = lps::stochastic_distribution(static_cast<Derived&>(*this)(x.distribution()), static_cast<Derived&>(*this)(x.variables())); }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

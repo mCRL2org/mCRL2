@@ -41,6 +41,7 @@ template <typename Object> bool is_well_typed(const Object& o);
 template <typename LinearProcess, typename InitialProcessExpression> class specification_base;
 template <typename LinearProcess, typename InitialProcessExpression> atermpp::aterm_appl specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec);
 class specification;
+// void complete_data_specification(specification& spec);
 
 // template function overloads
 bool is_well_typed(const specification& spec);
@@ -270,7 +271,9 @@ class specification: public specification_base<linear_process, process_initializ
     /// \param t A term
     specification(const atermpp::aterm_appl &t)
       : super(t)
-    { }
+    {
+      // complete_data_specification(*this);
+    }
 
     /// \brief Constructor.
     /// \param data A data specification
@@ -295,6 +298,7 @@ class specification: public specification_base<linear_process, process_initializ
     void load(std::istream& stream, bool binary=true)
     {
       super::load(stream, binary);
+      // complete_data_specification(*this);
       assert(is_well_typed(*this));
     }
 };
