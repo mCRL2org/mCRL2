@@ -69,8 +69,14 @@ void test_stochastic_operator()
     "                                    \n"
     "init P;                             \n"
     ;
-
   process_specification p = parse_process_specification(text);
+  std::cout << p << std::endl;
+
+  text =
+    "proc P = sum x:Real.(x==x) -> tau.P;\n"
+    "init P;\n"
+    ;
+  p = parse_process_specification(text);
   std::cout << p << std::endl;
 }
 

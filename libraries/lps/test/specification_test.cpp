@@ -15,6 +15,7 @@
 #include <iterator>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/linearise.h"
@@ -52,11 +53,32 @@ void test_empty_distribution()
   BOOST_CHECK(!dist.is_defined());
 }
 
+// This test is added to demonstrate that context sorts need to be added to
+// the data specification of an LPS. If this is not done, the resulting
+// LPS is not well typed.
+void test_context_sorts()
+{
+  std::string text =
+    "proc P = sum x:Real.(x==x) -> tau.P;\n"
+    "init P;\n"
+    ;
+
+  specification spec = parse_linear_process_specification(text);
+  std::cout << "spec = " << spec << std::endl;
+  BOOST_CHECK(is_well_typed(spec));
+
+  stochastic_specification sspec;
+  parse_lps(text, sspec);
+  std::cout << "sspec = " << sspec << std::endl;
+  BOOST_CHECK(is_well_typed(sspec));
+}
+
 int test_main(int argc, char* argv[])
 {
   test_find_sort_expressions();
   test_system_defined_sorts();
   test_empty_distribution();
+  test_context_sorts();
 
   return 0;
 }

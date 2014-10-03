@@ -1047,9 +1047,13 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     dependent = True
                     # special case for arguments of a data application
                     if self.classname(True) == 'data::application' and p.name() == 'arguments':
-                        updates.append('for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }')
+                        update = 'for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }'
                     else:
-                        updates.append('static_cast<Derived&>(*this)(x.%s());' % p.name())
+                        update = 'static_cast<Derived&>(*this)(x.%s());' % p.name()
+                    # special case for stochastic distribution
+                    if self.classname(True) == 'lps::stochastic_distribution' and p.name() == 'distribution':
+                        update = 'if (x.is_defined()) { ' + update + ' }'
+                    updates.append(update)
             if dependent:
                 visit_text = '\n'.join(updates)
             else:
@@ -1169,6 +1173,9 @@ function_pointer fp = &Derived::operator();
    x.end(),
    boost::bind(fp, static_cast<Derived*>(this), _1)
 );''' % return_type
+                    # special case for stochastic distribution
+                    elif return_type == 'lps::stochastic_distribution':
+                        visit_text = '%s result = x; if (x.is_defined()) { result = %s(%s); }' % (return_type, classname, ', '.join(updates))
                     else:
                         visit_text = '%s result = %s(%s);' % (return_type, classname, ', '.join(updates))
                     return_statement = 'return result;'
