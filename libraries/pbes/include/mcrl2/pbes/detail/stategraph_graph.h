@@ -653,7 +653,7 @@ class global_control_flow_graph_vertex: public add_edges<global_control_flow_gra
     }
 
     // also print the parameters
-    std::string print(const data::variable_list& d_X) const
+    std::string print(const data::variable_list&) const
     {
       return print_outgoing_edges();
       // std::ostringstream out;

@@ -179,7 +179,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
 
     // eq_X is the equation corresponding to u = (X, e)
     // eq_Y is the equation corresponding to Yf
-    bool enabled_edge(const global_control_flow_graph_vertex& u, const stategraph_equation& eq_X, const predicate_variable& Yf, const stategraph_equation& eq_Y)
+    bool enabled_edge(const global_control_flow_graph_vertex& u, const stategraph_equation& eq_X, const predicate_variable& Yf)
     {
       auto const& e = u.values();
       auto const& cfp_X = eq_X.control_flow_parameter_indices();
@@ -286,7 +286,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
           auto const& Yf = predvars[i];
           auto const& Y = Yf.variable().name();
           auto const& eq_Y = *find_equation(m_pbes, Y);
-          if (enabled_edge(u, eq_X, Yf, eq_Y))
+          if (enabled_edge(u, eq_X, Yf))
           {
             const global_control_flow_graph_vertex& v = compute_vertex(m_control_flow_graph, u, eq_X, Yf, eq_Y);
             m_control_flow_graph.insert_edge(u, i, v);
