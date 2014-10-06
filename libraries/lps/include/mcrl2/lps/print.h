@@ -132,12 +132,37 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
+  void operator()(const lps::stochastic_distribution& x)
+  {
+    derived().enter(x);
+    if (x.variables().empty()) // do not print the empty distribution
+    {
+      return;
+    }
+    derived().print("dist ");
+    print_variables(x.variables(), true, true, false, "", "");
+    derived().print("[");
+    derived()(x.distribution());
+    derived().print("]");
+    derived().leave(x);
+  }
+
+  void print_distribution(const lps::action_summand& x)
+  { }
+
+  void print_distribution(const lps::stochastic_action_summand& x)
+  {
+    derived()(x);
+    derived().print(" . ");
+  }
+
   template <typename ActionSummand>
   void print_action_summand(const ActionSummand& x)
   {
     derived().enter(x);
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
     print_condition(x.condition(), " ->\n         ", max_precedence);
+    print_distribution(x);
     derived()(x.multi_action());
     derived().print(" .\n         ");
     derived().print("P(");
@@ -266,21 +291,6 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   void operator()(const stochastic_specification& x)
   {
     print_specification(x);
-  }
-
-  void operator()(const lps::stochastic_distribution& x)
-  {
-    derived().enter(x);
-    if (x.variables().empty()) // do not print the empty distribution
-    {
-      return;
-    }
-    derived().print("dist ");
-    print_variables(x.variables(), true, true, false, "", "");
-    derived().print("[");
-    derived()(x.distribution());
-    derived().print("]");
-    derived().leave(x);
   }
 
   /* void operator()(const lps::state &x)
