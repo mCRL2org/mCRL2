@@ -137,8 +137,12 @@ namespace detail {
 /// \brief Conversion to atermAppl.
 /// \return The action summand converted to aterm format.
 inline
-atermpp::aterm_appl action_summand_to_aterm(const action_summand& s, const atermpp::aterm_appl& dist = stochastic_distribution())
+atermpp::aterm_appl action_summand_to_aterm(const action_summand& s, const stochastic_distribution& dist = stochastic_distribution())
 {
+  if (dist.is_defined())
+  {
+    throw mcrl2::runtime_error("cannot handle stochastic processes!");
+  }
   atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
                        s.summation_variables(),
                        s.condition(),

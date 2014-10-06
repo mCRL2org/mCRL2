@@ -47,6 +47,11 @@ class process_initializer: public atermpp::aterm_appl
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_LinearProcessInit(*this));
+      const lps::stochastic_distribution& dist = atermpp::down_cast<lps::stochastic_distribution>(atermpp::down_cast<atermpp::aterm_appl>(term)[1]);
+      if (dist.is_defined())
+      {
+        throw mcrl2::runtime_error("cannot handle stochastic processes!");
+      }
     }
 
     /// \brief Constructor.
