@@ -47,6 +47,16 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
   {
     decrease_bind_count(x.variables());
   }
+
+  void enter(const process::stochastic_operator& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(const process::stochastic_operator& x)
+  {
+    decrease_bind_count(x.variables());
+  }
 };
 
 } // namespace process
