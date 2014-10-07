@@ -152,7 +152,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
 
   void print_distribution(const lps::stochastic_action_summand& x)
   {
-    derived()(x);
+    derived()(x.distribution());
     derived().print(" . ");
   }
 
