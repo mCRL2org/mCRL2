@@ -30,7 +30,6 @@
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/basename.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
