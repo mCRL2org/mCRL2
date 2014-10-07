@@ -204,7 +204,7 @@ class BDD_Prover: public Prover
       mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << v_term1 << std::endl;
 
       data_expression v_term2 = f_manipulator.set_false(a_formula, v_guard);
-      v_term2 = m_rewriter->rewrite(data_expression(v_term2),bdd_sigma);
+      v_term2 = m_rewriter->rewrite(v_term2,bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
       mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
@@ -248,7 +248,7 @@ class BDD_Prover: public Prover
           while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
           {
             mCRL2log(log::debug) << "Applying induction." << std::endl;
-            f_formula = data_expression(f_induction.apply_induction());
+            f_formula = f_induction.apply_induction();
             build_bdd();
             eliminate_paths();
           }
@@ -259,13 +259,13 @@ class BDD_Prover: public Prover
           }
           else
           {
-            v_original_formula = sort_bool::not_(data_expression(v_original_formula));
+            v_original_formula = sort_bool::not_(v_original_formula);
             f_bdd = v_original_bdd;
             f_induction.initialize(v_original_formula);
             while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
             {
               mCRL2log(log::debug) << "Applying induction on the negated formula." << std::endl;
-              f_formula = data_expression(f_induction.apply_induction());
+              f_formula = f_induction.apply_induction();
               build_bdd();
               eliminate_paths();
             }
@@ -384,13 +384,13 @@ class BDD_Prover: public Prover
           }
           else
           {
-            data_expression v_term = sort_bool::not_(data_expression(v_guard));
-            v_result = lazy::and_(data_expression(v_branch), v_term);
+            data_expression v_term = sort_bool::not_(v_guard);
+            v_result = lazy::and_(v_branch, v_term);
           }
         }
         else
         {
-          v_result = lazy::and_(data_expression(v_branch), data_expression(v_guard));
+          v_result = lazy::and_(v_branch, v_guard);
         }
       }
       else

@@ -181,8 +181,8 @@ class Induction
     }
 
     /// \brief
-    data_expression_list create_clauses(const atermpp::aterm_appl &a_formula,
-                             const atermpp::aterm_appl &a_hypothesis,
+    data_expression_list create_clauses(const data_expression& a_formula,
+                             const data_expression& a_hypothesis,
                              const size_t a_variable_number,
                              const size_t a_number_of_variables,
                              const variable_list &a_list_of_variables,
@@ -256,9 +256,9 @@ class Induction
     }
 
     /// \brief
-    atermpp::aterm_appl apply_induction()
+    data_expression apply_induction()
     {
-      atermpp::aterm_appl v_result;
+      data_expression v_result;
 
       // f_fresh_dummy_number = 0;
       if (f_count == 1)
