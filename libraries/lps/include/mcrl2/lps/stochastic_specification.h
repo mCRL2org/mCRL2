@@ -19,6 +19,12 @@ namespace mcrl2 {
 
 namespace lps {
 
+namespace detail {
+
+
+
+} // namespace detail
+
 class stochastic_specification;
 void complete_data_specification(stochastic_specification& spec);
 
@@ -108,6 +114,38 @@ void complete_data_specification(stochastic_specification& spec)
 {
   std::set<data::sort_expression> s = lps::find_sort_expressions(spec);
   spec.data().add_context_sorts(s);
+}
+
+/// \brief Converts a stochastic specification to a specification. Throws an exception if
+/// non-empty distributions are encountered.
+inline
+void remove_stochastic_operators(const stochastic_specification& src, specification& dest)
+{
+  dest.data() = src.data();
+  dest.action_labels() = src.action_labels();
+  dest.global_variables() = src.global_variables();
+
+  auto& proc = dest.process();
+  proc.process_parameters() = src.process().process_parameters();
+  proc.deadlock_summands() = src.process().deadlock_summands();
+
+  action_summand_vector v;
+  auto const& action_summands = src.process().action_summands();
+  for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+  {
+    if (i->distribution().is_defined())
+    {
+      throw mcrl2::runtime_error("action summand has non-empty stochastic distribution");
+    }
+    v.push_back(*i);
+  }
+  proc.action_summands() = v;
+
+  if (src.initial_process().distribution().is_defined())
+  {
+    throw mcrl2::runtime_error("initial state has non-empty stochastic distribution");
+  }
+  dest.initial_process() = process_initializer(src.initial_process().assignments());
 }
 
 } // namespace lps

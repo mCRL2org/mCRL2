@@ -155,7 +155,7 @@ stochastic_distribution(const data::data_expression& distribution, const data::v
 stochastic_action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments, const stochastic_distribution& distribution) : public lps::action_summand | CMS  | None              | A stochastic action summand
 stochastic_linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const stochastic_action_summand_vector& action_summands) : public linear_process      | MSW  | LinearProcess     | A stochastic linear process
 stochastic_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const stochastic_linear_process& process, const process_initializer& initial_process) : public lps::specification       | MSW  | LinProcSpec       | A stochastic linear process specification
-stochastic_process_initializer(const data::assignment_list& assignments, const stochastic_distribution& distribution)                                                          : public lps::process_initializer | CI   | LinearProcessInit | A stochastic process initializer
+stochastic_process_initializer(const data::assignment_list& assignments, const stochastic_distribution& distribution)                                                          : public lps::process_initializer | CIS  | LinearProcessInit | A stochastic process initializer
 '''
 
 PROCESS_CLASSES = r'''

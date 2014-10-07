@@ -19,27 +19,28 @@ namespace mcrl2 {
 
 namespace lps {
 
-//--- start generated class stochastic_process_initializer ---//
 /// \brief A stochastic process initializer
 class stochastic_process_initializer: public process_initializer
 {
+  typedef process_initializer super;
+
   public:
     /// \brief Default constructor.
     stochastic_process_initializer()
-      : process_initializer(core::detail::default_values::LinearProcessInit)
+      : super(core::detail::default_values::LinearProcessInit)
     {}
 
     /// \brief Constructor.
     /// \param term A term
     explicit stochastic_process_initializer(const atermpp::aterm& term)
-      : process_initializer(term)
+      : super(term, false)
     {
       assert(core::detail::check_term_LinearProcessInit(*this));
     }
 
     /// \brief Constructor.
     stochastic_process_initializer(const data::assignment_list& assignments, const stochastic_distribution& distribution)
-      : process_initializer(atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, distribution))
+      : super(atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, distribution), false)
     {}
 
     const stochastic_distribution& distribution() const
@@ -48,6 +49,7 @@ class stochastic_process_initializer: public process_initializer
     }
 };
 
+//--- start generated class stochastic_process_initializer ---//
 /// \brief list of stochastic_process_initializers
 typedef atermpp::term_list<stochastic_process_initializer> stochastic_process_initializer_list;
 

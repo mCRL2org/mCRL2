@@ -46,13 +46,6 @@ void test_system_defined_sorts()
   BOOST_CHECK(r.size() != 0);
 }
 
-void test_empty_distribution()
-{
-  stochastic_distribution dist;
-  std::cout << "empty dist = " << dist << std::endl;
-  BOOST_CHECK(!dist.is_defined());
-}
-
 // This test is added to demonstrate that context sorts need to be added to
 // the data specification of an LPS. If this is not done, the resulting
 // LPS is not well typed.

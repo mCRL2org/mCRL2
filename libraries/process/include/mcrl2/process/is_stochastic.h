@@ -54,7 +54,7 @@ bool is_stochastic(const T& x)
 {
   detail::is_stochastic_traverser f;
   f(x);
-  return x.result;
+  return f.result;
 }
 
 } // namespace process
