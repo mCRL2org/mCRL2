@@ -93,9 +93,17 @@ bool operator==(const stochastic_action_summand& x, const stochastic_action_summ
 
 /// \brief Conversion to aterm_appl.
 inline
-atermpp::aterm_appl stochastic_action_summand_to_aterm(const stochastic_action_summand& s)
+atermpp::aterm_appl action_summand_to_aterm(const stochastic_action_summand& s)
 {
-  return detail::action_summand_to_aterm(s, s.distribution());
+  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
+                       s.summation_variables(),
+                       s.condition(),
+                       lps::detail::multi_action_to_aterm(s.multi_action()),
+                       s.multi_action().time(),
+                       s.assignments(),
+                       s.distribution()
+                     );
+  return result;
 }
 
 } // namespace lps

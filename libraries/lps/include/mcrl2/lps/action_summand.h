@@ -134,26 +134,6 @@ inline void swap(action_summand& t1, action_summand& t2)
 
 namespace detail {
 
-/// \brief Conversion to atermAppl.
-/// \return The action summand converted to aterm format.
-inline
-atermpp::aterm_appl action_summand_to_aterm(const action_summand& s, const stochastic_distribution& dist = stochastic_distribution())
-{
-  if (dist.is_defined())
-  {
-    throw mcrl2::runtime_error("cannot handle stochastic processes!");
-  }
-  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
-                       s.summation_variables(),
-                       s.condition(),
-                       lps::detail::multi_action_to_aterm(s.multi_action()),
-                       s.multi_action().time(),
-                       s.assignments(),
-                       dist
-                     );
-  return result;
-}
-
 /// \brief Comparison operator for action summands.
 inline
 bool less(const action_summand& x, const action_summand& y, bool default_result = false)
@@ -197,7 +177,15 @@ bool operator==(const action_summand& x, const action_summand& y)
 inline
 atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
 {
-  return detail::action_summand_to_aterm(s);
+  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
+                       s.summation_variables(),
+                       s.condition(),
+                       lps::detail::multi_action_to_aterm(s.multi_action()),
+                       s.multi_action().time(),
+                       s.assignments(),
+                       lps::stochastic_distribution()
+                     );
+  return result;
 }
 
 } // namespace lps

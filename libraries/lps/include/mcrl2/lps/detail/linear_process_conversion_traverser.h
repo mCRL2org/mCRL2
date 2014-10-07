@@ -15,11 +15,11 @@
 #include <stdexcept>
 #include <vector>
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/detail/is_linear.h"
-#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -29,6 +29,8 @@ namespace process
 
 namespace detail
 {
+
+// TODO: join the stochastic and non-stochastic versions of the traversers
 
 /// \brief Converts a process expression into linear process format.
 /// Use the \p convert member functions for this.
@@ -80,12 +82,6 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \brief Contains intermediary results.
   data::data_expression m_condition;
 
-  /// \brief Contains intermediary results.
-  lps::action_summand m_action_summand;
-
-  /// \brief Contains intermediary results.
-  lps::deadlock_summand m_deadlock_summand;
-
   /// \brief Exception that is thrown to denote that the process is not linear.
   struct non_linear_process
   {
@@ -117,6 +113,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
       if (m_next_state_changed)
       {
         m_action_summands.push_back(lps::action_summand(m_sum_variables, m_condition, m_multi_action, m_next_state));
+        mCRL2log(log::debug) << "adding action summand\n" << m_action_summands.back() << std::endl;
         clear_summand();
       }
       else
@@ -127,9 +124,9 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     else if (m_deadlock_changed)
     {
       m_deadlock_summands.push_back(lps::deadlock_summand(m_sum_variables, m_condition, m_deadlock));
+      mCRL2log(log::debug) << "adding deadlock summand\n" << m_deadlock_summands.back() << std::endl;
       clear_summand();
     }
-// std::cout << "adding summand" << m_multi_action_changed << m_deadlock_changed << "\n" << lps::pp(m_summand) << std::endl;
   }
 
   /// \brief Visit delta node
@@ -139,7 +136,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   {
     m_deadlock = lps::deadlock();
     m_deadlock_changed = true;
-// std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
+    mCRL2log(log::debug) << "adding deadlock\n" << m_deadlock << std::endl;
   }
 
   /// \brief Visit tau node
@@ -149,7 +146,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   {
     m_multi_action = lps::multi_action();
     m_multi_action_changed = true;
-// std::cout << "adding multi action tau\n" << m_multi_action.to_string() << std::endl;
+    mCRL2log(log::debug) << "adding multi action tau\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit action node
@@ -162,7 +159,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     action a(x.label(), x.arguments());
     m_multi_action = lps::multi_action(a);
     m_multi_action_changed = true;
-// std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
+    mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit sum node
@@ -173,7 +170,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   void leave(const process::sum& x)
   {
     m_sum_variables = m_sum_variables + x.variables();
-// std::cout << "adding sum variables\n" << data::pp(v) << std::endl;
+    mCRL2log(log::debug) << "adding sum variables\n" << data::pp(x.variables()) << std::endl;
   }
 
   /// \brief Visit block node
@@ -239,7 +236,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     lps::multi_action r = m_multi_action;
     m_multi_action = l + r;
     m_multi_action_changed = true;
-// std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
+    mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit at node
@@ -252,12 +249,12 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     if (is_delta(x))
     {
       m_deadlock.time() = x.time_stamp();
-// std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
+      mCRL2log(log::debug) << "adding deadlock\n" << m_deadlock << std::endl;
     }
     else
     {
       m_multi_action.time() = x.time_stamp();
-// std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
+      mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
     }
   }
 
@@ -301,7 +298,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
       throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered with an unexpected right hand side");
     }
 
-// std::cout << "adding next state\n" << data::pp(m_next_state) << std::endl;
+    mCRL2log(log::debug) << "adding next state\n" << data::pp(m_next_state) << std::endl;
   }
 
   /// \brief Visit if_then node
@@ -312,7 +309,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   void leave(const process::if_then& x)
   {
     m_condition = x.condition();
-// std::cout << "adding condition\n" << data::pp(m_condition) << std::endl;
+    mCRL2log(log::debug) << "adding condition\n" << data::pp(m_condition) << std::endl;
   }
 
   /// \brief Visit if_then_else node
@@ -491,12 +488,6 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   /// \brief Contains intermediary results.
   data::data_expression m_condition;
 
-  /// \brief Contains intermediary results.
-  lps::stochastic_action_summand m_action_summand;
-
-  /// \brief Contains intermediary results.
-  lps::deadlock_summand m_deadlock_summand;
-
   /// \brief Exception that is thrown to denote that the process is not linear.
   struct non_linear_process
   {
@@ -529,6 +520,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
       if (m_next_state_changed)
       {
         m_action_summands.push_back(lps::stochastic_action_summand(m_sum_variables, m_condition, m_multi_action, m_next_state, m_distribution));
+        mCRL2log(log::debug) << "adding action summand\n" << m_action_summands.back() << std::endl;
         clear_summand();
       }
       else
@@ -539,9 +531,9 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     else if (m_deadlock_changed)
     {
       m_deadlock_summands.push_back(lps::deadlock_summand(m_sum_variables, m_condition, m_deadlock));
+      mCRL2log(log::debug) << "adding deadlock summand\n" << m_deadlock_summands.back() << std::endl;
       clear_summand();
     }
-// std::cout << "adding summand" << m_multi_action_changed << m_deadlock_changed << "\n" << lps::pp(m_summand) << std::endl;
   }
 
   /// \brief Visit delta node
@@ -551,7 +543,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   {
     m_deadlock = lps::deadlock();
     m_deadlock_changed = true;
-// std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
+    mCRL2log(log::debug) << "adding deadlock\n" << m_deadlock << std::endl;
   }
 
   /// \brief Visit tau node
@@ -561,7 +553,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   {
     m_multi_action = lps::multi_action();
     m_multi_action_changed = true;
-// std::cout << "adding multi action tau\n" << m_multi_action.to_string() << std::endl;
+    mCRL2log(log::debug) << "adding multi action tau\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit action node
@@ -574,7 +566,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     action a(x.label(), x.arguments());
     m_multi_action = lps::multi_action(a);
     m_multi_action_changed = true;
-// std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
+    mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit sum node
@@ -585,7 +577,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   void leave(const process::sum& x)
   {
     m_sum_variables = m_sum_variables + x.variables();
-// std::cout << "adding sum variables\n" << data::pp(v) << std::endl;
+    mCRL2log(log::debug) << "adding sum variables\n" << data::pp(x.variables()) << std::endl;
   }
 
   /// \brief Visit block node
@@ -651,7 +643,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     lps::multi_action r = m_multi_action;
     m_multi_action = l + r;
     m_multi_action_changed = true;
-// std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
+    mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit at node
@@ -664,12 +656,12 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     if (is_delta(x))
     {
       m_deadlock.time() = x.time_stamp();
-// std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
+      mCRL2log(log::debug) << "adding deadlock\n" << m_deadlock << std::endl;
     }
     else
     {
       m_multi_action.time() = x.time_stamp();
-// std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
+      mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
     }
   }
 
@@ -682,38 +674,46 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   {
     (*this)(x.left());
 
-    // Check 1) The expression right must be a process instance or a process assignment
-    if (is_process_instance(x.right()))
+    process_expression right = x.right();
+    if (is_stochastic_operator(right))
     {
-      const process_instance& p = atermpp::down_cast<process_instance>(x.right());
+      auto const& op = atermpp::down_cast<stochastic_operator>(right);
+      m_distribution = lps::stochastic_distribution(op.distribution(), op.variables());
+      right = op.operand();
+    }
+
+    // Check 1) The expression right must be a process instance or a process assignment
+    if (is_process_instance(right))
+    {
+      const process_instance& p = atermpp::down_cast<process_instance>(right);
       // Check 2) The process equation and and the process instance must match
       if (!detail::check_process_instance(m_equation, p))
       {
-        std::clog << "seq right hand side: " << process::pp(x.right()) << std::endl;
-        throw mcrl2::runtime_error("Error in stochastic_linear_process_conversion_traverser::convert: seq expression encountered that does not match the process equation");
+        std::clog << "seq right hand side: " << process::pp(right) << std::endl;
+        throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered that does not match the process equation");
       }
       m_next_state = data::make_assignment_list(m_equation.formal_parameters(), p.actual_parameters());
       m_next_state_changed = true;
     }
-    else if (is_process_instance_assignment(x.right()))
+    else if (is_process_instance_assignment(right))
     {
-      const process_instance_assignment& p = atermpp::down_cast<process_instance_assignment>(x.right());
+      const process_instance_assignment& p = atermpp::down_cast<process_instance_assignment>(right);
       // Check 2) The process equation and and the process instance assignment must match
       if (!detail::check_process_instance_assignment(m_equation, p))
       {
-        std::clog << "seq right hand side: " << process::pp(x.right()) << std::endl;
-        throw mcrl2::runtime_error("Error in stochastic_linear_process_conversion_traverser::convert: seq expression encountered that does not match the process equation");
+        std::clog << "seq right hand side: " << process::pp(right) << std::endl;
+        throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered that does not match the process equation");
       }
       m_next_state = p.assignments(); // TODO: check if this is correct
       m_next_state_changed = true;
     }
     else
     {
-      std::clog << "seq right hand side: " << process::pp(x.right()) << std::endl;
-      throw mcrl2::runtime_error("Error in stochastic_linear_process_conversion_traverser::convert: seq expression encountered with an unexpected right hand side");
+      std::clog << "seq right hand side: " << process::pp(right) << std::endl;
+      throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered with an unexpected right hand side");
     }
 
-// std::cout << "adding next state\n" << data::pp(m_next_state) << std::endl;
+    mCRL2log(log::debug) << "adding next state\n" << data::pp(m_next_state) << std::endl;
   }
 
   /// \brief Visit if_then node
@@ -724,7 +724,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   void leave(const process::if_then& x)
   {
     m_condition = x.condition();
-// std::cout << "adding condition\n" << data::pp(m_condition) << std::endl;
+    mCRL2log(log::debug) << "adding condition\n" << data::pp(m_condition) << std::endl;
   }
 
   /// \brief Visit if_then_else node
@@ -816,10 +816,11 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     {
       throw mcrl2::runtime_error("Error in stochastic_linear_process_conversion_traverser::convert: the number of process equations is not equal to 1!");
     }
+
     m_equation = p.equations().front();
 
+    // convert the initial state
     lps::stochastic_process_initializer proc_init;
-
     process_expression p_init = p.init();
     lps::stochastic_distribution dist;
     if (is_stochastic_operator(p.init()))
@@ -828,10 +829,9 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
       dist = lps::stochastic_distribution(s.distribution(), s.variables());
       p_init = s.operand();
     }
-
     if (is_process_instance(p_init))
     {
-      const process_instance& init = atermpp::down_cast<process_instance>(p.init());
+      const process_instance& init = atermpp::down_cast<process_instance>(p_init);
       if (!check_process_instance(m_equation, init))
       {
         throw mcrl2::runtime_error("Error in stochastic_linear_process_conversion_traverser::convert: the initial process does not match the process equation");
@@ -840,7 +840,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     }
     else if (is_process_instance_assignment(p.init()))
     {
-      const process_instance_assignment& init = atermpp::down_cast<process_instance_assignment>(p.init());
+      const process_instance_assignment& init = atermpp::down_cast<process_instance_assignment>(p_init);
       if (!check_process_instance_assignment(m_equation, init))
       {
         throw mcrl2::runtime_error("Error in stochastic_linear_process_conversion_traverser::convert: the initial process does not match the process equation");
@@ -852,10 +852,10 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
       throw mcrl2::runtime_error("Error in stochastic_linear_process_conversion_traverser::convert: the initial process has an unexpected value");
     }
 
-    // Do the conversion
     convert(m_equation);
 
     lps::stochastic_linear_process proc(m_equation.formal_parameters(), m_deadlock_summands, m_action_summands);
+
     return lps::stochastic_specification(p.data(), p.action_labels(), p.global_variables(), proc, proc_init);
   }
 };
