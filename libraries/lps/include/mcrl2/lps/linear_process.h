@@ -100,7 +100,7 @@ class linear_process_base
 
     /// \brief Constructor.
     /// \param lps A term
-    linear_process_base(const atermpp::aterm_appl& lps)
+    linear_process_base(const atermpp::aterm_appl& lps, bool stochastic_distributions_allowed = true)
     {
       using atermpp::down_cast;
       assert(core::detail::check_term_LinearProcess(lps));
@@ -116,6 +116,10 @@ class linear_process_base
         auto const& time = down_cast<data::data_expression>(t[3]);
         auto const& assignments = down_cast<data::assignment_list>(t[4]);
         auto const& distribution = down_cast<stochastic_distribution>(t[5]);
+        if (!stochastic_distributions_allowed && distribution.is_defined())
+        {
+          throw mcrl2::runtime_error("summand with non-empty stochastic distribution encountered");
+        }
         if (down_cast<atermpp::aterm_appl>(t[2]).function() == core::detail::function_symbols::Delta)
         {
           m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));
@@ -225,8 +229,8 @@ class linear_process: public linear_process_base<action_summand>
 
     /// \brief Constructor.
     /// \param lps A term
-    linear_process(const atermpp::aterm_appl& lps)
-      : super(lps)
+    linear_process(const atermpp::aterm_appl& lps, bool = false)
+      : super(lps, false)
     { }
 };
 

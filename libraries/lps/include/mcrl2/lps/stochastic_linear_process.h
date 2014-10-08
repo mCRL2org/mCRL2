@@ -51,8 +51,8 @@ class stochastic_linear_process: public linear_process_base<stochastic_action_su
       : super(other)
     { }
 
-    stochastic_linear_process(const atermpp::aterm_appl& t)
-      : super(t)
+    stochastic_linear_process(const atermpp::aterm_appl& t, bool stochastic_distributions_allowed = true)
+      : super(t, stochastic_distributions_allowed)
     { }
 
     /// \brief Constructor.

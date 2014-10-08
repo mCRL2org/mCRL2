@@ -43,17 +43,14 @@ class process_initializer: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    explicit process_initializer(const atermpp::aterm& term, bool check_stochastic_distribution = true)
+    explicit process_initializer(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_LinearProcessInit(*this));
-      if (check_stochastic_distribution)
+      const lps::stochastic_distribution& dist = atermpp::down_cast<lps::stochastic_distribution>(atermpp::down_cast<atermpp::aterm_appl>(term)[1]);
+      if (dist.is_defined())
       {
-        const lps::stochastic_distribution& dist = atermpp::down_cast<lps::stochastic_distribution>(atermpp::down_cast<atermpp::aterm_appl>(term)[1]);
-        if (dist.is_defined())
-        {
-          throw mcrl2::runtime_error("cannot handle stochastic processes!");
-        }
+        throw mcrl2::runtime_error("initial state with non-empty stochastic distribution encountered");
       }
     }
 

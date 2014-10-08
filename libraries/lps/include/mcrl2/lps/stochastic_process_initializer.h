@@ -33,14 +33,14 @@ class stochastic_process_initializer: public process_initializer
     /// \brief Constructor.
     /// \param term A term
     explicit stochastic_process_initializer(const atermpp::aterm& term)
-      : super(term, false)
+      : super(term)
     {
       assert(core::detail::check_term_LinearProcessInit(*this));
     }
 
     /// \brief Constructor.
     stochastic_process_initializer(const data::assignment_list& assignments, const stochastic_distribution& distribution)
-      : super(atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, distribution), false)
+      : super(atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, distribution))
     {}
 
     const stochastic_distribution& distribution() const

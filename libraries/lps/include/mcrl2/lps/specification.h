@@ -82,7 +82,7 @@ class specification_base
 
     /// \brief Initializes the specification with an aterm.
     /// \param t A term
-    void construct_from_aterm(const atermpp::aterm_appl& t)
+    void construct_from_aterm(const atermpp::aterm_appl& t, bool stochastic_distributions_allowed = true)
     {
       using atermpp::down_cast;
       assert(core::detail::check_term_LinProcSpec(t));
@@ -90,7 +90,7 @@ class specification_base
       m_action_labels    = down_cast<process::action_label_list>(get(t, 1)[0]);
       data::variable_list global_variables = down_cast<data::variable_list>(get(t, 2)[0]);
       m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
-      m_process          = LinearProcess(get(t, 3));
+      m_process          = LinearProcess(get(t, 3), stochastic_distributions_allowed);
       m_initial_process  = InitialProcessExpression(get(t, 4));
       m_data.declare_data_specification_to_be_type_checked();
     }
@@ -111,10 +111,10 @@ class specification_base
 
     /// \brief Constructor.
     /// \param t A term
-    specification_base(const atermpp::aterm_appl &t)
+    specification_base(const atermpp::aterm_appl& t, bool stochastic_distributions_allowed = true)
     {
       assert(core::detail::check_rule_LinProcSpec(t));
-      construct_from_aterm(t);
+      construct_from_aterm(t, stochastic_distributions_allowed);
     }
 
     /// \brief Constructor.
@@ -263,14 +263,14 @@ class specification: public specification_base<linear_process, process_initializ
     specification()
     { }
 
-    specification(const specification &other)
+    specification(const specification& other)
       : super(other)
     { }
 
     /// \brief Constructor.
     /// \param t A term
-    specification(const atermpp::aterm_appl &t)
-      : super(t)
+    specification(const atermpp::aterm_appl& t)
+      : super(t, false)
     {
       complete_data_specification(*this);
     }
@@ -291,13 +291,13 @@ class specification: public specification_base<linear_process, process_initializ
       complete_data_specification(*this);
     }
 
-    void save(std::ostream& stream, bool binary=true) const
+    void save(std::ostream& stream, bool binary = true) const
     {
       assert(is_well_typed(*this));
       super::save(stream, binary);
     }
 
-    void load(std::istream& stream, bool binary=true)
+    void load(std::istream& stream, bool binary = true)
     {
       super::load(stream, binary);
       complete_data_specification(*this);
