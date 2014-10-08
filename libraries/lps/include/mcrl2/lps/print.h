@@ -147,7 +147,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void print_distribution(const lps::action_summand& x)
+  void print_distribution(const lps::action_summand&)
   { }
 
   void print_distribution(const lps::stochastic_action_summand& x)
