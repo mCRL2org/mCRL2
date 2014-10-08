@@ -70,7 +70,6 @@ int test_main(int argc, char* argv[])
 {
   test_find_sort_expressions();
   test_system_defined_sorts();
-  test_empty_distribution();
   test_context_sorts();
 
   return 0;
