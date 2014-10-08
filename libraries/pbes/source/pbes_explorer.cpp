@@ -1320,10 +1320,13 @@ ltsmin_state explorer::false_state()
 
 
 data::data_expression explorer::string_to_data(const std::string& s) {
-    aterm t = atermpp::read_term_from_string(s);
-    data::data_expression value(t);
-    pbes_expression result = pgg->rewrite_and_simplify_expression(value);
-    return atermpp::down_cast<const data::data_expression>(result);
+    atermpp::aterm t = data::detail::add_index(atermpp::read_term_from_string(s));
+    return atermpp::down_cast<data::data_expression>(t);
+    //aterm t = atermpp::read_term_from_string(s);
+    //std::clog << "string_to_data: [" << s << "] -> " << t << std::endl;
+    //data::data_expression value(t);
+    //pbes_expression result = pgg->rewrite_and_simplify_expression(value);
+    //return atermpp::down_cast<const data::data_expression>(result);
 }
 
 
@@ -1484,8 +1487,12 @@ std::string explorer::get_value(int type_no, int index)
     else
     {
         data_expression value = get_data_value(type_no, index);
-        std::string s = data::pp(value);
-        return s;
+        //std::stringstream os;
+        //write_term_to_text_stream(value, os);
+        //std::string s = atermpp::pp(value);
+        //return os.str();
+        atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm>(value));
+        return to_string(t);
     }
 }
 
