@@ -57,35 +57,42 @@ struct is_singleton_sort
   }
 };
 
-/// \brief Function object for removing parameters from LPS data types.
+/// \brief Traverser for removing parameters from LPS data types.
 /// These parameters can be either process parameters or free variables.
 /// Assignments to these parameters are removed as well.
-template <typename SetContainer>
-struct lps_parameter_remover
+struct remove_parameters_builder: public data_expression_builder<remove_parameters_builder>
 {
-  const SetContainer& to_be_removed;
+  typedef data_expression_builder<remove_parameters_builder> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
 
-  lps_parameter_remover(const SetContainer& to_be_removed_)
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+
+  const std::set<data::variable>& to_be_removed;
+
+  remove_parameters_builder(const std::set<data::variable>& to_be_removed_)
     : to_be_removed(to_be_removed_)
   {}
 
   /// \brief Removes parameters from a set container.
-  template <typename SetContainer1>
-  void remove_set_container(SetContainer1& c) const
+  void operator()(std::set<data::variable>& x)
   {
     for (auto i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
     {
-      c.erase(*i);
+      x.erase(*i);
     }
   }
 
   /// \brief Removes parameters from a list of variables.
-  data::variable_list remove_list_copy(const data::variable_list& l) const
+  data::variable_list operator()(const data::variable_list& x)
   {
   	using utilities::detail::contains;
 
     std::vector<data::variable> result;
-    for (auto i = l.begin(); i != l.end(); ++i)
+    for (auto i = x.begin(); i != x.end(); ++i)
     {
       if (!contains(to_be_removed, *i))
       {
@@ -97,84 +104,59 @@ struct lps_parameter_remover
 
   /// \brief Removes parameters from a list of assignments.
   /// Assignments to removed parameters are removed.
-  data::assignment_list remove_list_copy(const data::assignment_list& l) const
+  data::assignment_list operator()(const data::assignment_list& x)
   {
     // TODO: make this implementation more efficient
-    std::vector<data::assignment> a(l.begin(), l.end());
+    std::vector<data::assignment> a(x.begin(), x.end());
     a.erase(std::remove_if(a.begin(), a.end(), data::detail::has_left_hand_side_in(to_be_removed)), a.end());
     return data::assignment_list(a.begin(), a.end());
   }
 
-  /// \brief Removes parameters from the elements of a term list
-  template <typename TermList>
-  void remove_list(TermList& l) const
+  /// \brief Removes parameters from a linear_process
+  /// \param s A linear_process
+  void operator()(linear_process& x)
   {
-    l = remove_list_copy(l);
-  }
-
-  /// \brief Removes parameters from the elements of a container
-  template <typename Container>
-  void remove_container(Container& c) const
-  {
-    for (auto i = c.begin(); i != c.end(); ++i)
-    {
-      remove(*i);
-    }
-  }
-
-  /// \brief Removes parameters from a summand
-  /// \param s A summand
-  void remove(action_summand& s) const
-  {
-    remove_list(s.assignments());
-  }
-
-  /// \brief Removes parameters from a process_initializer
-  /// \param s A process_initializer
-  void remove(process_initializer& i) const
-  {
-    i = process_initializer(remove_list_copy(i.assignments()));
+    super::operator()(x);
+std::cout << "before: " << data::pp(x.process_parameters()) << std::endl;
+    x.process_parameters() = (*this)(x.process_parameters());
+std::cout << "after : " << data::pp(x.process_parameters()) << std::endl;
   }
 
   /// \brief Removes parameters from a linear_process
   /// \param s A linear_process
-  void remove(linear_process& p) const
+  void operator()(stochastic_linear_process& x)
   {
-    remove_list(p.process_parameters());
-    remove_container(p.action_summands());
+    super::operator()(x);
+std::cout << "before1: " << data::pp(x.process_parameters()) << std::endl;
+    x.process_parameters() = (*this)(x.process_parameters());
+std::cout << "after1 : " << data::pp(x.process_parameters()) << std::endl;
   }
 
   /// \brief Removes parameters from a linear process specification
   /// \param spec A linear process specification
-  void remove(specification& spec) const
+  void operator()(specification& x)
   {
-    remove(spec.process());
-    remove(spec.initial_process());
-    remove_set_container(spec.global_variables());
+    super::operator()(x);
+    (*this)(x.global_variables());
   }
 
-  template <typename Term>
-  void operator()(Term& t)
+  /// \brief Removes parameters from a linear process specification
+  /// \param spec A linear process specification
+  void operator()(stochastic_specification& x)
   {
-    remove(t);
+    super::operator()(x);
+    (*this)(x.global_variables());
   }
 };
-
-/// \brief Utility function to create an lps_parameter_remover.
-template <typename SetContainer>
-lps_parameter_remover<SetContainer> make_lps_parameter_remover(const SetContainer& to_be_removed)
-{
-  return lps_parameter_remover<SetContainer>(to_be_removed);
-}
 
 } // namespace detail
 
 /// \brief Rewrites an LPS data type.
-template <typename Object, typename SetContainer>
-void remove_parameters(Object& o, const SetContainer& to_be_removed)
+template <typename Object>
+void remove_parameters(Object& x, const std::set<data::variable>& to_be_removed)
 {
-  lps::detail::lps_parameter_remover<SetContainer> r(to_be_removed);
-  r(o);
+  detail::remove_parameters_builder f(to_be_removed);
+  f(x);
 }
 
 /// \brief Removes summands with condition equal to false from a linear process specification

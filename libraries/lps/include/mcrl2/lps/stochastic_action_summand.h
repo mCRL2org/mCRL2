@@ -42,6 +42,12 @@ class stochastic_action_summand: public action_summand
       return m_distribution;
     }
 
+    /// \brief Returns the distribution of this summand.
+    stochastic_distribution& distribution()
+    {
+      return m_distribution;
+    }
+
     /// \brief Swaps the contents
     void swap(stochastic_action_summand& other)
     {
