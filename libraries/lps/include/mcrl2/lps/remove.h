@@ -117,9 +117,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   void operator()(linear_process& x)
   {
     super::operator()(x);
-std::cout << "before: " << data::pp(x.process_parameters()) << std::endl;
     x.process_parameters() = (*this)(x.process_parameters());
-std::cout << "after : " << data::pp(x.process_parameters()) << std::endl;
   }
 
   /// \brief Removes parameters from a linear_process
@@ -127,9 +125,7 @@ std::cout << "after : " << data::pp(x.process_parameters()) << std::endl;
   void operator()(stochastic_linear_process& x)
   {
     super::operator()(x);
-std::cout << "before1: " << data::pp(x.process_parameters()) << std::endl;
     x.process_parameters() = (*this)(x.process_parameters());
-std::cout << "after1 : " << data::pp(x.process_parameters()) << std::endl;
   }
 
   /// \brief Removes parameters from a linear process specification
