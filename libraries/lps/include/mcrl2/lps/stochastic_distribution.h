@@ -37,18 +37,18 @@ class stochastic_distribution: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    stochastic_distribution(const data::data_expression& distribution, const data::variable_list& variables)
-      : atermpp::aterm_appl(core::detail::function_symbol_Distribution(), distribution, variables)
+    stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)
+      : atermpp::aterm_appl(core::detail::function_symbol_Distribution(), variables, distribution)
     {}
-
-    const data::data_expression& distribution() const
-    {
-      return atermpp::down_cast<data::data_expression>((*this)[0]);
-    }
 
     const data::variable_list& variables() const
     {
-      return atermpp::down_cast<data::variable_list>((*this)[1]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const data::data_expression& distribution() const
+    {
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
     }
 //--- start user section stochastic_distribution ---//
     /// \brief Returns true if the distribution is defined, i.e. it contains a valid distribution.

@@ -115,8 +115,8 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (x.is_defined()) { static_cast<Derived&>(*this)(x.distribution()); }
     static_cast<Derived&>(*this)(x.variables());
+    if (x.is_defined()) { static_cast<Derived&>(*this)(x.distribution()); }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -386,8 +386,8 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (x.is_defined()) { static_cast<Derived&>(*this)(x.distribution()); }
     static_cast<Derived&>(*this)(x.variables());
+    if (x.is_defined()) { static_cast<Derived&>(*this)(x.distribution()); }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -526,8 +526,8 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    if (x.is_defined()) { static_cast<Derived&>(*this)(x.distribution()); }
     static_cast<Derived&>(*this)(x.variables());
+    if (x.is_defined()) { static_cast<Derived&>(*this)(x.distribution()); }
     static_cast<Derived&>(*this).leave(x);
   }
 

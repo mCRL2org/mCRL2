@@ -678,7 +678,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     if (is_stochastic_operator(right))
     {
       auto const& op = atermpp::down_cast<stochastic_operator>(right);
-      m_distribution = lps::stochastic_distribution(op.distribution(), op.variables());
+      m_distribution = lps::stochastic_distribution(op.variables(), op.distribution());
       right = op.operand();
     }
 
@@ -768,7 +768,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   /// \param x A process expression
   void leave(const process::stochastic_operator& x)
   {
-    m_distribution = lps::stochastic_distribution(x.distribution(), x.variables());
+    m_distribution = lps::stochastic_distribution(x.variables(), x.distribution());
   }
 
   /// \brief Visit choice node
@@ -826,7 +826,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     if (is_stochastic_operator(p.init()))
     {
       auto const& s = atermpp::down_cast<stochastic_operator>(p.init());
-      dist = lps::stochastic_distribution(s.distribution(), s.variables());
+      dist = lps::stochastic_distribution(s.variables(), s.distribution());
       p_init = s.operand();
     }
     if (is_process_instance(p_init))
