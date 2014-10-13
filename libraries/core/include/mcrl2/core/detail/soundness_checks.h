@@ -3248,7 +3248,7 @@ bool check_term_ActNot(Term t)
   return true;
 }
 
-// Distribution(DataExpr, DataVarId*)
+// Distribution(DataVarId*, DataExpr)
 template <typename Term>
 bool check_term_Distribution(Term t)
 {
@@ -3271,14 +3271,14 @@ bool check_term_Distribution(Term t)
     return false;
   }
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 0))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_DataExpr<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

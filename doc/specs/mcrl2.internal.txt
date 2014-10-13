@@ -202,7 +202,7 @@
 //-----------------------------
 
 //distribution
-<Distribution>  ::= Distribution(<DataExpr>, <DataVarId>*)
+<Distribution>  ::= Distribution(<DataVarId>*, <DataExpr>)
 
 //process specification
 <LinProcSpec>   ::= LinProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,

@@ -696,7 +696,7 @@ const atermpp::aterm_appl& default_value_ActNot()
 inline
 const atermpp::aterm_appl& default_value_Distribution()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_Distribution(), default_value_DataExpr(), default_value_List());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_Distribution(), default_value_List(), default_value_DataExpr());
   return t;
 }
 
