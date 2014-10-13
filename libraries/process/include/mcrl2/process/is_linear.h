@@ -228,17 +228,22 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     {
       throw non_linear_process_error(process::pp(x.left()) + " is not a timed multi action and not a process");
     }
-    if (is_process_instance(x.right()))
+    process_expression right = x.right();
+    if (is_stochastic_operator(right))
     {
-      const process_instance& q = atermpp::down_cast<process_instance>(x.right());
+      right = atermpp::down_cast<stochastic_operator>(right).operand();
+    }
+    if (is_process_instance(right))
+    {
+      const process_instance& q = atermpp::down_cast<process_instance>(right);
       if (q.identifier() != eqn.identifier())
       {
         throw non_linear_process_error(process::pp(q) + " has an unexpected identifier");
       }
     }
-    else if (is_process_instance_assignment(x.right()))
+    else if (is_process_instance_assignment(right))
     {
-      const process_instance_assignment& q = atermpp::down_cast<process_instance_assignment>(x.right());
+      const process_instance_assignment& q = atermpp::down_cast<process_instance_assignment>(right);
       if (q.identifier() != eqn.identifier())
       {
         throw non_linear_process_error(process::pp(q) + " has an unexpected identifier");
@@ -246,7 +251,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
     else
     {
-      std::cerr << "seq right hand side: " << process::pp(x.right()) << std::endl;
+      std::cerr << "seq right hand side: " << process::pp(right) << std::endl;
       throw std::runtime_error("unexpected error in visit_seq");
     }
   }
