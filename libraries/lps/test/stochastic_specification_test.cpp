@@ -42,8 +42,7 @@ BOOST_AUTO_TEST_CASE(test_remove_stochastic_operators)
   parse_lps(text, src);
   BOOST_CHECK(!is_stochastic(src));
 
-  specification dest;
-  remove_stochastic_operators(src, dest);
+  specification dest = remove_stochastic_operators(src);
   std::cout << "dest = " << dest;
   BOOST_CHECK(lps::pp(src) == lps::pp(dest));
 }
