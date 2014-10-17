@@ -88,6 +88,10 @@ else()
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${Boost_INCLUDE_DIRS}\"")
 endif()
 
+# Remove clang-specific compiler flags; when deployed, the user may not have clang
+# available. We're assuming a GNU-compatible compiler though.
+string(REPLACE "-fsanitize=address" "" R_CXXFLAGS ${R_CXXFLAGS})
+
 # Configure including and linking for the stage build.
 if(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
   set( MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter" )
