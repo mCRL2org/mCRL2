@@ -2849,7 +2849,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_at(body1)||
           is_action(body1)||
           is_sync(body1)||
-          // is_process_instance(body1)||
+          is_stochastic_operator(body1)||
           is_process_instance_assignment(body1)||
           is_delta(body1)||
           is_tau(body1))
