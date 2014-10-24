@@ -645,7 +645,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_stochastic_operator(t))
       {
-        const stochastic_operator& sto(t);
+        const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(t);
         return stochastic_operator(sto.variables(),RewriteTerm(sto.distribution()),pCRLrewrite(sto.operand()));
       }
 
@@ -1409,7 +1409,7 @@ class specification_basic_type:public boost::noncopyable
       }
       if (is_stochastic_operator(p))
       {
-        const stochastic_operator& sto(p);
+        const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(p);
         if (strict)
         {  
           return occursintermlist(var,data_expression_list(sto.variables()))||
@@ -2974,7 +2974,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_stochastic_operator(sequence))
       {
-        const stochastic_operator& sto(sequence);
+        const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(sequence);
         extract_names(sto.operand(),result);
         return;
       }
@@ -4878,7 +4878,7 @@ class specification_basic_type:public boost::noncopyable
         }
         else
         {
-          const stochastic_operator& sto(summandterm);
+          const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(summandterm);
           cumulative_distribution=stochastic_distribution(
                                     cumulative_distribution.variables()+sto.variables(),
                                     sort_real::times(cumulative_distribution.distribution(),
