@@ -907,17 +907,10 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     CopyVars=Vars;
 
     std::map<identifier_string,sort_expression> NewVars;
-    try
-    {
-      AddVars2Table(CopyVars,t.variables(),NewVars);
-    }
-    catch (mcrl2::runtime_error &e)
-    {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + process::pp(ProcTerm));
-    }
     process_expression NewProc;
     try
     {
+      AddVars2Table(CopyVars,t.variables(),NewVars);
       NewProc=TraverseActProcVarConstP(NewVars,t.operand());
     }
     catch (mcrl2::runtime_error &e)
@@ -932,21 +925,13 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     std::map<identifier_string,sort_expression> CopyVars;
     CopyVars=Vars;
 
-    std::map<identifier_string,sort_expression> NewVars;
-    try
-    {
-      AddVars2Table(CopyVars,t.variables(),NewVars);
-    }
-    catch (mcrl2::runtime_error &e)
-    {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + process::pp(ProcTerm));
-    }
     data_expression distribution=t.distribution();
-    TraverseVarConsTypeD(NewVars,NewVars,distribution,sort_real::real_());
-
+    std::map<identifier_string,sort_expression> NewVars;
     process_expression NewProc;
     try
     {
+      AddVars2Table(CopyVars,t.variables(),NewVars);
+      TraverseVarConsTypeD(NewVars,NewVars,distribution,sort_real::real_());
       NewProc=TraverseActProcVarConstP(NewVars,t.operand());
     }
     catch (mcrl2::runtime_error &e)
