@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(case_1)
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(case_2)
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(case_3)
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(case_4)
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(case_5)
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(case_6)
     "init P(d1(e1));\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(bug_623)
     "init X(d2,d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
   binary_algorithm<rewriter>(s1, r).run();
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(bug_623)
 
 BOOST_AUTO_TEST_CASE(abp)
 {
-  specification spec = linearise(lps::detail::ABP_SPECIFICATION());
+  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   std::clog << "--- before ---\n" << lps::pp(spec) << std::endl;
   rewriter r(spec.data());
   binary_algorithm<rewriter>(spec, r).run();

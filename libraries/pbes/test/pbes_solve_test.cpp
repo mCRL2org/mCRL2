@@ -296,7 +296,7 @@ std::string frm_nolivelock = "[true*]mu X.[tau]X";
 void test_abp_frm(const std::string& FORMULA, bool expected_result)
 {
   bool timed = false;
-  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
+  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
   pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
   std::string abp_text = pbes_system::pp(p);

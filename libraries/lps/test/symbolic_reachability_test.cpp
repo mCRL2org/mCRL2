@@ -73,7 +73,7 @@ class group_information
 {
 
   private:
-    mcrl2::lps::specification const&     m_model;
+    mcrl2::lps::stochastic_specification const& m_model;
     std::vector< std::vector< size_t > > m_group_indices;
 
   private:
@@ -100,9 +100,9 @@ class group_information
       }
     }
 
-    void gather(lps::specification const& l)
+    void gather(lps::stochastic_specification const& l)
     {
-      lps::linear_process specification(l.process());
+      lps::stochastic_linear_process specification(l.process());
 
       std::size_t size = specification.action_summands().size() + specification.deadlock_summands().size();
       m_group_indices.resize(size);
@@ -117,7 +117,7 @@ class group_information
     /**
      * \brief constructor from an mCRL2 lps
      **/
-    group_information(mcrl2::lps::specification const& l) : m_model(l)
+    group_information(mcrl2::lps::stochastic_specification const& l) : m_model(l)
     {
       gather(l);
     }
@@ -148,7 +148,7 @@ class group_information
 };
 
 
-void check_info(mcrl2::lps::specification const& model)
+void check_info(mcrl2::lps::stochastic_specification const& model)
 {
   group_information info(model);
 
@@ -191,7 +191,7 @@ int test_main(int argc, char** argv)
   check_info(linearise(case_summands));
   check_info(linearise(case_last));
 
-  lps::specification model(linearise(case_no_influenced_parameters));
+  lps::specification model=remove_stochastic_operators(linearise(case_no_influenced_parameters));
 
   if (1 < argc)
   {

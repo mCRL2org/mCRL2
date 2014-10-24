@@ -328,7 +328,7 @@ void test_cabp()
   std::string INFINITELY_OFTEN_SEND = "nu X. mu Y. (<r1(d1)>X || <!r1(d1)>Y)";
 
   // create a pbes p
-  lps::specification spec    = lps::linearise(CABP_SPECIFICATION);
+  lps::specification spec=remove_stochastic_operators(lps::linearise(CABP_SPECIFICATION));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(INFINITELY_OFTEN_SEND, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -451,7 +451,7 @@ void test_balancing_plat()
     " init BalancingAct(C,0,0);                                                            \n"
     ;
 
-  lps::specification spec = lps::linearise(BALANCE_PLAT_SPECIFICATION);
+  lps::specification spec=remove_stochastic_operators(lps::linearise(BALANCE_PLAT_SPECIFICATION));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -483,7 +483,7 @@ void test_pbesinst_finite()
 
 void test_abp_no_deadlock()
 {
-  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
+  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);

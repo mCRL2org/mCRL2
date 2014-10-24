@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
 
   // FIXME, this test case requires the parser to allow parsing of free
   // variables.
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
   sumelm_algorithm(s1).run();
   std::set<variable> parameters = mcrl2::data::find_all_variables(s1.process().process_parameters());

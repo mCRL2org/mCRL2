@@ -30,7 +30,7 @@ void run_linearisation_instance(const std::string& spec, const t_lin_options& op
 {
   if (expect_success)
   {
-    lps::specification s = linearise(spec, options);
+    lps::specification s=remove_stochastic_operators(linearise(spec, options));
     BOOST_CHECK(s != lps::specification());
   }
   else
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_linearization_calls)
     "init sum t:List(struct a | b) . c;\n"
   );
 
-  specification spec;
+  stochastic_specification spec;
   spec = linearise(case_1);
   spec = linearise(case_2);
   spec = linearise(case_3);
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(test_no_free_variables)
   t_lin_options options;
   options.noglobalvars = true;
 
-  specification spec;
+  stochastic_specification spec;
   spec = linearise(no_free_variables_case_1, options);
   BOOST_CHECK(spec.global_variables().empty());
 }

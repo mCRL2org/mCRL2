@@ -422,7 +422,7 @@ void test_constelm()
 static
 void test_abp()
 {
-  specification spec = linearise(lps::detail::ABP_SPECIFICATION());
+  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   data::rewriter R(spec.data());
   bool instantiate_free_variables = false;
   constelm(spec, R, instantiate_free_variables);

@@ -92,7 +92,7 @@ static void test_data_type(lps::pins_data_type& type)
 static void test_ltsmin(const std::string& rewriter_strategy)
 {
   // create an input file
-  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
+  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
   std::string abp_filename = "temporary_abp.lps";
   save_lps(spec, abp_filename);
 

@@ -59,8 +59,7 @@ BOOST_AUTO_TEST_CASE(rational)
       "init Test_unary_operations + Test_binary_operations + Test_exponentation;\n"
   );
 
-  specification s;
-  s = linearise(input);
+  specification s=remove_stochastic_operators(linearise(input));
 
   std::string output;
   output = lps::pp(s);

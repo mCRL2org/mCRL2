@@ -38,7 +38,7 @@ void test1()
     "  (n>4)  -> a(n) => b(n); \n"
     "  (n<22) -> a(n) => c(n); \n";
 
-  specification spec = lps::linearise(SPEC);
+  specification spec=remove_stochastic_operators(lps::linearise(SPEC));
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   specification new_spec = action_rename(ar_spec,spec);
@@ -65,7 +65,7 @@ void test2()
     "  (f(n)>23) -> a(n) => b(n); \n"
     "  b(n) => c(n); \n";
 
-  specification spec = lps::linearise(SPEC);
+  specification spec=remove_stochastic_operators(lps::linearise(SPEC));
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   specification new_spec = action_rename(ar_spec,spec);
@@ -85,7 +85,7 @@ void test3()
     "rename \n"
     "  a(1) => delta; \n";
 
-  specification spec = lps::linearise(SPEC);
+  specification spec=remove_stochastic_operators(lps::linearise(SPEC));
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
@@ -113,7 +113,7 @@ void test4()
     "rename\n"
     "(e==d1) -> a(e) => tau;\n";
 
-  specification spec = lps::linearise(SPEC);
+  specification spec=remove_stochastic_operators(lps::linearise(SPEC));
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
@@ -160,7 +160,7 @@ void test5() // Test whether partial renaming to delta is going well. See bug re
     "  rs(1, 0, s) => delta;\n";
 
 
-  specification spec = lps::linearise(SPEC);
+  specification spec=remove_stochastic_operators(lps::linearise(SPEC));
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());

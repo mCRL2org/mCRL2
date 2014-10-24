@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_rename)
     ;
 
   using mcrl2::state_formulas::pp;
-  specification spec    = linearise(SPECIFICATION);
+  specification spec=remove_stochastic_operators(linearise(SPECIFICATION));
 
   state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
 
@@ -106,11 +106,10 @@ BOOST_AUTO_TEST_CASE(test_type_checking)
 {
   using namespace state_formulas::detail::accessors;
 
-  specification context = linearise(
+  specification context=remove_stochastic_operators(linearise(
                             "sort CPU = struct p1;"
                             "sort CPUs = Set(CPU);"
-                            "init delta;"
-                          );
+                            "init delta;"));
 
   state_formula formula = parse_state_formula("nu X (P : CPUs = {p1}) . val(P != {})", context);
 
@@ -122,11 +121,11 @@ BOOST_AUTO_TEST_CASE(test_type_checking_conversion_of_arguments)
 {
   using namespace state_formulas::detail::accessors;
 
-  specification context = linearise(
+  specification context=remove_stochastic_operators(linearise(
                             "sort B = struct d;"
                             "act a: List(B);"
                             "init a([d]);"
-                          );
+                          ));
 
   state_formula formula = parse_state_formula("<a([d])>true", context);
 
@@ -166,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_parse)
 
   std::string formula_text = "<a(1)>true";
 
-  lps::specification spec = lps::linearise(spec_text);
+  lps::specification spec=remove_stochastic_operators(lps::linearise(spec_text));
   state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
 
   std::cerr << "--- f ---\n" << state_formulas::pp(f) << "\n\n" << f << std::endl;

@@ -12,7 +12,7 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include <mcrl2/lps/specification.h>
+// #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/untime.h>
 #include <mcrl2/lps/linearise.h>
 #include <mcrl2/lps/find.h>
@@ -32,7 +32,7 @@ void test_case_1()
     "init P;\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
   lps::untime_algorithm(s1).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
@@ -64,7 +64,7 @@ void test_case_2()
     "init P;\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
   lps::untime_algorithm(s1).run();
   const action_summand_vector& summands0 = s0.process().action_summands();
@@ -93,7 +93,7 @@ void test_case_3()
     "init P;\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
   lps::untime_algorithm(s1).run();
   const action_summand_vector& summands0 = s0.process().action_summands();
@@ -125,7 +125,7 @@ void test_case_4()
     "init P;\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
   lps::untime_algorithm(s1).run();
   const action_summand_vector& summands0 = s0.process().action_summands();

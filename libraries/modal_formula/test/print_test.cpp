@@ -31,7 +31,7 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void run_test_case(const std::string& formula, const std::string& lps_spec)
 {
-  specification spec = linearise(lps_spec);
+  specification spec=remove_stochastic_operators(linearise(lps_spec));
   bool check_monotonicity = false;
   bool translate_regular = false;
   state_formula f = parse_state_formula(formula, spec, check_monotonicity, translate_regular);

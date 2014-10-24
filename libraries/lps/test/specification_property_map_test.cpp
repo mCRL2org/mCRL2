@@ -41,7 +41,7 @@ const std::string LPSINFO =
 
 int test_main(int argc, char* argv[])
 {
-  specification spec = linearise(lps::detail::ABP_SPECIFICATION());
+  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   lps::detail::specification_property_map info1(spec);
   std::cerr << info1.to_string() << std::endl;
   lps::detail::specification_property_map info2(LPSINFO);

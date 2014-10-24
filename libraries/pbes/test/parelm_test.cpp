@@ -49,7 +49,7 @@ const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
 void test_parelm()
 {
-  specification spec    = linearise(lps::detail::ABP_SPECIFICATION());
+  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);

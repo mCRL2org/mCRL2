@@ -185,7 +185,7 @@ void separate_action_specification(const std::string& text, const std::string& k
       result.second = result.second + "\ninit delta;\n";
     }
     keyword_text = result.first.substr(keyword.size());
-    spec = lps::linearise(result.second);
+    spec=remove_stochastic_operators(lps::linearise(result.second));
   }
 }
 

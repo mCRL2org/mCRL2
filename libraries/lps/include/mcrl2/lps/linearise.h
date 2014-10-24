@@ -15,7 +15,7 @@
 #include <string>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/linearisation_method.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
 
@@ -64,7 +64,7 @@ struct t_lin_options
 /// \param[in] lin_options options that should be used during linearisation
 /// \return An LPS equivalent to spec, which is linearised using lin_options
 /// \exception mcrl2::runtime_error Linearisation failed
-mcrl2::lps::specification linearise(
+mcrl2::lps::stochastic_specification linearise(
   const mcrl2::process::process_specification& spec,
   mcrl2::lps::t_lin_options lin_options = t_lin_options());
 
@@ -73,7 +73,7 @@ mcrl2::lps::specification linearise(
 /// \param[in] lin_options options that should be used during linearisation
 /// \return An LPS equivalent to the specification representing text, which is linearised using lin_options
 /// \exception mcrl2::runtime_error Linearisation failed
-inline mcrl2::lps::specification linearise(
+inline mcrl2::lps::stochastic_specification linearise(
   const std::string& text,
   mcrl2::lps::t_lin_options lin_options = t_lin_options())
 {

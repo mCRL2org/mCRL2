@@ -110,7 +110,7 @@ void test_normalize1()
 void test_normalize2()
 {
   // test case from Aad Mathijssen, 2/11/2008
-  lps::specification spec       = lps::linearise("init tau + tau;");
+  lps::specification spec=remove_stochastic_operators(lps::linearise("init tau + tau;"));
   state_formulas::state_formula formula  = state_formulas::parse_state_formula("nu X. [true]X", spec);
   bool timed = false;
   pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
@@ -120,10 +120,9 @@ void test_normalize2()
 void test_normalize3()
 {
   // test case from Aad Mathijssen, 1-4-2008
-  lps::specification spec = lps::linearise(
+  lps::specification spec=remove_stochastic_operators(lps::linearise(
                               "proc P = tau.P;\n"
-                              "init P;        \n"
-                            );
+                              "init P;        \n"));
   state_formulas::state_formula formula = state_formulas::parse_state_formula("![true*]<true>true", spec);
   bool timed = false;
   pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);

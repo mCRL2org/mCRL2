@@ -29,7 +29,7 @@ void test_case_1()
     "init X;\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1,r).run();
@@ -55,7 +55,7 @@ void test_case_2()
     "init X(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
@@ -79,7 +79,7 @@ void test_case_3()
     "init X;\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
@@ -106,7 +106,7 @@ void test_case_4()
     "init P;\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, finite_sorts(s1.data()), true).run();
@@ -144,7 +144,7 @@ void test_case_5()
     "init P;\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
@@ -173,7 +173,7 @@ void test_case_6()
     "init P(5);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();
@@ -193,7 +193,7 @@ void test_case_7()
     "init P;\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();

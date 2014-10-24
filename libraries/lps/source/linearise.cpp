@@ -205,6 +205,7 @@ class specification_basic_type:public boost::noncopyable
                                                          instances that are represented by the variables in seq_varnames */
     t_lin_options options;
     bool timeIsBeingUsed;
+    bool stochastic_operator_is_being_used;
     bool fresh_equation_added;
     std::deque < objectdatatype > objectdata; // This is a double ended queue to guarantee that the objects will not
                                               // be moved to another place when the object data structure grows. This
@@ -229,6 +230,7 @@ class specification_basic_type:public boost::noncopyable
       rewr(data,opt.rewrite_strategy),
       options(opt),
       timeIsBeingUsed(false),
+      stochastic_operator_is_being_used(false),
       fresh_equation_added(false)
     {
       objectIndexTable=indexed_set<aterm_appl>(1024,75);
@@ -273,6 +275,18 @@ class specification_basic_type:public boost::noncopyable
     }
 
   private:
+    data_expression real_zero()
+    {
+      static data_expression one=sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1());
+      return one;
+    }
+
+    data_expression real_one()
+    {
+      static data_expression one=sort_real::creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1());
+      return one;
+    }
+
     process_expression delta_at_zero(void)
     {
       return at(delta(), data::sort_real::real_(0));
@@ -629,6 +643,12 @@ class specification_basic_type:public boost::noncopyable
         return at(t1,atTime);
       }
 
+      if (is_stochastic_operator(t))
+      {
+        const stochastic_operator& sto(t);
+        return stochastic_operator(sto.variables(),RewriteTerm(sto.distribution()),pCRLrewrite(sto.operand()));
+      }
+
       if (is_delta(t) || is_tau(t))
       {
         return t;
@@ -915,6 +935,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_stochastic_operator(body))
       {
+        stochastic_operator_is_being_used=true;
         /* insert the variable names of variables, to avoid
            that this variable name will be reused later on */
         const stochastic_operator& sto=down_cast<const stochastic_operator>(body);
@@ -1385,6 +1406,22 @@ class specification_basic_type:public boost::noncopyable
           return
             (!occursintermlist(var,data_expression_list(sum(p).variables()))) &&
             occursinpCRLterm(var,sum(p).operand(),strict);
+      }
+      if (is_stochastic_operator(p))
+      {
+        const stochastic_operator& sto(p);
+        if (strict)
+        {  
+          return occursintermlist(var,data_expression_list(sto.variables()))||
+                      occursinterm(var,sto.distribution()) ||
+                      occursinpCRLterm(var,sto.operand(),strict);
+        }
+        else
+        { 
+          return (!occursintermlist(var,data_expression_list(sto.variables()))) &&
+                      (occursinterm(var,sto.distribution()) ||
+                       occursinpCRLterm(var,sto.operand(),strict));
+        }
       }
       if (is_process_instance(p))
       {
@@ -2188,7 +2225,7 @@ class specification_basic_type:public boost::noncopyable
       return process_expression();
     }
 
-    typedef enum { alt_state, sum_state, /* cond,*/ seq_state, name_state, multiaction_state, stochastic_state } state;
+    typedef enum { alt_state, sum_state, /* cond,*/ seq_state, name_state, multiaction_state } state;
 
     variable get_fresh_variable(const std::string& s, const sort_expression sort, const int reuse_index=-1)
     {
@@ -2392,7 +2429,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_stochastic_operator(body))
       {
-        if (stochastic_state>=s)
+        if (seq_state>=s)
         {
           const stochastic_operator& sto=down_cast<const stochastic_operator>(body);
           variable_list sumvars=sto.variables();
@@ -2406,13 +2443,13 @@ class specification_basic_type:public boost::noncopyable
           body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
-          body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first,variables_bound_in_sum1);
+          body1=bodytovarheadGNF(body1,seq_state,sumvars+freevars,v,variables_bound_in_sum1);
           /* Due to the optimisation below, suggested by Yaroslav Usenko, bodytovarheadGNF(...,sum_state,...)
              can deliver a process of the form c -> x + !c -> y. In this case, the
              sumvars must be distributed over both summands. */
           return stochastic_operator(sumvars,distribution,body1);
         }
-        const process_expression body1=bodytovarheadGNF(body,stochastic_state,freevars,first,variables_bound_in_sum);
+        const process_expression body1=bodytovarheadGNF(body,seq_state,freevars,first,variables_bound_in_sum);
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
@@ -2935,6 +2972,13 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
+      if (is_stochastic_operator(sequence))
+      {
+        const stochastic_operator& sto(sequence);
+        extract_names(sto.operand(),result);
+        return;
+      }
+
       if (is_seq(sequence))
       {
         const process_expression first=seq(sequence).left();
@@ -3065,6 +3109,12 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance_assignment(t)||is_delta(t)||is_action(t)||is_tau(t)||is_sync(t))
       {
         return t;
+      }
+  
+      if (is_stochastic_operator(t))
+      {
+        const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(t);
+        return stochastic_operator(sto.variables(),sto.distribution(), cut_off_unreachable_tail(sto.operand()));
       }
 
       if (is_seq(t))
@@ -3392,7 +3442,7 @@ class specification_basic_type:public boost::noncopyable
         return stochastic_operator(
                               sumvars,
                               sto.distribution(),
-                              procstorealGNFbody(sto.operand(),first,
+                              procstorealGNFbody(sto.operand(),v,
                                   todo,regular,mode,sumvars+freevars,variables_bound_in_sum1));
       }
 
@@ -3786,6 +3836,18 @@ class specification_basic_type:public boost::noncopyable
       const std::vector < process_identifier>& pCRLprocs)
     {
       variable_list parameters;
+      for (std::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
+           walker!=pCRLprocs.end(); ++walker)
+      {
+        size_t n=objectIndex(*walker);
+        parameters=joinparameters(parameters,objectdata[n].parameters,n);
+        std::set<process_identifier> visited;
+        const process_expression process_with_stochastic_distribution=obtain_initial_distribution(*walker,visited);
+        if (is_stochastic_operator(process_with_stochastic_distribution))
+        {
+          parameters=joinparameters(parameters,stochastic_operator(process_with_stochastic_distribution).variables(),n);
+        }
+      }
       for (std::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
            walker!=pCRLprocs.end(); ++walker)
       {
@@ -4356,7 +4418,8 @@ class specification_basic_type:public boost::noncopyable
     assignment_list find_dummy_arguments(
       const variable_list parlist,   // The list of all parameters.
       const assignment_list args,
-      const std::set<variable>& free_variables_in_body)
+      const std::set<variable>& free_variables_in_body,
+      const variable_list& stochastic_variables)
     {
       std::map<variable,data_expression> assignment_map;
       for(assignment_list::const_iterator k=args.begin(); k!=args.end(); ++k)
@@ -4367,11 +4430,18 @@ class specification_basic_type:public boost::noncopyable
       assignment_vector result;
       for(variable_list::const_iterator i=parlist.begin(); i!=parlist.end(); ++i)
       {
-        if (free_variables_in_body.find(*i)==free_variables_in_body.end())
+        if (std::find(stochastic_variables.begin(),stochastic_variables.end(),*i)!=stochastic_variables.end())
         {
-          // The variable *i must get a default value.
-          const data_expression rhs=representative_generator_internal(i->sort());
-          result.push_back(assignment(*i,rhs));
+          // *i is a stochastic variable. Insert the identity assignment.
+          result.push_back(assignment(*i,*i));
+        }
+        else if (free_variables_in_body.find(*i)==free_variables_in_body.end())
+        {
+          {
+            // The variable *i must get a default value.
+            const data_expression rhs=representative_generator_internal(i->sort());
+            result.push_back(assignment(*i,rhs));
+          }
         }
         else
         {
@@ -4394,13 +4464,15 @@ class specification_basic_type:public boost::noncopyable
       const assignment_list args,
       const stacklisttype& stack,
       const std::vector < process_identifier >& pCRLprcs,
-      bool singlestate)
+      bool singlestate,
+      const variable_list& stochastic_variables)
     {
       const size_t n=objectIndex(procId);
-      assignment_list t=find_dummy_arguments(stack.parameters,args,get_free_variables(n));
+      const assignment_list t=find_dummy_arguments(stack.parameters,args,get_free_variables(n),stochastic_variables);
+
       if (singlestate)
       {
-        return args;
+        return t;
       }
 
       size_t i;
@@ -4408,32 +4480,13 @@ class specification_basic_type:public boost::noncopyable
       return processencoding(i,t,stack);
     }
 
-    data_expression push_stack(
-      const process_identifier procId,
-      const assignment_list args,
-      const data_expression_list t2,
-      const stacklisttype& stack,
-      const std::vector < process_identifier >& pCRLprcs,
-      const variable_list vars)
-    {
-      const size_t n=objectIndex(procId);
-      data_expression_list t=findarguments(objectdata[n].parameters,
-                                           stack.parameters,args,t2,stack,vars,get_free_variables(n));
-
-      int i;
-      for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
-
-      const data_expression_list l=processencoding(i,t,stack);
-      assert(l.size()==function_sort(stack.opns->push.sort()).domain().size());
-      return application(stack.opns->push,l);
-    }
-
 
     assignment_list make_procargs_regular(
       const process_expression& t,
       const stacklisttype& stack,
       const std::vector < process_identifier >& pcrlprcs,
-      const bool singlestate)
+      const bool singlestate,
+      const variable_list& stochastic_variables)
     {
       /* t is a sequential composition of process variables */
 
@@ -4451,17 +4504,39 @@ class specification_basic_type:public boost::noncopyable
                             t1,
                             stack,
                             pcrlprcs,
-                            singlestate);
+                            singlestate,
+                            stochastic_variables);
       }
 
       throw mcrl2::runtime_error("expected seq or name " + process::pp(t) +".");
+    }
+
+    data_expression push_stack(
+      const process_identifier procId,
+      const assignment_list args,
+      const data_expression_list t2,
+      const stacklisttype& stack,
+      const std::vector < process_identifier >& pCRLprcs,
+      const variable_list vars)
+    {
+      const size_t n=objectIndex(procId);
+      const data_expression_list t=findarguments(objectdata[n].parameters,
+                                                 stack.parameters,args,t2,stack,vars,get_free_variables(n));
+
+      int i;
+      for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
+
+      const data_expression_list l=processencoding(i,t,stack);
+      assert(l.size()==function_sort(stack.opns->push.sort()).domain().size());
+      return application(stack.opns->push,l);
     }
 
     data_expression make_procargs_stack(
       const process_expression& t,
       const stacklisttype& stack,
       const std::vector < process_identifier >& pcrlprcs,
-      const variable_list& vars)
+      const variable_list& vars,
+      const variable_list& stochastic_variables)
     {
       /* t is a sequential composition of process variables */
 
@@ -4474,7 +4549,7 @@ class specification_basic_type:public boost::noncopyable
 
         if (objectdata[objectIndex(procId)].canterminate)
         {
-          const data_expression stackframe=make_procargs_stack(process2,stack,pcrlprcs, vars);
+          const data_expression stackframe=make_procargs_stack(process2,stack,pcrlprcs, vars,stochastic_variables);
           return push_stack(procId,t1,make_list<data_expression>(stackframe),stack,pcrlprcs,vars);
         }
 
@@ -4513,14 +4588,15 @@ class specification_basic_type:public boost::noncopyable
       const std::vector < process_identifier >& pcrlprcs,
       const variable_list& vars,
       const bool regular,
-      const bool singlestate)
+      const bool singlestate,
+      const variable_list& stochastic_variables)
     {
       if (regular)
       {
-        return make_procargs_regular(t,stack,pcrlprcs,singlestate);
+        return make_procargs_regular(t,stack,pcrlprcs,singlestate,stochastic_variables);
       }
       /* return a stackframe */
-      data_expression sf=make_procargs_stack(t,stack,pcrlprcs,vars);
+      data_expression sf=make_procargs_stack(t,stack,pcrlprcs,vars,stochastic_variables);
       return make_list(assignment(stack.stackvar,sf));
     }
 
@@ -4542,7 +4618,8 @@ class specification_basic_type:public boost::noncopyable
     assignment_list pushdummyrec_regular(
       const variable_list& totalpars,
       const variable_list& pars,
-      const stacklisttype& stack)
+      const stacklisttype& stack,
+      const variable_list& stochastic_variables)
     {
       /* totalpars is the total list of parameters of the
          aggregated pCRL process. The variable pars contains
@@ -4557,22 +4634,37 @@ class specification_basic_type:public boost::noncopyable
       const variable par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
-        assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack);
-        //result.push_front(data_expression(par));
+        assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack,stochastic_variables);
+        return result;
+      }
+      // Check whether it is a stochastic variable.
+      if (std::find(stochastic_variables.begin(),stochastic_variables.end(),par)!=pars.end())
+      {
+        assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack,stochastic_variables);
+        result.push_front(assignment(par,par));
         return result;
       }
       /* otherwise the value of this argument is irrelevant, so
          make it a don't care variable. */
 
-      assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack);
+      assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack,stochastic_variables);
       result.push_front(assignment(par,representative_generator_internal(par.sort())));
       return result;
+    }
+
+    assignment_list pushdummy_regular(
+      const variable_list& parameters,
+      const stacklisttype& stack,
+      const variable_list& stochastic_variables)
+    {
+      return pushdummyrec_regular(stack.parameters,parameters,stack,stochastic_variables);
     }
 
     data_expression_list pushdummyrec_stack(
       const variable_list& totalpars,
       const variable_list& pars,
-      const stacklisttype& stack)
+      const stacklisttype& stack,
+      const variable_list& stochastic_variables)
     {
       /* totalpars is the total list of parameters of the
          aggregated pCRL process. The variable pars contains
@@ -4587,30 +4679,31 @@ class specification_basic_type:public boost::noncopyable
       const variable par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
-        data_expression_list result=pushdummyrec_stack(totalpars.tail(),pars,stack);
+        data_expression_list result=pushdummyrec_stack(totalpars.tail(),pars,stack,stochastic_variables);
+        result.push_front(par);
+        return result;
+      }
+      /* Check whether the parameter par refers to a stochastic variables */
+      if (std::find(stochastic_variables.begin(),stochastic_variables.end(),par)!=pars.end())
+      {
+        data_expression_list result=pushdummyrec_stack(totalpars.tail(),pars,stack,stochastic_variables);
         result.push_front(par);
         return result;
       }
       /* otherwise the value of this argument is irrelevant, so
          make it Nil, if a regular translation is made. If a translation
          with stacks is made, then yield a default `unique' term. */
-      data_expression_list result=pushdummyrec_stack(totalpars.tail(),pars,stack);
+      data_expression_list result=pushdummyrec_stack(totalpars.tail(),pars,stack,stochastic_variables);
       result.push_front(representative_generator_internal(par.sort()));
       return result;
     }
 
-    assignment_list pushdummy_regular(
-      const variable_list& parameters,
-      const stacklisttype& stack)
-    {
-      return pushdummyrec_regular(stack.parameters,parameters,stack);
-    }
-
     data_expression_list pushdummy_stack(
       const variable_list& parameters,
-      const stacklisttype& stack)
+      const stacklisttype& stack,
+      const variable_list& stochastic_variables)
     {
-      return pushdummyrec_stack(stack.parameters,parameters,stack);
+      return pushdummyrec_stack(stack.parameters,parameters,stack,stochastic_variables);
     }
 
     assignment_list make_initialstate(
@@ -4618,17 +4711,32 @@ class specification_basic_type:public boost::noncopyable
       const stacklisttype& stack,
       const std::vector < process_identifier >& pcrlprcs,
       const bool regular,
-      const bool singlecontrolstate)
+      const bool singlecontrolstate,
+      stochastic_distribution& initial_stochastic_distribution)
     {
-      int i;
+      size_t i;
       for (i=1 ; pcrlprcs[i-1]!=initialProcId ; ++i) {};
       /* i is the index of the initial state */
 
+      /* Calculate the initial distribution */
+      std::set<process_identifier> visited;
+      const process_expression initial_process_with_stochastic_distribution=obtain_initial_distribution(initialProcId,visited);
+      if (is_stochastic_operator(initial_process_with_stochastic_distribution))
+      {
+        const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(initial_process_with_stochastic_distribution);
+        initial_stochastic_distribution=stochastic_distribution(sto.variables(),sto.distribution());
+      }
+      else
+      {
+        initial_stochastic_distribution=stochastic_distribution(variable_list(),real_one());
+      }
 
       if (regular)
       {
         assignment_list result=
-          pushdummy_regular(objectdata[objectIndex(initialProcId)].parameters,stack);
+          pushdummy_regular(objectdata[objectIndex(initialProcId)].parameters,
+                            stack,
+                            initial_stochastic_distribution.variables());
         if (!singlecontrolstate)
         {
           return processencoding(i,result,stack);
@@ -4638,7 +4746,9 @@ class specification_basic_type:public boost::noncopyable
       else
       {
         data_expression_list result=
-                pushdummy_stack(objectdata[objectIndex(initialProcId)].parameters,stack);
+                pushdummy_stack(objectdata[objectIndex(initialProcId)].parameters,
+                                stack,
+                                initial_stochastic_distribution.variables());
         const data_expression_list l=processencoding(i,result,stack);
         assert(l.size()==function_sort(stack.opns->push.sort()).domain().size());
         return make_list(assignment(stack.stackvar,application(stack.opns->push,l)));
@@ -4660,16 +4770,18 @@ class specification_basic_type:public boost::noncopyable
 
 
     void insert_summand(
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       const variable_list& sumvars,
       const data_expression& condition,
       const action_list& multiAction,
       const data_expression& actTime,
       const assignment_list& procargs,
+      const stochastic_distribution& distribution,
       const bool has_time,
       const bool is_deadlock_summand)
     {
+      assert(distribution!=stochastic_distribution());
       const data_expression rewritten_condition=RewriteTerm(condition);
       if (rewritten_condition==sort_bool::false_())
       {
@@ -4686,17 +4798,19 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        action_summands.push_back(action_summand(sumvars,
+        action_summands.push_back(stochastic_action_summand(
+                                                 sumvars,
                                                  rewritten_condition,
                                                  has_time?multi_action(multiAction,actTime):multi_action(multiAction),
-                                                 procargs));
+                                                 procargs,
+                                                 distribution));
       }
     }
 
 
     void add_summands(
       const process_identifier& procId,
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       process_expression summandterm,
       const std::vector < process_identifier>& pCRLprocs,
@@ -4737,25 +4851,45 @@ class specification_basic_type:public boost::noncopyable
         condition1=correctstatecond(procId,pCRLprocs,stack,regular);
       }
 
-      for (; (is_if_then(summandterm)) ;)
+      stochastic_distribution cumulative_distribution(variable_list(),real_one());
+
+      /* The conditions are collected for use. The stochastic operators before the action are ignored */
+      for (; (is_if_then(summandterm)||is_stochastic_operator(summandterm)) ;)
       {
-        const data_expression localcondition=data_expression(if_then(summandterm).condition());
-        if (!(regular && singlestate))
+        if (is_if_then(summandterm))
         {
-          condition1=lazy::and_(
-                       condition1,
-                       ((regular)?localcondition:
-                        adapt_term_to_stack(
-                          localcondition,
-                          stack,
-                          sumvars)));
+          const data_expression localcondition=data_expression(if_then(summandterm).condition());
+          if (!(regular && singlestate))
+          {
+            condition1=lazy::and_(
+                         condition1,
+                         ((regular)?localcondition:
+                          adapt_term_to_stack(
+                            localcondition,
+                            stack,
+                            sumvars)));
+          }
+          else
+          {
+            /* regular and singlestate */
+            condition1=lazy::and_(localcondition,condition1);
+          }
+          summandterm=if_then(summandterm).then_case();
         }
         else
         {
-          /* regular and singlestate */
-          condition1=lazy::and_(localcondition,condition1);
+          const stochastic_operator& sto(summandterm);
+          cumulative_distribution=stochastic_distribution(
+                                    cumulative_distribution.variables()+sto.variables(),
+                                    sort_real::times(cumulative_distribution.distribution(),
+                                                     sto.distribution()));
+          summandterm=sto.operand();
         }
-        summandterm=if_then(summandterm).then_case();
+      }
+
+      if (!cumulative_distribution.variables().empty() && !sumvars.empty())
+      {
+        throw mcrl2::runtime_error("Cannot permute sum operator and stochastic distribution in " + data::pp(summandterm));
       }
 
       if (is_seq(summandterm))
@@ -4779,7 +4913,16 @@ class specification_basic_type:public boost::noncopyable
           assert(is_tau(t1)||is_action(t1)||is_sync(t1));
           multiAction=to_action_list(t1);
         }
-        assignment_list procargs=make_procargs(t2,stack,pCRLprocs,sumvars,regular,singlestate);
+
+        std::set<process_identifier> visited;
+        const process_expression process_with_stochastic_distribution=obtain_initial_distribution_term(t2,visited);
+        stochastic_distribution distribution(variable_list(),real_one());
+        if (is_stochastic_operator(process_with_stochastic_distribution))
+        {
+          const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(process_with_stochastic_distribution);
+          distribution=stochastic_distribution(sto.variables(),sto.distribution());
+        }
+        const assignment_list procargs=make_procargs(t2,stack,pCRLprocs,sumvars,regular,singlestate,distribution.variables());
         if (!regular)
         {
           if (!is_delta_summand)
@@ -4795,7 +4938,8 @@ class specification_basic_type:public boost::noncopyable
         }
         insert_summand(action_summands,deadlock_summands,
                        sumvars,condition1,multiAction,
-                       atTime,procargs,has_time,is_delta_summand);
+                       atTime,procargs,distribution,
+                       has_time,is_delta_summand);
         return;
       }
 
@@ -4846,6 +4990,7 @@ class specification_basic_type:public boost::noncopyable
                        multiAction,
                        atTime,
                        dummyparameterlist(stack,singlestate),
+                       stochastic_distribution(variable_list(),real_one()),
                        has_time,
                        is_delta_summand);
         return;
@@ -4861,6 +5006,7 @@ class specification_basic_type:public boost::noncopyable
                 multiAction,
                 atTime,
                 procargs,
+                stochastic_distribution(variable_list(),real_one()),   // TODO: UNLIKELY THAT THIS IS CORRECT. 
                 has_time,
                 is_delta_summand);
 
@@ -4870,7 +5016,7 @@ class specification_basic_type:public boost::noncopyable
 
     void collectsumlistterm(
       const process_identifier& procId,
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       const process_expression& body,
       const variable_list& pars,
@@ -4898,7 +5044,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void collectsumlist(
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       const std::vector < process_identifier>& pCRLprocs,
       const variable_list& pars,
@@ -5161,7 +5307,7 @@ class specification_basic_type:public boost::noncopyable
 
           spec.create_case_function_on_enumeratedtype(sort_bool::bool_(),enumeratedtype_index);
 
-          if (spec.timeIsBeingUsed)
+          if (spec.timeIsBeingUsed || spec.stochastic_operator_is_being_used)
           {
             spec.create_case_function_on_enumeratedtype(sort_real::real_(),enumeratedtype_index);
           }
@@ -5446,8 +5592,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool summandsCanBeClustered(
-      const action_summand& summand1,
-      const action_summand& summand2)
+      const stochastic_action_summand& summand1,
+      const stochastic_action_summand& summand2)
     {
       if (summand1.has_time()!= summand2.has_time())
       {
@@ -5496,10 +5642,10 @@ class specification_basic_type:public boost::noncopyable
       return data_expression(var);
     }
 
-    action_summand collect_sum_arg_arg_cond(
+    stochastic_action_summand collect_sum_arg_arg_cond(
       const enumtype& e,
       size_t n,
-      const action_summand_vector& action_summands,
+      const stochastic_action_summand_vector& action_summands,
       const variable_list& parameters)
     {
       /* This function gets a list of summands, with
@@ -5521,7 +5667,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression binarysumcondition;
       int equaluptillnow=1;
 
-      for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
+      for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
       {
         const variable_list sumvars=walker->summation_variables();
         resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist,parameters);
@@ -5547,9 +5693,9 @@ class specification_basic_type:public boost::noncopyable
 
       data_expression equalterm;
       equaluptillnow=1;
-      for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
+      for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
       {
-        const action_summand smmnd=*walker;
+        const stochastic_action_summand smmnd=*walker;
         const data_expression condition=smmnd.condition();
         assert(auxrename_list_pars!=rename_list_pars.end());
         assert(auxrename_list_args!=rename_list_args.end());
@@ -5645,7 +5791,7 @@ class specification_basic_type:public boost::noncopyable
          of multiactions */
       std::vector < action_list > multiActionList;
 
-      for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
+      for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
       {
         multiActionList.push_back(walker->multi_action().actions());
       }
@@ -5671,7 +5817,7 @@ class specification_basic_type:public boost::noncopyable
           std::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
           std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
           std::vector<action_list>::const_iterator  multiactionwalker=multiActionList.begin();
-          for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end();
+          for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end();
                ++walker,++multiactionwalker)
           {
             assert(auxrename_list_pars!=rename_list_pars.end());
@@ -5756,7 +5902,7 @@ class specification_basic_type:public boost::noncopyable
       bool all_summands_have_time=true;
 
       // first find out whether there is a summand with explicit time.
-      for (action_summand_vector::const_iterator walker=action_summands.begin() ; walker!=action_summands.end(); ++walker)
+      for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin() ; walker!=action_summands.end(); ++walker)
       {
         if (walker->has_time())
         {
@@ -5768,7 +5914,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      if ((some_summand_has_time))
+      if (some_summand_has_time)
       {
         variable dummy_time_variable;
         if (!all_summands_have_time)
@@ -5777,10 +5923,10 @@ class specification_basic_type:public boost::noncopyable
           dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
           resultsum.push_front(dummy_time_variable);
         }
-        auxrename_list_pars=rename_list_pars.begin();
-        auxrename_list_args=rename_list_args.begin();
-        auxresult=data_expression_list();
-        for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
+        std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
+        std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+        data_expression_list auxresult;
+        for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
         {
           if (walker->has_time())
           {
@@ -5851,35 +5997,200 @@ class specification_basic_type:public boost::noncopyable
           }
         }
       }
-      /* now we construct the arguments of the invoked
+     
+      /* we construct the resulting distribution --------------------------------------------------------- */
+
+      
+      variable_list resulting_stochastic_variables;
+      std::vector < variable_list > stochastic_rename_list_pars;
+      std::vector < data_expression_list > stochastic_rename_list_args;
+      data_expression resulting_distribution=real_one();
+      {
+        data_expression_list stochastic_conditionlist;
+        for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
+        {
+          const variable_list stochastic_vars=walker->distribution().variables();
+          resulting_stochastic_variables=merge_var(stochastic_vars,resulting_stochastic_variables,
+                              stochastic_rename_list_pars,stochastic_rename_list_args,stochastic_conditionlist,parameters);
+        }
+
+        std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
+        std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+
+        std::vector < variable_list >::const_iterator stochastic_auxrename_list_pars=stochastic_rename_list_pars.begin();
+        std::vector < data_expression_list >::const_iterator stochastic_auxrename_list_args=stochastic_rename_list_args.begin();
+
+        data_expression_list aux_result;
+        data_expression equalterm;
+        equaluptillnow=1;
+        for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
+        {
+          const stochastic_action_summand smmnd=*walker;
+          const data_expression dist=smmnd.distribution().distribution();
+          const variable_list stochastic_variables=smmnd.distribution().variables();
+          assert(auxrename_list_pars!=rename_list_pars.end());
+          assert(auxrename_list_args!=rename_list_args.end());
+          assert(stochastic_auxrename_list_pars!=stochastic_rename_list_pars.end());
+          assert(stochastic_auxrename_list_args!=stochastic_rename_list_args.end());
+
+          const variable_list auxpars= *auxrename_list_pars;
+          ++auxrename_list_pars;
+          const data_expression_list auxargs= *auxrename_list_args;
+          ++auxrename_list_args;
+          const variable_list stochastic_auxpars= *stochastic_auxrename_list_pars;
+          ++stochastic_auxrename_list_pars;
+          const data_expression_list stochastic_auxargs= *stochastic_auxrename_list_args;
+          ++stochastic_auxrename_list_args;
+          std::map<variable,data_expression> sigma;
+          std::set<variable> variables_in_rhs_of_sigma;
+          data_expression_list::const_iterator j=stochastic_auxargs.begin();
+          for (variable_list::const_iterator i=stochastic_auxpars.begin();
+               i!=stochastic_auxpars.end(); ++i, ++j)
+          {
+            /* Substitutions are carried out from left to right. The first applicable substitution counts */
+            if (sigma.count(*i)==0)
+            {
+              sigma[*i]=*j;
+              const std::set<variable> varset=find_free_variables(*j);
+              variables_in_rhs_of_sigma.insert(varset.begin(),varset.end());
+            }
+          }
+          j=auxargs.begin();
+          for (variable_list::const_iterator i=auxpars.begin();
+               i!=auxpars.end(); ++i, ++j)
+          {
+            /* Substitutions are carried out from left to right. The first applicable substitution counts */
+            if (sigma.count(*i)==0)
+            {
+              sigma[*i]=*j;
+              const std::set<variable> varset=find_free_variables(*j);
+              variables_in_rhs_of_sigma.insert(varset.begin(),varset.end());
+            }
+          }
+          mutable_map_substitution<> mutable_sigma(sigma);
+
+          const data_expression auxresult1=data::replace_variables_capture_avoiding(dist,mutable_sigma,variables_in_rhs_of_sigma);
+          if (equalterm==data_expression()||is_global_variable(equalterm))
+          {
+            equalterm=auxresult1;
+          }
+          else
+          {
+            if (equaluptillnow)
+            {
+              equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
+            }
+          }
+          aux_result.push_front(auxresult1);
+        }
+        if (options.binary)
+        {
+          resulting_distribution=construct_binary_case_tree(n,
+                          resultsum,aux_result,sort_real::real_(),e);
+          resulting_distribution=lazy::and_(
+                            construct_binary_case_tree(n,
+                                resultsum,stochastic_conditionlist,sort_bool::bool_(),e),
+                            resulting_distribution);
+        }
+        else
+        {
+          if (equaluptillnow)
+          {
+            if (all_equal(stochastic_conditionlist))
+            {
+              resulting_distribution=sort_real::times(
+                                                  if_(stochastic_conditionlist.front(),real_one(),real_zero()), 
+                                                  equalterm);
+            }
+            else
+            {
+              data_expression_list temp_stochastic_conditionlist=stochastic_conditionlist;
+              temp_stochastic_conditionlist.push_front(data_expression(e.var));
+              resulting_distribution=sort_real::times(
+                                if_(application(
+                                      find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
+                                      temp_stochastic_conditionlist),
+                                      real_one(),
+                                      real_zero()),
+                                equalterm);
+            }
+          }
+          else
+          {
+            data_expression_list tempauxresult=aux_result;
+            tempauxresult.push_front(data_expression(e.var));
+            resulting_distribution=application(
+                              find_case_function(e.enumeratedtype_index,sort_real::real_()),
+                              tempauxresult);
+            if (all_equal(stochastic_conditionlist))
+            {
+             resulting_distribution=sort_real::times(
+                                                 if_(stochastic_conditionlist.front(),real_one(),real_zero()),
+                                                 resulting_distribution);
+            }
+            else
+            {
+             data_expression_list temp_stochastic_conditionlist=stochastic_conditionlist;
+             temp_stochastic_conditionlist.push_front(data_expression(e.var));
+             resulting_distribution=sort_real::times(
+                              if_(application(
+                                     find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
+                                     temp_stochastic_conditionlist),
+                                  real_one(),
+                                  real_zero()),
+                              resulting_distribution);
+            }
+          }
+        }
+      }
+      /* now we construct the arguments of the invoked -----------------------------------------------------
          process, i.e. the new function g */
       size_t fcnt=0;
       data_expression_list resultnextstate;
-
 
       for (variable_list::const_iterator var_it=parameters.begin(); var_it!=parameters.end(); ++var_it)
       {
         equalterm=data_expression();
         equaluptillnow=1;
-        auxrename_list_pars=rename_list_pars.begin();
-        auxrename_list_args=rename_list_args.begin();
+        std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
+        std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+        std::vector < variable_list >::const_iterator stochastic_auxrename_list_pars=stochastic_rename_list_pars.begin();
+        std::vector < data_expression_list >::const_iterator stochastic_auxrename_list_args=stochastic_rename_list_args.begin();
         data_expression_list auxresult;
-        for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
+        for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
         {
           const assignment_list nextstate=walker->assignments();
           assert(auxrename_list_pars!=rename_list_pars.end());
           assert(auxrename_list_args!=rename_list_args.end());
+          assert(stochastic_auxrename_list_pars!=stochastic_rename_list_pars.end());
+          assert(stochastic_auxrename_list_args!=stochastic_rename_list_args.end());
           const variable_list auxpars= *auxrename_list_pars;
           ++auxrename_list_pars;
           const data_expression_list auxargs= *auxrename_list_args;
           ++auxrename_list_args;
+          const variable_list stochastic_auxpars= *stochastic_auxrename_list_pars;
+          ++stochastic_auxrename_list_pars;
+          const data_expression_list stochastic_auxargs= *stochastic_auxrename_list_args;
+          ++stochastic_auxrename_list_args;
 
           data_expression nextstateparameter;
           nextstateparameter=getRHSassignment(*var_it,nextstate);
 
           std::map < variable, data_expression > sigma;
           std::set<variable> variables_in_rhs_sigma;
-          data_expression_list::const_iterator j=auxargs.begin();
+          data_expression_list::const_iterator j=stochastic_auxargs.begin();
+          for (variable_list::const_iterator i=stochastic_auxpars.begin();
+                 i!=stochastic_auxpars.end(); ++i, ++j)
+          {
+            /* Substitutions are carried out from left to right. The first applicable substitution counts */
+            if (sigma.count(*i)==0)
+            {
+              sigma[*i]=*j;
+              std::set<variable> varset=find_free_variables(*j);
+              variables_in_rhs_sigma.insert(varset.begin(),varset.end());
+            }
+          }
+          j=auxargs.begin();
           for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
           {
@@ -5950,10 +6261,12 @@ class specification_basic_type:public boost::noncopyable
       /* The list of arguments in nextstate are now in a sequential form, and
            must be transformed back to a list of assignments */
       const assignment_list final_resultnextstate=make_assignment_list(parameters,resultnextstate);
-      return action_summand(resultsum,
+      return stochastic_action_summand(
+                            resultsum,
                             resultcondition,
                             some_summand_has_time?multi_action(resultmultiactionlist,resulttime):multi_action(resultmultiactionlist),
-                            final_resultnextstate);
+                            final_resultnextstate,
+                            stochastic_distribution(resulting_stochastic_variables,resulting_distribution));
     }
 
     deadlock_summand collect_sum_arg_arg_cond(
@@ -6136,9 +6449,9 @@ class specification_basic_type:public boost::noncopyable
           dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
           resultsum.push_front(dummy_time_variable);
         }
-        auxrename_list_pars=rename_list_pars.begin();
-        auxrename_list_args=rename_list_args.begin();
-        auxresult=data_expression_list();
+        std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
+        std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+        data_expression_list auxresult;
         for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end(); ++walker)
         {
           if (walker->deadlock().has_time())
@@ -6228,7 +6541,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void cluster_actions(
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       const variable_list& pars)
     {
@@ -6237,18 +6550,18 @@ class specification_basic_type:public boost::noncopyable
             occurring in the first summand of sums.
             These summands are first stored in w1. */
 
-        action_summand_vector result;
-        action_summand_vector reducible_sumlist=action_summands;
+        stochastic_action_summand_vector result;
+        stochastic_action_summand_vector reducible_sumlist=action_summands;
 
-        for (action_summand_vector::const_iterator i=action_summands.begin() ; i!=action_summands.end() ; ++i)
+        for (stochastic_action_summand_vector::const_iterator i=action_summands.begin() ; i!=action_summands.end() ; ++i)
         {
-          const action_summand summand1=*i;
+          const stochastic_action_summand summand1=*i;
 
-          action_summand_vector w1;
-          action_summand_vector w2;
-          for (action_summand_vector::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
+          stochastic_action_summand_vector w1;
+          stochastic_action_summand_vector w2;
+          for (stochastic_action_summand_vector::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
           {
-            const action_summand summand2=*w3;
+            const stochastic_action_summand summand2=*w3;
             if (summandsCanBeClustered(summand1,summand2))
             {
               w1.push_back(summand2);
@@ -6280,7 +6593,7 @@ class specification_basic_type:public boost::noncopyable
             else
             {
               // result=w1 + result;
-              for(action_summand_vector::const_iterator i=result.begin(); i!=result.end(); ++i)
+              for(stochastic_action_summand_vector::const_iterator i=result.begin(); i!=result.end(); ++i)
               {
                 w1.push_back(*i);
               }
@@ -6349,13 +6662,14 @@ class specification_basic_type:public boost::noncopyable
     /* The variable regular indicates that we are interested in generating
        a LPE assuming the pCRL term under consideration is regular */
 
-    void generateLPEpCRL(action_summand_vector& action_summands,
+    void generateLPEpCRL(stochastic_action_summand_vector& action_summands,
                          deadlock_summand_vector& deadlock_summands,
                          const process_identifier& procId,
                          const bool containstime,
                          const bool regular,
                          variable_list& parameters,
-                         assignment_list& init)
+                         assignment_list& init,
+                         stochastic_distribution& initial_stochastic_distribution)
     /* A pair of initial state and linear process must be extracted
        from the underlying GNF */
     {
@@ -6380,11 +6694,10 @@ class specification_basic_type:public boost::noncopyable
       }
       parameters=collectparameterlist(pCRLprocs);
 
-      alphaconversion(procId,parameters);
-      /* We reverse the pCRLprocslist to give the processes that occur first the
-         lowest index. In particular initial states get value 1, instead of the
-         highest value, as happened hitherto (29/9/05). Not necessary anymore, now
-         that we are using a vector (16/5/2009). */
+std::cerr << "TODO: We comment out alpha conversion here, which may not be necessary. It in "
+             "any case disturbs stochastic variables. Was it necessary for normal linearisation?\n";
+      // alphaconversion(procId,parameters);
+
       if ((!regular)||((!singlecontrolstate) && (options.newstate) && (!options.binary)))
       {
         declare_control_state(pCRLprocs);
@@ -6414,11 +6727,9 @@ class specification_basic_type:public boost::noncopyable
         parameters=make_list(stack.stackvar);
       }
 
-      init=make_initialstate(procId,stack,pCRLprocs,regular,singlecontrolstate);
+      init=make_initialstate(procId,stack,pCRLprocs,regular,singlecontrolstate,initial_stochastic_distribution);
 
-      collectsumlist(action_summands,deadlock_summands,pCRLprocs,parameters,stack,
-                     /*(canterminate&&objectdata[n].canterminate),*/regular,
-                     singlecontrolstate);
+      collectsumlist(action_summands,deadlock_summands,pCRLprocs,parameters,stack,regular,singlecontrolstate);
 
       if (!options.no_intermediate_cluster)
       {
@@ -6460,15 +6771,16 @@ class specification_basic_type:public boost::noncopyable
       return reverse(resultactionlist);
     }
 
-    void hidecomposition(const identifier_string_list& hidelist, action_summand_vector& action_summands)
+    void hidecomposition(const identifier_string_list& hidelist, stochastic_action_summand_vector& action_summands)
     {
-      for (action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end() ; ++i)
+      for (stochastic_action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end() ; ++i)
       {
         const action_list acts=hide_(hidelist,i->multi_action().actions());
-        *i=action_summand(i->summation_variables(),
+        *i=stochastic_action_summand(i->summation_variables(),
                           i->condition(),
                           i->has_time()?multi_action(acts,i->multi_action().time()):multi_action(acts),
-                          i->assignments());
+                          i->assignments(),
+                          i->distribution());
       }
     }
 
@@ -6534,7 +6846,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void insert_timed_delta_summand(
-      const action_summand_vector& action_summands,
+      const stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       const deadlock_summand& s)
     {
@@ -6549,7 +6861,7 @@ class specification_basic_type:public boost::noncopyable
       const data_expression actiontime=s.deadlock().time();
 
       // First check whether the delta summand is subsumed by an action summands.
-      for (action_summand_vector::const_iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
+      for (stochastic_action_summand_vector::const_iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
       {
         const data_expression cond1=i->condition();
         if ((!options.add_delta) &&
@@ -6681,13 +6993,13 @@ class specification_basic_type:public boost::noncopyable
     void allowblockcomposition(
       const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
       const bool is_allow,
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
       /* This function calculates the allow or the block operator,
          depending on whether is_allow is true */
 
-      action_summand_vector sourcesumlist;
+      stochastic_action_summand_vector sourcesumlist;
       action_summands.swap(sourcesumlist);
 
       deadlock_summand_vector resultdeltasumlist;
@@ -6713,9 +7025,9 @@ class specification_basic_type:public boost::noncopyable
          each delta summand it is determined whether it ought
          to be added, or is superseded by an action or another
          delta summand */
-      for (action_summand_vector::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
+      for (stochastic_action_summand_vector::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
       {
-        const action_summand smmnd= *i;
+        const stochastic_action_summand smmnd= *i;
         const variable_list sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.multi_action().actions();
         const data_expression actiontime=smmnd.multi_action().time();
@@ -6815,16 +7127,17 @@ class specification_basic_type:public boost::noncopyable
 
     void renamecomposition(
       const rename_expression_list& renamings,
-      action_summand_vector& action_summands)
+      stochastic_action_summand_vector& action_summands)
     {
-      for (action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
+      for (stochastic_action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
       {
         const action_list actions=rename_actions(renamings,i->multi_action().actions());
 
-        *i= action_summand(i->summation_variables(),
+        *i= stochastic_action_summand(i->summation_variables(),
                            i->condition(),
                            i->multi_action().has_time()?multi_action(actions,i->multi_action().time()):multi_action(actions),
-                           i->assignments());
+                           i->assignments(),
+                           i->distribution());
 
       }
     }
@@ -7432,7 +7745,7 @@ class specification_basic_type:public boost::noncopyable
       const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
 
     {
@@ -7460,7 +7773,7 @@ class specification_basic_type:public boost::noncopyable
       }
       communication_expression_list communications1=resultingCommunications;
 
-      action_summand_vector resultsumlist;
+      stochastic_action_summand_vector resultsumlist;
       deadlock_summand_vector resultingDeltaSummands;
       deadlock_summands.swap(resultingDeltaSummands);
 
@@ -7474,14 +7787,15 @@ class specification_basic_type:public boost::noncopyable
       }
       action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
 
-      for (action_summand_vector::const_iterator sourcesumlist=action_summands.begin();
+      for (stochastic_action_summand_vector::const_iterator sourcesumlist=action_summands.begin();
            sourcesumlist!=action_summands.end(); ++sourcesumlist)
       {
-        const action_summand smmnd=*sourcesumlist;
+        const stochastic_action_summand smmnd=*sourcesumlist;
         const variable_list sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.multi_action().actions();
         const data_expression condition=smmnd.condition();
         const assignment_list nextstate=smmnd.assignments();
+        const stochastic_distribution dist=smmnd.distribution();
 
         if (!inline_allow)
         {
@@ -7546,10 +7860,11 @@ class specification_basic_type:public boost::noncopyable
 
           const data_expression newcondition=RewriteTerm(
                                                lazy::and_(condition,communicationcondition));
-          action_summand new_summand(sumvars,
+          stochastic_action_summand new_summand(sumvars,
                                      newcondition,
                                      smmnd.multi_action().has_time()?multi_action(multiaction, smmnd.multi_action().time()):multi_action(multiaction),
-                                     nextstate);
+                                     nextstate,
+                                     dist);
           if (!options.nosumelm)
           {
             if (sumelm(new_summand))
@@ -7690,7 +8005,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression getUltimateDelayCondition(
-      const action_summand_vector& action_summands,
+      const stochastic_action_summand_vector& action_summands,
       const deadlock_summand_vector& deadlock_summands,
       const variable_list& freevars,
       const data_expression& timevariable,
@@ -7712,7 +8027,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      for (action_summand_vector::const_iterator i=action_summands.begin();
+      for (stochastic_action_summand_vector::const_iterator i=action_summands.begin();
            i!=action_summands.end(); ++i)
       {
         if ((!i->multi_action().has_time()) && (i->condition()==sort_bool::true_()))
@@ -7753,7 +8068,7 @@ class specification_basic_type:public boost::noncopyable
         results.push_front(ult_del_condition);
       }
 
-      for (action_summand_vector::const_iterator i=action_summands.begin();
+      for (stochastic_action_summand_vector::const_iterator i=action_summands.begin();
            i!=action_summands.end(); ++i)
       {
         variable_list new_existentially_quantified_variables;
@@ -7840,26 +8155,33 @@ class specification_basic_type:public boost::noncopyable
     /******** make_parameters_and_variables_unique **********************/
 
     void make_parameters_and_sum_variables_unique(
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       variable_list& pars,
       assignment_list& init,
       const std::string hint="")
     {
-      action_summand_vector result_action_summands;
+      stochastic_action_summand_vector result_action_summands;
 
       std::set<data::variable> rhs_variables_sigma;
       data::mutable_map_substitution<> sigma=make_unique_variables(pars,hint, rhs_variables_sigma);
       const variable_list unique_pars=data::replace_variables(pars, sigma);
 
       init=substitute_assignmentlist(init,pars,true,false, sigma,rhs_variables_sigma);  // Only substitute the variables in the lhs.
-      for (action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
+      for (stochastic_action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
       {
+        const stochastic_action_summand smmnd= *s;
+
         std::set<data::variable> rhs_variables_sumvars;
-        const action_summand smmnd= *s;
         const variable_list sumvars=smmnd.summation_variables();
         data::mutable_map_substitution<> sigma_sumvars=make_unique_variables(sumvars,hint,rhs_variables_sumvars);
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
+
+        stochastic_distribution distribution=smmnd.distribution();
+        std::set<data::variable> rhs_variables_stochastic_vars;
+        const variable_list stochastic_vars=distribution.variables();
+        data::mutable_map_substitution<> sigma_stochastic_vars=make_unique_variables(stochastic_vars,hint,rhs_variables_stochastic_vars);
+        const variable_list unique_stochastic_vars=data::replace_variables(stochastic_vars, sigma_stochastic_vars);
 
         data_expression condition=smmnd.condition();
         action_list multiaction=smmnd.multi_action().actions();
@@ -7874,13 +8196,26 @@ class specification_basic_type:public boost::noncopyable
         multiaction=lps::replace_variables_capture_avoiding(multiaction, sigma_sumvars, rhs_variables_sumvars);
         multiaction=lps::replace_variables_capture_avoiding(multiaction, sigma, rhs_variables_sigma);
 
+        distribution=stochastic_distribution(
+                       unique_stochastic_vars,
+                       data::replace_variables_capture_avoiding(distribution.distribution(), sigma_sumvars, rhs_variables_sumvars));
+        distribution=stochastic_distribution(
+                       unique_stochastic_vars,
+                       data::replace_variables_capture_avoiding(distribution.distribution(), sigma_stochastic_vars, rhs_variables_stochastic_vars));
+        distribution=stochastic_distribution(
+                       distribution.variables(),
+                       data::replace_variables_capture_avoiding(distribution.distribution(), sigma, rhs_variables_sigma));
+
         nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_sumvars,rhs_variables_sumvars);
+        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_stochastic_vars,rhs_variables_stochastic_vars);
         nextstate=substitute_assignmentlist(nextstate,pars,true,true,sigma,rhs_variables_sigma);
 
-        result_action_summands.push_back(action_summand(unique_sumvars,
+        result_action_summands.push_back(stochastic_action_summand(
+                                                        unique_sumvars,
                                                         condition,
                                                         s->multi_action().has_time()?multi_action(multiaction,actiontime):multi_action(multiaction),
-                                                        nextstate));
+                                                        nextstate,
+                                                        distribution));
       }
       pars=unique_pars;
       action_summands.swap(result_action_summands);
@@ -7922,9 +8257,9 @@ class specification_basic_type:public boost::noncopyable
     /**************** parallel composition ******************************/
 
     void combine_summand_lists(
-      const action_summand_vector& action_summands1,
+      const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
-      const action_summand_vector& action_summands2,
+      const stochastic_action_summand_vector& action_summands2,
       const deadlock_summand_vector& deadlock_summands2,
       const variable_list& par1,
       const variable_list& par3,
@@ -7932,7 +8267,7 @@ class specification_basic_type:public boost::noncopyable
       const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
 
     {
@@ -8005,15 +8340,16 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      for (action_summand_vector::const_iterator walker1=action_summands1.begin();
+      for (stochastic_action_summand_vector::const_iterator walker1=action_summands1.begin();
            walker1!=action_summands1.end(); ++walker1)
       {
-        const action_summand summand1= *walker1;
+        const stochastic_action_summand summand1= *walker1;
         variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
         action_list multiaction1=summand1.multi_action().actions();
         data_expression actiontime1=summand1.multi_action().time();
         data_expression condition1=summand1.condition();
         assignment_list nextstate1=summand1.assignments();
+        const stochastic_distribution distribution1=summand1.distribution();
         bool has_time=summand1.has_time();
 
         if (multiaction1!=make_list(terminationAction))
@@ -8052,10 +8388,12 @@ class specification_basic_type:public boost::noncopyable
           condition1=RewriteTerm(condition1);
           if (condition1!=sort_bool::false_())
           {
-            action_summands.push_back(action_summand(sumvars1,
-                                                     condition1,
-                                                     has_time?multi_action(multiaction1, actiontime1):multi_action(multiaction1),
-                                                     nextstate1));
+            action_summands.push_back(stochastic_action_summand(
+                                             sumvars1,
+                                             condition1,
+                                             has_time?multi_action(multiaction1, actiontime1):multi_action(multiaction1),
+                                             nextstate1,
+                                             distribution1));
           }
         }
       }
@@ -8110,15 +8448,16 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      for (action_summand_vector::const_iterator walker2=action_summands2.begin();
+      for (stochastic_action_summand_vector::const_iterator walker2=action_summands2.begin();
            walker2!=action_summands2.end(); ++walker2)
       {
-        const action_summand summand2= *walker2;
+        const stochastic_action_summand summand2= *walker2;
         variable_list sumvars2=summand2.summation_variables() + ultimate_delay_sumvars2;
         action_list multiaction2=summand2.multi_action().actions();
         data_expression actiontime2=summand2.multi_action().time();
         data_expression condition2=summand2.condition();
         assignment_list nextstate2=summand2.assignments();
+        const stochastic_distribution distribution2=summand2.distribution();
         bool has_time=summand2.multi_action().has_time();
 
         if (multiaction2!=make_list(terminationAction))
@@ -8158,36 +8497,40 @@ class specification_basic_type:public boost::noncopyable
           condition2=RewriteTerm(condition2);
           if (condition2!=sort_bool::false_())
           {
-            action_summands.push_back(action_summand(sumvars2,
+            action_summands.push_back(stochastic_action_summand(
+                                                     sumvars2,
                                                      condition2,
                                                      has_time?multi_action(multiaction2,actiontime2):multi_action(multiaction2),
-                                                     nextstate2));
+                                                     nextstate2,
+                                                     distribution2));
           }
         }
       }
 
       /* thirdly we enumerate all multi actions*/
 
-      for (action_summand_vector::const_iterator walker1=action_summands1.begin();
+      for (stochastic_action_summand_vector::const_iterator walker1=action_summands1.begin();
            walker1!=action_summands1.end(); ++walker1)
       {
-        const action_summand summand1= *walker1;
+        const stochastic_action_summand summand1= *walker1;
 
         const variable_list sumvars1=summand1.summation_variables();
         const action_list multiaction1=summand1.multi_action().actions();
         const data_expression actiontime1=summand1.multi_action().time();
         const data_expression condition1=summand1.condition();
         const assignment_list nextstate1=summand1.assignments();
+        const stochastic_distribution distribution1=summand1.distribution();
 
-        for (action_summand_vector::const_iterator walker2=action_summands2.begin();
+        for (stochastic_action_summand_vector::const_iterator walker2=action_summands2.begin();
              walker2!=action_summands2.end(); ++walker2)
         {
-          const action_summand summand2= *walker2;
+          const stochastic_action_summand summand2= *walker2;
           const variable_list sumvars2=summand2.summation_variables();
           const action_list multiaction2=summand2.multi_action().actions();
           const data_expression actiontime2=summand2.multi_action().time();
           const data_expression condition2=summand2.condition();
           const assignment_list nextstate2=summand2.assignments();
+          const stochastic_distribution distribution2=summand2.distribution();
 
           if ((multiaction1==make_list(terminationAction))==(multiaction2==make_list(terminationAction)))
           {
@@ -8249,14 +8592,19 @@ class specification_basic_type:public boost::noncopyable
             }
 
             const assignment_list nextstate3=nextstate1+nextstate2;
+            const stochastic_distribution distribution3(
+                                              distribution1.variables()+distribution2.variables(),
+                                              sort_real::times(distribution1.distribution(),distribution2.distribution()));
 
             condition3=RewriteTerm(condition3);
             if (condition3!=sort_bool::false_())
             {
-              action_summands.push_back(action_summand(allsums,
-                                                       condition3,
-                                                       has_time3?multi_action(multiaction3,action_time3):multi_action(multiaction3),
-                                                       nextstate3));
+              action_summands.push_back(stochastic_action_summand(
+                                           allsums,
+                                           condition3,
+                                           has_time3?multi_action(multiaction3,action_time3):multi_action(multiaction3),
+                                           nextstate3,
+                                           distribution3));
             }
           }
         }
@@ -8265,18 +8613,18 @@ class specification_basic_type:public boost::noncopyable
 
 
     void parallelcomposition(
-      const action_summand_vector& action_summands1,
+      const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
       const variable_list& pars1,
       const assignment_list& init1,
-      const action_summand_vector& action_summands2,
+      const stochastic_action_summand_vector& action_summands2,
       const deadlock_summand_vector& deadlock_summands2,
       const variable_list& pars2,
       const assignment_list& init2,
       const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       variable_list& pars_result,
       assignment_list& init_result)
@@ -8286,9 +8634,9 @@ class specification_basic_type:public boost::noncopyable
              is_block ? "- calculating parallel composition modulo the block operator: " :
                         "- calculating parallel composition: ") <<
             action_summands1.size() <<
-            " actions + " << deadlock_summands1.size() <<
-            " deadlocks || " << action_summands2.size() <<
-            " actions + " << deadlock_summands2.size() << " deadlocks = ";
+            " action summands + " << deadlock_summands1.size() <<
+            " deadlock summands || " << action_summands2.size() <<
+            " action summands + " << deadlock_summands2.size() << " deadlock summands = ";
 
       // At this point the parameters of pars1 and pars2 are unique, except for
       // those that are constant in both processes.
@@ -8321,17 +8669,18 @@ class specification_basic_type:public boost::noncopyable
     ///              and the initial assignment list.
 
     void generateLPEmCRLterm(
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       const process_expression t,    // This process expression cannot be a reference.
       const bool regular,
       const bool rename_variables,
       variable_list& pars,
-      assignment_list& init)
+      assignment_list& init,
+      stochastic_distribution& initial_stochastic_distribution)
     {
       if (is_process_instance_assignment(t))
       {
-        generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),regular,pars,init);
+        generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),regular,pars,init,initial_stochastic_distribution);
         size_t n=objectIndex(process_instance_assignment(t).identifier());
         const assignment_list ass=process_instance_assignment(t).assignments();
 
@@ -8371,12 +8720,13 @@ class specification_basic_type:public boost::noncopyable
           // Note that this is only useful, in regular mode. This does not make sense if
           // stacks are being used.
 
-          linear_process lps(pars,deadlock_summands,action_summands);
-          process_initializer initializer(init);
+          stochastic_linear_process lps(pars,deadlock_summands,action_summands);
+          stochastic_process_initializer initializer(init,stochastic_distribution(variable_list(),real_one())); // Default distribution.
 
-          specification temporary_spec(data,acts,global_variables,lps,initializer);
-          constelm_algorithm < rewriter > alg(temporary_spec,rewr);
-          alg.run(true); // Remove constants from the specification, where global variables are
+          stochastic_specification temporary_spec(data,acts,global_variables,lps,initializer);
+std::cerr << "Warning Constelm is not applied to linear processes at this moment\n";
+// TODO UNREMOVE:          constelm_algorithm < rewriter > alg(temporary_spec,rewr);
+// TODO UNREMOVE:          alg.run(true); // Remove constants from the specification, where global variables are
           // also instantiated if they exist.
           // Reconstruct the variables from the temporary specification
 
@@ -8413,12 +8763,12 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list pars1,pars2;
         assignment_list init1,init2;
-        action_summand_vector action_summands1, action_summands2;
+        stochastic_action_summand_vector action_summands1, action_summands2;
         deadlock_summand_vector deadlock_summands1, deadlock_summands2;
         generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(t).left(),
-                              regular,rename_variables,pars1,init1);
+                              regular,rename_variables,pars1,init1,initial_stochastic_distribution);
         generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(t).right(),
-                              regular,true,pars2,init2);
+                              regular,true,pars2,init2,initial_stochastic_distribution);
         parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
                               action_summands2,deadlock_summands2,pars2,init2,
                               action_name_multiset_list(),false,false,
@@ -8429,7 +8779,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_hide(t))
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,hide(t).operand(),
-                              regular,rename_variables,pars,init);
+                              regular,rename_variables,pars,init,initial_stochastic_distribution);
         hidecomposition(hide(t).hide_set(),action_summands);
         return;
       }
@@ -8442,12 +8792,12 @@ class specification_basic_type:public boost::noncopyable
           // Perform parallel composition with inline allow.
           variable_list pars1,pars2;
           assignment_list init1,init2;
-          action_summand_vector action_summands1, action_summands2;
+          stochastic_action_summand_vector action_summands1, action_summands2;
           deadlock_summand_vector deadlock_summands1, deadlock_summands2;
           generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
-                                regular,rename_variables,pars1,init1);
+                                regular,rename_variables,pars1,init1,initial_stochastic_distribution);
           generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
-                                regular,true,pars2,init2);
+                                regular,true,pars2,init2,initial_stochastic_distribution);
           parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
                                 action_summands2,deadlock_summands2,pars2,init2,
                                 allow(t).allow_set(),true,false,
@@ -8457,12 +8807,12 @@ class specification_basic_type:public boost::noncopyable
         else if (!options.nodeltaelimination && options.add_delta && is_comm(par))
         {
           generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
-                                regular,rename_variables,pars,init);
+                                regular,rename_variables,pars,init,initial_stochastic_distribution);
           communicationcomposition(comm(par).comm_set(),allow(t).allow_set(),true,false,action_summands,deadlock_summands);
           return;
         }
 
-        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init);
+        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution);
         allowblockcomposition(allow(t).allow_set(),true,action_summands,deadlock_summands);
         return;
       }
@@ -8475,12 +8825,12 @@ class specification_basic_type:public boost::noncopyable
           // Perform parallel composition with inline block.
           variable_list pars1,pars2;
           assignment_list init1,init2;
-          action_summand_vector action_summands1, action_summands2;
+          stochastic_action_summand_vector action_summands1, action_summands2;
           deadlock_summand_vector deadlock_summands1, deadlock_summands2;
           generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
-                                regular,rename_variables,pars1,init1);
+                                regular,rename_variables,pars1,init1,initial_stochastic_distribution);
           generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
-                                regular,true,pars2,init2);
+                                regular,true,pars2,init2,initial_stochastic_distribution);
           parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
                                 action_summands2,deadlock_summands2,pars2,init2,
                                 action_name_multiset_list(block(t).block_set()),false,true,
@@ -8490,12 +8840,12 @@ class specification_basic_type:public boost::noncopyable
         else if (!options.nodeltaelimination && options.add_delta && is_comm(par))
         {
           generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
-                                regular,rename_variables,pars,init);
+                                regular,rename_variables,pars,init,initial_stochastic_distribution);
           communicationcomposition(comm(par).comm_set(),action_name_multiset_list(block(t).block_set()),false,true,action_summands,deadlock_summands);
           return;
         }
 
-        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init);
+        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution);
         allowblockcomposition(action_name_multiset_list(block(t).block_set()),false,action_summands,deadlock_summands);
         return;
       }
@@ -8503,7 +8853,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_rename(t))
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,process::rename(t).operand(),
-                              regular,rename_variables,pars,init);
+                              regular,rename_variables,pars,init,initial_stochastic_distribution);
         renamecomposition(process::rename(t).rename_set(),action_summands);
         return;
       }
@@ -8511,7 +8861,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_comm(t))
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,comm(t).operand(),
-                              regular,rename_variables,pars,init);
+                              regular,rename_variables,pars,init,initial_stochastic_distribution);
         communicationcomposition(comm(t).comm_set(),action_name_multiset_list(),false,false,action_summands,deadlock_summands);
         return;
       }
@@ -8522,12 +8872,13 @@ class specification_basic_type:public boost::noncopyable
     /**************** GENERaTE LPEmCRL **********************************/
 
     void generateLPEmCRL(
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       const process_identifier& procIdDecl,
       const bool regular,
       variable_list& pars,
-      assignment_list& init)
+      assignment_list& init,
+      stochastic_distribution& initial_stochastic_distribution)
     {
       /* If regular=1, then a regular version of the pCRL processes
          must be generated */
@@ -8540,7 +8891,7 @@ class specification_basic_type:public boost::noncopyable
           (objectdata[n].processstatus==multiAction))
       {
         generateLPEpCRL(action_summands,deadlock_summands,procIdDecl,
-                               objectdata[n].containstime,regular,pars,init);
+                               objectdata[n].containstime,regular,pars,init,initial_stochastic_distribution);
         return;
       }
       /* process is a mCRLdone */
@@ -8550,7 +8901,7 @@ class specification_basic_type:public boost::noncopyable
       {
         objectdata[n].processstatus=mCRLlin;
         return generateLPEmCRLterm(action_summands,deadlock_summands,objectdata[n].processbody,
-                                   regular,false,pars,init);
+                                   regular,false,pars,init,initial_stochastic_distribution);
       }
 
       throw mcrl2::runtime_error("laststatus: " + str(boost::format("%d") % objectdata[n].processstatus));
@@ -9988,11 +10339,11 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
 
     /**************** AddTerminationActionIfNecessary ****************/
 
-    void AddTerminationActionIfNecessary(const action_summand_vector& summands)
+    void AddTerminationActionIfNecessary(const stochastic_action_summand_vector& summands)
     {
-      for (action_summand_vector::const_iterator i=summands.begin(); i!=summands.end(); ++i)
+      for (stochastic_action_summand_vector::const_iterator i=summands.begin(); i!=summands.end(); ++i)
       {
-        const action_summand smd=*i;
+        const stochastic_action_summand smd=*i;
         const action_list multiaction=smd.multi_action().actions();
         if (multiaction==make_list(terminationAction))
         {
@@ -10003,11 +10354,12 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
       }
     }
 
-    /********************** SieveProcDataVars ***********************/
   public:
+    /********************** SieveProcDataVars ***********************/
+
     variable_list SieveProcDataVarsSummands(
       const std::set <variable>& vars,
-      const action_summand_vector& action_summands,
+      const stochastic_action_summand_vector& action_summands,
       const deadlock_summand_vector& deadlock_summands,
       const variable_list& parameters)
     {
@@ -10031,10 +10383,10 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
         }
         filter_vars_by_term(smd.condition(),vars_set,vars_result_set);
       }
-      for (action_summand_vector::const_iterator smds=action_summands.begin();
+      for (stochastic_action_summand_vector::const_iterator smds=action_summands.begin();
            smds!=action_summands.end(); ++smds)
       {
-        const action_summand smd= *smds;
+        const stochastic_action_summand smd= *smds;
 
         filter_vars_by_multiaction(smd.multi_action().actions(),vars_set,vars_result_set);
         filter_vars_by_assignmentlist(smd.assignments(),parameters,vars_set,vars_result_set);
@@ -10081,10 +10433,11 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
   public:
     void transform(
       const process_identifier& init,
-      action_summand_vector& action_summands,
+      stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       variable_list& parameters,
-      assignment_list& initial_state)
+      assignment_list& initial_state,
+      stochastic_distribution& initial_stochastic_distribution)
     {
       /* Then select the BPA processes, and check that the others
          are proper parallel processes */
@@ -10093,17 +10446,10 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
       const process_identifier init_=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
-      std::set<process_identifier> visited;
-      const process_expression init_distribution=obtain_initial_distribution(init_,visited);
-      const process_identifier init1=
-               process_instance_assignment(
-                                    is_stochastic_operator(init_distribution)?
-                                    stochastic_operator(init_distribution).operand():
-                                    init_distribution).identifier();
-      determinewhetherprocessescontaintime(init1);
+      determinewhetherprocessescontaintime(init_);
 
       std::vector <process_identifier> pcrlprocesslist;
-      collectPcrlProcesses(init1,pcrlprocesslist);
+      collectPcrlProcesses(init_,pcrlprocesslist);
       if (pcrlprocesslist.size()==0)
       {
         throw mcrl2::runtime_error("There are no pCRL processes to be linearized. This is most likely due to the use of unguarded recursion in process equations");
@@ -10117,9 +10463,9 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
 
       /* Third, transform to GNF by subsitution, such that the
          first variable in a sequence is always an actionvariable */
-      procstorealGNF(init1,options.lin_method!=lmStack);
+      procstorealGNF(init_,options.lin_method!=lmStack);
 
-      generateLPEmCRL(action_summands,deadlock_summands,init1, options.lin_method!=lmStack,parameters,initial_state);
+      generateLPEmCRL(action_summands,deadlock_summands,init_, options.lin_method!=lmStack,parameters,initial_state,initial_stochastic_distribution);
       allowblockcomposition(action_name_multiset_list(),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
       if (options.final_cluster)
       {
@@ -10133,7 +10479,7 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
 
 /**************** linearise **************************************/
 
-mcrl2::lps::specification mcrl2::lps::linearise(
+mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
   mcrl2::lps::t_lin_options lin_options)
 {
@@ -10158,9 +10504,12 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   //linearise spec
   variable_list parameters;
   assignment_list initial_state;
-  action_summand_vector action_summands;
+  stochastic_action_summand_vector action_summands;
   deadlock_summand_vector deadlock_summands;
-  spec.transform(init,action_summands,deadlock_summands,parameters,initial_state);
+  stochastic_distribution initial_distribution(
+                              variable_list(),
+                              sort_real::creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1()));
+  spec.transform(init,action_summands,deadlock_summands,parameters,initial_state,initial_distribution);
 
   // compute global variables
   data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,action_summands,deadlock_summands,parameters);
@@ -10169,16 +10518,15 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
 
-  linear_process lps(parameters,
-                     deadlock_summands,
-                     action_summands);
-
-  lps::specification spec1(
-    spec.data,
-    spec.acts,
-    global_variables,
-    lps,
-    process_initializer(initial_state));
+  stochastic_linear_process lps(parameters,
+                                deadlock_summands,
+                                action_summands);
+  lps::stochastic_specification spec1(
+      spec.data,
+      spec.acts,
+      global_variables,
+      lps,
+      stochastic_process_initializer(initial_state,initial_distribution));
 
   // add missing sorts to the data specification
   lps::complete_data_specification(spec1);

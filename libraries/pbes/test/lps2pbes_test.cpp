@@ -123,8 +123,16 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
   std::cerr << "specification = \n" << lps_spec << std::endl;
   std::cerr << "formula = " << mcf_formula << std::endl;
   std::cerr << "expected_solution = " << expected_solution << std::endl;
-
-  lps::specification spec = linearize ? lps::linearise(lps_spec) : lps::parse_linear_process_specification(lps_spec);
+  
+  lps::specification spec;
+  if (linearize)
+  { 
+    spec=remove_stochastic_operators(lps::linearise(lps_spec));
+  }
+  else
+  {
+    spec=lps::parse_linear_process_specification(lps_spec);
+  }
   state_formulas::state_formula formula;
   pbes p;
 

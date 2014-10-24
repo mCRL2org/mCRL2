@@ -942,7 +942,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
       throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + process::pp(ProcTerm));
     }
     data_expression distribution=t.distribution();
-    TraverseVarConsTypeD(Vars,Vars,distribution,sort_real::real_());
+    TraverseVarConsTypeD(NewVars,NewVars,distribution,sort_real::real_());
 
     process_expression NewProc;
     try
