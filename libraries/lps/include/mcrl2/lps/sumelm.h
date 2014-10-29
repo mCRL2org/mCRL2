@@ -31,7 +31,7 @@ namespace lps
 {
 
 /// \brief Class implementing the sum elimination lemma.
-class sumelm_algorithm: public lps::detail::lps_algorithm
+class sumelm_algorithm: public lps::detail::lps_algorithm<>
 {
   protected:
     /// Stores the number of summation variables that has been removed.
@@ -165,7 +165,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// \param decluster Control whether disjunctive conditions need to be split
     ///        into multiple summands.
     sumelm_algorithm(specification& spec, bool decluster = false)
-      : lps::detail::lps_algorithm(spec),
+      : lps::detail::lps_algorithm<>(spec),
         m_removed(0),
         m_decluster(decluster)
     {}

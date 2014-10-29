@@ -36,7 +36,7 @@ namespace lps
 
 /// \brief Algorithm class for elimination of constant parameters
 template <typename DataRewriter>
-class constelm_algorithm: public lps::detail::lps_algorithm
+class constelm_algorithm: public lps::detail::lps_algorithm<>
 {
   protected:
     /// \brief If true, then the algorithm is allowed to instantiate free variables
@@ -102,7 +102,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
     /// \brief Constructor
     constelm_algorithm(specification& spec, const DataRewriter& R_)
-      : lps::detail::lps_algorithm(spec),
+      : lps::detail::lps_algorithm<>(spec),
         m_instantiate_global_variables(false),
         m_ignore_conditions(false),
         R(R_)

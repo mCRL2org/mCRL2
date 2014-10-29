@@ -63,8 +63,8 @@ std::string SPECIFICATION =
 
 void test_remove_unused_summand_variables()
 {
-  specification spec=remove_stochastic_operators(linearise(SPECIFICATION));
-  lps::detail::lps_algorithm algorithm(spec);
+  specification spec = remove_stochastic_operators(linearise(SPECIFICATION));
+  lps::detail::lps_algorithm<> algorithm(spec);
   algorithm.remove_unused_summand_variables();
 }
 

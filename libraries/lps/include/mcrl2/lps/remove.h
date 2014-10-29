@@ -169,8 +169,8 @@ void remove_trivial_summands(Specification& spec)
 
 /// \brief Removes parameters with a singleton sort from a linear process specification
 /// \param spec A linear process specification
-inline
-void remove_singleton_sorts(specification& spec)
+template <typename Specification>
+void remove_singleton_sorts(Specification& spec)
 {
   data::mutable_map_substitution<> sigma;
   std::set<data::variable> to_be_removed;
@@ -206,8 +206,8 @@ data::assignment_list remove_redundant_assignments(const data::assignment_list& 
 
 /// \brief Removes redundant assignments of the form x = x from an LPS specification
 /// \param spec A linear process specification
-inline
-void remove_redundant_assignments(specification& lpsspec)
+template <typename Specification>
+void remove_redundant_assignments(Specification& lpsspec)
 {
   auto& summands = lpsspec.process().action_summands();
   for (auto i = summands.begin(); i != summands.end(); ++i)

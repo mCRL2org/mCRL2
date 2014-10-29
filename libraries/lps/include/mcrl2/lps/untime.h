@@ -21,7 +21,7 @@ namespace mcrl2
 namespace lps
 {
 
-class untime_algorithm: public lps::detail::lps_algorithm
+class untime_algorithm: public lps::detail::lps_algorithm<>
 {
   protected:
     /// \brief Variable denoting the time at which the last action occurred
@@ -137,7 +137,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
 
   public:
     untime_algorithm(specification& spec)
-      : lps::detail::lps_algorithm(spec)
+      : lps::detail::lps_algorithm<>(spec)
     {
       m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
     }

@@ -60,8 +60,8 @@ void test_remove_parameters()
 
 void test_instantiate_free_variables()
 {
-  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
-  lps::detail::lps_algorithm algorithm(spec);
+  specification spec = remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
+  lps::detail::lps_algorithm<> algorithm(spec);
   algorithm.instantiate_free_variables();
 }
 

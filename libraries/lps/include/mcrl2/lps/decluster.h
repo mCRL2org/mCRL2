@@ -21,7 +21,7 @@ namespace mcrl2
 namespace lps
 {
 
-class decluster_algorithm: public lps::detail::lps_algorithm
+class decluster_algorithm: public lps::detail::lps_algorithm<>
 {
   protected:
 

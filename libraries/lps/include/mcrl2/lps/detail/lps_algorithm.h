@@ -34,11 +34,13 @@ namespace detail
 {
 
 /// \brief Algorithm class for algorithms on linear process specifications.
+/// It can be instantiated with lps::specification and lps::stochastic_specification.
+template <typename Specification = specification>
 class lps_algorithm
 {
   protected:
     /// \brief The specification that is processed by the algorithm
-    specification& m_spec;
+    Specification& m_spec;
 
     void sumelm_find_variables(const action_summand& s, std::set<data::variable>& result) const
     {
@@ -83,7 +85,7 @@ class lps_algorithm
 
   public:
     /// \brief Constructor
-    lps_algorithm(specification& spec)
+    lps_algorithm(Specification& spec)
       : m_spec(spec)
     {}
 
@@ -97,7 +99,7 @@ class lps_algorithm
     data::data_expression next_state(const action_summand& s, const data::variable& v) const
     {
       const data::assignment_list& a = s.assignments();
-      for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
+      for (auto i = a.begin(); i != a.end(); ++i)
       {
         if (i->lhs() == v)
         {
