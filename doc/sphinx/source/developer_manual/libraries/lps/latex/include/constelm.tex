@@ -1,0 +1,98 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+Let $P$ be the stochastic linear process%
+\[
+\begin{array}{l}
+P(d:D)=\sum\limits_{i\in I}\sum\limits_{e:E_{i}}c_{i}(d,e_{i})\rightarrow
+a_{i}(f_{i}(d,e_{i}))\at t_{i}(d,e_{i}).\frac{p(d,e_{i},h_{i})}{h_{i}:F_{i}}%
+P(g_{i}(d,e_{i},h_{i})),%
+\end{array}%
+\]%
+with initial state%
+\[
+\begin{array}{l}
+P_{init}=\frac{p(h)}{h:F}P(g(h)),%
+\end{array}%
+\]
+
+with $d=[d_{1},\ldots ,d_{n}]$ the process parameters of $P$. The algorithm 
+\textsc{Constelm} is used to find process parameters that have a constant
+value. If needed the global variables of $P$ will be assigned constant
+values. The result is a substitution $\sigma $ that assigns these constant
+values to the corresponding process parameters and global variables. It is
+not guaranteed that all constant parameters are detected.
+
+\subsection{Constelm implementations}
+
+Then we define the following implementation of \textsc{Constelm}:
+
+\[
+\begin{tabular}{|l|}
+\hline
+\textsc{Constelm(}$P,P_{init},V,R$\textsc{)} \\ 
+$r:=R(g(h))$ \\ 
+$G:=\{d_{1},\ldots ,d_{n}\}$ \\ 
+$\sigma :=\epsilon $ \\ 
+\textbf{for} $j:=1$ \textbf{to} $n$ \textbf{do} \\ 
+$\qquad \sigma \lbrack d_{j}]:=r_{j}$ \\ 
+$\qquad undo[j]:=\emptyset $ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \Delta G:=\emptyset $ \\ 
+$\qquad $\textbf{for} $i\in I$ \textbf{do} \\ 
+$\qquad \qquad $\textbf{if }$R(\sigma (c_{i}(d,e_{i})))\neq false$ \\ 
+$\qquad \qquad \qquad $\textbf{for }$d_{j}\in G\setminus \Delta G$ \textbf{do%
+} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let }$z=R(g_{i}(d,e_{i},h_{i})_{j},%
+\sigma )$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{if }$z\neq \sigma (d_{j})$ \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{if }$z\in V$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack z]:=r_{j}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad undo[j]:=undo[j]\cup \{z\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \Delta G:=\Delta G\cup \{d_{j}\}$
+\\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack d_{j}]:=d_{j}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for }$w\in undo[j]$ 
+\textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack w]:=w$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad undo[j]:=\emptyset $ \\ 
+$\qquad G:=G\setminus \Delta G$ \\ 
+$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
+$\text{\textbf{return} }\sigma $ \\ \hline
+\end{tabular}%
+\]%
+where $V$ is the set of global variables of the linear process $P$, where $R$
+is a rewriter and $\epsilon $ is the empty substitution (i.e. the identity
+function). The notation $\sigma \lbrack v]:=w$ means $\sigma =\sigma
+^{\prime }$ with%
+\[
+\left\{ 
+\begin{array}{l}
+\sigma ^{\prime }(x)=\sigma ^{\prime }(x)\text{ if }x\neq v \\ 
+\sigma ^{\prime }(x)=w\text{ if }x\neq v%
+\end{array}%
+\right. 
+\]%
+An alternative implementation may look like this:
+
+\[
+\begin{tabular}{|l|}
+\hline
+\textsc{Constelm2(}$p,\overline{d}$\textsc{)} \\ 
+$R:=\overline{\{d\}}$ \\ 
+$G:=\{1,\ldots ,n\}$ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \Delta R:=next\_states(p,R)\backslash R$ \\ 
+$\qquad \text{\textbf{if }}\exists _{i\in I}.\exists _{j\in G}.\exists
+_{r\in \Delta R}.r_{j}\neq \overline{d}_{j}$ \\ 
+$\qquad \qquad G:=G\backslash \{j\}$ \\ 
+$\qquad \text{\textbf{fi}}$ \\ 
+$\qquad R:=R\cup \Delta R$ \\ 
+$\text{\textbf{while }}(\Delta R\neq \emptyset )$ \\ 
+$\text{\textbf{return} \textsc{RemoveConstantParameters(}}%
+p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}\text{\textsc{)}},$ \\ \hline
+\end{tabular}%
+\]%
+where $\{j_{1},\cdots ,j_{m}\}=G$.\newpage

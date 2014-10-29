@@ -1,6 +1,10 @@
 
 \documentclass{article}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{makeidx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{eurosym}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{fullpage}
 \usepackage{amsfonts}
 
@@ -8,13 +12,13 @@
 %TCIDATA{Version=5.50.0.2890}
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
-%TCIDATA{LastRevised=Tuesday, July 09, 2013 10:53:16}
+%TCIDATA{LastRevised=Wednesday, October 29, 2014 13:16:36}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
 
 \font \aap cmmi10
-\newcommand{\at}[1]{\mbox{\aap ,} #1}
+\providecommand{\at}[1]{\mbox{\aap ,} #1}
 \input{include/tcilatex}
 \begin{document}
 
@@ -99,8 +103,8 @@ R:r\rightarrow s\}$.
 
 \subsection{Global variables}
 
-In the mCRL2 tool set a linear process is parameterized with a finite set $DC
-$ of so called \emph{global} variables. This means that the expressions $%
+In the mCRL2 tool set a linear process is parameterized with a finite set $%
+DC $ of so called \emph{global} variables. This means that the expressions $%
 c_{i}(d,e)$, $f_{i}(d,e)$, $g_{i}(d,e)$, and $t_{i}(d,e)$ may contain
 unbound variables from the set $DC$. Global variables have the implicit
 property that any two processes obtained by assigning values to them are
@@ -331,112 +335,11 @@ $\text{\textbf{return} \textsc{RemoveParameters(}}p,R\text{\textsc{)}},$ \\
 \newpage
 
 \subsection{Constelm}
-
-Let $p$ be a linear process as defined in \ref{eq:lps_untimed}, or \ref%
-{eq:lps_timed}, and let $\overline{d}:D$ be its initial value. A \emph{%
-constelm} algorithm is an algorithm that returns \textsc{%
-RemoveConstantParameters(}$p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}$%
-\textsc{)} for some subset $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ of constant
-parameters of $p$.
-
-\subsection{Constelm implementations}
-
-We assume that $R:\mathcal{D\rightarrow D}$ is a (rewriter) function on data
-expressions with the following properties:%
-\begin{eqnarray*}
-R(false) &=&false \\
-(R(t) &=&R(t^{\prime }))\Rightarrow t\simeq t^{\prime }\text{.}
-\end{eqnarray*}%
-Then we define the following implementations of constelm:
-
-\[
-\begin{tabular}{|l|}
-\hline
-\textsc{Constelm1(}$p(d),\widehat{d},V,R$\textsc{)} \\ 
-$e:=R(\widehat{d})$ \\ 
-$G:=\{d_{1},\ldots ,d_{n}\}$ \\ 
-$\sigma :=\widehat{\sigma }$ \\ 
-\textbf{for} $j:=1$ \textbf{to} $n$ \textbf{do} \\ 
-$\qquad \sigma \lbrack d_{j}]:=e_{j}$ \\ 
-$\qquad undo[j]:=\emptyset $ \\ 
-$\text{\textbf{do}}$ \\ 
-$\qquad \Delta G:=\emptyset $ \\ 
-$\qquad $\textbf{for} $i\in I$ \textbf{do} \\ 
-$\qquad \qquad $\textbf{if }$R(\sigma (c_{i}))\neq false$ \\ 
-$\qquad \qquad \qquad $\textbf{for }$d_{j}\in G\setminus \Delta G$ \textbf{do%
-} \\ 
-$\qquad \qquad \qquad \qquad $\textbf{if }$R(\sigma (g_{ij}))\neq R(\sigma
-(d_{j}))$ \\ 
-$\qquad \qquad \qquad \qquad \qquad W:=$\textsc{solve}$%
-(V,c_{i},g_{ij},d_{j},e_{j},R,\sigma )$ \\ 
-$\qquad \qquad \qquad \qquad \qquad $\textbf{if }$W\neq \emptyset $ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for }$(w_{0},w_{1})\in W$
-\textbf{do} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack
-w_{0}]:=w_{1}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad undo[j]:=undo[j]\cup
-\{w_{0}\}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad $\textbf{else} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \Delta G:=\Delta G\cup \{d_{j}\}$
-\\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack d_{j}]:=d_{j}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for }$w\in undo[j]$ 
-\textbf{do} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack w]:=w$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad undo[j]:=\emptyset $ \\ 
-$\qquad G:=G\setminus \Delta G$ \\ 
-$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
-$\text{\textbf{return} \textsc{RemoveConstantParameters(}}p,\overline{d}%
-,\sigma \text{\textsc{)}},$ \\ \hline
-\end{tabular}%
-\]%
-where $V$ is the set of global variables of the linear process $p$, and
-where $\sigma $ is a substitution function and $\widehat{\sigma }$ is the
-identity function. The notation $\sigma \lbrack v]:=w$ means $\sigma =\sigma
-^{\prime }$ with%
-\[
-\left\{ 
-\begin{array}{l}
-\sigma ^{\prime }(x)=\sigma ^{\prime }(x)\text{ if }x\neq v \\ 
-\sigma ^{\prime }(x)=w\text{ if }x\neq v%
-\end{array}%
-\right. 
-\]%
-The function \textsc{solve} is defined as%
-\[
-\begin{tabular}{|l|}
-\hline
-$\text{\textsc{solve}}(V,c,g,d,\overline{d},R,\sigma )$ \\ 
-\textbf{if }$R(\sigma (g))\in V$ \\ 
-$\qquad \text{\textbf{return} }\{(R(\sigma (g)),\overline{d})\}$ \\ 
-\textbf{else} \\ 
-$\qquad \text{\textbf{return} }\emptyset $ \\ \hline
-\end{tabular}%
-\]%
-In general, \textsc{solve} is a function that returns an assignment to
-variables in $V$ that makes the expression $R(\sigma (c))=false\vee R(\sigma
-(g))=R(\overline{d})$ true, or returns the empty set if it can't find such
-an assignment.
-
-\[
-\begin{tabular}{|l|}
-\hline
-\textsc{Constelm2(}$p,\overline{d}$\textsc{)} \\ 
-$R:=\overline{\{d\}}$ \\ 
-$G:=\{1,\ldots ,n\}$ \\ 
-$\text{\textbf{do}}$ \\ 
-$\qquad \Delta R:=next\_states(p,R)\backslash R$ \\ 
-$\qquad \text{\textbf{if }}\exists _{i\in I}.\exists _{j\in G}.\exists
-_{r\in \Delta R}.r_{j}\neq \overline{d}_{j}$ \\ 
-$\qquad \qquad G:=G\backslash \{j\}$ \\ 
-$\qquad \text{\textbf{fi}}$ \\ 
-$\qquad R:=R\cup \Delta R$ \\ 
-$\text{\textbf{while }}(\Delta R\neq \emptyset )$ \\ 
-$\text{\textbf{return} \textsc{RemoveConstantParameters(}}%
-p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}\text{\textsc{)}},$ \\ \hline
-\end{tabular}%
-\]%
-where $\{j_{1},\cdots ,j_{m}\}=G$.\newpage
+%TCIMACRO{%
+%\QSubDoc{Include constelm}{\input{include/constelm.tex}}}%
+%BeginExpansion
+\input{include/constelm.tex}%
+%EndExpansion
 
 \subsection{Conversion to linear process}
 
