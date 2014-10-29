@@ -50,11 +50,11 @@ void test_remove_parameters()
 
   // check the result
   std::string expected_result = "process_parameter_names =";
-  lps::detail::specification_property_map info(spec);
+  lps::detail::specification_property_map<> info(spec);
 
   specification spec2 = parse_linear_process_specification(SPEC);
   remove_parameters(spec2, to_be_removed);
-  lps::detail::specification_property_map info2(spec2);
+  lps::detail::specification_property_map<> info2(spec2);
   BOOST_CHECK(data::detail::compare_property_maps("test_remove_parameters", info2, expected_result));
 }
 

@@ -42,9 +42,9 @@ const std::string LPSINFO =
 int test_main(int argc, char* argv[])
 {
   specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
-  lps::detail::specification_property_map info1(spec);
+  lps::detail::specification_property_map<> info1(spec);
   std::cerr << info1.to_string() << std::endl;
-  lps::detail::specification_property_map info2(LPSINFO);
+  lps::detail::specification_property_map<> info2(LPSINFO);
   std::cerr << info1.compare(info2) << std::endl;
 
   return 0;

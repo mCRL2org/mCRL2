@@ -54,10 +54,10 @@ void lpsconstelm(const std::string& input_filename,
                  bool remove_singleton_sorts
                 )
 {
-  lps::specification spec;
+  lps::stochastic_specification spec;
   load_lps(spec, input_filename);
   mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
-  lps::constelm_algorithm<data::rewriter> algorithm(spec, R);
+  lps::constelm_algorithm<data::rewriter, stochastic_specification> algorithm(spec, R);
 
   // preprocess: remove single element sorts
   if (remove_singleton_sorts)
@@ -83,7 +83,7 @@ void lpsinfo(const std::string& input_filename,
 {
   specification spec;
   load_lps(spec, input_filename);
-  lps::detail::specification_property_map info(spec);
+  lps::detail::specification_property_map<> info(spec);
   std::cout << input_file_message << "\n\n";
   std::cout << info.info();
 }

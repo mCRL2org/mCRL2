@@ -35,9 +35,11 @@ namespace lps
 {
 
 /// \brief Algorithm class for elimination of constant parameters
-template <typename DataRewriter>
-class constelm_algorithm: public lps::detail::lps_algorithm<>
+template <typename DataRewriter, typename Specification = specification>
+class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 {
+  typedef typename lps::detail::lps_algorithm<Specification> super;
+
   protected:
     /// \brief If true, then the algorithm is allowed to instantiate free variables
     /// as a side effect.
@@ -101,8 +103,8 @@ class constelm_algorithm: public lps::detail::lps_algorithm<>
   public:
 
     /// \brief Constructor
-    constelm_algorithm(specification& spec, const DataRewriter& R_)
-      : lps::detail::lps_algorithm<>(spec),
+    constelm_algorithm(Specification& spec, const DataRewriter& R_)
+      : lps::detail::lps_algorithm<Specification>(spec),
         m_instantiate_global_variables(false),
         m_ignore_conditions(false),
         R(R_)
@@ -118,7 +120,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<>
 
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
-      data::data_expression_list vl = m_spec.initial_process().state(m_spec.process().process_parameters());
+      data::data_expression_list vl = super::m_spec.initial_process().state(super::m_spec.process().process_parameters());
       data::data_expression_vector r(vl.begin(), vl.end());
 
       // essential: rewrite the initial state vector r to normal form. Essential
@@ -126,8 +128,8 @@ class constelm_algorithm: public lps::detail::lps_algorithm<>
       // must be a normal form.
       lps::rewrite(r, R);
 
-      linear_process& p = m_spec.process();
-      const std::set<data::variable>& global_variables = m_spec.global_variables();
+      auto& p = super::m_spec.process();
+      const std::set<data::variable>& global_variables = super::m_spec.global_variables();
       data::variable_list V(global_variables.begin(), global_variables.end());
       const data::variable_list& d = p.process_parameters();
 
@@ -143,7 +145,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<>
 
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;
-      const data::assignment_list& assignments = m_spec.initial_process().assignments();
+      const data::assignment_list& assignments = super::m_spec.initial_process().assignments();
       for (auto i = assignments.begin(); i != assignments.end(); ++i)
       {
         // The rewriter requires that the rhs's of a substitution are in normal form.
@@ -170,7 +172,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<>
               }
               size_t index_j = m_index_of[*j];
               const data::variable& d_j = *j;
-              data::data_expression g_ij = next_state(s, d_j);
+              data::data_expression g_ij = super::next_state(s, d_j);
 
               if (R(g_ij, sigma) != R(d_j, sigma))
               {
@@ -224,10 +226,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm<>
       {
         constant_parameters.insert(i->first);
       }
-      lps::remove_parameters(m_spec, constant_parameters);
+      lps::remove_parameters(super::m_spec, constant_parameters);
 
       // rewrite the specification with substitution sigma
-      lps::rewrite(m_spec, R, sigma);
+      lps::rewrite(super::m_spec, R, sigma);
     }
 };
 
@@ -235,10 +237,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm<>
 /// \param spec A linear process specification
 /// \param R A data rewriter
 /// \param instantiate_global_variables If true, free variables may be instantiated as a side effect of the algorithm
-template <typename DataRewriter>
-void constelm(specification& spec, const DataRewriter& R, bool instantiate_global_variables = false)
+template <typename DataRewriter, typename Specification = specification>
+void constelm(Specification& spec, const DataRewriter& R, bool instantiate_global_variables = false)
 {
-  constelm_algorithm<DataRewriter> algorithm(spec, R);
+  constelm_algorithm<DataRewriter, Specification> algorithm(spec, R);
   algorithm.run(instantiate_global_variables);
 }
 
