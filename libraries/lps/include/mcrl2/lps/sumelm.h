@@ -177,7 +177,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm<>
       if(m_decluster)
       {
         // First decluster specification
-        decluster_algorithm(m_spec).run();
+        decluster_algorithm<specification>(m_spec).run();
       }
 
       m_removed = 0; // Re-initialise number of removed variables for a fresh run.

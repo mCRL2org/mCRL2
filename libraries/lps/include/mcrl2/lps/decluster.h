@@ -21,8 +21,12 @@ namespace mcrl2
 namespace lps
 {
 
-class decluster_algorithm: public detail::lps_algorithm<>
+template <typename Specification>
+class decluster_algorithm: public detail::lps_algorithm<Specification>
 {
+  typedef typename detail::lps_algorithm<Specification> super;
+  using super::m_spec;
+
   protected:
 
     template <typename SummandType, typename OutIter>
@@ -44,18 +48,18 @@ class decluster_algorithm: public detail::lps_algorithm<>
 
     void run()
     {
-      action_summand_vector action_summands;
       action_summand_vector declustered_action_summands;
-      std::back_insert_iterator<action_summand_vector> act_it (declustered_action_summands);
-      for (action_summand_vector::iterator i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
+      std::back_insert_iterator<action_summand_vector> act_it(declustered_action_summands);
+      auto const& action_summands = m_spec.process().action_summands();
+      for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
       {
         decluster_summand(*i, act_it);
       }
 
-      deadlock_summand_vector deadlock_summands;
       deadlock_summand_vector declustered_deadlock_summands;
       std::back_insert_iterator<deadlock_summand_vector> dl_it (declustered_deadlock_summands);
-      for (deadlock_summand_vector::iterator i = m_spec.process().deadlock_summands().begin(); i != m_spec.process().deadlock_summands().end(); ++i)
+      auto const& deadlock_summands = m_spec.process().deadlock_summands();
+      for (auto i = deadlock_summands.begin(); i != deadlock_summands.end(); ++i)
       {
         decluster_summand(*i, dl_it);
       }
