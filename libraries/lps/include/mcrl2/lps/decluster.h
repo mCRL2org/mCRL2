@@ -39,7 +39,7 @@ class decluster_algorithm: public detail::lps_algorithm<>
 
   public:
     decluster_algorithm(specification& spec)
-      : detail::lps_algorithm(spec)
+      : detail::lps_algorithm<>(spec)
     {}
 
     void run()
