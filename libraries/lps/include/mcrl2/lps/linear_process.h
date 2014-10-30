@@ -76,6 +76,9 @@ class linear_process_base
     std::vector<ActionSummand> m_action_summands;
 
   public:
+    /// \brief The action summand type
+    typedef ActionSummand action_summand_type;
+
     /// \brief Constructor.
     linear_process_base()
     { }

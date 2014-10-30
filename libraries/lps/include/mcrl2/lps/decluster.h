@@ -25,6 +25,9 @@ template <typename Specification>
 class decluster_algorithm: public detail::lps_algorithm<Specification>
 {
   typedef typename detail::lps_algorithm<Specification> super;
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  typedef std::vector<action_summand_type> action_summand_vector_type;
   using super::m_spec;
 
   protected:
@@ -42,14 +45,14 @@ class decluster_algorithm: public detail::lps_algorithm<Specification>
     }
 
   public:
-    decluster_algorithm(specification& spec)
-      : detail::lps_algorithm<>(spec)
+    decluster_algorithm(Specification& spec)
+      : detail::lps_algorithm<Specification>(spec)
     {}
 
     void run()
     {
-      action_summand_vector declustered_action_summands;
-      std::back_insert_iterator<action_summand_vector> act_it(declustered_action_summands);
+      action_summand_vector_type declustered_action_summands;
+      std::back_insert_iterator<action_summand_vector_type> act_it(declustered_action_summands);
       auto const& action_summands = m_spec.process().action_summands();
       for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
       {

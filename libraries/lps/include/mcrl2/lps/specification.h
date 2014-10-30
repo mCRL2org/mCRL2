@@ -96,6 +96,9 @@ class specification_base
     }
 
   public:
+    /// \brief The process type
+    typedef LinearProcess process_type;
+
     /// \brief Constructor.
     specification_base()
     { }

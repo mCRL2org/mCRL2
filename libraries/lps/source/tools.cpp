@@ -252,10 +252,10 @@ void lpssumelm(const std::string& input_filename,
                const std::string& output_filename,
                const bool decluster)
 {
-  lps::specification spec;
+  stochastic_specification spec;
   load_lps(spec, input_filename);
 
-  lps::sumelm_algorithm(spec, decluster).run();
+  sumelm_algorithm<stochastic_specification>(spec, decluster).run();
 
   mCRL2log(log::debug) << "Sum elimination completed, saving to " <<  output_filename << std::endl;
   save_lps(spec, output_filename);

@@ -164,7 +164,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       if (m_sumelm)
       {
         mCRL2log(verbose) << "applying sum elimination..." << std::endl;
-        sumelm_algorithm(new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
+        sumelm_algorithm<lps::specification>(new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
         if (m_rewrite)
         {
           mCRL2log(verbose) << "rewriting data expressions in LPS again..." << std::endl;
