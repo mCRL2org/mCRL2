@@ -76,13 +76,13 @@ void resolve_summand_variable_name_clashes(Summand& summand, const std::set<core
 } // namespace detail
 
 /// \brief Renames summand variables such that there are no name clashes between summand variables and process parameters
-inline
-void resolve_summand_variable_name_clashes(specification& spec)
+template <typename Specification>
+void resolve_summand_variable_name_clashes(Specification& spec)
 {
-  linear_process& proc = spec.process();
+  auto& proc = spec.process();
   std::set<core::identifier_string> process_parameter_names = detail::variable_names(proc.process_parameters());
 
-  action_summand_vector& action_summands = proc.action_summands();
+  auto& action_summands = proc.action_summands();
   for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
   {
     detail::resolve_summand_variable_name_clashes(*i, process_parameter_names);
