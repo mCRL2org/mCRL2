@@ -34,8 +34,8 @@ BOOST_AUTO_TEST_CASE(case_1)
 {
   const std::string text(
     "sort D = struct d1|d2;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1);\n"
   );
 
@@ -70,8 +70,8 @@ BOOST_AUTO_TEST_CASE(case_2)
 {
   const std::string text(
     "sort D = struct d1|d2|d3|d4|d5|d6|d7|d8;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1);\n"
   );
 
@@ -106,8 +106,8 @@ BOOST_AUTO_TEST_CASE(case_3)
 {
   const std::string text(
     "sort D = struct d1|d2|d3|d4|d5|d6|d7;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1);\n"
   );
 
@@ -177,8 +177,8 @@ BOOST_AUTO_TEST_CASE(case_5)
 {
   const std::string text(
     "sort D = struct d1|d2|d3|d4|d5|d6|d7|d8|d9;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1);\n"
   );
 
@@ -216,8 +216,8 @@ BOOST_AUTO_TEST_CASE(case_6)
   const std::string text(
     "sort D = struct d1(E) | d2(E);\n"
     "     E = struct e1 | e2;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1(e1));\n"
   );
 

@@ -4499,7 +4499,6 @@ class specification_basic_type:public boost::noncopyable
       {
         const process_identifier procId=process_instance_assignment(t).identifier();
         const assignment_list t1=process_instance_assignment(t).assignments();
-
         return push_regular(procId,
                             t1,
                             stack,
@@ -4776,8 +4775,8 @@ class specification_basic_type:public boost::noncopyable
       const data_expression& condition,
       const action_list& multiAction,
       const data_expression& actTime,
-      const assignment_list& procargs,
       const stochastic_distribution& distribution,
+      const assignment_list& procargs,
       const bool has_time,
       const bool is_deadlock_summand)
     {
@@ -4936,9 +4935,9 @@ class specification_basic_type:public boost::noncopyable
                      atTime,stack,sumvars);
           }
         }
-        insert_summand(action_summands,deadlock_summands,
+        insert_summand(action_summands,deadlock_summands, 
                        sumvars,condition1,multiAction,
-                       atTime,procargs,distribution,
+                       atTime,distribution,procargs,
                        has_time,is_delta_summand);
         return;
       }
@@ -4989,8 +4988,8 @@ class specification_basic_type:public boost::noncopyable
                        condition1,
                        multiAction,
                        atTime,
-                       dummyparameterlist(stack,singlestate),
                        stochastic_distribution(variable_list(),real_one()),
+                       dummyparameterlist(stack,singlestate),
                        has_time,
                        is_delta_summand);
         return;
@@ -5005,8 +5004,8 @@ class specification_basic_type:public boost::noncopyable
                 condition1,
                 multiAction,
                 atTime,
-                procargs,
                 stochastic_distribution(variable_list(),real_one()),   // TODO: UNLIKELY THAT THIS IS CORRECT. 
+                procargs,
                 has_time,
                 is_delta_summand);
 
@@ -6694,9 +6693,9 @@ class specification_basic_type:public boost::noncopyable
       }
       parameters=collectparameterlist(pCRLprocs);
 
-std::cerr << "TODO: We comment out alpha conversion here, which may not be necessary. It in "
+      mCRL2log(mcrl2::log::debug) << "TODO: We comment out alpha conversion here, which may not be necessary. It in "
              "any case disturbs stochastic variables. Was it necessary for normal linearisation?\n";
-      // alphaconversion(procId,parameters);
+      //  alphaconversion(procId,parameters);
 
       if ((!regular)||((!singlecontrolstate) && (options.newstate) && (!options.binary)))
       {
@@ -8724,9 +8723,8 @@ std::cerr << "TODO: We comment out alpha conversion here, which may not be neces
           stochastic_process_initializer initializer(init,stochastic_distribution(variable_list(),real_one())); // Default distribution.
 
           stochastic_specification temporary_spec(data,acts,global_variables,lps,initializer);
-std::cerr << "Warning Constelm is not applied to linear processes at this moment\n";
-// TODO UNREMOVE:          constelm_algorithm < rewriter > alg(temporary_spec,rewr);
-// TODO UNREMOVE:          alg.run(true); // Remove constants from the specification, where global variables are
+          constelm_algorithm < rewriter, stochastic_specification > alg(temporary_spec,rewr);
+          alg.run(true); // Remove constants from the specification, where global variables are
           // also instantiated if they exist.
           // Reconstruct the variables from the temporary specification
 
