@@ -27,15 +27,15 @@ namespace lps
 namespace detail
 {
 
-inline
-void instantiate_global_variables(specification& spec)
+template <typename Specification>
+void instantiate_global_variables(Specification& spec)
 {
   mCRL2log(log::verbose) << "Replacing free variables with dummy values." << std::endl;
   data::mutable_map_substitution<> sigma;
   data::representative_generator default_expression_generator(spec.data());
   std::set<data::variable> to_be_removed;
   const std::set<data::variable>& v = spec.global_variables();
-  for (std::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (auto i = v.begin(); i != v.end(); ++i)
   {
     data::data_expression d = default_expression_generator(i->sort());
     if (!d.defined())
