@@ -326,11 +326,17 @@ struct control_flow_graph
     }
   }
 
-  const std::set<const Vertex*>& index(const core::identifier_string& X) const
+  std::set<const Vertex*> index(const core::identifier_string& X) const
   {
     auto i = m_graph_index.find(X);
-    assert(i != m_graph_index.end());
-    return i->second;
+    if (i == m_graph_index.end())
+    {
+      return std::set<const Vertex*>();
+    }
+    else
+    {
+      return i->second;
+    }
   }
 
   bool has_vertex(const core::identifier_string& X, std::size_t p) const

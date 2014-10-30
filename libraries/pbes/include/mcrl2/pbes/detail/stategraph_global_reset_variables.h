@@ -205,7 +205,11 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       std::vector<data::data_expression> e(x.parameters().begin(),x.parameters().end());
 
       // iterate over the alternatives as defined by the control flow graph
-      auto const& inst = m_control_flow_graph.index(Y);
+      auto inst = m_control_flow_graph.index(Y);
+      if (inst.empty())
+      {
+        mCRL2log(log::verbose) << "Equation " << Y << " is not reachable!" << std::endl;
+      }
       for (auto q = inst.begin(); q != inst.end(); ++q)
       {
         auto& u = **q;
