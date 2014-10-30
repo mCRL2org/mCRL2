@@ -204,11 +204,16 @@ class sumelm_algorithm: public lps::detail::lps_algorithm<>
       using namespace data;
 
       data::mutable_map_substitution<> substitutions;
-      data::data_expression new_condition = compute_substitutions(s, substitutions);
-      std::set<data::variable> substitutions_variables = data::substitution_variables(substitutions);
-      s.condition() = data::replace_variables_capture_avoiding(new_condition, substitutions, substitutions_variables);
-      lps::replace_variables_capture_avoiding(s.multi_action(), substitutions, substitutions_variables);
-      s.assignments() = data::replace_variables_capture_avoiding(s.assignments(), substitutions, substitutions_variables);
+      s.condition() = compute_substitutions(s, substitutions);
+
+      // temporarily remove the summation variables, otherwise the capture avoiding substitution will touch them
+      auto summmation_variables = s.summation_variables();
+      s.summation_variables() = data::variable_list();
+
+      lps::replace_variables_capture_avoiding(s, substitutions, data::substitution_variables(substitutions));
+
+      // restore the summation variables
+      s.summation_variables() = summmation_variables;
 
       const size_t var_count = s.summation_variables().size();
       remove_unused_summand_variables(s);
@@ -222,14 +227,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm<>
       using namespace data;
 
       data::mutable_map_substitution<> substitutions;
-      data::data_expression new_condition = compute_substitutions(s, substitutions);
-      std::set<data::variable> substitutions_variables = data::substitution_variables(substitutions);
-
-      s.condition() = data::replace_variables_capture_avoiding(new_condition, substitutions, substitutions_variables);
-      if (s.deadlock().has_time())
-      {
-        s.deadlock().time() = data::replace_variables_capture_avoiding(s.deadlock().time(), substitutions, substitutions_variables);
-      }
+      s.condition() = compute_substitutions(s, substitutions);
+      lps::replace_variables_capture_avoiding(s, substitutions, data::substitution_variables(substitutions));
 
       const size_t var_count = s.summation_variables().size();
       remove_unused_summand_variables(s);
