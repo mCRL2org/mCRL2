@@ -19,6 +19,7 @@
 #include <mcrl2/lps/parse.h>
 #include <mcrl2/lps/parelm.h>
 #include <mcrl2/lps/specification.h>
+#include <mcrl2/lps/stochastic_specification.h>
 #include "mcrl2/lps/detail/specification_property_map.h"
 
 using namespace mcrl2;

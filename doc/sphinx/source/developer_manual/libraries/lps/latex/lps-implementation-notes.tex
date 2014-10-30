@@ -1,18 +1,19 @@
 
 \documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{makeidx}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{eurosym}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{fullpage}
 \usepackage{amsfonts}
 
+\setcounter{MaxMatrixCols}{10}
 %TCIDATA{OutputFilter=Latex.dll}
 %TCIDATA{Version=5.50.0.2890}
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
-%TCIDATA{LastRevised=Wednesday, October 29, 2014 13:16:36}
+%TCIDATA{LastRevised=Thursday, October 30, 2014 10:22:32}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -20,6 +21,7 @@
 \font \aap cmmi10
 \providecommand{\at}[1]{\mbox{\aap ,} #1}
 \input{include/tcilatex}
+
 \begin{document}
 
 
@@ -136,7 +138,7 @@ g_{i}(d,e)$, and $t_{i}(d,e)$ that appear in the definition of $p$.
 Linear process expressions in mCRL2 are expressions built according to the
 following syntax:
 
-\[
+\begin{equation*}
 \begin{array}{ccc}
 \text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\ 
 b(e) & \text{action(}b\text{,}e\text{)} & \text{Action} \\ 
@@ -158,9 +160,9 @@ Here $f$ is a superset of the free variables appearing in $e$.}
 Here $s=[s_{1},\cdots ,s_{n}]$ is a sequence of summands, $v$ is the
 sequence of process parameters of the corresponding process, and $f$ is a
 sequence of free variables appearing in $s$.}
-\]%
+\end{equation*}%
 where the types of the symbols are as follows:%
-\[
+\begin{equation*}
 \begin{array}{cl}
 a & \text{a (timed) multi-action} \\ 
 b & \text{a string (action name)} \\ 
@@ -172,7 +174,7 @@ t & \text{a data expression of type real} \\
 s & \text{a sequence of summands} \\ 
 c & \text{ a data expression of type bool}%
 \end{array}%
-\]%
+\end{equation*}%
 A grammar for linear processes can be found in the Process implementation
 notes document.
 
@@ -289,54 +291,14 @@ values, and possibly applying the rewriter to it?}.
 
 \subsection{Parelm}
 
-Let $p$ be a linear process as defined in \ref{eq:lps_untimed}, or \ref%
-{eq:lps_timed}. A \emph{parelm} algorithm is an algorithm that returns 
-\textsc{RemoveParameters(}$p,\{d_{j_{1}},\cdots ,d_{j_{m}}\}$\textsc{)} for
-some subset $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ of insignificant parameters of 
-$p$.
-
-\subsection{Parelm implementations}
-
-We define the following implementations of parelm:
-
-\[
-\begin{tabular}{|l|}
-\hline
-\textsc{Parelm1(}$p$\textsc{)} \\ 
-$G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V}%
-ar(c_{i}(d,e))\cup \mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}ar(t_{i}(d,e))\}$
-\\ 
-$\text{\textbf{do}}$ \\ 
-$\qquad \Delta G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{l\in G}\ \exists
-_{i\in I}:d_{k}\in \mathcal{V}ar(g_{i}(d,e)_{l}\}$ \\ 
-$\qquad G:=G\cup \Delta G$ \\ 
-$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
-$\text{\textbf{return} \textsc{RemoveParameters(}}p,\{d_{j_{1}},\cdots
-,d_{j_{m}}\}\text{\textsc{)}},$ \\ \hline
-\end{tabular}%
-\]%
-where $\{j_{1},\cdots ,j_{m}\}=G$. Note that $g_{i}(d,e)_{l}$ is the $l$-th
-component of the vector of terms $g_{i}(d,e)$.%
-\[
-\begin{tabular}{|l|}
-\hline
-\textsc{Parelm2(}$p$\textsc{)} \\ 
-$W:=\{d_{k}\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V}ar(c_{i}(d,e))\cup 
-\mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}ar(t_{i}(d,e))\}$ \\ 
-$V:=\{d_{1},\ldots ,d_{n}\}$ \\ 
-$E:=\{(d_{j},d_{k})\ |\ \exists _{i\in I}:d_{j}\in \mathcal{V}%
-ar(g_{i}(d,e)_{k}\}$ \\ 
-$R:=\{d_{k}\ |\ $graph $G=(V,E)$ contains a directed path $w,\cdots ,d_{k}$
-for some $w\in W\}$ \\ 
-$\text{\textbf{return} \textsc{RemoveParameters(}}p,R\text{\textsc{)}},$ \\ 
-\hline
-\end{tabular}%
-\]%
-\newpage
+%TCIMACRO{\QSubDoc{Include parelm}{\input{include/parelm.tex}}}%
+%BeginExpansion
+\input{include/parelm.tex}%
+%EndExpansion
 
 \subsection{Constelm}
-%TCIMACRO{%
-%\QSubDoc{Include constelm}{\input{include/constelm.tex}}}%
+
+%TCIMACRO{\QSubDoc{Include constelm}{\input{include/constelm.tex}}}%
 %BeginExpansion
 \input{include/constelm.tex}%
 %EndExpansion

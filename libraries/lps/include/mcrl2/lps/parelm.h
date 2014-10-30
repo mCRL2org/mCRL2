@@ -24,6 +24,7 @@
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
 namespace mcrl2
@@ -32,10 +33,52 @@ namespace mcrl2
 namespace lps
 {
 
+namespace detail
+{
+  inline
+  void collect_transition_variables(const action_summand& s, std::set<data::variable>& result)
+  {
+    std::set<data::variable> tmp;
+
+    tmp = data::find_all_variables(s.condition());
+    result.insert(tmp.begin(), tmp.end());
+
+    tmp = lps::find_all_variables(s.multi_action());
+    result.insert(tmp.begin(), tmp.end());
+  }
+
+  inline
+  void collect_transition_variables(const stochastic_action_summand& s, std::set<data::variable>& result)
+  {
+    collect_transition_variables(static_cast<const action_summand&>(s), result);
+
+    std::set<data::variable> tmp = data::find_all_variables(s.distribution());
+    result.insert(tmp.begin(), tmp.end());
+  }
+
+  inline
+  void collect_transition_variables(const deadlock_summand& s, std::set<data::variable>& result)
+  {
+    std::set<data::variable> tmp;
+
+    tmp = data::find_all_variables(s.condition());
+    result.insert(tmp.begin(), tmp.end());
+
+    tmp = lps::find_all_variables(s.deadlock());
+    result.insert(tmp.begin(), tmp.end());
+  }
+
+} // namespace detail
+
 /// \brief Algorithm class for elimination of unused parameters from a linear
 /// process specification
-class parelm_algorithm: public lps::detail::lps_algorithm<>
+template <typename Specification>
+class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 {
+  typedef typename lps::detail::lps_algorithm<Specification> super;
+  using super::m_spec;
+  using super::verbose;
+
   protected:
 
     /// \brief Returns the data variables that are considered in the parelm algorithm.
@@ -43,25 +86,17 @@ class parelm_algorithm: public lps::detail::lps_algorithm<>
     std::set<data::variable> transition_variables()
     {
       std::set<data::variable> result;
-      for (auto i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
+
+      auto const& action_summands = m_spec.process().action_summands();
+      for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
       {
-        std::set<data::variable> tmp;
-
-        tmp = data::find_all_variables(i->condition());
-        result.insert(tmp.begin(), tmp.end());
-
-        tmp = lps::find_all_variables(i->multi_action());
-        result.insert(tmp.begin(), tmp.end());
+        detail::collect_transition_variables(*i, result);
       }
-      for (auto i = m_spec.process().deadlock_summands().begin(); i != m_spec.process().deadlock_summands().end(); ++i)
+
+      auto const& deadlock_summands = m_spec.process().deadlock_summands();
+      for (auto i = deadlock_summands.begin(); i != deadlock_summands.end(); ++i)
       {
-        std::set<data::variable> tmp;
-
-        tmp = data::find_all_variables(i->condition());
-        result.insert(tmp.begin(), tmp.end());
-
-        tmp = lps::find_all_variables(i->deadlock());
-        result.insert(tmp.begin(), tmp.end());
+        detail::collect_transition_variables(*i, result);
       }
       return result;
     }
@@ -84,7 +119,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<>
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "--- parelm 1 ---" << std::endl;
 #endif
-      const data::variable_list& pars=m_spec.process().process_parameters();
+      const data::variable_list& pars = m_spec.process().process_parameters();
       std::set<data::variable> process_parameters(pars.begin(),pars.end());
 
       // significant variables may not be removed by parelm
@@ -141,7 +176,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<>
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "--- parelm 2 ---" << std::endl;
 #endif
-      const data::variable_list& pars=m_spec.process().process_parameters();
+      const data::variable_list& pars = m_spec.process().process_parameters();
       std::set<data::variable> process_parameters(pars.begin(),pars.end());
 
       // create a mapping m from process parameters to integers
@@ -224,8 +259,8 @@ class parelm_algorithm: public lps::detail::lps_algorithm<>
   public:
 
     /// \brief Constructor
-    parelm_algorithm(specification& spec )
-      : lps::detail::lps_algorithm<>(spec)
+    parelm_algorithm(Specification& spec )
+      : lps::detail::lps_algorithm<Specification>(spec)
     {}
 
     /// \brief Runs the parelm algorithm
@@ -246,10 +281,10 @@ class parelm_algorithm: public lps::detail::lps_algorithm<>
 /// \param spec A linear process specification
 /// \param variant1 If true the default variant of parelm is used, otherwise an
 ///        alternative implementation is chosen.
-inline
-void parelm(specification& spec, bool variant1 = true)
+template <typename Specification>
+void parelm(Specification& spec, bool variant1 = true)
 {
-  parelm_algorithm algorithm(spec);
+  parelm_algorithm<Specification> algorithm(spec);
   algorithm.run(variant1);
 }
 
