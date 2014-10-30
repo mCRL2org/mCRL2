@@ -34,6 +34,17 @@ stochastic_action_summand make_action_summand<stochastic_action_summand>(const d
   return stochastic_action_summand(summation_variables, condition, a, assignments, distribution);
 }
 
+inline
+stochastic_action_summand_vector convert_action_summands(const action_summand_vector& action_summands)
+{
+  stochastic_action_summand_vector result;
+  for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+  {
+    result.push_back(stochastic_action_summand(*i));
+  }
+  return result;
+}
+
 } // namespace detail
 
 /// \brief linear process.
@@ -51,6 +62,7 @@ class stochastic_linear_process: public linear_process_base<stochastic_action_su
       : super(other)
     { }
 
+    /// \brief Constructor.
     stochastic_linear_process(const atermpp::aterm_appl& t, bool stochastic_distributions_allowed = true)
       : super(t, stochastic_distributions_allowed)
     { }
@@ -61,6 +73,11 @@ class stochastic_linear_process: public linear_process_base<stochastic_action_su
                               const stochastic_action_summand_vector& action_summands
                              )
       : super(process_parameters, deadlock_summands, action_summands)
+    { }
+
+    /// \brief Constructor.
+    stochastic_linear_process(const linear_process& other)
+      : super(other.process_parameters(), other.deadlock_summands(), detail::convert_action_summands(other.action_summands()))
     { }
 };
 

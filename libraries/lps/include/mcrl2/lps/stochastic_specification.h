@@ -49,6 +49,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     stochastic_specification()
     { }
 
+    /// \brief Constructor.
     stochastic_specification(const stochastic_specification &other)
       : super(other)
     { }
@@ -76,6 +77,11 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     {
       complete_data_specification(*this);
     }
+
+    /// \brief Constructor.
+    stochastic_specification(const specification &other)
+      : super(other.data(), other.action_labels(), other.global_variables(), other.process(), other.initial_process())
+    { }
 
     void save(std::ostream& stream, bool binary=true) const
     {

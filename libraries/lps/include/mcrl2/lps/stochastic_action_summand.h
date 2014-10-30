@@ -36,6 +36,11 @@ class stochastic_action_summand: public action_summand
       : action_summand(summation_variables, condition, action, assignments), m_distribution(distribution)
     {}
 
+    /// \brief Constructor.
+    stochastic_action_summand(const action_summand& s)
+      : action_summand(s)
+    {}
+
     /// \brief Returns the distribution of this summand.
     const stochastic_distribution& distribution() const
     {

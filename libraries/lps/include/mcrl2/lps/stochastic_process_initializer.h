@@ -43,6 +43,11 @@ class stochastic_process_initializer: public process_initializer
       : super(atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, distribution), false)
     {}
 
+    /// \brief Constructor.
+    stochastic_process_initializer(const process_initializer& other)
+      : super(other)
+    {}
+
     const stochastic_distribution& distribution() const
     {
       return atermpp::down_cast<stochastic_distribution>((*this)[1]);
