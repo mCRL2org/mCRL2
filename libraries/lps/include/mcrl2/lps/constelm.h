@@ -237,7 +237,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 /// \param spec A linear process specification
 /// \param R A data rewriter
 /// \param instantiate_global_variables If true, free variables may be instantiated as a side effect of the algorithm
-template <typename DataRewriter, typename Specification = specification>
+template <typename DataRewriter, typename Specification>
 void constelm(Specification& spec, const DataRewriter& R, bool instantiate_global_variables = false)
 {
   constelm_algorithm<DataRewriter, Specification> algorithm(spec, R);
