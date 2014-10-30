@@ -75,7 +75,7 @@ namespace lps
 /// parameter a_simplify_all is set, the condition of each summand is replaced by the BDD obtained from the prover after
 /// proving that summand's formula.
 
-class invelm_algorithm: public lps::detail::lps_algorithm<>
+class invelm_algorithm: public detail::lps_algorithm<>
 {
   private:
     mcrl2::data::detail::BDD_Prover f_bdd_prover;
@@ -122,7 +122,7 @@ class invelm_algorithm: public lps::detail::lps_algorithm<>
       const bool a_apply_induction = false,
       const bool a_simplify_all = false
     )
-      : lps_algorithm<>(a_lps),
+      : detail::lps_algorithm<>(a_lps),
         f_bdd_prover(a_lps.data(), data::used_data_equation_selector(a_lps.data()),a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
         f_simplify_all(a_simplify_all)
     {}

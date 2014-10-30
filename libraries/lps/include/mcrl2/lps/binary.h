@@ -50,7 +50,7 @@ size_t nr_of_booleans_for_elements(size_t n)
 /// All parameters of finite data types are replaced with a vector of
 /// booleans.
 template<typename DataRewriter>
-class binary_algorithm: public lps::detail::lps_algorithm<>
+class binary_algorithm: public detail::lps_algorithm<>
 {
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
   typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
@@ -271,7 +271,7 @@ class binary_algorithm: public lps::detail::lps_algorithm<>
     /// \param r a rewriter for data
     binary_algorithm(specification& spec,
                      DataRewriter& r)
-      : lps_algorithm<>(spec),
+      : detail::lps_algorithm<>(spec),
         m_rewriter(r)
     {}
 

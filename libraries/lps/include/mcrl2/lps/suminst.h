@@ -46,7 +46,7 @@ std::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 }
 
 template<typename DataRewriter>
-class suminst_algorithm: public lps::detail::lps_algorithm<>
+class suminst_algorithm: public detail::lps_algorithm<>
 {
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
   typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
@@ -186,7 +186,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm<>
                       DataRewriter& r,
                       std::set<data::sort_expression> sorts = std::set<data::sort_expression>(),
                       bool tau_summands_only = false)
-      : lps_algorithm<>(spec),
+      : detail::lps_algorithm<>(spec),
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
