@@ -268,7 +268,7 @@ void lpssuminst(const std::string& input_filename,
                 const bool finite_sorts_only,
                 const bool tau_summands_only)
 {
-  lps::specification spec;
+  stochastic_specification spec;
   load_lps(spec, input_filename);
   std::set<data::sort_expression> sorts;
 
@@ -276,7 +276,7 @@ void lpssuminst(const std::string& input_filename,
   if(!sorts_string.empty())
   {
     std::vector<std::string> parts = utilities::split(utilities::remove_whitespace(sorts_string), ",");
-    for(std::vector<std::string>::const_iterator i = parts.begin(); i != parts.end(); ++i)
+    for (auto i = parts.begin(); i != parts.end(); ++i)
     {
       sorts.insert(data::parse_sort_expression(*i, spec.data()));
     }
@@ -294,7 +294,7 @@ void lpssuminst(const std::string& input_filename,
   mCRL2log(log::verbose, "lpssuminst") << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
 
   mcrl2::data::rewriter r(spec.data(), rewrite_strategy);
-  lps::suminst_algorithm<data::rewriter>(spec, r, sorts, tau_summands_only).run();
+  lps::suminst_algorithm<data::rewriter, stochastic_specification>(spec, r, sorts, tau_summands_only).run();
   save_lps(spec, output_filename);
 }
 
