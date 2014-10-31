@@ -51,8 +51,7 @@ namespace detail
   void collect_transition_variables(const stochastic_action_summand& s, std::set<data::variable>& result)
   {
     collect_transition_variables(static_cast<const action_summand&>(s), result);
-
-    std::set<data::variable> tmp = data::find_all_variables(s.distribution());
+    std::set<data::variable> tmp = lps::find_all_variables(s.distribution());
     result.insert(tmp.begin(), tmp.end());
   }
 
