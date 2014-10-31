@@ -42,13 +42,27 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     : super(sigma, V)
   { }
 
-  void operator()(action_summand& x)
+  template <typename ActionSummand>
+  void do_action_summand(ActionSummand& x, const data::variable_list& v)
   {
-    data::variable_list v = update_sigma.push(x.summation_variables());
     x.summation_variables() = v;
     x.condition() = (*this)(x.condition());
     (*this)(x.multi_action());
     x.assignments() = (*this)(x.assignments());
+  }
+
+  void operator()(action_summand& x)
+  {
+    data::variable_list v = update_sigma.push(x.summation_variables());
+    do_action_summand(x, v);
+    update_sigma.pop(v);
+  }
+
+  void operator()(stochastic_action_summand& x)
+  {
+    data::variable_list v = update_sigma.push(x.summation_variables());
+    do_action_summand(x, v);
+    x.distribution() = (*this)(x.distribution());
     update_sigma.pop(v);
   }
 
@@ -61,7 +75,8 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     update_sigma.pop(v);
   }
 
-  void operator()(linear_process& x)
+  template <typename LinearProcess>
+  void do_linear_process(const LinearProcess& x)
   {
     data::variable_list v = update_sigma.push(x.process_parameters());
     x.process_parameters() = v;
@@ -70,7 +85,18 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     update_sigma.pop(v);
   }
 
-  void operator()(specification& x)
+  void operator()(linear_process& x)
+  {
+    do_linear_process(x);
+  }
+
+  void operator()(stochastic_linear_process& x)
+  {
+    do_linear_process(x);
+  }
+
+  template <typename Specification>
+  void do_specification(Specification& x)
   {
     std::set<data::variable> v = update_sigma(x.global_variables());
     x.global_variables() = v;
@@ -79,6 +105,20 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     x.initial_process() = (*this)(x.initial_process());
     update_sigma.pop(v);
   }
+
+  void operator()(specification& x)
+  {
+    do_specification(x);
+  }
+
+  void operator()(stochastic_specification& x)
+  {
+    do_specification(x);
+  }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
 };
 
 } // namespace detail
