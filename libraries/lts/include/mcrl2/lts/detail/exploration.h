@@ -77,16 +77,16 @@ class lps2lts_algorithm
     {
     }
 
-    virtual ~lps2lts_algorithm()
+    ~lps2lts_algorithm()
     {
       delete m_generator;
     }
 
-    virtual bool initialise_lts_generation(lts_generation_options* options);
-    virtual bool generate_lts();
-    virtual bool finalise_lts_generation();
+    bool initialise_lts_generation(lts_generation_options* options);
+    bool generate_lts();
+    bool finalise_lts_generation();
 
-    virtual void abort()
+    void abort()
     {
       // Stops the exploration algorithm if it is running by making sure
       // not a single state can be generated anymore.

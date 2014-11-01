@@ -32,7 +32,7 @@ void test_initial_state_successors(const specification& lps_spec)
   next_state_generator::enumerator_queue_t enumeration_queue;
   for (next_state_generator::iterator it = generator.begin(generator.initial_state(), &enumeration_queue); it != generator.end(); it++)
   {
-    std::cout << atermpp::pp(it->state()) << std::endl;
+    std::cout << atermpp::pp(it->target_state()) << std::endl;
   }
 }
 
@@ -65,10 +65,10 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
         {
           transition_labels.insert(it->action());
           ++transitions;
-          if (seen.find(it->state()) == seen.end())
+          if (seen.find(it->target_state()) == seen.end())
           {
-            q.push(it->state());
-            seen.insert(it->state());
+            q.push(it->target_state());
+            seen.insert(it->target_state());
           }
         }
       }
@@ -80,10 +80,10 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
       {
         transition_labels.insert(it->action());
         ++transitions;
-        if (seen.find(it->state()) == seen.end())
+        if (seen.find(it->target_state()) == seen.end())
         {
-          q.push(it->state());
-          seen.insert(it->state());
+          q.push(it->target_state());
+          seen.insert(it->target_state());
         }
       }
     }

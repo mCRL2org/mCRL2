@@ -219,11 +219,11 @@ int test_main(int argc, char** argv)
         next_state_generator::enumerator_queue_t enumeration_queue;
         for(next_state_generator::iterator j = explorer.begin(current, i, &enumeration_queue); j != explorer.end(); ++j)
         {
-          if (known.find(j->state()) == known.end())
+          if (known.find(j->target_state()) == known.end())
           {
-            std::cerr << atermpp::pp(j->state()) << std::endl;
-            known.insert(j->state());
-            stack.push(j->state());
+            std::cerr << atermpp::pp(j->target_state()) << std::endl;
+            known.insert(j->target_state());
+            stack.push(j->target_state());
           }
         }
       }

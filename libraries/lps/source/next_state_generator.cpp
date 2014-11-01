@@ -56,7 +56,7 @@ class state_applier
 };
 
 next_state_generator::next_state_generator(
-  const specification& spec,
+  const stochastic_specification& spec,
   const data::rewriter& rewriter,
   bool use_enumeration_caching,
   bool use_summand_pruning)
@@ -72,7 +72,8 @@ next_state_generator::next_state_generator(
     mCRL2log(log::warning) << "specification uses time, which is (currently) not supported; ignoring timing" << std::endl;
   }
 
-  for (action_summand_vector::iterator i = m_specification.process().action_summands().begin(); i != m_specification.process().action_summands().end(); i++)
+  for (stochastic_action_summand_vector::iterator i = m_specification.process().action_summands().begin(); 
+                 i != m_specification.process().action_summands().end(); i++)
   {
     summand_t summand;
     summand.summand = &(*i);
@@ -137,17 +138,21 @@ next_state_generator::summand_subset_t::summand_subset_t(next_state_generator *g
   }
 }
 
-bool next_state_generator::summand_subset_t::summand_set_contains(const std::set<action_summand>& summand_set, const next_state_generator::summand_t& summand)
+bool next_state_generator::summand_subset_t::summand_set_contains(
+            const std::set<stochastic_action_summand>& summand_set, 
+            const next_state_generator::summand_t& summand)
 {
   return summand_set.count(*summand.summand) > 0;
 }
 
-next_state_generator::summand_subset_t::summand_subset_t(next_state_generator *generator, const action_summand_vector& summands, bool use_summand_pruning)
+next_state_generator::summand_subset_t::summand_subset_t(
+                next_state_generator *generator, 
+                const stochastic_action_summand_vector& summands, bool use_summand_pruning)
   : m_generator(generator),
     m_use_summand_pruning(use_summand_pruning)
 {
-  std::set<action_summand> summand_set;
-  for (action_summand_vector::const_iterator i = summands.begin(); i != summands.end(); i++)
+  std::set<stochastic_action_summand> summand_set;
+  for (stochastic_action_summand_vector::const_iterator i = summands.begin(); i != summands.end(); i++)
   {
     summand_set.insert(*i);
   }
@@ -241,14 +246,14 @@ static bool parameter_score_compare(const parameter_score& left, const parameter
   return left.score > right.score;
 }
 
-void next_state_generator::summand_subset_t::build_pruning_parameters(const action_summand_vector& summands)
+void next_state_generator::summand_subset_t::build_pruning_parameters(const stochastic_action_summand_vector& summands)
 {
   std::vector < parameter_score> parameters;
 
   for (size_t i = 0; i < m_generator->m_process_parameters.size(); i++)
   {
     parameters.push_back(parameter_score(i, 0));
-    for (action_summand_vector::const_iterator j = summands.begin(); j != summands.end(); j++)
+    for (stochastic_action_summand_vector::const_iterator j = summands.begin(); j != summands.end(); j++)
     {
       parameters[i].score += condition_selectivity(j->condition(), m_generator->m_process_parameters[i]);
     }
@@ -326,7 +331,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_summand_iterator_end = summand_subset.m_summands.end();
   }
 
-  m_transition.m_generator = m_generator;
+  // m_transition.m_generator = m_generator;
 
   size_t j=0;
   for (state::iterator i = state.begin(); i!=state.end(); ++i, ++j)
@@ -348,7 +353,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_caching(false),
     m_enumeration_queue(enumeration_queue)
 {
-  m_transition.m_generator = m_generator;
+  // m_transition.m_generator = m_generator;
 
   size_t j=0;
   for (state::iterator i = state.begin(); i!=state.end(); ++i, ++j)
@@ -484,7 +489,7 @@ void next_state_generator::iterator::increment()
 
   const data_expression_vector& state_args=m_summand->result_state;
   rewriter_class r(m_generator->m_rewriter,*m_substitution);
-  m_transition.m_state=lps::state(state_args.begin(),state_args.size(),r);
+  m_transition.set_target_state(lps::state(state_args.begin(),state_args.size(),r));
 
   std::vector <process::action> actions;
   actions.resize(m_summand->action_label.size());
@@ -498,9 +503,9 @@ void next_state_generator::iterator::increment()
     }
     actions[i] = process::action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
   }
-  m_transition.m_action = multi_action(process::action_list(actions.begin(), actions.end()));
+  m_transition.set_action(multi_action(process::action_list(actions.begin(), actions.end())));
 
-  m_transition.m_summand_index = (m_summand - &m_generator->m_summands[0]);
+  m_transition.set_summand_index(m_summand - &m_generator->m_summands[0]);
 
   for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++)
   {

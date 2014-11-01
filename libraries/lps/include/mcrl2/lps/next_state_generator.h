@@ -20,7 +20,7 @@
 #ifdef MCRL2_NEXT_STATE_LOG_EQUALITIES
 #include "mcrl2/data/find_equalities.h"
 #endif
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/atermpp/shared_subset.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
@@ -54,7 +54,7 @@ class next_state_generator
 
     struct summand_t
     {
-      action_summand *summand;
+      stochastic_action_summand *summand;
       data::variable_list variables;
       data::data_expression condition;
       data::data_expression_vector result_state;
@@ -88,7 +88,7 @@ class next_state_generator
         summand_subset_t(next_state_generator *generator, bool use_summand_pruning);
 
         /// \brief Constructs the summand subset containing the given commands.
-        summand_subset_t(next_state_generator *generator, const action_summand_vector& summands, bool use_summand_pruning);
+        summand_subset_t(next_state_generator *generator, const stochastic_action_summand_vector& summands, bool use_summand_pruning);
 
       private:
         next_state_generator *m_generator;
@@ -100,32 +100,37 @@ class next_state_generator
         std::vector<size_t> m_pruning_parameters;
         substitution_t m_pruning_substitution;
 
-        static bool summand_set_contains(const std::set<action_summand>& summand_set, const summand_t& summand);
-        void build_pruning_parameters(const action_summand_vector& summands);
+        static bool summand_set_contains(const std::set<stochastic_action_summand>& summand_set, const summand_t& summand);
+        void build_pruning_parameters(const stochastic_action_summand_vector& summands);
         bool is_not_false(const summand_t& summand);
         atermpp::shared_subset<summand_t>::iterator begin(const state_t& state_t);
     };
 
     class transition_t
     {
-      friend class next_state_generator::iterator;
-      private:
-        next_state_generator *m_generator;
-        lps::state m_state;
+      protected:
         lps::multi_action m_action;
+        lps::state m_target_state;
         size_t m_summand_index;
 
       public:
-        state_t state() const
+        const lps::multi_action& action() const { return m_action; }
+        void set_action(const lps::multi_action& action)
         {
-          return m_state;
+          m_action=action;
         }
 
-        lps::state& internal_state() { return m_state; }
-        const lps::state& internal_state() const { return m_state; }
-        lps::multi_action& action() { return m_action; }
-        const lps::multi_action& action() const { return m_action; }
+        const lps::state& target_state() const { return m_target_state; }
+        void set_target_state(const lps::state& target_state)
+        {
+          m_target_state=target_state;
+        }
+
         size_t summand_index() const { return m_summand_index; }
+        void set_summand_index(const size_t summand_index)
+        {
+          m_summand_index=summand_index;
+        }
     };
 
     class iterator: public boost::iterator_facade<iterator, const transition_t, boost::forward_traversal_tag>
@@ -216,7 +221,7 @@ class next_state_generator
     };
 
   protected:
-    specification m_specification;
+    stochastic_specification m_specification;
     rewriter_t m_rewriter;
     substitution_t m_substitution;
     enumerator_t m_enumerator;
@@ -235,7 +240,7 @@ class next_state_generator
     /// \param rewriter The rewriter used
     /// \param use_enumeration_caching Cache intermediate enumeration results
     /// \param use_summand_pruning Preprocess summands using pruning strategy.
-    next_state_generator(const specification& specification, const data::rewriter& rewriter, bool use_enumeration_caching = false, bool use_summand_pruning = false);
+    next_state_generator(const stochastic_specification& specification, const data::rewriter& rewriter, bool use_enumeration_caching = false, bool use_summand_pruning = false);
 
     ~next_state_generator();
 
@@ -270,29 +275,17 @@ class next_state_generator
       return m_initial_state;
     }
 
-    /// \brief Gets the initial state in internal format.
-    /* lps::state internal_initial_state() const
-    {
-      return m_initial_state;
-    } */
-
     /// \brief Returns the currently loaded specification.
-    const lps::specification& get_specification() const
+    const lps::stochastic_specification& get_specification() const
     {
       return m_specification;
-    }
+    } 
 
     /// \brief Returns the rewriter associated with this generator.
     rewriter_t& get_rewriter()
     {
       return m_rewriter;
     }
-
-    /// \brief Converts states to internal states.
-    // data::data_expression_vector get_internal_state(const state& s) const;
-
-    /// \brief Converts internal states to states.
-    // state get_state(const data::data_expression_vector& internal_state) const;
 
     /// \brief Returns a reference to the summand subset containing all summands.
     summand_subset_t& full_subset()

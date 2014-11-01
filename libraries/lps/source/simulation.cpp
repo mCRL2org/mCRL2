@@ -15,7 +15,7 @@ using namespace mcrl2::lps;
 simulation::simulation(const specification& specification, data::rewrite_strategy strategy)
   : m_specification(specification),
     m_rewriter(m_specification.data(), strategy),
-    m_generator(m_specification, m_rewriter),
+    m_generator(stochastic_specification(m_specification), m_rewriter),
     m_tau_prioritization(false)
 {
   state_t state;
@@ -160,7 +160,7 @@ std::vector<simulation::transition_t> simulation::transitions(state source_state
     for (next_state_generator::iterator i = m_generator.begin(source_state, &enumeration_queue); i != m_generator.end(); i++)
     {
       transition_t transition;
-      transition.destination = i->state();
+      transition.destination = i->target_state();
       transition.action = i->action();
       output.push_back(transition);
     }

@@ -195,7 +195,7 @@ class torx_tool : public rewriter_tool< input_tool >
                   /* Rebuild transition string in Torx format*/
                   std::cout << "Ee " << "_e" << summand_index << "." << states.size() << "\t" << (i->action().actions().empty() ? 0 : 1) << "\t" << 1 << "\t" << print_torx_action(i->action()) << "\t\t\t";
 
-                  state next = i->state();
+                  state next = i->target_state();
 
                   /* Print optional first-encounted visited state */
                   if(state_numbers.find(next) == state_numbers.end())

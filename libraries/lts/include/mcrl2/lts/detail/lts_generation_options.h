@@ -99,7 +99,7 @@ struct lts_generation_options
     }
   }
 
-  mcrl2::lps::specification specification;
+  mcrl2::lps::stochastic_specification specification;
   bool usedummies;
   bool removeunused;
 

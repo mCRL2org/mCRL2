@@ -44,7 +44,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
   m_maintain_traces = m_options.trace || m_options.save_error_trace;
   m_value_prioritize = (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized);
 
-  lps::specification specification(m_options.specification);
+  lps::stochastic_specification specification(m_options.specification);
   resolve_summand_variable_name_clashes(specification);
 
   if (m_options.outformat == lts_aut)
@@ -95,13 +95,13 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
     rewriter = data::rewriter(specification.data(), m_options.strat);
   }
 
-  action_summand_vector prioritised_summands;
-  action_summand_vector nonprioritised_summands;
+  stochastic_action_summand_vector prioritised_summands;
+  stochastic_action_summand_vector nonprioritised_summands;
   if (m_options.priority_action != "")
   {
     mCRL2log(verbose) << "applying confluence reduction with tau action '" << m_options.priority_action << "'..." << std::endl;
 
-    for (action_summand_vector::iterator i = specification.process().action_summands().begin(); i != specification.process().action_summands().end(); i++)
+    for (stochastic_action_summand_vector::iterator i = specification.process().action_summands().begin(); i != specification.process().action_summands().end(); i++)
     {
       if ((m_options.priority_action == "tau" && i->is_tau()) ||
           (i->multi_action().actions().size() == 1 && m_options.priority_action == (std::string)i->multi_action().actions().front().label().name()))
@@ -121,7 +121,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
     m_use_confluence_reduction = false;
   }
 
-  action_summand_vector tau_summands;
+  stochastic_action_summand_vector tau_summands;
   if (m_options.detect_divergence)
   {
     mCRL2log(verbose) << "Detect divergences with tau action is `tau'.\n";
@@ -379,7 +379,7 @@ lps2lts_algorithm::storage_state_t lps2lts_algorithm::get_prioritised_representa
       enumeration_queue.clear();
       for (next_state_generator::iterator i = m_generator->begin(state, m_prioritized_subset, &enumeration_queue); i; i++)
       {
-        const storage_state_t s=i->internal_state();
+        const storage_state_t s=i->target_state();
         next[state].push_back(s);
         if (number.count(s) == 0)
         {
@@ -502,7 +502,7 @@ void lps2lts_algorithm::construct_trace(const storage_state_t& state1, mcrl2::tr
   {
     for (next_state_generator::iterator j = m_generator->begin(state, &enumeration_queue); j != m_generator->end(); j++)
     {
-      storage_state_t destination = j->internal_state();
+      storage_state_t destination = j->target_state();
       if (m_use_confluence_reduction)
       {
         destination = get_prioritised_representative(destination);
@@ -544,7 +544,7 @@ bool lps2lts_algorithm::save_trace(const storage_state_t& state1, const next_sta
   mcrl2::trace::Trace trace;
   lps2lts_algorithm::construct_trace(state1, trace);
   trace.addAction(transition.action());
-  trace.setState(transition.internal_state());
+  trace.setState(transition.target_state());
   m_traces_saved++;
 
   try
@@ -574,11 +574,11 @@ bool lps2lts_algorithm::search_divergence(
   {
     assert(j->action().actions().size() == 0);
 
-    if (visited.insert(j->internal_state()).second)
+    if (visited.insert(j->target_state()).second)
     {
-      new_states.push_back(j->internal_state());
+      new_states.push_back(j->target_state());
     }
-    else if (current_path.count(j->internal_state()) != 0)
+    else if (current_path.count(j->target_state()) != 0)
     {
       return true;
     }
@@ -700,7 +700,7 @@ void lps2lts_algorithm::save_error(const storage_state_t& state)
 
 bool lps2lts_algorithm::add_transition(const storage_state_t& source_state, next_state_generator::transition_t& transition)
 {
-  storage_state_t destination = transition.internal_state();
+  storage_state_t destination = transition.target_state();
 
   size_t source_state_number;
   std::pair<size_t, bool> destination_state_number;
@@ -726,7 +726,7 @@ bool lps2lts_algorithm::add_transition(const storage_state_t& source_state, next
     if (m_options.outformat != lts_none && m_options.outformat != lts_aut)
     {
       assert(!m_options.bithashing);
-      size_t state_number = m_output_lts.add_state(transition.state());
+      size_t state_number = m_output_lts.add_state(transition.target_state());
       assert(state_number == destination_state_number.first);
       static_cast <void>(state_number);
     }
@@ -808,7 +808,7 @@ void lps2lts_algorithm::get_transitions(const storage_state_t& state,
   {
     for (std::vector<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
-      i->internal_state() = get_prioritised_representative(i->internal_state());
+      i->set_target_state(get_prioritised_representative(i->target_state()));
     }
   }
 }
@@ -827,7 +827,7 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos()
          (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
     storage_state_t state=m_state_numbers.get(current_state);
-    get_transitions(state,transitions, enumeration_queue);
+    get_transitions(state,transitions,enumeration_queue);
 
     for (std::vector<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
@@ -888,7 +888,7 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_larger_than_0(const storag
     {
       if (add_transition(state, *i))
       {
-        storage_state_t removed = state_queue.add_to_queue(i->internal_state());
+        storage_state_t removed = state_queue.add_to_queue(i->target_state());
         if (removed != storage_state_t())
         {
           m_num_states--;
@@ -963,7 +963,7 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(const storage_state_t& i
     {
       if (add_transition(state, *i))
       {
-        storage_state_t removed = state_queue.add_to_queue(i->internal_state());
+        storage_state_t removed = state_queue.add_to_queue(i->target_state());
         if (removed != storage_state_t())
         {
           m_bit_hash_table.remove_state_from_bithash(removed);
@@ -1030,7 +1030,7 @@ void lps2lts_algorithm::generate_lts_depth(const storage_state_t& initial_state)
     {
       if (add_transition(state, *i) && (current_state + stack.size() < m_options.max_states) && (stack.size() < m_options.todo_max))
       {
-        stack.push_back(i->internal_state());
+        stack.push_back(i->target_state());
       }
     }
     transitions.clear();
@@ -1076,7 +1076,7 @@ void lps2lts_algorithm::generate_lts_random(const storage_state_t& initial_state
 
       if (index-- == 0)
       {
-        new_state = i->internal_state();
+        new_state = i->target_state();
       }
     }
     transitions.clear();

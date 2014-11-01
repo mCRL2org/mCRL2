@@ -374,9 +374,9 @@ class pins
     }
 
     /// \brief Returns the process of the LPS specification
-    const linear_process& process() const
+    const linear_process process() const
     {
-      return m_generator.get_specification().process();
+      return remove_stochastic_operators(m_generator.get_specification()).process();
     }
 
     /// \brief Returns the data specification of the LPS specification
@@ -639,7 +639,8 @@ class pins
     std::set<std::string> summand_action_names(std::size_t i) const
     {
       std::set<std::string> result;
-      auto const& l = process().action_summands()[i].multi_action().actions();
+      auto const l = process().action_summands()[i].multi_action().actions(); // Using a reference in whatever this type
+                                                                              // is, leads to a failing lps_ltsmin_test.
       for (auto i = l.begin(); i != l.end(); ++i)
       {
         result.insert(std::string(i->label().name()));
@@ -675,7 +676,7 @@ class pins
       next_state_generator::enumerator_queue_t enumeration_queue;
       for (next_state_generator::iterator i = m_generator.begin(source, &enumeration_queue); i; i++)
       {
-        state destination = i->internal_state();
+        state destination = i->target_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
@@ -716,7 +717,7 @@ class pins
       next_state_generator::enumerator_queue_t enumeration_queue;
       for (next_state_generator::iterator i = m_generator.begin(source, group, &enumeration_queue); i; i++)
       {
-        state destination = i->internal_state();
+        state destination = i->target_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
