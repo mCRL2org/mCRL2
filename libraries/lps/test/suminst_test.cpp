@@ -32,7 +32,7 @@ void test_case_1()
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1,r).run();
+  suminst_algorithm<rewriter, specification>(s1,r).run();
   std::clog << lps::pp(s0) << std::endl;
   std::clog << lps::pp(s1) << std::endl;
   const action_summand_vector& summands1 = s1.process().action_summands();
@@ -58,7 +58,7 @@ void test_case_2()
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r).run();
+  suminst_algorithm<rewriter, specification>(s1, r).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -82,7 +82,7 @@ void test_case_3()
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r).run();
+  suminst_algorithm<rewriter, specification>(s1, r).run();
   bool sum_occurs = false;
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -109,7 +109,7 @@ void test_case_4()
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, finite_sorts(s1.data()), true).run();
+  suminst_algorithm<rewriter, specification>(s1, r, finite_sorts(s1.data()), true).run();
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
   const action_summand_vector& summands1 = s1.process().action_summands();
@@ -147,7 +147,7 @@ void test_case_5()
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r).run();
+  suminst_algorithm<rewriter, specification>(s1, r).run();
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
   const action_summand_vector& summands1 = s1.process().action_summands();
@@ -176,7 +176,7 @@ void test_case_6()
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();
+  suminst_algorithm<rewriter, specification>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -196,7 +196,7 @@ void test_case_7()
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();
+  suminst_algorithm<rewriter, specification>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();
   int sum_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
