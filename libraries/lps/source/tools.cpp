@@ -81,9 +81,9 @@ void lpsinfo(const std::string& input_filename,
              const std::string& input_file_message
             )
 {
-  specification spec;
+  stochastic_specification spec;
   load_lps(spec, input_filename);
-  lps::detail::specification_property_map<> info(spec);
+  lps::detail::specification_property_map<stochastic_specification> info(spec);
   std::cout << input_file_message << "\n\n";
   std::cout << info.info();
 }
