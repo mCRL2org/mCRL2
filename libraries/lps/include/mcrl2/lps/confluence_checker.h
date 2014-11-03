@@ -228,11 +228,11 @@ class Confluence_Checker
       const action_summand_type a_summand_2,
       const size_t a_summand_number_2);
 
-    /// \brief Checks the confluence of summand a_summand concerning all other tau-summands.
-    typename Specification::process_type::action_summand_type check_confluence_and_mark_summand(
-      const data::data_expression& a_invariant,
-      const action_summand_type& a_summand,
+    /// \brief Checks and updates the confluence of summand a_summand concerning all other tau-summands.
+    void check_confluence_and_mark_summand(
+      action_summand_type& a_summand,
       const size_t a_summand_number,
+      const data::data_expression& a_invariant,
       bool& a_is_marked);
 
   public:
@@ -569,10 +569,10 @@ bool Confluence_Checker<Specification>::check_summands(
 // --------------------------------------------------------------------------------------------
 
 template <typename Specification>
-typename Specification::process_type::action_summand_type Confluence_Checker<Specification>::check_confluence_and_mark_summand(
-  const data::data_expression& a_invariant,
-  const action_summand_type& a_summand,
+void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
+  action_summand_type& a_summand,
   const size_t a_summand_number,
+  const data::data_expression& a_invariant,
   bool& a_is_marked)
 {
   assert(a_summand.is_tau());
@@ -655,14 +655,7 @@ typename Specification::process_type::action_summand_type Confluence_Checker<Spe
   {
     mCRL2log(log::info) << "Confluent with all summands.";
     a_is_marked = true;
-    return action_summand_type(a_summand.summation_variables(),
-                          a_summand.condition(),
-                          multi_action(make_ctau_action()),
-                          a_summand.assignments());
-  }
-  else
-  {
-    return a_summand;
+    a_summand.multi_action() = make_ctau_action();
   }
 }
 
@@ -717,7 +710,7 @@ Specification Confluence_Checker<Specification>::check_confluence_and_mark(const
       if (v_summand.is_tau())
       {
         mCRL2log(log::info) << "tau-summand " << v_summand_number << ": ";
-        *i = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
+        check_confluence_and_mark_summand(*i, v_summand_number, a_invariant, v_is_marked);
         mCRL2log(log::info) << std::endl;
       }
     }
