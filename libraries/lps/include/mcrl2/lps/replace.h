@@ -116,6 +116,14 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     do_specification(x);
   }
 
+  stochastic_distribution operator()(stochastic_distribution& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    stochastic_distribution result(x.variables(), (*this)(x.distribution()));
+    update_sigma.pop(v);
+    return result;
+  }
+
 #ifdef BOOST_MSVC
 #include "mcrl2/core/detail/builder_msvc.inc.h"
 #endif

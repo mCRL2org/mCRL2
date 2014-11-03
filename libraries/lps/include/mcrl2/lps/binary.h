@@ -275,12 +275,12 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
     process_initializer update_initial_process(const process_initializer& init)
     {
-      return process_initializer(replace_enumerated_parameters_in_assignments(m_spec.initial_process().assignments()));
+      return process_initializer(replace_enumerated_parameters_in_assignments(init.assignments()));
     }
     
     stochastic_process_initializer update_initial_process(const stochastic_process_initializer& init)
     {
-      return stochastic_process_initializer(replace_enumerated_parameters_in_assignments(m_spec.initial_process().assignments()),
+      return stochastic_process_initializer(replace_enumerated_parameters_in_assignments(init.assignments()),
                                             lps::replace_variables_capture_avoiding(init.distribution(), m_if_trees, m_if_trees_variables)
                                            );
     }
@@ -303,7 +303,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
       // Initial process
       mCRL2log(log::debug) << "Updating process initializer" << std::endl;
-      m_spec.initial_process() = update_initial_process(m_spec.initial_process().assignments());
+      m_spec.initial_process() = update_initial_process(m_spec.initial_process());
 
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;
