@@ -144,7 +144,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
             }
             else
             {
-              const data::variable& v = atermpp::down_cast<data::variable>(substitutions(vleft));
+              data::variable v = atermpp::down_cast<data::variable>(substitutions(vleft));
               if (is_summand_variable(s, v) && substitutions.find(v) != substitutions.end())
               {
                 sumelm_add_replacement(substitutions, v, right);
