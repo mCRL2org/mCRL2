@@ -216,32 +216,14 @@ void lpspp(const std::string& input_filename,
   }
 }
 
-template <typename DataRewriter>
-void lpsrewr_bench_mark(const lps::specification& spec, const DataRewriter& R, unsigned long bench_times)
-{
-  std::clog << "rewriting LPS " << bench_times << " times...\n";
-  for (unsigned long i=0; i < bench_times; i++)
-  {
-    lps::specification spec1 = spec;
-    lps::rewrite(spec1, R);
-  }
-}
-
-// TODO: remove the benchmark option?
 void lpsrewr(const std::string& input_filename,
              const std::string& output_filename,
-             const data::rewriter::strategy rewrite_strategy,
-             bool benchmark,
-             unsigned long bench_times
+             const data::rewriter::strategy rewrite_strategy
             )
 {
   lps::specification spec;
   load_lps(spec, input_filename);
   mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
-  if (benchmark)
-  {
-    lpsrewr_bench_mark(spec, R, bench_times);
-  }
   lps::rewrite(spec, R);
   lps::remove_trivial_summands(spec);
   lps::remove_redundant_assignments(spec);
