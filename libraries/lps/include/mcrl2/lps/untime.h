@@ -21,8 +21,14 @@ namespace mcrl2
 namespace lps
 {
 
-class untime_algorithm: public lps::detail::lps_algorithm<>
+template <typename Specification>
+class untime_algorithm: public detail::lps_algorithm<Specification>
 {
+  typedef typename detail::lps_algorithm<Specification> super;
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  using super::m_spec;
+
   protected:
     /// \brief Variable denoting the time at which the last action occurred
     data::variable m_last_action_time;
@@ -63,8 +69,8 @@ class untime_algorithm: public lps::detail::lps_algorithm<>
 
       assert(j == time_variable_candidates.end());
 
-      const lps::action_summand_vector& summands = m_spec.process().action_summands();
-      for (lps::action_summand_vector::const_iterator i = summands.begin(); i != summands.end(); ++i)
+      auto const& summands = m_spec.process().action_summands();
+      for (auto i = summands.begin(); i != summands.end(); ++i)
       {
         const data::data_expression_list summand_arguments = i->next_state(m_spec.process().process_parameters());
         std::vector <bool>::iterator j = time_variable_candidates.begin();
@@ -100,7 +106,7 @@ class untime_algorithm: public lps::detail::lps_algorithm<>
     }
 
     /// \brief Apply untime to an action summand
-    void untime(action_summand& s)
+    void untime(action_summand_type& s)
     {
       if (s.has_time())
       {
@@ -136,8 +142,8 @@ class untime_algorithm: public lps::detail::lps_algorithm<>
     }
 
   public:
-    untime_algorithm(specification& spec)
-      : lps::detail::lps_algorithm<>(spec)
+    untime_algorithm(Specification& spec)
+      : detail::lps_algorithm<Specification>(spec)
     {
       m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
     }
