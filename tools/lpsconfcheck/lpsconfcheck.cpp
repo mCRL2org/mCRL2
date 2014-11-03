@@ -216,7 +216,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
           m_apply_induction, m_check_all,
           m_counter_example, m_generate_invariants, m_dot_file_name);
 
-        spec = lps::specification(v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number));
+        v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number);
         save_lps(spec, output_filename());
       }
 

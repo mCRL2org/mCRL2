@@ -58,9 +58,9 @@ void run_confluence_test_case(const std::string& s, const size_t ctau_count)
   Confluence_Checker<specification> checker1(s0);
   // Check confluence for all summands and
   // replace confluents tau's by ctau's.
-  specification s1(checker1.check_confluence_and_mark(data::sort_bool::true_(),0));
+  checker1.check_confluence_and_mark(data::sort_bool::true_(),0);
 
-  BOOST_CHECK_EQUAL(count_ctau(s1), ctau_count);
+  BOOST_CHECK_EQUAL(count_ctau(s0), ctau_count);
 }
 
 BOOST_AUTO_TEST_CASE(case_1)

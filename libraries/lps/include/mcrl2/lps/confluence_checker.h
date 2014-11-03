@@ -189,7 +189,7 @@ class Confluence_Checker
     data::detail::BDD2Dot f_bdd2dot;
 
     /// \brief A linear process specification.
-    const Specification& f_lps;
+    Specification& f_lps;
 
     /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
     // bool f_no_marking;
@@ -243,7 +243,7 @@ class Confluence_Checker
     /// to 0, no time limit will be enforced
     Confluence_Checker
     (
-      const Specification& a_lps,
+      Specification& a_lps,
       data::rewriter::strategy a_rewrite_strategy = data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
@@ -259,7 +259,7 @@ class Confluence_Checker
     /// precondition: the argument passed as parameter a_invariant is an expression of sort Bool in internal mCRL2 format
     /// precondition: the argument passed as parameter a_summand_number corresponds with a summand of the LPS for which
     /// confluence must be checked (lowest summand has number 1). If this number is 0 confluence for all summands is checked.
-    Specification check_confluence_and_mark(const data::data_expression a_invariant, const size_t a_summand_number);
+    void check_confluence_and_mark(const data::data_expression& a_invariant, const size_t a_summand_number);
 };
 
 // Auxiliary functions ----------------------------------------------------------------------------
@@ -663,7 +663,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
 
 template <typename Specification>
 Confluence_Checker<Specification>::Confluence_Checker(
-  const Specification& a_lps,
+  Specification& a_lps,
   data::rewriter::strategy a_rewrite_strategy,
   int a_time_limit,
   bool a_path_eliminator,
@@ -692,10 +692,10 @@ Confluence_Checker<Specification>::Confluence_Checker(
 // --------------------------------------------------------------------------------------------
 
 template <typename Specification>
-Specification Confluence_Checker<Specification>::check_confluence_and_mark(const data::data_expression a_invariant, const size_t a_summand_number)
+void Confluence_Checker<Specification>::check_confluence_and_mark(const data::data_expression& a_invariant, const size_t a_summand_number)
 {
-  const linear_process v_process_equation = f_lps.process();
-  action_summand_vector_type v_summands = v_process_equation.action_summands();
+  auto& v_process_equation = f_lps.process();
+  auto& v_summands = v_process_equation.action_summands();
   bool v_is_marked = false;
   size_t v_summand_number = 1;
 
@@ -704,10 +704,9 @@ Specification Confluence_Checker<Specification>::check_confluence_and_mark(const
 
   for (auto i=v_summands.begin(); i!=v_summands.end(); ++i)
   {
-    const action_summand_type v_summand = *i;
     if ((a_summand_number == v_summand_number) || (a_summand_number == 0))
     {
-      if (v_summand.is_tau())
+      if (i->is_tau())
       {
         mCRL2log(log::info) << "tau-summand " << v_summand_number << ": ";
         check_confluence_and_mark_summand(*i, v_summand_number, a_invariant, v_is_marked);
@@ -716,22 +715,13 @@ Specification Confluence_Checker<Specification>::check_confluence_and_mark(const
     }
     v_summand_number++;
   }
-  const linear_process new_process_equation(
-    v_process_equation.process_parameters(),
-    v_process_equation.deadlock_summands(),
-    v_summands);
 
-  process::action_label_list v_act_decls=f_lps.action_labels();
   if (v_is_marked && !has_ctau_action(f_lps))
   {
-    v_act_decls.push_front(make_ctau_act_id());
+    f_lps.action_labels().push_front(make_ctau_act_id());
   }
 
-  Specification v_lps(f_lps.data(),v_act_decls,f_lps.global_variables(),new_process_equation,f_lps.initial_process());
-
   f_intermediate = std::vector<size_t>();
-
-  return v_lps;
 }
 
 } // namespace detail
