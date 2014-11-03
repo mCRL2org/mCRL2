@@ -170,13 +170,13 @@ class Confluence_Checker
     Invariant_Checker<specification> f_invariant_checker;
 
     /// \brief BDD based prover.
-    mcrl2::data::detail::BDD_Prover f_bdd_prover;
+    data::detail::BDD_Prover f_bdd_prover;
 
     /// \brief Class that prints BDDs in dot format.
-    mcrl2::data::detail::BDD2Dot f_bdd2dot;
+    data::detail::BDD2Dot f_bdd2dot;
 
     /// \brief A linear process specification.
-    const mcrl2::lps::specification& f_lps;
+    const specification& f_lps;
 
     /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
     // bool f_no_marking;
@@ -230,11 +230,11 @@ class Confluence_Checker
     /// to 0, no time limit will be enforced
     Confluence_Checker
     (
-      mcrl2::lps::specification const& a_lps,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
+      specification const& a_lps,
+      data::rewriter::strategy a_rewrite_strategy = data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,
+      data::detail::smt_solver_type a_solver_type = data::detail::solver_type_cvc,
       bool a_apply_induction = false,
       bool a_check_all = false,
       bool a_counter_example = false,
