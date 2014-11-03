@@ -221,7 +221,7 @@ void lpsrewr(const std::string& input_filename,
              const data::rewriter::strategy rewrite_strategy
             )
 {
-  lps::specification spec;
+  stochastic_specification spec;
   load_lps(spec, input_filename);
   mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
   lps::rewrite(spec, R);
