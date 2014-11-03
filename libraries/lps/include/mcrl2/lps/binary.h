@@ -49,11 +49,15 @@ size_t nr_of_booleans_for_elements(size_t n)
 ///
 /// All parameters of finite data types are replaced with a vector of
 /// booleans.
-template<typename DataRewriter>
-class binary_algorithm: public detail::lps_algorithm<>
+template<typename DataRewriter, typename Specification>
+class binary_algorithm: public detail::lps_algorithm<Specification>
 {
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
   typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
+  typedef typename detail::lps_algorithm<Specification> super;
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  using super::m_spec;
 
   protected:
     /// Rewriter
@@ -67,6 +71,9 @@ class binary_algorithm: public detail::lps_algorithm<>
 
     /// Mapping of variables to corresponding if-tree
     data::mutable_map_substitution<> m_if_trees;
+
+    /// Variables appearing in rhs of m_if_trees
+    std::set<data::variable> m_if_trees_variables;
 
     /// \brief Build an if-then-else tree of enumerated elements in terms
     ///        of new parameters.
@@ -183,6 +190,7 @@ class binary_algorithm: public detail::lps_algorithm<>
       mCRL2log(log::debug) << "New process parameter(s): " << data::pp(new_parameters) << std::endl;
 
       m_spec.process().process_parameters() = data::variable_list(new_parameters.begin(),new_parameters.end());
+      m_if_trees_variables = data::substitution_variables(m_if_trees);
     }
 
     /// \brief Replace assignments in v that are of a finite sort with a
@@ -244,34 +252,46 @@ class binary_algorithm: public detail::lps_algorithm<>
     }
 
     /// \brief Update an action summand with the new Boolean parameters
-    void update_action_summand(action_summand& s, const std::set<data::variable>& if_trees_variables)
+    void update_action_summand(action_summand& s)
     {
-      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, if_trees_variables);
-      s.multi_action().actions() = lps::replace_variables_capture_avoiding(s.multi_action().actions(), m_if_trees, data::substitution_variables(m_if_trees));
-      if (s.multi_action().has_time())
-      {
-        s.multi_action().time() = data::replace_variables_capture_avoiding(s.multi_action().time(), m_if_trees, if_trees_variables);
-      }
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, m_if_trees_variables);
+      lps::replace_variables_capture_avoiding(s.multi_action(), m_if_trees, m_if_trees_variables);
       s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
     }
 
-    /// \brief Update a deadlock summand with the new Boolean parameters
-    void update_deadlock_summand(deadlock_summand& s, const std::set<data::variable>& if_trees_variables)
+    /// \brief Update an action summand with the new Boolean parameters
+    void update_action_summand(stochastic_action_summand& s)
     {
-      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, data::substitution_variables(m_if_trees));
-      if (s.deadlock().has_time())
-      {
-        s.deadlock().time() = data::replace_variables_capture_avoiding(s.deadlock().time(), m_if_trees, if_trees_variables);
-      }
+      update_action_summand(static_cast<action_summand&>(s));
+      s.distribution() = lps::replace_variables_capture_avoiding(s.distribution(), m_if_trees, m_if_trees_variables);
+    }
+
+    /// \brief Update a deadlock summand with the new Boolean parameters
+    void update_deadlock_summand(deadlock_summand& s)
+    {
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, m_if_trees_variables);
+      lps::replace_variables_capture_avoiding(s.deadlock(), m_if_trees, m_if_trees_variables);
+    }
+
+    process_initializer update_initial_process(const process_initializer& init)
+    {
+      return process_initializer(replace_enumerated_parameters_in_assignments(m_spec.initial_process().assignments()));
+    }
+    
+    stochastic_process_initializer update_initial_process(const stochastic_process_initializer& init)
+    {
+      return stochastic_process_initializer(replace_enumerated_parameters_in_assignments(m_spec.initial_process().assignments()),
+                                            lps::replace_variables_capture_avoiding(init.distribution(), m_if_trees, m_if_trees_variables)
+                                           );
     }
 
   public:
     /// \brief Constructor for binary algorithm
     /// \param spec Specification to which the algorithm should be applied
     /// \param r a rewriter for data
-    binary_algorithm(specification& spec,
+    binary_algorithm(Specification& spec,
                      DataRewriter& r)
-      : detail::lps_algorithm<>(spec),
+      : detail::lps_algorithm<Specification>(spec),
         m_rewriter(r)
     {}
 
@@ -283,20 +303,22 @@ class binary_algorithm: public detail::lps_algorithm<>
 
       // Initial process
       mCRL2log(log::debug) << "Updating process initializer" << std::endl;
-
-      m_spec.initial_process() = process_initializer(replace_enumerated_parameters_in_assignments(m_spec.initial_process().assignments()));
+      m_spec.initial_process() = update_initial_process(m_spec.initial_process().assignments());
 
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;
-      std::set<data::variable> if_trees_variables = data::substitution_variables(m_if_trees);
+ 
+      auto& action_summands = m_spec.process().action_summands();
+      for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+      {
+        update_action_summand(*i);
+      }
 
-      std::for_each(m_spec.process().action_summands().begin(),
-                    m_spec.process().action_summands().end(),
-                    boost::bind(&binary_algorithm::update_action_summand, this, _1, if_trees_variables));
-
-      std::for_each(m_spec.process().deadlock_summands().begin(),
-                    m_spec.process().deadlock_summands().end(),
-                    boost::bind(&binary_algorithm::update_deadlock_summand, this, _1, if_trees_variables));
+      auto& deadlock_summands = m_spec.process().deadlock_summands();
+      for (auto i = deadlock_summands.begin(); i != deadlock_summands.end(); ++i)
+      {
+        update_deadlock_summand(*i);
+      }
     }
 };
 

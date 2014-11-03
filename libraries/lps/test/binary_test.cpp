@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(case_1)
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   variable_list parameters1 = s1.process().process_parameters();
 
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(case_2)
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(case_3)
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(case_4)
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(case_5)
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(case_6)
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(bug_623)
   specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
   action_summand_vector summands1 = s1.process().action_summands();
   for (auto i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(abp)
   specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   std::clog << "--- before ---\n" << lps::pp(spec) << std::endl;
   rewriter r(spec.data());
-  binary_algorithm<rewriter>(spec, r).run();
+  binary_algorithm<rewriter, specification>(spec, r).run();
   std::clog << "--- after ---\n" << lps::pp(spec) << std::endl;
   BOOST_CHECK(is_well_typed(spec));
 }

@@ -235,7 +235,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       {
         if (!m_no_check)
         {
-          Invariant_Checker v_invariant_checker(specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), false, false, false, m_dot_file_name);
+          Invariant_Checker<lps::specification> v_invariant_checker(specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), false, false, false, m_dot_file_name);
 
           return v_invariant_checker.check_invariant(m_invariant);
         }

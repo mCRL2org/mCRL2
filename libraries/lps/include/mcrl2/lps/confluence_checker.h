@@ -167,7 +167,7 @@ class Confluence_Checker
     Disjointness_Checker f_disjointness_checker;
 
     /// \brief Class that checks if an invariant holds for an LPS.
-    Invariant_Checker f_invariant_checker;
+    Invariant_Checker<specification> f_invariant_checker;
 
     /// \brief BDD based prover.
     mcrl2::data::detail::BDD_Prover f_bdd_prover;

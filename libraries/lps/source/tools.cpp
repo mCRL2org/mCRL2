@@ -37,11 +37,11 @@ namespace lps
 void lpsbinary(const std::string& input_filename,
                const std::string& output_filename)
 {
-  lps::specification spec;
+  lps::stochastic_specification spec;
   load_lps(spec, input_filename);
   data::rewriter r(spec.data());
 
-  lps::binary_algorithm<data::rewriter>(spec, r).run();
+  lps::binary_algorithm<data::rewriter, stochastic_specification>(spec, r).run();
   save_lps(spec, output_filename);
 }
 
@@ -103,7 +103,7 @@ void lpsinvelm(const std::string& input_filename,
                const bool apply_induction,
                const int time_limit)
 {
-  lps::specification spec;
+  stochastic_specification spec;
   data::data_expression invariant;
 
   load_lps(spec, input_filename);
@@ -137,7 +137,7 @@ void lpsinvelm(const std::string& input_filename,
   }
   else
   {
-    detail::Invariant_Checker v_invariant_checker(spec,
+    detail::Invariant_Checker<stochastic_specification> v_invariant_checker(spec,
                                           rewrite_strategy,
                                           time_limit,
                                           path_eliminator,
@@ -152,7 +152,7 @@ void lpsinvelm(const std::string& input_filename,
 
   if (invariance_result)
   {
-    invelm_algorithm algorithm(spec,
+    invelm_algorithm<stochastic_specification> algorithm(spec,
                                rewrite_strategy,
                                time_limit,
                                path_eliminator,

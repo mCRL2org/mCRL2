@@ -43,7 +43,7 @@ lps::specification invelm(const lps::specification& spec,
   data::detail::smt_solver_type solver_type = mcrl2::data::detail::solver_type_cvc;
   bool apply_induction = false;
 
-  lps::detail::Invariant_Checker v_invariant_checker(specification,
+  lps::detail::Invariant_Checker<lps::specification> v_invariant_checker(specification,
                                                      rewrite_strategy,
                                                      time_limit,
                                                      path_eliminator,
@@ -53,7 +53,7 @@ lps::specification invelm(const lps::specification& spec,
                                                     );
   if (v_invariant_checker.check_invariant(invariant))
   {
-    lps::invelm_algorithm algorithm(specification,
+    lps::invelm_algorithm<lps::specification> algorithm(specification,
                                     rewrite_strategy,
                                     time_limit,
                                     path_eliminator,
