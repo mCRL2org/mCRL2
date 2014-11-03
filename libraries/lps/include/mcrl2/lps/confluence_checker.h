@@ -15,15 +15,24 @@
 #ifndef CONFLUENCE_CHECKER_H
 #define CONFLUENCE_CHECKER_H
 
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
 #include <string>
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/bdd2dot.h"
+#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/detail/prover/bdd2dot.h"
 #include "mcrl2/lps/linear_process.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/exception.h"
+
 
 /** \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.
     \brief The tau actions of all confluent tau-summands are renamed to ctau.
@@ -159,15 +168,19 @@ inline process::action make_ctau_action()
   return process::action(ctau_action);
 }
 
-
+template <typename Specification>
 class Confluence_Checker
 {
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  typedef std::vector<action_summand_type> action_summand_vector_type;
+
   private:
     /// \brief Class that can check if two summands are disjoint.
     Disjointness_Checker f_disjointness_checker;
 
     /// \brief Class that checks if an invariant holds for an LPS.
-    Invariant_Checker<specification> f_invariant_checker;
+    Invariant_Checker<Specification> f_invariant_checker;
 
     /// \brief BDD based prover.
     data::detail::BDD_Prover f_bdd_prover;
@@ -176,7 +189,7 @@ class Confluence_Checker
     data::detail::BDD2Dot f_bdd2dot;
 
     /// \brief A linear process specification.
-    const specification& f_lps;
+    const Specification& f_lps;
 
     /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
     // bool f_no_marking;
@@ -210,15 +223,15 @@ class Confluence_Checker
     /// \brief Checks the confluence of summand a_summand_1 and a_summand_2
     bool check_summands(
       const data::data_expression a_invariant,
-      const action_summand a_summand_1,
+      const action_summand_type a_summand_1,
       const size_t a_summand_number_1,
-      const action_summand a_summand_2,
+      const action_summand_type a_summand_2,
       const size_t a_summand_number_2);
 
     /// \brief Checks the confluence of summand a_summand concerning all other tau-summands.
-    action_summand check_confluence_and_mark_summand(
-      const data::data_expression a_invariant,
-      const action_summand a_summand,
+    typename Specification::process_type::action_summand_type check_confluence_and_mark_summand(
+      const data::data_expression& a_invariant,
+      const action_summand_type& a_summand,
       const size_t a_summand_number,
       bool& a_is_marked);
 
@@ -230,7 +243,7 @@ class Confluence_Checker
     /// to 0, no time limit will be enforced
     Confluence_Checker
     (
-      specification const& a_lps,
+      const Specification& a_lps,
       data::rewriter::strategy a_rewrite_strategy = data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
@@ -242,15 +255,491 @@ class Confluence_Checker
       std::string const& a_dot_file_name = std::string()
     );
 
-    /// \brief Destructor that frees the memory used by Confluence_Checker::f_dot_file_name.
-    ~Confluence_Checker();
-
     /// \brief Check the confluence of the LPS Confluence_Checker::f_lps.
     /// precondition: the argument passed as parameter a_invariant is an expression of sort Bool in internal mCRL2 format
     /// precondition: the argument passed as parameter a_summand_number corresponds with a summand of the LPS for which
     /// confluence must be checked (lowest summand has number 1). If this number is 0 confluence for all summands is checked.
-    specification check_confluence_and_mark(const data::data_expression a_invariant, const size_t a_summand_number);
+    Specification check_confluence_and_mark(const data::data_expression a_invariant, const size_t a_summand_number);
 };
+
+// Auxiliary functions ----------------------------------------------------------------------------
+
+static
+data::mutable_map_substitution<> get_substitutions_from_assignments(const data::assignment_list a_assignments)
+{
+  data::mutable_map_substitution<> v_substitutions;
+
+  for (auto i=a_assignments.begin(); i!=a_assignments.end(); ++i)
+  {
+    v_substitutions[i->lhs()]=i->rhs();
+  }
+  return v_substitutions;
+}
+
+// ----------------------------------------------------------------------------------------------
+static
+data::data_expression get_subst_equation_from_assignments(
+  const data::variable_list a_variables,
+  data::assignment_list a_assignments_1,
+  data::assignment_list a_assignments_2,
+  data::mutable_map_substitution<>& a_substitutions_1,
+  data::mutable_map_substitution<>& a_substitutions_2)
+{
+  data::data_expression v_result = data::sort_bool::true_();
+
+  const data::assignment_list v_assignment_1, v_assignment_2;
+  data::variable v_variable_1, v_variable_2;
+  data::data_expression v_expression_1, v_expression_2;
+  bool v_next_1 = true, v_next_2 = true;
+
+  for (auto i=a_variables.begin(); i!=a_variables.end();)
+  {
+    data::variable v_variable = *i;
+    ++i;
+
+    if (!a_assignments_1.empty() && v_next_1)
+    {
+      const data::assignment v_assignment_1 = a_assignments_1.front();
+      a_assignments_1.pop_front();
+      v_variable_1 = v_assignment_1.lhs();
+      v_expression_1 = v_assignment_1.rhs();
+      v_expression_1 = data::replace_variables_capture_avoiding(v_expression_1, a_substitutions_2, data::substitution_variables(a_substitutions_2));
+    }
+    if (!a_assignments_2.empty() && v_next_2)
+    {
+      const data::assignment v_assignment_2 = a_assignments_2.front();
+      a_assignments_2.pop_front();
+      v_variable_2 = v_assignment_2.lhs();
+      v_expression_2 = v_assignment_2.rhs();
+      v_expression_2 = data::replace_variables_capture_avoiding(v_expression_2, a_substitutions_1, data::substitution_variables(a_substitutions_1));
+    }
+    while (v_variable != v_variable_1 && v_variable != v_variable_2 && i!=a_variables.end())
+    {
+      v_variable = *i;
+      ++i;
+    }
+    if (v_variable_1 == v_variable_2)
+    {
+      v_result = data::sort_bool::and_(v_result, equal_to(v_expression_1, v_expression_2));
+      v_next_1 = true;
+      v_next_2 = true;
+    }
+    else if (v_variable == v_variable_1)
+    {
+      data::data_expression expr = data::replace_variables_capture_avoiding(data::data_expression(v_variable_1), a_substitutions_1, data::substitution_variables(a_substitutions_1));
+      v_result = data::sort_bool::and_(data::data_expression(v_result), equal_to(v_expression_1, expr));
+      v_next_1 = true;
+      v_next_2 = false;
+    }
+    else if (v_variable == v_variable_2)
+    {
+      data::data_expression expr = data::replace_variables_capture_avoiding(data::data_expression(v_variable_2), a_substitutions_2, data::substitution_variables(a_substitutions_2));
+      v_result = data::sort_bool::and_(data::data_expression(v_result), equal_to(data::data_expression(v_expression_2), expr));
+      v_next_1 = false;
+      v_next_2 = true;
+    }
+  }
+  return v_result;
+}
+
+// ----------------------------------------------------------------------------------------------
+
+static
+data::data_expression get_equation_from_assignments(
+  const data::variable_list a_variables,
+  data::assignment_list a_assignments_1,
+  data::assignment_list a_assignments_2)
+{
+  data::data_expression v_result = data::sort_bool::true_();
+
+  for (auto i=a_variables.begin(); i!=a_variables.end(); ++i)
+  {
+    const data::variable v_variable=*i;
+    if (!a_assignments_1.empty() && v_variable == a_assignments_1.front().lhs())
+    {
+      if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs())
+      {
+        // Create a condition from the assigments from both lists.
+        v_result = data::sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), a_assignments_2.front().rhs()));
+        a_assignments_2.pop_front();
+      }
+      else
+      {
+        // Create a condition from first assigment only.
+        v_result = data::sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), v_variable));
+      }
+      a_assignments_1.pop_front();
+    }
+    else
+    {
+      if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs())
+      {
+        // Create a condition from the second assigments only.
+        v_result = data::sort_bool::and_(v_result, equal_to(v_variable, a_assignments_2.front().rhs()));
+        a_assignments_2.pop_front();
+      }
+    }
+  }
+
+  assert(a_assignments_1.empty()); // If this is not the case, the assignments do not have the
+  assert(a_assignments_2.empty()); // same order as the list of variables. This means that some equations
+                                   // have not been generated.
+  return v_result;
+}
+
+// ----------------------------------------------------------------------------------------------
+inline
+data::data_expression get_subst_equation_from_actions(
+  const process::action_list a_actions,
+  data::mutable_map_substitution<>& a_substitutions)
+{
+  data::data_expression v_result = data::sort_bool::true_();
+
+  for (auto i=a_actions.begin(); i!=a_actions.end(); ++i)
+  {
+    const data::data_expression_list v_expressions = i->arguments();
+    for (auto j=v_expressions.begin(); j!=v_expressions.end(); ++j)
+    {
+      const data::data_expression v_subst_expression = data::replace_variables_capture_avoiding(*j, a_substitutions, data::substitution_variables(a_substitutions));
+      v_result = data::sort_bool::and_(data::data_expression(v_result), equal_to(*j, v_subst_expression));
+    }
+  }
+  return v_result;
+}
+
+// ----------------------------------------------------------------------------------------------
+
+template <typename ActionSummand>
+data::data_expression get_confluence_condition(
+  const data::data_expression& a_invariant,
+  const ActionSummand& a_summand_1,
+  const ActionSummand& a_summand_2,
+  const data::variable_list& a_variables)
+{
+  assert(a_summand_1.is_tau());
+
+  const data::data_expression v_condition_1 = a_summand_1.condition();
+  const data::assignment_list v_assignments_1 = a_summand_1.assignments();
+
+  data::mutable_map_substitution<> v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
+  const data::data_expression v_condition_2 = a_summand_2.condition();
+  const data::data_expression v_lhs = data::sort_bool::and_(data::sort_bool::and_(v_condition_1, v_condition_2), a_invariant);
+  const data::assignment_list v_assignments_2 = a_summand_2.assignments();
+
+  data::mutable_map_substitution<> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
+  const data::data_expression v_subst_condition_1 = data::replace_variables_capture_avoiding(v_condition_1, v_substitutions_2, data::substitution_variables(v_substitutions_2));
+  const data::data_expression v_subst_condition_2 = data::replace_variables_capture_avoiding(v_condition_2, v_substitutions_1, data::substitution_variables(v_substitutions_1));
+
+  const data::data_expression v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
+
+  const process::action_list v_actions =a_summand_2.multi_action().actions();
+  data::data_expression v_rhs;
+
+  if (v_actions.empty())
+  {
+    // tau-summand
+    const data::data_expression  v_equation = get_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2);
+    v_rhs = data::sort_bool::and_(v_subst_condition_1, v_subst_condition_2);
+    v_rhs = data::sort_bool::and_(v_rhs, v_subst_equation);
+    v_rhs = data::sort_bool::or_(v_equation, v_rhs);
+  }
+  else
+  {
+    // non-tau-summand
+    const data::data_expression v_actions_equation = get_subst_equation_from_actions(v_actions, v_substitutions_1);
+    v_rhs = data::sort_bool::and_(v_subst_condition_1, v_subst_condition_2);
+    v_rhs = data::sort_bool::and_(v_rhs, v_actions_equation);
+    v_rhs = data::sort_bool::and_(v_rhs, data::data_expression(v_subst_equation));
+  }
+  return data::sort_bool::implies(v_lhs, v_rhs);
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+bool has_ctau_action(const Specification& a_lps)
+{
+  auto const& v_action_specification = a_lps.action_labels();
+  return std::find(v_action_specification.begin(),v_action_specification.end(),make_ctau_act_id())!=v_action_specification.end();
+}
+
+
+// Class Confluence_Checker -----------------------------------------------------------------------
+// Class Confluence_Checker - Functions declared private ----------------------------------------
+
+template <typename Specification>
+void Confluence_Checker<Specification>::save_dot_file(size_t a_summand_number_1, size_t a_summand_number_2)
+{
+  if (!f_dot_file_name.empty())
+  {
+    std::ostringstream v_file_name(f_dot_file_name);
+
+    v_file_name << "-" << a_summand_number_1 << "-" << a_summand_number_2 << ".dot";
+
+    f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name.str().c_str());
+  }
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+void Confluence_Checker<Specification>::print_counter_example()
+{
+  if (f_counter_example)
+  {
+    const data::data_expression v_counter_example(f_bdd_prover.get_counter_example());
+    mCRL2log(log::info) << "  Counter example: " << v_counter_example << "\n";
+  }
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+bool Confluence_Checker<Specification>::check_summands(
+  const data::data_expression a_invariant,
+  const action_summand_type a_summand_1,
+  const size_t a_summand_number_1,
+  const action_summand_type a_summand_2,
+  const size_t a_summand_number_2)
+{
+  assert(a_summand_1.is_tau());
+
+  const data::variable_list v_variables = f_lps.process().process_parameters();
+  bool v_is_confluent = true;
+
+  if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2))
+  {
+    mCRL2log(log::info) << ":";
+  }
+  else
+  {
+    const data::data_expression v_condition = get_confluence_condition(a_invariant, a_summand_1, a_summand_2, v_variables);
+    f_bdd_prover.set_formula(v_condition);
+    if (f_bdd_prover.is_tautology() == data::detail::answer_yes)
+    {
+      mCRL2log(log::info) << "+";
+    }
+    else
+    {
+      if (f_generate_invariants)
+      {
+        const data::data_expression v_new_invariant(f_bdd_prover.get_bdd());
+        mCRL2log(log::verbose) << "\nChecking invariant: " << data::pp(v_new_invariant) << "\n";
+        if (f_invariant_checker.check_invariant(v_new_invariant))
+        {
+          mCRL2log(log::verbose) << "Invariant holds" << std::endl;
+          mCRL2log(log::info) << "i";
+        }
+        else
+        {
+          mCRL2log(log::verbose) << "Invariant doesn't hold" << std::endl;
+          v_is_confluent = false;
+          if (f_check_all)
+          {
+            mCRL2log(log::info) << "-";
+          }
+          else
+          {
+            mCRL2log(log::info) << "Not confluent with summand " << a_summand_number_2 << ".";
+          }
+          print_counter_example();
+          save_dot_file(a_summand_number_1, a_summand_number_2);
+        }
+      }
+      else
+      {
+        v_is_confluent = false;
+        if (f_check_all)
+        {
+          mCRL2log(log::info) << "-";
+        }
+        else
+        {
+          mCRL2log(log::info) << "Not confluent with summand " << a_summand_number_2 << ".";
+        }
+        print_counter_example();
+        save_dot_file(a_summand_number_1, a_summand_number_2);
+      }
+    }
+
+  }
+  return v_is_confluent;
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+typename Specification::process_type::action_summand_type Confluence_Checker<Specification>::check_confluence_and_mark_summand(
+  const data::data_expression& a_invariant,
+  const action_summand_type& a_summand,
+  const size_t a_summand_number,
+  bool& a_is_marked)
+{
+  assert(a_summand.is_tau());
+  auto const& v_summands = f_lps.process().action_summands();
+  size_t v_summand_number = 1;
+  bool v_is_confluent = true;
+  bool v_current_summands_are_confluent;
+
+  // Add here that the sum variables of a_summand must be empty otherwise
+  // the confluence of the summand must be checked with respect to itself,
+  // which requires quantification. Otherwise tau.a+tau.b will be designated
+  // tau-confluent, if linearised with summand clustering.
+
+  const data::variable_list a_summand_sum_variables=a_summand.summation_variables();
+  if (!a_summand_sum_variables.empty())
+  {
+    v_is_confluent = false;
+    mCRL2log(log::info) << "Summand " << a_summand_number << " is not proven confluent because it contains a sum operator.";
+  }
+
+  for (auto i=v_summands.begin(); i!=v_summands.end() && (v_is_confluent || f_check_all); ++i)
+  {
+    const action_summand_type v_summand = *i;
+
+    if (v_summand_number < a_summand_number)
+    {
+      if (f_intermediate[v_summand_number] > a_summand_number)
+      {
+        mCRL2log(log::info) << ".";
+        v_summand_number++;
+      }
+      else
+      {
+        if (f_intermediate[v_summand_number] == a_summand_number)
+        {
+          if (f_check_all)
+          {
+            mCRL2log(log::info) << "-";
+          }
+          else
+          {
+            mCRL2log(log::info) << "Not confluent with summand " << v_summand_number << ".";
+          }
+          v_is_confluent = false;
+        }
+        else
+        {
+          v_current_summands_are_confluent = check_summands(a_invariant, a_summand, a_summand_number, v_summand, v_summand_number);
+          if (v_current_summands_are_confluent)
+          {
+            v_summand_number++;
+          }
+          else
+          {
+            v_is_confluent = false;
+          }
+        }
+      }
+    }
+    else
+    {
+      v_current_summands_are_confluent = check_summands(a_invariant, a_summand, a_summand_number, v_summand, v_summand_number);
+      if (v_current_summands_are_confluent)
+      {
+        v_summand_number++;
+      }
+      else
+      {
+        v_is_confluent = false;
+      }
+    }
+  }
+
+  if (!f_check_all)
+  {
+    f_intermediate[a_summand_number] = v_summand_number;
+  }
+
+  if (v_is_confluent)
+  {
+    mCRL2log(log::info) << "Confluent with all summands.";
+    a_is_marked = true;
+    return action_summand_type(a_summand.summation_variables(),
+                          a_summand.condition(),
+                          multi_action(make_ctau_action()),
+                          a_summand.assignments());
+  }
+  else
+  {
+    return a_summand;
+  }
+}
+
+// Class Confluence_Checker - Functions declared public -----------------------------------------
+
+template <typename Specification>
+Confluence_Checker<Specification>::Confluence_Checker(
+  const Specification& a_lps,
+  data::rewriter::strategy a_rewrite_strategy,
+  int a_time_limit,
+  bool a_path_eliminator,
+  data::detail::smt_solver_type a_solver_type,
+  bool a_apply_induction,
+  bool a_check_all,
+  bool a_counter_example,
+  bool a_generate_invariants,
+  std::string const& a_dot_file_name):
+  f_disjointness_checker(lps::linear_process_to_aterm(a_lps.process())),
+  f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
+  f_bdd_prover(a_lps.data(), data::used_data_equation_selector(a_lps.data()), a_rewrite_strategy,
+                     a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
+  f_lps(a_lps),
+  f_check_all(a_check_all),
+  f_counter_example(a_counter_example),
+  f_dot_file_name(a_dot_file_name),
+  f_generate_invariants(a_generate_invariants)
+{
+  if (has_ctau_action(a_lps))
+  {
+    throw mcrl2::runtime_error("An action named \'ctau\' already exists.\n");
+  }
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+Specification Confluence_Checker<Specification>::check_confluence_and_mark(const data::data_expression a_invariant, const size_t a_summand_number)
+{
+  const linear_process v_process_equation = f_lps.process();
+  action_summand_vector_type v_summands = v_process_equation.action_summands();
+  bool v_is_marked = false;
+  size_t v_summand_number = 1;
+
+  f_number_of_summands = v_summands.size();
+  f_intermediate = std::vector<size_t>(f_number_of_summands + 2, 0);
+
+  for (auto i=v_summands.begin(); i!=v_summands.end(); ++i)
+  {
+    const action_summand_type v_summand = *i;
+    if ((a_summand_number == v_summand_number) || (a_summand_number == 0))
+    {
+      if (v_summand.is_tau())
+      {
+        mCRL2log(log::info) << "tau-summand " << v_summand_number << ": ";
+        *i = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
+        mCRL2log(log::info) << std::endl;
+      }
+    }
+    v_summand_number++;
+  }
+  const linear_process new_process_equation(
+    v_process_equation.process_parameters(),
+    v_process_equation.deadlock_summands(),
+    v_summands);
+
+  process::action_label_list v_act_decls=f_lps.action_labels();
+  if (v_is_marked && !has_ctau_action(f_lps))
+  {
+    v_act_decls.push_front(make_ctau_act_id());
+  }
+
+  Specification v_lps(f_lps.data(),v_act_decls,f_lps.global_variables(),new_process_equation,f_lps.initial_process());
+
+  f_intermediate = std::vector<size_t>();
+
+  return v_lps;
+}
 
 } // namespace detail
 } // namespace lps

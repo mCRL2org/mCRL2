@@ -210,7 +210,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
       if (check_invariant(spec))
       {
-        Confluence_Checker v_confluence_checker(
+        Confluence_Checker<specification> v_confluence_checker(
           spec, rewrite_strategy(),
           m_time_limit, m_path_eliminator, solver_type(),
           m_apply_induction, m_check_all,
