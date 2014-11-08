@@ -14,7 +14,11 @@
 #include <iterator>
 #include <string>
 #include <vector>
+#include <forward_list>
 #include <boost/iterator/iterator_facade.hpp>
+
+#include "mcrl2/atermpp/shared_subset.h"
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
 
 #include "mcrl2/data/enumerator.h"
 #ifdef MCRL2_NEXT_STATE_LOG_EQUALITIES
@@ -22,8 +26,6 @@
 #endif
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/state.h"
-#include "mcrl2/atermpp/shared_subset.h"
-#include "mcrl2/atermpp/aterm_balanced_tree.h"
 
 namespace mcrl2
 {
@@ -57,6 +59,7 @@ class next_state_generator
       stochastic_action_summand *summand;
       data::variable_list variables;
       data::data_expression condition;
+      stochastic_distribution distribution;
       data::data_expression_vector result_state;
       std::vector<action_internal_t> action_label;
 
@@ -106,12 +109,52 @@ class next_state_generator
         atermpp::shared_subset<summand_t>::iterator begin(const state_t& state_t);
     };
 
+    class state_probability_pair
+    {
+      protected:
+        // A state 
+        lps::state m_state;
+        // A data expression of sort Real that indicates the probability of this state
+        data::data_expression m_probability;
+      public:
+
+        /// \Brief constructor
+        state_probability_pair(const lps::state state, const data::data_expression& probability)
+         : m_state(state), 
+           m_probability(probability)
+        {
+          assert(probability.sort()==data::sort_real::real_());
+        } 
+
+        const lps::state& state() const
+        {
+          return m_state;
+        }
+
+        void set_state(const lps::state& state) 
+        {
+          m_state=state;
+        }
+
+        const data::data_expression& probability() const
+        {
+          return m_probability;
+        }
+    };
+
     class transition_t
     {
+      public:
+        typedef std::forward_list<state_probability_pair> state_probability_list;
+
       protected:
         lps::multi_action m_action;
         lps::state m_target_state;
         size_t m_summand_index;
+        // The following list contains all but one target states with their probabity. 
+        // m_target_state is the other state, with the residual probability, such
+        // that all probabilities add up to 1.
+        state_probability_list m_other_target_states; 
 
       public:
         const lps::multi_action& action() const { return m_action; }
@@ -130,6 +173,12 @@ class next_state_generator
         void set_summand_index(const size_t summand_index)
         {
           m_summand_index=summand_index;
+        }
+
+        const state_probability_list& other_target_states() const { return m_other_target_states; }
+        void set_other_target_states(const state_probability_list& other_target_states)
+        {
+          m_other_target_states=other_target_states;
         }
     };
 
@@ -230,7 +279,7 @@ class next_state_generator
 
     data::variable_vector m_process_parameters;
     std::vector<summand_t> m_summands;
-    state_t m_initial_state;
+    transition_t::state_probability_list m_initial_states;
 
     summand_subset_t m_all_summands;
 
@@ -270,10 +319,10 @@ class next_state_generator
     }
 
     /// \brief Gets the initial state.
-    state_t initial_state() const
+    const transition_t::state_probability_list& initial_states() const
     {
-      return m_initial_state;
-    }
+      return m_initial_states;
+    } 
 
     /// \brief Returns the currently loaded specification.
     const lps::stochastic_specification& get_specification() const
@@ -292,6 +341,14 @@ class next_state_generator
     {
       return m_all_summands;
     }
+
+    // Calculate the set of states with associated probabilities from a symbolic state
+    // and an associated stochastic distribution for the free variables in that state.
+    // The result is a list of closed states with associated probabilities.
+    const transition_t::state_probability_list calculate_distribution(
+                         const stochastic_distribution& dist,
+                         const data::data_expression_vector& state,
+                         substitution_t& sigma);
 };
 
 } // namespace lps

@@ -627,7 +627,7 @@ class pins
     /// \brief Assigns the initial state to s.
     void get_initial_state(ltsmin_state_type& s)
     {
-      state initial_state = m_generator.initial_state();
+      state initial_state = m_generator.initial_states().front().state(); // Only the first state of this state distribution is considered.
       for (size_t i = 0; i < m_state_length; i++)
       {
         s[i] = state_type_map(i)[initial_state[i]];

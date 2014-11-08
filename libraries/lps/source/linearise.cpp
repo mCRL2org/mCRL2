@@ -277,8 +277,8 @@ class specification_basic_type:public boost::noncopyable
   private:
     data_expression real_zero()
     {
-      static data_expression one=sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1());
-      return one;
+      static data_expression zero=sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1());
+      return zero;
     }
 
     data_expression real_one()

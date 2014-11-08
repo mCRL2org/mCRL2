@@ -206,7 +206,7 @@ int test_main(int argc, char** argv)
     std::stack< state >     stack;
     std::set< state >   known;
 
-    stack.push(explorer.initial_state());
+    stack.push(explorer.initial_states().front().state());
     known.insert(stack.top());
 
     while (!stack.empty())

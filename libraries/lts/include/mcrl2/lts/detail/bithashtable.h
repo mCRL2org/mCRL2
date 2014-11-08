@@ -149,10 +149,6 @@ class bit_hash_table
       m_bit_hash_table[i] = false;
     }
 
-    /* void remove_state_from_bithash(atermpp::aterm state)
-    {
-      remove_state_from_bithash((const atermpp::aterm)state);
-    } */
 
     size_t add_state(atermpp::aterm state, bool& is_new)
     {
@@ -161,6 +157,15 @@ class bit_hash_table
       m_bit_hash_table[i] = true;
       return i;
     }
+
+    void add_states(lps::next_state_generator::transition_t::state_probability_list states)
+    {
+      for(lps::next_state_generator::transition_t::state_probability_list::const_iterator i=states.begin(); i!=states.end(); ++i)
+      {
+        add_state(i->state());
+      }
+    }
+
 
     std::pair<size_t, bool> add_state(atermpp::aterm state)
     {

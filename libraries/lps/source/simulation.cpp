@@ -19,7 +19,8 @@ simulation::simulation(const specification& specification, data::rewrite_strateg
     m_tau_prioritization(false)
 {
   state_t state;
-  state.source_state = m_generator.initial_state();
+std::cerr << "TODO:: THIS SIMULATOR DOES NOT TAKE INITIAL DISTRIBUTION INTO ACCOUNT. IT JUST PICKS ONE (1).\n";
+  state.source_state = m_generator.initial_states().front().state();
   state.transitions = transitions(state.source_state);
   m_full_trace.push_back(state);
 }
@@ -124,7 +125,9 @@ void simulation::load(const std::string &filename)
 
   // Get the first state from the generator
   m_full_trace.clear();
-  push_back(m_generator.initial_state());
+std::cerr << "TODO:: THIS SIMULATOR DOES NOT TAKE INITIAL DISTRIBUTION INTO ACCOUNT. IT JUST PICKS ONE (2).\n";
+  // push_back(m_generator.initial_state());
+  push_back(m_generator.initial_states().front().state());
 
   // Check that the first state (if given) matches the first state of our generator
   if (trace.current_state_exists() && trace.currentState() != m_full_trace.back().source_state)

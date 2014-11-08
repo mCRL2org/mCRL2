@@ -355,8 +355,8 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  auto const throw_exceptions = true;
-  auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+  const bool throw_exceptions = true;
+  const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_false, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
   enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
@@ -458,8 +458,8 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  auto const throw_exceptions = true;
-  auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+  const bool throw_exceptions = true;
+  const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_true, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
   enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
