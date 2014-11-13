@@ -172,7 +172,14 @@ class next_state_generator
 #endif
           m_enumeration_queue->clear();
           m_enumeration_queue->push_back(data::enumerator_list_element_with_substitution<>(variables, phi));
-          m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, *m_enumeration_queue);
+          try 
+          { 
+            m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, *m_enumeration_queue);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nProblem occurred when enumerating variables " + data::pp(variables) + " in " + data::pp(phi));
+          }
         }
 
 
