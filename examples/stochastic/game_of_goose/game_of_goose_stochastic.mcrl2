@@ -1,6 +1,4 @@
 % The Royal Game of Goose (in Dutch: Het oudholands ganzenbord)
-% [This is a non-stochastic variant. For the stochastic variant see the
-%  directory with stochastic examples]
 % 
 % We model the Royal Game of Goose in mCRL2. Using this we can determine
 % what the probability is of the various players to win. Roughly the rules
@@ -129,7 +127,7 @@ proc
         (position(player)==64) -> skip(player).THROW(next(player),position[player->19])<>
         
         % Otherwise throw the dice.
-        sum throw1,throw2:Pos.(throw1<=6 && throw2<=6)->throw(player,throw1,throw2).
+        dist throw1,throw2:Pos[if(throw1<=6 && throw2<=6,1/36,0)].throw(player,throw1,throw2).
                          THROW(next(player),position[player->next_position(player,position,throw1,throw2)]);
 
 init THROW(1,initial_positions);

@@ -2845,11 +2845,30 @@ class specification_basic_type:public boost::noncopyable
                    substitute_pCRLproc(sum(body1).operand(),sigma,variables_occurring_in_rhs_of_sigma),
                    condition));
       }
+      
+      if (is_stochastic_operator(body1))
+      {
+        /* we must take care that no variables in condition are
+            inadvertently bound */
+        const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(body1);
+        variable_list stochvars=sto.variables();
+        mutable_map_substitution<> sigma;
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
+        alphaconvert(stochvars,sigma,variable_list(), make_list(condition),variables_occurring_in_rhs_of_sigma);
+        return stochastic_operator(
+                 stochvars,
+                 data::replace_variables_capture_avoiding(
+                                               sto.distribution(),
+                                               sigma,
+                                               variables_occurring_in_rhs_of_sigma),
+                 distribute_condition(
+                       substitute_pCRLproc(sto.operand(),sigma,variables_occurring_in_rhs_of_sigma),
+                       condition));
+      }
 
       if (is_at(body1)||
           is_action(body1)||
           is_sync(body1)||
-          is_stochastic_operator(body1)||
           is_process_instance_assignment(body1)||
           is_delta(body1)||
           is_tau(body1))
@@ -5034,6 +5053,14 @@ class specification_basic_type:public boost::noncopyable
         collectsumlistterm(procId,action_summands,deadlock_summands,t2,pars,stack,
                            regular,singlestate,pCRLprocs);
         return;
+      }
+      if (is_stochastic_operator(body))
+      {
+        /* Remove leading stochastic operators. They will not become
+           part of this summand */
+        const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(body);
+        collectsumlistterm(procId,action_summands,deadlock_summands,sto.operand(),pars,stack,
+                           regular,singlestate,pCRLprocs);
       }
       else
       {
