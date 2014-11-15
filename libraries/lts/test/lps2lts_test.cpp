@@ -26,7 +26,6 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -129,36 +128,6 @@ static void check_lps2lts_specification(std::string const& specification,
       BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
       BOOST_CHECK_EQUAL(result3.num_action_labels(), expected_labels);
 
-#ifdef USE_BCG
-      lts::lts_bcg_t result6 = translate_lps_to_lts<lts::lts_bcg_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
-
-//	bool has_i_label = false;
-//	bool has_tau = false;
-//        for( process::action_label_list::iterator i = lps.action_labels().begin(); i != lps.action_labels().end(); ++i )
-//	{
-//                has_i_label = has_i_label || ( i -> name() == atermpp::aterm_string( "i" ) );
-//	}
-
- //       for( lps::action_summand_vector::iterator i = lps.process().action_summands().begin() ;
- //         i != lps.process().action_summands().end() ;
- //         ++i )
- //       {
- //          has_tau = has_tau || i->is_tau() ;
- //       }
-
-
-      std::cerr << "BCG FORMAT\n";
-      BOOST_CHECK_EQUAL(result6.num_states(), expected_states);
-      BOOST_CHECK_EQUAL(result6.num_transitions(), expected_transitions);
-//        if( has_i_label )
-//        {
-//          BOOST_CHECK_EQUAL(result6.num_action_labels(), expected_labels );
-//        }
-//        else
-//        {
-//            BOOST_CHECK_EQUAL(result6.num_action_labels() , expected_labels + 1 );
-//        }
-#endif
     }
   }
 }

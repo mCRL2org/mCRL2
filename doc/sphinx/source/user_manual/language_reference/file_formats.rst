@@ -19,7 +19,6 @@ This page lists all file formats supported by the mCRL2 toolset.
   GM           .gm         textual  parity game in the PGSolver format
   LTS          .lts        binary   labelled transition system in the :ref:`language-mcrl2-lts`
   SVC          .svc        binary   labelled transition system in the `SVC file format <http://db.cwi.nl/rapporten/abstract.php?abstractnr=1060>`_
-  BCG          .bcg        binary   labelled transition system in the `BCG file format <http://www.inrialpes.fr/vasy/cadp/man/bcg.html>`_
   AUT          .aut        textual  labelled transition system in the :ref:`language-aut-lts`
   FSM          .fsm        textual  labelled transition system in the :ref:`language-fsm-lts`
   trace        .trc        binary   trace for simulation

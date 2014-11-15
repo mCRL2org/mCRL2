@@ -351,15 +351,6 @@ bool lps2lts_algorithm::finalise_lts_generation()
         fsm.save(m_options.lts);
         break;
       }
-#ifdef USE_BCG
-      case lts_bcg:
-      {
-        lts_bcg_t bcg;
-        detail::lts_convert(m_output_lts, bcg);
-        bcg.save(m_options.lts);
-        break;
-      }
-#endif
       case lts_dot:
       {
         lts_dot_t dot;

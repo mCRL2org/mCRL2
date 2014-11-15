@@ -294,12 +294,6 @@ class lts2lps_tool : public input_output_tool
         {
           return transform_lps2lts<lts_fsm_t>();
         }
-#ifdef USE_BCG
-        case lts_bcg:
-        {
-          return transform_lps2lts<lts_bcg_t>();
-        }
-#endif
         case lts_dot:
         {
           return transform_lps2lts<lts_dot_t>();

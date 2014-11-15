@@ -243,15 +243,6 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
           convert_to_lts_lts(l, result);
           break;
         }
-#ifdef USE_BCG
-        case lts_bcg:
-        {
-          lts_bcg_t l;
-          l.load(infilename);
-          convert_to_lts_lts(l, result);
-          break;
-        }
-#endif
         case lts_dot:
         {
           lts_dot_t l;

@@ -179,15 +179,6 @@ class ltsconvert_tool : public ltsconvert_base
           l_out.save(tool_options.outfilename);
           return true;
         }
-#ifdef USE_BCG
-        case lts_bcg:
-        {
-          lts_bcg_t l_out;
-          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
-          l_out.save(tool_options.outfilename);
-          return true;
-        }
-#endif
         case lts_dot:
         {
           lts_dot_t l_out;
@@ -224,12 +215,6 @@ class ltsconvert_tool : public ltsconvert_base
         {
           return load_convert_and_save<lts_fsm_t>();
         }
-#ifdef USE_BCG
-        case lts_bcg:
-        {
-          return load_convert_and_save<lts_bcg_t>();
-        }
-#endif
         case lts_dot:
         {
           return load_convert_and_save<lts_dot_t>();

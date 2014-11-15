@@ -29,8 +29,6 @@ project (MCRL2)
 
 option(MCRL2_ENABLE_GUI_TOOLS
        "Enable/disable creation of GUI tools"          ON)
-option(MCRL2_ENABLE_CADP_SUPPORT
-       "Enable/disable support for CADP"               OFF)
 option(MCRL2_ENABLE_EXPERIMENTAL
        "Enable/disable creation of experimental tools" OFF)
 option(MCRL2_ENABLE_DEVELOPER
@@ -146,9 +144,6 @@ set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}")
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
-
-## Setup dependency to CADP
-include(MCRL2CADPSupport)
 
 ## Determine latest SVN revision
 include(MCRL2Version)

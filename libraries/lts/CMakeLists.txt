@@ -25,7 +25,6 @@ set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/sim_hashtable.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dot.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_bcg.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tree_set.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsm.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/exploration.cpp
@@ -62,14 +61,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_syntax
   mcrl2_fsm_syntax
 )
-
-if( USE_BCG STREQUAL "" )
-  include_directories( ${MCRL2_CADP_INCLUDE_DIR} )
-  target_link_libraries(${PROJECT_NAME}
-    imp_bcg_io
-    imp_bcg
-  )
-endif( USE_BCG STREQUAL "" )
 
 # add install target:
 install(TARGETS ${PROJECT_NAME} mcrl2_fsm_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

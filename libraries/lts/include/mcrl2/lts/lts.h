@@ -49,14 +49,7 @@ enum lts_type
   lts_aut,  /**< Ald&eacute;baran format (CADP) */
   lts_fsm,  /**< FSM format */
   lts_dot, /**< GraphViz format */
-#ifdef USE_BCG
-  lts_bcg,  /**< BCG format
-                  * \note Only available if the LTS library is built with BCG
-                  * support.*/
-  lts_type_max = lts_bcg,
-#else
   lts_type_max = lts_dot,
-#endif
   lts_type_min = lts_none
 };
 

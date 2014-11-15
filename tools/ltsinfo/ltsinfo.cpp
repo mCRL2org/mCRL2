@@ -24,7 +24,6 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
 
 
@@ -174,12 +173,6 @@ class ltsinfo_tool : public ltsinfo_base
         {
           return provide_information<lts_fsm_t>();
         }
-#ifdef USE_BCG
-        case lts_bcg:
-        {
-          return provide_information<lts_bcg_t>();
-        }
-#endif
         case lts_dot:
         {
           return provide_information<lts_dot_t>();

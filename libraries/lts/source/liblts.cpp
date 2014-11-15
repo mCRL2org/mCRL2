@@ -31,9 +31,6 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::log;
 
-#ifdef USE_BCG
-// #include <bcg_user.h>
-#endif
 
 using namespace std;
 
@@ -85,33 +82,23 @@ lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
         mCRL2log(verbose) << "Detected GraphViz extension.\n";
       }
       return lts_dot;
-#ifdef USE_BCG
-    }
-    else if (ext == "bcg")
-    {
-      if (be_verbose)
-      {
-        mCRL2log(verbose) << "Detected Binary Coded Graph extension.\n";
-      }
-      return lts_bcg;
-#endif
     }
   }
 
   return lts_none;
 }
 
-static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot", "bcg" };
+static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot" };
 
-static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot", "bcg" };
+static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot" };
 
-static std::string type_desc_strings[] = { "unknown LTS format",
+static std::string type_desc_strings[] = { 
+    "unknown LTS format",
     "mCRL2 LTS format",
     "Aldebaran format (CADP)",
     "Finite State Machine format",
     "GraphViz format (no longer supported as input format)",
-    "SVC format",
-    "Binary Coded Graph format (CADP)"
+    "SVC format"
                                          };
 
 
@@ -119,8 +106,7 @@ static std::string mime_type_strings[] = { "",
     "application/lts",
     "text/aut",
     "text/fsm",
-    "application/bcg",
-    "text/dot",
+    "text/dot"
                                          };
 
 lts_type parse_format(std::string const& s)
@@ -137,12 +123,6 @@ lts_type parse_format(std::string const& s)
   {
     return lts_fsm;
   }
-#ifdef USE_BCG
-  else if (s == "bcg")
-  {
-    return lts_bcg;
-  }
-#endif
   else if (s == "dot")
   {
     return lts_dot;

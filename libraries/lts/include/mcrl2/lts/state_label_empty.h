@@ -27,7 +27,7 @@ namespace detail
 /** \brief Contains empty state values, used for lts's without state valued.
  *  \details Empty state values are used in labelled transition
  *          systems which do not have state values, such as
- *          the .aut and the .bcg format. */
+ *          the .aut format. */
 class state_label_empty
 {
   public:
