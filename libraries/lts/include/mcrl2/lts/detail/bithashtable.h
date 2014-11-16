@@ -90,7 +90,7 @@ class bit_hash_table
       {
         calc_hash_add(0x13ad3780,sh_a,sh_b,sh_c,sh_i);
         {
-          size_t len = atermpp::aterm_cast<atermpp::aterm_appl>(t).function().arity();
+          size_t len = atermpp::down_cast<atermpp::aterm_appl>(t).function().arity();
           for (size_t i=0; i<len; i++)
           {
             calc_hash_aterm(((atermpp::aterm_appl) t)[i],sh_a,sh_b,sh_c,sh_i);
@@ -149,10 +149,6 @@ class bit_hash_table
       m_bit_hash_table[i] = false;
     }
 
-    /* void remove_state_from_bithash(atermpp::aterm state)
-    {
-      remove_state_from_bithash((const atermpp::aterm)state);
-    } */
 
     size_t add_state(atermpp::aterm state, bool& is_new)
     {
@@ -161,6 +157,15 @@ class bit_hash_table
       m_bit_hash_table[i] = true;
       return i;
     }
+
+    void add_states(lps::next_state_generator::transition_t::state_probability_list states)
+    {
+      for(lps::next_state_generator::transition_t::state_probability_list::const_iterator i=states.begin(); i!=states.end(); ++i)
+      {
+        add_state(i->state());
+      }
+    }
+
 
     std::pair<size_t, bool> add_state(atermpp::aterm state)
     {

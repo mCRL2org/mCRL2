@@ -15,11 +15,12 @@ using namespace mcrl2::lps;
 simulation::simulation(const specification& specification, data::rewrite_strategy strategy)
   : m_specification(specification),
     m_rewriter(m_specification.data(), strategy),
-    m_generator(m_specification, m_rewriter),
+    m_generator(stochastic_specification(m_specification), m_rewriter),
     m_tau_prioritization(false)
 {
   state_t state;
-  state.source_state = m_generator.initial_state();
+std::cerr << "TODO:: THIS SIMULATOR DOES NOT TAKE INITIAL DISTRIBUTION INTO ACCOUNT. IT JUST PICKS ONE (1).\n";
+  state.source_state = m_generator.initial_states().front().state();
   state.transitions = transitions(state.source_state);
   m_full_trace.push_back(state);
 }
@@ -124,7 +125,9 @@ void simulation::load(const std::string &filename)
 
   // Get the first state from the generator
   m_full_trace.clear();
-  push_back(m_generator.initial_state());
+std::cerr << "TODO:: THIS SIMULATOR DOES NOT TAKE INITIAL DISTRIBUTION INTO ACCOUNT. IT JUST PICKS ONE (2).\n";
+  // push_back(m_generator.initial_state());
+  push_back(m_generator.initial_states().front().state());
 
   // Check that the first state (if given) matches the first state of our generator
   if (trace.current_state_exists() && trace.currentState() != m_full_trace.back().source_state)
@@ -160,7 +163,7 @@ std::vector<simulation::transition_t> simulation::transitions(state source_state
     for (next_state_generator::iterator i = m_generator.begin(source_state, &enumeration_queue); i != m_generator.end(); i++)
     {
       transition_t transition;
-      transition.destination = i->state();
+      transition.destination = i->target_state();
       transition.action = i->action();
       output.push_back(transition);
     }

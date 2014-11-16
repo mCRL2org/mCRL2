@@ -133,7 +133,7 @@ class term_balanced_tree: public aterm_appl
     const term_balanced_tree<Term>& left_branch() const
     {
       assert(is_node());
-      return aterm_cast< const term_balanced_tree<Term> >(aterm_cast<const aterm_appl>(*this)[0]);
+      return down_cast< const term_balanced_tree<Term> >(aterm_appl::operator[](0));
     }
 
     /// \brief Get the left branch of the tree
@@ -142,7 +142,7 @@ class term_balanced_tree: public aterm_appl
     const term_balanced_tree<Term>& right_branch() const
     {
       assert(is_node());
-      return aterm_cast< const term_balanced_tree<Term> >(aterm_cast<const aterm_appl>(*this)[1]);
+      return down_cast< const term_balanced_tree<Term> >(aterm_appl::operator[](1));
     }
 
     /// \brief Element indexing operator.
@@ -176,7 +176,7 @@ class term_balanced_tree: public aterm_appl
                right_branch().element_at(position-left_size, size - left_size);
       }
 
-      return aterm_cast<Term>(*this);
+      return deprecated_cast<Term>(*this);
     }
 
     /// \brief Returns the size of the term_balanced_tree.
@@ -362,7 +362,18 @@ inline void swap(atermpp::term_balanced_tree<T>& t1, atermpp::term_balanced_tree
 {
   t1.swap(t2);
 }
-} // namespace atermpp
+
+
+/// \brief Standard hash function.
+template<class T>
+struct hash<atermpp::term_balanced_tree<T> >
+{
+  std::size_t operator()(const atermpp::term_balanced_tree<T>& t) const
+  {
+    return std::hash<atermpp::aterm>()(t);
+  }
+};
+} // namespace std
 
 
 #endif // MCRL2_ATERMPP_ATERM_BALANCED_TREE_H

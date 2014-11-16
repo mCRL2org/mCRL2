@@ -242,31 +242,31 @@ class pbes_type_checker:public data::data_type_checker
 
         if (is_pbes_not(PBESTerm))
         {
-          const not_& argument=aterm_cast<const not_>(PBESTerm);
+          const not_& argument=down_cast<const not_>(PBESTerm);
           return not_(TraversePBESVarConstPB(Vars,argument.operand()));
         }
 
         if (is_pbes_and(PBESTerm))
         {
-          const and_& t=aterm_cast<const and_>(PBESTerm);
+          const and_& t=down_cast<const and_>(PBESTerm);
           return and_(TraversePBESVarConstPB(Vars,t.left()),TraversePBESVarConstPB(Vars,t.right()));
         }
 
         if (is_pbes_or(PBESTerm))
         {
-          const or_& t=aterm_cast<const or_>(PBESTerm);
+          const or_& t=down_cast<const or_>(PBESTerm);
           return or_(TraversePBESVarConstPB(Vars,t.left()),TraversePBESVarConstPB(Vars,t.right()));
         }
 
         if (is_pbes_imp(PBESTerm))
         {
-          const imp& t=aterm_cast<const imp>(PBESTerm);
+          const imp& t=down_cast<const imp>(PBESTerm);
           return imp(TraversePBESVarConstPB(Vars,t.left()),TraversePBESVarConstPB(Vars,t.right()));
         }
 
         if (is_pbes_forall(PBESTerm))
         {
-          const forall& t=aterm_cast<const forall>(PBESTerm);
+          const forall& t=down_cast<const forall>(PBESTerm);
           std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
           std::map<core::identifier_string,sort_expression> NewVars;
@@ -290,7 +290,7 @@ class pbes_type_checker:public data::data_type_checker
 
         if (is_pbes_exists(PBESTerm))
         {
-          const exists& t=aterm_cast<const exists>(PBESTerm);
+          const exists& t=down_cast<const exists>(PBESTerm);
           std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
           std::map<core::identifier_string,sort_expression> NewVars;
@@ -314,7 +314,7 @@ class pbes_type_checker:public data::data_type_checker
 
         if (is_propositional_variable_instantiation(PBESTerm))
         {
-          const propositional_variable_instantiation& var=aterm_cast<const propositional_variable_instantiation>(PBESTerm);
+          const propositional_variable_instantiation& var=down_cast<const propositional_variable_instantiation>(PBESTerm);
           return RewrPbes(Vars, var);
         }
         throw mcrl2::runtime_error("Internal error. The pbes term " + pbes_system::pp(PBESTerm) + " fails to match any known form in typechecking case analysis");
@@ -490,9 +490,9 @@ propositional_variable type_check(const propositional_variable& x, const Variabl
     std::vector<data::variable> typed_parameters;
     for (auto i = parameters.begin(); i != parameters.end(); ++i)
     {
-      data::data_expression d = atermpp::aterm_cast<data::data_expression>(*i);
+      data::variable d = *i;
       data::type_check(d, variables.begin(), variables.end(), dataspec);
-      typed_parameters.push_back(atermpp::aterm_cast<data::variable>(d));
+      typed_parameters.push_back(d);
     }
     return propositional_variable(x.name(), data::variable_list(typed_parameters.begin(), typed_parameters.end()));
   }

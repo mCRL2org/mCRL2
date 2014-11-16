@@ -161,26 +161,26 @@ class stategraph_equation: public pbes_equation
       {
         if (data::is_data_expression(*i))
         {
-          const data::data_expression& v_i = atermpp::aterm_cast<const data::data_expression>(*i);
+          const data::data_expression& v_i = atermpp::down_cast<const data::data_expression>(*i);
           if (data::is_equal_to_application(v_i))
           {
             data::data_expression left = data::binary_left1(v_i);
             data::data_expression right = data::binary_right1(v_i);
             if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && is_constant(right))
             {
-              const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
+              const data::variable& vleft = atermpp::down_cast<data::variable>(left);
               result[vleft] = right;
             }
             else if (data::is_variable(right) && std::find(d.begin(), d.end(), data::variable(right)) != d.end() && is_constant(left))
             {
-              const data::variable& vright = core::static_down_cast<const data::variable&>(right);
+              const data::variable& vright = atermpp::down_cast<data::variable>(right);
               result[vright] = left;
             }
           }
           // handle conjuncts b and !b, with b a variable with sort Bool
           else if (data::is_variable(v_i) && data::sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
           {
-            const data::variable& v = core::static_down_cast<const data::variable&>(v_i);
+            const data::variable& v = atermpp::down_cast<data::variable>(v_i);
             result[v] = data::sort_bool::true_();
           }
           else if (data::sort_bool::is_not_application(v_i))
@@ -188,7 +188,7 @@ class stategraph_equation: public pbes_equation
             data::data_expression narg(data::sort_bool::arg(v_i));
             if (data::is_variable(narg) && data::sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(narg)) != d.end())
             {
-              const data::variable& v = core::static_down_cast<const data::variable&>(narg);
+              const data::variable& v = atermpp::down_cast<data::variable>(narg);
               result[v] = data::sort_bool::false_();
             }
           }

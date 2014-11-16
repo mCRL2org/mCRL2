@@ -12,6 +12,9 @@ include(InstallRequiredSystemLibraries)
 # Variables common to all CPack generators
 # ----------------------------------------
 
+configure_file(${CMAKE_SOURCE_DIR}/COPYING ${CMAKE_BINARY_DIR}/COPYING.txt COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/README ${CMAKE_BINARY_DIR}/README.txt COPYONLY)
+
 set(CPACK_PACKAGE_NAME "mcrl2")
 set(CPACK_PACKAGE_VENDOR "TUe")
 set(CPACK_PACKAGE_VERSION "${MCRL2_VERSION}")
@@ -26,9 +29,22 @@ set(CPACK_PACKAGE_EXECUTABLES # exename/displayname to create start menu shortcu
 set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
 set(CPACK_PACKAGE_CONTACT "mCRL2 Development team <mcrl2-users@listserver.tue.nl>")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2)
-set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/COPYING )
-set(CPACK_RESOURCE_FILE_README  ${CMAKE_SOURCE_DIR}/README )
-set(CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION True)
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/COPYING.txt )
+set(CPACK_RESOURCE_FILE_README  ${CMAKE_BINARY_DIR}/README.txt )
+
+if(APPLE)
+  set(CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION False)
+  install(CODE
+    "
+    file(WRITE /tmp/mcrl2.log 
+    \"
+    \${CPACK_INSTALL_PREFIX};
+    \${CMAKE_INSTALL_PREFIX};
+    \${CPACK_PACKAGING_INSTALL_PREFX};
+    \${CPACK_PACKAGE_DEFAULT_LOCATION};
+    \")
+    ")
+endif()
 
 # Branding image displayed inside the installer
 if(WIN32)
@@ -112,7 +128,6 @@ set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://www.mcrl2.org")
 set(CPACK_DEBIAN_PACKAGE_SECTION "science")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY ${CPACK_DEBIAN_PACKAGE_PRIORITY})
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/build/packaging/debian/postinst")
-message(STATUS ${CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA})
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
 # -----------------------------------------------------------------------------
 "toolset for the mCRL2 formal specification language
@@ -131,28 +146,6 @@ if(EXISTS /etc/debian_version)
   install(FILES ${CMAKE_SOURCE_DIR}/COPYING DESTINATION share/doc/mcrl2 RENAME copyright)
 endif()
 
-# Apple
-# -----
-
-if(APPLE)
-  set(CPACK_STRIP_FILES FALSE)
- 
-  #set(CPACK_SET_DESTDIR TRUE)
-  set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
-
-  configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-
-  #set(CPACK_POSTFLIGHT_SCRIPT
-  #  ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-  set(CPACK_POSTUPGRADE_SCRIPT
-    ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-
-  #Force installer to behave as a monolithic installer.
-  #This workaround enables to install mCRL2 properly. (CMake 2.8.9, PackageMaker 3.0.4)
-  set(CPACK_MONOLITHIC_INSTALL 1)
-
-endif()
-
 # Windows
 # -------
 
@@ -163,5 +156,4 @@ SET(CPACK_NSIS_MODIFY_PATH ON)
 
 # Include CPack specific stuff
 # ----------------------------
-set(CPACK_BINARY_DRAGNDROP ON)
 include(CPack)

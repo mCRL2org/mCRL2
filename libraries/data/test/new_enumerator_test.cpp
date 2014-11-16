@@ -357,6 +357,36 @@ BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form_test)
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
+BOOST_AUTO_TEST_CASE(cannot_enumerate_real)
+{
+  typedef data::enumerator_list_element_with_substitution<data_expression> enumerator_element;
+
+  data::data_specification data_spec;
+  data_spec.add_context_sort(data::sort_real::real_());
+  data::rewriter R(data_spec);
+  data::variable_list v;
+  v.push_front(data::variable("r", data::sort_real::real_()));
+  data_expression phi = parse_data_expression("r == r", v.begin(), v.end());
+  data::mutable_indexed_substitution<> sigma;
+  std::size_t max_count = 1000;
+  bool throw_exceptions = true;
+  data::enumerator_algorithm_with_iterator<rewriter, enumerator_element> E(R, data_spec, R, max_count, throw_exceptions);
+  std::deque<enumerator_element> P;
+  P.push_back(enumerator_element(v, phi));
+  try {
+    for (auto i = E.begin(sigma, P); i != E.end() ; ++i)
+    {
+      // skip
+    }
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    std::cout << e.what() << std::endl;
+    return;
+  }
+  BOOST_CHECK(false);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;

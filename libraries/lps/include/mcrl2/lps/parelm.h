@@ -12,7 +12,6 @@
 #ifndef MCRL2_LPS_PARELM_H
 #define MCRL2_LPS_PARELM_H
 
-#include <iterator>
 #include <algorithm>
 #include <map>
 #include <set>
@@ -25,6 +24,7 @@
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
 namespace mcrl2
@@ -33,10 +33,51 @@ namespace mcrl2
 namespace lps
 {
 
+namespace detail
+{
+  inline
+  void collect_transition_variables(const action_summand& s, std::set<data::variable>& result)
+  {
+    std::set<data::variable> tmp;
+
+    tmp = data::find_all_variables(s.condition());
+    result.insert(tmp.begin(), tmp.end());
+
+    tmp = lps::find_all_variables(s.multi_action());
+    result.insert(tmp.begin(), tmp.end());
+  }
+
+  inline
+  void collect_transition_variables(const stochastic_action_summand& s, std::set<data::variable>& result)
+  {
+    collect_transition_variables(static_cast<const action_summand&>(s), result);
+    std::set<data::variable> tmp = lps::find_all_variables(s.distribution());
+    result.insert(tmp.begin(), tmp.end());
+  }
+
+  inline
+  void collect_transition_variables(const deadlock_summand& s, std::set<data::variable>& result)
+  {
+    std::set<data::variable> tmp;
+
+    tmp = data::find_all_variables(s.condition());
+    result.insert(tmp.begin(), tmp.end());
+
+    tmp = lps::find_all_variables(s.deadlock());
+    result.insert(tmp.begin(), tmp.end());
+  }
+
+} // namespace detail
+
 /// \brief Algorithm class for elimination of unused parameters from a linear
 /// process specification
-class parelm_algorithm: public lps::detail::lps_algorithm
+template <typename Specification>
+class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 {
+  typedef typename lps::detail::lps_algorithm<Specification> super;
+  using super::m_spec;
+  using super::verbose;
+
   protected:
 
     /// \brief Returns the data variables that are considered in the parelm algorithm.
@@ -44,25 +85,17 @@ class parelm_algorithm: public lps::detail::lps_algorithm
     std::set<data::variable> transition_variables()
     {
       std::set<data::variable> result;
-      for (action_summand_vector::const_iterator i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
+
+      auto const& action_summands = m_spec.process().action_summands();
+      for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
       {
-        std::set<data::variable> tmp;
-
-        tmp = data::find_all_variables(i->condition());
-        result.insert(tmp.begin(), tmp.end());
-
-        tmp = lps::find_all_variables(i->multi_action());
-        result.insert(tmp.begin(), tmp.end());
+        detail::collect_transition_variables(*i, result);
       }
-      for (deadlock_summand_vector::const_iterator i = m_spec.process().deadlock_summands().begin(); i != m_spec.process().deadlock_summands().end(); ++i)
+
+      auto const& deadlock_summands = m_spec.process().deadlock_summands();
+      for (auto i = deadlock_summands.begin(); i != deadlock_summands.end(); ++i)
       {
-        std::set<data::variable> tmp;
-
-        tmp = data::find_all_variables(i->condition());
-        result.insert(tmp.begin(), tmp.end());
-
-        tmp = lps::find_all_variables(i->deadlock());
-        result.insert(tmp.begin(), tmp.end());
+        detail::collect_transition_variables(*i, result);
       }
       return result;
     }
@@ -72,7 +105,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       if (verbose())
       {
         std::clog << "parelm removed " << to_be_removed.size() << " process parameters: " <<std::endl;
-        for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+        for (auto i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
         {
           std::clog << *i << ":" << i->sort() << std::endl;
         }
@@ -85,7 +118,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "--- parelm 1 ---" << std::endl;
 #endif
-      const data::variable_list& pars=m_spec.process().process_parameters();
+      const data::variable_list& pars = m_spec.process().process_parameters();
       std::set<data::variable> process_parameters(pars.begin(),pars.end());
 
       // significant variables may not be removed by parelm
@@ -93,7 +126,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "initial significant variables: ";
-      for (std::set<data::variable>::iterator i = significant_variables.begin(); i != significant_variables.end(); ++i)
+      for (auto i = significant_variables.begin(); i != significant_variables.end(); ++i)
       {
         std::clog << *i << " ";
       }
@@ -107,10 +140,10 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         data::variable x = *todo.begin();
         todo.erase(todo.begin());
 
-        for (action_summand_vector::iterator i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
+        for (auto i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
         {
           data::assignment_list assignments(i->assignments());
-          data::assignment_list::iterator j = std::find_if(assignments.begin(), assignments.end(), data::detail::has_left_hand_side(x));
+          auto j = std::find_if(assignments.begin(), assignments.end(), data::detail::has_left_hand_side(x));
           if (j != assignments.end())
           {
             std::set<data::variable> vars;
@@ -119,7 +152,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
             todo.insert(new_variables.begin(), new_variables.end());
             significant_variables.insert(new_variables.begin(), new_variables.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
-            for (std::set<data::variable>::iterator k = new_variables.begin(); k != new_variables.end(); ++k)
+            for (auto k = new_variables.begin(); k != new_variables.end(); ++k)
             {
               std::clog << "found dependency " << x << " -> " << *k << std::endl;
             }
@@ -142,13 +175,13 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "--- parelm 2 ---" << std::endl;
 #endif
-      const data::variable_list& pars=m_spec.process().process_parameters();
+      const data::variable_list& pars = m_spec.process().process_parameters();
       std::set<data::variable> process_parameters(pars.begin(),pars.end());
 
       // create a mapping m from process parameters to integers
       std::map<data::variable, size_t> m;
       int index = 0;
-      for (std::set<data::variable>::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+      for (auto i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {
 #ifdef MCRL2_LPS_PARELM_DEBUG
         std::clog << "vertex " << index << " = " << data::pp(*i) << std::endl;
@@ -159,7 +192,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       // compute the initial set v of significant variables
       std::set<data::variable> significant_variables = transition_variables();
       std::vector<size_t> v;
-      for (std::set<data::variable>::iterator i = significant_variables.begin(); i != significant_variables.end(); ++i)
+      for (auto i = significant_variables.begin(); i != significant_variables.end(); ++i)
       {
         v.push_back(m[*i]);
       }
@@ -167,15 +200,15 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       // compute the dependency graph G
       typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> graph;
       graph G(process_parameters.size());
-      for (action_summand_vector::const_iterator i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
+      for (auto i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
       {
         data::assignment_list assignments(i->assignments());
-        for (data::assignment_list::iterator j = assignments.begin(); j != assignments.end(); ++j)
+        for (auto j = assignments.begin(); j != assignments.end(); ++j)
         {
           size_t j0 = m[j->lhs()];
           std::set<data::variable> vars;
           data::find_all_variables(j->rhs(), std::inserter(vars, vars.end()));
-          for (std::set<data::variable>::iterator k = vars.begin(); k != vars.end(); ++k)
+          for (auto k = vars.begin(); k != vars.end(); ++k)
           {
             size_t k0 = m[*k];
 #ifdef MCRL2_LPS_PARELM_DEBUG
@@ -188,7 +221,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "initial significant variables: ";
-      for (std::vector<size_t>::iterator k = v.begin(); k != v.end(); ++k)
+      for (auto k = v.begin(); k != v.end(); ++k)
       {
         std::clog << *k << " ";
       }
@@ -199,7 +232,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       std::vector<size_t> r1 = mcrl2::utilities::reachable_nodes(G, v.begin(), v.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "reachable nodes: ";
-      for (std::vector<size_t>::iterator k = r1.begin(); k != r1.end(); ++k)
+      for (auto k = r1.begin(); k != r1.end(); ++k)
       {
         std::clog << *k << " ";
       }
@@ -207,7 +240,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #endif
       std::set<size_t> r2(r1.begin(), r1.end());
       std::set<data::variable> to_be_removed;
-      for (std::set<data::variable>::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+      for (auto i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {
         if (r2.find(m[*i]) == r2.end())
         {
@@ -225,8 +258,8 @@ class parelm_algorithm: public lps::detail::lps_algorithm
   public:
 
     /// \brief Constructor
-    parelm_algorithm(specification& spec )
-      : lps::detail::lps_algorithm(spec)
+    parelm_algorithm(Specification& spec )
+      : lps::detail::lps_algorithm<Specification>(spec)
     {}
 
     /// \brief Runs the parelm algorithm
@@ -247,10 +280,10 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 /// \param spec A linear process specification
 /// \param variant1 If true the default variant of parelm is used, otherwise an
 ///        alternative implementation is chosen.
-inline
-void parelm(specification& spec, bool variant1 = true)
+template <typename Specification>
+void parelm(Specification& spec, bool variant1 = true)
 {
-  parelm_algorithm algorithm(spec);
+  parelm_algorithm<Specification> algorithm(spec);
   algorithm.run(variant1);
 }
 

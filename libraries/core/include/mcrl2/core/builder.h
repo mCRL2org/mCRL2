@@ -16,8 +16,6 @@
 #include <type_traits>
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/atermpp/convert.h"
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -84,7 +82,7 @@ struct builder
                )
   {
     msg("aterm update copy");
-    return core::static_down_cast<const T&>(static_cast<Derived&>(*this)(x));
+    return atermpp::vertical_cast<T>(static_cast<Derived&>(*this)(x));
   }
 
   // non-aterm update copy
@@ -101,7 +99,7 @@ struct builder
   // non-container visit
   template <typename T>
   void visit(T&,
-             typename atermpp::detail::disable_if_container<T>::type* = 0
+             typename atermpp::disable_if_container<T>::type* = 0
             )
   {
     msg("non-container visit");
@@ -111,7 +109,7 @@ struct builder
   // container visit
   template <typename T>
   void visit(T& x,
-             typename atermpp::detail::enable_if_container<T>::type* = 0
+             typename atermpp::enable_if_container<T>::type* = 0
             )
   {
     msg("container visit");
@@ -152,7 +150,7 @@ struct builder
     std::vector<T> result;
     for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
     {
-      result.push_back(core::static_down_cast<const T&>(static_cast<Derived&>(*this)(*i)));
+      result.push_back(atermpp::vertical_cast<T>(static_cast<Derived&>(*this)(*i)));
     }
     return atermpp::term_list<T>(result.begin(),result.end());
   }

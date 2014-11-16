@@ -43,7 +43,7 @@ class add_binding : public Traverser<Derived>
 
     /// \brief Add a sequence of variables to the multiset of bound variables.
     template <typename Container>
-    void increase_bind_count(const Container& variables, typename atermpp::detail::enable_if_container<Container, variable_type>::type* = 0)
+    void increase_bind_count(const Container& variables, typename atermpp::enable_if_container<Container, variable_type>::type* = 0)
     {
       for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
       {
@@ -59,7 +59,7 @@ class add_binding : public Traverser<Derived>
 
     /// \brief Remove a sequence of variables from the multiset of bound variables.
     template <typename Container>
-    void decrease_bind_count(const Container& variables, typename atermpp::detail::enable_if_container<Container, variable_type>::type* = 0)
+    void decrease_bind_count(const Container& variables, typename atermpp::enable_if_container<Container, variable_type>::type* = 0)
     {
       for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
       {

@@ -49,14 +49,7 @@ enum lts_type
   lts_aut,  /**< Ald&eacute;baran format (CADP) */
   lts_fsm,  /**< FSM format */
   lts_dot, /**< GraphViz format */
-#ifdef USE_BCG
-  lts_bcg,  /**< BCG format
-                  * \note Only available if the LTS library is built with BCG
-                  * support.*/
-  lts_type_max = lts_bcg,
-#else
   lts_type_max = lts_dot,
-#endif
   lts_type_min = lts_none
 };
 
@@ -108,6 +101,11 @@ class lts
     std::vector<STATE_LABEL_T> m_state_labels;
     std::vector<ACTION_LABEL_T> m_action_labels;
     std::vector<bool> m_taus; // A vector indicating which labels are to be viewed as tau's.
+    std::vector<bool> m_is_probabilistic_state; // A vector indicating for each state whether
+                                                // it is an ordinary state (false), or whether
+                                                // it is a probabilistic state (true). This
+                                                // vector has at most the length of m_nstates.
+                                                // States not in this vector are not probabilistic.
 
   public:
 
@@ -124,7 +122,8 @@ class lts
       m_transitions(l.m_transitions),
       m_state_labels(l.m_state_labels),
       m_action_labels(l.m_action_labels),
-      m_taus(l.m_taus)
+      m_taus(l.m_taus),
+      m_is_probabilistic_state(l.m_is_probabilistic_state)
     {};
 
     /** \brief Standard destructor for the class lts.
@@ -151,6 +150,7 @@ class lts
       m_state_labels.swap(l.m_state_labels);
       m_taus.swap(l.m_taus);
       m_action_labels.swap(l.m_action_labels);
+      m_is_probabilistic_state.swap(l.m_is_probabilistic_state);
     };
 
     /** \brief Gets the lts_type of the lts.
@@ -245,8 +245,11 @@ class lts
      *             label, all states must have state labels. If
      *             no state label is given, it must be the case that no
      *             state has a label.
+     * \param[in] is_probabilistic This boolean indicates whether this state
+     *            is a probabilistic state, of which the outgoing transitions are
+     *            labelled with probabilities.
      * \return The number of the added state label. */
-    states_size_type add_state(const STATE_LABEL_T label=STATE_LABEL_T())
+    states_size_type add_state(const STATE_LABEL_T label=STATE_LABEL_T(),bool is_probabilistic=false)
     {
       if (label==STATE_LABEL_T())
       {
@@ -256,6 +259,11 @@ class lts
       {
         assert(m_nstates==m_state_labels.size());
         m_state_labels.push_back(label);
+      }
+      if (is_probabilistic)
+      {
+        m_is_probabilistic_state.resize(m_nstates+1);
+        m_is_probabilistic_state[m_nstates]=true;
       }
       return m_nstates++;
     }
@@ -284,6 +292,19 @@ class lts
       m_state_labels[state] = label;
     }
 
+    /** \brief Sets whether this state is a probabilistic node.
+     * \param[in] state The number of the state.
+     * \param[in] is_probabilistic A boolean indicating whether state is probabilistic. */
+    void set_is_probabilistic(states_size_type state, bool is_probabilistic)
+    {
+      assert(state<m_nstates);
+      if (m_is_probabilistic_state.size()<=state)
+      {
+        m_is_probabilistic_state.resize(state+1);
+      }
+      m_is_probabilistic_state[state] = is_probabilistic;
+    }
+
     /** \brief Sets the label of an action.
      * \param[in] action The number of the action.
      * \param[in] label The label that will be assigned to the action.
@@ -305,6 +326,19 @@ class lts
       assert(state<m_nstates);
       assert(m_nstates==m_state_labels.size());
       return m_state_labels[state];
+    }
+
+    /** \brief Gets the label of a state.
+     * \param[in] state The number of the state.
+     * \return The label of the state. */
+    bool is_probabilistic(const states_size_type state) const
+    {
+      assert(state<m_nstates);
+      if (state<m_is_probabilistic_state.size())
+      {
+        return m_is_probabilistic_state[state];
+      }
+      return false;
     }
 
     /** \brief Gets the label of an action.
@@ -349,6 +383,15 @@ class lts
     void clear_state_labels()
     {
       m_state_labels = std::vector<STATE_LABEL_T>();
+    }
+
+    /** \brief Set all states as being non-probabilistic.
+     *  \details This removes the vector with information whether states
+     *           are probabilistic, effectively indicating that states are
+     *           all non probabilistic. */
+    void clear_is_probabilistic()
+    {
+      m_is_probabilistic_state = std::vector<bool>();
     }
 
     /** \brief Clear the transitions system.

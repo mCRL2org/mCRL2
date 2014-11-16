@@ -12,6 +12,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 #define MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 
+#include <iterator>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
@@ -154,7 +155,7 @@ void find_all_if_impl(const aterm &t, MatchPredicate op, OutputIterator& destBeg
     if (op(a))
     {
       value_type v(a);
-      *destBegin++ = aterm_cast<value_type>(a);
+      *destBegin++ = vertical_cast<value_type>(a);
     }
     for (aterm_appl::iterator i = a.begin(); i != a.end(); ++i)
     {
@@ -275,13 +276,13 @@ aterm replace_impl(const aterm &t, ReplaceFunction f)
 {
   if (t.type_is_appl())
   {
-    const aterm_appl a(t);
+    const aterm_appl& a = deprecated_cast<aterm_appl>(t);
     const aterm fa = f(a);
     return (a == fa) ? appl_apply(a, replace_helper<ReplaceFunction>(f)) : fa;
   }
   else if (t.type_is_list())
   {
-    aterm_list l(t);
+    const aterm_list& l = deprecated_cast<aterm_list>(t);
     return aterm_list(l.begin(),l.end(), replace_helper<ReplaceFunction>(f));
   }
   return t;

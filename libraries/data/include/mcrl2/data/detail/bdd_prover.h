@@ -12,11 +12,10 @@
 #ifndef BDD_PROVER_H
 #define BDD_PROVER_H
 
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/data/detail/prover.h"
+#include "mcrl2/data/detail/prover/manipulator.h"
 #include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/induction.h"
@@ -81,10 +80,45 @@ namespace detail
  * example is a valuation for which it does not hold.
 */
 
-class BDD_Prover: public Prover
+enum Answer
+{
+  answer_yes,
+  answer_no,
+  answer_undefined
+};
+
+
+// class BDD_Prover: public Prover
+class BDD_Prover: protected rewriter
 {
   public:
-    typedef Prover::substitution_type substitution_type;
+    typedef rewriter::substitution_type substitution_type;
+
+  protected:
+    /// \brief An expression of sort Bool.
+    data_expression f_formula;
+
+    /// \brief A class that can be used to manipulate expressions.
+    Manipulator f_manipulator;
+
+    /// \brief A class that provides information about expressions.
+    Info f_info;
+
+    /// \brief A flag that indicates whether or not the formala Prover::f_formula has been processed.
+    bool f_processed;
+
+    /// \brief A flag that indicates whether or not the formala Prover::f_formula is a tautology.
+    Answer f_tautology;
+
+    /// \brief A flag that indicates whether or not the formala Prover::f_formula is a contradiction.
+    Answer f_contradiction;
+
+    /// \brief An integer representing the maximal amount of seconds to be spent on processing a formula.
+    int f_time_limit;
+
+    /// \brief A timestamp representing the moment when the maximal amount of seconds has been spent on processing the current formula.
+    time_t f_deadline;
+
 
   private:
 
@@ -162,7 +196,6 @@ class BDD_Prover: public Prover
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
     data_expression bdd_down(data_expression a_formula, std::string& a_indent)
     {
-      using namespace atermpp;
       a_indent.append("  ");
 
       if (f_time_limit != 0 && (f_deadline - time(0)) <= 0)
@@ -187,7 +220,7 @@ class BDD_Prover: public Prover
       }
 
       data_expression v_guard = smallest(a_formula);
-      if (!v_guard.defined())
+      if (v_guard==data_expression())
       {
         return a_formula;
       }
@@ -204,7 +237,7 @@ class BDD_Prover: public Prover
       mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << v_term1 << std::endl;
 
       data_expression v_term2 = f_manipulator.set_false(a_formula, v_guard);
-      v_term2 = m_rewriter->rewrite(data_expression(v_term2),bdd_sigma);
+      v_term2 = m_rewriter->rewrite(v_term2,bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
       mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
@@ -248,7 +281,7 @@ class BDD_Prover: public Prover
           while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
           {
             mCRL2log(log::debug) << "Applying induction." << std::endl;
-            f_formula = data_expression(f_induction.apply_induction());
+            f_formula = f_induction.apply_induction();
             build_bdd();
             eliminate_paths();
           }
@@ -259,13 +292,13 @@ class BDD_Prover: public Prover
           }
           else
           {
-            v_original_formula = sort_bool::not_(data_expression(v_original_formula));
+            v_original_formula = sort_bool::not_(v_original_formula);
             f_bdd = v_original_bdd;
             f_induction.initialize(v_original_formula);
             while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
             {
               mCRL2log(log::debug) << "Applying induction on the negated formula." << std::endl;
-              f_formula = data_expression(f_induction.apply_induction());
+              f_formula = f_induction.apply_induction();
               build_bdd();
               eliminate_paths();
             }
@@ -375,22 +408,22 @@ class BDD_Prover: public Prover
         data_expression v_true_branch = f_bdd_info.get_true_branch(a_bdd);
         data_expression v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         data_expression v_branch = get_branch(v_true_branch, a_polarity);
-        if (!v_branch.defined())
+        if (v_branch==data_expression())
         {
           v_branch = get_branch(v_false_branch, a_polarity);
-          if (!v_branch.defined())
+          if (v_branch==data_expression())
           {
             v_result = data_expression();
           }
           else
           {
-            data_expression v_term = sort_bool::not_(data_expression(v_guard));
-            v_result = lazy::and_(data_expression(v_branch), v_term);
+            data_expression v_term = sort_bool::not_(v_guard);
+            v_result = lazy::and_(v_branch, v_term);
           }
         }
         else
         {
-          v_result = lazy::and_(data_expression(v_branch), data_expression(v_guard));
+          v_result = lazy::and_(v_branch, v_guard);
         }
       }
       else
@@ -439,10 +472,39 @@ class BDD_Prover: public Prover
       bool a_path_eliminator = false,
       smt_solver_type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
-      : Prover(data_spec, equations_selector, a_rewrite_strategy, a_time_limit),
-//        f_data_spec(data_spec),
-        f_induction(data_spec)
+      : 
+        mcrl2::data::rewriter(data_spec, equations_selector, a_rewrite_strategy),
+                       f_manipulator(f_info),
+                       f_info(),
+                       f_induction(data_spec)
     {
+      f_time_limit = a_time_limit;
+      f_processed = false;
+
+      switch (a_rewrite_strategy)
+      {
+        case(jitty):
+#ifdef MCRL2_JITTYC_AVAILABLE
+        case(jitty_compiling):
+#endif
+        {
+          /* These provers are ok */
+          break;
+        }
+        case(jitty_prover):
+#ifdef MCRL2_JITTYC_AVAILABLE
+        case(jitty_compiling_prover):
+#endif
+        {
+          throw mcrl2::runtime_error("The proving rewriters are not supported by the prover (only jitty and jittyc are supported).");
+        }
+        default:
+        {
+          throw mcrl2::runtime_error("Unknown type of rewriter.");
+          break;
+        }
+      }
+
       f_reverse = true;
       f_full = true;
       f_apply_induction = a_apply_induction;
@@ -462,7 +524,7 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Destructor that destroys the BDD simplifier BDD_Prover::f_bdd_simplifier.
-    virtual ~BDD_Prover()
+    ~BDD_Prover()
     {
       delete f_bdd_simplifier;
       f_bdd_simplifier = 0;
@@ -481,28 +543,28 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Indicates whether or not the formula Prover::f_formula is a tautology.
-    virtual Answer is_tautology()
+    Answer is_tautology()
     {
       update_answers();
       return f_tautology;
     }
 
     /// \brief Indicates whether or not the formula Prover::f_formula is a contradiction.
-    virtual Answer is_contradiction()
+    Answer is_contradiction()
     {
       update_answers();
       return f_contradiction;
     }
 
     /// \brief Returns the BDD BDD_Prover::f_bdd.
-    virtual data_expression get_bdd()
+    data_expression get_bdd()
     {
       update_answers();
       return f_bdd;
     }
 
     /// \brief Returns all the guards on a path in the BDD that leads to a leaf labelled "true", if such a leaf exists.
-    virtual data_expression get_witness()
+    data_expression get_witness()
     {
       update_answers();
       if (is_contradiction() == answer_yes)
@@ -519,7 +581,7 @@ class BDD_Prover: public Prover
       {
         mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
         data_expression t=get_branch(f_bdd, true);
-        if (!t.defined())
+        if (t==data_expression())
         { throw mcrl2::runtime_error(
             "Cannot provide witness. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
@@ -529,7 +591,7 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Returns all the guards on a path in the BDD that leads to a leaf labelled "false", if such a leaf exists.
-    virtual data_expression get_counter_example()
+    data_expression get_counter_example()
     {
       update_answers();
       if (is_contradiction() == answer_yes)
@@ -546,7 +608,7 @@ class BDD_Prover: public Prover
       {
         mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
         data_expression t=get_branch(f_bdd, false);
-        if (!t.defined())
+        if (t==data_expression())
         { throw mcrl2::runtime_error(
             "Cannot provide counter example. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
@@ -554,6 +616,22 @@ class BDD_Prover: public Prover
         return t;
       }
     }
+
+    /// \brief Returns the rewriter used by this prover (i.e. it returns Prover::f_rewriter).
+    std::shared_ptr<detail::Rewriter> get_rewriter()
+    {
+      return m_rewriter;
+    }
+
+    /// \brief Sets Prover::f_formula to a_formula.
+    /// precondition: the argument passed as parameter a_formula is an expression of sort Bool
+    void set_formula(const data_expression a_formula)
+    {
+      f_formula = a_formula;
+      f_processed = false;
+      mCRL2log(log::debug) << "The formula has been set." << std::endl;
+    }
+  
 
 };
 }

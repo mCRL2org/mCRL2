@@ -19,6 +19,7 @@
 struct D_ParseNode;
 struct D_ParserTables;
 struct D_Parser;
+struct d_loc_t;
 typedef void (*D_SyntaxErrorFn)(struct D_Parser *);
 typedef struct D_ParseNode *(*D_AmbiguityFn)(struct D_Parser *,
                int n, struct D_ParseNode **v);
@@ -31,6 +32,8 @@ namespace core {
 
 namespace detail
 {
+
+std::string add_context(const d_loc_t* loc, const std::string& message);
 
 template <class T> // note, T is only a dummy
 struct dparser_error_message_count
@@ -77,7 +80,6 @@ void set_dparser_max_error_message_count(std::size_t n)
 
 } // namespace detail
 
-
 /// \brief Wrapper for D_ParseNode
 struct parse_node
 {
@@ -98,6 +100,7 @@ struct parse_node
   int column() const;
   int line() const;
   std::string pathname() const;
+  std::string add_context(const std::string& message) const;
 
   operator bool() const
   {
@@ -143,7 +146,7 @@ struct parser
   D_Parser* m_parser;
   std::size_t m_max_error_message_count;
 
-  parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = 0, D_SyntaxErrorFn syntax_error_fn = 0, std::size_t max_error_message_count = 1);
+  explicit parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = 0, D_SyntaxErrorFn syntax_error_fn = 0, std::size_t max_error_message_count = 1);
 
   ~parser();
 
@@ -164,6 +167,8 @@ struct parser
   void print_tree(const parse_node& node, unsigned int level = 0) const;
 
   void destroy_parse_node(const parse_node& node);
+
+  void custom_parse_error(const std::string& message) const;
 
   /// \brief Callback function for nodes in the parse tree
   void announce(D_ParseNode& node_ref);

@@ -41,7 +41,7 @@ private:
 
   const atermpp::aterm_appl& get_arg(size_t i) const
   {
-    return atermpp::aterm_cast<atermpp::aterm_appl>((*this)[i]);
+    return atermpp::down_cast<atermpp::aterm_appl>((*this)[i]);
   }
 
 public:
@@ -69,7 +69,7 @@ public:
 
   data::data_specification data() const
   {
-    data::data_specification data_spec(atermpp::aterm_cast<atermpp::aterm_appl>(data::detail::add_index((*this)[0])));
+    data::data_specification data_spec(atermpp::down_cast<atermpp::aterm_appl>(data::detail::add_index((*this)[0])));
     data_spec.declare_data_specification_to_be_type_checked();  // Assume that the data specification in an lts is well typed.
     return data_spec;
   }
@@ -257,7 +257,7 @@ static void read_from_lts(lts_lts_t& l, const std::string& filename)
   {
     if (svc_file_has_state_info)
     {
-      state_label = detail::state_label_lts(atermpp::aterm_cast<atermpp::aterm_appl>(data::detail::add_index(SVCstate2ATerm(&f, i))));
+      state_label = detail::state_label_lts(atermpp::down_cast<atermpp::aterm_appl>(data::detail::add_index(SVCstate2ATerm(&f, i))));
     }
     l.add_state(state_label);
   }
@@ -272,7 +272,7 @@ static void read_from_lts(lts_lts_t& l, const std::string& filename)
   const process::action_list tau = process::action_list();
   for (SVCstateIndex i = 0; i < num_labels; ++i)
   {
-    action_label = detail::action_label_lts(atermpp::aterm_cast<atermpp::aterm_appl>(data::detail::add_index(SVClabel2ATerm(&f, i))));
+    action_label = detail::action_label_lts(atermpp::down_cast<atermpp::aterm_appl>(data::detail::add_index(SVClabel2ATerm(&f, i))));
     l.add_action(action_label, action_label.actions() == tau);
   }
 

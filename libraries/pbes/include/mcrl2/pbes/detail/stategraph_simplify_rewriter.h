@@ -29,7 +29,7 @@ pbes_expression stategraph_not(const pbes_expression& x)
   typedef core::term_traits<pbes_expression> tr;
   if (is_data(x))
   {
-    auto const& x1 = atermpp::aterm_cast<data::data_expression>(x);
+    auto const& x1 = atermpp::down_cast<data::data_expression>(x);
     if (data::sort_bool::is_not_application(x1))
     {
       return tt::not_arg(x1);
@@ -59,7 +59,7 @@ pbes_expression smart_and(const pbes_expression& x, const pbes_expression& y)
 {
   if (is_data(x) && is_data(y))
   {
-    return data::sort_bool::and_(atermpp::aterm_cast<data::data_expression>(x), atermpp::aterm_cast<data::data_expression>(y));
+    return data::sort_bool::and_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y));
   }
   return and_(x, y);
 }
@@ -69,7 +69,7 @@ pbes_expression smart_or(const pbes_expression& x, const pbes_expression& y)
 {
   if (is_data(x) && is_data(y))
   {
-    return data::sort_bool::or_(atermpp::aterm_cast<data::data_expression>(x), atermpp::aterm_cast<data::data_expression>(y));
+    return data::sort_bool::or_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y));
   }
   return or_(x, y);
 }
@@ -116,7 +116,7 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
   {
     if (is_data(x))
     {
-      return atermpp::aterm_cast<pbes_expression>(*data::application(x).begin());
+      return atermpp::down_cast<pbes_expression>(*data::application(x).begin());
     }
     else
     {
@@ -138,13 +138,13 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
 
   pbes_expression stategraph_join_or(const std::vector<pbes_expression>& terms) const
   {
-    const pbes_expression& F = atermpp::aterm_cast<pbes_expression>(false_());
+    const pbes_expression& F = false_();
     return utilities::detail::join(terms.begin(), terms.end(), smart_or, F);
   }
 
   pbes_expression stategraph_join_and(const std::vector<pbes_expression>& terms) const
   {
-    const pbes_expression& T = atermpp::aterm_cast<pbes_expression>(true_());
+    const pbes_expression& T = true_();
     return utilities::detail::join(terms.begin(), terms.end(), smart_and, T);
   }
 

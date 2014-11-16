@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file down_cast_test.cpp
-/// \brief Test for down casting
+/// \file swap_test.cpp
+/// \brief Test for std::swap usage
 
 #include <boost/test/included/unit_test_framework.hpp>
 

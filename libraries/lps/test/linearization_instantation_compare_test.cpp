@@ -57,7 +57,7 @@ void run_linearisation_instance(const std::string& spec, const t_lin_options& op
             << "    binary: " << std::boolalpha << options.binary << std::endl
             << "    nocluster: " << std::boolalpha << options.no_intermediate_cluster << std::endl;
 
-  lps::specification s = linearise(spec, options);
+  lps::specification s=remove_stochastic_operators(linearise(spec, options));
   BOOST_CHECK(s != lps::specification());
 
   lts::lts_aut_t result = translate_lps_to_lts<lts::lts_aut_t>(s);

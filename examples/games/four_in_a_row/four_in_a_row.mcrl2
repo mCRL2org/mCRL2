@@ -28,7 +28,28 @@
 % lpsconstelm -v -c -rjittyc temp1.lps temp2.lps &&
 % lps2lts -v -rjittyc temp2.lps 
 %
-% Jan Friso Groote, April 6, 2010
+% Using the following formula, it can be determined whether red has 
+% winning strategy.
+%
+%    mu X.(exists x:Pos.<RedMoves(x)>
+%            (<RedWins>true || 
+%             ((exists y:Pos.<YellowMoves(y)>true) && forall y:Pos.[YellowMoves(y)](X && [YellowWins]false))))
+%
+% Using pbes2bool this formula can be verified on smaller than the full board.
+% The table below shows on which boards red has a winning strategy.
+% This has been verified using pbes2bool -rjittyc -v -s2 -zd temp1.pbes --erase=some
+% For 7x4 and 5x6 boards typically 40Gbyte memory was required.
+%
+%       Columns
+% Rows    1     2     3     4     5     6     7
+%   1     No    No    No    No    No    No    No  
+%   2     No    No    No    No    No    No    No
+%   3     No    No    No    No    No    No    No
+%   4     No    No    No    No    No    No    No
+%   5     No    No    No    No    No    No
+%   6     No    No    No    No    No
+%
+% Jan Friso Groote, April 6, 2010/Juli 28, 2014
 
 sort Piece = struct Red | Yellow | None;
 map N,M,R:Pos;
@@ -68,12 +89,15 @@ map  At:Nat#Nat#Board->Piece;                       % At(x,y,b) give the piece a
 
 var  b,b':Board;
      r:Row;
-     p,p':Piece;
+     p,p',p'':Piece;
      x,y:Nat;
      c:Bool;
      z:Pos;
 
-eqn  y==1 -> At(x,y,r|>b)=At(x,r);
+eqn  if(c,true,false)=c;
+     if(c,false,true)=!c;
+     if(c,p,p')==p'' = if(c,p==p'',p'==p'');
+     y==1 -> At(x,y,r|>b)=At(x,r);
      1<y && y<=M -> At(x,y,r|>b)=At(x,Int2Nat(y-1),b);
      y==0 || y>M || x==0 || x>N -> At(x,y,b)=None;
      At(x,y,if(c,b,b'))=if(c,At(x,y,b),At(x,y,b'));  % This rewrite rule is instrumental to let lpsconstelm 
@@ -134,7 +158,7 @@ eqn  y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
      y<M -> Four_in_a_row_diagonally_column(p,y,b)=Count_rows_diagonally(p,1,y,b,0) ||
                                                    Count_rows_diagonally'(p,N,y,b,0) ||
                                                    Four_in_a_row_diagonally_column(p,y+1,b);
-     y==M -> Four_in_a_row_diagonally_column(p,y,b)=false;
+     y>=M -> Four_in_a_row_diagonally_column(p,y,b)=false;
      x<N && y<M ->  Count_rows_diagonally(p,x,y,b,count)=
                                        if(At(x,y,b)==p,
                                          count>=R-1 || Count_rows_diagonally(p,x+1,y+1,b,count+1),

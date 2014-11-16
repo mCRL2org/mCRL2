@@ -47,12 +47,12 @@ class alias: public atermpp::aterm_appl
 
     const basic_sort& name() const
     {
-      return atermpp::aterm_cast<const basic_sort>((*this)[0]);
+      return atermpp::down_cast<basic_sort>((*this)[0]);
     }
 
     const sort_expression& reference() const
     {
-      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
+      return atermpp::down_cast<sort_expression>((*this)[1]);
     }
 };
 

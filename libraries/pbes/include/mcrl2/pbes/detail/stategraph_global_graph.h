@@ -72,15 +72,18 @@ struct stategraph_edge
   std::string print() const;
 };
 
+struct stategraph_vertex;
+std::ostream& operator<<(std::ostream& out, const stategraph_vertex& u);
+
 // vertex of the control flow graph
 struct stategraph_vertex
 {
   propositional_variable_instantiation X;
   std::set<stategraph_edge> incoming_edges;
   std::set<stategraph_edge> outgoing_edges;
-  std::set<data::variable> sig;
-  std::set<data::variable> marking;    // used in the reset variables procedure
-  std::vector<bool> marked_parameters; // will be set after computing the marking
+  mutable std::set<data::variable> m_sig;
+  mutable std::set<data::variable> m_marking;    // used in the reset variables procedure
+  mutable std::vector<bool> m_marked_parameters; // will be set after computing the marking
 
   stategraph_vertex(const propositional_variable_instantiation& X_)
     : X(X_)
@@ -95,7 +98,7 @@ struct stategraph_vertex
     {
       out << " " << pbes_system::pp(i->target->X);
     }
-    out << " sig: " << core::detail::print_set(sig);
+    out << " sig: " << core::detail::print_set(m_sig);
     return out.str();
   }
 
@@ -112,14 +115,14 @@ struct stategraph_vertex
     {
       out << " " << i->print();
     }
-    out << " sig: " << core::detail::print_set(sig);
+    out << " sig: " << core::detail::print_set(m_sig);
     return out.str();
   }
 
   std::set<std::size_t> marking_variable_indices(const stategraph_pbes& p) const
   {
     std::set<std::size_t> result;
-    for (std::set<data::variable>::const_iterator i = marking.begin(); i != marking.end(); ++i)
+    for (auto i = m_marking.begin(); i != m_marking.end(); ++i)
     {
       // TODO: make this code more efficient
       const stategraph_equation& eqn = *find_equation(p, X.name());
@@ -139,17 +142,62 @@ struct stategraph_vertex
   // returns true if the i-th parameter of X is marked
   bool is_marked_parameter(std::size_t i) const
   {
-    return marked_parameters[i];
+    return m_marked_parameters[i];
+  }
+
+  void add_marked_parameter(bool b) const
+  {
+    m_marked_parameters.push_back(b);
+  }
+
+  void set_marking(const std::set<data::variable>& marking) const
+  {
+    m_marking = marking;
+  }
+
+  void set_significant_variables(const std::set<data::variable>& sig) const
+  {
+    m_sig = sig;
   }
 
   std::string print_marking() const
   {
     std::ostringstream out;
-    out << "vertex " << pbes_system::pp(X) << " = " << core::detail::print_set(marking);
+    out << "vertex " << pbes_system::pp(X) << " = " << core::detail::print_set(m_marking);
     return out.str();
   }
 
+  const core::identifier_string& name() const
+  {
+    return X.name();
+  }
+
+  const data::data_expression_list& values() const
+  {
+    return X.parameters();
+  }
+
+  const std::set<data::variable>& sig() const
+  {
+    return m_sig;
+  }
+
+  const std::set<data::variable>& marking() const
+  {
+    return m_marking;
+  }
+
+  const std::vector<bool>& marked_parameters() const
+  {
+    return m_marked_parameters;
+  }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const stategraph_vertex& u)
+{
+  return out << u.X;
+}
 
 inline
 std::string stategraph_edge::print() const
@@ -169,6 +217,7 @@ struct stategraph_global_graph
 
   typedef std::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
   typedef std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator vertex_const_iterator;
+  typedef stategraph_vertex vertex_type;
 
   void create_index()
   {

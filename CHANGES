@@ -1,5 +1,37 @@
 ===============================================================================
-Changes between toolset releases 201210.1 and 201309.0:
+Changes between toolset releases 201310.0 and 201409.0:
+===============================================================================
+
+54 tickets were closed since the previous release. The changes in this release 
+are for the greatest part refactoring efforts to prepare for coming changes. 
+
+- Enumeration of finite set sorts and finite function sorts has been added.
+- PBES tools can now handle PBESs containing negations and implications. The 
+  txt2pbes tool no longer eliminates these operators by default.
+- PBES tools can now use textual representation as in- and output format.
+- The implementation of the pbesstategraph has been thoroughly revised. A more 
+  efficient local variant of the algorithm is now used by default.
+- The internal ATerm format of mCRL2 data types has been changed. Variables
+  and function symbols now store a unique number, to make table lookups more 
+  efficient. This change has no effect on the disk format.
+- Stricter ATerm casting mechanism to prevent casts between incompatible Aterm
+  structures.
+- A new, more generic implementation of the enumerator was made that also 
+  operates on PBES expressions. It has been used to improve the performance of
+  some PBES rewriters.
+- The dependencies between the mCRL2 libraries were minimized.
+- Preparation for move to Qt5.
+- Preparation to use more C++11 features.
+
+Known bugs:
+- The ltsgraph tool does not properly export images on all platforms. Notably,
+  the bitmap export functionality on Mac OSX Mavericks is broken. This seems to
+  be a combination of Qt4 issues and OSX OpenGL issues; this bug might be fixed
+  in a point-release, or it may be left until the next release, which should be
+  using Qt5.
+
+===============================================================================
+Changes between toolset releases 201210.1 and 201310.0:
 ===============================================================================
 
 60 tickets were fixed for this release. We summarise the most important changes

@@ -42,13 +42,27 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     : super(sigma, V)
   { }
 
-  void operator()(action_summand& x)
+  template <typename ActionSummand>
+  void do_action_summand(ActionSummand& x, const data::variable_list& v)
   {
-    data::variable_list v = update_sigma.push(x.summation_variables());
     x.summation_variables() = v;
     x.condition() = (*this)(x.condition());
     (*this)(x.multi_action());
     x.assignments() = (*this)(x.assignments());
+  }
+
+  void operator()(action_summand& x)
+  {
+    data::variable_list v = update_sigma.push(x.summation_variables());
+    do_action_summand(x, v);
+    update_sigma.pop(v);
+  }
+
+  void operator()(stochastic_action_summand& x)
+  {
+    data::variable_list v = update_sigma.push(x.summation_variables());
+    do_action_summand(x, v);
+    x.distribution() = (*this)(x.distribution());
     update_sigma.pop(v);
   }
 
@@ -61,7 +75,8 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     update_sigma.pop(v);
   }
 
-  void operator()(linear_process& x)
+  template <typename LinearProcess>
+  void do_linear_process(const LinearProcess& x)
   {
     data::variable_list v = update_sigma.push(x.process_parameters());
     x.process_parameters() = v;
@@ -70,7 +85,18 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     update_sigma.pop(v);
   }
 
-  void operator()(specification& x)
+  void operator()(linear_process& x)
+  {
+    do_linear_process(x);
+  }
+
+  void operator()(stochastic_linear_process& x)
+  {
+    do_linear_process(x);
+  }
+
+  template <typename Specification>
+  void do_specification(Specification& x)
   {
     std::set<data::variable> v = update_sigma(x.global_variables());
     x.global_variables() = v;
@@ -79,6 +105,28 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
     x.initial_process() = (*this)(x.initial_process());
     update_sigma.pop(v);
   }
+
+  void operator()(specification& x)
+  {
+    do_specification(x);
+  }
+
+  void operator()(stochastic_specification& x)
+  {
+    do_specification(x);
+  }
+
+  stochastic_distribution operator()(stochastic_distribution& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    stochastic_distribution result(x.variables(), (*this)(x.distribution()));
+    update_sigma.pop(v);
+    return result;
+  }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
 };
 
 } // namespace detail
@@ -101,7 +149,7 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return core::static_down_cast<const T&>(data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost)(x));
+  return data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
@@ -121,7 +169,7 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return core::static_down_cast<const T&>(data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost)(x));
+  return data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
@@ -181,7 +229,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x));
+  return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x);
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -207,7 +255,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables));
+  return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 //--- end generated lps replace code ---//
 
@@ -243,7 +291,7 @@ T replace_variables_capture_avoiding(const T& x,
   std::multiset<data::variable> V;
   lps::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  return core::static_down_cast<const T&>(data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x));
+  return data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
 //--- end generated lps replace_capture_avoiding code ---//
 
@@ -286,7 +334,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
 
   data::assignment_expression operator()(const data::assignment& x)
   {
-    data::variable lhs = core::static_down_cast<const data::variable&>((*this)(x.lhs()));
+    data::variable lhs = atermpp::down_cast<data::variable>((*this)(x.lhs()));
     data::data_expression rhs = (*this)(x.rhs());
     return data::assignment(lhs, rhs);
   }

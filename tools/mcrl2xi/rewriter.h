@@ -21,8 +21,11 @@
 
 #include <QObject>
 #include <QPoint>
+
+#ifndef Q_MOC_RUN // Workaround for QTBUG-22829
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/data_specification.h"
+#endif // Q_MOC_RUN
 
 class Rewriter : public QObject
 {

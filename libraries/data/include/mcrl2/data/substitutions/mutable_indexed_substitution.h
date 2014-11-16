@@ -251,7 +251,7 @@ protected:
       if (j->second == i)
       {
         const variable_key_type& v = j->first;
-        return atermpp::aterm_cast<core::identifier_string>(v.first);
+        return atermpp::down_cast<core::identifier_string>(v.first);
       }
     }
     throw mcrl2::runtime_error("mutable_indexed_substitution::variable_name: index does not exist");

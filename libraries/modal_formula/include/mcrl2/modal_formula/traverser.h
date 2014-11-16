@@ -142,51 +142,51 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (action_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::true_>(x));
     }
     else if (action_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::false_>(x));
     }
     else if (action_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::not_>(x));
     }
     else if (action_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::and_>(x));
     }
     else if (action_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::or_>(x));
     }
     else if (action_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::imp>(x));
     }
     else if (action_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::forall>(x));
     }
     else if (action_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::exists>(x));
     }
     else if (action_formulas::is_at(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::at>(x));
     }
     else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::multi_action>(x));
     }
     else if (action_formulas::is_untyped_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -299,51 +299,51 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (action_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::true_>(x));
     }
     else if (action_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::false_>(x));
     }
     else if (action_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::not_>(x));
     }
     else if (action_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::and_>(x));
     }
     else if (action_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::or_>(x));
     }
     else if (action_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::imp>(x));
     }
     else if (action_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::forall>(x));
     }
     else if (action_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::exists>(x));
     }
     else if (action_formulas::is_at(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::at>(x));
     }
     else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::multi_action>(x));
     }
     else if (action_formulas::is_untyped_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -455,51 +455,51 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (action_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::true_>(x));
     }
     else if (action_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::false_>(x));
     }
     else if (action_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::not_>(x));
     }
     else if (action_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::and_>(x));
     }
     else if (action_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::or_>(x));
     }
     else if (action_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::imp>(x));
     }
     else if (action_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::forall>(x));
     }
     else if (action_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::exists>(x));
     }
     else if (action_formulas::is_at(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::at>(x));
     }
     else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::multi_action>(x));
     }
     else if (action_formulas::is_untyped_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -614,51 +614,51 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (action_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::true_>(x));
     }
     else if (action_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::false_>(x));
     }
     else if (action_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::not_>(x));
     }
     else if (action_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::and_>(x));
     }
     else if (action_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::or_>(x));
     }
     else if (action_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::imp>(x));
     }
     else if (action_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::forall>(x));
     }
     else if (action_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::exists>(x));
     }
     else if (action_formulas::is_at(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::at>(x));
     }
     else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::multi_action>(x));
     }
     else if (action_formulas::is_untyped_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -773,51 +773,51 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (action_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::true_>(x));
     }
     else if (action_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::false_>(x));
     }
     else if (action_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::not_>(x));
     }
     else if (action_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::and_>(x));
     }
     else if (action_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::or_>(x));
     }
     else if (action_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::imp>(x));
     }
     else if (action_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::forall>(x));
     }
     else if (action_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::exists>(x));
     }
     else if (action_formulas::is_at(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::at>(x));
     }
     else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::multi_action>(x));
     }
     else if (action_formulas::is_untyped_multi_action(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -915,27 +915,31 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (action_formulas::is_action_formula(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::action_formula>(x));
+    }
+    else if (data::is_data_expression(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (regular_formulas::is_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::seq>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::seq>(x));
     }
     else if (regular_formulas::is_alt(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::alt>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::alt>(x));
     }
     else if (regular_formulas::is_trans(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans>(x));
     }
     else if (regular_formulas::is_trans_or_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans_or_nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1004,27 +1008,31 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (action_formulas::is_action_formula(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::action_formula>(x));
+    }
+    else if (data::is_data_expression(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (regular_formulas::is_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::seq>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::seq>(x));
     }
     else if (regular_formulas::is_alt(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::alt>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::alt>(x));
     }
     else if (regular_formulas::is_trans(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans>(x));
     }
     else if (regular_formulas::is_trans_or_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans_or_nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1093,27 +1101,31 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (action_formulas::is_action_formula(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::action_formula>(x));
+    }
+    else if (data::is_data_expression(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (regular_formulas::is_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::seq>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::seq>(x));
     }
     else if (regular_formulas::is_alt(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::alt>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::alt>(x));
     }
     else if (regular_formulas::is_trans(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans>(x));
     }
     else if (regular_formulas::is_trans_or_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans_or_nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1182,27 +1194,31 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (action_formulas::is_action_formula(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::action_formula>(x));
+    }
+    else if (data::is_data_expression(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (regular_formulas::is_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::seq>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::seq>(x));
     }
     else if (regular_formulas::is_alt(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::alt>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::alt>(x));
     }
     else if (regular_formulas::is_trans(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans>(x));
     }
     else if (regular_formulas::is_trans_or_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans_or_nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1271,27 +1287,31 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (action_formulas::is_action_formula(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::action_formula>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<action_formulas::action_formula>(x));
+    }
+    else if (data::is_data_expression(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (regular_formulas::is_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::seq>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::seq>(x));
     }
     else if (regular_formulas::is_alt(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::alt>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::alt>(x));
     }
     else if (regular_formulas::is_trans(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans>(x));
     }
     else if (regular_formulas::is_trans_or_nil(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<regular_formulas::trans_or_nil>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1473,75 +1493,75 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1699,75 +1719,75 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1921,75 +1941,75 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2149,75 +2169,75 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2371,75 +2391,75 @@ struct add_traverser_state_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2602,75 +2622,75 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -2826,75 +2846,75 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<data::data_expression>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<data::data_expression>(x));
     }
     else if (state_formulas::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::true_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::true_>(x));
     }
     else if (state_formulas::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::false_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::false_>(x));
     }
     else if (state_formulas::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::not_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::not_>(x));
     }
     else if (state_formulas::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::and_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::and_>(x));
     }
     else if (state_formulas::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::or_>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::or_>(x));
     }
     else if (state_formulas::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::imp>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::imp>(x));
     }
     else if (state_formulas::is_forall(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::forall>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::forall>(x));
     }
     else if (state_formulas::is_exists(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::exists>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::exists>(x));
     }
     else if (state_formulas::is_must(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::must>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::must>(x));
     }
     else if (state_formulas::is_may(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::may>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::may>(x));
     }
     else if (state_formulas::is_yaled(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled>(x));
     }
     else if (state_formulas::is_yaled_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::yaled_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::yaled_timed>(x));
     }
     else if (state_formulas::is_delay(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay>(x));
     }
     else if (state_formulas::is_delay_timed(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::delay_timed>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::delay_timed>(x));
     }
     else if (state_formulas::is_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::variable>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::variable>(x));
     }
     else if (state_formulas::is_nu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::nu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::nu>(x));
     }
     else if (state_formulas::is_mu(x))
     {
-      static_cast<Derived&>(*this)(atermpp::aterm_cast<state_formulas::mu>(x));
+      static_cast<Derived&>(*this)(atermpp::down_cast<state_formulas::mu>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

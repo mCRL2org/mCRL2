@@ -18,7 +18,7 @@
 #include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/action_rename.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
@@ -34,8 +34,8 @@ namespace detail
 
 struct multi_action_actions: public process::action_actions
 {
-  multi_action_actions(const core::parser_table& table_)
-    : process::action_actions(table_)
+  multi_action_actions(const core::parser& parser_)
+    : process::action_actions(parser_)
   {}
 
   lps::untyped_multi_action parse_MultAct(const core::parse_node& node)
@@ -45,8 +45,7 @@ struct multi_action_actions: public process::action_actions
     {
       return lps::untyped_multi_action(parse_ActionList(node.child(0)));
     }
-    report_unexpected_node(node);
-    return lps::untyped_multi_action();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
 
@@ -57,7 +56,7 @@ lps::untyped_multi_action parse_multi_action_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("MultAct");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  lps::untyped_multi_action result = multi_action_actions(parser_tables_mcrl2).parse_MultAct(node);
+  lps::untyped_multi_action result = multi_action_actions(p).parse_MultAct(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -73,8 +72,8 @@ multi_action complete_multi_action(untyped_multi_action& x, const process::actio
 
 struct action_rename_actions: public process::action_actions
 {
-  action_rename_actions(const core::parser_table& table_)
-    : process::action_actions(table_)
+  action_rename_actions(const core::parser& parser_)
+    : process::action_actions(parser_)
   {}
 
   lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node)
@@ -82,8 +81,7 @@ struct action_rename_actions: public process::action_actions
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return action_rename_rule_rhs(parse_Action(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Tau())); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Delta())); }
-    report_unexpected_node(node);
-    return lps::action_rename_rule_rhs();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
   lps::action_rename_rule parse_ActionRenameRule(const core::parse_node& node)
@@ -159,7 +157,7 @@ action_rename_specification parse_action_rename_specification_new(const std::str
   unsigned int start_symbol_index = p.start_symbol_index("ActionRenameSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  action_rename_specification result = action_rename_actions(parser_tables_mcrl2).parse_ActionRenameSpec(node);
+  action_rename_specification result = action_rename_actions(p).parse_ActionRenameSpec(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -168,10 +166,7 @@ inline
 void complete_action_rename_specification(action_rename_specification& x, const lps::specification& spec)
 {
   using namespace mcrl2::data;
-  // atermpp::aterm_appl result = lps::action_rename_specification_to_aterm(x);
-  // atermpp::aterm_appl lps_spec = lps::specification_to_aterm(spec);
   x = lps::type_check_action_rename_specification(x, spec);
-  // x = action_rename_specification(result);
   x.data().declare_data_specification_to_be_type_checked();
   x = action_rename_specification(x.data()+spec.data(),x.action_labels(),x.rules());
   x = detail::translate_user_notation_and_normalise_sorts_action_rename_spec(x);
@@ -255,6 +250,7 @@ specification parse_linear_process_specification(std::istream& spec_stream)
   complete_data_specification(result);
   return result;
 }
+
 /// \brief Parses a linear process specification from a string
 /// \param text A string containing a linear process specification
 /// \return The parsed specification
@@ -269,6 +265,49 @@ specification parse_linear_process_specification(const std::string& text)
 {
   std::istringstream stream(text);
   return parse_linear_process_specification(stream);
+}
+
+template <typename Specification>
+void parse_lps(std::istream&, Specification&)
+{
+  throw mcrl2::runtime_error("parse_lps not implemented yet!");
+}
+
+template <>
+inline
+void parse_lps<specification>(std::istream& from, specification& result)
+{
+  result = parse_linear_process_specification(from);
+}
+
+/// \brief Parses a stochastic linear process specification from an input stream
+/// \param spec_stream An input stream containing a linear process specification
+/// \return The parsed specification
+/// \exception non_linear_process if a non-linear sub-expression is encountered.
+/// \exception mcrl2::runtime_error in the following cases:
+/// \li The number of equations is not equal to one
+/// \li The initial process is not a process instance, or it does not match with the equation
+/// \li A sequential process is found with a right hand side that is not a process instance,
+/// or it doesn't match the equation
+template <>
+inline
+void parse_lps<stochastic_specification>(std::istream& from, stochastic_specification& result)
+{
+  process::process_specification pspec = mcrl2::process::parse_process_specification(from);
+  if (!process::is_linear(pspec, true))
+  {
+    throw mcrl2::runtime_error("the process specification is not linear!");
+  }
+  process::detail::stochastic_linear_process_conversion_traverser visitor;
+  result = visitor.convert(pspec);
+  complete_data_specification(result);
+}
+
+template <typename Specification>
+void parse_lps(const std::string& text, Specification& result)
+{
+  std::istringstream stream(text);
+  parse_lps(stream, result);
 }
 
 /// \brief Parses an action from a string

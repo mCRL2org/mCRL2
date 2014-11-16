@@ -115,10 +115,10 @@ class state_label_lts : public atermpp::aterm_appl
         \param[in] i The index of the state label. Must be smaller than the length of this state label.
         \return The data expression at position i of this state label.
     */
-    mcrl2::data::data_expression operator [](const size_t i) const
+    const mcrl2::data::data_expression& operator [](const size_t i) const
     {
       assert(i<size());
-      return mcrl2::data::data_expression(atermpp::aterm_cast<atermpp::aterm_appl>(*this)[i]);
+      return atermpp::down_cast<mcrl2::data::data_expression>(atermpp::aterm_appl::operator[](i));
     }
 
     /** \brief Set the i-th element of this state label to the indicated value.
@@ -236,9 +236,9 @@ inline std::string pp(const action_label_lts l)
 inline action_label_lts parse_lts_action(
   const std::string& multi_action_string,
   const data::data_specification& data_spec,
-  const process::action_list& act_decls)
+  const process::action_label_list& act_decls)
 {
-  lps::multi_action ma = lps::parse_multi_action(multi_action_string, atermpp::aterm_cast<process::action_label_list>(act_decls), data_spec);
+  lps::multi_action ma = lps::parse_multi_action(multi_action_string, act_decls, data_spec);
   return action_label_lts(atermpp::aterm_appl(core::detail::function_symbol_MultAct(), ma.actions()));
 }
 

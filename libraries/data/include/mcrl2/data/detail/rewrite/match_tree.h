@@ -34,7 +34,7 @@ class variable_or_number:public atermpp::aterm
     variable_or_number(const atermpp::aterm& v):
        atermpp::aterm(v)
     {
-      assert(is_variable(core::down_cast<atermpp::aterm_appl>(v)) || v.type_is_int());
+      assert(is_variable(atermpp::down_cast<atermpp::aterm_appl>(v)) || v.type_is_int());
     }
 };
 
@@ -219,12 +219,12 @@ class match_tree_S:public match_tree
 
     const variable& target_variable() const
     {
-      return atermpp::aterm_cast<const variable>((*this)[0]);
+      return atermpp::down_cast<const variable>((*this)[0]);
     }
 
     const match_tree& subtree() const
     {
-      return atermpp::aterm_cast<const match_tree>((*this)[1]);
+      return atermpp::down_cast<const match_tree>((*this)[1]);
     }
 };
 
@@ -248,7 +248,7 @@ class match_tree_A:public match_tree
 
     size_t variable_index() const
     {
-      return atermpp::aterm_cast<const atermpp::aterm_int>((*this)[0]).value();
+      return atermpp::down_cast<const atermpp::aterm_int>((*this)[0]).value();
     }
 };
 
@@ -272,17 +272,17 @@ class match_tree_M:public match_tree
 
     const variable& match_variable() const
     {
-      return atermpp::aterm_cast<const variable>((*this)[0]);
+      return atermpp::down_cast<const variable>((*this)[0]);
     }
 
     const match_tree& true_tree() const
     {
-      return atermpp::aterm_cast<const match_tree>((*this)[1]);
+      return atermpp::down_cast<const match_tree>((*this)[1]);
     }
 
     const match_tree& false_tree() const
     {
-      return atermpp::aterm_cast<const match_tree>((*this)[2]);
+      return atermpp::down_cast<const match_tree>((*this)[2]);
     }
 };
 
@@ -305,17 +305,17 @@ class match_tree_F:public match_tree
 
     const data::function_symbol& function() const
     {
-      return atermpp::aterm_cast<const data::function_symbol>((*this)[0]);
+      return atermpp::down_cast<const data::function_symbol>((*this)[0]);
     }
 
     const match_tree& true_tree() const
     {
-      return atermpp::aterm_cast<const match_tree>((*this)[1]);
+      return atermpp::down_cast<const match_tree>((*this)[1]);
     }
 
     const match_tree& false_tree() const
     {
-      return atermpp::aterm_cast<const match_tree>((*this)[2]);
+      return atermpp::down_cast<const match_tree>((*this)[2]);
     }
 };
 
@@ -341,7 +341,7 @@ class match_tree_N:public match_tree
 
     const match_tree& subtree() const
     {
-      return atermpp::aterm_cast<const match_tree>((*this)[0]);
+      return atermpp::down_cast<const match_tree>((*this)[0]);
     }
 };
 
@@ -367,7 +367,7 @@ class match_tree_D:public match_tree
 
     const match_tree& subtree() const
     {
-      return atermpp::aterm_cast<const match_tree>((*this)[0]);
+      return atermpp::down_cast<const match_tree>((*this)[0]);
     }
 };
 
@@ -391,7 +391,7 @@ class match_tree_R:public match_tree
 
     const data_expression& result() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[0]);
+      return atermpp::down_cast<const data_expression>((*this)[0]);
     }
 };
 
@@ -414,17 +414,17 @@ class match_tree_C:public match_tree
 
     const data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[0]);
+      return atermpp::down_cast<const data_expression>((*this)[0]);
     }
 
     const match_tree& true_tree() const
     {
-      return atermpp::aterm_cast<const match_tree>((*this)[1]);
+      return atermpp::down_cast<const match_tree>((*this)[1]);
     }
 
     const match_tree& false_tree() const
     {
-      return atermpp::aterm_cast<const match_tree>((*this)[2]);
+      return atermpp::down_cast<const match_tree>((*this)[2]);
     }
 };
 
@@ -463,12 +463,12 @@ class match_tree_Re:public match_tree
 
     const data_expression& result() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[0]);
+      return atermpp::down_cast<const data_expression>((*this)[0]);
     }
 
     const variable_or_number_list& variables() const
     {
-      return atermpp::aterm_cast<const variable_or_number_list>((*this)[1]);
+      return atermpp::down_cast<const variable_or_number_list>((*this)[1]);
     }
 };
 
@@ -492,22 +492,22 @@ class match_tree_CRe:public match_tree
 
     const data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[0]);
+      return atermpp::down_cast<const data_expression>((*this)[0]);
     }
 
     const data_expression& result() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[1]);
+      return atermpp::down_cast<const data_expression>((*this)[1]);
     }
 
     const variable_or_number_list& variables_condition() const
     {
-      return atermpp::aterm_cast<const variable_or_number_list>((*this)[2]);
+      return atermpp::down_cast<const variable_or_number_list>((*this)[2]);
     }
 
     const variable_or_number_list& variables_result() const
     {
-      return  atermpp::aterm_cast<const variable_or_number_list>((*this)[3]);
+      return  atermpp::down_cast<const variable_or_number_list>((*this)[3]);
     }
 };
 
@@ -530,12 +530,12 @@ class match_tree_Me:public match_tree
 
     const variable& match_variable() const
     {
-      return atermpp::aterm_cast<const variable>((*this)[0]);
+      return atermpp::down_cast<const variable>((*this)[0]);
     }
 
     size_t variable_index() const
     {
-      return (atermpp::aterm_cast<const atermpp::aterm_int>((*this)[1])).value();
+      return (atermpp::down_cast<const atermpp::aterm_int>((*this)[1])).value();
     }
 };
 

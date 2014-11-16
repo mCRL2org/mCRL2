@@ -70,11 +70,9 @@ void test_basic()
 
   s[y] = c;
 
-  BOOST_CHECK(data::replace_free_variables(x, s) == x);
-#ifdef MCRL2_NEW_REPLACE_VARIABLES
-// in the old version this fails due to the unfortunate interface of replace_free_variables
-  BOOST_CHECK(data::replace_free_variables(y, s) == c);
-#endif
+  BOOST_CHECK(data::replace_free_variables(static_cast<const data_expression&>(x), s) == x);
+  BOOST_CHECK(data::replace_free_variables(static_cast<const data_expression&>(y), s) == c);
+
   BOOST_CHECK(data::replace_free_variables(c + x * y, s) == c + x * c);
   BOOST_CHECK(data::replace_free_variables(lambda(x,x), s) == lambda(x,x));
   BOOST_CHECK(data::replace_free_variables(lambda(x,y), s) == lambda(x,c));

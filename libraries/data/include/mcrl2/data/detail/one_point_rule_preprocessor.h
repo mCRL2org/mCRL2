@@ -55,11 +55,11 @@ one_point_rule_preprocessor
       }
       else if (data::is_equal_to_application(y))
       {
-        return data::not_equal_to(binary_left(atermpp::aterm_cast<application>(y)), binary_right(atermpp::aterm_cast<application>(y)));
+        return data::not_equal_to(binary_left(atermpp::down_cast<application>(y)), binary_right(atermpp::down_cast<application>(y)));
       }
       else if (data::is_not_equal_to_application(y))
       {
-        return data::equal_to(binary_left(atermpp::aterm_cast<application>(y)), binary_right(atermpp::aterm_cast<application>(y)));
+        return data::equal_to(binary_left(atermpp::down_cast<application>(y)), binary_right(atermpp::down_cast<application>(y)));
       }
     }
     return x;

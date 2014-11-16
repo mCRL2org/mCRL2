@@ -61,12 +61,12 @@ class propositional_variable: public atermpp::aterm_appl
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::variable_list& parameters() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
+      return atermpp::down_cast<data::variable_list>((*this)[1]);
     }
 //--- start user section propositional_variable ---//
     /// \brief Type of the parameters.
@@ -77,7 +77,7 @@ class propositional_variable: public atermpp::aterm_appl
     propositional_variable(const std::string& s)
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
-      copy_term(atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), core::identifier_string(p.first), atermpp::aterm_cast< data::variable_list >(p.second)));
+      copy_term(atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), core::identifier_string(p.first), atermpp::container_cast< data::variable_list >(p.second)));
     }
 //--- end user section propositional_variable ---//
 };

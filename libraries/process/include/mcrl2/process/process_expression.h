@@ -14,7 +14,6 @@
 
 #include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/data_expression.h"
@@ -81,6 +80,7 @@ inline bool is_bounded_init(const atermpp::aterm_appl& x);
 inline bool is_merge(const atermpp::aterm_appl& x);
 inline bool is_left_merge(const atermpp::aterm_appl& x);
 inline bool is_choice(const atermpp::aterm_appl& x);
+inline bool is_stochastic_operator(const atermpp::aterm_appl& x);
 inline bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x);
 inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
 
@@ -110,6 +110,7 @@ bool is_process_expression(const atermpp::aterm_appl& x)
          process::is_merge(x) ||
          process::is_left_merge(x) ||
          process::is_choice(x) ||
+         process::is_stochastic_operator(x) ||
          process::is_untyped_parameter_identifier(x) ||
          process::is_untyped_process_assignment(x);
 }
@@ -157,12 +158,12 @@ class action: public process_expression
 
     const action_label& label() const
     {
-      return atermpp::aterm_cast<const action_label>((*this)[0]);
+      return atermpp::down_cast<action_label>((*this)[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -224,12 +225,12 @@ class process_instance: public process_expression
 
     const process_identifier& identifier() const
     {
-      return atermpp::aterm_cast<const process_identifier>((*this)[0]);
+      return atermpp::down_cast<process_identifier>((*this)[0]);
     }
 
     const data::data_expression_list& actual_parameters() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -285,12 +286,12 @@ class process_instance_assignment: public process_expression
 
     const process_identifier& identifier() const
     {
-      return atermpp::aterm_cast<const process_identifier>((*this)[0]);
+      return atermpp::down_cast<process_identifier>((*this)[0]);
     }
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::assignment_list>((*this)[1]);
+      return atermpp::down_cast<data::assignment_list>((*this)[1]);
     }
 };
 
@@ -432,18 +433,18 @@ class sum: public process_expression
     }
 
     /// \brief Constructor.
-    sum(const data::variable_list& bound_variables, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), bound_variables, operand))
+    sum(const data::variable_list& variables, const process_expression& operand)
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), variables, operand))
     {}
 
-    const data::variable_list& bound_variables() const
+    const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -499,12 +500,12 @@ class block: public process_expression
 
     const core::identifier_string_list& block_set() const
     {
-      return atermpp::aterm_cast<const core::identifier_string_list>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -560,12 +561,12 @@ class hide: public process_expression
 
     const core::identifier_string_list& hide_set() const
     {
-      return atermpp::aterm_cast<const core::identifier_string_list>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -621,12 +622,12 @@ class rename: public process_expression
 
     const rename_expression_list& rename_set() const
     {
-      return atermpp::aterm_cast<const rename_expression_list>((*this)[0]);
+      return atermpp::down_cast<rename_expression_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -682,12 +683,12 @@ class comm: public process_expression
 
     const communication_expression_list& comm_set() const
     {
-      return atermpp::aterm_cast<const communication_expression_list>((*this)[0]);
+      return atermpp::down_cast<communication_expression_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -743,12 +744,12 @@ class allow: public process_expression
 
     const action_name_multiset_list& allow_set() const
     {
-      return atermpp::aterm_cast<const action_name_multiset_list>((*this)[0]);
+      return atermpp::down_cast<action_name_multiset_list>((*this)[0]);
     }
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -804,12 +805,12 @@ class sync: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -865,12 +866,12 @@ class at: public process_expression
 
     const process_expression& operand() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::aterm_cast<const data::data_expression>((*this)[1]);
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
     }
 };
 
@@ -926,12 +927,12 @@ class seq: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -987,12 +988,12 @@ class if_then: public process_expression
 
     const data::data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data::data_expression>((*this)[0]);
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 
     const process_expression& then_case() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1048,17 +1049,17 @@ class if_then_else: public process_expression
 
     const data::data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data::data_expression>((*this)[0]);
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
     }
 
     const process_expression& then_case() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 
     const process_expression& else_case() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[2]);
+      return atermpp::down_cast<process_expression>((*this)[2]);
     }
 };
 
@@ -1114,12 +1115,12 @@ class bounded_init: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1175,12 +1176,12 @@ class merge: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1236,12 +1237,12 @@ class left_merge: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1297,12 +1298,12 @@ class choice: public process_expression
 
     const process_expression& left() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[0]);
+      return atermpp::down_cast<process_expression>((*this)[0]);
     }
 
     const process_expression& right() const
     {
-      return atermpp::aterm_cast<const process_expression>((*this)[1]);
+      return atermpp::down_cast<process_expression>((*this)[1]);
     }
 };
 
@@ -1329,6 +1330,72 @@ std::ostream& operator<<(std::ostream& out, const choice& x)
 
 /// \brief swap overload
 inline void swap(choice& t1, choice& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \brief The distribution operator
+class stochastic_operator: public process_expression
+{
+  public:
+    /// \brief Default constructor.
+    stochastic_operator()
+      : process_expression(core::detail::default_values::StochasticOperator)
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit stochastic_operator(const atermpp::aterm& term)
+      : process_expression(term)
+    {
+      assert(core::detail::check_term_StochasticOperator(*this));
+    }
+
+    /// \brief Constructor.
+    stochastic_operator(const data::variable_list& variables, const data::data_expression& distribution, const process_expression& operand)
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_StochasticOperator(), variables, distribution, operand))
+    {}
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const data::data_expression& distribution() const
+    {
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
+    }
+
+    const process_expression& operand() const
+    {
+      return atermpp::down_cast<process_expression>((*this)[2]);
+    }
+};
+
+/// \brief Test for a stochastic_operator expression
+/// \param x A term
+/// \return True if \a x is a stochastic_operator expression
+inline
+bool is_stochastic_operator(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StochasticOperator;
+}
+
+// prototype declaration
+std::string pp(const stochastic_operator& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const stochastic_operator& x)
+{
+  return out << process::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(stochastic_operator& t1, stochastic_operator& t2)
 {
   t1.swap(t2);
 }
@@ -1363,12 +1430,12 @@ class untyped_parameter_identifier: public process_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 
@@ -1429,12 +1496,12 @@ class untyped_process_assignment: public process_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::untyped_identifier_assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::untyped_identifier_assignment_list>((*this)[1]);
+      return atermpp::down_cast<data::untyped_identifier_assignment_list>((*this)[1]);
     }
 };
 
@@ -1470,40 +1537,43 @@ inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
 // The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
 
 /// \brief Defines a precedence relation on process expressions
-inline int left_precedence(const choice&)       { return 1; }
-inline int left_precedence(const sum&)          { return 2; }
-inline int left_precedence(const merge&)        { return 3; }
-inline int left_precedence(const left_merge&)   { return 4; }
-inline int left_precedence(const if_then&)      { return 5; }
-inline int left_precedence(const if_then_else&) { return 5; }
-inline int left_precedence(const bounded_init&) { return 6; }
-inline int left_precedence(const seq&)          { return 7; }
-inline int left_precedence(const at&)           { return 8; }
-inline int left_precedence(const sync&)         { return 9; }
+inline int left_precedence(const choice&)              { return 1; }
+inline int left_precedence(const sum&)                 { return 2; }
+inline int left_precedence(const stochastic_operator&) { return 2; }
+inline int left_precedence(const merge&)               { return 3; }
+inline int left_precedence(const left_merge&)          { return 4; }
+inline int left_precedence(const if_then&)             { return 5; }
+inline int left_precedence(const if_then_else&)        { return 5; }
+inline int left_precedence(const bounded_init&)        { return 6; }
+inline int left_precedence(const seq&)                 { return 7; }
+inline int left_precedence(const at&)                  { return 8; }
+inline int left_precedence(const sync&)                { return 9; }
 inline int left_precedence(const process_expression& x)
 {
-       if (is_choice(x))       { return left_precedence(static_cast<const choice&>(x)); }
-  else if (is_sum(x))          { return left_precedence(static_cast<const sum&>(x)); }
-  else if (is_merge(x))        { return left_precedence(static_cast<const merge&>(x)); }
-  else if (is_left_merge(x))   { return left_precedence(static_cast<const left_merge>(x)); }
-  else if (is_if_then(x))      { return left_precedence(static_cast<const if_then&>(x)); }
-  else if (is_if_then_else(x)) { return left_precedence(static_cast<const if_then_else&>(x)); }
-  else if (is_bounded_init(x)) { return left_precedence(static_cast<const bounded_init&>(x)); }
-  else if (is_seq(x))          { return left_precedence(static_cast<const seq&>(x)); }
-  else if (is_at(x))           { return left_precedence(static_cast<const at&>(x)); }
-  else if (is_sync(x))         { return left_precedence(static_cast<const sync&>(x)); }
+       if (is_choice(x))              { return left_precedence(static_cast<const choice&>(x)); }
+  else if (is_sum(x))                 { return left_precedence(static_cast<const sum&>(x)); }
+  else if (is_stochastic_operator(x)) { return left_precedence(static_cast<const stochastic_operator&>(x)); }
+  else if (is_merge(x))               { return left_precedence(static_cast<const merge&>(x)); }
+  else if (is_left_merge(x))          { return left_precedence(static_cast<const left_merge>(x)); }
+  else if (is_if_then(x))             { return left_precedence(static_cast<const if_then&>(x)); }
+  else if (is_if_then_else(x))        { return left_precedence(static_cast<const if_then_else&>(x)); }
+  else if (is_bounded_init(x))        { return left_precedence(static_cast<const bounded_init&>(x)); }
+  else if (is_seq(x))                 { return left_precedence(static_cast<const seq&>(x)); }
+  else if (is_at(x))                  { return left_precedence(static_cast<const at&>(x)); }
+  else if (is_sync(x))                { return left_precedence(static_cast<const sync&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
 inline int right_precedence(const process_expression& x) { return left_precedence(x); }
 
-inline const process_expression& unary_operand(const sum& x)         { return x.operand(); }
-inline const process_expression& unary_operand(const block& x)       { return x.operand(); }
-inline const process_expression& unary_operand(const hide& x)        { return x.operand(); }
-inline const process_expression& unary_operand(const rename& x)      { return x.operand(); }
-inline const process_expression& unary_operand(const comm& x)        { return x.operand(); }
-inline const process_expression& unary_operand(const allow& x)       { return x.operand(); }
-inline const process_expression& unary_operand(const at& x)          { return x.operand(); }
+inline const process_expression& unary_operand(const sum& x)                 { return x.operand(); }
+inline const process_expression& unary_operand(const stochastic_operator& x) { return x.operand(); }
+inline const process_expression& unary_operand(const block& x)               { return x.operand(); }
+inline const process_expression& unary_operand(const hide& x)                { return x.operand(); }
+inline const process_expression& unary_operand(const rename& x)              { return x.operand(); }
+inline const process_expression& unary_operand(const comm& x)                { return x.operand(); }
+inline const process_expression& unary_operand(const allow& x)               { return x.operand(); }
+inline const process_expression& unary_operand(const at& x)                  { return x.operand(); }
 
 inline const process_expression& binary_left(const sync& x)          { return x.left(); }
 inline const process_expression& binary_right(const sync& x)         { return x.right(); }
@@ -1606,5 +1676,22 @@ std::string pp(const multi_action_name_set& A)
 } // namespace process
 
 } // namespace mcrl2
+
+namespace std
+{
+
+/// \brief Standard has function for actions.
+template <>
+struct hash<mcrl2::process::action>
+{
+  std::size_t operator()(const mcrl2::process::action& t) const
+  {
+    return std::hash<atermpp::aterm>()(t);
+  }
+
+};
+
+
+} // namespace std;
 
 #endif // MCRL2_PROCESS_PROCESS_EXPRESSION_H

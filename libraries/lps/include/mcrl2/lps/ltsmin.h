@@ -32,6 +32,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/next_state_generator.h"
@@ -241,14 +242,18 @@ class state_data_type: public pins_data_type
       m_name = data::pp(m_sort);
     }
 
+    // prints the expression as an ATerm string
     std::string serialize(int i) const
     {
-      return to_string(index2expression(i));
+      data::data_expression e = index2expression(i);
+      atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm>(e));
+      return to_string(t);
     }
 
     std::size_t deserialize(const std::string& s)
     {
-      return expression2index(data::data_expression(atermpp::read_term_from_string(s)));
+      atermpp::aterm t = data::detail::add_index(atermpp::read_term_from_string(s));
+      return expression2index(atermpp::down_cast<data::data_expression>(t));
     }
 
     std::string print(int i) const
@@ -369,9 +374,9 @@ class pins
     }
 
     /// \brief Returns the process of the LPS specification
-    const linear_process& process() const
+    const linear_process process() const
     {
-      return m_generator.get_specification().process();
+      return remove_stochastic_operators(m_generator.get_specification()).process();
     }
 
     /// \brief Returns the data specification of the LPS specification
@@ -622,7 +627,7 @@ class pins
     /// \brief Assigns the initial state to s.
     void get_initial_state(ltsmin_state_type& s)
     {
-      state initial_state = m_generator.initial_state();
+      state initial_state = m_generator.initial_states().front().state(); // Only the first state of this state distribution is considered.
       for (size_t i = 0; i < m_state_length; i++)
       {
         s[i] = state_type_map(i)[initial_state[i]];
@@ -634,7 +639,8 @@ class pins
     std::set<std::string> summand_action_names(std::size_t i) const
     {
       std::set<std::string> result;
-      auto const& l = process().action_summands()[i].multi_action().actions();
+      auto const l = process().action_summands()[i].multi_action().actions(); // Using a reference in whatever this type
+                                                                              // is, leads to a failing lps_ltsmin_test.
       for (auto i = l.begin(); i != l.end(); ++i)
       {
         result.insert(std::string(i->label().name()));
@@ -670,7 +676,7 @@ class pins
       next_state_generator::enumerator_queue_t enumeration_queue;
       for (next_state_generator::iterator i = m_generator.begin(source, &enumeration_queue); i; i++)
       {
-        state destination = i->internal_state();
+        state destination = i->target_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
@@ -711,7 +717,7 @@ class pins
       next_state_generator::enumerator_queue_t enumeration_queue;
       for (next_state_generator::iterator i = m_generator.begin(source, group, &enumeration_queue); i; i++)
       {
-        state destination = i->internal_state();
+        state destination = i->target_state();
         for (size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];

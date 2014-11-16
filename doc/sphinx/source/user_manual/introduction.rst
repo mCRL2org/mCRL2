@@ -215,9 +215,7 @@ Integration with other tools
 The mCRL2 toolset also integrates with other tool sets.
 An interface with the TorX tool is provided by :ref:`tool-lps2torx`.
 Furthermore, mCRL2 can be used as a language front-end for the
-`LTSmin toolset <http://fmt.cs.utwente.nl/tools/ltsmin/>`_. It can
-also be built against `CADP <http://cadp.inria.fr/>`_ to enable support
-for the BCG file format for labelled transition systems. Furthermore,
+`LTSmin toolset <http://fmt.cs.utwente.nl/tools/ltsmin/>`_. Furthermore,
 a number of textual file formats are available, that facilitate easy
 integration with other tools. Examples are the :ref:`language-aut-lts` for labelled
 transition systems, that is, e.g., supported by `μCRL <http://homepages.cwi.nl/~mcrl/>`_

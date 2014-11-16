@@ -31,7 +31,7 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void run_test_case(const std::string& formula, const std::string& lps_spec)
 {
-  specification spec = linearise(lps_spec);
+  specification spec=remove_stochastic_operators(linearise(lps_spec));
   bool check_monotonicity = false;
   bool translate_regular = false;
   state_formula f = parse_state_formula(formula, spec, check_monotonicity, translate_regular);
@@ -67,6 +67,8 @@ BOOST_AUTO_TEST_CASE(test_abp)
   run_test_case("nu Z(i: Nat = 0). Z(2)", lps_spec);
   run_test_case("[true]true", lps_spec);
   run_test_case("[true]val(true)", lps_spec);
+  run_test_case("exists d: Nat. val(d < 0)", lps_spec);
+  run_test_case("exists d: Nat. val(d < 0) || val(d + 1 == 5)", lps_spec);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

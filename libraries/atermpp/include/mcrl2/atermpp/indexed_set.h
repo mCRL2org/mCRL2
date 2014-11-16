@@ -13,7 +13,7 @@
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
 #include <vector>
-#include <deque>
+#include <stack>
 #include <cassert>
 #include "mcrl2/atermpp/detail/aterm_implementation.h"
 
@@ -27,17 +27,18 @@ class indexed_set
   protected:
     size_t sizeMinus1;
     unsigned int max_load;
-    size_t max_entries;
+    size_t nr_of_insertions_until_next_rehash;
     std::vector<size_t> hashtable;
     std::deque <ELEMENT > m_keys;
+    std::stack < size_t > free_positions; 
 
     /* Find whether the key is already inserted in the hashtable.
        If no, insert n as the index for key. If yes return its already
        existing index */
-    size_t hashPut(const ELEMENT& key, size_t n);
+    size_t put_in_hashtable(const ELEMENT& key, size_t n);
 
     /* Double the size of the hashtable. */
-    void hashResizeSet();
+    void resize_hashtable();
 
   public:
     /// \brief A constant that if returned as an index means that the index does not exist.
@@ -100,10 +101,22 @@ class indexed_set
     /// \return The element in the set with the given index.
     const ELEMENT& get(size_t index) const;
 
+    /// \brief Indicates whether a certain index is defined.
+    /// \param index A positive number.
+    /// \return The element in the set with the given index.
+    bool defined(size_t index) const;
+
+    /// \brief Remove elem from set. 
+    /// The elem is removed from the indexed set, and if a number was assigned to elem, 
+    /// it is freed to be reassigned to an element, that may be put into the set at some later instance. 
+    /// \param elem An element of the set. 
+    /// \return whether the element was successfully removed. 
+    bool erase(const ELEMENT& elem); 
+
     /// \brief Returns the size of the indexed set.
     std::size_t size() const
     {
-      return m_keys.size();
+      return m_keys.size()-free_positions.size();
     }
 };
 

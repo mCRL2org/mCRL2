@@ -20,7 +20,7 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/constelm.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
 
@@ -392,18 +392,16 @@ std::string case_10 =
 
 const std::string expected_10 = "process_parameter_count = 1";
 
-static
 void test_constelm(const std::string& message, const std::string& spec_text, const std::string& expected_result)
 {
   specification spec = parse_linear_process_specification(spec_text);
   data::rewriter R(spec.data());
   bool instantiate_free_variables = false;
   constelm(spec, R, instantiate_free_variables);
-  lps::detail::specification_property_map info(spec);
+  lps::detail::specification_property_map<> info(spec);
   BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
 }
 
-static
 void test_constelm()
 {
   test_constelm("case_1" , case_1,  expected_1);
@@ -419,20 +417,41 @@ void test_constelm()
   test_constelm("case_10" , case_10,  expected_10);
 }
 
-static
 void test_abp()
 {
-  specification spec = linearise(lps::detail::ABP_SPECIFICATION());
+  stochastic_specification spec = linearise(lps::detail::ABP_SPECIFICATION());
   data::rewriter R(spec.data());
   bool instantiate_free_variables = false;
   constelm(spec, R, instantiate_free_variables);
   BOOST_CHECK(is_well_typed(spec));
 }
 
+void test_stochastic_specification()
+{
+  std::string text =
+    "act action :Nat;                                     \n"
+    "                                                     \n"
+    "proc P(i, j: Nat) = true  -> action(j). P(i+1,j)   + \n"
+    "                    false -> action(j). P(i+1,j+1);  \n"
+    "                                                     \n"
+    "init P(0,5);                                         \n"
+    "                                                     \n"
+    ;
+  std::string expected_result = "process_parameter_names = i";
+  stochastic_specification spec;
+  parse_lps(text, spec);
+  data::rewriter R(spec.data());
+  bool instantiate_free_variables = false;
+  constelm(spec, R, instantiate_free_variables);
+  lps::detail::specification_property_map<stochastic_specification> info(spec);
+  BOOST_CHECK(data::detail::compare_property_maps("test_stochastic_specification", info, expected_result));
+}
+
 int test_main(int argc, char* argv[])
 {
   test_constelm();
   test_abp();
+  test_stochastic_specification();
 
   return 0;
 }

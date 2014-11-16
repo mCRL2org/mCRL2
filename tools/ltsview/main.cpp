@@ -19,9 +19,6 @@ class ltsview_tool : public ltsview_base
         "an attempt is made to force the input format based on the file extension. "
         "The supported formats with file extensions are:\n"
         "  Aldebaran format (CADP; *.aut);\n"
-#ifdef USE_BCG
-        "  Binary Coded Graph format (CADP; *.bcg);\n"
-#endif
         "  GraphViz format (*.dot);\n"
         "  Finite State Machine format (*.fsm);\n"
         "  mCRL SVC format (*.svc);\n"

@@ -76,7 +76,7 @@ class used_data_equation_selector
         // Always add insert for an FSet(S) function, as it is used when enumerating the elements of an FSet.
         if (sort_fset::is_fset(*j))
         {
-          const container_sort s=core::down_cast<container_sort>(*j);
+          const container_sort &s = atermpp::down_cast<container_sort>(*j);
           add_symbol(sort_fset::insert(s.element_sort()));
         }
       }

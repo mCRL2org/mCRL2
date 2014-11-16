@@ -60,11 +60,32 @@ void test_actdecl()
   action_label_list l = parse_action_declaration(text);
 }
 
+void test_stochastic_operator()
+{
+  std::string text =
+    "act  throw: Bool;                   \n"
+    "                                    \n"
+    "proc P = dist b:Bool[1/2].throw(b); \n"
+    "                                    \n"
+    "init P;                             \n"
+    ;
+  process_specification p = parse_process_specification(text);
+  std::cout << p << std::endl;
+
+  text =
+    "proc P = sum x:Real.(x==x) -> tau.P;\n"
+    "init P;\n"
+    ;
+  p = parse_process_specification(text);
+  std::cout << p << std::endl;
+}
+
 int test_main(int argc, char** argv)
 {
   test_parse_process_specification();
   test_parse();
   test_actdecl();
+  test_stochastic_operator();
 
   return EXIT_SUCCESS;
 }

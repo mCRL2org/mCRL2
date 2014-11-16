@@ -390,7 +390,7 @@ class stategraph_algorithm
       mCRL2log(log::debug, "stategraph") << print_GCFP();
     }
 
-    bool is_local_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
+    bool is_LCFP_parameter(const core::identifier_string& X, std::size_t i) const
     {
       auto j = m_is_LCFP.find(X);
       assert(j != m_is_LCFP.end());
@@ -399,13 +399,21 @@ class stategraph_algorithm
       return cf[i];
     }
 
-    bool is_global_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
+    bool is_GCFP_parameter(const core::identifier_string& X, std::size_t i) const
     {
       auto j = m_is_GCFP.find(X);
       assert(j != m_is_GCFP.end());
       const std::vector<bool>& cf = j->second;
       assert(i < cf.size());
       return cf[i];
+    }
+
+    bool is_global_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
+    {
+      using utilities::detail::contains;
+      auto const& eq_X = *find_equation(m_pbes, X);
+      const std::vector<std::size_t>& I = eq_X.control_flow_parameter_indices();
+      return contains(I, i);
     }
 
     // relate (X, n) and (Y, m) in the dependency graph
@@ -457,7 +465,7 @@ class stategraph_algorithm
         auto const& d_X = k->parameters();
         for (std::size_t n = 0; n < d_X.size(); n++)
         {
-          if (is_global_control_flow_parameter(X, n))
+          if (is_GCFP_parameter(X, n))
           {
             m_GCFP_graph.add_vertex(GCFP_vertex(X, n, d_X[n]));
           }
@@ -478,7 +486,7 @@ class stategraph_algorithm
           {
             std::size_t n = j->first;
             std::size_t m = j->second;
-            if (is_global_control_flow_parameter(X, n) && is_global_control_flow_parameter(Y, m))
+            if (is_GCFP_parameter(X, n) && is_GCFP_parameter(Y, m))
             {
               if (m_use_alternative_gcfp_relation)
               {
@@ -924,7 +932,7 @@ class stategraph_algorithm
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
-      mCRL2log(log::debug, "stategraph") << "--- GCFP graph = ---\n" << m_GCFP_graph << std::endl;
+      mCRL2log(log::debug1, "stategraph") << "--- GCFP graph = ---\n" << m_GCFP_graph << std::endl;
       set_parameters(m_pbes);
       print_final_control_flow_parameters();
 

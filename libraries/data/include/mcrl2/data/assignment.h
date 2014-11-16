@@ -110,12 +110,12 @@ class assignment: public assignment_expression
 
     const variable& lhs() const
     {
-      return atermpp::aterm_cast<const variable>((*this)[0]);
+      return atermpp::down_cast<variable>((*this)[0]);
     }
 
     const data_expression& rhs() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[1]);
+      return atermpp::down_cast<data_expression>((*this)[1]);
     }
 //--- start user section assignment ---//
     /// \brief Applies the assignment to a variable
@@ -123,7 +123,7 @@ class assignment: public assignment_expression
     /// \return The value <tt>x[lhs() := rhs()]</tt>.
     const data_expression &operator()(const variable& x) const
     {
-      return x == lhs() ? rhs() : atermpp::aterm_cast<const data_expression>(x);
+      return x == lhs() ? rhs() : x;
     }
 
     /// \brief Applies the assignment to a term
@@ -200,12 +200,12 @@ class untyped_identifier_assignment: public assignment_expression
 
     const core::identifier_string& lhs() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data_expression& rhs() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[1]);
+      return atermpp::down_cast<data_expression>((*this)[1]);
     }
 //--- start user section untyped_identifier_assignment ---//
     /// \brief Applies the assignment to a variable

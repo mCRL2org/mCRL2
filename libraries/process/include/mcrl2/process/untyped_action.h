@@ -48,12 +48,12 @@ class untyped_action: public atermpp::aterm_appl
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 };
 

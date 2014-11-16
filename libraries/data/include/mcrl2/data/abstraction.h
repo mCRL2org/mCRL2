@@ -49,23 +49,23 @@ class abstraction: public data_expression
 
     /// \brief Constructor.
     template <typename Container>
-    abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
+    abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::enable_if_container<Container, variable>::type* = 0)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Binder(), binding_operator, variable_list(variables.begin(), variables.end()), body))
     {}
 
     const binder_type& binding_operator() const
     {
-      return atermpp::aterm_cast<const binder_type>((*this)[0]);
+      return atermpp::down_cast<const binder_type>((*this)[0]);
     }
 
     const variable_list& variables() const
     {
-      return atermpp::aterm_cast<const variable_list>((*this)[1]);
+      return atermpp::down_cast<const variable_list>((*this)[1]);
     }
 
     const data_expression& body() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[2]);
+      return atermpp::down_cast<const data_expression>((*this)[2]);
     }
 };
 

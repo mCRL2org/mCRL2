@@ -224,7 +224,7 @@ class not_: public boolean_expression
 
     const boolean_expression& operand() const
     {
-      return atermpp::aterm_cast<const boolean_expression>((*this)[0]);
+      return atermpp::down_cast<boolean_expression>((*this)[0]);
     }
 };
 
@@ -280,12 +280,12 @@ class and_: public boolean_expression
 
     const boolean_expression& left() const
     {
-      return atermpp::aterm_cast<const boolean_expression>((*this)[0]);
+      return atermpp::down_cast<boolean_expression>((*this)[0]);
     }
 
     const boolean_expression& right() const
     {
-      return atermpp::aterm_cast<const boolean_expression>((*this)[1]);
+      return atermpp::down_cast<boolean_expression>((*this)[1]);
     }
 };
 
@@ -341,12 +341,12 @@ class or_: public boolean_expression
 
     const boolean_expression& left() const
     {
-      return atermpp::aterm_cast<const boolean_expression>((*this)[0]);
+      return atermpp::down_cast<boolean_expression>((*this)[0]);
     }
 
     const boolean_expression& right() const
     {
-      return atermpp::aterm_cast<const boolean_expression>((*this)[1]);
+      return atermpp::down_cast<boolean_expression>((*this)[1]);
     }
 };
 
@@ -402,12 +402,12 @@ class imp: public boolean_expression
 
     const boolean_expression& left() const
     {
-      return atermpp::aterm_cast<const boolean_expression>((*this)[0]);
+      return atermpp::down_cast<boolean_expression>((*this)[0]);
     }
 
     const boolean_expression& right() const
     {
-      return atermpp::aterm_cast<const boolean_expression>((*this)[1]);
+      return atermpp::down_cast<boolean_expression>((*this)[1]);
     }
 };
 
@@ -447,7 +447,7 @@ class boolean_variable: public boolean_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 //--- start user section boolean_variable ---//
     /// \brief Default constructor.
@@ -561,14 +561,14 @@ inline
 const boolean_expression &left(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
-  return atermpp::aterm_cast<const boolean_expression>(e[0]);
+  return atermpp::down_cast<const boolean_expression>(e[0]);
 }
 
 inline
 const boolean_expression &right(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
-  return atermpp::aterm_cast<const boolean_expression>(e[1]);
+  return atermpp::down_cast<const boolean_expression>(e[1]);
 }
 
 } // namespace accessors
@@ -730,7 +730,7 @@ struct term_traits<bes::boolean_expression>
   const term_type &arg(const term_type& t)
   {
     assert(is_not(t));
-    return atermpp::aterm_cast<const term_type>(t[0]);
+    return atermpp::down_cast<const term_type>(t[0]);
   }
 
   /// \brief Returns the left argument of a term of type and, or or imp
@@ -740,7 +740,7 @@ struct term_traits<bes::boolean_expression>
   const term_type &left(const term_type& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::aterm_cast<const term_type>(t[0]);
+    return atermpp::down_cast<const term_type>(t[0]);
   }
 
   /// \brief Returns the right argument of a term of type and, or or imp
@@ -750,7 +750,7 @@ struct term_traits<bes::boolean_expression>
   const term_type &right(const term_type& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::aterm_cast<const term_type>(t[1]);
+    return atermpp::down_cast<const term_type>(t[1]);
   }
 
   /// \brief Returns the argument of a term of type not
@@ -759,7 +759,7 @@ struct term_traits<bes::boolean_expression>
   const term_type &not_arg(const term_type& t)
   {
     assert(is_not(t));
-    return atermpp::aterm_cast<const term_type>(t[0]);
+    return atermpp::down_cast<const term_type>(t[0]);
   }
 
   /// \brief Returns the name of a boolean variable
@@ -769,7 +769,7 @@ struct term_traits<bes::boolean_expression>
   const string_type &name(const term_type& t)
   {
     assert(is_variable(t));
-    return atermpp::aterm_cast<const string_type>(t[0]);
+    return atermpp::down_cast<const string_type>(t[0]);
   }
 
   /// \brief Conversion from variable to term
@@ -778,7 +778,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   const term_type &variable2term(const variable_type &v)
   {
-    return atermpp::aterm_cast<const term_type>(v);
+    return v;
   }
 
   /// \brief Conversion from term to variable
@@ -787,7 +787,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   const variable_type &term2variable(const term_type& t)
   {
-    return atermpp::aterm_cast<const variable_type>(t);
+    return atermpp::down_cast<const variable_type>(t);
   }
 
   /// \brief Pretty print function

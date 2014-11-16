@@ -58,28 +58,28 @@ class data_equation: public atermpp::aterm_appl
 
     /// \brief Constructor.
     template <typename Container>
-    data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
+    data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = 0)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
     {}
 
     const variable_list& variables() const
     {
-      return atermpp::aterm_cast<const variable_list>((*this)[0]);
+      return atermpp::down_cast<variable_list>((*this)[0]);
     }
 
     const data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[1]);
+      return atermpp::down_cast<data_expression>((*this)[1]);
     }
 
     const data_expression& lhs() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[2]);
+      return atermpp::down_cast<data_expression>((*this)[2]);
     }
 
     const data_expression& rhs() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[3]);
+      return atermpp::down_cast<data_expression>((*this)[3]);
     }
 //--- start user section data_equation ---//
     /// \brief Constructor
@@ -93,7 +93,7 @@ class data_equation: public atermpp::aterm_appl
     data_equation(const Container& variables,
                   const data_expression& lhs,
                   const data_expression& rhs,
-                  typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+                  typename atermpp::enable_if_container< Container, variable >::type* = 0)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs)
     {}
 

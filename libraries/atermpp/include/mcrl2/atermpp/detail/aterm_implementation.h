@@ -74,13 +74,13 @@ void call_creation_hook(const _aterm*);
 
 inline size_t SHIFT(const size_t w)
 {
-  return w>>4;
+  return w>>3;
 }
 
 inline
 size_t COMBINE(const HashNumber hnr, const size_t w)
 {
-  return (hnr>>1) ^ hnr ^ w;
+  return (w>>3) + (hnr>>1) + (hnr<<1);
 }
 
 inline
@@ -140,7 +140,7 @@ inline const _aterm* allocate_term(const size_t size)
     assert(size<terminfo_size);
   }
 
-  if (total_nodes_in_hashtable>=(aterm_table_size))
+  if (total_nodes_in_hashtable>=aterm_table_size)
   {
     // The hashtable is not big enough to hold nr_of_nodes_for_the_next_garbage_collect. So, resizing
     // is wise (although not necessary, due to the structure of the hastable, which allows is to contain

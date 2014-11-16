@@ -176,7 +176,8 @@ inline
 pbes lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed = false, bool structured = false, bool unoptimized = false)
 {
   pbes result;
-  lps::specification spec = lps::linearise(spec_text);
+  lps::specification spec=remove_stochastic_operators(lps::linearise(spec_text));
+
   state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, spec);
   return lps2pbes(spec, f, timed, structured, unoptimized);
 }

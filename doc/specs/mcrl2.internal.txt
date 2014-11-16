@@ -154,6 +154,7 @@
                  | Merge(<ProcExpr>, <ProcExpr>)
                  | LMerge(<ProcExpr>, <ProcExpr>)
                  | Choice(<ProcExpr>, <ProcExpr>)
+                 | StochasticOperator(<DataVarId>+, <DataExpr>, <ProcExpr>)
                  | UntypedParamId(<String>, <DataExpr>*)
                  | UntypedProcessAssignment(<String>, <UntypedIdentifierAssignment>*)
 
@@ -174,8 +175,7 @@
 //----------------------
 
 //process specification
-<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,
-                     <ProcEqnSpec>, <ProcInit>)
+<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>, <ProcEqnSpec>, <ProcInit>)
 
 //action specification
 <ActSpec>      ::= ActSpec(<ActId>*)
@@ -201,6 +201,9 @@
 //Linear process specifications
 //-----------------------------
 
+//distribution
+<Distribution>  ::= Distribution(<DataVarId>*, <DataExpr>)
+
 //process specification
 <LinProcSpec>   ::= LinProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,
                       <LinearProcess>, <LinearProcessInit>)
@@ -211,11 +214,11 @@
 //Linear process summand
 <LinearProcessSummand>
                 ::= LinearProcessSummand(<DataVarId>*, <DataExpr>,
-                      <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*)
+                      <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*, <Distribution>)
 
 //process initialisation
 <LinearProcessInit>
-                ::= LinearProcessInit(<DataVarIdInit>*)
+                ::= LinearProcessInit(<DataVarIdInit>*, <Distribution>)
 
 
 //Mu-calculus formulas

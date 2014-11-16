@@ -56,8 +56,6 @@ lts_type guess_format(std::string const& s, const bool be_verbose=true);
  * \li "aut" for the Ald&eacute;baran format;
  * \li "fsm" for the FSM format;
  * \li "dot" for the GraphViz format;
- * \li "bcg" for the BCG format (only available if the LTS library is built
- * with BCG support).
  *
  * \param[in] s The format specification string.
  * \return The LTS format based on the value of \a s.
@@ -124,7 +122,7 @@ std::string lts_extensions_as_string(const std::set<lts_type> &supported);
 
 
 /** \brief Read a labelled transition system and return it in fsm format.
- *  \details The file can refer to any file in lts, aut, fsm, bcg, or dot
+ *  \details The file can refer to any file in lts, aut, fsm, or dot
  *           format. After reading it is is attempted to translate it into
  *           fsm format.
  *  \param[in] path A string with the name of the file.
@@ -155,15 +153,6 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
       l.load(path);
       return;
     }
-#ifdef USE_BCG
-    case lts_bcg:
-    {
-      lts_bcg_t l1;
-      l1.load(path);
-      detail::lts_convert(l1,l);
-      return;
-    }
-#endif
     case lts_dot:
     {
       lts_dot_t l1;

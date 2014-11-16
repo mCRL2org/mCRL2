@@ -82,13 +82,13 @@ process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::id
 
   if (ParList.size()==1)
   {
-    Result=MakeAction(Name,ParList.front(),aterm_cast<data_expression_list>(act.arguments()));
+    Result=MakeAction(Name,ParList.front(),act.arguments());
   }
   else
   {
     // we need typechecking to find the correct type of the action.
     // make the list of possible types for the parameters
-    Result=MakeAction(Name,GetNotInferredList(ParList),aterm_cast<data_expression_list>(act.arguments()));
+    Result=MakeAction(Name,GetNotInferredList(ParList),act.arguments());
   }
 
   //process the arguments
@@ -277,7 +277,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
   for (sort_expression_vector::const_iterator i=sorts.begin(); i!=sorts.end(); ++i)
   {
     assert(is_basic_sort(*i));
-    const basic_sort& bsort = core::static_down_cast<const basic_sort&>(*i);
+    const basic_sort& bsort = atermpp::down_cast<basic_sort>(*i);
     add_basic_sort(bsort);
     basic_sorts.insert(bsort.name());
   }
@@ -329,7 +329,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
 
     DeclaredVars=NewDeclaredVars;
-    process::untyped_action Left(atermpp::aterm_cast<atermpp::aterm>(Rule.lhs()));
+    process::untyped_action Left(Rule.lhs());
 
     //extra check requested by Tom: actions in the LHS can only come from the LPS
     actions.swap(actions_from_lps);
@@ -342,7 +342,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     action_rename_rule_rhs Right=Rule.rhs();
     if (!Right.is_delta() && !Right.is_tau())
     {
-      Right = TraverseAct(DeclaredVars, atermpp::aterm_cast<process::untyped_action>(Right.act()));
+      Right = TraverseAct(DeclaredVars, atermpp::deprecated_cast<process::untyped_action>(Right.act()));
     }
 
     new_rules.push_back(action_rename_rule(VarList,Cond,new_action_at_the_left,Right));

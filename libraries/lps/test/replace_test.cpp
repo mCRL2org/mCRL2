@@ -18,7 +18,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/replace.h"
-#include "mcrl2/lps/detail/specification_property_map.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

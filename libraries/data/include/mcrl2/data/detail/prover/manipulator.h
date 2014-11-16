@@ -56,7 +56,7 @@ class Manipulator
 
       if (f_info.is_equality(a_guard))
       {
-        const application& a = core::down_cast<application>(a_guard);
+        const application& a = atermpp::down_cast<application>(a_guard);
         if (a[1]==a_formula)
         {
            return a[0];
@@ -180,9 +180,9 @@ class Manipulator
         return it->second;
       }
 
-      const application& a = core::down_cast<application>(a_term);
+      const application& a = atermpp::down_cast<application>(a_term);
       /*const atermpp::function_symbol& v_symbol = a_term.function();
-      const data::function_symbol& v_function = atermpp::aterm_cast<data::function_symbol>(a_term[0]);
+      const data::function_symbol& v_function = atermpp::down_cast<data::function_symbol>(a_term[0]);
       size_t v_arity = v_symbol.arity(); */
 
       data_expression_vector v_parts;

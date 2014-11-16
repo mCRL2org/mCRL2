@@ -24,7 +24,6 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
 
 
@@ -218,12 +217,6 @@ class ltscompare_tool : public ltscompare_base
         {
           return lts_compare<lts_fsm_t>();
         }
-#ifdef USE_BCG
-        case lts_bcg:
-        {
-          return lts_compare<lts_bcg_t>();
-        }
-#endif
         case lts_dot:
         {
           return lts_compare<lts_dot_t>();

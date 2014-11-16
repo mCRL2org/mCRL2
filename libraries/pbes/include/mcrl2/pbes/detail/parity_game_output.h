@@ -81,7 +81,7 @@ class parity_game_output: public parity_game_generator
     /// \param f A function
     /// \return The transformed container
     template <typename Container, typename Function>
-    std::vector<std::string> apply(const Container& c, Function f) const
+    std::vector<std::string> apply(const Container& c, const Function& f) const
     {
       std::vector<std::string> result;
       for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
@@ -151,11 +151,12 @@ class parity_game_output: public parity_game_generator
     std::string python_graph()
     {
       std::string result;
-      result = result + python_set(apply(V, boost::bind(&parity_game_output::vertex, *this, _1))) + "\n";
-      result = result + python_set(apply(E, boost::bind(&parity_game_output::edge, *this, _1))) + "\n";
-      result = result + "{" + join(apply(priorities, boost::bind(&parity_game_output::priority, *this, _1)), ", ") + "}\n";
-      result = result + python_set(apply(even_vertices, boost::bind(&parity_game_output::vertex, *this, _1))) + "\n";
-      result = result + python_set(apply(odd_vertices, boost::bind(&parity_game_output::vertex, *this, _1)));
+      // boost::ref is needed to prevent copying of *this
+      result = result + python_set(apply(V, boost::bind(&parity_game_output::vertex, boost::ref(*this), _1))) + "\n";
+      result = result + python_set(apply(E, boost::bind(&parity_game_output::edge, boost::ref(*this), _1))) + "\n";
+      result = result + "{" + join(apply(priorities, boost::bind(&parity_game_output::priority, boost::ref(*this), _1)), ", ") + "}\n";
+      result = result + python_set(apply(even_vertices, boost::bind(&parity_game_output::vertex, boost::ref(*this), _1))) + "\n";
+      result = result + python_set(apply(odd_vertices, boost::bind(&parity_game_output::vertex, boost::ref(*this), _1)));
       return result;
     }
 

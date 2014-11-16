@@ -86,7 +86,7 @@ Testing is done by running (a platform specific variation of)::
   
 
   
-Furthermore, integration with CADP and LTSmin must be tested on Linux::
+Furthermore, integration with CADP and LTSmin must be tested on Linux:
 
 *CADP support*
 
@@ -266,21 +266,31 @@ Upload the installer that has been generated to
 
 Mac OS-X installer for 10.5+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-First check out ``tags/mcrl2-VERSION`` using a subversion client, assume to
-``mcrl2-VERSION``.
 
-Then statically build and install QT for the i386 architecture to ``$QT-INSTALL``.
-Then statically build and install Boost 1.47 for the i386 architecture to ``$BOOST-INSTALL``.
+First check out ``tags/mcrl2-VERSION`` using a subversion client, assume to
+``mcrl2-VERSION``. Also make sure you have PackageMaker installed. This program
+is no longer part of the standard Xcode distribution, so should be installed
+separately.
+
+Figure out which deployment target you want to compile for. For Mavericks, this
+would be 10.9. Bundles compiled for older versions of OSX can usually be run on
+newer versions too, but this needs some double checking. Next, find out where
+the SDK for this target is located (under Mavericks, it can be found inside the
+Xcode executable, for instance
+``/Applications/Xcode.app/Contents/Developr/Platforms/MacOSX.platform/Developr/SDKs/MacOSX10.9.sdk``
+for the Mavericks SDK).
 
 Then configure cmake::
 
-  $ cmake . -DCMAKE_OSX_ARCHITECTURES=i386 \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5 \
-            -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
-            -DCMAKE_INSTALL_PREFIX=/  \
-            -DMCRL2_OSX_PACKAGE=ON  \
-            -DBOOST_ROOT=$BOOST-INSTALL \
+  $ cmake . -DCMAKE_OSX_DEPLOYMENT_TARGET={SDK version (e.g. '10.9')} \
+            -DCMAKE_OSX_SYSROOT={/Path/To/SDK} \
+            -DCMAKE_INSTALL_PREFIX=/ \
+            -DMCRL2_OSX_PACKAGE=ON \
             -DMCRL2_PACKAGE_RELEASE=ON
+
+As of the 201409.0 release, only the x64 platform is supported (this used to be
+i386). No additional CMake variables should have to be set for this if you are
+working in a 64-bit version of OSX.
 
 Build the toolset::
 

@@ -630,20 +630,20 @@ class Trace
         using namespace mcrl2::lps;
         const aterm& e = trace.front();
 
-        if (e.type_is_appl() && lps::is_multi_action(aterm_cast<aterm_appl>(e)))   // To be compatible with old untimed version
+        if (e.type_is_appl() && lps::is_multi_action(down_cast<aterm_appl>(e)))   // To be compatible with old untimed version
         {
-          addAction(multi_action(process::action_list(aterm_cast<aterm_appl>(e))));
+          addAction(multi_action(process::action_list(down_cast<aterm_appl>(e))));
         }
-        else if (e.type_is_appl() && isTimedMAct(aterm_cast<aterm_appl>(e)))
+        else if (e.type_is_appl() && isTimedMAct(down_cast<aterm_appl>(e)))
         {
-          if (aterm_cast<aterm_appl>(e)[1]==data::undefined_real())  // There is no time tag.
+          if (down_cast<aterm_appl>(e)[1]==data::undefined_real())  // There is no time tag.
           {
-            addAction(multi_action(process::action_list(aterm_cast<aterm_appl>(e)[0])));
+            addAction(multi_action(process::action_list(down_cast<aterm_appl>(e)[0])));
           }
           else
           {
-            addAction(multi_action(process::action_list(aterm_cast<aterm_appl>(e)[0]),
-                               mcrl2::data::data_expression(aterm_cast<aterm_appl>(e)[1])));
+            addAction(multi_action(process::action_list(down_cast<aterm_appl>(e)[0]),
+                               mcrl2::data::data_expression(down_cast<aterm_appl>(e)[1])));
           }
         }
         else

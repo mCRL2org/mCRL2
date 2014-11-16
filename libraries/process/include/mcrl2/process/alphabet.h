@@ -19,6 +19,7 @@
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/process/detail/alphabet_traverser.h"
+#include "mcrl2/process/detail/expand_process_instance_assignments.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/process/traverser.h"
@@ -31,9 +32,9 @@ namespace process {
 
 namespace detail {
 
-struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduce_builder>
+struct alphabet_push_builder: public process_expression_builder<alphabet_push_builder>
 {
-  typedef process_expression_builder<alphabet_reduce_builder> super;
+  typedef process_expression_builder<alphabet_push_builder> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -45,7 +46,7 @@ struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduc
   std::vector<process_equation>& equations;
   data::set_identifier_generator id_generator;
 
-  alphabet_reduce_builder(std::vector<process_equation>& equations_)
+  alphabet_push_builder(std::vector<process_equation>& equations_)
     : equations(equations_)
   {
     for (auto i = equations_.begin(); i != equations_.end(); ++i)
@@ -68,7 +69,7 @@ struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduc
 inline
 process_expression alphabet_reduce(const process_expression& x, std::vector<process_equation>& equations)
 {
-  alphabet_reduce_builder f(equations);
+  alphabet_push_builder f(equations);
   return f(x);
 }
 
@@ -77,7 +78,16 @@ process_expression alphabet_reduce(const process_expression& x, std::vector<proc
 inline
 void alphabet_reduce(process_specification& procspec)
 {
-  procspec.init() = detail::alphabet_reduce(procspec.init(), procspec.equations());
+  process_expression init = procspec.init();
+  if (is_pcrl(init))
+  {
+    init = expand_process_instance_assignments(init, procspec.equations());
+  }
+  process_expression init_reduced = detail::alphabet_reduce(init, procspec.equations());
+  if (init != init_reduced)
+  {
+    procspec.init() = init_reduced;
+  }
   remove_duplicate_equations(procspec);
 }
 

@@ -30,11 +30,11 @@ endif()
 message(STATUS "Path: ${BIN_PATH}")
 
 add_custom_target(doc
-  ${MCRL2_GENERATE_DOC_COMMAND} -c
-  COMMAND ${MCRL2_GENERATE_DOC_COMMAND}
+  COMMAND ${MCRL2_GENERATE_DOC_COMMAND} -ddc
   COMMENT "(Re)-generating mCRL2 documentation (regenerates all cached documentation)" VERBATIM
 )
 
-add_custom_target(fastdoc ${MCRL2_GENERATE_DOC_COMMAND}
+add_custom_target(fastdoc 
+  COMMAND ${MCRL2_GENERATE_DOC_COMMAND} -dd
   COMMENT "Generating mCRL2 documentation (does not regenerate cached PDF, manual pages and Doxygen documentation)" VERBATIM
 )

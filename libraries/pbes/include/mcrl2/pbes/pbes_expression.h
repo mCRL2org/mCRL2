@@ -14,7 +14,6 @@
 
 #include <iterator>
 #include <stdexcept>
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/index_traits.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/function_symbols.h"
@@ -59,6 +58,11 @@ class pbes_expression: public atermpp::aterm_appl
     pbes_expression(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// \brief Constructor.
+    pbes_expression(const data::variable& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of pbes_expressions
@@ -89,7 +93,8 @@ bool is_pbes_expression(const atermpp::aterm_appl& x)
          pbes_system::is_or(x) ||
          pbes_system::is_imp(x) ||
          pbes_system::is_forall(x) ||
-         pbes_system::is_exists(x);
+         pbes_system::is_exists(x) ||
+         data::is_variable(x);
 }
 
 // prototype declaration
@@ -119,12 +124,12 @@ class propositional_variable_instantiation: public pbes_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::data_expression_list& parameters() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
 //--- start user section propositional_variable_instantiation ---//
     /// \brief Default constructor.
@@ -235,7 +240,7 @@ class not_: public pbes_expression
 
     const pbes_expression& operand() const
     {
-      return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
+      return atermpp::down_cast<pbes_expression>((*this)[0]);
     }
 };
 
@@ -291,12 +296,12 @@ class and_: public pbes_expression
 
     const pbes_expression& left() const
     {
-      return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
+      return atermpp::down_cast<pbes_expression>((*this)[0]);
     }
 
     const pbes_expression& right() const
     {
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
 
@@ -352,12 +357,12 @@ class or_: public pbes_expression
 
     const pbes_expression& left() const
     {
-      return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
+      return atermpp::down_cast<pbes_expression>((*this)[0]);
     }
 
     const pbes_expression& right() const
     {
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
 
@@ -413,12 +418,12 @@ class imp: public pbes_expression
 
     const pbes_expression& left() const
     {
-      return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
+      return atermpp::down_cast<pbes_expression>((*this)[0]);
     }
 
     const pbes_expression& right() const
     {
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
 
@@ -474,12 +479,12 @@ class forall: public pbes_expression
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const pbes_expression& body() const
     {
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
 
@@ -535,12 +540,12 @@ class exists: public pbes_expression
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
     const pbes_expression& body() const
     {
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::down_cast<pbes_expression>((*this)[1]);
     }
 };
 
@@ -762,12 +767,12 @@ const pbes_expression& arg(const pbes_expression& t)
 {
   if (is_pbes_not(t))
   {
-    return atermpp::aterm_cast<const pbes_expression>(t[0]);
+    return atermpp::down_cast<const pbes_expression>(t[0]);
   }
   else
   {
     assert(is_forall(t) || is_exists(t));
-    return atermpp::aterm_cast<const pbes_expression>(t[1]);
+    return atermpp::down_cast<const pbes_expression>(t[1]);
   }
 }
 
@@ -780,7 +785,7 @@ pbes_expression data_arg(const pbes_expression& t)
   if (data::is_data_expression(t))
   {
     assert(data::is_application(t));
-    const data::application &a=atermpp::aterm_cast<const data::application>(t);
+    const data::application &a=atermpp::down_cast<const data::application>(t);
     return *(a.begin());
   }
   else
@@ -796,7 +801,7 @@ inline
 const pbes_expression& left(const pbes_expression& t)
 {
   assert(is_and(t) || is_or(t) || is_imp(t));
-  return core::static_down_cast<const pbes_expression&>(t[0]);
+  return atermpp::down_cast<pbes_expression>(t[0]);
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -807,7 +812,7 @@ pbes_expression data_left(const pbes_expression& x)
 {
   if (data::is_data_expression(x))
   {
-    return data::binary_left(atermpp::aterm_cast<data::application>(x));
+    return data::binary_left(atermpp::down_cast<data::application>(x));
   }
   else
   {
@@ -821,7 +826,7 @@ pbes_expression data_left(const pbes_expression& x)
 inline
 const pbes_expression& right(const pbes_expression& t)
 {
-  return core::static_down_cast<const pbes_expression&>(t[1]);
+  return atermpp::down_cast<pbes_expression>(t[1]);
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -832,7 +837,7 @@ pbes_expression data_right(const pbes_expression& x)
 {
   if (data::is_data_expression(x))
   {
-    return data::binary_right(atermpp::aterm_cast<data::application>(x));
+    return data::binary_right(atermpp::down_cast<data::application>(x));
   }
   else
   {
@@ -847,7 +852,7 @@ inline
 const data::variable_list& var(const pbes_expression& t)
 {
   assert(is_forall(t) || is_exists(t));
-  return atermpp::aterm_cast<data::variable_list>(t[0]);
+  return atermpp::down_cast<data::variable_list>(t[0]);
 }
 
 /// \brief Returns the name of a propositional variable expression
@@ -857,7 +862,7 @@ inline
 const core::identifier_string& name(const pbes_expression& t)
 {
   assert(is_propositional_variable_instantiation(t));
-  return atermpp::aterm_cast<core::identifier_string>(t[0]);
+  return atermpp::down_cast<core::identifier_string>(t[0]);
 }
 
 /// \brief Returns the parameters of a propositional variable instantiation.
@@ -867,7 +872,7 @@ inline
 const data::data_expression_list& param(const pbes_expression& t)
 {
   assert(is_propositional_variable_instantiation(t));
-  return core::static_down_cast<const data::data_expression_list&>(t[1]);
+  return atermpp::down_cast<data::data_expression_list>(t[1]);
 }
 } // accessors
 
@@ -1513,7 +1518,7 @@ struct term_traits<pbes_system::pbes_expression>
   const term_type& not_arg(const term_type& t)
   {
     assert(is_pbes_not(t));
-    return core::static_down_cast<const term_type&>(t[0]);
+    return atermpp::down_cast<term_type>(t[0]);
   }
 
   /// \brief Returns the quantifier variables of a quantifier expression
@@ -1527,7 +1532,7 @@ struct term_traits<pbes_system::pbes_expression>
                                             || (!data::is_forall(data::abstraction(t)) && !data::is_exists(data::abstraction(t)))));
     assert(is_exists(t) || is_forall(t));
 
-    return atermpp::aterm_cast<variable_sequence_type>(t[0]);
+    return atermpp::down_cast<variable_sequence_type>(t[0]);
   }
 
   /// \brief Returns the name of a propositional variable instantiation
@@ -1537,7 +1542,7 @@ struct term_traits<pbes_system::pbes_expression>
   const string_type &name(const term_type& t)
   {
     assert(is_prop_var(t));
-    return atermpp::aterm_cast<string_type>(t[0]);
+    return atermpp::down_cast<string_type>(t[0]);
   }
 
   /// \brief Returns the parameter list of a propositional variable instantiation
@@ -1547,7 +1552,7 @@ struct term_traits<pbes_system::pbes_expression>
   const data_term_sequence_type &param(const term_type& t)
   {
     assert(is_prop_var(t));
-    return atermpp::aterm_cast<data_term_sequence_type>(t[1]);
+    return atermpp::down_cast<data_term_sequence_type>(t[1]);
   }
 
   /// \brief Conversion from variable to term
@@ -1556,7 +1561,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   const term_type &variable2term(const variable_type& v)
   {
-    return atermpp::aterm_cast<term_type>(v);
+    return atermpp::down_cast<term_type>(v);
   }
 
   /// \brief Test if a term is a variable
@@ -1602,7 +1607,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   const propositional_variable_type& term2propvar(const term_type& t)
   {
-    return core::static_down_cast<const propositional_variable_type&>(t);
+    return atermpp::down_cast<propositional_variable_type>(t);
   }
 
   /// \brief Returns the difference of two unordered sets of variables

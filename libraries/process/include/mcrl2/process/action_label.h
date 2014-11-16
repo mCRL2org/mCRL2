@@ -56,12 +56,12 @@ class action_label: public atermpp::aterm_appl
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::sort_expression_list& sorts() const
     {
-      return atermpp::aterm_cast<const data::sort_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::sort_expression_list>((*this)[1]);
     }
 };
 

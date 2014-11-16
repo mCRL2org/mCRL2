@@ -1735,7 +1735,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_creal_application(e) || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_reduce_fraction_application(e) || is_reduce_fraction_helper_application(e));
-        return atermpp::aterm_cast<const application >(e)[1];
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1747,7 +1747,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_reduce_fraction_where_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1759,7 +1759,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_reduce_fraction_where_application(e));
-        return atermpp::aterm_cast<const application >(e)[1];
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1771,7 +1771,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_reduce_fraction_where_application(e));
-        return atermpp::aterm_cast<const application >(e)[2];
+        return atermpp::down_cast<const application >(e)[2];
       }
 
       ///\brief Function for projecting out argument
@@ -1783,7 +1783,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_pos2real_application(e) || is_nat2real_application(e) || is_int2real_application(e) || is_real2pos_application(e) || is_real2nat_application(e) || is_real2int_application(e) || is_abs_application(e) || is_negate_application(e) || is_succ_application(e) || is_pred_application(e) || is_floor_application(e) || is_ceil_application(e) || is_round_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1795,7 +1795,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_creal_application(e) || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_reduce_fraction_application(e) || is_reduce_fraction_helper_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for real_

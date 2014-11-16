@@ -25,6 +25,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/parse_substitution.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
@@ -99,7 +100,7 @@ class rewriter_with_substitution
 {
   protected:
     Rewriter& R;
-    data::mutable_map_substitution<> sigma;
+    data::mutable_indexed_substitution<> sigma;
 
   public:
     /// \brief The term type
@@ -310,7 +311,7 @@ void test_enumerate_quantifiers_rewriter()
   test_rewriters(N(R), N(r),  "forall m:Nat. false"                                             , "false");
   test_rewriters(N(R), N(r),  "X && X"                                                          , "X");
   test_rewriters(N(R), N(r),  "val(true)"                                                       , "true");
-  // test_rewriters(N(R), N(r),  "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
+  test_rewriters(N(R), N(r),  "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
   test_rewriters(N(R), N(r),  "exists m:Nat.true"                                               , "true");
   test_rewriters(N(R), N(r),  "forall m:Nat.val(m < 3)"                                         , "false");
   test_rewriters(N(R), N(r),  "exists m:Nat.val(m > 3)"                                         , "true");
@@ -556,18 +557,6 @@ void test_substitutions3()
   data::rewriter datar(data_spec);
   pbes_system::enumerate_quantifiers_rewriter r(datar, data_spec);
 
-  data::mutable_map_substitution<> sigma;
-  sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
-  sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
-  sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");
-  sigma[data::parse_variable("bst1_K:Bool")]         = data::parse_data_expression("false");
-  sigma[data::parse_variable("k_K:Nat")]             = data::parse_data_expression("0");
-  sigma[data::parse_variable("bst2_L:Bool")]         = data::parse_data_expression("false");
-  sigma[data::parse_variable("bst3_L:Bool")]         = data::parse_data_expression("false");
-  sigma[data::parse_variable("k_L:Nat")]             = data::parse_data_expression("0");
-  sigma[data::parse_variable("l'_R:Nat")]            = data::parse_data_expression("0");
-  sigma[data::parse_variable("b_R:BBuf", data_spec)] = data::normalize_sorts(data::parse_data_expression("[false, false]"),data_spec);
-
   std::string var_decl =
     "datavar                                                     \n"
     "  l_S:Nat    ;                                              \n"
@@ -586,6 +575,22 @@ void test_substitutions3()
     ;
 
   pbes_system::pbes_expression phi = pbes_system::parse_pbes_expression("forall k_S2_00: Nat. val(!(k_S2_00 < m_S && !bst_K && !bst1_K)) || X(l_S, m_S, false, true, (l_S + k_S2_00) mod 4, bst2_L, bst3_L, k_L, l'_R, b_R)", var_decl, DATA_SPEC);
+
+  // Note: the variables below do not exist elsewhere. So if a mutable_indexed_substitution is used,
+  // they are immediately destroyed after parsing. The resulting substitution is not safe to use,
+  // since it refers to variables that no longer exist.
+  data::mutable_map_substitution<> sigma;
+  sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");
+  sigma[data::parse_variable("bst1_K:Bool")]         = data::parse_data_expression("false");
+  sigma[data::parse_variable("k_K:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_variable("bst2_L:Bool")]         = data::parse_data_expression("false");
+  sigma[data::parse_variable("bst3_L:Bool")]         = data::parse_data_expression("false");
+  sigma[data::parse_variable("k_L:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_variable("l'_R:Nat")]            = data::parse_data_expression("0");
+  sigma[data::parse_variable("b_R:BBuf", data_spec)] = data::normalize_sorts(data::parse_data_expression("[false, false]"),data_spec);
+
   pbes_system::pbes_expression x = r(phi, sigma);
 }
 
@@ -614,21 +619,68 @@ void test_substitutions4()
   expr1 = "val(m < n) && X(m + n)";
   expr2 = "X(7)";
   sigma = "m: Pos := 3; n: Pos := 4";
-  // test_expressions(R, expr1, R, expr2, var_decl, sigma);
+  test_expressions(R, expr1, R, expr2, var_decl, sigma);
 
   //------------------------//
   var_decl =
     "datavar         \n"
-    "  n1, n2: Nat;  \n"
+    "  n1, n2: Pos;  \n"
     "                \n"
     "predvar         \n"
     "  X: Pos;       \n"
     ;
-  expr1 = "!(forall m: Nat. false) && !(exists m: Nat. false) && !(forall m: Nat. false) && !(exists m: Nat. val(!(n1 > n2))) && !(forall m: Nat. false) && !(exists m: Nat. val(!(n1 > n2)))";
+  expr1 = "val(n1 > n2)";
+  expr2 = "false";
+  sigma = "n2:Pos := 2; n1:Pos := 1";
+  test_expressions(R, expr1, R, expr2, var_decl, sigma);
+
+  //------------------------//
+  var_decl =
+    "datavar         \n"
+    "  n1, n2: Pos;  \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Pos;       \n"
+    ;
   expr1 = "!(exists m: Nat. val(!(n1 > n2)))";
+  expr2 = "false";
+  sigma = "n2:Pos := 2; n1:Pos := 1";
+  test_expressions(R, expr1, R, expr2, var_decl, sigma);
+
+  expr1 = "!(forall m: Nat. false) && !(exists m: Nat. false) && !(forall m: Nat. false) && !(exists m: Nat. val(!(n1 > n2))) && !(forall m: Nat. false) && !(exists m: Nat. val(!(n1 > n2)))";
+  expr2 = "false";
+  test_expressions(R, expr1, R, expr2, var_decl, sigma);
+}
+
+void test_substitutions5()
+{
+  std::cout << "<test_substitutions5>" << std::endl;
+  data::data_specification data_spec;
+  data_spec.add_context_sort(data::sort_nat::nat());
+  data::rewriter datar(data_spec);
+  pbes_system::data_rewriter<data::rewriter> R(datar);
+
+  std::string var_decl;
+  std::string sigma;
+  std::string expr1;
+  std::string expr2;
+  std::string expr3;
+
+  //------------------------//
+  var_decl =
+    "datavar         \n"
+    "  n: Pos;       \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Pos;       \n"
+    ;
+  expr1 = "val(n == 2)";
   expr2 = "true";
-  sigma = "n2:Nat := 2; n1:Nat := 1";
-  // test_expressions(R, expr1, R, expr2, var_decl, sigma);
+  sigma = "n:Pos := 2";
+  test_expressions(R, expr1, R, expr2, var_decl, sigma);
+
+  expr1 = "val(2 == 2)";
+  test_expressions(R, expr1, R, expr2, var_decl, sigma);
 }
 
 void test_data2pbes()
@@ -671,7 +723,7 @@ void test_simplify_rewriter()
 
 int test_main(int argc, char* argv[])
 {
-  log::mcrl2_logger::set_reporting_level(log::debug);
+  // log::mcrl2_logger::set_reporting_level(log::debug);
 
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
@@ -681,6 +733,7 @@ int test_main(int argc, char* argv[])
   test_substitutions2();
   test_substitutions3();
   test_substitutions4();
+  test_substitutions5();
   test_data2pbes();
   test_simplify_rewriter();
 

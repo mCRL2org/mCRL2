@@ -56,28 +56,28 @@ struct add_sort_expressions: public Builder<Derived>
   using super::leave;
   using super::operator();
 
-  data::data_expression operator()(const data::variable& x)
+  data::variable operator()(const data::variable& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::variable(x.name(), static_cast<Derived&>(*this)(x.sort()));
+    data::variable result = data::variable(x.name(), static_cast<Derived&>(*this)(x.sort()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::function_symbol& x)
+  data::function_symbol operator()(const data::function_symbol& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::function_symbol(x.name(), static_cast<Derived&>(*this)(x.sort()));
+    data::function_symbol result = data::function_symbol(x.name(), static_cast<Derived&>(*this)(x.sort()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::application& x)
+  data::application operator()(const data::application& x)
   {
     static_cast<Derived&>(*this).enter(x);
     typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
     function_pointer fp = &Derived::operator();
-    data::data_expression result = data::application(
+    data::application result = data::application(
        static_cast<Derived&>(*this)(x.head()),
        x.begin(),
        x.end(),
@@ -87,15 +87,15 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  data::data_expression operator()(const data::where_clause& x)
+  data::where_clause operator()(const data::where_clause& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::where_clause(static_cast<Derived&>(*this)(x.body()), static_cast<Derived&>(*this)(x.declarations()));
+    data::where_clause result = data::where_clause(static_cast<Derived&>(*this)(x.body()), static_cast<Derived&>(*this)(x.declarations()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::untyped_identifier& x)
+  data::untyped_identifier operator()(const data::untyped_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -103,23 +103,23 @@ struct add_sort_expressions: public Builder<Derived>
     return x;
   }
 
-  data::assignment_expression operator()(const data::assignment& x)
+  data::assignment operator()(const data::assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result = data::assignment(core::static_down_cast<const data::variable&>(static_cast<Derived&>(*this)(x.lhs())), static_cast<Derived&>(*this)(x.rhs()));
+    data::assignment result = data::assignment(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::assignment_expression operator()(const data::untyped_identifier_assignment& x)
+  data::untyped_identifier_assignment operator()(const data::untyped_identifier_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result = data::untyped_identifier_assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
+    data::untyped_identifier_assignment result = data::untyped_identifier_assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::sort_expression operator()(const data::basic_sort& x)
+  data::basic_sort operator()(const data::basic_sort& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -127,31 +127,31 @@ struct add_sort_expressions: public Builder<Derived>
     return x;
   }
 
-  data::sort_expression operator()(const data::container_sort& x)
+  data::container_sort operator()(const data::container_sort& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::sort_expression result = data::container_sort(x.container_name(), static_cast<Derived&>(*this)(x.element_sort()));
+    data::container_sort result = data::container_sort(x.container_name(), static_cast<Derived&>(*this)(x.element_sort()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::sort_expression operator()(const data::structured_sort& x)
+  data::structured_sort operator()(const data::structured_sort& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::sort_expression result = data::structured_sort(static_cast<Derived&>(*this)(x.constructors()));
+    data::structured_sort result = data::structured_sort(static_cast<Derived&>(*this)(x.constructors()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::sort_expression operator()(const data::function_sort& x)
+  data::function_sort operator()(const data::function_sort& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::sort_expression result = data::function_sort(static_cast<Derived&>(*this)(x.domain()), static_cast<Derived&>(*this)(x.codomain()));
+    data::function_sort result = data::function_sort(static_cast<Derived&>(*this)(x.domain()), static_cast<Derived&>(*this)(x.codomain()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::sort_expression operator()(const data::untyped_sort& x)
+  data::untyped_sort operator()(const data::untyped_sort& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -159,58 +159,58 @@ struct add_sort_expressions: public Builder<Derived>
     return x;
   }
 
-  data::sort_expression operator()(const data::untyped_possible_sorts& x)
+  data::untyped_possible_sorts operator()(const data::untyped_possible_sorts& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::sort_expression result = data::untyped_possible_sorts(static_cast<Derived&>(*this)(x.sorts()));
+    data::untyped_possible_sorts result = data::untyped_possible_sorts(static_cast<Derived&>(*this)(x.sorts()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::forall& x)
+  data::forall operator()(const data::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::forall result = data::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::exists& x)
+  data::exists operator()(const data::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::exists result = data::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::lambda& x)
+  data::lambda operator()(const data::lambda& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::lambda(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::lambda result = data::lambda(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::set_comprehension& x)
+  data::set_comprehension operator()(const data::set_comprehension& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::set_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::set_comprehension result = data::set_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::bag_comprehension& x)
+  data::bag_comprehension operator()(const data::bag_comprehension& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::bag_comprehension result = data::bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::untyped_set_or_bag_comprehension& x)
+  data::untyped_set_or_bag_comprehension operator()(const data::untyped_set_or_bag_comprehension& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::untyped_set_or_bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::untyped_set_or_bag_comprehension result = data::untyped_set_or_bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -253,27 +253,27 @@ struct add_sort_expressions: public Builder<Derived>
     data::data_expression result;
     if (data::is_abstraction(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::abstraction>(x));
     }
     else if (data::is_variable(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::variable>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_function_symbol(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_symbol>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::function_symbol>(x));
     }
     else if (data::is_application(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::application>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::application>(x));
     }
     else if (data::is_where_clause(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::where_clause>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::where_clause>(x));
     }
     else if (data::is_untyped_identifier(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -285,11 +285,11 @@ struct add_sort_expressions: public Builder<Derived>
     data::assignment_expression result;
     if (data::is_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::assignment>(x));
     }
     else if (data::is_untyped_identifier_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier_assignment>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier_assignment>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -301,59 +301,59 @@ struct add_sort_expressions: public Builder<Derived>
     data::sort_expression result;
     if (data::is_basic_sort(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::basic_sort>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::basic_sort>(x));
     }
     else if (data::is_container_sort(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::container_sort>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::container_sort>(x));
     }
     else if (data::is_structured_sort(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::structured_sort>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::structured_sort>(x));
     }
     else if (data::is_function_sort(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_sort>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::function_sort>(x));
     }
     else if (data::is_untyped_sort(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_sort>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_sort>(x));
     }
     else if (data::is_untyped_possible_sorts(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_possible_sorts>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_possible_sorts>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::abstraction& x)
+  data::abstraction operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
+    data::abstraction result;
     if (data::is_forall(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::exists>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_comprehension>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::set_comprehension>(x));
     }
     else if (data::is_bag_comprehension(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::bag_comprehension>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::bag_comprehension>(x));
     }
     else if (data::is_untyped_set_or_bag_comprehension(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_set_or_bag_comprehension>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_set_or_bag_comprehension>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -382,7 +382,7 @@ struct add_data_expressions: public Builder<Derived>
   using super::leave;
   using super::operator();
 
-  data::data_expression operator()(const data::variable& x)
+  data::variable operator()(const data::variable& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -390,7 +390,7 @@ struct add_data_expressions: public Builder<Derived>
     return x;
   }
 
-  data::data_expression operator()(const data::function_symbol& x)
+  data::function_symbol operator()(const data::function_symbol& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -398,12 +398,12 @@ struct add_data_expressions: public Builder<Derived>
     return x;
   }
 
-  data::data_expression operator()(const data::application& x)
+  data::application operator()(const data::application& x)
   {
     static_cast<Derived&>(*this).enter(x);
     typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
     function_pointer fp = &Derived::operator();
-    data::data_expression result = data::application(
+    data::application result = data::application(
        static_cast<Derived&>(*this)(x.head()),
        x.begin(),
        x.end(),
@@ -413,15 +413,15 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  data::data_expression operator()(const data::where_clause& x)
+  data::where_clause operator()(const data::where_clause& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::where_clause(static_cast<Derived&>(*this)(x.body()), static_cast<Derived&>(*this)(x.declarations()));
+    data::where_clause result = data::where_clause(static_cast<Derived&>(*this)(x.body()), static_cast<Derived&>(*this)(x.declarations()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::untyped_identifier& x)
+  data::untyped_identifier operator()(const data::untyped_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -429,66 +429,66 @@ struct add_data_expressions: public Builder<Derived>
     return x;
   }
 
-  data::assignment_expression operator()(const data::assignment& x)
+  data::assignment operator()(const data::assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result = data::assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
+    data::assignment result = data::assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::assignment_expression operator()(const data::untyped_identifier_assignment& x)
+  data::untyped_identifier_assignment operator()(const data::untyped_identifier_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result = data::untyped_identifier_assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
+    data::untyped_identifier_assignment result = data::untyped_identifier_assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::forall& x)
+  data::forall operator()(const data::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    data::forall result = data::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::exists& x)
+  data::exists operator()(const data::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    data::exists result = data::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::lambda& x)
+  data::lambda operator()(const data::lambda& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::lambda(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    data::lambda result = data::lambda(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::set_comprehension& x)
+  data::set_comprehension operator()(const data::set_comprehension& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::set_comprehension(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    data::set_comprehension result = data::set_comprehension(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::bag_comprehension& x)
+  data::bag_comprehension operator()(const data::bag_comprehension& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::bag_comprehension(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    data::bag_comprehension result = data::bag_comprehension(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::untyped_set_or_bag_comprehension& x)
+  data::untyped_set_or_bag_comprehension operator()(const data::untyped_set_or_bag_comprehension& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::untyped_set_or_bag_comprehension(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    data::untyped_set_or_bag_comprehension result = data::untyped_set_or_bag_comprehension(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -507,27 +507,27 @@ struct add_data_expressions: public Builder<Derived>
     data::data_expression result;
     if (data::is_abstraction(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::abstraction>(x));
     }
     else if (data::is_variable(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::variable>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_function_symbol(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_symbol>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::function_symbol>(x));
     }
     else if (data::is_application(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::application>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::application>(x));
     }
     else if (data::is_where_clause(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::where_clause>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::where_clause>(x));
     }
     else if (data::is_untyped_identifier(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -539,43 +539,43 @@ struct add_data_expressions: public Builder<Derived>
     data::assignment_expression result;
     if (data::is_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::assignment>(x));
     }
     else if (data::is_untyped_identifier_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier_assignment>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier_assignment>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::abstraction& x)
+  data::abstraction operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
+    data::abstraction result;
     if (data::is_forall(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::exists>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_comprehension>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::set_comprehension>(x));
     }
     else if (data::is_bag_comprehension(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::bag_comprehension>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::bag_comprehension>(x));
     }
     else if (data::is_untyped_set_or_bag_comprehension(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_set_or_bag_comprehension>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_set_or_bag_comprehension>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -603,7 +603,7 @@ struct add_variables: public Builder<Derived>
   using super::leave;
   using super::operator();
 
-  data::data_expression operator()(const data::variable& x)
+  data::variable operator()(const data::variable& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -611,7 +611,7 @@ struct add_variables: public Builder<Derived>
     return x;
   }
 
-  data::data_expression operator()(const data::function_symbol& x)
+  data::function_symbol operator()(const data::function_symbol& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -619,12 +619,12 @@ struct add_variables: public Builder<Derived>
     return x;
   }
 
-  data::data_expression operator()(const data::application& x)
+  data::application operator()(const data::application& x)
   {
     static_cast<Derived&>(*this).enter(x);
     typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
     function_pointer fp = &Derived::operator();
-    data::data_expression result = data::application(
+    data::application result = data::application(
        static_cast<Derived&>(*this)(x.head()),
        x.begin(),
        x.end(),
@@ -634,15 +634,15 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
-  data::data_expression operator()(const data::where_clause& x)
+  data::where_clause operator()(const data::where_clause& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::where_clause(static_cast<Derived&>(*this)(x.body()), static_cast<Derived&>(*this)(x.declarations()));
+    data::where_clause result = data::where_clause(static_cast<Derived&>(*this)(x.body()), static_cast<Derived&>(*this)(x.declarations()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::untyped_identifier& x)
+  data::untyped_identifier operator()(const data::untyped_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -650,66 +650,66 @@ struct add_variables: public Builder<Derived>
     return x;
   }
 
-  data::assignment_expression operator()(const data::assignment& x)
+  data::assignment operator()(const data::assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result = data::assignment(core::static_down_cast<const data::variable&>(static_cast<Derived&>(*this)(x.lhs())), static_cast<Derived&>(*this)(x.rhs()));
+    data::assignment result = data::assignment(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::assignment_expression operator()(const data::untyped_identifier_assignment& x)
+  data::untyped_identifier_assignment operator()(const data::untyped_identifier_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result = data::untyped_identifier_assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
+    data::untyped_identifier_assignment result = data::untyped_identifier_assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::forall& x)
+  data::forall operator()(const data::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::forall result = data::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::exists& x)
+  data::exists operator()(const data::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::exists result = data::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::lambda& x)
+  data::lambda operator()(const data::lambda& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::lambda(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::lambda result = data::lambda(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::set_comprehension& x)
+  data::set_comprehension operator()(const data::set_comprehension& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::set_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::set_comprehension result = data::set_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::bag_comprehension& x)
+  data::bag_comprehension operator()(const data::bag_comprehension& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::bag_comprehension result = data::bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::untyped_set_or_bag_comprehension& x)
+  data::untyped_set_or_bag_comprehension operator()(const data::untyped_set_or_bag_comprehension& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result = data::untyped_set_or_bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::untyped_set_or_bag_comprehension result = data::untyped_set_or_bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -728,27 +728,27 @@ struct add_variables: public Builder<Derived>
     data::data_expression result;
     if (data::is_abstraction(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::abstraction>(x));
     }
     else if (data::is_variable(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::variable>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_function_symbol(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_symbol>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::function_symbol>(x));
     }
     else if (data::is_application(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::application>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::application>(x));
     }
     else if (data::is_where_clause(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::where_clause>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::where_clause>(x));
     }
     else if (data::is_untyped_identifier(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -760,43 +760,43 @@ struct add_variables: public Builder<Derived>
     data::assignment_expression result;
     if (data::is_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::assignment>(x));
     }
     else if (data::is_untyped_identifier_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_identifier_assignment>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_identifier_assignment>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::data_expression operator()(const data::abstraction& x)
+  data::abstraction operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::data_expression result;
+    data::abstraction result;
     if (data::is_forall(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::exists>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_comprehension>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::set_comprehension>(x));
     }
     else if (data::is_bag_comprehension(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::bag_comprehension>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::bag_comprehension>(x));
     }
     else if (data::is_untyped_set_or_bag_comprehension(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::untyped_set_or_bag_comprehension>(x));
+      result = static_cast<Derived&>(*this)(atermpp::down_cast<data::untyped_set_or_bag_comprehension>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;

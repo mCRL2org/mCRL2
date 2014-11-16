@@ -51,6 +51,11 @@ class regular_formula: public atermpp::aterm_appl
     regular_formula(const action_formulas::action_formula& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// \brief Constructor.
+    regular_formula(const data::data_expression& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of regular_formulas
@@ -73,6 +78,7 @@ inline
 bool is_regular_formula(const atermpp::aterm_appl& x)
 {
   return action_formulas::is_action_formula(x) ||
+         data::is_data_expression(x) ||
          regular_formulas::is_nil(x) ||
          regular_formulas::is_seq(x) ||
          regular_formulas::is_alt(x) ||
@@ -169,12 +175,12 @@ class seq: public regular_formula
 
     const regular_formula& left() const
     {
-      return atermpp::aterm_cast<const regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formula>((*this)[0]);
     }
 
     const regular_formula& right() const
     {
-      return atermpp::aterm_cast<const regular_formula>((*this)[1]);
+      return atermpp::down_cast<regular_formula>((*this)[1]);
     }
 };
 
@@ -230,12 +236,12 @@ class alt: public regular_formula
 
     const regular_formula& left() const
     {
-      return atermpp::aterm_cast<const regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formula>((*this)[0]);
     }
 
     const regular_formula& right() const
     {
-      return atermpp::aterm_cast<const regular_formula>((*this)[1]);
+      return atermpp::down_cast<regular_formula>((*this)[1]);
     }
 };
 
@@ -291,7 +297,7 @@ class trans: public regular_formula
 
     const regular_formula& operand() const
     {
-      return atermpp::aterm_cast<const regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formula>((*this)[0]);
     }
 };
 
@@ -347,7 +353,7 @@ class trans_or_nil: public regular_formula
 
     const regular_formula& operand() const
     {
-      return atermpp::aterm_cast<const regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formula>((*this)[0]);
     }
 };
 

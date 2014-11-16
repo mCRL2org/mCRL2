@@ -92,7 +92,7 @@ static void test_data_type(lps::pins_data_type& type)
 static void test_ltsmin(const std::string& rewriter_strategy)
 {
   // create an input file
-  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
+  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
   std::string abp_filename = "temporary_abp.lps";
   save_lps(spec, abp_filename);
 
@@ -254,11 +254,58 @@ void test_dependency_matrix()
   std::remove(filename.c_str());
 }
 
+inline
+void test_serialisation()
+{
+  std::string EXAMPLE  =
+    "sort Piece = struct Red | Yellow | None;   \n"
+    "                                           \n"
+    "proc P(i: Pos, j: Nat, p: Piece) =         \n"
+    "       tau . P(i = 1, j = 0, p = Red);     \n"
+    "                                           \n"
+    "init P(1, 1, None);                        \n"
+    ;
+
+  lps::specification spec = lps::parse_linear_process_specification(EXAMPLE);
+  std::string filename = "temporary_onebit.lps";
+  save_lps(spec, filename);
+  lps::pins p1(filename, "jitty");
+  lps::pins p2(filename, "jitty");
+  std::cout << "datatypes: " << p1.datatype_count() << std::endl;
+  for(size_t i=0; i < p1.datatype_count(); i++)
+  {
+    std::cout << i << ": " << p1.data_type(i).name() << std::endl;
+  }
+  std::vector<std::pair<std::string, size_t>> expressions;
+  expressions.push_back(std::make_pair("1", 0));
+  expressions.push_back(std::make_pair("0", 1));
+  expressions.push_back(std::make_pair("1", 1));
+  expressions.push_back(std::make_pair("Red", 2));
+  expressions.push_back(std::make_pair("Yellow", 2));
+
+  for(auto ei = expressions.begin(); ei != expressions.end(); ++ei)
+  {
+    auto e = *ei;
+    std::string s = e.first;
+    size_t type = e.second;
+
+    data::data_expression d1 = data::parse_data_expression(s, spec.data());
+    std::string serialised = p1.data_type(type).serialize(p1.data_type(type)[d1]);
+    data::data_expression d2(p2.data_type(type).get(p2.data_type(type).deserialize(serialised)));
+    std::cout << "string:     " << s << std::endl;
+    std::cout << "expression: " << d1 << std::endl;
+    std::cout << "serialised: " << serialised << std::endl;
+    std::cout << "result:     " << d2 << std::endl;
+    BOOST_CHECK(d1==d2);
+  }
+}
+
 int test_main(int, char**)
 {
   log::mcrl2_logger::set_reporting_level(log::debug);
 
   test_dependency_matrix();
+  test_serialisation();
   test_ltsmin("jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE
   test_ltsmin("jittyc");

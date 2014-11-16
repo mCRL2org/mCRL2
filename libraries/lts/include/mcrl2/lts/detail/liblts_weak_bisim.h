@@ -25,7 +25,6 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
 
 namespace mcrl2

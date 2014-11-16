@@ -392,10 +392,10 @@ class pbes_constelm_algorithm
     typedef std::map<variable_type, data_term_type> constraint_map;
 
     /// \brief Compares data expressions for equality.
-    DataRewriter m_data_rewriter;
+    const DataRewriter& m_data_rewriter;
 
     /// \brief Compares data expressions for equality.
-    PbesRewriter m_pbes_rewriter;
+    const PbesRewriter& m_pbes_rewriter;
 
     /// \brief Represents an edge of the dependency graph. The assignments are stored
     /// implicitly using the 'right' parameter. The condition determines under
@@ -556,7 +556,7 @@ class pbes_constelm_algorithm
 
         /// \brief Assign new values to the parameters of this vertex, and update the constraints accordingly.
         /// The new values have a number of constraints.
-        bool update(data_term_sequence_type e, const constraint_map& e_constraints, DataRewriter datar)
+        bool update(data_term_sequence_type e, const constraint_map& e_constraints, const DataRewriter& datar)
         {
           bool changed = false;
 
@@ -714,7 +714,7 @@ class pbes_constelm_algorithm
     /// \brief Constructor.
     /// \param datar A data rewriter
     /// \param pbesr A PBES rewriter
-    pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
+    pbes_constelm_algorithm(const DataRewriter& datar, const PbesRewriter& pbesr)
       : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
     {}
 

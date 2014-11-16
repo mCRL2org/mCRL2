@@ -14,12 +14,19 @@
 #ifndef INVARIANT_CHECKER_H
 #define INVARIANT_CHECKER_H
 
+#include <cstring>
+#include <sstream>
 #include <string>
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/exception.h"
 
 /// The class Invariant_Checker is initialized with an LPS using the constructor Invariant_Checker::Invariant_Checker.
 /// After initialization, the function Invariant_Checker::check_invariant can be called any number of times to check
@@ -71,42 +78,225 @@ namespace lps
 namespace detail
 {
 
+template <typename Specification>
 class Invariant_Checker
 {
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  typedef std::vector<action_summand_type> action_summand_vector_type;
+
   private:
-    mcrl2::data::detail::BDD_Prover f_bdd_prover;
-    mcrl2::data::detail::BDD2Dot f_bdd2dot;
+    data::detail::BDD_Prover f_bdd_prover;
+    data::detail::BDD2Dot f_bdd2dot;
     process_initializer f_init;
-    action_summand_vector f_summands;
+    action_summand_vector_type f_summands;
     bool f_counter_example;
     bool f_all_violations;
     std::string f_dot_file_name;
     void print_counter_example();
     void save_dot_file(size_t a_summand_number);
-    bool check_init(const data::data_expression a_invariant);
-    bool check_summand(const data::data_expression a_invariant, const action_summand a_summand, const size_t a_summand_number);
-    bool check_summands(const data::data_expression a_invariant);
+    bool check_init(const data::data_expression& a_invariant);
+    bool check_summand(const data::data_expression& a_invariant, const action_summand_type& a_summand, const size_t a_summand_number);
+    bool check_summands(const data::data_expression& a_invariant);
   public:
 
     /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     Invariant_Checker(
-      mcrl2::lps::specification const& a_lps,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = data::jitty,
+      const Specification& a_lps,
+      data::rewriter::strategy a_rewrite_strategy = data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,
+      data::detail::smt_solver_type a_solver_type = data::detail::solver_type_cvc,
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_all_violations = false,
-      std::string const& a_dot_file_name = std::string()
+      const std::string& a_dot_file_name = std::string()
     );
-    ~Invariant_Checker();
 
     /// precondition: the argument passed as parameter a_invariant is a valid expression in internal mCRL2 format
-    bool check_invariant(const data::data_expression a_invariant);
+    bool check_invariant(const data::data_expression& a_invariant);
 };
+
+// Class Invariant_Checker ------------------------------------------------------------------------
+// Class Invariant_Checker - Functions declared private -----------------------------------------
+
+template <typename Specification>
+void Invariant_Checker<Specification>::print_counter_example()
+{
+  if (f_counter_example)
+  {
+    data::data_expression v_counter_example(f_bdd_prover.get_counter_example());
+    assert(v_counter_example.defined());
+    mCRL2log(log::info) << "  Counter example: " << data::pp(v_counter_example) << "\n";
+  }
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+void Invariant_Checker<Specification>::save_dot_file(size_t a_summand_number)
+{
+  if (!f_dot_file_name.empty())
+  {
+    std::ostringstream v_file_name;
+
+    v_file_name << f_dot_file_name;
+
+    if (a_summand_number == (size_t)-1) // Dangerous
+    {
+      v_file_name << "-init.dot";
+    }
+    else
+    {
+      v_file_name << "-" << a_summand_number << ".dot";
+    }
+    f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name.str().c_str());
+  }
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+bool Invariant_Checker<Specification>::check_init(const data::data_expression& a_invariant)
+{
+  data::mutable_map_substitution<> v_substitutions;
+  const data::assignment_list l=f_init.assignments();
+  for (auto i = l.begin(); i != l.end(); ++i)
+  {
+    v_substitutions[i->lhs()]=i->rhs();
+  }
+
+  data::data_expression b_invariant = data::replace_variables_capture_avoiding(a_invariant, v_substitutions, data::substitution_variables(v_substitutions));
+  f_bdd_prover.set_formula(b_invariant);
+  if (f_bdd_prover.is_tautology() == data::detail::answer_yes)
+  {
+    return true;
+  }
+  else
+  {
+    if (f_bdd_prover.is_contradiction() != data::detail::answer_yes)
+    {
+      print_counter_example();
+      save_dot_file((size_t)(-1));
+    }
+    return false;
+  }
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+bool Invariant_Checker<Specification>::check_summand(
+  const data::data_expression& a_invariant,
+  const action_summand_type& a_summand,
+  const size_t a_summand_number)
+{
+  using namespace data::sort_bool;
+  const data::data_expression v_condition = a_summand.condition();
+  const data::assignment_list v_assignments = a_summand.assignments();
+
+  data::mutable_map_substitution<> v_substitutions;
+
+  for (auto i = v_assignments.begin(); i != v_assignments.end(); ++i)
+  {
+    v_substitutions[i->lhs()]=i->rhs();
+  }
+
+  const data::data_expression v_subst_invariant = data::replace_variables_capture_avoiding(a_invariant, v_substitutions, data::substitution_variables(v_substitutions));
+
+  const data::data_expression v_formula = implies(and_(a_invariant, v_condition), v_subst_invariant);
+  f_bdd_prover.set_formula(v_formula);
+  if (f_bdd_prover.is_tautology() == data::detail::answer_yes)
+  {
+    mCRL2log(log::verbose) << "The invariant holds for summand " << a_summand_number << "." << std::endl;
+    return true;
+  }
+  else
+  {
+    mCRL2log(log::info) << "The invariant does not hold for summand " << a_summand_number << std::endl;
+    if (f_bdd_prover.is_contradiction() != data::detail::answer_yes)
+    {
+      print_counter_example();
+      save_dot_file(a_summand_number);
+    }
+    return false;
+  }
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+bool Invariant_Checker<Specification>::check_summands(const data::data_expression& a_invariant)
+{
+  bool v_result = true;
+  size_t v_summand_number = 1;
+
+  for (auto i = f_summands.begin(); i != f_summands.end() && (f_all_violations || v_result); ++i)
+  {
+    v_result = check_summand(a_invariant, *i, v_summand_number) && v_result;
+    v_summand_number++;
+  }
+  return v_result;
+}
+
+// Class Invariant_Checker<Specification> - Functions declared public --------------------------------------------
+
+template <typename Specification>
+Invariant_Checker<Specification>::Invariant_Checker(
+  const Specification& a_lps,
+  data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, data::detail::smt_solver_type a_solver_type,
+  bool a_apply_induction, bool a_counter_example, bool a_all_violations, std::string const& a_dot_file_name
+):
+  f_bdd_prover(a_lps.data(), data::used_data_equation_selector(a_lps.data()), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+{
+  f_init = a_lps.initial_process();
+  f_summands = a_lps.process().action_summands();
+  f_counter_example = a_counter_example;
+  f_all_violations = a_all_violations;
+  f_dot_file_name = a_dot_file_name;
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename Specification>
+bool Invariant_Checker<Specification>::check_invariant(const data::data_expression& a_invariant)
+{
+  bool v_result = true;
+
+  if (check_init(a_invariant))
+  {
+    mCRL2log(log::verbose) << "The invariant holds for the initial state." << std::endl;
+  }
+  else
+  {
+    mCRL2log(log::info) << "The invariant does not hold for the initial state." << std::endl;
+    v_result = false;
+  }
+  if ((f_all_violations || v_result))
+  {
+    if (check_summands(a_invariant))
+    {
+      mCRL2log(log::verbose) << "The invariant holds for all summands." << std::endl;
+    }
+    else
+    {
+      mCRL2log(log::info) << "The invariant does not hold for all summands." << std::endl;
+      v_result = false;
+    }
+  }
+  if (v_result)
+  {
+    mCRL2log(log::info) << "The invariant holds for this LPS." << std::endl;
+  }
+  else
+  {
+    mCRL2log(log::info) << "The invariant does not hold for this LPS." << std::endl;
+  }
+
+  return v_result;
+}
 
 } // namespace detail
 } // namespace lps

@@ -47,23 +47,23 @@ class where_clause: public data_expression
 
     /// \brief Constructor.
     template <typename Container>
-    where_clause(const data_expression& body, const Container& declarations, typename atermpp::detail::enable_if_container<Container, assignment_expression>::type* = 0)
+    where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = 0)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
     {}
 
     const data_expression& body() const
     {
-      return atermpp::aterm_cast<const data_expression>((*this)[0]);
+      return atermpp::down_cast<data_expression>((*this)[0]);
     }
 
     const assignment_expression_list& declarations() const
     {
-      return atermpp::aterm_cast<const assignment_expression_list>((*this)[1]);
+      return atermpp::down_cast<assignment_expression_list>((*this)[1]);
     }
 //--- start user section where_clause ---//
     const assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const assignment_list>((*this)[1]);
+      return atermpp::down_cast<const assignment_list>((*this)[1]);
     }
 //--- end user section where_clause ---//
 };

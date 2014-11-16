@@ -16,7 +16,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite.h"
@@ -53,7 +52,7 @@ struct is_a_variable
 {
   bool operator()(const atermpp::aterm& t) const
   {
-    return is_variable(atermpp::aterm_cast<atermpp::aterm_appl>(t));
+    return is_variable(atermpp::down_cast<atermpp::aterm_appl>(t));
   }
 };
 
@@ -120,7 +119,7 @@ data_expression Rewriter::rewrite_where(
   for(mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
       it!=variable_renaming.end(); ++it)
   {
-    sigma[core::down_cast<variable>(it->second)]=it->second;
+    sigma[atermpp::down_cast<variable>(it->second)]=it->second;
   }
   return result;
 }
@@ -273,7 +272,7 @@ data_expression Rewriter::rewrite_lambda_application(
   for(mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
                  it!=variable_renaming.end(); ++it)
   {
-    sigma[core::down_cast<variable>(it->second)]=it->second;
+    sigma[atermpp::down_cast<variable>(it->second)]=it->second;
   }
   if (vl.size()+1==arity)
   {
@@ -285,7 +284,7 @@ data_expression Rewriter::rewrite_lambda_application(
   for(size_t i=1; i<arity-vl.size(); ++i)
   {
     assert(vl.size()+i<arity);
-    args.push_back(atermpp::aterm_cast<data_expression>(t[vl.size()+i]));
+    args.push_back(atermpp::down_cast<data_expression>(t[vl.size()+i]));
   }
   // We do not employ the knowledge that the first argument is in normal form... TODO.
   return rewrite(application(result, args.begin(), args.end()),sigma);
@@ -356,8 +355,8 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  auto const throw_exceptions = true;
-  auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+  const bool throw_exceptions = true;
+  const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_false, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
   enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
@@ -459,8 +458,8 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  auto const throw_exceptions = true;
-  auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+  const bool throw_exceptions = true;
+  const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_true, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
   enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
@@ -541,13 +540,13 @@ static void check_vars(const data_expression& expr, const std::set <variable>& v
 {
   if (is_application(expr))
   {
-    const application& a=core::down_cast<const application>(expr);
+    const application& a=atermpp::down_cast<application>(expr);
     check_vars(a.head(),vars,used_vars);
     check_vars(a.begin(),a.end(),vars,used_vars);
   }
   else if (is_variable(expr))
   {
-    const variable& v=core::down_cast<const variable>(expr);
+    const variable& v=atermpp::down_cast<variable>(expr);
     used_vars.insert(v);
 
     if (vars.count(v)==0)
@@ -573,12 +572,12 @@ static void checkPattern(const data_expression& p)
 {
   if (is_application(p))
   {
-    if (is_variable(core::down_cast<application>(p).head()))
+    if (is_variable(atermpp::down_cast<application>(p).head()))
     {
       throw mcrl2::runtime_error(std::string("variable ") + data::pp(application(p).head()) +
                " is used as head symbol in an application, which is not supported");
     }
-    const application& a=core::down_cast<const application>(p);
+    const application& a=atermpp::down_cast<application>(p);
     checkPattern(a.head());
     checkPattern(a.begin(),a.end());
   }

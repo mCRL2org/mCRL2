@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.11)
 project(mCRL2)
 
 cmake_policy(SET CMP0020 NEW)
+cmake_policy(SET CMP0043 NEW)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 enable_testing()
@@ -40,7 +41,8 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(Qt5OpenGL  QUIET REQUIRED)
   find_package(Qt5Widgets QUIET REQUIRED)
   find_package(Qt5Xml     QUIET REQUIRED)
-  set_target_properties(Qt5::Core Qt5::OpenGL Qt5::Widgets Qt5::Xml 
+  find_package(Qt5Gui     QUIET REQUIRED)
+  set_target_properties(Qt5::Core Qt5::OpenGL Qt5::Widgets Qt5::Xml Qt5::Gui
                         PROPERTIES MAP_IMPORTED_CONFIG_MAINTAINER "DEBUG")
 endif()
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)

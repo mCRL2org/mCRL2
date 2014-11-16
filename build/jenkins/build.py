@@ -138,10 +138,10 @@ if package == 'official-release-doc':
 # Test
 #
 
-ctest_command = ['ctest', \
-                 '-T', 'Test', \
-                 '--output-on-failure', \
-                 '--no-compress-output', \
+ctest_command = ['ctest', 
+                 '-T', 'Test', 
+                 '--output-on-failure', 
+                 '--no-compress-output', 
                  '-j{0}'.format(buildthreads)]
 if label in ["windows-x86", "windows-amd64"]:
   ctest_command += ['--build-config', buildtype]

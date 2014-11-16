@@ -39,7 +39,11 @@ private:
     size_t transition_count;
 
 public:
+#ifdef MCRL2_JITTYC_AVAILABLE
     explorer(const pbes& p, const std::string& rewrite_strategy = "jittyc", bool reset = false, bool always_split = false) :
+#else
+    explorer(const pbes& p, const std::string& rewrite_strategy = "jitty", bool reset = false, bool always_split = false) :
+#endif
         mcrl2::pbes_system::explorer(p, rewrite_strategy, reset, always_split),
         transition_count(0)
     {}
@@ -69,6 +73,13 @@ public:
       std::vector<int> result;
       for(int i=0; i < size; i++)
       {
+        // testing serialisation/deserialisation
+        int type_no = this->get_info()->get_lts_type().get_state_type_no(i);
+        std::string s = this->get_value(type_no, data[i]);
+        //std::clog << "Testing (de)serialisation of expression: " << s << std::endl;
+        int index = this->get_index(type_no, s);
+        BOOST_CHECK(index==data[i]);
+
         result.push_back(data[i]);
       }
       return result;
@@ -76,9 +87,11 @@ public:
 
     void from_int_vector(int size, std::vector<int> data, int* dst)
     {
-      for(int i=0; i < size; i++)
+      BOOST_CHECK(size==(int)data.size());
+      auto it = data.begin();
+      for(int i=0; i < size; i++, it++)
       {
-        dst[i] = data[i];
+        dst[i] = *it;
       }
     }
 

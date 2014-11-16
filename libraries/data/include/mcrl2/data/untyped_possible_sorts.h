@@ -45,13 +45,13 @@ class untyped_possible_sorts: public sort_expression
 
     /// \brief Constructor.
     template <typename Container>
-    untyped_possible_sorts(const Container& sorts, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
+    untyped_possible_sorts(const Container& sorts, typename atermpp::enable_if_container<Container, sort_expression>::type* = 0)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sort_expression_list(sorts.begin(), sorts.end())))
     {}
 
     const sort_expression_list& sorts() const
     {
-      return atermpp::aterm_cast<const sort_expression_list>((*this)[0]);
+      return atermpp::down_cast<sort_expression_list>((*this)[0]);
     }
 };
 

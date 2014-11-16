@@ -47,7 +47,7 @@ class exists: public abstraction
     template < typename Container >
     exists(const Container& variables,
            const data_expression& body,
-           typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = 0)
       : abstraction(exists_binder(), variables, body)
     {
       assert(!variables.empty());

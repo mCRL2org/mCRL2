@@ -18,7 +18,6 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/invelm_algorithm.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -44,7 +43,7 @@ lps::specification invelm(const lps::specification& spec,
   data::detail::smt_solver_type solver_type = mcrl2::data::detail::solver_type_cvc;
   bool apply_induction = false;
 
-  lps::detail::Invariant_Checker v_invariant_checker(specification,
+  lps::detail::Invariant_Checker<lps::specification> v_invariant_checker(specification,
                                                      rewrite_strategy,
                                                      time_limit,
                                                      path_eliminator,
@@ -54,7 +53,7 @@ lps::specification invelm(const lps::specification& spec,
                                                     );
   if (v_invariant_checker.check_invariant(invariant))
   {
-    lps::invelm_algorithm algorithm(specification,
+    lps::invelm_algorithm<lps::specification> algorithm(specification,
                                     rewrite_strategy,
                                     time_limit,
                                     path_eliminator,

@@ -90,13 +90,13 @@ class structured_sort: public sort_expression
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort(const Container& constructors, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor>::type* = 0)
+    structured_sort(const Container& constructors, typename atermpp::enable_if_container<Container, structured_sort_constructor>::type* = 0)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
     {}
 
     const structured_sort_constructor_list& constructors() const
     {
-      return atermpp::aterm_cast<const structured_sort_constructor_list>((*this)[0]);
+      return atermpp::down_cast<structured_sort_constructor_list>((*this)[0]);
     }
 //--- start user section structured_sort ---//
 

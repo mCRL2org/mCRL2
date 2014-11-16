@@ -17,7 +17,6 @@
 #include <cctype>
 #include <map>
 #include <string>
-#include <boost/lexical_cast.hpp>
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
@@ -30,7 +29,7 @@ class number_postfix_generator
 {
   protected:
     /// \brief A map that maintains the highest index for each prefix.
-    std::map<std::string, std::size_t> m_index;
+    mutable std::map<std::string, std::size_t> m_index;
 
     /// \brief The default hint.
     std::string m_hint;
@@ -57,10 +56,10 @@ class number_postfix_generator
       {
         name = id.substr(0, i + 1);
         std::string num = id.substr(i + 1);
-        new_index = boost::lexical_cast<int>(num);
+        new_index = atoi(num.c_str());
       }
       std::size_t old_index = m_index.find(name) == m_index.end() ? 0 : m_index[name];
-      m_index[name] = (std::max)(old_index, new_index);
+      m_index[name] = (std::max)(old_index, new_index); // Windows requires brackets around std::max. 
     }
 
     /// \brief Adds the strings in the range [first, last) to the context.
@@ -90,7 +89,7 @@ class number_postfix_generator
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
-    std::string operator()(std::string hint, bool add_to_context = true)
+    std::string operator()(std::string hint, bool add_to_context = true) const
     {
       // remove digits at the end of hint
       if (std::isdigit(hint[hint.size() - 1]))
@@ -113,7 +112,7 @@ class number_postfix_generator
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
-    std::string operator()()
+    std::string operator()() const
     {
       return (*this)(m_hint, true);
     }
@@ -128,6 +127,12 @@ class number_postfix_generator
     std::string& hint()
     {
       return m_hint;
+    }
+
+    /// \brief Clear the context of the generator
+    void clear()
+    {
+      m_index.clear();
     }
 };
 

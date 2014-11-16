@@ -38,12 +38,12 @@ class process_identifier: public atermpp::aterm_appl
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
+      return atermpp::down_cast<data::variable_list>((*this)[1]);
     }
 //--- start user section process_identifier ---//
     /// \brief Default constructor.

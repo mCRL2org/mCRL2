@@ -291,8 +291,7 @@ class parity_game_generator
     /// \return the initial state rewritten by R
     virtual propositional_variable_instantiation get_initial_state()
     {
-      propositional_variable_instantiation phi = core::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
-      return phi;
+      return atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
     }
 
     /// \brief Returns the vertex type.

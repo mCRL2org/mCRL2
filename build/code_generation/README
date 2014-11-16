@@ -1,9 +1,0 @@
-# This directory contains scripts for generating code. The following commands should be run:
-
-python generate_classes.py
-python generate_template_overloads.py
-python generate_term_functions.py
-python generate_traverser_functions.py
-python generate_traversers.py
-cd data_library
-python generate_data_types.py

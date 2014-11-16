@@ -36,12 +36,12 @@ class variable: public data_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const sort_expression& sort() const
     {
-      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
+      return atermpp::down_cast<sort_expression>((*this)[1]);
     }
 //--- start user section variable ---//
     /// \brief Default constructor.

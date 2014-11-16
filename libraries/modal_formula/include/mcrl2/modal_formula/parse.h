@@ -29,8 +29,8 @@ namespace action_formulas
 
 struct action_formula_actions: public lps::detail::multi_action_actions
 {
-  action_formula_actions(const core::parser_table& table_)
-    : lps::detail::multi_action_actions(table_)
+  action_formula_actions(const core::parser& parser_)
+    : lps::detail::multi_action_actions(parser_)
   {}
 
   action_formulas::action_formula parse_ActFrm(const core::parse_node& node)
@@ -47,8 +47,7 @@ struct action_formula_actions: public lps::detail::multi_action_actions
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ActFrm")) { return action_formulas::exists(parse_VarsDeclList(node.child(1)), parse_ActFrm(node.child(3))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ActFrm") && (node.child(1).string() == "@") && (symbol_name(node.child(2)) == "DataExpr")) { return action_formulas::at(parse_ActFrm(node.child(0)), parse_DataExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "ActFrm") && (symbol_name(node.child(2)) == ")")) { return parse_ActFrm(node.child(1)); }
-    report_unexpected_node(node);
-    return action_formulas::action_formula();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
 
@@ -60,7 +59,7 @@ action_formula parse_action_formula_new(const std::string& text)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  action_formula result = action_formula_actions(parser_tables_mcrl2).parse_ActFrm(node);
+  action_formula result = action_formula_actions(p).parse_ActFrm(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -72,8 +71,8 @@ namespace regular_formulas
 
 struct regular_formula_actions: public action_formulas::action_formula_actions
 {
-  regular_formula_actions(const core::parser_table& table_)
-    : action_formulas::action_formula_actions(table_)
+  regular_formula_actions(const core::parser& parser_)
+    : action_formulas::action_formula_actions(parser_)
   {}
 
   regular_formulas::regular_formula parse_RegFrm(const core::parse_node& node)
@@ -85,8 +84,7 @@ struct regular_formula_actions: public action_formulas::action_formula_actions
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "+")) { return trans(parse_RegFrm(node.child(0))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "RegFrm")) { return seq(parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "RegFrm")) { return alt(parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
-    report_unexpected_node(node);
-    return regular_formulas::regular_formula();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
 
@@ -97,7 +95,7 @@ regular_formula parse_regular_formula_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("RegFrm");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  regular_formula result = regular_formula_actions(parser_tables_mcrl2).parse_RegFrm(node);
+  regular_formula result = regular_formula_actions(p).parse_RegFrm(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -109,8 +107,8 @@ namespace state_formulas
 
 struct state_formula_actions: public regular_formulas::regular_formula_actions
 {
-  state_formula_actions(const core::parser_table& table_)
-    : regular_formulas::regular_formula_actions(table_)
+  state_formula_actions(const core::parser& parser_)
+    : regular_formulas::regular_formula_actions(parser_)
   {}
 
   state_formula make_delay(const core::parse_node& node)
@@ -166,8 +164,7 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "delay")) { return make_delay(node.child(1)); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "yaled")) { return make_yaled(node.child(1)); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "StateFrm") && (symbol_name(node.child(2)) == ")")) { return parse_StateFrm(node.child(1)); }
-    report_unexpected_node(node);
-    return state_formulas::state_formula();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
 
@@ -179,7 +176,7 @@ state_formula parse_state_formula_new(const std::string& text)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  state_formula result = state_formula_actions(parser_tables_mcrl2).parse_StateFrm(node);
+  state_formula result = state_formula_actions(p).parse_StateFrm(node);
   p.destroy_parse_node(node);
   return result;
 }

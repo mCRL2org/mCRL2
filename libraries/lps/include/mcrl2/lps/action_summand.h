@@ -14,6 +14,7 @@
 
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/stochastic_distribution.h"
 #include "mcrl2/process/process_expression.h"
 
 namespace mcrl2 {
@@ -35,7 +36,6 @@ class action_summand: public summand_base
 
   public:
     /// \brief Constructor.
-    // TODO: check if the default constructor results in a deadlock summand
     action_summand()
     {}
 
@@ -132,9 +132,11 @@ inline void swap(action_summand& t1, action_summand& t2)
 }
 //--- end generated class action_summand ---//
 
+namespace detail {
+
 /// \brief Comparison operator for action summands.
 inline
-bool operator<(const action_summand& x, const action_summand& y)
+bool less(const action_summand& x, const action_summand& y, bool default_result = false)
 {
   if (x.summation_variables() != y.summation_variables())
   {
@@ -148,7 +150,20 @@ bool operator<(const action_summand& x, const action_summand& y)
   {
     return x.assignments() < y.assignments();
   }
-  return x.multi_action() < y.multi_action();
+  if (x.multi_action() != y.multi_action())
+  {
+    return x.multi_action() < y.multi_action();
+  }
+  return default_result;
+}
+
+} // namespace detail
+
+/// \brief Comparison operator for action summands.
+inline
+bool operator<(const action_summand& x, const action_summand& y)
+{
+  return detail::less(x, y);
 }
 
 /// \brief Equality operator of action summands
@@ -158,8 +173,7 @@ bool operator==(const action_summand& x, const action_summand& y)
   return x.condition() == y.condition() && x.multi_action() == y.multi_action() && x.assignments() == y.assignments();
 }
 
-/// \brief Conversion to atermAppl.
-/// \return The action summand converted to aterm format.
+/// \brief Conversion to aterm_appl.
 inline
 atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
 {
@@ -168,7 +182,8 @@ atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
                        s.condition(),
                        lps::detail::multi_action_to_aterm(s.multi_action()),
                        s.multi_action().time(),
-                       s.assignments()
+                       s.assignments(),
+                       lps::stochastic_distribution()
                      );
   return result;
 }

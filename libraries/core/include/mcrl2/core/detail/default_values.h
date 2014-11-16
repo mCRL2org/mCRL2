@@ -78,6 +78,7 @@ const atermpp::aterm_appl& default_value_StateImp();
 const atermpp::aterm_appl& default_value_PBESExists();
 const atermpp::aterm_appl& default_value_PBESImp();
 const atermpp::aterm_appl& default_value_Binder();
+const atermpp::aterm_appl& default_value_StochasticOperator();
 const atermpp::aterm_appl& default_value_SortRef();
 const atermpp::aterm_appl& default_value_ProcEqnSpec();
 const atermpp::aterm_appl& default_value_StateForall();
@@ -122,6 +123,7 @@ const atermpp::aterm_appl& default_value_StructCons();
 const atermpp::aterm_appl& default_value_Mu();
 const atermpp::aterm_appl& default_value_PBEqnSpec();
 const atermpp::aterm_appl& default_value_ActNot();
+const atermpp::aterm_appl& default_value_Distribution();
 const atermpp::aterm_appl& default_value_BooleanTrue();
 const atermpp::aterm_appl& default_value_Block();
 const atermpp::aterm_appl& default_value_Rename();
@@ -330,6 +332,14 @@ const atermpp::aterm_appl& default_value_Binder()
   return t;
 }
 
+// StochasticOperator
+inline
+const atermpp::aterm_appl& default_value_StochasticOperator()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StochasticOperator(), default_value_List(default_value_DataVarId()), default_value_DataExpr(), default_value_ProcExpr());
+  return t;
+}
+
 // SortRef
 inline
 const atermpp::aterm_appl& default_value_SortRef()
@@ -446,7 +456,7 @@ const atermpp::aterm_appl& default_value_DataEqnSpec()
 inline
 const atermpp::aterm_appl& default_value_LinearProcessSummand()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_LinearProcessSummand(), default_value_List(), default_value_DataExpr(), default_value_MultActOrDelta(), default_value_DataExprOrNil(), default_value_List());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_LinearProcessSummand(), default_value_List(), default_value_DataExpr(), default_value_MultActOrDelta(), default_value_DataExprOrNil(), default_value_List(), default_value_Distribution());
   return t;
 }
 
@@ -598,7 +608,7 @@ const atermpp::aterm_appl& default_value_Choice()
 inline
 const atermpp::aterm_appl& default_value_LinearProcessInit()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_LinearProcessInit(), default_value_List());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_LinearProcessInit(), default_value_List(), default_value_Distribution());
   return t;
 }
 
@@ -679,6 +689,14 @@ inline
 const atermpp::aterm_appl& default_value_ActNot()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ActNot(), default_value_ActFrm());
+  return t;
+}
+
+// Distribution
+inline
+const atermpp::aterm_appl& default_value_Distribution()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_Distribution(), default_value_List(), default_value_DataExpr());
   return t;
 }
 
@@ -1446,6 +1464,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl PBESExists;
   static const atermpp::aterm_appl PBESImp;
   static const atermpp::aterm_appl Binder;
+  static const atermpp::aterm_appl StochasticOperator;
   static const atermpp::aterm_appl SortRef;
   static const atermpp::aterm_appl ProcEqnSpec;
   static const atermpp::aterm_appl StateForall;
@@ -1490,6 +1509,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl Mu;
   static const atermpp::aterm_appl PBEqnSpec;
   static const atermpp::aterm_appl ActNot;
+  static const atermpp::aterm_appl Distribution;
   static const atermpp::aterm_appl BooleanTrue;
   static const atermpp::aterm_appl Block;
   static const atermpp::aterm_appl Rename;

@@ -12,7 +12,7 @@
 /// data specifications.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/linearise.h"
 
 using namespace mcrl2;
@@ -29,7 +29,7 @@ const std::string SPECIFICATION =
 
 int test_main(int argc, char** argv)
 {
-  specification spec = linearise(SPECIFICATION);
+  stochastic_specification spec = linearise(SPECIFICATION);
   data_specification data = spec.data();
   BOOST_CHECK(data.is_certainly_finite(sort_bool::bool_()));
   BOOST_CHECK(!data.is_certainly_finite(sort_nat::nat()));

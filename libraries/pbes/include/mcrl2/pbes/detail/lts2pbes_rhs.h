@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 #define MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 
+#include "boost/lexical_cast.hpp"
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/traverser.h"
@@ -160,7 +161,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
   {
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
-    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
+    const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
     state_formulas::state_formula phi = x.operand();
 
     // traverse all transitions s --a--> t
@@ -179,7 +180,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
   {
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
-    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
+    const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
     state_formulas::state_formula phi = x.operand();
 
     // traverse all transitions s --a--> t

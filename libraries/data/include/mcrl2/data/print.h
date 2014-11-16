@@ -1914,15 +1914,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     data::abstraction result;
     if (data::is_forall(x))
     {
-      derived()(atermpp::aterm_cast<data::forall>(x));
+      derived()(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      derived()(atermpp::aterm_cast<data::exists>(x));
+      derived()(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      derived()(atermpp::aterm_cast<data::lambda>(x));
+      derived()(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {

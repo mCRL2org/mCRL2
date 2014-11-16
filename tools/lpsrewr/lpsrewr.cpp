@@ -21,25 +21,15 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
   protected:
     typedef rewriter_tool< input_output_tool > super;
 
-    bool          m_benchmark;
-    unsigned long m_bench_times;
-
     void add_options(utilities::interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_hidden_option("benchmark", utilities::make_mandatory_argument("NUM"),
-                             "rewrite data expressions NUM times; do not save output", 'b');
     }
 
     /// Parse the non-default options.
     void parse_options(const utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_benchmark = (parser.options.count("benchmark")>0);
-      if (m_benchmark)
-      {
-        m_bench_times = parser.option_argument_as< unsigned long >("benchmark");
-      }
     }
 
   public:
@@ -51,18 +41,14 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
         "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE."
         "If OUTFILE is not present, standard output is used. If INFILE is not present,"
         "standard input is used"
-      ),
-      m_benchmark(false),
-      m_bench_times(1)
+      )
     {}
 
     bool run()
     {
       lps::lpsrewr(input_filename(),
                    output_filename(),
-                   rewrite_strategy(),
-                   m_benchmark,
-                   m_bench_times
+                   rewrite_strategy()
                  );
       return true;
     }

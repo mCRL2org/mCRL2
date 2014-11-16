@@ -6,8 +6,8 @@ Process syntax
 *Process expressions*
 
 .. dparser:: Action ActIdSet MultActId MultActIdList MultActIdSet RenExpr 
-             RenExprList RenExprSet CommExprRhs CommExpr CommExprList CommExprSet 
-             DataExprUnit IfThen ProcExpr
+             RenExprList RenExprSet CommExpr CommExprList CommExprSet 
+             DataExprUnit ProcExpr
 
 The non-terminal :token:`ProcExprNoif` is equal to :token:`ProcExpr`, except 
 that no *if-then* or *if-then-else* productions are allowed. It recurses back 

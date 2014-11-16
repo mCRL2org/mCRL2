@@ -12,7 +12,7 @@
 % lpssuminst temp.lps temp1.lps
 % lpsstructelm -depth 10 temp1.lps temp2.lps [to replace the
 % list structure of the Board by explicit variables]
-% lps2lts -Rjittyc -t -v -aready temp2.lps | less
+% lps2lts -Rjittyc -v -aready temp2.lps | less
 %
 % There are 35144889 states at 19 levels. The action ready
 % is found at the end. There are 36 moves necessary to

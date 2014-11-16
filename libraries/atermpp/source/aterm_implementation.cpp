@@ -23,6 +23,13 @@
 namespace atermpp
 {
 
+std::string to_string(const aterm& t)
+{
+  std::stringstream s;
+  s << t;
+  return s.str();
+}
+
 typedef std::vector<std::pair<const function_symbol*,term_callback> > hook_table;
 
 static hook_table& creation_hooks()

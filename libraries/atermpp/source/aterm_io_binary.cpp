@@ -90,7 +90,7 @@ static size_t calcUniqueAFuns(
   }
   else if (t.type_is_list())
   {
-    aterm_list list = aterm_cast<const aterm_list>(t);
+    aterm_list list = down_cast<const aterm_list>(t);
     while (list!=aterm_list() && visited.count(list)==0)
     {
       visited.insert(list);
@@ -113,13 +113,13 @@ static size_t calcUniqueAFuns(
   else
   {
     assert(t.type_is_appl());
-    function_symbol sym = aterm_cast<aterm_appl>(t).function();
+    function_symbol sym = down_cast<aterm_appl>(t).function();
     nr_unique = count[sym.number()]>0 ? 0 : 1;
     count[sym.number()]++;
     size_t arity = sym.arity();
     for (size_t i = 0; i < arity; i++)
     {
-      nr_unique += calcUniqueAFuns(aterm_cast<const aterm_appl>(t)[i],visited,count);
+      nr_unique += calcUniqueAFuns(down_cast<const aterm_appl>(t)[i],visited,count);
     }
   }
 
@@ -146,11 +146,12 @@ static const size_t BAF_MAGIC = 0xbaf;
 //
 // History:
 //
-// before 2013      : version 0x0300
-// 29 August 2013   : version changed to 0x0301
-// 23 November 2013 : version changed to 0x0302 (introduction of index for variable types)
+// before 2013       : version 0x0300
+// 29 August 2013    : version changed to 0x0301
+// 23 November 2013  : version changed to 0x0302 (introduction of index for variable types)
+// 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
 
-static const size_t BAF_VERSION = 0x0302;
+static const size_t BAF_VERSION = 0x0303;
 
 typedef struct _trm_bucket
 {
@@ -389,7 +390,7 @@ static sym_entry* get_top_symbol(const aterm &t, const std::vector<size_t> &inde
   }
   else if (t.type_is_appl())
   {
-    sym = aterm_cast<aterm_appl>(t).function();
+    sym = down_cast<aterm_appl>(t).function();
   }
   else
   {
@@ -504,7 +505,7 @@ static void build_arg_tables(const std::vector<size_t> &index)
         }
         else if (term.type_is_appl())
         {
-          arg = aterm_cast<const aterm_appl>(term)[cur_arg];
+          arg = down_cast<const aterm_appl>(term)[cur_arg];
         }
         else
         {
@@ -545,15 +546,15 @@ static const aterm& subterm(const aterm& t, size_t i)
 {
   if (t.type_is_appl())
   {
-    assert(i < aterm_cast<const aterm_appl>(t).function().arity());
-    return atermpp::aterm_cast<const aterm_appl>(t)[i];
+    assert(i < down_cast<const aterm_appl>(t).function().arity());
+    return atermpp::down_cast<const aterm_appl>(t)[i];
   }
   else
   {
     assert(t.type_is_list() && t != aterm_list());
     assert(i < 2);
-    return i == 0 ? atermpp::aterm_cast<const aterm_list>(t).front()
-                  : atermpp::aterm_cast<const aterm_list>(t).tail();
+    return i == 0 ? atermpp::down_cast<const aterm_list>(t).front()
+                  : atermpp::down_cast<const aterm_list>(t).tail();
   }
 }
 
@@ -939,7 +940,7 @@ static aterm read_term(sym_read_entry* sym, istream &is)
   aterm result;
   size_t value;
   std::stack<read_todo> stack;
-  
+
   read_todo item = { sym, 0, std::vector<aterm>(sym->arity), &result, NULL };
   stack.push(item);
 
@@ -989,7 +990,7 @@ static aterm read_term(sym_read_entry* sym, istream &is)
     }
     else if (current.sym->sym == detail::function_adm.AS_LIST)
     {
-      aterm_list result = atermpp::aterm_cast<aterm_list>(current.args[1]);
+      aterm_list result = atermpp::down_cast<aterm_list>(current.args[1]);
       result.push_front(current.args[0]);
       *current.result = result;
     }

@@ -25,8 +25,8 @@ void test_bisimulation(const std::string& s1, const std::string& s2,
   specification spec2;
   if (linearize)
   {
-    spec1 = linearise(s1);
-    spec2 = linearise(s2);
+    spec1=remove_stochastic_operators(linearise(s1));
+    spec2=remove_stochastic_operators(linearise(s2));
   }
   else
   {

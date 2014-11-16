@@ -127,7 +127,7 @@ const std::string MPSU_FORMULA =
 
 void test_pbes()
 {
-  specification spec = linearise(SPECIFICATION);
+  specification spec=remove_stochastic_operators(linearise(SPECIFICATION));
   state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -215,7 +215,7 @@ void test_pbes_expression()
 
 void test_trivial()
 {
-  specification spec    = linearise(lps::detail::ABP_SPECIFICATION());
+  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -231,7 +231,7 @@ void test_instantiate_global_variables()
     "init d.P(1);             \n"
     ;
   std::string formula_text = "([true*.a(1)]  (mu X.([!a(1)]X && <true> true)))";
-  specification spec = linearise(spec_text);
+  specification spec=remove_stochastic_operators(linearise(spec_text));
   state_formula formula = state_formulas::parse_state_formula(formula_text, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -245,7 +245,7 @@ void test_find_sort_expressions()
 {
   using data::sort_expression;
 
-  specification spec    = linearise(lps::detail::ABP_SPECIFICATION());
+  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);

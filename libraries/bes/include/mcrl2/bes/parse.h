@@ -26,8 +26,8 @@ namespace bes
 
 struct bes_actions: public core::default_parser_actions
 {
-  bes_actions(const core::parser_table& table_)
-    : core::default_parser_actions(table_)
+  bes_actions(const core::parser& parser_)
+    : core::default_parser_actions(parser_)
   {}
 
   bes::boolean_expression parse_BesExpr(const core::parse_node& node)
@@ -40,8 +40,7 @@ struct bes_actions: public core::default_parser_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::or_(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "BesExpr") && (symbol_name(node.child(2)) == ")")) { return parse_BesExpr(node.child(1)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "BesVar")) { return parse_BesVar(node.child(0)); }
-    report_unexpected_node(node);
-    return bes::boolean_expression();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
   bes::boolean_variable parse_BesVar(const core::parse_node& node)
@@ -53,8 +52,7 @@ struct bes_actions: public core::default_parser_actions
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "mu")) { return fixpoint_symbol::mu(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nu")) { return fixpoint_symbol::nu(); }
-    report_unexpected_node(node);
-    return pbes_system::fixpoint_symbol();
+    throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
   bes::boolean_equation parse_BesEqnDecl(const core::parse_node& node)
@@ -91,7 +89,7 @@ boolean_expression parse_boolean_expression_new(const std::string& text)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  boolean_expression result = bes_actions(parser_tables_mcrl2).parse_BesExpr(node);
+  boolean_expression result = bes_actions(p).parse_BesExpr(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -104,7 +102,7 @@ boolean_equation_system parse_boolean_equation_system_new(const std::string& tex
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  boolean_equation_system result = bes_actions(parser_tables_mcrl2).parse_BesSpec(node);
+  boolean_equation_system result = bes_actions(p).parse_BesSpec(node);
   p.destroy_parse_node(node);
   return result;
 }

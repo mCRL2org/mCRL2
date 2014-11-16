@@ -102,8 +102,8 @@ void test2()
 
   std::string var_decl = "m, n: Pos;\n";
   data::rewriter::substitution_type sigma;
-  sigma[atermpp::aterm_cast<variable>(parse_data_expression("m", var_decl))] = r(parse_data_expression("3"));
-  sigma[atermpp::aterm_cast<variable>(parse_data_expression("n", var_decl))] = r(parse_data_expression("4"));
+  sigma[atermpp::down_cast<variable>(parse_data_expression("m", var_decl))] = r(parse_data_expression("3"));
+  sigma[atermpp::down_cast<variable>(parse_data_expression("n", var_decl))] = r(parse_data_expression("4"));
 
   // Rewrite two data expressions, and check if they are the same
   d1 = parse_data_expression("m+n", var_decl);

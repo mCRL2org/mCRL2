@@ -97,7 +97,7 @@ void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, Outpu
 template <typename Term, typename ReplaceFunction>
 Term replace(const Term &t, ReplaceFunction r)
 {
-  return aterm_cast<Term>(detail::replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r));
+  return vertical_cast<Term>(detail::replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -126,7 +126,7 @@ template <typename Term, typename ReplaceFunction>
 Term bottom_up_replace(Term t, ReplaceFunction r)
 {
   aterm x = detail::bottom_up_replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r);
-  return Term(aterm_cast<aterm_appl>(x));
+  return Term(down_cast<aterm_appl>(x));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -157,7 +157,7 @@ template <typename Term, typename ReplaceFunction>
 Term partial_replace(Term t, ReplaceFunction r)
 {
   aterm x = detail::partial_replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r);
-  return Term(aterm_cast<aterm_appl>(x));
+  return Term(down_cast<aterm_appl>(x));
 }
 
 } // namespace atermpp

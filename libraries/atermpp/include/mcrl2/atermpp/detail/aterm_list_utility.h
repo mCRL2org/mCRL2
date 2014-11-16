@@ -18,6 +18,7 @@ namespace atermpp
 {
 namespace detail
 {
+
 /// \brief Returns the concatenation of the lists l and m
 /// \param l A sequence of data expressions
 /// \param m A sequence of data variables
@@ -29,7 +30,7 @@ atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression 
 {
   static_assert(std::is_convertible< CompatibleExpression, Expression >::value,"Concatenated lists must be of the same type (1)");
 
-  return atermpp::term_list< Expression >(l+aterm_cast< atermpp::term_list<Expression > >(m));
+  return atermpp::term_list< Expression >(l+container_cast< atermpp::term_list< Expression > >(m));
 }
 
 /// \brief Returns the concatenation of the lists l and m
@@ -39,13 +40,10 @@ atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression 
 /// \note Candidate for moving to atermpp library
 template < typename Expression, typename CompatibleExpression >
 inline
-atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression > &l, const CompatibleExpression &m)
+atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, const CompatibleExpression &m)
 {
-  static_assert(std::is_convertible< CompatibleExpression, Expression >::value,"Concatenated lists must be of the same type (2)");
-
-  atermpp::term_list< Expression > resultl=l;
-  resultl.push_back(aterm_cast< Expression >(m));
-  return resultl;
+  l.push_back(down_cast< Expression >(m));
+  return l;
 }
 
 /// \brief Returns the concatenation of the lists l and m
@@ -55,12 +53,10 @@ atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression 
 /// \note Candidate for moving to atermpp library
 template < typename Expression, typename CompatibleExpression >
 inline
-atermpp::term_list< Expression > operator+(const CompatibleExpression &m, const atermpp::term_list< Expression > &l)
+atermpp::term_list< Expression > operator+(const CompatibleExpression &m, atermpp::term_list< Expression > l)
 {
-  static_assert(std::is_convertible< CompatibleExpression, Expression >::value,"Concatenated lists must be of the same type (3)");
-  atermpp::term_list< Expression > result=l;
-  result.push_front(aterm_cast<Expression>(m));
-  return result;
+  l.push_front(m);
+  return l;
 }
 
 

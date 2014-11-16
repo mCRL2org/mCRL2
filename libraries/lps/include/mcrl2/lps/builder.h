@@ -16,8 +16,10 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/untyped_multi_action.h"
 #include "mcrl2/process/untyped_action.h"
+#include "mcrl2/lps/stochastic_specification.h"
 
 namespace mcrl2
 {
@@ -107,6 +109,52 @@ struct add_sort_expressions: public Builder<Derived>
     static_cast<Derived&>(*this)(x.process());
     x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
+  }
+
+  lps::stochastic_distribution operator()(const lps::stochastic_distribution& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::stochastic_distribution result = x; if (x.is_defined()) { result = lps::stochastic_distribution(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.distribution())); }
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  void operator()(lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.summation_variables() = static_cast<Derived&>(*this)(x.summation_variables());
+    x.condition() = static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.multi_action());
+    x.assignments() = static_cast<Derived&>(*this)(x.assignments());
+    x.distribution() = static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.process_parameters() = static_cast<Derived&>(*this)(x.process_parameters());
+    static_cast<Derived&>(*this)(x.deadlock_summands());
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.action_labels() = static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this)(x.process());
+    x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  lps::stochastic_process_initializer operator()(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::stochastic_process_initializer result = lps::stochastic_process_initializer(static_cast<Derived&>(*this)(x.assignments()), static_cast<Derived&>(*this)(x.distribution()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
   }
 
 };
@@ -199,6 +247,48 @@ struct add_data_expressions: public Builder<Derived>
     static_cast<Derived&>(*this)(x.process());
     x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
+  }
+
+  lps::stochastic_distribution operator()(const lps::stochastic_distribution& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::stochastic_distribution result = x; if (x.is_defined()) { result = lps::stochastic_distribution(x.variables(), static_cast<Derived&>(*this)(x.distribution())); }
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  void operator()(lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.condition() = static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.multi_action());
+    x.assignments() = static_cast<Derived&>(*this)(x.assignments());
+    x.distribution() = static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.deadlock_summands());
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.process());
+    x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  lps::stochastic_process_initializer operator()(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::stochastic_process_initializer result = lps::stochastic_process_initializer(static_cast<Derived&>(*this)(x.assignments()), static_cast<Derived&>(*this)(x.distribution()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
   }
 
 };
@@ -294,6 +384,51 @@ struct add_variables: public Builder<Derived>
     static_cast<Derived&>(*this)(x.process());
     x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
+  }
+
+  lps::stochastic_distribution operator()(const lps::stochastic_distribution& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::stochastic_distribution result = x; if (x.is_defined()) { result = lps::stochastic_distribution(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.distribution())); }
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  void operator()(lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.summation_variables() = static_cast<Derived&>(*this)(x.summation_variables());
+    x.condition() = static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.multi_action());
+    x.assignments() = static_cast<Derived&>(*this)(x.assignments());
+    x.distribution() = static_cast<Derived&>(*this)(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.process_parameters() = static_cast<Derived&>(*this)(x.process_parameters());
+    static_cast<Derived&>(*this)(x.deadlock_summands());
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this)(x.process());
+    x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  lps::stochastic_process_initializer operator()(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::stochastic_process_initializer result = lps::stochastic_process_initializer(static_cast<Derived&>(*this)(x.assignments()), static_cast<Derived&>(*this)(x.distribution()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
   }
 
 };

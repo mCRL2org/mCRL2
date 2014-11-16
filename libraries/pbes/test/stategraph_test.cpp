@@ -292,7 +292,7 @@ void test_local_stategraph()
     ;
   p = txt2pbes(text, normalize);
   pbesstategraph_options options;
-  options.use_local_variant = true;
+  options.use_global_variant = false;
   pbes_system::detail::local_reset_variables_algorithm(p, options).run();
 }
 

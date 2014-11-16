@@ -14,7 +14,7 @@ namespace atermpp
 template <class Term>
 void term_list<Term>::push_front(const Term& el)
 {
-   *this=aterm_cast<const term_list<Term> > (term_appl<aterm> (detail::function_adm.AS_LIST,el,*this));
+   *this = term_list<Term>(detail::term_appl2<aterm>(detail::function_adm.AS_LIST, el, *this));
 }
 
 
@@ -156,7 +156,7 @@ namespace detail
     const _aterm* result=aterm::empty_aterm_list();
     while (first != last)
     {
-      result=term_appl2<aterm>(detail::function_adm.AS_LIST,convert_to_aterm(*(--last)),aterm_cast<term_list<Term> >(aterm(result)));
+      result=term_appl2<aterm>(detail::function_adm.AS_LIST,convert_to_aterm(*(--last)),down_cast<term_list<Term> >(aterm(result)));
     }
     return result;
   }
@@ -182,7 +182,7 @@ namespace detail
     for( ; i!=buffer_begin ; )
     {
       --i;
-      result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,aterm_cast<term_list<Term> >(aterm(result)));
+      result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,down_cast<term_list<Term> >(aterm(result)));
       (*i).~Term(); // Destroy the elements in the buffer explicitly.
     }
     return result; 

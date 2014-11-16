@@ -69,8 +69,8 @@ const utilities::file_format* guess_format(const std::string& filename)
 /// \param format Determines the format in which the result is written. If unspecified, or
 ///        utilities::file_format::unknown() is specified, then a default format is chosen.
 ///
-inline
-void save_lps(const specification& spec, std::ostream& stream,
+template <typename Specification>
+void save_lps(const Specification& spec, std::ostream& stream,
                const utilities::file_format* format=utilities::file_format::unknown())
 {
   if (format == utilities::file_format::unknown())
@@ -103,8 +103,8 @@ void save_lps(const specification& spec, std::ostream& stream,
 /// \param stream The stream from which to load the LPS (it is assumed to have been opened in the
 ///               right mode).
 /// \param f The format that should be assumed for the file in infilename.
-inline
-void load_lps(specification& spec, std::istream& stream, const utilities::file_format* format)
+template <typename Specification>
+void load_lps(Specification& spec, std::istream& stream, const utilities::file_format* format)
 {
   if (format == utilities::file_format::unknown())
   {
@@ -123,7 +123,7 @@ void load_lps(specification& spec, std::istream& stream, const utilities::file_f
   else
   if (format == lps_format_text())
   {
-    spec = parse_linear_process_specification(stream);
+    parse_lps(stream, spec);
   }
   else
   {
@@ -135,8 +135,8 @@ void load_lps(specification& spec, std::istream& stream, const utilities::file_f
 /// \param spec The LPS to save.
 /// \param filename The file to save the LPS in.
 /// \param format The format in which to save the LPS.
-inline
-void save_lps(const specification &spec, const std::string &filename,
+template <typename Specification>
+void save_lps(const Specification &spec, const std::string &filename,
                const utilities::file_format* format=utilities::file_format::unknown())
 {
   if (format == utilities::file_format::unknown())
@@ -155,8 +155,8 @@ void save_lps(const specification &spec, const std::string &filename,
 ///
 /// The format of the file in filename is guessed if format is not given, or if it is equal to
 /// utilities::file_format::unknown().
-inline
-void load_lps(specification& spec, const std::string& filename,
+template <typename Specification>
+void load_lps(Specification& spec, const std::string& filename,
                const utilities::file_format* format=utilities::file_format::unknown())
 {
   if (format == utilities::file_format::unknown())

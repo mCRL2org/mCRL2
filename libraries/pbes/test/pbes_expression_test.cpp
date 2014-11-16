@@ -56,7 +56,7 @@ void test_accessors()
   variable d(identifier_string("d"), sort_nat::nat());
   variable_list v = make_list(d);
   pbes_expression z = d;
-  propositional_variable_instantiation X(identifier_string("X"), atermpp::aterm_cast<data::data_expression_list>(make_list(d)));
+  propositional_variable_instantiation X(identifier_string("X"), atermpp::make_list<data::data_expression>(d));
 
   std::set<pbes_expression> q;
   q.insert(x);
@@ -112,7 +112,7 @@ void test_accessors()
     BOOST_CHECK(s == identifier_string("X"));
 
     data_expression_list f = param(X);
-    data_expression_list g = atermpp::aterm_cast<data::data_expression_list>(make_list(d));
+    data_expression_list g = atermpp::make_list<data::data_expression>(d);
     BOOST_CHECK(f == g);
 
     print(q);

@@ -45,11 +45,16 @@ std::set<data::sort_expression> finite_sorts(const data::data_specification& s)
   return result;
 }
 
-template<typename DataRewriter>
-class suminst_algorithm: public lps::detail::lps_algorithm
+template<typename DataRewriter, typename Specification>
+class suminst_algorithm: public detail::lps_algorithm<Specification>
 {
+  typedef detail::lps_algorithm<Specification> super;
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
   typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  typedef std::vector<action_summand_type> action_summand_vector_type;
+  using super::m_spec;
 
   protected:
     /// Sorts to be instantiated
@@ -144,7 +149,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
       return nr_summands;
     }
 
-    bool must_instantiate(const action_summand& summand)
+    bool must_instantiate(const action_summand_type& summand)
     {
       return !m_tau_summands_only || summand.is_tau();
     }
@@ -182,11 +187,11 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     }
 
   public:
-    suminst_algorithm(specification& spec,
+    suminst_algorithm(Specification& spec,
                       DataRewriter& r,
                       std::set<data::sort_expression> sorts = std::set<data::sort_expression>(),
                       bool tau_summands_only = false)
-      : lps_algorithm(spec),
+      : detail::lps_algorithm<Specification>(spec),
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
@@ -204,7 +209,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
     void run()
     {
-      action_summand_vector action_summands;
+      action_summand_vector_type action_summands;
       deadlock_summand_vector deadlock_summands;
       m_added = 0;
       m_deleted = 0;

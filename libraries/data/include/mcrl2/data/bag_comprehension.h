@@ -45,7 +45,7 @@ class bag_comprehension: public abstraction
     template < typename Container >
     bag_comprehension(const Container& variables,
            const data_expression& body,
-           typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = 0)
       : abstraction(bag_comprehension_binder(), variables, body)
     {
       assert(!variables.empty());

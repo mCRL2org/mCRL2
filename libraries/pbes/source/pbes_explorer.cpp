@@ -11,6 +11,7 @@
 #include <queue>
 #include <set>
 
+#include "boost/lexical_cast.hpp"
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/representative_generator.h"
@@ -216,7 +217,7 @@ void lts_info::compute_lts_type()
                 //std::clog << "paramtypes[" << signature << "] = " << paramtypes[signature] << std::endl;
                 data_expression e(default_expression_generator(varparam.sort()));
                 pbes_expression e1 = pgg->rewrite_and_simplify_expression(e,false);
-                this->param_default_values.push_back(atermpp::aterm_cast<const data::data_expression>(e1));
+                this->param_default_values.push_back(atermpp::down_cast<const data::data_expression>(e1));
             }
         }
         //params.sort();
@@ -804,7 +805,7 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
             std::string param_signature = *param;
             if (tr::is_variable(*val))
             {
-                const variable& value = core::static_down_cast<const variable&>(*val);
+                const variable& value = atermpp::down_cast<variable>(*val);
                 std::string value_signature = get_param_signature(value);
                 if (param_signature != value_signature || L.find(value_signature) != L.end())
                 {
@@ -950,7 +951,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
             std::string param_signature = get_param_signature(parameter);
             if (tr::is_variable(*val))
             {
-                const variable& value = core::static_down_cast<const variable&>(*val);
+                const variable& value = atermpp::down_cast<variable>(*val);
                 std::string value_signature = get_param_signature(value);
                 if (param_signature != value_signature || L.find(value_signature) != L.end())
                 {
@@ -1319,10 +1320,13 @@ ltsmin_state explorer::false_state()
 
 
 data::data_expression explorer::string_to_data(const std::string& s) {
-    aterm t = atermpp::read_term_from_string(s);
-    data::data_expression value(t);
-    pbes_expression result = pgg->rewrite_and_simplify_expression(value);
-    return atermpp::aterm_cast<const data::data_expression>(result);
+    atermpp::aterm t = data::detail::add_index(atermpp::read_term_from_string(s));
+    return atermpp::down_cast<data::data_expression>(t);
+    //aterm t = atermpp::read_term_from_string(s);
+    //std::clog << "string_to_data: [" << s << "] -> " << t << std::endl;
+    //data::data_expression value(t);
+    //pbes_expression result = pgg->rewrite_and_simplify_expression(value);
+    //return atermpp::down_cast<const data::data_expression>(result);
 }
 
 
@@ -1483,8 +1487,12 @@ std::string explorer::get_value(int type_no, int index)
     else
     {
         data_expression value = get_data_value(type_no, index);
-        std::string s = data::pp(value);
-        return s;
+        //std::stringstream os;
+        //write_term_to_text_stream(value, os);
+        //std::string s = atermpp::pp(value);
+        //return os.str();
+        atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm>(value));
+        return to_string(t);
     }
 }
 
@@ -1584,7 +1592,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
         for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                 != successors.end(); ++expr) {
             if (tr::is_prop_var(*expr)) {
-                result.push_back(get_state(core::static_down_cast<const propositional_variable_instantiation&>(*expr)));
+                result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
             } else if (tr::is_true(*expr)) {
                 if (type != parity_game_generator::PGAME_AND)
                 {
@@ -1635,7 +1643,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
                     != successors.end(); ++expr) {
                 //std::clog << "* Successor: " << *expr << std::endl;
                 if (tr::is_prop_var(*expr)) {
-                    result.push_back(get_state(core::static_down_cast<const propositional_variable_instantiation&>(*expr)));
+                    result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
                 } else if (tr::is_true(*expr)) {
                     if (type != parity_game_generator::PGAME_AND)
                     {

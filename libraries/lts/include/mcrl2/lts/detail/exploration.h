@@ -15,6 +15,7 @@
 
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
+#include "mcrl2/trace/trace.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/bithashtable.h"
@@ -33,8 +34,8 @@ namespace lts
 class lps2lts_algorithm
 {
   private:
-  typedef lps::next_state_generator next_state_generator;
-  typedef atermpp::term_balanced_tree<data::data_expression> storage_state_t;
+    typedef lps::next_state_generator next_state_generator;
+    typedef atermpp::term_balanced_tree<data::data_expression> storage_state_t;
 
   private:
     lts_generation_options m_options;
@@ -64,7 +65,8 @@ class lps2lts_algorithm
 
     size_t m_num_states;
     size_t m_num_transitions;
-    size_t m_initial_state_number;
+    // size_t m_initial_state_number;
+    next_state_generator::transition_t::state_probability_list m_initial_states;
     size_t m_level;
 
     volatile bool m_must_abort;
@@ -76,16 +78,16 @@ class lps2lts_algorithm
     {
     }
 
-    virtual ~lps2lts_algorithm()
+    ~lps2lts_algorithm()
     {
       delete m_generator;
     }
 
-    virtual bool initialise_lts_generation(lts_generation_options* options);
-    virtual bool generate_lts();
-    virtual bool finalise_lts_generation();
+    bool initialise_lts_generation(lts_generation_options* options);
+    bool generate_lts();
+    bool finalise_lts_generation();
 
-    virtual void abort()
+    void abort()
     {
       // Stops the exploration algorithm if it is running by making sure
       // not a single state can be generated anymore.
@@ -99,24 +101,36 @@ class lps2lts_algorithm
   private:
     data::data_expression_vector generator_state(const storage_state_t& storage_state);
     storage_state_t storage_state(const data::data_expression_vector& generator_state);
+    void set_prioritised_representatives(next_state_generator::transition_t::state_probability_list& states);
     storage_state_t get_prioritised_representative(const storage_state_t& state);
     void value_prioritize(std::vector<next_state_generator::transition_t>& transitions);
     bool save_trace(const storage_state_t& state, const std::string& filename);
+    bool save_trace(const storage_state_t& state, const next_state_generator::transition_t& transition, const std::string& filename);
+    void construct_trace(const storage_state_t& state1, mcrl2::trace::Trace& trace);
     bool search_divergence(const storage_state_t& state, std::set<storage_state_t>& current_path, std::set<storage_state_t>& visited);
     void check_divergence(const storage_state_t& state);
     void save_actions(const storage_state_t& state, const next_state_generator::transition_t& transition);
     void save_deadlock(const storage_state_t& state);
     void save_error(const storage_state_t& state);
+    std::pair<size_t, bool> add_target_state(const storage_state_t& source_state, const storage_state_t& target_state);
     bool add_transition(const storage_state_t& source_state, next_state_generator::transition_t& transition);
     void get_transitions(const storage_state_t& state,
                          std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
                          next_state_generator::enumerator_queue_t& enumeration_queue
     );
     void generate_lts_breadth_todo_max_is_npos();
-    void generate_lts_breadth_todo_max_larger_than_0(const storage_state_t& initial_state);
-    void generate_lts_breadth_bithashing(const storage_state_t& initial_state);
-    void generate_lts_depth(const storage_state_t& initial_state);
-    void generate_lts_random(const storage_state_t& initial_state);
+    void generate_lts_breadth_todo_max_is_not_npos(const next_state_generator::transition_t::state_probability_list& initial_states);
+    void generate_lts_breadth_bithashing(const next_state_generator::transition_t::state_probability_list& initial_states);
+    void generate_lts_depth(const next_state_generator::transition_t::state_probability_list& initial_states);
+    void generate_lts_random(const next_state_generator::transition_t::state_probability_list& initial_states);
+    void print_target_distribution_in_aut_format(
+               const lps::next_state_generator::transition_t::state_probability_list& state_probability_list,
+               const size_t last_state_number,
+               const storage_state_t& source_state);
+    void print_target_distribution_in_aut_format(
+                const lps::next_state_generator::transition_t::state_probability_list& state_probability_list,
+                const storage_state_t& source_state);
+
 };
 
 } // namespace lps

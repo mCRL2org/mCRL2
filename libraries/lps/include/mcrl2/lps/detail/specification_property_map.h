@@ -18,7 +18,6 @@
 #include <set>
 #include <sstream>
 #include <utility>
-// #include <boost/algorithm/string/join.hpp> Don't use this, it leads to stack overflows with Visual C++ 9.0 express
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/bind.hpp>
@@ -57,16 +56,22 @@ namespace detail
 /// <tr><td>used_multi_actions          </td><td>The used multi-actions (sets of label names)</td><td>{NAME,...,NAME}; ... ; {NAME,...,NAME}</td></tr>
 /// <tr><td>used_multi_action_count     </td><td>The number of used multi-actions            </td><td>NUMBER
 /// </table>
-class specification_property_map : protected mcrl2::data::detail::data_property_map< specification_property_map >
+template <typename Specification = specification>
+class specification_property_map: protected mcrl2::data::detail::data_property_map<specification_property_map<Specification> >
 {
   protected:
 
     // Allow base class access to protected functions
-    friend class data::detail::data_property_map< specification_property_map >;
+    friend class data::detail::data_property_map<specification_property_map<Specification> >;
 
-    typedef data::detail::data_property_map< specification_property_map > super;
+    typedef data::detail::data_property_map<specification_property_map> super;
 
+    using super::m_data;
+    using super::names;
     using super::print;
+    using super::parse_unsigned_int;
+    using super::parse_set_string;
+    using super::parse_set_multiset_string;
 
     std::string print(const process::action_label& l) const
     {
@@ -182,7 +187,7 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
     // compute functions
     //--------------------------------------------//
     // TODO: the compute functions can be combined for efficiency
-    std::set<std::multiset<process::action_label> > compute_used_multi_actions(const specification& spec) const
+    std::set<std::multiset<process::action_label> > compute_used_multi_actions(const Specification& spec) const
     {
       std::set<std::multiset<process::action_label> > result;
       for (auto i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
@@ -198,7 +203,7 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
       return result;
     }
 
-    std::set<process::action_label> compute_used_action_labels(const specification& spec) const
+    std::set<process::action_label> compute_used_action_labels(const Specification& spec) const
     {
       std::set<process::action_label> result;
       for (auto i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
@@ -212,10 +217,10 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
       return result;
     }
 
-    size_t compute_tau_summand_count(const specification& spec) const
+    std::size_t compute_tau_summand_count(const Specification& spec) const
     {
-      size_t result = 0;
-      const action_summand_vector& summands = spec.process().action_summands();
+      std::size_t result = 0;
+      auto const& summands = spec.process().action_summands();
       for (auto i = summands.begin(); i != summands.end(); ++i)
       {
         if (i->is_tau())
@@ -226,7 +231,7 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
       return result;
     }
 
-    std::set<data::variable> compute_used_free_variables(const specification& spec) const
+    std::set<data::variable> compute_used_free_variables(const Specification& spec) const
     {
       return lps::find_free_variables(spec.process());
     }
@@ -240,11 +245,11 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
 
     /// \brief Constructor
     /// Initializes the specification_property_map with a linear process specification
-    specification_property_map(const specification& spec)
+    specification_property_map(const Specification& spec)
     {
-      size_t                                 summand_count           = spec.process().summand_count();
-      size_t                                 tau_summand_count       = compute_tau_summand_count(spec);
-      size_t                                 delta_summand_count     = spec.process().deadlock_summands().size();
+      std::size_t                            summand_count           = spec.process().summand_count();
+      std::size_t                            tau_summand_count       = compute_tau_summand_count(spec);
+      std::size_t                            delta_summand_count     = spec.process().deadlock_summands().size();
       std::set<data::variable>               declared_free_variables = spec.global_variables();
       std::set<data::variable>               used_free_variables     = compute_used_free_variables(spec);
       auto const&                            params                  = spec.process().process_parameters();
@@ -278,7 +283,7 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
     using super::data;
     using super::operator[];
 
-    std::string compare(const specification_property_map& other) const
+    std::string compare(const specification_property_map<Specification>& other) const
     {
       return super::compare(other);
     }

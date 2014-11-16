@@ -31,8 +31,14 @@ namespace lps
 {
 
 /// \brief Class implementing the sum elimination lemma.
-class sumelm_algorithm: public lps::detail::lps_algorithm
+template <typename Specification = specification>
+class sumelm_algorithm: public detail::lps_algorithm<Specification>
 {
+  typedef typename detail::lps_algorithm<Specification> super;
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  using super::m_spec;
+
   protected:
     /// Stores the number of summation variables that has been removed.
     size_t m_removed;
@@ -63,7 +69,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     bool is_summand_variable(const summand_base& s, const data::data_expression& x)
     {
       const data::variable_list& l=s.summation_variables();
-      return data::is_variable(x) && std::find(l.begin(),l.end(),atermpp::aterm_cast<data::variable>(x))!=l.end();
+      return data::is_variable(x) && std::find(l.begin(),l.end(),atermpp::down_cast<data::variable>(x))!=l.end();
     }
 
     template <typename T>
@@ -122,8 +128,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
           //    for which there is no substitution yet -> add d := e, and x := e
           if (is_summand_variable(s, left) && !search_data_expression(right, left))
           {
-            const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
-            const data::variable& vright = core::static_down_cast<const data::variable&>(right);
+            const data::variable& vleft = atermpp::down_cast<data::variable>(left);
+            const data::variable& vright = atermpp::down_cast<data::variable>(right);
 
             // Check if we already have a substition with left as left hand side
             if (substitutions.find(vleft) == substitutions.end())
@@ -138,7 +144,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
             }
             else
             {
-              data::variable v = core::static_down_cast<const data::variable&>(substitutions(vleft));
+              data::variable v = atermpp::down_cast<data::variable>(substitutions(vleft));
               if (is_summand_variable(s, v) && substitutions.find(v) != substitutions.end())
               {
                 sumelm_add_replacement(substitutions, v, right);
@@ -164,8 +170,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     ///             applied.
     /// \param decluster Control whether disjunctive conditions need to be split
     ///        into multiple summands.
-    sumelm_algorithm(specification& spec, bool decluster = false)
-      : lps::detail::lps_algorithm(spec),
+    sumelm_algorithm(Specification& spec, bool decluster = false)
+      : lps::detail::lps_algorithm<Specification>(spec),
         m_removed(0),
         m_decluster(decluster)
     {}
@@ -177,13 +183,12 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
       if(m_decluster)
       {
         // First decluster specification
-        decluster_algorithm(m_spec).run();
+        decluster_algorithm<Specification>(m_spec).run();
       }
 
       m_removed = 0; // Re-initialise number of removed variables for a fresh run.
 
-      for (action_summand_vector::iterator i = m_spec.process().action_summands().begin();
-           i != m_spec.process().action_summands().end(); ++i)
+      for (auto i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
       {
         (*this)(*i);
       }
@@ -199,19 +204,22 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
 
     /// \brief Apply the sum elimination lemma to summand s.
     /// \param s an action_summand.
-    void operator()(action_summand& s)
+    void operator()(action_summand_type& s)
     {
-      using namespace data;
-
       data::mutable_map_substitution<> substitutions;
-      data::data_expression new_condition = compute_substitutions(s, substitutions);
-      std::set<data::variable> substitutions_variables = data::substitution_variables(substitutions);
-      s.condition() = data::replace_variables_capture_avoiding(new_condition, substitutions, substitutions_variables);
-      lps::replace_variables_capture_avoiding(s.multi_action(), substitutions, substitutions_variables);
-      s.assignments() = data::replace_variables_capture_avoiding(s.assignments(), substitutions, substitutions_variables);
+      s.condition() = compute_substitutions(s, substitutions);
+
+      // temporarily remove the summation variables, otherwise the capture avoiding substitution will touch them
+      auto summmation_variables = s.summation_variables();
+      s.summation_variables() = data::variable_list();
+
+      lps::replace_variables_capture_avoiding(s, substitutions, data::substitution_variables(substitutions));
+
+      // restore the summation variables
+      s.summation_variables() = summmation_variables;
 
       const size_t var_count = s.summation_variables().size();
-      remove_unused_summand_variables(s);
+      super::summand_remove_unused_summand_variables(s);
       m_removed += var_count - s.summation_variables().size();
     }
 
@@ -219,20 +227,12 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// \param s a deadlock_summand.
     void operator()(deadlock_summand& s)
     {
-      using namespace data;
-
       data::mutable_map_substitution<> substitutions;
-      data::data_expression new_condition = compute_substitutions(s, substitutions);
-      std::set<data::variable> substitutions_variables = data::substitution_variables(substitutions);
-
-      s.condition() = data::replace_variables_capture_avoiding(new_condition, substitutions, substitutions_variables);
-      if (s.deadlock().has_time())
-      {
-        s.deadlock().time() = data::replace_variables_capture_avoiding(s.deadlock().time(), substitutions, substitutions_variables);
-      }
+      s.condition() = compute_substitutions(s, substitutions);
+      lps::replace_variables_capture_avoiding(s, substitutions, data::substitution_variables(substitutions));
 
       const size_t var_count = s.summation_variables().size();
-      remove_unused_summand_variables(s);
+      super::summand_remove_unused_summand_variables(s);
       m_removed += var_count - s.summation_variables().size();
     }
 
@@ -250,7 +250,19 @@ inline
 bool sumelm(action_summand& s)
 {
   specification spec;
-  sumelm_algorithm algorithm(spec);
+  sumelm_algorithm<specification> algorithm(spec);
+  algorithm(s);
+  return algorithm.removed() > 0;
+}
+
+/// \brief Apply the sum elimination lemma to summand s.
+/// \param s a stochastic action summand
+/// \return \c true if any summation variables have been removed, or \c false otherwise.
+inline
+bool sumelm(stochastic_action_summand& s)
+{
+  stochastic_specification spec;
+  sumelm_algorithm<stochastic_specification> algorithm(spec);
   algorithm(s);
   return algorithm.removed() > 0;
 }
@@ -262,7 +274,7 @@ inline
 bool sumelm(deadlock_summand& s)
 {
   specification spec;
-  sumelm_algorithm algorithm(spec);
+  sumelm_algorithm<specification> algorithm(spec);
   algorithm(s);
   return algorithm.removed() > 0;
 }

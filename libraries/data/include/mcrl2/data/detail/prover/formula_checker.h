@@ -87,7 +87,7 @@ class Formula_Checker
       if (f_witness)
       {
         const data_expression v_witness = f_bdd_prover.get_witness();
-        if (!v_witness.defined())
+        if (v_witness==data_expression())
         {
           throw mcrl2::runtime_error(
             "Cannot print witness. This is probably caused by an abrupt stop of the\n"
@@ -107,7 +107,7 @@ class Formula_Checker
       if (f_counter_example)
       {
         const data_expression v_counter_example = f_bdd_prover.get_counter_example();
-        if (!v_counter_example.defined())
+        if (v_counter_example==data_expression())
         {
           throw mcrl2::runtime_error(
             "Cannot print counter example. This is probably caused by an abrupt stop of the\n"

@@ -34,6 +34,11 @@ namespace mcrl2 {
 
 namespace core {
 
+std::string parse_node::add_context(const std::string& message) const
+{
+  return detail::add_context(&node->start_loc, message);
+}
+
 int parse_node::symbol() const
 {
   return node->symbol;
@@ -269,6 +274,27 @@ void parser::announce(D_ParseNode& node_ref)
 
 namespace detail {
 
+std::string add_context(const d_loc_t* loc, const std::string& message)
+{
+  std::stringstream s;
+  s << "Line " << loc->line << ", column " << loc->col << ": "
+    << message << std::endl;
+  char* beg = loc->s - loc->col;
+  char* end = loc->s;
+  while (*end != '\0' && *end != '\n' && *end != '\r')
+  {
+    ++end;
+  }
+  std::string line(beg, end);
+  s << "  " << line << std::endl;
+  for (int i = 0; i < loc->col + 2; ++i)
+  {
+    s << ' ';
+  }
+  s << '^';
+  return s.str();
+}
+
 /// \brief Function for resolving parser ambiguities.
 struct D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v)
 {
@@ -305,6 +331,30 @@ struct D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseN
   throw mcrl2::runtime_error("Unresolved ambiguity.");
 }
 
+void log_location(struct D_Parser *ap)
+{
+  // We recover information about the last parsed node by casting D_Parser to Parser, which
+  // is the structure that the dparser library internally uses to keep its administration in.
+  std::string after;
+  SNode *s = ((Parser*)ap)->snode_hash.last_all;
+  ZNode *z = s != NULL ? s->zns.v[0] : NULL;
+  while (z != NULL && z->pn->parse_node.start_loc.s == z->pn->parse_node.end)
+  {
+    z = (z->sns.v && z->sns.v[0]->zns.v) ? z->sns.v[0]->zns.v[0] : NULL;
+  }
+  if (z && z->pn->parse_node.start_loc.s != z->pn->parse_node.end)
+  {
+    after = std::string(z->pn->parse_node.start_loc.s, z->pn->parse_node.end);
+  }
+
+  std::string message = "syntax error";
+  if (!after.empty())
+  {
+    message = message + " after '" + after + "'";
+  }
+  mCRL2log(log::error, "parser") << add_context(&ap->loc, message) << std::endl;
+}
+
 void syntax_error_fn(struct D_Parser *ap)
 {
   core::detail::increment_dparser_error_message_count();
@@ -312,69 +362,62 @@ void syntax_error_fn(struct D_Parser *ap)
   {
     return;
   }
-  Parser *p = (Parser *) ap;
-  std::string filename;
-  if (p->user.loc.pathname)
-  {
-    filename = std::string(p->user.loc.pathname);
-  }
-  std::string after;
-  ZNode *z = p->snode_hash.last_all ? p->snode_hash.last_all->zns.v[0] : 0;
-  while (z && z->pn->parse_node.start_loc.s == z->pn->parse_node.end)
-  {
-    z = (z->sns.v && z->sns.v[0]->zns.v) ? z->sns.v[0]->zns.v[0] : 0;
-  }
-  if (z && z->pn->parse_node.start_loc.s != z->pn->parse_node.end)
-  {
-    after = std::string(z->pn->parse_node.start_loc.s, z->pn->parse_node.end);
-  }
-  mCRL2log(log::error, "parser") << filename << "line " << p->user.loc.line << " col " << p->user.loc.col << ": syntax error";
-  if (!after.empty())
-  {
-    mCRL2log(log::error, "parser") << " after '" << after << "'";
-  }
-  mCRL2log(log::error, "parser") << std::endl;
-  if (*p->user.loc.s == 0)
+  log_location(ap);
+  if (ap->loc.s == 0)
   {
     mCRL2log(log::error, "parser") << "Unexpected end of input." << std::endl;
   }
   else
-  if (p->pnode_hash.all && p->pnode_hash.all->latest)
   {
-    core::parse_node n(&p->pnode_hash.all->latest->parse_node);
-    D_Symbol &s = p->t->symbols[n.symbol()];
-    if (s.kind == D_SYMBOL_INTERNAL)
+    // Dive into the internals of dparser to recover some extra diagnostics.
+    Parser* p = (Parser*)ap;
+    if (p->pnode_hash.all && p->pnode_hash.all->latest)
     {
-      /* DParser stores production rules in order: search for the corresponding nonterminal. */
-      int parentsym = n.symbol() - 1;
-      while (p->t->symbols[parentsym].kind == D_SYMBOL_INTERNAL)
-        --parentsym;
-      s = p->t->symbols[parentsym];
-    }
-
-    switch (s.kind)
-    {
-    case D_SYMBOL_STRING:
-    case D_SYMBOL_TOKEN:
+      core::parse_node n(&p->pnode_hash.all->latest->parse_node);
+      D_Symbol &s = p->t->symbols[n.symbol()];
+      if (s.kind == D_SYMBOL_INTERNAL)
       {
-        std::locale loc;
-        mCRL2log(log::error, "parser") << "Unexpected "
-                                       << (std::isalpha(n.string()[0], loc) ? "keyword " : "")
-                                       << "'" << n.string() << "'" << std::endl;
+        /* DParser stores production rules in order: search for the corresponding nonterminal. */
+        int parentsym = n.symbol() - 1;
+        while (p->t->symbols[parentsym].kind == D_SYMBOL_INTERNAL)
+          --parentsym;
+        s = p->t->symbols[parentsym];
       }
-      break;
-    case D_SYMBOL_NTERM:
-      mCRL2log(log::error, "parser") << "Unexpected " << s.name << " '" << n.string() << "'" << std::endl;
-      break;
-    default:
-      // TODO: check if we can give more sensible output in the remaining cases.
-      break;
-    }
 
+      switch (s.kind)
+      {
+      case D_SYMBOL_STRING:
+      case D_SYMBOL_TOKEN:
+        {
+          std::locale loc;
+          mCRL2log(log::error, "parser") << "Unexpected "
+                                         << (std::isalpha(n.string()[0], loc) ? "keyword " : "")
+                                         << "'" << n.string() << "'" << std::endl;
+        }
+        break;
+      case D_SYMBOL_NTERM:
+        mCRL2log(log::error, "parser") << "Unexpected " << s.name << " '" << n.string() << "'" << std::endl;
+        break;
+      default:
+        // TODO: check if we can give more sensible output in the remaining cases.
+        break;
+      }
+    }
   }
 }
 
 } // namespace detail
+
+void parser::custom_parse_error(const std::string& message) const
+{
+  core::detail::increment_dparser_error_message_count();
+  if (core::detail::get_dparser_error_message_count() > core::detail::get_dparser_max_error_message_count())
+  {
+    return;
+  }
+  detail::log_location(m_parser);
+  mCRL2log(log::error, "parser") << message << std::endl;
+}
 
 } // namespace core
 

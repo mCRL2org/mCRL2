@@ -50,7 +50,7 @@ class action_name_multiset: public atermpp::aterm_appl
 
     const core::identifier_string_list& names() const
     {
-      return atermpp::aterm_cast<const core::identifier_string_list>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string_list>((*this)[0]);
     }
 };
 

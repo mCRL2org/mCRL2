@@ -147,7 +147,7 @@ void test_abp()
 {
   bool timed = false;
   std::string FORMULA = "[true*]<true*>true";
-  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
+  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
 
   pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);

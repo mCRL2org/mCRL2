@@ -18,7 +18,8 @@
 #include <functional>
 
 #include <type_traits>
-#include "mcrl2/atermpp/detail/aterm.h"
+#include "detail/aterm.h"
+#include "type_traits.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
@@ -253,28 +254,80 @@ class aterm
     }
 };
 
+template <class Term1, class Term2>
+struct is_convertible : public
+    std::conditional<std::is_base_of<aterm, Term1>::value &&
+                     std::is_base_of<aterm, Term2>::value && (
+                     std::is_convertible<Term1, Term2>::value ||
+                     std::is_convertible<Term2, Term1>::value),
+                     std::true_type, std::false_type>::type
+{ };
+
 /// \brief A cheap cast from one aterm based type to another
-/// \details When casting one aterm based type into another, generally
-///          a new aterm is constructed, and the old one is destroyed.
-///          This can cause undesired overhead, for instance due to
-///          increasing and decreasing of reference counts. This
-///          cast changes the type, without changing the aterm itself.
-///          It can only be used if the input and output types inherit
-///          from aterms, and contain no additional information than a
+///        When casting one aterm based type into another, generally  a new aterm is constructed,
+///        and the old one is destroyed. This can cause undesired overhead, for instance due to
+///        increasing and decreasing of reference counts. This cast changes the type, without
+///        changing the aterm itself. It can only be used if Base and Derived inherit from aterm,
+///        and contain no additional information than a
 ///          single aterm.
 /// \param   t A term of a type inheriting from an aterm.
-/// \return  A term of type ATERM_TYPE_OUT.
-template <class ATERM_TYPE_OUT>
-const ATERM_TYPE_OUT &aterm_cast(const aterm &t)
+/// \return  A term of type Derived.
+template <class Derived, class Base>
+const Derived& down_cast(const Base& t,
+                          typename std::enable_if<is_convertible<Base, Derived>::value &&
+                                                  !std::is_base_of<Derived, Base>::value>::type* = NULL)
 {
-  static_assert(std::is_base_of<aterm, ATERM_TYPE_OUT>::value,"Aterm_cast must be applied on a term derived from aterm");
-  static_assert(sizeof(ATERM_TYPE_OUT)==sizeof(aterm),"Aterm_cast cannot be applied types derived from aterms where extra fields are added");
-#ifndef NDEBUG
-  // This assignment checks whether e has the right type;
-  ATERM_TYPE_OUT t0=(ATERM_TYPE_OUT &)t;
-  // assert(t0); // Prevent warning for not using t;
-#endif
-  return (ATERM_TYPE_OUT &)t;
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const Derived&>(t);
+}
+
+template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
+const DerivedCont& container_cast(const Cont<Base>& t,
+                              typename std::enable_if<
+                                is_container<DerivedCont>::value &&
+                                std::is_same<Cont<typename DerivedCont::value_type>, DerivedCont>::value &&
+                                !std::is_base_of<DerivedCont, Cont<Base> >::value &&
+                                is_convertible<Base, typename DerivedCont::value_type>::value
+                              >::type* = NULL)
+{
+  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const DerivedCont&>(t);
+}
+
+template <class Derived, class Base>
+const Derived& vertical_cast(const Base& t,
+                          typename std::enable_if<is_convertible<Base, Derived>::value>::type* = NULL)
+{
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const Derived&>(t);
+}
+
+template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
+const DerivedCont& vertical_cast(const Cont<Base>& t,
+                              typename std::enable_if<
+                                is_container<DerivedCont>::value &&
+                                std::is_same<Cont<typename DerivedCont::value_type>, DerivedCont>::value &&
+                                is_convertible<Base, typename DerivedCont::value_type>::value
+                              >::type* = NULL)
+{
+  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const DerivedCont&>(t);
+}
+
+template <class Derived, class Base>
+const Derived& deprecated_cast(const Base& t,
+                          typename std::enable_if<
+                             std::is_base_of<aterm, Base>::value &&
+                             std::is_base_of<aterm, Derived>::value
+                          >::type* = NULL)
+{
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  return reinterpret_cast<const Derived&>(t);
 }
 
 /// \brief Send the term in textual form to the ostream.
@@ -308,7 +361,8 @@ struct hash<atermpp::aterm>
 {
   std::size_t operator()(const atermpp::aterm& t) const
   {
-    return std::hash<atermpp::detail::_aterm*>()(const_cast<atermpp::detail::_aterm*>(atermpp::detail::address(t)));
+    static const size_t a_prime_number = 134217689;
+    return (reinterpret_cast<size_t>(atermpp::detail::address(t))>>3) * a_prime_number;
   }
 };
 

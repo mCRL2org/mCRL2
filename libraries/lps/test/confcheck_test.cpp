@@ -29,12 +29,12 @@ using mcrl2::utilities::collect_after_test_case;
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 //static bool check_for_ctau(lps::specification const& s) .
-static size_t count_ctau(lps::specification const& s)
+static size_t count_ctau(specification const& s)
 {
   size_t result = 0;
-  const action_summand_vector v_summands = s.process().action_summands();
+  auto const& v_summands = s.process().action_summands();
 
-  for (action_summand_vector::const_iterator i=v_summands.begin(); i!=v_summands.end(); ++i)
+  for (auto i=v_summands.begin(); i!=v_summands.end(); ++i)
   {
     const process::action_list al=i->multi_action().actions();
     if (al.size()==1)
@@ -55,12 +55,12 @@ void run_confluence_test_case(const std::string& s, const size_t ctau_count)
   using namespace mcrl2::lps;
 
   specification s0 = parse_linear_process_specification(s);
-  Confluence_Checker checker1(s0);
+  Confluence_Checker<specification> checker1(s0);
   // Check confluence for all summands and
   // replace confluents tau's by ctau's.
-  specification s1(lps::specification(checker1.check_confluence_and_mark(data::sort_bool::true_(),0)));
+  checker1.check_confluence_and_mark(data::sort_bool::true_(),0);
 
-  BOOST_CHECK_EQUAL(count_ctau(s1), ctau_count);
+  BOOST_CHECK_EQUAL(count_ctau(s0), ctau_count);
 }
 
 BOOST_AUTO_TEST_CASE(case_1)

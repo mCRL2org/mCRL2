@@ -32,34 +32,32 @@ class pbes_stategraph_tool: public pbes_input_tool<pbes_output_tool<rewriter_too
     {
       super::parse_options(parser);
       options.rewrite_strategy = rewrite_strategy();
-      options.simplify = parser.option_argument_as<bool>("simplify");
-      options.apply_to_original = parser.option_argument_as<bool>("apply-to-original");
-      options.use_local_variant = parser.option_argument_as<bool>("use-local-variant");
-      options.print_influence_graph = parser.option_argument_as<bool>("print-influence-graph");
-      options.cache_marking_updates = parser.option_argument_as<bool>("cache-marking-updates");
+      options.simplify = 0 == parser.options.count("no-simplify");
+      options.use_global_variant = 0 < parser.options.count("use-global-variant");
+      options.print_influence_graph = 0 < parser.options.count("print-influence-graph");
+      options.cache_marking_updates = 0 == parser.options.count("disable-cache-marking-updates");
       options.marking_algorithm = parser.option_argument_as<int>("marking-algorithm");
       if (options.marking_algorithm < 0 || options.marking_algorithm > 2)
       {
         throw mcrl2::runtime_error("invalid value for marking-algorithm!");
       }
-      options.use_alternative_lcfp_criterion = parser.option_argument_as<bool>("use-alternative-lcfp-criterion");
-      options.use_alternative_gcfp_relation = parser.option_argument_as<bool>("use-alternative-gcfp-relation");
-      options.use_alternative_gcfp_consistency = parser.option_argument_as<bool>("use-alternative-gcfp-consistency");
+      options.use_alternative_lcfp_criterion = 0 < parser.options.count("use-alternative-lcfp-criterion");
+      options.use_alternative_gcfp_relation = 0 < parser.options.count("use-alternative-gcfp-relation");
+      options.use_alternative_gcfp_consistency = 0 < parser.options.count("use-alternative-gcfp-consistency");
       options.timer = &timer();
     }
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("simplify", make_optional_argument("NAME", "1"), "simplify the PBES during reduction", 's');
-      desc.add_option("apply-to-original", make_optional_argument("NAME", "0"), "apply reduction on the original PBES", 'a');
-      desc.add_option("use-local-variant", make_optional_argument("NAME", "0"), "use the local variant of the algorithm", 'l');
-      desc.add_option("print-influence-graph", make_optional_argument("NAME", "0"), "print the influence graph", 'I');
-      desc.add_option("cache-marking-updates", make_optional_argument("NAME", "0"), "cache rewriter calls in marking updates", 'c');
-      desc.add_option("marking-algorithm", make_optional_argument("NAME", "0"), "specifies the algorithm that is used for the marking computation 0 (default), 1 or 2", 'm');
-      desc.add_option("use-alternative-lcfp-criterion", make_optional_argument("NAME", "0"), "use an alternative criterion for local control flow parameter computation", 'x');
-      desc.add_option("use-alternative-gcfp-relation", make_optional_argument("NAME", "0"), "use an alternative global control flow parameter relation", 'y');
-      desc.add_option("use-alternative-gcfp-consistency", make_optional_argument("NAME", "0"), "use an alternative global control flow parameter consistency", 'z');
+      desc.add_hidden_option("no-simplify", "do not simplify the PBES during reduction (works only in combination with -g)", 's');
+      desc.add_option("use-global-variant", "use the global variant of the algorithm", 'g');
+      desc.add_hidden_option("print-influence-graph", "print the influence graph", 'I');
+      desc.add_hidden_option("disable-cache-marking-updates", "disable caching of rewriter calls in marking updates", 'c');
+      desc.add_option("marking-algorithm", make_optional_argument("NAME", "0"), "specifies the algorithm that is used for the marking computation 0 (default), 1 or 2. In certain cases this choice can have a significant impact on the performance.", 'm');
+      desc.add_hidden_option("use-alternative-lcfp-criterion", "use an alternative criterion for local control flow parameter computation", 'x');
+      desc.add_hidden_option("use-alternative-gcfp-relation", "use an alternative global control flow parameter relation", 'y');
+      desc.add_hidden_option("use-alternative-gcfp-consistency", "use an alternative global control flow parameter consistency", 'z');
     }
 
   public:
@@ -79,8 +77,7 @@ class pbes_stategraph_tool: public pbes_input_tool<pbes_output_tool<rewriter_too
       mCRL2log(verbose) << "  input file:                       " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:                      " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  simplify:                         " << std::boolalpha << options.simplify << std::endl;
-      mCRL2log(verbose) << "  apply to original:                " << std::boolalpha << options.apply_to_original << std::endl;
-      mCRL2log(verbose) << "  use local variant:                " << std::boolalpha << options.use_local_variant << std::endl;
+      mCRL2log(verbose) << "  use global variant:               " << std::boolalpha << options.use_global_variant << std::endl;
       mCRL2log(verbose) << "  print influence graph:            " << std::boolalpha << options.print_influence_graph << std::endl;
       mCRL2log(verbose) << "  cache marking updates:            " << std::boolalpha << options.cache_marking_updates << std::endl;
       mCRL2log(verbose) << "  margking algorithm:               " << options.marking_algorithm << std::endl;

@@ -7,11 +7,11 @@ os.system('lpsconstelm -v -rjittyc temp1.lps temp2.lps')
 # Reducing the number of columns, e.g. to four instead of default 7 does lead to a result.
 # In that case the there are 16M states. Solving the formulas red_wins.mcf requires 7M bes
 # variables (with result false). Five columns lead to appr. 100Mstates.
-os.system('lps2lts -v -rjittyc temp2.lps') 
+#os.system('lps2lts -v -rjittyc temp2.lps') 
 # Also pbes2bool does not tend to terminate on the full game, as it is too big.
 os.system('lps2pbes -vfred_wins.mcf temp2.lps temp.pbes')
 os.system('pbesrewr -pquantifier-all temp.pbes | pbesconstelm -v | pbesrewr -v > temp1.pbes')
-os.system('pbes2bool -rjittyc -v -s2 temp1.pbes')
+os.system('pbes2bool -rjittyc -v -s2 -zd temp1.pbes --erase=some')
 
 
 

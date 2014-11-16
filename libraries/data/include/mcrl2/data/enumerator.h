@@ -12,6 +12,8 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
+#define MCRL2_NEW_IDENTIFIER_GENERATOR
+
 #include <deque>
 #include <limits>
 #include <map>
@@ -109,7 +111,7 @@ bool compute_finite_set_elements(const container_sort& sort, const data_specific
 /// \brief Computes the elements of a finite function sort, and puts them in result. If there are too many elements, false is returned.
 template <class IdentifierGenerator, class Rewriter>
 bool compute_finite_function_sorts(const function_sort& sort,
-                                   const IdentifierGenerator& id_generator,
+                                   IdentifierGenerator& id_generator,
                                    const data::data_specification& dataspec,
                                    Rewriter datar,
                                    data_expression_vector& result,
@@ -125,7 +127,7 @@ bool compute_finite_function_sorts(const function_sort& sort,
   {
     domain_expressions.push_back(enumerate_expressions(*i, dataspec, datar));
     total_domain_size = total_domain_size * domain_expressions.back().size();
-    function_parameters.push_back(variable(const_cast<IdentifierGenerator&>(id_generator)(), *i));
+    function_parameters.push_back(variable(id_generator("x"), *i));
   }
 
   if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
@@ -311,6 +313,7 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
   return out << "{ variables = " << core::detail::print_list(p.variables()) << ", expression = " << p.expression() << " }";
 }
 
+#ifdef MCRL2_NEW_IDENTIFIER_GENERATOR
 class enumerator_identifier_generator
 {
   protected:
@@ -320,38 +323,44 @@ class enumerator_identifier_generator
     /// \brief Constructor
     /// \param The prefix of the generated generated strings
     /// \pre The prefix may not be empty, and it may not have trailing digits
-    enumerator_identifier_generator(const std::string& prefix)
+    enumerator_identifier_generator(const std::string& prefix = "@x")
       : f(prefix)
     { }
 
     /// \brief Generates a unique function symbol with the given prefix followed by a number.
-    core::identifier_string operator()()
+    core::identifier_string operator()(const std::string& = "", bool = false)
     {
       return core::identifier_string(f());
     }
-};
 
+   void clear()
+   {
+     f.clear();
+   }
+};
+#else
+typedef utilities::number_postfix_generator enumerator_identifier_generator;
+#endif
+
+template <typename IdentifierGenerator>
 struct sort_name_generator
 {
-  enumerator_identifier_generator& id_generator;
+  IdentifierGenerator& id_generator;
 
-  sort_name_generator(enumerator_identifier_generator& id_generator_)
+  sort_name_generator(IdentifierGenerator& id_generator_)
     : id_generator(id_generator_)
   {}
 
   data::variable operator()(const data::sort_expression& s) const
   {
-    return data::variable(id_generator(), s);
+    return data::variable(id_generator("@x"), s);
   }
 };
 
 /// \brief An enumerator algorithm that generates solutions of a condition.
-template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter>
+template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter, typename IdentifierGenerator = data::enumerator_identifier_generator>
 class enumerator_algorithm
 {
-  /// \brief A map that caches the constructors corresponding to sort expressions.
-  typedef std::map<data::sort_expression, std::vector<data::function_symbol> > constructor_map;
-
   protected:
     // A rewriter
     const Rewriter& R;
@@ -362,31 +371,14 @@ class enumerator_algorithm
     // Needed for enumerate_expressions
     const DataRewriter& datar;
 
-    // A name generator, used for generating variable names
-    mutable enumerator_identifier_generator id_generator;
-
-    /// \brief A mapping with constructors.
-    mutable constructor_map m_constructors;
+    // A name generator
+    IdentifierGenerator& id_generator;
 
     /// \brief max_count The enumeration is aborted after max_count iterations
     std::size_t m_max_count;
 
     /// \brief throw_exceptions If true, an exception is thrown when the enumeration is aborted.
     bool m_throw_exceptions;
-
-    /// \brief Returns the constructors with target s.
-    /// \param s A sort expression
-    /// \return The constructors corresponding to the sort expression.
-    const std::vector<data::function_symbol>& constructors(const data::sort_expression& s) const
-    {
-      auto i = m_constructors.find(s);
-      if (i != m_constructors.end())
-      {
-        return i->second;
-      }
-      m_constructors[s] = dataspec.constructors(s);
-      return m_constructors[s];
-    }
 
     std::string print(const data::variable& x) const
     {
@@ -484,15 +476,16 @@ class enumerator_algorithm
     enumerator_algorithm(const Rewriter& R_,
                          const data::data_specification& dataspec_,
                          const DataRewriter& datar_,
+                         IdentifierGenerator& id_generator_,
                          std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                          bool throw_exceptions = false
                        )
-      : R(R_), dataspec(dataspec_), datar(datar_), id_generator("x"), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
+      : R(R_), dataspec(dataspec_), datar(datar_), id_generator(id_generator_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
     {}
 
   private:
     // enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
-    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&)
+    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter, IdentifierGenerator>&)
     {}
 
   public:
@@ -518,7 +511,7 @@ class enumerator_algorithm
 
       if (data::is_function_sort(sort))
       {
-        const function_sort& function = atermpp::aterm_cast<function_sort>(sort);
+        const function_sort& function = atermpp::down_cast<function_sort>(sort);
         if (dataspec.is_certainly_finite(function))
         {
           data_expression_vector function_sorts;
@@ -549,8 +542,8 @@ class enumerator_algorithm
         const sort_expression element_sort = container_sort(sort).element_sort();
         if (dataspec.is_certainly_finite(element_sort))
         {
-          const data_expression lambda_term = abstraction(lambda_binder(), atermpp::make_list<variable>(variable(id_generator(), element_sort)), sort_bool::false_());
-          const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
+          const data_expression lambda_term = abstraction(lambda_binder(), atermpp::make_list<variable>(variable(id_generator("x"), element_sort)), sort_bool::false_());
+          const variable fset_variable(id_generator("@var_fset@", false), sort_fset::fset(element_sort));
           const data_expression term = sort_set::constructor(element_sort, lambda_term, fset_variable);
           const data_expression old_substituted_value = sigma(v1);
           sigma[v1] = term;
@@ -565,7 +558,7 @@ class enumerator_algorithm
       }
       else if (sort_fset::is_fset(sort))
       {
-        const container_sort& fset = atermpp::aterm_cast<container_sort>(sort);
+        const container_sort& fset = atermpp::down_cast<container_sort>(sort);
         if (dataspec.is_certainly_finite(fset.element_sort()))
         {
           data_expression_vector set_elements;
@@ -603,7 +596,7 @@ class enumerator_algorithm
       }
       else
       {
-        auto const& C = constructors(sort);
+        auto const& C = dataspec.constructors(sort);
         if (!C.empty())
         {
           for (auto i = C.begin(); i != C.end(); ++i)
@@ -611,8 +604,8 @@ class enumerator_algorithm
             auto const& constructor = *i;
             if (data::is_function_sort(constructor.sort()))
             {
-              auto const& domain = atermpp::aterm_cast<data::function_sort>(constructor.sort()).domain();
-              data::variable_list y(domain.begin(), domain.end(), sort_name_generator(id_generator));
+              auto const& domain = atermpp::down_cast<data::function_sort>(constructor.sort()).domain();
+              data::variable_list y(domain.begin(), domain.end(), sort_name_generator<IdentifierGenerator>(id_generator));
               // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
               data_expression cy = datar(application(constructor, y.begin(), y.end()), sigma);
               sigma[v1] = cy;
@@ -686,6 +679,8 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
   public:
     typedef enumerator_algorithm<Rewriter, DataRewriter> super;
 
+    data::enumerator_identifier_generator id_generator;
+
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
     ///          the list of variables for which a solution is sought.
@@ -730,7 +725,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
             if (E->throw_exceptions())
             {
               std::ostringstream out;
-              out << "enumeration was aborted, since it did complete within " << E->max_count() << " iterations";
+              out << "enumeration was aborted, since it did not complete within " << E->max_count() << " iterations";
               throw mcrl2::runtime_error(out.str());
             }
             else
@@ -761,8 +756,10 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
                 const DataRewriter& datar,
                 std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                 bool throw_exceptions = false)
-      : super(R, dataspec, datar, max_count, throw_exceptions)
-    {}
+      : super(R, dataspec, datar, id_generator, max_count, throw_exceptions)
+    {
+      id_generator.clear();
+    }
 
     /// \brief Returns an iterator that enumerates solutions for variables that satisfy a condition
     /// \param E An enumerator

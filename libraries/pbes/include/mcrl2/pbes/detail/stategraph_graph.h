@@ -326,11 +326,17 @@ struct control_flow_graph
     }
   }
 
-  const std::set<const Vertex*>& index(const core::identifier_string& X) const
+  std::set<const Vertex*> index(const core::identifier_string& X) const
   {
     auto i = m_graph_index.find(X);
-    assert(i != m_graph_index.end());
-    return i->second;
+    if (i == m_graph_index.end())
+    {
+      return std::set<const Vertex*>();
+    }
+    else
+    {
+      return i->second;
+    }
   }
 
   bool has_vertex(const core::identifier_string& X, std::size_t p) const
@@ -479,6 +485,16 @@ struct control_flow_graph
     }
     return false;
   }
+
+  typename std::set<Vertex>::const_iterator begin() const
+  {
+    return vertices.begin();
+  }
+
+  typename std::set<Vertex>::const_iterator end() const
+  {
+    return vertices.end();
+  }
 };
 
 template <typename Vertex>
@@ -572,6 +588,9 @@ struct local_control_flow_graph: public control_flow_graph<local_control_flow_gr
   }
 };
 
+class global_control_flow_graph_vertex;
+std::ostream& operator<<(std::ostream& out, const global_control_flow_graph_vertex&);
+
 // Vertex in the global control flow graph.
 class global_control_flow_graph_vertex: public add_edges<global_control_flow_graph_vertex>
 {
@@ -579,6 +598,9 @@ class global_control_flow_graph_vertex: public add_edges<global_control_flow_gra
     typedef add_edges<global_control_flow_graph_vertex> super;
     core::identifier_string m_name;
     data::data_expression_list m_values;
+    mutable std::set<data::variable> m_sig;
+    mutable std::set<data::variable> m_marking;    // used in the reset variables procedure
+    mutable std::vector<bool> m_marked_parameters; // will be set after computing the marking
 
   public:
     using super::incoming_edges;
@@ -602,9 +624,109 @@ class global_control_flow_graph_vertex: public add_edges<global_control_flow_gra
       return m_values;
     }
 
+    void set_marking(const std::set<data::variable>& marking) const
+    {
+      m_marking = marking;
+    }
+
+    void extend_marking(const std::set<data::variable>& marking) const
+    {
+      m_marking.insert(marking.begin(), marking.end());
+    }
+
+    void set_significant_variables(const std::set<data::variable>& sig) const
+    {
+      m_sig = sig;
+    }
+
     bool operator==(const global_control_flow_graph_vertex& other) const
     {
       return m_name == other.m_name && m_values == other.m_values;
+    }
+
+    std::string print() const
+    {
+      return print_outgoing_edges();
+      // std::ostringstream out;
+      // out << pbes_system::pp(X);
+      // out << " edges:";
+      // for (auto i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
+      // {
+      //   out << " " << pbes_system::pp(i->target->X);
+      // }
+      // out << " sig: " << core::detail::print_set(sig);
+      // return out.str();
+    }
+
+    // also print the parameters
+    std::string print(const data::variable_list&) const
+    {
+      return print_outgoing_edges();
+      // std::ostringstream out;
+      // out << core::pp(X.name());
+      // out << "(";
+      // out << data::pp(data::make_assignment_list(d_X, X.parameters()));
+      // out << ")";
+      // out << " edges:";
+      // for (auto i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
+      // {
+      //   out << " " << i->print();
+      // }
+      // out << " sig: " << core::detail::print_set(sig);
+      // return out.str();
+    }
+
+    std::set<std::size_t> marking_variable_indices(const stategraph_pbes& p) const
+    {
+      std::set<std::size_t> result;
+      for (auto i = marking().begin(); i != marking().end(); ++i)
+      {
+        // TODO: make this code more efficient
+        const stategraph_equation& eqn = *find_equation(p, m_name);
+        const std::vector<data::variable>& d = eqn.parameters();
+        for (auto j = d.begin(); j != d.end(); ++j)
+        {
+          if (*i == *j)
+          {
+            result.insert(j - d.begin());
+            break;
+          }
+        }
+      }
+      return result;
+    }
+
+    // returns true if the i-th parameter of X is marked
+    bool is_marked_parameter(std::size_t i) const
+    {
+      return m_marked_parameters[i];
+    }
+
+    void add_marked_parameter(bool b) const
+    {
+      m_marked_parameters.push_back(b);
+    }
+
+    std::string print_marking() const
+    {
+      std::ostringstream out;
+      out << "vertex " << *this << " = " << core::detail::print_set(m_marking);
+      return out.str();
+    }
+
+    const std::set<data::variable>& sig() const
+    {
+      return m_sig;
+    }
+
+    const std::set<data::variable>& marking() const
+    {
+      return m_marking;
+    }
+
+    const std::vector<bool>& marked_parameters() const
+    {
+      return m_marked_parameters;
     }
 };
 
@@ -616,12 +738,13 @@ bool operator<(const global_control_flow_graph_vertex& x, const global_control_f
 
 std::ostream& operator<<(std::ostream& out, const global_control_flow_graph_vertex& u)
 {
-  return out << "vertex " << u.name() << core::detail::print_container(u.values(), "(", ")", "", false, false);
+  return out << u.name() << core::detail::print_container(u.values(), "(", ")", "", false, false);
 }
 
 struct global_control_flow_graph: public control_flow_graph<global_control_flow_graph_vertex>
 {
   typedef control_flow_graph<global_control_flow_graph_vertex> super;
+  typedef global_control_flow_graph_vertex vertex_type;
 
   /// \brief Default constructor
   global_control_flow_graph()
@@ -631,6 +754,16 @@ struct global_control_flow_graph: public control_flow_graph<global_control_flow_
   global_control_flow_graph(const global_control_flow_graph& other)
     : super(other)
   {}
+
+  std::string print_marking() const
+  {
+    std::ostringstream out;
+    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    {
+      out << i->print_marking() << std::endl;
+    }
+    return out.str();
+  }
 };
 
 } // namespace detail

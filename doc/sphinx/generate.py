@@ -14,7 +14,6 @@ def clean(temppath, outpath):
     shutil.rmtree(usr)
   if os.path.exists(dev):
     shutil.rmtree(dev)
-  sys.exit(0)
 
 def clearcache(temppath, tags):
   for tag in tags:
@@ -74,7 +73,7 @@ if __name__ == '__main__':
     clean(temppath, outpath)
   
   if args.debug is None:
-    logging.basicConfig()#level=logging.WARNING)
+    logging.basicConfig(level=logging.WARNING)
   elif args.debug > 0:
     logging.basicConfig(level=logging.INFO)  
   elif args.debug > 1:

@@ -640,7 +640,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_cdub_application(e) || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
-        return atermpp::aterm_cast<const application >(e)[1];
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -652,7 +652,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_add_with_carry_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -664,7 +664,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_add_with_carry_application(e));
-        return atermpp::aterm_cast<const application >(e)[1];
+        return atermpp::down_cast<const application >(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -676,7 +676,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_add_with_carry_application(e));
-        return atermpp::aterm_cast<const application >(e)[2];
+        return atermpp::down_cast<const application >(e)[2];
       }
 
       ///\brief Function for projecting out argument
@@ -688,7 +688,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_succ_application(e) || is_pos_predecessor_application(e) || is_powerlog2_pos_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -700,7 +700,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_cdub_application(e) || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
-        return atermpp::aterm_cast<const application >(e)[0];
+        return atermpp::down_cast<const application >(e)[0];
       }
 
       /// \brief Give all system defined equations for pos

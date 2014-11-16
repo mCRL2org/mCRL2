@@ -18,7 +18,6 @@
 #include <set>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/detail/io.h"
@@ -100,7 +99,7 @@ class pbes
       }
 
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
-      m_initial_state = core::down_cast<propositional_variable_instantiation>(init[0]);
+      m_initial_state = atermpp::down_cast<propositional_variable_instantiation>(init[0]);
     }
 
     /// \brief Returns the predicate variables appearing in the left hand side of an equation.

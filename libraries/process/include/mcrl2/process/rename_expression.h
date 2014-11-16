@@ -54,12 +54,12 @@ class rename_expression: public atermpp::aterm_appl
 
     const core::identifier_string& source() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
     }
 
     const core::identifier_string& target() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[1]);
+      return atermpp::down_cast<core::identifier_string>((*this)[1]);
     }
 };
 

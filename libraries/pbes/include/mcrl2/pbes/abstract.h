@@ -108,6 +108,10 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
     pop_variables();
     return pbes_expr::exists(x.variables(), new_expression);
   }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
 };
 
 } // namespace detail

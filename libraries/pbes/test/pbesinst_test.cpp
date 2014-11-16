@@ -19,7 +19,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -328,7 +328,7 @@ void test_cabp()
   std::string INFINITELY_OFTEN_SEND = "nu X. mu Y. (<r1(d1)>X || <!r1(d1)>Y)";
 
   // create a pbes p
-  lps::specification spec    = lps::linearise(CABP_SPECIFICATION);
+  lps::specification spec=remove_stochastic_operators(lps::linearise(CABP_SPECIFICATION));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(INFINITELY_OFTEN_SEND, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -341,7 +341,12 @@ void test_cabp()
   pbes_expression t = parse_pbes_expression(expr, subst, p, sigma);
   pbesinst_algorithm algorithm(p.data());
   enumerate_quantifiers_rewriter& R = algorithm.rewriter();
-  pbes_expression z = R(t, sigma);
+  data::mutable_indexed_substitution<> sigma1;
+  for (auto i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    sigma1[i->first] = i->second;
+  }
+  pbes_expression z = R(t, sigma1);
 }
 
 // Note: this test takes a lot of time!
@@ -446,7 +451,7 @@ void test_balancing_plat()
     " init BalancingAct(C,0,0);                                                            \n"
     ;
 
-  lps::specification spec = lps::linearise(BALANCE_PLAT_SPECIFICATION);
+  lps::specification spec=remove_stochastic_operators(lps::linearise(BALANCE_PLAT_SPECIFICATION));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -478,7 +483,7 @@ void test_pbesinst_finite()
 
 void test_abp_no_deadlock()
 {
-  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
+  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);

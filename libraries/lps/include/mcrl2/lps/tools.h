@@ -65,9 +65,7 @@ void lpspp(const std::string& input_filename,
 
 void lpsrewr(const std::string& input_filename,
              const std::string& output_filename,
-             const data::rewriter::strategy rewrite_strategy,
-             bool benchmark,
-             unsigned long bench_times
+             const data::rewriter::strategy rewrite_strategy
             );
 
 void lpssumelm(const std::string& input_filename,

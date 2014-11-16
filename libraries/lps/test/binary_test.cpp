@@ -34,15 +34,15 @@ BOOST_AUTO_TEST_CASE(case_1)
 {
   const std::string text(
     "sort D = struct d1|d2;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   variable_list parameters1 = s1.process().process_parameters();
 
@@ -70,15 +70,15 @@ BOOST_AUTO_TEST_CASE(case_2)
 {
   const std::string text(
     "sort D = struct d1|d2|d3|d4|d5|d6|d7|d8;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -106,15 +106,15 @@ BOOST_AUTO_TEST_CASE(case_3)
 {
   const std::string text(
     "sort D = struct d1|d2|d3|d4|d5|d6|d7;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -146,10 +146,10 @@ BOOST_AUTO_TEST_CASE(case_4)
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -177,15 +177,15 @@ BOOST_AUTO_TEST_CASE(case_5)
 {
   const std::string text(
     "sort D = struct d1|d2|d3|d4|d5|d6|d7|d8|d9;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -216,15 +216,15 @@ BOOST_AUTO_TEST_CASE(case_6)
   const std::string text(
     "sort D = struct d1(E) | d2(E);\n"
     "     E = struct e1 | e2;\n"
-    "act a;\n"
-    "proc P(e:D) = sum d:D . a . P(d);\n"
+    "act a:D;\n"
+    "proc P(e:D) = sum d:D . a(e) . P(d);\n"
     "init P(d1(e1));\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
 
   int bool_param_count = 0;
   for (variable_list::iterator i = s1.process().process_parameters().begin();
@@ -253,15 +253,15 @@ BOOST_AUTO_TEST_CASE(bug_623)
     "init X(d2,d1);\n"
   );
 
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   rewriter r(s0.data());
   specification s1 = s0;
-  binary_algorithm<rewriter>(s1, r).run();
+  binary_algorithm<rewriter, specification>(s1, r).run();
   action_summand_vector summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (auto i = summands1.begin(); i != summands1.end(); ++i)
   {
     data_expression_list next_state = i->next_state(s1.process().process_parameters());
-    BOOST_CHECK_EQUAL(next_state.size(), 2);
+    BOOST_CHECK_EQUAL(next_state.size(), 2u);
     BOOST_CHECK_NE(*next_state.begin(), *(++next_state.begin()));
     std::clog << "erroneous next state " << data::pp(next_state) << std::endl;
   }
@@ -270,10 +270,10 @@ BOOST_AUTO_TEST_CASE(bug_623)
 
 BOOST_AUTO_TEST_CASE(abp)
 {
-  specification spec = linearise(lps::detail::ABP_SPECIFICATION());
+  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   std::clog << "--- before ---\n" << lps::pp(spec) << std::endl;
   rewriter r(spec.data());
-  binary_algorithm<rewriter>(spec, r).run();
+  binary_algorithm<rewriter, specification>(spec, r).run();
   std::clog << "--- after ---\n" << lps::pp(spec) << std::endl;
   BOOST_CHECK(is_well_typed(spec));
 }

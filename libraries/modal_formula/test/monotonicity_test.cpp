@@ -32,7 +32,7 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void run_monotonicity_test_case(const std::string& formula, const std::string& lps_spec, const bool expect_success = true)
 {
-  specification spec = linearise(lps_spec);
+  specification spec=remove_stochastic_operators(linearise(lps_spec));
   bool check_monotonicity = false;
   state_formula f = parse_state_formula(formula, spec, check_monotonicity);
   if (state_formulas::has_name_clashes(f))

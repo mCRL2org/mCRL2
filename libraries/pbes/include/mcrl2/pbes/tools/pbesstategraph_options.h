@@ -23,8 +23,7 @@ struct pbesstategraph_options
 {
   data::rewrite_strategy rewrite_strategy;
   bool simplify;
-  bool apply_to_original;
-  bool use_local_variant;
+  bool use_global_variant;
   bool print_influence_graph;
   bool cache_marking_updates;
   int marking_algorithm;
@@ -36,8 +35,7 @@ struct pbesstategraph_options
   pbesstategraph_options()
   : rewrite_strategy(data::jitty),
     simplify(true),
-    apply_to_original(false),
-    use_local_variant(false),
+    use_global_variant(false),
     print_influence_graph(false),
     cache_marking_updates(false),
     marking_algorithm(0),

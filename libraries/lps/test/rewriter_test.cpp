@@ -101,8 +101,8 @@ void test1()
 
   specification spec1 = spec;
   lps::rewrite(spec1, r);
-  lps::detail::specification_property_map info(spec);
-  lps::detail::specification_property_map info1(spec1);
+  lps::detail::specification_property_map<> info(spec);
+  lps::detail::specification_property_map<> info1(spec1);
   BOOST_CHECK(info.to_string() == info1.to_string());
 
   // test destructor
@@ -125,8 +125,8 @@ void test2()
   specification spec2 = spec1;
   lps::rewrite(spec2, r);
 
-  lps::detail::specification_property_map info1(spec1);
-  lps::detail::specification_property_map info2(spec2);
+  lps::detail::specification_property_map<> info1(spec1);
+  lps::detail::specification_property_map<> info2(spec2);
   BOOST_CHECK(info1.to_string() == info2.to_string());
   BOOST_CHECK(spec1.process().summand_count() == 1);
 }
@@ -148,8 +148,8 @@ void test3()
   specification spec2 = spec1;
   lps::rewrite(spec2, r);
 
-  lps::detail::specification_property_map info1(spec1);
-  lps::detail::specification_property_map info2(spec2);
+  lps::detail::specification_property_map<> info1(spec1);
+  lps::detail::specification_property_map<> info2(spec2);
   BOOST_CHECK(info1.to_string() == info2.to_string());
   BOOST_CHECK(spec1.process().summand_count() == 3);
 }

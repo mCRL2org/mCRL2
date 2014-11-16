@@ -34,31 +34,31 @@ regular_formula mcrl2::state_formulas::state_formula_type_checker::TraverseRegFr
 
   if (is_seq(RegFrm))
   {
-    const seq t=aterm_cast<const seq>(RegFrm);
+    const seq t=down_cast<const seq>(RegFrm);
     return seq(TraverseRegFrm(Vars,t.left()),TraverseRegFrm(Vars,t.right()));
   }
 
   if (is_alt(RegFrm))
   {
-    const alt t=aterm_cast<const alt>(RegFrm);
+    const alt t=down_cast<const alt>(RegFrm);
     return alt(TraverseRegFrm(Vars,t.left()),TraverseRegFrm(Vars,t.right()));
   }
 
   if (is_trans(RegFrm))
   {
-    const trans t=aterm_cast<const trans>(RegFrm);
+    const trans t=down_cast<const trans>(RegFrm);
     return trans(TraverseRegFrm(Vars,t.operand()));
   }
 
   if (is_trans_or_nil(RegFrm))
   {
-    const trans t=aterm_cast<const trans>(RegFrm);
+    const trans t=down_cast<const trans>(RegFrm);
     return trans_or_nil(TraverseRegFrm(Vars,t.operand()));
   }
 
   if (is_action_formula(RegFrm))
   {
-    action_formula a = TraverseActFrm(Vars, atermpp::aterm_cast<const action_formula>(RegFrm));
+    action_formula a = TraverseActFrm(Vars, atermpp::down_cast<const action_formula>(RegFrm));
     return regular_formula(a);
   }
 
@@ -79,31 +79,31 @@ action_formulas::action_formula mcrl2::state_formulas::state_formula_type_checke
 
   if (action_formulas::is_not(ActFrm))
   {
-    const action_formulas::not_& f = core::static_down_cast<const action_formulas::not_&>(ActFrm);
+    const action_formulas::not_& f = atermpp::down_cast<action_formulas::not_>(ActFrm);
     return action_formulas::not_(TraverseActFrm(Vars,f.operand()));
   }
 
   if (action_formulas::is_and(ActFrm))
   {
-    const action_formulas::and_& t=aterm_cast<action_formulas::and_>(ActFrm);
+    const action_formulas::and_& t=atermpp::down_cast<action_formulas::and_>(ActFrm);
     return action_formulas::and_(TraverseActFrm(Vars,t.left()),TraverseActFrm(Vars,t.right()));
   }
 
   if (action_formulas::is_or(ActFrm))
   {
-    const action_formulas::or_& t=aterm_cast<action_formulas::or_>(ActFrm);
+    const action_formulas::or_& t=atermpp::down_cast<action_formulas::or_>(ActFrm);
     return action_formulas::or_(TraverseActFrm(Vars,t.left()),TraverseActFrm(Vars,t.right()));
   }
 
   if (action_formulas::is_imp(ActFrm))
   {
-    const action_formulas::imp& t=aterm_cast<action_formulas::imp>(ActFrm);
+    const action_formulas::imp& t=atermpp::down_cast<action_formulas::imp>(ActFrm);
     return action_formulas::imp(TraverseActFrm(Vars,t.left()),TraverseActFrm(Vars,t.right()));
   }
 
   if (action_formulas::is_forall(ActFrm))
   {
-    const action_formulas::forall& t=aterm_cast<const action_formulas::forall>(ActFrm);
+    const action_formulas::forall& t=atermpp::down_cast<action_formulas::forall>(ActFrm);
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
     const variable_list& VarList=t.variables();
@@ -115,7 +115,7 @@ action_formulas::action_formula mcrl2::state_formulas::state_formula_type_checke
 
   if (action_formulas::is_exists(ActFrm))
   {
-    const action_formulas::exists& t=aterm_cast<const action_formulas::exists>(ActFrm);
+    const action_formulas::exists& t=atermpp::down_cast<action_formulas::exists>(ActFrm);
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
     const variable_list& VarList=t.variables();
@@ -127,7 +127,7 @@ action_formulas::action_formula mcrl2::state_formulas::state_formula_type_checke
 
   if (action_formulas::is_at(ActFrm))
   {
-    const action_formulas::at& t=aterm_cast<const action_formulas::at>(ActFrm);
+    const action_formulas::at& t=atermpp::down_cast<action_formulas::at>(ActFrm);
     action_formula NewArg1=TraverseActFrm(Vars,t.operand());
 
     data_expression Time=t.time_stamp();
@@ -190,31 +190,31 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   if (state_formulas::is_not(StateFrm))
   {
-    const  not_& t=aterm_cast<const not_>(StateFrm);
+    const  not_& t=down_cast<const not_>(StateFrm);
     return not_(TraverseStateFrm(Vars,StateVars,t.operand()));
   }
 
   if (state_formulas::is_and(StateFrm))
   {
-    const and_& t=aterm_cast<const and_>(StateFrm);
+    const and_& t=down_cast<const and_>(StateFrm);
     return and_(TraverseStateFrm(Vars,StateVars,t.left()),TraverseStateFrm(Vars,StateVars,t.right()));
   }
 
   if (state_formulas::is_or(StateFrm))
   {
-    const or_& t=aterm_cast<const or_>(StateFrm);
+    const or_& t=down_cast<const or_>(StateFrm);
     return or_(TraverseStateFrm(Vars,StateVars,t.left()),TraverseStateFrm(Vars,StateVars,t.right()));
   }
 
   if (state_formulas::is_imp(StateFrm))
   {
-    const imp& t=aterm_cast<const imp>(StateFrm);
+    const imp& t=down_cast<const imp>(StateFrm);
     return imp(TraverseStateFrm(Vars,StateVars,t.left()),TraverseStateFrm(Vars,StateVars,t.right()));
   }
 
   if (state_formulas::is_forall(StateFrm))
   {
-    const forall& t=aterm_cast<const forall>(StateFrm);
+    const forall& t=down_cast<const forall>(StateFrm);
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
     std::map<core::identifier_string,sort_expression> NewVars;
@@ -225,7 +225,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   if (state_formulas::is_exists(StateFrm))
   {
-    const exists& t=aterm_cast<const exists>(StateFrm);
+    const exists& t=down_cast<const exists>(StateFrm);
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
     std::map<core::identifier_string,sort_expression> NewVars;
@@ -236,19 +236,19 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   if (is_may(StateFrm))
   {
-    const may& f=aterm_cast<const may>(StateFrm);
+    const may& f=down_cast<const may>(StateFrm);
     return may(TraverseRegFrm(Vars,f.formula()),TraverseStateFrm(Vars,StateVars,f.operand()));
   }
 
   if (is_must(StateFrm))
   {
-    const must& f=aterm_cast<const must>(StateFrm);
+    const must& f=down_cast<const must>(StateFrm);
     return must(TraverseRegFrm(Vars,f.formula()),TraverseStateFrm(Vars,StateVars,f.operand()));
   }
 
   if (state_formulas::is_delay_timed(StateFrm))
   {
-    const delay_timed& f=aterm_cast<const delay_timed>(StateFrm);
+    const delay_timed& f=down_cast<const delay_timed>(StateFrm);
     data_expression Time=f.time_stamp();
     sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
 
@@ -272,7 +272,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   if (state_formulas::is_yaled_timed(StateFrm))
   {
-    const yaled_timed& f=aterm_cast<const yaled_timed>(StateFrm);
+    const yaled_timed& f=down_cast<const yaled_timed>(StateFrm);
     data_expression Time=f.time_stamp();
     sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
 
@@ -296,7 +296,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   if (state_formulas::is_variable(StateFrm))
   {
-    state_formulas::variable v=aterm_cast<const state_formulas::variable>(StateFrm);
+    state_formulas::variable v=down_cast<const state_formulas::variable>(StateFrm);
     core::identifier_string StateVarName=v.name();
     std::map<core::identifier_string,sort_expression_list>::const_iterator i=StateVars.find(StateVarName);
     if (i==StateVars.end())
@@ -351,7 +351,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   if (state_formulas::is_nu(StateFrm))
   {
-    const nu& f=aterm_cast<const nu>(StateFrm);
+    const nu& f=down_cast<const nu>(StateFrm);
     std::map<core::identifier_string,sort_expression_list> CopyStateVars(StateVars);
 
     // Make the new state variable:
@@ -428,7 +428,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   if (state_formulas::is_mu(StateFrm))
   {
-    const mu& f=aterm_cast<const mu>(StateFrm);
+    const mu& f=down_cast<const mu>(StateFrm);
     std::map<core::identifier_string,sort_expression_list> CopyStateVars(StateVars);
 
     // Make the new state variable:

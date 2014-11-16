@@ -23,9 +23,6 @@ void ToolCatalog::generateFileTypes()
   m_filetypes.insert("aut", "lts");
   m_filetypes.insert("dot", "lts");
   m_filetypes.insert("svc", "lts");
-#ifdef USE_BCG
-  m_filetypes.insert("bcg", "lts");
-#endif
   m_filetypes.insert("gm",  "bes");
   m_filetypes.insert("cwi", "bes");
   m_filetypes.insert("bes", "pbes");

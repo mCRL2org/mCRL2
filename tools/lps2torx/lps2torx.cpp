@@ -79,7 +79,7 @@ class torx_tool : public rewriter_tool< input_tool >
       }
 
       std::string result;
-      for (auto i = ma.actions().begin(); i != ma.actions().end(); i++)
+      for (process::action_list::const_iterator i = ma.actions().begin(); i != ma.actions().end(); i++)
       {
         result += process::pp(i->label());
         for (data::data_expression_list::const_iterator j = i->arguments().begin(); j != i->arguments().end(); j++)
@@ -116,7 +116,8 @@ class torx_tool : public rewriter_tool< input_tool >
 
       next_state_generator generator(spec, data::rewriter(spec.data(), rewrite_strategy()));
 
-      state current = generator.initial_state();
+std::cerr << "TODO: TORX DOES NOT WORK WITH STOCHASTIC INITIAL STATE\n";
+      state current = generator.initial_states().front().state();
       std::deque<state> states;
       std::map<state, int> state_numbers;
 
@@ -195,7 +196,7 @@ class torx_tool : public rewriter_tool< input_tool >
                   /* Rebuild transition string in Torx format*/
                   std::cout << "Ee " << "_e" << summand_index << "." << states.size() << "\t" << (i->action().actions().empty() ? 0 : 1) << "\t" << 1 << "\t" << print_torx_action(i->action()) << "\t\t\t";
 
-                  state next = i->state();
+                  state next = i->target_state();
 
                   /* Print optional first-encounted visited state */
                   if(state_numbers.find(next) == state_numbers.end())

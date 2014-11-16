@@ -122,12 +122,12 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         p_eqn[k].formula() = local_reset_variables(*this, p_eqn[k].formula(), s_eqn[k]);
       }
 
-      // TODO: merge the two rewriters?
-      if (m_simplify)
-      {
-        pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
-        pbes_system::pbes_rewrite(p, pbesr);
-      }
+      // Commented out, since Tim thinks this should not have any effect
+      // if (m_simplify)
+      // {
+      //   pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
+      //   pbes_system::pbes_rewrite(p, pbesr);
+      // }
     }
 
     local_reset_variables_algorithm(const pbes& p, const pbesstategraph_options& options)
@@ -212,7 +212,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
   void leave(const pbes_system::not_& /* x */)
   {
     pbes_expression operand = pop();
-    push(not_(atermpp::aterm_cast<atermpp::aterm_appl>(operand)));
+    push(not_(atermpp::deprecated_cast<atermpp::aterm_appl>(operand)));
   }
 
   void leave(const pbes_system::and_& /* x */)

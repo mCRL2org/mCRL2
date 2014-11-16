@@ -18,6 +18,7 @@
 #include "mcrl2/process/detail/alphabet_traverser.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/replace.h"
+#include "mcrl2/process/utility.h"
 
 namespace mcrl2 {
 
@@ -105,7 +106,7 @@ struct push_allow_map
 
   void insert(const process_expression& x, const allow_set& A, const process_instance& Q)
   {
-    data[atermpp::aterm_cast<process_instance>(x)].push_back(wnode(A, Q));
+    data[atermpp::down_cast<process_instance>(x)].push_back(wnode(A, Q));
   }
 
   void set_alphabet(const process_instance& x, const allow_set& A, const multi_action_name_set& alphabet)
@@ -236,11 +237,6 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     log_push_result(x, A, W, top(), "", text);
   }
 
-  bool is_pcrl(const process_expression& x) const
-  {
-    return !is_merge(x) && !is_left_merge(x) && !is_sync(x) && !is_hide(x) && !is_rename(x) && !is_block(x) && !is_allow(x) && !is_comm(x);
-  }
-
   void leave(const process::action& x)
   {
     multi_action_name alpha;
@@ -316,7 +312,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void leave(const process::sum& x)
   {
-    top().m_expression = process::sum(x.bound_variables(), top().m_expression);
+    top().m_expression = process::sum(x.variables(), top().m_expression);
     log(x);
   }
 

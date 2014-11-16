@@ -73,8 +73,8 @@ void test_normalize1()
   x = data::variable("x", data::sort_bool::bool_());
   y = data::variable("y", data::sort_bool::bool_());
   z = data::variable("z", data::sort_bool::bool_());
-  const data::data_expression& x1 = atermpp::aterm_cast<data::data_expression>(x);
-  const data::data_expression& y1 = atermpp::aterm_cast<data::data_expression>(y);
+  const data::data_expression& x1 = atermpp::down_cast<data::data_expression>(x);
+  const data::data_expression& y1 = atermpp::down_cast<data::data_expression>(y);
 
   f  = not_(x);
   f1 = pbes_system::normalize(f);
@@ -110,7 +110,7 @@ void test_normalize1()
 void test_normalize2()
 {
   // test case from Aad Mathijssen, 2/11/2008
-  lps::specification spec       = lps::linearise("init tau + tau;");
+  lps::specification spec=remove_stochastic_operators(lps::linearise("init tau + tau;"));
   state_formulas::state_formula formula  = state_formulas::parse_state_formula("nu X. [true]X", spec);
   bool timed = false;
   pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
@@ -120,10 +120,9 @@ void test_normalize2()
 void test_normalize3()
 {
   // test case from Aad Mathijssen, 1-4-2008
-  lps::specification spec = lps::linearise(
+  lps::specification spec=remove_stochastic_operators(lps::linearise(
                               "proc P = tau.P;\n"
-                              "init P;        \n"
-                            );
+                              "init P;        \n"));
   state_formulas::state_formula formula = state_formulas::parse_state_formula("![true*]<true>true", spec);
   bool timed = false;
   pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);

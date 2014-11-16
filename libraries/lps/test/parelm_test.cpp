@@ -19,6 +19,7 @@
 #include <mcrl2/lps/parse.h>
 #include <mcrl2/lps/parelm.h>
 #include <mcrl2/lps/specification.h>
+#include <mcrl2/lps/stochastic_specification.h>
 #include "mcrl2/lps/detail/specification_property_map.h"
 
 using namespace mcrl2;
@@ -115,8 +116,8 @@ void test_parelm(const std::string& message, const std::string& spec_text, const
   specification spec2 = spec1;
   parelm(spec1, true);
   parelm(spec2, false);
-  lps::detail::specification_property_map info1(spec1);
-  lps::detail::specification_property_map info2(spec2);
+  lps::detail::specification_property_map<> info1(spec1);
+  lps::detail::specification_property_map<> info2(spec2);
   BOOST_CHECK(data::detail::compare_property_maps(message + "a", info1, expected_result));
   BOOST_CHECK(data::detail::compare_property_maps(message + "b", info2, expected_result));
 }

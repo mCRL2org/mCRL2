@@ -444,6 +444,14 @@ const atermpp::function_symbol& function_symbol_Delta()
   return function_symbol_Delta;
 }
 
+// Distribution
+inline
+const atermpp::function_symbol& function_symbol_Distribution()
+{
+  static const atermpp::function_symbol function_symbol_Distribution = atermpp::function_symbol("Distribution", 2);
+  return function_symbol_Distribution;
+}
+
 // Exists
 inline
 const atermpp::function_symbol& function_symbol_Exists()
@@ -528,7 +536,7 @@ const atermpp::function_symbol& function_symbol_LinearProcess()
 inline
 const atermpp::function_symbol& function_symbol_LinearProcessInit()
 {
-  static const atermpp::function_symbol function_symbol_LinearProcessInit = atermpp::function_symbol("LinearProcessInit", 1);
+  static const atermpp::function_symbol function_symbol_LinearProcessInit = atermpp::function_symbol("LinearProcessInit", 2);
   return function_symbol_LinearProcessInit;
 }
 
@@ -536,7 +544,7 @@ const atermpp::function_symbol& function_symbol_LinearProcessInit()
 inline
 const atermpp::function_symbol& function_symbol_LinearProcessSummand()
 {
-  static const atermpp::function_symbol function_symbol_LinearProcessSummand = atermpp::function_symbol("LinearProcessSummand", 5);
+  static const atermpp::function_symbol function_symbol_LinearProcessSummand = atermpp::function_symbol("LinearProcessSummand", 6);
   return function_symbol_LinearProcessSummand;
 }
 
@@ -1068,6 +1076,14 @@ const atermpp::function_symbol& function_symbol_StateYaledTimed()
   return function_symbol_StateYaledTimed;
 }
 
+// StochasticOperator
+inline
+const atermpp::function_symbol& function_symbol_StochasticOperator()
+{
+  static const atermpp::function_symbol function_symbol_StochasticOperator = atermpp::function_symbol("StochasticOperator", 3);
+  return function_symbol_StochasticOperator;
+}
+
 // StructCons
 inline
 const atermpp::function_symbol& function_symbol_StructCons()
@@ -1218,6 +1234,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol PBESExists;
   static const atermpp::function_symbol PBESImp;
   static const atermpp::function_symbol Binder;
+  static const atermpp::function_symbol StochasticOperator;
   static const atermpp::function_symbol SortRef;
   static const atermpp::function_symbol ProcEqnSpec;
   static const atermpp::function_symbol StateForall;
@@ -1262,6 +1279,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol Mu;
   static const atermpp::function_symbol PBEqnSpec;
   static const atermpp::function_symbol ActNot;
+  static const atermpp::function_symbol Distribution;
   static const atermpp::function_symbol BooleanTrue;
   static const atermpp::function_symbol Block;
   static const atermpp::function_symbol Rename;
