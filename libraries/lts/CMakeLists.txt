@@ -1,8 +1,3 @@
-if(BCG_FOUND)
-  set(EXTERNAL_LIBS ${BCG_LIBRARIES})
-  set(EXTERNAL_INCL ${BCG_INCLUDE_DIRS})
-endif()
-
 add_mcrl2_library(lts
   INSTALL_HEADERS TRUE
   SOURCES
@@ -12,7 +7,6 @@ add_mcrl2_library(lts
     liblts_aut.cpp
     liblts_lts.cpp
     liblts_dot.cpp
-    liblts_bcg.cpp
     liblts.cpp
     tree_set.cpp
     sim_hashtable.cpp
@@ -22,7 +16,4 @@ add_mcrl2_library(lts
     mcrl2_data
     mcrl2_lps
     mcrl2_svc
-    ${EXTERNAL_LIBS}
-  INCLUDE
-    ${EXTERNAL_INCL}
 )

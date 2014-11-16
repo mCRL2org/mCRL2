@@ -5,9 +5,7 @@ add_mcrl2_library(lps
     tools.cpp
     linearise.cpp
     lpsparunfoldlib.cpp
-    invariant_checker.cpp
     next_state_generator.cpp
-    confluence_checker.cpp
     disjointness_checker.cpp
     simulation.cpp
     typecheck.cpp
