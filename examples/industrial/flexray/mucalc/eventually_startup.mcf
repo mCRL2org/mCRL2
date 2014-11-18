@@ -1,0 +1,14 @@
+mu X(s: List(Sender) = CORRECT_NODES) .
+  (val(s != []) 
+   && (forall i: Sender . 
+        (val(!(i in CORRECT_NODES)) || ([enter_operation(i)](val(i in s) && X(remove(s, i)))
+      )))
+   && [!exists i: Sender . 
+        ((val(i in CORRECT_NODES) && enter_operation(i)) || (val(i <= NODES) && is_integrating(i)))]X(s)   
+  )
+||(val(s == []) &&
+   nu Y . 
+      [exists i: Sender . 
+        val(i in CORRECT_NODES) && enter_operation(i)]false 
+   && [true]Y
+  )
