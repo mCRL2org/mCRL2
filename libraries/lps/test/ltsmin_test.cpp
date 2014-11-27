@@ -82,10 +82,11 @@ static void test_data_type(lps::pins_data_type& type)
   }
 
   // test iterator
-  for (lps::pins_data_type::index_iterator i = type.index_begin(); i != type.index_end(); ++i)
+  std::size_t index = 0;
+  for (auto i = type.index_begin(); i != type.index_end(); ++i)
   {
-    std::cout << "iterator " << (i - type.index_begin()) << " -> " << *i << std::endl;
-    BOOST_CHECK(*i == static_cast<size_t>(i - type.index_begin()));
+    std::cout << "iterator " << index++ << " -> " << *i << std::endl;
+    BOOST_CHECK(*i == index);
   }
 }
 
