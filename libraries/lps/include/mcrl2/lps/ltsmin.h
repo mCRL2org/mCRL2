@@ -133,7 +133,7 @@ class pins_data_type
 
     /// \brief Constructor
     pins_data_type(const data::data_specification& data,
-                   const process::action_label_list& action_labels, 
+                   const process::action_label_list& action_labels,
                    bool is_bounded = false)
       : // m_generator(generator),
         m_data(data),
@@ -382,7 +382,7 @@ class pins
     }
 
     /// \brief Returns the process of the LPS specification
-    const linear_process process() const
+    const linear_process& process() const
     {
       return m_specification.process();
     }
