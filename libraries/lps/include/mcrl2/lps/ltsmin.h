@@ -83,7 +83,9 @@ class pins_data_type
 {
   protected:
     atermpp::indexed_set<atermpp::aterm> m_indexed_set;
-    lps::next_state_generator& m_generator;
+    // lps::next_state_generator& m_generator;
+    const data::data_specification& m_data;
+    const process::action_label_list& m_action_labels;
     bool m_is_bounded;
 
   public:
@@ -130,8 +132,12 @@ class pins_data_type
     };
 
     /// \brief Constructor
-    pins_data_type(lps::next_state_generator& generator, bool is_bounded = false)
-      : m_generator(generator),
+    pins_data_type(const data::data_specification& data,
+                   const process::action_label_list& action_labels, 
+                   bool is_bounded = false)
+      : // m_generator(generator),
+        m_data(data),
+        m_action_labels(action_labels),
         m_is_bounded(is_bounded)
     {}
 
@@ -235,8 +241,10 @@ class state_data_type: public pins_data_type
     }
 
   public:
-    state_data_type(lps::next_state_generator& generator, const data::sort_expression& sort)
-      : pins_data_type(generator, generator.get_specification().data().is_certainly_finite(sort)),
+    state_data_type(const data::data_specification& data,
+                    const process::action_label_list& action_labels,
+                    const data::sort_expression& sort, bool sort_is_finite)
+      : pins_data_type(data, action_labels, sort_is_finite),
         m_sort(sort)
     {
       m_name = data::pp(m_sort);
@@ -263,7 +271,7 @@ class state_data_type: public pins_data_type
 
     std::size_t parse(const std::string& s)
     {
-      return expression2index(data::parse_data_expression(s, m_generator.get_specification().data()));
+      return expression2index(data::parse_data_expression(s, m_data));
     }
 
     const std::string& name() const
@@ -273,7 +281,7 @@ class state_data_type: public pins_data_type
 
     std::vector<std::string> generate_values(std::size_t max_size = 1000) const
     {
-      return lps::generate_values(m_generator.get_specification().data(), m_sort, max_size);
+      return lps::generate_values(m_data, m_sort, max_size);
     }
 };
 
@@ -284,8 +292,8 @@ class action_label_data_type: public pins_data_type
     std::string m_name;
 
   public:
-    action_label_data_type(lps::next_state_generator& generator)
-      : pins_data_type(generator, false)
+    action_label_data_type(const data::data_specification& data, const process::action_label_list& action_labels)
+      : pins_data_type(data, action_labels, false)
     {
       m_name = "action_labels";
     }
@@ -307,7 +315,7 @@ class action_label_data_type: public pins_data_type
 
     std::size_t parse(const std::string& s)
     {
-      lps::multi_action m = lps::parse_multi_action(s, m_generator.get_specification().action_labels(), m_generator.get_specification().data());
+      lps::multi_action m = lps::parse_multi_action(s, m_action_labels, m_data);
       return m_indexed_set[detail::multi_action_to_aterm(m)];
     }
 
@@ -376,13 +384,13 @@ class pins
     /// \brief Returns the process of the LPS specification
     const linear_process& process() const
     {
-      return m_generator.get_specification().process();
+      return m_specification.process();
     }
 
     /// \brief Returns the data specification of the LPS specification
     const data::data_specification& data() const
     {
-      return m_generator.get_specification().data();
+      return m_specification.data();
     }
 
     template <typename Iter>
@@ -480,13 +488,13 @@ class pins
     /// \brief Returns the number of process parameters of the LPS
     std::size_t process_parameter_count() const
     {
-      return m_generator.get_specification().process().process_parameters().size();
+      return m_specification.process().process_parameters().size();
     }
 
     /// \brief Returns the number of available groups. This equals the number of action summands of the LPS.
     std::size_t group_count() const
     {
-      return m_generator.get_specification().process().action_summands().size();
+      return m_specification.process().action_summands().size();
     }
 
     static lps::specification load_specification(const std::string& filename)
@@ -506,7 +514,7 @@ class pins
       initialize_read_write_groups();
 
       // store the process parameter names in a vector, to have random access to them
-      data::variable_list params = m_generator.get_specification().process().process_parameters();
+      data::variable_list params = m_specification.process().process_parameters();
       for (data::variable_list::iterator i = params.begin(); i != params.end(); ++i)
       {
         m_process_parameter_names.push_back(i->name());
@@ -522,7 +530,7 @@ class pins
         std::map<data::sort_expression, pins_data_type*>::const_iterator j = existing_type_maps.find(s);
         if (j == existing_type_maps.end())
         {
-          pins_data_type* dt = new state_data_type(m_generator, s);
+          pins_data_type* dt = new state_data_type(m_specification.data(), m_specification.action_labels(), s, m_specification.data().is_certainly_finite(s));
           m_data_types.push_back(dt);
           m_unique_data_types.push_back(dt);
           existing_type_maps[s] = dt;
@@ -532,7 +540,7 @@ class pins
           m_data_types.push_back(j->second);
         }
       }
-      pins_data_type* dt = new action_label_data_type(m_generator);
+      pins_data_type* dt = new action_label_data_type(m_specification.data(), m_specification.action_labels());
       m_data_types.push_back(dt);
       m_unique_data_types.push_back(dt);
 

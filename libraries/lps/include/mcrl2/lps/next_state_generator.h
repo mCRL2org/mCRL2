@@ -276,12 +276,6 @@ class next_state_generator
       return m_initial_state;
     } */
 
-    /// \brief Returns the currently loaded specification.
-    const lps::specification& get_specification() const
-    {
-      return m_specification;
-    }
-
     /// \brief Returns the rewriter associated with this generator.
     rewriter_t& get_rewriter()
     {
