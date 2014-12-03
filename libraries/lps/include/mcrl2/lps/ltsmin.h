@@ -459,16 +459,18 @@ class pins
       // iterate over the list of summands
       {
         size_t i = 0;
-        for (const auto& summand: proc.action_summands())
+        for (auto p = proc.action_summands().begin(); p != proc.action_summands().end(); ++p)
         {
+          const auto& summand = *p;
           std::set<data::variable> used_read_variables;
           std::set<data::variable> used_write_variables;
 
           data::find_free_variables(summand.condition(), std::inserter(used_read_variables, used_read_variables.end()));
           lps::find_free_variables(summand.multi_action(), std::inserter(used_read_variables, used_read_variables.end()));
 
-          for (const auto& assignment: summand.assignments())
+          for (auto q = summand.assignments().begin(); q != summand.assignments().end(); ++q)
           {
+            const auto& assignment = *q;
             if (assignment.lhs() != assignment.rhs())
             {
               data::find_all_variables(assignment.lhs(), std::inserter(used_write_variables, used_write_variables.end()));
@@ -515,14 +517,16 @@ class pins
       // iterate over the list of reduced summands
       {
         size_t i = 0;
-        for (const auto& reduced_summand: process_reduced().action_summands())
+        for (auto p = process_reduced().action_summands().begin(); p != process_reduced().action_summands().end(); ++p)
         {
+          const auto& reduced_summand = *p;
           std::set<data::variable> used_update_variables;
 
           lps::find_free_variables(reduced_summand.multi_action(), std::inserter(used_update_variables, used_update_variables.end()));
 
-          for (const auto& assignment: reduced_summand.assignments())
+          for (auto q = reduced_summand.assignments().begin(); q != reduced_summand.assignments().end(); ++q)
           {
+            const auto& assignment = *q;
             if (assignment.lhs() != assignment.rhs())
             {
               data::find_all_variables(assignment.rhs(), std::inserter(used_update_variables, used_update_variables.end()));
@@ -540,8 +544,9 @@ class pins
                                               used_update_parameters.begin()));
 
           size_t j = 0;
-          for (const auto& param: m_parameters_list)
+          for (auto q = m_parameters_list.begin(); q != m_parameters_list.end(); ++q)
           {
+            const auto& param = *q;
             if (used_update_parameters.find(param) != used_update_parameters.end())
             {
               m_update_group[i].push_back(j);
