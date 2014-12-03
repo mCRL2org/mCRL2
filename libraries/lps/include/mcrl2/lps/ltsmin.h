@@ -496,8 +496,9 @@ class pins
                                               used_write_parameters.begin()));
 
           size_t j = 0;
-          for (const auto& param: m_parameters_list)
+          for (auto q = m_parameters_list.begin(); q != m_parameters_list.end(); ++q)
           {
+            const auto& param = *q;
             if (used_read_parameters.find(param) != used_read_parameters.end())
             {
               m_read_group[i].push_back(j);
@@ -585,8 +586,10 @@ class pins
     lps::specification reduce_specification(const lps::specification& spec) {
       // the list of summands
       std::vector<lps::action_summand> reduced_summands;
-      for (const auto& summand: spec.process().action_summands())
+      for (auto p = spec.process().action_summands().begin(); p != spec.process().action_summands().end(); ++p)
       {
+        const auto& summand = *p;
+
         // contains info about which guards this transition group has.
         std::vector<size_t> guard_info;
 
@@ -598,8 +601,10 @@ class pins
         std::set<data::data_expression> conjuncts = data::split_and(summand.condition());
         std::set<data::variable> summation_variables(summand.summation_variables().begin(), summand.summation_variables().end());
 
-        for (const auto& conjunct: conjuncts)
+        for (auto q = conjuncts.begin(); q != conjuncts.end(); ++q)
         {
+          const auto& conjunct = *q;
+
           // check if the conjunct is new
           size_t at = m_guards.index(conjunct);
           bool is_new = (at == atermpp::indexed_set<atermpp::aterm>::npos);
@@ -646,8 +651,10 @@ class pins
               {
                 // compute indexes of parameters used by the guard
                 size_t p = 0;
-                for (const auto& param: m_parameters_list)
+                for (auto r = m_parameters_list.begin(); r != m_parameters_list.end(); ++r)
                 {
+                  const auto& param = *r;
+
                   if (conjunct_variables.find(param) != conjunct_variables.end())
                   {
                     guard_parameters.push_back(p);
