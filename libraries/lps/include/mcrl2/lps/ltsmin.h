@@ -459,16 +459,18 @@ class pins
       // iterate over the list of summands
       {
         size_t i = 0;
-        for (const auto& summand: proc.action_summands())
+        for (auto p = proc.action_summands().begin(); p != proc.action_summands().end(); ++p)
         {
+          const auto& summand = *p;
           std::set<data::variable> used_read_variables;
           std::set<data::variable> used_write_variables;
 
           data::find_free_variables(summand.condition(), std::inserter(used_read_variables, used_read_variables.end()));
           lps::find_free_variables(summand.multi_action(), std::inserter(used_read_variables, used_read_variables.end()));
 
-          for (const auto& assignment: summand.assignments())
+          for (auto q = summand.assignments().begin(); q != summand.assignments().end(); ++q)
           {
+            const auto& assignment = *q;
             if (assignment.lhs() != assignment.rhs())
             {
               data::find_all_variables(assignment.lhs(), std::inserter(used_write_variables, used_write_variables.end()));
@@ -494,8 +496,9 @@ class pins
                                               used_write_parameters.begin()));
 
           size_t j = 0;
-          for (const auto& param: m_parameters_list)
+          for (auto q = m_parameters_list.begin(); q != m_parameters_list.end(); ++q)
           {
+            const auto& param = *q;
             if (used_read_parameters.find(param) != used_read_parameters.end())
             {
               m_read_group[i].push_back(j);
@@ -515,14 +518,16 @@ class pins
       // iterate over the list of reduced summands
       {
         size_t i = 0;
-        for (const auto& reduced_summand: process_reduced().action_summands())
+        for (auto p = process_reduced().action_summands().begin(); p != process_reduced().action_summands().end(); ++p)
         {
+          const auto& reduced_summand = *p;
           std::set<data::variable> used_update_variables;
 
           lps::find_free_variables(reduced_summand.multi_action(), std::inserter(used_update_variables, used_update_variables.end()));
 
-          for (const auto& assignment: reduced_summand.assignments())
+          for (auto q = reduced_summand.assignments().begin(); q != reduced_summand.assignments().end(); ++q)
           {
+            const auto& assignment = *q;
             if (assignment.lhs() != assignment.rhs())
             {
               data::find_all_variables(assignment.rhs(), std::inserter(used_update_variables, used_update_variables.end()));
@@ -540,8 +545,9 @@ class pins
                                               used_update_parameters.begin()));
 
           size_t j = 0;
-          for (const auto& param: m_parameters_list)
+          for (auto q = m_parameters_list.begin(); q != m_parameters_list.end(); ++q)
           {
+            const auto& param = *q;
             if (used_update_parameters.find(param) != used_update_parameters.end())
             {
               m_update_group[i].push_back(j);
@@ -580,8 +586,10 @@ class pins
     lps::specification reduce_specification(const lps::specification& spec) {
       // the list of summands
       std::vector<lps::action_summand> reduced_summands;
-      for (const auto& summand: spec.process().action_summands())
+      for (auto p = spec.process().action_summands().begin(); p != spec.process().action_summands().end(); ++p)
       {
+        const auto& summand = *p;
+
         // contains info about which guards this transition group has.
         std::vector<size_t> guard_info;
 
@@ -593,8 +601,10 @@ class pins
         std::set<data::data_expression> conjuncts = data::split_and(summand.condition());
         std::set<data::variable> summation_variables(summand.summation_variables().begin(), summand.summation_variables().end());
 
-        for (const auto& conjunct: conjuncts)
+        for (auto q = conjuncts.begin(); q != conjuncts.end(); ++q)
         {
+          const auto& conjunct = *q;
+
           // check if the conjunct is new
           size_t at = m_guards.index(conjunct);
           bool is_new = (at == atermpp::indexed_set<atermpp::aterm>::npos);
@@ -641,8 +651,10 @@ class pins
               {
                 // compute indexes of parameters used by the guard
                 size_t p = 0;
-                for (const auto& param: m_parameters_list)
+                for (auto r = m_parameters_list.begin(); r != m_parameters_list.end(); ++r)
                 {
+                  const auto& param = *r;
+
                   if (conjunct_variables.find(param) != conjunct_variables.end())
                   {
                     guard_parameters.push_back(p);
