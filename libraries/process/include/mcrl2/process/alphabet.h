@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <iterator>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
@@ -75,8 +76,14 @@ process_expression alphabet_reduce(const process_expression& x, std::vector<proc
 
 } // detail
 
+/// \brief Applies alphabet reduction to a process specification.
+/// \param procspec A process specification
+/// \param duplicate_equation_limit If the number of equations is less than or equal to
+/// duplicate_equation_limit, the remove duplicate equations procedure is applied.
+/// Note that this procedure is not efficient, so it should not be used if the number
+/// of equations is big.
 inline
-void alphabet_reduce(process_specification& procspec)
+void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equation_limit = (std::numeric_limits<size_t>::max)())
 {
   mCRL2log(log::verbose) << "applying alphabet reduction..." << std::endl;
   process_expression init = procspec.init();
@@ -89,9 +96,12 @@ void alphabet_reduce(process_specification& procspec)
   {
     procspec.init() = init_reduced;
   }
-  mCRL2log(log::debug) << "removing duplicate equations..." << std::endl;
-  remove_duplicate_equations(procspec);
-  mCRL2log(log::debug) << "removing duplicate equations finished" << std::endl;
+  if (procspec.equations().size() <= duplicate_equation_limit)
+  {
+    mCRL2log(log::debug) << "removing duplicate equations..." << std::endl;
+    remove_duplicate_equations(procspec);
+    mCRL2log(log::debug) << "removing duplicate equations finished" << std::endl;
+  }
   mCRL2log(log::debug) << "alphabet reduction finished" << std::endl;
 }
 
