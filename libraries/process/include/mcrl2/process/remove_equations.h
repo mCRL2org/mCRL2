@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_REMOVE_EQUATIONS_H
 #define MCRL2_PROCESS_REMOVE_EQUATIONS_H
 
+#include <sstream>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/process_specification.h"
@@ -45,6 +46,41 @@ struct duplicate_equation_removal
   data::set_identifier_generator generator;
   std::vector<group> groups;
 
+  std::string print_group(const group& g)
+  {
+    std::ostringstream out;
+    for (auto i = g.begin(); i != g.end(); ++i)
+    {
+      const process_equation& eq = **i;
+
+      // use a custom print for equations, since by default they are printed on multiple lines...
+      bool print_parens = !eq.formal_parameters().empty();
+      out << eq.identifier().name();
+      if (print_parens)
+      {
+        out << "(";
+      }
+      out << data::pp(eq.formal_parameters());
+      if (print_parens)
+      {
+        out << ")";
+      }
+      out << " = " << eq.expression() << ";\n";
+    }
+    return out.str();
+  }
+
+  std::string print_groups()
+  {
+    std::ostringstream out;
+    std::size_t index = 0;
+    for (auto i = groups.begin(); i != groups.end(); ++i)
+    {
+      out << "--- group " << index++ << " ---\n" << print_group(*i) << std::endl;
+    }
+    return out.str();
+  }
+
   duplicate_equation_removal(process_specification& procspec_)
     : procspec(procspec_)
   {
@@ -58,6 +94,7 @@ struct duplicate_equation_removal
     {
       groups.push_back(i->second);
     }
+    mCRL2log(log::debug) << "==========================================================\n" << print_groups() << std::endl;
   }
 
   // assigns a unique process identifier to each process identifier within a group
@@ -118,6 +155,7 @@ struct duplicate_equation_removal
       {
         break;
       }
+      mCRL2log(log::debug) << "==========================================================\n" << print_groups() << std::endl;
     }
 
     // Choose one equation per group (the one with the lowest index in equations),
