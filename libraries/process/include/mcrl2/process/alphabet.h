@@ -78,6 +78,7 @@ process_expression alphabet_reduce(const process_expression& x, std::vector<proc
 inline
 void alphabet_reduce(process_specification& procspec)
 {
+  mCRL2log(log::verbose) << "applying alphabet reduction..." << std::endl;
   process_expression init = procspec.init();
   if (is_pcrl(init))
   {
@@ -88,7 +89,10 @@ void alphabet_reduce(process_specification& procspec)
   {
     procspec.init() = init_reduced;
   }
+  mCRL2log(log::debug) << "removing duplicate equations..." << std::endl;
   remove_duplicate_equations(procspec);
+  mCRL2log(log::debug) << "removing duplicate equations finished" << std::endl;
+  mCRL2log(log::debug) << "alphabet reduction finished" << std::endl;
 }
 
 } // namespace process
