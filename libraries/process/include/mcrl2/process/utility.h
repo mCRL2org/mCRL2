@@ -41,7 +41,7 @@ process_expression expand_rhs(const process::process_instance_assignment& x, con
   process_expression p = eqn.expression();
   data::mutable_map_substitution<> sigma;
   data::assignment_list a = x.assignments();
-  for (data::assignment_list::iterator i = a.begin(); i != a.end(); ++i)
+  for (auto i = a.begin(); i != a.end(); ++i)
   {
     sigma[i->lhs()] = i->rhs();
   }
@@ -141,7 +141,7 @@ process_expression make_allow(const multi_action_name_set& A, const process_expr
 
   // convert A to an action_name_multiset_list B
   std::vector<action_name_multiset> v;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
     const multi_action_name& alpha = *i;
     if (!i->empty()) // exclude tau
@@ -197,7 +197,7 @@ process_expression make_block(const core::identifier_string_list& B, const proce
 inline
 bool is_source(const rename_expression_list& R, const core::identifier_string& x)
 {
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+  for (auto i = R.begin(); i != R.end(); ++i)
   {
     if (i->source() == x)
     {
@@ -241,7 +241,7 @@ inline
 rename_inverse_map rename_inverse(const rename_expression_list& R)
 {
   rename_inverse_map Rinverse;
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+  for (auto i = R.begin(); i != R.end(); ++i)
   {
     Rinverse[i->target()].push_back(i->source());
     if (!is_source(R, i->target()))
@@ -279,7 +279,7 @@ void rename_inverse(const rename_inverse_map& Rinverse, const multi_action_name&
   multi_action_name alpha = x;
 
   // remove elements that appear in Rinverse, and put the replacements in V
-  for (multi_action_name::iterator i = alpha.begin(); i != alpha.end(); )
+  for (auto i = alpha.begin(); i != alpha.end(); )
   {
     rename_inverse_map::const_iterator j = Rinverse.find(*i);
     if (j != Rinverse.end())
@@ -311,7 +311,7 @@ inline
 // Returns true if A contains an x such that includes(x, y)
 bool includes(const multi_action_name_set& A, const multi_action_name& y)
 {
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
     if (includes(*i, y))
     {
@@ -330,12 +330,12 @@ void apply_comm(const communication_expression& c, multi_action_name_set& A)
   // c == alpha -> a
 
   multi_action_name_set to_be_added;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
     multi_action_name beta = *i;
     while (includes(beta, alpha))
     {
-      for (multi_action_name::const_iterator j = alpha.begin(); j != alpha.end(); ++j)
+      for (auto j = alpha.begin(); j != alpha.end(); ++j)
       {
         beta.erase(beta.find(*j));
       }
@@ -354,7 +354,7 @@ void apply_comm_inverse(const communication_expression& gamma, multi_action_name
   core::identifier_string c = gamma.name();
   core::identifier_string_list lhs = gamma.action_name().names();
 
-  for (multi_action_name_set::iterator i = A.begin(); i != A.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
     const multi_action_name& alpha = *i;
     std::size_t n = alpha.count(c);
@@ -375,7 +375,7 @@ void apply_comm_inverse(const communication_expression& gamma, multi_action_name
 inline
 core::identifier_string apply_rename(const rename_expression_list& R, const core::identifier_string& x)
 {
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+  for (auto i = R.begin(); i != R.end(); ++i)
   {
     if (x == i->source())
     {
@@ -389,7 +389,7 @@ inline
 multi_action_name apply_rename(const rename_expression_list& R, const multi_action_name& a)
 {
   multi_action_name result;
-  for (multi_action_name::const_iterator i = a.begin(); i != a.end(); ++i)
+  for (auto i = a.begin(); i != a.end(); ++i)
   {
     result.insert(apply_rename(R, *i));
   }
@@ -402,7 +402,7 @@ inline
 multi_action_name multiset_difference(const multi_action_name& alpha, const multi_action_name& beta)
 {
   multi_action_name result = alpha;
-  for (multi_action_name::const_iterator i = beta.begin(); i != beta.end(); ++i)
+  for (auto i = beta.begin(); i != beta.end(); ++i)
   {
     multi_action_name::iterator j = result.find(*i);
     if (j != result.end())
@@ -441,9 +441,9 @@ inline
 multi_action_name_set concat(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
   multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A1.begin(); i != A1.end(); ++i)
+  for (auto i = A1.begin(); i != A1.end(); ++i)
   {
-    for (multi_action_name_set::const_iterator j = A2.begin(); j != A2.end(); ++j)
+    for (auto j = A2.begin(); j != A2.end(); ++j)
     {
        result.insert(multiset_union(*i, *j));
     }
@@ -455,10 +455,10 @@ inline
 multi_action_name_set left_arrow1(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
   multi_action_name_set result = A1; // needed because tau is not explicitly stored
-  for (multi_action_name_set::const_iterator i = A2.begin(); i != A2.end(); ++i)
+  for (auto i = A2.begin(); i != A2.end(); ++i)
   {
     const multi_action_name& beta = *i;
-    for (multi_action_name_set::const_iterator j = A1.begin(); j != A1.end(); ++j)
+    for (auto j = A1.begin(); j != A1.end(); ++j)
     {
       const multi_action_name& gamma = *j;
       if (detail::includes(gamma, beta))
@@ -495,7 +495,7 @@ inline
 multi_action_name_set make_name_set(const action_name_multiset_list& v)
 {
   multi_action_name_set result;
-  for (action_name_multiset_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (auto i = v.begin(); i != v.end(); ++i)
   {
     core::identifier_string_list names = i->names();
     result.insert(multi_action_name(names.begin(), names.end()));
@@ -508,7 +508,7 @@ inline
 multi_action_name_set set_intersection(const multi_action_name_set& alphabet, const multi_action_name_set& A, bool A_includes_subsets)
 {
   multi_action_name_set result = alphabet;
-  for (multi_action_name_set::iterator i = result.begin(); i != result.end(); )
+  for (auto i = result.begin(); i != result.end(); )
   {
     bool remove = A_includes_subsets ? !detail::includes(A, *i) : A.find(*i) == A.end();
     if (remove)
@@ -527,7 +527,7 @@ inline
 communication_expression_list filter_comm_set(const communication_expression_list& C, const multi_action_name_set& alphabet)
 {
   std::vector<communication_expression> result;
-  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  for (auto i = C.begin(); i != C.end(); ++i)
   {
     core::identifier_string_list lhs = i->action_name().names();
     multi_action_name alpha(lhs.begin(), lhs.end());
@@ -547,7 +547,7 @@ inline
 multi_action_name_set remove_subsets(const multi_action_name_set& A)
 {
   multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
     if (!detail::includes(result, *i))
     {
@@ -581,7 +581,7 @@ multi_action_name_set comm(const communication_expression_list& C, const multi_a
   multi_action_name_set result = A;
 
   // sequentially apply the communication rules to result
-  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  for (auto i = C.begin(); i != C.end(); ++i)
   {
     detail::apply_comm(*i, result);
   }
@@ -606,10 +606,10 @@ multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name
 {
   multi_action_name m(I.begin(), I.end());
   multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
     multi_action_name alpha = *i;
-    for (typename IdentifierContainer::const_iterator j = I.begin(); j != I.end(); ++j)
+    for (auto j = I.begin(); j != I.end(); ++j)
     {
       alpha.erase(*j);
     }
@@ -623,7 +623,7 @@ inline
 multi_action_name_set rename(const rename_expression_list& R, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
     result.insert(detail::apply_rename(R, *i));
   }
@@ -637,7 +637,7 @@ multi_action_name_set rename_inverse(const rename_expression_list& R, const mult
   detail::rename_inverse_map Rinverse = detail::rename_inverse(R);
 
   multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
     detail::rename_inverse(Rinverse, *i, result);
   }
@@ -649,11 +649,11 @@ multi_action_name_set allow(const action_name_multiset_list& V, const multi_acti
 {
   multi_action_name_set result;
 
-  for (action_name_multiset_list::const_iterator i = V.begin(); i != V.end(); ++i)
+  for (auto i = V.begin(); i != V.end(); ++i)
   {
     core::identifier_string_list names = i->names();
     multi_action_name v(names.begin(), names.end());
-    for (multi_action_name_set::const_iterator j = A.begin(); j != A.end(); ++j)
+    for (auto j = A.begin(); j != A.end(); ++j)
     {
       const multi_action_name& alpha = *j;
       bool keep = A_includes_subsets ? detail::includes(alpha, v) : alpha == v;
@@ -674,10 +674,10 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
 
   if (A_includes_subsets)
   {
-    for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+    for (auto i = A.begin(); i != A.end(); ++i)
     {
       multi_action_name alpha = *i;
-      for (core::identifier_string_list::const_iterator j = B.begin(); j != B.end(); ++j)
+      for (auto j = B.begin(); j != B.end(); ++j)
       {
         alpha.erase(*j);
       }
@@ -689,7 +689,7 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
   }
   else
   {
-    for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+    for (auto i = A.begin(); i != A.end(); ++i)
     {
       if (utilities::detail::has_empty_intersection(beta.begin(), beta.end(), i->begin(), i->end()))
       {

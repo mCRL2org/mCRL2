@@ -403,6 +403,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     rename_expression_list R = x.rename_set();
     allow_set A1 = allow_set_operations::rename_inverse(R, A);
+    mCRL2log(log::debug) << "rename_inverse(" << R << ", " << A << ") = " << A1 << std::endl;
     push_allow_node node = push_allow(x.operand(), A1, equations, W, id_generator);
     push(push_allow_node(alphabet_operations::rename(R, node.alphabet), process::rename(R, node.m_expression)));
     log(x, log_rename(x, A1));
