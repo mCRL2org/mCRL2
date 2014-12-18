@@ -272,7 +272,7 @@ struct rename_inverse_apply
 };
 
 inline
-void rename_inverse(const rename_inverse_map& Rinverse, const multi_action_name& x, multi_action_name_set& result)
+void rename_inverse(const rename_inverse_map& Rinverse, const multi_action_name& x, bool x_includes_subsets, multi_action_name_set& result)
 {
   std::vector<std::vector<core::identifier_string> > V;
 
@@ -281,11 +281,14 @@ void rename_inverse(const rename_inverse_map& Rinverse, const multi_action_name&
   // remove elements that appear in Rinverse, and put the replacements in V
   for (auto i = alpha.begin(); i != alpha.end(); )
   {
-    rename_inverse_map::const_iterator j = Rinverse.find(*i);
+    auto j = Rinverse.find(*i);
     if (j != Rinverse.end())
     {
       alpha.erase(i++);
-      V.push_back(j->second);
+      if (!j->second.empty() || !x_includes_subsets)
+      {
+        V.push_back(j->second);
+      }
     }
     else
     {
@@ -632,14 +635,14 @@ multi_action_name_set rename(const rename_expression_list& R, const multi_action
 
 /// \brief Computes R^[-1}(A)
 inline
-multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
+multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   detail::rename_inverse_map Rinverse = detail::rename_inverse(R);
 
   multi_action_name_set result;
   for (auto i = A.begin(); i != A.end(); ++i)
   {
-    detail::rename_inverse(Rinverse, *i, result);
+    detail::rename_inverse(Rinverse, *i, A_includes_subsets, result);
   }
   return result;
 }

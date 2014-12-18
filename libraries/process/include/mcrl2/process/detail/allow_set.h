@@ -269,7 +269,7 @@ allow_set allow(const action_name_multiset_list& V, const allow_set& x)
 inline
 allow_set rename_inverse(const rename_expression_list& R, const allow_set& x)
 {
-  return allow_set(alphabet_operations::rename_inverse(R, x.A), x.A_includes_subsets, rename_inverse(R, x.I));
+  return allow_set(alphabet_operations::rename_inverse(R, x.A, x.A_includes_subsets), x.A_includes_subsets, rename_inverse(R, x.I));
 }
 
 inline
