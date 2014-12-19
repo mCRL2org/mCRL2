@@ -78,7 +78,7 @@ process_expression alphabet_reduce(const process_expression& x, std::vector<proc
 
 /// \brief Applies alphabet reduction to a process specification.
 /// \param procspec A process specification
-/// \param duplicate_equation_limit If the number of equations is less than or equal to
+/// \param duplicate_equation_limit If the number of equations is less than
 /// duplicate_equation_limit, the remove duplicate equations procedure is applied.
 /// Note that this procedure is not efficient, so it should not be used if the number
 /// of equations is big.
@@ -96,7 +96,7 @@ void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equa
   {
     procspec.init() = init_reduced;
   }
-  if (procspec.equations().size() <= duplicate_equation_limit)
+  if (procspec.equations().size() < duplicate_equation_limit)
   {
     mCRL2log(log::debug) << "removing duplicate equations..." << std::endl;
     remove_duplicate_equations(procspec);

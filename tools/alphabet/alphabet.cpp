@@ -27,7 +27,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
 inline
-void alphabet(const std::string& input_filename, const std::string& output_filename)
+void alphabet(const std::string& input_filename, const std::string& output_filename, bool remove_duplicate_equations)
 {
   std::string text;
   if (input_filename.empty())
@@ -41,7 +41,14 @@ void alphabet(const std::string& input_filename, const std::string& output_filen
 
   process::process_specification result;
   result = process::parse_process_specification(text, false);
-  process::alphabet_reduce(result);
+  if (remove_duplicate_equations)
+  {
+    process::alphabet_reduce(result);
+  }
+  else
+  {
+    process::alphabet_reduce(result, 0);
+  }
 
   std::ofstream out(output_filename.c_str());
   out << process::pp(result);
@@ -51,15 +58,19 @@ class alphabet_tool : public input_output_tool
 {
   typedef input_output_tool super;
 
+  bool remove_duplicate_equations;
+
   protected:
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
+      remove_duplicate_equations = 0 < parser.options.count("remove-duplicate-equations");
     }
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
+      desc.add_option("remove-duplicate-equations", "remove duplicate equations after alphabet reduction", 'r');
     }
 
   public:
@@ -73,7 +84,11 @@ class alphabet_tool : public input_output_tool
 
     bool run()
     {
-      alphabet(input_filename(), output_filename());
+      mCRL2log(log::verbose) << "alphabet parameters:" << std::endl;
+      mCRL2log(log::verbose) << "  input file:                       " << m_input_filename << std::endl;
+      mCRL2log(log::verbose) << "  output file:                      " << m_output_filename << std::endl;
+      mCRL2log(log::verbose) << "  remove-duplicate-equations:       " << std::boolalpha << remove_duplicate_equations << std::endl;
+      alphabet(input_filename(), output_filename(), remove_duplicate_equations);
       return true;
     }
 };
