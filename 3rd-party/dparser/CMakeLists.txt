@@ -56,4 +56,4 @@ target_link_libraries(make_dparser
 
 # No need to install; library is statically linked into the libraries
 # that need it...
-#install(TARGETS dparser DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
+install(TARGETS dparser DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
