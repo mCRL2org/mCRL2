@@ -420,6 +420,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     communication_expression_list C = x.comm_set();
     allow_set A1 = allow_set_operations::comm_inverse(C, A);
+    mCRL2log(log::debug) << "comm_inverse(" << C << ", " << A << ") = " << A1 << std::endl;
     push_allow_node node = push_allow(x.operand(), A1, equations, W, id_generator);
     communication_expression_list C1 = filter_comm_set(x.comm_set(), node.alphabet);
     push(push_allow_node(alphabet_operations::comm(C1, node.alphabet), detail::make_comm(C1, node.m_expression)));
