@@ -456,6 +456,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W, id_generator);
     allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
+    mCRL2log(log::debug) << "left_arrow(" << A << ", " << process::pp(p1.alphabet) << ") = " << A_arrow << std::endl;
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W, id_generator);
     push(push_allow_node(alphabet_operations::merge(p1.alphabet, q1.alphabet), detail::make_merge(p1.m_expression, q1.m_expression)));
     top().apply_allow(A);
