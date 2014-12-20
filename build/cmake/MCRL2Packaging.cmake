@@ -33,17 +33,13 @@ set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/COPYING.txt )
 set(CPACK_RESOURCE_FILE_README  ${CMAKE_BINARY_DIR}/README.txt )
 
 if(APPLE)
-  set(CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION False)
-  install(CODE
-    "
-    file(WRITE /tmp/mcrl2.log 
-    \"
-    \${CPACK_INSTALL_PREFIX};
-    \${CMAKE_INSTALL_PREFIX};
-    \${CPACK_PACKAGING_INSTALL_PREFX};
-    \${CPACK_PACKAGE_DEFAULT_LOCATION};
-    \")
-    ")
+  #set(CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION False)
+  #set(CPACK_POSTFLIGHT_SCRIPT "${CMAKE_SOURCE_DIR}/build/packaging/postinstall")
+  set(CPACK_BUNDLE_NAME "mCRL2")
+  set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/build/packaging/Info.plist")
+  set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_SOURCE_DIR}/build/packaging/mCRL2")
+  set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/build/packaging/icons/mcrl2-orange.icns")
+  set(CPACK_MONOLITHIC_INSTALL 1)
 endif()
 
 # Branding image displayed inside the installer
@@ -51,8 +47,7 @@ if(WIN32)
   # Install icon for NSIS (must be a .bmp file)
   set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\packaging\\\\mcrl2-install-logo.bmp")
 elseif(APPLE)
-  # TODO: Check if this is actually used
-  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/tools/mcrl2-gui/mcrl2-gui.icns")
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/build/packaging/icons/mcrl2-green.icns")
 endif()
 
 # Source packages
@@ -79,7 +74,7 @@ set(CPACK_STRIP_FILES True)
 
 set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
 set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
-set(CPACK_COMPONENT_EXAMPLE_GROUP "Documentation")
+set(CPACK_COMPONENT_EXAMPLES_GROUP "Documentation")
 set(CPACK_COMPONENT_LIBRARIES_GROUP "Development")
 set(CPACK_COMPONENT_HEADERS_GROUP "Development")
 set(CPACK_COMPONENT_APPLICATIONS_REQUIRED TRUE)
