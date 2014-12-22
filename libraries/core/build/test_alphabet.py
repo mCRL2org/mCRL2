@@ -27,7 +27,7 @@ def main():
     options = parse_command_line()
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
-    size = 7
+    size = 10
     try:
         for i in range(options.iterations):
             filename = 'alphabet_%d' % i
