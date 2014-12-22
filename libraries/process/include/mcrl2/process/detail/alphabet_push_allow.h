@@ -156,7 +156,7 @@ std::ostream& operator<<(std::ostream& out, const push_allow_map& W)
 inline
 std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
 {
-  return out << "alphabet = " << pp(x.alphabet) << " expression = " << process::pp(x.m_expression) << std::endl;
+  return out << "Node(" << pp(x.alphabet) << ", " << process::pp(x.m_expression) << ")";
 }
 
 push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, push_allow_map& W, data::set_identifier_generator& id_generator);
@@ -227,7 +227,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     {
       text1 = text1 + " = ";
     }
-    mCRL2log(log::debug) << msg << "push(" << A << ", " << process::pp(x) << ", " << W << ") = "
+    mCRL2log(log::debug) << msg << "push_allow(" << A << ", " << process::pp(x) << ", " << W << ") = "
       << text1
       << process::pp(result.m_expression) << " with alphabet(" << process::pp(result.m_expression) << ") = " << pp(result.alphabet) << std::endl;
   }
@@ -409,10 +409,10 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     log(x, log_rename(x, A1));
   }
 
-  std::string log_comm(const process::comm& x, const allow_set& A1)
+  std::string log_comm(const process::comm& x, const allow_set& A, const allow_set& A1)
   {
     std::ostringstream out;
-    out << "comm({" << process::pp(x.comm_set()) << "}, push(" << A1 << ", " << process::pp(x.operand()) << "))";
+    out << "allow(" << A << ", comm({" << process::pp(x.comm_set()) << "}, push(" << A1 << ", " << process::pp(x.operand()) << ")))";
     return out.str();
   }
 
@@ -425,7 +425,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     communication_expression_list C1 = filter_comm_set(x.comm_set(), node.alphabet);
     push(push_allow_node(alphabet_operations::comm(C1, node.alphabet), detail::make_comm(C1, node.m_expression)));
     top().apply_allow(A);
-    log(x, log_comm(x, A1));
+    log(x, log_comm(x, A, A1));
   }
 
   std::string log_allow(const process::allow& x, const allow_set& A1)
@@ -444,10 +444,10 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     log(x, log_allow(x, A1));
   }
 
-  std::string log_merge(const process::merge& x, const allow_set& A_sub, const allow_set& A_arrow)
+  std::string log_merge(const process::merge& x, const allow_set& A, const allow_set& A_sub, const allow_set& A_arrow)
   {
     std::ostringstream out;
-    out << "merge(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << "))";
+    out << "allow(" << A << ", merge(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << ")))";
     return out.str();
   }
 
@@ -460,13 +460,13 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W, id_generator);
     push(push_allow_node(alphabet_operations::merge(p1.alphabet, q1.alphabet), detail::make_merge(p1.m_expression, q1.m_expression)));
     top().apply_allow(A);
-    log(x, log_merge(x, A_sub, A_arrow));
+    log(x, log_merge(x, A, A_sub, A_arrow));
   }
 
-  std::string log_left_merge(const process::left_merge& x, const allow_set& A_sub, const allow_set& A_arrow)
+  std::string log_left_merge(const process::left_merge& x, const allow_set& A, const allow_set& A_sub, const allow_set& A_arrow)
   {
     std::ostringstream out;
-    out << "left_merge(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << "))";
+    out << "allow(" << A << ", left_merge(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << ")))";
     return out.str();
   }
 
@@ -478,13 +478,13 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W, id_generator);
     push(push_allow_node(alphabet_operations::left_merge(p1.alphabet, q1.alphabet), detail::make_left_merge(p1.m_expression, q1.m_expression)));
     top().apply_allow(A);
-    log(x, log_left_merge(x, A_sub, A_arrow));
+    log(x, log_left_merge(x, A, A_sub, A_arrow));
   }
 
-  std::string log_sync(const process::sync& x, const allow_set& A_sub, const allow_set& A_arrow)
+  std::string log_sync(const process::sync& x, const allow_set& A, const allow_set& A_sub, const allow_set& A_arrow)
   {
     std::ostringstream out;
-    out << "sync(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << "))";
+    out << "allow(" << A << ", sync(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << ")))";
     return out.str();
   }
 
@@ -496,7 +496,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W, id_generator);
     push(push_allow_node(alphabet_operations::sync(p1.alphabet, q1.alphabet), detail::make_sync(p1.m_expression, q1.m_expression)));
     top().apply_allow(A);
-    log(x, log_sync(x, A_sub, A_arrow));
+    log(x, log_sync(x, A, A_sub, A_arrow));
   }
 };
 
