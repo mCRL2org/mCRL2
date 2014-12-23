@@ -308,13 +308,17 @@ allow_set allow(const action_name_multiset_list& V, const allow_set& x)
 inline
 allow_set rename_inverse(const rename_expression_list& R, const allow_set& x)
 {
-  return allow_set(alphabet_operations::rename_inverse(R, x.A, x.A_includes_subsets), x.A_includes_subsets, rename_inverse(R, x.I));
+  allow_set result(alphabet_operations::rename_inverse(R, x.A, x.A_includes_subsets), x.A_includes_subsets, rename_inverse(R, x.I));
+  mCRL2log(log::debug) << "rename_inverse(" << R << ", " << x << ") = " << result << std::endl;
+  return result;
 }
 
 inline
 allow_set comm_inverse(const communication_expression_list& C, const allow_set& x)
 {
-  return allow_set(comm_inverse(C, x.A), x.A_includes_subsets, comm_inverse(C, x.I));
+  allow_set result(comm_inverse(C, x.A), x.A_includes_subsets, comm_inverse(C, x.I));
+  mCRL2log(log::debug) << "comm_inverse(" << C << ", " << x << ") = " << result << std::endl;
+  return result;
 }
 
 inline
@@ -349,6 +353,7 @@ allow_set left_arrow(const allow_set& x, const multi_action_name_set& A)
     result.A = left_arrow2(x.A, x.I, A);
   }
   result.establish_invariant();
+  mCRL2log(log::debug) << "left_arrow(" << x << ", " << process::pp(A) << ") = " << result << std::endl;
   return result;
 }
 

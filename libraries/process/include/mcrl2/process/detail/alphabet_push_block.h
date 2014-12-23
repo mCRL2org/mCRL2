@@ -302,9 +302,10 @@ struct push_block_builder: public process_expression_builder<Derived>
     allow_set A(make_name_set(x.allow_set()));
     core::identifier_string_list B1(B.begin(), B.end());
     allow_set A1(alphabet_operations::block(B1, A.A));
-    detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations, id_generator);
+    detail::push_allow_map W;
+    detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations, W, id_generator);
     mCRL2log(log::debug) << push_block_printer(B).print(x, A1);
-    return node.m_expression;
+    return node.expression;
   }
 
   // This function is needed because the linearization algorithm does not handle the case 'delta | delta'.
