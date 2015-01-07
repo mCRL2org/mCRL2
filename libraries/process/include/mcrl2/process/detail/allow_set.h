@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_DETAIL_ALLOW_SET_H
 #define MCRL2_PROCESS_DETAIL_ALLOW_SET_H
 
+#include <algorithm>
 #include "mcrl2/process/utility.h"
 
 namespace mcrl2 {
@@ -163,6 +164,28 @@ struct allow_set
   {
     return A == other.A && A_includes_subsets == other.A_includes_subsets && I == other.I;
   }
+
+  bool operator<(const allow_set& other) const
+  {
+    if (A_includes_subsets != other.A_includes_subsets)
+    {
+      return A_includes_subsets < other.A_includes_subsets;
+    }
+    if (A.size() != other.A.size())
+    {
+      return A.size() < other.A.size();
+    }
+    if (I.size() != other.I.size())
+    {
+      return I.size() < other.I.size();
+    }
+    auto m = std::mismatch(A.begin(), A.end(), other.A.begin());
+    if (m.first != A.end())
+    {
+      return *m.first < *m.second;
+    }
+    return I < other.I;
+  }
 };
 
 inline
@@ -283,6 +306,7 @@ inline
 allow_set hide_inverse(const core::identifier_string_list& I, const allow_set& x)
 {
   allow_set result = x;
+  result.A = alphabet_operations::hide_inverse(I, result.A, result.A_includes_subsets);
   result.I.insert(I.begin(), I.end());
   result.establish_invariant();
   return result;
@@ -309,7 +333,7 @@ inline
 allow_set rename_inverse(const rename_expression_list& R, const allow_set& x)
 {
   allow_set result(alphabet_operations::rename_inverse(R, x.A, x.A_includes_subsets), x.A_includes_subsets, rename_inverse(R, x.I));
-  mCRL2log(log::debug) << "rename_inverse(" << R << ", " << x << ") = " << result << std::endl;
+  mCRL2log(log::debug1) << "rename_inverse(" << R << ", " << x << ") = " << result << std::endl;
   return result;
 }
 
@@ -317,7 +341,7 @@ inline
 allow_set comm_inverse(const communication_expression_list& C, const allow_set& x)
 {
   allow_set result(comm_inverse(C, x.A), x.A_includes_subsets, comm_inverse(C, x.I));
-  mCRL2log(log::debug) << "comm_inverse(" << C << ", " << x << ") = " << result << std::endl;
+  mCRL2log(log::debug1) << "comm_inverse(" << C << ", " << x << ") = " << result << std::endl;
   return result;
 }
 
@@ -353,7 +377,7 @@ allow_set left_arrow(const allow_set& x, const multi_action_name_set& A)
     result.A = left_arrow2(x.A, x.I, A);
   }
   result.establish_invariant();
-  mCRL2log(log::debug) << "left_arrow(" << x << ", " << process::pp(A) << ") = " << result << std::endl;
+  mCRL2log(log::debug1) << "left_arrow(" << x << ", " << process::pp(A) << ") = " << result << std::endl;
   return result;
 }
 

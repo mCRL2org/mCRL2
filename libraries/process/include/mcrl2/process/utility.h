@@ -604,23 +604,6 @@ multi_action_name_set comm_inverse(const communication_expression_list& C, const
   return result;
 }
 
-template <typename IdentifierContainer>
-multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
-{
-  multi_action_name m(I.begin(), I.end());
-  multi_action_name_set result;
-  for (auto i = A.begin(); i != A.end(); ++i)
-  {
-    multi_action_name alpha = *i;
-    for (auto j = I.begin(); j != I.end(); ++j)
-    {
-      alpha.erase(*j);
-    }
-    result.insert(alpha);
-  }
-  return result;
-}
-
 /// \brief Computes R(A)
 inline
 multi_action_name_set rename(const rename_expression_list& R, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
@@ -701,6 +684,29 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
     }
   }
   return result;
+}
+
+template <typename IdentifierContainer>
+multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
+{
+  multi_action_name m(I.begin(), I.end());
+  multi_action_name_set result;
+  for (auto i = A.begin(); i != A.end(); ++i)
+  {
+    multi_action_name alpha = *i;
+    for (auto j = I.begin(); j != I.end(); ++j)
+    {
+      alpha.erase(*j);
+    }
+    result.insert(alpha);
+  }
+  return result;
+}
+
+inline
+multi_action_name_set hide_inverse(const core::identifier_string_list& I, const multi_action_name_set& A, bool A_includes_subsets = false)
+{
+  return block(I, A, A_includes_subsets);
 }
 
 } // namespace alphabet_operations

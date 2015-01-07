@@ -14,7 +14,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Monday, December 22, 2014 17:58:37}
+%TCIDATA{LastRevised=Wednesday, January 07, 2015 11:45:56}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -47,6 +47,7 @@
 \providecommand{\at}{\mathbin{\mbox{\aap ,}}}
 \providecommand{\leftmerge}{\mathbin{\mathrel{\llfloor}}}
 
+\input{tcilatex}
 
 \begin{document}
 
@@ -325,20 +326,20 @@ Let $I$ be a hide set, then we define%
 \begin{array}{ccc}
 \tau _{I}(A) & = & \{\beta \mid \exists _{\alpha \in A,\gamma \in I^{\ast
 }}.\alpha =\beta \gamma \wedge \beta \cap I=\emptyset \} \\ 
-\tau _{I}^{-1}(A) & = & AI^{\ast }%
+\tau _{I}^{-1}(A) & = & \partial _{I}(A)I^{\ast }%
 \end{array}%
 \]%
 Let $B$ be a block set, then we define%
 \[
-\partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \} 
+\partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \}
 \]%
 We define a mapping $act$ that extracts the individual action names of a set
 of multi action names:%
 \[
 \begin{array}{lll}
-act\left( a_{1}\mid \ldots \mid a_{n}\right) & = & \left\{ a_{1}\mid \ldots
-\mid a_{n}\right\} \\ 
-act\left( A\right) & = & \bigcup_{\alpha \in A}act\left( \alpha \right)%
+act\left( a_{1}\mid \ldots \mid a_{n}\right)  & = & \left\{ a_{1}\mid \ldots
+\mid a_{n}\right\}  \\ 
+act\left( A\right)  & = & \bigcup_{\alpha \in A}act\left( \alpha \right) 
 \end{array}%
 \]
 
@@ -673,8 +674,8 @@ under the operations in $push_{\nabla }$.%
 \begin{array}{lll}
 \partial _{B}(A^{\subseteq }I^{\ast }) & = & \tau _{B}(A)^{\subseteq }\tau
 _{B}(I)^{\ast } \\ 
-\tau _{I_{1}}^{-1}\left( A^{\subseteq }I^{\ast }\right)  & = & A^{\subseteq
-}\left( I\cup I_{1}\right) ^{\ast } \\ 
+\tau _{I_{1}}^{-1}\left( A^{\subseteq }I^{\ast }\right)  & = & \partial
+_{I_{1}}(A^{\subseteq })\left( I\cup I_{1}\right) ^{\ast } \\ 
 \left( A^{\subseteq }I^{\ast }\right) \cap V & = & \{\beta \in V\mid \exists
 _{\alpha \in A}.\tau _{I}(\beta )\sqsubseteq \alpha \} \\ 
 R^{-1}\left( A^{\subseteq }I^{\ast }\right)  & = & R^{-1}\left( A^{\subseteq
@@ -686,8 +687,8 @@ A^{\subseteq }I^{\ast } \\
 \left( A^{\subseteq }I^{\ast }\right) ^{\subseteq } & = & A^{\subseteq
 }I^{\ast } \\ 
 \partial _{B}(AI^{\ast }) & = & \partial _{B}(A)\tau _{B}(I)^{\ast } \\ 
-\tau _{I_{1}}^{-1}\left( AI^{\ast }\right)  & = & A\left( I\cup I_{1}\right)
-^{\ast } \\ 
+\tau _{I_{1}}^{-1}\left( AI^{\ast }\right)  & = & \partial _{I_{1}}(A)\left(
+I\cup I_{1}\right) ^{\ast } \\ 
 \left( AI^{\ast }\right) \cap V & = & \{\beta \in V\mid \exists _{\alpha \in
 A}.\tau _{I}(\beta )=\alpha \} \\ 
 R^{-1}\left( AI^{\ast }\right)  & = & R^{-1}\left( A\right) R^{-1}\left(

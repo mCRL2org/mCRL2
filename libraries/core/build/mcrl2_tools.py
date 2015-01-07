@@ -77,7 +77,7 @@ def timeout_command(program, options, timeout = -1):
 
     cmd = re.split('\s+', command)
     start = datetime.datetime.now()
-    print 'Starting "{0}" with timeout {1}'.format(' '.join('"{0}"'.format(arg) if ' ' in arg else arg for arg in cmd), timeout)
+    #print 'Starting "{0}" with timeout {1}'.format(' '.join('"{0}"'.format(arg) if ' ' in arg else arg for arg in cmd), timeout)
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     while process.poll() is None:
