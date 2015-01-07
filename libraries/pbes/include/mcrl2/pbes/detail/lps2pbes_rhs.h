@@ -209,8 +209,6 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
         data::mutable_map_substitution<> sigma_ti;
         sigma_ti[T] = ti;
         rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_ti, data::substitution_variables(sigma_ti));
-std::cout << "ti = " << ti << std::endl;
-std::cout << "T  = " << T << std::endl;
         p = tr::and_(p, data::greater(ti, T));
       }
       data::variable_list y = data::replace_variables(yi, sigma_yi);
