@@ -20,9 +20,6 @@ typedef qt::qt_tool<tools::tool> mcrl2_gui_base;
 
 class mcrl2_gui_tool : public mcrl2_gui_base
 {
-  private:
-    // QSplashScreen *m_splash; Appears not to be used.
-
   public:
     mcrl2_gui_tool():
       mcrl2_gui_base("mcrl2-gui",

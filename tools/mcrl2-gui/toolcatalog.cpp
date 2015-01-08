@@ -50,8 +50,13 @@ void ToolCatalog::load()
   QFile file(catalogFilename);
   if(!file.open( QFile::ReadOnly ))
   {
-    mCRL2log(mcrl2::log::error) << "Could not open XML file: " << catalogFilename.toStdString() << std::endl;
-    return;
+    file.setFileName(":/share/mcrl2/tool_catalog.xml");
+    if (!file.open(QFile::ReadOnly))
+    {
+      mCRL2log(mcrl2::log::error) << "Could not open XML file: " << catalogFilename.toStdString() << std::endl;
+      return;
+    }
+    mCRL2log(mcrl2::log::warning) << "Could not open XML file: " << catalogFilename.toStdString() << ", using embedded copy instead." << std::endl;;
   }
   QString errorMsg;
   if(!m_xml.setContent(&file, false, &errorMsg))

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>mcrl2.png</file>
+        <file>share/mcrl2/tool_catalog.xml</file>
     </qresource>
 </RCC>
