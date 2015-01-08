@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_DETAIL_ALLOW_SET_H
 #define MCRL2_PROCESS_DETAIL_ALLOW_SET_H
 
+#include <algorithm>
 #include "mcrl2/process/utility.h"
 
 namespace mcrl2 {
@@ -50,7 +51,7 @@ inline
 action_name_set hide(const core::identifier_string_list& I, const action_name_set& J)
 {
   action_name_set result;
-  for (action_name_set::const_iterator j = J.begin(); j != J.end(); ++j)
+  for (auto j = J.begin(); j != J.end(); ++j)
   {
     if (!contains(I, *j))
     {
@@ -64,7 +65,7 @@ inline
 multi_action_name hide(const action_name_set& I, const multi_action_name& alpha)
 {
   multi_action_name result;
-  for (multi_action_name::const_iterator i = alpha.begin(); i != alpha.end(); ++i)
+  for (auto i = alpha.begin(); i != alpha.end(); ++i)
   {
     if (!contains(I, *i))
     {
@@ -80,18 +81,57 @@ struct allow_set;
 std::ostream& operator<<(std::ostream& out, const allow_set& x);
 
 /// \brief Represents the set AI*. If the attribute A_includes_subsets is true, also subsets of the elements are included.
+/// An invariant of the allow_set is that elements of A do not contain elements of I. This invariant will be
+/// established during construction.
 struct allow_set
 {
   multi_action_name_set A;
   bool A_includes_subsets;
   action_name_set I;
 
+  void establish_invariant()
+  {
+    multi_action_name_set A1;
+    for (auto i = A.begin(); i != A.end(); ++i)
+    {
+      A1.insert(detail::hide(I, *i));
+    }
+    std::swap(A, A1);
+    assert(check_invariant());
+  }
+
+  bool check_invariant() const
+  {
+    using utilities::detail::contains;
+    if (I.empty())
+    {
+      return true;
+    }
+    for (auto i = A.begin(); i != A.end(); ++i)
+    {
+      const multi_action_name& alpha = *i;
+      for (auto j = alpha.begin(); j != alpha.end(); ++j)
+      {
+        if (contains(I, *j))
+        {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   allow_set()
   {}
 
   allow_set(const multi_action_name_set& A_, bool A_includes_subsets_ = false, const action_name_set& I_ = action_name_set())
-    : A(A_), A_includes_subsets(A_includes_subsets_), I(I_)
-  {}
+    : A_includes_subsets(A_includes_subsets_), I(I_)
+  {
+    for (auto i = A_.begin(); i != A_.end(); ++i)
+    {
+      A.insert(detail::hide(I_, *i));
+    }
+  }
 
   /// \brief Returns true if the allow set contains the multi action name alpha.
   bool contains(const multi_action_name& alpha) const
@@ -104,7 +144,7 @@ struct allow_set
   multi_action_name_set intersect(const multi_action_name_set& alphabet) const
   {
     multi_action_name_set result;
-    for (multi_action_name_set::const_iterator i = alphabet.begin(); i != alphabet.end(); ++i)
+    for (auto i = alphabet.begin(); i != alphabet.end(); ++i)
     {
       const multi_action_name& alpha = *i;
       if (contains(alpha))
@@ -115,7 +155,6 @@ struct allow_set
     multi_action_name tau;
     if (alphabet.find(tau) != alphabet.end())
     {
-      multi_action_name tau;
       result.insert(tau);
     }
     return result;
@@ -124,6 +163,28 @@ struct allow_set
   bool operator==(const allow_set& other) const
   {
     return A == other.A && A_includes_subsets == other.A_includes_subsets && I == other.I;
+  }
+
+  bool operator<(const allow_set& other) const
+  {
+    if (A_includes_subsets != other.A_includes_subsets)
+    {
+      return A_includes_subsets < other.A_includes_subsets;
+    }
+    if (A.size() != other.A.size())
+    {
+      return A.size() < other.A.size();
+    }
+    if (I.size() != other.I.size())
+    {
+      return I.size() < other.I.size();
+    }
+    auto m = std::mismatch(A.begin(), A.end(), other.A.begin());
+    if (m.first != A.end())
+    {
+      return *m.first < *m.second;
+    }
+    return I < other.I;
   }
 };
 
@@ -155,9 +216,9 @@ action_name_set rename_inverse(const rename_expression_list& R, const action_nam
   detail::rename_inverse_map Rinverse = detail::rename_inverse(R);
 
   action_name_set result;
-  for (action_name_set::const_iterator i = I.begin(); i != I.end(); ++i)
+  for (auto i = I.begin(); i != I.end(); ++i)
   {
-    detail::rename_inverse_map::const_iterator j = Rinverse.find(*i);
+    auto j = Rinverse.find(*i);
     if (j != Rinverse.end())
     {
       result.insert(j->second.begin(), j->second.end());
@@ -187,7 +248,7 @@ inline
 void comm_inverse(const communication_expression_list& C, const multi_action_name& alpha1, const multi_action_name& alpha2, multi_action_name_set& result)
 {
   result.insert(multiset_union(alpha1, alpha2));
-  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  for (auto i = C.begin(); i != C.end(); ++i)
   {
     if (detail::contains(alpha1, i->name()))
     {
@@ -202,7 +263,7 @@ multi_action_name_set comm_inverse(const communication_expression_list& C, const
 {
   multi_action_name_set result;
   multi_action_name empty;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
     comm_inverse(C, *i, empty, result);
   }
@@ -214,9 +275,9 @@ inline
 action_name_set comm_inverse(const communication_expression_list& C, const action_name_set& I)
 {
   action_name_set result = I;
-  for (action_name_set::const_iterator i = I.begin(); i != I.end(); ++i)
+  for (auto i = I.begin(); i != I.end(); ++i)
   {
-    for (communication_expression_list::const_iterator j = C.begin(); j != C.end(); ++j)
+    for (auto j = C.begin(); j != C.end(); ++j)
     {
       if (*i == j->name())
       {
@@ -245,14 +306,16 @@ inline
 allow_set hide_inverse(const core::identifier_string_list& I, const allow_set& x)
 {
   allow_set result = x;
+  result.A = alphabet_operations::hide_inverse(I, result.A, result.A_includes_subsets);
   result.I.insert(I.begin(), I.end());
+  result.establish_invariant();
   return result;
 }
 
 inline
 allow_set allow(const action_name_multiset_list& V, const allow_set& x)
 {
-  multi_action_name_set result;
+  multi_action_name_set A;
   for (auto i = V.begin(); i != V.end(); ++i)
   {
     core::identifier_string_list names = i->names();
@@ -260,22 +323,49 @@ allow_set allow(const action_name_multiset_list& V, const allow_set& x)
     bool add = x.A_includes_subsets ? detail::includes(x.A, beta) : detail::contains(x.A, detail::hide(x.I, beta));
     if (add)
     {
-      result.insert(beta);
+      A.insert(beta);
     }
   }
-  return allow_set(result);
+  return allow_set(A);
 }
 
 inline
 allow_set rename_inverse(const rename_expression_list& R, const allow_set& x)
 {
-  return allow_set(alphabet_operations::rename_inverse(R, x.A), x.A_includes_subsets, rename_inverse(R, x.I));
+  allow_set result(alphabet_operations::rename_inverse(R, x.A, x.A_includes_subsets), x.A_includes_subsets, rename_inverse(R, x.I));
+  mCRL2log(log::debug1) << "rename_inverse(" << R << ", " << x << ") = " << result << std::endl;
+  return result;
 }
 
 inline
 allow_set comm_inverse(const communication_expression_list& C, const allow_set& x)
 {
-  return allow_set(comm_inverse(C, x.A), x.A_includes_subsets, comm_inverse(C, x.I));
+  allow_set result(comm_inverse(C, x.A), x.A_includes_subsets, comm_inverse(C, x.I));
+  mCRL2log(log::debug1) << "comm_inverse(" << C << ", " << x << ") = " << result << std::endl;
+  return result;
+}
+
+inline
+multi_action_name_set left_arrow2(const multi_action_name_set& A1, const action_name_set& I, const multi_action_name_set& A2)
+{
+  multi_action_name_set result = A1; // needed because tau is not explicitly stored
+  for (auto i = A2.begin(); i != A2.end(); ++i)
+  {
+    multi_action_name beta = detail::hide(I, *i);
+    for (auto j = A1.begin(); j != A1.end(); ++j)
+    {
+      const multi_action_name& gamma = *j;
+      if (detail::includes(gamma, beta))
+      {
+        multi_action_name alpha = multiset_difference(gamma, beta);
+        if (!alpha.empty())
+        {
+          result.insert(detail::hide(I, alpha));
+        }
+      }
+    }
+  }
+  return result;
 }
 
 inline
@@ -284,8 +374,10 @@ allow_set left_arrow(const allow_set& x, const multi_action_name_set& A)
   allow_set result = x;
   if (!x.A_includes_subsets)
   {
-    result.A = left_arrow1(x.A, alphabet_operations::hide(x.I, A));
+    result.A = left_arrow2(x.A, x.I, A);
   }
+  result.establish_invariant();
+  mCRL2log(log::debug1) << "left_arrow(" << x << ", " << process::pp(A) << ") = " << result << std::endl;
   return result;
 }
 
@@ -295,6 +387,7 @@ allow_set subsets(const allow_set& x)
   allow_set result = x;
   result.A_includes_subsets = true;
   result.A = alphabet_operations::remove_subsets(result.A);
+  result.establish_invariant();
   return result;
 }
 

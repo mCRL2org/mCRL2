@@ -37,7 +37,9 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const lps::deadlock& x)
   {
@@ -178,7 +180,9 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const lps::deadlock& x)
   {
@@ -309,7 +313,9 @@ struct add_traverser_variables: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const lps::deadlock& x)
   {
@@ -448,7 +454,9 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const lps::deadlock& x)
   {
@@ -589,7 +597,9 @@ struct add_traverser_action_labels: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const lps::multi_action& x)
   {

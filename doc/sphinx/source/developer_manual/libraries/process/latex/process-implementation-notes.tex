@@ -14,7 +14,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Monday, March 03, 2014 15:02:30}
+%TCIDATA{LastRevised=Wednesday, January 07, 2015 11:45:56}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -47,6 +47,7 @@
 \providecommand{\at}{\mathbin{\mbox{\aap ,}}}
 \providecommand{\leftmerge}{\mathbin{\mathrel{\llfloor}}}
 
+\input{tcilatex}
 
 \begin{document}
 
@@ -325,20 +326,20 @@ Let $I$ be a hide set, then we define%
 \begin{array}{ccc}
 \tau _{I}(A) & = & \{\beta \mid \exists _{\alpha \in A,\gamma \in I^{\ast
 }}.\alpha =\beta \gamma \wedge \beta \cap I=\emptyset \} \\ 
-\tau _{I}^{-1}(A) & = & AI^{\ast }%
+\tau _{I}^{-1}(A) & = & \partial _{I}(A)I^{\ast }%
 \end{array}%
 \]%
 Let $B$ be a block set, then we define%
 \[
-\partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \} 
+\partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \}
 \]%
 We define a mapping $act$ that extracts the individual action names of a set
 of multi action names:%
 \[
 \begin{array}{lll}
-act\left( a_{1}\mid \ldots \mid a_{n}\right) & = & \left\{ a_{1}\mid \ldots
-\mid a_{n}\right\} \\ 
-act\left( A\right) & = & \bigcup_{\alpha \in A}act\left( \alpha \right)%
+act\left( a_{1}\mid \ldots \mid a_{n}\right)  & = & \left\{ a_{1}\mid \ldots
+\mid a_{n}\right\}  \\ 
+act\left( A\right)  & = & \bigcup_{\alpha \in A}act\left( \alpha \right) 
 \end{array}%
 \]
 
@@ -663,58 +664,55 @@ become very large. The computation of $push_{\nabla }(A,\tau _{I}(p))$
 involves computation of $push_{\nabla }(p,\tau _{I}^{-1}(A)\dot{)}$. The set 
 $\tau _{I}^{-1}(A)=AI^{\ast }$ is infinite.
 
-In the implementation we use allow sets of the form $A^{\subseteq }I^{\ast
-}, $ where $A$ is a set of multi action names and $I$ is a set of action
-names. The $^{\subseteq }$ is optional and $I$ may be empty. Such an allow
-set is stored as two sets $A$ and $I$, together with an attribute that tells
-if $^{\subseteq }$ is appicable. We need to show that allow sets are closed
+In the implementation we use allow sets of the form $A^{\subseteq }I^{\ast },
+$ where $A$ is a set of multi action names and $I$ is a set of action names.
+The $^{\subseteq }$ is optional and $I$ may be empty. Such an allow set is
+stored as two sets $A$ and $I$, together with an attribute that tells if $%
+^{\subseteq }$ is appicable. We need to show that allow sets are closed
 under the operations in $push_{\nabla }$.%
 \[
 \begin{array}{lll}
 \partial _{B}(A^{\subseteq }I^{\ast }) & = & \tau _{B}(A)^{\subseteq }\tau
 _{B}(I)^{\ast } \\ 
-\tau _{I_{1}}^{-1}\left( A^{\subseteq }I^{\ast }\right) & = & A^{\subseteq
-}\left( I\cup I_{1}\right) ^{\ast } \\ 
+\tau _{I_{1}}^{-1}\left( A^{\subseteq }I^{\ast }\right)  & = & \partial
+_{I_{1}}(A^{\subseteq })\left( I\cup I_{1}\right) ^{\ast } \\ 
 \left( A^{\subseteq }I^{\ast }\right) \cap V & = & \{\beta \in V\mid \exists
 _{\alpha \in A}.\tau _{I}(\beta )\sqsubseteq \alpha \} \\ 
-R^{-1}\left( A^{\subseteq }I^{\ast }\right) & = & R^{-1}\left( A\right)
-^{\subseteq }R^{-1}\left( I\right) ^{\ast } \\ 
-C^{-1}\left( A^{\subseteq }I^{\ast }\right) & \subseteq & C^{-1}\left(
+R^{-1}\left( A^{\subseteq }I^{\ast }\right)  & = & R^{-1}\left( A^{\subseteq
+}\right) R^{-1}\left( I\right) ^{\ast } \\ 
+C^{-1}\left( A^{\subseteq }I^{\ast }\right)  & \subseteq  & C^{-1}\left(
 A\right) ^{\subseteq }act\left( C^{-1}\left( I\right) \right) ^{\ast } \\ 
 \left( A^{\subseteq }I^{\ast }\right) \leftarrowtail A_{1} & = & 
 A^{\subseteq }I^{\ast } \\ 
 \left( A^{\subseteq }I^{\ast }\right) ^{\subseteq } & = & A^{\subseteq
 }I^{\ast } \\ 
 \partial _{B}(AI^{\ast }) & = & \partial _{B}(A)\tau _{B}(I)^{\ast } \\ 
-\tau _{I_{1}}^{-1}\left( AI^{\ast }\right) & = & A\left( I\cup I_{1}\right)
-^{\ast } \\ 
+\tau _{I_{1}}^{-1}\left( AI^{\ast }\right)  & = & \partial _{I_{1}}(A)\left(
+I\cup I_{1}\right) ^{\ast } \\ 
 \left( AI^{\ast }\right) \cap V & = & \{\beta \in V\mid \exists _{\alpha \in
 A}.\tau _{I}(\beta )=\alpha \} \\ 
-R^{-1}\left( AI^{\ast }\right) & = & R^{-1}\left( A\right) R^{-1}\left(
+R^{-1}\left( AI^{\ast }\right)  & = & R^{-1}\left( A\right) R^{-1}\left(
 I\right) ^{\ast } \\ 
-C^{-1}\left( AI^{\ast }\right) & \subseteq & C^{-1}\left( A\right) act\left(
-C^{-1}\left( I\right) \right) ^{\ast } \\ 
-\left( AI^{\ast }\right) \leftarrowtail A_{1} & = & \left( A\leftarrowtail
-\tau _{I}(A_{1})\right) I^{\ast } \\ 
+C^{-1}\left( AI^{\ast }\right)  & \subseteq  & C^{-1}\left( A\right)
+act\left( C^{-1}\left( I\right) \right) ^{\ast } \\ 
 \left( AI^{\ast }\right) ^{\subseteq } & = & A^{\subseteq }I^{\ast }%
 \end{array}%
 \]%
 where we used the following properties:%
 \[
 \begin{array}{lll}
-\partial _{B}\left( A_{1}A_{2}\right) & = & \partial _{B}\left( A_{1}\right)
-\partial _{B}\left( A_{1}\right) \\ 
-\partial _{B}\left( A^{\subseteq }\right) & = & \tau _{B}(A)^{\subseteq } \\ 
-R^{-1}\left( A^{\subseteq }\right) & = & R^{-1}\left( A\right) ^{\subseteq }
+\partial _{B}\left( A_{1}A_{2}\right)  & = & \partial _{B}\left(
+A_{1}\right) \partial _{B}\left( A_{1}\right)  \\ 
+\partial _{B}\left( A^{\subseteq }\right)  & = & \tau _{B}(A)^{\subseteq }
 \\ 
-R^{-1}\left( A_{1}A_{2}\right) & = & R^{-1}\left( A_{1}\right) R^{-1}\left(
-A_{2}\right) \\ 
-R^{-1}\left( A^{\ast }\right) & = & R^{-1}\left( A\right) ^{\ast } \\ 
-C^{-1}\left( A^{\subseteq }\right) & \subseteq & C^{-1}\left( A\right)
+R^{-1}\left( A_{1}A_{2}\right)  & = & R^{-1}\left( A_{1}\right) R^{-1}\left(
+A_{2}\right)  \\ 
+R^{-1}\left( A^{\ast }\right)  & = & R^{-1}\left( A\right) ^{\ast } \\ 
+C^{-1}\left( A^{\subseteq }\right)  & \subseteq  & C^{-1}\left( A\right)
 ^{\subseteq } \\ 
-C^{-1}\left( A_{1}A_{2}\right) & = & C^{-1}\left( A_{1}\right) C^{-1}\left(
-A_{2}\right) \\ 
-C^{-1}\left( A^{\ast }\right) & = & C^{-1}\left( A\right) ^{\ast } \\ 
+C^{-1}\left( A_{1}A_{2}\right)  & = & C^{-1}\left( A_{1}\right) C^{-1}\left(
+A_{2}\right)  \\ 
+C^{-1}\left( A^{\ast }\right)  & = & C^{-1}\left( A\right) ^{\ast } \\ 
 A^{\subseteq }\leftarrowtail A_{1} & = & A^{\subseteq }%
 \end{array}%
 \]%
@@ -722,7 +720,14 @@ Note that in case of the communication we only have an inclusion relation
 instead of equality. This is done to stay within the format $A^{\subseteq
 }I^{\ast }$. As a consequence the implementation uses an over-approximation
 of $C^{-1}\left( A^{\subseteq }I^{\ast }\right) $ and $C^{-1}\left( AI^{\ast
-}\right) $.
+}\right) $. Furthermore note that the property $R^{-1}\left( A^{\subseteq
+}\right) =R^{-1}\left( A\right) ^{\subseteq }$ does not hold. A counter
+example is $R=\{b\rightarrow a\}$ and $A=\{a,b\mid c\}$. In that case we
+have $R^{-1}\left( A^{\subseteq }\right) =\{a,b,c\}^{\subseteq }$ and $%
+R^{-1}\left( A\right) ^{\subseteq }=\{a,b\}^{\subseteq }$. Another property
+that was initially assumed, but that does not hold is $\left( AI^{\ast
+}\right) \leftarrowtail A_{1}=\left( A\leftarrowtail \tau _{I}(A_{1})\right)
+I^{\ast }$.
 
 \newpage
 
@@ -756,9 +761,9 @@ q^{\prime }\right) \right) \right) \text{ where}\left\{ \text{ }%
 p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\ 
 q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\ 
 A^{\prime } & = & C^{-1}(A)^{\subseteq }\setminus \left( C^{-1}(A)\setminus
-A\right)  \\ 
+A\right) \\ 
 A^{\prime \prime } & = & \left( C^{-1}(A)\leftarrowtail \alpha (p^{\prime
-})\right) \setminus \left( C^{-1}(A)\setminus A\right) 
+})\right) \setminus \left( C^{-1}(A)\setminus A\right)%
 \end{array}%
 \right. $ \\ 
 $push_{\nabla \Gamma }(A,C,p\leftmerge q)$ & $=$ & $\mathsf{allow}\left(
@@ -768,9 +773,9 @@ q^{\prime }\right) \right) \right) \text{ where}\left\{ \text{ }%
 p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\ 
 q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\ 
 A^{\prime } & = & C^{-1}(A)^{\subseteq }\setminus \left( C^{-1}(A)\setminus
-A\right)  \\ 
+A\right) \\ 
 A^{\prime \prime } & = & \left( C^{-1}(A)\leftarrowtail \alpha (p^{\prime
-})\right) \setminus \left( C^{-1}(A)\setminus A\right) 
+})\right) \setminus \left( C^{-1}(A)\setminus A\right)%
 \end{array}%
 \right. $ \\ 
 $push_{\nabla \Gamma }(A,C,p\mid q)$ & $=$ & $\mathsf{allow}\left( A,\Gamma
@@ -780,9 +785,9 @@ _{C}\left( \mathsf{allow}\left( C^{-1}(A),p^{\prime }\mid q^{\prime }\right)
 p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\ 
 q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\ 
 A^{\prime } & = & C^{-1}(A)^{\subseteq }\setminus \left( C^{-1}(A)\setminus
-A\right)  \\ 
+A\right) \\ 
 A^{\prime \prime } & = & \left( C^{-1}(A)\leftarrowtail \alpha (p^{\prime
-})\right) \setminus \left( C^{-1}(A)\setminus A\right) 
+})\right) \setminus \left( C^{-1}(A)\setminus A\right)%
 \end{array}%
 \right. $ \\ 
 $push_{\nabla \Gamma }(A,C,\partial _{B}(p))$ & $=$ & $push_{\nabla \Gamma

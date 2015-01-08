@@ -28,14 +28,11 @@ SortExpr
   | Id                                                           // Sort reference
   | '(' SortExpr ')'                                             // Sort expression with parentheses
   | 'struct' ConstrDeclList                                      // Structured sort
-  | SortProduct ('->' $binary_op_right 0) SortExpr;              // Function sort
+  | SortExpr ('->' $binary_op_right 0) SortExpr                  // Function sort
+  | SortExpr ('#' $binary_op_left 1) SortExpr                    // Product sort
   ;
 
-SortProduct                                                      // Product sort
-  : SortExpr $left 2
-  | SortProduct ('#' $binary_op_left 1) SortExpr
-  | SortProduct ('->' $binary_op_right 0) SortExpr
-  ;
+SortProduct : SortExpr ;                                         // SortExpr in which # is allowed as top-level operator
 
 SortSpec: 'sort' SortDecl+ ;                                     // Sort specification
 
@@ -184,36 +181,15 @@ ProcExpr
   | ProcExpr ('||' $binary_op_right 3) ProcExpr                  // Parallel operator
   | ProcExpr ('||_' $binary_op_right 4) ProcExpr                 // Leftmerge operator
   | (DataExprUnit '->' $unary_op_right 5) ProcExpr               // If-then operator
-  | (DataExprUnit IfThen $unary_op_right 5) ProcExpr             // If-then-else operator
-  | ProcExpr ('<<' $binary_op_left 6) ProcExpr                   // Until operator
-  | ProcExpr ('.' $binary_op_right 7) ProcExpr                   // Sequential composition operator
-  | ProcExpr ('@' $binary_op_left 8) DataExprUnit                // At operator
-  | ProcExpr ('|' $binary_op_left 9) ProcExpr                    // Communication merge
+  | ((DataExprUnit '->' $unary_op_right 6) ProcExpr              // If-then-else operator 
+                   '<>' $unary_op_right 5) ProcExpr
+  | ProcExpr ('<<' $binary_op_left 8) ProcExpr                   // Until operator
+  | ProcExpr ('.' $binary_op_right 9) ProcExpr                   // Sequential composition operator
+  | ProcExpr ('@' $binary_op_left 10) DataExprUnit               // At operator
+  | ProcExpr ('|' $binary_op_left 11) ProcExpr                   // Communication merge
+  | ('dist' VarsDeclList '[' DataExpr ']'
+              '.' $unary_op_right 2) ProcExpr                    // Distribution operator
   ;
-
-ProcExprNoIf
-  : Action                                                       // Action or process instantiation
-  | Id '(' AssignmentList? ')'                                   // Process assignment
-  | 'delta'                                                      // Delta, deadlock, inaction
-  | 'tau'                                                        // Tau, hidden action, empty multi-action
-  | 'block' '(' ActIdSet ',' ProcExpr ')'                        // Block or encapsulation operator
-  | 'allow' '(' MultActIdSet ',' ProcExpr ')'                    // Allow operator
-  | 'hide' '(' ActIdSet ',' ProcExpr ')'                         // Hiding operator
-  | 'rename' '(' RenExprSet ',' ProcExpr ')'                     // Action renaming operator
-  | 'comm' '(' CommExprSet ',' ProcExpr ')'                      // Communication operator
-  | '(' ProcExpr ')'                                             // Brackets
-  | ProcExprNoIf ('+' $binary_op_left 1) ProcExprNoIf            // Choice operator
-  | ('sum' VarsDeclList '.' $unary_op_right 2) ProcExprNoIf      // Sum operator
-  | ProcExprNoIf ('||' $binary_op_right 3) ProcExprNoIf          // Parallel operator
-  | ProcExprNoIf ('||_' $binary_op_right 3) ProcExprNoIf         // Leftmerge operator
-  | (DataExprUnit IfThen $unary_op_right 4) ProcExprNoIf         // If-then-else operator
-  | ProcExprNoIf ('<<' $binary_op_left 5) ProcExprNoIf           // Until operator
-  | ProcExprNoIf ('.' $binary_op_right 6) ProcExprNoIf           // Sequential composition operator
-  | ProcExprNoIf ('@' $binary_op_left 7) DataExprUnit            // At operator
-  | ProcExprNoIf ('|' $binary_op_left 8) ProcExprNoIf            // Communication merge
-  ;
-
-IfThen: '->' ProcExprNoIf '<>' $left 0 ;                         // Auxiliary if-then-else
 
 //--- Actions
 

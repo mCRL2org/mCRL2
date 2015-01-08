@@ -1,0 +1,54 @@
+FlexRay startup specification
+=============================
+
+This specification describes the FlexRay startup protocol. The case study is
+described in the following paper:
+
+  S. Cranen. Model checking the FlexRay startup phase. In M. Stoelinga & 
+    R. Pinger (eds.), Formal Methods for Industrial Critical Systems – 17th 
+    International Workshop, FMICS, Paris, France, August 27–28, 2012. 
+    Proceedings. LNCS, Vol. 7437, pp. 131–145. Berlin: Springer.
+
+The results presented in that paper can be reproduced by running
+
+  python generate.py
+
+This will run the µ-calculus verification for the properties in the "mucalc"
+folder. To also produce PDF drawings of the error traces, run
+
+  python generate_traces.py
+
+
+Scripts
+=======
+
+Various scripts are included that analyse and process results from the mCRL2
+tools. We give a short description here:
+
+  analyse.py
+    This tool can perform SCC decomposition of .aut files. Given a .aut
+    file, it will generate for each SCC another .aut file in the same
+    directory. If the --path option is used, a trace from the initial state
+    to this SCC is included in those .aut files. Alternatively, the script
+    can be used to generate a trace to a certain action in a .aut file with
+    the --find option.
+
+  preprocessor.py
+    The file startup.mcrl2 uses some non-standard abbreviations to make the
+    specification more readable. This script expands these abbreviations.
+    Note that this is a script that was only meant to work on this specific
+    specification, and the transformation it achieves is not well-documented.
+    It should therefore always be checked manually that the script has
+    generated the right output.
+
+  randomtrace.py
+    Given a .aut-file, this script prints a random trace from it to the
+    standard output. The output of this script can be piped to trace.py.
+
+  trace.py
+    Reads a textual trace (the output of tracepp or of randomtrace.py) on
+    the standard input, and spits out a Tikz script that draws a graphical
+    representation of the trace. With the --pdf option, also calls pdflatex
+    on the result directly to generate a PDF file. With the --events option,
+    extra annotations are inserted in the picture that mark events occuring
+    in each node in the network.

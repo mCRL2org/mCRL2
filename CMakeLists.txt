@@ -47,7 +47,6 @@ if(MCRL2_ENABLE_GUI_TOOLS)
 endif()
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
-find_package(BCG QUIET)
 
 add_subdirectory(3rd-party/dparser)
 

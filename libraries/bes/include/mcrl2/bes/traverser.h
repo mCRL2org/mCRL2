@@ -32,7 +32,9 @@ struct add_traverser_boolean_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const bes::boolean_equation& x)
   {
@@ -155,7 +157,9 @@ struct add_traverser_boolean_variables: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const bes::boolean_equation& x)
   {

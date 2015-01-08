@@ -169,15 +169,17 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
                  "use search strategy SEARCH:",
                  'z').
       add_option("counter",
-                 "print at the end a tree labelled with instantiations "
-                 "of the left hand side of equations; this tree is an "
-                 "indication of how pbes2bool came to the validity or "
-                 "invalidity of the PBES",
+                 "print evidence why the formula is valid or invalid. If invalid "
+                 "this information can be used to construct a counterexample using the tool "
+                 "lpsxsim. The evidence consists of a tree labelled with instantiations "
+                 "of the left hand side of PBES equations. These instantiations largely match the states "
+                 "of the lps. An indentation corresponds in general with one (sometimes zero, sometimes more) "
+                 "transition. ",
                  'c').
       add_option("hashtables",
                  "use hashtables when substituting in bes equations, "
                  "and translate internal expressions to binary decision "
-                 "diagrams (discouraged, due to performance)",
+                 "diagrams (discouraged, due to performance). ",
                  'H').
       add_option("erase", make_enum_argument<remove_level>("LEVEL")
                  .add_value(none, true)
@@ -198,9 +200,9 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       add_option("approximate-false",
                  "If set, variables that are removed from the todo buffer are set to true. This means that the result "
                  "false is reliable, and the result true can still mean that the formula is false. Without this flag "
-                 "true is appromated, meaning that true is the reliable answer, and false is not.").
+                 "true is appromated, meaning that true is the reliable answer, and false is not. ").
       add_option("unused_data",
-                 "do not remove unused parts of the data specification",
+                 "do not remove unused parts of the data specification. ",
                  'u');
     }
 

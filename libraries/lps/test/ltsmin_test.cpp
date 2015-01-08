@@ -82,10 +82,11 @@ static void test_data_type(lps::pins_data_type& type)
   }
 
   // test iterator
-  for (lps::pins_data_type::index_iterator i = type.index_begin(); i != type.index_end(); ++i)
+  std::size_t index = 0;
+  for (auto i = type.index_begin(); i != type.index_end(); ++i)
   {
-    std::cout << "iterator " << (i - type.index_begin()) << " -> " << *i << std::endl;
-    BOOST_CHECK(*i == static_cast<size_t>(i - type.index_begin()));
+    std::cout << "iterator " << index++ << " -> " << *i << std::endl;
+    BOOST_CHECK(*i == index);
   }
 }
 
@@ -100,6 +101,13 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   std::size_t N = p.process_parameter_count();
 
   BOOST_CHECK(p.process_parameter_count() == 11);
+
+  std::size_t G = p.guard_count();
+
+  BOOST_CHECK(G == 13);
+  BOOST_CHECK(p.guard_parameters(0).size() == 1);
+  BOOST_CHECK(p.guard_info(5).size() == 2);
+  BOOST_CHECK(p.guard_name(0) == "s1_S == 1");
 
   BOOST_CHECK(p.edge_label_count() == 1);
   for (std::size_t i = 0; i < p.edge_label_count(); i++)
@@ -122,8 +130,6 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   	BOOST_CHECK(type.name() == data::pp(i->sort()));
   }
 
-  std::cout << p.info() << std::endl;
-
   // get the initial state
   state_vector initial_state = new int[N];
   state_vector dest_state = new int[N];
@@ -144,6 +150,25 @@ static void test_ltsmin(const std::string& rewriter_strategy)
     p.next_state_long(initial_state, group, f_long, dest_state, labels);
     std::cout << "group " << group << " count = " << f_long.state_count << std::endl;
     count += f_long.state_count;
+  }
+  BOOST_CHECK(count == f_all.state_count);
+
+  // find successors (without evaluating condition) of the initial state for individual groups
+  count = 0;
+  for (std::size_t group = 0; group < p.group_count(); group++)
+  {
+
+    std::size_t all_true = p.GUARD_TRUE;
+    for(std::size_t guard = 0; guard < p.guard_info(group).size() && all_true == p.GUARD_TRUE; guard++) {
+      all_true = p.eval_guard_long(initial_state, p.guard_info(group)[guard]);
+    }
+
+    if (all_true == p.GUARD_TRUE) {
+      state_callback_function f_long(p.process_parameter_count());
+      p.update_long(initial_state, group, f_long, dest_state, labels);
+      std::cout << "group " << group << " count = " << f_long.state_count << std::endl;
+      count += f_long.state_count;
+    }
   }
   BOOST_CHECK(count == f_all.state_count);
 
@@ -227,6 +252,17 @@ std::string write_groups(const lps::pins& p)
 }
 
 inline
+std::string update_groups(const lps::pins& p)
+{
+  std::ostringstream out;
+  for (std::size_t i = 0; i < p.group_count(); i++)
+  {
+    out << print_vector(p.update_group(i)) << std::endl;
+  }
+  return out.str();
+}
+
+inline
 void test_dependency_matrix()
 {
   std::string ONEBIT =
@@ -244,11 +280,13 @@ void test_dependency_matrix()
   for (std::size_t i = 0; i < p.group_count(); i++)
   {
     std::cout << "\n";
-    std::cout << " read_group(" << i << ") = " << print_vector(p.read_group(i)) << std::endl;
-    std::cout << "write_group(" << i << ") = " << print_vector(p.write_group(i)) << std::endl;
+    std::cout << "  read_group(" << i << ") = " << print_vector(p.read_group(i)) << std::endl;
+    std::cout << " write_group(" << i << ") = " << print_vector(p.write_group(i)) << std::endl;
+    std::cout << "update_group(" << i << ") = " << print_vector(p.update_group(i)) << std::endl;
   }
   BOOST_CHECK(print_vector(p.read_group(0)) == "[]");
   BOOST_CHECK(print_vector(p.write_group(0)) == "[0]");
+  BOOST_CHECK(print_vector(p.update_group(0)) == "[]");
 
   // cleanup temporary files
   std::remove(filename.c_str());

@@ -23,6 +23,7 @@
 #include <map>
 #include <stdio.h>
 #include "mcrl2/lts/transition.h"
+#include "mcrl2/lts/probabilistic_label.h"
 
 
 namespace mcrl2
@@ -68,7 +69,7 @@ enum lts_type
         a separate variable.
 */
 
-template < class STATE_LABEL_T, class ACTION_LABEL_T >
+template < class STATE_LABEL_T, class ACTION_LABEL_T, class PROBABILISTIC_LABEL_T = detail::probabilistic_label>
 class lts
 {
   public:
@@ -80,6 +81,10 @@ class lts
     /** \brief The type of action labels.
     */
     typedef ACTION_LABEL_T action_label_t;
+
+    /** \brief The type of probabilistic labels.
+    */
+    typedef PROBABILISTIC_LABEL_T probabilistic_label_t;
 
     /** \brief The sort that contains the indices of states.
     */
@@ -100,6 +105,7 @@ class lts
     std::vector<transition> m_transitions;
     std::vector<STATE_LABEL_T> m_state_labels;
     std::vector<ACTION_LABEL_T> m_action_labels;
+    std::vector<PROBABILISTIC_LABEL_T> m_probabilistic_labels;
     std::vector<bool> m_taus; // A vector indicating which labels are to be viewed as tau's.
     std::vector<bool> m_is_probabilistic_state; // A vector indicating for each state whether
                                                 // it is an ordinary state (false), or whether
@@ -122,6 +128,7 @@ class lts
       m_transitions(l.m_transitions),
       m_state_labels(l.m_state_labels),
       m_action_labels(l.m_action_labels),
+      m_probabilistic_labels(l.m_probabilistic_labels),
       m_taus(l.m_taus),
       m_is_probabilistic_state(l.m_is_probabilistic_state)
     {};
@@ -150,6 +157,7 @@ class lts
       m_state_labels.swap(l.m_state_labels);
       m_taus.swap(l.m_taus);
       m_action_labels.swap(l.m_action_labels);
+      m_probabilistic_labels.swap(l.m_probabilistic_labels);
       m_is_probabilistic_state.swap(l.m_is_probabilistic_state);
     };
 
@@ -216,11 +224,26 @@ class lts
       m_action_labels.resize(n);
     }
 
+    /** \brief Sets the number of probabilistic labels of this LTS.
+     * \details If space is reserved for new action labels,
+     *          these are set to the default action label. */
+    void set_num_probabilistic_labels(const labels_size_type n)
+    {
+      m_probabilistic_labels.resize(n);
+    }
+
     /** \brief Gets the number of action labels of this LTS.
      * \return The number of action labels of this LTS. */
     labels_size_type num_action_labels() const
     {
       return m_action_labels.size();
+    }
+
+    /** \brief Gets the number of probabilistic labels of this LTS.
+     * \return The number of action labels of this LTS. */
+    labels_size_type num_probabilistic_labels() const
+    {
+      return m_probabilistic_labels.size();
     }
 
     /** \brief Gets the initial state number of this LTS.
@@ -282,6 +305,17 @@ class lts
       return label_index;
     }
 
+    /** \brief Adds a probabilistic label to this LTS.
+     * \details It is not checked whether this action label already exists.
+     * \param[in] label The label of the label.
+     * \return The number of the added label. */
+    labels_size_type add_probabilistic_label(const PROBABILISTIC_LABEL_T label)
+    {
+      const labels_size_type label_index=m_probabilistic_labels.size();
+      m_probabilistic_labels.push_back(label);
+      return label_index;
+    }
+
     /** \brief Sets the label of a state.
      * \param[in] state The number of the state.
      * \param[in] label The label that will be assigned to the state. */
@@ -316,7 +350,15 @@ class lts
       assert(action<m_taus.size());
       m_taus[action] = is_tau;
     }
-    ;
+
+    /** \brief Sets the probabilistic label corresponding to some index.
+     * \param[in] action The number of the label.
+     * \param[in] label The label that will be assigned to the action.  */
+    void set_probabilistic_label(labels_size_type action, PROBABILISTIC_LABEL_T label)
+    {
+      assert(action<m_probabilistic_labels.size());
+      m_probabilistic_labels[action] = label;
+    }
 
     /** \brief Gets the label of a state.
      * \param[in] state The number of the state.
@@ -344,11 +386,19 @@ class lts
     /** \brief Gets the label of an action.
      *  \param[in] action The number of the action.
      *  \return The label of the action. */
-
     ACTION_LABEL_T action_label(const labels_size_type action) const
     {
       assert(action < m_action_labels.size());
       return m_action_labels[action];
+    }
+
+    /** \brief Gets the probabilistic label of an index.
+     *  \param[in] action The number of the index.
+     *  \return The probabilistic label of the index. */
+    const PROBABILISTIC_LABEL_T& probabilistic_label(const labels_size_type action) const
+    {
+      assert(action < m_probabilistic_labels.size());
+      return m_probabilistic_labels[action];
     }
 
     /** \brief Clear the transitions of an lts.
@@ -373,6 +423,7 @@ class lts
     void clear_actions()
     {
       m_action_labels = std::vector<ACTION_LABEL_T>();
+      m_probabilistic_labels = std::vector<PROBABILISTIC_LABEL_T>();
       m_taus = std::vector<bool>();
     }
 
@@ -531,6 +582,8 @@ class lts
     }
 
 };
+
+
 
 }
 }

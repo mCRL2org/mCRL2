@@ -28,3 +28,8 @@ add_mcrl2_tool(mcrl2-gui
     QtWidgets
     QtXml
 )
+add_custom_target(mcrl2-gui-shared
+  SOURCES
+    share/mcrl2/tool_catalog.xml
+)
+install(FILES share/mcrl2/tool_catalog.xml DESTINATION ${MCRL2_RESOURCE_PATH})

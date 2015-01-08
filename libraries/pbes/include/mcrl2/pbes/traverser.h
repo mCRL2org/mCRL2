@@ -51,7 +51,9 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const pbes_system::propositional_variable& x)
   {
@@ -193,7 +195,9 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const pbes_system::pbes_equation& x)
   {
@@ -324,7 +328,9 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const pbes_system::pbes_equation& x)
   {
@@ -454,7 +460,9 @@ struct add_traverser_variables: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const pbes_system::propositional_variable& x)
   {
@@ -596,7 +604,9 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
+#ifndef _MSC_VER
   using super::operator();
+#endif
 
   void operator()(const pbes_system::propositional_variable& x)
   {

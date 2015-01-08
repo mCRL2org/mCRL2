@@ -37,7 +37,7 @@ class mcrl2_gui_tool : public mcrl2_gui_base
     {
 
       //Create splash pixmap
-      QPixmap pixmap(":/share/mcrl2/mcrl2.png");
+      QPixmap pixmap(":/mcrl2.png");
       QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
 
       //Show the splashscreen for 2 seconds

@@ -19,24 +19,10 @@ ToolInformation::ToolInformation(QString name, QString input1, QString input2, Q
     input.insert(*it);
 
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
-
-  #ifdef __APPLE__
-    appDir.cdUp();
-    appDir.cdUp();
-    appDir.cdUp();
-  #endif
-
-    path = appDir.absoluteFilePath(name);
-  #ifdef _WIN32
-    path.append(".exe");
-  #endif
-  #ifdef __APPLE__
-    if (guiTool)
-    {
-      path.append(".app/Contents/MacOS/");
-      path.append(name);
-    }
-  #endif
+  path = appDir.absoluteFilePath(name);
+#ifdef _WIN32
+  path.append(".exe");
+#endif
 }
 
 void ToolInformation::load()
