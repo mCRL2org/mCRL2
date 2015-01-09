@@ -13,6 +13,7 @@
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_ALLOW_H
 
 #include <sstream>
+#include <utility>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/detail/allow_set.h"
 #include "mcrl2/process/detail/alphabet_traverser.h"
@@ -61,95 +62,183 @@ struct push_allow_node: public alphabet_node
   process_expression expression;
 };
 
-struct wnode
+struct alphabet_cache
 {
-  wnode(const allow_set& A_, const process_instance& Q_)
-    : A(A_), Q(Q_)
+  // This attribute denotes the status of the alphabet computation.
+  // - unknown: the alphabet computation has not started yet
+  // - busy: the alphabet computation is busy
+  // - finished: the alphabet computation is finished
+  enum alphabet_status { unknown, busy, finished };
+
+  struct alphabet_key
+  {
+    allow_set A;
+    process_instance P;
+
+    bool operator==(const alphabet_key& other) const
+    {
+      return P == other.P && A == other.A;
+    }
+
+    bool operator<(const alphabet_key& other) const
+    {
+      if (P != other.P)
+      {
+        return P < other.P;
+      }
+      return A < other.A;
+    }
+
+    alphabet_key(const allow_set& A_, const process_instance& P_)
+     : A(A_), P(P_)
+    {}
+  };
+
+  // Records the alphabet corresponding to an allow set A and a process instance Q.
+  // Each alphabet value has a corresponding equation P = push_allow(A, q), where
+  // q is the right hand side of the equation corresponding to Q.
+  struct alphabet_value
+  {
+    multi_action_name_set alphabet;
+    alphabet_status status;
+    process_instance P;
+
+    alphabet_value()
+    {}
+
+    alphabet_value(const multi_action_name_set& alphabet_, alphabet_status status_, const process_instance& P_)
+     : alphabet(alphabet_), status(status_), P(P_)
+    {}
+  };
+
+  // An identifier generator that is used for generating new equations
+  data::set_identifier_generator& id_generator;
+
+  // The cache of alphabet values
+  std::map<alphabet_key, alphabet_value> alphabet_map;
+
+  // The pairs (A, P) for which an equation needs to be generated
+  std::set<alphabet_key> unfinished;
+
+  // The push_allow algorithm maintains a set of dependent nodes. It is used
+  // to invalidate alphabet values in the cache.
+  std::set<alphabet_key> dependent_nodes;
+
+  alphabet_cache(data::set_identifier_generator& id_generator_)
+    : id_generator(id_generator_)
   {}
 
-  wnode(const allow_set& A_, const process_instance& Q_, const multi_action_name_set& alphabet_)
-    : A(A_), Q(Q_), alphabet(alphabet_)
-  {}
-
-  allow_set A;
-  process_instance Q;
-  multi_action_name_set alphabet;
-};
-
-struct push_allow_map
-{
-  std::map<process_instance, std::vector<wnode> > data;
-
-  // Returns true if (x, A) is in the map. In that case result and alphabet are being set.
-  // Returns false if (x, A) is not in the map. In that case a new entry for (x, A) is created, and result and alphabet are being set.
-  bool find(const process_instance& x, const allow_set& A, push_allow_node& node) const
+  std::string print_status(alphabet_status status) const
   {
-    bool result = false;
-
-    auto i = data.find(x);
-    if (i != data.end())
+    switch(status)
     {
-      const std::vector<wnode>& v = i->second;
-      for (auto j = v.begin(); j != v.end(); ++j)
-      {
-        if (A == j->A)
-        {
-          node.expression = j->Q;
-          node.alphabet = j->alphabet;
-          result = true;
-          break;
-        }
-      }
+      case unknown: return "unknown";
+      case busy: return "busy";
+      case finished: return "finished";
     }
-    return result;
+    throw mcrl2::runtime_error("unknown status!");
   }
 
-  void insert(const process_expression& x, const allow_set& A, const process_instance& Q)
+  // Returns a reference to the alphabet value corresponding to (A, P).
+  // If such value does is not yet present in the map, it is inserted.
+  alphabet_value& alphabet(const allow_set& A, const process_instance& P)
   {
-    data[atermpp::down_cast<process_instance>(x)].push_back(wnode(A, Q));
+    alphabet_key key(A, P);
+    auto i = alphabet_map.find(key);
+    if (i == alphabet_map.end())
+    {
+      core::identifier_string name = id_generator(P.identifier().name());
+      process_identifier P1(name, P.identifier().variables());
+      process_instance P1e(P1, P.actual_parameters());
+      multi_action_name_set empty_set;
+      alphabet_value value(empty_set, unknown, P1e);
+      auto p = alphabet_map.insert(std::make_pair(key, value));
+      return p.first->second;
+    }
+    return i->second;
   }
 
-  void set_alphabet(const process_instance& x, const allow_set& A, const multi_action_name_set& alphabet)
+  // Add (A, x) to the set of unfinished nodes
+  void set_unfinished(const allow_set& A, const process_instance& x)
   {
-    auto i = data.find(x);
-    if (i != data.end())
+    unfinished.insert(alphabet_key(A, x));
+  }
+
+  // For each entry (A, P) -> (alpha, finished, P1) it is checked if
+  // intersection(alphabet(P), A) == alpha.
+  void check_equations(const std::vector<process_equation>& equations) const
+  {
+    for (auto i = alphabet_map.begin(); i != alphabet_map.end(); ++i)
     {
-      std::vector<wnode>& v = i->second;
-      for (auto j = v.begin(); j != v.end(); ++j)
+      multi_action_name_set alphabet_P = process::alphabet(i->first.P, equations);
+      multi_action_name_set a = i->first.A.intersect(alphabet_P);
+      std::cout << "check (" << i->first.A << ", " << i->first.P << ")";
+      if (a != i->second.alphabet)
       {
-        if (A == j->A)
-        {
-          j->alphabet = alphabet;
-          return;
-        }
+        std::cout << "Error: left = " << process::pp(a) << " right = " << process::pp(i->second.alphabet);
       }
+      std::cout << std::endl;
     }
-    throw mcrl2::runtime_error("push_allow_map: entry not found!");
   }
 };
 
 inline
-std::ostream& operator<<(std::ostream& out, const push_allow_map& W)
+std::ostream& operator<<(std::ostream& out, const alphabet_cache::alphabet_key& x)
 {
-  out << "{";
-  for (auto i = W.data.begin(); i != W.data.end(); ++i)
+  return out << "(" << x.A << ", " << x.P << ")";
+}
+
+inline
+char print_alphabet_status(alphabet_cache::alphabet_status status)
+{
+  switch (status)
   {
-    if (i != W.data.begin())
+    case alphabet_cache::unknown:  { return 'u'; }
+    case alphabet_cache::busy:     { return 'b'; }
+    case alphabet_cache::finished: { return 'f'; }
+  }
+  return '?';
+}
+
+inline
+std::ostream& operator<<(std::ostream& out, const alphabet_cache::alphabet_value& x)
+{
+  return out << "(" << process::pp(x.alphabet) << ", " << print_alphabet_status(x.status) << ", " << x.P << ")";
+}
+
+inline
+std::ostream& operator<<(std::ostream& out, const alphabet_cache& W)
+{
+  out << "map: {";
+  for (auto i = W.alphabet_map.begin(); i != W.alphabet_map.end(); ++i)
+  {
+    if (i != W.alphabet_map.begin())
     {
       out << ", ";
     }
-    const process_instance& P = i->first;
-    const std::vector<wnode>& v = i->second;
-    for (auto j = v.begin(); j != v.end(); ++j)
-    {
-      if (j != v.begin())
-      {
-        out << ", ";
-      }
-      out << "(" << process::pp(P) << "_" << j->A << " = " << process::pp(j->Q) << ", " << process::pp(j->alphabet) << ")";
-    }
+    out << i->first << " -> " << i->second;
   }
   out << "}";
+  out << " dependent: {";
+  for (auto i = W.dependent_nodes.begin(); i != W.dependent_nodes.end(); ++i)
+  {
+    if (i != W.dependent_nodes.begin())
+    {
+      out << ", ";
+    }
+    out << *i;
+  }
+  out << "]";
+  out << " unfinished: [";
+  for (auto i = W.unfinished.begin(); i != W.unfinished.end(); ++i)
+  {
+    if (i != W.unfinished.begin())
+    {
+      out << ", ";
+    }
+    out << *i;
+  }
+  out << "]";
   return out;
 }
 
@@ -159,7 +248,7 @@ std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
   return out << "Node(" << pp(x.alphabet) << ", " << process::pp(x.expression) << ")";
 }
 
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, push_allow_map& W, data::set_identifier_generator& id_generator);
+push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, alphabet_cache& W);
 
 template <typename Derived, typename Node = push_allow_node>
 struct push_allow_traverser: public process_expression_traverser<Derived>
@@ -175,18 +264,15 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   // used for computing the alphabet
   std::vector<process_equation>& equations;
-  push_allow_map& W;
+  alphabet_cache& W;
 
   // the parameter A
   const allow_set& A;
 
-  // used for generating process identifiers
-  data::set_identifier_generator& id_generator;
-
   std::vector<Node> node_stack;
 
-  push_allow_traverser(std::vector<process_equation>& equations_, push_allow_map& W_, const allow_set& A_, data::set_identifier_generator& id_generator_)
-    : equations(equations_), W(W_), A(A_), id_generator(id_generator_)
+  push_allow_traverser(std::vector<process_equation>& equations_, alphabet_cache& W_, const allow_set& A_)
+    : equations(equations_), W(W_), A(A_)
   {}
 
   Derived& derived()
@@ -220,7 +306,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return node_stack.back();
   }
 
-  void log_push_result(const process_expression& x, const allow_set& A, const push_allow_map& W, const push_allow_node& result, const std::string& msg = "", const std::string& text = "")
+  void log_push_result(const process_expression& x, const allow_set& A, const alphabet_cache& W, const push_allow_node& result, const std::string& msg = "", const std::string& text = "")
   {
     std::string text1 = text;
     if (!text1.empty())
@@ -229,8 +315,8 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     }
     mCRL2log(log::debug) << msg << "push_allow(" << A << ", " << process::pp(x) << ") = "
       << text1
-      << process::pp(result.expression) << " with alphabet(" << process::pp(result.expression) << ") = " << pp(result.alphabet)
-      << " and W = " << W << std::endl;
+      << process::pp(result.expression) << " with alphabet(" << process::pp(result.expression) << ") = " << pp(result.alphabet) << std::endl
+      << " W = " << W << std::endl;
   }
 
   void log(const process_expression& x, const std::string& text = "")
@@ -258,39 +344,66 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void leave(const process::process_instance& x)
   {
-    // Let x = P(e)
-    // The corresponding equation is P(d) = p
-    push_allow_node node;
-    if (W.find(x, A, node))
+    alphabet_cache::alphabet_key key(A, x);
+    alphabet_cache::alphabet_value& alpha = W.alphabet(A, x);
+    const multi_action_name_set& alphabet = alpha.alphabet;
+    alphabet_cache::alphabet_status status = alpha.status;
+    const process_instance& P = alpha.P;
+
+    if (status == alphabet_cache::finished)
     {
+      // we already know the result for (A, x)
+      push_allow_node node(alphabet, P);
       push(node);
+      log(x);
+      return;
+    }
+    else if (status == alphabet_cache::busy)
+    {
+      // the alphabet of (A, x) is currently being computed; it suffices to return (emptyset, P)
+      W.dependent_nodes.insert(key);
+      multi_action_name_set empty_set;
+      push_allow_node node(empty_set, P);
+      push(node);
+      log(x);
       return;
     }
 
-    const process_equation& eqn = find_equation(equations, x.identifier());
-    data::variable_list d = eqn.formal_parameters();
-    core::identifier_string name = id_generator(x.identifier().name());
-    process_identifier P1(name, x.identifier().variables());
-    const process_expression& p = eqn.expression();
+    if (status == alphabet_cache::unknown)
+    {
+      alpha.status = alphabet_cache::busy;
 
-    // Add (P(e), A, P1(e)) to W
-    process_instance P1e(P1, x.actual_parameters());
-    W.insert(x, A, P1e);
+      // N.B. A copy is made, because a call to push_allow may invalidate a reference.
+      process_equation eqn = find_equation(equations, x.identifier());
+      const data::variable_list& d = eqn.formal_parameters();
+      const process_expression& p = eqn.expression();
 
-    node = push_allow(p, A, equations, W, id_generator);
+      // compute the alphabet for (A, x)
+      push_allow_node node = push_allow(p, A, equations, W);
 
-    // create a new equation P1(d) = p1
-    process_equation eqn1(P1, d, node.expression);
-    equations.push_back(eqn1);
+      W.dependent_nodes.erase(key);
+      if (W.dependent_nodes.empty())
+      {
+        // create a new equation P(d) = p1
+        const process_expression& p1 = node.expression;
+        process_equation eqn1(P.identifier(), d, p1);
+        equations.push_back(eqn1);
 
-    node.expression = P1e;
-    node.apply_allow(A);
-    push(node);
+        alpha.alphabet = node.alphabet;
+        alpha.status = alphabet_cache::finished;
 
-    // put the alphabet of P1e in W
-    W.set_alphabet(x, A, node.alphabet);
+        node.apply_allow(A);
+      }
+      else
+      {
+        alpha.status = alphabet_cache::unknown;
+        W.set_unfinished(A, x);
+      }
 
-    log(x);
+      node.expression = P;
+      push(node);
+      log(x);
+    }
   }
 
   void leave(const process::process_instance_assignment& x)
@@ -372,7 +485,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     core::identifier_string_list I = x.hide_set();
     allow_set A1 = allow_set_operations::hide_inverse(I, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W, id_generator);
+    push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(push_allow_node(alphabet_operations::hide(I, node.alphabet), process::hide(I, node.expression)));
     log(x, log_hide(x, A1));
   }
@@ -388,7 +501,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     core::identifier_string_list B = x.block_set();
     allow_set A1 = allow_set_operations::block(B, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W, id_generator);
+    push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(node);
     log(x, log_block(x, A1));
   }
@@ -404,7 +517,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     rename_expression_list R = x.rename_set();
     allow_set A1 = allow_set_operations::rename_inverse(R, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W, id_generator);
+    push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(push_allow_node(alphabet_operations::rename(R, node.alphabet), process::rename(R, node.expression)));
     log(x, log_rename(x, A1));
   }
@@ -420,7 +533,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     communication_expression_list C = x.comm_set();
     allow_set A1 = allow_set_operations::comm_inverse(C, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W, id_generator);
+    push_allow_node node = push_allow(x.operand(), A1, equations, W);
     communication_expression_list C1 = filter_comm_set(x.comm_set(), node.alphabet);
     push(push_allow_node(alphabet_operations::comm(C1, node.alphabet), detail::make_comm(C1, node.expression)));
     top().apply_allow(A);
@@ -438,7 +551,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     action_name_multiset_list V = x.allow_set();
     allow_set A1 = allow_set_operations::allow(V, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W, id_generator);
+    push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(node);
     log(x, log_allow(x, A1));
   }
@@ -453,9 +566,9 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::merge& x)
   {
     allow_set A_sub = allow_set_operations::subsets(A);
-    push_allow_node p1 = push_allow(x.left(), A_sub, equations, W, id_generator);
+    push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
-    push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W, id_generator);
+    push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
     push(push_allow_node(alphabet_operations::merge(p1.alphabet, q1.alphabet), detail::make_merge(p1.expression, q1.expression)));
     top().apply_allow(A);
     log(x, log_merge(x, A, A_sub, A_arrow));
@@ -471,9 +584,9 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::left_merge& x)
   {
     allow_set A_sub = allow_set_operations::subsets(A);
-    push_allow_node p1 = push_allow(x.left(), A_sub, equations, W, id_generator);
+    push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
-    push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W, id_generator);
+    push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
     push(push_allow_node(alphabet_operations::left_merge(p1.alphabet, q1.alphabet), detail::make_left_merge(p1.expression, q1.expression)));
     top().apply_allow(A);
     log(x, log_left_merge(x, A, A_sub, A_arrow));
@@ -489,9 +602,9 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::sync& x)
   {
     allow_set A_sub = allow_set_operations::subsets(A);
-    push_allow_node p1 = push_allow(x.left(), A_sub, equations, W, id_generator);
+    push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
-    push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W, id_generator);
+    push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
     push(push_allow_node(alphabet_operations::sync(p1.alphabet, q1.alphabet), detail::make_sync(p1.expression, q1.expression)));
     top().apply_allow(A);
     log(x, log_sync(x, A, A_sub, A_arrow));
@@ -506,8 +619,8 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
   using super::leave;
   using super::operator();
 
-  apply_push_allow_traverser(std::vector<process_equation>& equations, push_allow_map& W, const allow_set& A, data::set_identifier_generator& id_generator)
-    : super(equations, W, A, id_generator)
+  apply_push_allow_traverser(std::vector<process_equation>& equations, alphabet_cache& W, const allow_set& A)
+    : super(equations, W, A)
   {}
 
 #ifdef BOOST_MSVC
@@ -516,9 +629,9 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
 };
 
 inline
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, push_allow_map& W, data::set_identifier_generator& id_generator)
+push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, alphabet_cache& W)
 {
-  apply_push_allow_traverser<push_allow_traverser> f(equations, W, A, id_generator);
+  apply_push_allow_traverser<push_allow_traverser> f(equations, W, A);
   f(x);
   return f.node_stack.back();
 }
@@ -529,8 +642,23 @@ inline
 process_expression push_allow(const process_expression& x, const action_name_multiset_list& V, std::vector<process_equation>& equations, data::set_identifier_generator& id_generator)
 {
   allow_set A(make_name_set(V));
-  detail::push_allow_map W;
-  detail::push_allow_node node = detail::push_allow(x, A, equations, W, id_generator);
+  detail::alphabet_cache W(id_generator);
+  detail::push_allow_node node = detail::push_allow(x, A, equations, W);
+
+  // add unfinished equations
+  while (!W.unfinished.empty())
+  {
+    detail::alphabet_cache::alphabet_key key = *W.unfinished.begin();
+    W.unfinished.erase(W.unfinished.begin());
+    detail::alphabet_cache::alphabet_value& value = W.alphabet(key.A, key.P);
+    if (value.status != detail::alphabet_cache::finished)
+    {
+      mCRL2log(log::debug) << "generating unfinished equation for " << key << " -> " << value << std::endl;
+      push_allow(key.P, key.A, equations, W);
+    }
+  }
+  W.check_equations(equations);
+
   return node.expression;
 }
 
