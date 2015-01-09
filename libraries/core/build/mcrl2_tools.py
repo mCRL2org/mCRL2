@@ -27,10 +27,12 @@ def parse_command_line():
     mcrl2_tool_options.verbose = options.verbose
     return options
 
-def add_temporary_files(filename1, filename2 = None):
+def add_temporary_files(filename1, filename2 = None, filename3 = None):
     mcrl2_tool_options.files_to_be_removed[filename1] = 1
-    if filename2 != None:
+    if filename2:
         mcrl2_tool_options.files_to_be_removed[filename2] = 1
+    if filename3:
+        mcrl2_tool_options.files_to_be_removed[filename3] = 1
 
 def remove_temporary_files():
     for filename in mcrl2_tool_options.files_to_be_removed.keys():
@@ -233,3 +235,7 @@ def run_symbolic_exploration(pbesfile1, pbesfile2, options = '', timeout = 10):
     add_temporary_files(pbesfile1, pbesfile2)
     timeout_command('symbolic_exploration',  '%s %s %s' % (options, pbesfile1, pbesfile2), timeout)
 
+def run_lpsbisim2pbes(lpsfile1, lpsfile2, pbesfile, options = '', timeout = 10):
+    add_temporary_files(lpsfile1, lpsfile2, pbesfile)
+    args = '%s %s %s %s' % (lpsfile1, lpsfile2, options, pbesfile)
+    timeout_command('lpsbisim2pbes',  args.strip(), timeout)
