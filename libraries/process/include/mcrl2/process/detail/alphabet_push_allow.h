@@ -657,7 +657,7 @@ process_expression push_allow(const process_expression& x, const action_name_mul
       push_allow(key.P, key.A, equations, W);
     }
   }
-  W.check_equations(equations);
+  // W.check_equations(equations);
 
   return node.expression;
 }
