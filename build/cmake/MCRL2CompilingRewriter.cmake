@@ -60,7 +60,7 @@ while(NOT ${_temp} STREQUAL "")
 endwhile()
 
 # Configure one version for deployment
-set(R_INCLUDE_DIRS "$-I\"`dirname $0`/${REL_INCLUDE_PATH}\"")
+set(R_INCLUDE_DIRS "-I\"`dirname $0`/${REL_INCLUDE_PATH}\"")
 if(Boost_INCLUDE_DIRS)
   set(R_INCLUDE_DIRS "${R_INCLUDE_DIRS} -I\"${Boost_INCLUDE_DIRS}\"")
 endif()

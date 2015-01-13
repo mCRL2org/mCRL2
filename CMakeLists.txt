@@ -58,6 +58,7 @@ add_subdirectory(doc)
 add_subdirectory(tests)
 
 include(MCRL2CompilingRewriter)
+install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 
 # Add the packaging as a subdirectory to assure that CMake only performs install
 # commands from this script _after_ all install commands from other subdirectories

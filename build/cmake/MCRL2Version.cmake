@@ -39,7 +39,7 @@ find_package(Subversion)
 if(SUBVERSION_FOUND)
   if(EXISTS "${CMAKE_SOURCE_DIR}/.svn")
     # Subversion available: minor revision becomes SVN revision
-    Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
+    Subversion_WC_INFO(${CMAKE_SOURCE_DIR} Project)
     set(MCRL2_MINOR_VERSION ${Project_WC_REVISION})
     # Check for local changes; if there are any, then minor revision gets a 
     # postfix "M"
@@ -59,7 +59,7 @@ if(SUBVERSION_FOUND)
     message(WARNING "No version information could be included because ${CMAKE_SOURCE_DIR} is unversioned.")
   endif()
 else()
-  message(WARNING "No version information could be included because the Subversion package could not be found (are you using CMake <2.8?)")
+  message(WARNING "No version information could be included because the Subversion package could not be found.")
 endif()
 
 # Try to read build/SourceVersion, and set that version
@@ -70,7 +70,8 @@ if(MCRL2_MINOR_VERSION STREQUAL "Unknown" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR
     set(MCRL2_MINOR_VERSION ${MCRL2_SOURCE_PACKAGE_REVISION})
   endif()
 else()
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion.in" "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion" @ONLY)
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion.in"
+                 "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion" @ONLY)
 endif()
 
 if(MCRL2_PACKAGE_RELEASE)

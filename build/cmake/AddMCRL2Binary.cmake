@@ -20,8 +20,8 @@ function(_add_library_tests TARGET_NAME)
       endif()
       add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
          --build-and-test
-         "${CMAKE_CURRENT_SOURCE_DIR}"
-         "${CMAKE_CURRENT_BINARY_DIR}"
+         "${CMAKE_SOURCE_DIR}"
+         "${CMAKE_BINARY_DIR}"
          --build-noclean
          --build-nocmake
          --build-generator "${CMAKE_GENERATOR}"
