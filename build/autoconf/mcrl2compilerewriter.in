@@ -36,7 +36,7 @@ if [ -z "$CXX" ]; then  # Let user choose via $CXX
 fi
 
 (echo $1 &&
-$CXX -c @R_CXXFLAGS@ -o $1.o $1 > $1.log 2>&1 &&
+$CXX -c @R_CXXFLAGS@ @R_INCLUDE_DIRS@ -o $1.o $1 > $1.log 2>&1 &&
 echo $1.o &&
 $CXX @R_LDFLAGS@ -o $1.bin $1.o >> $1.log 2>&1 &&
 echo $1.log &&

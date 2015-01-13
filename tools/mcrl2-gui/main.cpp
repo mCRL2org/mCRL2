@@ -32,7 +32,6 @@ class mcrl2_gui_tool : public mcrl2_gui_base
 
     bool run()
     {
-
       //Create splash pixmap
       QPixmap pixmap(":/mcrl2.png");
       QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
@@ -42,11 +41,18 @@ class mcrl2_gui_tool : public mcrl2_gui_base
       QTimer::singleShot(2000, &splash, SLOT(hide()));
       MainWindow *window = new MainWindow();
       return show_main_window(window);
-
     }
 };
 
+#include <QLibraryInfo>
+
 int main(int argc, char *argv[])
 {
+  /// TODO: Remove the following four lines when QTBUG-38598 is fixed
+  QDir dir = QFileInfo(argv[0]).dir();
+  dir.cdUp();
+  dir.cd("PlugIns");
+  QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+
   return mcrl2_gui_tool().execute(argc, argv);
 }

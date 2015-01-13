@@ -47,6 +47,7 @@ add_mcrl2_tool(diagraphica
     QtCore
     QtOpenGL
     QtXml
+    QtGui
     ${OPENGL_LIBRARIES}
   INCLUDE
     ${OPENGL_INCLUDE_DIR}

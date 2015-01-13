@@ -25,6 +25,7 @@ add_mcrl2_tool(ltsgraph
     mcrl2_lts
     mcrl2_utilities_qt
     QtCore
+    QtGui
     QtOpenGL
     QtWidgets
     QtXml

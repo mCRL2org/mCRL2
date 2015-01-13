@@ -35,9 +35,7 @@ struct add_sort_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(lps::deadlock& x)
   {
@@ -180,9 +178,7 @@ struct add_data_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(lps::deadlock& x)
   {
@@ -315,9 +311,7 @@ struct add_variables: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(lps::deadlock& x)
   {

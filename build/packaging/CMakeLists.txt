@@ -33,15 +33,38 @@ set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/COPYING.txt )
 set(CPACK_RESOURCE_FILE_README  ${CMAKE_BINARY_DIR}/README.txt )
 
 if(APPLE)
-  #set(CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION False)
-  #set(CPACK_POSTFLIGHT_SCRIPT "${CMAKE_SOURCE_DIR}/build/packaging/postinstall")
-  add_custom_target(APPLE_START_SCRIPT SOURCES ${CMAKE_SOURCE_DIR}/build/packaging/mCRL2)
+  add_custom_target(APPLE_BUNDLE_ITEMS
+    SOURCES
+      ${CMAKE_SOURCE_DIR}/build/packaging/osx/Contents/MacOS/mCRL2
+      ${CMAKE_SOURCE_DIR}/build/packaging/osx/Contents/Info.plist
+  )
 
-  set(CPACK_BUNDLE_NAME "mCRL2")
-  set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/build/packaging/Info.plist")
-  set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_SOURCE_DIR}/build/packaging/mCRL2")
-  set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/build/packaging/icons/mcrl2-orange.icns")
-  set(CPACK_MONOLITHIC_INSTALL 1)
+  configure_file(${CMAKE_SOURCE_DIR}/build/packaging/osx/Contents/Info.plist
+            ${MCRL2_STAGE_PATH}/${MCRL2_BUNDLE_PATH}/Contents/Info.plist @ONLY)
+  configure_file(${CMAKE_SOURCE_DIR}/build/packaging/osx/Contents/MacOS/mCRL2
+            ${MCRL2_STAGE_PATH}/${MCRL2_BUNDLE_PATH}/Contents/MacOS/mCRL2 @ONLY)
+
+  add_executable(mCRL2 IMPORTED
+    IMPORTED_LOCATION ${MCRL2_STAGE_PATH}/${MCRL2_BUNDLE_PATH}/Contents/MacOS/mCRL2)
+
+  install(FILES ${MCRL2_STAGE_PATH}/${MCRL2_BUNDLE_PATH}/Contents/Info.plist
+          DESTINATION ${MCRL2_BUNDLE_PATH}/Contents)
+  install(PROGRAMS ${MCRL2_STAGE_PATH}/${MCRL2_BUNDLE_PATH}/Contents/MacOS/mCRL2
+          DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/MacOS)
+  install(FILES ${CMAKE_SOURCE_DIR}/build/packaging/icons/mcrl2-orange.icns
+          DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/Resources)
+
+  set(EXECUTABLES "")
+  foreach(EXECUTABLE ${MCRL2_QT_APPS})
+    set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
+  endforeach()
+  install(CODE "
+    message(STATUS \"Executing macdeployqt mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+    execute_process(
+      COMMAND macdeployqt mCRL2.app ${EXECUTABLES}
+      WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
+    )
+  ")
 endif()
 
 # Branding image displayed inside the installer

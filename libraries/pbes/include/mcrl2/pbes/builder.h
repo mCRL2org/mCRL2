@@ -49,9 +49,7 @@ struct add_sort_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   pbes_system::propositional_variable operator()(const pbes_system::propositional_variable& x)
   {
@@ -199,9 +197,7 @@ struct add_data_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(pbes_system::pbes_equation& x)
   {
@@ -338,9 +334,7 @@ struct add_variables: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   pbes_system::propositional_variable operator()(const pbes_system::propositional_variable& x)
   {
@@ -488,9 +482,7 @@ struct add_pbes_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(pbes_system::pbes_equation& x)
   {

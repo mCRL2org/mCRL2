@@ -49,9 +49,7 @@ struct add_sort_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   action_formulas::true_ operator()(const action_formulas::true_& x)
   {
@@ -217,9 +215,7 @@ struct add_data_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   action_formulas::true_ operator()(const action_formulas::true_& x)
   {
@@ -385,9 +381,7 @@ struct add_variables: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   action_formulas::true_ operator()(const action_formulas::true_& x)
   {
@@ -553,9 +547,7 @@ struct add_action_formula_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   action_formulas::true_ operator()(const action_formulas::true_& x)
   {
@@ -744,9 +736,7 @@ struct add_sort_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   regular_formulas::nil operator()(const regular_formulas::nil& x)
   {
@@ -844,9 +834,7 @@ struct add_data_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   regular_formulas::nil operator()(const regular_formulas::nil& x)
   {
@@ -944,9 +932,7 @@ struct add_variables: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   regular_formulas::nil operator()(const regular_formulas::nil& x)
   {
@@ -1044,9 +1030,7 @@ struct add_regular_formula_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   regular_formulas::nil operator()(const regular_formulas::nil& x)
   {
@@ -1167,9 +1151,7 @@ struct add_sort_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   state_formulas::true_ operator()(const state_formulas::true_& x)
   {
@@ -1407,9 +1389,7 @@ struct add_data_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   state_formulas::true_ operator()(const state_formulas::true_& x)
   {
@@ -1647,9 +1627,7 @@ struct add_variables: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   state_formulas::true_ operator()(const state_formulas::true_& x)
   {
@@ -1887,9 +1865,7 @@ struct add_state_formula_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   state_formulas::true_ operator()(const state_formulas::true_& x)
   {

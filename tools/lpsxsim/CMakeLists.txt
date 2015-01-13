@@ -11,5 +11,6 @@ add_mcrl2_tool(lpsxsim
     mcrl2_lps
     mcrl2_utilities_qt
     QtCore
+    QtGui
     QtWidgets
 )

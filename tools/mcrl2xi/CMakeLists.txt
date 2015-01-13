@@ -18,5 +18,6 @@ add_mcrl2_tool(mcrl2xi
     mcrl2_lps
     mcrl2_utilities_qt
     QtCore
+    QtGui
     QtWidgets
 )

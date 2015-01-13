@@ -54,5 +54,11 @@ class lpsxsim_tool : public lpsxsim_base
 
 int main(int argc, char *argv[])
 {
+  /// TODO: Remove the following four lines when QTBUG-38598 is fixed
+  QDir dir = QFileInfo(argv[0]).dir();
+  dir.cdUp();
+  dir.cd("PlugIns");
+  QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+
   return lpsxsim_tool().execute(argc, argv);
 }

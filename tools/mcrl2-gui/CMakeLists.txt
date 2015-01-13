@@ -25,6 +25,7 @@ add_mcrl2_tool(mcrl2-gui
     mcrl2_utilities
     mcrl2_utilities_qt
     QtCore
+    QtGui
     QtWidgets
     QtXml
 )

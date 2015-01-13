@@ -22,7 +22,8 @@ if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
       persistentfiledialog.cpp
     DEPENDS
       mcrl2_utilities
-      QtWidgets
       QtCore
+      QtGui
+      QtWidgets
   )
 endif()

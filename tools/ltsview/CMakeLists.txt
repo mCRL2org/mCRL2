@@ -47,6 +47,7 @@ add_mcrl2_tool(ltsview
     mcrl2_lts
     mcrl2_utilities_qt
     QtCore
+    QtGui
     QtOpenGL
     QtWidgets
     QtXml

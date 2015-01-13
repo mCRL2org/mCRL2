@@ -28,9 +28,7 @@ struct add_boolean_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(bes::boolean_equation& x)
   {
@@ -159,9 +157,7 @@ struct add_boolean_variables: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(bes::boolean_equation& x)
   {

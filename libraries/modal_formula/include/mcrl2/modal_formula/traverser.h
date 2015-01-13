@@ -52,9 +52,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const action_formulas::true_& x)
   {
@@ -213,9 +211,7 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const action_formulas::true_& x)
   {
@@ -372,9 +368,7 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const action_formulas::true_& x)
   {
@@ -530,9 +524,7 @@ struct add_traverser_variables: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const action_formulas::true_& x)
   {
@@ -691,9 +683,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const action_formulas::true_& x)
   {
@@ -881,9 +871,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const regular_formulas::nil& x)
   {
@@ -976,9 +964,7 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const regular_formulas::nil& x)
   {
@@ -1071,9 +1057,7 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const regular_formulas::nil& x)
   {
@@ -1166,9 +1150,7 @@ struct add_traverser_variables: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const regular_formulas::nil& x)
   {
@@ -1261,9 +1243,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const regular_formulas::nil& x)
   {
@@ -1378,9 +1358,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const state_formulas::true_& x)
   {
@@ -1608,9 +1586,7 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const state_formulas::true_& x)
   {
@@ -1836,9 +1812,7 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const state_formulas::true_& x)
   {
@@ -2060,9 +2034,7 @@ struct add_traverser_variables: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const state_formulas::true_& x)
   {
@@ -2290,9 +2262,7 @@ struct add_traverser_state_variables: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const state_formulas::true_& x)
   {
@@ -2514,9 +2484,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const state_formulas::true_& x)
   {
@@ -2747,9 +2715,7 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(const state_formulas::true_& x)
   {

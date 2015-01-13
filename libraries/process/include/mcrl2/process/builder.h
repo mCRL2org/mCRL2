@@ -30,9 +30,7 @@ struct add_sort_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   process::action_label operator()(const process::action_label& x)
   {
@@ -381,9 +379,7 @@ struct add_data_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   process::untyped_action operator()(const process::untyped_action& x)
   {
@@ -713,9 +709,7 @@ struct add_variables: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   process::untyped_action operator()(const process::untyped_action& x)
   {
@@ -1055,9 +1049,7 @@ struct add_process_expressions: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(process::process_specification& x)
   {
@@ -1379,9 +1371,7 @@ struct add_process_identifiers: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-#ifndef _MSC_VER
   using super::operator();
-#endif
 
   void operator()(process::process_specification& x)
   {
