@@ -122,8 +122,6 @@ BOOST_AUTO_TEST_CASE(test_elevator)
   run_monotonicity_test_case("nu U. [true] U && (!(nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lps_spec, true);
   run_monotonicity_test_case("(nu X . mu Y. X) => true", lps_spec, true);
   run_monotonicity_test_case("!(nu X . mu Y. X)", lps_spec, true);
-
-#ifndef MCRL2_DISABLE_MONOTONICITY_CHECKS
   run_monotonicity_test_case("mu X . X", lps_spec, true);
   run_monotonicity_test_case("nu X . X", lps_spec, true);
   run_monotonicity_test_case("mu X . !X", lps_spec, false);
@@ -133,7 +131,9 @@ BOOST_AUTO_TEST_CASE(test_elevator)
   run_monotonicity_test_case("(mu X . X) => true", lps_spec, true);
   run_monotonicity_test_case("(nu X . X) => true", lps_spec, true);
   run_monotonicity_test_case("!(mu X. (mu X. X))", lps_spec, true);
-#endif
+
+  // trac ticket #1320
+  run_monotonicity_test_case("!mu X. [true]X && mu X. [true]X", lps_spec, true);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
