@@ -44,15 +44,7 @@ class mcrl2_gui_tool : public mcrl2_gui_base
     }
 };
 
-#include <QLibraryInfo>
-
 int main(int argc, char *argv[])
 {
-  /// TODO: Remove the following four lines when QTBUG-38598 is fixed
-  QDir dir = QFileInfo(argv[0]).dir();
-  dir.cdUp();
-  dir.cd("PlugIns");
-  QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
-
   return mcrl2_gui_tool().execute(argc, argv);
 }
