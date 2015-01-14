@@ -105,30 +105,14 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
     {
       std::set<core::identifier_string> neg = negated_variables;
       core::identifier_string X = name(f);
-      std::set<core::identifier_string>::iterator i = neg.find(X);
-      if (i != neg.end())
-      {
-        neg.erase(i);
-      }
-      else
-      {
-        neg.insert(X);
-      }
+      neg.insert(X);
       return is_monotonous(not_(arg(f)), neg);
     }
     else if (is_nu(f))
     {
       std::set<core::identifier_string> neg = negated_variables;
       core::identifier_string X = name(f);
-      std::set<core::identifier_string>::iterator i = neg.find(X);
-      if (i != neg.end())
-      {
-        neg.erase(i);
-      }
-      else
-      {
-        neg.insert(X);
-      }
+      neg.insert(X);
       return is_monotonous(not_(arg(f)), neg);
     }
   }
