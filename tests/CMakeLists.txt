@@ -30,6 +30,19 @@ if(MCRL2_EXTRA_TOOL_TESTS)
   generate_tool_tests(${MCRL2_DIR}/rational.mcrl2 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes;lpsrealelm;lps2lts;ltsinfo;ltsconvert;ltscompare")
 endif()
 
+#
+# Python test drivers are assumed to have the following behaviour:
+#
+#   testdrv.py --name NUM
+#
+# prints a test name and returns exit code 0 for all numbers 0 < NUM < N, for
+# some N. For all NUM < 0 and NUM >= N, this command returns exit code 1.
+#
+#   testdrv.py --run NUM
+#
+# runs the test numbered NUM (if it exists) and returns exit code 0 if the
+# test succeeds, or 1 if it fails.
+#
 set(python_dirs "random" "regression")
 foreach(dir ${python_dirs})
   set(moretests 0)

@@ -9,7 +9,6 @@ enable_testing()
 
 # TODO: Clean up utilities/workarounds.h
 # TODO: See if -fPIC can be replaced by CMAKE_POSITION_INDEPENDENT_CODE
-# TODO: check RPATH settings
 # TODO: remove the build/workarounds include (contains only FlexLexer.h) when we finally stop using the old FSM parser
 # TODO: See if we can get rid of the __STDC_VERSION__ define in ltsgraph/ltsview/diagraphica (currently included to prevent qopenglext.h from redefining int32_t etc.)
 include_directories(build/workarounds)
@@ -39,6 +38,7 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(OpenGL     QUIET REQUIRED)
   find_package(GL2PS      QUIET REQUIRED)
   find_package(TR         QUIET REQUIRED)
+  find_package(CVC3       QUIET)
   find_package(Qt5Core    QUIET REQUIRED)
   find_package(Qt5OpenGL  QUIET REQUIRED)
   find_package(Qt5Widgets QUIET REQUIRED)
