@@ -310,8 +310,8 @@ endfunction()
 
 # pbes2bool
 function(gen_pbes2bool_release_tests PBESFILE)
-  set(ARGUMENTS "-c" "-H" "-psimplify" "-pquantifier-all" "-pquantifier-finite" "-ppfnf" 
-                "-rjitty" "-rjittyp" ${_JITTYC} "-s0" "-s1" "-s2" "-s3" "-t" "-u")
+  set(ARGUMENTS "-c" "-H" "-rjitty" "-rjittyp" ${_JITTYC} "-s0" "-s1" "-s2" "-s3" "-u"
+                "-zbreadth-first" "-zdepth-first" "--erase=none" "--erase=some" "--erase=all")
   foreach(arglist ${ARGUMENTS})
     add_tool_test(pbes2bool ${arglist} ${tagIN} ${PBESFILE})
   endforeach()
@@ -329,8 +329,7 @@ endfunction()
 
 # pbes2bes
 function(gen_pbes2bes_release_tests PBESFILE BESFILE)
-  set(ARGUMENTS "-H" "-opbes" "-ocwi" "-obes" "-opgsolver" "-psimplify" "-pquantifier-all" 
-                "-pquantifier-finite" "-ppfnf" "-rjitty" "-rjittyp" ${_JITTYC} 
+  set(ARGUMENTS "-H" "-opbes" "-ocwi" "-obes" "-opgsolver" "-rjitty" "-rjittyp" ${_JITTYC} 
                 "-s0" "-s1" "-s2" "-s3" "-t" "-u")
   add_tool_test(pbes2bes ${arglist} ${tagIN} ${PBESFILE} ${tagOUT} ${BESFILE})
   foreach(arglist ${ARGUMENTS})
