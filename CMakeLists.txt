@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.11)
 project(mCRL2)
 
 cmake_policy(SET CMP0020 NEW)
-cmake_policy(SET CMP0043 NEW)
+# cmake_policy(SET CMP0043 NEW)  TODO: set policies according to CMake version (this one is defined from 3.0 onwards)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 enable_testing()
