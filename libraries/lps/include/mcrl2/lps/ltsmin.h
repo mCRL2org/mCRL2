@@ -523,6 +523,7 @@ class pins
           const auto& reduced_summand = *p;
           std::set<data::variable> used_update_variables;
 
+          data::find_free_variables(reduced_summand.condition(), std::inserter(used_update_variables, used_update_variables.end()));
           lps::find_free_variables(reduced_summand.multi_action(), std::inserter(used_update_variables, used_update_variables.end()));
 
           for (auto q = reduced_summand.assignments().begin(); q != reduced_summand.assignments().end(); ++q)
