@@ -248,7 +248,7 @@ std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
   return out << "Node(" << pp(x.alphabet) << ", " << process::pp(x.expression) << ")";
 }
 
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, alphabet_cache& W);
+push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, alphabet_cache& W, bool generate_missing_equations = false);
 
 template <typename Derived, typename Node = push_allow_node>
 struct push_allow_traverser: public process_expression_traverser<Derived>
@@ -629,11 +629,29 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
 };
 
 inline
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, alphabet_cache& W)
+push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, alphabet_cache& W, bool generate_missing_equations)
 {
   apply_push_allow_traverser<push_allow_traverser> f(equations, W, A);
   f(x);
-  return f.node_stack.back();
+  push_allow_node result = f.node_stack.back();
+
+  if (generate_missing_equations)
+  {
+    while (!W.unfinished.empty())
+    {
+      detail::alphabet_cache::alphabet_key key = *W.unfinished.begin();
+      W.unfinished.erase(W.unfinished.begin());
+      detail::alphabet_cache::alphabet_value& value = W.alphabet(key.A, key.P);
+      if (value.status != detail::alphabet_cache::finished)
+      {
+        mCRL2log(log::debug) << "generating unfinished equation for " << key << " -> " << value << std::endl;
+        push_allow(key.P, key.A, equations, W);
+      }
+    }
+  }
+  // W.check_equations(equations);
+
+  return result;
 }
 
 } // namespace detail
@@ -643,22 +661,7 @@ process_expression push_allow(const process_expression& x, const action_name_mul
 {
   allow_set A(make_name_set(V));
   detail::alphabet_cache W(id_generator);
-  detail::push_allow_node node = detail::push_allow(x, A, equations, W);
-
-  // add unfinished equations
-  while (!W.unfinished.empty())
-  {
-    detail::alphabet_cache::alphabet_key key = *W.unfinished.begin();
-    W.unfinished.erase(W.unfinished.begin());
-    detail::alphabet_cache::alphabet_value& value = W.alphabet(key.A, key.P);
-    if (value.status != detail::alphabet_cache::finished)
-    {
-      mCRL2log(log::debug) << "generating unfinished equation for " << key << " -> " << value << std::endl;
-      push_allow(key.P, key.A, equations, W);
-    }
-  }
-  // W.check_equations(equations);
-
+  detail::push_allow_node node = detail::push_allow(x, A, equations, W, true);
   return node.expression;
 }
 
