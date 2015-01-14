@@ -52,18 +52,6 @@ if label.startswith('macosx') and package in ['nightly', 'official-release']:
   packageflags += ['-DMCRL2_OSX_PACKAGE=ON'] # Needed for packaging relevant Boost headers (for compiling rewriter)
 
 #
-# Enable random tests for all builds.
-#
-testflags = ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
-
-#
-# Do not run long tests if we're doing the ubuntu-amd64 clang maintainer 
-# build (these time out because profiling is on in Clang).
-#
-if (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
-  testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
-
-#
 # For Windows, explicitly tell CMake which generator to use to avoid trouble
 # with x86/x64 incompatibilities
 #
@@ -78,8 +66,16 @@ elif label == 'windows-x86':
 # Note that jobname is something like, i.e. including buildtype etc.
 # mCRL2-release/buildtype=Maintainer,compiler=default,label=ubuntu-amd64
 #
+testflags = []
 if jobname.split('/')[0].lower().find("release") <> -1:
-  testflags += ['-DMCRL2_ENABLE_RELEASE_TEST_TARGETS=ON']
+  testflags += ['-DMCRL2_EXTRA_TOOL_TESTS=ON']
+
+#
+# Do not run long tests if we're doing the ubuntu-amd64 clang maintainer 
+# build (these time out because profiling is on in Clang).
+#
+if (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
+  testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
 
 #
 # Run CMake, take into account configuration axes.
@@ -143,12 +139,11 @@ ctest_command = ['ctest',
                  '--output-on-failure', 
                  '--no-compress-output', 
                  '-j{0}'.format(buildthreads)]
+ 
 if label in ["windows-x86", "windows-amd64"]:
   ctest_command += ['--build-config', buildtype]
-env = {}
-env.update(os.environ)
-env['MCRL2_COMPILEREWRITER'] = os.path.abspath(os.path.join('.', 'mcrl2compilerewriter_ctest'))
-ctest_result = call('CTest', ctest_command, env=env)
+
+ctest_result = call('CTest', ctest_command)
 if ctest_result:
   log('CTest returned ' + str(ctest_result))
 
