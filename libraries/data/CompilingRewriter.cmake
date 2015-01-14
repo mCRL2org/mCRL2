@@ -6,12 +6,8 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-if(WIN32)
-  return()
-endif()
-
 set(R_NAME "mcrl2compilerewriter")
-set(R_IN_PATH "${CMAKE_SOURCE_DIR}/build/autoconf/${R_NAME}.in")
+set(R_IN_PATH "source/${R_NAME}.in")
 set(R_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${R_NAME}" )
 
 # Configure compiler
@@ -52,18 +48,10 @@ set(R_CXXFLAGS "${R_CXXFLAGS} ${R_OSX_FLAGS}")
 set(R_LDFLAGS "${R_LDFLAGS} ${R_OSX_FLAGS}")
 
 # Find mCRL2 include directory
-set(_temp ${MCRL2_RUNTIME_PATH})
-set(REL_INCLUDE_PATH ${MCRL2_INCLUDE_PATH})
-while(NOT ${_temp} STREQUAL "")
-  get_filename_component(_temp ${_temp} PATH)
-  set(REL_INCLUDE_PATH "../${REL_INCLUDE_PATH}")
-endwhile()
+file(RELATIVE_PATH REL_INCLUDE_PATH ${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH} ${CMAKE_INSTALL_PREFIX}/${MCRL2_INCLUDE_PATH})
 
 # Configure one version for deployment
 set(R_INCLUDE_DIRS "-I\"`dirname $0`/${REL_INCLUDE_PATH}\"")
-if(Boost_INCLUDE_DIRS)
-  set(R_INCLUDE_DIRS "${R_INCLUDE_DIRS} -I\"${Boost_INCLUDE_DIRS}\"")
-endif()
 configure_file(${R_IN_PATH} "${R_PATH}.install" @ONLY)
 
 # Configure one version for use in the build tree

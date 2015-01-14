@@ -11,6 +11,7 @@ enable_testing()
 # TODO: See if -fPIC can be replaced by CMAKE_POSITION_INDEPENDENT_CODE
 # TODO: remove the build/workarounds include (contains only FlexLexer.h) when we finally stop using the old FSM parser
 # TODO: See if we can get rid of the __STDC_VERSION__ define in ltsgraph/ltsview/diagraphica (currently included to prevent qopenglext.h from redefining int32_t etc.)
+# TODO: Remove DEB-dependency on compiler (g++/clang). Instead let mcrl2compilerewriter report a user-friendly error message if no compiler can be found.
 include_directories(build/workarounds)
 
 set(MCRL2_MIN_QT_VERSION 5.2.0)
@@ -57,7 +58,6 @@ add_subdirectory(tools)
 add_subdirectory(doc)
 add_subdirectory(tests)
 
-include(MCRL2CompilingRewriter)
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 
 # Add the packaging as a subdirectory to assure that CMake only performs install

@@ -1,6 +1,7 @@
 if(NOT WIN32)
   set(COMPILING_REWRITER_SRC detail/rewrite/jittyc.cpp)
   set(COMPILING_REWRITER_DEPS dl)
+  include(CompilingRewriter.cmake)
 endif()
 
 add_mcrl2_library(data

@@ -27,8 +27,6 @@ if(MCRL2_PACKAGE_RELEASE)
   set(MCRL2_GENERATE_DOC_COMMAND ${MCRL2_GENERATE_DOC_COMMAND} -r)
 endif()
 
-message(STATUS "Path: ${BIN_PATH}")
-
 add_custom_target(doc
   COMMAND ${MCRL2_GENERATE_DOC_COMMAND} -ddc
   COMMENT "(Re)-generating mCRL2 documentation (regenerates all cached documentation)" VERBATIM
