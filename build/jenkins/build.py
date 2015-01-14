@@ -22,8 +22,8 @@ elif compiler == 'gcc-oldest':
   cc = which('gcc-4.4')
   cpp = which('g++-4.4')
 elif compiler == 'gcc-latest':
-  cc = which('gcc-4.7')
-  cpp = which('g++-4.7')
+  cc = which('gcc-4.9')
+  cpp = which('g++-4.9')
 if compiler != 'default':
   if cc and cpp:
     compilerflags = ['-DCMAKE_C_COMPILER=' + cc, '-DCMAKE_CXX_COMPILER=' + cpp]
