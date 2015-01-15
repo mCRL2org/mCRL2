@@ -143,6 +143,9 @@ ctest_command = ['ctest',
 if label in ["windows-x86", "windows-amd64"]:
   ctest_command += ['--build-config', buildtype]
 
+if buildtype != 'Maintainer':
+  ctest_command += ['-LE headertest']
+
 ctest_result = call('CTest', ctest_command)
 if ctest_result:
   log('CTest returned ' + str(ctest_result))

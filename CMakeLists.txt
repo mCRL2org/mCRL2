@@ -12,6 +12,7 @@ enable_testing()
 # TODO: remove the build/workarounds include (contains only FlexLexer.h) when we finally stop using the old FSM parser
 # TODO: See if we can get rid of the __STDC_VERSION__ define in ltsgraph/ltsview/diagraphica (currently included to prevent qopenglext.h from redefining int32_t etc.)
 # TODO: Remove DEB-dependency on compiler (g++/clang). Instead let mcrl2compilerewriter report a user-friendly error message if no compiler can be found.
+# TODO: Remove trace library (to LPS? or LTS?)
 include_directories(build/workarounds)
 
 set(MCRL2_MIN_QT_VERSION 5.2.0)
@@ -22,9 +23,6 @@ option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphica
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
 option(MCRL2_ENABLE_DEPRECATED      "Enable compilation of deprecated tools." OFF)
 option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF)
-option(MCRL2_ENABLE_TEST_EXAMPLES   "Enable the tests in the example directory of each library." ON)
-option(MCRL2_ENABLE_TEST_LIBRARIES  "Enable the tests in the test directory of each library." ON)
-option(MCRL2_ENABLE_TEST_HEADERS    "Enable testing of self-containment of headers." OFF)
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_SKIP_LONG_TESTS        "Do not compile test code that takes too long when profiling is on." OFF)
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
