@@ -260,7 +260,7 @@ inline
 void save_pbes(const pbes_system::pbes& pbes, std::ostream& stream,
                const utilities::file_format* format=utilities::file_format::unknown())
 {
-  if (pbes_system::is_pbes_file_format(format))
+  if (pbes_system::is_pbes_file_format(format) || format == utilities::file_format::unknown())
   {
     pbes_system::save_pbes(pbes, stream, format);
   }
