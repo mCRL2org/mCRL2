@@ -20,13 +20,6 @@
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/pfnf_print.h"
 
-#define MCRL2_USE_PBESPGSOLVE
-// N.B. The test fails if this flag is not set, due to a problem in pbes2bool.
-
-#ifdef MCRL2_USE_PBESPGSOLVE
-#include "mcrl2/pbes/pbespgsolve.h"
-#endif
-
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
@@ -141,11 +134,7 @@ void test_pfnf_rewriter2(const std::string& text)
   std::cout << "--- before ---\n";
   std::cout << pbes_system::pp(p) << std::endl;
 
-#ifdef MCRL2_USE_PBESPGSOLVE
-  bool result1 = pbespgsolve(p);
-#else
   bool result1 = pbes2_bool_test(p);
-#endif
 
   pfnf_rewriter R;
   pbes_rewrite(p, R);
@@ -154,11 +143,7 @@ void test_pfnf_rewriter2(const std::string& text)
   std::cout << pbes_system::pp(p) << std::endl;
 
   BOOST_CHECK(p.is_well_typed());
-#ifdef MCRL2_USE_PBESPGSOLVE
-  bool result2 = pbespgsolve(p);
-#else
   bool result2 = pbes2_bool_test(p);
-#endif
   BOOST_CHECK(result1 == result2);
 }
 
