@@ -128,7 +128,7 @@ set(CPACK_COMPONENT_EXAMPLES_INSTALL_TYPES Full Default)
 set(CPACK_RPM_PACKAGE_LICENSE "Boost Software License, Version 1.0")
 set(CPACK_RPM_PACKAGE_GROUP "Productivity/Scientific/Other")
 set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
-set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, boost-devel >= ${MCRL2_MIN_BOOST_VERSION}")
+set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa")
 set(CPACK_RPM_PACKAGE_DESCRIPTION
 # -----------------------------------------------------------------------------
 "toolset for the mCRL2 formal specification language
@@ -142,7 +142,7 @@ state-space exploration and generation and tools to optimise and analyse
 specifications.  Moreover, state spaces can be manipulated, visualised and
 analysed.")
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "g++, libboost-dev (>=${MCRL2_MIN_BOOST_VERSION})")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "g++ | clang")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://www.mcrl2.org")
 set(CPACK_DEBIAN_PACKAGE_SECTION "science")
