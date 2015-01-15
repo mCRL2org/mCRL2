@@ -22,17 +22,21 @@ function(_add_library_tests TARGET_NAME)
       if(TARGET_NAME STREQUAL "mcrl2_bes")
         target_link_libraries(${testname} mcrl2_pbes mcrl2_bes)
       endif()
-      add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
-         --build-and-test
-         "${CMAKE_SOURCE_DIR}"
-         "${CMAKE_BINARY_DIR}"
-         --build-noclean
-         --build-nocmake
-         --build-generator "${CMAKE_GENERATOR}"
-         --build-target "${testname}"
-         --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
-         --test-command "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}"
+      if(${category} STREQUAL "librarytest")
+        add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
+           --build-and-test
+           "${CMAKE_SOURCE_DIR}"
+           "${CMAKE_BINARY_DIR}"
+           --build-noclean
+           --build-nocmake
+           --build-generator "${CMAKE_GENERATOR}"
+           --build-target "${testname}"
+           --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
+           --test-command "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}"
         )
+      else()
+        add_test(NAME ${testname} COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${testname})
+      endif()
       set_tests_properties(${testname} PROPERTIES LABELS ${category})
     endforeach()
   endforeach()
