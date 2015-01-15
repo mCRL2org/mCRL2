@@ -15,4 +15,4 @@ class TestRunner(testrunner.TestRunner):
       raise RuntimeError('Invalid test number')  
 
 if __name__ == "__main__":
-  sys.exit(TestRunner().main())
+  TestRunner().main()

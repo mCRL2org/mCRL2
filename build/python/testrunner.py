@@ -12,15 +12,14 @@ class TestRunner(object):
     if args.name is not None:
       result = self.name(args.name)
       if result is None: 
-        return 1
+        sys.exit(1)
       else:
         print result
     elif args.run is not None:
       try:
         self.run(args.run)
-      except:
-        return 1
-    return 0
+      except Exception as e:
+        sys.exit(str(e))
 
   def run(self, testnum):
     '''Runs the name of the test with number testnum.'''

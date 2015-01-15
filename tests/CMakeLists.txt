@@ -52,12 +52,12 @@ foreach(dir ${python_dirs})
                     RESULT_VARIABLE moretests
                     OUTPUT_VARIABLE testname 
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    math(EXPR num "${num} + 1")
     if(moretests EQUAL 0)
       add_test(NAME ${testname}
                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${dir}
                COMMAND ${PYTHON_EXECUTABLE} test.py --run ${num})
       set_tests_properties(${testname} PROPERTIES LABELS ${dir})
     endif()
+    math(EXPR num "${num} + 1")
   endwhile()
 endforeach()
