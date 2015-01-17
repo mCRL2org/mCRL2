@@ -190,7 +190,8 @@ template <typename VariableContainer, typename PropositionalVariableContainer>
 pbes_expression parse_pbes_expression(const std::string& text,
                                       const VariableContainer& variables,
                                       const PropositionalVariableContainer& propositional_variables,
-                                      const data::data_specification& dataspec = data::data_specification()
+                                      const data::data_specification& dataspec = data::data_specification(),
+                                      bool type_check = true
                                      )
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
@@ -198,9 +199,13 @@ pbes_expression parse_pbes_expression(const std::string& text,
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  pbes_expression result = pbes_actions(p).parse_PbesExpr(node);
+  pbes_expression x = pbes_actions(p).parse_PbesExpr(node);
   p.destroy_parse_node(node);
-  return type_check(result, variables, propositional_variables, dataspec);
+  if (type_check)
+  {
+    x = pbes_system::type_check(x, variables, propositional_variables, dataspec);
+  }
+  return x;
 }
 
 /// \brief Parses a sequence of pbes expressions. The format of the text is as

@@ -540,27 +540,6 @@ inline static data_specification const& default_specification()
 } // namespace detail
 /// \endcond
 
-inline
-void complete_sort_expression(sort_expression& x, const data_specification& data_spec = detail::default_specification())
-{
-  type_check(x, data_spec);
-  x = normalize_sorts(x, data_spec);
-}
-
-template <typename VariableIterator>
-void complete_data_expression(data_expression& x, VariableIterator first, VariableIterator last, const data_specification& data_spec = detail::default_specification())
-{
-  type_check(x, first, last, data_spec);
-  x = data::translate_user_notation(x);
-  x = data::normalize_sorts(x, data_spec);
-}
-
-inline
-void complete_data_specification(data_specification& x)
-{
-  type_check(x);
-}
-
 /// \brief Parses a and type checks a data specification.
 /// \details This function reads a data specification in
 ///    input string text. It is assumed that the string contains
@@ -586,7 +565,7 @@ data_specification parse_data_specification(std::istream& in)
 {
   std::string text = utilities::read_text(in);
   data_specification result = parse_data_specification_new(text);
-  complete_data_specification(result);
+  type_check(result);
   return result;
 }
 
@@ -747,20 +726,20 @@ inline
 variable parse_variable(const std::string& text,
                         const data_specification& data_spec = detail::default_specification())
 {
-  std::vector < variable > variable_store;
+  std::vector<variable> v;
 
-  parse_variables(text + ";", std::back_inserter(variable_store),data_spec);
+  parse_variables(text + ";", std::back_inserter(v),data_spec);
 
-  if (variable_store.size()==0)
+  if (v.size()==0)
   {
     throw mcrl2::runtime_error("Input does not contain a variable declaration.");
   }
-  if (variable_store.size()>1)
+  if (v.size()>1)
   {
     throw mcrl2::runtime_error("Input contains more than one variable declaration.");
   }
 
-  return variable_store.front();
+  return v.front();
 }
 
 /// \brief Parses and type checks a data variable declaration.
@@ -802,12 +781,27 @@ template <typename Variable_iterator>
 data_expression parse_data_expression(std::istream& in,
                                       const Variable_iterator first,
                                       const Variable_iterator last,
-                                      const data_specification& data_spec = detail::default_specification())
+                                      const data_specification& data_spec = detail::default_specification(),
+                                      bool type_check = true,
+                                      bool translate_user_notation = true,
+                                      bool normalize_sorts = true
+                                     )
 {
   std::string text = utilities::read_text(in);
-  data_expression result = parse_data_expression_new(text);
-  complete_data_expression(result, first, last, data_spec);
-  return result;
+  data_expression x = parse_data_expression_new(text);
+  if (type_check)
+  {
+    data::type_check(x, first, last, data_spec);
+  }
+  if (translate_user_notation)
+  {
+    x = data::translate_user_notation(x);
+  }
+  if (normalize_sorts)
+  {
+    x = data::normalize_sorts(x, data_spec);
+  }
+  return x;
 }
 
 /// \brief Parses and type checks a data expression.
@@ -822,10 +816,14 @@ template <typename Variable_iterator>
 data_expression parse_data_expression(const std::string& text,
                                       const Variable_iterator begin,
                                       const Variable_iterator end,
-                                      const data_specification& data_spec = detail::default_specification())
+                                      const data_specification& data_spec = detail::default_specification(),
+                                      bool type_check = true,
+                                      bool translate_user_notation = true,
+                                      bool normalize_sorts = true
+                                     )
 {
   std::istringstream spec_stream(text);
-  return parse_data_expression(spec_stream, begin,end, data_spec);
+  return parse_data_expression(spec_stream, begin, end, data_spec, type_check, translate_user_notation, normalize_sorts);
 }
 
 /// \brief Parses and type checks a data expression.
@@ -835,10 +833,14 @@ data_expression parse_data_expression(const std::string& text,
 /// \param[in] data_spec The data specification that is used for type checking.
 inline
 data_expression parse_data_expression(std::istream& text,
-                                      const data_specification& data_spec = detail::default_specification())
+                                      const data_specification& data_spec = detail::default_specification(),
+                                      bool type_check = true,
+                                      bool translate_user_notation = true,
+                                      bool normalize_sorts = true
+                                     )
 {
-  variable_list v_list;
-  return parse_data_expression(text,v_list.begin(),v_list.end(),data_spec);
+  variable_list v;
+  return parse_data_expression(text, v.begin(), v.end(), data_spec, type_check, translate_user_notation, normalize_sorts);
 }
 
 /// \brief Parses and type checks a data expression.
@@ -848,10 +850,14 @@ data_expression parse_data_expression(std::istream& text,
 /// \param[in] data_spec The data specification that is used for type checking.
 inline
 data_expression parse_data_expression(const std::string& text,
-                                      const data_specification& data_spec = detail::default_specification())
+                                      const data_specification& data_spec = detail::default_specification(),
+                                      bool type_check = true,
+                                      bool translate_user_notation = true,
+                                      bool normalize_sorts = true
+                                     )
 {
-  variable_list v_list;
-  return parse_data_expression(text,v_list.begin(),v_list.end(),data_spec);
+  variable_list v;
+  return parse_data_expression(text, v.begin(), v.end(), data_spec, type_check, translate_user_notation, normalize_sorts);
 }
 
 /// \brief Parses and type checks a data expression.
@@ -863,14 +869,18 @@ data_expression parse_data_expression(const std::string& text,
 inline
 data_expression parse_data_expression(const std::string& text,
                                       const std::string& var_decl,
-                                      const data_specification& data_spec = detail::default_specification())
+                                      const data_specification& data_spec = detail::default_specification(),
+                                      bool type_check = true,
+                                      bool translate_user_notation = true,
+                                      bool normalize_sorts = true
+                                     )
 {
-  std::vector < variable > variable_store;
+  std::vector<variable> v;
   if (!var_decl.empty())
   {
-    parse_variables(var_decl,std::back_inserter(variable_store),data_spec);
+    parse_variables(var_decl,std::back_inserter(v),data_spec);
   }
-  return parse_data_expression(text,variable_store.begin(),variable_store.end(),data_spec);
+  return parse_data_expression(text, v.begin(), v.end(), data_spec, type_check, translate_user_notation, normalize_sorts);
 }
 
 /// \brief Parses and type checks a sort expression.
@@ -882,9 +892,10 @@ sort_expression parse_sort_expression(std::istream& in,
                                       const data_specification& data_spec = detail::default_specification())
 {
   std::string text = utilities::read_text(in);
-  sort_expression result = parse_sort_expression_new(text);
-  complete_sort_expression(result, data_spec);
-  return result;
+  sort_expression x = parse_sort_expression_new(text);
+  type_check(x, data_spec);
+  x = normalize_sorts(x, data_spec);
+  return x;
 }
 
 /// \brief Parses and type checks a sort expression.
