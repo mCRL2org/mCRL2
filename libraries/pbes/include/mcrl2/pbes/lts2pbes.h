@@ -87,7 +87,7 @@ class lts2pbes_algorithm
 
       // compute the initial state
       state_type s0 = lts0.initial_state();
-      core::identifier_string Xs0 = detail::make_identifier(state_formulas::detail::accessors::name(f), s0);
+      core::identifier_string Xs0 = detail::make_identifier(detail::mu_name(f), s0);
       data::data_expression_list e = detail::mu_expressions(f);
       propositional_variable_instantiation init(Xs0, e);
 

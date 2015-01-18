@@ -11,7 +11,7 @@
 
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/find.h"
-#include "mcrl2/modal_formula/monotonicity.h"
+#include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mcrl2/modal_formula/typecheck.h"
-#include "mcrl2/modal_formula/monotonicity.h"
+#include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/process/process_expression.h"
 
 using namespace atermpp;
