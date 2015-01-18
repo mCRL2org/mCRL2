@@ -149,6 +149,10 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     {}
   };
 
+  linear_process_expression_traverser(const process_equation& eqn_ = process_equation())
+   : eqn(eqn_)
+  {}
+
   // TODO: check if this function is needed
   void enter(const process::process_instance& x)
   {
@@ -284,13 +288,13 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     throw non_linear_process_error("left merge expression " + process::pp(x) + " encountered");
   }
 
+
   /// \brief Returns true if the process equation e is linear.
-  bool is_linear(const process_equation& e, bool verbose = false)
+  bool is_linear(const process_expression& x, bool verbose = false)
   {
-    eqn = e;
     try
     {
-      (*this)(e.expression());
+      (*this)(x);
     }
     catch (non_linear_process_error& p)
     {
@@ -318,9 +322,10 @@ bool is_linear(const process_specification& p, bool verbose = false)
     }
     return false;
   }
-  detail::linear_process_expression_traverser visitor;
+  const process_equation& eqn = p.equations().front();
+  detail::linear_process_expression_traverser visitor(eqn);
   {
-    if (!visitor.is_linear(*p.equations().begin(), verbose))
+    if (!visitor.is_linear(eqn.expression(), verbose))
     {
       if (verbose)
       {
@@ -344,8 +349,17 @@ bool is_linear(const process_specification& p, bool verbose = false)
 inline
 bool is_linear(const process_equation& eqn)
 {
-  detail::linear_process_expression_traverser f;
-  return f.is_linear(eqn);
+  detail::linear_process_expression_traverser f(eqn);
+  return f.is_linear(eqn.expression());
+}
+
+/// \brief Returns true if the process expression is linear.
+/// \param The linear equation of the corresponding process
+inline
+bool is_linear(const process_expression& x, const process_equation& eqn)
+{
+  detail::linear_process_expression_traverser f(eqn);
+  return f.is_linear(x);
 }
 
 } // namespace process
