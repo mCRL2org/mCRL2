@@ -36,7 +36,6 @@
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/detail/print_utility.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/is_untyped.h"
 #include "mcrl2/data/traverser.h"
 #include "mcrl2/utilities/exception.h"
@@ -1897,13 +1896,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     print_sorted_declarations(x.user_defined_constructors(), true, true, false, "cons ",";\n\n", ";\n     ", get_sort_default());
     print_sorted_declarations(x.user_defined_mappings(), true, true, false, "map  ",";\n\n", ";\n     ", get_sort_default());
     print_equations(x.user_defined_equations(), x, "eqn  ", ";\n\n", ";\n     ");
-    derived().leave(x);
-  }
-
-  void operator()(const data::data_expression_with_variables& x)
-  {
-    derived().enter(x);
-    derived()(static_cast<const data::data_expression&>(x));
     derived().leave(x);
   }
 

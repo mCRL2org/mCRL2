@@ -19,7 +19,6 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/concepts.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
@@ -274,25 +273,6 @@ void test_mutable_substitution_composer()
   BOOST_CHECK(g(x) == y);
 }
 
-void test_mutable_substitution()
-{
-  using namespace mcrl2::data::detail;
-
-  mutable_map_substitution< std::map< variable, data_expression_with_variables > > sigma;
-  variable v("v", sort_nat::nat());
-  data_expression e = v;
-
-  data_expression_with_variables e1;
-  e1 = e;
-
-  sigma[v] = e;
-
-  // Compile test
-  mutable_map_substitution< std::map< variable, variable > > sigmaprime;
-
-  sigma[v] = v;
-}
-
 struct my_sort_substitution: public std::unary_function<data::basic_sort, data::sort_expression>
 {
   data::sort_expression operator()(const data::basic_sort& s)
@@ -428,7 +408,6 @@ int test_main(int /* a */, char**  /* aa */)
   test_basic();
   test_assignment_sequence_substitution();
   test_list_substitution();
-  test_mutable_substitution();
   test_sort_substitution();
   test_indexed_substitution();
   test_enumerator_substitution();

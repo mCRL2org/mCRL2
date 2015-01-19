@@ -14,7 +14,6 @@ struct identifier_string                   {};
 struct lambda                              {};
 struct forall                              {};
 struct exists                              {};
-struct data_expression_with_variables      {};
 struct assignment                          {};
 struct data_equation                       {};
 struct action_label                        {};
@@ -137,12 +136,6 @@ class data_traverser
 
       static_cast<Derived&>(*this).leave(e);
       static_cast<Derived&>(*this).leave(static_cast<data_expression const&>(e));
-    }
-
-    // Default, no traversal of sort expressions
-    void operator()(data_expression_with_variables const& e)
-    {
-      static_cast<Derived&>(*this)(static_cast<data_expression const&>(e));
     }
 
     // Default, no traversal of sort expressions
