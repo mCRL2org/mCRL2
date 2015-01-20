@@ -22,7 +22,7 @@
 #include "mcrl2/lps/detail/make_timed_lps.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/monotonicity.h"
+#include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/pbes/detail/lps2pbes_indenter.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/detail/lps2pbes_rhs.h"
