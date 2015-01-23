@@ -104,7 +104,7 @@ inline
 std::string find_equalities(const pbes_expression& x)
 {
   detail::find_equalities_traverser_inst f;
-  f(x);
+  f.apply(x);
   std::ostringstream out;
   assert(f.expression_stack.size() == 1);
   out << f.top();
