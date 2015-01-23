@@ -55,49 +55,6 @@ struct builder
   void leave(const T&)
   {}
 
-  /*
-  // aterm update
-  template <typename T>
-  void update(T& x,
-              typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-             )
-  {
-    msg("aterm update");
-    x = static_cast<Derived*>(this)->visit_copy(x);
-  }
-
-  // non-aterm update
-  template <typename T>
-  void update(T& x,
-              typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-             )
-  {
-    msg("non-aterm update");
-	static_cast<Derived*>(this)->visit(x);
-  }
-
-  // aterm update copy
-  template <typename T>
-  T update_copy(const T& x,
-                typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-               )
-  {
-    msg("aterm update copy");
-    return atermpp::vertical_cast<T>(static_cast<Derived*>(this)->visit_copy(x));
-  }
-
-  // non-aterm update copy
-  template <typename T>
-  T& update_copy(T& x,
-                 typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-                )
-  {
-    msg("non-aterm update copy");
-    static_cast<Derived*>(this)->visit(x);
-    return x;
-  }
-  */
-
   template <typename T>
   void update(T& x, typename atermpp::disable_if_container<T>::type* = 0)
   {
@@ -110,9 +67,9 @@ struct builder
   void update(T& x, typename atermpp::enable_if_container<T>::type* = 0)
   {
     msg("container visit");
-    for (auto& v: x)
+    for (typename T::iterator v = x.begin(); v != x.end(); ++v)
     {
-      static_cast<Derived*>(this)->update(v);
+      static_cast<Derived*>(this)->update(*v);
     }
   }
 
@@ -122,24 +79,14 @@ struct builder
   {
     msg("set visit");
     std::set<T> result;
-    for (T v: x)
+    for (typename std::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
     {
+      T v = *i;
       static_cast<Derived*>(this)->update(v);
-	    result.insert(v);
+      result.insert(v);
     }
     result.swap(x);
   }
-
-  /*
-  // non-container visit_copy
-  template <typename T>
-  T apply(const T& x)
-  {
-    msg("non-container visit_copy");
-    throw mcrl2::runtime_error("unknown type encountered in builder function!");
-    return x;
-  }
-  */
 
   // term_list visit copy
   template <typename T>
@@ -153,28 +100,6 @@ struct builder
     }
     return atermpp::term_list<T>(result.begin(),result.end());
   }
-
-  /*
-  // aterm traversal
-  template <typename T>
-  T operator()(const T& x,
-               typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-              )
-  {
-    msg("aterm traversal");
-    return atermpp::vertical_cast<T>(static_cast<Derived*>(this)->apply(x));
-  }
-
-  // non-aterm traversal
-  template <typename T>
-  void operator()(T& x,
-                  typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-                 )
-  {
-    msg("non aterm traversal");
-    static_cast<Derived*>(this)->update(x);
-  }
-  */
 };
 
 

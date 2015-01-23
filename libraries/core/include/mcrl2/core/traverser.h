@@ -31,55 +31,45 @@ namespace core
  *
  **/
 template <typename Derived>
-class traverser
+struct traverser
 {
-public:
-/*
-	template <typename T>
-	void operator()(const T& x)
-	{
-		static_cast<Derived*>(this)->apply(x);
-	}
-*/
-protected:
+  template <typename Expression>
+  void enter(Expression const&)
+  {}
 
-    template <typename Expression>
-    void enter(Expression const&)
-    {}
+  template <typename Expression>
+  void leave(Expression const&)
+  {}
 
-    template <typename Expression>
-    void leave(Expression const&)
-    {}
+  template <typename T>
+  void apply(const T& x, typename atermpp::disable_if_container<T>::type* = 0)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).leave(x);
+  }
 
-	template <typename T>
-	void apply(const T& x, typename atermpp::disable_if_container<T>::type* = 0)
-	{
-	  static_cast<Derived&>(*this).enter(x);
-	  static_cast<Derived&>(*this).leave(x);
-	}
-
-	// traverse containers
-	template <typename Container>
-	void apply(Container const& container, typename atermpp::enable_if_container<Container>::type* = 0)
-	{
-      for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-	  {
-		static_cast<Derived*>(this)->apply(*i);
-  	  }
-	}
-
-	// TODO: This dependency on identifier_string and nil should be moved elsewhere...
-    void apply(const core::identifier_string& x)
+  // traverse containers
+  template <typename Container>
+  void apply(Container const& container, typename atermpp::enable_if_container<Container>::type* = 0)
+  {
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
     {
-      static_cast<Derived&>(*this).enter(x);
-      static_cast<Derived&>(*this).leave(x);
+      static_cast<Derived*>(this)->apply(*i);
     }
+  }
 
-    void apply(const core::nil& x)
-    {
-      static_cast<Derived&>(*this).enter(x);
-      static_cast<Derived&>(*this).leave(x);
-    }
+  // TODO: This dependency on identifier_string and nil should be moved elsewhere...
+  void apply(const core::identifier_string& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const core::nil& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).leave(x);
+  }
 };
 
 // apply a builder without additional template arguments
@@ -90,7 +80,7 @@ struct apply_traverser: public Traverser<apply_traverser<Traverser> >
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 
 template <template <class> class Traverser>
