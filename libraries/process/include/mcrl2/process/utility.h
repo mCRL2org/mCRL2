@@ -35,56 +35,6 @@ bool is_pcrl(const process_expression& x)
 }
 
 inline
-process_expression expand_rhs(const process::process_instance_assignment& x, const std::vector<process_equation>& equations)
-{
-  const process_equation& eqn = find_equation(equations, x.identifier());
-  process_expression p = eqn.expression();
-  data::mutable_map_substitution<> sigma;
-  data::assignment_list a = x.assignments();
-  for (auto i = a.begin(); i != a.end(); ++i)
-  {
-    sigma[i->lhs()] = i->rhs();
-  }
-  std::set<data::variable> v = process::find_free_variables(x);
-  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
-  return result;
-}
-
-inline
-process_expression expand_rhs(const process::process_instance& x, const std::vector<process_equation>& equations)
-{
-  const process_equation& eqn = find_equation(equations, x.identifier());
-  process_expression p = eqn.expression();
-  data::mutable_map_substitution<> sigma;
-  data::variable_list d = eqn.formal_parameters();
-  data::data_expression_list e = x.actual_parameters();
-  data::variable_list::iterator di = d.begin();
-  data::data_expression_list::iterator ei = e.begin();
-  for (; di != d.end(); ++di, ++ei)
-  {
-    sigma[*di] = *ei;
-  }
-  std::set<data::variable> v = process::find_free_variables(x);
-  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
-  return result;
-}
-
-// Expands the assignments in x
-inline
-process_instance expand_assignments(const process::process_instance_assignment& x, const std::vector<process_equation>& equations)
-{
-  const process_equation& eqn = find_equation(equations, x.identifier());
-  const data::variable_list& v = eqn.formal_parameters();
-  data::assignment_sequence_substitution sigma(x.assignments());
-  std::vector<data::data_expression> e;
-  for (auto i = v.begin(); i != v.end(); ++i)
-  {
-    e.push_back(sigma(*i));
-  }
-  return process_instance(x.identifier(), data::data_expression_list(e.begin(), e.end()));
-}
-
-inline
 multi_action_name multiset_union(const multi_action_name& alpha, const multi_action_name& beta)
 {
   multi_action_name result;

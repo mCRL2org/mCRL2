@@ -16,7 +16,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/parse.h"
 
 using namespace mcrl2;

@@ -111,48 +111,6 @@ void test2()
   BOOST_CHECK(r(d1, sigma) == r(d2));
 }
 
-void test3()
-{
-  typedef data::rewriter::substitution_type substitution_function;
-
-  data_specification data_spec = parse_data_specification(
-                                   "map dummy1:Pos;  \n"
-                                   "var dummy2:Bool; \n"
-                                   "    dummy3:Pos;  \n"
-                                   "    dummy4:Nat;  \n"
-                                   "    dummy5:Int;  \n"
-                                   "    dummy6:Real; \n"
-                                   "eqn dummy1 = 1;  \n"
-                                 );
-  rewriter_with_variables r(data_spec);
-  data_expression x = parse_data_expression("b == b", "b: Bool;\n");
-  std::set<variable> v = find_all_variables(x);
-  BOOST_CHECK(v.size() == 1);
-
-  data_expression_with_variables y(x, variable_list(v.begin(), v.end()));
-  data_expression_with_variables z = r(y);
-  std::cout << "y = " << data::pp(y) << " " << data::pp(y.variables()) << std::endl;
-  std::cout << "z = " << data::pp(z) << " " << data::pp(z.variables()) << std::endl;
-  BOOST_CHECK(z.variables().empty());
-
-  std::string var_decl = "m, n: Pos;\n";
-  substitution_function sigma;
-  variable m(variable("m", sort_pos::pos()));
-  variable n(variable("n", sort_pos::pos()));
-  sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
-  sigma[n] = r(data_expression_with_variables(parse_data_expression("4")));
-
-  data_expression_with_variables sigma_m = data::replace_variables(static_cast<const data_expression&>(m), sigma);
-
-  data_expression_with_variables d1(parse_data_expression("m+n", var_decl));
-  data_expression_with_variables d2(parse_data_expression("7"));
-  BOOST_CHECK(r(d1, sigma) == r(d2));
-
-  BOOST_CHECK(d1.variables().size() == 0);
-  data_expression_with_variables rd1 = r(d1);
-  BOOST_CHECK(rd1.variables().size() == 2);
-}
-
 template <typename Rewriter>
 void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitution_text)
 {
@@ -226,7 +184,6 @@ int test_main(int argc, char** argv)
 {
   test1();
   test2();
-  test3();
   test4();
   one_point_rule_preprocessor_test();
   simplify_rewriter_test();

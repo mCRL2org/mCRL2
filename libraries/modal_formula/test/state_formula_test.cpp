@@ -22,7 +22,6 @@
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/normalize.h"
-#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
 #include "mcrl2/modal_formula/maximal_closed_subformula.h"
@@ -77,8 +76,6 @@ BOOST_AUTO_TEST_CASE(test_rename)
 
 BOOST_AUTO_TEST_CASE(test_normalize)
 {
-  using namespace state_formulas::detail::accessors;
-
   state_formula x = state_formulas::variable(identifier_string("X"), data::data_expression_list());
   state_formula y = state_formulas::variable(identifier_string("Y"), data::data_expression_list());
   state_formula f;
@@ -104,23 +101,16 @@ BOOST_AUTO_TEST_CASE(test_normalize)
 
 BOOST_AUTO_TEST_CASE(test_type_checking)
 {
-  using namespace state_formulas::detail::accessors;
-
   specification context=remove_stochastic_operators(linearise(
                             "sort CPU = struct p1;"
                             "sort CPUs = Set(CPU);"
                             "init delta;"));
 
   state_formula formula = parse_state_formula("nu X (P : CPUs = {p1}) . val(P != {})", context);
-
-  // BOOST_CHECK(is_may(formula));
-  // BOOST_CHECK(is_regular_formula(act(formula)));
 }
 
 BOOST_AUTO_TEST_CASE(test_type_checking_conversion_of_arguments)
 {
-  using namespace state_formulas::detail::accessors;
-
   specification context=remove_stochastic_operators(linearise(
                             "sort B = struct d;"
                             "act a: List(B);"
@@ -130,7 +120,8 @@ BOOST_AUTO_TEST_CASE(test_type_checking_conversion_of_arguments)
   state_formula formula = parse_state_formula("<a([d])>true", context);
 
   BOOST_CHECK(is_may(formula));
-  BOOST_CHECK(is_regular_formula(act(formula)));
+  const state_formulas::may& f = atermpp::down_cast<state_formulas::may>(formula);
+  BOOST_CHECK(is_regular_formula(f.formula()));
 }
 
 

@@ -22,7 +22,7 @@
 #include "mcrl2/lps/detail/make_timed_lps.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/monotonicity.h"
+#include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/pbes/detail/lps2pbes_indenter.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/detail/lps2pbes_rhs.h"
@@ -48,7 +48,6 @@ class lps2pbes_algorithm
     /// \return A PBES that encodes the property applied to the given specification
     pbes run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, data::variable T = data::undefined_real_variable())
     {
-      using namespace state_formulas::detail::accessors;
       using atermpp::detail::operator+;
       lps::linear_process lps = spec.process();
 
@@ -113,7 +112,7 @@ class lps2pbes_algorithm
       pbes_equation e1 = eqn.front();
       core::identifier_string Xe(e1.variable().name());
       assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
-      core::identifier_string Xf = name(f);
+      core::identifier_string Xf = detail::mu_name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
       data::data_expression_list pi = spec.initial_process().state(spec.process().process_parameters());
       data::data_expression_list e = fi + pi + detail::Par(Xf, data::variable_list(), f);

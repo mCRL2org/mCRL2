@@ -14,7 +14,7 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/pbes/monotonicity.h"
+#include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/test_utilities.h"

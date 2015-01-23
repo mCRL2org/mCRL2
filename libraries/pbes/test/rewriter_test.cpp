@@ -23,7 +23,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"

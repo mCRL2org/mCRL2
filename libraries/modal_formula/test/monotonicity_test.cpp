@@ -17,7 +17,7 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/modal_formula/monotonicity.h"
+#include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/modal_formula/resolve_name_clashes.h"

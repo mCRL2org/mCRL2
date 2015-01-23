@@ -20,7 +20,7 @@
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/process/detail/alphabet_traverser.h"
-#include "mcrl2/process/detail/expand_process_instance_assignments.h"
+#include "mcrl2/process/expand_process_instance_assignments.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/process/traverser.h"

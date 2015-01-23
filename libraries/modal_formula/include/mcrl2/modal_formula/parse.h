@@ -181,27 +181,6 @@ state_formula parse_state_formula_new(const std::string& text)
   return result;
 }
 
-inline
-void complete_state_formula(state_formula& x, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true)
-{
-  type_check(x, spec, check_monotonicity);
-  if (translate_regular)
-  {
-    mCRL2log(log::debug) << "formula before translating regular formulas: " << x << std::endl;
-    x = translate_regular_formulas(x);
-    mCRL2log(log::debug) << "formula after translating regular formulas: " << x << std::endl;
-  }
-  spec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
-  x = state_formulas::translate_user_notation(x);
-  x = state_formulas::normalize_sorts(x, spec.data());
-  if (check_monotonicity && state_formulas::has_name_clashes(x))
-  {
-    mCRL2log(log::debug) << "formula before resolving name clashes: " << x << std::endl;
-    x = state_formulas::resolve_name_clashes(x);
-    mCRL2log(log::debug) << "formula after resolving name clashes: " << x << std::endl;
-  }
-}
-
 /// \brief Parses a state formula from an input stream
 // spec may be updated as the data implementation of the state formula
 // may cause internal names to change.
@@ -210,16 +189,41 @@ void complete_state_formula(state_formula& x, lps::specification& spec, bool che
 /// \param check_monotonicity If true, an exception will be thrown if the formula is not monotonous. Furthermore, name clashes are resolved.
 /// \return The converted modal formula
 inline
-state_formula parse_state_formula(std::istream& in, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true)
+state_formula parse_state_formula(std::istream& in, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true,
+                                  bool type_check = true, bool translate_user_notation = true, bool normalize_sorts = true)
 {
   std::string text = utilities::read_text(in);
-  state_formula result = parse_state_formula_new(text);
-  if (find_nil(result))
+  state_formula x = parse_state_formula_new(text);
+  if (find_nil(x))
   {
     throw mcrl2::runtime_error("regular formulas containing nil are unsupported!");
   }
-  complete_state_formula(result, spec, check_monotonicity, translate_regular);
-  return result;
+  if (type_check)
+  {
+    state_formulas::type_check(x, spec, check_monotonicity);
+  }
+  if (translate_regular)
+  {
+    mCRL2log(log::debug) << "formula before translating regular formulas: " << x << std::endl;
+    x = translate_regular_formulas(x);
+    mCRL2log(log::debug) << "formula after translating regular formulas: " << x << std::endl;
+  }
+  spec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
+  if (translate_user_notation)
+  {
+    x = state_formulas::translate_user_notation(x);
+  }
+  if (normalize_sorts)
+  {
+    x = state_formulas::normalize_sorts(x, spec.data());
+  }
+  if (check_monotonicity && state_formulas::has_name_clashes(x))
+  {
+    mCRL2log(log::debug) << "formula before resolving name clashes: " << x << std::endl;
+    x = state_formulas::resolve_name_clashes(x);
+    mCRL2log(log::debug) << "formula after resolving name clashes: " << x << std::endl;
+  }
+  return x;
 }
 
 /// \brief Parses a state formula from text
@@ -229,10 +233,11 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
 /// \param spec A linear process specification
 /// \return The converted modal formula
 inline
-state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true)
+state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true,
+                                  bool type_check = true, bool translate_user_notation = true, bool normalize_sorts = true)
 {
   std::stringstream formula_stream(formula_text);
-  return parse_state_formula(formula_stream, spec, check_monotonicity, translate_regular);
+  return parse_state_formula(formula_stream, spec, check_monotonicity, translate_regular, type_check, translate_user_notation, normalize_sorts);
 }
 
 } // namespace state_formulas

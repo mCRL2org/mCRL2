@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {
@@ -53,32 +52,22 @@ std::vector<pbes_equation> operator+(const std::vector<pbes_equation>& p, const 
 
 namespace detail {
 
-/// \brief Returns the variables corresponding to ass(f)
-/// \param f A modal formula
-/// \return The variables corresponding to ass(f)
 inline
-data::variable_list mu_variables(state_formulas::state_formula f)
+data::variable_list lhs_variables(const data::assignment_list& l)
 {
-  assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
-  data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::variable_list result;
-  for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (auto i = l.begin(); i != l.end(); ++i)
   {
     result.push_front(i->lhs());
   }
   return atermpp::reverse(result);
 }
 
-/// \brief Returns the data expressions corresponding to ass(f)
-/// \param f A modal formula
-/// \return The data expressions corresponding to ass(f)
 inline
-data::data_expression_list mu_expressions(state_formulas::state_formula f)
+data::data_expression_list rhs_expressions(const data::assignment_list& l)
 {
-  assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
-  data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::data_expression_list result;
-  for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (auto i = l.begin(); i != l.end(); ++i)
   {
     result.push_front(i->rhs());
   }
@@ -86,11 +75,64 @@ data::data_expression_list mu_expressions(state_formulas::state_formula f)
 }
 
 inline
+const core::identifier_string& mu_name(const state_formulas::state_formula& f)
+{
+  if (state_formulas::is_mu(f))
+  {
+    const state_formulas::mu& g = atermpp::down_cast<state_formulas::mu>(f);
+    return g.name();
+  }
+  else
+  {
+    const state_formulas::nu& g = atermpp::down_cast<state_formulas::nu>(f);
+    return g.name();
+  }
+}
+
+/// \brief Returns the variables corresponding to ass(f)
+/// \param f A modal formula
+/// \return The variables corresponding to ass(f)
+inline
+data::variable_list mu_variables(const state_formulas::state_formula& f)
+{
+  assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
+  if (state_formulas::is_mu(f))
+  {
+    const state_formulas::mu& g = atermpp::down_cast<state_formulas::mu>(f);
+    return lhs_variables(g.assignments());
+  }
+  else
+  {
+    const state_formulas::nu& g = atermpp::down_cast<state_formulas::nu>(f);
+    return lhs_variables(g.assignments());
+  }
+}
+
+/// \brief Returns the data expressions corresponding to ass(f)
+/// \param f A modal formula
+/// \return The data expressions corresponding to ass(f)
+inline
+data::data_expression_list mu_expressions(const state_formulas::state_formula& f)
+{
+  assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
+  if (state_formulas::is_mu(f))
+  {
+    const state_formulas::mu& g = atermpp::down_cast<state_formulas::mu>(f);
+    return rhs_expressions(g.assignments());
+  }
+  else
+  {
+    const state_formulas::nu& g = atermpp::down_cast<state_formulas::nu>(f);
+    return rhs_expressions(g.assignments());
+  }
+}
+
+inline
 std::string myprint(const std::vector<pbes_equation>& v)
 {
   std::ostringstream out;
   out << "[";
-  for (std::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (auto i = v.begin(); i != v.end(); ++i)
   {
     out << "\n  " << pbes_system::pp(i->symbol()) << " " << pbes_system::pp(i->variable()) << " = " << pbes_system::pp(i->formula());
   }
@@ -106,7 +148,7 @@ inline
 data::mutable_map_substitution<> make_fresh_variables(const data::variable_list& variables, data::set_identifier_generator& id_generator, bool add_to_context = true)
 {
   data::mutable_map_substitution<> result;
-  for (data::variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
+  for (auto i = variables.begin(); i != variables.end(); ++i)
   {
     core::identifier_string name =  id_generator(std::string(i->name()));
     result[*i] = data::variable(name, i->sort());

@@ -99,7 +99,7 @@ class pbes_eqelm_algorithm
     {
       std::ostringstream out;
       out << "{ ";
-      for (typename Set::const_iterator i = s.begin(); i != s.end(); ++i)
+      for (auto i = s.begin(); i != s.end(); ++i)
       {
         if (i != s.begin())
         {
@@ -114,12 +114,12 @@ class pbes_eqelm_algorithm
     std::vector<equivalence_class> compute_equivalence_sets(const propositional_variable_decl_type& X) const
     {
       std::map< data::sort_expression, equivalence_class> m;
-      for (typename variable_sequence_type::const_iterator i = X.parameters().begin(); i != X.parameters().end(); ++i)
+      for (auto i = X.parameters().begin(); i != X.parameters().end(); ++i)
       {
         m[i->sort()].insert(*i);
       }
       std::vector<equivalence_class> result;
-      for (typename std::map<data::sort_expression, equivalence_class>::iterator i = m.begin(); i != m.end(); ++i)
+      for (auto i = m.begin(); i != m.end(); ++i)
       {
         if (i->second.size() > 1)
         {
@@ -133,11 +133,11 @@ class pbes_eqelm_algorithm
     std::string print_vertices() const
     {
       std::ostringstream out;
-      for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
         out << i->first << " -> [ ";
         const std::vector<equivalence_class>& v = i->second;
-        for (typename std::vector<equivalence_class>::const_iterator j = v.begin(); j != v.end(); ++j)
+        for (auto j = v.begin(); j != v.end(); ++j)
         {
           if (j != v.begin())
           {
@@ -154,7 +154,7 @@ class pbes_eqelm_algorithm
     std::string print_edges() const
     {
       std::ostringstream out;
-      for (typename std::map<string_type, std::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
+      for (auto i = m_edges.begin(); i != m_edges.end(); ++i)
       {
         out << i->first << " -> " << print_set(i->second) << std::endl;
       }
@@ -165,10 +165,10 @@ class pbes_eqelm_algorithm
     std::string print_equivalence_classes() const
     {
       std::ostringstream out;
-      for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
         out << "  vertex " << i->first << ": ";
-        for (typename std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+        for (auto j = i->second.begin(); j != i->second.end(); ++j)
         {
           out << print_set(*j) << " ";
         }
@@ -209,18 +209,18 @@ class pbes_eqelm_algorithm
 
       std::vector<equivalence_class>& cY = m_vertices[Y];
       std::vector<equivalence_class> cY1;
-      for (typename std::vector<equivalence_class>::iterator j = cY.begin(); j != cY.end(); ++j)
+      for (auto j = cY.begin(); j != cY.end(); ++j)
       {
         equivalence_class& equiv = *j;
         std::map<data_term_type, equivalence_class> w;
-        for (typename equivalence_class::iterator k = equiv.begin(); k != equiv.end(); ++k)
+        for (auto k = equiv.begin(); k != equiv.end(); ++k)
         {
           size_t p = index_of(*k, m_parameters[Y]);
           pbes_system::data_rewriter<DataRewriter> rewr(m_data_rewriter);
           pbes_system::pbes_expression e_p = rewr(e[p], vX);
           w[atermpp::down_cast<const data::data_expression>(e_p)].insert(*k);
         }
-        for (typename std::map<data_term_type, equivalence_class>::iterator i = w.begin(); i != w.end(); ++i)
+        for (auto i = w.begin(); i != w.end(); ++i)
         {
           if (i->second.size() > 1)
           {
@@ -246,10 +246,10 @@ class pbes_eqelm_algorithm
     {
       data::mutable_map_substitution<> result;
       const std::vector<equivalence_class>& cX = m_vertices[X];
-      for (typename std::vector<equivalence_class>::const_iterator i = cX.begin(); i != cX.end(); ++i)
+      for (auto i = cX.begin(); i != cX.end(); ++i)
       {
         const equivalence_class& s = *i;
-        for (typename equivalence_class::const_iterator j = ++s.begin(); j != s.end(); ++j)
+        for (auto j = ++s.begin(); j != s.end(); ++j)
         {
           result[*j] = *s.begin();
         }
@@ -280,9 +280,9 @@ class pbes_eqelm_algorithm
       {
         string_type X = i->variable().name();
         const std::vector<equivalence_class>& eq = m_vertices[X];
-        for (typename std::vector<equivalence_class>::const_iterator j = eq.begin(); j != eq.end(); ++j)
+        for (auto j = eq.begin(); j != eq.end(); ++j)
         {
-          for (typename equivalence_class::const_iterator k = ++j->begin(); k != j->end(); ++k)
+          for (auto k = ++j->begin(); k != j->end(); ++k)
           {
             to_be_removed[X].push_back(index_of(*k, m_parameters[X]));
           }
@@ -355,7 +355,7 @@ class pbes_eqelm_algorithm
         // create a substitution function that corresponds to cX
         data::mutable_map_substitution<> vX = compute_substitution(X);
         const std::set<propositional_variable_type>& edges = m_edges[X];
-        for (typename std::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
+        for (auto i = edges.begin(); i != edges.end(); ++i)
         {
           // propagate the equivalence relations in X over the edge Ye
           const propositional_variable_type& Ye = *i;

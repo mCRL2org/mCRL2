@@ -547,7 +547,6 @@ class mcrl2parse_tool : public input_tool
             case dataspec_e :
             {
               data::data_specification x = data::parse_data_specification(text);
-              data::complete_data_specification(x);
               if (aterm_format)
               {
                 std::cout << data::detail::data_specification_to_aterm_data_spec(x) << std::endl;
@@ -646,8 +645,7 @@ class mcrl2parse_tool : public input_tool
             case sortexpr_e :
             {
               separate_data_specification(text, "sortexpr", dataspec, text);
-              data::sort_expression x = data::parse_sort_expression_new(text);
-              data::complete_sort_expression(x, dataspec);
+              data::sort_expression x = data::parse_sort_expression(text, dataspec);
               if (aterm_format)
               {
                 std::cout << x << std::endl;
@@ -661,8 +659,12 @@ class mcrl2parse_tool : public input_tool
             case statefrm_e :
             {
               separate_action_specification(text, "statefrm", lpsspec, text);
-              state_formulas::state_formula x = state_formulas::parse_state_formula_new(text);
-              state_formulas::complete_state_formula(x, lpsspec, false);
+              bool check_monotonicity = false;
+              bool translate_regular = true;
+              bool type_check = true;
+              bool translate_user_notation = true;
+              bool normalize_sorts = true;
+              state_formulas::state_formula x = state_formulas::parse_state_formula(text, lpsspec, check_monotonicity, translate_regular, type_check, translate_user_notation, normalize_sorts);
               if (aterm_format)
               {
                 std::cout << x << std::endl;

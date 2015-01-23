@@ -12,8 +12,8 @@
 #ifndef MCRL2_PROCESS_IS_LINEAR_H
 #define MCRL2_PROCESS_IS_LINEAR_H
 
+#include <algorithm>
 #include "mcrl2/process/traverser.h"
-#include "mcrl2/process/detail/is_linear.h"
 
 namespace mcrl2
 {
@@ -23,6 +23,50 @@ namespace process
 
 namespace detail
 {
+
+/// \brief Returns true if the process instance assignment a matches with the process equation eq.
+inline
+bool check_process_instance_assignment(const process_equation& eq, const process_instance_assignment& a)
+{
+  if (a.identifier() != eq.identifier())
+  {
+    return false;
+  }
+  data::assignment_list a1 = a.assignments();
+  data::variable_list v = eq.formal_parameters();
+
+  // check if the left hand sides of the assignments exist
+  for (data::assignment_list::iterator i = a1.begin(); i != a1.end(); ++i)
+  {
+    if (std::find(v.begin(), v.end(), i->lhs()) == v.end())
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// \brief Returns true if the process instance a matches with the process equation eq.
+inline
+bool check_process_instance(const process_equation& eq, const process_instance& init)
+{
+  if (eq.identifier() != init.identifier())
+  {
+    return false;
+  }
+  data::variable_list v = eq.formal_parameters();
+  data::data_expression_list e = init.actual_parameters();
+  data::variable_list::const_iterator i = v.begin();
+  data::data_expression_list::const_iterator j = e.begin();
+  for (; i != v.end(); ++i, ++j)
+  {
+    if (i->sort() != j->sort())
+    {
+      return false;
+    }
+  }
+  return true;
+}
 
 /// \brief Returns true if the argument is a process instance
 inline
@@ -148,6 +192,10 @@ struct linear_process_expression_traverser: public process_expression_traverser<
       : msg(s)
     {}
   };
+
+  linear_process_expression_traverser(const process_equation& eqn_ = process_equation())
+   : eqn(eqn_)
+  {}
 
   // TODO: check if this function is needed
   void enter(const process::process_instance& x)
@@ -284,13 +332,13 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     throw non_linear_process_error("left merge expression " + process::pp(x) + " encountered");
   }
 
+
   /// \brief Returns true if the process equation e is linear.
-  bool is_linear(const process_equation& e, bool verbose = false)
+  bool is_linear(const process_expression& x, bool verbose = false)
   {
-    eqn = e;
     try
     {
-      (*this)(e.expression());
+      (*this)(x);
     }
     catch (non_linear_process_error& p)
     {
@@ -318,9 +366,10 @@ bool is_linear(const process_specification& p, bool verbose = false)
     }
     return false;
   }
-  detail::linear_process_expression_traverser visitor;
+  const process_equation& eqn = p.equations().front();
+  detail::linear_process_expression_traverser visitor(eqn);
   {
-    if (!visitor.is_linear(*p.equations().begin(), verbose))
+    if (!visitor.is_linear(eqn.expression(), verbose))
     {
       if (verbose)
       {
@@ -344,8 +393,17 @@ bool is_linear(const process_specification& p, bool verbose = false)
 inline
 bool is_linear(const process_equation& eqn)
 {
-  detail::linear_process_expression_traverser f;
-  return f.is_linear(eqn);
+  detail::linear_process_expression_traverser f(eqn);
+  return f.is_linear(eqn.expression());
+}
+
+/// \brief Returns true if the process expression is linear.
+/// \param The linear equation of the corresponding process
+inline
+bool is_linear(const process_expression& x, const process_equation& eqn)
+{
+  detail::linear_process_expression_traverser f(eqn);
+  return f.is_linear(x);
 }
 
 } // namespace process

@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/monotonicity.h
+/// \file mcrl2/pbes/is_monotonous.h
 /// \brief Functions for computing monotonicity of pbes data types.
 
-#ifndef MCRL2_PBES_MONOTONICITY_H
-#define MCRL2_PBES_MONOTONICITY_H
+#ifndef MCRL2_PBES_IS_MONOTONOUS_H
+#define MCRL2_PBES_IS_MONOTONOUS_H
 
 #include "mcrl2/pbes/pbes.h"
 
@@ -143,4 +143,4 @@ bool is_monotonous(const pbes& p)
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_MONOTONICITY_H
+#endif // MCRL2_PBES_IS_MONOTONOUS_H

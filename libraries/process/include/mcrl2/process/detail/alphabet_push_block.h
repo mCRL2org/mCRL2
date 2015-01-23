@@ -303,7 +303,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     core::identifier_string_list B1(B.begin(), B.end());
     allow_set A1(alphabet_operations::block(B1, A.A));
     detail::alphabet_cache W(id_generator);
-    detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations, W);
+    detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations, W, true);
     mCRL2log(log::debug) << push_block_printer(B).print(x, A1);
     return node.expression;
   }
