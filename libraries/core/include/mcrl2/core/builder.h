@@ -94,9 +94,9 @@ struct builder
   {
     msg("term_list traversal");
     std::vector<T> result;
-    for (const auto& v: x)
+    for (typename atermpp::term_list<T>::const_iterator v = x.begin(); v != x.end(); ++v)
     {
-      result.push_back(atermpp::vertical_cast<T>(static_cast<Derived*>(this)->apply(v)));
+      result.push_back(atermpp::vertical_cast<T>(static_cast<Derived*>(this)->apply(*v)));
     }
     return atermpp::term_list<T>(result.begin(),result.end());
   }
