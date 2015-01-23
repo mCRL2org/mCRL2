@@ -71,7 +71,7 @@ std::string pp_with_summand_numbers(const specification& x)
   std::ostringstream out;
   core::detail::apply_printer<lps::detail::printer> printer(out);
   printer.print_summand_numbers() = true;
-  printer(x);
+  printer.apply(x);
   return out.str();
 }
 
@@ -80,7 +80,7 @@ std::string pp_with_summand_numbers(const stochastic_specification& x)
   std::ostringstream out;
   core::detail::apply_printer<lps::detail::printer> printer(out);
   printer.print_summand_numbers() = true;
-  printer(x);
+  printer.apply(x);
   return out.str();
 }
 

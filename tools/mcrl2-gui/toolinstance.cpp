@@ -85,35 +85,43 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
     m_ui.pckFileIn->setVisible(false);
   }
 
+  QFormLayout *formLayout = new QFormLayout();
+  formLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
   for (int i = 0; i < m_info.options.count(); i++)
   {
     ToolOption option = m_info.options.at(i);
-    QCheckBox *cbOpt = NULL;
+    QWidget *nameOpt = NULL;
+    QCheckBox* cbOpt = NULL;
+    QVBoxLayout *lytOpt = new QVBoxLayout();
 
-    if (option.argument.type != EnumArgument)
+    if (option.argument.type == EnumArgument)
     {
-        cbOpt = new QCheckBox(option.nameLong+": ", this);
-        cbOpt->setChecked(option.standard);
-        QFont font(cbOpt->font());
-        font.setBold(true);
-        cbOpt->setFont(font);
+      nameOpt = new QLabel("<b>"+option.nameLong+": </b>");
+    }
+    else
+    {
+      cbOpt = new QCheckBox(option.nameLong + ": ", this);
+      cbOpt->setChecked(option.standard);
+      QFont font(cbOpt->font());
+      font.setBold(true);
+      cbOpt->setFont(font);
+      nameOpt = cbOpt;
     }
 
+    formLayout->addRow(nameOpt, lytOpt);
+
     QLabel *lblOpt = new QLabel(option.description, this);
+    lblOpt->setAlignment(Qt::AlignJustify | Qt::AlignTop);
+    lblOpt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     lblOpt->setWordWrap(true);
+    lytOpt->addWidget(lblOpt);
 
     if (!option.hasArgument())
     {
-      m_ui.frmOptions2->addRow(cbOpt, lblOpt);
       m_optionValues.append(new OptionValue(option, cbOpt));
     }
     else
     {
-      QVBoxLayout *lytOpt = new QVBoxLayout();
-      lytOpt->setSpacing(20);
-
-      lytOpt->addWidget(lblOpt);
-
       switch (option.argument.type)
       {
         case StringArgument:
@@ -124,10 +132,6 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
           {
             QHBoxLayout *lytArg = new QHBoxLayout();
             lytArg->setSpacing(6);
-
-//            QLabel *lblArg = new QLabel(option.argument.name, this);
-//            lblArg->setMinimumWidth(100);
-//            lytArg->addWidget(lblArg);
 
             QWidget *edtArg = NULL;
 
@@ -210,10 +214,6 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
             QHBoxLayout *lytArg = new QHBoxLayout();
             lytArg->setSpacing(6);
 
-//            QLabel *lblArg = new QLabel(option.argument.name, this);
-//            lblArg->setMinimumWidth(100);
-//            lytArg->addWidget(lblArg);
-
             FilePicker *edtArg = new FilePicker(m_fileDialog, this, false);
             lytArg->addWidget(edtArg);
             m_optionValues.append(new OptionValue(option, cbOpt, edtArg));
@@ -256,16 +256,9 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
         default:
           break;
       }
-      if (cbOpt != NULL)
-      {
-        m_ui.frmOptions2->addRow(cbOpt, lytOpt);
-      }
-      else
-      {
-        m_ui.frmOptions2->addRow("<b>"+option.nameLong+": </b>", lytOpt);
-      }
     }
   }
+  m_ui.scrollWidget->setLayout(formLayout);
 }
 
 ToolInstance::~ToolInstance()
@@ -459,7 +452,7 @@ void ToolInstance::onSave()
 
     if (file.open(QFile::WriteOnly | QFile::Text))
     {
-      file.write((const char *)m_ui.edtOutput->toPlainText().toAscii().data());
+      file.write((const char *)m_ui.edtOutput->toPlainText().toLatin1().data());
       file.close();
     }
   }

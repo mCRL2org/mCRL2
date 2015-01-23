@@ -30,7 +30,7 @@ struct pbes_expression2boolean_expression_traverser: public pbes_system::pbes_ex
   typedef core::term_traits<pbes_system::pbes_expression> tr;
   typedef core::term_traits<bes::boolean_expression> br;
 
-  using super::operator();
+  using super::apply;
   using super::enter;
   using super::leave;
 
@@ -129,7 +129,7 @@ inline
 boolean_expression pbes_expression2boolean_expression(const pbes_system::pbes_expression& x)
 {
   detail::pbes_expression2boolean_expression_traverser f;
-  f(x);
+  f.apply(x);
   return f.result();
 }
 

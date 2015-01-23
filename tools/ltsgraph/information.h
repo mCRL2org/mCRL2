@@ -20,6 +20,7 @@
 #define GRAPHINFORMATION_H
 
 #include <QDockWidget>
+#include <QtOpenGL>
 #include "ui_information.h"
 
 #include "graph.h"
@@ -60,10 +61,10 @@ namespace Graph
 
       QString m_initial;        ///< The initial node index.
       QString m_initialstring;  ///< The initial node label.
-      int m_nodes;              ///< The total number of nodes.
-      int m_edges;              ///< The total number of edges.
-      int m_slabels;            ///< The total number of state labels.
-      int m_tlabels;            ///< The total number of transition labels.
+      size_t m_nodes;              ///< The total number of nodes.
+      size_t m_edges;              ///< The total number of edges.
+      size_t m_slabels;            ///< The total number of state labels.
+      size_t m_tlabels;            ///< The total number of transition labels.
   };
 
   class InformationUi : public QDockWidget

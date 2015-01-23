@@ -8,15 +8,13 @@
 //
 /// \file ./shape.cpp
 
-#ifdef __APPLE__
-# include <GLUT/glut.h>
-#else
-# ifdef WIN32
-#  define NOMINMAX
+#ifdef WIN32
 #  include <windows.h>
-#  undef __in_range // for STLport on Windows
-# endif
-# include <GL/glu.h>
+#endif
+#ifdef __APPLE__
+#  include <OpenGL/glu.h>
+#else
+#  include <GL/glu.h>
 #endif
 
 #include "shape.h"

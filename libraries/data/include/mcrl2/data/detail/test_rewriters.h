@@ -32,7 +32,8 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
   typedef data_expression_builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
   /// \brief Splits a disjunction into a sequence of operands
   /// Given a data expression of the form p1 || p2 || .... || pn, this will yield a
@@ -60,9 +61,9 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
     return result;
   }
 
-  data_expression operator()(const application& x)
+  data_expression apply(const application& x)
   {
-    data_expression y = super::operator()(x);
+    data_expression y = super::apply(x);
     if (sort_bool::is_and_application(y))
     {
       std::multiset<data_expression> s = split_and(y);
@@ -82,7 +83,7 @@ T normalize_and_or(const T& x,
                    typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                   )
 {
-  return core::make_apply_builder<normalize_and_or_builder>()(x);
+  return core::make_apply_builder<normalize_and_or_builder>().apply(x);
 }
 
 template <typename T>
@@ -90,7 +91,7 @@ void normalize_and_or(T& x,
                       typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                      )
 {
-  core::make_apply_builder<normalize_and_or_builder>()(x);
+  core::make_apply_builder<normalize_and_or_builder>().update(x);
 }
 
 // Normalizes equalities.
@@ -100,11 +101,11 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
   typedef data_expression_builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  data_expression operator()(const application& x)
+  data_expression apply(const application& x)
   {
-    data_expression y = super::operator()(x);
+    data_expression y = super::apply(x);
     if (data::is_equal_to_application(y))
     {
       data_expression left = data::binary_left1(y);
@@ -140,7 +141,7 @@ T normalize_equality(const T& x,
                      typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                     )
 {
-  return core::make_apply_builder<normalize_equality_builder>()(x);
+  return core::make_apply_builder<normalize_equality_builder>().apply(x);
 }
 
 template <typename T>
@@ -148,7 +149,7 @@ void normalize_equality(T& x,
                         typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                        )
 {
-  core::make_apply_builder<normalize_equality_builder>()(x);
+  core::make_apply_builder<normalize_equality_builder>().update(x);
 }
 
 // normalize operator
@@ -242,3 +243,4 @@ data_expression I(const data_expression& x)
 } // namespace mcrl2
 
 #endif // MCRL2_DATA_DETAIL_TEST_REWRITERS_H
+

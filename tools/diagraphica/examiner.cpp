@@ -10,6 +10,8 @@
 
 #include "examiner.h"
 
+#include <QMessageBox>
+#include <QMenu>
 #include <iostream>
 using namespace std;
 

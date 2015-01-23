@@ -38,11 +38,8 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
   typedef process_expression_builder<alphabet_push_builder> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
+  using super::apply;
+  using super::update;
 
   std::vector<process_equation>& equations;
   data::set_identifier_generator id_generator;
@@ -56,12 +53,12 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
     }
   }
 
-  process_expression operator()(const process::allow& x)
+  process_expression apply(const process::allow& x)
   {
     return push_allow(x.operand(), x.allow_set(), equations, id_generator);
   }
 
-  process_expression operator()(const process::block& x)
+  process_expression apply(const process::block& x)
   {
     return push_block(x.block_set(), x.operand(), equations, id_generator);
   }
@@ -71,7 +68,7 @@ inline
 process_expression alphabet_reduce(const process_expression& x, std::vector<process_equation>& equations)
 {
   alphabet_push_builder f(equations);
-  return f(x);
+  return f.apply(x);
 }
 
 } // detail

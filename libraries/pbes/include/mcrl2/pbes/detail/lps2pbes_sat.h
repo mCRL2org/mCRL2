@@ -40,11 +40,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   const lps::multi_action& a;
   data::set_identifier_generator& id_generator;
@@ -96,7 +92,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     push(false_());
   }
 
-  void operator()(const action_formulas::not_& x)
+  void apply(const action_formulas::not_& x)
   {
     push(tr::not_(Sat(a, x.operand(), id_generator, TermTraits())));
   }
@@ -122,7 +118,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     push(tr::imp(left, right));
   }
 
-  void operator()(const action_formulas::forall& x)
+  void apply(const action_formulas::forall& x)
   {
     data::mutable_map_substitution<> sigma_x = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
     std::set<data::variable> sigma_x_variables = data::substitution_variables(sigma_x);
@@ -131,7 +127,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     push(tr::forall(y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x, sigma_x_variables), id_generator, TermTraits())));
   }
 
-  void operator()(const action_formulas::exists& x)
+  void apply(const action_formulas::exists& x)
   {
     data::mutable_map_substitution<> sigma_x = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
     std::set<data::variable> sigma_x_variables = data::substitution_variables(sigma_x);
@@ -140,7 +136,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     push(tr::exists(y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x, sigma_x_variables), id_generator, TermTraits())));
   }
 
-  void operator()(const action_formulas::at& x)
+  void apply(const action_formulas::at& x)
   {
     data::data_expression t = a.time();
     action_formulas::action_formula alpha = x.operand();
@@ -155,16 +151,12 @@ struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser, Term
   typedef Traverser<apply_sat_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::top;
 
   apply_sat_traverser(const lps::multi_action& a, data::set_identifier_generator& id_generator, TermTraits tr)
     : super(a, id_generator, tr)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <typename TermTraits>
@@ -175,7 +167,7 @@ pbes_expression Sat(const lps::multi_action& a,
                    )
 {
   apply_sat_traverser<sat_traverser, TermTraits> f(a, id_generator, tr);
-  f(x);
+  f.apply(x);
   return f.top();
 }
 

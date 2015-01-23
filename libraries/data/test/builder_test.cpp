@@ -31,18 +31,19 @@ struct my_builder: public add_data_variable_binding<data::data_expression_builde
   typedef add_data_variable_binding<data::data_expression_builder, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
   using super::is_bound;
 
   std::multiset<variable> unbound;
 
-  data_expression operator()(const variable& v)
+  data_expression apply(const variable& v)
   {
     if (!is_bound(v))
     {
       unbound.insert(v);
     }
-    return super::operator()(v);
+    return super::apply(v);
   }
 };
 
@@ -52,7 +53,8 @@ struct replace_free_variables_builder: public Binder<Builder, replace_free_varia
   typedef Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
   using super::is_bound;
   using super::increase_bind_count;
 
@@ -69,7 +71,7 @@ struct replace_free_variables_builder: public Binder<Builder, replace_free_varia
     increase_bind_count(bound_variables);
   }
 
-  data_expression operator()(const variable& v)
+  data_expression apply(const variable& v)
   {
     if (is_bound(v))
     {
@@ -77,9 +79,6 @@ struct replace_free_variables_builder: public Binder<Builder, replace_free_varia
     }
     return sigma(v);
   }
-  #if BOOST_MSVC
-  #include "mcrl2/core/detail/builder_msvc.inc.h"
-  #endif
 };
 
 struct subst: public std::unary_function<data::variable, data::data_expression>
@@ -119,15 +118,15 @@ void test_binding()
   v.push_back(bool_("d"));
   data_expression x = parse_data_expression("exists b: Bool. if(c, c, b)", v.begin(), v.end());
   core::apply_builder<my_builder> f;
-  f(x);
+  f.apply(x);
   BOOST_CHECK(f.unbound.size() == 2);
   size_t count = f.unbound.erase(bool_("c"));
   BOOST_CHECK(count == 2);
 
   std::multiset<variable> bound_variables;
   bound_variables.insert(bool_("c"));
-  data::data_expression y = make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(subst())(x);
-  data::data_expression z = make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(subst(), bound_variables)(x);
+  data::data_expression y = make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(subst()).apply(x);
+  data::data_expression z = make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(subst(), bound_variables).apply(x);
   BOOST_CHECK(y == parse_data_expression("exists b: Bool. if(d, d, b)", v.begin(), v.end()));
   BOOST_CHECK(z == x);
 }

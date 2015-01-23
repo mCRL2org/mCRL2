@@ -1,5 +1,0 @@
-sort X = struct c(Nat)?f ;
-
-proc P(a:X) = tau . P(c(4));
-
-init P(c(2));

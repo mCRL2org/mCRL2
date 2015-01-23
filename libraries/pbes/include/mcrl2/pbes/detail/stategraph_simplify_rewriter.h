@@ -78,9 +78,7 @@ template <typename Derived, typename DataRewriter, typename SubstitutionFunction
 struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction>
 {
   typedef simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   typedef core::term_traits<data::data_expression> tt;
   typedef core::term_traits<pbes_expression> tr;
@@ -188,44 +186,44 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
     return result;
   }
 
-  pbes_expression operator()(const data::data_expression& x)
+  pbes_expression apply(const data::data_expression& x)
   {
-    return post_process(super::operator()(data::simplify(x)));
+    return post_process(super::apply(data::simplify(x)));
   }
 
-  pbes_expression operator()(const not_& x)
+  pbes_expression apply(const not_& x)
   {
-    return post_process(super::operator()(x));
+    return post_process(super::apply(x));
   }
 
-  pbes_expression operator()(const and_& x)
+  pbes_expression apply(const and_& x)
   {
-    return post_process(super::operator()(x));
+    return post_process(super::apply(x));
   }
 
-  pbes_expression operator()(const or_& x)
+  pbes_expression apply(const or_& x)
   {
-    return post_process(super::operator()(x));
+    return post_process(super::apply(x));
   }
 
-  pbes_expression operator()(const imp& x)
+  pbes_expression apply(const imp& x)
   {
-    return derived()(or_(not_(x.left()), x.right()));
+    return derived().apply(or_(not_(x.left()), x.right()));
   }
 
-  pbes_expression operator()(const forall& x)
+  pbes_expression apply(const forall& x)
   {
-    return post_process(super::operator()(x));
+    return post_process(super::apply(x));
   }
 
-  pbes_expression operator()(const exists& x)
+  pbes_expression apply(const exists& x)
   {
-    return post_process(super::operator()(x));
+    return post_process(super::apply(x));
   }
 
-  pbes_expression operator()(const propositional_variable_instantiation& x)
+  pbes_expression apply(const propositional_variable_instantiation& x)
   {
-    return post_process(super::operator()(x));
+    return post_process(super::apply(x));
   }
 };
 
@@ -256,7 +254,7 @@ class stategraph_simplify_rewriter
     pbes_expression operator()(const pbes_expression& x) const
     {
       data::no_substitution sigma;
-      return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma)(x);
+      return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma).apply(x);
     }
 
     /// \brief Rewrites a pbes expression.
@@ -266,7 +264,7 @@ class stategraph_simplify_rewriter
     template <typename SubstitutionFunction>
     pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
     {
-      return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma)(x);
+      return detail::make_apply_rewriter_builder<stategraph_simplify_builder>(m_rewriter, sigma).apply(x);
     }
 };
 

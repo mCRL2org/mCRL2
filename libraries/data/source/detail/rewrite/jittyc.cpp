@@ -804,11 +804,11 @@ struct auxiliary_count_variables_class: public Traverser < auxiliary_count_varia
   typedef Traverser< auxiliary_count_variables_class < Traverser > > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::map <variable,size_t> m_map;
 
-  void operator ()(const variable& v)
+  void apply(const variable& v)
   {
     if (m_map.count(v)==0)
     {
@@ -830,7 +830,7 @@ static variable_list get_doubles(const data_expression& t)
 {
   typedef std::map <variable,size_t> t_variable_map;
   auxiliary_count_variables_class<data::variable_traverser> acvc;
-  acvc(t);
+  acvc.apply(t);
   t_variable_map variable_map=acvc.get_map();
   variable_list result;
   for(t_variable_map::const_iterator i=variable_map.begin();

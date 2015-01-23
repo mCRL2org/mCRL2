@@ -30,8 +30,8 @@ void rewrite2()
   // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
   std::string var_decl = "m, n: Pos;\n";
   std::map<variable, data_expression> substitutions;
-  substitutions[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
-  substitutions[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
+  substitutions[atermpp::down_cast<variable>(parse_data_expression("m", var_decl))] = r(parse_data_expression("3"));
+  substitutions[atermpp::down_cast<variable>(parse_data_expression("n", var_decl))] = r(parse_data_expression("4"));
   map_substitution<std::map<variable, data_expression> > sigma(substitutions);
 
   // Rewrite two data expressions, and check if they are the same

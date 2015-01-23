@@ -8,24 +8,24 @@
 
 # This script generates toolset documentation
 
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-nightly.inc.template" "${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-nightly.inc" @ONLY )
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-release.inc.template" "${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-release.inc" @ONLY )
-
-set( MCRL2_GENERATE_DOC_RELEASE_FLAG "" )
-if(MCRL2_PACKAGE_RELEASE)
-  set( MCRL2_GENERATE_DOC_RELEASE_FLAG "-r" )
-endif(MCRL2_PACKAGE_RELEASE)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-nightly.inc.template"
+               "${CMAKE_CURRENT_BINARY_DIR}/_temp/source/user_manual/downloads-nightly.inc" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-release.inc.template"
+               "${CMAKE_CURRENT_BINARY_DIR}/_temp/source/user_manual/downloads-release.inc" @ONLY)
 
 if(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-  set( BIN_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+  set(BIN_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 else()
-  set( BIN_PATH ${CMAKE_BINARY_DIR})
+  set(BIN_PATH ${CMAKE_BINARY_DIR})
 endif()
 
-set( MCRL2_GENERATE_DOC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/generate.py )
-set( MCRL2_GENERATE_DOC_COMMAND ${MCRL2_GENERATE_DOC_SCRIPT} ${MCRL2_GENERATE_DOC_RELEASE_FLAG} -v=${MCRL2_VERSION} --path=${BIN_PATH} --temp=${CMAKE_CURRENT_BINARY_DIR}/_temp --out=${CMAKE_CURRENT_BINARY_DIR}/html )
+set(MCRL2_GENERATE_DOC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/generate.py)
+set(MCRL2_GENERATE_DOC_COMMAND ${MCRL2_GENERATE_DOC_SCRIPT} -v=${MCRL2_VERSION} --path=${BIN_PATH}
+  --temp=${CMAKE_CURRENT_BINARY_DIR}/_temp --out=${CMAKE_CURRENT_BINARY_DIR}/html)
 
-message(STATUS "Path: ${BIN_PATH}")
+if(MCRL2_PACKAGE_RELEASE)
+  set(MCRL2_GENERATE_DOC_COMMAND ${MCRL2_GENERATE_DOC_COMMAND} -r)
+endif()
 
 add_custom_target(doc
   COMMAND ${MCRL2_GENERATE_DOC_COMMAND} -ddc

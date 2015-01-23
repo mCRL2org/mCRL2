@@ -137,7 +137,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
   typedef pbes_system::detail::data_rewriter_builder<pbesinst_finite_builder, DataRewriter, SubstitutionFunction> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
   using super::sigma;
 
   typedef core::term_traits<pbes_expression> tr;
@@ -202,7 +203,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     return result;
   }
 
-  pbes_expression operator()(const propositional_variable_instantiation& x)
+  pbes_expression apply(const propositional_variable_instantiation& x)
   {
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
 
@@ -273,10 +274,6 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     core::identifier_string X = m_rename(init.name(), finite_parameters);
     return propositional_variable_instantiation(X, infinite_parameters);
   }
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 } // namespace detail
@@ -393,7 +390,7 @@ class pbesinst_finite_algorithm
           mCRL2log(log::debug1) << "formula before = " << pbes_system::pp(i->formula()) << "\n";
           mCRL2log(log::debug1) << "sigma = " << sigma_j << "\n";
           detail::pbesinst_finite_builder<data::rewriter, data::mutable_indexed_substitution<>> visitor(rewr, sigma_j, pbesinst_finite_rename(), p.data(), index_map, variable_map);
-          pbes_expression formula = visitor(i->formula());
+          pbes_expression formula = visitor.apply(i->formula());
           mCRL2log(log::debug1) << "formula after  = " << pbes_system::pp(formula) << "\n";
           pbes_equation eqn(i->symbol(), X, formula);
           equations.push_back(eqn);

@@ -116,7 +116,7 @@ void test_guard(const std::string& pbesspec, const std::string& X, const std::st
   simplify_data_rewriter<data::rewriter> R(p.data());
 
   detail::guard_traverser f(p.data());
-  f(x1);
+  f.apply(x1);
   BOOST_CHECK(f.expression_stack.back().check_guards(x1, R));
 
 //  pbes_expression g = detail::guard(X1, x1);

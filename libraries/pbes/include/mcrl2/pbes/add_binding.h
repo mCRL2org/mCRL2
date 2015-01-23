@@ -9,15 +9,11 @@
 /// \file mcrl2/pbes/add_binding.h
 /// \brief add your file description here.
 
-// to avoid circular header file problems
-#ifndef MCRL2_PBES_H
-#include "mcrl2/pbes/pbes.h"
-#endif
-
 #ifndef MCRL2_PBES_ADD_BINDING_H
 #define MCRL2_PBES_ADD_BINDING_H
 
 #include "mcrl2/data/add_binding.h"
+#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2
 {
@@ -32,8 +28,7 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
   typedef data::add_data_variable_binding<Builder, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-  using super::bind_count;
+  using super::apply;
   using super::increase_bind_count;
   using super::decrease_bind_count;
 

@@ -22,6 +22,7 @@
 #include <QtGlobal>
 #include <string>
 #include "toolset_version.h"
+#include "workarounds.h"
 
 #if defined(_WIN32)
 #include <iostream>
@@ -153,6 +154,7 @@ class qt_tool: public Tool, public QtToolBase
     {
       m_argc = argc;
       m_argv = argv;
+      work_around_qtbug_38598(m_argv[0]);
       return static_cast<Tool *>(this)->execute(argc, argv);
     }
 

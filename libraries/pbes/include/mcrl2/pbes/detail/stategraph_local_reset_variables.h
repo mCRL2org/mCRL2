@@ -159,7 +159,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
   typedef pbes_expression_traverser<local_reset_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   local_reset_variables_algorithm& algorithm;
   const stategraph_equation& eq_X;
@@ -254,7 +254,7 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
 {
   std::size_t i = 0;
   local_reset_traverser f(algorithm, eq_X, i);
-  f(x);
+  f.apply(x);
   return f.top();
 }
 

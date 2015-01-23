@@ -16,8 +16,6 @@
 #include <functional>
 #include <vector>
 
-#include "boost/bind.hpp"
-
 #include "mcrl2/atermpp/aterm_appl.h"
 
 // utilities

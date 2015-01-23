@@ -34,7 +34,7 @@ class pfnf_rewriter
     pbes_expression operator()(const pbes_expression& x) const
     {
       pbes_system::detail::pfnf_traverser visitor;
-      visitor(x);
+      visitor.apply(x);
       return visitor.evaluate();
     }
 

@@ -1188,11 +1188,7 @@ struct is_timed_traverser: public state_formula_traverser<is_timed_traverser>
   typedef state_formula_traverser<is_timed_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   bool result;
 
@@ -1229,7 +1225,7 @@ inline
 bool is_timed(const state_formula& x)
 {
   is_timed_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

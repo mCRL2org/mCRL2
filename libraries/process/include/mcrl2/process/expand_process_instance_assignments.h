@@ -26,11 +26,8 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
   typedef process_expression_builder<expand_process_instance_assignments_builder> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
+  using super::apply;
+  using super::update;
 
   const std::vector<process_equation>& equations;
 
@@ -40,7 +37,7 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
 
   /// \brief Converts a process instance P(e) into p[d := e], where P(d) = d is the equation
   /// corresponding to P.
-  process_expression operator()(const process::process_instance& x)
+  process_expression apply(const process::process_instance& x)
   {
     const process_equation& eqn = find_equation(equations, x.identifier());
     process_expression p = eqn.expression();
@@ -59,7 +56,7 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
 
   /// \brief Converts a process instance assignment P(d = e) into p[d := e], where P(d) = d is the equation
   /// corresponding to P.
-  process_expression operator()(const process::process_instance_assignment& x)
+  process_expression apply(const process::process_instance_assignment& x)
   {
     const process_equation& eqn = find_equation(equations, x.identifier());
     process_expression p = eqn.expression();
@@ -81,7 +78,7 @@ inline
 process_expression expand_process_instance_assignments(const process_expression& x, const std::vector<process_equation>& equations)
 {
   detail::expand_process_instance_assignments_builder f(equations);
-  return f(x);
+  return f.apply(x);
 }
 
 // Converts a process_instance_assignment into a process_instance, by expanding assignments

@@ -53,10 +53,8 @@ struct bottom_up_traverser: public Traverser<Derived>
 {
   typedef Traverser<Derived> super;
   using super::enter;
-#ifndef BOOST_MSVC
   using super::leave;
-#endif
-  using super::operator();
+  using super::apply;
 
   Derived& derived()
   {
@@ -160,17 +158,13 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
   typedef bottom_up_traverser<state_formulas::state_formula_traverser, maximal_closed_subformula_node, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::push;
   using super::pop;
   using super::top;
   using super::node_stack;
 
   typedef typename super::node_iterator node_iterator;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 
   Derived& derived()
   {
@@ -250,7 +244,7 @@ struct apply_maximal_closed_subformula_traverser: public maximal_closed_subformu
   typedef maximal_closed_subformula_traverser<apply_maximal_closed_subformula_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::top;
 };
 
@@ -260,7 +254,7 @@ inline
 std::set<state_formulas::state_formula> maximal_closed_subformulas(const state_formula& x)
 {
   detail::apply_maximal_closed_subformula_traverser f;
-  f(x);
+  f.apply(x);
   return f.top().formulas;
 }
 

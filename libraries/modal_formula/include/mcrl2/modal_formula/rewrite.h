@@ -29,7 +29,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_builder<action_formulas::data_expression_builder>(R)(x);
+  data::detail::make_rewrite_data_expressions_builder<action_formulas::data_expression_builder>(R).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x
@@ -42,7 +42,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<action_formulas::data_expression_builder>(R)(x);
+  return data::detail::make_rewrite_data_expressions_builder<action_formulas::data_expression_builder>(R).apply(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -56,7 +56,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_with_substitution_builder<action_formulas::data_expression_builder>(R, sigma)(x);
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<action_formulas::data_expression_builder>(R, sigma).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -71,7 +71,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<action_formulas::data_expression_builder>(R, sigma)(x);
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<action_formulas::data_expression_builder>(R, sigma).apply(x);
 }
 //--- end generated action_formulas rewrite code ---//
 
@@ -89,7 +89,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_builder<regular_formulas::data_expression_builder>(R)(x);
+  data::detail::make_rewrite_data_expressions_builder<regular_formulas::data_expression_builder>(R).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x
@@ -102,7 +102,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<regular_formulas::data_expression_builder>(R)(x);
+  return data::detail::make_rewrite_data_expressions_builder<regular_formulas::data_expression_builder>(R).apply(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -116,7 +116,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_with_substitution_builder<regular_formulas::data_expression_builder>(R, sigma)(x);
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<regular_formulas::data_expression_builder>(R, sigma).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -131,7 +131,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<regular_formulas::data_expression_builder>(R, sigma)(x);
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<regular_formulas::data_expression_builder>(R, sigma).apply(x);
 }
 //--- end generated regular_formulas rewrite code ---//
 
@@ -149,7 +149,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_builder<state_formulas::data_expression_builder>(R)(x);
+  data::detail::make_rewrite_data_expressions_builder<state_formulas::data_expression_builder>(R).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x
@@ -162,7 +162,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<state_formulas::data_expression_builder>(R)(x);
+  return data::detail::make_rewrite_data_expressions_builder<state_formulas::data_expression_builder>(R).apply(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -176,7 +176,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_with_substitution_builder<state_formulas::data_expression_builder>(R, sigma)(x);
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<state_formulas::data_expression_builder>(R, sigma).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -191,7 +191,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<state_formulas::data_expression_builder>(R, sigma)(x);
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<state_formulas::data_expression_builder>(R, sigma).apply(x);
 }
 //--- end generated state_formulas rewrite code ---//
 

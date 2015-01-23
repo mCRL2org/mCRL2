@@ -22,15 +22,12 @@ namespace core
 {
 
 /// \brief Traverser that defines functions for maintaining bound variables.
-template <template <class> class Traverser, typename Derived, typename Variable>
-class add_binding : public Traverser<Derived>
+template <template <class> class TraverserOrBuilder, typename Derived, typename Variable>
+class add_binding : public TraverserOrBuilder<Derived>
 {
   public:
-    typedef Traverser<Derived> super;
+    typedef TraverserOrBuilder<Derived> super;
     typedef Variable variable_type;
-    using super::operator();
-    using super::enter;
-    using super::leave;
 
   protected:
     std::multiset<variable_type> m_bound_variables;

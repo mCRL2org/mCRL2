@@ -48,11 +48,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   typedef process_expression_traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   Derived& derived()
   {
@@ -141,7 +137,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     {
       W.insert(x.identifier());
       const process_equation& eqn = find_equation(equations, x.identifier());
-      derived()(eqn.expression());
+      derived().apply(eqn.expression());
       W.erase(x.identifier());
     }
     else
@@ -157,7 +153,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     {
       W.insert(x.identifier());
       const process_equation& eqn = find_equation(equations, x.identifier());
-      derived()(eqn.expression());
+      derived().apply(eqn.expression());
       W.erase(x.identifier());
     }
     else
@@ -256,12 +252,8 @@ struct apply_alphabet_traverser: public alphabet_traverser<apply_alphabet_traver
   typedef alphabet_traverser<apply_alphabet_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::node_stack;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 
   apply_alphabet_traverser(const std::vector<process_equation>& equations, std::set<process_identifier>& W)
     : super(equations, W)
@@ -272,7 +264,7 @@ inline
 alphabet_node alphabet(const process_expression& x, const std::vector<process_equation>& equations, std::set<process_identifier>& W)
 {
   detail::apply_alphabet_traverser f(equations, W);
-  f(x);
+  f.apply(x);
   return f.node_stack.back();
 }
 

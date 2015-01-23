@@ -25,7 +25,7 @@ struct is_stochastic_traverser: public lps::data_expression_traverser<is_stochas
   typedef lps::data_expression_traverser<is_stochastic_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   bool result;
 
@@ -33,7 +33,7 @@ struct is_stochastic_traverser: public lps::data_expression_traverser<is_stochas
     : result(false)
   {}
 
-  void operator()(const lps::stochastic_distribution& x)
+  void apply(const lps::stochastic_distribution& x)
   {
     if (x.is_defined())
     {
@@ -41,9 +41,6 @@ struct is_stochastic_traverser: public lps::data_expression_traverser<is_stochas
     }
   }
 
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 } // namespace detail
@@ -53,7 +50,7 @@ template <typename T>
 bool is_stochastic(const T& x)
 {
   detail::is_stochastic_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

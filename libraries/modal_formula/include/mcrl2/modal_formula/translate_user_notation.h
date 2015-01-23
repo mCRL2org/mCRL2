@@ -71,7 +71,7 @@ void translate_user_notation(T& x,
                              typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                             )
 {
-  core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+  core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).update(x);
 }
 
 template <typename T>
@@ -79,7 +79,7 @@ T translate_user_notation(const T& x,
                           typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                          )
 {
-  return core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+  return core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(x);
 }
 
 } // namespace state_formulas

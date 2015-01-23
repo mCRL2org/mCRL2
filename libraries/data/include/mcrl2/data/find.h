@@ -35,9 +35,10 @@ template <template <class> class Traverser, class OutputIterator>
 struct find_identifiers_traverser: public Traverser<find_identifiers_traverser<Traverser, OutputIterator> >
 {
   typedef Traverser<find_identifiers_traverser<Traverser, OutputIterator> > super;
+
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   OutputIterator out;
 
@@ -45,14 +46,10 @@ struct find_identifiers_traverser: public Traverser<find_identifiers_traverser<T
     : out(out_)
   {}
 
-  void operator()(const core::identifier_string& v)
+  void apply(const core::identifier_string& v)
   {
     *out = v;
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, class OutputIterator>
@@ -68,7 +65,7 @@ struct find_function_symbols_traverser: public Traverser<find_function_symbols_t
   typedef Traverser<find_function_symbols_traverser<Traverser, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   OutputIterator out;
 
@@ -76,14 +73,10 @@ struct find_function_symbols_traverser: public Traverser<find_function_symbols_t
     : out(out_)
   {}
 
-  void operator()(const function_symbol& v)
+  void apply(const function_symbol& v)
   {
     *out = v;
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, class OutputIterator>
@@ -99,7 +92,7 @@ struct find_sort_expressions_traverser: public Traverser<find_sort_expressions_t
   typedef Traverser<find_sort_expressions_traverser<Traverser, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   OutputIterator out;
 
@@ -107,17 +100,13 @@ struct find_sort_expressions_traverser: public Traverser<find_sort_expressions_t
     : out(out_)
   {}
 
-  void operator()(const data::sort_expression& v)
+  void apply(const data::sort_expression& v)
   {
     *out = v;
 
     // also traverse sub-expressions!
-    super::operator()(v);
+    super::apply(v);
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, class OutputIterator>
@@ -133,7 +122,7 @@ struct find_data_expressions_traverser: public Traverser<find_data_expressions_t
   typedef Traverser<find_data_expressions_traverser<Traverser, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   OutputIterator out;
 
@@ -141,17 +130,13 @@ struct find_data_expressions_traverser: public Traverser<find_data_expressions_t
     : out(out_)
   {}
 
-  void operator()(const data::data_expression& v)
+  void apply(const data::data_expression& v)
   {
     *out = v;
 
     // also traverse sub-expressions!
-    super::operator()(v);
+    super::apply(v);
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, class OutputIterator>
@@ -167,7 +152,7 @@ struct find_all_variables_traverser: public Traverser<find_all_variables_travers
   typedef Traverser<find_all_variables_traverser<Traverser, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   OutputIterator out;
 
@@ -175,14 +160,10 @@ struct find_all_variables_traverser: public Traverser<find_all_variables_travers
     : out(out_)
   {}
 
-  void operator()(const variable& v)
+  void apply(const variable& v)
   {
     *out = v;
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, class OutputIterator>
@@ -197,7 +178,7 @@ struct find_free_variables_traverser: public Binder<Traverser, find_free_variabl
   typedef Binder<Traverser, find_free_variables_traverser<Traverser, Binder, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::is_bound;
   using super::bound_variables;
   using super::increase_bind_count;
@@ -215,17 +196,13 @@ struct find_free_variables_traverser: public Binder<Traverser, find_free_variabl
     increase_bind_count(v);
   }
 
-  void operator()(const variable& v)
+  void apply(const variable& v)
   {
     if (!is_bound(v))
     {
       *out = v;
     }
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator>
@@ -249,7 +226,7 @@ struct search_variable_traverser: public Traverser<search_variable_traverser<Tra
   typedef Traverser<search_variable_traverser<Traverser> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   bool found;
   const variable& v;
@@ -258,17 +235,13 @@ struct search_variable_traverser: public Traverser<search_variable_traverser<Tra
     : found(false), v(v_)
   {}
 
-  void operator()(const variable& x)
+  void apply(const variable& x)
   {
     if (x == v)
     {
       found = true;
     }
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser>
@@ -284,7 +257,7 @@ struct search_free_variable_traverser: public Binder<Traverser, search_free_vari
   typedef Binder<Traverser, search_free_variable_traverser<Traverser, Binder> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::is_bound;
   using super::bound_variables;
   using super::increase_bind_count;
@@ -296,17 +269,13 @@ struct search_free_variable_traverser: public Binder<Traverser, search_free_vari
     : found(false), v(v_)
   {}
 
-  void operator()(const variable& x)
+  void apply(const variable& x)
   {
     if (v == x && !is_bound(x))
     {
       found = true;
     }
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, template <template <class> class, class> class Binder>
@@ -327,7 +296,7 @@ make_search_free_variable_traverser(const data::variable& v)
 template <typename T, typename OutputIterator>
 void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_all_variables_traverser<data::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<data::variable_traverser>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -348,7 +317,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_binding>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -359,7 +328,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_binding>(o, bound).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -392,7 +361,7 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 template <typename T, typename OutputIterator>
 void find_identifiers(const T& x, OutputIterator o)
 {
-  data::detail::make_find_identifiers_traverser<data::identifier_string_traverser>(o)(x);
+  data::detail::make_find_identifiers_traverser<data::identifier_string_traverser>(o).apply(x);
 }
 
 /// \brief Returns all identifiers that occur in an object
@@ -413,7 +382,7 @@ std::set<core::identifier_string> find_identifiers(const T& x)
 template <typename T, typename OutputIterator>
 void find_sort_expressions(const T& x, OutputIterator o)
 {
-  data::detail::make_find_sort_expressions_traverser<data::sort_expression_traverser>(o)(x);
+  data::detail::make_find_sort_expressions_traverser<data::sort_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all sort expressions that occur in an object
@@ -434,7 +403,7 @@ std::set<data::sort_expression> find_sort_expressions(const T& x)
 template <typename T, typename OutputIterator>
 void find_function_symbols(const T& x, OutputIterator o)
 {
-  data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(o)(x);
+  data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all function symbols that occur in an object
@@ -456,7 +425,7 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 template <typename T, typename OutputIterator>
 void find_data_expressions(const T& x, OutputIterator o)
 {
-  data::detail::make_find_data_expressions_traverser<data::data_expression_traverser>(o)(x);
+  data::detail::make_find_data_expressions_traverser<data::data_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all data expressions that occur in an object
@@ -478,7 +447,7 @@ template <typename T>
 bool search_variable(const T& x, const variable& v)
 {
   data::detail::search_variable_traverser<data::variable_traverser> f(v);
-  f(x);
+  f.apply(x);
   return f.found;
 }
 
@@ -490,7 +459,7 @@ template <typename T>
 bool search_free_variable(const T& x, const variable& v)
 {
   data::detail::search_free_variable_traverser<data::data_expression_traverser, data::add_data_variable_binding> f(v);
-  f(x);
+  f.apply(x);
   return f.found;
 }
 

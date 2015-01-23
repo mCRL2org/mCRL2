@@ -31,11 +31,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
   typedef pbes_expression_traverser<bqnf_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   enum expression_mode {
     BOUNDED_FORALL, BOUNDED_EXISTS,
@@ -246,7 +242,7 @@ template <typename T>
 bool is_bqnf(const T& x)
 {
   bqnf_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

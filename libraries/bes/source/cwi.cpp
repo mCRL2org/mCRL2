@@ -128,7 +128,7 @@ struct variable_traits<pbes_system::pbes_equation>
     std::set<core::identifier_string> occ_ids;
     for(auto it = equations.begin(); it != equations.end(); ++it)
     {
-      pbes_system::detail::make_find_propositional_variables_traverser<pbes_system::pbes_expression_traverser>(oit)(it->formula());
+      pbes_system::detail::make_find_propositional_variables_traverser<pbes_system::pbes_expression_traverser>(oit).apply(it->formula());
       occ_ids.insert(it->variable().name());
     }
     for(auto it = occ.begin(); it != occ.end(); ++it)

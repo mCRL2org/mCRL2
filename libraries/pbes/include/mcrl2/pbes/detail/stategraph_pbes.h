@@ -325,7 +325,7 @@ class stategraph_equation: public pbes_equation
       : pbes_equation(eqn)
     {
       pbes_system::detail::guard_traverser f(dataspec);
-      f(eqn.formula());
+      f.apply(eqn.formula());
       const std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >& guards = f.expression_stack.back().guards;
       for (auto i = guards.begin(); i != guards.end(); ++i)
       {

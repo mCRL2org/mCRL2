@@ -35,11 +35,7 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
   typedef state_formulas::state_formula_traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   typedef std::vector<pbes_equation> result_type;
 
@@ -106,7 +102,7 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
     push(epsilon());
   }
 
-  void operator()(const state_formulas::not_&)
+  void apply(const state_formulas::not_&)
   {
     throw mcrl2::runtime_error("e_lts2pbes_traverser: negation is not supported!");
   }
@@ -125,7 +121,7 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
     push(left + right);
   }
 
-  void operator()(const state_formulas::imp&)
+  void apply(const state_formulas::imp&)
   {
     throw mcrl2::runtime_error("e_lts2pbes_traverser: implication is not supported!");
   }
@@ -196,12 +192,12 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
     push(v + E(phi0, x.operand(), lts0, lts1, m_progress_meter, TermTraits()));
   }
 
-  void operator()(const state_formulas::nu& x)
+  void apply(const state_formulas::nu& x)
   {
     handle_mu_nu(x, fixpoint_symbol::nu());
   }
 
-  void operator()(const state_formulas::mu& x)
+  void apply(const state_formulas::mu& x)
   {
     handle_mu_nu(x, fixpoint_symbol::mu());
   }
@@ -213,7 +209,7 @@ struct apply_e_lts2pbes_traverser: public Traverser<apply_e_lts2pbes_traverser<T
   typedef Traverser<apply_e_lts2pbes_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   apply_e_lts2pbes_traverser(const state_formulas::state_formula& phi0,
                              const lts::lts_lts_t& lts0,
@@ -223,10 +219,6 @@ struct apply_e_lts2pbes_traverser: public Traverser<apply_e_lts2pbes_traverser<T
                             )
     : super(phi0, lts0, lts1, pm, tr)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <typename TermTraits>
@@ -239,7 +231,7 @@ std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
                             )
 {
   apply_e_lts2pbes_traverser<e_lts2pbes_traverser, TermTraits> f(x0, lts0, lts1, pm, tr);
-  f(x);
+  f.apply(x);
   assert(f.result_stack.size() == 1);
   return f.top();
 }

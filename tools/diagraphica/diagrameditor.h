@@ -12,7 +12,7 @@
 #define DIAGRAMEDITOR_H
 
 #include <QtCore>
-#include <QtGui>
+#include <QtWidgets>
 #include <QEvent>
 
 #include <cstddef>

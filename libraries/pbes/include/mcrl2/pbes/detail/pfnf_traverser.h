@@ -194,11 +194,7 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
   typedef pbes_expression_traverser<pfnf_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   // makes sure there are no name clashes between quantifier variables in left and right
   // TODO: the efficiency can be increased by maintaining some additional data structures

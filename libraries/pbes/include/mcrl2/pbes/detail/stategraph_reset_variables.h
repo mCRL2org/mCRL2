@@ -26,9 +26,7 @@ namespace detail {
 struct reset_variable_builder: public pbes_expression_builder<reset_variable_builder>
 {
   typedef pbes_expression_builder<reset_variable_builder> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::vector<pbes_expression>::const_iterator i;
 
@@ -36,7 +34,7 @@ struct reset_variable_builder: public pbes_expression_builder<reset_variable_bui
     : i(i_)
   {}
 
-  pbes_expression operator()(const propositional_variable_instantiation& x)
+  pbes_expression apply(const propositional_variable_instantiation& x)
   {
     mCRL2log(log::debug, "stategraph") << "<reset>" << pbes_system::pp(x) << " -> " << pbes_system::pp(*i) << std::endl;
     return *i++;

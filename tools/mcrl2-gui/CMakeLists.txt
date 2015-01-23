@@ -1,113 +1,36 @@
-# Authors: Frank Stappers, Aad Mathijssen and Rimco Boudewijns
-# Copyright: see the accompanying file COPYING or copy at
-# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-#
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
-
-# ########## Project setup ##########
-project(mcrl2-gui)
-cmake_minimum_required(VERSION 2.6)
-
-# Create MacOSX Bundle Information
-macosx_set_packaging_info("mcrl2-green")
-
-# ######### General setup ##########
-set(MCRL2_GUI_RCC_SRCS mcrl2-gui.qrc)
-
-qt4_add_resources(MCRL2_GUI_RC_FILES ${MCRL2_GUI_RCC_SRCS})
-
-set(MCRL2_GUI_UI_FILES
-  mainwindow.ui
-  toolinstance.ui
-  fileinformation.ui
-  filepicker.ui
-  copydialog.ui
+add_mcrl2_tool(mcrl2-gui
+  MENUNAME "mCRL2 GUI"
+  DESCRIPTION "Graphical interface for the mCRL2 toolset"
+  ICON "mcrl2-orange"
+  SOURCES
+    mainwindow.ui
+    toolinstance.ui
+    fileinformation.ui
+    filepicker.ui
+    copydialog.ui
+    mcrl2-gui.qrc
+    main.cpp
+    mainwindow.cpp
+    filebrowser.cpp
+    toolaction.cpp
+    toolinstance.cpp
+    toolcatalog.cpp
+    toolinformation.cpp
+    fileinformation.cpp
+    filepicker.cpp
+    copydialog.cpp
+    copythread.cpp
+    optionvalue.cpp
+  DEPENDS
+    mcrl2_utilities
+    mcrl2_utilities_qt
+    QtCore
+    QtGui
+    QtWidgets
+    QtXml
 )
-
-qt4_wrap_ui(MCRL2_GUI_UI_HEADERS ${MCRL2_GUI_UI_FILES})
-
-set(MCRL2_GUI_MOC_HEADERS
-  mainwindow.h
-  filebrowser.h
-  toolaction.h
-  toolinstance.h
-  optionvalue.h
-  fileinformation.h
-  filepicker.h
-  copydialog.h
-  copythread.h
+add_custom_target(mcrl2-gui-shared
+  SOURCES
+    share/mcrl2/tool_catalog.xml
 )
-qt4_wrap_cpp(MCRL2_GUI_MOC_SOURCES ${MCRL2_GUI_MOC_HEADERS})
-
-set(MCRL2_GUI_SRC_FILES
-  ${MCRL2_GUI_RC_FILES}
-  ${MCRL2_GUI_UI_HEADERS}
-  ${MCRL2_GUI_MOC_SOURCES}
-  main.cpp
-  mainwindow.cpp
-  filebrowser.cpp
-  toolaction.cpp
-  toolinstance.cpp
-  toolcatalog.cpp
-  toolinformation.cpp
-  fileinformation.cpp
-  filepicker.cpp
-  copydialog.cpp
-  copythread.cpp
-  optionvalue.cpp
-)
-
-# ######### Copy extra files ##########
-if(NOT APPLE)
-  if(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
-    configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/tool_catalog.xml" COPYONLY )
-  else(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
-    configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
-  endif(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
-  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2 COMPONENT Applications)
-
-  if( UNIX )
-    # Install desktop icons
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications COMPONENT Applications)
-  endif( UNIX )
-
-else(NOT APPLE)
-  # Copy directly into application
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/share/mcrl2/tool_catalog.xml" COPYONLY COMPONENT Applications)
-endif(NOT APPLE)
-
-# ######### Create Windows Icon ##########
-if(WIN32)
-  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
-  set(MCRL2_GUI_SRC_FILES ${MCRL2_GUI_SRC_FILES} mcrl2-gui.rc)
-endif(WIN32)
-
-add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${MACOSX_ICON_PATH} ${MCRL2_GUI_SRC_FILES})
-
-if(APPLE)
-  set_source_files_properties(${MACOSX_ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-endif()
-
-target_link_libraries(${PROJECT_NAME}
-  ${QT_LIBRARIES}
-  mcrl2_core
-  mcrl2_utilities
-  mcrl2_utilities_qt
-)
-
-# Don't forget to include output directory, otherwise
-# the UI file won't be wrapped!
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-# For promoted widgets
-include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR})
-
-# install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Applications)
-
-# Relocate install tree
-include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
-
-# Generate man pages
-include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
+install(FILES share/mcrl2/tool_catalog.xml DESTINATION ${MCRL2_RESOURCE_PATH})

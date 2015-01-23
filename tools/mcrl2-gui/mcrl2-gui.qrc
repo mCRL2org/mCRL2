@@ -1,8 +1,6 @@
 <RCC>
-    <qresource prefix="/mcrl2-gui/icons">
-        <file>mcrl2-gui.ico</file>
-    </qresource>
     <qresource prefix="/">
-        <file>share/mcrl2/mcrl2.png</file>
+        <file>mcrl2.png</file>
+        <file>share/mcrl2/tool_catalog.xml</file>
     </qresource>
 </RCC>

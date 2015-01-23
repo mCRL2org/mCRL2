@@ -9,14 +9,10 @@
 /// \file mcrl2/lps/add_binding.h
 /// \brief add your file description here.
 
-// To avoid circular inclusion problems
-#ifndef MCRL2_LPS_SPECIFICATION_H
-#include "mcrl2/lps/stochastic_specification.h"
-#endif
-
 #ifndef MCRL2_LPS_ADD_BINDING_H
 #define MCRL2_LPS_ADD_BINDING_H
 
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/data/add_binding.h"
 
 namespace mcrl2
@@ -30,10 +26,9 @@ template <template <class> class Builder, class Derived>
 struct add_data_variable_binding: public data::add_data_variable_binding<Builder, Derived>
 {
   typedef data::add_data_variable_binding<Builder, Derived> super;
+  using super::apply;
   using super::enter;
   using super::leave;
-  using super::operator();
-  using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;
 

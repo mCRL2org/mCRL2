@@ -31,9 +31,9 @@ LtsCanvas::LtsCanvas(QWidget *parent, Settings *settings, LtsManager *ltsManager
   m_dragging(false)
 {
   m_selectCursor = QCursor(Qt::ArrowCursor);
-  m_panCursor = QCursor(pan_cursor);
-  m_zoomCursor = QCursor(zoom_cursor);
-  m_rotateCursor = QCursor(rotate_cursor);
+  m_panCursor = QCursor(QPixmap(pan_cursor));
+  m_zoomCursor = QCursor(QPixmap(zoom_cursor));
+  m_rotateCursor = QCursor(QPixmap(rotate_cursor));
 
   connect(m_visualizer, SIGNAL(dirtied()), this, SLOT(update()));
   connect(m_ltsManager, SIGNAL(clusterPositionsChanged()), this, SLOT(clusterPositionsChanged()));

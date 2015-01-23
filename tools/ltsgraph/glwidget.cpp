@@ -6,13 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+#include <QtOpenGL>
 
 #include "glwidget.h"
 #include "springlayout.h"
 #include "ui_glwidget.h"
 #include "mcrl2/utilities/logger.h"
 
-#include <QtOpenGL>
 #include <map>
 
 struct MoveRecord
@@ -129,10 +129,13 @@ struct NodeMoveRecord : public MoveRecord
 
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget *parent)
-  : QGLWidget(parent), m_ui(NULL), m_graph(graph), m_painting(false), m_paused(false)
+  : QGLWidget(parent), m_ui(NULL), m_graph(graph), m_painting(false), m_paused(true)
 {
-  m_scene = new GLScene(m_graph);
-  QGLFormat fmt = format();
+  m_scene = new GLScene(m_graph, devicePixelRatio());
+  // Set up OpenGL to use alpha channel
+  QGLFormat fmt = QGLFormat::defaultFormat();
+  fmt.setVersion(1, 2);
+  fmt.setDepth(true);
   fmt.setAlpha(true);
   setFormat(fmt);
 }
@@ -227,9 +230,17 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
+  // On OSX, there is a mysterious "invalid drawable" error, which seems to correspond
+  // to not having a valid drawing surface in OpenGL. It looks like the paintGL routine
+  // is called after OpenGL is requested to initialize, but before it has finished. As
+  // there seems to be no workaround for this problem, the best we can do is to clear
+  // the OpenGL error buffer before painting, so we don't trigger assert statements
+  // later in the code due to this bug.
+  glGetError();
+
   if (m_paused)
   {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
   else
   {

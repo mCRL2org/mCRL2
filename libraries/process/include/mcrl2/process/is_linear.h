@@ -170,15 +170,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   typedef process_expression_traverser<linear_process_expression_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-  template <typename Container >
-  void operator()(Container const& a)
-  {
-    super::operator()(a);
-  }
-#endif
+  using super::apply;
 
   /// \brief The process equation that is checked.
   process_equation eqn;
@@ -338,7 +330,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   {
     try
     {
-      (*this)(x);
+      this->apply(x);
     }
     catch (non_linear_process_error& p)
     {

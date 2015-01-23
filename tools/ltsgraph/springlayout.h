@@ -20,6 +20,7 @@
 #define SPRINGLAYOUT_H
 
 #include <QDockWidget>
+#include <QtOpenGL>
 #include "ui_springlayout.h"
 
 #include "graph.h"

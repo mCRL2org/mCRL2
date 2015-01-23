@@ -31,9 +31,7 @@ namespace detail
 struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_builder>
 {
   typedef pbes_expression_builder<pbes_abstract_builder> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::vector<data::variable_list> m_quantifier_stack;
   const std::vector<data::variable> m_selected_variables;
@@ -73,7 +71,7 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
   }
 
   /// \brief Visit data_expression node
-  pbes_expression operator()(const data::data_expression& d)
+  pbes_expression apply(const data::data_expression& d)
   {
     std::set<data::variable> FV = data::find_free_variables(d);
     for (std::set<data::variable>::iterator i = FV.begin(); i != FV.end(); ++i)
@@ -92,26 +90,22 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
   }
 
   /// \brief Visit forall node
-  pbes_expression operator()(const forall& x)
+  pbes_expression apply(const forall& x)
   {
     push_variables(x.variables());
-    pbes_expression new_expression = (*this)(x.body());
+    pbes_expression new_expression = apply(x.body());
     pop_variables();
     return pbes_expr::forall(x.variables(), new_expression);
   }
 
   /// \brief Visit exists node
-  pbes_expression operator()(const exists& x)
+  pbes_expression apply(const exists& x)
   {
     push_variables(x.variables());
-    pbes_expression new_expression = (*this)(x.body());
+    pbes_expression new_expression = apply(x.body());
     pop_variables();
     return pbes_expr::exists(x.variables(), new_expression);
   }
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 } // namespace detail
@@ -135,7 +129,7 @@ class pbes_abstract_algorithm
         if (j != parameter_map.end())
         {
           detail::pbes_abstract_builder builder(j->second, value_true);
-          i->formula() = builder(i->formula());
+          i->formula() = builder.apply(i->formula());
         }
       }
     }

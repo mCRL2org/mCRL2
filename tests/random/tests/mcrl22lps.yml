@@ -1,0 +1,25 @@
+options:
+  grammar:
+    - grammars\mcrl2.g
+    - grammars\data.g
+  constraints:
+    - constraints\mcrl2-attrs.yml
+    - constraints\data-attrs.yml
+  path: ../../tools/bin
+  platform: linux
+nodes: {l1: mCRL2Spec, l2: LPS}
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: mcrl22lps
+
+  t2:
+    input: [l2]
+    output: []
+    args: []
+    name: lpsinfo
+
+result: |
+  result = True

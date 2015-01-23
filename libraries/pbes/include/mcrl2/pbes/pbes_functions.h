@@ -25,11 +25,7 @@ struct print_brief_traverser: public pbes_expression_traverser<print_brief_trave
   typedef pbes_expression_traverser<print_brief_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   std::string result;
 
@@ -37,32 +33,32 @@ struct print_brief_traverser: public pbes_expression_traverser<print_brief_trave
     : result("")
   {}
 
-  void operator()(const not_& /* x */)
+  void apply(const not_& /* x */)
   {
     result = "not";
   }
 
-  void operator()(const imp& /* x */)
+  void apply(const imp& /* x */)
   {
     result = "imp";
   }
 
-  void operator()(const forall& /* x */)
+  void apply(const forall& /* x */)
   {
     result = "forall";
   }
 
-  void operator()(const exists& /* x */)
+  void apply(const exists& /* x */)
   {
     result = "exists";
   }
 
-  void operator()(const propositional_variable_instantiation& x)
+  void apply(const propositional_variable_instantiation& x)
   {
     result = "propvar " + std::string(x.name());
   }
 
-  void operator()(const pbes_equation& x)
+  void apply(const pbes_equation& x)
   {
     result = "equation " + std::string(x.variable().name());
   }
@@ -74,7 +70,7 @@ template <typename T>
 std::string print_brief(const T& x)
 {
   print_brief_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
@@ -86,11 +82,7 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
   typedef pbes_expression_traverser<is_simple_expression_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   bool result;
 
@@ -113,7 +105,7 @@ template <typename T>
 bool is_simple_expression(const T& x)
 {
   is_simple_expression_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

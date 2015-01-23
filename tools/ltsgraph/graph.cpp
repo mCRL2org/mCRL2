@@ -8,6 +8,9 @@
 //
 
 #include <QDomDocument>
+#include <QTextStream>
+#include <QFile>
+#include <QtOpenGL>
 
 #include "graph.h"
 #include "mcrl2/lts/lts.h"

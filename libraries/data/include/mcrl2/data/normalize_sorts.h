@@ -134,7 +134,7 @@ void normalize_sorts(T& x,
                     )
 {
   core::make_update_apply_builder<data::sort_expression_builder>
-  (data::detail::normalize_sorts_function(data_spec))(x);
+  (data::detail::normalize_sorts_function(data_spec)).update(x);
 } 
 
 template <typename T>
@@ -144,7 +144,7 @@ T normalize_sorts(const T& x,
                  )
 {
   return core::make_update_apply_builder<data::sort_expression_builder>
-         (data::detail::normalize_sorts_function(data_spec))(x);
+         (data::detail::normalize_sorts_function(data_spec)).apply(x);
 }
 
 /* The functions below are defined as the function normalize_sorts

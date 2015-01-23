@@ -195,9 +195,7 @@ template <typename Derived>
 struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_builder<Derived>
 {
   typedef pbes_system::pbes_expression_builder<Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   Derived& derived()
   {
@@ -205,7 +203,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
   }
 
   // convert !val(d) to val(!d)
-  pbes_expression operator()(const not_& x)
+  pbes_expression apply(const not_& x)
   {
     if (is_data(x.operand()))
     {
@@ -216,17 +214,17 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     return x;
   }
 
-  pbes_expression operator()(const imp& x)
+  pbes_expression apply(const imp& x)
   {
-    pbes_expression result = derived()(or_(not_(x.left()), x.right()));
+    pbes_expression result = derived().apply(or_(not_(x.left()), x.right()));
     mCRL2log(log::debug, "one_point_rewriter") << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << std::endl;
     return result;
   }
 
-  pbes_expression operator()(const exists& x)
+  pbes_expression apply(const exists& x)
   {
     mCRL2log(log::debug, "one_point_rewriter") << "x = " << pbes_system::pp(x) << std::endl;
-    pbes_expression body = derived()(x.body());
+    pbes_expression body = derived().apply(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_and(body, true);
     mCRL2log(log::debug, "one_point_rewriter") << "  split_and(x.body()) = " << core::detail::print_set(terms) << std::endl;
     data::mutable_map_substitution<> sigma;
@@ -300,10 +298,10 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     return result;
   }
 
-  pbes_expression operator()(const forall& x)
+  pbes_expression apply(const forall& x)
   {
     mCRL2log(log::debug, "one_point_rewriter") << "x = " << pbes_system::pp(x) << std::endl;
-    pbes_expression body = derived()(x.body());
+    pbes_expression body = derived().apply(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_or(body, true);
     mCRL2log(log::debug, "one_point_rewriter") << "  split_or(x.body()) = " << core::detail::print_set(terms) << std::endl;
     data::mutable_map_substitution<> sigma;
@@ -380,7 +378,7 @@ class one_point_rule_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      return core::make_apply_builder<detail::one_point_rule_rewrite_builder>()(detail::data2pbes(normalize(x)));
+      return core::make_apply_builder<detail::one_point_rule_rewrite_builder>().apply(detail::data2pbes(normalize(x)));
     }
 };
 

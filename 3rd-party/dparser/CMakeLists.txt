@@ -25,10 +25,6 @@ add_definitions(
 )
 endif(MSVC)
 
-# ######### General setup ##########
-include_directories(BEFORE ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-
-# actual target:
 add_library(dparser STATIC
   arg.c
   parse.c
@@ -54,6 +50,4 @@ target_link_libraries(make_dparser
   dparser
 )
 
-# No need to install; library is statically linked into the libraries
-# that need it...
-install(TARGETS dparser DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
+set(dparser_include ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

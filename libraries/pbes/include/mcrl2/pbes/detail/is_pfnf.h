@@ -173,7 +173,7 @@ struct is_pfnf_traverser: public pbes_expression_traverser<is_pfnf_traverser>
   typedef pbes_expression_traverser<is_pfnf_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   bool result;
 
@@ -181,7 +181,7 @@ struct is_pfnf_traverser: public pbes_expression_traverser<is_pfnf_traverser>
     : result(true)
   {}
 
-  void operator()(const pbes_expression& x)
+  void apply(const pbes_expression& x)
   {
     result = is_pfnf_expression(x) && result;
   }
@@ -191,7 +191,7 @@ template <typename T>
 bool is_pfnf(const T& x)
 {
   is_pfnf_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

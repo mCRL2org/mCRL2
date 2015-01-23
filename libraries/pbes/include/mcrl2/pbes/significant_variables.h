@@ -26,7 +26,7 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
   typedef pbes_expression_traverser<significant_variables_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::vector<std::set<data::variable> > result_stack;
 
@@ -114,7 +114,7 @@ inline
 std::set<data::variable> significant_variables(const pbes_expression& x)
 {
   detail::significant_variables_traverser f;
-  f(x);
+  f.apply(x);
   return f.result_stack.back();
 }
 

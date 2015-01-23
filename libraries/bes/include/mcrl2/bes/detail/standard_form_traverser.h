@@ -60,7 +60,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     typedef bes::boolean_expression_traverser<standard_form_traverser> super;
     typedef core::term_traits<boolean_expression> tr;
 
-    using super::operator();
+    using super::apply;
     using super::enter;
     using super::leave;
 

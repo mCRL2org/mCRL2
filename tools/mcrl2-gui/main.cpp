@@ -20,9 +20,6 @@ typedef qt::qt_tool<tools::tool> mcrl2_gui_base;
 
 class mcrl2_gui_tool : public mcrl2_gui_base
 {
-  private:
-    // QSplashScreen *m_splash; Appears not to be used.
-
   public:
     mcrl2_gui_tool():
       mcrl2_gui_base("mcrl2-gui",
@@ -35,9 +32,8 @@ class mcrl2_gui_tool : public mcrl2_gui_base
 
     bool run()
     {
-
       //Create splash pixmap
-      QPixmap pixmap(":/share/mcrl2/mcrl2.png");
+      QPixmap pixmap(":/mcrl2.png");
       QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
 
       //Show the splashscreen for 2 seconds
@@ -45,7 +41,6 @@ class mcrl2_gui_tool : public mcrl2_gui_base
       QTimer::singleShot(2000, &splash, SLOT(hide()));
       MainWindow *window = new MainWindow();
       return show_main_window(window);
-
     }
 };
 

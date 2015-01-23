@@ -36,7 +36,7 @@ inline
 pbes_system::pbes_expression bes2pbes(const boolean_expression& x)
 {
   bes::detail::boolean_expression2pbes_expression_traverser t;
-  t(x);
+  t.apply(x);
   return t.result();
 }
 

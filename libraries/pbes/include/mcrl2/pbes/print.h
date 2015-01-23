@@ -28,7 +28,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::print_abstraction;
   using super::print_list;
   using super::print_binary_operation;
@@ -55,7 +55,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     {
       derived().print("val(");
     }
-    derived()(x);
+    derived().apply(x);
     if (is_data_expr)
     {
       derived().print(")");
@@ -98,19 +98,19 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::propositional_variable& x)
+  void apply(const pbes_system::propositional_variable& x)
   {
     derived().enter(x);
-    derived()(x.name());
+    derived().apply(x.name());
     print_variables(x.parameters());
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::pbes_equation& x)
+  void apply(const pbes_system::pbes_equation& x)
   {
     derived().enter(x);
     derived().print(x.symbol().is_mu() ? "mu " : "nu ");
-    derived()(x.variable());
+    derived().apply(x.variable());
     // TODO: change the weird convention of putting the rhs of an equation on a new line
     derived().print(" =\n       ");
     bool print_val = data::is_data_expression(x.formula());
@@ -118,7 +118,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     {
       derived().print("val(");
     }
-    derived()(x.formula());
+    derived().apply(x.formula());
     if (print_val)
     {
       derived().print(")");
@@ -127,10 +127,10 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::pbes& x)
+  void apply(const pbes_system::pbes& x)
   {
     derived().enter(x);
-    derived()(x.data());
+    derived().apply(x.data());
     print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
 
     // N.B. We have to normalize the sorts of the equations first.
@@ -144,50 +144,50 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::propositional_variable_instantiation& x)
+  void apply(const pbes_system::propositional_variable_instantiation& x)
   {
     derived().enter(x);
-    derived()(x.name());
+    derived().apply(x.name());
     print_list(x.parameters(), "(", ")", ", ", false);
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::not_& x)
+  void apply(const pbes_system::not_& x)
   {
     derived().enter(x);
     print_pbes_unary_operation(x, "!");
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::and_& x)
+  void apply(const pbes_system::and_& x)
   {
     derived().enter(x);
     print_pbes_binary_operation(x, " && ");
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::or_& x)
+  void apply(const pbes_system::or_& x)
   {
     derived().enter(x);
     print_pbes_binary_operation(x, " || ");
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::imp& x)
+  void apply(const pbes_system::imp& x)
   {
     derived().enter(x);
     print_pbes_binary_operation(x, " => ");
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::forall& x)
+  void apply(const pbes_system::forall& x)
   {
     derived().enter(x);
     print_pbes_abstraction(x, "forall");
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::exists& x)
+  void apply(const pbes_system::exists& x)
   {
     derived().enter(x);
     print_pbes_abstraction(x, "exists");
@@ -204,7 +204,7 @@ struct stream_printer
   void operator()(const T& x, std::ostream& out)
   {
     core::detail::apply_printer<pbes_system::detail::printer> printer(out);
-    printer(x);
+    printer.apply(x);
   }
 };
 

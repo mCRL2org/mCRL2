@@ -10,6 +10,8 @@
 
 #include "simulator.h"
 
+#include <QMessageBox>
+
 using namespace std;
 
 static const int labelHeight = 40;

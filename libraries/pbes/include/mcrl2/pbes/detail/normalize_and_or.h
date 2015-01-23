@@ -34,7 +34,8 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   typedef pbes_expression_builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
   /// \brief Splits a disjunction into a sequence of operands
   /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a
@@ -82,14 +83,14 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   }
 
   // to prevent default operator() being called
-  data::data_expression operator()(const data::data_expression& x)
+  data::data_expression apply(const data::data_expression& x)
   {
     return x;
   }
 
-  pbes_expression operator()(const pbes_expression& x)
+  pbes_expression apply(const pbes_expression& x)
   {
-    return normalize(super::operator()(x));
+    return normalize(super::apply(x));
   }
 };
 
@@ -98,7 +99,7 @@ T normalize_and_or(const T& x,
                    typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                   )
 {
-  return core::make_apply_builder<normalize_and_or_builder>()(x);
+  return core::make_apply_builder<normalize_and_or_builder>().apply(x);
 }
 
 template <typename T>
@@ -106,7 +107,7 @@ void normalize_and_or(T& x,
                       typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                      )
 {
-  core::make_apply_builder<normalize_and_or_builder>()(x);
+  core::make_apply_builder<normalize_and_or_builder>().update(x);
 }
 
 } // namespace detail

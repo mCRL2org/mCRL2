@@ -25,11 +25,7 @@ struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
   typedef pbes_expression_traverser<is_bes_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   bool result;
 
@@ -81,7 +77,7 @@ template <typename T>
 bool is_bes(const T& x)
 {
   is_bes_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

@@ -9,11 +9,6 @@
 /// \file mcrl2/process/add_binding.h
 /// \brief add your file description here.
 
-// to avoid circular header file problems
-#ifndef MCRL2_PROCESS_PROCESS_SPECIFICATION_H
-#include "mcrl2/process/process_specification.h"
-#endif
-
 #ifndef MCRL2_PROCESS_ADD_BINDING_H
 #define MCRL2_PROCESS_ADD_BINDING_H
 
@@ -33,7 +28,7 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
   typedef data::add_data_variable_binding<Builder, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;

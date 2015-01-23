@@ -35,7 +35,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::print_action_declarations;
   using super::print_assignments;
   using super::print_condition;
@@ -88,11 +88,11 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
       {
         derived().print(separator);
       }
-      derived()(*i);
+      derived().apply(*i);
     }
   }
 
-  void operator()(const lps::deadlock& x)
+  void apply(const lps::deadlock& x)
   {
     derived().enter(x);
     derived().print("delta");
@@ -104,7 +104,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const lps::multi_action& x)
+  void apply(const lps::multi_action& x)
   {
     derived().enter(x);
     if (x.actions().empty())
@@ -123,16 +123,16 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const lps::deadlock_summand& x)
+  void apply(const lps::deadlock_summand& x)
   {
     derived().enter(x);
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
     print_condition(x.condition(), " ->\n         ", max_precedence);
-    derived()(x.deadlock());
+    derived().apply(x.deadlock());
     derived().leave(x);
   }
 
-  void operator()(const lps::stochastic_distribution& x)
+  void apply(const lps::stochastic_distribution& x)
   {
     derived().enter(x);
     if (x.variables().empty()) // do not print the empty distribution
@@ -142,7 +142,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().print("dist ");
     print_variables(x.variables(), true, true, false, "", "");
     derived().print("[");
-    derived()(x.distribution());
+    derived().apply(x.distribution());
     derived().print("]");
     derived().leave(x);
   }
@@ -154,7 +154,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   {
     if (x.distribution().is_defined())
     {
-      derived()(x.distribution());
+      derived().apply(x.distribution());
       derived().print(" .\n         ");
     }
   }
@@ -165,7 +165,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().enter(x);
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
     print_condition(x.condition(), " ->\n         ", max_precedence);
-    derived()(x.multi_action());
+    derived().apply(x.multi_action());
     derived().print(" .\n         ");
     print_distribution(x);
     derived().print("P(");
@@ -174,17 +174,17 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const lps::action_summand& x)
+  void apply(const lps::action_summand& x)
   {
     print_action_summand(x);
   }
 
-  void operator()(const lps::stochastic_action_summand& x)
+  void apply(const lps::stochastic_action_summand& x)
   {
     print_action_summand(x);
   }
 
-  void operator()(const lps::process_initializer& x)
+  void apply(const lps::process_initializer& x)
   {
     derived().enter(x);
     derived().print("init P");
@@ -193,13 +193,13 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const lps::stochastic_process_initializer& x)
+  void apply(const lps::stochastic_process_initializer& x)
   {
     derived().enter(x);
     derived().print("init ");
     if (x.distribution().is_defined())
     {
-      derived()(x.distribution());
+      derived().apply(x.distribution());
       derived().print(" . ");
     }
     derived().print("P");
@@ -267,12 +267,12 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const linear_process& x)
+  void apply(const linear_process& x)
   {
     print_linear_process(x);
   }
 
-  void operator()(const stochastic_linear_process& x)
+  void apply(const stochastic_linear_process& x)
   {
     print_linear_process(x);
   }
@@ -281,27 +281,27 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   void print_specification(const Specification& x)
   {
     derived().enter(x);
-    derived()(x.data());
+    derived().apply(x.data());
     print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
     print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
-    derived()(x.process());
+    derived().apply(x.process());
     derived().print("\n");
-    derived()(x.initial_process());
+    derived().apply(x.initial_process());
     derived().print("\n");
     derived().leave(x);
   }
 
-  void operator()(const specification& x)
+  void apply(const specification& x)
   {
     print_specification(x);
   }
 
-  void operator()(const stochastic_specification& x)
+  void apply(const stochastic_specification& x)
   {
     print_specification(x);
   }
 
-  /* void operator()(const lps::state &x)
+  /* void apply(const lps::state &x)
   {
     derived().enter(x);
     derived().print("state(");
@@ -329,7 +329,7 @@ struct stream_printer
   void operator()(const T& x, std::ostream& out)
   {
     core::detail::apply_printer<lps::detail::printer> printer(out);
-    printer(x);
+    printer.apply(x);
   }
 };
 

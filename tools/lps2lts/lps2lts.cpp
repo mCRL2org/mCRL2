@@ -252,8 +252,8 @@ class lps2lts_tool : public lps2lts_base
       m_options.suppress_progress_messages = parser.options.count("suppress") !=0;
       m_options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
 
-      m_options.use_enumeration_caching = parser.options.count("cached");
-      m_options.use_summand_pruning = parser.options.count("prune");
+      m_options.use_enumeration_caching = parser.options.count("cached") > 0;
+      m_options.use_summand_pruning = parser.options.count("prune") > 0;
 
       if (parser.options.count("dummy"))
       {

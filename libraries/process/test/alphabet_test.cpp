@@ -17,7 +17,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/tuple/tuple.hpp>
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/lps/parse.h"
+// #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
 #include "mcrl2/process/parse.h"
@@ -197,12 +197,13 @@ BOOST_AUTO_TEST_CASE(test_print)
 
 BOOST_AUTO_TEST_CASE(test_parse)
 {
+/*
   process::action_label_list act_decl = process::parse_action_declaration("a: Nat;");
   process::action a = lps::parse_action("a(2)", act_decl);
   multi_action_name A;
   A.insert(core::identifier_string("a"));
   BOOST_CHECK(name(a) == A);
-
+*/
   multi_action_name_set B;
   bool dummy;
   boost::tuples::tie(B, dummy) = parse_multi_action_name_set("{a, ab}");

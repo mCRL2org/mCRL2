@@ -21,7 +21,7 @@
 
 #include "mcrl2/lts/lts.h"
 
-#include <QtOpenGL>
+#include <cmath>
 
 namespace Graph
 {

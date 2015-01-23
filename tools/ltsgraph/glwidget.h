@@ -20,7 +20,7 @@
 #define GLWIDGET_H
 
 #include <QGLWidget>
-#include <QtOpenGL>
+#include <QColorDialog>
 #include "ui_glwidget.h"
 
 #include "mcrl2/lts/lts.h"

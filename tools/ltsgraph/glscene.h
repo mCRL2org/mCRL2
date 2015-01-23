@@ -19,6 +19,9 @@
 #ifndef GLSCENE_H
 #define GLSCENE_H
 
+#include <QColor>
+#include <QImage>
+
 #include "graph.h"
 #include "gl2ps.h"
 
@@ -26,6 +29,15 @@ struct VertexData;
 struct TextureData;
 struct CameraView;
 struct CameraAnimation;
+
+/**
+ * @brief Helper function to convert an image to the OpenGL RGBA format. This calls
+ *        QGLWidget::convertToGLFormat, but we cannot use this method in glscene.cpp
+ *        because in Windows, the Qt5 practice of including the OpenGL ES2.0 headers
+ *        then clashes with our inclusion of glu.h.
+ * @param img The image to convert.
+ */
+QImage convertToGLFormat(const QImage& img);
 
 class GLScene
 {
@@ -44,7 +56,7 @@ class GLScene
 
     bool m_drawfog;                ///< Fog is rendered only if this field is true.
     float m_fogdistance;           ///< The distance at which the fog starts
-
+    
     /**
      * @brief Renders a single edge.
      * @param i The index of the edge to render.
@@ -124,7 +136,7 @@ class GLScene
      * @brief Constructor.
      * @param g The graph that is to be visualised by this object.
      */
-    GLScene(Graph::Graph& g);
+    GLScene(Graph::Graph& g, float device_pixel_ratio);
 
     /**
      * @brief Destructor.

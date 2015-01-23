@@ -26,12 +26,8 @@ struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
   typedef alphabet_traverser<Derived, Node> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::top;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 
   Derived& derived()
   {
@@ -116,12 +112,8 @@ struct apply_alphabet_intersection_traverser: public alphabet_intersection_trave
   typedef alphabet_intersection_traverser<apply_alphabet_intersection_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::node_stack;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 
   apply_alphabet_intersection_traverser(const std::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A)
     : super(equations, W, A)
@@ -132,7 +124,7 @@ inline
 alphabet_node alphabet_intersection(const process_expression& x, const std::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A)
 {
   apply_alphabet_intersection_traverser f(equations, W, A);
-  f(x);
+  f.apply(x);
   return f.node_stack.back();
 }
 

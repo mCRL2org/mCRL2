@@ -39,15 +39,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   typedef process_expression_traverser<linear_process_conversion_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-  template <typename Container >
-  void operator()(Container const& a)
-  {
-    super::operator()(a);
-  }
-#endif
+  using super::apply;
 
   /// \brief The result of the conversion.
   lps::action_summand_vector m_action_summands;
@@ -228,11 +220,11 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void operator()(const process::sync& x)
+  void apply(const process::sync& x)
   {
-    (*this)(x.left());
+    apply(x.left());
     lps::multi_action l = m_multi_action;
-    (*this)(x.right());
+    apply(x.right());
     lps::multi_action r = m_multi_action;
     m_multi_action = l + r;
     m_multi_action_changed = true;
@@ -263,9 +255,9 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void operator()(const process::seq& x)
+  void apply(const process::seq& x)
   {
-    (*this)(x.left());
+    apply(x.left());
 
     // Check 1) The expression right must be a process instance or a process assignment
     if (is_process_instance(x.right()))
@@ -358,14 +350,14 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void operator()(const process::choice& x)
+  void apply(const process::choice& x)
   {
-    (*this)(x.left());
+    apply(x.left());
     if (!is_choice(x.left()))
     {
       add_summand();
     }
-    (*this)(x.right());
+    apply(x.right());
     if (!is_choice(x.right()))
     {
       add_summand();
@@ -377,7 +369,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   void convert(const process_equation& /* e */)
   {
     clear_summand();
-    (*this)(m_equation.expression());
+    apply(m_equation.expression());
     add_summand(); // needed if it is not a choice
   }
 
@@ -442,15 +434,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   typedef process_expression_traverser<stochastic_linear_process_conversion_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-  template <typename Container >
-  void operator()(Container const& a)
-  {
-    super::operator()(a);
-  }
-#endif
+  using super::apply;
 
   /// \brief The result of the conversion.
   lps::stochastic_action_summand_vector m_action_summands;
@@ -635,11 +619,11 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void operator()(const process::sync& x)
+  void apply(const process::sync& x)
   {
-    (*this)(x.left());
+    apply(x.left());
     lps::multi_action l = m_multi_action;
-    (*this)(x.right());
+    apply(x.right());
     lps::multi_action r = m_multi_action;
     m_multi_action = l + r;
     m_multi_action_changed = true;
@@ -670,9 +654,9 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void operator()(const process::seq& x)
+  void apply(const process::seq& x)
   {
-    (*this)(x.left());
+    apply(x.left());
 
     process_expression right = x.right();
     if (is_stochastic_operator(right))
@@ -774,14 +758,14 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   /// \brief Visit choice node
   /// \return The result of visiting the node
   /// \param x A process expression
-  void operator()(const process::choice& x)
+  void apply(const process::choice& x)
   {
-    (*this)(x.left());
+    apply(x.left());
     if (!is_choice(x.left()))
     {
       add_summand();
     }
-    (*this)(x.right());
+    apply(x.right());
     if (!is_choice(x.right()))
     {
       add_summand();
@@ -793,7 +777,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   void convert(const process_equation& /* e */)
   {
     clear_summand();
-    (*this)(m_equation.expression());
+    apply(m_equation.expression());
     add_summand(); // needed if it is not a choice
   }
 

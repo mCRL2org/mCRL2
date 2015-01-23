@@ -1959,7 +1959,7 @@ void TimeSeries::drawLabels(const bool& inSelectMode)
 void TimeSeries::initDragSlider()
 {
   double pix  = pixelSize();
-  sliderDragPosition = worldCoordinate(m_lastMouseEvent.posF()).x() - (posSliderTopLft.x + 5 * pix + wdwStartIdx*itvSliderPerNode);
+  sliderDragPosition = worldCoordinate(m_lastMouseEvent.localPos()).x() - (posSliderTopLft.x + 5 * pix + wdwStartIdx*itvSliderPerNode);
 }
 
 
@@ -1974,7 +1974,7 @@ void TimeSeries::clickSliderBar()
 void TimeSeries::dragSlider()
 {
   double pix  = pixelSize();
-  int index = (int)((worldCoordinate(m_lastMouseEvent.posF()).x() - sliderDragPosition - posSliderTopLft.x - 5 * pix) / itvSliderPerNode);
+  int index = (int)((worldCoordinate(m_lastMouseEvent.localPos()).x() - sliderDragPosition - posSliderTopLft.x - 5 * pix) / itvSliderPerNode);
   wdwStartIdx = (index < 0) ? 0 : ((size_t)index > m_graph->getSizeNodes() - nodesWdwScale) ? m_graph->getSizeNodes() - nodesWdwScale : index;
   update();
 }
@@ -2241,7 +2241,7 @@ void TimeSeries::handleDragDiagram(const int& dgrmIdx)
   it = showDgrm.find(dgrmIdx);
   if (it != showDgrm.end())
   {
-    QPointF delta = worldCoordinate(m_lastMouseEvent.posF()) - worldCoordinate(m_lastMousePos);
+    QPointF delta = worldCoordinate(m_lastMouseEvent.pos()) - worldCoordinate(m_lastMousePos);
     it->second.x += delta.x();
     it->second.y += delta.y();
   }

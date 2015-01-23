@@ -89,7 +89,7 @@ class used_data_equation_selector
       {
         std::set< function_symbol > used_symbols;
 
-        data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
+        data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(used_symbols, used_symbols.end())).apply(i->lhs());
 
         symbols_for_equation[*i].swap(used_symbols);
       }
@@ -134,14 +134,14 @@ class used_data_equation_selector
 
       std::set< function_symbol > used_symbols;
 
-      data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
+      data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(used_symbols, used_symbols.end())).apply(e.lhs());
 
       return std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
     }
 
     void add_function_symbols(const data_expression t)
     {
-      data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(t);
+      data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end())).apply(t);
     }
 
     /// \brief default constructor

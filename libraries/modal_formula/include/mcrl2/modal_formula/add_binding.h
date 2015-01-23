@@ -31,7 +31,7 @@ struct add_data_variable_binding: public lps::add_data_variable_binding<Builder,
   typedef lps::add_data_variable_binding<Builder, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;
@@ -69,7 +69,7 @@ struct add_data_variable_binding: public action_formulas::add_data_variable_bind
   typedef action_formulas::add_data_variable_binding<Builder, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;
@@ -87,7 +87,7 @@ struct add_data_variable_binding: public regular_formulas::add_data_variable_bin
   typedef regular_formulas::add_data_variable_binding<Builder, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;
@@ -120,7 +120,7 @@ struct add_state_variable_binding: public core::add_binding<Builder, Derived, co
   typedef core::add_binding<Builder, Derived, core::identifier_string> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;

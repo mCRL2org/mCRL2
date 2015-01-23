@@ -1,108 +1,33 @@
-# Authors: Frank Stappers and Aad Mathijssen
-# Copyright: see the accompanying file COPYING or copy at
-# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-#
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+configure_file(include/mcrl2/utilities/toolset_version_const.h.in mcrl2/utilities/toolset_version_const.h)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mcrl2/utilities/toolset_version_const.h
+        DESTINATION ${MCRL2_INCLUDE_PATH}/mcrl2/utilities
+        COMPONENT Headers)
 
-# ##################################
-# ## mcrl2_utilities ##
-# ##################################
+add_mcrl2_library(utilities
+  INSTALL_HEADERS TRUE
+  SOURCES
+    command_line_interface.cpp
+    logger.cpp
+    text_utility.cpp
+    toolset_version.cpp
+)
 
-project(mcrl2_utilities)
-cmake_minimum_required(VERSION 2.6)
-
-# Trick to add header files to projects in IDEs like Visual Studio and XCode
-FILE(GLOB_RECURSE HEADERS "include" "*.h")
-add_custom_target(${PROJECT_NAME}_headers
-  SOURCES ${HEADERS})
-  
-# Generate version header file
-if(CMAKE_CFG_INTDIR STREQUAL ".")
-  add_definitions("-DMCRL2_BUILD_TYPE=\"${CMAKE_BUILD_TYPE}\"")
-else()
-  add_definitions("-DMCRL2_BUILD_TYPE=\"${CMAKE_CFG_INTDIR}\"")
+if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
+  add_mcrl2_library(utilities_qt
+    INSTALL_HEADERS TRUE
+    SOURCES
+      logwidget.ui
+      qt_tool.cpp
+      atermthread.cpp
+      logwidget.cpp
+      extendedtabwidget.cpp
+      numberedtextedit.cpp
+      persistentfiledialog.cpp
+      workarounds_qt.cpp
+    DEPENDS
+      mcrl2_utilities
+      QtCore
+      QtGui
+      QtWidgets
+  )
 endif()
-configure_file("${CMAKE_SOURCE_DIR}/build/autoconf/toolset_version_const.h.in"
-               "${PROJECT_BINARY_DIR}/include/mcrl2/utilities/toolset_version_const.h")
-
-set(mcrl2_utilities_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/command_line_interface.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_version.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/logger.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/text_utility.cpp
-)
-
-set(mcrl2_utilities_src ${mcrl2_utilities_src}  PARENT_SCOPE)
-
-include_directories(BEFORE ${PROJECT_BINARY_DIR}/include)
-
-
-add_library(${PROJECT_NAME}
-  ${mcrl2_utilities_src}
-)
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
-
-# ##############################
-# ##    mcrl2_utilities_qt    ##
-# ##############################
-
-if(MCRL2_ENABLE_GUI_TOOLS)
-
-# ##############################
-# ##    mcrl2_utilities_qt    ##
-# ##############################
-
-project(mcrl2_utilities_qt)
-cmake_minimum_required(VERSION 2.6)
-
-set(mcrl2_utilities_qt_ui
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.ui
-)
-qt4_wrap_ui(mcrl2_utilities_qt_ui_h ${mcrl2_utilities_qt_ui})
-
-set(mcrl2_utilities_qt_h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/atermthread.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/logwidget.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/qt_tool.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/setting.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/extendedtabwidget.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/numberedtextedit.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/persistentfiledialog.h
-)
-qt4_wrap_cpp(mcrl2_utilities_qt_h_moc ${mcrl2_utilities_qt_h})
-
-set(mcrl2_utilities_qt_src
-  ${mcrl2_utilities_qt_ui_h}
-  ${mcrl2_utilities_qt_h_moc}
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/qt_tool.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/atermthread.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/extendedtabwidget.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/numberedtextedit.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/persistentfiledialog.cpp
-)
-
-#set(mcrl2_utilities_qt_src ${mcrl2_utilities_qt_src} PARENT_SCOPE)
-
-# Don't forget to include output directory, otherwise
-# the UI file won't be wrapped!
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-
-add_library(${PROJECT_NAME}
-  ${mcrl2_utilities_qt_src}
-)
-
-target_link_libraries(${PROJECT_NAME}
-  ${QT_QTCORE_LIBRARY}
-  ${QT_QTGUI_LIBRARY}
-  ${QT_QTMAIN_LIBRARY}
-  mcrl2_atermpp
-)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
-
-endif(MCRL2_ENABLE_GUI_TOOLS)

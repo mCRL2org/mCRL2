@@ -32,105 +32,105 @@ struct add_traverser_boolean_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  void operator()(const bes::boolean_equation& x)
+  void apply(const bes::boolean_equation& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.formula());
+    static_cast<Derived&>(*this).apply(x.formula());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const bes::boolean_equation_system& x)
+  void apply(const bes::boolean_equation_system& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.equations());
-    static_cast<Derived&>(*this)(x.initial_state());
+    static_cast<Derived&>(*this).apply(x.equations());
+    static_cast<Derived&>(*this).apply(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const bes::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::false_& x)
+  void apply(const bes::true_& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const bes::not_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::and_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.left());
-    static_cast<Derived&>(*this)(x.right());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::or_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.left());
-    static_cast<Derived&>(*this)(x.right());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::imp& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.left());
-    static_cast<Derived&>(*this)(x.right());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::boolean_variable& x)
+  void apply(const bes::false_& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const bes::boolean_expression& x)
+  void apply(const bes::not_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::and_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::or_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::imp& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::boolean_variable& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::boolean_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     if (bes::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::true_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::true_>(x));
     }
     else if (bes::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::false_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::false_>(x));
     }
     else if (bes::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::not_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::not_>(x));
     }
     else if (bes::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::and_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::and_>(x));
     }
     else if (bes::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::or_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::or_>(x));
     }
     else if (bes::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::imp>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::imp>(x));
     }
     else if (bes::is_boolean_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::boolean_variable>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::boolean_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -144,7 +144,7 @@ struct boolean_expression_traverser: public add_traverser_boolean_expressions<co
   typedef add_traverser_boolean_expressions<core::traverser, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 //--- end generated add_traverser_boolean_expressions code ---//
 
@@ -155,106 +155,106 @@ struct add_traverser_boolean_variables: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  void operator()(const bes::boolean_equation& x)
+  void apply(const bes::boolean_equation& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.variable());
-    static_cast<Derived&>(*this)(x.formula());
+    static_cast<Derived&>(*this).apply(x.variable());
+    static_cast<Derived&>(*this).apply(x.formula());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const bes::boolean_equation_system& x)
+  void apply(const bes::boolean_equation_system& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.equations());
-    static_cast<Derived&>(*this)(x.initial_state());
+    static_cast<Derived&>(*this).apply(x.equations());
+    static_cast<Derived&>(*this).apply(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const bes::true_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::false_& x)
+  void apply(const bes::true_& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const bes::not_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::and_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.left());
-    static_cast<Derived&>(*this)(x.right());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::or_& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.left());
-    static_cast<Derived&>(*this)(x.right());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::imp& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.left());
-    static_cast<Derived&>(*this)(x.right());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void operator()(const bes::boolean_variable& x)
+  void apply(const bes::false_& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const bes::boolean_expression& x)
+  void apply(const bes::not_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::and_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::or_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::imp& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::boolean_variable& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const bes::boolean_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     if (bes::is_true(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::true_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::true_>(x));
     }
     else if (bes::is_false(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::false_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::false_>(x));
     }
     else if (bes::is_not(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::not_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::not_>(x));
     }
     else if (bes::is_and(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::and_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::and_>(x));
     }
     else if (bes::is_or(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::or_>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::or_>(x));
     }
     else if (bes::is_imp(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::imp>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::imp>(x));
     }
     else if (bes::is_boolean_variable(x))
     {
-      static_cast<Derived&>(*this)(atermpp::down_cast<bes::boolean_variable>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<bes::boolean_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -268,7 +268,7 @@ struct boolean_variable_traverser: public add_traverser_boolean_variables<core::
   typedef add_traverser_boolean_variables<core::traverser, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 //--- end generated add_traverser_boolean_variables code ---//
 

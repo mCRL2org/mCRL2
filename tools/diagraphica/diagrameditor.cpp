@@ -368,7 +368,7 @@ void DiagramEditor::pasteShapes()
     double xOriginal = m_clipBoardList[0]->xCenter();
     double yOriginal = m_clipBoardList[0]->yCenter();
 
-    QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+    QPointF pos = worldCoordinate(m_lastMouseEvent.localPos());
     double xPaste = pos.x();
     double yPaste = pos.y();
 
@@ -947,7 +947,7 @@ void DiagramEditor::handleDragLft(Shape* s)
 {
   double angle = Utils::degrToRad(s->angle());
 
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   QPointF rightLocation = QPointF(s->xCenter()+cos(angle)*s->xDistance(), s->yCenter()+sin(angle)*s->xDistance());
 
   double mouseToRightDistance = snapIfNeeded(Utils::distLinePoint(rightLocation, rightLocation + QPointF(sin(-angle), cos(-angle)), mouseLocation));
@@ -964,7 +964,7 @@ void DiagramEditor::handleDragBot(Shape* s)
 {
   double angle = Utils::degrToRad(s->angle());
 
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   QPointF topLocation = QPointF(s->xCenter()-sin(angle)*s->yDistance(), s->yCenter()+cos(angle)*s->yDistance());
 
   double mouseToTopDistance = snapIfNeeded(Utils::distLinePoint(topLocation, topLocation + QPointF(cos(angle), sin(angle)), mouseLocation));
@@ -981,7 +981,7 @@ void DiagramEditor::handleDragRgt(Shape* s)
 {
   double angle = Utils::degrToRad(s->angle());
 
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   QPointF leftLocation = QPointF(s->xCenter()-cos(angle)*s->xDistance(), s->yCenter()-sin(angle)*s->xDistance());
 
   double mouseToLeftDistance = snapIfNeeded(Utils::distLinePoint(leftLocation, leftLocation + QPointF(sin(-angle), cos(-angle)), mouseLocation));
@@ -998,7 +998,7 @@ void DiagramEditor::handleDragTop(Shape* s)
 {
   double angle = Utils::degrToRad(s->angle());
 
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   QPointF bottomLocation = QPointF(s->xCenter()+sin(angle)*s->yDistance(), s->yCenter()-cos(angle)*s->yDistance());
 
   double mouseToBottomDistance = snapIfNeeded(Utils::distLinePoint(bottomLocation, bottomLocation + QPointF(cos(angle), sin(angle)), mouseLocation));
@@ -1013,7 +1013,7 @@ void DiagramEditor::handleDragTop(Shape* s)
 
 void DiagramEditor::handleDragRot(Shape* s, bool isTop)
 {
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   QPointF relativeMouseLocation = mouseLocation - QPointF(s->xCenter(), s->yCenter());
   double newAngle = Utils::calcAngleDg(relativeMouseLocation.x(), relativeMouseLocation.y()) + (isTop ? 270.0 : 0);
 
@@ -1034,7 +1034,7 @@ void DiagramEditor::handleDragRot(Shape* s, bool isTop)
 
 void DiagramEditor::handleDragDOFXCtrEnd(Shape* s)
 {
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   double mouseToCenterDistance = snapIfNeeded(mouseLocation.x() - s->xCenter());
 
   s->xCenterDOF()->setMax(mouseToCenterDistance);
@@ -1043,7 +1043,7 @@ void DiagramEditor::handleDragDOFXCtrEnd(Shape* s)
 
 void DiagramEditor::handleDragDOFYCtrEnd(Shape* s)
 {
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   double mouseToCenterDistance = snapIfNeeded(mouseLocation.y() - s->yCenter());
 
   s->yCenterDOF()->setMax(mouseToCenterDistance);
@@ -1053,7 +1053,7 @@ void DiagramEditor::handleDragDOFYCtrEnd(Shape* s)
 void DiagramEditor::handleDragDOFWthEnd(Shape* s)
 {
   double angle = Utils::degrToRad(s->angle());
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   QPointF rightLocation = QPointF(s->xCenter()+cos(angle)*s->xDistance(), s->yCenter()+sin(angle)*s->xDistance());
   double mouseToRightDistance = snapIfNeeded(Utils::distLinePoint(rightLocation, rightLocation + QPointF(sin(-angle), cos(-angle)), mouseLocation));
 
@@ -1064,7 +1064,7 @@ void DiagramEditor::handleDragDOFWthEnd(Shape* s)
 void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
 {
   double angle = Utils::degrToRad(s->angle());
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   QPointF topLocation = QPointF(s->xCenter()-sin(angle)*s->yDistance(), s->yCenter()+cos(angle)*s->yDistance());
   double mouseToTopDistance = snapIfNeeded(Utils::distLinePoint(topLocation, topLocation - QPointF(cos(angle), sin(angle)), mouseLocation));
 
@@ -1074,7 +1074,7 @@ void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
 
 void DiagramEditor::handleDragDOFHge(Shape* s)
 {
-  QPointF mouseLocation = snapIfNeeded(worldCoordinate(m_lastMouseEvent.posF()));
+  QPointF mouseLocation = snapIfNeeded(worldCoordinate(m_lastMouseEvent.localPos()));
   QPointF centerLocation = QPointF(s->xCenter(), s->yCenter());
   QPointF relativeLocation = mouseLocation - centerLocation;
 
@@ -1084,7 +1084,7 @@ void DiagramEditor::handleDragDOFHge(Shape* s)
 
 void DiagramEditor::handleDragDOFAglEnd(Shape* s)
 {
-  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.localPos());
   QPointF relativeMouseLocation = mouseLocation - QPointF(s->xCenter()+s->xHinge(), s->yCenter()+s->yHinge());
   double newAngle = Utils::calcAngleDg(relativeMouseLocation.x(), relativeMouseLocation.y());
   double offsetAngle = Utils::calcAngleDg(-s->xHinge(), -s->yHinge());

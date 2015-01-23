@@ -29,11 +29,7 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
   typedef state_formula_traverser<is_normalized_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   bool result;
 
@@ -69,11 +65,8 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   typedef state_formula_builder<normalize_builder> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
+  using super::update;
+  using super::apply;
 
   bool negated;
 
@@ -81,12 +74,12 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     : negated(negated_)
   {}
 
-  state_formula operator()(const data::data_expression& x)
+  state_formula apply(const data::data_expression& x)
   {
     return negated ? data::sort_bool::not_(x) : x;
   }
 
-  state_formula operator()(const true_& /*x*/)
+  state_formula apply(const true_& /*x*/)
   {
     if (negated)
     {
@@ -98,7 +91,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const false_& /*x*/)
+  state_formula apply(const false_& /*x*/)
   {
     if (negated)
     {
@@ -110,12 +103,12 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const not_& x)
+  state_formula apply(const not_& x)
   {
     return normalize(x.operand(), !negated);
   }
 
-  state_formula operator()(const and_& x)
+  state_formula apply(const and_& x)
   {
     state_formula left = normalize(x.left(), negated);
     state_formula right = normalize(x.right(), negated);
@@ -129,7 +122,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const or_& x)
+  state_formula apply(const or_& x)
   {
     state_formula left = normalize(x.left(), negated);
     state_formula right = normalize(x.right(), negated);
@@ -143,13 +136,13 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const imp& x)
+  state_formula apply(const imp& x)
   {
     state_formula y = or_(not_(x.left()), x.right());
     return normalize(y, negated);
   }
 
-  state_formula operator()(const forall& x)
+  state_formula apply(const forall& x)
   {
     if (negated)
     {
@@ -161,7 +154,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const exists& x)
+  state_formula apply(const exists& x)
   {
     if (negated)
     {
@@ -173,7 +166,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const variable& x)
+  state_formula apply(const variable& x)
   {
     if (negated)
     {
@@ -182,7 +175,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     return x;
   }
 
-  state_formula operator()(const must& x)
+  state_formula apply(const must& x)
   {
     if (negated)
     {
@@ -194,7 +187,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const may& x)
+  state_formula apply(const may& x)
   {
     if (negated)
     {
@@ -206,7 +199,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const mu& x)
+  state_formula apply(const mu& x)
   {
     if (negated)
     {
@@ -218,7 +211,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const nu& x)
+  state_formula apply(const nu& x)
   {
     if (negated)
     {
@@ -230,22 +223,22 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     }
   }
 
-  state_formula operator()(const delay& x)
+  state_formula apply(const delay& x)
   {
     return x;
   }
 
-  state_formula operator()(const delay_timed& x)
+  state_formula apply(const delay_timed& x)
   {
     return x;
   }
 
-  state_formula operator()(const yaled& x)
+  state_formula apply(const yaled& x)
   {
     return x;
   }
 
-  state_formula operator()(const yaled_timed& x)
+  state_formula apply(const yaled_timed& x)
   {
     return x;
   }
@@ -259,7 +252,7 @@ template <typename T>
 bool is_normalized(const T& x)
 {
   is_normalized_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
@@ -270,7 +263,7 @@ template <typename T>
 void normalize(T& x, bool negated, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
   normalize_builder f(negated);
-  f(x);
+  f.update(x);
 }
 
 /// \brief The function normalize brings (embedded) state formulas into positive normal form,
@@ -280,7 +273,7 @@ template <typename T>
 T normalize(const T& x, bool negated, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
   normalize_builder f(negated);
-  return f(x);
+  return f.apply(x);
 }
 
 } // namespace state_formulas

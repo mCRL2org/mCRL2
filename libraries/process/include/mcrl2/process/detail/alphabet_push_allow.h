@@ -257,11 +257,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   typedef process_expression_traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   // used for computing the alphabet
   std::vector<process_equation>& equations;
@@ -410,7 +406,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void leave(const process::process_instance_assignment& x)
   {
     process_instance x1 = expand_assignments(x, equations);
-    derived()(x1);
+    derived().apply(x1);
   }
 
   void leave(const process::delta& x)
@@ -482,7 +478,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return out.str();
   }
 
-  void operator()(const process::hide& x)
+  void apply(const process::hide& x)
   {
     core::identifier_string_list I = x.hide_set();
     allow_set A1 = allow_set_operations::hide_inverse(I, A);
@@ -498,7 +494,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return out.str();
   }
 
-  void operator()(const process::block& x)
+  void apply(const process::block& x)
   {
     core::identifier_string_list B = x.block_set();
     allow_set A1 = allow_set_operations::block(B, A);
@@ -514,7 +510,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return out.str();
   }
 
-  void operator()(const process::rename& x)
+  void apply(const process::rename& x)
   {
     rename_expression_list R = x.rename_set();
     allow_set A1 = allow_set_operations::rename_inverse(R, A);
@@ -530,7 +526,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return out.str();
   }
 
-  void operator()(const process::comm& x)
+  void apply(const process::comm& x)
   {
     communication_expression_list C = x.comm_set();
     allow_set A1 = allow_set_operations::comm_inverse(C, A);
@@ -548,7 +544,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return out.str();
   }
 
-  void operator()(const process::allow& x)
+  void apply(const process::allow& x)
   {
     action_name_multiset_list V = x.allow_set();
     allow_set A1 = allow_set_operations::allow(V, A);
@@ -564,7 +560,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return out.str();
   }
 
-  void operator()(const process::merge& x)
+  void apply(const process::merge& x)
   {
     allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
@@ -582,7 +578,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return out.str();
   }
 
-  void operator()(const process::left_merge& x)
+  void apply(const process::left_merge& x)
   {
     allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
@@ -600,7 +596,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return out.str();
   }
 
-  void operator()(const process::sync& x)
+  void apply(const process::sync& x)
   {
     allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
@@ -618,22 +614,18 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
   typedef Traverser<apply_push_allow_traverser<Traverser, Node>, Node> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   apply_push_allow_traverser(std::vector<process_equation>& equations, alphabet_cache& W, const allow_set& A)
     : super(equations, W, A)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 inline
 push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, alphabet_cache& W, bool generate_missing_equations)
 {
   apply_push_allow_traverser<push_allow_traverser> f(equations, W, A);
-  f(x);
+  f.apply(x);
   push_allow_node result = f.node_stack.back();
 
   if (generate_missing_equations)

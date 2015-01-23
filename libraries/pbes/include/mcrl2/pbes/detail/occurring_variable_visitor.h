@@ -29,11 +29,11 @@ struct occurring_variable_visitor: public pbes_expression_traverser<occurring_va
   typedef pbes_expression_traverser<occurring_variable_visitor> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::set<propositional_variable_instantiation> variables;
 
-  void operator()(const propositional_variable_instantiation& x)
+  void apply(const propositional_variable_instantiation& x)
   {
     variables.insert(x);
   }

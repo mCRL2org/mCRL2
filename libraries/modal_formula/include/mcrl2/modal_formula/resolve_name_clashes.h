@@ -35,7 +35,7 @@ class state_formula_name_clash_resolver: public state_formulas::state_formula_bu
 
     using super::enter;
     using super::leave;
-    using super::operator();
+    using super::apply;
 
     typedef std::map<core::identifier_string, std::vector<core::identifier_string> > name_map;
 
@@ -86,27 +86,27 @@ class state_formula_name_clash_resolver: public state_formulas::state_formula_bu
     }
 
     // Rename variable
-    state_formula operator()(const mu& x)
+    state_formula apply(const mu& x)
     {
       enter(x);
       // N.B. If the two lines below are replace by
       //   state_formula result = mu(m_names[x.name()].back(), x.assignments(), (*this)(x.operand()));
       // a memory error occurs with the clang and intel compilers!
       core::identifier_string name = m_names[x.name()].back();
-      state_formula result = mu(name, x.assignments(), (*this)(x.operand()));
+      state_formula result = mu(name, x.assignments(), apply(x.operand()));
       leave(x);
       return result;
     }
 
     // Rename variable
-    state_formula operator()(const nu& x)
+    state_formula apply(const nu& x)
     {
       enter(x);
       // N.B. If the two lines below are replace by
       //   state_formula result = nu(m_names[x.name()].back(), x.assignments(), (*this)(x.operand()));
       // a memory error occurs with the clang and intel compilers!
       core::identifier_string name = m_names[x.name()].back();
-      state_formula result = nu(name, x.assignments(), (*this)(x.operand()));
+      state_formula result = nu(name, x.assignments(), apply(x.operand()));
       leave(x);
       return result;
     }
@@ -115,7 +115,6 @@ class state_formula_name_clash_resolver: public state_formulas::state_formula_bu
     state_formula operator()(const variable& x)
     {
       return variable(m_names[x.name()].back(), x.arguments());
-      return x;
     }
 };
 
@@ -125,7 +124,7 @@ class state_formula_name_clash_resolver: public state_formulas::state_formula_bu
 inline
 state_formula resolve_name_clashes(const state_formula& x)
 {
-  return core::make_apply_builder<detail::state_formula_name_clash_resolver>()(x);
+  return core::make_apply_builder<detail::state_formula_name_clash_resolver>().apply(x);
 }
 
 } // namespace state_formulas

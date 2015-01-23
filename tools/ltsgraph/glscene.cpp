@@ -7,20 +7,30 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <QtOpenGL>
 #include <assert.h>
 #include <cstdio>
-#include "glscene.h"
+#include <cmath>
 
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glu.h> // Needed for compilation on Ubuntu 12.04
+#include <QScreen>
+#include <QFont>
+#include <QFontMetrics>
+#include <QPainter>
+#include <QFile>
+
+#ifdef _WINDOWS
+#include <windows.h>
 #endif
+#include <QtOpenGL>
+#ifdef __APPLE__
+#include <OpenGL/glu.h>
+#else
+#include <GL/glu.h>
+#endif
+
 #include "mcrl2/utilities/workarounds.h"
 #include "mcrl2/utilities/logger.h"
+
+#include "glscene.h"
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc
@@ -49,7 +59,7 @@ struct Color3f
     operator const GLfloat*() const { return &r; }
 };
 
-struct TextureData
+struct TextureData 
 {
     size_t* transition_widths;
     size_t* transition_heights;
@@ -66,10 +76,13 @@ struct TextureData
     GLuint* number_textures;
     size_t statenr_count;
 
-    TextureData()
+    float device_pixel_ratio;
+
+    TextureData(float device_pixel_ratio)
       : transition_widths(NULL), transition_heights(NULL), transition_textures(NULL), transition_count(0),
         state_widths(NULL), state_heights(NULL), state_textures(NULL), state_count(0),
-        number_widths(NULL), number_heights(NULL), number_textures(NULL), statenr_count(0)
+        number_widths(NULL), number_heights(NULL), number_textures(NULL), statenr_count(0),
+        device_pixel_ratio(device_pixel_ratio)
     { }
 
     ~TextureData()
@@ -98,24 +111,25 @@ struct TextureData
       QFontMetrics metrics(font);
       QPainter p;
       QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, labelstring);
-      QImage label(bounds.width(), bounds.height(), QImage::Format_ARGB32_Premultiplied);
+      // Save the original width and height for posterity
+      *widths = bounds.width() * device_pixel_ratio;
+      *heights = bounds.height() * device_pixel_ratio;
+      QImage label(*widths, *heights, QImage::Format_ARGB32_Premultiplied);
+      label.setDevicePixelRatio(device_pixel_ratio);
+      label.fill(QColor(1, 1, 1, 0));
       p.begin(&label);
       p.setFont(font);
       p.setCompositionMode(QPainter::CompositionMode_Clear);
-      p.fillRect(bounds, QColor(1, 1, 1, 0));
       p.setCompositionMode(QPainter::CompositionMode_SourceOver);
       p.setPen(QColor(255, 0, 0, 255));
       p.drawText(bounds, labelstring);
       p.end();
-      // Save the original width and height for posterity
-      *widths = label.width();
-      *heights = label.height();
       // OpenGL likes its textures to have dimensions that are powers of 2
       int w = 1, h = 1;
-      while (w < label.width()) w <<= 1;
-      while (h < label.height()) h <<= 1;
+      while (w < *widths) w <<= 1;
+      while (h < *heights) h <<= 1;
       // ... and also wants the alpha component to be the 4th component
-      label = QGLWidget::convertToGLFormat(label.scaled(w, h));
+      label = convertToGLFormat(label.scaled(w, h));
 
       glBindTexture(GL_TEXTURE_2D, texture);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -210,9 +224,9 @@ struct VertexData
     void generate(const TextureData& textures, float pixelsize, float size_node)
     {
 
-      float handlesize = SIZE_HANDLE * pixelsize,
-          nodesize = size_node * pixelsize,
-          arrowheadsize = SIZE_ARROWHEAD * pixelsize;
+      float handlesize = SIZE_HANDLE * pixelsize * textures.device_pixel_ratio,
+          nodesize = size_node * pixelsize * textures.device_pixel_ratio,
+          arrowheadsize = SIZE_ARROWHEAD * pixelsize * textures.device_pixel_ratio;
 
       // Delete old data
       delete[] node;
@@ -865,7 +879,6 @@ void GLScene::renderHandle(size_t i)
       fill = Color3f(0.7f, 0.7f, 0.7f);
 
     glDisable(GL_LINE_SMOOTH);
-    glDisable(GL_POLYGON_SMOOTH);
     glStartName(so_handle, i);
     glPushMatrix();
 
@@ -875,7 +888,6 @@ void GLScene::renderHandle(size_t i)
     glPopMatrix();
     glEndName();
     glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_POLYGON_SMOOTH);
   }
 }
 
@@ -883,13 +895,13 @@ void GLScene::renderHandle(size_t i)
 // GLScene public methods
 //
 
-GLScene::GLScene(Graph::Graph &g)
+GLScene::GLScene(Graph::Graph &g, float device_pixel_ratio)
   : m_graph(g),
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
 {
   m_camera = new CameraAnimation();
-  m_texturedata = new TextureData;
+  m_texturedata = new TextureData(device_pixel_ratio);
   m_vertexdata = new VertexData;
 }
 
@@ -903,22 +915,24 @@ GLScene::~GLScene()
 void GLScene::init(const QColor& clear)
 {
   // Set clear color to desired color
-  glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 0.0f);
-  // Enable anti-aliasing for all primitives
+  glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 1.0f);
+  // Enable anti-aliasing for lines and points. Anti-aliasing for polygons gives artifacts on
+  // OSX when drawing a quadstrip.
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_POINT_SMOOTH);
-  glEnable(GL_POLYGON_SMOOTH);
   glEnable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   gl2psEnable(GL2PS_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  GLfloat fog_color[4] = {float(clear.redF()), float(clear.greenF()), float(clear.blueF()), 0.0f};
+  GLfloat fog_color[4] = {float(clear.redF()), float(clear.greenF()), float(clear.blueF()), 1.0f};
   glFogf(GL_FOG_MODE, GL_LINEAR);
   glFogf(GL_FOG_DENSITY, 1);
   glFogfv(GL_FOG_COLOR, fog_color);
-  if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
+  const GLubyte* version = glGetString(GL_VERSION);
+  if (version && ((version[0] == '1' && version[2] >= '4') || version[0] > '1'))
+  // if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
     glFogf(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
   updateFog();
 
@@ -929,8 +943,8 @@ void GLScene::init(const QColor& clear)
   // array. We enable that feature once and leave it untouched.
   glEnableClientState(GL_VERTEX_ARRAY);
   // Load textures and shapes
-  m_texturedata->generate(m_graph);
-  m_vertexdata->generate(*m_texturedata, m_camera->pixelsize, m_size_node);
+  updateLabels();
+  updateShapes();
   // Initialise projection matrix
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -1012,6 +1026,8 @@ Coord3D GLScene::eyeToWorld(int x, int y, GLfloat z)
   GLdouble P[16];
   GLdouble M[16];
   GLdouble wx, wy, wz;
+  x *= m_texturedata->device_pixel_ratio;
+  y *= m_texturedata->device_pixel_ratio;
   glGetDoublev(GL_PROJECTION_MATRIX, P);
   glGetDoublev(GL_MODELVIEW_MATRIX, M);
   glGetIntegerv(GL_VIEWPORT, V);
@@ -1031,7 +1047,9 @@ Coord3D GLScene::worldToEye(const Coord3D& pos)
   glGetDoublev(GL_MODELVIEW_MATRIX, M);
   glGetIntegerv(GL_VIEWPORT, V);
   gluProject(pos.x, pos.y, pos.z, M, P, V, &ex, &ey, &ez);
-  return Coord3D(ex, V[3] - ey, ez);
+  return Coord3D(ex /m_texturedata->device_pixel_ratio,
+                 (V[3] - ey) / m_texturedata->device_pixel_ratio,
+                 ez);
 }
 
 Coord3D GLScene::size()
@@ -1045,6 +1063,9 @@ GLScene::Selection GLScene::select(int x, int y)
   GLuint selectBuf[512];
   GLint  hits = 0;
   GLdouble fuzz = 2.0;
+
+  x *= m_texturedata->device_pixel_ratio;
+  y *= m_texturedata->device_pixel_ratio;
 
   glSelectBuffer(512, selectBuf);
   glRenderMode(GL_SELECT);
@@ -1199,7 +1220,7 @@ void GLScene::renderLatexGraphics(QString filename, float aspectRatio)
 
   if (file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
   {
-    file.write(tikz_code.toAscii());
+    file.write(tikz_code.toLatin1());
     file.close();
   }
 }

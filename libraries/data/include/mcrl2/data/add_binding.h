@@ -34,7 +34,7 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
   typedef core::add_binding<Builder, Derived, variable> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;

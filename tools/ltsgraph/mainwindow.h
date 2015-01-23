@@ -24,8 +24,8 @@
 
 #include "mcrl2/utilities/persistentfiledialog.h"
 
-#include "graph.h"
 #include "glwidget.h"
+#include "graph.h"
 #include "springlayout.h"
 #include "information.h"
 
