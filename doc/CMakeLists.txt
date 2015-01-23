@@ -1,7 +1,7 @@
 find_package(PythonModules 2.4 COMPONENTS sphinx argparse)
 find_package(Doxygen QUIET)
 find_package(Xsltproc QUIET)
-if(XSLTPROC AND PythonModules_sphinx_FOUND AND PythonModules_argparse_FOUND AND DOXYGEN_FOUND)
+if(XSLTPROC_FOUND AND PythonModules_sphinx_FOUND AND PythonModules_argparse_FOUND AND DOXYGEN_FOUND)
   add_subdirectory(sphinx)
 else()
   message(STATUS "**")
