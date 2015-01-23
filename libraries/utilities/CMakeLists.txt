@@ -14,6 +14,7 @@ add_mcrl2_library(utilities
 
 if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
   add_mcrl2_library(utilities_qt
+    NOTEST
     INSTALL_HEADERS TRUE
     SOURCES
       logwidget.ui
