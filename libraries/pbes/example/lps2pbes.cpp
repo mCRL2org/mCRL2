@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
   string mcf_file(argv[2]);  // modal formula file
   string pbes_file(argv[3]); // resulting pbes file
 
-  specification spec = linearise(utilities::read_text(spec_file));
+  specification spec = remove_stochastic_operators(linearise(utilities::read_text(spec_file)));
   state_formula sf = parse_state_formula(utilities::read_text(mcf_file), spec);
   bool timed = false;
   pbes p = lps2pbes(spec, sf, timed);

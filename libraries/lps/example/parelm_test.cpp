@@ -6,8 +6,8 @@ using namespace mcrl2;
 
 void test_parelm(std::string spec_text)
 {
-  lps::specification spec1 = lps::linearise(spec_text);
-  lps::specification spec2 = spec1;
+  lps::stochastic_specification spec1 = lps::linearise(spec_text);
+  lps::stochastic_specification spec2 = spec1;
   lps::parelm(spec2);
   std::cout << "<before>\n" << lps::pp(spec1.process()) << std::endl;
   std::cout << "<after>\n"  << lps::pp(spec2.process()) << std::endl;
