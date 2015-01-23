@@ -24,6 +24,7 @@
 #include "boost/algorithm/string.hpp"
 #include "mcrl2/utilities/toolset_version.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {
