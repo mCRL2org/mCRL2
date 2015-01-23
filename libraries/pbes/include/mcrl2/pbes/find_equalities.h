@@ -27,7 +27,7 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
   typedef data::detail::find_equalities_traverser<Traverser, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::push;
   using super::pop;
   using super::top;
@@ -94,7 +94,7 @@ struct find_equalities_traverser_inst: public pbes_system::detail::find_equaliti
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 
 } // namespace detail

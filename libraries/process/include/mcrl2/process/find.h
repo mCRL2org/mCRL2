@@ -34,7 +34,7 @@ struct find_action_labels_traverser: public Traverser<find_action_labels_travers
   typedef Traverser<find_action_labels_traverser<Traverser, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   OutputIterator out;
 
@@ -42,7 +42,7 @@ struct find_action_labels_traverser: public Traverser<find_action_labels_travers
     : out(out_)
   {}
 
-  void operator()(const process::action_label& x)
+  void apply(const process::action_label& x)
   {
     *out = x;
   }
@@ -283,7 +283,7 @@ template <typename T>
 std::set<core::identifier_string> find_action_names(const T& x)
 {
   detail::find_action_names_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
