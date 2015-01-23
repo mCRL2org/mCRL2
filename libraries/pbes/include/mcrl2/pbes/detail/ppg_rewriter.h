@@ -69,11 +69,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
   typedef pbes_expression_traverser<ppg_rewriter> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   enum expression_mode {
     CONJUNCTIVE, UNIVERSAL,
@@ -126,13 +122,13 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     propositional_variable fresh_var =
         propositional_variable(fresh_varname, variable_parameters);
     pbes_equation new_eqn = pbes_equation(symbol, fresh_var, x);
-    (*this)(new_eqn);
+    this->apply(new_eqn);
     propositional_variable_instantiation fresh_var_instantiation =
         propositional_variable_instantiation(fresh_varname, atermpp::container_cast<data::data_expression_list>(variable_parameters));
     return fresh_var_instantiation;
   }
 
-  void operator()(const pbes_system::forall& x)
+  void apply(const pbes_system::forall& x)
   {
     this->enter(x);
     bool simple_body = is_simple_expression(x.body());
@@ -152,7 +148,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       {
         quantifier_variable_stack.push(quantifier_variable_stack.top() + x.variables());
         mode_stack.push(mode);
-        (*this)(x.body());
+        this->apply(x.body());
         mode_stack.pop();
         pbes_expression body = expression_stack.top();
         expression_stack.pop();
@@ -174,7 +170,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     this->leave(x);
   }
 
-  void operator()(const pbes_system::exists& x)
+  void apply(const pbes_system::exists& x)
   {
     this->enter(x);
     bool simple_body = is_simple_expression(x.body());
@@ -194,7 +190,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       {
         quantifier_variable_stack.push(quantifier_variable_stack.top() + x.variables());
         mode_stack.push(mode);
-        (*this)(x.body());
+        this->apply(x.body());
         mode_stack.pop();
         pbes_expression body = expression_stack.top();
         expression_stack.pop();
@@ -216,7 +212,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     this->leave(x);
   }
 
-  void operator()(const pbes_system::and_& x)
+  void apply(const pbes_system::and_& x)
   {
     this->enter(x);
     bool is_simple = is_simple_expression(x);
@@ -234,8 +230,8 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       case CONJUNCTIVE:
       {
         mode_stack.push(mode);
-        (*this)(x.left());
-        (*this)(x.right());
+        this->apply(x.left());
+        this->apply(x.right());
         mode_stack.pop();
         pbes_expression r = expression_stack.top();
         expression_stack.pop();
@@ -305,7 +301,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     this->leave(x);
   }
 
-  void operator()(const pbes_system::or_& x)
+  void apply(const pbes_system::or_& x)
   {
     this->enter(x);
     bool is_simple = is_simple_expression(x);
@@ -323,8 +319,8 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       case DISJUNCTIVE:
       {
         mode_stack.push(mode);
-        (*this)(x.left());
-        (*this)(x.right());
+        this->apply(x.left());
+        this->apply(x.right());
         mode_stack.pop();
         pbes_expression r = expression_stack.top();
         expression_stack.pop();
@@ -433,7 +429,7 @@ inline
 pbes to_ppg(const pbes& x)
 {
   ppg_rewriter f(x.equations());
-  f(x);
+  f.apply(x);
   pbes result(
       x.data(),
       f.equations,

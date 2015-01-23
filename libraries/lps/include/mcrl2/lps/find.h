@@ -33,7 +33,7 @@ namespace lps
 template <typename T, typename OutputIterator>
 void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_all_variables_traverser<lps::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<lps::variable_traverser>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -54,7 +54,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<lps::data_expression_traverser, lps::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<lps::data_expression_traverser, lps::add_data_variable_binding>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -65,7 +65,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<lps::data_expression_traverser, lps::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<lps::data_expression_traverser, lps::add_data_variable_binding>(o, bound).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -98,7 +98,7 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 template <typename T, typename OutputIterator>
 void find_identifiers(const T& x, OutputIterator o)
 {
-  data::detail::make_find_identifiers_traverser<lps::identifier_string_traverser>(o)(x);
+  data::detail::make_find_identifiers_traverser<lps::identifier_string_traverser>(o).apply(x);
 }
 
 /// \brief Returns all identifiers that occur in an object
@@ -119,7 +119,7 @@ std::set<core::identifier_string> find_identifiers(const T& x)
 template <typename T, typename OutputIterator>
 void find_sort_expressions(const T& x, OutputIterator o)
 {
-  data::detail::make_find_sort_expressions_traverser<lps::sort_expression_traverser>(o)(x);
+  data::detail::make_find_sort_expressions_traverser<lps::sort_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all sort expressions that occur in an object
@@ -140,7 +140,7 @@ std::set<data::sort_expression> find_sort_expressions(const T& x)
 template <typename T, typename OutputIterator>
 void find_function_symbols(const T& x, OutputIterator o)
 {
-  data::detail::make_find_function_symbols_traverser<lps::data_expression_traverser>(o)(x);
+  data::detail::make_find_function_symbols_traverser<lps::data_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all function symbols that occur in an object
@@ -163,7 +163,7 @@ template <typename T>
 bool search_free_variable(const T& x, const data::variable& v)
 {
   data::detail::search_free_variable_traverser<lps::data_expression_traverser, lps::add_data_variable_binding> f(v);
-  f(x);
+  f.apply(x);
   return f.found;
 }
 
@@ -174,7 +174,7 @@ bool search_free_variable(const T& x, const data::variable& v)
 template <typename T, typename OutputIterator>
 void find_action_labels(const T& x, OutputIterator o)
 {
-  process::detail::make_find_action_labels_traverser<lps::action_label_traverser>(o)(x);
+  process::detail::make_find_action_labels_traverser<lps::action_label_traverser>(o).apply(x);
 }
 
 /// \brief Returns all action labels that occur in an object

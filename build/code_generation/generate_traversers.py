@@ -23,7 +23,7 @@ struct <ADD_TRAVERSER>: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
 <VISIT_TEXT>
 };
@@ -35,7 +35,7 @@ struct <TRAVERSER>: public <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived>
   typedef <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 '''
     classnames = parse_classnames(class_map[namespace], namespace)
@@ -59,10 +59,10 @@ struct <TRAVERSER>: public <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived>
     #----------------------------------------------------------------------------------------#
     # N.B. THIS IS AN UGLY HACK to deal with the optional time function in some LPS classes
     # TODO: investigate if the time interface can be improved
-    text = re.sub(r'static_cast<Derived&>\(\*this\)\(x.time\(\)\);', '''if (x.has_time())
+    text = text.replace('static_cast<Derived&>(*this).apply(x.time());', '''if (x.has_time())
     {
-      static_cast<Derived&>(*this)(x.time());
-    }''', text)
+      static_cast<Derived&>(*this).apply(x.time());
+    }''')
     #----------------------------------------------------------------------------------------#
 
     label = add_traverser
@@ -77,7 +77,8 @@ struct <ADD_BUILDER>: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
 <VISIT_TEXT>
 };
@@ -89,7 +90,8 @@ struct <BUILDER>: public <ADD_BUILDER><<PARENT_BUILDER>, Derived>
   typedef <ADD_BUILDER><<PARENT_BUILDER>, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 };
 '''
 
@@ -114,10 +116,10 @@ struct <BUILDER>: public <ADD_BUILDER><<PARENT_BUILDER>, Derived>
     #----------------------------------------------------------------------------------------#
     # N.B. THIS IS AN UGLY HACK to deal with the optional time function in some LPS classes
     # TODO: investigate if the time interface can be improved
-    text = re.sub(r'x.time\(\) = static_cast<Derived&>\(\*this\)\(x.time\(\)\);', '''if (x.has_time())
+    text = text.replace('x.time() = static_cast<Derived&>(*this).apply(x.time());', '''if (x.has_time())
     {
-      x.time() = static_cast<Derived&>(*this)(x.time());
-    }''', text)
+      x.time() = static_cast<Derived&>(*this).apply(x.time());
+    }''')
     #----------------------------------------------------------------------------------------#
 
     label = add_builder

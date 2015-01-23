@@ -32,7 +32,7 @@ struct find_boolean_variables_traverser: public Traverser<find_boolean_variables
   typedef Traverser<find_boolean_variables_traverser<Traverser, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   OutputIterator out;
 
@@ -40,14 +40,10 @@ struct find_boolean_variables_traverser: public Traverser<find_boolean_variables
     : out(out_)
   {}
 
-  void operator()(const boolean_variable& v)
+  void apply(const boolean_variable& v)
   {
     *out = v;
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, class OutputIterator>
@@ -67,7 +63,7 @@ make_find_boolean_variables_traverser(OutputIterator out)
 template <typename Container, typename OutputIterator>
 void find_boolean_variables(Container const& container, OutputIterator o)
 {
-  bes::detail::make_find_boolean_variables_traverser<bes::boolean_expression_traverser>(o)(container);
+  bes::detail::make_find_boolean_variables_traverser<bes::boolean_expression_traverser>(o).apply(container);
 }
 
 /// \brief Returns all variables that occur in a range of expressions

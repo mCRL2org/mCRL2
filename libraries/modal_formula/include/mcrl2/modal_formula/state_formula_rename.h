@@ -32,10 +32,10 @@ template <typename IdentifierGenerator>
 struct state_formula_predicate_variable_rename_builder: public state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> >
 {
   typedef state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> > super;
-
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
   /// \brief An identifier generator
   IdentifierGenerator& generator;
@@ -70,7 +70,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
   /// \param n A
   /// \param l A sequence of data expressions
   /// \return The result of visiting the node
-  state_formula operator()(const variable& x)
+  state_formula apply(const variable& x)
   {
     core::identifier_string new_name = x.name();
     for (std::deque<std::pair<core::identifier_string, core::identifier_string> >::iterator i = replacements.begin(); i != replacements.end(); ++i)
@@ -90,10 +90,10 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula operator()(const mu& x)
+  state_formula apply(const mu& x)
   {
     core::identifier_string new_name = push(x.name());
-    state_formula new_formula = (*this)(x.operand());
+    state_formula new_formula = apply(x.operand());
     pop();
     return mu(new_name, x.assignments(), new_formula);
   }
@@ -104,17 +104,13 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula operator()(const nu& x)
+  state_formula apply(const nu& x)
   {
     core::identifier_string new_name = push(x.name());
-    state_formula new_formula = (*this)(x.operand());
+    state_formula new_formula = apply(x.operand());
     pop();
     return nu(new_name, x.assignments(), new_formula);
   }
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 /// \brief Utility function for creating a state_formula_predicate_variable_rename_builder.
@@ -134,7 +130,7 @@ state_formula_predicate_variable_rename_builder<IdentifierGenerator> make_state_
 template <typename IdentifierGenerator>
 state_formula rename_predicate_variables(const state_formula& f, IdentifierGenerator& generator)
 {
-  return make_state_formula_predicate_variable_rename_builder(generator)(f);
+  return make_state_formula_predicate_variable_rename_builder(generator).apply(f);
 }
 
 /// Visitor that renames variables using the specified identifier generator. Also bound variables are renamed!
@@ -144,7 +140,8 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
   /// \brief The set of identifiers that may not be used as a variable name.
   const std::set<core::identifier_string>& forbidden_identifiers;
@@ -176,12 +173,12 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
   }
 
   // do not traverse sorts
-  data::sort_expression operator()(const data::sort_expression& x)
+  data::sort_expression apply(const data::sort_expression& x)
   {
     return x;
   }
 
-  data::variable operator()(const data::variable& x)
+  data::variable apply(const data::variable& x)
   {
     using utilities::detail::contains;
     if (!contains(forbidden_identifiers, x.name()))
@@ -190,10 +187,6 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
     }
     return data::variable(create_name(x.name()), x.sort());
   }
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 /// \brief Renames all data variables in the formula f such that the forbidden identifiers are not used
@@ -202,7 +195,7 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
 inline
 state_formula rename_variables(const state_formula& f, const std::set<core::identifier_string>& forbidden_identifiers)
 {
-  return state_formula_variable_rename_builder(forbidden_identifiers)(f);
+  return state_formula_variable_rename_builder(forbidden_identifiers).apply(f);
 }
 
 } // namespace state_formulas

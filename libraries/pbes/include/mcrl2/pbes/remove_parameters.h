@@ -8,10 +8,6 @@
 /// \file mcrl2/pbes/remove_parameters.h
 /// \brief Functions for removing insignificant parameters from pbes types.
 
-#ifndef MCRL2_PBES_PBES_H
-#include "mcrl2/pbes/pbes.h"
-#endif
-
 #ifndef MCRL2_PBES_REMOVE_PARAMETERS_H
 #define MCRL2_PBES_REMOVE_PARAMETERS_H
 
@@ -64,7 +60,8 @@ struct remove_parameters_builder: public pbes_system::pbes_expression_builder<De
   typedef pbes_system::pbes_expression_builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
   const std::vector<size_t>& to_be_removed;
 
@@ -72,27 +69,27 @@ struct remove_parameters_builder: public pbes_system::pbes_expression_builder<De
     : to_be_removed(to_be_removed_)
   {}
 
-  propositional_variable operator()(const propositional_variable& x)
+  propositional_variable apply(const propositional_variable& x)
   {
     return propositional_variable(x.name(), detail::remove_elements(x.parameters(), to_be_removed));
   }
 
-  propositional_variable_instantiation operator()(const propositional_variable_instantiation& x)
+  propositional_variable_instantiation apply(const propositional_variable_instantiation& x)
   {
     return propositional_variable_instantiation(x.name(), detail::remove_elements(x.parameters(), to_be_removed));
   }
 
-  void operator()(pbes_equation& x)
+  void update(pbes_equation& x)
   {
-    x.variable() = static_cast<Derived&>(*this)(x.variable());
-    x.formula() = static_cast<Derived&>(*this)(x.formula());
+    x.variable() = static_cast<Derived&>(*this).apply(x.variable());
+    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
   }
 
-  void operator()(pbes& x)
+  void update(pbes& x)
   {
-    static_cast<Derived&>(*this)(x.equations());
-    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
-    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this).update(x.equations());
+    x.initial_state() = static_cast<Derived&>(*this).apply(x.initial_state());
+    static_cast<Derived&>(*this).update(x.global_variables());
   }
 };
 
@@ -110,7 +107,7 @@ T remove_parameters(const T& x,
                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                    )
 {
-  return core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed)(x);
+  return core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed).apply(x);
 }
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
@@ -123,7 +120,7 @@ void remove_parameters(T& x,
                        typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                       )
 {
-  core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed)(x);
+  core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed).update(x);
 }
 
 /// \cond INTERNAL_DOCS
@@ -136,7 +133,8 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
   typedef pbes_expression_builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
   const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed;
 
@@ -145,12 +143,12 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
   {}
 
   // to prevent default operator() being called
-  data::data_expression operator()(const data::data_expression& x)
+  data::data_expression apply(const data::data_expression& x)
   {
   	return x;
   }
 
-  propositional_variable operator()(const propositional_variable& x)
+  propositional_variable apply(const propositional_variable& x)
   {
     auto i = to_be_removed.find(x.name());
     if (i == to_be_removed.end())
@@ -160,7 +158,7 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
     return remove_parameters(x, i->second);
   }
 
-  propositional_variable_instantiation operator()(const propositional_variable_instantiation& x)
+  propositional_variable_instantiation apply(const propositional_variable_instantiation& x)
   {
     auto i = to_be_removed.find(x.name());
     if (i == to_be_removed.end())
@@ -173,16 +171,16 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
     }
   }
 
-  void operator()(pbes_equation& x)
+  void update(pbes_equation& x)
   {
-    x.variable() = static_cast<Derived&>(*this)(x.variable());
-    x.formula() = static_cast<Derived&>(*this)(x.formula());
+    x.variable() = static_cast<Derived&>(*this).apply(x.variable());
+    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
   }
 
-  void operator()(pbes& x)
+  void update(pbes& x)
   {
-    static_cast<Derived&>(*this)(x.equations());
-    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    static_cast<Derived&>(*this).update(x.equations());
+    x.initial_state() = static_cast<Derived&>(*this).apply(x.initial_state());
   }
 };
 } // namespace detail
@@ -198,7 +196,7 @@ T remove_parameters(const T& x,
                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                    )
 {
-  return core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed)(x);
+  return core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed).apply(x);
 }
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
@@ -211,7 +209,7 @@ void remove_parameters(T& x,
                        typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                       )
 {
-  core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed)(x);
+  core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed).update(x);
 }
 
 /// \cond INTERNAL_DOCS
@@ -224,7 +222,8 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
   typedef pbes_expression_builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
   const std::set<data::variable>& to_be_removed;
 
@@ -240,7 +239,7 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
     }
   }
 
-  data::variable_list operator()(const data::variable_list& l) const
+  data::variable_list apply(const data::variable_list& l) const
   {
   	using utilities::detail::contains;
 
@@ -255,28 +254,28 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
     return data::variable_list(result.begin(), result.end());
   }
 
-  data::assignment_list operator()(const data::assignment_list& l) const
+  data::assignment_list apply(const data::assignment_list& l) const
   {
     std::vector<data::assignment> a(l.begin(), l.end());
     a.erase(std::remove_if(a.begin(), a.end(), data::detail::has_left_hand_side_in(to_be_removed)), a.end());
     return data::assignment_list(a.begin(), a.end());
   }
 
-  propositional_variable operator()(const propositional_variable& x) const
+  propositional_variable apply(const propositional_variable& x)
   {
-    return propositional_variable(x.name(), static_cast<Derived&>(*this)(x.parameters()));
+    return propositional_variable(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
   }
 
-  void operator()(pbes_equation& x)
+  void update(pbes_equation& x)
   {
-    x.variable() = static_cast<Derived&>(*this)(x.variable());
-    x.formula() = static_cast<Derived&>(*this)(x.formula());
+    x.variable() = static_cast<Derived&>(*this).apply(x.variable());
+    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
   }
 
-  void operator()(pbes& x)
+  void update(pbes& x)
   {
-    static_cast<Derived&>(*this)(x.equations());
-    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    static_cast<Derived&>(*this).update(x.equations());
+    x.initial_state() = static_cast<Derived&>(*this).apply(x.initial_state());
     remove_parameters(x.global_variables());
   }
 };
@@ -293,7 +292,7 @@ T remove_parameters(const T& x,
                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                    )
 {
-  return core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed)(x);
+  return core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed).apply(x);
 }
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
@@ -306,7 +305,7 @@ void remove_parameters(T& x,
                        typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                       )
 {
-  core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed)(x);
+  core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed).update(x);
 }
 
 

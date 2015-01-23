@@ -159,7 +159,7 @@ struct find_equalities_traverser: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::vector<find_equalities_expression> expression_stack;
 
@@ -205,7 +205,7 @@ struct find_equalities_traverser: public Traverser<Derived>
     return result;
   }
 
-  void operator()(const data::application& x)
+  void apply(const data::application& x)
   {
     if (data::is_equal_to_application(x))
     {
@@ -243,13 +243,13 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
     else if (sort_bool::is_not_application(x))
     {
-      derived()(sort_bool::arg(x));
+      derived().apply(sort_bool::arg(x));
       top().invert();
     }
     else if (sort_bool::is_and_application(x))
     {
-      derived()(binary_left(x));
-      derived()(binary_right(x));
+      derived().apply(binary_left(x));
+      derived().apply(binary_right(x));
       auto& left = below_top();
       auto const& right = top();
       left.join_and(right);
@@ -257,8 +257,8 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
     else if (sort_bool::is_or_application(x))
     {
-      derived()(binary_left(x));
-      derived()(binary_right(x));
+      derived().apply(binary_left(x));
+      derived().apply(binary_right(x));
       auto& left = below_top();
       auto const& right = top();
       left.join_or(right);
@@ -266,8 +266,8 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
     else if (sort_bool::is_implies_application(x))
     {
-      derived()(binary_left(x));
-      derived()(binary_right(x));
+      derived().apply(binary_left(x));
+      derived().apply(binary_right(x));
       auto& left = below_top();
       auto const& right = top();
       left.invert();
@@ -307,10 +307,6 @@ struct find_equalities_traverser: public Traverser<Derived>
   {
     throw mcrl2::runtime_error("not implemented yet!");
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 struct find_equalities_traverser_inst: public find_equalities_traverser<data::data_expression_traverser, find_equalities_traverser_inst>
@@ -319,7 +315,7 @@ struct find_equalities_traverser_inst: public find_equalities_traverser<data::da
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 
 } // namespace detail
@@ -329,7 +325,7 @@ inline
 std::string find_equalities(const data_expression& x)
 {
   detail::find_equalities_traverser_inst f;
-  f(x);
+  f.apply(x);
   assert(f.expression_stack.size() == 1);
   std::ostringstream out;
   out << f.top();

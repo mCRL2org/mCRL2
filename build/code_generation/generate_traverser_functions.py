@@ -19,7 +19,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R)(x);
+  data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R).update(x);
 }
 
 /// \\\\brief Rewrites all embedded expressions in an object x
@@ -32,7 +32,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R)(x);
+  return data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R).apply(x);
 }
 
 /// \\\\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -46,7 +46,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma)(x);
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma).update(x);
 }
 
 /// \\\\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -61,7 +61,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma)(x);
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma).apply(x);
 }
 '''
 
@@ -72,7 +72,7 @@ void replace_sort_expressions(T& x,
                               typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                              )
 {
-  data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost)(x);
+  data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -82,7 +82,7 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost)(x);
+  return data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -92,7 +92,7 @@ void replace_data_expressions(T& x,
                               typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                              )
 {
-  data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost)(x);
+  data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -102,7 +102,7 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost)(x);
+  return data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -111,7 +111,7 @@ void replace_variables(T& x,
                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                       )
 {
-  core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma)(x);
+  core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -120,7 +120,7 @@ T replace_variables(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                    )
 {
-  return core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma)(x);
+  return core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -129,7 +129,7 @@ void replace_all_variables(T& x,
                            typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma)(x);
+  core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -138,7 +138,7 @@ T replace_all_variables(const T& x,
                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                        )
 {
-  return core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma)(x);
+  return core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma).apply(x);
 }
 
 /// \\\\brief Applies the substitution sigma to x.
@@ -150,7 +150,7 @@ void replace_free_variables(T& x,
                            )
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x);
+  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma).update(x);
 }
 
 /// \\\\brief Applies the substitution sigma to x.
@@ -162,7 +162,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x);
+  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma).apply(x);
 }
 
 /// \\\\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -175,7 +175,7 @@ void replace_free_variables(T& x,
                            )
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
+  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma).update(x, bound_variables);
 }
 
 /// \\\\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -188,7 +188,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
+  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma).apply(x, bound_variables);
 }
 '''
 
@@ -206,7 +206,7 @@ void replace_variables_capture_avoiding(T& x,
   std::multiset<data::variable> V;
   NAMESPACE::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma, V).update(x);
 }
 
 /// \\\\brief Applies sigma as a capture avoiding substitution to x
@@ -223,7 +223,7 @@ T replace_variables_capture_avoiding(const T& x,
   std::multiset<data::variable> V;
   NAMESPACE::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  return data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  return data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma, V).apply(x);
 }
 '''
 
@@ -234,7 +234,7 @@ FIND_VARIABLES_FUNCTION_TEXT = '''/// \\\\brief Returns all variables that occur
 template <typename T, typename OutputIterator>
 void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_all_variables_traverser<NAMESPACE::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<NAMESPACE::variable_traverser>(o).apply(x);
 }
 
 /// \\\\brief Returns all variables that occur in an object
@@ -255,7 +255,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<NAMESPACE::data_expression_traverser, NAMESPACE::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<NAMESPACE::data_expression_traverser, NAMESPACE::add_data_variable_binding>(o).apply(x);
 }
 
 /// \\\\brief Returns all variables that occur in an object
@@ -266,7 +266,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<NAMESPACE::data_expression_traverser, NAMESPACE::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<NAMESPACE::data_expression_traverser, NAMESPACE::add_data_variable_binding>(o, bound).apply(x);
 }
 
 /// \\\\brief Returns all variables that occur in an object
@@ -299,7 +299,7 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 template <typename T, typename OutputIterator>
 void find_identifiers(const T& x, OutputIterator o)
 {
-  data::detail::make_find_identifiers_traverser<NAMESPACE::identifier_string_traverser>(o)(x);
+  data::detail::make_find_identifiers_traverser<NAMESPACE::identifier_string_traverser>(o).apply(x);
 }
 
 /// \\\\brief Returns all identifiers that occur in an object
@@ -320,7 +320,7 @@ std::set<core::identifier_string> find_identifiers(const T& x)
 template <typename T, typename OutputIterator>
 void find_sort_expressions(const T& x, OutputIterator o)
 {
-  data::detail::make_find_sort_expressions_traverser<NAMESPACE::sort_expression_traverser>(o)(x);
+  data::detail::make_find_sort_expressions_traverser<NAMESPACE::sort_expression_traverser>(o).apply(x);
 }
 
 /// \\\\brief Returns all sort expressions that occur in an object
@@ -341,7 +341,7 @@ std::set<data::sort_expression> find_sort_expressions(const T& x)
 template <typename T, typename OutputIterator>
 void find_function_symbols(const T& x, OutputIterator o)
 {
-  data::detail::make_find_function_symbols_traverser<NAMESPACE::data_expression_traverser>(o)(x);
+  data::detail::make_find_function_symbols_traverser<NAMESPACE::data_expression_traverser>(o).apply(x);
 }
 
 /// \\\\brief Returns all function symbols that occur in an object

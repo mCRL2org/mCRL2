@@ -8,7 +8,7 @@
 //
 /// \file mcrl2/core/builder_msvc.inc.h
 /// \brief add your file description here.
-
+/*
 // aterm traversal
 template <typename T>
 T operator()(const T& x,
@@ -60,3 +60,4 @@ void operator()(std::set<T>& x)
   using std::swap;
   swap(x, result);
 }
+*/

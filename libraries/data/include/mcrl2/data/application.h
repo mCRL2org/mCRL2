@@ -221,7 +221,7 @@ class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator
     
     /// \brief The dereference operator.
     /// \return The dereferenced term.
-    typename term_appl_prepend_iterator<ForwardIterator>::reference operator*() const
+    typename term_appl_prepend_iterator<ForwardIterator>::reference operator*()
     {
       if (term_appl_prepend_iterator<ForwardIterator>::m_prepend)
       {
@@ -233,7 +233,7 @@ class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator
 
     /// \brief Dereference the current iterator.
     /// \return The dereference term.
-    typename term_appl_prepend_iterator<ForwardIterator>::pointer operator->() const
+    typename term_appl_prepend_iterator<ForwardIterator>::pointer operator->()
     {
       if (term_appl_prepend_iterator<ForwardIterator>::m_prepend)
       {

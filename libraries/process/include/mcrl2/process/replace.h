@@ -32,7 +32,8 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
   typedef data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
+  using super::update;
   using super::sigma;
   using super::update_sigma;
 
@@ -52,7 +53,7 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
     : super(sigma, V)
   { }
 
-  process::process_expression operator()(const process::process_instance_assignment& x)
+  process::process_expression apply(const process::process_instance_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
     data::assignment_list a = x.assignments();
@@ -64,7 +65,7 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
       auto k = find_variable(a, *j);
       if (k == a.end())
       {
-        data::data_expression e = (*this)(*j);
+        data::data_expression e = apply(*j);
         if (e != *j)
         {
           v.push_back(data::assignment(*j, e));
@@ -72,7 +73,7 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
       }
       else
       {
-        v.push_back(data::assignment(k->lhs(), (*this)(k->rhs())));
+        v.push_back(data::assignment(k->lhs(), apply(k->rhs())));
       }
     }
     process::process_expression result = process::process_instance_assignment(x.identifier(), data::assignment_list(v.begin(), v.end()));
@@ -80,10 +81,10 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
     return result;
   }
 
-  process_expression operator()(const sum& x)
+  process_expression apply(const sum& x)
   {
     data::variable_list v = update_sigma.push(x.variables());
-    process_expression result = sum(v, (*this)(x.operand()));
+    process_expression result = sum(v, apply(x.operand()));
     update_sigma.pop(v);
     return result;
   }
@@ -95,15 +96,12 @@ struct replace_capture_avoiding_variables_builder: public Binder<Builder, replac
   typedef Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
+  using super::update;
 
   replace_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V)
     : super(sigma, V)
   { }
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
@@ -124,7 +122,7 @@ void replace_sort_expressions(T& x,
                               typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                              )
 {
-  data::detail::make_replace_sort_expressions_builder<process::sort_expression_builder>(sigma, innermost)(x);
+  data::detail::make_replace_sort_expressions_builder<process::sort_expression_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -134,7 +132,7 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<process::sort_expression_builder>(sigma, innermost)(x);
+  return data::detail::make_replace_sort_expressions_builder<process::sort_expression_builder>(sigma, innermost).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -144,7 +142,7 @@ void replace_data_expressions(T& x,
                               typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                              )
 {
-  data::detail::make_replace_data_expressions_builder<process::data_expression_builder>(sigma, innermost)(x);
+  data::detail::make_replace_data_expressions_builder<process::data_expression_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -154,7 +152,7 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<process::data_expression_builder>(sigma, innermost)(x);
+  return data::detail::make_replace_data_expressions_builder<process::data_expression_builder>(sigma, innermost).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -163,7 +161,7 @@ void replace_variables(T& x,
                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                       )
 {
-  core::make_update_apply_builder<process::data_expression_builder>(sigma)(x);
+  core::make_update_apply_builder<process::data_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -172,7 +170,7 @@ T replace_variables(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                    )
 {
-  return core::make_update_apply_builder<process::data_expression_builder>(sigma)(x);
+  return core::make_update_apply_builder<process::data_expression_builder>(sigma).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -181,7 +179,7 @@ void replace_all_variables(T& x,
                            typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  core::make_update_apply_builder<process::variable_builder>(sigma)(x);
+  core::make_update_apply_builder<process::variable_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -190,7 +188,7 @@ T replace_all_variables(const T& x,
                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                        )
 {
-  return core::make_update_apply_builder<process::variable_builder>(sigma)(x);
+  return core::make_update_apply_builder<process::variable_builder>(sigma).apply(x);
 }
 
 /// \brief Applies the substitution sigma to x.
@@ -202,7 +200,7 @@ void replace_free_variables(T& x,
                            )
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x);
+  data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma).update(x);
 }
 
 /// \brief Applies the substitution sigma to x.
@@ -214,7 +212,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x);
+  return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma).apply(x);
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -227,7 +225,7 @@ void replace_free_variables(T& x,
                            )
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x, bound_variables);
+  data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma).update(x, bound_variables);
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -240,7 +238,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x, bound_variables);
+  return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma).apply(x, bound_variables);
 }
 //--- end generated process replace code ---//
 
@@ -259,7 +257,7 @@ void replace_variables_capture_avoiding(T& x,
   std::multiset<data::variable> V;
   process::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V).update(x);
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
@@ -276,7 +274,7 @@ T replace_variables_capture_avoiding(const T& x,
   std::multiset<data::variable> V;
   process::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  return data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  return data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V).apply(x);
 }
 //--- end generated process replace_capture_avoiding code ---//
 
@@ -308,7 +306,7 @@ void replace_process_identifiers(T& x,
                        typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                       )
 {
-  core::make_update_apply_builder<process::process_identifier_builder>(sigma)(x);
+  core::make_update_apply_builder<process::process_identifier_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -317,7 +315,7 @@ T replace_process_identifiers(const T& x,
                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                    )
 {
-  return core::make_update_apply_builder<process::process_identifier_builder>(sigma)(x);
+  return core::make_update_apply_builder<process::process_identifier_builder>(sigma).apply(x);
 }
 
 } // namespace process

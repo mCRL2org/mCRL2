@@ -29,7 +29,7 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
   typedef pbes_expression_traverser<find_free_variables_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   data::variable_list bound_variables;
   std::vector<data::variable_list> quantifier_stack;
@@ -128,7 +128,7 @@ inline
 std::set<data::variable> find_free_variables(const pbes_expression& x, const data::variable_list& bound_variables = data::variable_list(), bool search_propositional_variables = true)
 {
   find_free_variables_traverser f(bound_variables, search_propositional_variables);
-  f(x);
+  f.apply(x);
   return f.result;
 };
 

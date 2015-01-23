@@ -332,7 +332,7 @@ struct reset_traverser: public pbes_expression_traverser<reset_traverser>
   typedef pbes_expression_traverser<reset_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   global_reset_variables_algorithm& algorithm;
   const stategraph_equation& eq_X;
@@ -427,7 +427,7 @@ pbes_expression reset_variables(global_reset_variables_algorithm& algorithm, con
 {
   std::size_t i = 0;
   reset_traverser f(algorithm, eq_X, i);
-  f(x);
+  f.apply(x);
   return f.top();
 }
 

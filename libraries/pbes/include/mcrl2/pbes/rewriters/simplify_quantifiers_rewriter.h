@@ -25,16 +25,14 @@ template <template <class> class Builder, class Derived>
 struct add_simplify_quantifiers: public Builder<Derived>
 {
   typedef Builder<Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   typedef core::term_traits<pbes_expression> tr;
 
-  pbes_expression operator()(const forall& x)
+  pbes_expression apply(const forall& x)
   {
     pbes_expression result;
-    pbes_expression body = super::operator()(x.body());
+    pbes_expression body = super::apply(x.body());
     auto const& variables = x.variables();
 
     if (variables.empty())
@@ -77,10 +75,10 @@ struct add_simplify_quantifiers: public Builder<Derived>
     return result;
   }
 
-  pbes_expression operator()(const exists& x)
+  pbes_expression apply(const exists& x)
   {
     pbes_expression result;
-    pbes_expression body = super::operator()(x.body());
+    pbes_expression body = super::apply(x.body());
     auto const& variables = x.variables();
 
     if (variables.empty())
@@ -126,12 +124,7 @@ struct add_simplify_quantifiers: public Builder<Derived>
 
 template <typename Derived>
 struct simplify_quantifiers_builder: public add_simplify_quantifiers<pbes_system::detail::simplify_builder, Derived>
-{
-  typedef add_simplify_quantifiers<pbes_system::detail::simplify_builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-};
+{ };
 
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<pbes_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction>
@@ -139,7 +132,6 @@ struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<pbes
   typedef add_data_rewriter<pbes_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction> super;
   using super::enter;
   using super::leave;
-  using super::operator();
 
   simplify_quantifiers_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma)
@@ -156,7 +148,7 @@ struct simplify_quantifiers_rewriter
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    return core::make_apply_builder<detail::simplify_quantifiers_builder>()(x);
+    return core::make_apply_builder<detail::simplify_quantifiers_builder>().apply(x);
   }
 };
 
@@ -176,13 +168,13 @@ struct simplify_quantifiers_data_rewriter
   pbes_expression operator()(const pbes_expression& x) const
   {
     data::no_substitution sigma;
-    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma).apply(x);
   }
 
   template <typename SubstitutionFunction>
   pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
   {
-    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma).apply(x);
   }
 };
 

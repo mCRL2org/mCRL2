@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(mCRL2)
 
-cmake_policy(SET CMP0020 NEW)
-# cmake_policy(SET CMP0043 NEW)  TODO: set policies according to CMake version (this one is defined from 3.0 onwards)
+if("${CMAKE_MAJOR_VERSION}" GREATER 2)
+  cmake_policy(SET CMP0043 NEW)
+  if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 3.0)
+    cmake_policy(SET CMP0054 OLD)
+  endif()
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 enable_testing()
@@ -25,10 +30,12 @@ option(MCRL2_ENABLE_DEPRECATED      "Enable compilation of deprecated tools." OF
 option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF)
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_SKIP_LONG_TESTS        "Do not compile test code that takes too long when profiling is on." OFF)
+option(MCRL2_SKIP_ALL_TESTS         "Do not generate any test targets." OFF)
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
 
 mark_as_advanced(MCRL2_ENABLE_STABLE)
 mark_as_advanced(MCRL2_SKIP_LONG_TESTS)
+mark_as_advanced(MCRL2_SKIP_ALL_TESTS)
 
 include(ConfigurePlatform)
 include(ConfigureCompiler)

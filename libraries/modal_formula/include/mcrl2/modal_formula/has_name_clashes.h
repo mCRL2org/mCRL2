@@ -31,13 +31,9 @@ class state_formula_name_clash_checker: public state_formulas::state_formula_tra
   public:
     typedef state_formulas::state_formula_traverser<state_formula_name_clash_checker> super;
 
-    using super::operator();
+    using super::apply;
     using super::enter;
     using super::leave;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 
     /// \brief The stack of names.
     std::vector<core::identifier_string> m_name_stack;
@@ -88,9 +84,9 @@ bool has_name_clashes(const state_formula& f)
   try
   {
     detail::state_formula_name_clash_checker checker;
-    checker(f);
+    checker.apply(f);
   }
-  catch (mcrl2::runtime_error e)
+  catch (mcrl2::runtime_error)
   {
     return true;
   }

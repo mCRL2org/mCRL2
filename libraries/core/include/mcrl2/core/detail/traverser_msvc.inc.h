@@ -8,9 +8,10 @@
 //
 /// \file mcrl2/core/detail/traverser_msvc.inc.h
 /// \brief add your file description here.
-
+/*
 template <typename Container >
 void operator()(Container const& a)
 {
   super::operator()(a);
 }
+*/

@@ -46,7 +46,7 @@ struct boolean_variable_substitution: public std::unary_function<boolean_variabl
 template <typename Substitution>
 boolean_expression replace_boolean_variables(const boolean_expression& x, Substitution sigma)
 {
-  return core::make_update_apply_builder<boolean_expression_builder>(sigma)(x);
+  return core::make_update_apply_builder<boolean_expression_builder>(sigma).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -55,7 +55,7 @@ void replace_all_boolean_variables(T& x,
                                    typename std::enable_if< !std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                                   )
 {
-  core::make_update_apply_builder<bes::boolean_variable_builder>(sigma)(x);
+  core::make_update_apply_builder<bes::boolean_variable_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -64,7 +64,7 @@ T replace_all_boolean_variables(const T& x,
                                 typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                                )
 {
-  return core::make_update_apply_builder<bes::boolean_variable_builder>(sigma)(x);
+  return core::make_update_apply_builder<bes::boolean_variable_builder>(sigma).apply(x);
 }
 
 } // namespace bes

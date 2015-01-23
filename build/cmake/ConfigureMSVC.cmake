@@ -6,13 +6,13 @@ include_directories( build/workarounds/msvc )
 ## Set MSVC specific compiler flags
 ##---------------------------------------------------
 
-try_add_cxx_flag(/MD)                   # Creates multithreaded DLLs using MSVCRT.lib
+#try_add_cxx_flag(/MD)                   # Creates multithreaded DLLs using MSVCRT.lib
 try_add_cxx_flag(/EHs)                  # Synchronous exception handling (TODO: check why)
 try_add_cxx_flag(/bigobj)               # Allow big object files
 try_add_cxx_flag(/MP)                   # Use multicore compilation where possible
 try_add_cxx_flag(/W3        MAINTAINER) # More warnings in Maintainer builds
 
-try_add_c_flag(/MD)
+#try_add_c_flag(/MD)
 try_add_c_flag(/EHs)
 try_add_c_flag(/bigobj)
 try_add_c_flag(/MP)

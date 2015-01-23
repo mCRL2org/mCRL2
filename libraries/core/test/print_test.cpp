@@ -23,7 +23,7 @@ void test_print()
   std::ostringstream out1;
   core::detail::apply_printer<core::detail::printer> printer(out1);
   core::identifier_string s("abc");
-  printer(s);
+  printer.apply(s);
   BOOST_CHECK(out1.str() == "abc");
 
   // print using the one argument function print

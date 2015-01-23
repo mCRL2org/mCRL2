@@ -1007,7 +1007,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
     #     return text + '\n'
 
     def traverser_function(self, all_classes, dependencies):
-        text = r'''void operator()(const <CLASS_NAME>& x)
+        text = r'''void apply(const <CLASS_NAME>& x)
 {
   static_cast<Derived&>(*this).enter(x);<VISIT_TEXT>
   static_cast<Derived&>(*this).leave(x);
@@ -1027,7 +1027,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     cast = 'atermpp::down_cast<%s>(x)' % c.classname(True)
                 updates.append('''if (%s(x))
 {
-  static_cast<Derived&>(*this)(%s);
+  static_cast<Derived&>(*this).apply(%s);
 }''' % (is_function, cast))
             if len(updates) == 0:
                 visit_text = '// skip'
@@ -1047,9 +1047,9 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     dependent = True
                     # special case for arguments of a data application
                     if self.classname(True) == 'data::application' and p.name() == 'arguments':
-                        update = 'for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this)(*i); }'
+                        update = 'for (auto i = x.begin(); i != x.end(); ++i) { static_cast<Derived&>(*this).apply(*i); }'
                     else:
-                        update = 'static_cast<Derived&>(*this)(x.%s());' % p.name()
+                        update = 'static_cast<Derived&>(*this).apply(x.%s());' % p.name()
                     # special case for stochastic distribution
                     if self.classname(True) == 'lps::stochastic_distribution' and p.name() == 'distribution':
                         update = 'if (x.is_defined()) { ' + update + ' }'
@@ -1086,7 +1086,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         return classname
 
     def builder_function(self, all_classes, dependencies, modifiability_map):
-        text = r'''<RETURN_TYPE> operator()(<CONST><CLASS_NAME>& x)
+        text = r'''<RETURN_TYPE> <METHOD>(<CONST><CLASS_NAME>& x)
 {
   static_cast<Derived&>(*this).enter(x);<VISIT_TEXT>
   static_cast<Derived&>(*this).leave(x);<RETURN_STATEMENT>
@@ -1096,9 +1096,11 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         visit_text = ''
         dependent = False
 
+        method = 'apply'
         return_type = self.builder_return_type(all_classes, modifiability_map)
         if return_type == 'void':
             const = ''
+            method = 'update'
         else:
             const = 'const '
             # We currently return the same class as we get passed as parameter.
@@ -1120,9 +1122,9 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 if is_dependent_type(dependencies, ptype):
                     dependent = True
                     if is_modifiable_type(qtype, modifiability_map):
-                        updates.append('static_cast<Derived&>(*this)(x.%s());' % p.name())
+                        updates.append('static_cast<Derived&>(*this).update(x.%s());' % p.name())
                     else:
-                        updates.append('x.%s() = static_cast<Derived&>(*this)(x.%s());' % (p.name(), p.name()))
+                        updates.append('x.%s() = static_cast<Derived&>(*this).apply(x.%s());' % (p.name(), p.name()))
                 else:
                     continue
             if dependent:
@@ -1141,7 +1143,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                         cast = 'atermpp::down_cast<%s>(x)' % c.classname(True)
                     updates.append('''if (%s(x))
 {
-  result = static_cast<Derived&>(*this)(%s);
+  result = static_cast<Derived&>(*this).apply(%s);
 }''' % (is_function, cast))
                 if len(updates) == 0:
                     visit_text = '// skip'
@@ -1159,16 +1161,16 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                         pclass = all_classes[ptype]
                     if is_dependent_type(dependencies, ptype):
                         dependent = True
-                        updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
+                        updates.append('static_cast<Derived&>(*this).apply(x.%s())' % p.name())
                     else:
                         updates.append('x.%s()' % p.name())
                 if dependent:
                     # special case for arguments of a data application
                     if self.classname(True) == 'data::application' and p.name() == 'arguments':
                         visit_text = '''typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);
-function_pointer fp = &Derived::operator();
+function_pointer fp = &Derived::apply;
 %s result = data::application(
-   static_cast<Derived&>(*this)(x.head()),
+   static_cast<Derived&>(*this).apply(x.head()),
    x.begin(),
    x.end(),
    boost::bind(fp, static_cast<Derived*>(this), _1)
@@ -1194,6 +1196,7 @@ function_pointer fp = &Derived::operator();
         text = re.sub('<CLASS_NAME>', classname, text)
         text = re.sub('<VISIT_TEXT>', visit_text, text)
         text = re.sub('<RETURN_STATEMENT>', return_statement, text)
+        text = re.sub('<METHOD>', method, text)
         if self.constructor.is_template():
             text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
         return text

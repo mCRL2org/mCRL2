@@ -30,9 +30,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
   public:
     typedef data_expression_builder<Derived> super;
 
-    using super::enter;
-    using super::leave;
-    using super::operator();
+    using super::apply;
 
     Derived& derived()
     {
@@ -75,52 +73,52 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       return data::is_exists(x);
     }
 
-    data_expression operator()(const application& x)
+    data_expression apply(const application& x)
     {
       data_expression result;
       derived().enter(x);
       if (is_not(x)) // x = !y
       {
-        data_expression y = derived()(*x.begin());
+        data_expression y = derived().apply(*x.begin());
         result = utilities::optimized_not(y);
       }
       else if (is_and(x)) // x = y && z
       {
-        data_expression y = derived()(binary_left(x));
-        data_expression z = derived()(binary_right(x));
+        data_expression y = derived().apply(binary_left(x));
+        data_expression z = derived().apply(binary_right(x));
         result = utilities::optimized_and(y, z);
       }
       else if (is_or(x)) // x = y || z
       {
-        data_expression y = derived()(binary_left(x));
-        data_expression z = derived()(binary_right(x));
+        data_expression y = derived().apply(binary_left(x));
+        data_expression z = derived().apply(binary_right(x));
         result = utilities::optimized_or(y, z);
       }
       else if (is_imp(x)) // x = y => z
       {
-        data_expression y = derived()(binary_left(x));
-        data_expression z = derived()(binary_right(x));
+        data_expression y = derived().apply(binary_left(x));
+        data_expression z = derived().apply(binary_right(x));
         result = utilities::optimized_imp(y, z);
       }
       else
       {
-        result = super::operator()(x);
+        result = super::apply(x);
       }
       derived().leave(x);
       return result;
     }
 
-    data_expression operator()(const forall& x) // x = forall d. y
+    data_expression apply(const forall& x) // x = forall d. y
     {
       variable_list d = forall(x).variables();
-      data_expression y = derived()(forall(x).body());
+      data_expression y = derived().apply(forall(x).body());
       return utilities::optimized_forall(d, y, true);
     }
 
-    data_expression operator()(const exists& x) // x = exists d. y
+    data_expression apply(const exists& x) // x = exists d. y
     {
       variable_list d = exists(x).variables();
-      data_expression y = derived()(exists(x).body());
+      data_expression y = derived().apply(exists(x).body());
       return utilities::optimized_exists(d, y, true);
     }
 };
@@ -131,20 +129,20 @@ struct simplify_rewriter: public std::unary_function<data_expression, data_expre
 {
   data_expression operator()(const data_expression& x) const
   {
-    return core::make_apply_builder<detail::simplify_rewrite_builder>()(x);
+    return core::make_apply_builder<detail::simplify_rewrite_builder>().apply(x);
   }
 };
 
 template <typename T>
 void simplify(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
 {
-  core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter())(x);
+  core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).update(x);
 }
 
 template <typename T>
 T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
 {
-  T result = core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter())(x);
+  T result = core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).apply(x);
   return result;
 }
 

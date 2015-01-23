@@ -64,32 +64,32 @@ struct find_action_names_traverser: public process::action_label_traverser<find_
   typedef process::action_label_traverser<find_action_names_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::set<core::identifier_string> result;
 
-  void operator()(const process::action_label& x)
+  void apply(const process::action_label& x)
   {
     result.insert(x.name());
   }
 
-  void operator()(const process::block& x)
+  void apply(const process::block& x)
   {
-    super::operator()(x);
+    super::apply(x);
     core::identifier_string_list B = x.block_set();
     result.insert(B.begin(), B.end());
   }
 
-  void operator()(const process::hide& x)
+  void apply(const process::hide& x)
   {
-    super::operator()(x);
+    super::apply(x);
     core::identifier_string_list I = x.hide_set();
     result.insert(I.begin(), I.end());
   }
 
-  void operator()(const process::rename& x)
+  void apply(const process::rename& x)
   {
-    super::operator()(x);
+    super::apply(x);
     rename_expression_list R = x.rename_set();
     for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
     {
@@ -98,9 +98,9 @@ struct find_action_names_traverser: public process::action_label_traverser<find_
     }
   }
 
-  void operator()(const process::comm& x)
+  void apply(const process::comm& x)
   {
-    super::operator()(x);
+    super::apply(x);
     communication_expression_list C = x.comm_set();
     for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
     {
@@ -110,9 +110,9 @@ struct find_action_names_traverser: public process::action_label_traverser<find_
     }
   }
 
-  void operator()(const process::allow& x)
+  void apply(const process::allow& x)
   {
-    super::operator()(x);
+    super::apply(x);
     action_name_multiset_list V = x.allow_set();
     for (action_name_multiset_list::const_iterator i = V.begin(); i != V.end(); ++i)
     {
@@ -120,10 +120,6 @@ struct find_action_names_traverser: public process::action_label_traverser<find_
       result.insert(names.begin(), names.end());
     }
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 /// \endcond
 
@@ -137,7 +133,7 @@ struct find_action_names_traverser: public process::action_label_traverser<find_
 template <typename T, typename OutputIterator>
 void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_all_variables_traverser<process::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<process::variable_traverser>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -158,7 +154,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<process::data_expression_traverser, process::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<process::data_expression_traverser, process::add_data_variable_binding>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -169,7 +165,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<process::data_expression_traverser, process::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<process::data_expression_traverser, process::add_data_variable_binding>(o, bound).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -202,7 +198,7 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 template <typename T, typename OutputIterator>
 void find_identifiers(const T& x, OutputIterator o)
 {
-  data::detail::make_find_identifiers_traverser<process::identifier_string_traverser>(o)(x);
+  data::detail::make_find_identifiers_traverser<process::identifier_string_traverser>(o).apply(x);
 }
 
 /// \brief Returns all identifiers that occur in an object
@@ -223,7 +219,7 @@ std::set<core::identifier_string> find_identifiers(const T& x)
 template <typename T, typename OutputIterator>
 void find_sort_expressions(const T& x, OutputIterator o)
 {
-  data::detail::make_find_sort_expressions_traverser<process::sort_expression_traverser>(o)(x);
+  data::detail::make_find_sort_expressions_traverser<process::sort_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all sort expressions that occur in an object
@@ -244,7 +240,7 @@ std::set<data::sort_expression> find_sort_expressions(const T& x)
 template <typename T, typename OutputIterator>
 void find_function_symbols(const T& x, OutputIterator o)
 {
-  data::detail::make_find_function_symbols_traverser<process::data_expression_traverser>(o)(x);
+  data::detail::make_find_function_symbols_traverser<process::data_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all function symbols that occur in an object

@@ -44,24 +44,25 @@ struct complement_builder: public pbes_expression_builder<Derived>
   typedef pbes_expression_builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
-  pbes_expression operator()(const data::data_expression& x)
+  pbes_expression apply(const data::data_expression& x)
   {
     return data::sort_bool::not_(x);
   }
 
-  pbes_expression operator()(const and_& x)
+  pbes_expression apply(const and_& x)
   {
-    return pbes_expr_optimized::or_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
+    return pbes_expr_optimized::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
   }
 
-  pbes_expression operator()(const or_& x)
+  pbes_expression apply(const or_& x)
   {
-    return pbes_expr_optimized::and_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
+    return pbes_expr_optimized::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
   }
 
-  pbes_expression operator()(const propositional_variable_instantiation& x)
+  pbes_expression apply(const propositional_variable_instantiation& x)
   {
     throw mcrl2::runtime_error(std::string("complement_builder error: unexpected propositional variable encountered ") + mcrl2::pbes_system::pp(x));
     return pbes_expression();
@@ -76,7 +77,7 @@ struct complement_builder: public pbes_expression_builder<Derived>
 inline
 pbes_expression complement(const pbes_expression& x)
 {
-  return core::make_apply_builder<complement_builder>()(x);
+  return core::make_apply_builder<complement_builder>().apply(x);
 }
 
 } // namespace pbes_system

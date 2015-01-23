@@ -176,7 +176,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   typedef pbes_expression_traverser<edge_condition_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   typedef constelm_edge_condition<pbes_expression> edge_condition;
   typedef edge_condition::condition_map condition_map;
@@ -762,7 +762,7 @@ class pbes_constelm_algorithm
         {
           // use an edge_condition_traverser to compute the edges
           detail::edge_condition_traverser f;
-          f(i->formula());
+          f.apply(i->formula());
           edge_condition ec = f.result();
           if (!ec.condition.empty())
           {

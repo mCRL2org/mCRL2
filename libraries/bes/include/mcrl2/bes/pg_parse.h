@@ -176,12 +176,12 @@ struct pg_actions: public core::default_parser_actions
 
   identifier_t parse_Id(const core::parse_node& node)
   {
-    return parse_Number(node.child(0));
+    return parse_Number<identifier_t>(node.child(0));
   }
 
   priority_t parse_Priority(const core::parse_node& node)
   {
-    return parse_Number(node.child(0));
+    return parse_Number<priority_t>(node.child(0));
   }
 
   bool parse_Owner(const core::parse_node& node)
@@ -196,9 +196,10 @@ struct pg_actions: public core::default_parser_actions
     return result;
   }
 
-  identifier_t parse_Number(const core::parse_node& node)
+  template <typename T>
+  T parse_Number(const core::parse_node& node)
   {
-    identifier_t result;
+    T result;
     std::stringstream tmp;
     tmp << node.string();
     tmp >> result;

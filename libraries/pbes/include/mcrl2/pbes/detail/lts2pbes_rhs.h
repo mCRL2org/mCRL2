@@ -56,11 +56,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
 
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   const state_formulas::state_formula& phi0; // the original formula
   const lts::lts_lts_t& lts0;
@@ -121,7 +117,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     push(false_());
   }
 
-  void operator()(const state_formulas::not_&)
+  void apply(const state_formulas::not_&)
   {
     throw mcrl2::runtime_error("rhs_lts2pbes_traverser: negation is not supported!");
   }
@@ -140,24 +136,24 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     push(tr::or_(left, right));
   }
 
-  void operator()(const state_formulas::imp&)
+  void apply(const state_formulas::imp&)
   {
     throw mcrl2::runtime_error("rhs_lts2pbes_traverser: implication is not supported!");
   }
 
-  void operator()(const state_formulas::forall& x)
+  void apply(const state_formulas::forall& x)
   {
-    derived()(x.body());
+    derived().apply(x.body());
     top() = forall(x.variables(), top());
   }
 
-  void operator()(const state_formulas::exists& x)
+  void apply(const state_formulas::exists& x)
   {
-    derived()(x.body());
+    derived().apply(x.body());
     top() = exists(x.variables(), top());
   }
 
-  void operator()(const state_formulas::must& x)
+  void apply(const state_formulas::must& x)
   {
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
@@ -176,7 +172,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     push(tr::join_and(v.begin(), v.end()));
   }
 
-  void operator()(const state_formulas::may& x)
+  void apply(const state_formulas::may& x)
   {
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
@@ -224,7 +220,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), phi0)));
   }
 
-  void operator()(const state_formulas::nu& x)
+  void apply(const state_formulas::nu& x)
   {
     using atermpp::detail::operator+;
     core::identifier_string X = x.name();
@@ -233,7 +229,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), phi0)));
   }
 
-  void operator()(const state_formulas::mu& x)
+  void apply(const state_formulas::mu& x)
   {
     using atermpp::detail::operator+;
     core::identifier_string X = x.name();
@@ -249,7 +245,7 @@ struct apply_rhs_lts2pbes_traverser: public Traverser<apply_rhs_lts2pbes_travers
   typedef Traverser<apply_rhs_lts2pbes_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   apply_rhs_lts2pbes_traverser(const state_formulas::state_formula& x0,
                                const lts::lts_lts_t& lts0,
@@ -260,10 +256,6 @@ struct apply_rhs_lts2pbes_traverser: public Traverser<apply_rhs_lts2pbes_travers
                               )
     : super(x0, lts0, lts1, s, pm, tr)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <typename TermTraits>
@@ -277,7 +269,7 @@ pbes_expression RHS(const state_formulas::state_formula& x0,
                    )
 {
   apply_rhs_lts2pbes_traverser<rhs_lts2pbes_traverser, TermTraits> f(x0, lts0, lts1, s, pm, tr);
-  f(x);
+  f.apply(x);
   return f.top();
 }
 

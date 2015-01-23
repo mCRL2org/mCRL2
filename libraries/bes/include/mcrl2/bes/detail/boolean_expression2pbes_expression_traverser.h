@@ -31,7 +31,7 @@ struct boolean_expression2pbes_expression_traverser: public bes::boolean_express
   typedef bes::boolean_expression_traverser<boolean_expression2pbes_expression_traverser> super;
   typedef core::term_traits<pbes_system::pbes_expression> tr;
 
-  using super::operator();
+  using super::apply;
   using super::enter;
   using super::leave;
 

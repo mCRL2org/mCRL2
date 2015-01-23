@@ -253,7 +253,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   typedef pbes_expression_traverser<guard_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   simplify_data_rewriter<data::rewriter> R;
   std::vector<guard_expression> expression_stack;

@@ -27,11 +27,7 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
   typedef state_formulas::state_formula_traverser<par_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   const core::identifier_string& X;
   const data::variable_list& l;
@@ -101,12 +97,12 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
     join();
   }
 
-  void operator()(const state_formulas::forall& x)
+  void apply(const state_formulas::forall& x)
   {
     push(Par(X, l + x.variables(), x.body()));
   }
 
-  void operator()(const state_formulas::exists& x)
+  void apply(const state_formulas::exists& x)
   {
     push(Par(X, l + x.variables(), x.body()));
   }
@@ -146,7 +142,7 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
     push(data::variable_list());
   }
 
-  void operator()(const state_formulas::nu& x)
+  void apply(const state_formulas::nu& x)
   {
     if (x.name() == X)
     {
@@ -158,7 +154,7 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
     }
   }
 
-  void operator()(const state_formulas::mu& x)
+  void apply(const state_formulas::mu& x)
   {
     if (x.name() == X)
     {
@@ -175,7 +171,7 @@ inline
 data::variable_list Par(const core::identifier_string& X, const data::variable_list& l, const state_formulas::state_formula& x)
 {
   par_traverser f(X, l);
-  f(x);
+  f.apply(x);
   return f.top();
 }
 

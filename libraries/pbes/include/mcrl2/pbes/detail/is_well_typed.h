@@ -34,7 +34,7 @@ struct find_quantifier_variables_traverser: public pbes_expression_traverser<fin
   typedef pbes_expression_traverser<find_quantifier_variables_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::set<data::variable> result;
 
@@ -55,7 +55,7 @@ inline
 std::set<data::variable> find_quantifier_variables(const pbes_expression& x)
 {
   find_quantifier_variables_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
@@ -66,7 +66,7 @@ struct has_quantifier_name_clashes_traverser: public pbes_expression_traverser<h
   typedef pbes_expression_traverser<has_quantifier_name_clashes_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::vector<data::variable_list> quantifier_stack;
   bool result;
@@ -151,7 +151,7 @@ inline
 bool has_quantifier_name_clashes(const pbes_expression& x)
 {
   has_quantifier_name_clashes_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
@@ -192,7 +192,7 @@ bool is_well_typed(const pbes_equation& eqn)
 
   // check 3)
   has_quantifier_name_clashes_traverser nvisitor;
-  nvisitor(eqn.formula());
+  nvisitor.apply(eqn.formula());
   if (nvisitor.result)
   {
     mCRL2log(log::error) << "pbes_equation::is_well_typed() failed: the quantifier variable " << nvisitor.name_clash << " occurs within the scope of a quantifier variable with the same name." << std::endl;

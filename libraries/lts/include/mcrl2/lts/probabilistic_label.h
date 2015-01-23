@@ -44,6 +44,12 @@ class probabilistic_label
     number_t m_enumerator;
     number_t m_denominator;
 
+    inline
+    static number_t to_number_t(const std::string& s)
+    {
+      return std::stoul(s);
+    }
+
     // An algorithm to calculate the greatest common divisor
     static number_t greatest_common_divisor(number_t x, number_t y)
     {
@@ -98,30 +104,32 @@ class probabilistic_label
      */
     probabilistic_label(const std::string& enumerator, const std::string& denominator)
     {
-      assert(enumerator.size()<=denominator.size());
+      assert(enumerator.size() <= denominator.size());
       
       // Check whether the denominator fits in number_t.
-      if (denominator.size()>=std::numeric_limits<number_t>::digits10)
+      if (denominator.size() >= std::numeric_limits<number_t>::digits10)
       {
-        std::string shortened_denominator=denominator.substr(0,std::numeric_limits<number_t>::digits10);
-        m_denominator=std::stoull(shortened_denominator);
-        int shortened_enumerator_size=enumerator.size()+std::numeric_limits<number_t>::digits10-denominator.size();
-        if (shortened_enumerator_size<=0)
+        std::string shortened_denominator = denominator.substr(0, std::numeric_limits<number_t>::digits10);
+        m_denominator = to_number_t(shortened_denominator);
+        size_t shortened_enumerator_size = enumerator.size() + std::numeric_limits<number_t>::digits10 - denominator.size();
+        if (shortened_enumerator_size <= 0)
         {
-          m_enumerator=0;
+          m_enumerator = 0;
         }
         else
         {
-          std::string shortened_enumerator= enumerator.substr(0,shortened_enumerator_size);
-          m_enumerator=std::stoull(shortened_enumerator);
+          std::string shortened_enumerator = enumerator.substr(0, shortened_enumerator_size);
+          m_enumerator = to_number_t(shortened_enumerator);
         }
-        return;
       }
-      m_enumerator=std::stoull(enumerator);
-      m_denominator=std::stoull(denominator);
-      assert(m_denominator!=0);
-      remove_common_factors(m_enumerator,m_denominator);
-      assert(m_enumerator<=m_denominator);
+      else
+      {
+        m_enumerator = to_number_t(enumerator);
+        m_denominator = to_number_t(denominator);
+        assert(m_denominator != 0);
+        remove_common_factors(m_enumerator, m_denominator);
+        assert(m_enumerator <= m_denominator);
+      }
     }
 
     /* \brief Return the enumerator of the label.

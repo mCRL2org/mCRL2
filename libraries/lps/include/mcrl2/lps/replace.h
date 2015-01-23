@@ -34,7 +34,8 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   typedef process::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
+  using super::update;
   using super::sigma;
   using super::update_sigma;
 
@@ -46,32 +47,32 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   void do_action_summand(ActionSummand& x, const data::variable_list& v)
   {
     x.summation_variables() = v;
-    x.condition() = (*this)(x.condition());
-    (*this)(x.multi_action());
-    x.assignments() = (*this)(x.assignments());
+    x.condition() = apply(x.condition());
+    apply(x.multi_action());
+    x.assignments() = apply(x.assignments());
   }
 
-  void operator()(action_summand& x)
+  void apply(action_summand& x)
   {
     data::variable_list v = update_sigma.push(x.summation_variables());
     do_action_summand(x, v);
     update_sigma.pop(v);
   }
 
-  void operator()(stochastic_action_summand& x)
+  void apply(stochastic_action_summand& x)
   {
     data::variable_list v = update_sigma.push(x.summation_variables());
     do_action_summand(x, v);
-    x.distribution() = (*this)(x.distribution());
+    x.distribution() = apply(x.distribution());
     update_sigma.pop(v);
   }
 
-  void operator()(deadlock_summand& x)
+  void apply(deadlock_summand& x)
   {
     data::variable_list v = update_sigma.push(x.summation_variables());
     x.summation_variables() = v;
-    x.condition() = (*this)(x.condition());
-    (*this)(x.deadlock());
+    x.condition() = apply(x.condition());
+    apply(x.deadlock());
     update_sigma.pop(v);
   }
 
@@ -80,17 +81,17 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   {
     data::variable_list v = update_sigma.push(x.process_parameters());
     x.process_parameters() = v;
-    (*this)(x.action_summands());
-    (*this)(x.deadlock_summands());
+    apply(x.action_summands());
+    apply(x.deadlock_summands());
     update_sigma.pop(v);
   }
 
-  void operator()(linear_process& x)
+  void apply(linear_process& x)
   {
     do_linear_process(x);
   }
 
-  void operator()(stochastic_linear_process& x)
+  void apply(stochastic_linear_process& x)
   {
     do_linear_process(x);
   }
@@ -100,9 +101,9 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   {
     std::set<data::variable> v = update_sigma(x.global_variables());
     x.global_variables() = v;
-    (*this)(x.process());
-    x.action_labels() = (*this)(x.action_labels());
-    x.initial_process() = (*this)(x.initial_process());
+    apply(x.process());
+    x.action_labels() = apply(x.action_labels());
+    x.initial_process() = apply(x.initial_process());
     update_sigma.pop(v);
   }
 
@@ -119,14 +120,10 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
   stochastic_distribution operator()(stochastic_distribution& x)
   {
     data::variable_list v = update_sigma.push(x.variables());
-    stochastic_distribution result(x.variables(), (*this)(x.distribution()));
+    stochastic_distribution result(x.variables(), apply(x.distribution()));
     update_sigma.pop(v);
     return result;
   }
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 } // namespace detail
@@ -139,7 +136,7 @@ void replace_sort_expressions(T& x,
                               typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                              )
 {
-  data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost)(x);
+  data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -149,7 +146,7 @@ T replace_sort_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost)(x);
+  return data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -159,7 +156,7 @@ void replace_data_expressions(T& x,
                               typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                              )
 {
-  data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost)(x);
+  data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -169,7 +166,7 @@ T replace_data_expressions(const T& x,
                            typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost)(x);
+  return data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -178,7 +175,7 @@ void replace_variables(T& x,
                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                       )
 {
-  core::make_update_apply_builder<lps::data_expression_builder>(sigma)(x);
+  core::make_update_apply_builder<lps::data_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -187,7 +184,7 @@ T replace_variables(const T& x,
                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                    )
 {
-  return core::make_update_apply_builder<lps::data_expression_builder>(sigma)(x);
+  return core::make_update_apply_builder<lps::data_expression_builder>(sigma).apply(x);
 }
 
 template <typename T, typename Substitution>
@@ -196,7 +193,7 @@ void replace_all_variables(T& x,
                            typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                           )
 {
-  core::make_update_apply_builder<lps::variable_builder>(sigma)(x);
+  core::make_update_apply_builder<lps::variable_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -205,7 +202,7 @@ T replace_all_variables(const T& x,
                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
                        )
 {
-  return core::make_update_apply_builder<lps::variable_builder>(sigma)(x);
+  return core::make_update_apply_builder<lps::variable_builder>(sigma).apply(x);
 }
 
 /// \brief Applies the substitution sigma to x.
@@ -217,7 +214,7 @@ void replace_free_variables(T& x,
                            )
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x);
+  data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma).update(x);
 }
 
 /// \brief Applies the substitution sigma to x.
@@ -229,7 +226,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x);
+  return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma).apply(x);
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -242,7 +239,7 @@ void replace_free_variables(T& x,
                            )
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
+  data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma).update(x, bound_variables);
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -255,7 +252,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
+  return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma).apply(x, bound_variables);
 }
 //--- end generated lps replace code ---//
 
@@ -274,7 +271,7 @@ void replace_variables_capture_avoiding(T& x,
   std::multiset<data::variable> V;
   lps::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V).update(x);
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
@@ -291,7 +288,7 @@ T replace_variables_capture_avoiding(const T& x,
   std::multiset<data::variable> V;
   lps::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  return data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  return data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V).apply(x);
 }
 //--- end generated lps replace_capture_avoiding code ---//
 
@@ -304,7 +301,8 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   typedef Binder<Builder, replace_process_parameter_builder<Builder, Binder, Substitution> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
+  using super::update;
   using super::is_bound;
   using super::bound_variables;
   using super::increase_bind_count;
@@ -323,7 +321,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
     increase_bind_count(bound_variables);
   }
 
-  data::data_expression operator()(const data::variable& x)
+  data::data_expression apply(const data::variable& x)
   {
     if (bound_variables().count(x) == count)
     {
@@ -332,43 +330,39 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
     return x;
   }
 
-  data::assignment_expression operator()(const data::assignment& x)
+  data::assignment_expression apply(const data::assignment& x)
   {
-    data::variable lhs = atermpp::down_cast<data::variable>((*this)(x.lhs()));
-    data::data_expression rhs = (*this)(x.rhs());
+    data::variable lhs = atermpp::down_cast<data::variable>(apply(x.lhs()));
+    data::data_expression rhs = apply(x.rhs());
     return data::assignment(lhs, rhs);
   }
 
-  void operator()(lps::deadlock_summand& x)
+  void update(lps::deadlock_summand& x)
   {
     count = 1;
-    super::operator()(x);
+    super::update(x);
   }
 
-  void operator()(lps::action_summand& x)
+  void update(lps::action_summand& x)
   {
     count = 1;
-    super::operator()(x);
-    x.assignments() = super::operator()(x.assignments());
+    super::update(x);
+    x.assignments() = super::apply(x.assignments());
   }
 
-  lps::process_initializer operator()(const lps::process_initializer& x)
+  lps::process_initializer apply(const lps::process_initializer& x)
   {
     count = 0;
-    lps::process_initializer result = super::operator()(x);
-    return lps::process_initializer(super::operator()(result.assignments()));
+    lps::process_initializer result = super::apply(x);
+    return lps::process_initializer(super::apply(result.assignments()));
   }
 
-  void operator()(lps::linear_process& x)
+  void update(lps::linear_process& x)
   {
-    super::operator()(x);
+    super::update(x);
     count = 0;
-    x.process_parameters() = super::operator()(x.process_parameters());
+    x.process_parameters() = super::apply(x.process_parameters());
   }
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
@@ -385,7 +379,7 @@ make_replace_process_parameters_builder(Substitution sigma)
 template <typename Substitution>
 void replace_process_parameters(specification& spec, Substitution sigma)
 {
-  lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(spec);
+  lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma).update(spec);
 }
 
 /// \brief Applies a substitution to the process parameters of the specification spec.

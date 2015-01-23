@@ -28,11 +28,7 @@ struct count_fixpoints_traverser: public state_formula_traverser<count_fixpoints
   typedef state_formula_traverser<count_fixpoints_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   std::size_t result;
 
@@ -61,7 +57,7 @@ inline
 std::size_t count_fixpoints(const state_formula& x)
 {
   detail::count_fixpoints_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

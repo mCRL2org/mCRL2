@@ -1,6 +1,9 @@
 include(CMakeParseArguments)
 
 function(_add_library_tests TARGET_NAME)
+  if(MCRL2_SKIP_ALL_TESTS)
+    return()
+  endif()
   file(GLOB librarytest "test/*.cpp")
   file(GLOB libraryexample "example/*.cpp")
 
@@ -42,6 +45,9 @@ function(_add_library_tests TARGET_NAME)
 endfunction()
 
 function(_add_header_tests TARGET_NAME)
+  if(MCRL2_SKIP_ALL_TESTS)
+    return()
+  endif()
   file(GLOB_RECURSE headers "include/*.h")
   foreach(header ${headers})
     file(RELATIVE_PATH cppname ${CMAKE_CURRENT_SOURCE_DIR}/include ${header})
@@ -60,13 +66,6 @@ endfunction()
 
 macro(_install_qt_libs TARGET_NAME COMPONENT QT_LIBS TARGET_TYPE)
   if(WIN32 AND QT_LIBS)
-    get_target_property(QT_PATH Qt5::Core LOCATION)
-    get_filename_component(DIRS ${QT_PATH} PATH)
-    get_target_property(TARGET_LOCATION ${TARGET_NAME} LOCATION)
-    set(POSTBUILDSCRIPT ${CMAKE_CURRENT_BINARY_DIR}/post_build.cmake)
-    configure_file(${CMAKE_SOURCE_DIR}/build/cmake/post_build.cmake.in ${POSTBUILDSCRIPT} @ONLY)
-    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD 
-      COMMAND ${CMAKE_COMMAND} -DCONFIGURATION=$<CONFIGURATION> -P ${POSTBUILDSCRIPT})
   endif()
 endmacro()
 
@@ -211,7 +210,6 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
 
   if((NOT IS_GUI_BINARY OR MCRL2_ENABLE_GUI_TOOLS) AND ARG_COMPONENT)
 
-    include_directories(${INCLUDE})
     if(${TARGET_TYPE} STREQUAL "LIBRARY")
       if(NOT SOURCES)
         # This is a header-only library. We're still going to make a static library
@@ -267,6 +265,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       qt5_use_modules(${TARGET_NAME} ${QT_LIBS})
       set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
     endif()
+    include_directories(${INCLUDE})
 
   endif()
 endfunction()

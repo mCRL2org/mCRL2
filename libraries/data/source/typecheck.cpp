@@ -2742,7 +2742,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
             NewParList=detail::insert_sort_unique(NewParList,result);
           }
         }
-        catch (mcrl2::runtime_error &e)
+        catch (mcrl2::runtime_error&)
         {
           // Ignore the error. Just do not add the type to NewParList
         }

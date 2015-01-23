@@ -46,11 +46,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   const state_formulas::state_formula& phi0; // the original formula
   const lps::linear_process& lps;
@@ -130,7 +126,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     push(false_());
   }
 
-  void operator()(const state_formulas::not_&)
+  void apply(const state_formulas::not_&)
   {
     throw mcrl2::runtime_error("rhs_traverser: negation is not supported!");
   }
@@ -149,23 +145,23 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     push(tr::or_(left, right));
   }
 
-  void operator()(const state_formulas::imp&)
+  void apply(const state_formulas::imp&)
   {
     throw mcrl2::runtime_error("rhs_traverser: implication is not supported!");
   }
 
-  void operator()(const state_formulas::forall& x)
+  void apply(const state_formulas::forall& x)
   {
     push_variables(x.variables());
-    derived()(x.body());
+    derived().apply(x.body());
     top() = tr::forall(x.variables(), top());
     //pop_variables(x.variables());
   }
 
-  void operator()(const state_formulas::exists& x)
+  void apply(const state_formulas::exists& x)
   {
     push_variables(x.variables());
-    derived()(x.body());
+    derived().apply(x.body());
     top() = tr::exists(x.variables(), top());
     //pop_variables(x.variables());
   }
@@ -220,12 +216,12 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     push(result);
   }
 
-  void operator()(const state_formulas::must& x)
+  void apply(const state_formulas::must& x)
   {
     handle_must_may(x, true);
   }
 
-  void operator()(const state_formulas::may& x)
+  void apply(const state_formulas::may& x)
   {
     handle_must_may(x, false);
   }
@@ -304,7 +300,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     push(propositional_variable_instantiation(X, e));
   }
 
-  void operator()(const state_formulas::nu& x)
+  void apply(const state_formulas::nu& x)
   {
     using atermpp::detail::operator+;
     core::identifier_string X = x.name();
@@ -318,7 +314,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     push(propositional_variable_instantiation(X, e));
   }
 
-  void operator()(const state_formulas::mu& x)
+  void apply(const state_formulas::mu& x)
   {
     using atermpp::detail::operator+;
     core::identifier_string X = x.name();
@@ -339,7 +335,7 @@ struct apply_rhs_traverser: public Traverser<apply_rhs_traverser<Traverser, Term
   typedef Traverser<apply_rhs_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   apply_rhs_traverser(const state_formulas::state_formula& phi0,
                       const lps::linear_process& lps,
@@ -349,10 +345,6 @@ struct apply_rhs_traverser: public Traverser<apply_rhs_traverser<Traverser, Term
                      )
     : super(phi0, lps, id_generator, T, tr)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <typename TermTraits>
@@ -366,7 +358,7 @@ pbes_expression RHS(const state_formulas::state_formula& x0,
                    )
 {
   apply_rhs_traverser<rhs_traverser, TermTraits> f(x0, lps, id_generator, T, tr);
-  f(x);
+  f.apply(x);
   return f.top();
 }
 
@@ -392,7 +384,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::push;
   using super::top;
   using super::pop;
@@ -401,10 +393,6 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
   using super::lps;
   using super::id_generator;
   using super::T;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 
   std::multiset<data::variable> variables;
   const fixpoint_symbol& sigma;
@@ -433,22 +421,22 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
     return static_cast<Derived&>(*this);
   }
 
-  void operator()(const state_formulas::forall& x)
+  void apply(const state_formulas::forall& x)
   {
   	data::variable_list v = x.variables();
   	variables.insert(v.begin(), v.end());
-  	super::operator()(x);
+  	super::apply(x);
   	for (data::variable_list::iterator i = v.begin(); i != v.end(); ++i)
     {
       variables.erase(*i);
     }
   }
 
-  void operator()(const state_formulas::exists& x)
+  void apply(const state_formulas::exists& x)
   {
   	data::variable_list v = x.variables();
   	variables.insert(v.begin(), v.end());
-  	super::operator()(x);
+  	super::apply(x);
   	for (data::variable_list::iterator i = v.begin(); i != v.end(); ++i)
     {
       variables.erase(*i);
@@ -518,12 +506,12 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
     push(result);
   }
 
-  void operator()(const state_formulas::must& x)
+  void apply(const state_formulas::must& x)
   {
     handle_must_may(x, true);
   }
 
-  void operator()(const state_formulas::may& x)
+  void apply(const state_formulas::may& x)
   {
     handle_must_may(x, false);
   }
@@ -535,7 +523,7 @@ struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_tra
   typedef Traverser<apply_rhs_structured_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   apply_rhs_structured_traverser(const state_formulas::state_formula& phi0,
                                  const lps::linear_process& lps,
@@ -549,10 +537,6 @@ struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_tra
                                 )
     : super(phi0, lps, id_generator, propvar_generator, variables, sigma, Z, T, tr)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <typename TermTraits>
@@ -570,7 +554,7 @@ pbes_expression RHS_structured(const state_formulas::state_formula& x0,
                     )
 {
   apply_rhs_structured_traverser<rhs_structured_traverser, TermTraits> f(x0, lps, id_generator, propvar_generator, variables, sigma, Z, T, tr);
-  f(x);
+  f.apply(x);
   return f.top();
 }
 

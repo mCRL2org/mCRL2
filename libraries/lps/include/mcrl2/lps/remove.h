@@ -65,11 +65,8 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   typedef data_expression_builder<remove_parameters_builder> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
+  using super::apply;
+  using super::update;
 
   const std::set<data::variable>& to_be_removed;
 
@@ -78,7 +75,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   {}
 
   /// \brief Removes parameters from a set container.
-  void operator()(std::set<data::variable>& x)
+  void update(std::set<data::variable>& x)
   {
     for (auto i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
     {
@@ -87,7 +84,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   }
 
   /// \brief Removes parameters from a list of variables.
-  data::variable_list operator()(const data::variable_list& x)
+  data::variable_list apply(const data::variable_list& x)
   {
   	using utilities::detail::contains;
 
@@ -104,7 +101,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
 
   /// \brief Removes parameters from a list of assignments.
   /// Assignments to removed parameters are removed.
-  data::assignment_list operator()(const data::assignment_list& x)
+  data::assignment_list apply(const data::assignment_list& x)
   {
     // TODO: make this implementation more efficient
     std::vector<data::assignment> a(x.begin(), x.end());
@@ -114,34 +111,34 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
 
   /// \brief Removes parameters from a linear_process
   /// \param s A linear_process
-  void operator()(linear_process& x)
+  void update(linear_process& x)
   {
-    super::operator()(x);
-    x.process_parameters() = (*this)(x.process_parameters());
+    super::update(x);
+    x.process_parameters() = apply(x.process_parameters());
   }
 
   /// \brief Removes parameters from a linear_process
   /// \param s A linear_process
-  void operator()(stochastic_linear_process& x)
+  void update(stochastic_linear_process& x)
   {
-    super::operator()(x);
-    x.process_parameters() = (*this)(x.process_parameters());
+    super::update(x);
+    x.process_parameters() = apply(x.process_parameters());
   }
 
   /// \brief Removes parameters from a linear process specification
   /// \param spec A linear process specification
-  void operator()(specification& x)
+  void update(specification& x)
   {
-    super::operator()(x);
-    (*this)(x.global_variables());
+    super::update(x);
+    update(x.global_variables());
   }
 
   /// \brief Removes parameters from a linear process specification
   /// \param spec A linear process specification
-  void operator()(stochastic_specification& x)
+  void update(stochastic_specification& x)
   {
-    super::operator()(x);
-    (*this)(x.global_variables());
+    super::update(x);
+    update(x.global_variables());
   }
 };
 
@@ -152,7 +149,7 @@ template <typename Object>
 void remove_parameters(Object& x, const std::set<data::variable>& to_be_removed)
 {
   detail::remove_parameters_builder f(to_be_removed);
-  f(x);
+  f.update(x);
 }
 
 /// \brief Removes summands with condition equal to false from a linear process specification

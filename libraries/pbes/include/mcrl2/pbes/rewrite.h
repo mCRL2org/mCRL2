@@ -26,9 +26,7 @@ template <template <class> class Builder, class Rewriter>
 struct rewrite_pbes_expressions_builder: public Builder<rewrite_pbes_expressions_builder<Builder, Rewriter> >
 {
   typedef Builder<rewrite_pbes_expressions_builder<Builder, Rewriter> > super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   const Rewriter& R;
 
@@ -36,14 +34,10 @@ struct rewrite_pbes_expressions_builder: public Builder<rewrite_pbes_expressions
     : R(R_)
   {}
 
-  pbes_expression operator()(const pbes_expression& x)
+  pbes_expression apply(const pbes_expression& x)
   {
     return R(x);
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Builder, class Rewriter>
@@ -57,9 +51,7 @@ template <template <class> class Builder, class Rewriter, class Substitution>
 struct rewrite_pbes_expressions_with_substitution_builder: public Builder<rewrite_pbes_expressions_with_substitution_builder<Builder, Rewriter, Substitution> >
 {
   typedef Builder<rewrite_pbes_expressions_with_substitution_builder<Builder, Rewriter, Substitution> > super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   const Rewriter& R;
   Substitution& sigma;
@@ -69,14 +61,10 @@ struct rewrite_pbes_expressions_with_substitution_builder: public Builder<rewrit
       sigma(sigma_)
   {}
 
-  pbes_expression operator()(const pbes_expression& x)
+  pbes_expression apply(const pbes_expression& x)
   {
     return R(x, sigma);
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Builder, class Rewriter, class Substitution>
@@ -99,7 +87,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R)(x);
+  data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x
@@ -112,7 +100,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R)(x);
+  return data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R).apply(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -126,7 +114,7 @@ void rewrite(T& x,
              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma)(x);
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -141,7 +129,7 @@ T rewrite(const T& x,
           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma)(x);
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma).apply(x);
 }
 //--- end generated pbes_system rewrite code ---//
 
@@ -154,7 +142,7 @@ void pbes_rewrite(T& x,
                   typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                  )
 {
-  pbes_system::detail::make_rewrite_pbes_expressions_builder<pbes_system::pbes_expression_builder>(R)(x);
+  pbes_system::detail::make_rewrite_pbes_expressions_builder<pbes_system::pbes_expression_builder>(R).update(x);
 }
 
 /// \brief Rewrites all embedded pbes expressions in an object x
@@ -167,7 +155,7 @@ T pbes_rewrite(const T& x,
                typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
               )
 {
-  return pbes_system::detail::make_rewrite_pbes_expressions_builder<pbes_system::pbes_expression_builder>(R)(x);
+  return pbes_system::detail::make_rewrite_pbes_expressions_builder<pbes_system::pbes_expression_builder>(R).apply(x);
 }
 
 /// \brief Rewrites all embedded pbes expressions in an object x, and applies a substitution to variables on the fly
@@ -181,7 +169,7 @@ void pbes_rewrite(T& x,
                   typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                  )
 {
-  pbes_system::detail::make_rewrite_pbes_expressions_with_substitution_builder<pbes_system::pbes_expression_builder>(R, sigma)(x);
+  pbes_system::detail::make_rewrite_pbes_expressions_with_substitution_builder<pbes_system::pbes_expression_builder>(R, sigma).update(x);
 }
 
 /// \brief Rewrites all embedded pbes expressions in an object x, and applies a substitution to variables on the fly
@@ -196,7 +184,7 @@ T pbes_rewrite(const T& x,
                typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
               )
 {
-  return pbes_system::detail::make_rewrite_pbes_expressions_with_substitution_builder<pbes_system::pbes_expression_builder>(R, sigma)(x);
+  return pbes_system::detail::make_rewrite_pbes_expressions_with_substitution_builder<pbes_system::pbes_expression_builder>(R, sigma).apply(x);
 }
 
 } // namespace pbes_system

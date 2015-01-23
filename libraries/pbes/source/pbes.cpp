@@ -112,7 +112,7 @@ std::set<propositional_variable_instantiation> pbes::occurring_variable_instanti
   for (auto i = equations().begin(); i != equations().end(); ++i)
   {
     detail::occurring_variable_visitor f;
-    f(i->formula());
+    f.apply(i->formula());
     result.insert(f.variables.begin(), f.variables.end());
   }
   return result;

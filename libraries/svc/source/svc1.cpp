@@ -25,6 +25,7 @@
 #include <string.h>
 #include <errno.h>
 #if defined(_MSC_VER)
+# include <io.h>
 # include <fcntl.h>
 #endif
 
