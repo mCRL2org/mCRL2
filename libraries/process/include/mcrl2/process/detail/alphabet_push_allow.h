@@ -74,7 +74,7 @@ struct alphabet_cache
   struct alphabet_key
   {
     allow_set A;
-    process_instance P;
+    process_identifier P;
 
     bool operator==(const alphabet_key& other) const
     {
@@ -90,7 +90,7 @@ struct alphabet_cache
       return A < other.A;
     }
 
-    alphabet_key(const allow_set& A_, const process_instance& P_)
+    alphabet_key(const allow_set& A_, const process_identifier& P_)
      : A(A_), P(P_)
     {}
   };
@@ -102,13 +102,32 @@ struct alphabet_cache
   {
     multi_action_name_set alphabet;
     alphabet_status status;
-    process_instance P;
+    process_identifier P;
 
     alphabet_value()
     {}
 
-    alphabet_value(const multi_action_name_set& alphabet_, alphabet_status status_, const process_instance& P_)
+    alphabet_value(const multi_action_name_set& alphabet_, alphabet_status status_, const process_identifier& P_)
      : alphabet(alphabet_), status(status_), P(P_)
+    {}
+  };
+
+  struct unfinished_value
+  {
+    allow_set A;
+    process_instance P;
+
+    bool operator<(const unfinished_value& other) const
+    {
+      if (P != other.P)
+      {
+        return P < other.P;
+      }
+      return A < other.A;
+    }
+
+    unfinished_value(const allow_set& A_, const process_instance& P_)
+     : A(A_), P(P_)
     {}
   };
 
@@ -118,8 +137,8 @@ struct alphabet_cache
   // The cache of alphabet values
   std::map<alphabet_key, alphabet_value> alphabet_map;
 
-  // The pairs (A, P) for which an equation needs to be generated
-  std::set<alphabet_key> unfinished;
+  // The pairs (A, P(e)) for which an equation needs to be generated
+  std::set<unfinished_value> unfinished;
 
   // The push_allow algorithm maintains a set of dependent nodes. It is used
   // to invalidate alphabet values in the cache.
@@ -142,17 +161,16 @@ struct alphabet_cache
 
   // Returns a reference to the alphabet value corresponding to (A, P).
   // If such value does is not yet present in the map, it is inserted.
-  alphabet_value& alphabet(const allow_set& A, const process_instance& P)
+  alphabet_value& alphabet(const allow_set& A, const process_identifier& P)
   {
     alphabet_key key(A, P);
     auto i = alphabet_map.find(key);
     if (i == alphabet_map.end())
     {
-      core::identifier_string name = id_generator(P.identifier().name());
-      process_identifier P1(name, P.identifier().variables());
-      process_instance P1e(P1, P.actual_parameters());
+      core::identifier_string name = id_generator(P.name());
+      process_identifier P1(name, P.variables());
       multi_action_name_set empty_set;
-      alphabet_value value(empty_set, unknown, P1e);
+      alphabet_value value(empty_set, unknown, P1);
       auto p = alphabet_map.insert(std::make_pair(key, value));
       return p.first->second;
     }
@@ -162,9 +180,10 @@ struct alphabet_cache
   // Add (A, x) to the set of unfinished nodes
   void set_unfinished(const allow_set& A, const process_instance& x)
   {
-    unfinished.insert(alphabet_key(A, x));
+    unfinished.insert(unfinished_value(A, x));
   }
 
+/*
   // For each entry (A, P) -> (alpha, finished, P1) it is checked if
   // intersection(alphabet(P), A) == alpha.
   void check_equations(const std::vector<process_equation>& equations) const
@@ -181,6 +200,7 @@ struct alphabet_cache
       std::cout << std::endl;
     }
   }
+*/
 };
 
 inline
@@ -208,6 +228,12 @@ std::ostream& operator<<(std::ostream& out, const alphabet_cache::alphabet_value
 }
 
 inline
+std::ostream& operator<<(std::ostream& out, const alphabet_cache::unfinished_value& x)
+{
+  return out << "(" << x.A << ", " << x.P << ")";
+}
+
+inline
 std::ostream& operator<<(std::ostream& out, const alphabet_cache& W)
 {
   out << "map: {";
@@ -229,7 +255,7 @@ std::ostream& operator<<(std::ostream& out, const alphabet_cache& W)
     }
     out << *i;
   }
-  out << "]";
+  out << "}";
   out << " unfinished: [";
   for (auto i = W.unfinished.begin(); i != W.unfinished.end(); ++i)
   {
@@ -341,26 +367,28 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void leave(const process::process_instance& x)
   {
-    alphabet_cache::alphabet_key key(A, x);
-    alphabet_cache::alphabet_value& alpha = W.alphabet(A, x);
+    const process_identifier& P = x.identifier();
+    alphabet_cache::alphabet_key key(A, P);
+    alphabet_cache::alphabet_value& alpha = W.alphabet(A, P);
     const multi_action_name_set& alphabet = alpha.alphabet;
     alphabet_cache::alphabet_status status = alpha.status;
-    const process_instance& P = alpha.P;
+    const process_identifier& P1 = alpha.P;
+    process_instance P1e(P1, x.actual_parameters());
 
     if (status == alphabet_cache::finished)
     {
-      // we already know the result for (A, x)
-      push_allow_node node(alphabet, P);
+      // we already know the result for (A, P)
+      push_allow_node node(alphabet, P1e);
       push(node);
       log(x);
       return;
     }
     else if (status == alphabet_cache::busy)
     {
-      // the alphabet of (A, x) is currently being computed; it suffices to return (emptyset, P)
+      // the alphabet of (A, x) is currently being computed; it suffices to return (emptyset, P1e)
       W.dependent_nodes.insert(key);
       multi_action_name_set empty_set;
-      push_allow_node node(empty_set, P);
+      push_allow_node node(empty_set, P1e);
       push(node);
       log(x);
       return;
@@ -375,7 +403,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       const data::variable_list& d = eqn.formal_parameters();
       const process_expression& p = eqn.expression();
 
-      // compute the alphabet for (A, x)
+      // compute the alphabet for (A, P)
       push_allow_node node = push_allow(p, A, equations, W);
 
       W.dependent_nodes.erase(key);
@@ -383,7 +411,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       {
         // create a new equation P(d) = p1
         const process_expression& p1 = node.expression;
-        process_equation eqn1(P.identifier(), d, p1);
+        process_equation eqn1(P1, d, p1);
         equations.push_back(eqn1);
 
         alpha.alphabet = node.alphabet;
@@ -397,7 +425,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
         W.set_unfinished(A, x);
       }
 
-      node.expression = P;
+      node.expression = P1e;
       push(node);
       log(x);
     }
@@ -632,13 +660,14 @@ push_allow_node push_allow(const process_expression& x, const allow_set& A, std:
   {
     while (!W.unfinished.empty())
     {
-      detail::alphabet_cache::alphabet_key key = *W.unfinished.begin();
+      detail::alphabet_cache::unfinished_value v = *W.unfinished.begin();
+      detail::alphabet_cache::alphabet_key key(v.A, v.P.identifier());
       W.unfinished.erase(W.unfinished.begin());
       detail::alphabet_cache::alphabet_value& value = W.alphabet(key.A, key.P);
       if (value.status != detail::alphabet_cache::finished)
       {
         mCRL2log(log::debug) << "generating unfinished equation for " << key << " -> " << value << std::endl;
-        push_allow(key.P, key.A, equations, W);
+        push_allow(v.P, v.A, equations, W);
       }
     }
   }
