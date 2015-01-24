@@ -4,9 +4,9 @@
 
 #include <iostream>
 
-struct where_clause                        {};
-struct function_symbol                     {};
 struct data_expression                     {};
+struct where_clause: public data_expression {};
+struct function_symbol: public data_expression {};
 struct abstraction: public data_expression {};
 struct variable: public data_expression    {};
 struct application: public data_expression {};
