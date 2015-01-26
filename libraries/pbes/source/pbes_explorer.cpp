@@ -467,7 +467,7 @@ void lts_info::compute_transition_groups()
             priority++;
             symbol = (*eqn).symbol();
         }
-        mCRL2log(log::verbose) << "Adding var " << variable_name << ", priority=" << priority << ", symbol=" << symbol << std::endl;
+        mCRL2log(log::debug) << "Adding var " << variable_name << ", priority=" << priority << ", symbol=" << symbol << std::endl;
         this->variable_priority[variable_name] = priority;
         this->variable_parameters[variable_name] = (*eqn).variable().parameters();
         this->variable_parameter_signatures[variable_name] = get_param_sequence((*eqn).variable().parameters());
@@ -523,7 +523,7 @@ void lts_info::compute_transition_groups()
             priority = this->variable_priority[variable_name];
             pbes_expression expr = this->variable_expression[variable_name];
             std::set<std::string> vars_stack;
-            //std::clog << std::endl << "Generating groups for equation " << variable_name << std::endl;
+            mCRL2log(log::debug) << std::endl << "Generating groups for equation " << variable_name << std::endl;
             std::vector<pbes_expression> expression_parts = split_expression_and_substitute_variables(expr, priority, type, vars_stack);
             for (std::vector<pbes_expression>::const_iterator e =
                     expression_parts.begin(); e != expression_parts.end(); ++e) {
@@ -698,19 +698,34 @@ bool lts_info::is_read_dependent_parameter(int group, int part)
 {
     if (group==0 || group==1) return false;
     std::string p = type.get_state_names()[part];
+    mCRL2log(log::debug) << "is_read_dependent_parameter (group=" << group << ", part=" << part << " [" << p << "]" << std::endl;
     pbes_expression phi = transition_expression_plain[group];
-    std::set<std::string> usedSet = used(phi);
     std::string X = transition_variable_name[group];
-    if (usedSet.find(p) == usedSet.end())
-    {
-        return false; // Parameter is not in used(phi).
-    }
     std::set<std::string> params = lts_info::get_param_set(variable_parameters[X]);
-    if (params.find(p) != params.end())
+    if (params.find(p) == params.end())
     {
-        return true; // Parameter is both in used(phi) and in params(X).
+        return false; // Parameter is not in params(X).
     }
-    return false; // Parameter is in used(phi), but not in params(X).
+    else
+    {
+        std::set<std::string> usedSet = used(phi);
+        std::set<std::string> changedSet = changed(phi);
+        std::set<std::string> copySet = copied(phi);
+        std::set<std::string> changedAndCopied;
+        std::set_intersection(changedSet.begin(), changedSet.end(), copySet.begin(), copySet.end(),
+            std::inserter(changedAndCopied, changedAndCopied.end()));
+
+        if (usedSet.find(p) == usedSet.end() && changedAndCopied.find(p) == changedAndCopied.end())
+        {
+            // Parameter is not in used(phi) and not in (changed(phi) /\ copied(phi)).
+            return false; // Parameter is not in used(phi).
+        }
+        else
+        {
+            return true; // Parameter is both in used(phi) and in params(X).
+        }
+    }
+
 }
 
 
@@ -759,10 +774,16 @@ bool lts_info::is_write_dependent_parameter(int group , int part)
             return true; // Dependent, because p in reset(phi, params(X)).
         }
     }
-    std::set<std::string> emptySet;
-    std::set<std::string> changedSet = changed(phi, emptySet);
+    std::set<std::string> changedSet = changed(phi);
     bool changedSetContainsP = (changedSet.find(p) != changedSet.end());
     return changedSetContainsP; // Dependent, because p in changed(phi, {}).
+}
+
+
+std::set<std::string> lts_info::changed(const pbes_expression& phi)
+{
+    std::set<std::string> empty;
+    return changed(phi, empty);
 }
 
 
@@ -997,6 +1018,72 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
 }
 
 
+std::set<std::string> lts_info::copied(const pbes_expression& expr)
+{
+    std::set<std::string> emptySet;
+    return copied(expr, emptySet);
+}
+
+
+std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::set<std::string>& L)
+{
+    //std::clog << "lts_info::copied(" << bqnf_visitor<equation_type, term_type>::print_brief(expr) << ", L)" << std::endl;
+    std::set<std::string> result;
+    if (tr::is_data(expr))
+    {
+        // skip
+    }
+    if (tr::is_prop_var(expr))
+    {
+        data::variable_list var_params =
+                    variable_parameters[tr::name(expr)];
+        data::data_expression_list values = tr::param(expr);
+        assert(var_params.size() == values.size());
+        data::data_expression_list::const_iterator val = values.begin();
+        for (data::variable_list::const_iterator param =
+                var_params.begin(); param != var_params.end(); ++param) {
+            variable parameter = *param;
+            std::string param_signature = get_param_signature(parameter);
+            if (tr::is_variable(*val))
+            {
+                const variable& value = atermpp::down_cast<variable>(*val);
+                std::string value_signature = get_param_signature(value);
+                if (param_signature == value_signature && L.find(value_signature) == L.end())
+                {
+                    result.insert(value_signature);
+                }
+            }
+            if (val != values.end()) {
+                ++val;
+            }
+        }
+    }
+    else if (tr::is_and(expr) || tr::is_or(expr) || tr::is_imp(expr))
+    {
+        std::set<std::string> l = copied(tr::left(expr), L);
+        result.insert(l.begin(), l.end());
+        std::set<std::string> r = copied(tr::right(expr), L);
+        result.insert(r.begin(), r.end());
+    }
+    else if (tr::is_not(expr))
+    {
+        result = copied(tr::arg(expr), L);
+    }
+    else if (tr::is_forall(expr) || tr::is_exists(expr))
+    {
+        std::set<std::string> LL;
+        LL.insert(L.begin(), L.end());
+        data::variable_list vars = tr::var(expr);
+        for (data::variable_list::const_iterator var =
+                vars.begin(); var != vars.end(); ++var)
+        {
+            variable variable = *var;
+            LL.insert(get_param_signature(variable));
+        }
+        result = copied(tr::arg(expr), LL);
+    }
+    return result;
+}
 
 
 std::string lts_info::state_to_string(const ltsmin_state& state)
@@ -1615,7 +1702,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
 std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
                                                      int group)
 {
-    //std::clog << "get_successors: " << state.to_string() << ", group=" << group << std::endl;
+    //std::clog << "get_successors: group=" << group << std::endl;
     std::vector<ltsmin_state> result;
 
     if (group == 0 && state.get_variable()=="true")
@@ -1641,7 +1728,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
             operation_type type = detail::map_at(info->get_variable_types(), state.get_variable());
             for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                     != successors.end(); ++expr) {
-                //std::clog << "* Successor: " << *expr << std::endl;
+                //std::clog << " * successor: " << pp(*expr) << std::endl;
                 if (tr::is_prop_var(*expr)) {
                     result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
                 } else if (tr::is_true(*expr)) {

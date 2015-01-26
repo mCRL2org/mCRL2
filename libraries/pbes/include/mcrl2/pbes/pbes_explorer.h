@@ -288,6 +288,19 @@ protected:
     /// \param L
     std::set<std::string> used(const pbes_expression& expr, const std::set<std::string>& L);
 
+    /// \brief Computes the free variables which are copied/passed through (to a recursive variable) in an expression.
+    /// \param expr
+    std::set<std::string> copied(const pbes_expression& expr);
+
+    /// \brief Computes the free variables which are copied/passed through (to a recursive variable) in an expression.
+    /// \param expr
+    /// \param L
+    std::set<std::string> copied(const pbes_expression& expr, const std::set<std::string>& L);
+
+    /// \brief Computes the set of parameters changed in the expression.
+    /// \param phi
+    std::set<std::string> changed(const pbes_expression& phi);
+
     /// \brief Computes the set of parameters changed in the expression.
     /// \param phi
     /// \param L
