@@ -4,20 +4,22 @@ import sys
 from mcrl2_classes import *
 from mcrl2_utility import *
 
+MCRL2_ROOT = '../../'
+
 class_map = mcrl2_class_map()
 all_classes = parse_class_map(class_map)
 modifiability_map = make_modifiability_map(all_classes)
 
 file_map = {
-  'action_formulas' : '../../modal_formula/source/modal_formula.cpp',
-  'bes' : '../../bes/source/bes.cpp',
-  'core' : '../../core/source/core.cpp',
-  'data' : '../../data/source/data.cpp',
-  'lps' : '../../lps/source/lps.cpp',
-  'pbes_system' : '../../pbes/source/pbes.cpp',
-  'process' : '../../process/source/process.cpp',
-  'regular_formulas' : '../../modal_formula/source/modal_formula.cpp',
-  'state_formulas' : '../../modal_formula/source/modal_formula.cpp',
+  'action_formulas' : MCRL2_ROOT + 'libraries/modal_formula/source/modal_formula.cpp',
+  'bes' : MCRL2_ROOT + 'libraries/bes/source/bes.cpp',
+  'core' : MCRL2_ROOT + 'libraries/core/source/core.cpp',
+  'data' : MCRL2_ROOT + 'libraries/data/source/data.cpp',
+  'lps' : MCRL2_ROOT + 'libraries/lps/source/lps.cpp',
+  'pbes_system' : MCRL2_ROOT + 'libraries/pbes/source/pbes.cpp',
+  'process' : MCRL2_ROOT + 'libraries/process/source/process.cpp',
+  'regular_formulas' : MCRL2_ROOT + 'libraries/modal_formula/source/modal_formula.cpp',
+  'state_formulas' : MCRL2_ROOT + 'libraries/modal_formula/source/modal_formula.cpp',
 }
 
 PP_CLASSNAMES = '''

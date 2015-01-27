@@ -10,6 +10,8 @@ from mcrl2_parser import *
 from mcrl2_utility import *
 from path import *
 
+MCRL2_ROOT = '../../'
+
 #---------------------------------------------------------------#
 #            generate_function_symbol_constructors
 #---------------------------------------------------------------#
@@ -336,20 +338,20 @@ def parse_ebnf(filename):
 #---------------------------------------------------------------#
 def main():
     result = True
-    filename = '../../../doc/specs/mcrl2.internal.txt'
+    filename = MCRL2_ROOT + 'doc/specs/mcrl2.internal.txt'
     rules = parse_ebnf(filename)
 
     # elements in this list are skipped during generation
     skip_list = ['DataAppl']
 
-    result = generate_soundness_check_functions(rules, '../include/mcrl2/core/detail/soundness_checks.h', skip_list) and result
+    result = generate_soundness_check_functions(rules, MCRL2_ROOT + 'libraries/core/include/mcrl2/core/detail/soundness_checks.h', skip_list) and result
 
-    declaration_filename = '../include/mcrl2/core/detail/function_symbols.h'
-    definition_filename = '../source/core.cpp'
+    declaration_filename = MCRL2_ROOT + 'libraries/core/include/mcrl2/core/detail/function_symbols.h'
+    definition_filename = MCRL2_ROOT + 'libraries/core/source/core.cpp'
     result = generate_function_symbol_constructors(rules, declaration_filename, definition_filename, skip_list) and result
 
-    declaration_filename = '../include/mcrl2/core/detail/default_values.h'
-    definition_filename = '../source/core.cpp'
+    declaration_filename = MCRL2_ROOT + 'libraries/core/include/mcrl2/core/detail/default_values.h'
+    definition_filename = MCRL2_ROOT + 'libraries/core/source/core.cpp'
     result = generate_default_values(rules, declaration_filename, definition_filename, skip_list) and result
 
     return result
