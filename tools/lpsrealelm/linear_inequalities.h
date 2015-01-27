@@ -18,7 +18,6 @@
 
 #include <algorithm>
 
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/set_identifier_generator.h"

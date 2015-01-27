@@ -14,7 +14,6 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
 
 using namespace std;

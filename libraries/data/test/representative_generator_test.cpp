@@ -22,7 +22,6 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/structured_sort.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/parse.h"
 
 using namespace mcrl2;

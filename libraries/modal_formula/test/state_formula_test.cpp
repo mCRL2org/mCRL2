@@ -27,7 +27,6 @@
 #include "mcrl2/modal_formula/maximal_closed_subformula.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
 
 using namespace std;

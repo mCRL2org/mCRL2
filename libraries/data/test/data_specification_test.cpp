@@ -21,7 +21,6 @@
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/structured_sort.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
 

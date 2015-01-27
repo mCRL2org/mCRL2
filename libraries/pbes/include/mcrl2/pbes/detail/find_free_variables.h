@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_FIND_FREE_VARIABLES_H
 #define MCRL2_PBES_DETAIL_FIND_FREE_VARIABLES_H
 
-#include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2

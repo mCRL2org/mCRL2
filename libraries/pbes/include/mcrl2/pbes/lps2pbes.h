@@ -35,6 +35,24 @@ namespace mcrl2
 namespace pbes_system
 {
 
+namespace detail
+{
+  /// \brief Returns a variable that doesn't appear in context
+  /// \param ids a set of identifiers to use as context.
+  /// \param s A sort expression
+  /// \param hint A string
+  /// \return A variable that doesn't appear in context
+  /// \warning reorganising the identifier context is expensive, consider using an identifier generator
+  inline
+  data::variable fresh_variable(const std::set<core::identifier_string>& ids, const data::sort_expression& s, const std::string& hint)
+  {
+    data::set_identifier_generator generator;
+    generator.add_identifiers(ids);
+    return data::variable(generator(hint), s);
+  }
+
+} // namespace detail
+
 /// \brief Algorithm for translating a state formula and a timed specification to a pbes.
 class lps2pbes_algorithm
 {
@@ -152,12 +170,12 @@ inline pbes lps2pbes(const lps::specification& spec, const state_formulas::state
   if (timed)
   {
     lps::specification spec_timed = spec;
-    std::set<core::identifier_string> id_generator = lps::find_identifiers(spec);
+    std::set<core::identifier_string> ids = lps::find_identifiers(spec);
     std::set<core::identifier_string> fcontext = state_formulas::find_identifiers(formula);
-    id_generator.insert(fcontext.begin(), fcontext.end());
-    data::variable T = fresh_variable(id_generator, data::sort_real::real_(), "T");
-    id_generator.insert(T.name());
-    lps::detail::make_timed_lps(spec_timed.process(), id_generator);
+    ids.insert(fcontext.begin(), fcontext.end());
+    data::variable T = detail::fresh_variable(ids, data::sort_real::real_(), "T");
+    ids.insert(T.name());
+    lps::detail::make_timed_lps(spec_timed.process(), ids);
     return lps2pbes_algorithm().run(formula, spec_timed, structured, unoptimized, T);
   }
   else

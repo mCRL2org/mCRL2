@@ -13,7 +13,6 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/standard_utility.h"

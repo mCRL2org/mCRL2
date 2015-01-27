@@ -17,7 +17,6 @@
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"

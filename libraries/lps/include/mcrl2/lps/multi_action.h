@@ -18,7 +18,6 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/undefined.h"
-#include "mcrl2/data/utility.h" // substitute
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/core/print.h"
 

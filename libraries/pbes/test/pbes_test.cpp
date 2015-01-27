@@ -20,7 +20,6 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"

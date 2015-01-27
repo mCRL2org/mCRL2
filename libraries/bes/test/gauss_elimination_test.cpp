@@ -18,7 +18,6 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"

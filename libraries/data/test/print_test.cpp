@@ -12,7 +12,6 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/real.h"

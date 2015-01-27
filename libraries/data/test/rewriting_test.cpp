@@ -25,7 +25,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/data_specification.h"
@@ -359,7 +358,7 @@ BOOST_AUTO_TEST_CASE(list_rewrite_test)
     data_rewrite_test(R, rtail(bool_(), head_true), empty_);
     data_rewrite_test(R, tail(bool_(), head_true), empty_);
   }
-} 
+}
 
 BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
 {
@@ -387,7 +386,7 @@ BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
     data_rewrite_test(R, e3, true_());
     data_rewrite_test(R, e4, false_());
   }
-} 
+}
 
 
 BOOST_AUTO_TEST_CASE(set_rewrite_test)
@@ -423,7 +422,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     data_rewrite_test(R, normalize_sorts(equal_to(sort_set::false_function(sort_nat::nat()), sort_set::true_function(sort_nat::nat())),specification), sort_bool::false_());
 
     data_expression s1(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p1, sort_fset::empty(sort_nat::nat()))),specification)));
-    data_expression s2(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat()))),specification))); 
+    data_expression s2(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat()))),specification)));
     data_expression s(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p1, sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat())))),specification)));
 
     data_expression empty_complement(normalize_sorts(sort_set::complement(sort_nat::nat(),
@@ -438,7 +437,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
 
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p0, s),specification), sort_bool::false_());
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p1, s),specification), sort_bool::true_());
-    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p2, s),specification), sort_bool::true_()); 
+    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p2, s),specification), sort_bool::true_());
 
     data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s, empty_set),specification), s);
     data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s1, s2),specification), s);
@@ -466,7 +465,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     // see also set_bool_rewrite_test()
     x = sort_bool::not_(sort_fset::in(sort_nat::nat(), sort_nat::c0(), sort_fset::insert(sort_nat::nat(), sort_nat::cnat(sort_pos::c1()), sort_fset::cons_(sort_nat::nat(), sort_nat::c0(), sort_fset::empty(sort_nat::nat())))));
     x = normalize_sorts(x,specification);
-    data_rewrite_test(R, x, sort_bool::false_()); 
+    data_rewrite_test(R, x, sort_bool::false_());
   }
 }
 
@@ -877,7 +876,7 @@ BOOST_AUTO_TEST_CASE(test_othello_condition)
     data::data_expression e(parse_data_expression("At(1, 2, [[None, None, None, None], [None, Red, White, None], [None, White, Red, None], [None, None, None, None]]) == None", specification));
     data_rewrite_test(R, e, sort_bool::true_());
   }
-} 
+}
 
 BOOST_AUTO_TEST_CASE(test_lambda_expression)
 {
@@ -1049,7 +1048,7 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
     data_rewrite_test(R, e, f);
   }
 
-} 
+}
 
 BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
 {
@@ -1125,7 +1124,7 @@ BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
     data::data_expression f(parse_data_expression("true", specification));
     data_rewrite_test(R, e, f);
   }
-} 
+}
 
 BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form)
 {
@@ -1203,7 +1202,7 @@ BOOST_AUTO_TEST_CASE(rewrite_rule_for_higher_order_functions)
     data::data_expression f(parse_data_expression("f(0)(0)", specification));
     data_rewrite_test(R, e, f);
   }
-}  
+}
 
 BOOST_AUTO_TEST_CASE(check_whether_counting_of_elements_in_an_FBag_works_properly)
 {
@@ -1232,7 +1231,7 @@ BOOST_AUTO_TEST_CASE(check_whether_counting_of_elements_in_an_FBag_works_properl
     f=parse_data_expression("{Pos2Nat(7):4}", specification);
     data_rewrite_test(R, e, R(f));
   }
-}  
+}
 
 
 BOOST_AUTO_TEST_CASE(square_root_test)
@@ -1395,7 +1394,7 @@ BOOST_AUTO_TEST_CASE(check_whether_higher_order_function_are_dealt_with_appropri
     data_rewrite_test(R, e, f);
 
   }
-} 
+}
 
 
 
