@@ -4,18 +4,22 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+# This script is used to generate LaTeX code corresponding to the DParser grammars.
+
 import re
 import string
 from optparse import OptionParser
 from parse_mcrl2_syntax import *
 from path import *
 
+MCRL2_ROOT = '../../../'
+
 #---------------------------------------------------------------#
 #                          print_alternative
 #---------------------------------------------------------------#
 def print_alternative(text, comment, annotation):
 # Replace text in quotes with \texttt{...}.
-    text = re.sub(r"'([^']*)'", r'\\texttt{\1}', text) 
+    text = re.sub(r"'([^']*)'", r'\\texttt{\1}', text)
 # Replace other strings with {\it ...}.
     text = re.sub(r'(\b\w+)\s', r'{\\it \1} ', text)
     text = re.sub(r'(\b\w+)$', r'{\\it \1}', text)
@@ -69,7 +73,7 @@ def main():
     parser = OptionParser(usage)
     (options, args) = parser.parse_args()
 
-    filename = '../../../doc/specs/mcrl2-syntax.g'
+    filename = MCRL2_ROOT + 'doc/specs/mcrl2-syntax.g'
     sections = parse_mcrl2_syntax(filename)
     for (title, productions) in sections:
         print_section(title, productions)

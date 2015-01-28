@@ -6,6 +6,8 @@ import re
 import string
 from path import *
 
+MCRL2_ROOT = '../../../'
+
 def parse_annotation(pattern, replacement, text, annotation):
     if annotation != '':
         return text, annotation

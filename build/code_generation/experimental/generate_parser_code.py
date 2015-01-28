@@ -5,15 +5,21 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 # This script generates code for traversing a DParser parse tree from a DParser grammar.
-# It can only handle a subset of EBNF, so the result is not perfect. The layout of the
-# DParser grammar is expected to be in a specific format.
+# It can only handle a subset of EBNF, so the result is not perfect and not complete.
+# N.B. The layout of the DParser grammar is expected to be in a specific format.
 
 import re
 import string
 from optparse import OptionParser
+
+import sys
+sys.path.append('..')
+
 from mcrl2_utility import *
 from parse_mcrl2_syntax import *
 from path import *
+
+MCRL2_ROOT = '../../../'
 
 MCRL2_MAPPING = '''
   ActDecl lps::action_label_list
@@ -315,13 +321,13 @@ def main():
     parser = OptionParser(usage)
     (options, args) = parser.parse_args()
 
-    filename = '../../../doc/specs/mcrl2-syntax.g'
+    filename = MCRL2_ROOT + 'doc/specs/mcrl2-syntax.g'
     generate_code(filename, MCRL2_MAPPING)
 
-    filename = '../../../doc/specs/fsm-syntax.g'
+    filename = MCRL2_ROOT + 'doc/specs/fsm-syntax.g'
     #generate_code(filename, FSM_MAPPING)
 
-    filename = '../../../doc/specs/dot-syntax.g'
+    filename = MCRL2_ROOT + 'doc/specs/dot-syntax.g'
     #generate_code(filename, DOT_MAPPING)
 
 if __name__ == "__main__":
