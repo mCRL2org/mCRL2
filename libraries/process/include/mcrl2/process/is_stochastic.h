@@ -25,7 +25,7 @@ struct is_stochastic_traverser: public process::data_expression_traverser<is_sto
   typedef process::data_expression_traverser<is_stochastic_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   bool result;
 
@@ -33,17 +33,13 @@ struct is_stochastic_traverser: public process::data_expression_traverser<is_sto
     : result(false)
   {}
 
-  void operator()(const process::stochastic_operator& x)
+  void apply(const process::stochastic_operator& x)
   {
     if (!x.variables().empty())
     {
       result = true;
     }
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 } // namespace detail
