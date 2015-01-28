@@ -4,25 +4,24 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import sys
+sys.path.append('../python')
 from path import *
 from random_pbes_generator import *
-from mcrl2_tools import *
+from replay import run_replay
 
 def test_pbesstategraph(p, filename):
     txtfile = filename + '.txt'
     path(txtfile).write_text('%s' % p)
-    pbesfile1 = filename + 'a.pbes'
-    pbesfile2 = filename + 'b.pbes'
-    #pbesfile3 = filename + 'c.pbes'
-    run_txt2pbes(txtfile, pbesfile1)
-    run_pbesstategraph(pbesfile1, pbesfile2)
-    #run_pbesstategraph(pbesfile1, pbesfile3, '-p1')
-    answer1 = run_pbes2bool(pbesfile1)
-    answer2 = run_pbes2bool(pbesfile2)
-    #answer3 = run_pbes2bool(pbesfile3)
-    print filename, answer1, answer2 #, answer3
-    answers = [answer1, answer2] #, answer3]
-    return not (True in answers and False in answers)
+    testfile = '../random/tests/pbesstategraph.yml'
+    inputfiles = [txtfile]
+    reporterrors = True
+    settings = dict()
+    settings['verbose'] = False
+    settings['toolpath'] = '../../tools/bin'
+    result = run_replay(testfile, inputfiles, reporterrors, settings)
+    print filename, result
+    return result
 
 def main():
     options = parse_command_line()

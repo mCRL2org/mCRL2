@@ -22,24 +22,18 @@ def test_pbesconstelm(p, filename):
       return True
     return answer1 == answer2
 
-def main():
-    options = parse_command_line()
+def run(filename, keep_files, equation_count = 3, atom_count = 4, propvar_count = 3, use_quantifiers = True):
     try:
-        equation_count = 3
-        atom_count = 4
-        propvar_count = 3
-        use_quantifiers = True
-
-        for i in range(options.iterations):
-            filename = 'pbes_constelm'
-            p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-            if not test_pbesconstelm(p, filename):
-                m = CounterExampleMinimizer(p, lambda x: test_pbesconstelm(x, filename + '_minimize'), 'pbesconstelm')
-                m.minimize()
-                raise Exception('Test %s.txt failed' % filename)
+        p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
+        if not test_pbesconstelm(p, filename):
+            m = CounterExampleMinimizer(p, lambda x: test_pbesconstelm(x, filename + '_minimize'), 'pbesconstelm')
+            m.minimize()
+            raise Exception('Test %s.txt failed' % filename)
     finally:
-        if not options.keep_files:
+        if not keep_files:
             remove_temporary_files()
 
 if __name__ == '__main__':
-    main()
+    options = parse_command_line()
+    for i in range(options.iterations):
+        run('pbesconstelm%03d' % i, options.keep_files)

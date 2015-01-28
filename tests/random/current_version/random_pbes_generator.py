@@ -296,7 +296,7 @@ class quantifier:
             if not q in freevars:
                 qvar.append(q)
         if len(qvar) == 0:
-            raise Exception('error: quantifier nesting depth exceeded')
+            raise RuntimeError('warning: quantifier nesting depth exceeded')
         var, dummy = pick_element(qvar)
         self.x = var
         if self.quantor == 'exists':

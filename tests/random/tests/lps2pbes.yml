@@ -1,9 +1,9 @@
 options:
   grammar:
-    - grammars\mcrl2.g
-    - grammars\pbes.g
+    - grammars/mcrl2.g
+    - grammars/pbes.g
   constraints:
-    - constraints\pbes-attrs.yml
+    - constraints/pbes-attrs.yml
   path: ../tools/bin
   platform: linux
 nodes: {l1: mCRL2Spec, l2: StateFrm, l3: LPS, l4: PBES, l5: Bool}

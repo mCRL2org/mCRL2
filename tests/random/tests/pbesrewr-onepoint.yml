@@ -1,9 +1,9 @@
 options:
   grammar:
-    - grammars\pbes.g
+    - grammars/pbes.g
   constraints:
-    - constraints\pbes-attrs.yml
-  path: ../tools/bin
+    - constraints/pbes-attrs.yml
+  path: ../../tools/bin
   platform: linux
 nodes: {l1: PbesSpec, l2: PBES, l3: PBES, l4: Bool}
 tools:

@@ -1,13 +1,12 @@
 options:
   grammar:
-    - grammars\mcrl2.g
-    - grammars\data.g
+    - grammars/mcrl2.g
+    - grammars/data.g
   constraints:
-    - constraints\mcrl2-attrs.yml
-    - constraints\data-attrs.yml
-  #path: C:\Program Files\mCRL2\bin
-  path: D:\mcrl2feb2012\mCRL2\bin
-  platform: windows
+    - constraints/mcrl2-attrs.yml
+    - constraints/data-attrs.yml
+  path: ../../tools/bin
+  platform: linux
 nodes: {l1: mCRL2Spec, l2: LPS, l3.aut: LTS, l4: LPS, l5.aut: LTS, l6: Bool}
 tools:
   - input: [l1]

@@ -1,24 +1,32 @@
 options:
+  grammar:
+    - grammars/pbes.g
+  constraints:
+    - constraints/pbes-attrs.yml
   version: -mcrl2.201202.0
-  path: /home/wieger/svn/mcrl2/tools/bin
+  path: ../../tools/bin
   platform: linux
 nodes: {l1: PbesSpec, l2: PBES, l3: PBES, l4: Bool, l5: Bool}
 tools:
-  - input: [l1]
+  t1:
+    input: [l1]
     output: [l2]
     args: []
     name: txt2pbes
-  - input: [l2]
+  t2:
+    input: [l2]
     output: [l3]
     args: []
     name: pbesconstelm
-  - input: [l2]
+  t3:
+    input: [l2]
     output: [l4]
-    args: []
+    args: [-ipbes]
     name: pbes2bool
-  - input: [l3]
+  t4:
+    input: [l3]
     output: [l5]
-    args: []
+    args: [-ipbes]
     name: pbes2bool
 result: |
   result = value(l4) == value(l5)

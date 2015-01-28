@@ -5,7 +5,8 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import randgen, yaml
-from subprocess import Popen, PIPE, STDOUT
+from popen import Popen, MemoryExceededError, TimeExceededError
+from subprocess import  PIPE, STDOUT
 import shutil
 import psutil
 import time
@@ -37,18 +38,6 @@ class ToolCrashedError(Exception):
     def __str__(self):
         return repr(self.value)
 
-class ToolTimeoutError(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-class MemoryError(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
 class Node:
     def __init__(self, label, type, ext):
         self.base = label
@@ -58,6 +47,9 @@ class Node:
         self.value = None
         self.ext = ext
         return
+
+    def __str__(self):
+        return repr(self.value)
 
 class Tool:
     def __init__(self, name, input, output, args):
@@ -69,7 +61,6 @@ class Tool:
         self.executed = False
         self.infiles = True
         self.outfiles = True
-        self.time = 0
         if sys.platform.startswith("win"):
             # Don't display the Windows GPF dialog if the invoked program dies.
             # See comp.os.ms-windows.programmer.win32
@@ -89,52 +80,48 @@ class Tool:
                 return False
         return True
 
+    # Raises an exception if the execution was aborted
+    def checkExecution(self, p, timeout, memlimit):
+        if p.maxVirtualMem > memlimit:
+            raise MemoryExceededError(p.maxVirtualMem)
+        if p.userTime > timeout:
+            raise TimeExceededError(p.userTime)
+
     def execute(self, dir, timeout, memlimit, verbose):
         args = []
         if dir == None:
             dir = ''
         name = os.path.join(dir, self.name)
         if self.infiles:
-            #args = [os.path.join(os.getcwd(), i.label + "." + i.ext) for i in self.input]
             args = [os.path.join(os.getcwd(), i.label) for i in self.input]
         if self.outfiles:
-            #args = args + [os.path.join(os.getcwd(), o.label + "." + o.ext) for o in self.output]
             args = args + [os.path.join(os.getcwd(), o.label) for o in self.output]
         if verbose:
             print 'Executing ' + ' '.join([name] + args + self.args)
-        p = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE,
-                  creationflags=self.subprocess_flags)
+        p = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit = 100000000, usrTimeLimit = 5)
+
         input = None
         if not self.infiles:
             input = (b' ').join([i.value for i in self.input])
 
-        t = threading.Thread(target=self.threadedExecute, args=(p, input,))
-        pp = psutil.Process(p.pid)
-        descendants = list(pp.get_children(recursive=True))
-        descendants = descendants + [pp]
-        t0 = time.clock()
-        t.start()
-        try:
-            while t.isAlive():
-                if time.clock() - t0 > timeout:
-                    t.join(0)
-                    if t.isAlive():
-                        p.terminate()
-                        t.join()
-                    raise ToolTimeoutError(name)
-                rss_memory = 0
-                vms_memory = 0
-            self.executed = True
-        except psutil.NoSuchProcess as e:
-            # Process has finished
-            self.executed = True
-            pass
-        except MemoryError:
-            raise MemoryError(name)
-        except ToolTimeoutError as e:
-            raise e
-        except Exception as e:
-            pass
+        self.threadedExecute(p, input)
+        self.executed = True
+        if verbose:
+            print('usr={0} sys={1} virt={2} res={3}'.format(p.userTime, p.systemTime, p.maxVirtualMem, p.maxResidentMem))
+        self.checkExecution(p, timeout, memlimit)
+
+    def __str__(self):
+        import StringIO
+        out = StringIO.StringIO()
+        out.write('name     = ' + str(self.name)     + '\n')
+        out.write('input    = ' + str(self.input)    + '\n')
+        out.write('output   = ' + str(self.output)   + '\n')
+        out.write('args     = ' + str(self.args)     + '\n')
+        out.write('error    = ' + str(self.error)    + '\n')
+        out.write('executed = ' + str(self.executed) + '\n')
+        out.write('infiles) = ' + str(self.infiles)  + '\n')
+        out.write('outfiles = ' + str(self.outfiles) + '\n')
+        return out.getvalue()
 
     def threadedExecute(self, process, input):
         res = process.communicate(input)
@@ -152,9 +139,12 @@ class Test:
         self.name = file
         f = open(file)
         data = yaml.safe_load(f)
+
         self.options = data['options']
         self.nodes = []
         self.verbose = True if settings['verbose'] else False
+        if 'toolpath' in settings:
+            self.options['toolpath'] = settings['toolpath']
         for n in data['nodes']: # create nodes
             type = data['nodes'][n]
             self.nodes.append(Node(n, type, ''))
@@ -172,10 +162,14 @@ class Test:
 
         self.res = data['result']
         f.close()
-        self.glbs = {'value': self.value, 'last_word': self.last_word, 'file_get_contents': self.file_get_contents}
+
+        # These are the global variables used for the computation of the test result
+        self.globals = {'value': self.value, 'last_word': self.last_word, 'file_get_contents': self.file_get_contents}
         for n in self.nodes:
-            self.glbs[n.label] = n
-        self.__calcInitials() # calculate the initial nodes
+            self.globals[n.label] = n
+
+        # calculate the initial nodes
+        self.__calcInitials()
 
     def __calcInitials(self):
         outputs = []
@@ -229,16 +223,14 @@ class Test:
         # Returns the result of the test after all tools have been executed
         if self.verbose:
             print 'Validating result'
-        exec (self.res, self.glbs)
-        return self.glbs['result']
+        exec(self.res, self.globals)
+        return self.globals['result']
 
+    # Returns the value of the node. Enables 'value(l1)' in the YAML
     def value(self, node):
-        # Returns the value of the node. Enables 'value(l1)' in the YAML
-
-        #return node.value
         try:
             if node.value or node.type == 'Bool':
-                return node.value
+                return node.value.strip()
             else:
                 #f = open(os.path.join(os.getcwd(), node.label + "." + node.ext), 'r')
                 f = open(os.path.join(os.getcwd(), node.label), 'r')
@@ -265,7 +257,7 @@ class Test:
         else:
             return None
 
-    def enabled(self):
+    def remaining_tasks(self):
         # Returns a list of tools that can be executed and have not been executed before
         return [t for t in self.tools if not t.executed and t.canExecute()]
 
@@ -284,13 +276,13 @@ class Test:
 
     def run(self, reporterrors):
         # Singlecore run
-        en = self.enabled()
-        while len(en) > 0:
-            t = en[0]
-            t.execute(self.options['path'], 5, 75000, self.verbose)
+        tasks = self.remaining_tasks()
+        while len(tasks) > 0:
+            t = tasks[0]
+            t.execute(self.options['toolpath'], timeout = 5, memlimit = 100000000, verbose = self.verbose)
             if reporterrors and t.error != '' and 'error' in t.error:
                 raise ToolInputError(t.name, t.error)
-            en = self.enabled()
+            tasks = self.remaining_tasks()
 
         if reporterrors and not all(t.executed for t in self.tools):
             raise UnusedToolsError([t for t in self.tools if not t.executed])
@@ -299,12 +291,12 @@ class Test:
 
     def run_multicore(self, max):
         # Multicore run
-        en = self.enabled()
-        while len(en) > 0:
+        tasks = self.remaining_tasks()
+        while len(tasks) > 0:
             pool = multiprocessing.Pool()
             jobs = []
-            for i in range(min(len(en), max)):
-                p = multiprocessing.Process(target=en[i].execute, args=(self.options['path'],))
+            for i in range(min(len(tasks), max)):
+                p = multiprocessing.Process(target=tasks[i].execute, args=(self.options['toolpath'],))
 
                 p.daemon = True
                 jobs.append(p)
@@ -314,7 +306,7 @@ class Test:
                 j.join()
                 if j.exitcode != 0:
                     return 'Error'
-            en = self.enabled()
+            tasks = self.remaining_tasks()
 
         if not all(t.executed for t in self.tools):
             return 'Error'
@@ -329,16 +321,3 @@ class Test:
             f = open(os.path.join(dir, fname), 'w')
             f.write(l.value)
             f.close()
-
-
-
-
-
-
-
-
-
-
-
-
-

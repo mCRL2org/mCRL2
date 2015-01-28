@@ -24,13 +24,13 @@ def generate_dotfile(ymlfile):
   tools = data['tools']
   nodes = data['nodes']
   for node in sorted(nodes):
-    out.write('  %s [label=%s];\n' % (remove_ext(node), nodes[node]))
+    out.write('  %s [label="%s: %s"];\n' % (remove_ext(node), node, nodes[node]))
   toolindex = 1
   for name in tools:
     tool = tools[name]
     toolname = 'tool%d' % toolindex
     toolindex = toolindex + 1
-    out.write('  %s [shape=box, label="%s"];\n' % (toolname, name + ' ' + ' '.join(tool['args'])))
+    out.write('  %s [shape=box, label="%s"];\n' % (toolname, name + ': ' + tool['name'] + ' ' + ' '.join(tool['args'])))
     for src in tool['input']:
       out.write('  %s -> %s;\n' % (remove_ext(src), toolname))
     for dest in tool['output']:
@@ -38,7 +38,6 @@ def generate_dotfile(ymlfile):
   out.write('}\n')
   dotfile = remove_ext(ymlfile) + '.dot'
   pdffile = remove_ext(ymlfile) + '.pdf'
-  print dotfile, pdffile
   with open(dotfile, 'w') as text_file:
     text_file.write(out.getvalue())
   os.system('dot -Tpdf %s -o %s' % (dotfile, pdffile))
