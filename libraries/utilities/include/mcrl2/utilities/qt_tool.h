@@ -154,7 +154,7 @@ class qt_tool: public Tool, public QtToolBase
     {
       m_argc = argc;
       m_argv = argv;
-      work_around_qtbug_38598(m_argv[0]);
+      work_around_qtbug_38598();
       return static_cast<Tool *>(this)->execute(argc, argv);
     }
 

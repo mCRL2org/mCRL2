@@ -1,7 +1,7 @@
 #ifndef WORKAROUNDS_H__
 #define WORKAROUNDS_H__
 
-void work_around_qtbug_38598(const char* argv0);
+void work_around_qtbug_38598();
 
 // Windows specific workarounds
 #if defined(BOOST_MSVC) || defined(BOOST_INTEL_WIN) || defined(_MSC_VER)
