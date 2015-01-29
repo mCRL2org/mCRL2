@@ -1,0 +1,42 @@
+options:
+  grammar:
+    - grammars/pbes.g
+  constraints:
+    - constraints/pbes-attrs.yml
+  version: -mcrl2.201202.0
+  path: ../../tools/bin
+  platform: linux
+nodes: {l1: PbesSpec, l2: PBES, l3: PBES, l4: PBES, l5: Bool, l6: Bool, l7: Bool}
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2]
+    output: [l3]
+    args: [--strategy=over]
+    name: pbesabsinthe
+  t3:
+    input: [l2]
+    output: [l4]
+    args: [--strategy=under]
+    name: pbesabsinthe
+  t4:
+    input: [l2]
+    output: [l5]
+    args: [-ipbes]
+    name: pbes2bool
+  t5:
+    input: [l3]
+    output: [l6]
+    args: [-ipbes]
+    name: pbes2bool
+  t6:
+    input: [l4]
+    output: [l7]
+    args: [-ipbes]
+    name: pbes2bool
+result: |
+  result = (not value(l5) or not value(l6) or value(l5) == value(l6)) and (not value(l5) or not value(l7) or value(l5) == value(l7))
