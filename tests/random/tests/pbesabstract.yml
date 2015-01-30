@@ -15,14 +15,14 @@ tools:
   t2:
     input: [l2]
     output: [l3]
-    args: [--select="*(*:*)" --abstraction-value=0]
+    args: ["--select=*(*:*)", --abstraction-value=0]
     name: pbesabstract
   t3:
     input: [l2]
     output: [l4]
-    args: [--select="*(*:*)" --abstraction-value=1]
+    args: ["--select=*(*:*)", --abstraction-value=1]
     name: pbesabstract
-  t4
+  t4:
     input: [l2]
     output: [l5]
     args: [-ipbes]

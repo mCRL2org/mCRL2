@@ -15,8 +15,8 @@ tools:
   t2:
     input: [l2]
     output: [l3]
-    args: [-ppfnf]
-    name: pbesrewr
+    args: [-slazy]
+    name: pbesinst
   t3:
     input: [l2]
     output: [l4]

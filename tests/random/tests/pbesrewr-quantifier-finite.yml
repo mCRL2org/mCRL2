@@ -5,7 +5,7 @@ options:
     - constraints/pbes-attrs.yml
   path: ../../tools/bin
   platform: linux
-nodes: {l1: PbesSpec, l2: PBES, l3: BES, l4: Bool, l5: Bool}
+nodes: {l1: PbesSpec, l2: PBES, l3: PBES, l4: Bool, l5: Bool}
 tools:
   t1:
     input: [l1]
