@@ -6,6 +6,10 @@ include_directories( build/workarounds/msvc )
 ## Set MSVC specific compiler flags
 ##---------------------------------------------------
 
+# TODO: check what the deal is with the /MD flag; do we need it? Most of the project is
+#       built statically because the library exports of the mCRL2 libraries are not 
+#       marked as such (no __declspec(dllexport) etc.). It might be needed for Qt5, but
+#       Qt5 seems to add this flag automatically.
 #try_add_cxx_flag(/MD)                   # Creates multithreaded DLLs using MSVCRT.lib
 try_add_cxx_flag(/EHs)                  # Synchronous exception handling (TODO: check why)
 try_add_cxx_flag(/bigobj)               # Allow big object files
@@ -29,10 +33,12 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
-# TODO: check if the following are still needed.
+# TODO: check if the following are still needed. (WIN32 can probably be replaced by the compiler-
+#       defined _WIN32, which also avoids clashes with the Windows SDK which also defines WIN32.)
 add_definitions(-DBOOST_ALL_NO_LIB=1)
 add_definitions(-DWIN32)
 
 # The following flag prevents compiling rewriter code from being compiled.
-# TODO: rename NO_DYNLOAD to MCRL2_NO_DYNLOAD
+# TODO: rename NO_DYNLOAD to MCRL2_NO_DYNLOAD, or replace it with a check for Windows. We want to
+#       compile the compiling rewriter stuff for all other platforms anyway.
 add_definitions(-DNO_DYNLOAD)

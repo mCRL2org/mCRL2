@@ -1,4 +1,5 @@
 add_mcrl2_tool(complps2pbes
+  COMPONENT Experimental
   SOURCES
     complps2pbes.cpp
   DEPENDS

@@ -1,4 +1,5 @@
 add_mcrl2_tool(pbespareqelm
+  COMPONENT Experimental
   SOURCES
     pbespareqelm.cpp
   DEPENDS

@@ -64,11 +64,6 @@ function(_add_header_tests TARGET_NAME)
   endforeach()
 endfunction()
 
-macro(_install_qt_libs TARGET_NAME COMPONENT QT_LIBS TARGET_TYPE)
-  if(WIN32 AND QT_LIBS)
-  endif()
-endmacro()
-
 function(_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_FILES)
   if(MSVC)
     if(NOT ICON)
@@ -147,23 +142,14 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   set(LIST_KW "SOURCES" "DEPENDS" "INCLUDE" "RESOURCES")
   cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
 
-  set(INCLUDE ${ARG_INCLUDEDIR} ${ARG_INCLUDE})
-  file(GLOB_RECURSE TARGET_INCLUDE_FILES ${ARG_INCLUDEDIR}/*.h)
-  if(TARGET_INCLUDE_FILES)
-    add_custom_target(${TARGET_NAME}_headers SOURCES ${TARGET_INCLUDE_FILES})
-  endif()
-
-  if(ARG_COMPONENT)
-    string(TOLOWER ${ARG_COMPONENT} COMPONENT_LC)
-    if((${COMPONENT_LC} STREQUAL "experimental" AND NOT MCRL2_ENABLE_EXPERIMENTAL) OR
-       (${COMPONENT_LC} STREQUAL "deprecated" AND NOT MCRL2_ENABLE_DEPRECATED) OR
-       (${COMPONENT_LC} STREQUAL "developer"))
-      set(ARG_COMPONENT "ARG_COMPONENT-NotFound")
+  if(NOT ARG_COMPONENT)
+    if(${TARGET_TYPE} STREQUAL "LIBRARY")
+      set(ARG_COMPONENT "Libraries")
+    else()
+      set(ARG_COMPONENT "Stable")
     endif()
-  else()
-    set(ARG_COMPONENT "${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME}")
   endif()
-
+  
   foreach(DEP ${ARG_DEPENDS})
     string(REGEX REPLACE "Qt(.*)" "\\1" QT_LIB ${DEP})
     if(NOT ${QT_LIB} STREQUAL ${DEP})
@@ -175,6 +161,21 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       list(APPEND DEPENDS ${DEP})
     endif()
   endforeach()
+
+  string(TOLOWER ${ARG_COMPONENT} COMPONENT_LC)
+  if((${COMPONENT_LC} STREQUAL "experimental" AND NOT MCRL2_ENABLE_EXPERIMENTAL) OR
+     (${COMPONENT_LC} STREQUAL "deprecated" AND NOT MCRL2_ENABLE_DEPRECATED) OR
+     (${COMPONENT_LC} STREQUAL "developer" AND NOT MCRL2_ENABLE_DEVELOPER) OR
+     (${COMPONENT_LC} STREQUAL "stable" AND NOT MCRL2_ENABLE_STABLE) OR
+     (IS_GUI_BINARY AND NOT MCRL2_ENABLE_GUI_TOOLS))
+    return()
+  endif()
+
+  set(INCLUDE ${ARG_INCLUDEDIR} ${ARG_INCLUDE})
+  file(GLOB_RECURSE TARGET_INCLUDE_FILES ${ARG_INCLUDEDIR}/*.h)
+  if(TARGET_INCLUDE_FILES)
+    add_custom_target(${TARGET_NAME}_headers SOURCES ${TARGET_INCLUDE_FILES})
+  endif()
 
   foreach(SRC ${ARG_SOURCES})
     get_filename_component(SRC_ABS ${SRC} ABSOLUTE)
@@ -199,78 +200,69 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       set(SRC_ABS ${PARSER_CODE})
       set(DEPENDS ${DEPENDS} dparser)
       set(INCLUDE ${INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-    elseif((NOT IS_GUI_BINARY OR MCRL2_ENABLE_GUI_TOOLS) AND ARG_COMPONENT)
-      if("${SRC_EXT}" STREQUAL ".ui")
-        qt5_wrap_ui(SRC_ABS ${SRC_ABS})
-      elseif("${SRC_EXT}" STREQUAL ".qrc")
-        qt5_add_resources(SRC_ABS ${SRC_ABS})
-      endif()
+    elseif("${SRC_EXT}" STREQUAL ".ui")
+      qt5_wrap_ui(SRC_ABS ${SRC_ABS})
+    elseif("${SRC_EXT}" STREQUAL ".qrc")
+      qt5_add_resources(SRC_ABS ${SRC_ABS})
     endif()
     set(SOURCES ${SRC_ABS} ${SOURCES})
   endforeach()
 
-  if((NOT IS_GUI_BINARY OR MCRL2_ENABLE_GUI_TOOLS) AND ARG_COMPONENT)
-
-    if(${TARGET_TYPE} STREQUAL "LIBRARY")
-      if(NOT SOURCES)
-        # This is a header-only library. We're still going to make a static library
-        # (exporting nothing) out of it, so we can use CMake's dependency handling
-        # mechanisms.
-        # We are adding an empty file here so CMake does not complain that it does 
-        # not know what linker to use. We could have used the LINKER_LANGUAGE CXX 
-        # property, but then that breaks the RPATH handling at install time on *nix
-        # systems...
-        if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/empty.cpp)
-          file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/empty.cpp "")
-        endif()
-        add_library(${TARGET_NAME} ${CMAKE_CURRENT_BINARY_DIR}/empty.cpp ${TARGET_INCLUDE_FILES})
-      else()
-        add_library(${TARGET_NAME} ${SOURCES} ${TARGET_INCLUDE_FILES})
+  if(${TARGET_TYPE} STREQUAL "LIBRARY")
+    if(NOT SOURCES)
+      # This is a header-only library. We're still going to make a static library
+      # (exporting nothing) out of it, so we can use CMake's dependency handling
+      # mechanisms.
+      # We are adding an empty file here so CMake does not complain that it does 
+      # not know what linker to use. We could have used the LINKER_LANGUAGE CXX 
+      # property, but then that breaks the RPATH handling at install time on *nix
+      # systems...
+      if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/empty.cpp)
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/empty.cpp "")
       endif()
-      target_include_directories(${TARGET_NAME} INTERFACE ${ARG_INCLUDEDIR} ${ARG_INCLUDE})
-      install(TARGETS ${TARGET_NAME}
-              LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
-              ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
-              FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH}
-              COMPONENT ${ARG_COMPONENT})
-      _install_header_files(${TARGET_INCLUDE_FILES})
-      _add_header_tests(${TARGET_NAME})
-      if(NOT ${ARG_NOTEST})
-        _add_library_tests(${TARGET_NAME})
-      endif()
-    elseif(${TARGET_TYPE} STREQUAL "EXECUTABLE")
-      if(IS_GUI_BINARY)
-        _add_resource_files(${TARGET_NAME} "${ARG_MENUNAME}" "${ARG_DESCRIPTION}" "${ARG_ICON}" SOURCES)
-      endif()
-      add_executable(${TARGET_NAME} ${SOURCES} ${TARGET_INCLUDE_FILES})
-      if(IS_GUI_BINARY)
-        _prepare_desktop_application(${TARGET_NAME} "${ARG_MENUNAME}" "${ARG_DESCRIPTION}" "${ARG_ICON}")
-      endif()
-      _add_man_page(${TARGET_NAME})
-      install(TARGETS ${TARGET_NAME}
-              RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
-              BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH}
-              COMPONENT ${ARG_COMPONENT})
-      get_target_property(IS_BUNDLE ${TARGET_NAME} MACOSX_BUNDLE)
+      add_library(${TARGET_NAME} ${CMAKE_CURRENT_BINARY_DIR}/empty.cpp ${TARGET_INCLUDE_FILES})
+    else()
+      add_library(${TARGET_NAME} ${SOURCES} ${TARGET_INCLUDE_FILES})
     endif()
-    if(DEPENDS)
-      target_link_libraries(${TARGET_NAME} ${DEPENDS})
+    target_include_directories(${TARGET_NAME} INTERFACE ${ARG_INCLUDEDIR} ${ARG_INCLUDE})
+    install(TARGETS ${TARGET_NAME}
+            COMPONENT ${ARG_COMPONENT}
+            LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
+            ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
+            FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
+    _install_header_files(${TARGET_INCLUDE_FILES})
+    _add_header_tests(${TARGET_NAME})
+    _add_library_tests(${TARGET_NAME})
+  elseif(${TARGET_TYPE} STREQUAL "EXECUTABLE")
+    if(IS_GUI_BINARY)
+      _add_resource_files(${TARGET_NAME} "${ARG_MENUNAME}" "${ARG_DESCRIPTION}" "${ARG_ICON}" SOURCES)
     endif()
-    if(QT_LIBS)
-      _install_qt_libs(${TARGET_NAME} ${ARG_COMPONENT} "${QT_LIBS}" ${TARGET_TYPE})
-      if(${TARGET_TYPE} STREQUAL "EXECUTABLE")
-        if(MCRL2_QT_APPS)
-          set(MCRL2_QT_APPS "${MCRL2_QT_APPS};${TARGET_NAME}" CACHE INTERNAL "")
-        else()
-          set(MCRL2_QT_APPS "${TARGET_NAME}" CACHE INTERNAL "")
-        endif()
-      endif()
-      qt5_use_modules(${TARGET_NAME} ${QT_LIBS})
-      set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
+    add_executable(${TARGET_NAME} ${SOURCES} ${TARGET_INCLUDE_FILES})
+    if(IS_GUI_BINARY)
+      _prepare_desktop_application(${TARGET_NAME} "${ARG_MENUNAME}" "${ARG_DESCRIPTION}" "${ARG_ICON}")
     endif()
-    include_directories(${INCLUDE})
-
+    _add_man_page(${TARGET_NAME})
+    install(TARGETS ${TARGET_NAME}
+            COMPONENT ${ARG_COMPONENT}
+            RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
+            BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH})
+    get_target_property(IS_BUNDLE ${TARGET_NAME} MACOSX_BUNDLE)
   endif()
+  if(DEPENDS)
+    target_link_libraries(${TARGET_NAME} ${DEPENDS})
+  endif()
+  if(QT_LIBS)
+    if(${TARGET_TYPE} STREQUAL "EXECUTABLE")
+      if(MCRL2_QT_APPS)
+        set(MCRL2_QT_APPS "${MCRL2_QT_APPS};${TARGET_NAME}" CACHE INTERNAL "")
+      else()
+        set(MCRL2_QT_APPS "${TARGET_NAME}" CACHE INTERNAL "")
+      endif()
+    endif()
+    qt5_use_modules(${TARGET_NAME} ${QT_LIBS})
+    set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
+  endif()
+  include_directories(${INCLUDE})
 endfunction()
 
 function(add_mcrl2_library LIBNAME)

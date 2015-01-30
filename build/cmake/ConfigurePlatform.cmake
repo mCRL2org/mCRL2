@@ -1,5 +1,5 @@
 set(MCRL2_STAGE_PATH ${CMAKE_BINARY_DIR}/stage)
-
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "Shared")
 if(WIN32)
 
   # Platform is Windows
@@ -8,8 +8,8 @@ if(WIN32)
   # with __declspec(dllexport).
   set(BUILD_SHARED_LIBS OFF)
   set(MCRL2_MAN_PAGES OFF)
-  set(MCRL2_RUNTIME_PATH .)
-  set(MCRL2_LIBRARY_PATH .)
+  set(MCRL2_RUNTIME_PATH bin)
+  set(MCRL2_LIBRARY_PATH bin)
   set(MCRL2_ARCHIVE_PATH lib)
   set(MCRL2_INCLUDE_PATH include)
   set(MCRL2_RESOURCE_PATH .)
@@ -43,7 +43,7 @@ elseif(UNIX)
     set(MCRL2_RUNTIME_PATH bin)
     set(MCRL2_LIBRARY_PATH lib)
     set(MCRL2_ARCHIVE_PATH share/mcrl2/lib)
-    set(MCRL2_INCLUDE_PATH share/mcrl2/include)
+    set(MCRL2_INCLUDE_PATH include)
     set(MCRL2_RESOURCE_PATH share/mcrl2)
 
     option(MCRL2_MAN_PAGES "Enable/disable creation of UNIX man pages" ON)

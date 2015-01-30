@@ -1,4 +1,5 @@
 add_mcrl2_tool(lpsbisim2pbes
+  COMPONENT Experimental
   SOURCES
     lpsbisim2pbes.cpp
   DEPENDS

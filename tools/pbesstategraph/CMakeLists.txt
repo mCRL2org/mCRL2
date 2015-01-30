@@ -1,4 +1,5 @@
 add_mcrl2_tool(pbesstategraph
+  COMPONENT Experimental
   SOURCES
     pbesstategraph.cpp
   DEPENDS

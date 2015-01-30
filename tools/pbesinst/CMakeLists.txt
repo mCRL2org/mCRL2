@@ -1,4 +1,5 @@
 add_mcrl2_tool(pbesinst
+  COMPONENT Experimental
   SOURCES
     pbesinst.cpp
   DEPENDS

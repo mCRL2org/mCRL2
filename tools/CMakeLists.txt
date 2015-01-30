@@ -1,78 +1,67 @@
-if(MCRL2_ENABLE_STABLE)
-  set(MCRL2_STABLE_TOOLS
-    besinfo
-    bespp
-    diagraphica
-    lps2lts
-    lps2pbes
-    lps2torx
-    lpsactionrename
-    lpsbinary
-    lpsconfcheck
-    lpsconstelm
-    lpsinfo
-    lpsinvelm
-    lpsparelm
-    lpsparunfold
-    lpspp
-    lpsrewr
-    lpssumelm
-    lpssuminst
-    lpsuntime
-    lpssim
-    lpsxsim
-    lts2lps
-    lts2pbes
-    ltsconvert
-    ltscompare
-    ltsgraph
-    ltsinfo
-    ltsview
-    mcrl2-gui
-    mcrl22lps
-    mcrl2i
-    mcrl2xi
-    pbes2bool
-    pbes2bes
-    pbesconstelm
-    pbesinfo
-    pbesparelm
-    pbespgsolve
-    pbespp
-    pbesrewr
-    tracepp
-    txt2pbes
-    txt2lps
-  )
-endif()
-if(MCRL2_ENABLE_EXPERIMENTAL)
-  set(MCRL2_EXPERIMENTAL_TOOLS
-    besconvert
-    bessolve
-    complps2pbes
-    lpsbisim2pbes
-    lpsrealelm
-    pbesabstract
-    pbesabsinthe
-    pbesinst
-    pbespareqelm
-    pbesstategraph
-    symbolic_exploration
-    txt2bes
-  )
-endif()
-if(MCRL2_ENABLE_DEPRECATED)
-  set(MCRL2_DEPRECATED_TOOLS
-    formulacheck
-  )
-endif()
-if(MCRL2_ENABLE_DEVELOPER)
-  set(MCRL2_DEVELOPER_TOOLS
-    alphabet
-    mcrl2parse
-  )
-endif()
+set(MCRL2_TOOLS
+  besinfo
+  bespp
+  diagraphica
+  lps2lts
+  lps2pbes
+  lps2torx
+  lpsactionrename
+  lpsbinary
+  lpsconfcheck
+  lpsconstelm
+  lpsinfo
+  lpsinvelm
+  lpsparelm
+  lpsparunfold
+  lpspp
+  lpsrewr
+  lpssumelm
+  lpssuminst
+  lpsuntime
+  lpssim
+  lpsxsim
+  lts2lps
+  lts2pbes
+  ltsconvert
+  ltscompare
+  ltsgraph
+  ltsinfo
+  ltsview
+  mcrl2-gui
+  mcrl22lps
+  mcrl2i
+  mcrl2xi
+  pbes2bool
+  pbes2bes
+  pbesconstelm
+  pbesinfo
+  pbesparelm
+  pbespgsolve
+  pbespp
+  pbesrewr
+  tracepp
+  txt2pbes
+  txt2lps
 
-foreach(TOOL ${MCRL2_EXPERIMENTAL_TOOLS} ${MCRL2_DEPRECATED_TOOLS} ${MCRL2_DEVELOPER_TOOLS} ${MCRL2_STABLE_TOOLS})
+  besconvert
+  bessolve
+  complps2pbes
+  lpsbisim2pbes
+  lpsrealelm
+  pbesabstract
+  pbesabsinthe
+  pbesinst
+  pbespareqelm
+  pbesstategraph
+  symbolic_exploration
+  txt2bes
+
+  formulacheck
+
+  alphabet
+  mcrl2parse
+)
+
+foreach(TOOL ${MCRL2_TOOLS})
   add_subdirectory(${TOOL})
 endforeach()

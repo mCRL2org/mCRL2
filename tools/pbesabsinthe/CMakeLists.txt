@@ -1,4 +1,5 @@
 add_mcrl2_tool(pbesabsinthe
+  COMPONENT Experimental
   SOURCES
     pbesabsinthe.cpp
   DEPENDS
