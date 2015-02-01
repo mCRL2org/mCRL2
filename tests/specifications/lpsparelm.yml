@@ -1,0 +1,32 @@
+options:
+  grammar:
+    - grammars/mcrl2.g
+    - grammars/data.g
+  constraints:
+    - constraints/mcrl2-attrs.yml
+    - constraints/data-attrs.yml
+nodes: {l1.mcrl2: mCRL2Spec, l2.lps: LPS, l3.lps: LPS, l4.pbes: PBES, l5: Bool}
+tools:
+  t1:
+    input: [l1.mcrl2]
+    output: [l2.lps]
+    args: []
+    name: mcrl22lps
+  t2:
+    input: [l2.lps]
+    output: [l3.lps]
+    args: []
+    name: lpsparelm
+  t3:
+    input: [l2.lps, l3.lps]
+    output: [l4.pbes]
+    args: [--bisimulation=branching-bisim]
+    name: lpsbisim2pbes
+  t4:
+    input: [l4.pbes]
+    output: [l5]
+    args: []
+    name: pbes2bool
+
+result: |
+  result = value(l5) == 'true'

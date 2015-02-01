@@ -1,0 +1,29 @@
+options:
+  grammar:
+    - grammars/bes.g
+  constraints:
+    - constraints/bes-attrs.yml
+nodes: {l1: BesSpec, l2.bes: BES, l3: Bool, l4: Bool, l5: Bool}
+tools:
+  t1:
+    input: [l1]
+    output: [l2.bes]
+    args: []
+    name: txt2bes
+  t2:
+    input: [l2.bes]
+    output: [l3]
+    args: [-sgauss]
+    name: bessolve
+  t3:
+    input: [l2.bes]
+    output: [l4]
+    args: [-sspm]
+    name: bessolve
+  t4:
+    input: [l2.bes]
+    output: [l5]
+    args: []
+    name: pbes2bool
+result: |
+  result = last_word(value(l3)) == last_word(value(l4)) == value(l5)

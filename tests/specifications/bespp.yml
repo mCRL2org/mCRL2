@@ -1,0 +1,35 @@
+options:
+  grammar:
+    - grammars/bes.g
+  constraints:
+    - constraints/bes-attrs.yml
+nodes: {l1: BesSpec, l2.bes: BES, l3: BesSpec, l4.bes: BES, l5: Bool, l6: Bool}
+tools:
+  t1:
+    input: [l1]
+    output: [l2.bes]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2.bes]
+    output: [l3]
+    args: []
+    name: pbespp
+  t3:
+    input: [l3]
+    output: [l4.bes]
+    args: []
+    name: txt2pbes
+  t4:
+    input: [l2.bes]
+    output: [l5]
+    args: []
+    name: pbes2bool
+  t5:
+    input: [l4.bes]
+    output: [l6]
+    args: []
+    name: pbes2bool
+result: |
+  result = value(l5) == value(l6)
+

@@ -27,6 +27,9 @@ def run_replay(testfile, inputfiles, reporterrors, settings):
 
     try:
         result = t.run(reporterrors)
+################################
+        #print t
+################################
         if result == True:
             return True, ''
         else:

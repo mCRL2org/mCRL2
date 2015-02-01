@@ -1,0 +1,62 @@
+options:
+  grammar:
+    - grammars/pbes.g
+  constraints:
+    - constraints/pbes-attrs.yml
+nodes: {l1.txt: PbesSpec, l2.pbes: PBES, l3.pbes: PBES, l4: Bool, l5: Bool}
+tools:
+  t1:
+    input: [l1.txt]
+    output: [l2.pbes]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2.pbes]
+    output: [l3.pbes]
+    args: [-o1, -c]
+    name: symbolic_exploration
+  t3:
+    input: [l2.pbes]
+    output: [l4]
+    args: [-o1]
+    name: symbolic_exploration
+  t4:
+    input: [l2.pbes]
+    output: [l5]
+    args: [-O0, -c]
+    name: symbolic_exploration
+  t5:
+    input: [l2.pbes]
+    output: [l6]
+    args: [-O0]
+    name: symbolic_exploration
+  t6:
+    input: [l2.pbes]
+    output: [l7]
+    args: []
+    name: pbes2bool
+  t7:
+    input: [l3.pbes]
+    output: [l8]
+    args: []
+    name: pbes2bool
+  t8:
+    input: [l4]
+    output: [l9]
+    args: []
+    name: pbes2bool
+  t9:
+    input: [l5]
+    output: [l10]
+    args: []
+    name: pbes2bool
+  t10:
+    input: [l6]
+    output: [l11]
+    args: []
+    name: pbes2bool
+result: |
+  answers = [value(l7), value(l8), value(l9), value(l10), value(l11)]
+  print 'ANSWERS', answers
+  result = not 'true' in answers and 'false' in answers
+

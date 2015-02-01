@@ -1,0 +1,26 @@
+options:
+  grammar:
+    - grammars/mcrl2.g
+    - grammars/pbes.g
+  constraints:
+    - constraints/pbes-attrs.yml
+nodes: {l1.mcrl2: mCRL2Spec, l2: StateFrm, l3.lps: LPS, l4.pbes: PBES, l5: Bool}
+tools:
+  t1:
+    input: [l1.mcrl2]
+    output: [l3.lps]
+    args: []
+    name: mcrl22lps
+  t2:
+    input: [l2, l3.lps]
+    output: [l4.pbes]
+    args: []
+    name: lps2pbes
+  t3:
+    input: [l4.pbes]
+    output: []
+    args: []
+    name: pbespp
+result: |
+  result = True
+

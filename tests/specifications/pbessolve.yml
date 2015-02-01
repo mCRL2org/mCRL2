@@ -1,0 +1,25 @@
+options:
+  grammar:
+    - grammars/pbes.g
+  constraints:
+    - constraints/pbes-attrs.yml
+nodes: {l1.txt: PbesSpec, l2.pbes: PBES, l3: Bool, l4: Bool}
+tools:
+  t1:
+    input: [l1.txt]
+    output: [l2.pbes]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2.pbes]
+    output: [l3]
+    args: []
+    name: pbes2bool
+  t3:
+    input: [l2.pbes]
+    output: [l4]
+    args: []
+    name: pbespgsolve
+result: |
+  result = value(l3) == value(l4)
+

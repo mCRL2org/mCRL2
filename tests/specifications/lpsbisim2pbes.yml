@@ -1,0 +1,32 @@
+options:
+  grammar:
+    - grammars/mcrl2.g
+    - grammars/data.g
+  constraints:
+    - constraints/mcrl2-attrs.yml
+    - constraints/data-attrs.yml
+nodes: {l1.mcrl2: mCRL2Spec, l2.mcrl2: mCRL2Spec, l3.lps: LPS, l4.lps: LPS, l5.pbes: PBES}
+tools:
+  t1:
+    input: [l1.mcrl2]
+    output: [l3.lps]
+    args: []
+    name: txt2lps
+  t2:
+    input: [l2.mcrl2]
+    output: [l4.lps]
+    args: []
+    name: txt2lps
+  t3:
+    input: [l3.lps, l4.lps]
+    output: [l5.pbes]
+    args: [-bstrong-bisim]
+    name: lpsbisim2pbes
+  t4:
+    input: [l5.pbes]
+    output: []
+    args: []
+    name: pbespp
+
+result: |
+  result = True

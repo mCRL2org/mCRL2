@@ -1,0 +1,19 @@
+absmap
+h: Nat -> AbsNat;
+
+sort
+  AbsNat  = struct arbitrary| specific;
+
+var
+  d:Nat;
+eqn
+  h(d) = arbitrary;
+  abseq(arbitrary,arbitrary) = {true,false};
+  abseq(arbitrary,specific) = {false};
+  abseq(specific,specific) = {true};
+  abseq(specific,arbitrary) = {false};
+
+
+absfunc
+  ==: Nat # Nat -> Bool        := abseq : AbsNat # AbsNat -> Set(Bool)
+

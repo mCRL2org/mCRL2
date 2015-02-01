@@ -1,0 +1,25 @@
+options:
+  grammar:
+    - grammars/pbes.g
+  constraints:
+    - constraints/pbes-attrs.yml
+nodes: {l1.txt: PbesSpec, l2.pbes: PBES, l3.pbes: PBES, l4: Bool}
+tools:
+  t1:
+    input: [l1.txt]
+    output: [l2.pbes]
+    args: [-n]
+    name: txt2pbes
+  t2:
+    input: [l2.pbes]
+    output: [l3.pbes]
+    args: [-pquantifier-one-point]
+    name: pbesrewr
+  t3:
+    input: [l3.pbes]
+    output: [l4]
+    args: []
+    name: pbesinfo
+result: |
+  result =  True
+

@@ -1,0 +1,39 @@
+options:
+  grammar:
+    - grammars/pbes.g
+  constraints:
+    - constraints/pbes-attrs.yml
+nodes: {l1.txt: PbesSpec, l2.pbes: PBES, l3.pbes: PBES, l4.pbes: PBES, l5: Bool, l6: Bool, l7: Bool}
+tools:
+  t1:
+    input: [l1.txt]
+    output: [l2.pbes]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2.pbes]
+    output: [l3.pbes]
+    args: ["--select=*(*:*)", --abstraction-value=0]
+    name: pbesabstract
+  t3:
+    input: [l2.pbes]
+    output: [l4.pbes]
+    args: ["--select=*(*:*)", --abstraction-value=1]
+    name: pbesabstract
+  t4:
+    input: [l2.pbes]
+    output: [l5]
+    args: []
+    name: pbes2bool
+  t5:
+    input: [l3.pbes]
+    output: [l6]
+    args: []
+    name: pbes2bool
+  t6:
+    input: [l4.pbes]
+    output: [l7]
+    args: []
+    name: pbes2bool
+result: |
+  result = (not value(l5) or not value(l6) or value(l5) == value(l6)) and (not value(l5) or not value(l7) or value(l5) == value(l7))

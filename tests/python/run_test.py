@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 #~ Copyright 2013, 2014 Mark Geelen.
+#~ Copyright 2014, 2015 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
@@ -40,13 +41,13 @@ class ToolCrashedError(Exception):
 
 class Node:
     def __init__(self, label, type, ext):
-        self.base = label
         self.label = label
-        self.iter = 0
         self.type = type
         self.value = None
-        self.ext = ext
         return
+
+    def pp(self):
+        return 'Node(label = {0}, type = {1}, value = {2})'.format(self.label, self.type, self.value)
 
     def __str__(self):
         return repr(self.value)
@@ -114,12 +115,12 @@ class Tool:
         import StringIO
         out = StringIO.StringIO()
         out.write('name     = ' + str(self.name)     + '\n')
-        out.write('input    = ' + str(self.input)    + '\n')
-        out.write('output   = ' + str(self.output)   + '\n')
+        out.write('input    = [{0}]\n'.format(', '.join([x.pp() for x in self.input])))
+        out.write('output   = [{0}]\n'.format(', '.join([x.pp() for x in self.output])))
         out.write('args     = ' + str(self.args)     + '\n')
         out.write('error    = ' + str(self.error)    + '\n')
         out.write('executed = ' + str(self.executed) + '\n')
-        out.write('infiles) = ' + str(self.infiles)  + '\n')
+        out.write('infiles  = ' + str(self.infiles)  + '\n')
         out.write('outfiles = ' + str(self.outfiles) + '\n')
         return out.getvalue()
 
@@ -135,10 +136,18 @@ class Tool:
 
 class Test:
     def __init__(self, file, settings):
+        from collections import Counter
+
         # Reads a test from a YAML file
         self.name = file
         f = open(file)
         data = yaml.safe_load(f)
+
+        # Add tool arguments specified in settings
+        if 'tools' in settings:
+            for tool in settings['tools']:
+                data['tools'][tool]['args'] += settings['tools'][tool]['args']
+        # print yaml.dump(data)
 
         self.options = data['options']
         self.nodes = []
@@ -171,6 +180,18 @@ class Test:
         # calculate the initial nodes
         self.__calcInitials()
 
+    def __str__(self):
+        import StringIO
+        out = StringIO.StringIO()
+        out.write('name     = ' + str(self.name)     + '\n')
+        out.write('options  = ' + str(self.options)  + '\n')
+        out.write('verbose  = ' + str(self.verbose)  + '\n')
+        out.write('res      = ' + str(self.res)      + '\n\n')
+        out.write('\n'.join(['--- Node ---\n{0}'.format(node) for node in self.nodes]) + '\n\n')
+        out.write('\n'.join(['--- Tool ---\n{0}'.format(tool) for tool in self.tools]) + '\n\n')
+        out.write('\n'.join(['--- Init ---\n{0}'.format(node) for node in self.initials]))
+        return out.getvalue()
+
     def __calcInitials(self):
         outputs = []
         inputs = []
@@ -180,44 +201,21 @@ class Test:
         self.initials = OrderedDict.fromkeys([i for i in inputs if i not in outputs]).keys()
 
     def __addTool(self, td):
+        import platform
         input = [i for i in self.nodes if i.label in td['input']]
         output = [o for o in self.nodes if o.label in td['output']]
         name = td['name']
-        if re.search('(W|w)in', self.options['platform']):
+        if platform.system() == 'Windows':
             name = name + '.exe'
         self.tools.append(Tool(td['name'], input, output, td['args']))
 
-
-    def initialize(self, randgen, max_termlength):
-        # pre: validTermLengths(self, randgen, max_termlength)
-        for i in self.initials:
-            if self.verbose:
-                print 'Generating random %s for %s' % (i.type, i.label)
-            i.value = randgen.generate(i.type, max_termlength)
-            while True:
-                try:
-                    f = open(i.label, 'w')
-                    break
-                except IOError as e:
-                    i.iter = i.iter + 1
-                    i.label = i.base + '_' + str(i.iter)
-            f.write(codecs.escape_decode(i.value)[0])
-            f.close()
-
     def replay(self, inputfiles):
         if len(self.initials) != len(inputfiles):
-            print 'Invalid number of input files provided: expected %s, got %s' % (len(self.initials), len(inputfiles))
-            raise Exception
+            raise RuntimeError('Invalid number of input files provided: expected {0}, got {1}'.format(len(self.initials), len(inputfiles)))
         for i in range(len(self.initials)):
             f = open(inputfiles[i])
             self.initials[i].label = inputfiles[i]
             self.initials[i].value = f.read()
-
-    def validTermLengths(self, randgen, termlength):
-        for i in self.initials:
-            if not randgen.validTermLength(i.type, termlength):
-                return False
-        return True
 
     def result(self):
         # Returns the result of the test after all tools have been executed
@@ -232,7 +230,6 @@ class Test:
             if node.value or node.type == 'Bool':
                 return node.value.strip()
             else:
-                #f = open(os.path.join(os.getcwd(), node.label + "." + node.ext), 'r')
                 f = open(os.path.join(os.getcwd(), node.label), 'r')
                 res = f.read()
                 f.close()
@@ -266,7 +263,6 @@ class Test:
         for n in self.nodes:
             n.value = None
             try:
-                #os.remove(os.path.join(os.getcwd(), n.label + "." + n.ext))
                 os.remove(os.path.join(os.getcwd(), n.label))
             except OSError as e:
                 pass

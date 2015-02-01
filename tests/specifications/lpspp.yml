@@ -1,0 +1,43 @@
+options:
+  grammar:
+    - grammars/mcrl2.g
+    - grammars/data.g
+  constraints:
+    - constraints/mcrl2-attrs.yml
+    - constraints/data-attrs.yml
+nodes: {l1.mcrl2: mCRL2Spec, l2.lps: LPS, l3.aut: LTS, l4.lps: LPS, l5.lps: LPS, l6.aut: LTS, l7: Bool}
+tools:
+  t1:
+    input: [l1.mcrl2]
+    output: [l2.lps]
+    args: []
+    name: mcrl22lps
+  t2:
+    input: [l2.lps]
+    output: [l3.aut]
+    args: [-oaut]
+    name: lps2lts
+  t3:
+    input: [l2.lps]
+    output: [l4.lps]
+    args: []
+    name: lpspp
+  t4:
+    input: [l4.lps]
+    output: [l5.lps]
+    args: []
+    name: txt2lps
+  t5:
+    input: [l5.lps]
+    output: [l6.aut]
+    args: [-oaut]
+    name: lps2lts
+  t6:
+    input: [l3.aut, l6.aut]
+    output: [l7]
+    args: [-iaut, -ebisim]
+    name: ltscompare
+
+result: |
+  result = 'not' not in value(l7)
+
