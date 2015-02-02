@@ -1,0 +1,4 @@
+pbes mu X = X;                                           
+                                                         
+init X;
+

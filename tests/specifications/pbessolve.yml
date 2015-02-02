@@ -3,7 +3,7 @@ options:
     - grammars/pbes.g
   constraints:
     - constraints/pbes-attrs.yml
-nodes: {l1.txt: PbesSpec, l2.pbes: PBES, l3: Bool, l4: Bool}
+nodes: {l1.txt: PbesSpec, l2.pbes: PBES, l3: Bool, l4: Bool, l5: Bool}
 tools:
   t1:
     input: [l1.txt]
@@ -20,6 +20,11 @@ tools:
     output: [l4]
     args: []
     name: pbespgsolve
+  t4:
+    input: [l2.pbes]
+    output: [l5]
+    args: [-c]
+    name: pbespgsolve
 result: |
-  result = value(l3) == value(l4)
+  result = value(l3) == value(l4) == value(l5)
 

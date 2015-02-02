@@ -1,0 +1,5 @@
+% Problematic test case involving lambda expressions
+sort  State = struct S;
+pbes nu X(f: Nat -> State) = val(!(f(3) == S));
+init X(lambda x: Nat. S);
+

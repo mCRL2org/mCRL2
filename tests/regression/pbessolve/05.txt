@@ -1,0 +1,8 @@
+pbes mu X1 = X2;
+     nu X2 = X1 || X3;
+     mu X3 = X4 && X5;
+     nu X4 = X1;
+     nu X5 = X1 || X3;
+
+init X1;
+

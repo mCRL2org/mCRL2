@@ -1,0 +1,20 @@
+% Regression test 1 for #1215
+map  Generated_or: Bool # Bool -> Set(Bool);
+     Generated_and: Bool # Bool -> Set(Bool);
+     LiftGenerated_or: Set(Bool) # Set(Bool) -> Set(Bool);
+     LiftGenerated_and: Set(Bool) # Set(Bool) -> Set(Bool);
+
+var x0,x1: Bool;
+eqn Generated_or(x0, x1)  =  {x0 || x1};
+
+var  x0,x1: Bool;
+     X0,X1: Set(Bool);
+eqn  Generated_and(x0, x1)  =  {x0 && x1};
+     LiftGenerated_or(X0, X1)  =  { y: Bool | exists x0,x1: Bool. x0 in X0 && x1 in X1 && y in Generated_or(x0, x1) };
+var  X0,X1: Set(Bool);
+eqn  LiftGenerated_and(X0, X1)  =  { y: Bool | exists x0,x1: Bool. x0 in X0 && x1 in X1 && y in Generated_and(x0, x1) };
+
+pbes nu Z = val(true in LiftGenerated_and(LiftGenerated_and({false}, LiftGenerated_or({true,false}, {true,false})), {false}));
+
+init Z;
+

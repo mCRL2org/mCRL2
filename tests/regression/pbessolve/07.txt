@@ -1,0 +1,9 @@
+pbes nu X1 = X2 && X3;
+     nu X2 = X4 && X5;
+     nu X3 = true;
+     nu X4 = false;
+     nu X5 = X6;
+     nu X6 = X5;
+
+init X1;
+
