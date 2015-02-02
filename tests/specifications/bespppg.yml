@@ -3,7 +3,21 @@ options:
     - grammars/bes.g
   constraints:
     - constraints/bes-attrs.yml
-nodes: {l1: BesSpec, l2.bes: BES, l3: BesSpec, l4.bes: BES, l5: Bool, l6: Bool}
+
+nodes:
+  l1:
+    type: BesSpec
+  l2.bes:
+    type: BES
+  l3:
+    type: BesSpec
+  l4.bes:
+    type: BES
+  l5:
+    type: Bool
+  l6:
+    type: Bool
+
 tools:
   t1:
     input: [l1]
@@ -30,6 +44,7 @@ tools:
     output: [l6]
     args: []
     name: pbespgsolve
+
 result: |
   result = value(l5) == value(l6)
 

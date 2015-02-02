@@ -3,7 +3,18 @@ options:
     - grammars/pbes.g
   constraints:
     - constraints/pbes-attrs.yml
-nodes: {l1.txt: PbesSpec, l2.pbes: PBES, l3.pbes: PBES, l4: Bool, l5: Bool}
+nodes:
+  l1.txt:
+    type: PbesSpec
+  l2.pbes:
+    type: PBES
+  l3.pbes:
+    type: PBES
+  l4:
+    type: Bool
+  l5:
+    type: Bool
+
 tools:
   t1:
     input: [l1.txt]

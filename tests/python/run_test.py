@@ -114,6 +114,7 @@ class Tool:
     def __str__(self):
         import StringIO
         out = StringIO.StringIO()
+        out.write('label    = ' + str(self.label)    + '\n')
         out.write('name     = ' + str(self.name)     + '\n')
         out.write('input    = [{0}]\n'.format(', '.join([x.pp() for x in self.input])))
         out.write('output   = [{0}]\n'.format(', '.join([x.pp() for x in self.output])))
@@ -147,16 +148,16 @@ class Test:
         if 'tools' in settings:
             for tool in settings['tools']:
                 data['tools'][tool]['args'] += settings['tools'][tool]['args']
-        # print yaml.dump(data)
+        #print yaml.dump(data)
 
         self.options = data['options']
-        self.nodes = []
         self.verbose = True if settings['verbose'] else False
         if 'toolpath' in settings:
             self.options['toolpath'] = settings['toolpath']
-        for n in data['nodes']: # create nodes
-            type = data['nodes'][n]
-            self.nodes.append(Node(n, type, ''))
+
+        self.nodes = []
+        for label in data['nodes']: # create nodes
+            self.__addNode(data['nodes'][label], label)
 
         self.tools = []
         for label in data['tools']: # create tools
@@ -198,14 +199,20 @@ class Test:
             inputs = inputs + t.input
         self.initials = OrderedDict.fromkeys([i for i in inputs if i not in outputs]).keys()
 
-    def __addTool(self, td, label):
+    def __addNode(self, data, label):
+        value = ''
+        if 'value' in data:
+            value = data['value']
+        self.nodes.append(Node(label, data['type'], value))
+
+    def __addTool(self, data, label):
         import platform
-        input = [i for i in self.nodes if i.label in td['input']]
-        output = [o for o in self.nodes if o.label in td['output']]
-        name = td['name']
+        input = [i for i in self.nodes if i.label in data['input']]
+        output = [o for o in self.nodes if o.label in data['output']]
+        name = data['name']
         if platform.system() == 'Windows':
             name = name + '.exe'
-        self.tools.append(Tool(label, td['name'], input, output, td['args']))
+        self.tools.append(Tool(label, data['name'], input, output, data['args']))
 
     def replay(self, inputfiles):
         if len(self.initials) != len(inputfiles):

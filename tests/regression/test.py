@@ -12,6 +12,8 @@ class TestRunner(testrunner.TestRunner):
     def __init__(self):
         self.tests = []
 
+        #self.addtest('ticket_1167', '../specifications/countstates.yml', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'])
+
         # add pbessolve tests
         index = 0
         for filename in sorted(glob.glob(os.path.join(os.path.dirname(__file__), 'pbessolve', '*.txt'))):

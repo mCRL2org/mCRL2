@@ -5,7 +5,21 @@ options:
   constraints:
     - constraints/mcrl2-attrs.yml
     - constraints/data-attrs.yml
-nodes: {l1.mcrl2: mCRL2Spec, l2.lps: LPS, l3.lps: LPS, l4.aut: LTS, l5.aut: LTS, l6: Bool}
+
+nodes:
+  l1.mcrl2:
+    type: mCRL2Spec
+  l2.lps:
+    type: LPS
+  l3.lps:
+    type: LPS
+  l4.aut:
+    type: LTS
+  l5.aut:
+    type: LTS
+  l6:
+    type: Bool
+
 tools:
   t1:
     input: [l1.mcrl2]

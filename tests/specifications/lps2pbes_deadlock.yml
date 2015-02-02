@@ -4,7 +4,16 @@ options:
     - grammars/pbes.g
   constraints:
     - constraints/pbes-attrs.yml
-nodes: {l1.mcrl2: mCRL2Spec, l2.lps: LPS, l3.pbes: PBES, l4: Bool}
+nodes:
+  l1.mcrl2:
+    type: mCRL2Spec
+  l2.lps:
+    type: LPS
+  l3.pbes:
+    type: PBES
+  l4:
+    type: Bool
+
 tools:
   t1:
     input: [l1.mcrl2]
