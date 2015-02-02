@@ -53,7 +53,9 @@ class Node:
         return repr(self.value)
 
 class Tool:
-    def __init__(self, name, input, output, args):
+    def __init__(self, label, name, input, output, args):
+        import platform
+        self.label = label
         self.name = name
         self.input = input
         self.output = output
@@ -62,7 +64,7 @@ class Tool:
         self.executed = False
         self.infiles = True
         self.outfiles = True
-        if sys.platform.startswith("win"):
+        if platform.system() == 'Windows':
             # Don't display the Windows GPF dialog if the invoked program dies.
             # See comp.os.ms-windows.programmer.win32
             # How to suppress crash notification dialog?, Raymond Chen Jan 14,2004 -
@@ -72,8 +74,6 @@ class Tool:
             self.subprocess_flags = 0x8000000 #win32con.CREATE_NO_WINDOW?
         else:
             self.subprocess_flags = 0
-
-        return
 
     def canExecute(self):
         for i in self.input:
@@ -88,7 +88,7 @@ class Tool:
         if p.userTime > timeout:
             raise TimeExceededError(p.userTime)
 
-    def execute(self, dir, timeout, memlimit, verbose):
+    def execute(self, dir, timeout, memlimit, verbose, maxVirtLimit = 100000000, usrTimeLimit = 5):
         args = []
         if dir == None:
             dir = ''
@@ -99,7 +99,7 @@ class Tool:
             args = args + [os.path.join(os.getcwd(), o.label) for o in self.output]
         if verbose:
             print 'Executing ' + ' '.join([name] + args + self.args)
-        p = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit = 100000000, usrTimeLimit = 5)
+        p = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=maxVirtLimit, usrTimeLimit=usrTimeLimit)
 
         input = None
         if not self.infiles:
@@ -107,8 +107,8 @@ class Tool:
 
         self.threadedExecute(p, input)
         self.executed = True
-        if verbose:
-            print('usr={0} sys={1} virt={2} res={3}'.format(p.userTime, p.systemTime, p.maxVirtualMem, p.maxResidentMem))
+        self.userTime = p.userTime
+        self.maxVirtualMem = p.maxVirtualMem
         self.checkExecution(p, timeout, memlimit)
 
     def __str__(self):
@@ -159,11 +159,9 @@ class Test:
             self.nodes.append(Node(n, type, ''))
 
         self.tools = []
-        for t in data['tools']: # create tools
-            if isinstance(data['tools'], dict):
-                self.__addTool(data['tools'][t])
-            else:
-                self.__addTool(t)
+        for label in data['tools']: # create tools
+            assert isinstance(data['tools'], dict)
+            self.__addTool(data['tools'][label], label)
 
         for t in self.tools:
             if any(x for x in t.output if x.type == 'Bool'):
@@ -200,14 +198,14 @@ class Test:
             inputs = inputs + t.input
         self.initials = OrderedDict.fromkeys([i for i in inputs if i not in outputs]).keys()
 
-    def __addTool(self, td):
+    def __addTool(self, td, label):
         import platform
         input = [i for i in self.nodes if i.label in td['input']]
         output = [o for o in self.nodes if o.label in td['output']]
         name = td['name']
         if platform.system() == 'Windows':
             name = name + '.exe'
-        self.tools.append(Tool(td['name'], input, output, td['args']))
+        self.tools.append(Tool(label, td['name'], input, output, td['args']))
 
     def replay(self, inputfiles):
         if len(self.initials) != len(inputfiles):
@@ -317,3 +315,10 @@ class Test:
             f = open(os.path.join(dir, fname), 'w')
             f.write(l.value)
             f.close()
+
+    # Returns the tool with the given label
+    def tool(self, label):
+        try:
+            return next(tool for tool in self.tools if tool.label == label)
+        except StopIteration:
+            raise RuntimeError("could not find model a tool with label '{0}'".format(label))
