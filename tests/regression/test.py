@@ -1,6 +1,7 @@
 import glob
 import os
 import sys
+import yaml
 sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
 sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
 import testrunner
@@ -12,7 +13,7 @@ class TestRunner(testrunner.TestRunner):
     def __init__(self):
         self.tests = []
 
-        #self.addtest('ticket_1167', '../specifications/countstates.yml', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'])
+        #self.addtest('ticket_1167', '../specifications/countstates.yml', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'], 'nodes:\n  l4.txt:\n    value: 20')
 
         # add pbessolve tests
         index = 0
@@ -23,7 +24,7 @@ class TestRunner(testrunner.TestRunner):
         # add trac tickets tests
         self.addtest('ticket_283',  '../specifications/mcrl22lps.yml', ['tickets/283/1.mcrl2'])
         self.addtest('ticket_325',  '../specifications/alphabet.yml', ['tickets/325/1.mcrl2'])
-        #self.addtest('ticket_352',  '../specifications/alphabet.yml', ['tickets/352/1.mcrl2'], )
+        #self.addtest('ticket_352',  '../specifications/alphabet.yml', ['tickets/352/1.mcrl2'])
         #self.addtest('ticket_397',  '../specifications/mcrl22lps.yml', ['tickets/397/1.mcrl2'])
         #self.addtest('ticket_1090', '../specifications/lps2pbes.yml', ['tickets/1090/form.mcf', 'tickets/1090/spec.mcrl2'])
         self.addtest('ticket_1093', '../specifications/alphabet.yml', ['tickets/1093/1.mcrl2'])
@@ -43,18 +44,22 @@ class TestRunner(testrunner.TestRunner):
         self.addtest('ticket_1319', '../specifications/alphabet.yml', ['tickets/1319/1.mcrl2'])
         self.addtest('ticket_1321', '../specifications/alphabet.yml', ['tickets/1321/1.mcrl2'])
 
-    def addtest(self, name, testfile, inputfiles):
-        self.tests.append((name, testfile, inputfiles))
+    def addtest(self, name, testfile, inputfiles, settings = ''):
+        if settings:
+            settings = yaml.load(settings)
+        else:
+            settings = dict()
+        self.tests.append((name, testfile, inputfiles, settings))
 
     def name(self, testnum):
         if testnum < len(self.tests):
-            (name, testfile, inputfiles) = self.tests[testnum]
+            (name, testfile, inputfiles, settings) = self.tests[testnum]
             return name
 
     def run(self, testnum):
         if testnum < len(self.tests):
-            (name, testfile, inputfiles) = self.tests[testnum]
-            run_test(testfile, inputfiles)
+            (name, testfile, inputfiles, settings) = self.tests[testnum]
+            run_test(testfile, inputfiles, settings)
         else:
             raise RuntimeError('Invalid test number')
 

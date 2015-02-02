@@ -34,7 +34,6 @@
 import copy
 import os
 import random
-from path import *
 
 ACTIONS = ['a', 'b', 'c', 'd']
 PROCESS_IDENTIFIERS = ['P', 'Q', 'R']

@@ -5,7 +5,8 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-import randgen, yaml
+import randgen
+import yaml
 from popen import Popen, MemoryExceededError, TimeExceededError
 from subprocess import  PIPE, STDOUT
 import shutil
@@ -19,6 +20,15 @@ import sys
 import re
 import codecs
 from collections import OrderedDict
+import types
+
+def is_list_of(l, types):
+    if not isinstance(l, list):
+        return False
+    for x in l:
+        if not isinstance(x, types):
+            return False
+    return True
 
 class ToolInputError(Exception):
     def __init__(self, name, value):
@@ -53,17 +63,19 @@ class Node:
         return repr(self.value)
 
 class Tool:
-    def __init__(self, label, name, input, output, args):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert is_list_of(input_nodes, Node)
+        assert is_list_of(output_nodes, Node)
         import platform
         self.label = label
         self.name = name
-        self.input = input
-        self.output = output
+        self.input_nodes = input_nodes
+        self.output_nodes = output_nodes
         self.args = args
         self.error = ''
         self.executed = False
-        self.infiles = True
-        self.outfiles = True
+        self.has_input_nodes = True
+        self.has_output_nodes = True
         if platform.system() == 'Windows':
             # Don't display the Windows GPF dialog if the invoked program dies.
             # See comp.os.ms-windows.programmer.win32
@@ -76,7 +88,7 @@ class Tool:
             self.subprocess_flags = 0
 
     def canExecute(self):
-        for i in self.input:
+        for i in self.input_nodes:
             if i.value == None:
                 return False
         return True
@@ -93,17 +105,17 @@ class Tool:
         if dir == None:
             dir = ''
         name = os.path.join(dir, self.name)
-        if self.infiles:
-            args = [os.path.join(os.getcwd(), i.label) for i in self.input]
-        if self.outfiles:
-            args = args + [os.path.join(os.getcwd(), o.label) for o in self.output]
+        if self.has_input_nodes:
+            args = [os.path.join(os.getcwd(), i.label) for i in self.input_nodes]
+        if self.has_output_nodes:
+            args = args + [os.path.join(os.getcwd(), o.label) for o in self.output_nodes]
         if verbose:
             print 'Executing ' + ' '.join([name] + args + self.args)
         p = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=maxVirtLimit, usrTimeLimit=usrTimeLimit)
 
         input = None
-        if not self.infiles:
-            input = (b' ').join([i.value for i in self.input])
+        if not self.has_input_nodes:
+            input = (b' ').join([i.value for i in self.input_nodes])
 
         self.threadedExecute(p, input)
         self.executed = True
@@ -116,18 +128,18 @@ class Tool:
         out = StringIO.StringIO()
         out.write('label    = ' + str(self.label)    + '\n')
         out.write('name     = ' + str(self.name)     + '\n')
-        out.write('input    = [{0}]\n'.format(', '.join([x.pp() for x in self.input])))
-        out.write('output   = [{0}]\n'.format(', '.join([x.pp() for x in self.output])))
+        out.write('input    = [{0}]\n'.format(', '.join([x.pp() for x in self.input_nodes])))
+        out.write('output   = [{0}]\n'.format(', '.join([x.pp() for x in self.output_nodes])))
         out.write('args     = ' + str(self.args)     + '\n')
         out.write('error    = ' + str(self.error)    + '\n')
         out.write('executed = ' + str(self.executed) + '\n')
-        out.write('infiles  = ' + str(self.infiles)  + '\n')
-        out.write('outfiles = ' + str(self.outfiles) + '\n')
+        out.write('has_input_nodes  = ' + str(self.has_input_nodes)  + '\n')
+        out.write('has_output_nodes = ' + str(self.has_output_nodes) + '\n')
         return out.getvalue()
 
     def threadedExecute(self, process, input):
         res = process.communicate(input)
-        for o in self.output:
+        for o in self.output_nodes:
             o.value = res[0]
             if o.value == '':
                 o.value = res[1]
@@ -148,6 +160,12 @@ class Test:
         if 'tools' in settings:
             for tool in settings['tools']:
                 data['tools'][tool]['args'] += settings['tools'][tool]['args']
+
+        # Add node values specified in settings
+        if 'nodes' in settings:
+            for label in settings['nodes']:
+                data['nodes'][label]['value'] = settings['nodes'][label]['value']
+
         #print yaml.dump(data)
 
         self.options = data['options']
@@ -165,8 +183,8 @@ class Test:
             self.__addTool(data['tools'][label], label)
 
         for t in self.tools:
-            if any(x for x in t.output if x.type == 'Bool'):
-                t.outfiles = False
+            if any(x for x in t.output_nodes if x.type == 'Bool'):
+                t.has_output_nodes = False
 
         self.res = data['result']
         f.close()
@@ -195,8 +213,8 @@ class Test:
         outputs = []
         inputs = []
         for t in self.tools:
-            outputs = outputs + t.output
-            inputs = inputs + t.input
+            outputs = outputs + t.output_nodes
+            inputs = inputs + t.input_nodes
         self.initials = OrderedDict.fromkeys([i for i in inputs if i not in outputs]).keys()
 
     def __addNode(self, data, label):

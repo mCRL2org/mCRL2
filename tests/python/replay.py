@@ -30,7 +30,7 @@ def run_replay(testfile, inputfiles, reporterrors, settings):
 ################################
         #print t
 ################################
-        if result == True:
+        if result:
             return True, ''
         else:
             return False, ''
