@@ -1,0 +1,11 @@
+act
+  a,b,c,d;
+
+init
+  allow({d},
+        hide({b},
+             comm({b | c -> d},
+                  b || c
+             )
+        )
+      );
