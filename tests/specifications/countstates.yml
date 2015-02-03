@@ -12,7 +12,9 @@ nodes:
     type: LPS
   l3.aut:
     type: LTS
-  l4.txt:
+  l4:
+    type: TEXT
+  l5:
     type: NUMBER
 
 tools:
@@ -28,9 +30,9 @@ tools:
     name: lps2lts
   t3:
     input: [l3.aut]
-    output: []
+    output: [l4]
     args: []
     name: ltsinfo
 
 result: |
-  result = 'not' not in value(l4.txt)
+  result = l4.value['states'] == l5.value

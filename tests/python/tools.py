@@ -8,6 +8,7 @@
 from popen import Popen, MemoryExceededError, TimeExceededError
 from subprocess import  PIPE, STDOUT
 import os.path
+import re
 import types
 
 def is_list_of(l, types):
@@ -19,19 +20,16 @@ def is_list_of(l, types):
     return True
 
 class Node:
-    def __init__(self, label, type, ext):
+    def __init__(self, label, type, value):
         self.label = label
         self.type = type
-        self.value = None
+        self.value = value
         return
 
-    def pp(self):
+    def __str__(self):
         return 'Node(label = {0}, type = {1}, value = {2})'.format(self.label, self.type, self.value)
 
-    def __str__(self):
-        return repr(self.value)
-
-class Tool:
+class Tool(object):
     def __init__(self, label, name, input_nodes, output_nodes, args):
         assert is_list_of(input_nodes, Node)
         assert is_list_of(output_nodes, Node)
@@ -57,48 +55,64 @@ class Tool:
             self.subprocess_flags = 0
 
     def canExecute(self):
+        if self.executed:
+            return False
         for i in self.input_nodes:
-            if i.value == None:
+            if not i.value:
                 return False
         return True
 
     # Raises an exception if the execution was aborted
-    def checkExecution(self, p, timeout, memlimit):
-        if p.maxVirtualMem > memlimit:
-            raise MemoryExceededError(p.maxVirtualMem)
-        if p.userTime > timeout:
-            raise TimeExceededError(p.userTime)
+    def checkExecution(self, process, timeout, memlimit):
+        if process.maxVirtualMem > memlimit:
+            raise MemoryExceededError(process.maxVirtualMem)
+        if process.userTime > timeout:
+            raise TimeExceededError(process.userTime)
 
-    def execute(self, dir, timeout, memlimit, verbose, maxVirtLimit = 100000000, usrTimeLimit = 5):
+    def arguments(self):
         args = []
-        if dir == None:
-            dir = ''
-        name = os.path.join(dir, self.name)
         if self.has_input_nodes:
             args = [os.path.join(os.getcwd(), i.label) for i in self.input_nodes]
         if self.has_output_nodes:
-            args = args + [os.path.join(os.getcwd(), o.label) for o in self.output_nodes]
+            args = args + [os.path.join(os.getcwd(), node.label) for node in self.output_nodes]
+        return args
+
+    def assign_outputs(self, stdout, stderr):
+        for node in self.output_nodes:
+            node.value = stdout
+            if node.value == '':
+                node.value = stderr
+            if node.value == '':
+                node.value = 'not None'
+            self.error = self.error + stderr
+
+    def execute(self, dir, timeout, memlimit, verbose, maxVirtLimit = 100000000, usrTimeLimit = 5):
+        args = self.arguments()
+        if dir == None:
+            dir = ''
+        name = os.path.join(dir, self.name)
         if verbose:
             print 'Executing ' + ' '.join([name] + args + self.args)
-        p = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=maxVirtLimit, usrTimeLimit=usrTimeLimit)
+        process = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=maxVirtLimit, usrTimeLimit=usrTimeLimit)
 
         input = None
         if not self.has_input_nodes:
             input = (b' ').join([i.value for i in self.input_nodes])
 
-        self.threadedExecute(p, input)
+        stdout, stderr = process.communicate(input)
+        self.assign_outputs(stdout, stderr)
         self.executed = True
-        self.userTime = p.userTime
-        self.maxVirtualMem = p.maxVirtualMem
-        self.checkExecution(p, timeout, memlimit)
+        self.userTime = process.userTime
+        self.maxVirtualMem = process.maxVirtualMem
+        self.checkExecution(process, timeout, memlimit)
 
     def __str__(self):
         import StringIO
         out = StringIO.StringIO()
         out.write('label    = ' + str(self.label)    + '\n')
         out.write('name     = ' + str(self.name)     + '\n')
-        out.write('input    = [{0}]\n'.format(', '.join([x.pp() for x in self.input_nodes])))
-        out.write('output   = [{0}]\n'.format(', '.join([x.pp() for x in self.output_nodes])))
+        out.write('input    = [{0}]\n'.format(', '.join([str(x) for x in self.input_nodes])))
+        out.write('output   = [{0}]\n'.format(', '.join([str(x) for x in self.output_nodes])))
         out.write('args     = ' + str(self.args)     + '\n')
         out.write('error    = ' + str(self.error)    + '\n')
         out.write('executed = ' + str(self.executed) + '\n')
@@ -106,16 +120,31 @@ class Tool:
         out.write('has_output_nodes = ' + str(self.has_output_nodes) + '\n')
         return out.getvalue()
 
-    def threadedExecute(self, process, input):
-        res = process.communicate(input)
-        for o in self.output_nodes:
-            o.value = res[0]
-            if o.value == '':
-                o.value = res[1]
-            if o.value == '':
-                o.value = 'not None'
-            self.error = self.error + res[1]
+class LtsInfoTool(Tool):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 1
+        assert len(output_nodes) == 1
+        super(LtsInfoTool, self).__init__(label, name, input_nodes, output_nodes, args)
+
+    # skip the output nodes
+    def arguments(self):
+        return [os.path.join(os.getcwd(), i.label) for i in self.input_nodes]
+
+    # parse the output
+    def assign_outputs(self, stdout, stderr):
+        node = self.output_nodes[0]
+        if stderr:
+            node.value = stderr
+            self.error = self.error + stderr
+            return
+        result = {}
+        lines = stdout.splitlines()
+        m = re.search('Number of states: (\d+)', lines[0])
+        result['states'] = int(m.group(1))
+        node.value = result
 
 class ToolFactory:
     def create_tool(self, label, name, input_nodes, output_nodes, args):
+        if name == 'ltsinfo':
+            return LtsInfoTool(label, name, input_nodes, output_nodes, args)
         return Tool(label, name, input_nodes, output_nodes, args)

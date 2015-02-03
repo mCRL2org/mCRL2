@@ -11,9 +11,8 @@ sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
 from random_bes_generator import make_bes
 from random_pbes_generator import make_pbes, CounterExampleMinimizer
 from random_process_generator import make_process_specification, generator_map
-from replay import run_replay
 from text_utility import write_text
-from testing import run_test, run_pbes_test, run_pbes_test_with_counter_example_minimization
+from testing import run_replay, run_yml_test, run_pbes_test, run_pbes_test_with_counter_example_minimization
 
 MCRL2_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 
@@ -26,7 +25,7 @@ def run_alphabet_test(name):
     filename = '{0}.mcrl2'.format(name)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_test(testfile, inputfiles)
+    run_yml_test(name, testfile, inputfiles)
 
 def run_lpssuminst_test(name):
     testfile = '../specifications/lpssuminst.yml'
@@ -37,7 +36,7 @@ def run_lpssuminst_test(name):
     filename = '{0}.mcrl2'.format(name)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_test(testfile, inputfiles)
+    run_yml_test(name, testfile, inputfiles)
 
 def run_lpssumelm_test(name):
     testfile = '../specifications/lpssumelm.yml'
@@ -48,7 +47,7 @@ def run_lpssumelm_test(name):
     filename = '{0}.mcrl2'.format(name)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_test(testfile, inputfiles)
+    run_yml_test(name, testfile, inputfiles)
 
 def run_lpsparelm_test(name):
     testfile = '../specifications/lpsparelm.yml'
@@ -59,7 +58,7 @@ def run_lpsparelm_test(name):
     filename = '{0}.mcrl2'.format(name)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_test(testfile, inputfiles)
+    run_yml_test(name, testfile, inputfiles)
 
 def run_lpsconstelm_test(name):
     testfile = '../specifications/lpsconstelm.yml'
@@ -70,7 +69,7 @@ def run_lpsconstelm_test(name):
     filename = '{0}.mcrl2'.format(name)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_test(testfile, inputfiles)
+    run_yml_test(name, testfile, inputfiles)
 
 def run_lpsbinary_test(name):
     testfile = '../specifications/lpsbinary.yml'
@@ -81,7 +80,7 @@ def run_lpsbinary_test(name):
     filename = '{0}.mcrl2'.format(name)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_test(testfile, inputfiles)
+    run_yml_test(name, testfile, inputfiles)
 
 def run_bessolve_test(name):
     testfile = '../specifications/bessolve.yml'
@@ -91,7 +90,7 @@ def run_bessolve_test(name):
     p = make_bes(equation_count, term_size)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_test(testfile, inputfiles)
+    run_yml_test(name, testfile, inputfiles)
 
 # TODO: find a more elegant way to pass the formula file to lps2pbes
 def run_lps2pbes_deadlock_test(name):
@@ -106,7 +105,7 @@ def run_lps2pbes_deadlock_test(name):
     settings = dict()
     settings['tools'] = { 't2': { 'args': [nodeadlock] } }
     inputfiles = [filename]
-    run_test(testfile, inputfiles, settings)
+    run_yml_test(name, testfile, inputfiles, settings)
 
 # N.B. does not work yet due to unusable abstraction map
 def run_pbesabsinthe_test(name):
@@ -119,7 +118,7 @@ def run_pbesabsinthe_test(name):
     settings = dict()
     abstraction = '-a{0}'.format(os.path.join(os.path.dirname(__file__), 'formulas', 'abstraction.txt'))
     settings['tools'] = { 't2': { 'args': [abstraction] }, 't3': { 'args': [abstraction] } }
-    run_pbes_test_with_counter_example_minimization(testfile, p, name, settings)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
 def run_pbesrewr_pfnf_test(name):
     testfile = '../specifications/pbesrewr_pfnf.yml'
@@ -128,7 +127,7 @@ def run_pbesrewr_pfnf_test(name):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 def run_pbesrewr_simplify_test(name):
     testfile = '../specifications/pbesrewr_simplify.yml'
@@ -137,7 +136,7 @@ def run_pbesrewr_simplify_test(name):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 def run_pbesabstract_test(name):
     testfile = '../specifications/pbesabstract.yml'
@@ -146,7 +145,7 @@ def run_pbesabstract_test(name):
     propvar_count = 2
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 def run_pbesconstelm_test(name):
     testfile = '../specifications/pbesconstelm.yml'
@@ -155,7 +154,7 @@ def run_pbesconstelm_test(name):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 def run_pbesparelm_test(name):
     testfile = '../specifications/pbesparelm.yml'
@@ -164,7 +163,7 @@ def run_pbesparelm_test(name):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 def run_pbespareqelm_test(name):
     testfile = '../specifications/pbespareqelm.yml'
@@ -173,7 +172,7 @@ def run_pbespareqelm_test(name):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 # N.B. does not work since the generated PBES is not in BQNF format!
 def run_pbesrewr_test(name, rewriter):
@@ -184,7 +183,7 @@ def run_pbesrewr_test(name, rewriter):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 def run_pbesinst_lazy_test(name):
     testfile = '../specifications/pbesinst_lazy.yml'
@@ -193,7 +192,7 @@ def run_pbesinst_lazy_test(name):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 def run_pbesinst_finite_test(name):
     testfile = '../specifications/pbesinst_finite.yml'
@@ -202,7 +201,7 @@ def run_pbesinst_finite_test(name):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 # N.B does not work due to unknown expressions (F_or)
 def run_symbolic_exploration_test(name):
@@ -212,7 +211,7 @@ def run_symbolic_exploration_test(name):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 def run_pbessolve_test(name):
     testfile = '../specifications/pbessolve.yml'
@@ -221,7 +220,7 @@ def run_pbessolve_test(name):
     propvar_count = 3
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 def run_pbesstategraph_test(name):
     testfile = '../specifications/pbesstategraph.yml'
@@ -230,7 +229,7 @@ def run_pbesstategraph_test(name):
     propvar_count = 4
     use_quantifiers = True
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(testfile, p, name)
+    run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 if __name__ == '__main__':
     run_lps2pbes_deadlock_test('lps2pbes_deadlock')
