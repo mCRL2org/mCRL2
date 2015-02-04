@@ -72,9 +72,9 @@ class Tool(object):
     def arguments(self):
         args = []
         if self.has_input_nodes:
-            args = [os.path.join(os.getcwd(), i.label) for i in self.input_nodes]
+            args = [os.path.join(os.getcwd(), node.filename) for node in self.input_nodes]
         if self.has_output_nodes:
-            args = args + [os.path.join(os.getcwd(), node.label) for node in self.output_nodes]
+            args = args + [os.path.join(os.getcwd(), node.filename) for node in self.output_nodes]
         return args
 
     def assign_outputs(self, stdout, stderr):
@@ -127,7 +127,7 @@ class LtsInfoTool(Tool):
         super(LtsInfoTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
     def arguments(self):
-        return [os.path.join(os.getcwd(), i.label) for i in self.input_nodes]
+        return [os.path.join(os.getcwd(), node.filename) for node in self.input_nodes]
 
     def assign_outputs(self, stdout, stderr):
         node = self.output_nodes[0]

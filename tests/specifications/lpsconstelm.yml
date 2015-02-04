@@ -1,47 +1,40 @@
-options:
-  grammar:
-    - grammars/mcrl2.g
-    - grammars/data.g
-  constraints:
-    - constraints/mcrl2-attrs.yml
-    - constraints/data-attrs.yml
 nodes:
-  l1.mcrl2:
+  l1:
     type: mCRL2Spec
-  l2.lps:
+  l2:
     type: LPS
-  l3.aut:
+  l3:
     type: LTS
-  l4.lps:
+  l4:
     type: LPS
-  l5.aut:
+  l5:
     type: LTS
   l6:
     type: Bool
 
 tools:
   t1:
-    input: [l1.mcrl2]
-    output: [l2.lps]
+    input: [l1]
+    output: [l2]
     args: []
     name: mcrl22lps
   t2:
-    input: [l2.lps]
-    output: [l3.aut]
+    input: [l2]
+    output: [l3]
     args: [-oaut]
     name: lps2lts
   t3:
-    input: [l2.lps]
-    output: [l4.lps]
+    input: [l2]
+    output: [l4]
     args: []
     name: lpsconstelm
   t4:
-    input: [l4.lps]
-    output: [l5.aut]
+    input: [l4]
+    output: [l5]
     args: [-oaut]
     name: lps2lts
   t5:
-    input: [l3.aut, l5.aut]
+    input: [l3, l5]
     output: [l6]
     args: [-iaut, -ebisim]
     name: ltscompare

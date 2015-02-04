@@ -17,7 +17,6 @@ import sys
 import threading
 import time
 import yaml
-from collections import OrderedDict
 from popen import Popen, MemoryExceededError, TimeExceededError
 from subprocess import  PIPE, STDOUT
 from text_utility import write_text
@@ -66,7 +65,10 @@ class Test:
 
         #print yaml.dump(data)
 
-        self.options = data['options']
+        if 'options' in data:
+            self.options = data['options']
+        else:
+            self.options = {}
         self.verbose = True if settings['verbose'] else False
         if 'toolpath' in settings:
             self.options['toolpath'] = settings['toolpath']
@@ -89,11 +91,25 @@ class Test:
 
         # These are the global variables used for the computation of the test result
         self.globals = {'value': self.value, 'last_word': self.last_word, 'file_get_contents': self.file_get_contents}
-        for n in self.nodes:
-            self.globals[n.label] = n
+        for node in self.nodes:
+            self.globals[node.label] = node
 
-        # calculate the initial nodes
-        self.__calcInitials()
+        # Contains a list of input nodes of this test, sorted by label
+        self.input_nodes = self.compute_input_nodes()
+
+        # Set the filename attributes of the nodes
+        for node in self.nodes:
+            node.filename = '{0}.{1}'.format(node.label, self.extension(node.type))
+
+    def extension(self, type): 
+        if type == 'mCRL2Spec':
+            return 'mcrl2'
+        elif type == 'PbesSpec':
+            return 'txt'
+        elif type == 'LTS':
+            return 'aut'
+        else:
+            return type.lower()
 
     def __str__(self):
         import StringIO
@@ -104,16 +120,16 @@ class Test:
         out.write('res      = ' + str(self.res)      + '\n\n')
         out.write('\n'.join(['--- Node ---\n{0}'.format(node) for node in self.nodes]) + '\n\n')
         out.write('\n'.join(['--- Tool ---\n{0}'.format(tool) for tool in self.tools]) + '\n\n')
-        out.write('\n'.join(['--- Init ---\n{0}'.format(node) for node in self.initials]))
+        out.write('\n'.join(['--- Init ---\n{0}'.format(node) for node in self.input_nodes]))
         return out.getvalue()
 
-    def __calcInitials(self):
+    # Returns the input nodes of the test, ordered by label
+    def compute_input_nodes(self):
         outputs = []
-        inputs = []
         for tool in self.tools:
             outputs = outputs + tool.output_nodes
-            inputs = inputs + tool.input_nodes
-        self.initials = OrderedDict.fromkeys([i for i in inputs if i not in outputs]).keys()
+        result = [node for node in self.nodes if not node in outputs]
+        return sorted(result, key = lambda node: node.label)
 
     def __addNode(self, data, label):
         value = None
@@ -131,12 +147,13 @@ class Test:
         self.tools.append(ToolFactory().create_tool(label, data['name'], input, output, data['args']))
 
     def replay(self, inputfiles):
-        if len(self.initials) != len(inputfiles):
-            raise RuntimeError('Invalid number of input files provided: expected {0}, got {1}'.format(len(self.initials), len(inputfiles)))
-        for i in range(len(self.initials)):
+        input_nodes = [node for node in self.input_nodes if node.value == None]
+        if len(input_nodes) != len(inputfiles):
+            raise RuntimeError('Invalid number of input files provided: expected {0}, got {1}'.format(len(input_nodes), len(inputfiles)))
+        for i in range(len(inputfiles)):
             f = open(inputfiles[i])
-            self.initials[i].label = inputfiles[i]
-            self.initials[i].value = f.read()
+            self.input_nodes[i].filename = inputfiles[i]
+            self.input_nodes[i].value = f.read()
 
     def result(self):
         # Returns the result of the test after all tools have been executed
@@ -166,11 +183,6 @@ class Test:
         with open(filename) as f:
             return f.read()
 
-    def record(self):
-        for n in self.initials:
-            if n.type != 'Bool':
-                shutil.copyfile(os.path.join(os.getcwd(), n.label), os.path.join(os.getcwd(), 'recorded', n.label + '%0.2f' % time.clock()))
-
     def last_word(self, term):
         if ' ' in term:
             return term.split(' ')[-1]
@@ -183,10 +195,11 @@ class Test:
 
     def reset(self):
         # Reset the test to the initial values
-        for n in self.nodes:
-            # n.value = None
+        for node in self.nodes:
+            if not node in self.input_nodes:
+                node.value = None
             try:
-                os.remove(os.path.join(os.getcwd(), n.label))
+                os.remove(os.path.join(os.getcwd(), node.filename))
             except OSError as e:
                 pass
         for tool in self.tools:
@@ -207,39 +220,6 @@ class Test:
             raise UnusedToolsError([tool for tool in self.tools if not tool.executed])
         else:
             return self.result()
-
-    def run_multicore(self, max):
-        # Multicore run
-        tasks = self.remaining_tasks()
-        while len(tasks) > 0:
-            pool = multiprocessing.Pool()
-            jobs = []
-            for i in range(min(len(tasks), max)):
-                p = multiprocessing.Process(target=tasks[i].execute, args=(self.options['toolpath'],))
-
-                p.daemon = True
-                jobs.append(p)
-                p.start()
-
-            for j in jobs:
-                j.join()
-                if j.exitcode != 0:
-                    return 'Error'
-            tasks = self.remaining_tasks()
-
-        if not all(tool.executed for tool in self.tools):
-            return 'Error'
-        else:
-            return self.result()
-
-    def write_output(self, dir):
-        if not os.path.exists(dir):
-            os.makedirs(dir)
-        for l in self.initials:
-            fname =  l.label + '_' + l.type
-            f = open(os.path.join(dir, fname), 'w')
-            f.write(l.value)
-            f.close()
 
     # Returns the tool with the given label
     def tool(self, label):
@@ -267,12 +247,12 @@ def run_replay(testfile, inputfiles, reporterrors, settings):
             return True, ''
         else:
             return False, ''
-    except ToolInputError as e:
-        return False, next(x for x in e.value.split('\n') if 'error' in x)
-    except UnusedToolsError as e:
-        return False, 'UnusedToolsError'
-    except ToolCrashedError as e:
-        return False, 'ToolCrashedError'
+    # except ToolInputError as e:
+    #     return False, next(x for x in e.value.split('\n') if 'error' in x)
+    # except UnusedToolsError as e:
+    #     return False, 'UnusedToolsError'
+    # except ToolCrashedError as e:
+    #     return False, 'ToolCrashedError'
     except MemoryExceededError as e:
         return None, 'Memory Exceeded'
     except TimeExceededError as e:

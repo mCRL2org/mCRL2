@@ -1,37 +1,40 @@
-options:
-  grammar:
-    - grammars/mcrl2.g
-    - grammars/pbes.g
-  constraints:
-    - constraints/pbes-attrs.yml
 nodes:
-  l1.mcrl2:
+  l1:
     type: mCRL2Spec
-  l2:
+  l2.mcf:
     type: StateFrm
-  l3.lps:
+  l3:
     type: LPS
-  l4.pbes:
+  l4:
     type: PBES
   l5:
     type: Bool
+  l6:
+    type: LTS
 
 tools:
   t1:
-    input: [l1.mcrl2]
-    output: [l3.lps]
+    input: [l1]
+    output: [l3]
     args: []
     name: mcrl22lps
   t2:
-    input: [l2, l3.lps]
-    output: [l4.pbes]
+    input: [l3, l2.mcf]
+    output: [l4]
     args: []
     name: lps2pbes
   t3:
-    input: [l4.pbes]
-    output: []
+    input: [l4]
+    output: [l5]
     args: []
-    name: pbespp
+    name: pbes2bool
+  t4:
+    input: [l3]
+    output: [l4, l6]
+    args: [-D]
+    name: lps2lts
+
 result: |
-  result = True
+  print '5555555555555', l5.value
+  result = value(l5) == l6.value['deadlock']
 

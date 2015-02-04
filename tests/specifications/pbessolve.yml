@@ -1,12 +1,7 @@
-options:
-  grammar:
-    - grammars/pbes.g
-  constraints:
-    - constraints/pbes-attrs.yml
 nodes:
-  l1.txt:
+  l1:
     type: PbesSpec
-  l2.pbes:
+  l2:
     type: PBES
   l3:
     type: Bool
@@ -17,22 +12,22 @@ nodes:
 
 tools:
   t1:
-    input: [l1.txt]
-    output: [l2.pbes]
+    input: [l1]
+    output: [l2]
     args: []
     name: txt2pbes
   t2:
-    input: [l2.pbes]
+    input: [l2]
     output: [l3]
     args: []
     name: pbes2bool
   t3:
-    input: [l2.pbes]
+    input: [l2]
     output: [l4]
     args: []
     name: pbespgsolve
   t4:
-    input: [l2.pbes]
+    input: [l2]
     output: [l5]
     args: [-c]
     name: pbespgsolve

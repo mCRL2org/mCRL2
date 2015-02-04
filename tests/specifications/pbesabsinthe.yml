@@ -1,16 +1,11 @@
-options:
-  grammar:
-    - grammars/pbes.g
-  constraints:
-    - constraints/pbes-attrs.yml
 nodes:
-  l1.txt:
+  l1:
     type: PbesSpec
-  l2.pbes:
+  l2:
     type: PBES
-  l3.pbes:
+  l3:
     type: PBES
-  l4.pbes:
+  l4:
     type: PBES
   l5:
     type: Bool
@@ -21,32 +16,32 @@ nodes:
 
 tools:
   t1:
-    input: [l1.txt]
-    output: [l2.pbes]
+    input: [l1]
+    output: [l2]
     args: []
     name: txt2pbes
   t2:
-    input: [l2.pbes]
-    output: [l3.pbes]
+    input: [l2]
+    output: [l3]
     args: [--strategy=over]
     name: pbesabsinthe
   t3:
-    input: [l2.pbes]
-    output: [l4.pbes]
+    input: [l2]
+    output: [l4]
     args: [--strategy=under]
     name: pbesabsinthe
   t4:
-    input: [l2.pbes]
+    input: [l2]
     output: [l5]
     args: []
     name: pbes2bool
   t5:
-    input: [l3.pbes]
+    input: [l3]
     output: [l6]
     args: []
     name: pbes2bool
   t6:
-    input: [l4.pbes]
+    input: [l4]
     output: [l7]
     args: []
     name: pbes2bool

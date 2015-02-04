@@ -1,13 +1,7 @@
-options:
-  grammar:
-    - grammars/bes.g
-  constraints:
-    - constraints/bes-attrs.yml
-
 nodes:
   l1:
     type: BesSpec
-  l2.bes:
+  l2:
     type: BES
   l3:
     type: Bool
@@ -19,21 +13,21 @@ nodes:
 tools:
   t1:
     input: [l1]
-    output: [l2.bes]
+    output: [l2]
     args: []
     name: txt2bes
   t2:
-    input: [l2.bes]
+    input: [l2]
     output: [l3]
     args: [-sgauss]
     name: bessolve
   t3:
-    input: [l2.bes]
+    input: [l2]
     output: [l4]
     args: [-sspm]
     name: bessolve
   t4:
-    input: [l2.bes]
+    input: [l2]
     output: [l5]
     args: []
     name: pbes2bool

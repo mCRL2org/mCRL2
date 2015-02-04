@@ -92,20 +92,17 @@ def run_bessolve_test(name):
     inputfiles = [filename]
     run_yml_test(name, testfile, inputfiles)
 
-# TODO: find a more elegant way to pass the formula file to lps2pbes
-def run_lps2pbes_deadlock_test(name):
-    testfile = '../specifications/lps2pbes_deadlock.yml'
+def run_lps2pbes_test(name):
+    testfile = '../specifications/lps2pbes.yml'
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
     p = make_process_specification(generator_map, actions, process_identifiers, size)
     filename = '{0}.mcrl2'.format(name)
     write_text(filename, str(p))
-    nodeadlock = '-f{0}'.format(os.path.join(MCRL2_ROOT, 'examples', 'modal-formulas', 'nodeadlock.mcf'))
-    settings = dict()
-    settings['tools'] = { 't2': { 'args': [nodeadlock] } }
-    inputfiles = [filename]
-    run_yml_test(name, testfile, inputfiles, settings)
+    nodeadlock = os.path.join(MCRL2_ROOT, 'examples', 'modal-formulas', 'nodeadlock.mcf')
+    inputfiles = [filename, nodeadlock]
+    run_yml_test(name, testfile, inputfiles)
 
 # N.B. does not work yet due to unusable abstraction map
 def run_pbesabsinthe_test(name):
@@ -232,7 +229,8 @@ def run_pbesstategraph_test(name):
     run_pbes_test_with_counter_example_minimization(name, testfile, p)
 
 if __name__ == '__main__':
-    run_lps2pbes_deadlock_test('lps2pbes_deadlock')
+    #run_lps2pbes_test('lps2pbes')
+
     # run_pbesabsinthe_test('pbesabsinthe')
     run_pbesabstract_test('pbesabstract')
     run_pbesconstelm_test('pbesconstelm')
