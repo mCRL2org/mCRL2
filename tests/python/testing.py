@@ -281,7 +281,7 @@ def run_yml_test(name, testfile, inputfiles, settings = dict()):
     reporterrors = True
     settings['toolpath'] = '../../stage/bin'
     settings['verbose'] = False
-    #settings['verbose'] = True
+    settings['verbose'] = True
     result, msg = run_replay(testfile, inputfiles, reporterrors, settings)
     print name, result, msg
     return result
