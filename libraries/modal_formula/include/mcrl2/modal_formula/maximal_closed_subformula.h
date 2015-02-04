@@ -53,7 +53,6 @@ struct bottom_up_traverser: public Traverser<Derived>
 {
   typedef Traverser<Derived> super;
   using super::enter;
-  using super::leave;
   using super::apply;
 
   Derived& derived()
