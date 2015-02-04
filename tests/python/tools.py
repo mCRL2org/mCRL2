@@ -126,11 +126,9 @@ class LtsInfoTool(Tool):
         assert len(output_nodes) == 1
         super(LtsInfoTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
-    # skip the output nodes
     def arguments(self):
         return [os.path.join(os.getcwd(), i.label) for i in self.input_nodes]
 
-    # parse the output
     def assign_outputs(self, stdout, stderr):
         node = self.output_nodes[0]
         if stderr:
@@ -143,8 +141,42 @@ class LtsInfoTool(Tool):
         result['states'] = int(m.group(1))
         node.value = result
 
-class ToolFactory:
+class Lps2PbesTool(Tool):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 2
+        assert len(output_nodes) == 1
+        super(Lps2PbesTool, self).__init__(label, name, input_nodes, output_nodes, args)
+
+    def arguments(self):
+        args = []
+        args.append(os.path.join(os.getcwd(), self.input_nodes[0]))
+        args.append('-f' + os.path.join(os.getcwd(), self.input_nodes[1]))
+        args.append(os.path.join(os.getcwd(), self.output_nodes[0]))
+        return args
+
+class Lps2LtsTool(Tool):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 1
+        assert len(output_nodes) in [1, 2]
+        super(Lps2LtsTool, self).__init__(label, name, input_nodes, output_nodes, args)
+
+    def assign_outputs(self, stdout, stderr):
+        if stderr:
+            node.value = stderr
+            self.error = self.error + stderr
+            return
+        if '-D' in self.args and len(self.output_nodes) > 1:
+            result = {}
+            result['deadlock'] = re.search('deadlock-detect: deadlock found', stdout) != None
+            self.output_nodes[1].value = result
+
+class ToolFactory(object):
     def create_tool(self, label, name, input_nodes, output_nodes, args):
-        if name == 'ltsinfo':
+        if name == 'lps2pbes':
+            return Lps2PbesTool(label, name, input_nodes, output_nodes, args)
+        #elif name == 'lps2lts':
+        #    return Lps2LtsTool(label, name, input_nodes, output_nodes, args)
+        elif name == 'ltsinfo':
             return LtsInfoTool(label, name, input_nodes, output_nodes, args)
         return Tool(label, name, input_nodes, output_nodes, args)
+
