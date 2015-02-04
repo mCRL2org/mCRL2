@@ -24,6 +24,7 @@ from text_utility import write_text
 from tools import Node, Tool, ToolFactory
 
 MCRL2_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
+MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
 
 class ToolInputError(Exception):
     def __init__(self, name, value):
@@ -279,7 +280,7 @@ def run_replay(testfile, inputfiles, reporterrors, settings):
 
 def run_yml_test(name, testfile, inputfiles, settings = dict()):
     reporterrors = True
-    settings['toolpath'] = '../../stage/bin'
+    settings['toolpath'] = MCRL2_INSTALL_DIR
     settings['verbose'] = False
     settings['verbose'] = True
     result, msg = run_replay(testfile, inputfiles, reporterrors, settings)
