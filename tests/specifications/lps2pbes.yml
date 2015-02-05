@@ -37,5 +37,5 @@ tools:
     name: lps2lts
 
 result: |
-  result = value(l5) == l7.value['deadlock']
+  result = l5.value == l7.value['deadlock']
 

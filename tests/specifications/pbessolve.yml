@@ -32,5 +32,5 @@ tools:
     args: [-c]
     name: pbespgsolve
 result: |
-  result = value(l3) == value(l4) == value(l5)
+  result = l3.value == l4.value == l5.value
 

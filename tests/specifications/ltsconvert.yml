@@ -26,7 +26,7 @@ tools:
   t3:
     input: [l3]
     output: [l4.fsm]
-    args: [-iaut, -ofsm]
+    args: [-ofsm]
     name: ltsconvert
   t4:
     input: [l4.fsm]
@@ -40,4 +40,4 @@ tools:
     name: ltscompare
 
 result: |
-  result = 'not' not in value(l6)
+  result = 'not' not in l6.value

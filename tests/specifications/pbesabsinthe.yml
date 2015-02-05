@@ -46,4 +46,4 @@ tools:
     args: []
     name: pbes2bool
 result: |
-  result = (not value(l5) or not value(l6) or value(l5) == value(l6)) and (not value(l5) or not value(l7) or value(l5) == value(l7))
+  result = (not l5.value or not l6.value or l5.value == l6.value) and (not l5.value or not l7.value or l5.value == l7.value)

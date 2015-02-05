@@ -43,9 +43,9 @@ tools:
   t6:
     input: [l3, l6]
     output: [l7]
-    args: [-iaut, -ebisim]
+    args: [-ebisim]
     name: ltscompare
 
 result: |
-  result = 'not' not in value(l7)
+  result = 'not' not in l7.value
 

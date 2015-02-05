@@ -56,13 +56,8 @@ class Test:
 
         #print yaml.dump(data)
 
-        if 'options' in data:
-            self.options = data['options']
-        else:
-            self.options = {}
-        self.verbose = True if settings['verbose'] else False
-        if 'toolpath' in settings:
-            self.options['toolpath'] = settings['toolpath']
+        self.verbose = settings['verbose']
+        self.toolpath = settings['toolpath']
 
         self.nodes = []
         for label in data['nodes']: # create nodes
@@ -81,7 +76,7 @@ class Test:
         f.close()
 
         # These are the global variables used for the computation of the test result
-        self.globals = {'value': self.value, 'last_word': self.last_word, 'file_get_contents': self.file_get_contents}
+        self.globals = {}
         for node in self.nodes:
             self.globals[node.label] = node
 
@@ -106,7 +101,6 @@ class Test:
         import StringIO
         out = StringIO.StringIO()
         out.write('name     = ' + str(self.name)     + '\n')
-        out.write('options  = ' + str(self.options)  + '\n')
         out.write('verbose  = ' + str(self.verbose)  + '\n')
         out.write('res      = ' + str(self.res)      + '\n\n')
         out.write('\n'.join(['--- Node ---\n{0}'.format(node) for node in self.nodes]) + '\n\n')
@@ -170,19 +164,9 @@ class Test:
             print 'cannot open stored value file'
             raise IOError
 
-    def file_get_contents(self, filename):
-        with open(filename) as f:
-            return f.read()
-
-    def last_word(self, term):
-        if ' ' in term:
-            return term.split(' ')[-1]
-        else:
-            return None
-
     def remaining_tasks(self):
         # Returns a list of tools that can be executed and have not been executed before
-        return [tool for tool in self.tools if tool.canExecute()]
+        return [tool for tool in self.tools if tool.can_execute()]
 
     def reset(self):
         # Reset the test to the initial values
@@ -197,18 +181,17 @@ class Test:
             tool.executed = False
             tool.error = ''
 
-    def run(self, reporterrors):
+    def run(self):
         # Singlecore run
         tasks = self.remaining_tasks()
         while len(tasks) > 0:
             tool = tasks[0]
-            tool.execute(self.options['toolpath'], timeout = 5, memlimit = 100000000, verbose = self.verbose)
-            if reporterrors and tool.error != '' and 'error' in tool.error:
-                raise ToolInputError(tool.name, tool.error)
+            tool.execute(self.toolpath, timeout = 5, memlimit = 100000000, verbose = self.verbose)
             tasks = self.remaining_tasks()
 
-        if reporterrors and not all(tool.executed for tool in self.tools):
-            raise UnusedToolsError([tool for tool in self.tools if not tool.executed])
+        if not all(tool.executed for tool in self.tools):
+            not_executed = [tool for tool in self.tools if not tool.executed]
+            raise UnusedToolsError(not_executed)
         else:
             return self.result()
 
@@ -219,7 +202,7 @@ class Test:
         except StopIteration:
             raise RuntimeError("could not find model a tool with label '{0}'".format(label))
 
-def run_replay(testfile, inputfiles, reporterrors, settings):
+def run_replay(testfile, inputfiles, settings):
     for filename in [testfile] + inputfiles:
         if not os.path.isfile(filename):
             print('Error:', filename, 'does not exist!')
@@ -227,42 +210,35 @@ def run_replay(testfile, inputfiles, reporterrors, settings):
 
     t = Test(testfile, settings)
 
-    if settings['verbose']:
+    if 'verbose' in settings and settings['verbose']:
         print 'Running test ' + testfile
     t.reset()
     t.replay(inputfiles)
 
     try:
-        result = t.run(reporterrors)
+        result = t.run()
         if result:
             return True, ''
         else:
             return False, ''
-    # except ToolInputError as e:
-    #     return False, next(x for x in e.value.split('\n') if 'error' in x)
-    # except UnusedToolsError as e:
-    #     return False, 'UnusedToolsError'
-    # except ToolCrashedError as e:
-    #     return False, 'ToolCrashedError'
     except MemoryExceededError as e:
         return None, 'Memory Exceeded'
     except TimeExceededError as e:
         return None, 'Time Exceeded'
 
-def run_yml_test(name, testfile, inputfiles, settings = dict()):
-    reporterrors = True
-    result, msg = run_replay(testfile, inputfiles, reporterrors, settings)
+def run_yml_test(name, testfile, inputfiles, settings):
+    result, msg = run_replay(testfile, inputfiles, settings)
     print name, result, msg
     return result
 
-def run_pbes_test(name, testfile, p, settings = dict()):
+def run_pbes_test(name, testfile, p, settings):
     filename = '{0}.txt'.format(name)
     with open(filename, 'w') as f:
         f.write(str(p))
     inputfiles = [filename]
     run_yml_test(name, testfile, inputfiles, settings)
 
-def run_pbes_test_with_counter_example_minimization(name, testfile, p, settings = dict()):
+def run_pbes_test_with_counter_example_minimization(name, testfile, p, settings):
     result = run_pbes_test(name, testfile, p, settings)
     if result == False:
         m = CounterExampleMinimizer(p, lambda x: run_pbes_test(testfile, x, name + '_minimize', settings), name)

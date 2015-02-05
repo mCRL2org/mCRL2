@@ -33,4 +33,4 @@ tools:
     name: pbes2bool
 
 result: |
-  result = value(l5) == 'true'
+  result = l5.value

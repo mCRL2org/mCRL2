@@ -54,16 +54,16 @@ class Tool(object):
         else:
             self.subprocess_flags = 0
 
-    def canExecute(self):
+    def can_execute(self):
         if self.executed:
             return False
         for i in self.input_nodes:
-            if not i.value:
+            if i.value == None:
                 return False
         return True
 
     # Raises an exception if the execution was aborted
-    def checkExecution(self, process, timeout, memlimit):
+    def check_execution(self, process, timeout, memlimit):
         if process.maxVirtualMem > memlimit:
             raise MemoryExceededError(process.maxVirtualMem)
         if process.userTime > timeout:
@@ -77,14 +77,14 @@ class Tool(object):
             args = args + [os.path.join(os.getcwd(), node.filename) for node in self.output_nodes]
         return args
 
-    def assign_outputs(self, stdout, stderr):
+    def assign_outputs(self):
         for node in self.output_nodes:
-            node.value = stdout
+            node.value = self.stdout
             if node.value == '':
-                node.value = stderr
+                node.value = self.stderr
             if node.value == '':
                 node.value = 'not None'
-            self.error = self.error + stderr
+            self.error = self.error + self.stderr
 
     def execute(self, dir, timeout, memlimit, verbose, maxVirtLimit = 100000000, usrTimeLimit = 5):
         args = self.arguments()
@@ -99,12 +99,12 @@ class Tool(object):
         if not self.has_input_nodes:
             input = (b' ').join([i.value for i in self.input_nodes])
 
-        stdout, stderr = process.communicate(input)
-        self.assign_outputs(stdout, stderr)
+        self.stdout, self.stderr = process.communicate(input)
+        self.assign_outputs()
         self.executed = True
         self.userTime = process.userTime
         self.maxVirtualMem = process.maxVirtualMem
-        self.checkExecution(process, timeout, memlimit)
+        self.check_execution(process, timeout, memlimit)
 
     def __str__(self):
         import StringIO
@@ -120,6 +120,66 @@ class Tool(object):
         out.write('has_output_nodes = ' + str(self.has_output_nodes) + '\n')
         return out.getvalue()
 
+class Pbes2BoolTool(Tool):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 1
+        assert len(output_nodes) == 1
+        super(Pbes2BoolTool, self).__init__(label, name, input_nodes, output_nodes, args)
+
+    def assign_outputs(self):
+        if self.stderr:
+            self.output_nodes[0] = self.stderr
+            self.error = self.error + self.stderr
+        else:
+            text = self.stdout.strip()
+            if text.endswith('true'):
+                value = True
+            elif text.endswith('false'):
+                value = False
+            else:
+                value = None
+            self.output_nodes[0].value = value
+
+class PbesPgSolveTool(Tool):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 1
+        assert len(output_nodes) == 1
+        super(PbesPgSolveTool, self).__init__(label, name, input_nodes, output_nodes, args)
+
+    def assign_outputs(self):
+        if self.stderr:
+            self.output_nodes[0] = self.stderr
+            self.error = self.error + self.stderr
+        else:
+            text = self.stdout.strip()
+            if text.endswith('true'):
+                value = True
+            elif text.endswith('false'):
+                value = False
+            else:
+                value = None
+            self.output_nodes[0].value = value
+
+class BesSolveTool(Tool):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 1
+        assert len(output_nodes) == 1
+        super(BesSolveTool, self).__init__(label, name, input_nodes, output_nodes, args)
+
+    def assign_outputs(self):
+        if self.stderr:
+            self.output_nodes[0] = self.stderr
+            self.error = self.error + self.stderr
+        else:
+            text = self.stdout.strip()
+            if text.endswith('true'):
+                value = True
+            elif text.endswith('false'):
+                value = False
+            else:
+                value = None
+            self.output_nodes[0].value = value
+
 class LtsInfoTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
         assert len(input_nodes) == 1
@@ -129,14 +189,14 @@ class LtsInfoTool(Tool):
     def arguments(self):
         return [os.path.join(os.getcwd(), node.filename) for node in self.input_nodes]
 
-    def assign_outputs(self, stdout, stderr):
+    def assign_outputs(self):
         node = self.output_nodes[0]
-        if stderr:
-            node.value = stderr
-            self.error = self.error + stderr
+        if self.stderr:
+            node.value = self.stderr
+            self.error = self.error + self.stderr
             return
         result = {}
-        lines = stdout.splitlines()
+        lines = self.stdout.splitlines()
         m = re.search('Number of states: (\d+)', lines[0])
         result['states'] = int(m.group(1))
         node.value = result
@@ -149,9 +209,9 @@ class Lps2PbesTool(Tool):
 
     def arguments(self):
         args = []
-        args.append(os.path.join(os.getcwd(), self.input_nodes[0]))
-        args.append('-f' + os.path.join(os.getcwd(), self.input_nodes[1]))
-        args.append(os.path.join(os.getcwd(), self.output_nodes[0]))
+        args.append('-f' + os.path.join(os.getcwd(), self.input_nodes[0].filename))
+        args.append(os.path.join(os.getcwd(), self.input_nodes[1].filename))
+        args.append(os.path.join(os.getcwd(), self.output_nodes[0].filename))
         return args
 
 class Lps2LtsTool(Tool):
@@ -160,23 +220,43 @@ class Lps2LtsTool(Tool):
         assert len(output_nodes) in [1, 2]
         super(Lps2LtsTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
-    def assign_outputs(self, stdout, stderr):
-        if stderr:
-            node.value = stderr
-            self.error = self.error + stderr
-            return
-        if '-D' in self.args and len(self.output_nodes) > 1:
-            result = {}
-            result['deadlock'] = re.search('deadlock-detect: deadlock found', stdout) != None
-            self.output_nodes[1].value = result
+    def assign_outputs(self):
+        if self.stderr:
+            if 'error' in self.stderr:
+                self.error = self.error + self.stderr
+                return
+            if '-D' in self.args and len(self.output_nodes) > 1:
+                self.output_nodes[1].value = { 'deadlock': re.search('deadlock-detect: deadlock found', self.stdout) != None }
+        self.output_nodes[0].value = self.output_nodes[0].filename
+
+    def arguments(self):
+        return [os.path.join(os.getcwd(), self.input_nodes[0].filename), os.path.join(os.getcwd(), self.output_nodes[0].filename)]
+
+class LtsCompareTool(Tool):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 2
+        assert len(output_nodes) == 1
+        super(LtsCompareTool, self).__init__(label, name, input_nodes, output_nodes, args)
+
+    def assign_outputs(self):
+        if self.stderr:
+            self.output_nodes[0].value = self.stderr
+            self.error = self.error + self.stderr
+        self.output_nodes[0].value = 'not' in self.stdout
 
 class ToolFactory(object):
     def create_tool(self, label, name, input_nodes, output_nodes, args):
         if name == 'lps2pbes':
             return Lps2PbesTool(label, name, input_nodes, output_nodes, args)
-        #elif name == 'lps2lts':
-        #    return Lps2LtsTool(label, name, input_nodes, output_nodes, args)
+        elif name == 'pbespgsolve':
+            return PbesPgSolveTool(label, name, input_nodes, output_nodes, args)
+        elif name == 'lps2lts':
+            return Lps2LtsTool(label, name, input_nodes, output_nodes, args)
         elif name == 'ltsinfo':
             return LtsInfoTool(label, name, input_nodes, output_nodes, args)
+        elif name == 'pbes2bool':
+            return Pbes2BoolTool(label, name, input_nodes, output_nodes, args)
+        elif name == 'bessolve':
+            return BesSolveTool(label, name, input_nodes, output_nodes, args)
         return Tool(label, name, input_nodes, output_nodes, args)
 

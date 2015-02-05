@@ -62,7 +62,7 @@ tools:
     args: []
     name: pbes2bool
 result: |
-  answers = [value(l7), value(l8), value(l9), value(l10), value(l11)]
+  answers = [l7.value, l8.value, l9.value, l10.value, l11.value]
   print 'ANSWERS', answers
-  result = not 'true' in answers and 'false' in answers
+  result = not (True in answers and False in answers)
 

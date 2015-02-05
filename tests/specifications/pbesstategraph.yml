@@ -32,5 +32,5 @@ tools:
     args: []
     name: pbes2bool
 result: |
-  result = value(l4) == value(l5)
+  result = l4.value == l5.value
 

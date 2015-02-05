@@ -48,4 +48,4 @@ tools:
 
 
 result: |
-  result = 'error' in value(l3)
+  result = 'error' in l3.value
