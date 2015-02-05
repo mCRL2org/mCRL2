@@ -44,18 +44,21 @@ endif()
 # test succeeds, or 1 if it fails.
 #
 set(python_dirs "random" "regression")
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace)
 foreach(dir ${python_dirs})
   set(moretests 0)
   set(num 0)
+  set(testrunner ${CMAKE_CURRENT_SOURCE_DIR}/${dir}/test.py)
   while(moretests EQUAL 0)
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${dir}/test.py --name ${num}
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --name ${num}
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
                     RESULT_VARIABLE moretests
                     OUTPUT_VARIABLE testname 
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(moretests EQUAL 0)
       add_test(NAME ${testname}
-               WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${dir}
-               COMMAND ${PYTHON_EXECUTABLE} test.py --run ${num} --toolpath ${MCRL2_STAGE_PATH}/${MCRL2_RUNTIME_PATH})
+               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
+               COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --run ${num} --toolpath ${MCRL2_STAGE_PATH}/${MCRL2_RUNTIME_PATH})
       set_tests_properties(${testname} PROPERTIES LABELS ${dir})
     endif()
     math(EXPR num "${num} + 1")
