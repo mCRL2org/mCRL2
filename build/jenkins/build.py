@@ -45,18 +45,12 @@ packageflags = []
 if package.startswith('official-release'):
   packageflags += ['-DMCRL2_PACKAGE_RELEASE=ON']
 
-if label.startswith('macosx') and package in ['nightly', 'official-release']:
-  packageflags += ['-DMCRL2_OSX_PACKAGE=ON'] # Needed for packaging relevant Boost headers (for compiling rewriter)
-
 #
-# For Windows, explicitly tell CMake which generator to use to avoid trouble
-# with x86/x64 incompatibilities
+# Parallelize the Windows build using the JOM make program (which is shipped with Qt)
 #
 generator = []
-if label == 'windows-amd64':
-  generator += ['-GNMake Makefiles']
-elif label == 'windows-x86':
-  generator += ['-GNMake Makefiles']
+if label in ['windows-amd64', 'windows-x86']:
+  generator += ['-GNMake Makefiles JOM']
 
 #
 # If we are building the mCRL2-release job, run all tests

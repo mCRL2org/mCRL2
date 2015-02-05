@@ -285,7 +285,6 @@ Then configure cmake::
   $ cmake . -DCMAKE_OSX_DEPLOYMENT_TARGET={SDK version (e.g. '10.9')} \
             -DCMAKE_OSX_SYSROOT={/Path/To/SDK} \
             -DCMAKE_INSTALL_PREFIX=/ \
-            -DMCRL2_OSX_PACKAGE=ON \
             -DMCRL2_PACKAGE_RELEASE=ON
 
 As of the 201409.0 release, only the x64 platform is supported (this used to be
@@ -298,9 +297,9 @@ Build the toolset::
 
 Create the DMG-installer::
 
-  $ cpack -G PackageMaker
+  $ cpack -G DragNDrop
 
-Upload the installer that has been generated to
+Upload the disk image that has been generated to
 ``http://www.mcrl2.org/download/release``.
 
 Checking the installers
