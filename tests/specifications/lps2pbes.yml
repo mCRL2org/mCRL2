@@ -1,7 +1,7 @@
 nodes:
   l1:
     type: mCRL2Spec
-  l2.mcf:
+  l2:
     type: StateFrm
   l3:
     type: LPS
@@ -11,6 +11,8 @@ nodes:
     type: Bool
   l6:
     type: LTS
+  l7:
+    type: INFO
 
 tools:
   t1:
@@ -19,7 +21,7 @@ tools:
     args: []
     name: mcrl22lps
   t2:
-    input: [l3, l2.mcf]
+    input: [l3, l2]
     output: [l4]
     args: []
     name: lps2pbes
@@ -30,11 +32,10 @@ tools:
     name: pbes2bool
   t4:
     input: [l3]
-    output: [l4, l6]
+    output: [l6, l7]
     args: [-D]
     name: lps2lts
 
 result: |
-  print '5555555555555', l5.value
-  result = value(l5) == l6.value['deadlock']
+  result = value(l5) == l7.value['deadlock']
 

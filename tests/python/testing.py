@@ -5,17 +5,8 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-import codecs
-import exceptions
-import multiprocessing
 import os
 import os.path
-import psutil
-import re
-import shutil
-import sys
-import threading
-import time
 import yaml
 from popen import Popen, MemoryExceededError, TimeExceededError
 from subprocess import  PIPE, STDOUT
@@ -101,7 +92,7 @@ class Test:
         for node in self.nodes:
             node.filename = '{0}.{1}'.format(node.label, self.extension(node.type))
 
-    def extension(self, type): 
+    def extension(self, type):
         if type == 'mCRL2Spec':
             return 'mcrl2'
         elif type == 'PbesSpec':
