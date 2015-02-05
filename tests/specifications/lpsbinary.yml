@@ -40,5 +40,5 @@ tools:
     name: ltscompare
 
 result: |
-  result = 'not' not in l6.value
+  result = l6.value
 

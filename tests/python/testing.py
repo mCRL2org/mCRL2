@@ -7,6 +7,7 @@
 
 import os
 import os.path
+import shutil
 import yaml
 from popen import Popen, MemoryExceededError, TimeExceededError
 from subprocess import  PIPE, STDOUT
@@ -61,12 +62,12 @@ class Test:
 
         self.nodes = []
         for label in data['nodes']: # create nodes
-            self.__addNode(data['nodes'][label], label)
+            self._add_node(data['nodes'][label], label)
 
         self.tools = []
         for label in data['tools']: # create tools
             assert isinstance(data['tools'], dict)
-            self.__addTool(data['tools'][label], label)
+            self._add_tool(data['tools'][label], label)
 
         for tool in self.tools:
             if any(x for x in tool.output_nodes if x.type == 'Bool'):
@@ -82,20 +83,6 @@ class Test:
 
         # Contains a list of input nodes of this test, sorted by label
         self.input_nodes = self.compute_input_nodes()
-
-        # Set the filename attributes of the nodes
-        for node in self.nodes:
-            node.filename = '{0}.{1}'.format(node.label, self.extension(node.type))
-
-    def extension(self, type):
-        if type == 'mCRL2Spec':
-            return 'mcrl2'
-        elif type == 'PbesSpec':
-            return 'txt'
-        elif type == 'LTS':
-            return 'aut'
-        else:
-            return type.lower()
 
     def __str__(self):
         import StringIO
@@ -116,28 +103,31 @@ class Test:
         result = [node for node in self.nodes if not node in outputs]
         return sorted(result, key = lambda node: node.label)
 
-    def __addNode(self, data, label):
+    def _add_node(self, data, label):
         value = None
         if 'value' in data:
             value = data['value']
         self.nodes.append(Node(label, data['type'], value))
 
-    def __addTool(self, data, label):
+    def _add_tool(self, data, label):
         import platform
-        input = [i for i in self.nodes if i.label in data['input']]
-        output = [o for o in self.nodes if o.label in data['output']]
+        input = [node for node in self.nodes if node.label in data['input']]
+        output = [node for node in self.nodes if node.label in data['output']]
         name = data['name']
         if platform.system() == 'Windows':
             name = name + '.exe'
         self.tools.append(ToolFactory().create_tool(label, data['name'], input, output, data['args']))
 
-    def replay(self, inputfiles):
+    def setup(self, inputfiles):
+        for node in self.input_nodes:
+            if node.value:
+                write_text(node.filename(), str(node.value))
         input_nodes = [node for node in self.input_nodes if node.value == None]
         if len(input_nodes) != len(inputfiles):
             raise RuntimeError('Invalid number of input files provided: expected {0}, got {1}'.format(len(input_nodes), len(inputfiles)))
         for i in range(len(inputfiles)):
             f = open(inputfiles[i])
-            self.input_nodes[i].filename = inputfiles[i]
+            shutil.copy(inputfiles[i], self.input_nodes[i].filename())
             self.input_nodes[i].value = f.read()
 
     def result(self):
@@ -168,19 +158,6 @@ class Test:
         # Returns a list of tools that can be executed and have not been executed before
         return [tool for tool in self.tools if tool.can_execute()]
 
-    def reset(self):
-        # Reset the test to the initial values
-        for node in self.nodes:
-            if not node in self.input_nodes:
-                node.value = None
-            try:
-                os.remove(os.path.join(os.getcwd(), node.filename))
-            except OSError as e:
-                pass
-        for tool in self.tools:
-            tool.executed = False
-            tool.error = ''
-
     def run(self):
         # Singlecore run
         tasks = self.remaining_tasks()
@@ -193,7 +170,15 @@ class Test:
             not_executed = [tool for tool in self.tools if not tool.executed]
             raise UnusedToolsError(not_executed)
         else:
-            return self.result()
+            for filename in self.used_files():
+                if not os.path.exists(filename):
+                    raise RuntimeError('Error in test {}: output file {} is missing!'.format(self.name, filename))
+            result = self.result()
+            if self.result():
+                for filename in self.used_files():
+                    #print 'Removing {}'.format(filename)
+                    os.remove(filename)
+            return result
 
     # Returns the tool with the given label
     def tool(self, label):
@@ -202,7 +187,11 @@ class Test:
         except StopIteration:
             raise RuntimeError("could not find model a tool with label '{0}'".format(label))
 
-def run_replay(testfile, inputfiles, settings):
+    # Returns the names of the files that are used when running the test
+    def used_files(self):
+        return filter(None, [node.filename() for node in self.nodes])
+
+def run_replay(testfile, inputfiles, settings, remove_files = True):
     for filename in [testfile] + inputfiles:
         if not os.path.isfile(filename):
             print('Error:', filename, 'does not exist!')
@@ -212,8 +201,7 @@ def run_replay(testfile, inputfiles, settings):
 
     if 'verbose' in settings and settings['verbose']:
         print 'Running test ' + testfile
-    t.reset()
-    t.replay(inputfiles)
+    t.setup(inputfiles)
 
     try:
         result = t.run()

@@ -10,6 +10,7 @@ from subprocess import  PIPE, STDOUT
 import os.path
 import re
 import types
+from text_utility import write_text
 
 def is_list_of(l, types):
     if not isinstance(l, list):
@@ -28,6 +29,19 @@ class Node:
 
     def __str__(self):
         return 'Node(label = {0}, type = {1}, value = {2})'.format(self.label, self.type, self.value)
+
+    def extension(self, type):
+        if type == 'mCRL2Spec':
+            return 'mcrl2'
+        elif type == 'PbesSpec':
+            return 'txt'
+        elif type == 'LTS':
+            return 'aut'
+        else:
+            return type.lower()
+
+    def filename(self):
+        return '{}.{}'.format(self.label, self.extension(self.type))
 
 class Tool(object):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -72,9 +86,9 @@ class Tool(object):
     def arguments(self):
         args = []
         if self.has_input_nodes:
-            args = [os.path.join(os.getcwd(), node.filename) for node in self.input_nodes]
+            args = [os.path.join(os.getcwd(), node.filename()) for node in self.input_nodes]
         if self.has_output_nodes:
-            args = args + [os.path.join(os.getcwd(), node.filename) for node in self.output_nodes]
+            args = args + [os.path.join(os.getcwd(), node.filename()) for node in self.output_nodes]
         return args
 
     def assign_outputs(self):
@@ -139,6 +153,7 @@ class Pbes2BoolTool(Tool):
             else:
                 value = None
             self.output_nodes[0].value = value
+            write_text(self.output_nodes[0].filename(), str(value))
 
 class PbesPgSolveTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -159,6 +174,7 @@ class PbesPgSolveTool(Tool):
             else:
                 value = None
             self.output_nodes[0].value = value
+            write_text(self.output_nodes[0].filename(), str(value))
 
 class BesSolveTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -179,6 +195,7 @@ class BesSolveTool(Tool):
             else:
                 value = None
             self.output_nodes[0].value = value
+            write_text(self.output_nodes[0].filename(), str(value))
 
 class LtsInfoTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -187,7 +204,7 @@ class LtsInfoTool(Tool):
         super(LtsInfoTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
     def arguments(self):
-        return [os.path.join(os.getcwd(), node.filename) for node in self.input_nodes]
+        return [os.path.join(os.getcwd(), node.filename()) for node in self.input_nodes]
 
     def assign_outputs(self):
         node = self.output_nodes[0]
@@ -200,6 +217,7 @@ class LtsInfoTool(Tool):
         m = re.search('Number of states: (\d+)', lines[0])
         result['states'] = int(m.group(1))
         node.value = result
+        write_text(node.filename(), str(result))
 
 class Lps2PbesTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -208,11 +226,10 @@ class Lps2PbesTool(Tool):
         super(Lps2PbesTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
     def arguments(self):
-        args = []
-        args.append('-f' + os.path.join(os.getcwd(), self.input_nodes[0].filename))
-        args.append(os.path.join(os.getcwd(), self.input_nodes[1].filename))
-        args.append(os.path.join(os.getcwd(), self.output_nodes[0].filename))
-        return args
+        return ['-f' + os.path.join(os.getcwd(), self.input_nodes[0].filename()),
+                os.path.join(os.getcwd(), self.input_nodes[1].filename()),
+                os.path.join(os.getcwd(), self.output_nodes[0].filename())
+               ]
 
 class Lps2LtsTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -227,10 +244,10 @@ class Lps2LtsTool(Tool):
                 return
             if '-D' in self.args and len(self.output_nodes) > 1:
                 self.output_nodes[1].value = { 'deadlock': re.search('deadlock-detect: deadlock found', self.stdout) != None }
-        self.output_nodes[0].value = self.output_nodes[0].filename
+        self.output_nodes[0].value = self.output_nodes[0].filename()
 
     def arguments(self):
-        return [os.path.join(os.getcwd(), self.input_nodes[0].filename), os.path.join(os.getcwd(), self.output_nodes[0].filename)]
+        return [os.path.join(os.getcwd(), self.input_nodes[0].filename()), os.path.join(os.getcwd(), self.output_nodes[0].filename())]
 
 class LtsCompareTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -242,7 +259,9 @@ class LtsCompareTool(Tool):
         if self.stderr:
             self.output_nodes[0].value = self.stderr
             self.error = self.error + self.stderr
-        self.output_nodes[0].value = 'not' in self.stdout
+        value = not 'not' in self.stdout
+        self.output_nodes[0].value = value
+        write_text(self.output_nodes[0].filename(), str(value))
 
 class ToolFactory(object):
     def create_tool(self, label, name, input_nodes, output_nodes, args):
@@ -258,5 +277,7 @@ class ToolFactory(object):
             return Pbes2BoolTool(label, name, input_nodes, output_nodes, args)
         elif name == 'bessolve':
             return BesSolveTool(label, name, input_nodes, output_nodes, args)
+        elif name == 'ltscompare':
+            return LtsCompareTool(label, name, input_nodes, output_nodes, args)
         return Tool(label, name, input_nodes, output_nodes, args)
 
