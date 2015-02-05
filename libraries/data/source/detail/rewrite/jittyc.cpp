@@ -1808,53 +1808,7 @@ void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, const s
   return;
 }
 
-static int* i_t_st = NULL;
-static int i_t_st_s = 0;
-static int i_t_st_p = 0;
-static void reset_st()
-{
-  i_t_st_p = 0;
-}
-static void push_st(int i)
-{
-  if (i_t_st_s <= i_t_st_p)
-  {
-    if (i_t_st_s == 0)
-    {
-      i_t_st_s = 16;
-    }
-    else
-    {
-      i_t_st_s = i_t_st_s*2;
-    }
-    i_t_st = (int*) realloc(i_t_st,i_t_st_s*sizeof(int));
-  }
-  i_t_st[i_t_st_p] = i;
-  i_t_st_p++;
-}
-static int pop_st()
-{
-  if (i_t_st_p == 0)
-  {
-    return 0;
-  }
-  else
-  {
-    i_t_st_p--;
-    return i_t_st[i_t_st_p];
-  }
-}
-static int peekn_st(int n)
-{
-  if (i_t_st_p <= n)
-  {
-    return 0;
-  }
-  else
-  {
-    return i_t_st[i_t_st_p-n-1];
-  }
-}
+static std::vector<int> i_t_stack;
 
 void RewriterCompilingJitty::implement_tree_aux(
       FILE* f,
@@ -2004,11 +1958,11 @@ void RewriterCompilingJitty::implement_tree_aux(
              );
       }
     }
-    push_st(cur_arg);
-    push_st(parent);
+    i_t_stack.push_back(cur_arg);
+    i_t_stack.push_back(parent);
     implement_tree_aux(f,treeF.true_tree(),1,(level==0)?cur_arg:cnt,level+1,cnt+1,d+1,arity,used,nnfvars);
-    pop_st();
-    pop_st();
+    i_t_stack.pop_back();
+    i_t_stack.pop_back();
     fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
     implement_tree_aux(f,treeF.false_tree(),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n",whitespace(d*2));
@@ -2017,11 +1971,13 @@ void RewriterCompilingJitty::implement_tree_aux(
   else if (tree.isD())
   {
     const match_tree_D& treeD(tree);
-    int i = pop_st();
-    int j = pop_st();
+    int i = i_t_stack.back();
+    i_t_stack.pop_back();
+    int j = i_t_stack.back();
+    i_t_stack.pop_back();
     implement_tree_aux(f,treeD.subtree(),j,i,level-1,cnt,d,arity,used,nnfvars);
-    push_st(j);
-    push_st(i);
+    i_t_stack.push_back(j);
+    i_t_stack.push_back(i);
     return;
   }
   else if (tree.isN())
@@ -2054,7 +2010,7 @@ void RewriterCompilingJitty::implement_tree_aux(
     fprintf(f,"%sreturn ",whitespace(d*2));
     if (level > 0)
     {
-      cur_arg = peekn_st(2*level-1);
+      cur_arg = i_t_stack[2*level-1];
     }
     calcTerm(f,treeR.result(),cur_arg+1,nnfvars);
     fprintf(f,"; // R1\n");
@@ -2124,7 +2080,7 @@ void RewriterCompilingJitty::implement_tree(
   }
   else
   {
-    reset_st();
+    i_t_stack.clear();
     implement_tree_aux(f,tree,0,0,0,0,d,arity,used,nnfvars);
   }
   while (l > 0)
