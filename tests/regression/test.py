@@ -7,11 +7,12 @@ sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
 import testrunner
 from testing import run_yml_test
 
-MCRL2_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
-
 class TestRunner(testrunner.TestRunner):
     def __init__(self):
+        super(TestRunner, self).__init__()
         self.tests = []
+        self.settings = {'toolpath': self._tool_path, 
+                         'verbose': True}
 
         # add pbessolve tests
         index = 0
@@ -33,8 +34,8 @@ class TestRunner(testrunner.TestRunner):
         self.addtest('ticket_1127', '../specifications/mcrl22lps.yml', ['tickets/1127/1.mcrl2'])
         self.addtest('ticket_1143', '../specifications/pbesrewr-onepoint.yml', ['tickets/1143/1.txt'])
         self.addtest('ticket_1144', '../specifications/lpsbisim2pbes.yml', ['tickets/1144/test1.txt', 'tickets/1144/test2.txt'])
-        self.addtest('ticket_1167', '../specifications/countstates.yml', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'], yaml.load('nodes:\n  l5:\n    value: 74'))
-        self.addtest('ticket_1234', '../specifications/lpsbinary.yml', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'])
+        self.addtest('ticket_1167', '../specifications/countstates.yml', [self._source_path + '/examples/academic/abp/abp.mcrl2'], yaml.load('nodes:\n  l5:\n    value: 74'))
+        self.addtest('ticket_1234', '../specifications/lpsbinary.yml', [self._source_path + '/examples/academic/cabp/cabp.mcrl2'])
         self.addtest('ticket_1241', '../specifications/alphabet.yml', ['tickets/1241/1.mcrl2'])
         #self.addtest('ticket_1247', '../specifications/alphabet.yml', ['tickets/1247/1.mcrl2'])
         self.addtest('ticket_1249', '../specifications/alphabet.yml', ['tickets/1249/1.mcrl2'])
@@ -46,7 +47,9 @@ class TestRunner(testrunner.TestRunner):
         self.addtest('ticket_1321', '../specifications/alphabet.yml', ['tickets/1321/1.mcrl2'])
 
     def addtest(self, name, testfile, inputfiles, settings = dict()):
-        self.tests.append((name, testfile, inputfiles, settings))
+        testsettings = self.settings
+        testsettings.update(settings)
+        self.tests.append((name, testfile, inputfiles, testsettings))
 
     def name(self, testnum):
         if testnum < len(self.tests):
@@ -62,4 +65,4 @@ class TestRunner(testrunner.TestRunner):
 
 if __name__ == "__main__":
     sys.exit(TestRunner().main())
-    #run_yml_test('ticket_1167', '../specifications/countstates.yml', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'], yaml.load('nodes:\n  l5:\n    value: 74'))
+    #run_yml_test('ticket_1167', '../specifications/countstates.yml', [self._source_path + '/examples/academic/abp/abp.mcrl2'], yaml.load('nodes:\n  l5:\n    value: 74'))
