@@ -303,7 +303,7 @@ static int decompress(BitStream* bs, LZbuffer* buffer, char** str)
 {
   unsigned int offset, length, i, last;
   LZtoken token;
-  char c;
+  char c = 0;
 
   /* *str=scratch; */
   last=0;

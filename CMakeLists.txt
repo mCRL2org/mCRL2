@@ -56,7 +56,7 @@ if(MCRL2_ENABLE_GUI_TOOLS)
                         PROPERTIES MAP_IMPORTED_CONFIG_MAINTAINER "DEBUG")
 endif()
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 add_subdirectory(3rd-party/dparser)
 

@@ -125,7 +125,7 @@ struct TextureData
       p.drawText(bounds, labelstring);
       p.end();
       // OpenGL likes its textures to have dimensions that are powers of 2
-      int w = 1, h = 1;
+      size_t w = 1, h = 1;
       while (w < *widths) w <<= 1;
       while (h < *heights) h <<= 1;
       // ... and also wants the alpha component to be the 4th component

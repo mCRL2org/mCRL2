@@ -226,7 +226,7 @@ void MainWindow::save(QString filename)
 void MainWindow::updateAttributes()
 {
   m_ui.attributes->setRowCount((int)m_graph->getSizeAttributes());
-  for (int i = 0; i < m_graph->getSizeAttributes(); ++i)
+  for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
   {
     for (int j = 0; j < m_ui.attributes->columnCount(); ++j)
     {
@@ -274,7 +274,7 @@ void MainWindow::updateValues()
 
     Attribute *attribute = m_graph->getAttribute(attributes[0]);
     m_ui.domain->setRowCount((int)attribute->getSizeCurValues());
-    for (int i = 0; i < attribute->getSizeCurValues(); ++i)
+    for (size_t i = 0; i < attribute->getSizeCurValues(); ++i)
     {
       Value *value = attribute->getCurValue(i);
 

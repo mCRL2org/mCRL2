@@ -107,7 +107,7 @@ class probabilistic_label
       assert(enumerator.size() <= denominator.size());
       
       // Check whether the denominator fits in number_t.
-      if (denominator.size() >= std::numeric_limits<number_t>::digits10)
+      if (denominator.size() >= (size_t)std::numeric_limits<number_t>::digits10)
       {
         std::string shortened_denominator = denominator.substr(0, std::numeric_limits<number_t>::digits10);
         m_denominator = to_number_t(shortened_denominator);

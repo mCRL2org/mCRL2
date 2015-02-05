@@ -489,7 +489,7 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint *selectionBuffer, GLint it
       continue;
     }
 
-    GLuint itemData[3];
+    GLuint itemData[3] = {0, 0, 0};
     for (GLuint j = 0; j < size; j++)
     {
       itemData[j] = *buffer++;
