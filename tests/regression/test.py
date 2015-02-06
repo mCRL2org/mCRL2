@@ -40,7 +40,8 @@ class TestRunner(testrunner.TestRunner):
                       ('ticket_1319', 'alphabet', ['tickets/1319/1.mcrl2']),
                       ('ticket_1321', 'alphabet', ['tickets/1321/1.mcrl2'])]
         self.settings = {'toolpath': self._tool_path,
-                         'verbose': True}
+                         'verbose': True,
+                         'cleanup_files': True}
 
     def name(self, testnum):
         if testnum < len(self.tests):

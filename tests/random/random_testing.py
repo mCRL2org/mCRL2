@@ -12,7 +12,7 @@ from random_bes_generator import make_bes
 from random_pbes_generator import make_pbes, CounterExampleMinimizer
 from random_process_generator import make_process_specification, generator_map
 from text_utility import write_text
-from testing import run_replay, run_yml_test, run_pbes_test, run_pbes_test_with_counter_example_minimization, UnusedToolsError
+from testing import run_replay, run_yml_test, run_pbes_test, run_pbes_test_with_counter_example_minimization, cleanup_files
 
 MCRL2_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
@@ -26,7 +26,8 @@ def run_alphabet_test(name, settings):
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_yml_test(name, testfile, inputfiles, settings)
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
 
 def run_lpssuminst_test(name, settings):
     testfile = '../specifications/lpssuminst.yml'
@@ -37,7 +38,8 @@ def run_lpssuminst_test(name, settings):
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_yml_test(name, testfile, inputfiles, settings)
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
 
 def run_lpssumelm_test(name, settings):
     testfile = '../specifications/lpssumelm.yml'
@@ -48,7 +50,8 @@ def run_lpssumelm_test(name, settings):
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_yml_test(name, testfile, inputfiles, settings)
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
 
 def run_lpsparelm_test(name, settings):
     testfile = '../specifications/lpsparelm.yml'
@@ -59,7 +62,8 @@ def run_lpsparelm_test(name, settings):
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_yml_test(name, testfile, inputfiles, settings)
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
 
 def run_lpsconstelm_test(name, settings):
     testfile = '../specifications/lpsconstelm.yml'
@@ -70,7 +74,8 @@ def run_lpsconstelm_test(name, settings):
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_yml_test(name, testfile, inputfiles, settings)
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
 
 def run_lpsbinary_test(name, settings):
     testfile = '../specifications/lpsbinary.yml'
@@ -81,7 +86,8 @@ def run_lpsbinary_test(name, settings):
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_yml_test(name, testfile, inputfiles, settings)
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
 
 def run_bessolve_test(name, settings):
     testfile = '../specifications/bessolve.yml'
@@ -91,7 +97,8 @@ def run_bessolve_test(name, settings):
     p = make_bes(equation_count, term_size)
     write_text(filename, str(p))
     inputfiles = [filename]
-    run_yml_test(name, testfile, inputfiles, settings)
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
 
 def run_lps2pbes_test(name, settings):
     testfile = '../specifications/lps2pbes.yml'
@@ -103,7 +110,8 @@ def run_lps2pbes_test(name, settings):
     write_text(filename, str(p))
     nodeadlock = os.path.join(MCRL2_ROOT, 'examples', 'modal-formulas', 'nodeadlock.mcf')
     inputfiles = [filename, nodeadlock]
-    run_yml_test(name, testfile, inputfiles, settings)
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, [filename], settings)
 
 # N.B. does not work yet due to unusable abstraction map
 def run_pbesabsinthe_test(name, settings):
@@ -230,38 +238,31 @@ def run_pbesstategraph_test(name, settings):
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
 if __name__ == '__main__':
-    settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False }
-    try:
-        run_lps2pbes_test('lps2pbes', settings)
-        # run_pbesabsinthe_test('pbesabsinthe', settings)
-        run_pbesabstract_test('pbesabstract', settings)
-        run_pbesconstelm_test('pbesconstelm', settings)
-        run_pbesinst_finite_test('pbesinst_finite', settings)
-        run_pbesinst_lazy_test('pbesinst_lazy', settings)
-        run_pbesparelm_test('pbesparelm', settings)
-        run_pbespareqelm_test('pbespareqelm', settings)
-        run_pbesrewr_test('pbesrewr', 'simplify', settings)
-        run_pbesrewr_test('pbesrewr', 'pfnf', settings)
-        run_pbesrewr_test('pbesrewr', 'quantifier-all', settings)
-        run_pbesrewr_test('pbesrewr', 'quantifier-finite', settings)
-        run_pbesrewr_test('pbesrewr', 'quantifier-one-point', settings)
-        # run_pbesrewr_test('pbesrewr', 'bqnf-quantifier', settings)
-        run_pbessolve_test('pbessolve', settings)
-        run_pbesstategraph_test('pbesstategraph', settings)
+    settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False, 'cleanup_files': True }
 
-        run_alphabet_test('alphabet', settings)
-        run_lpsbinary_test('lpsbinary', settings)
-        run_lpsparelm_test('lpsconstelm', settings)
-        run_lpsparelm_test('lpsparelm', settings)
-        run_lpssumelm_test('lpssumelm', settings)
-        run_lpssuminst_test('lpssuminst', settings)
+    run_lps2pbes_test('lps2pbes', settings)
+    # run_pbesabsinthe_test('pbesabsinthe', settings)
+    run_pbesabstract_test('pbesabstract', settings)
+    run_pbesconstelm_test('pbesconstelm', settings)
+    run_pbesinst_finite_test('pbesinst_finite', settings)
+    run_pbesinst_lazy_test('pbesinst_lazy', settings)
+    run_pbesparelm_test('pbesparelm', settings)
+    run_pbespareqelm_test('pbespareqelm', settings)
+    run_pbesrewr_test('pbesrewr', 'simplify', settings)
+    run_pbesrewr_test('pbesrewr', 'pfnf', settings)
+    run_pbesrewr_test('pbesrewr', 'quantifier-all', settings)
+    run_pbesrewr_test('pbesrewr', 'quantifier-finite', settings)
+    run_pbesrewr_test('pbesrewr', 'quantifier-one-point', settings)
+    # run_pbesrewr_test('pbesrewr', 'bqnf-quantifier', settings)
+    run_pbessolve_test('pbessolve', settings)
+    run_pbesstategraph_test('pbesstategraph', settings)
 
-        run_bessolve_test('bessolve', settings)
-        # run_symbolic_exploration_test('symbolic_exploration', settings)
+    run_alphabet_test('alphabet', settings)
+    run_lpsbinary_test('lpsbinary', settings)
+    run_lpsparelm_test('lpsconstelm', settings)
+    run_lpsparelm_test('lpsparelm', settings)
+    run_lpssumelm_test('lpssumelm', settings)
+    run_lpssuminst_test('lpssuminst', settings)
 
-#    except ToolInputError as e:
-#        print 'ToolInputError {0}'.format(e.value)
-    except UnusedToolsError as e:
-        print 'UnusedToolsError {0}'.format(', '.join([tool.name for tool in e.value]))
-#    except ToolCrashedError as e:
-#        print 'ToolCrashedError {0}'.format(e.value)
+    run_bessolve_test('bessolve', settings)
+    # run_symbolic_exploration_test('symbolic_exploration', settings)

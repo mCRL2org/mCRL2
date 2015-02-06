@@ -214,7 +214,9 @@ class Lps2LtsTool(Tool):
     def assign_outputs(self):
         if self.stderr:
             if '-D' in self.args and len(self.output_nodes) > 1:
-                self.output_nodes[1].value = { 'deadlock': re.search('deadlock-detect: deadlock found', self.stdout) != None }
+                value = { 'deadlock': re.search('deadlock-detect: deadlock found', self.stdout) != None }
+                self.output_nodes[1].value = value
+                write_text(self.output_nodes[1].filename(), str(value))
         self.output_nodes[0].value = 'executed'
 
     def arguments(self):

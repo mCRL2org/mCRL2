@@ -11,7 +11,7 @@ import shutil
 import yaml
 from popen import Popen, MemoryExceededError, TimeExceededError
 from subprocess import  PIPE, STDOUT
-from text_utility import write_text
+from text_utility import read_text, write_text
 from tools import Node, Tool, ToolFactory
 
 MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -59,6 +59,7 @@ class Test:
 
         self.verbose = settings['verbose']
         self.toolpath = settings['toolpath']
+        self.cleanup_files = settings['cleanup_files']
 
         self.nodes = []
         for label in data['nodes']: # create nodes
@@ -126,9 +127,8 @@ class Test:
         if len(input_nodes) != len(inputfiles):
             raise RuntimeError('Invalid number of input files provided: expected {0}, got {1}'.format(len(input_nodes), len(inputfiles)))
         for i in range(len(inputfiles)):
-            f = open(inputfiles[i])
             shutil.copy(inputfiles[i], self.input_nodes[i].filename())
-            self.input_nodes[i].value = f.read()
+            self.input_nodes[i].value = read_text(inputfiles[i])
 
     def result(self):
         # Returns the result of the test after all tools have been executed
@@ -157,7 +157,7 @@ class Test:
                 if not os.path.exists(node.filename()):
                     raise RuntimeError('Error in test {}: output file {} is missing!'.format(self.name, node.filename()))
             result = self.result()
-            if result:
+            if result and self.cleanup_files:
                 for node in self.nodes:
                     os.remove(node.filename())
             return result
@@ -197,12 +197,17 @@ def run_yml_test(name, testfile, inputfiles, settings):
     print name, result, msg
     return result
 
+def cleanup_files(result, files, settings):
+    if result and settings['cleanup_files']:
+        for filename in files:
+            os.remove(filename)
+
 def run_pbes_test(name, testfile, p, settings):
     filename = '{0}.txt'.format(name)
-    with open(filename, 'w') as f:
-        f.write(str(p))
+    write_text(filename, str(p))
     inputfiles = [filename]
-    run_yml_test(name, testfile, inputfiles, settings)
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
 
 def run_pbes_test_with_counter_example_minimization(name, testfile, p, settings):
     result = run_pbes_test(name, testfile, p, settings)
@@ -210,3 +215,4 @@ def run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
         m = CounterExampleMinimizer(p, lambda x: run_pbes_test(testfile, x, name + '_minimize', settings), name)
         m.minimize()
         raise RuntimeError('Test {0} failed'.format(name))
+    return result
