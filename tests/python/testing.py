@@ -137,23 +137,6 @@ class Test:
         exec(self.res, self.globals)
         return self.globals['result']
 
-    # Returns the value of the node. Enables 'value(l1)' in the YAML
-    def value(self, node):
-        try:
-            if node.value or node.type == 'Bool':
-                if isinstance(node.value, basestring):
-                    return node.value.strip()
-                return node.value
-            else:
-                # TODO: find out what the purpose of this code is
-                f = open(os.path.join(os.getcwd(), node.label), 'r')
-                res = f.read()
-                f.close()
-                return res
-        except IOError:
-            print 'cannot open stored value file'
-            raise IOError
-
     def remaining_tasks(self):
         # Returns a list of tools that can be executed and have not been executed before
         return [tool for tool in self.tools if tool.can_execute()]
@@ -170,14 +153,13 @@ class Test:
             not_executed = [tool for tool in self.tools if not tool.executed]
             raise UnusedToolsError(not_executed)
         else:
-            for filename in self.used_files():
-                if not os.path.exists(filename):
-                    raise RuntimeError('Error in test {}: output file {} is missing!'.format(self.name, filename))
+            for node in self.nodes:
+                if not os.path.exists(node.filename()):
+                    raise RuntimeError('Error in test {}: output file {} is missing!'.format(self.name, node.filename()))
             result = self.result()
-            if self.result():
-                for filename in self.used_files():
-                    #print 'Removing {}'.format(filename)
-                    os.remove(filename)
+            if result:
+                for node in self.nodes:
+                    os.remove(node.filename())
             return result
 
     # Returns the tool with the given label
@@ -186,10 +168,6 @@ class Test:
             return next(tool for tool in self.tools if tool.label == label)
         except StopIteration:
             raise RuntimeError("could not find model a tool with label '{0}'".format(label))
-
-    # Returns the names of the files that are used when running the test
-    def used_files(self):
-        return filter(None, [node.filename() for node in self.nodes])
 
 def run_replay(testfile, inputfiles, settings, remove_files = True):
     for filename in [testfile] + inputfiles:

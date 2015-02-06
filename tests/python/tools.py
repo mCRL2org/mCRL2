@@ -30,18 +30,8 @@ class Node:
     def __str__(self):
         return 'Node(label = {0}, type = {1}, value = {2})'.format(self.label, self.type, self.value)
 
-    def extension(self, type):
-        if type == 'mCRL2Spec':
-            return 'mcrl2'
-        elif type == 'PbesSpec':
-            return 'txt'
-        elif type == 'LTS':
-            return 'aut'
-        else:
-            return type.lower()
-
     def filename(self):
-        return '{}.{}'.format(self.label, self.extension(self.type))
+        return '{}.{}'.format(self.label, self.type.lower())
 
 class Tool(object):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -53,7 +43,6 @@ class Tool(object):
         self.input_nodes = input_nodes
         self.output_nodes = output_nodes
         self.args = args
-        self.error = ''
         self.executed = False
         self.has_input_nodes = True
         self.has_output_nodes = True
@@ -76,12 +65,14 @@ class Tool(object):
                 return False
         return True
 
-    # Raises an exception if the execution was aborted
+    # Raises an exception if the execution was aborted or produced an error
     def check_execution(self, process, timeout, memlimit):
         if process.maxVirtualMem > memlimit:
             raise MemoryExceededError(process.maxVirtualMem)
         if process.userTime > timeout:
             raise TimeExceededError(process.userTime)
+        if self.stderr and 'error' in self.stderr:
+            raise RuntimeError('Tool {} failed: {}'.format(self.name, self.stderr))
 
     def arguments(self):
         args = []
@@ -97,8 +88,7 @@ class Tool(object):
             if node.value == '':
                 node.value = self.stderr
             if node.value == '':
-                node.value = 'not None'
-            self.error = self.error + self.stderr
+                node.value = 'executed'
 
     def execute(self, dir, timeout, memlimit, verbose, maxVirtLimit = 100000000, usrTimeLimit = 5):
         args = self.arguments()
@@ -128,7 +118,7 @@ class Tool(object):
         out.write('input    = [{0}]\n'.format(', '.join([str(x) for x in self.input_nodes])))
         out.write('output   = [{0}]\n'.format(', '.join([str(x) for x in self.output_nodes])))
         out.write('args     = ' + str(self.args)     + '\n')
-        out.write('error    = ' + str(self.error)    + '\n')
+        out.write('stderr   = ' + str(self.stderr)    + '\n')
         out.write('executed = ' + str(self.executed) + '\n')
         out.write('has_input_nodes  = ' + str(self.has_input_nodes)  + '\n')
         out.write('has_output_nodes = ' + str(self.has_output_nodes) + '\n')
@@ -141,19 +131,15 @@ class Pbes2BoolTool(Tool):
         super(Pbes2BoolTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
-        if self.stderr:
-            self.output_nodes[0] = self.stderr
-            self.error = self.error + self.stderr
+        text = self.stdout.strip()
+        if text.endswith('true'):
+            value = True
+        elif text.endswith('false'):
+            value = False
         else:
-            text = self.stdout.strip()
-            if text.endswith('true'):
-                value = True
-            elif text.endswith('false'):
-                value = False
-            else:
-                value = None
-            self.output_nodes[0].value = value
-            write_text(self.output_nodes[0].filename(), str(value))
+            value = None
+        self.output_nodes[0].value = value
+        write_text(self.output_nodes[0].filename(), str(value))
 
 class PbesPgSolveTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -162,19 +148,15 @@ class PbesPgSolveTool(Tool):
         super(PbesPgSolveTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
-        if self.stderr:
-            self.output_nodes[0] = self.stderr
-            self.error = self.error + self.stderr
+        text = self.stdout.strip()
+        if text.endswith('true'):
+            value = True
+        elif text.endswith('false'):
+            value = False
         else:
-            text = self.stdout.strip()
-            if text.endswith('true'):
-                value = True
-            elif text.endswith('false'):
-                value = False
-            else:
-                value = None
-            self.output_nodes[0].value = value
-            write_text(self.output_nodes[0].filename(), str(value))
+            value = None
+        self.output_nodes[0].value = value
+        write_text(self.output_nodes[0].filename(), str(value))
 
 class BesSolveTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -183,19 +165,15 @@ class BesSolveTool(Tool):
         super(BesSolveTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
-        if self.stderr:
-            self.output_nodes[0] = self.stderr
-            self.error = self.error + self.stderr
+        text = self.stdout.strip()
+        if text.endswith('true'):
+            value = True
+        elif text.endswith('false'):
+            value = False
         else:
-            text = self.stdout.strip()
-            if text.endswith('true'):
-                value = True
-            elif text.endswith('false'):
-                value = False
-            else:
-                value = None
-            self.output_nodes[0].value = value
-            write_text(self.output_nodes[0].filename(), str(value))
+            value = None
+        self.output_nodes[0].value = value
+        write_text(self.output_nodes[0].filename(), str(value))
 
 class LtsInfoTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -208,10 +186,6 @@ class LtsInfoTool(Tool):
 
     def assign_outputs(self):
         node = self.output_nodes[0]
-        if self.stderr:
-            node.value = self.stderr
-            self.error = self.error + self.stderr
-            return
         result = {}
         lines = self.stdout.splitlines()
         m = re.search('Number of states: (\d+)', lines[0])
@@ -239,12 +213,9 @@ class Lps2LtsTool(Tool):
 
     def assign_outputs(self):
         if self.stderr:
-            if 'error' in self.stderr:
-                self.error = self.error + self.stderr
-                return
             if '-D' in self.args and len(self.output_nodes) > 1:
                 self.output_nodes[1].value = { 'deadlock': re.search('deadlock-detect: deadlock found', self.stdout) != None }
-        self.output_nodes[0].value = self.output_nodes[0].filename()
+        self.output_nodes[0].value = 'executed'
 
     def arguments(self):
         return [os.path.join(os.getcwd(), self.input_nodes[0].filename()), os.path.join(os.getcwd(), self.output_nodes[0].filename())]
@@ -256,9 +227,6 @@ class LtsCompareTool(Tool):
         super(LtsCompareTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
-        if self.stderr:
-            self.output_nodes[0].value = self.stderr
-            self.error = self.error + self.stderr
         value = not 'not' in self.stdout
         self.output_nodes[0].value = value
         write_text(self.output_nodes[0].filename(), str(value))

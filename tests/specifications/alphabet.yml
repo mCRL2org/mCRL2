@@ -26,12 +26,12 @@ tools:
   t3:
     input: [l2]
     output: [l4]
-    args: [-oaut]
+    args: []
     name: lps2lts
   t4:
     input: [l3]
     output: [l5]
-    args: [-oaut]
+    args: []
     name: lps2lts
   t5:
     input: [l4, l5]

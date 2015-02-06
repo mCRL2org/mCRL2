@@ -23,7 +23,7 @@ tools:
   t2:
     input: [l2]
     output: [l3]
-    args: [-oaut]
+    args: []
     name: lps2lts
   t3:
     input: [l2]
@@ -38,7 +38,7 @@ tools:
   t5:
     input: [l5]
     output: [l6]
-    args: [-oaut]
+    args: []
     name: lps2lts
   t6:
     input: [l3, l6]

@@ -6,7 +6,7 @@ nodes:
   l3:
     type: LTS
   l4:
-    type: TEXT
+    type: INFO
   l5:
     type: NUMBER
 
@@ -19,7 +19,7 @@ tools:
   t2:
     input: [l2]
     output: [l3]
-    args: [-oaut]
+    args: []
     name: lps2lts
   t3:
     input: [l3]
