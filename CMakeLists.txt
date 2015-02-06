@@ -53,7 +53,7 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(Qt5Xml     QUIET REQUIRED)
   find_package(Qt5Gui     QUIET REQUIRED)
   set_target_properties(Qt5::Core Qt5::OpenGL Qt5::Widgets Qt5::Xml Qt5::Gui
-                        PROPERTIES MAP_IMPORTED_CONFIG_MAINTAINER "DEBUG")
+                        PROPERTIES MAP_IMPORTED_CONFIG_MAINTAINER "RELEASE")
 endif()
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
