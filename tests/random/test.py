@@ -30,21 +30,21 @@ class RandomTestRunner(testrunner.TestRunner):
                      generate_tests('pbesconstelm'   , run_pbesconstelm_test   , testcount) + \
                      generate_tests('pbesinst_finite', run_pbesinst_finite_test, testcount) + \
                      generate_tests('pbesinst_lazy'  , run_pbesinst_lazy_test  , testcount) + \
-                     #generate_tests('pbesparelm'     , run_pbesparelm_test     , testcount) + \
-                     #generate_tests('pbespareqelm'   , run_pbespareqelm_test   , testcount) + \
                      generate_tests('pbessolve'      , run_pbessolve_test      , testcount) + \
-                     #generate_tests('pbesstategraph' , run_pbesstategraph_test , testcount) + \
                      generate_tests('alphabet'       , run_alphabet_test       , testcount) + \
-                     #generate_tests('lpsbinary'      , run_lpsbinary_test      , testcount) + \
-                     #generate_tests('lpsconstelm'    , run_lpsparelm_test      , testcount) + \
-                     #generate_tests('lpsparelm'      , run_lpsparelm_test      , testcount) + \
-                     #generate_tests('lpssumelm'      , run_lpssumelm_test      , testcount) + \
-                     #generate_tests('lpssuminst'     , run_lpssuminst_test     , testcount) + \
                      generate_pbesrewr_tests('simplify'            , run_pbesrewr_test, testcount) + \
                      generate_pbesrewr_tests('pfnf'                , run_pbesrewr_test, testcount) + \
                      generate_pbesrewr_tests('quantifier-all'      , run_pbesrewr_test, testcount) + \
                      generate_pbesrewr_tests('quantifier-finite'   , run_pbesrewr_test, testcount) + \
                      generate_pbesrewr_tests('quantifier-one-point', run_pbesrewr_test, testcount)
+                     #generate_tests('pbesparelm'     , run_pbesparelm_test     , testcount) + \
+                     #generate_tests('pbespareqelm'   , run_pbespareqelm_test   , testcount) + \
+                     #generate_tests('pbesstategraph' , run_pbesstategraph_test , testcount) + \
+                     #generate_tests('lpsbinary'      , run_lpsbinary_test      , testcount) + \
+                     #generate_tests('lpsconstelm'    , run_lpsparelm_test      , testcount) + \
+                     #generate_tests('lpsparelm'      , run_lpsparelm_test      , testcount) + \
+                     #generate_tests('lpssumelm'      , run_lpssumelm_test      , testcount) + \
+                     #generate_tests('lpssuminst'     , run_lpssuminst_test     , testcount) + \
 
         self.settings = { 'toolpath': self._tool_path,
                           'verbose': True,
