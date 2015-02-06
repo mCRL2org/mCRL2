@@ -31,9 +31,50 @@ namespace data
 namespace detail
 {
 
-struct rewriter_interface;
-
 typedef std::vector < sort_expression_list> sort_list_vector;
+
+///
+/// \brief The normal_form_cache class stores normal forms of data_expressions that
+///        are inserted in it. By keeping the cache on the stack, the normal forms
+///        in it will not be freed by the ATerm library, and can therefore be used
+///        in the generated jittyc code.
+///
+class normal_form_cache
+{
+private:
+  RewriterJitty& m_rewriter;
+  std::set<data_expression> m_lookup;
+public:
+  normal_form_cache(RewriterJitty& rewriter)
+    : m_rewriter(rewriter)
+  { }
+
+  ///
+  /// \brief insert stores the normal form of t in the cache, and returns a string
+  ///        that is a C++ representation of the stored normal form. This string can
+  ///        be used by the generated rewriter as long as the cache object is alive,
+  ///        and its clear() method has not been called.
+  /// \param t The term to normalize.
+  /// \return A C++ string that evaluates to the cached normal form of t.
+  ///
+  std::string insert(const data_expression& t)
+  {
+    std::stringstream ss;
+    RewriterJitty::substitution_type sigma;
+    auto pair = m_lookup.insert(m_rewriter(t, sigma));
+    ss << "*reinterpret_cast<const data_expression*>(" << (void*)&(*pair.first) << ")";
+    return ss.str();
+  }
+
+  ///
+  /// \brief clear clears the cache. This operation invalidates all the C++ strings
+  ///        obtained via the insert() method.
+  ///
+  void clear()
+  {
+    m_lookup.clear();
+  }
+};
 
 class RewriterCompilingJitty: public Rewriter
 {
@@ -85,11 +126,15 @@ class RewriterCompilingJitty: public Rewriter
     }
 
   private:
+    class ImplementTree;
+    friend class ImplementTree;
+    
     RewriterJitty jitty_rewriter;
     std::set < data_equation > rewrite_rules;
     bool made_files;
-
     std::map < function_symbol, data_equation_list >  jittyc_eqns;
+
+    normal_form_cache m_nf_cache;
 
     std::map <mcrl2::data::function_symbol,size_t> int2ar_idx;
     size_t ar_size;
@@ -114,10 +159,7 @@ class RewriterCompilingJitty: public Rewriter
     bool calc_nfs(const data_expression& t, variable_or_number_list nnfvars);
     std::string calc_inner_terms(nfs_array &nfs, const application& args, const size_t startarg, variable_or_number_list nnfvars, const nfs_array& rewr);
     std::pair<bool,std::string> calc_inner_term(const data_expression &t, 
-                const size_t startarg, variable_or_number_list nnfvars, const bool rewr);
-    void calcTerm(FILE* f, const data_expression& t, const size_t startarg, variable_or_number_list nnfvars, bool rewr = true);
-    void implement_tree_aux(FILE* f, const match_tree& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt, size_t d, const size_t arity, 
-               const std::vector<bool> &used, variable_or_number_list nnfvars);
+                const size_t startarg, variable_or_number_list nnfvars, const bool rewr = true);
     void implement_tree(FILE* f, const match_tree& tree, const size_t arity, size_t d, 
                         const std::vector<bool> &used);
     void implement_strategy(FILE* f, match_tree_list strat, size_t arity, size_t d, const mcrl2::data::function_symbol& opid, const nfs_array& nf_args);
@@ -143,10 +185,6 @@ struct rewriter_interface
   data_expression (*rewrite_external)(const data_expression &t);
   void (*rewrite_cleanup)();
 };
-
-// Declare as a global array. Should be moved into the jittyc rewriter class,
-// along with all the functions in the compiling rewriter.
-extern std::vector <data_expression> prepared_normal_forms;
 
 }
 }

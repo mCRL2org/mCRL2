@@ -203,28 +203,26 @@ static char* whitespace(size_t len)
 }
 
 
-// The function below yields true if the function indicated by the
-// function index can legitemately be used with a arguments.
-// Typically a function f:D1x...xDn->D can be used with 0 and n arguments.
-// A function f:(D1x...xDn)->(E1x...Em)->F can be used with 0, n, and n+m
-// arguments.
-static bool arity_is_allowed(
-                     const sort_expression s,
-                     const size_t a)
+///
+/// \brief arity_is_allowed yields true if the function indicated by the function index can
+///        legitemately be used with a arguments. A function f:D1x...xDn->D can be used with 0 and
+///        n arguments. A function f:(D1x...xDn)->(E1x...Em)->F can be used with 0, n, and n+m
+///        arguments.
+/// \param s A function sort
+/// \param a The desired number of arguments
+/// \return A boolean indicating whether a term of sort s applied to a arguments is a valid term.
+///
+static bool arity_is_allowed(const sort_expression& s, const size_t a)
 {
-  if (a==0)
+  if (a == 0)
   {
     return true;
   }
   if (is_function_sort(s))
   {
-    const function_sort fs(s);
-    size_t n=fs.domain().size();
-    if (n>a)
-    {
-      return false;
-    }
-    return arity_is_allowed(fs.codomain(),a-n);
+    const function_sort& fs = atermpp::down_cast<function_sort>(s);
+    size_t n = fs.domain().size();
+    return n <= a && arity_is_allowed(fs.codomain(), a - n);
   }
   return false;
 }
@@ -1373,9 +1371,6 @@ static string calc_inner_appl_head(size_t arity)
   return ss.str();
 }
 
-static std::map<data_expression,size_t> protected_data_expressions;
-std::vector <data_expression> prepared_normal_forms;
-
 /// This function generates a string of C++ code to calculate the data_expression t.
 /// If the result is a normal form the resulting boolean is true, otherwise it is false.
 /// The data expression t is the term for which C code is generated.
@@ -1397,25 +1392,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
   if (find_free_variables(t).empty())
   {
-    // Returning a value is better than an index in an array.
-    substitution_type sigma;
-    const data_expression t_normal_form=jitty_rewriter.rewrite(t,sigma);
-
-    size_t index;
-    if (protected_data_expressions.count(t_normal_form)>0)
-    {
-      index=protected_data_expressions[t_normal_form];
-    }
-    else
-    {
-      index=prepared_normal_forms.size();
-      protected_data_expressions[t_normal_form]=index;
-      assert(index==protected_data_expressions[t_normal_form]);
-      prepared_normal_forms.push_back(t_normal_form);
-    }
-
-    ss << "prepared_normal_forms[" << index << "]";
-    return pair<bool,string>(true,ss.str());
+    return pair<bool,string>(true, m_nf_cache.insert(t));
   }
 
   if (is_function_symbol(t))
@@ -1801,296 +1778,335 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   return pair<bool,string>(b,ss.str());
 }
 
-void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, const size_t startarg, variable_or_number_list nnfvars, bool rewr)
+class RewriterCompilingJitty::ImplementTree
 {
-  pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr);
-  fprintf(f,"%s",p.second.c_str());
-  return;
-}
-
-static std::vector<int> i_t_stack;
-
-void RewriterCompilingJitty::implement_tree_aux(
-      FILE* f,
-      const match_tree& tree,
-      size_t cur_arg,
-      size_t parent,
-      size_t level,
-      size_t cnt,
-      size_t d,
-      const size_t arity,
-      const std::vector<bool>& used,
-      variable_or_number_list nnfvars)
-// Print code representing tree to f.
-//
-// cur_arg   Indices refering to the variable that contains the current
-// parent    term. For level 0 this means arg<cur_arg>, for level 1 it
-//           means arg<parent>(<cur_arg) and for higher
-//           levels it means t<parent>(<cur_arg>)
-//
-// parent    Index of cur_arg in the previous level
-//
-// level     Indicates the how deep we are in the term (e.g. in
-//           f(.g(x),y) . indicates level 0 and in f(g(.x),y) level 1
-//
-// cnt       Counter indicating the number of variables t<i> (0<=i<cnt)
-//           used so far (in the current scope)
-//
-// d         Indicates the current scope depth in the code (i.e. new
-//           lines need to use at least 2*d spaces for indent)
-//
-// arity     Arity of the head symbol of the expression where are
-//           matching (for construction of return values)
-{
-  if (tree.isS())
+private:
+  class padding
+  {
+  private:
+    size_t m_indent;
+  public:
+    padding(size_t indent) : m_indent(indent) { }
+    void indent() { m_indent += 2; }
+    void unindent() { m_indent -= 2; }
+    
+    friend
+    std::ostream& operator<<(std::ostream& stream, const padding& p)
+    {
+      for (size_t i = p.m_indent; i != 0; --i)
+      {
+        stream << ' ';
+      }
+      return stream;
+    }
+  };
+  
+  RewriterCompilingJitty& m_rewriter;
+  std::ostream& m_stream;
+  const std::vector<bool>& m_used;
+  std::vector<int> m_stack;
+  padding m_padding;
+  variable_or_number_list m_nnfvars;
+  
+  // Print code representing tree to f.
+  //
+  // cur_arg   Indices refering to the variable that contains the current
+  // parent    term. For level 0 this means arg<cur_arg>, for level 1 it
+  //           means arg<parent>(<cur_arg) and for higher
+  //           levels it means t<parent>(<cur_arg>)
+  //
+  // parent    Index of cur_arg in the previous level
+  //
+  // level     Indicates the how deep we are in the term (e.g. in
+  //           f(.g(x),y) . indicates level 0 and in f(g(.x),y) level 1
+  //
+  // cnt       Counter indicating the number of variables t<i> (0<=i<cnt)
+  //           used so far (in the current scope)
+  void implement_tree_aux(const match_tree& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  {
+    if (tree.isS())
+    {
+      implement_tree_aux(atermpp::down_cast<match_tree_S>(tree), cur_arg, parent, level, cnt);
+    }
+    else if (tree.isM())
+    {
+      implement_tree_aux(atermpp::down_cast<match_tree_M>(tree), cur_arg, parent, level, cnt);
+    }
+    else if (tree.isF())
+    {
+      implement_tree_aux(atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt);
+    }
+    else if (tree.isD())
+    {
+      implement_tree_aux(atermpp::down_cast<match_tree_D>(tree), level, cnt);
+    }
+    else if (tree.isN())
+    {
+      implement_tree_aux(atermpp::down_cast<match_tree_N>(tree), cur_arg, parent, level, cnt);
+    }
+    else if (tree.isC())
+    {
+      implement_tree_aux(atermpp::down_cast<match_tree_C>(tree), cur_arg, parent, level, cnt);
+    }
+    else if (tree.isR())
+    {
+      implement_tree_aux(atermpp::down_cast<match_tree_R>(tree), cur_arg, level);
+    }
+    else 
+    {
+      // These are the only remaining case, where we do not have to do anything.
+      assert(tree.isA() || tree.isX() || tree.isMe()); 
+    }    
+  }
+  
+  void implement_tree_aux(const match_tree_S& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     const match_tree_S& treeS(tree);
+    m_stream << m_padding << "const data_expression& " << string(treeS.target_variable().name()).c_str() + 1 << " = ";
     if (level == 0)
     {
-      if (used[cur_arg])
+      if (m_used[cur_arg])
       {
-        fprintf(f,"%sconst data_expression& %s = arg%lu; // S1\n",whitespace(d*2), string(treeS.target_variable().name()).c_str()+1,cur_arg);
+        m_stream << "arg" << cur_arg << "; // S1\n";
       }
       else
       {
-        fprintf(f,"%sconst data_expression& %s = arg_not_nf%lu; // S1\n",whitespace(d*2),string(treeS.target_variable().name()).c_str()+1,cur_arg);
-        nnfvars.push_front(treeS.target_variable());
+        m_stream << "arg_not_nf" << cur_arg << "; // S1\n";
+        m_nnfvars.push_front(treeS.target_variable());
       }
     }
     else
     {
-      fprintf(f,"%sconst data_expression& %s = atermpp::down_cast<data_expression>(%s%lu[%lu]); // S2\n",
-              whitespace(d*2),
-              string(treeS.target_variable().name()).c_str()+1,
-              (level==1)?"arg":"t",
-              parent,cur_arg);
+      m_stream << "atermpp::down_cast<data_expression>(" 
+               << (level == 1 ? "arg" : "t") << parent << "[" << cur_arg << "]"
+               << "); // S2\n";
     }
-    implement_tree_aux(f,treeS.subtree(),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
-    return;
+    implement_tree_aux(tree.subtree(), cur_arg, parent, level, cnt);
   }
-  else if (tree.isM())
+  
+  void implement_tree_aux(const match_tree_M& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
-    const match_tree_M& treeM(tree);
+    m_stream << m_padding << "if (" << string(tree.match_variable().name()).c_str() + 1 << " == ";
     if (level == 0)
     {
-      fprintf(f,"%sif (%s==arg%lu) // M\n"
-              "%s{\n",
-              whitespace(d*2),
-              string(treeM.match_variable().name()).c_str()+1,
-              cur_arg,
-              whitespace(d*2)
-             );
+      m_stream << "arg" << cur_arg;
     }
     else
     {
-      fprintf(f,"%sif (%s==%s%lu[%lu]) // M\n"
-              "%s{\n",
-              whitespace(d*2),
-              string(treeM.match_variable().name()).c_str()+1,
-              (level==1)?"arg":"t",
-              parent,
-              cur_arg,
-              whitespace(d*2)
-             );
+      m_stream << (level == 1 ? "arg" : "t") << parent << "[" << cur_arg << "]";
     }
-    implement_tree_aux(f,treeM.true_tree(),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
-    fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
-    implement_tree_aux(f,treeM.false_tree(),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
-    fprintf(f,"%s}\n",whitespace(d*2));
-    return;
+    m_stream << ") // M\n" << m_padding 
+             << "{\n";
+    m_padding.indent();
+    implement_tree_aux(tree.true_tree(), cur_arg, parent, level, cnt);
+    m_padding.unindent();
+    m_stream << m_padding
+             << "}\n" << m_padding 
+             << "else\n" << m_padding
+             << "{\n";
+    m_padding.indent();
+    implement_tree_aux(tree.false_tree(), cur_arg, parent, level, cnt);
+    m_padding.unindent();
+    m_stream << m_padding
+             << "}\n";
   }
-  else if (tree.isF())
+  
+  void implement_tree_aux(const match_tree_F& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
-    const match_tree_F& treeF(tree);
+    const void* func = (void*)(atermpp::detail::address(tree.function()));
+    const char* s_arg = "arg";
+    const char* s_t = "t";
+    m_stream << m_padding;
     if (level == 0)
     {
-      if (!is_function_sort(treeF.function().sort()))
+      if (!is_function_sort(tree.function().sort()))
       {
-      fprintf(f,"%sif (atermpp::detail::address(arg%lu)==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F1\n"
-              "%s{\n",
-              whitespace(d*2),
-              cur_arg,
-              (void*)atermpp::detail::address(treeF.function()),
-              whitespace(d*2)
-             );
+        m_stream << "if (atermpp::detail::address(arg" << cur_arg << ") == "
+                 <<     "reinterpret_cast<const atermpp::detail::_aterm*>(" << func << ")) // F1\n" << m_padding
+                 << "{\n";
       }
       else
       {
-        fprintf(f,"%sif (atermpp::detail::address(\n"
-              "             (mcrl2::data::is_function_symbol(arg%lu)?arg%lu:arg%lu[0]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F1\n"
-              "%s{\n",
-              whitespace(d*2),
-              cur_arg,
-              cur_arg,
-              cur_arg,
-              (void*)atermpp::detail::address(treeF.function()),
-              whitespace(d*2)
-             );
+        m_stream << "if (atermpp::detail::address(\n" << m_padding
+                 << "     (mcrl2::data::is_function_symbol(arg" << cur_arg <<  ") ? arg" << cur_arg << " : arg" << cur_arg << "[0])) == "
+                 <<     "reinterpret_cast<const atermpp::detail::_aterm*>(" << func << ")) // F1\n" << m_padding
+                 << "{\n";
       }
     }
     else
     {
-      if (!is_function_sort(treeF.function().sort()))
+      const char* array = level == 1 ? s_arg : s_t;
+      if (!is_function_sort(tree.function().sort()))
       {
-        fprintf(f,"%sif (atermpp::detail::address(down_cast<data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
-              "%s{\n"
-              "%s  const data_expression& t%lu=atermpp::down_cast<data_expression>(%s%lu[%lu]);\n",  // Should be a function symbol, not a data expression, but this has consequences elsewhere.
-              whitespace(d*2),
-              // (level==1)?"arg":"t",parent,cur_arg,
-              (level==1)?"arg":"t",parent,cur_arg,
-              (void*)atermpp::detail::address(treeF.function()),
-                      string(treeF.function().name()).c_str(),
-              whitespace(d*2),
-              whitespace(d*2),cnt,(level==1)?"arg":"t",parent,cur_arg
-             );
+        m_stream << "if (atermpp::detail::address(down_cast<data_expression>(" << array << parent << "[" << cur_arg << "])) == "
+                 <<     "reinterpret_cast<const atermpp::detail::_aterm*>(" << func << ")) // F2a " << tree.function().name() << "\n" << m_padding
+                 << "{\n" << m_padding
+                 << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << array << parent << "[" << cur_arg << "]);\n";
       }
       else
-      { fprintf(f,"%sif (is_application_no_check(atermpp::down_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(down_cast<data_expression>(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2b %s\n"
-              "%s{\n"
-              "%s  const data_expression& t%lu=atermpp::down_cast<data_expression>(%s%lu[%lu]);\n",  // Should be an application, not a data expression, but this has consequences elsewhere.
-              whitespace(d*2),
-              (level==1)?"arg":"t",parent,cur_arg,
-              (level==1)?"arg":"t",parent,cur_arg,
-              (void*)atermpp::detail::address(treeF.function()),
-                      string(treeF.function().name()).c_str(),
-              whitespace(d*2),
-              whitespace(d*2),cnt,(level==1)?"arg":"t",parent,cur_arg
-             );
+      { 
+        m_stream << "if (is_application_no_check(down_cast<atermpp::aterm_appl>(" << array << parent << "[" << cur_arg << "])) && "
+                 <<     "atermpp::detail::address(down_cast<data_expression>(" << array << parent << "[" << cur_arg << "])[0]) == "
+                 <<     "reinterpret_cast<const atermpp::detail::_aterm*>(" << func << ")) // F2b " << tree.function().name() << "\n" << m_padding
+                 << "{\n" << m_padding
+                 << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << array << parent << "[" << cur_arg << "]);\n";
       }
     }
-    i_t_stack.push_back(cur_arg);
-    i_t_stack.push_back(parent);
-    implement_tree_aux(f,treeF.true_tree(),1,(level==0)?cur_arg:cnt,level+1,cnt+1,d+1,arity,used,nnfvars);
-    i_t_stack.pop_back();
-    i_t_stack.pop_back();
-    fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
-    implement_tree_aux(f,treeF.false_tree(),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
-    fprintf(f,"%s}\n",whitespace(d*2));
-    return;
+    m_stack.push_back(cur_arg);
+    m_stack.push_back(parent);
+    m_padding.indent();
+    implement_tree_aux(tree.true_tree(), 1, level == 0 ? cur_arg : cnt, level + 1, cnt + 1);
+    m_padding.unindent();
+    m_stack.pop_back();
+    m_stack.pop_back();
+    m_stream << m_padding
+             << "}\n" << m_padding
+             << "else\n" << m_padding
+             << "{\n";
+    m_padding.indent();
+    implement_tree_aux(tree.false_tree(), cur_arg, parent, level, cnt);
+    m_padding.unindent();
+    m_stream << m_padding
+             << "}\n";
   }
-  else if (tree.isD())
+  
+  void implement_tree_aux(const match_tree_D& tree, size_t level, size_t cnt)
   {
-    const match_tree_D& treeD(tree);
-    int i = i_t_stack.back();
-    i_t_stack.pop_back();
-    int j = i_t_stack.back();
-    i_t_stack.pop_back();
-    implement_tree_aux(f,treeD.subtree(),j,i,level-1,cnt,d,arity,used,nnfvars);
-    i_t_stack.push_back(j);
-    i_t_stack.push_back(i);
-    return;
+    int i = m_stack.back();
+    m_stack.pop_back();
+    int j = m_stack.back();
+    m_stack.pop_back();
+    implement_tree_aux(tree.subtree(), j, i, level - 1, cnt);
+    m_stack.push_back(j);
+    m_stack.push_back(i);
   }
-  else if (tree.isN())
-  {
-    const match_tree_N& treeN(tree);
-    implement_tree_aux(f,treeN.subtree(),cur_arg+1,parent,level,cnt,d,arity,used,nnfvars);
-    return;
-  }
-  else if (tree.isC())
-  {
-    const match_tree_C& treeC(tree);
-    fprintf(f,"%sif (",whitespace(d*2));
-    calcTerm(f,treeC.condition(),0,nnfvars);
 
-    fprintf(f,"==data_expression((const atermpp::detail::_aterm*) %p)) // C\n"
-            "%s{\n",
-            (void*)atermpp::detail::address(sort_bool::true_()),
-            whitespace(d*2)
-           );
-
-    implement_tree_aux(f,treeC.true_tree(),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
-    fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
-    implement_tree_aux(f,treeC.false_tree(),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
-    fprintf(f,"%s}\n",whitespace(d*2));
-    return;
-  }
-  else if (tree.isR())
+  void implement_tree_aux(const match_tree_N& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
-    const match_tree_R& treeR(tree);
-    fprintf(f,"%sreturn ",whitespace(d*2));
+    implement_tree_aux(tree.subtree(), cur_arg + 1, parent, level, cnt);
+  }
+
+  void implement_tree_aux(const match_tree_C& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  {
+    pair<bool, string> p = m_rewriter.calc_inner_term(tree.condition(), 0, m_nnfvars);
+    m_stream << m_padding
+             << "if (" << p.second << " == data_expression((const atermpp::detail::_aterm*)" 
+             <<      (void*)atermpp::detail::address(sort_bool::true_()) << ")) // C\n" << m_padding
+             << "{\n";
+    
+    m_padding.indent();
+    implement_tree_aux(tree.true_tree(), cur_arg, parent, level, cnt);
+    m_padding.unindent();
+    
+    m_stream << m_padding
+             << "}\n" << m_padding
+             << "else\n" << m_padding
+             << "{\n";
+          
+    m_padding.indent();
+    implement_tree_aux(tree.false_tree(), cur_arg, parent, level, cnt);
+    m_padding.unindent();
+    
+    m_stream << m_padding
+             << "}\n";
+  }
+  
+  void implement_tree_aux(const match_tree_R& tree, size_t cur_arg, size_t level)
+  {
     if (level > 0)
     {
-      cur_arg = i_t_stack[2*level-1];
+      cur_arg = m_stack[2 * level - 1];
     }
-    calcTerm(f,treeR.result(),cur_arg+1,nnfvars);
-    fprintf(f,"; // R1\n");
-    return;
+    pair<bool, string> p = m_rewriter.calc_inner_term(tree.result(), cur_arg + 1, m_nnfvars);
+    m_stream << m_padding << "return " << p.second << "; // R1\n";
   }
-  assert(tree.isA() || tree.isX() || tree.isMe()); // These are the only remaining case, where we do not have to do anything.
-}
+
+  const match_tree& implement_tree(const match_tree_C& tree)
+  {
+    assert(tree.true_tree().isR());
+    pair<bool, string> p = m_rewriter.calc_inner_term(tree.condition(), 0, variable_or_number_list());
+    pair<bool, string> r = m_rewriter.calc_inner_term(match_tree_R(tree.true_tree()).result(), 0, m_nnfvars);
+    m_stream << m_padding
+             << "if (" << p.second << " == atermpp::aterm_appl((const atermpp::detail::_aterm*)" << (void*)atermpp::detail::address(sort_bool::true_()) << ")) // C\n" << m_padding
+             << "{\n" << m_padding
+             << "  return " << r.second << ";\n" << m_padding
+             << "}\n" << m_padding
+             << "else\n" << m_padding
+             << "{\n" << m_padding;
+    m_padding.indent();
+    return tree.false_tree();
+  }
+  
+  void implement_tree(const match_tree_R& tree, size_t arity)
+  {
+    pair<bool, string> p = m_rewriter.calc_inner_term(tree.result(), 0, m_nnfvars);
+    if (arity == 0)
+    { 
+      // return a reference to an atermpp::aterm_appl
+      m_stream << m_padding
+               << "static data_expression static_term(rewrite(" << p.second << "));\n" << m_padding
+               << "return static_term; // R2a\n";
+    }
+    else
+    { 
+      // arity>0
+      m_stream << m_padding
+               << "return " << p.second << "; // R2b\n";
+    }
+  }
+  
+public:
+  ImplementTree(RewriterCompilingJitty& rewr, std::ostream& stream, const std::vector<bool>& used, size_t padding)
+    : m_rewriter(rewr), m_stream(stream), m_used(used), m_padding(padding)
+  { }
+  
+  void implement_tree(match_tree tree, const size_t arity)
+  {
+    size_t l = 0;
+    
+    for (size_t i = 0; i < arity; ++i)
+    {
+      if (!m_used[i])
+      {
+        m_nnfvars.push_front(atermpp::aterm_int(i));
+      }
+    }
+    
+    while (tree.isC())
+    {
+      tree = implement_tree(down_cast<match_tree_C>(tree));
+      l++;
+    }
+    
+    if (tree.isR())
+    {
+      implement_tree(down_cast<match_tree_R>(tree), arity);
+    }
+    else
+    {
+      implement_tree_aux(tree, 0, 0, 0, 0);
+    }
+    
+    // Close braces opened by implement_tree(const match_tree_C&)
+    while (0 < l--)
+    {
+      m_padding.unindent();
+      m_stream << m_padding << "}\n";
+    }
+  }
+};
 
 void RewriterCompilingJitty::implement_tree(
             FILE* f,
-            const match_tree& tree1,
+            const match_tree& tree,
             const size_t arity,
             size_t d,
             const std::vector<bool>& used)
 {
-  size_t l = 0;
-  match_tree tree=tree1;
-  variable_or_number_list nnfvars;
-  for (size_t i=0; i<arity; i++)
-  {
-    if (!used[i])
-    {
-      nnfvars.push_front(atermpp::aterm_int(i));
-    }
-  }
-
-  while (tree.isC())
-  {
-    const match_tree_C& treeC(tree);
-    fprintf(f,"%sif (",whitespace(d*2));
-    calcTerm(f,treeC.condition(),0,variable_or_number_list());
-
-    fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
-            "%s{\n"
-            "%sreturn ",
-            (void*)atermpp::detail::address(sort_bool::true_()),
-            whitespace(d*2),
-            whitespace(d*2)
-           );
-
-    assert(treeC.true_tree().isR());
-    calcTerm(f,match_tree_R(treeC.true_tree()).result(),0,nnfvars);
-    fprintf(f,";\n"
-            "%s}\n%selse\n%s{\n", whitespace(d*2),whitespace(d*2),whitespace(d*2)
-           );
-    tree = treeC.false_tree();
-    d++;
-    l++;
-  }
-  if (tree.isR())
-  {
-    const match_tree_R& treeR(tree);
-    if (arity==0)
-    { // return a reference to an atermpp::aterm_appl
-      fprintf(f,"%sstatic data_expression static_term(rewrite(",whitespace(d*2));
-      calcTerm(f,treeR.result(),0,nnfvars);
-      fprintf(f,")); \n");
-      fprintf(f,"%sreturn static_term",whitespace(d*2));
-      fprintf(f,"; // R2a\n");
-    }
-    else
-    { // arity>0
-      fprintf(f,"%sreturn ",whitespace(d*2));
-      calcTerm(f,treeR.result(),0,nnfvars);
-      fprintf(f,"; // R2b\n");
-    }
-  }
-  else
-  {
-    i_t_stack.clear();
-    implement_tree_aux(f,tree,0,0,0,0,d,arity,used,nnfvars);
-  }
-  while (l > 0)
-  {
-    --d;
-    fprintf(f,"%s}\n",whitespace(d*2));
-    --l;
-  }
+  std::stringstream s;
+  ImplementTree(*this, s, used, 2 * d).implement_tree(tree, arity);
+  fputs(s.str().c_str(), f);
 }
-
 
 static std::string finish_function_return_term(const size_t arity,
                                                const std::string& head,
@@ -2143,35 +2159,19 @@ void RewriterCompilingJitty::finish_function(FILE* f,
   // Note that arity is the total arity, of all function symbols.
   if (arity == 0)
   {
-    substitution_type sigma;
-    const data_expression t_normal_form=jitty_rewriter.rewrite(opid,sigma);
-    size_t index;
-    if (protected_data_expressions.count(t_normal_form)>0)
-    {
-      index=protected_data_expressions[t_normal_form];
-    }
-    else
-    {
-      index=prepared_normal_forms.size();
-      protected_data_expressions[t_normal_form]=index;
-      assert(index==protected_data_expressions[t_normal_form]);
-      prepared_normal_forms.push_back(t_normal_form);
-    }
-    fprintf(f,"return prepared_normal_forms[%ld]",index);
+    fprintf(f, "return %s;\n", m_nf_cache.insert(opid).c_str());
   }
   else
   {
-    fprintf(f,"return ");
     size_t used_arguments=0;
     stringstream ss;
-    ss << "atermpp::down_cast<const data_expression>(aterm((const atermpp::detail::_aterm*)"
+    ss << "data_expression((const atermpp::detail::_aterm*)"
        << (void*)atermpp::detail::address(opid)
-       << "))";
+       << ")";
 
-    fprintf(f,"%s",finish_function_return_term(arity,ss.str(),function_sort(opid.sort()),used,used_arguments).c_str());
+    fprintf(f,"return %s;\n",finish_function_return_term(arity,ss.str(),function_sort(opid.sort()),used,used_arguments).c_str());
     assert(used_arguments==arity);
   }
-  fprintf(f, ";\n");
 }
 
 void RewriterCompilingJitty::implement_strategy(
@@ -2183,9 +2183,9 @@ void RewriterCompilingJitty::implement_strategy(
                const nfs_array& nf_args)
 {
   std::vector<bool> used=nf_args; // This vector maintains which arguments are in normal form. Initially only those in nf_args are in normal form.
-stringstream ss;
-ss << "//" << strat << "\n";
-fprintf(f,"%s",ss.str().c_str());
+  stringstream ss;
+  ss << whitespace(2*d) << "//" << strat << "\n";
+  fprintf(f,"%s",ss.str().c_str());
   while (!strat.empty())
   {
     if (strat.front().isA())
@@ -2198,7 +2198,7 @@ fprintf(f,"%s",ss.str().c_str());
 
         used[arg] = true;
       }
-      fprintf(f,"// Considering argument  %ld\n",arg);
+      fprintf(f,"%s// Considering argument  %ld\n",whitespace(2*d),arg);
     }
     else
     {
@@ -2402,8 +2402,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
 
 void RewriterCompilingJitty::CleanupRewriteSystem()
 {
-  protected_data_expressions.clear();
-  prepared_normal_forms.clear();
+  m_nf_cache.clear();
   if (so_rewr_cleanup != NULL)
   {
     so_rewr_cleanup();
@@ -3104,9 +3103,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
 RewriterCompilingJitty::RewriterCompilingJitty(
                           const data_specification& data_spec,
-                          const used_data_equation_selector& equation_selector):
-   Rewriter(data_spec,equation_selector),
-   jitty_rewriter(data_spec,equation_selector)
+                          const used_data_equation_selector& equation_selector)
+  : Rewriter(data_spec,equation_selector),
+    jitty_rewriter(data_spec,equation_selector),
+    m_nf_cache(jitty_rewriter)
 {
   so_rewr_cleanup = NULL;
   rewriter_so = NULL;
