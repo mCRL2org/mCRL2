@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ~ Copyright 2011-2015 Wieger Wesselink.
+#~ Copyright 2015 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
@@ -17,8 +17,8 @@ from testing import run_replay, run_yml_test, run_pbes_test, run_pbes_test_with_
 MCRL2_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
 
-def run_alphabet_test(name, settings):
-    testfile = '../specifications/alphabet.yml'
+def run_alphabet_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'alphabet.yml')
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
@@ -29,8 +29,8 @@ def run_alphabet_test(name, settings):
     result = run_yml_test(name, testfile, inputfiles, settings)
     cleanup_files(result, inputfiles, settings)
 
-def run_lpssuminst_test(name, settings):
-    testfile = '../specifications/lpssuminst.yml'
+def run_lpssuminst_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpssuminst.yml')
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
@@ -41,8 +41,8 @@ def run_lpssuminst_test(name, settings):
     result = run_yml_test(name, testfile, inputfiles, settings)
     cleanup_files(result, inputfiles, settings)
 
-def run_lpssumelm_test(name, settings):
-    testfile = '../specifications/lpssumelm.yml'
+def run_lpssumelm_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpssumelm.yml')
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
@@ -53,8 +53,8 @@ def run_lpssumelm_test(name, settings):
     result = run_yml_test(name, testfile, inputfiles, settings)
     cleanup_files(result, inputfiles, settings)
 
-def run_lpsparelm_test(name, settings):
-    testfile = '../specifications/lpsparelm.yml'
+def run_lpsparelm_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsparelm.yml')
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
@@ -65,8 +65,8 @@ def run_lpsparelm_test(name, settings):
     result = run_yml_test(name, testfile, inputfiles, settings)
     cleanup_files(result, inputfiles, settings)
 
-def run_lpsconstelm_test(name, settings):
-    testfile = '../specifications/lpsconstelm.yml'
+def run_lpsconstelm_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsconstelm.yml')
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
@@ -77,8 +77,8 @@ def run_lpsconstelm_test(name, settings):
     result = run_yml_test(name, testfile, inputfiles, settings)
     cleanup_files(result, inputfiles, settings)
 
-def run_lpsbinary_test(name, settings):
-    testfile = '../specifications/lpsbinary.yml'
+def run_lpsbinary_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsbinary.yml')
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
@@ -89,8 +89,8 @@ def run_lpsbinary_test(name, settings):
     result = run_yml_test(name, testfile, inputfiles, settings)
     cleanup_files(result, inputfiles, settings)
 
-def run_bessolve_test(name, settings):
-    testfile = '../specifications/bessolve.yml'
+def run_bessolve_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'bessolve.yml')
     filename = '{0}.txt'.format(name, settings)
     equation_count = 4
     term_size = 3
@@ -100,8 +100,8 @@ def run_bessolve_test(name, settings):
     result = run_yml_test(name, testfile, inputfiles, settings)
     cleanup_files(result, inputfiles, settings)
 
-def run_lps2pbes_test(name, settings):
-    testfile = '../specifications/lps2pbes.yml'
+def run_lps2pbes_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lps2pbes.yml')
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
@@ -114,8 +114,8 @@ def run_lps2pbes_test(name, settings):
     cleanup_files(result, [filename], settings)
 
 # N.B. does not work yet due to unusable abstraction map
-def run_pbesabsinthe_test(name, settings):
-    testfile = '../specifications/pbesabsinthe.yml'
+def run_pbesabsinthe_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesabsinthe.yml')
     equation_count = 2
     atom_count = 2
     propvar_count = 2
@@ -126,26 +126,8 @@ def run_pbesabsinthe_test(name, settings):
     settings['tools'] = { 't2': { 'args': [abstraction] }, 't3': { 'args': [abstraction] } }
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
-def run_pbesrewr_pfnf_test(name, settings):
-    testfile = '../specifications/pbesrewr_pfnf.yml'
-    equation_count = 3
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
-
-def run_pbesrewr_simplify_test(name, settings):
-    testfile = '../specifications/pbesrewr_simplify.yml'
-    equation_count = 3
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
-
-def run_pbesabstract_test(name, settings):
-    testfile = '../specifications/pbesabstract.yml'
+def run_pbesabstract_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesabstract.yml')
     equation_count = 2
     atom_count = 2
     propvar_count = 2
@@ -153,8 +135,8 @@ def run_pbesabstract_test(name, settings):
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
-def run_pbesconstelm_test(name, settings):
-    testfile = '../specifications/pbesconstelm.yml'
+def run_pbesconstelm_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesconstelm.yml')
     equation_count = 3
     atom_count = 4
     propvar_count = 3
@@ -162,8 +144,8 @@ def run_pbesconstelm_test(name, settings):
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
-def run_pbesparelm_test(name, settings):
-    testfile = '../specifications/pbesparelm.yml'
+def run_pbesparelm_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesparelm.yml')
     equation_count = 3
     atom_count = 4
     propvar_count = 3
@@ -171,8 +153,8 @@ def run_pbesparelm_test(name, settings):
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
-def run_pbespareqelm_test(name, settings):
-    testfile = '../specifications/pbespareqelm.yml'
+def run_pbespareqelm_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbespareqelm.yml')
     equation_count = 3
     atom_count = 4
     propvar_count = 3
@@ -181,9 +163,9 @@ def run_pbespareqelm_test(name, settings):
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
 # N.B. does not work since the generated PBES is not in BQNF format!
-def run_pbesrewr_test(name, rewriter, settings):
+def run_pbesrewr_test(source_path, name, rewriter, settings):
     name = '{0}_{1}'.format(name, rewriter)
-    testfile = '../specifications/pbesrewr-{0}.yml'.format(rewriter)
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesrewr-{0}.yml'.format(rewriter))
     equation_count = 3
     atom_count = 4
     propvar_count = 3
@@ -191,8 +173,8 @@ def run_pbesrewr_test(name, rewriter, settings):
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
-def run_pbesinst_lazy_test(name, settings):
-    testfile = '../specifications/pbesinst_lazy.yml'
+def run_pbesinst_lazy_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesinst_lazy.yml')
     equation_count = 3
     atom_count = 4
     propvar_count = 3
@@ -200,8 +182,8 @@ def run_pbesinst_lazy_test(name, settings):
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
-def run_pbesinst_finite_test(name, settings):
-    testfile = '../specifications/pbesinst_finite.yml'
+def run_pbesinst_finite_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesinst_finite.yml')
     equation_count = 3
     atom_count = 4
     propvar_count = 3
@@ -210,8 +192,8 @@ def run_pbesinst_finite_test(name, settings):
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
 # N.B does not work due to unknown expressions (F_or)
-def run_symbolic_exploration_test(name, settings):
-    testfile = '../specifications/symbolic_exploration.yml'
+def run_symbolic_exploration_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'symbolic_exploration.yml')
     equation_count = 3
     atom_count = 4
     propvar_count = 3
@@ -219,8 +201,8 @@ def run_symbolic_exploration_test(name, settings):
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
-def run_pbessolve_test(name, settings):
-    testfile = '../specifications/pbessolve.yml'
+def run_pbessolve_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbessolve.yml')
     equation_count = 5
     atom_count = 4
     propvar_count = 3
@@ -228,8 +210,8 @@ def run_pbessolve_test(name, settings):
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
-def run_pbesstategraph_test(name, settings):
-    testfile = '../specifications/pbesstategraph.yml'
+def run_pbesstategraph_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesstategraph.yml')
     equation_count = 4
     atom_count = 5
     propvar_count = 4
@@ -239,30 +221,31 @@ def run_pbesstategraph_test(name, settings):
 
 if __name__ == '__main__':
     settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False, 'cleanup_files': True }
+    source_path = MCRL2_ROOT
 
-    run_lps2pbes_test('lps2pbes', settings)
-    # run_pbesabsinthe_test('pbesabsinthe', settings)
-    run_pbesabstract_test('pbesabstract', settings)
-    run_pbesconstelm_test('pbesconstelm', settings)
-    run_pbesinst_finite_test('pbesinst_finite', settings)
-    run_pbesinst_lazy_test('pbesinst_lazy', settings)
-    run_pbesparelm_test('pbesparelm', settings)
-    run_pbespareqelm_test('pbespareqelm', settings)
-    run_pbesrewr_test('pbesrewr', 'simplify', settings)
-    run_pbesrewr_test('pbesrewr', 'pfnf', settings)
-    run_pbesrewr_test('pbesrewr', 'quantifier-all', settings)
-    run_pbesrewr_test('pbesrewr', 'quantifier-finite', settings)
-    run_pbesrewr_test('pbesrewr', 'quantifier-one-point', settings)
-    # run_pbesrewr_test('pbesrewr', 'bqnf-quantifier', settings)
-    run_pbessolve_test('pbessolve', settings)
-    run_pbesstategraph_test('pbesstategraph', settings)
+    run_lps2pbes_test(source_path, 'lps2pbes', settings)
+    # run_pbesabsinthe_test(source_path, 'pbesabsinthe', settings)
+    run_pbesabstract_test(source_path, 'pbesabstract', settings)
+    run_pbesconstelm_test(source_path, 'pbesconstelm', settings)
+    run_pbesinst_finite_test(source_path, 'pbesinst_finite', settings)
+    run_pbesinst_lazy_test(source_path, 'pbesinst_lazy', settings)
+    run_pbesparelm_test(source_path, 'pbesparelm', settings)
+    run_pbespareqelm_test(source_path, 'pbespareqelm', settings)
+    run_pbesrewr_test(source_path, 'pbesrewr', 'simplify', settings)
+    run_pbesrewr_test(source_path, 'pbesrewr', 'pfnf', settings)
+    run_pbesrewr_test(source_path, 'pbesrewr', 'quantifier-all', settings)
+    run_pbesrewr_test(source_path, 'pbesrewr', 'quantifier-finite', settings)
+    run_pbesrewr_test(source_path, 'pbesrewr', 'quantifier-one-point', settings)
+    # run_pbesrewr_test(source_path, 'pbesrewr', 'bqnf-quantifier', settings)
+    run_pbessolve_test(source_path, 'pbessolve', settings)
+    run_pbesstategraph_test(source_path, 'pbesstategraph', settings)
 
-    run_alphabet_test('alphabet', settings)
-    run_lpsbinary_test('lpsbinary', settings)
-    run_lpsparelm_test('lpsconstelm', settings)
-    run_lpsparelm_test('lpsparelm', settings)
-    run_lpssumelm_test('lpssumelm', settings)
-    run_lpssuminst_test('lpssuminst', settings)
+    run_alphabet_test(source_path, 'alphabet', settings)
+    run_lpsbinary_test(source_path, 'lpsbinary', settings)
+    run_lpsparelm_test(source_path, 'lpsconstelm', settings)
+    run_lpsparelm_test(source_path, 'lpsparelm', settings)
+    run_lpssumelm_test(source_path, 'lpssumelm', settings)
+    run_lpssuminst_test(source_path, 'lpssuminst', settings)
 
-    run_bessolve_test('bessolve', settings)
-    # run_symbolic_exploration_test('symbolic_exploration', settings)
+    run_bessolve_test(source_path, 'bessolve', settings)
+    # run_symbolic_exploration_test(source_path, 'symbolic_exploration', settings)
