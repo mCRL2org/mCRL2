@@ -141,12 +141,28 @@ class Test:
         # Returns a list of tools that can be executed and have not been executed before
         return [tool for tool in self.tools if tool.can_execute()]
 
+    def cleanup(self):
+        for node in self.nodes:
+            try:
+                os.remove(node.filename())
+            except Exception as e:
+                print e
+
     def run(self):
         # Singlecore run
         tasks = self.remaining_tasks()
         while len(tasks) > 0:
             tool = tasks[0]
-            tool.execute(self.toolpath, timeout = 5, memlimit = 100000000, verbose = self.verbose)
+            try:
+                tool.execute(self.toolpath, timeout = 5, memlimit = 100000000, verbose = self.verbose)
+            except MemoryExceededError as e:
+                print e
+                self.cleanup()
+                return True
+            except TimeExceededError as e:
+                print e
+                self.cleanup()
+                return True
             tasks = self.remaining_tasks()
 
         if not all(tool.executed for tool in self.tools):
@@ -158,8 +174,7 @@ class Test:
                     raise RuntimeError('Error in test {}: output file {} is missing!'.format(self.name, node.filename()))
             result = self.result()
             if result and self.cleanup_files:
-                for node in self.nodes:
-                    os.remove(node.filename())
+                self.cleanup()
             return result
 
     # Returns the tool with the given label
