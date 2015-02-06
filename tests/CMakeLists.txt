@@ -33,10 +33,10 @@ endif()
 #
 # Python test drivers are assumed to have the following behaviour:
 #
-#   testdrv.py --name NUM
+#   testdrv.py --names
 #
-# prints a test name and returns exit code 0 for all numbers 0 < NUM < N, for
-# some N. For all NUM < 0 and NUM >= N, this command returns exit code 1.
+# prints all test names (on separate lines) defined by the test driver.
+# The test names are assumed to be numbered consecutively, starting from 0.
 #
 #   testdrv.py --run NUM
 #
@@ -48,21 +48,19 @@ find_package(PythonModules 2.4 COMPONENTS yaml psutil REQUIRED)
 set(python_dirs "random" "regression")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace)
 foreach(dir ${python_dirs})
-  set(moretests 0)
   set(num 0)
   set(testrunner ${CMAKE_CURRENT_SOURCE_DIR}/${dir}/test.py)
-  while(moretests EQUAL 0)
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --name ${num}
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
-                    RESULT_VARIABLE moretests
-                    OUTPUT_VARIABLE testname 
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(moretests EQUAL 0)
-      add_test(NAME ${testname}
-               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
-               COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --run ${num} --toolpath ${MCRL2_STAGE_PATH}/${MCRL2_RUNTIME_PATH})
-      set_tests_properties(${testname} PROPERTIES LABELS ${dir})
-    endif()
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --names
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
+                  OUTPUT_VARIABLE tests
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  string(REPLACE "\n" ";" tests "${tests}")
+  string(REPLACE "\r" "" tests "${tests}")
+  foreach(testname ${tests})
+    add_test(NAME ${testname}
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
+             COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --run ${num} --toolpath ${MCRL2_STAGE_PATH}/${MCRL2_RUNTIME_PATH})
+    set_tests_properties(${testname} PROPERTIES LABELS ${dir})
     math(EXPR num "${num} + 1")
-  endwhile()
+  endforeach()
 endforeach()

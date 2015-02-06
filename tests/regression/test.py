@@ -16,7 +16,7 @@ class TestRunner(testrunner.TestRunner):
     def __init__(self):
         super(TestRunner, self).__init__()
         self.test_path = os.path.join(os.getcwd(), os.path.dirname(__file__))
-        self.tests = sorted([('pbessolve_{}'.format(file[:-4]), 'pbessolve', ['pbessolve/{}'.format(file)])
+        self.tests = sorted([('regression_pbessolve_{}'.format(file[:-4]), 'pbessolve', ['pbessolve/{}'.format(file)])
                       for file in os.listdir(os.path.join(self.test_path, 'pbessolve'))
                       if file.endswith('.txt')]) + \
                      [('ticket_283',  'mcrl22lps', ['tickets/283/1.mcrl2']),
@@ -48,9 +48,9 @@ class TestRunner(testrunner.TestRunner):
                          'verbose': True,
                          'cleanup_files': True}
 
-    def name(self, testnum):
-        if testnum < len(self.tests):
-            return self.tests[testnum][0]
+    def names(self):
+        for test in self.tests:
+            yield test[0]
 
     def run(self, testnum):
         if testnum < len(self.tests):

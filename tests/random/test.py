@@ -14,10 +14,10 @@ from testing import run_yml_test
 from random_testing import *
 
 def generate_tests(name, testfunction, size):
-    return [('{}_{}'.format(name, i), testfunction) for i in range(size)]
+    return [('random_{}_{}'.format(name, i), testfunction) for i in range(size)]
 
 def generate_pbesrewr_tests(rewriter, testfunction, size):
-    return [('pbesrewr-{}_{}'.format(rewriter, i), lambda source_path, name, settings: testfunction(source_path, name, rewriter, settings) ) for i in range(size)]
+    return [('random_pbesrewr_{}_{}'.format(rewriter, i), lambda source_path, name, settings: testfunction(source_path, name, rewriter, settings) ) for i in range(size)]
 
 class RandomTestRunner(testrunner.TestRunner):
     def __init__(self):
@@ -51,9 +51,9 @@ class RandomTestRunner(testrunner.TestRunner):
                           'cleanup_files': True
                         }
 
-    def name(self, testnum):
-        if testnum < len(self.tests):
-            return self.tests[testnum][0]
+    def names(self):
+        for test in self.tests:
+            yield test[0]
 
     def run(self, testnum):
         if testnum < len(self.tests):
