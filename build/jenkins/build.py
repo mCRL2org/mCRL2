@@ -65,8 +65,14 @@ if jobname.split('/')[0].lower().find("release") <> -1:
 # Do not run long tests if we're doing the ubuntu-amd64 clang maintainer 
 # build (these time out because profiling is on in Clang).
 #
+# Do not run header tests in any build except that build, because we don't
+# gain any information by running them on more than one platform (and on
+# Windows they take ages).
+#
 if (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
   testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
+else:
+  testflags += ['-LE', 'headertest']
 
 #
 # Run CMake, take into account configuration axes.
@@ -133,9 +139,6 @@ ctest_command = ['ctest',
  
 if label in ["windows-x86", "windows-amd64"]:
   ctest_command += ['--build-config', buildtype]
-
-if buildtype != 'Maintainer':
-  ctest_command += ['-LE', 'headertest']
 
 ctest_result = call('CTest', ctest_command)
 if ctest_result:
