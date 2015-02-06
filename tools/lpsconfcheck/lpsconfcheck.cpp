@@ -1,4 +1,4 @@
-// Author(s): Luc Engelen
+// Author(s): Luc Engelen, Djurre van der Wal
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -65,6 +65,12 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     /// \brief The flag indicating whether or not the confluence of a tau-summand regarding all other summands is checked.
     bool m_check_all;
+    
+    /// \brief Do not rewrite summands with sum operators.
+    bool m_no_sums;
+    
+    /// \brief Confluence types for which the tool should check.
+    std::string m_conditions;
 
     /// \brief The flag indicating whether or not counter examples are printed each time a condition is encountered
     /// \brief that is neither a contradiction nor a tautology.
@@ -86,7 +92,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
     /// \brief The invariant provided as input.
     /// \brief If no invariant was provided, the constant true is used as invariant.
     data_expression m_invariant;
-
+    
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
@@ -96,6 +102,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       m_check_all           = 0 < parser.options.count("check-all");
       m_counter_example     = 0 < parser.options.count("counter-example");
       m_apply_induction     = 0 < parser.options.count("induction");
+      m_no_sums             = 0 < parser.options.count("no-sums");
 
       if (parser.options.count("invariant"))
       {
@@ -128,6 +135,15 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       {
         m_path_eliminator = true;
       }
+      
+      if (parser.options.count("conditions"))
+      {
+        m_conditions = parser.option_argument_as< std::string >("conditions");
+      }
+      else
+      {
+        m_conditions = "c";
+      }
     }
 
     void add_options(interface_description& desc)
@@ -145,6 +161,14 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       add_option("generate-invariants",
                  "try to prove that the reduced confluence condition is an invariant of the LPS, "
                  "in case the confluence condition is not a tautology", 'g').
+      add_option("conditions", make_optional_argument("CONDITIONS", ""),
+                 "use the confluence conditions specified by individual characters ("
+                 "c/C: commutative confluence with/without disjointness check; "
+                 "d: commutative confluence with disjointness check only; "
+                 "T: triangular confluence; "
+                 "Z: trivial confluence)", 'x').
+      add_option("no-sums",
+                 "do not rewrite summands with a sum operator and prove their confluence formula", 'u').
       add_option("no-check",
                  "do not check if the invariant holds before checking for for confluence", 'n').
       add_option("no-marking",
@@ -174,6 +198,8 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       m_generate_invariants(false),
       m_no_check(false),
       m_check_all(false),
+      m_no_sums(false),
+      m_conditions("c"),
       m_counter_example(false),
       m_dot_file_name(""),
       m_time_limit(0),
@@ -214,7 +240,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
         Confluence_Checker<stochastic_specification> v_confluence_checker(
           spec, rewrite_strategy(),
           m_time_limit, m_path_eliminator, solver_type(),
-          m_apply_induction, m_check_all,
+          m_apply_induction, m_check_all, m_no_sums, m_conditions,
           m_counter_example, m_generate_invariants, m_dot_file_name);
 
         v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number);
