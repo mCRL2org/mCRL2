@@ -6,8 +6,20 @@ nodes:
   l3:
     type: PBES
   l4:
-    type: Bool
+    type: PBES
   l5:
+    type: PBES
+  l6:
+    type: PBES
+  l7:
+    type: Bool
+  l8:
+    type: Bool
+  l9:
+    type: Bool
+  l10:
+    type: Bool
+  l11:
     type: Bool
 
 tools:
@@ -63,6 +75,5 @@ tools:
     name: pbes2bool
 result: |
   answers = [l7.value, l8.value, l9.value, l10.value, l11.value]
-  print 'ANSWERS', answers
   result = not (True in answers and False in answers)
 
