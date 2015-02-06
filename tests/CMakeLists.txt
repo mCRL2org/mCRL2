@@ -43,6 +43,8 @@ endif()
 # runs the test numbered NUM (if it exists) and returns exit code 0 if the
 # test succeeds, or 1 if it fails.
 #
+find_package(PythonModules 2.4 COMPONENTS yaml psutil REQUIRED)
+
 set(python_dirs "random" "regression")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace)
 foreach(dir ${python_dirs})
