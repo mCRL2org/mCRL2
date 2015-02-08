@@ -127,12 +127,12 @@ ctest_command = ['ctest',
                  '-j{0}'.format(buildthreads)]
   
 #
-# Do not run header tests in any build except that build, because we don't
-# gain any information by running them on more than one platform (and on
-# Windows they take ages).
+# Do not run header tests in any build except one, because we don't gain any 
+# information by running them on more than one platform (and on Windows they 
+# take ages).
 #
 if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
-  testflags += ['-LE', 'headertest']
+  ctest_command += ['-LE', 'headertest']
 
 ctest_result = call('CTest', ctest_command)
 if ctest_result:
