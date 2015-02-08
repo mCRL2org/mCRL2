@@ -131,7 +131,7 @@ ctest_command = ['ctest',
 # gain any information by running them on more than one platform (and on
 # Windows they take ages).
 #
-if (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
+if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
   testflags += ['-LE', 'headertest']
 
 ctest_result = call('CTest', ctest_command)
