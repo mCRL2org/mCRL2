@@ -38,16 +38,16 @@ class Popen(subprocess.Popen):
         self.__sysTime = 0
         self.__maxVirt = 0
         self.__maxResident = 0
-        self.__process = psutil.Process(self.pid)
         self.__perfThread = threading.Thread(target=self.__measure)
         self.__perfThread.daemon = True
         self.__perfThread.start()
 
     def __measure(self):
         try:
+            process = psutil.Process(self.pid)
             while self.returncode is None:
-                self.__usrTime, self.__sysTime = self.__process.get_cpu_times()
-                virt, res = self.__process.get_memory_info()
+                self.__usrTime, self.__sysTime = process.get_cpu_times()
+                virt, res = process.get_memory_info()
                 self.__maxVirt = max(self.__maxVirt, virt)
                 self.__maxResident = max(self.__maxResident, res)
                 if self.__maxVirt > self.__maxVirtLimit:
