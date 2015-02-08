@@ -23,33 +23,38 @@ class RandomTestRunner(testrunner.TestRunner):
     def __init__(self):
         super(RandomTestRunner, self).__init__()
         self.test_path = os.path.join(os.getcwd(), os.path.dirname(__file__))
-        testcount = 100
-        self.tests = generate_tests('bessolve'       , run_bessolve_test       , testcount) + \
-                     generate_tests('lps2pbes'       , run_lps2pbes_test       , testcount) + \
-                     generate_tests('pbesabstract'   , run_pbesabstract_test   , testcount) + \
-                     generate_tests('pbesconstelm'   , run_pbesconstelm_test   , testcount) + \
-                     generate_tests('pbesinst_finite', run_pbesinst_finite_test, testcount) + \
-                     generate_tests('pbesinst_lazy'  , run_pbesinst_lazy_test  , testcount) + \
-                     generate_tests('pbessolve'      , run_pbessolve_test      , testcount) + \
-                     generate_tests('alphabet'       , run_alphabet_test       , testcount) + \
-                     generate_pbesrewr_tests('simplify'            , run_pbesrewr_test, testcount) + \
-                     generate_pbesrewr_tests('pfnf'                , run_pbesrewr_test, testcount) + \
-                     generate_pbesrewr_tests('quantifier-all'      , run_pbesrewr_test, testcount) + \
-                     generate_pbesrewr_tests('quantifier-finite'   , run_pbesrewr_test, testcount) + \
-                     generate_pbesrewr_tests('quantifier-one-point', run_pbesrewr_test, testcount)
-                     #generate_tests('pbesparelm'     , run_pbesparelm_test     , testcount) + \
-                     #generate_tests('pbespareqelm'   , run_pbespareqelm_test   , testcount) + \
-                     #generate_tests('pbesstategraph' , run_pbesstategraph_test , testcount) + \
-                     #generate_tests('lpsbinary'      , run_lpsbinary_test      , testcount) + \
-                     #generate_tests('lpsconstelm'    , run_lpsparelm_test      , testcount) + \
-                     #generate_tests('lpsparelm'      , run_lpsparelm_test      , testcount) + \
-                     #generate_tests('lpssumelm'      , run_lpssumelm_test      , testcount) + \
-                     #generate_tests('lpssuminst'     , run_lpssuminst_test     , testcount) + \
+        self.tests = generate_tests('bessolve'       , run_bessolve_test       , self._args.count) + \
+                     generate_tests('lps2pbes'       , run_lps2pbes_test       , self._args.count) + \
+                     generate_tests('pbesabstract'   , run_pbesabstract_test   , self._args.count) + \
+                     generate_tests('pbesconstelm'   , run_pbesconstelm_test   , self._args.count) + \
+                     generate_tests('pbesinst_finite', run_pbesinst_finite_test, self._args.count) + \
+                     generate_tests('pbesinst_lazy'  , run_pbesinst_lazy_test  , self._args.count) + \
+                     generate_tests('pbessolve'      , run_pbessolve_test      , self._args.count) + \
+                     generate_tests('alphabet'       , run_alphabet_test       , self._args.count) + \
+                     generate_pbesrewr_tests('simplify'            , run_pbesrewr_test, self._args.count) + \
+                     generate_pbesrewr_tests('pfnf'                , run_pbesrewr_test, self._args.count) + \
+                     generate_pbesrewr_tests('quantifier-all'      , run_pbesrewr_test, self._args.count) + \
+                     generate_pbesrewr_tests('quantifier-finite'   , run_pbesrewr_test, self._args.count) + \
+                     generate_pbesrewr_tests('quantifier-one-point', run_pbesrewr_test, self._args.count)
+                     #generate_tests('pbesparelm'     , run_pbesparelm_test     , self._args.count) + \
+                     #generate_tests('pbespareqelm'   , run_pbespareqelm_test   , self._args.count) + \
+                     #generate_tests('pbesstategraph' , run_pbesstategraph_test , self._args.count) + \
+                     #generate_tests('lpsbinary'      , run_lpsbinary_test      , self._args.count) + \
+                     #generate_tests('lpsconstelm'    , run_lpsparelm_test      , self._args.count) + \
+                     #generate_tests('lpsparelm'      , run_lpsparelm_test      , self._args.count) + \
+                     #generate_tests('lpssumelm'      , run_lpssumelm_test      , self._args.count) + \
+                     #generate_tests('lpssuminst'     , run_lpssuminst_test     , self._args.count) + \
 
         self.settings = { 'toolpath': self._tool_path,
-                          'verbose': True,
+                          'verbose': self._args.verbose,
                           'cleanup_files': True
                         }
+
+    def _get_commandline_parser(self):
+        parser = super(RandomTestRunner, self)._get_commandline_parser()
+        parser.add_argument('--verbose', dest='verbose', action='store_true', help='Display additional progress messages.')
+        parser.add_argument('--count', metavar='Count', type=int, action='store', default=100, help='The number of repetitions for each random test')
+        return parser
 
     def names(self):
         for test in self.tests:

@@ -146,7 +146,8 @@ class Test:
             try:
                 os.remove(node.filename())
             except Exception as e:
-                print e
+                if self.verbose:
+                    print e
 
     def run(self):
         # Singlecore run
@@ -156,13 +157,15 @@ class Test:
             try:
                 tool.execute(self.toolpath, timeout = 5, memlimit = 100000000, verbose = self.verbose)
             except MemoryExceededError as e:
-                print e
+                if self.verbose:
+                    print 'Memory limit exceeded: ' + str(e)
                 self.cleanup()
-                return True
+                return None
             except TimeExceededError as e:
-                print e
+                if self.verbose:
+                    print 'Time limit exceeded: ' + str(e)
                 self.cleanup()
-                return True
+                return None
             tasks = self.remaining_tasks()
 
         if not all(tool.executed for tool in self.tools):
@@ -195,25 +198,19 @@ def run_replay(testfile, inputfiles, settings, remove_files = True):
     if 'verbose' in settings and settings['verbose']:
         print 'Running test ' + testfile
     t.setup(inputfiles)
-
-    try:
-        result = t.run()
-        if result:
-            return True, ''
-        else:
-            return False, ''
-    except MemoryExceededError as e:
-        return None, 'Memory Exceeded'
-    except TimeExceededError as e:
-        return None, 'Time Exceeded'
+    return t.run()
 
 def run_yml_test(name, testfile, inputfiles, settings):
-    result, msg = run_replay(testfile, inputfiles, settings)
-    print name, result, msg
+    result = run_replay(testfile, inputfiles, settings)
+    print name, result
+    if result == False:
+        for filename in inputfiles:
+            text = read_text(filename)
+            print '- file {}\n{}\n'.format(filename, text)
     return result
 
 def cleanup_files(result, files, settings):
-    if result and settings['cleanup_files']:
+    if result != False and settings['cleanup_files']:
         for filename in files:
             os.remove(filename)
 

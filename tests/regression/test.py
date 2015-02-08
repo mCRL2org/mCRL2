@@ -6,7 +6,6 @@
 import os
 import sys
 import yaml
-import shutil # TODO: remove this import
 sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
 sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
 import testrunner
@@ -45,8 +44,13 @@ class TestRunner(testrunner.TestRunner):
                       ('ticket_1319', 'alphabet', ['tickets/1319/1.mcrl2']),
                       ('ticket_1321', 'alphabet', ['tickets/1321/1.mcrl2'])]
         self.settings = {'toolpath': self._tool_path,
-                         'verbose': True,
+                         'verbose': self._args.verbose,
                          'cleanup_files': True}
+
+    def _get_commandline_parser(self):
+        parser = super(TestRunner, self)._get_commandline_parser()
+        parser.add_argument('--verbose', dest='verbose', action='store_true', help='Display additional progress messages.')
+        return parser
 
     def names(self):
         for test in self.tests:
