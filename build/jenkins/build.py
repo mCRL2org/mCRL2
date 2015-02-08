@@ -65,14 +65,8 @@ if jobname.split('/')[0].lower().find("release") <> -1:
 # Do not run long tests if we're doing the ubuntu-amd64 clang maintainer 
 # build (these time out because profiling is on in Clang).
 #
-# Do not run header tests in any build except that build, because we don't
-# gain any information by running them on more than one platform (and on
-# Windows they take ages).
-#
 if (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
   testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
-else:
-  testflags += ['-LE', 'headertest']
 
 #
 # Run CMake, take into account configuration axes.
@@ -111,12 +105,7 @@ if not buildthreads:
 # Build
 #
 
-extraoptions = []
-if label in ["windows-x86", "windows-amd64"]:
-  extraoptions = ['--config', buildtype]
-else:
-  extraoptions =  ['--', '-j{0}'.format(buildthreads)]
-make_command = ['cmake', '--build', builddir] + extraoptions
+make_command = ['cmake', '--build', builddir, '--', '-j{0}'.format(buildthreads)]
 if call('CMake --build', make_command):
   log('Build failed.')
   sys.exit(1)
@@ -136,9 +125,14 @@ ctest_command = ['ctest',
                  '--output-on-failure', 
                  '--no-compress-output', 
                  '-j{0}'.format(buildthreads)]
- 
-if label in ["windows-x86", "windows-amd64"]:
-  ctest_command += ['--build-config', buildtype]
+  
+#
+# Do not run header tests in any build except that build, because we don't
+# gain any information by running them on more than one platform (and on
+# Windows they take ages).
+#
+if (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
+  testflags += ['-LE', 'headertest']
 
 ctest_result = call('CTest', ctest_command)
 if ctest_result:
