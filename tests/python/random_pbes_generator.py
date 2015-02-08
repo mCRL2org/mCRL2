@@ -475,7 +475,8 @@ def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers
             p.finish()
             return p
         except Exception as inst:
-            print inst
+            #print inst
+            pass
 
 class CounterExampleMinimizer:
     def __init__(self, pbes, solver, name):

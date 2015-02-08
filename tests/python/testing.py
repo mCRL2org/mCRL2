@@ -112,8 +112,8 @@ class Test:
 
     def _add_tool(self, data, label):
         import platform
-        input = [node for node in self.nodes if node.label in data['input']]
-        output = [node for node in self.nodes if node.label in data['output']]
+        input = sorted([node for node in self.nodes if node.label in data['input']], key = lambda node: node.label)
+        output = sorted([node for node in self.nodes if node.label in data['output']], key = lambda node: node.label)
         name = data['name']
         if platform.system() == 'Windows':
             name = name + '.exe'

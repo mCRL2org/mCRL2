@@ -200,8 +200,8 @@ class Lps2PbesTool(Tool):
         super(Lps2PbesTool, self).__init__(label, name, input_nodes, output_nodes, args)
 
     def arguments(self):
-        return ['-f' + os.path.join(os.getcwd(), self.input_nodes[0].filename()),
-                os.path.join(os.getcwd(), self.input_nodes[1].filename()),
+        return [os.path.join(os.getcwd(), self.input_nodes[0].filename()),
+                '-f' + os.path.join(os.getcwd(), self.input_nodes[1].filename()),
                 os.path.join(os.getcwd(), self.output_nodes[0].filename())
                ]
 

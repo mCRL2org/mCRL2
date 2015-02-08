@@ -2,40 +2,54 @@ nodes:
   l1:
     type: mCRL2Spec
   l2:
-    type: StateFrm
-  l3:
     type: LPS
-  l4:
-    type: PBES
-  l5:
-    type: Bool
-  l6:
+  l3:
     type: LTS
-  l7:
+  l4:
     type: INFO
+  l5:
+    type: StateFrm
+  l6:
+    type: PBES
+  l7:
+    type: Bool
+  l8:
+    type: PBES
+  l9:
+    type: Bool
 
 tools:
   t1:
     input: [l1]
-    output: [l3]
+    output: [l2]
     args: []
     name: mcrl22lps
   t2:
-    input: [l3, l2]
-    output: [l4]
-    args: []
-    name: lps2pbes
-  t3:
-    input: [l4]
-    output: [l5]
-    args: []
-    name: pbes2bool
-  t4:
-    input: [l3]
-    output: [l6, l7]
+    input: [l2]
+    output: [l3, l4]
     args: [-D]
     name: lps2lts
+  t3:
+    input: [l2, l5]
+    output: [l6]
+    args: []
+    name: lps2pbes
+  t4:
+    input: [l6]
+    output: [l7]
+    args: []
+    name: pbes2bool
+  t5:
+    input: [l2, l5]
+    output: [l8]
+    args: [--structured]
+    name: lps2pbes
+  t6:
+    input: [l8]
+    output: [l9]
+    args: []
+    name: pbes2bool
 
 result: |
-  result = l5.value == (not l7.value['deadlock'])
+  result = l7.value == l9.value == (not l4.value['deadlock'])
 
