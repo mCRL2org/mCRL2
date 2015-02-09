@@ -12,10 +12,11 @@
 #define MCRL2_LTS_DETAIL_BITHASHTABLE_H
 
 #include <vector>
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/utilities/exception.h"
+#include "mcrl2/lps/next_state_generator.h"
 
 namespace mcrl2
 {
