@@ -6,10 +6,9 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 from popen import Popen, MemoryExceededError, TimeExceededError
-from subprocess import  PIPE, STDOUT
+from subprocess import  PIPE
 import os.path
 import re
-import types
 from text_utility import write_text
 
 def is_list_of(l, types):
@@ -221,6 +220,26 @@ class Lps2LtsTool(Tool):
     def arguments(self):
         return [os.path.join(os.getcwd(), self.input_nodes[0].filename()), os.path.join(os.getcwd(), self.output_nodes[0].filename())]
 
+class LpsConfcheckTool(Tool):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 1
+        assert len(output_nodes) in [1, 2]
+        super(LpsConfcheckTool, self).__init__(label, name, input_nodes, output_nodes, args)
+
+    def assign_outputs(self):
+        super(LpsConfcheckTool, self).assign_outputs()
+        if len(self.output_nodes) > 1:
+            text = self.stderr
+            value = {}
+            m = re.search(r'(\d+) of (\d+) tau summands were found to be confluent', text)
+            if m:
+                value['confluent_tau_summands'] = (int(m.group(1)), int(m.group(2)))
+            self.output_nodes[1].value = value
+            write_text(self.output_nodes[1].filename(), str(value))
+
+    def arguments(self):
+        return [os.path.join(os.getcwd(), self.input_nodes[0].filename()), os.path.join(os.getcwd(), self.output_nodes[0].filename())]
+
 class LtsCompareTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
         assert len(input_nodes) == 2
@@ -240,6 +259,8 @@ class ToolFactory(object):
             return PbesPgSolveTool(label, name, input_nodes, output_nodes, args)
         elif name == 'lps2lts':
             return Lps2LtsTool(label, name, input_nodes, output_nodes, args)
+        elif name == 'lpsconfcheck':
+            return LpsConfcheckTool(label, name, input_nodes, output_nodes, args)
         elif name == 'ltsinfo':
             return LtsInfoTool(label, name, input_nodes, output_nodes, args)
         elif name == 'pbes2bool':
