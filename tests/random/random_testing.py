@@ -4,18 +4,22 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import copy
 import os
 import sys
 sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
 
 from random_bes_generator import make_bes
-from random_pbes_generator import make_pbes, CounterExampleMinimizer
-from random_process_generator import make_process_specification, generator_map
+from random_pbes_generator import make_pbes
+from random_process_generator import make_process_specification, generator_map, make_tau
 from text_utility import write_text
-from testing import run_replay, run_yml_test, run_pbes_test, run_pbes_test_with_counter_example_minimization, cleanup_files
+from testing import run_yml_test, run_pbes_test_with_counter_example_minimization, cleanup_files
 
 MCRL2_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
+
+lpsconfcheck_generator_map = copy.deepcopy(generator_map)
+lpsconfcheck_generator_map[make_tau] = 8
 
 def run_alphabet_test(source_path, name, settings):
     testfile = '{}/tests/specifications/{}'.format(source_path, 'alphabet.yml')
@@ -58,6 +62,66 @@ def run_lpsparelm_test(source_path, name, settings):
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
+    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    filename = '{0}.mcrl2'.format(name, settings)
+    write_text(filename, str(p))
+    inputfiles = [filename]
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
+
+def run_lpsconfcheck_c_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsconfcheck_c.yml')
+    actions = ['a', 'b', 'c', 'd']
+    process_identifiers = ['P', 'Q', 'R']
+    size = 13
+    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    filename = '{0}.mcrl2'.format(name, settings)
+    write_text(filename, str(p))
+    inputfiles = [filename]
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
+
+def run_lpsconfcheck_capital_c_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsconfcheck_capital_c.yml')
+    actions = ['a', 'b', 'c', 'd']
+    process_identifiers = ['P', 'Q', 'R']
+    size = 13
+    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    filename = '{0}.mcrl2'.format(name, settings)
+    write_text(filename, str(p))
+    inputfiles = [filename]
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
+
+def run_lpsconfcheck_d_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsconfcheck_d.yml')
+    actions = ['a', 'b', 'c', 'd']
+    process_identifiers = ['P', 'Q', 'R']
+    size = 13
+    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    filename = '{0}.mcrl2'.format(name, settings)
+    write_text(filename, str(p))
+    inputfiles = [filename]
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
+
+def run_lpsconfcheck_t_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsconfcheck_t.yml')
+    actions = ['a', 'b', 'c', 'd']
+    process_identifiers = ['P', 'Q', 'R']
+    size = 13
+    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    filename = '{0}.mcrl2'.format(name, settings)
+    write_text(filename, str(p))
+    inputfiles = [filename]
+    result = run_yml_test(name, testfile, inputfiles, settings)
+    cleanup_files(result, inputfiles, settings)
+
+def run_lpsconfcheck_z_test(source_path, name, settings):
+    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsconfcheck_z.yml')
+    actions = ['a', 'b', 'c', 'd']
+    process_identifiers = ['P', 'Q', 'R']
+    size = 13
     p = make_process_specification(generator_map, actions, process_identifiers, size)
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
@@ -220,8 +284,14 @@ def run_pbesstategraph_test(source_path, name, settings):
     run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
 
 if __name__ == '__main__':
-    settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False, 'cleanup_files': True }
+    settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False, 'cleanup_files': False }
     source_path = MCRL2_ROOT
+
+    run_lpsconfcheck_c_test(source_path, 'lpsconfcheck_c'.format(), settings)
+    run_lpsconfcheck_capital_c_test(source_path, 'lpsconfcheck_capital_c'.format(), settings)
+    run_lpsconfcheck_d_test(source_path, 'lpsconfcheck_d'.format(), settings)
+    run_lpsconfcheck_t_test(source_path, 'lpsconfcheck_t'.format(), settings)
+    run_lpsconfcheck_z_test(source_path, 'lpsconfcheck_z'.format(), settings)
 
     run_lps2pbes_test(source_path, 'lps2pbes', settings)
     # run_pbesabsinthe_test(source_path, 'pbesabsinthe', settings)

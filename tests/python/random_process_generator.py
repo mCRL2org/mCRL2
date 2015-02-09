@@ -32,7 +32,6 @@
 # binit                       |     2      |  y   |
 
 import copy
-import os
 import random
 
 ACTIONS = ['a', 'b', 'c', 'd']

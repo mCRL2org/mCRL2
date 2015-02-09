@@ -5,12 +5,9 @@
 
 import os
 import sys
-import yaml
-import shutil # TODO: remove this import
 sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
 sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
 import testrunner
-from testing import run_yml_test
 from random_testing import *
 
 def generate_tests(name, testfunction, size):
@@ -31,6 +28,11 @@ class RandomTestRunner(testrunner.TestRunner):
                      generate_tests('pbesinst_lazy'  , run_pbesinst_lazy_test  , self._args.count) + \
                      generate_tests('pbessolve'      , run_pbessolve_test      , self._args.count) + \
                      generate_tests('alphabet'       , run_alphabet_test       , self._args.count) + \
+                     generate_tests('lpsconfcheck_c' , run_lpsconfcheck_c_test , self._args.count) + \
+                     generate_tests('lpsconfcheck_capital_c' , run_lpsconfcheck_capital_c_test , self._args.count) + \
+                     generate_tests('lpsconfcheck_d' , run_lpsconfcheck_d_test , self._args.count) + \
+                     generate_tests('lpsconfcheck_t' , run_lpsconfcheck_t_test , self._args.count) + \
+                     generate_tests('lpsconfcheck_z' , run_lpsconfcheck_z_test , self._args.count) + \
                      generate_pbesrewr_tests('simplify'            , run_pbesrewr_test, self._args.count) + \
                      generate_pbesrewr_tests('pfnf'                , run_pbesrewr_test, self._args.count) + \
                      generate_pbesrewr_tests('quantifier-all'      , run_pbesrewr_test, self._args.count) + \
