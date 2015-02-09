@@ -114,7 +114,7 @@ public:
     {
       for(std::list<std::string>::iterator f = m_tempfiles.begin(); f != m_tempfiles.end(); ++f)
       {
-        if (unlink((*f).c_str()))
+        if (remove((*f).c_str()))
         {
           std::stringstream s;
           s << "Could not remove file: " << *f;
