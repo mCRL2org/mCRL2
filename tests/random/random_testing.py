@@ -19,9 +19,9 @@ MCRL2_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
 
 lpsconfcheck_generator_map = {
-    make_action: 10,
+    make_action: 8,
     make_delta: 1,
-    make_tau: 3,
+    make_tau: 1,
     make_process_instance: 1,
     make_sum: 0,
     make_if_then: 0,
@@ -83,7 +83,7 @@ def run_lpsconfcheck(source_path, name, settings, testfile):
     actions = ['a', 'b', 'c']
     process_identifiers = ['P', 'Q', 'R']
     size = 13
-    p = make_process_specification(lpsconfcheck_generator_map, actions, process_identifiers, size, init='hide({a}, allow({b, c}, P || Q || R))')
+    p = make_process_specification(lpsconfcheck_generator_map, actions, process_identifiers, size, init='hide({a}, allow({a, b, c}, P || Q || R))')
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
