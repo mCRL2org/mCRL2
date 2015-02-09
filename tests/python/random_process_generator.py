@@ -480,7 +480,7 @@ def make_parallel_expression(actions, process_expressions, size, parallel_operat
     return x
 
 # generate a random process specification
-def make_process_specification(generator_map, actions, process_identifiers, size, parallel_operators = [make_block, make_hide, make_rename, make_comm, make_allow]):
+def make_process_specification(generator_map, actions, process_identifiers, size, parallel_operators = [make_block, make_hide, make_rename, make_comm, make_allow], init = None):
     is_guarded = True
     free_variables = []
     is_pcrl = True
@@ -489,8 +489,9 @@ def make_process_specification(generator_map, actions, process_identifiers, size
         x = make_process_expression(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size)
         equations.append(process_equation(P, x))
     n = random.randint(0, 3)
-    init = make_parallel_expression(actions, process_identifiers, n, parallel_operators)
-    return process_specification(actions, equations, init)
+    if not init:
+        init = make_parallel_expression(actions, process_identifiers, n, parallel_operators)
+    return process_specification(list(set(actions)), equations, init)
 
 generator_map = {
     make_action          : 8,
