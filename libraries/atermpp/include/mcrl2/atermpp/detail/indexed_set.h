@@ -13,6 +13,10 @@
 #ifndef MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
 #define MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
 
+#include <cstddef>
+#include <cassert>
+#include "../indexed_set.h"
+
 namespace atermpp
 {
 namespace detail
