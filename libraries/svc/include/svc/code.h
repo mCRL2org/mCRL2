@@ -23,6 +23,8 @@
 #ifndef __CODE_H
 #define __CODE_H
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

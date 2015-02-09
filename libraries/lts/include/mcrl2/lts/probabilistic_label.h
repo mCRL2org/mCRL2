@@ -20,8 +20,11 @@
 #ifndef MCRL2_LTS_PROBABILISTIC_LABEL_H
 #define MCRL2_LTS_PROBABILISTIC_LABEL_H
 
-// #include "mcrl2/utilities/exception.h"
-// #include "mcrl2/utilities/text_utility.h"
+#include <cstddef>
+#include <string>
+#include <cassert>
+#include <sstream>
+
 
 namespace mcrl2
 {

@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
+#include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
