@@ -5,6 +5,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mcrl2/utilities/toolset_version_const.
 
 add_mcrl2_library(utilities
   INSTALL_HEADERS TRUE
+  NOTEST
   SOURCES
     command_line_interface.cpp
     logger.cpp
@@ -14,7 +15,6 @@ add_mcrl2_library(utilities
 
 if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
   add_mcrl2_library(utilities_qt
-    NOTEST
     INSTALL_HEADERS TRUE
     SOURCES
       logwidget.ui
