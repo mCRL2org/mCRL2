@@ -23,9 +23,8 @@
 #include "mcrl2/data/detail/split_finite_variables.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/enumerator.h"
-#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/utilities/detail/join.h"
-#include "mcrl2/utilities/optimized_boolean_operators.h"
 
 namespace mcrl2 {
 
@@ -102,7 +101,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     E.next(P, sigma, is_not_true());
     while (!P.empty())
     {
-      result = utilities::optimized_and(result, P.front().expression());
+      result = data::optimized_and(result, P.front().expression());
       P.pop_front();
       if (tr::is_false(result))
       {
@@ -123,7 +122,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     E.next(P, sigma, is_not_false());
     while (!P.empty())
     {
-      result = utilities::optimized_or(result, P.front().expression());
+      result = data::optimized_or(result, P.front().expression());
       P.pop_front();
       if (tr::is_true(result))
       {
@@ -149,12 +148,12 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       data::detail::split_finite_variables(x.variables(), m_dataspec, finite, infinite);
       if (finite.empty())
       {
-        result = utilities::optimized_forall(infinite, derived().apply(x.body()));
+        result = data::optimized_forall(infinite, derived().apply(x.body()));
       }
       else
       {
         result = enumerate_forall(finite, x.body());
-        result = utilities::optimized_forall_no_empty_domain(infinite, result);
+        result = data::optimized_forall_no_empty_domain(infinite, result);
       }
     }
     return result;
@@ -174,12 +173,12 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       data::detail::split_finite_variables(x.variables(), m_dataspec, finite, infinite);
       if (finite.empty())
       {
-        result = utilities::optimized_exists(infinite, derived().apply(x.body()));
+        result = data::optimized_exists(infinite, derived().apply(x.body()));
       }
       else
       {
         result = enumerate_exists(finite, x.body());
-        result = utilities::optimized_exists_no_empty_domain(infinite, result);
+        result = data::optimized_exists_no_empty_domain(infinite, result);
       }
     }
     return result;

@@ -13,7 +13,7 @@
 #define MCRL2_PBES_REWRITERS_SIMPLIFY_REWRITER_H
 
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
-#include "mcrl2/utilities/detail/optimized_logic_operators.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 
 namespace mcrl2 {
 
@@ -31,7 +31,7 @@ struct add_simplify: public Builder<Derived>
 
   pbes_expression apply(const not_& x)
   {
-    return utilities::optimized_not(apply(x.operand()));
+    return data::optimized_not(apply(x.operand()));
   }
 
   pbes_expression apply(const and_& x)
@@ -42,7 +42,7 @@ struct add_simplify: public Builder<Derived>
       return tr::false_();
     }
     auto right = apply(x.right());
-    return utilities::optimized_and(left, right);
+    return data::optimized_and(left, right);
   }
 
   pbes_expression apply(const or_& x)
@@ -53,7 +53,7 @@ struct add_simplify: public Builder<Derived>
       return tr::true_();
     }
     auto right = apply(x.right());
-    return utilities::optimized_or(left, right);
+    return data::optimized_or(left, right);
   }
 
   pbes_expression apply(const imp& x)
@@ -64,19 +64,19 @@ struct add_simplify: public Builder<Derived>
       return tr::true_();
     }
     auto right = apply(x.right());
-    return utilities::optimized_imp(left, right);
+    return data::optimized_imp(left, right);
   }
 
   pbes_expression apply(const forall& x)
   {
     auto body = apply(x.body());
-    return utilities::optimized_forall(x.variables(), body, true);
+    return data::optimized_forall(x.variables(), body, true);
   }
 
   pbes_expression apply(const exists& x)
   {
     auto body = apply(x.body());
-    return utilities::optimized_exists(x.variables(), body, true);
+    return data::optimized_exists(x.variables(), body, true);
   }
 };
 
@@ -88,7 +88,7 @@ template <typename Derived, typename DataRewriter, typename SubstitutionFunction
 struct simplify_data_rewriter_builder : public add_data_rewriter < pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction >
 {
   typedef add_data_rewriter < pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction > super;
-  simplify_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma) 
+  simplify_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma)
   {}
 };

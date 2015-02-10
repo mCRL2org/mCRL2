@@ -21,7 +21,7 @@
 #include <set>
 #include <sstream>
 #include <functional>
-#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
@@ -254,17 +254,17 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
 
   pbes_expression make_and(const pfnf_traverser_expression& left, const pfnf_traverser_expression& right) const
   {
-    return utilities::optimized_and(left.expr, right.expr);
+    return data::optimized_and(left.expr, right.expr);
   }
 
   pbes_expression make_or(const pfnf_traverser_expression& left, const pfnf_traverser_expression& right) const
   {
-    return utilities::optimized_or(left.expr, right.expr);
+    return data::optimized_or(left.expr, right.expr);
   }
 
   pbes_expression make_not(const pfnf_traverser_expression& x) const
   {
-    return utilities::optimized_not(x.expr);
+    return data::optimized_not(x.expr);
   }
 
   /// \brief A stack containing expressions in PFNF format.
@@ -286,8 +286,8 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     const pbes_expression F = false_();
     for (std::vector<pfnf_traverser_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
     {
-      pbes_expression x = std::accumulate(i->rhs.begin(), i->rhs.end(), F, &utilities::optimized_or<pbes_expression>);
-      result = utilities::optimized_and(result, utilities::optimized_imp(i->g, x));
+      pbes_expression x = std::accumulate(i->rhs.begin(), i->rhs.end(), F, &data::optimized_or<pbes_expression>);
+      result = data::optimized_and(result, data::optimized_imp(i->g, x));
     }
     for (std::vector<pfnf_traverser_quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
     {

@@ -15,7 +15,7 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
-#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 
 namespace mcrl2 {
 
@@ -243,7 +243,7 @@ void split_pfnf_expression(const pbes_expression& phi, pbes_expression& h, std::
   {
     if (is_pfnf_simple_expression(*i))
     {
-      h = utilities::optimized_and(h, *i);
+      h = data::optimized_and(h, *i);
     }
     else
     {

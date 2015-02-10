@@ -28,7 +28,7 @@
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 
 namespace mcrl2
 {
@@ -164,8 +164,8 @@ struct constelm_edge_condition
     term_type result = tr::true_();
     for (auto i = c.begin(); i != c.end(); ++i)
     {
-      result = utilities::optimized_and(result, utilities::optimized_not(i->TC));
-      result = utilities::optimized_and(result, utilities::optimized_not(i->FC));
+      result = data::optimized_and(result, data::optimized_not(i->TC));
+      result = data::optimized_and(result, data::optimized_not(i->FC));
     }
     return result;
   }
@@ -226,7 +226,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
 
   void leave(const data::data_expression& x)
   {
-    push(edge_condition(x, utilities::optimized_not(x)));
+    push(edge_condition(x, data::optimized_not(x)));
   }
 
   void leave(const not_&)
@@ -240,7 +240,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   {
     edge_condition ec_right = pop();
     edge_condition ec_left = pop();
-    edge_condition ec(utilities::optimized_and(ec_left.TC, ec_right.TC), utilities::optimized_or(ec_left.FC, ec_right.FC));
+    edge_condition ec(data::optimized_and(ec_left.TC, ec_right.TC), data::optimized_or(ec_left.FC, ec_right.FC));
     merge_conditions(ec_left, ec_right, ec);
     push(ec);
   }
@@ -249,7 +249,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   {
     edge_condition ec_right = pop();
     edge_condition ec_left = pop();
-    edge_condition ec(utilities::optimized_or(ec_left.TC, ec_right.TC), utilities::optimized_and(ec_left.FC, ec_right.FC));
+    edge_condition ec(data::optimized_or(ec_left.TC, ec_right.TC), data::optimized_and(ec_left.FC, ec_right.FC));
     merge_conditions(ec_left, ec_right, ec);
     push(ec);
   }
@@ -258,7 +258,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   {
     edge_condition ec_right = pop();
     edge_condition ec_left = pop();
-    edge_condition ec(utilities::optimized_or(ec_left.FC, ec_right.TC), utilities::optimized_and(ec_left.TC, ec_right.FC));
+    edge_condition ec(data::optimized_or(ec_left.FC, ec_right.TC), data::optimized_and(ec_left.TC, ec_right.FC));
     merge_conditions(ec_left, ec_right, ec);
     push(ec);
   }

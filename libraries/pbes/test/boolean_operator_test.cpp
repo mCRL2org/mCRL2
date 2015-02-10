@@ -14,7 +14,7 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/parse.h"
 

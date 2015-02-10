@@ -24,7 +24,7 @@
 #include "mcrl2/data/hash.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/utilities/detail/join.h"
-#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 
 namespace mcrl2
 {
@@ -1049,7 +1049,7 @@ using pbes_expr::split_or;
 inline
 pbes_expression not_(const pbes_expression& p)
 {
-  return utilities::optimized_not(p);
+  return data::optimized_not(p);
 }
 
 /// \brief Make a conjunction
@@ -1059,7 +1059,7 @@ pbes_expression not_(const pbes_expression& p)
 inline
 pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 {
-  return utilities::optimized_and(p, q);
+  return data::optimized_and(p, q);
 }
 
 /// \brief Make a disjunction
@@ -1069,7 +1069,7 @@ pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 {
-  return utilities::optimized_or(p, q);
+  return data::optimized_or(p, q);
 }
 
 /// \brief Make an implication
@@ -1079,7 +1079,7 @@ pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 inline
 pbes_expression imp(const pbes_expression& p, const pbes_expression& q)
 {
-  return utilities::optimized_imp(p, q);
+  return data::optimized_imp(p, q);
 }
 
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)

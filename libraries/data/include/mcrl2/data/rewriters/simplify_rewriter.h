@@ -16,7 +16,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 #include "mcrl2/data/expression_traits.h"
-#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 
 namespace mcrl2 {
 
@@ -80,25 +80,25 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       if (is_not(x)) // x = !y
       {
         data_expression y = derived().apply(*x.begin());
-        result = utilities::optimized_not(y);
+        result = data::optimized_not(y);
       }
       else if (is_and(x)) // x = y && z
       {
         data_expression y = derived().apply(binary_left(x));
         data_expression z = derived().apply(binary_right(x));
-        result = utilities::optimized_and(y, z);
+        result = data::optimized_and(y, z);
       }
       else if (is_or(x)) // x = y || z
       {
         data_expression y = derived().apply(binary_left(x));
         data_expression z = derived().apply(binary_right(x));
-        result = utilities::optimized_or(y, z);
+        result = data::optimized_or(y, z);
       }
       else if (is_imp(x)) // x = y => z
       {
         data_expression y = derived().apply(binary_left(x));
         data_expression z = derived().apply(binary_right(x));
-        result = utilities::optimized_imp(y, z);
+        result = data::optimized_imp(y, z);
       }
       else
       {
@@ -112,14 +112,14 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
     {
       variable_list d = forall(x).variables();
       data_expression y = derived().apply(forall(x).body());
-      return utilities::optimized_forall(d, y, true);
+      return data::optimized_forall(d, y, true);
     }
 
     data_expression apply(const exists& x) // x = exists d. y
     {
       variable_list d = exists(x).variables();
       data_expression y = derived().apply(exists(x).body());
-      return utilities::optimized_exists(d, y, true);
+      return data::optimized_exists(d, y, true);
     }
 };
 
