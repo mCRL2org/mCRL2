@@ -51,10 +51,8 @@ pbes_system::pbes_expression expr(const std::string& text)
 
 void test_boolean_operators()
 {
-  using namespace utilities;
-
-  BOOST_CHECK(optimized_or(expr("false"), expr("X")) == expr("X"));
-  BOOST_CHECK(optimized_and(expr("false"), expr("X")) == expr("false"));
+  BOOST_CHECK(data::optimized_or(expr("false"), expr("X")) == expr("X"));
+  BOOST_CHECK(data::optimized_and(expr("false"), expr("X")) == expr("false"));
 }
 
 int test_main(int argc, char* argv[])
