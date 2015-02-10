@@ -33,19 +33,19 @@ class RandomTestRunner(testrunner.TestRunner):
                      generate_tests('lpsconfcheck_d' , run_lpsconfcheck_d_test , self._args.count) + \
                      generate_tests('lpsconfcheck_t' , run_lpsconfcheck_t_test , self._args.count) + \
                      generate_tests('lpsconfcheck_z' , run_lpsconfcheck_z_test , self._args.count) + \
+                     generate_tests('lpsbinary'      , run_lpsbinary_test      , self._args.count) + \
+                     generate_tests('lpsconstelm'    , run_lpsparelm_test      , self._args.count) + \
+                     generate_tests('lpsparelm'      , run_lpsparelm_test      , self._args.count) + \
+                     generate_tests('lpssumelm'      , run_lpssumelm_test      , self._args.count) + \
+                     generate_tests('lpssuminst'     , run_lpssuminst_test     , self._args.count) + \
                      generate_pbesrewr_tests('simplify'            , run_pbesrewr_test, self._args.count) + \
                      generate_pbesrewr_tests('pfnf'                , run_pbesrewr_test, self._args.count) + \
                      generate_pbesrewr_tests('quantifier-all'      , run_pbesrewr_test, self._args.count) + \
                      generate_pbesrewr_tests('quantifier-finite'   , run_pbesrewr_test, self._args.count) + \
-                     generate_pbesrewr_tests('quantifier-one-point', run_pbesrewr_test, self._args.count)
-                     #generate_tests('pbesparelm'     , run_pbesparelm_test     , self._args.count) + \
-                     #generate_tests('pbespareqelm'   , run_pbespareqelm_test   , self._args.count) + \
-                     #generate_tests('pbesstategraph' , run_pbesstategraph_test , self._args.count) + \
-                     #generate_tests('lpsbinary'      , run_lpsbinary_test      , self._args.count) + \
-                     #generate_tests('lpsconstelm'    , run_lpsparelm_test      , self._args.count) + \
-                     #generate_tests('lpsparelm'      , run_lpsparelm_test      , self._args.count) + \
-                     #generate_tests('lpssumelm'      , run_lpssumelm_test      , self._args.count) + \
-                     #generate_tests('lpssuminst'     , run_lpssuminst_test     , self._args.count) + \
+                     generate_pbesrewr_tests('quantifier-one-point', run_pbesrewr_test, self._args.count) + \
+                     generate_tests('pbesparelm'     , run_pbesparelm_test     , self._args.count) + \
+                     generate_tests('pbespareqelm'   , run_pbespareqelm_test   , self._args.count) + \
+                     generate_tests('pbesstategraph' , run_pbesstategraph_test , self._args.count)
 
         self.settings = { 'toolpath': self._tool_path,
                           'verbose': self._args.verbose,

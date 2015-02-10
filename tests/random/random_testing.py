@@ -47,7 +47,7 @@ def run_lpssuminst_test(source_path, name, settings):
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
@@ -59,7 +59,7 @@ def run_lpssumelm_test(source_path, name, settings):
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
@@ -71,7 +71,7 @@ def run_lpsparelm_test(source_path, name, settings):
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
@@ -109,8 +109,8 @@ def run_lpsconstelm_test(source_path, name, settings):
     testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsconstelm.yml')
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
-    size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    size = 13
+    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
@@ -122,7 +122,7 @@ def run_lpsbinary_test(source_path, name, settings):
     actions = ['a', 'b', 'c', 'd']
     process_identifiers = ['P', 'Q', 'R']
     size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size)
+    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
     filename = '{0}.mcrl2'.format(name, settings)
     write_text(filename, str(p))
     inputfiles = [filename]
@@ -288,7 +288,7 @@ if __name__ == '__main__':
     run_pbesstategraph_test(source_path, 'pbesstategraph', settings)
     run_alphabet_test(source_path, 'alphabet', settings)
     run_lpsbinary_test(source_path, 'lpsbinary', settings)
-    run_lpsparelm_test(source_path, 'lpsconstelm', settings)
+    run_lpsconstelm_test(source_path, 'lpsconstelm', settings)
     run_lpsparelm_test(source_path, 'lpsparelm', settings)
     run_lpssumelm_test(source_path, 'lpssumelm', settings)
     run_lpssuminst_test(source_path, 'lpssuminst', settings)

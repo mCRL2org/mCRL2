@@ -35,12 +35,16 @@ import copy
 import random
 import re
 
+def remove_postfix(name):
+    return re.sub('\d+$', '', name)
+
 # Sum variables have the format 'bN: Bool', with N in [1, 2, ...]
 def make_variable(forbidden_variables):
-    V = [int(x.name[1:]) for x in forbidden_variables]
+    V = [x.name for x in forbidden_variables]
     for i in range(1, len(V) + 2):
-        if not i in V:
-            return Variable('b%d' % i, 'Bool')
+        name = 'b{}'.format(i)
+        if not name in V:
+            return Variable(name, 'Bool')
 
 class Variable:
     def __init__(self, name, type = 'Bool'):
@@ -69,6 +73,54 @@ class MultiAction:
 
     def __hash__(self):
         return hash(str(self))
+
+# creates random booleans
+def make_booleans(free_variables):
+    integers = set([x.name for x in free_variables if x.type == 'Int'])
+    booleans = set([x.name for x in free_variables if x.type == 'Bool'])
+    result = []
+    for m in integers:
+        result.append('{} > 0'.format(m))
+        result.append('{} > 1'.format(m))
+        result.append('{} < 2'.format(m))
+        result.append('{} < 3'.format(m))
+        for n in integers - set([m]):
+            result.append('{} == {}'.format(m, n))
+    for b in booleans:
+        result.append(b)
+    result.append('true')
+    result.append('false')
+    return result
+
+# creates random integers
+def make_integers(free_variables):
+    integers = set([x.name for x in free_variables if x.type == 'Int'])
+    result = []
+    for m in integers:
+        result.append(m)
+        for n in integers - set([m]) | set(['1', '2']):
+            result.append('%s + %s' % (m, n))
+            result.append('%s - %s' % (m, n))
+    result.append('0')
+    result.append('1')
+    return result
+
+def default_value(v):
+    assert isinstance(v, Variable)
+    if v.type == 'Bool':
+        return random.choice(['true', 'false'])
+    elif v.type == 'Int':
+        return random.choice(['0', '1', '2'])
+    raise RuntimeError('default_value: only Bool and Int are supported! ' + str(v.type))
+
+# returns a random data expression for variable v
+def make_data_expression(v, free_variables):
+    assert isinstance(v, Variable)
+    if v.type == 'Bool':
+        return random.choice(make_booleans(free_variables))
+    elif v.type == 'Int':
+        return random.choice(make_integers(free_variables))
+    raise RuntimeError('make_data_expression: only Bool and Int are supported!')
 
 def make_multi_action(actions, size):
     result = []
@@ -132,12 +184,14 @@ def select_generators(generator_map, actions, process_identifiers, free_variable
 # example: 'b: Bool'
 def parse_variable(text):
     text = text.strip()
-    m = re.match('(\w+)\s*\:(\w+)')
-    return Variable(m.group(1), m.group(2))
+    m = re.match('([^,:]+)\s*\:(.+)', text)
+    result = Variable(m.group(1).strip(), m.group(2).strip())
+    return result
 
 # example: 'b: Bool, m: Nat'
 def parse_variables(text):
-    variables = filter(None, text.rsplit(r'\s*,\s*'))
+    import string
+    variables = filter(None, map(string.strip, text.split(',')))
     return map(parse_variable, variables)
 
 # example: 'P(m: Nat, b: Bool)'
@@ -150,7 +204,7 @@ class ProcessIdentifier(object):
             self.variables = parse_variables(vartext)
         else:
             self.variables = []
-            
+
     def __str__(self):
         if self.variables:
             return '{}({})'.format(self.name, ', '.join(map(str, self.variables)))
@@ -221,15 +275,15 @@ class ProcessInstance(ProcessExpression):
 
     def __str__(self):
         if self.parameters:
-            return '{}({})'.format(self.identifier.name, ', '.join(map(str, self.parameters)))
+            return '{}({})'.format(self.identifier.name, ', '.join(self.parameters))
         else:
             return self.identifier.name
 
 # generate a random process instance
 def make_process_instance(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
     P = random.choice(process_identifiers)
-    # TODO: generate expressions for the parameters
-    return ProcessInstance(P)
+    parameters = [make_data_expression(x, free_variables) for x in P.variables]
+    return ProcessInstance(P, parameters)
 
 class Sum(ProcessExpression):
     def __init__(self, d, x):
@@ -511,18 +565,29 @@ def make_parallel_expression(actions, process_expressions, size, parallel_operat
     return x
 
 # generate a random process specification
-def make_process_specification(generator_map, actions, process_identifiers, size, parallel_operators = [make_block, make_hide, make_rename, make_comm, make_allow], init = None):
+def make_process_specification(generator_map, actions, process_identifiers, size, parallel_operators = [make_block, make_hide, make_rename, make_comm, make_allow], \
+                               init = None, generate_process_parameters = False):
+
+    # create process identifiers for the equations
     process_identifiers = map(ProcessIdentifier, process_identifiers)
+    if generate_process_parameters:
+        V = parse_variables('c1: Bool, c2: Bool, c3: Bool, i1: Int, i2: Int, i3: Int')
+        for i, P in enumerate(process_identifiers):
+            if not P.variables:
+                n = random.randint(0, 3)
+                process_identifiers[i].variables = random.sample(V, n)
+
     is_guarded = True
     free_variables = []
     is_pcrl = True
     equations = []
     for P in process_identifiers:
-        x = make_process_expression(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size)
+        x = make_process_expression(generator_map, actions, process_identifiers, free_variables + P.variables, is_pcrl, is_guarded, size)
         equations.append(ProcessEquation(P, x))
     n = random.randint(0, 3)
     if not init:
-        init = make_parallel_expression(actions, process_identifiers, n, parallel_operators)
+        process_instances = [ProcessInstance(x, map(default_value, x.variables)) for x in process_identifiers]
+        init = make_parallel_expression(actions, process_instances, n, parallel_operators)
     return ProcessSpecification(list(set(actions)), equations, init)
 
 generator_map = {
