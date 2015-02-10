@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H
 #define MCRL2_PBES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H
 
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/utilities/detail/optimized_logic_operators.h"
 
 namespace mcrl2 {
 
@@ -41,13 +41,13 @@ struct add_simplify_quantifiers: public Builder<Derived>
     }
     else if (tr::is_not(body))
     {
-      result = utilities::optimized_not(utilities::optimized_exists(variables, atermpp::down_cast<not_>(body).operand(), true));
+      result = data::optimized_not(data::optimized_exists(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
     if (tr::is_and(body))
     {
       auto const& left = atermpp::down_cast<and_>(body).left();
       auto const& right = atermpp::down_cast<and_>(body).right();
-      result = utilities::optimized_and(utilities::optimized_forall(variables, left, true), utilities::optimized_forall(variables, right, true));
+      result = data::optimized_and(data::optimized_forall(variables, left, true), data::optimized_forall(variables, right, true));
     }
     else if (tr::is_or(body))
     {
@@ -57,20 +57,20 @@ struct add_simplify_quantifiers: public Builder<Derived>
       data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
       if (lv.empty())
       {
-        result = utilities::optimized_or(left, utilities::optimized_forall_no_empty_domain(rv, right, true));
+        result = data::optimized_or(left, data::optimized_forall_no_empty_domain(rv, right, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_or(right, utilities::optimized_forall_no_empty_domain(lv, left, true));
+        result = data::optimized_or(right, data::optimized_forall_no_empty_domain(lv, left, true));
       }
       else
       {
-        result = utilities::optimized_forall(variables, body, true);
+        result = data::optimized_forall(variables, body, true);
       }
     }
     else
     {
-      result = utilities::optimized_forall(variables, body, true);
+      result = data::optimized_forall(variables, body, true);
     }
     return result;
   }
@@ -87,13 +87,13 @@ struct add_simplify_quantifiers: public Builder<Derived>
     }
     else if (tr::is_not(body))
     {
-      result = utilities::optimized_not(utilities::optimized_forall(variables, atermpp::down_cast<not_>(body).operand(), true));
+      result = data::optimized_not(data::optimized_forall(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
     if (tr::is_or(body))
     {
       auto const& left = atermpp::down_cast<or_>(body).left();
       auto const& right = atermpp::down_cast<or_>(body).right();
-      result = utilities::optimized_or(utilities::optimized_exists(variables, left, true), utilities::optimized_exists(variables, right, true));
+      result = data::optimized_or(data::optimized_exists(variables, left, true), data::optimized_exists(variables, right, true));
     }
     else if (tr::is_and(body))
     {
@@ -103,20 +103,20 @@ struct add_simplify_quantifiers: public Builder<Derived>
       data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
       if (lv.empty())
       {
-        result = utilities::optimized_and(left, utilities::optimized_exists_no_empty_domain(rv, right, true));
+        result = data::optimized_and(left, data::optimized_exists_no_empty_domain(rv, right, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_and(right, utilities::optimized_exists_no_empty_domain(lv, left, true));
+        result = data::optimized_and(right, data::optimized_exists_no_empty_domain(lv, left, true));
       }
       else
       {
-        result = utilities::optimized_exists(variables, body, true);
+        result = data::optimized_exists(variables, body, true);
       }
     }
     else
     {
-      result = utilities::optimized_exists(variables, body, true);
+      result = data::optimized_exists(variables, body, true);
     }
     return result;
   }
