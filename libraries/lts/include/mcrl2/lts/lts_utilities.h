@@ -21,6 +21,7 @@
 // #include <string>
 #include <map>
 #include <set>
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
 
 namespace mcrl2
