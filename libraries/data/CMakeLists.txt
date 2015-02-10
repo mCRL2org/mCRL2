@@ -6,6 +6,8 @@ endif()
 
 add_mcrl2_library(data
   INSTALL_HEADERS TRUE
+  NOHEADERTEST
+    mcrl2/data/detail/rewrite/jittycpreamble.h
   SOURCES
     data.cpp
     data_specification.cpp
