@@ -24,6 +24,7 @@
 #include <string>
 #include <cassert>
 #include <sstream>
+#include <limits>
 
 
 namespace mcrl2
