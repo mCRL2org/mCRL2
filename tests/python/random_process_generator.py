@@ -7,52 +7,50 @@
 #--------------------------------------------------
 # expression                  | #children  | pcrl |
 #--------------------------------------------------
-# action                      |     0      |  y   |
-# delta                       |     0      |  y   |
-# tau                         |     0      |  y   |
-# process_instance            |     0      |  y   |
-# sum                         |     1      |  y   |
-# if_then                     |     1      |  y   |
-# if_then_else                |     2      |  y   |
-# choice                      |     2      |  y   |
-# seq                         |     2      |  y   |
-# block                       |     1      |  n   |
-# hide                        |     1      |  n   |
-# rename                      |     1      |  n   |
-# comm                        |     1      |  n   |
-# allow                       |     1      |  n   |
-# sync                        |     2      |  n   |
-# merge                       |     2      |  n   |
-# left_merge                  |     2      |  n   |
+# Action                      |     0      |  y   |
+# Delta                       |     0      |  y   |
+# Tau                         |     0      |  y   |
+# ProcessInstance             |     0      |  y   |
+# Sum                         |     1      |  y   |
+# IfThen                      |     1      |  y   |
+# IfThenElse                  |     2      |  y   |
+# Choice                      |     2      |  y   |
+# Seq                         |     2      |  y   |
+# Block                       |     1      |  n   |
+# Hide                        |     1      |  n   |
+# Rename                      |     1      |  n   |
+# Comm                        |     1      |  n   |
+# Allow                       |     1      |  n   |
+# Sync                        |     2      |  n   |
+# Merge                       |     2      |  n   |
+# LeftMerge                   |     2      |  n   |
 #--------------------------------------------------
 # unsupported                                     |
 #--------------------------------------------------
 # process_instance_assignment |     0      |  y   |
-# at                          |     1      |  y   |
+# At                          |     1      |  y   |
 # binit                       |     2      |  y   |
 
 import copy
 import random
+import re
 
-ACTIONS = ['a', 'b', 'c', 'd']
-PROCESS_IDENTIFIERS = ['P', 'Q', 'R']
-
-# sum variables have the format 'bN: Bool', with N in [1, 2, ...]
+# Sum variables have the format 'bN: Bool', with N in [1, 2, ...]
 def make_variable(forbidden_variables):
     V = [int(x.name[1:]) for x in forbidden_variables]
     for i in range(1, len(V) + 2):
         if not i in V:
-            return variable('b%d' % i, 'Bool')
+            return Variable('b%d' % i, 'Bool')
 
-class variable:
+class Variable:
     def __init__(self, name, type = 'Bool'):
         self.name = name
         self.type = type
 
-    def __repr__(self):
+    def __str__(self):
         return '%s: %s' % (self.name, self.type)
 
-class multi_action:
+class MultiAction:
     def __init__(self, actions):
         self.actions = actions
 
@@ -64,9 +62,9 @@ class multi_action:
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def __repr__(self):
+    def __str__(self):
         if len(self.actions) == 0:
-            return 'tau'
+            return 'Tau'
         return ' | '.join(self.actions)
 
     def __hash__(self):
@@ -74,17 +72,17 @@ class multi_action:
 
 def make_multi_action(actions, size):
     result = []
-    for i in range(size):
+    for _ in range(size):
         result.append(random.choice(actions))
-    return multi_action(sorted(result))
+    return MultiAction(sorted(result))
 
 # returns the size of a process expression
 def expression_size(x):
     result = 0
-    if isinstance(x, process_expression):
+    if isinstance(x, ProcessExpression):
         result = result + 1
     for key, value in vars(x).items():
-        if isinstance(value, process_expression):
+        if isinstance(value, ProcessExpression):
             result = result + expression_size(value)
     return result
 
@@ -93,19 +91,19 @@ def collect_process_expressions(x, type, result):
     if isinstance(x, type):
         result.append(x)
     for key, value in vars(x).items():
-        if isinstance(value, process_expression):
+        if isinstance(value, ProcessExpression):
             collect_process_expressions(value, type, result)
 
 # returns all sum variables that appear in the process expression x
 def find_sum_variables(x):
     result = []
-    collect_process_expressions(x, sum, result)
+    collect_process_expressions(x, Sum, result)
     return [x.d for x in result]
 
 # returns all action names that appear in the process expression x
 def find_actions(x):
     result = []
-    collect_process_expressions(x, action, result)
+    collect_process_expressions(x, Action, result)
     return [x.a for x in result]
 
 # returns the generator functions that are capable of producing a random process expression
@@ -131,7 +129,35 @@ def select_generators(generator_map, actions, process_identifiers, free_variable
         r = r + [x] * generator_map[x]
     return r
 
-class process_expression(object):
+# example: 'b: Bool'
+def parse_variable(text):
+    text = text.strip()
+    m = re.match('(\w+)\s*\:(\w+)')
+    return Variable(m.group(1), m.group(2))
+
+# example: 'b: Bool, m: Nat'
+def parse_variables(text):
+    variables = filter(None, text.rsplit(r'\s*,\s*'))
+    return map(parse_variable, variables)
+
+# example: 'P(m: Nat, b: Bool)'
+class ProcessIdentifier(object):
+    def __init__(self, text):
+        m = re.search(r'(\w*)(\(.*\))?', text)
+        self.name = m.group(1)
+        if m.group(2):
+            vartext = m.group(2)[1:-1]
+            self.variables = parse_variables(vartext)
+        else:
+            self.variables = []
+            
+    def __str__(self):
+        if self.variables:
+            return '{}({})'.format(self.name, ', '.join(map(str, self.variables)))
+        else:
+            return self.name
+
+class ProcessExpression(object):
     pass
 
 # generate a random process expression
@@ -146,7 +172,7 @@ def make_process_expression(generator_map, actions, process_identifiers, free_va
     generator = random.choice(generators)
     result = generator(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size)
     if expression_size(result) > size:
-        print 'foutje:', result, expression_size(result), size
+        raise RuntimeError('The generated expression has the wrong size! ' + str(result))
     assert 1 <= expression_size(result) <= size
     return result
 
@@ -158,54 +184,59 @@ def make_process_expressions(generator_map, actions, process_identifiers, free_v
     y = make_process_expression(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size - expression_size(x))
     return x, y
 
-class action(process_expression):
+class Action(ProcessExpression):
     def __init__(self, a):
         self.a = a
 
-    def __repr__(self):
+    def __str__(self):
         a = self.a
         return '%s' % a
 
-# generate a random action
+# generate a random Action
 def make_action(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
     a = random.choice(actions)
-    return action(a)
+    return Action(a)
 
-class delta(process_expression):
-    def __repr__(self):
+class Delta(ProcessExpression):
+    def __str__(self):
         return 'delta'
 
 # generate a random delta
 def make_delta(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
-    return delta()
+    return Delta()
 
-class tau(process_expression):
-    def __repr__(self):
+class Tau(ProcessExpression):
+    def __str__(self):
         return 'tau'
 
 # generate a random tau
 def make_tau(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
-    return tau()
+    return Tau()
 
-class process_instance(process_expression):
-    def __init__(self, P):
-        self.P = P
+class ProcessInstance(ProcessExpression):
+    def __init__(self, identifier, parameters = []):
+        assert isinstance(identifier, ProcessIdentifier)
+        self.identifier = identifier
+        self.parameters = parameters
 
-    def __repr__(self):
-        P = self.P
-        return '%s' % P
+    def __str__(self):
+        if self.parameters:
+            return '{}({})'.format(self.identifier.name, ', '.join(map(str, self.parameters)))
+        else:
+            return self.identifier.name
 
 # generate a random process instance
 def make_process_instance(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
     P = random.choice(process_identifiers)
-    return process_instance(P)
+    # TODO: generate expressions for the parameters
+    return ProcessInstance(P)
 
-class sum(process_expression):
+class Sum(ProcessExpression):
     def __init__(self, d, x):
         self.d = d
         self.x = x
 
-    def __repr__(self):
+    def __str__(self):
         d = self.d
         x = self.x
         return 'sum %s . (%s)' % (d, x)
@@ -214,14 +245,14 @@ class sum(process_expression):
 def make_sum(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
     d = make_variable(free_variables)
     x = make_process_expression(generator_map, actions, process_identifiers, free_variables + [d], is_pcrl, is_guarded, size - 1)
-    return sum(d, x)
+    return Sum(d, x)
 
-class if_then(process_expression):
+class IfThen(ProcessExpression):
     def __init__(self, c, x):
         self.x = x
         self.c = c
 
-    def __repr__(self):
+    def __str__(self):
         x = self.x
         c = self.c
         return '(%s) -> (%s)' % (c, x)
@@ -230,15 +261,15 @@ class if_then(process_expression):
 def make_if_then(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
     c = 'true'
     x = make_process_expression(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size - 1)
-    return if_then(c, x)
+    return IfThen(c, x)
 
-class if_then_else(process_expression):
+class IfThenElse(ProcessExpression):
     def __init__(self, c, x, y):
         self.c = c
         self.x = x
         self.y = y
 
-    def __repr__(self):
+    def __str__(self):
         c = self.c
         x = self.x
         y = self.y
@@ -248,83 +279,83 @@ class if_then_else(process_expression):
 def make_if_then_else(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
     c = 'true'
     x, y = make_process_expressions(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size - 1)
-    return if_then_else(c, x, y)
+    return IfThenElse(c, x, y)
 
-class binary_operator(process_expression):
+class BinaryOperator(ProcessExpression):
     def __init__(self, op, x, y):
         self.op = op
         self.x = x
         self.y = y
 
-    def __repr__(self):
+    def __str__(self):
         x = self.x
         y = self.y
         op = self.op
-        return '(%s) %s (%s)' % (x, op, y)
+        return '({}) {} ({})'.format(x, op, y)
 
-class choice(binary_operator):
+class Choice(BinaryOperator):
     def __init__(self, x, y):
-        super(choice, self).__init__('+', x, y)
+        super(Choice, self).__init__('+', x, y)
 
 # generate a random choice
 def make_choice(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
     x, y = make_process_expressions(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size - 1)
-    return choice(x, y)
+    return Choice(x, y)
 
-class seq(binary_operator):
+class Seq(BinaryOperator):
     def __init__(self, x, y):
-        super(seq, self).__init__('.', x, y)
+        super(Seq, self).__init__('.', x, y)
 
 # generate a random seq
 def make_seq(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
     x = make_process_expression(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size - 2)
     y = make_process_expression(generator_map, actions, process_identifiers, free_variables, is_pcrl, False, size - expression_size(x) - 1)
-    return seq(x, y)
+    return Seq(x, y)
 
-class bounded_init(binary_operator):
+class BoundedInit(BinaryOperator):
     def __init__(self, x, y):
-        super(bounded_init, self).__init__('<<', x, y)
+        super(BoundedInit, self).__init__('<<', x, y)
 
 # generate a random bounded_init
 def make_bounded_init(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size):
     x, y = make_process_expressions(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size - 1)
-    return bounded_init(x, y)
+    return BoundedInit(x, y)
 
-class left_merge(binary_operator):
+class LeftMerge(BinaryOperator):
     def __init__(self, x, y):
-        super(left_merge, self).__init__('||_', x, y)
+        super(LeftMerge, self).__init__('||_', x, y)
 
-class merge(binary_operator):
+class Merge(BinaryOperator):
     def __init__(self, x, y):
-        super(merge, self).__init__('||', x, y)
+        super(Merge, self).__init__('||', x, y)
 
-class sync(binary_operator):
+class Sync(BinaryOperator):
     def __init__(self, x, y):
-        super(sync, self).__init__('|', x, y)
+        super(Sync, self).__init__('|', x, y)
 
-class at(process_expression):
+class At(ProcessExpression):
     def __init__(self, x, t):
         self.x = x
         self.t = t
 
-    def __repr__(self):
+    def __str__(self):
         x = self.x
         t = self.t
         return '(%s) @ (%s)' % (x, t)
 
-class allow(process_expression):
+class Allow(ProcessExpression):
     def __init__(self, V, x):
         self.V = V
         self.x = x
 
-    def __repr__(self):
+    def __str__(self):
         V = self.V
         x = self.x
         return 'allow({%s}, %s)' % (', '.join(map(str, V)), x)
 
 def make_allow_set(actions, size):
     result = set([])
-    for i in range(size):
+    for _ in range(size):
         n = random.randint(1, 2)
         alpha = make_multi_action(actions, n)
         result.add(alpha)
@@ -333,14 +364,14 @@ def make_allow_set(actions, size):
 # generate a random allow
 def make_allow(actions, x):
     V = make_allow_set(actions, 5)
-    return allow(V, x)
+    return Allow(V, x)
 
-class block(process_expression):
+class Block(ProcessExpression):
     def __init__(self, B, x):
         self.B = B
         self.x = x
 
-    def __repr__(self):
+    def __str__(self):
         B = self.B
         x = self.x
         return 'block({%s}, %s)' % (', '.join(B), x)
@@ -351,14 +382,14 @@ def make_block_set(actions, size):
 # generate a random block
 def make_block(actions, x):
     B = make_block_set(actions, 1)
-    return block(B, x)
+    return Block(B, x)
 
-class comm(process_expression):
+class Comm(ProcessExpression):
     def __init__(self, C, x):
         self.C = C
         self.x = x
 
-    def __repr__(self):
+    def __str__(self):
         C = self.C
         x = self.x
         return 'comm({%s}, %s)' % (', '.join(C), x)
@@ -366,7 +397,7 @@ class comm(process_expression):
 def make_comm_set(actions, size):
     result = []
     A = set(actions)
-    for i in range(size):
+    for _ in range(size):
         if len(A) < 2:
             break
         a = random.choice(list(A))
@@ -381,19 +412,19 @@ def make_comm_set(actions, size):
 # generate a random comm
 def make_comm(actions, x):
     C = make_comm_set(actions, 1)
-    return comm(C, x)
+    return Comm(C, x)
 
-class hide(process_expression):
+class Hide(ProcessExpression):
     def __init__(self, I, x):
         self.I = I
         self.x = x
 
-    def __repr__(self):
+    def __str__(self):
         I = self.I
         x = self.x
         return 'hide({%s}, %s)' % (', '.join(I), x)
 
-# generate a random comm
+# generate a random hide set
 def make_hide_set(actions, size):
     if size > len(actions):
         return actions
@@ -402,14 +433,14 @@ def make_hide_set(actions, size):
 # generate a random hide
 def make_hide(actions, x):
     I = make_hide_set(actions, 1)
-    return hide(I, x)
+    return Hide(I, x)
 
-class rename(process_expression):
+class Rename(ProcessExpression):
     def __init__(self, R, x):
         self.R = R
         self.x = x
 
-    def __repr__(self):
+    def __str__(self):
         x = self.x
         R = self.R
         return 'rename({%s}, %s)' % (', '.join(R), x)
@@ -417,7 +448,7 @@ class rename(process_expression):
 def make_rename_set(actions, size):
     result = []
     A = copy.deepcopy(actions)
-    for i in range(size):
+    for _ in range(size):
         if len(A) < 2:
             break
         a, b = random.sample(A, 2)
@@ -429,25 +460,25 @@ def make_rename_set(actions, size):
 # generate a random rename
 def make_rename(actions, x):
     R = make_rename_set(actions, 1)
-    return rename(R, x)
+    return Rename(R, x)
 
-class process_equation:
+class ProcessEquation:
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
 
-    def __repr__(self):
+    def __str__(self):
         lhs = self.lhs
         rhs = self.rhs
         return '%s = %s;' % (lhs, rhs)
 
-class process_specification:
+class ProcessSpecification:
     def __init__(self, actions, equations, init):
         self.actions = actions
         self.equations = equations
         self.init = init
 
-    def __repr__(self):
+    def __str__(self):
         actions = self.actions
         equations = self.equations
         init = self.init
@@ -466,14 +497,14 @@ def make_parallel_expression(actions, process_expressions, size, parallel_operat
             p, q = random.sample(V, 2)
             V.remove(p)
             V.remove(q)
-            x = merge(p, q)
+            x = Merge(p, q)
         else:
             p = random.choice(V)
             V.remove(p)
-            x = merge(x, p)
+            x = Merge(x, p)
 
     # 2) wrap size parallel operators around x
-    for i in range(size):
+    for _ in range(size):
         f = random.choice(parallel_operators)
         x = f(actions, x)
 
@@ -481,17 +512,18 @@ def make_parallel_expression(actions, process_expressions, size, parallel_operat
 
 # generate a random process specification
 def make_process_specification(generator_map, actions, process_identifiers, size, parallel_operators = [make_block, make_hide, make_rename, make_comm, make_allow], init = None):
+    process_identifiers = map(ProcessIdentifier, process_identifiers)
     is_guarded = True
     free_variables = []
     is_pcrl = True
     equations = []
     for P in process_identifiers:
         x = make_process_expression(generator_map, actions, process_identifiers, free_variables, is_pcrl, is_guarded, size)
-        equations.append(process_equation(P, x))
+        equations.append(ProcessEquation(P, x))
     n = random.randint(0, 3)
     if not init:
         init = make_parallel_expression(actions, process_identifiers, n, parallel_operators)
-    return process_specification(list(set(actions)), equations, init)
+    return ProcessSpecification(list(set(actions)), equations, init)
 
 generator_map = {
     make_action          : 8,

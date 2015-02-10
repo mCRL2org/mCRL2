@@ -15,7 +15,7 @@ from random_process_generator import make_process_specification, generator_map, 
 from text_utility import write_text
 from testing import run_yml_test, run_pbes_test_with_counter_example_minimization, cleanup_files
 
-MCRL2_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
+MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
 
 lpsconfcheck_generator_map = {
@@ -261,17 +261,18 @@ def run_pbesstategraph_test(source_path, name, settings):
 
 if __name__ == '__main__':
     settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False, 'cleanup_files': False}
+    testdir = 'output'
+    if not os.path.exists(testdir):
+        os.mkdir(testdir)
+    os.chdir(testdir)
     source_path = MCRL2_ROOT
 
-    for i in range(100):
-        run_lpsconfcheck_c_test(source_path, 'lpsconfcheck_c'.format(), settings)
-        run_lpsconfcheck_capital_c_test(source_path, 'lpsconfcheck_capital_c'.format(), settings)
-        run_lpsconfcheck_d_test(source_path, 'lpsconfcheck_d'.format(), settings)
-        run_lpsconfcheck_t_test(source_path, 'lpsconfcheck_t'.format(), settings)
-        run_lpsconfcheck_z_test(source_path, 'lpsconfcheck_z'.format(), settings)
-
+    run_lpsconfcheck_c_test(source_path, 'lpsconfcheck_c', settings)
+    run_lpsconfcheck_capital_c_test(source_path, 'lpsconfcheck_capital_c', settings)
+    run_lpsconfcheck_d_test(source_path, 'lpsconfcheck_d', settings)
+    run_lpsconfcheck_t_test(source_path, 'lpsconfcheck_t', settings)
+    run_lpsconfcheck_z_test(source_path, 'lpsconfcheck_z', settings)
     run_lps2pbes_test(source_path, 'lps2pbes', settings)
-    # run_pbesabsinthe_test(source_path, 'pbesabsinthe', settings)
     run_pbesabstract_test(source_path, 'pbesabstract', settings)
     run_pbesconstelm_test(source_path, 'pbesconstelm', settings)
     run_pbesinst_finite_test(source_path, 'pbesinst_finite', settings)
@@ -283,16 +284,16 @@ if __name__ == '__main__':
     run_pbesrewr_test(source_path, 'pbesrewr', 'quantifier-all', settings)
     run_pbesrewr_test(source_path, 'pbesrewr', 'quantifier-finite', settings)
     run_pbesrewr_test(source_path, 'pbesrewr', 'quantifier-one-point', settings)
-    # run_pbesrewr_test(source_path, 'pbesrewr', 'bqnf-quantifier', settings)
     run_pbessolve_test(source_path, 'pbessolve', settings)
     run_pbesstategraph_test(source_path, 'pbesstategraph', settings)
-
     run_alphabet_test(source_path, 'alphabet', settings)
     run_lpsbinary_test(source_path, 'lpsbinary', settings)
     run_lpsparelm_test(source_path, 'lpsconstelm', settings)
     run_lpsparelm_test(source_path, 'lpsparelm', settings)
     run_lpssumelm_test(source_path, 'lpssumelm', settings)
     run_lpssuminst_test(source_path, 'lpssuminst', settings)
-
     run_bessolve_test(source_path, 'bessolve', settings)
+
+    # run_pbesabsinthe_test(source_path, 'pbesabsinthe', settings)
+    # run_pbesrewr_test(source_path, 'pbesrewr', 'bqnf-quantifier', settings)
     # run_symbolic_exploration_test(source_path, 'symbolic_exploration', settings)
