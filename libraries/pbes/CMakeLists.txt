@@ -18,6 +18,7 @@ add_mcrl2_library(pbes
     mcrl2_data
     mcrl2_lps
     mcrl2_modal_formula
+    mcrl2_lts
   INCLUDE
     # TODO: Get rid of dependency on BES library
     ${CMAKE_SOURCE_DIR}/libraries/bes/include
