@@ -427,6 +427,40 @@ data::data_expression get_subst_equation_from_actions(
 
 // ----------------------------------------------------------------------------------------------
 
+data::assignment_list get_full_assignment_list(
+  data::assignment_list a_assignment_list,
+  const data::variable_list& a_variables)
+{
+  data::assignment_list v_new_list;
+
+  for (auto i=a_variables.begin(); i!=a_variables.end(); i++)
+  {
+    data::variable v_variable = *i;
+    bool v_assignment_added = false;
+
+    if (!a_assignment_list.empty())
+    {
+      const data::assignment v_assignment = a_assignment_list.front();
+      a_assignment_list.pop_front();
+
+      if (v_assignment.lhs() == v_variable)
+      {
+        v_new_list.push_front(v_assignment);
+        v_assignment_added = true;
+      }
+    }
+
+    if (!v_assignment_added)
+    {
+      v_new_list.push_front(data::assignment(v_variable, v_variable));
+    }
+  }
+
+  return atermpp::reverse(v_new_list);
+}
+
+// ----------------------------------------------------------------------------------------------
+
 template <typename ActionSummand>
 data::data_expression get_confluence_condition(
   const data::data_expression& a_invariant,
@@ -480,7 +514,7 @@ data::data_expression get_confluence_condition(
     const data::data_expression v_condition_2 = a_summand_2.condition();
 
     const data::assignment_list v_assignments_1 = a_summand_1.assignments();
-    const data::assignment_list v_assignments_2 = a_summand_2.assignments();
+    const data::assignment_list v_assignments_2 = get_full_assignment_list(a_summand_2.assignments(), a_variables);
 
     const process::action_list v_actions = a_summand_2.multi_action().actions();
 
