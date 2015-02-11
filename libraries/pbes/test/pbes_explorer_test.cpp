@@ -10,7 +10,7 @@
 /// \brief Test for the PBES_Explorer interface.
 
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/pbes/txt2pbes.h"

@@ -12,7 +12,7 @@
 #ifndef ATERM_DETAIL_UTILITY_H
 #define ATERM_DETAIL_UTILITY_H
 
-#include <string.h>
+#include <string>
 #include <sstream>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"

@@ -12,9 +12,6 @@
 #ifndef MCRL2_CORE_DETAIL_FUNCTION_SYMBOLS_H
 #define MCRL2_CORE_DETAIL_FUNCTION_SYMBOLS_H
 
-#include <string.h>
-#include <ctype.h>
-#include <assert.h>
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/function_symbol.h"
@@ -35,9 +32,9 @@ bool operator==(const size_t x, const atermpp::function_symbol& y)
   return x == y.number();
 }
 
-// We use a deque here, and not a vector, as a vector is relocated in 
+// We use a deque here, and not a vector, as a vector is relocated in
 // memory, which means that function_symbol_DataAppl and function_symbol_DataAppl_helper
-// cannot deliver a reference. 
+// cannot deliver a reference.
 extern std::deque<atermpp::function_symbol> function_symbols_DataAppl;
 
 inline

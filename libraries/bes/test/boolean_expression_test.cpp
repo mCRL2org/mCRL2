@@ -11,7 +11,7 @@
 
 #include <iostream>
 #include <string>
-#include <stdio.h>
+#include <cstdio>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"

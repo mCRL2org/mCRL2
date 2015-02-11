@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <stdio.h>
+#include <cstdio>
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/lts/probabilistic_label.h"
 

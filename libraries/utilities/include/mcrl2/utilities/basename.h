@@ -13,7 +13,7 @@
 #define MCRL2_BASENAME_H
 
 
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <iostream>
 
@@ -64,7 +64,7 @@ namespace utilities
 	  char pathbuf[PATH_MAX];
 	  uint32_t  bufsize = sizeof(pathbuf);
 	  _NSGetExecutablePath( pathbuf, &bufsize);
- 
+
       path = pathbuf;
       std::string::size_type t = path.find_last_of("/");
       path = path.substr(0,t);

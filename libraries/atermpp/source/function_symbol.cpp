@@ -1,7 +1,7 @@
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <assert.h>
+#include <cctype>
+#include <cstdlib>
+#include <cstdarg>
+#include <cassert>
 #include <stdexcept>
 
 #include <set>
@@ -28,7 +28,7 @@ namespace detail
   // destroyed prematurely.
   static size_t function_symbol_table_size=0;
   static size_t function_symbol_table_mask;
-  static _function_symbol** function_symbol_hashtable; 
+  static _function_symbol** function_symbol_hashtable;
 
   static const size_t INITIAL_FUNCTION_HASH_TABLE_SIZE = 1<<FUNCTION_SYMBOL_BLOCK_CLASS; // Must be a multiple of 2.
   static const size_t INITIAL_FUNCTION_INDEX_TABLE_SIZE=128;
@@ -39,9 +39,9 @@ namespace detail
   size_t function_symbol_index_table_number_of_elements=0;
   static _function_symbol* function_symbol_free_list=END_OF_LIST;
   constant_function_symbols function_adm;
-  
+
   detail::_function_symbol** function_symbol_index_table;
-  
+
   static void create_new_function_symbol_block()
   {
     if (function_symbol_index_table_number_of_elements==function_symbol_index_table_size)
@@ -54,7 +54,7 @@ namespace detail
       }
       function_symbol_index_table_size=function_symbol_index_table_size*2;
     }
-  
+
     assert(function_symbol_index_table_number_of_elements<function_symbol_index_table_size);
     function_symbol_index_table[function_symbol_index_table_number_of_elements]=
              reinterpret_cast<_function_symbol*>(
@@ -84,7 +84,7 @@ namespace detail
     for (size_t i=0; i<function_symbol_index_table_number_of_elements; ++i)
     {
       if (function_symbol_index_table[i]<=f && f<(function_symbol_index_table[i])+FUNCTION_SYMBOL_BLOCK_SIZE)
-      { 
+      {
         return true;
       }
     }
@@ -94,7 +94,7 @@ namespace detail
   // A map that records for each prefix a function that must be called to set the
   // postfix number to a sufficiently high number if a function symbol with the same
   // prefix string is registered.
-  
+
   static std::map < std::string, detail::index_increaser> prefix_to_register_function_map;
 
   size_t get_sufficiently_large_postfix_index(const std::string& prefix_)
@@ -137,7 +137,7 @@ namespace detail
   {
     prefix_to_register_function_map[prefix]=increase_index;
   }
-  
+
   // deregister a prefix for a function symbol.
   void deregister_function_symbol_prefix_string(const std::string& prefix)
   {
@@ -154,17 +154,17 @@ namespace detail
     // of a static variable, which some compilers do.
 
     if (function_symbol_table_size==0)
-    { 
+    {
       function_symbol_table_size=INITIAL_FUNCTION_HASH_TABLE_SIZE;
       function_symbol_table_mask=function_symbol_table_size-1;
-      
+
       function_symbol_hashtable=reinterpret_cast<_function_symbol**>(malloc(function_symbol_table_size*sizeof(_function_symbol*)));
       if (function_symbol_hashtable==NULL)
       {
         throw std::runtime_error("Out of memory. Cannot create function symbol hashtable.");
       }
       for(size_t i=0; i<function_symbol_table_size; ++i)
-      { 
+      {
         function_symbol_hashtable[i]=END_OF_LIST;
       }
 
@@ -190,34 +190,34 @@ namespace detail
 
   template <class StringIterator>
   static HashNumber calculate_hash_of_function_symbol(const StringIterator string_begin, const StringIterator string_end, const size_t arity);
-  
+
   static void resize_function_symbol_hashtable()
   {
     function_symbol_table_size  <<=1;  // Double the size.
-  
+
     _function_symbol** const old_function_symbol_hashtable=function_symbol_hashtable;
     function_symbol_hashtable=reinterpret_cast<_function_symbol**>(realloc(function_symbol_hashtable,function_symbol_table_size*sizeof(_function_symbol*)));
     if (function_symbol_hashtable==NULL)
     {
       // resizing the hashtable failed; continue with the old hashtable.
-      mCRL2log(mcrl2::log::warning) << "could not resize function symbol hashtable to class " << function_symbol_table_size << "."; 
+      mCRL2log(mcrl2::log::warning) << "could not resize function symbol hashtable to class " << function_symbol_table_size << ".";
       function_symbol_table_size  >>=1; // Restore the size by dividing it by 2.
       function_symbol_hashtable=old_function_symbol_hashtable;
       return;
     }
     function_symbol_table_mask  = function_symbol_table_size-1;
-  
+
     for(size_t i=0; i<function_symbol_table_size; ++i)
     {
       function_symbol_hashtable[i]=END_OF_LIST;
     }
-  
+
     for (size_t i=0; i<function_symbol_index_table_number_of_elements; i++)
     {
       for (size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; j++)
       {
         _function_symbol* entry = &function_symbol_index_table[i][j];
-        if (entry->reference_count>0) 
+        if (entry->reference_count>0)
         {
           HashNumber hnr = calculate_hash_of_function_symbol(entry->name.begin(), entry->name.end(), entry->arity );
           hnr &= function_symbol_table_mask;
@@ -227,19 +227,19 @@ namespace detail
       }
     }
   }
-  
+
   static const size_t MAGIC_PRIME = 7;
-  
+
   template <class StringIterator>
   static HashNumber calculate_hash_of_function_symbol(const StringIterator string_begin, const StringIterator string_end, const size_t arity)
   {
     HashNumber hnr = arity*3;
-  
+
     for (StringIterator i=string_begin; i!=string_end; i++)
     {
       hnr = 251 * hnr + *i;
     }
-  
+
     return hnr*MAGIC_PRIME;
   }
 } // namespace detail
@@ -273,7 +273,7 @@ function_symbol::function_symbol(const std::string& name, const size_t arity_)
   /* Find symbol in table */
   detail::_function_symbol* cur = detail::function_symbol_hashtable[hnr];
   while (cur!=detail::END_OF_LIST)
-  { 
+  {
     if (cur->arity==arity_ && cur->name==name)
     {
       // The function_symbol was already present. Return it.
@@ -296,7 +296,7 @@ function_symbol::function_symbol(const std::string& name, const size_t arity_)
   cur->name=name;
   cur->arity=arity_;
   cur->next=detail::function_symbol_hashtable[hnr];
-  
+
   detail::function_symbol_hashtable[hnr] = cur;
   m_function_symbol=cur;
   increase_reference_count<false>();
@@ -310,7 +310,7 @@ function_symbol::function_symbol(const std::string& name, const size_t arity_)
     std::string prefix=name.substr(0,start_of_index);
     std::map < std::string, detail::index_increaser>::iterator i=detail::prefix_to_register_function_map.find(prefix);
     if (i!=detail::prefix_to_register_function_map.end())  // i points to the prefix.
-    { 
+    {
       try
       {
         size_t number=std::stol(potential_number);
@@ -337,7 +337,7 @@ function_symbol::function_symbol(const char* name_begin, const char* name_end, c
   detail::_function_symbol* cur = detail::function_symbol_hashtable[hnr];
   std::string name(name_begin);
   while (cur!=detail::END_OF_LIST)
-  { 
+  {
     if (cur->arity==arity_ && cur->name==name)
     {
       // The function_symbol was already present. Return it.
@@ -361,7 +361,7 @@ function_symbol::function_symbol(const char* name_begin, const char* name_end, c
   cur->name=name;
   cur->arity=arity_;
   cur->next=detail::function_symbol_hashtable[hnr];
-  
+
   detail::function_symbol_hashtable[hnr] = cur;
   m_function_symbol=cur;
   increase_reference_count<false>();
@@ -373,7 +373,7 @@ void function_symbol::free_function_symbol() const
   assert(m_function_symbol->reference_count==0);
   /* Calculate hashnumber */
   const HashNumber hnr = detail::calculate_hash_of_function_symbol(m_function_symbol->name.begin(),
-                                                                   m_function_symbol->name.end(), 
+                                                                   m_function_symbol->name.end(),
                                                                    m_function_symbol->arity) & detail::function_symbol_table_mask;
 
   /* Update hashtable */

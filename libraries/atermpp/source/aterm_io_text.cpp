@@ -1,10 +1,10 @@
 /*{{{  includes */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cctype>
+#include <string>
+#include <cassert>
 #include <stdexcept>
 #include <deque>
 #include <iostream>

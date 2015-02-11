@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 #define MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 
-#include <assert.h>
+#include <cassert>
 #include <string>
 #include <cstdio>
 #include "mcrl2/atermpp/detail/atypes.h"

@@ -1,7 +1,7 @@
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <assert.h>
+#include <cctype>
+#include <cstdlib>
+#include <cstdarg>
+#include <cassert>
 #include <stdexcept>
 
 #include <set>

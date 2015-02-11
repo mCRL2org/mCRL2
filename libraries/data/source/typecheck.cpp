@@ -6,10 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <cctype>
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/basic_sort.h"

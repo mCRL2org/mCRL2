@@ -1,6 +1,6 @@
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/toolset_version_const.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"

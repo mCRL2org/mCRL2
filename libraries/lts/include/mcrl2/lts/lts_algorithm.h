@@ -25,8 +25,8 @@
 #include <stack>
 #include <algorithm>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <boost/bind.hpp>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"

@@ -2,6 +2,7 @@
 #include <cerrno>       // for errno
 #include <cstddef>      // for size_t
 #include <cstdlib>
+#include <cstring>      // for strerror
 #include <sys/types.h>  // for pid_t
 #include <sys/wait.h>   // for waitpid()
 #include <sys/ioctl.h>  // for ioctl() and FIONREAD

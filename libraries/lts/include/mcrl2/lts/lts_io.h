@@ -23,8 +23,8 @@
 #include <vector>
 #include <set>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "boost/iterator/transform_iterator.hpp"
 

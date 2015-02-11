@@ -11,7 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
-#include <memory.h>
+#include <memory>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/bdd_prover.h"
@@ -28,8 +28,8 @@ namespace data
 namespace detail
 {
 
-RewriterProver::RewriterProver(const data_specification& data_spec, 
-                               mcrl2::data::rewriter::strategy strat, 
+RewriterProver::RewriterProver(const data_specification& data_spec,
+                               mcrl2::data::rewriter::strategy strat,
                                const used_data_equation_selector& equations_selector):
   Rewriter(data_spec, equations_selector)
 {

@@ -21,7 +21,7 @@
 #include <deque>
 #include <stack>
 #include <map>
-#include <time.h>
+#include <ctime>
 
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"

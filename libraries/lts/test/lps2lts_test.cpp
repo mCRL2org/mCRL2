@@ -13,8 +13,7 @@
 #define MCRL2_WITH_GARBAGE_COLLECTION
 #endif
 
-#include <stdio.h>
-#include <time.h>
+#include <ctime>
 #include <iostream>
 #include <sstream>
 #include <cstdio>
