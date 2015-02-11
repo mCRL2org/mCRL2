@@ -18,12 +18,8 @@
 
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/utilities/test_utilities.h"
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::lts;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 static lts_aut_t parse_aut(const std::string& s)
 {
@@ -216,13 +212,13 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t4,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
   t4=parse_aut(test4);
-  reduce(t4,lts_eq_branching_bisim_sigref); 
+  reduce(t4,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
   t4=parse_aut(test4);
   reduce(t4,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
   t4=parse_aut(test4);
-  reduce(t4,lts_eq_weak_bisim_sigref); 
+  reduce(t4,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
 
   std::cerr << "Test5\n";
@@ -233,13 +229,13 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t5,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
   t5=parse_aut(test5);
-  reduce(t5,lts_eq_branching_bisim_sigref); 
+  reduce(t5,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
   t5=parse_aut(test5);
   reduce(t5,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==6);
   t5=parse_aut(test5);
-  reduce(t5,lts_eq_weak_bisim_sigref); 
+  reduce(t5,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==6);
 
   std::cerr << "Test5a\n";
@@ -268,26 +264,26 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t6,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
   t6=parse_aut(test6);
-  reduce(t6,lts_eq_divergence_preserving_branching_bisim_sigref); 
+  reduce(t6,lts_eq_divergence_preserving_branching_bisim_sigref);
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
   t6=parse_aut(test6);
   reduce(t6,lts_eq_divergence_preserving_weak_bisim); //Divergence preserving weak bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
   t6=parse_aut(test6);
-  reduce(t6,lts_eq_divergence_preserving_weak_bisim_sigref); 
+  reduce(t6,lts_eq_divergence_preserving_weak_bisim_sigref);
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
   std::cerr << "Test6b\n";
   t6=parse_aut(test6);
   reduce(t6,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
   t6=parse_aut(test6);
-  reduce(t6,lts_eq_branching_bisim_sigref); 
+  reduce(t6,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
   t6=parse_aut(test6);
   reduce(t6,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
   t6=parse_aut(test6);
-  reduce(t6,lts_eq_weak_bisim_sigref); 
+  reduce(t6,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
 
   std::cerr << "Test7\n";
@@ -298,25 +294,25 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t7,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
-  reduce(t7,lts_eq_divergence_preserving_branching_bisim_sigref); 
+  reduce(t7,lts_eq_divergence_preserving_branching_bisim_sigref);
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
   reduce(t7,lts_eq_divergence_preserving_weak_bisim); //Divergence preserving weak bisimulation reduction
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
-  reduce(t7,lts_eq_divergence_preserving_weak_bisim_sigref); 
+  reduce(t7,lts_eq_divergence_preserving_weak_bisim_sigref);
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
   reduce(t7,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
-  reduce(t7,lts_eq_branching_bisim_sigref); 
+  reduce(t7,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
   reduce(t7,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
-  reduce(t7,lts_eq_weak_bisim_sigref); 
+  reduce(t7,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
 
   std::cerr << "Test8\n";
@@ -328,26 +324,26 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t8,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
   t8=parse_aut(test8);
-  reduce(t8,lts_eq_divergence_preserving_branching_bisim_sigref); 
+  reduce(t8,lts_eq_divergence_preserving_branching_bisim_sigref);
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
   t8=parse_aut(test8);
   reduce(t8,lts_eq_divergence_preserving_weak_bisim); //Divergence preserving weak bisimulation reduction
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==4);
   t8=parse_aut(test8);
-  reduce(t8,lts_eq_divergence_preserving_weak_bisim_sigref); 
+  reduce(t8,lts_eq_divergence_preserving_weak_bisim_sigref);
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==4);
   std::cerr << "Test8b\n";
   t8=parse_aut(test8);
   reduce(t8,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
   t8=parse_aut(test8);
-  reduce(t8,lts_eq_branching_bisim_sigref); 
+  reduce(t8,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
   t8=parse_aut(test8);
   reduce(t8,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
   t8=parse_aut(test8);
-  reduce(t8,lts_eq_weak_bisim_sigref); 
+  reduce(t8,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
 
   std::cerr << "Test9\n";
@@ -358,25 +354,25 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t9,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==1);
   t9=parse_aut(test9);
-  reduce(t9,lts_eq_branching_bisim_sigref); 
+  reduce(t9,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==1);
   t9=parse_aut(test9);
   reduce(t9,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==1);
   t9=parse_aut(test9);
-  reduce(t9,lts_eq_weak_bisim_sigref); 
+  reduce(t9,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==1);
   t9=parse_aut(test9);
   reduce(t9,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
   t9=parse_aut(test9);
-  reduce(t9,lts_eq_divergence_preserving_branching_bisim_sigref); 
+  reduce(t9,lts_eq_divergence_preserving_branching_bisim_sigref);
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
   t9=parse_aut(test9);
   reduce(t9,lts_eq_divergence_preserving_weak_bisim); //Divergence preserving weak bisimulation reduction
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
   t9=parse_aut(test9);
-  reduce(t9,lts_eq_divergence_preserving_weak_bisim_sigref); 
+  reduce(t9,lts_eq_divergence_preserving_weak_bisim_sigref);
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
 
   std::cerr << "Test10\n";
@@ -387,25 +383,25 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t10,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
   t10=parse_aut(test10);
-  reduce(t10,lts_eq_branching_bisim_sigref); 
+  reduce(t10,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
   t10=parse_aut(test10);
   reduce(t10,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==6);
   t10=parse_aut(test10);
-  reduce(t10,lts_eq_weak_bisim_sigref); 
+  reduce(t10,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==6);
   t10=parse_aut(test10);
   reduce(t10,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
   t10=parse_aut(test10);
-  reduce(t10,lts_eq_divergence_preserving_branching_bisim_sigref); 
+  reduce(t10,lts_eq_divergence_preserving_branching_bisim_sigref);
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
   t10=parse_aut(test10);
   reduce(t10,lts_eq_divergence_preserving_weak_bisim); //Divergence preserving weak bisimulation reduction
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==6);
   t10=parse_aut(test10);
-  reduce(t10,lts_eq_divergence_preserving_weak_bisim_sigref); 
+  reduce(t10,lts_eq_divergence_preserving_weak_bisim_sigref);
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==6);
 
   std::cerr << "Test11\n";
@@ -416,25 +412,25 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t11,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
-  reduce(t11,lts_eq_branching_bisim_sigref); 
+  reduce(t11,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
   reduce(t11,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
-  reduce(t11,lts_eq_weak_bisim_sigref); 
+  reduce(t11,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
   reduce(t11,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
-  reduce(t11,lts_eq_divergence_preserving_branching_bisim_sigref); 
+  reduce(t11,lts_eq_divergence_preserving_branching_bisim_sigref);
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
   reduce(t11,lts_eq_divergence_preserving_weak_bisim); //Divergence preserving weak bisimulation reduction
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
-  reduce(t11,lts_eq_divergence_preserving_weak_bisim_sigref); 
+  reduce(t11,lts_eq_divergence_preserving_weak_bisim_sigref);
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
 
   std::cerr << "Test12\n";
@@ -445,25 +441,25 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t12,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
   t12=parse_aut(test12);
-  reduce(t12,lts_eq_branching_bisim_sigref); 
+  reduce(t12,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
   t12=parse_aut(test12);
   reduce(t12,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==11);
   t12=parse_aut(test12);
-  reduce(t12,lts_eq_weak_bisim_sigref); 
+  reduce(t12,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==11);
   t12=parse_aut(test12);
   reduce(t12,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
   t12=parse_aut(test12);
-  reduce(t12,lts_eq_divergence_preserving_branching_bisim_sigref); 
+  reduce(t12,lts_eq_divergence_preserving_branching_bisim_sigref);
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
   t12=parse_aut(test12);
   reduce(t12,lts_eq_divergence_preserving_weak_bisim); //Divergence preserving weak bisimulation reduction
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==11);
   t12=parse_aut(test12);
-  reduce(t12,lts_eq_divergence_preserving_weak_bisim_sigref); 
+  reduce(t12,lts_eq_divergence_preserving_weak_bisim_sigref);
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==11);
   t12=parse_aut(test12);
   reduce(t12,lts_red_tau_star); //Tau star reduction
@@ -477,25 +473,25 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t13,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==2);
   t13=parse_aut(test13);
-  reduce(t13,lts_eq_branching_bisim_sigref); 
+  reduce(t13,lts_eq_branching_bisim_sigref);
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==2);
   t13=parse_aut(test13);
   reduce(t13,lts_eq_weak_bisim); //Weak bisimulation reduction
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==2);
   t13=parse_aut(test13);
-  reduce(t13,lts_eq_weak_bisim_sigref); 
+  reduce(t13,lts_eq_weak_bisim_sigref);
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==2);
   t13=parse_aut(test13);
   reduce(t13,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t13.num_states()==3 && t13.num_transitions()==3);
   t13=parse_aut(test13);
-  reduce(t13,lts_eq_divergence_preserving_branching_bisim_sigref); 
+  reduce(t13,lts_eq_divergence_preserving_branching_bisim_sigref);
   BOOST_CHECK(t13.num_states()==3 && t13.num_transitions()==3);
   t13=parse_aut(test13);
   reduce(t13,lts_eq_divergence_preserving_weak_bisim); //Divergence preserving weak bisimulation reduction
   BOOST_CHECK(t13.num_states()==3 && t13.num_transitions()==4);
   t13=parse_aut(test13);
-  reduce(t13,lts_eq_divergence_preserving_weak_bisim_sigref); 
+  reduce(t13,lts_eq_divergence_preserving_weak_bisim_sigref);
   BOOST_CHECK(t13.num_states()==3 && t13.num_transitions()==4);
   t13=parse_aut(test13);
   reduce(t13,lts_red_tau_star); //Tau star reduction

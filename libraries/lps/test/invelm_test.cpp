@@ -21,11 +21,7 @@
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/invelm_algorithm.h"
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/test_utilities.h"
 #include "test_specifications.h"
-
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 using namespace mcrl2;
 

@@ -1,5 +1,4 @@
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
@@ -10,9 +9,6 @@ using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::log;
-using mcrl2::utilities::collect_after_test_case;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void test_bisimulation(const std::string& s1, const std::string& s2,
                        bool strongly_bisimilar,

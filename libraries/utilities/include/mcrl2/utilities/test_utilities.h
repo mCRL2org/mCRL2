@@ -26,16 +26,6 @@ namespace mcrl2
 namespace utilities
 {
 
-/// \brief Garbage collect after each case.
-/// Use with BOOST_GLOBAL_FIXTURE(collect_after_test_case)
-struct collect_after_test_case
-{
-  ~collect_after_test_case()
-  {
-    // core::garbage_collect();
-  }
-};
-
 /// \brief Static initialisation of rewrite strategies used for testing.
 static inline
 std::vector<data::rewrite_strategy> initialise_test_rewrite_strategies(const bool with_prover)

@@ -13,8 +13,6 @@
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/utilities/test_utilities.h"
-
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/binary.h"
 #include "mcrl2/lps/linearise.h"
@@ -23,9 +21,6 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
-using mcrl2::utilities::collect_after_test_case;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 
 ///All process parameters of sort D should have been translated to

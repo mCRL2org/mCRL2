@@ -30,13 +30,10 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/test_utilities.h"
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 

@@ -15,13 +15,8 @@
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
-#include "mcrl2/utilities/test_utilities.h"
-
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
-
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 BOOST_AUTO_TEST_CASE(pbes_with_reals)
 {

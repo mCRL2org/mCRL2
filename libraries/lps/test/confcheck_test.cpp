@@ -13,7 +13,6 @@
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/detail/utility.h"
-#include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/confluence_checker.h"
@@ -24,9 +23,6 @@ using namespace mcrl2::data;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
-using mcrl2::utilities::collect_after_test_case;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 //static bool check_for_ctau(lps::specification const& s) .
 static size_t count_ctau(specification const& s)

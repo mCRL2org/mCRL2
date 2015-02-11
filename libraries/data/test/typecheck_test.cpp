@@ -20,12 +20,8 @@
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
-using mcrl2::utilities::collect_after_test_case;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 // Expected failures, these are not going to be fixed in the current
 // implementation of the type checker
@@ -674,7 +670,7 @@ BOOST_AUTO_TEST_CASE(test_sort_as_variable)
   );
 } */
 
-/* BOOST_AUTO_TEST_CASE(test_conflicting_aliases) // This test case leads to a parse error, due to the use of Nat. 
+/* BOOST_AUTO_TEST_CASE(test_conflicting_aliases) // This test case leads to a parse error, due to the use of Nat.
                                                // This is not a typecheck error. Therefore this case is outcommented.
 {
   test_data_specification(
@@ -837,7 +833,7 @@ BOOST_AUTO_TEST_CASE(test_recursive_struct_list_indirect)
   );
 }
 
-BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker does not detect this. 
+BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker does not detect this.
 {
   test_data_specification(
     "sort B = List(struct f(B));\n",
@@ -1565,7 +1561,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_term_with_wrong_number_of_arguments)
 /* The example below has the nasty feature that the sort of
    # in the expression below can be #:List(Nat)->Nat,
       List(Int)->Nat and List(Real)->Nat. In version 10169 of
-      the toolset the type of # became List(PossibleTypes([Nat, Int, Real]) 
+      the toolset the type of # became List(PossibleTypes([Nat, Int, Real])
       causing confusion in the other tools */
 BOOST_AUTO_TEST_CASE(test_avoidance_of_possible_types)
 {
@@ -1592,7 +1588,7 @@ BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos)
   );
 }
 
-/* This example checks whether explicit transformations among 
+/* This example checks whether explicit transformations among
  * numbers are properly typable.*/
 BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos1)
 {

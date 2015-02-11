@@ -24,15 +24,11 @@
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/utilities/test_utilities.h"
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool;
 using namespace mcrl2::data::sort_nat;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 template <typename T>
 void test_term(const std::string& s, const T& x)

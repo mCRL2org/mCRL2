@@ -16,14 +16,10 @@
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
-
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void print_specifications(const specification& s0, const specification& s1)
 {

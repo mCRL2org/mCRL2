@@ -16,12 +16,8 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
-#include "mcrl2/utilities/test_utilities.h"
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void test_process_specification(const std::string& ps_in, bool const expected_result = true, bool const test_type_checker = true)
 {

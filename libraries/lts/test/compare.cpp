@@ -7,15 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/utilities/test_utilities.h"
 
 #include <mcrl2/lts/lts_algorithm.h>
 #include <mcrl2/lts/lts_aut.h>
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::lts;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 static lts_aut_t parse_aut(const std::string& s)
 {

@@ -18,14 +18,10 @@
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
-using mcrl2::utilities::collect_after_test_case;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 BOOST_AUTO_TEST_CASE(test_empty_distribution)
 {

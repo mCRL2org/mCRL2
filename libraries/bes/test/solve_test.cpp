@@ -12,7 +12,6 @@
 #include <sstream>
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/bes/small_progress_measures.h"
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/parse.h"
@@ -20,8 +19,6 @@
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void run_all_algorithms(std::string const& b, bool expected_outcome)
 {

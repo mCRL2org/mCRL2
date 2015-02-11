@@ -23,9 +23,6 @@
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
-
 namespace ltsmin
 {
 

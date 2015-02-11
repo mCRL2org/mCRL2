@@ -21,14 +21,10 @@
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/modal_formula/resolve_name_clashes.h"
-#include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::lps;
 using namespace mcrl2::state_formulas;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void run_monotonicity_test_case(const std::string& formula, const std::string& lps_spec, const bool expect_success = true)
 {

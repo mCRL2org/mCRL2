@@ -27,13 +27,9 @@
 #include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/utilities/test_utilities.h"
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 template <class LTS_TYPE>
 LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
