@@ -5,11 +5,9 @@
 
 import os
 import sys
-import yaml
 sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
 sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
 import testrunner
-from testing import run_yml_test
 
 class TestRunner(testrunner.TestRunner):
     def __init__(self):
@@ -57,6 +55,7 @@ class TestRunner(testrunner.TestRunner):
             yield test[0]
 
     def run(self, testnum):
+        from testing import run_yml_test
         if testnum < len(self.tests):
             test = self.tests[testnum]
             name, specification, inputfiles = test[:3]

@@ -43,7 +43,7 @@ endif()
 # runs the test numbered NUM (if it exists) and returns exit code 0 if the
 # test succeeds, or 1 if it fails.
 #
-find_package(PythonModules 2.4 COMPONENTS yaml psutil REQUIRED)
+include(./dependencies.cmake)
 
 set(python_dirs "random" "regression")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace)
@@ -53,13 +53,22 @@ foreach(dir ${python_dirs})
   execute_process(COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --names
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
                   OUTPUT_VARIABLE tests
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+                  RESULT_VARIABLE testnames_error)
+  if(testnames_error)
+    message(SEND_ERROR "${testrunner} did not succesfully list its test targets. Please contact an mCRL2 developer to fix this.")
+  endif()
   string(REPLACE "\n" ";" tests "${tests}")
   string(REPLACE "\r" "" tests "${tests}")
   foreach(testname ${tests})
-    add_test(NAME ${testname}
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
-             COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --run ${num} --toolpath ${MCRL2_STAGE_PATH}/${MCRL2_RUNTIME_PATH})
+    if(MCRL2_PYTHON_TESTS)
+      add_test(NAME ${testname}
+               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
+               COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --run ${num} --toolpath ${MCRL2_STAGE_PATH}/${MCRL2_RUNTIME_PATH})
+    else()
+      add_test(NAME ${testname}
+               COMMAND ${CMAKE_COMMAND} -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -Dmode=FATAL_ERROR -P ${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
+    endif()
     set_tests_properties(${testname} PROPERTIES LABELS ${dir})
     math(EXPR num "${num} + 1")
   endforeach()
