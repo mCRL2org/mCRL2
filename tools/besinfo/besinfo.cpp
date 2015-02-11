@@ -21,7 +21,7 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/bes_property_map.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -30,6 +30,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::bes;
 using namespace mcrl2::utilities::tools;
+using bes::tools::bes_input_tool;
 
 class besinfo_tool: public bes_input_tool<input_tool>
 {

@@ -21,7 +21,7 @@
 
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_input_output_tool.h"
+#include "mcrl2/bes/pbes_input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 
 #include "mcrl2/pbes/algorithms.h"
@@ -36,14 +36,14 @@ using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
+using bes::tools::pbes_input_tool;
+using bes::tools::bes_output_tool;
+using data::tools::rewriter_tool;
+using utilities::tools::input_output_tool;
 using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_optional_argument;
 using utilities::make_enum_argument;
-using utilities::tools::input_output_tool;
-using utilities::tools::pbes_input_tool;
-using utilities::tools::bes_output_tool;
-using data::tools::rewriter_tool;
 
 /// The pbesinst tool.
 class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > >

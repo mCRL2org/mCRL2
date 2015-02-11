@@ -14,8 +14,8 @@
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_output_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -23,6 +23,8 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+using bes::tools::pbes_input_tool;
+using bes::tools::pbes_output_tool;
 
 class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {

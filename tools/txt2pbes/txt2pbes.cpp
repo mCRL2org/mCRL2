@@ -22,13 +22,14 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/bes/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+using mcrl2::bes::tools::pbes_output_tool;
 
 class txt2pbes_tool: public pbes_output_tool<input_output_tool>
 {

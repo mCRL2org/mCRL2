@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/pbes_rewriter_tool.h
+/// \file mcrl2/bes/pbes_rewriter_tool.h
 /// \brief Base class for tools that use a pbes rewriter.
 
 #ifndef MCRL2_UTILITIES_PBES_REWRITER_TOOL_H
@@ -17,11 +17,12 @@
 #include <iostream>
 #include <stdexcept>
 #include "mcrl2/pbes/pbes_rewriter_type.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 namespace mcrl2
 {
 
-namespace utilities
+namespace bes
 {
 
 namespace tools
@@ -61,11 +62,11 @@ class pbes_rewriter_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description
-    void add_options(interface_description& desc)
+    void add_options(utilities::interface_description& desc)
     {
       Tool::add_options(desc);
 
-      interface_description::enum_argument<pbes_system::pbes_rewriter_type> arg(make_enum_argument<pbes_system::pbes_rewriter_type>("NAME"));
+      utilities::interface_description::enum_argument<pbes_system::pbes_rewriter_type> arg(utilities::make_enum_argument<pbes_system::pbes_rewriter_type>("NAME"));
 
       // Compute the available rewriters, and add the approriate arguments
       std::set<pbes_system::pbes_rewriter_type> types = available_rewriters();
@@ -84,7 +85,7 @@ class pbes_rewriter_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser)
     {
       Tool::parse_options(parser);
       m_pbes_rewriter_type = parser.option_argument_as<pbes_system::pbes_rewriter_type>("pbes-rewriter");
@@ -117,7 +118,7 @@ class pbes_rewriter_tool: public Tool
 
 } // namespace tools
 
-} // namespace utilities
+} // namespace bes
 
 } // namespace mcrl2
 

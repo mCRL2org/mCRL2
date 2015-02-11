@@ -14,7 +14,7 @@
 #include <boost/bind.hpp>
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_input_output_tool.h"
+#include "mcrl2/bes/pbes_input_output_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
 #include "mcrl2/atermpp/indexed_set.h"
@@ -32,6 +32,7 @@
 using namespace mcrl2::bes;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
+using mcrl2::bes::tools::bes_input_output_tool;
 
 namespace mcrl2
 {

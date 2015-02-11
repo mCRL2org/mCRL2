@@ -25,7 +25,7 @@
 #include "mcrl2/pbes/lts2pbes.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/bes/pbes_output_tool.h"
 #include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
@@ -34,9 +34,10 @@ using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::data;
-using mcrl2::utilities::tools::input_output_tool;
-using mcrl2::utilities::tools::pbes_output_tool;
 using namespace mcrl2::log;
+using bes::tools::pbes_output_tool;
+using bes::tools::pbes_output_tool;
+using utilities::tools::input_output_tool;
 
 class lts2pbes_tool : public pbes_output_tool<input_output_tool>
 {

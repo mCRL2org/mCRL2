@@ -13,17 +13,19 @@
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/bes/pbes_rewriter_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
-using utilities::tools::input_output_tool;
-using data::tools::rewriter_tool;
-using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
+using bes::tools::pbes_input_tool;
+using bes::tools::pbes_output_tool;
+using bes::tools::pbes_rewriter_tool;
+using data::tools::rewriter_tool;
+using utilities::tools::input_output_tool;
 
 class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > >
 {

@@ -31,10 +31,10 @@
 #include <sstream>
 
 //Tool framework
-#include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_rewriter_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/utilities/pbes_rewriter_tool.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
 //Data Framework
@@ -63,10 +63,11 @@ using bes::bes_expression;
 
 using namespace mcrl2;
 using namespace mcrl2::log;
-using utilities::tools::input_tool;
-using data::tools::rewriter_tool;
-using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
+using mcrl2::bes::tools::pbes_input_tool;
+using mcrl2::bes::tools::pbes_rewriter_tool;
+using mcrl2::data::tools::rewriter_tool;
+using mcrl2::utilities::tools::input_tool;
 
 class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 {

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/pbes_input_output_tool.h
+/// \file mcrl2/bes/pbes_input_output_tool.h
 /// \brief Base class for tools that produce a (P)BES as output.
 
 #ifndef MCRL2_UTILITIES_PBES_INPUT_OUTPUT_TOOL_H
@@ -16,13 +16,13 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
-#include "mcrl2/utilities/pbes_input_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_output_tool.h"
 
 namespace mcrl2
 {
 
-namespace utilities
+namespace bes
 {
 
 namespace tools
@@ -76,7 +76,7 @@ class bes_input_output_tool: public bes_input_tool<bes_output_tool<Tool> >
 
 } // namespace tools
 
-} // namespace utilities
+} // namespace bes
 
 } // namespace mcrl2
 

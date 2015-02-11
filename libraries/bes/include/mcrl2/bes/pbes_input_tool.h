@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/pbes_input_tool.h
+/// \file mcrl2/bes/pbes_input_tool.h
 /// \brief Base class for tools that produce a (P)BES as output.
 
 #ifndef MCRL2_UTILITIES_PBES_INPUT_TOOL_H
@@ -23,7 +23,7 @@
 namespace mcrl2
 {
 
-namespace utilities
+namespace bes
 {
 
 namespace tools
@@ -37,14 +37,14 @@ class pbes_input_tool: public Tool
   protected:
 
     /// \brief The type of the pbes input format
-    const file_format* m_pbes_input_format;
+    const utilities::file_format* m_pbes_input_format;
 
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
     /// \return The set { pbes, bes, cwi, pgsolver }
-    virtual std::set<const file_format*> available_input_formats() const
+    virtual std::set<const utilities::file_format*> available_input_formats() const
     {
-      std::set<const file_format*> result;
+      std::set<const utilities::file_format*> result;
       result.insert(pbes_system::pbes_format_internal());
       result.insert(pbes_system::pbes_format_internal_text());
       result.insert(pbes_system::pbes_format_text());
@@ -58,12 +58,12 @@ class pbes_input_tool: public Tool
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual const file_format* default_input_format() const
+    virtual const utilities::file_format* default_input_format() const
     {
-      const file_format* result = pbes_system::guess_format(Tool::input_filename());
-      if (result == file_format::unknown())
+      const utilities::file_format* result = pbes_system::guess_format(Tool::input_filename());
+      if (result == utilities::file_format::unknown())
         result = bes::guess_format(Tool::input_filename());
-      if (result == file_format::unknown())
+      if (result == utilities::file_format::unknown())
         result = pbes_system::pbes_format_internal();
       return result;
     }
@@ -71,11 +71,11 @@ class pbes_input_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// input format options.
     /// \param desc An interface description
-    void add_options(interface_description& desc)
+    void add_options(utilities::interface_description& desc)
     {
       Tool::add_options(desc);
-      std::set<const file_format*> types = available_input_formats();
-      auto option_argument = make_enum_argument<std::string>("FORMAT");
+      std::set<const utilities::file_format*> types = available_input_formats();
+      auto option_argument = utilities::make_enum_argument<std::string>("FORMAT");
       for (auto it = types.begin(); it != types.end(); ++it)
       {
         option_argument.add_value_desc((*it)->shortname(), (*it)->description());
@@ -85,13 +85,13 @@ class pbes_input_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser)
     {
       Tool::parse_options(parser);
-      m_pbes_input_format = file_format::unknown();
+      m_pbes_input_format = utilities::file_format::unknown();
       if(parser.options.count("in"))
       {
-        std::set<const file_format*> types = available_input_formats();
+        std::set<const utilities::file_format*> types = available_input_formats();
         std::string arg = parser.option_argument_as<std::string>("in");
         for (auto it = types.begin(); it != types.end(); ++it)
         {
@@ -100,12 +100,12 @@ class pbes_input_tool: public Tool
             m_pbes_input_format = *it;
           }
         }
-        if (m_pbes_input_format == file_format::unknown())
+        if (m_pbes_input_format == utilities::file_format::unknown())
         {
           mCRL2log(log::warning) << "Invalid input format given (" << arg << ").\n";
         }
       }
-      if (m_pbes_input_format == file_format::unknown())
+      if (m_pbes_input_format == utilities::file_format::unknown())
       {
         m_pbes_input_format = default_input_format();
         mCRL2log(log::verbose) << "Guessing input format: " << m_pbes_input_format->description()
@@ -132,7 +132,7 @@ class pbes_input_tool: public Tool
 
     /// \brief Returns the input file format
     /// \return The input format
-    const file_format* pbes_input_format() const
+    const utilities::file_format* pbes_input_format() const
     {
       return m_pbes_input_format;
     }
@@ -164,9 +164,9 @@ class bes_input_tool: public pbes_input_tool<Tool>
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
     /// \return The set { pbes, bes, cwi, pgsolver }
-    virtual std::set<const file_format*> available_input_formats() const
+    virtual std::set<const utilities::file_format*> available_input_formats() const
     {
-      std::set<const file_format*> result;
+      std::set<const utilities::file_format*> result;
       result.insert(pbes_system::pbes_format_internal());
       result.insert(pbes_system::pbes_format_internal_text());
       result.insert(pbes_system::pbes_format_text());
@@ -180,7 +180,7 @@ class bes_input_tool: public pbes_input_tool<Tool>
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual const file_format* default_input_format() const
+    virtual const utilities::file_format* default_input_format() const
     {
       return bes::guess_format(Tool::input_filename());
     }
@@ -188,7 +188,7 @@ class bes_input_tool: public pbes_input_tool<Tool>
   public:
     /// \brief Returns the input format
     /// \return The input format
-    const file_format* bes_input_format() const
+    const utilities::file_format* bes_input_format() const
     {
       return pbes_input_tool<Tool>::pbes_input_format();
     }
@@ -196,7 +196,7 @@ class bes_input_tool: public pbes_input_tool<Tool>
 
 } // namespace tools
 
-} // namespace utilities
+} // namespace bes
 
 } // namespace mcrl2
 

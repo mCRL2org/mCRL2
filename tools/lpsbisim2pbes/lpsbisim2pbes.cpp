@@ -14,7 +14,7 @@
 #include "mcrl2/pbes/bisimulation_type.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/utilities/input_input_output_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/bes/pbes_output_tool.h"
 #include "mcrl2/utilities/exception.h"
 
 using namespace mcrl2;
@@ -24,8 +24,8 @@ using utilities::interface_description;
 using utilities::make_enum_argument;
 using utilities::tools::tool;
 using utilities::tools::input_input_output_tool;
-using utilities::tools::pbes_output_tool;
 using namespace mcrl2::log;
+using bes::tools::pbes_output_tool;
 
 typedef pbes_output_tool<input_input_output_tool> super;
 class lpsbisim2pbes_tool: public super

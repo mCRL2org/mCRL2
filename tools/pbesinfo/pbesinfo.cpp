@@ -29,13 +29,14 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
 
 using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
+using bes::tools::pbes_input_tool;
 
 class pbesinfo_tool: public pbes_input_tool<input_tool>
 {

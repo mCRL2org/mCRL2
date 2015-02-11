@@ -21,7 +21,7 @@
 #include <cstdio>
 
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
@@ -36,10 +36,10 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
-using utilities::tools::input_tool;
-using utilities::tools::pbes_input_tool;
-using data::tools::rewriter_tool;
 using namespace mcrl2::log;
+using bes::tools::pbes_input_tool;
+using data::tools::rewriter_tool;
+using utilities::tools::input_tool;
 
 // class pg_solver_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
 // TODO: extend the tool with rewriter options

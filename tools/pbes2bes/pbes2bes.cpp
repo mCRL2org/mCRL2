@@ -32,11 +32,11 @@
 #include <sstream>
 
 //Tool framework
-#include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_output_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_rewriter_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/utilities/pbes_rewriter_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
 //Data Framework
@@ -67,11 +67,12 @@ using namespace ::bes;
 //------------------------------------------
 
 using namespace mcrl2;
-using utilities::tools::input_output_tool;
-using utilities::tools::bes_output_tool;
-using data::tools::rewriter_tool;
-using utilities::tools::pbes_rewriter_tool;
-using namespace mcrl2::utilities::tools;
+using mcrl2::bes::tools::pbes_input_tool;
+using mcrl2::bes::tools::pbes_output_tool;
+using mcrl2::bes::tools::pbes_rewriter_tool;
+using mcrl2::bes::tools::bes_output_tool;
+using mcrl2::data::tools::rewriter_tool;
+using mcrl2::utilities::tools::input_output_tool;
 
 class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > >
 {

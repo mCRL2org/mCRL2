@@ -15,9 +15,9 @@
 #include <string>
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/bes/pbes_rewriter_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_output_tool.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
@@ -31,11 +31,15 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+using bes::tools::pbes_output_tool;
+using bes::tools::pbes_input_tool;
+using bes::tools::pbes_rewriter_tool;
+using data::tools::rewriter_tool;
 
-class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<data::tools::rewriter_tool<input_output_tool> > > >
+class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > >
 {
   protected:
-    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<data::tools::rewriter_tool<input_output_tool> > > > super;
+    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > > super;
 
     /// \brief If true, the computation is started from the initial state.
     bool m_use_initial_state;

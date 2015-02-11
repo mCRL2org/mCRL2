@@ -17,13 +17,14 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/pbes/tools.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2;
+using bes::tools::pbes_input_tool;
 
 //local declarations
 
