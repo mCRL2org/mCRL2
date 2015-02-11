@@ -16,6 +16,7 @@
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::pbes_system;
+using namespace mcrl2::bes::tools;
 using namespace mcrl2::bes;
 using namespace mcrl2;
 
