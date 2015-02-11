@@ -17,7 +17,6 @@
 #include <iostream>
 #include <stdexcept>
 #include "mcrl2/pbes/pbes_rewriter_type.h"
-#include "mcrl2/utilities/rewriter_tool.h"
 
 namespace mcrl2
 {

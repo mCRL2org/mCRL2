@@ -22,7 +22,7 @@
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_input_output_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/normalize.h"
@@ -43,7 +43,7 @@ using utilities::make_enum_argument;
 using utilities::tools::input_output_tool;
 using utilities::tools::pbes_input_tool;
 using utilities::tools::bes_output_tool;
-using utilities::tools::rewriter_tool;
+using data::tools::rewriter_tool;
 
 /// The pbesinst tool.
 class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > >

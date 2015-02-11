@@ -1,15 +1,17 @@
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/qt_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 #include "mainwindow.h"
 
 using namespace mcrl2::utilities;
 
-typedef qt::qt_tool<tools::rewriter_tool<tools::input_tool> > lpsxsim_base;
+using mcrl2::data::tools::rewriter_tool;
+
+typedef qt::qt_tool<rewriter_tool<tools::input_tool> > lpsxsim_base;
 
 class lpsxsim_tool : public lpsxsim_base
 {
-   
+
   protected:
 
     bool m_do_not_use_dummies;

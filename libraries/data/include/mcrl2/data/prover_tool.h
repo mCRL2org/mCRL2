@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/rewriter_tool.h
+/// \file mcrl2/data/prover_tool.h
 /// \brief Base class for tools that use a data rewriter.
 
-#ifndef MCRL2_UTILITIES_PROVER_TOOL_H
-#define MCRL2_UTILITIES_PROVER_TOOL_H
+#ifndef MCRL2_DATA_PROVER_TOOL_H
+#define MCRL2_DATA_PROVER_TOOL_H
 
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/utilities/command_line_interface.h"
@@ -18,7 +18,7 @@
 namespace mcrl2
 {
 
-namespace utilities
+namespace data
 {
 
 namespace tools
@@ -37,11 +37,11 @@ class prover_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description
-    void add_options(interface_description& desc)
+    void add_options(utilities::interface_description& desc)
     {
       Tool::add_options(desc);
 
-      desc.add_option("smt-solver", make_enum_argument< smt_solver_type >("SOLVER")
+      desc.add_option("smt-solver", utilities::make_enum_argument< smt_solver_type >("SOLVER")
                       .add_value(data::detail::solver_type_cvc),
                       "use SOLVER to remove inconsistent paths from the internally used "
                       "BDDs (by default, no path elimination is applied):",
@@ -50,7 +50,7 @@ class prover_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser)
     {
       Tool::parse_options(parser);
 
@@ -83,8 +83,8 @@ class prover_tool: public Tool
 
 } // namespace tools
 
-} // namespace utilities
+} // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_PROVER_TOOL_H
+#endif // MCRL2_DATA_PROVER_TOOL_H

@@ -22,8 +22,8 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/prover_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/data/prover_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -35,6 +35,9 @@ using namespace mcrl2::log;
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+
+using mcrl2::data::tools::rewriter_tool;
+using mcrl2::data::tools::prover_tool;
 
 /// \mainpage formcheck
 /// \section section_introduction Introduction

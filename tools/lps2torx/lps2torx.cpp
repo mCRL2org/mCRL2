@@ -29,7 +29,7 @@
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -37,6 +37,8 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+
+using mcrl2::data::tools::rewriter_tool;
 
 class torx_tool : public rewriter_tool< input_tool >
 {

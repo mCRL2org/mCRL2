@@ -9,12 +9,13 @@
 
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/qt_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 #include "mainwindow.h"
 
 using namespace mcrl2::utilities;
+using mcrl2::data::tools::rewriter_tool;
 
-typedef qt::qt_tool<tools::rewriter_tool<tools::input_tool> > mcrl2xi_base;
+typedef qt::qt_tool<rewriter_tool<tools::input_tool> > mcrl2xi_base;
 
 class mcrl2xi_tool : public mcrl2xi_base
 {

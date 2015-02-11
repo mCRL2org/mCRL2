@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/rewriter_tool.h
+/// \file mcrl2/data/rewriter_tool.h
 /// \brief Base class for tools that use a data rewriter.
 
-#ifndef MCRL2_UTILITIES_REWRITER_TOOL_H
-#define MCRL2_UTILITIES_REWRITER_TOOL_H
+#ifndef MCRL2_DATA_REWRITER_TOOL_H
+#define MCRL2_DATA_REWRITER_TOOL_H
 
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
@@ -20,7 +20,7 @@
 namespace mcrl2
 {
 
-namespace utilities
+namespace data
 {
 
 namespace tools
@@ -37,12 +37,12 @@ class rewriter_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description
-    void add_options(interface_description& desc)
+    void add_options(utilities::interface_description& desc)
     {
       Tool::add_options(desc);
 
       desc.add_option(
-        "rewriter", make_enum_argument<data::rewrite_strategy>("NAME")
+        "rewriter", utilities::make_enum_argument<data::rewrite_strategy>("NAME")
             .add_value(data::jitty, true)
 #ifdef MCRL2_JITTYC_AVAILABLE
             .add_value(data::jitty_compiling)
@@ -53,7 +53,7 @@ class rewriter_tool: public Tool
       );
 
       desc.add_option(
-        "qlimit", make_mandatory_argument("NUM"),
+        "qlimit", utilities::make_mandatory_argument("NUM"),
         "limit enumeration of quantifiers to NUM variables. (Default NUM=1000, NUM=0 for unlimited).",
         'Q'
       );
@@ -62,7 +62,7 @@ class rewriter_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser)
     {
       Tool::parse_options(parser);
       m_rewrite_strategy = parser.option_argument_as< data::rewrite_strategy >("rewriter");
@@ -105,8 +105,8 @@ class rewriter_tool: public Tool
 
 } // namespace tools
 
-} // namespace utilities
+} // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_REWRITER_TOOL_H
+#endif // MCRL2_DATA_REWRITER_TOOL_H

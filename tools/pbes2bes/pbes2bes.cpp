@@ -35,7 +35,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_output_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
@@ -69,7 +69,7 @@ using namespace ::bes;
 using namespace mcrl2;
 using utilities::tools::input_output_tool;
 using utilities::tools::bes_output_tool;
-using utilities::tools::rewriter_tool;
+using data::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 

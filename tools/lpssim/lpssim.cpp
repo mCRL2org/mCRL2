@@ -24,7 +24,7 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/simulation.h"
 #include "mcrl2/lps/io.h"
@@ -37,6 +37,8 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
+
+using mcrl2::data::tools::rewriter_tool;
 
 class sim_tool : public rewriter_tool< input_tool >
 {

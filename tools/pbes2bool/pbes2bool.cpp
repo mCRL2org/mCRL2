@@ -33,7 +33,7 @@
 //Tool framework
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
@@ -64,7 +64,7 @@ using bes::bes_expression;
 using namespace mcrl2;
 using namespace mcrl2::log;
 using utilities::tools::input_tool;
-using utilities::tools::rewriter_tool;
+using data::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 

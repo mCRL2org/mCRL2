@@ -20,7 +20,7 @@
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 
 #include "mcrl2/lps/io.h"
 #include "mcrl2/process/action_parse.h"
@@ -42,6 +42,8 @@ using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::log;
+
+using mcrl2::data::tools::rewriter_tool;
 
 static
 std::list<std::string> split_actions(const std::string& s)

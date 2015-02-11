@@ -18,8 +18,8 @@
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/prover_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/data/prover_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -30,6 +30,9 @@ using namespace mcrl2::lps::detail;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
+
+using mcrl2::data::tools::rewriter_tool;
+using mcrl2::data::tools::prover_tool;
 
 /// \mainpage lpsconfcheck
 /// \section section_introduction Introduction
@@ -65,10 +68,10 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     /// \brief The flag indicating whether or not the confluence of a tau-summand regarding all other summands is checked.
     bool m_check_all;
-    
+
     /// \brief Do not rewrite summands with sum operators.
     bool m_no_sums;
-    
+
     /// \brief Confluence types for which the tool should check.
     std::string m_conditions;
 
@@ -92,7 +95,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
     /// \brief The invariant provided as input.
     /// \brief If no invariant was provided, the constant true is used as invariant.
     data_expression m_invariant;
-    
+
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
@@ -135,7 +138,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       {
         m_path_eliminator = true;
       }
-      
+
       if (parser.options.count("conditions"))
       {
         m_conditions = parser.option_argument_as< std::string >("conditions");

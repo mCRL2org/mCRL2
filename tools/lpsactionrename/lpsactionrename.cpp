@@ -22,7 +22,7 @@
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -32,7 +32,7 @@ using namespace mcrl2::lps;
 using namespace mcrl2::log;
 
 using mcrl2::utilities::tools::input_output_tool;
-using mcrl2::utilities::tools::rewriter_tool;
+using mcrl2::data::tools::rewriter_tool;
 
 class action_rename_tool: public rewriter_tool<input_output_tool >
 {

@@ -10,9 +10,8 @@
 /// \brief
 
 #include <algorithm>
-#include <stdlib.h>
+#include <cstdlib>
 
-#include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
@@ -305,7 +304,7 @@ static size_t global_variable_counter=0;
 ///        and replace these by a boolean variable b. This variable is added to vars
 static data_expression replace_linear_inequalities_with_reals_by_variables(
                   const data_expression& t,
-                  data_expression& condition, 
+                  data_expression& condition,
                   variable_list& vars,
                   const variable_list& real_parameters)
 {
@@ -318,7 +317,7 @@ static data_expression replace_linear_inequalities_with_reals_by_variables(
     const variable v(t);
     if (std::find(real_parameters.begin(),real_parameters.end(),v)!=real_parameters.end()) // found
     {
-      throw mcrl2::runtime_error(std::string("Variable ") + data::pp(v) + ":" + data::pp(v.sort()) + " occurs in an action and cannot be removed"); 
+      throw mcrl2::runtime_error(std::string("Variable ") + data::pp(v) + ":" + data::pp(v.sort()) + " occurs in an action and cannot be removed");
     }
     return t;
   }
@@ -339,7 +338,7 @@ static data_expression replace_linear_inequalities_with_reals_by_variables(
       const assignment ass(*i);
       new_l.push_back(assignment(ass.lhs(),replace_linear_inequalities_with_reals_by_variables(ass.rhs(),condition,vars,real_parameters)));
     }
-    
+
     return where_clause(replace_linear_inequalities_with_reals_by_variables(tw.body(),condition,vars,real_parameters),
                         assignment_expression_list(new_l.begin(),new_l.end()));
   }
@@ -352,11 +351,11 @@ static data_expression replace_linear_inequalities_with_reals_by_variables(
     ss << "v@@r" << global_variable_counter;
     variable v(ss.str(),sort_bool::bool_());
     global_variable_counter++;
-    condition=sort_bool::and_(condition,equal_to(v,ta)); 
+    condition=sort_bool::and_(condition,equal_to(v,ta));
     vars.push_front(v);
     return v;
   }
-  
+
   data_expression_vector new_args;
   for(application::const_iterator a=ta.begin(); a!=ta.end(); ++a)
   {
@@ -364,7 +363,7 @@ static data_expression replace_linear_inequalities_with_reals_by_variables(
   }
   return application(replace_linear_inequalities_with_reals_by_variables(ta.head(),condition,vars,real_parameters),
                      new_args.begin(),new_args.end());
-  
+
 }
 
 /// \brief Remove references to variables in real_parameters from actions,
@@ -372,10 +371,10 @@ static data_expression replace_linear_inequalities_with_reals_by_variables(
 ///        are replaced by summands of the shape x<3 -> a(true) .... + !(x<3) -> a(false) ....
 /// \param s The specification s is changed in the sense that actions are removed.
 /// \param real_parameters are used to determine what the real parameters are.
-/// \detail This routine throws an exception if there is a real parameter in an 
+/// \detail This routine throws an exception if there is a real parameter in an
 ///         action that it fails to remove.
 
-static void move_real_parameters_out_of_actions(specification &s, 
+static void move_real_parameters_out_of_actions(specification &s,
                                                 const variable_list& real_parameters,
                                                 const rewriter &r)
 {
@@ -399,18 +398,18 @@ static void move_real_parameters_out_of_actions(specification &s,
        }
        new_actions.push_back(process::action(a->label(),data_expression_list(resulting_data.begin(),resulting_data.end())));
      }
-     
+
      if (replaced_variables.empty())
      {
        new_action_summands.push_back(*i);
      }
-     else 
+     else
      {
        mutable_indexed_substitution<> empty_sigma;
-       std::deque<enumerator_list_element_with_substitution<> > 
+       std::deque<enumerator_list_element_with_substitution<> >
                enumerator_deque(1, enumerator_list_element_with_substitution<>(replaced_variables,sort_bool::true_()));
        for (auto tl = enumerator.begin(empty_sigma, enumerator_deque); tl!= enumerator.end(); ++tl)
-       { 
+       {
          mutable_map_substitution<> sigma;
          tl->add_assignments(replaced_variables,sigma,r);
 
@@ -426,8 +425,8 @@ static void move_real_parameters_out_of_actions(specification &s,
          }
          const process::action_list new_action_list(new_replaced_actions.begin(),new_replaced_actions.end());
          new_action_summands.push_back(action_summand(
-                                          i->summation_variables(), 
-                                          r(sort_bool::and_(data::replace_free_variables(new_condition,sigma),i->condition())), 
+                                          i->summation_variables(),
+                                          r(sort_bool::and_(data::replace_free_variables(new_condition,sigma),i->condition())),
                                           (i->has_time()?
                                              multi_action(new_action_list,i->multi_action().time()):
                                              multi_action(new_action_list)),
