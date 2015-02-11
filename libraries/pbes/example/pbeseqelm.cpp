@@ -32,10 +32,10 @@ using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<data::rewriter_tool<input_output_tool> > > >
+class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<data::tools::rewriter_tool<input_output_tool> > > >
 {
   protected:
-    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<data::rewriter_tool<input_output_tool> > > > super;
+    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<data::tools::rewriter_tool<input_output_tool> > > > super;
 
     /// \brief If true, the computation is started from the initial state.
     bool m_use_initial_state;
