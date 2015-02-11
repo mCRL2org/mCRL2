@@ -31,7 +31,6 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "test_specifications.h"
 
@@ -123,10 +122,10 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
   std::cerr << "specification = \n" << lps_spec << std::endl;
   std::cerr << "formula = " << mcf_formula << std::endl;
   std::cerr << "expected_solution = " << expected_solution << std::endl;
-  
+
   lps::specification spec;
   if (linearize)
-  { 
+  {
     spec=remove_stochastic_operators(lps::linearise(lps_spec));
   }
   else
