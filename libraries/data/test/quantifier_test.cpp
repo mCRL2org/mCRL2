@@ -17,8 +17,7 @@
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/fset.h"
 #include "mcrl2/data/standard.h"
-
-#include "mcrl2/utilities/test_utilities.h"
+#include "mcrl2/data/detail/rewrite_strategies.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -170,7 +169,7 @@ void quantifier_in_rewrite_rules_test(mcrl2::data::rewrite_strategy s)
 
 int test_main(int argc, char** argv)
 {
-  auto strategies = utilities::get_test_rewrite_strategies(false);
+  auto strategies = data::detail::get_test_rewrite_strategies(false);
   for (auto strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << *strat << std::endl;

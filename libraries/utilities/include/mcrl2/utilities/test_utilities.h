@@ -18,44 +18,12 @@
 #include <vector>
 #include <cctype>
 #include <fstream>
-#include "mcrl2/data/rewrite_strategy.h"
 
 namespace mcrl2
 {
 
 namespace utilities
 {
-
-/// \brief Static initialisation of rewrite strategies used for testing.
-static inline
-std::vector<data::rewrite_strategy> initialise_test_rewrite_strategies(const bool with_prover)
-{
-  std::vector<data::rewrite_strategy> result;
-  result.push_back(data::jitty);
-  if (with_prover)
-  {
-    result.push_back(data::jitty_prover);
-  }
-#ifdef MCRL2_TEST_COMPILERS
-#ifdef MCRL2_JITTYC_AVAILABLE
-  result.push_back(data::jitty_compiling);
-  if (with_prover)
-  {
-    result.push_back(data::jitty_compiling_prover);
-  }
-#endif // MCRL2_JITTYC_AVAILABLE
-#endif // MCRL2_TEST_COMPILERS
-
-  return result;
-}
-
-/// \brief Rewrite strategies that should be tested.
-inline
-const std::vector<data::rewrite_strategy>& get_test_rewrite_strategies(const bool with_prover)
-{
-  static std::vector<data::rewrite_strategy> rewrite_strategies = initialise_test_rewrite_strategies(with_prover);
-  return rewrite_strategies;
-}
 
 /// \brief Generate a random alphanumeric character
 inline

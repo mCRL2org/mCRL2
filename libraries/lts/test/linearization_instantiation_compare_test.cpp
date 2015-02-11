@@ -14,6 +14,8 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
+#include "mcrl2/data/detail/rewrite_strategies.h"
+
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/lts_aut.h"
@@ -68,7 +70,7 @@ static
 void run_linearisation_test_case(const std::string& spec, const lts::lts_aut_t& expected_statespace)
 {
   // Set various rewrite strategies
-  rewrite_strategy_vector rewrite_strategies = utilities::get_test_rewrite_strategies(false);
+  rewrite_strategy_vector rewrite_strategies = data::detail::get_test_rewrite_strategies(false);
 
   for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {

@@ -18,6 +18,7 @@
 #include <sstream>
 #include <cstdio>
 #include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lts/detail/exploration.h"
@@ -93,7 +94,7 @@ static void check_lps2lts_specification(std::string const& specification,
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
   lps::specification lps = lps::parse_linear_process_specification(specification);
 
-  rewrite_strategy_vector rstrategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector rstrategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator rewr_strategy = rstrategies.begin(); rewr_strategy != rstrategies.end(); ++rewr_strategy)
   {
     exploration_strategy_vector estrategies(exploration_strategies());
