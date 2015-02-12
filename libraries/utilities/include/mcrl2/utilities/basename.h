@@ -38,7 +38,7 @@ namespace utilities
 
     /// \brief Returns the basename of a tool.
     /// \return A string
-    static std::string get_executable_basename()
+    inline std::string get_executable_basename()
     {
       std::string path;
 #ifdef __linux
