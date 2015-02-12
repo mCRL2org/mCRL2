@@ -9,7 +9,7 @@
 #ifndef MCRL2_LTS_DETAIL_QUEUE_H
 #define MCRL2_LTS_DETAIL_QUEUE_H
 
-#include <limits>
+#include <climits>
 #include <cassert>
 #include <deque>
 #include "mcrl2/utilities/logger.h"
