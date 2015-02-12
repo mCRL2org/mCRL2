@@ -460,7 +460,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
     // returns true if there is a vertex u in V and an edge (u, i, v) in V, such that u.name() == X
-    bool has_incoming_edge(const local_control_flow_graph& V, const local_control_flow_graph_vertex& v, const core::identifier_string& X, std::size_t i) const
+    bool has_incoming_edge(const local_control_flow_graph& /* V */, const local_control_flow_graph_vertex& v, const core::identifier_string& X, std::size_t i) const
     {
       using utilities::detail::contains;
 
