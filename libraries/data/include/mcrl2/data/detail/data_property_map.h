@@ -23,7 +23,7 @@
 // #include <boost/algorithm/string/join.hpp> Don't use this, it leads to stack overflows with Visual C++ 9.0 express
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 #include <boost/lexical_cast.hpp>
 
 #include "mcrl2/utilities/text_utility.h"
@@ -130,7 +130,7 @@ class data_property_map
     {
       std::vector<std::string> v;
       boost::algorithm::split(v, text, boost::algorithm::is_any_of(","));
-      std::for_each(v.begin(), v.end(), boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
+      std::for_each(v.begin(), v.end(), std::bind(boost::algorithm::trim<std::string>, std::placeholders::_1, std::locale()));
       return std::set<std::string>(v.begin(), v.end());
     }
 
@@ -145,7 +145,7 @@ class data_property_map
         std::string s = utilities::regex_replace("[{}]", "", *i);
         std::vector<std::string> v;
         boost::algorithm::split(v, s, boost::algorithm::is_any_of(","));
-        std::for_each(v.begin(), v.end(), boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
+        std::for_each(v.begin(), v.end(), std::bind(boost::algorithm::trim<std::string>, std::placeholders::_1, std::locale()));
         result.insert(std::multiset<std::string>(v.begin(), v.end()));
       }
       return result;

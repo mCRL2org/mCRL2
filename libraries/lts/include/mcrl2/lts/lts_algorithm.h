@@ -27,7 +27,7 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
-#include <boost/bind.hpp>
+#include <functional>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_merge.h"

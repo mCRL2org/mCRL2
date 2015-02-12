@@ -15,7 +15,7 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <boost/bind.hpp>
+#include <functional>
 #include <boost/graph/adjacency_list.hpp>
 #include "mcrl2/utilities/reachable_nodes.h"
 #include "mcrl2/utilities/logger.h"
@@ -217,11 +217,11 @@ class pbes_parelm_algorithm
       for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         size_t maxindex = index + i->variable().parameters().size();
-        std::vector<size_t>::iterator slast = std::find_if(sfirst, s.end(), boost::bind(std::greater_equal<size_t>(), _1, maxindex));
+        std::vector<size_t>::iterator slast = std::find_if(sfirst, s.end(), std::bind(std::greater_equal<size_t>(), std::placeholders::_1, maxindex));
         if (slast > sfirst)
         {
           std::vector<size_t> w(sfirst, slast);
-          std::transform(w.begin(), w.end(), w.begin(), boost::bind(std::minus<size_t>(), _1, index));
+          std::transform(w.begin(), w.end(), w.begin(), std::bind(std::minus<size_t>(), std::placeholders::_1, index));
           removals[i->variable().name()] = w;
         }
         index = maxindex;

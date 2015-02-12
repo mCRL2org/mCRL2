@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 #include <boost/algorithm/string/join.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
@@ -151,12 +151,12 @@ class parity_game_output: public parity_game_generator
     std::string python_graph()
     {
       std::string result;
-      // boost::ref is needed to prevent copying of *this
-      result = result + python_set(apply(V, boost::bind(&parity_game_output::vertex, boost::ref(*this), _1))) + "\n";
-      result = result + python_set(apply(E, boost::bind(&parity_game_output::edge, boost::ref(*this), _1))) + "\n";
-      result = result + "{" + join(apply(priorities, boost::bind(&parity_game_output::priority, boost::ref(*this), _1)), ", ") + "}\n";
-      result = result + python_set(apply(even_vertices, boost::bind(&parity_game_output::vertex, boost::ref(*this), _1))) + "\n";
-      result = result + python_set(apply(odd_vertices, boost::bind(&parity_game_output::vertex, boost::ref(*this), _1)));
+      // std::ref is needed to prevent copying of *this
+      result = result + python_set(apply(V, std::bind(&parity_game_output::vertex, std::ref(*this), std::placeholders::_1))) + "\n";
+      result = result + python_set(apply(E, std::bind(&parity_game_output::edge, std::ref(*this), std::placeholders::_1))) + "\n";
+      result = result + "{" + join(apply(priorities, std::bind(&parity_game_output::priority, std::ref(*this), std::placeholders::_1)), ", ") + "}\n";
+      result = result + python_set(apply(even_vertices, std::bind(&parity_game_output::vertex, std::ref(*this), std::placeholders::_1))) + "\n";
+      result = result + python_set(apply(odd_vertices, std::bind(&parity_game_output::vertex, std::ref(*this), std::placeholders::_1)));
       return result;
     }
 

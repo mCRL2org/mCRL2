@@ -12,7 +12,7 @@
 #ifndef MCRL2_LTS_DETAIL_LTS_GENERATION_OPTIONS_H
 #define MCRL2_LTS_DETAIL_LTS_GENERATION_OPTIONS_H
 
-#include "boost/bind.hpp"
+#include "functional"
 #include "boost/function.hpp"
 
 #include "mcrl2/data/rewrite_strategy.h"
@@ -54,7 +54,8 @@ struct lts_generation_options
     use_enumeration_caching(false),
     use_summand_pruning(false)
   {
-    generate_filename_for_trace = boost::bind(&lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
+    generate_filename_for_trace = std::bind(&lts_generation_options::generate_trace_file_name, this,
+                                            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
   }
 
   /* Method that takes an info string and an extension to produce a unique filename */

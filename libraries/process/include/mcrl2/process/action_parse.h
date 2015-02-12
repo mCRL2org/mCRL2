@@ -34,7 +34,7 @@ struct action_actions: public data::data_specification_actions
 
   untyped_action_list parse_ActionList(const core::parse_node& node)
   {
-    return parse_list<process::untyped_action>(node, "Action", boost::bind(&action_actions::parse_Action, this, _1));
+    return parse_list<process::untyped_action>(node, "Action", std::bind(&action_actions::parse_Action, this, std::placeholders::_1));
   }
 
   bool callback_ActDecl(const core::parse_node& node, action_label_vector& result)
@@ -59,7 +59,7 @@ struct action_actions: public data::data_specification_actions
   action_label_list parse_ActDeclList(const core::parse_node& node)
   {
     action_label_vector result;
-    traverse(node, boost::bind(&action_actions::callback_ActDecl, this, _1, boost::ref(result)));
+    traverse(node, std::bind(&action_actions::callback_ActDecl, this, std::placeholders::_1, std::ref(result)));
     return process::action_label_list(result.begin(), result.end());
   }
 

@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_BUILDER_H
 #define MCRL2_DATA_BUILDER_H
 
-#include <boost/bind.hpp>
+#include <functional>
 #include "mcrl2/core/builder.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
@@ -82,7 +82,7 @@ struct add_sort_expressions: public Builder<Derived>
        static_cast<Derived&>(*this).apply(x.head()),
        x.begin(),
        x.end(),
-       boost::bind(fp, static_cast<Derived*>(this), _1)
+       std::bind(fp, static_cast<Derived*>(this), std::placeholders::_1)
     );
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -410,7 +410,7 @@ struct add_data_expressions: public Builder<Derived>
        static_cast<Derived&>(*this).apply(x.head()),
        x.begin(),
        x.end(),
-       boost::bind(fp, static_cast<Derived*>(this), _1)
+       std::bind(fp, static_cast<Derived*>(this), std::placeholders::_1)
     );
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -633,7 +633,7 @@ struct add_variables: public Builder<Derived>
        static_cast<Derived&>(*this).apply(x.head()),
        x.begin(),
        x.end(),
-       boost::bind(fp, static_cast<Derived*>(this), _1)
+       std::bind(fp, static_cast<Derived*>(this), std::placeholders::_1)
     );
     static_cast<Derived&>(*this).leave(x);
     return result;

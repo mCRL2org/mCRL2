@@ -16,7 +16,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/bind.hpp>
+#include <functional>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/identifier_string.h"
@@ -257,7 +257,7 @@ struct default_parser_actions: public parser_actions
 
   core::identifier_string_list parse_IdList(const parse_node& node)
   {
-    return parse_list<core::identifier_string>(node, "Id", boost::bind(&default_parser_actions::parse_Id, this, _1));
+    return parse_list<core::identifier_string>(node, "Id", std::bind(&default_parser_actions::parse_Id, this, std::placeholders::_1));
   }
 };
 

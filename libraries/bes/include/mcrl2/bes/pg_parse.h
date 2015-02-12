@@ -171,7 +171,7 @@ struct pg_actions: public core::default_parser_actions
 
   void parse_NodeSpecList(const core::parse_node& node)
   {
-    traverse(node, make_visitor(m_parser.symbol_table(), "NodeSpec", boost::bind(&pg_actions::parse_NodeSpec, this, _1)));
+    traverse(node, make_visitor(m_parser.symbol_table(), "NodeSpec", std::bind(&pg_actions::parse_NodeSpec, this, std::placeholders::_1)));
   }
 
   identifier_t parse_Id(const core::parse_node& node)
@@ -192,7 +192,7 @@ struct pg_actions: public core::default_parser_actions
   std::set<identifier_t> parse_Successors(const core::parse_node& node)
   {
     std::set<identifier_t> result;
-    traverse(node, make_set_collector(m_parser.symbol_table(), "Id", result, boost::bind(&pg_actions::parse_Id, this, _1)));
+    traverse(node, make_set_collector(m_parser.symbol_table(), "Id", result, std::bind(&pg_actions::parse_Id, this, std::placeholders::_1)));
     return result;
   }
 

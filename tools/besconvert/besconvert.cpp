@@ -11,7 +11,7 @@
 /// boolean equation systems.
 
 #include <algorithm>
-#include <boost/bind.hpp>
+#include <functional>
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/pbes_input_output_tool.h"

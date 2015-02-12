@@ -14,7 +14,7 @@
 
 #include <algorithm>
 #include <sstream>
-#include <boost/bind.hpp>
+#include <functional>
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
@@ -606,7 +606,9 @@ class stategraph_algorithm
     // removes the connected components V for which !is_valid_connected_component(V)
     void remove_invalid_connected_components()
     {
-      auto i = std::remove_if(m_connected_components.begin(), m_connected_components.end(), !boost::bind(&stategraph_algorithm::is_valid_connected_component, this, _1));
+      auto i = std::remove_if(m_connected_components.begin(), m_connected_components.end(),
+                              std::bind(std::logical_not<bool>(),
+                                        std::bind(&stategraph_algorithm::is_valid_connected_component, this, std::placeholders::_1)));
       m_connected_components.erase(i, m_connected_components.end());
     }
 
@@ -663,7 +665,7 @@ class stategraph_algorithm
     // Removes the connected components V that consist of CFPs that are only copied.
     void remove_only_copy_components()
     {
-      auto i = std::remove_if(m_connected_components.begin(), m_connected_components.end(), boost::bind(&stategraph_algorithm::has_only_copied_CFPs, this, _1));
+      auto i = std::remove_if(m_connected_components.begin(), m_connected_components.end(), std::bind(&stategraph_algorithm::has_only_copied_CFPs, this, std::placeholders::_1));
       m_connected_components.erase(i, m_connected_components.end());
       mCRL2log(log::debug, "stategraph") << "--- connected components after removing 'only copy' ones ---" << std::endl;
       print_connected_components();

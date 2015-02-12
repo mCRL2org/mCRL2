@@ -77,7 +77,7 @@ struct bes_actions: public core::default_parser_actions
 
   std::vector<boolean_equation> parse_BesEqnDeclList(const core::parse_node& node)
   {
-    return parse_vector<bes::boolean_equation>(node, "BesEqnDecl", boost::bind(&bes_actions::parse_BesEqnDecl, this, _1));
+    return parse_vector<bes::boolean_equation>(node, "BesEqnDecl", std::bind(&bes_actions::parse_BesEqnDecl, this, std::placeholders::_1));
   }
 };
 

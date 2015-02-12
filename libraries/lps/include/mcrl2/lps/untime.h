@@ -173,7 +173,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
 
         std::for_each(m_spec.process().action_summands().begin(),
                       m_spec.process().action_summands().end(),
-                      boost::bind(&untime_algorithm::untime, this, _1));
+                      std::bind(&untime_algorithm::untime, this, std::placeholders::_1));
       }
     }
 };

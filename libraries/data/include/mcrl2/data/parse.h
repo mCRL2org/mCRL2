@@ -127,7 +127,7 @@ struct sort_expression_actions: public core::default_parser_actions
 
   data::structured_sort_constructor_list parse_ConstrDeclList(const core::parse_node& node)
   {
-    return parse_list<data::structured_sort_constructor>(node, "ConstrDecl", boost::bind(&sort_expression_actions::parse_ConstrDecl, this, _1));
+    return parse_list<data::structured_sort_constructor>(node, "ConstrDecl", std::bind(&sort_expression_actions::parse_ConstrDecl, this, std::placeholders::_1));
   }
 
   data::structured_sort_constructor_argument parse_ProjDecl(const core::parse_node& node)
@@ -144,7 +144,7 @@ struct sort_expression_actions: public core::default_parser_actions
 
   data::structured_sort_constructor_argument_list parse_ProjDeclList(const core::parse_node& node)
   {
-    return parse_list<data::structured_sort_constructor_argument>(node, "ProjDecl", boost::bind(&sort_expression_actions::parse_ProjDecl, this, _1));
+    return parse_list<data::structured_sort_constructor_argument>(node, "ProjDecl", std::bind(&sort_expression_actions::parse_ProjDecl, this, std::placeholders::_1));
   }
 };
 
@@ -216,7 +216,7 @@ struct data_expression_actions: public sort_expression_actions
   data::variable_list parse_VarsDeclList(const core::parse_node& node)
   {
     variable_vector result;
-    traverse(node, boost::bind(&data_expression_actions::callback_VarsDecl, this, _1, boost::ref(result)));
+    traverse(node, std::bind(&data_expression_actions::callback_VarsDecl, this, std::placeholders::_1, std::ref(result)));
     return data::variable_list(result.begin(), result.end());
   }
 
@@ -293,12 +293,12 @@ struct data_expression_actions: public sort_expression_actions
 
   data::untyped_identifier_assignment_list parse_AssignmentList(const core::parse_node& node)
   {
-    return parse_list<data::untyped_identifier_assignment>(node, "Assignment", boost::bind(&data_expression_actions::parse_Assignment, this, _1));
+    return parse_list<data::untyped_identifier_assignment>(node, "Assignment", std::bind(&data_expression_actions::parse_Assignment, this, std::placeholders::_1));
   }
 
   data::data_expression_list parse_DataExprList(const core::parse_node& node)
   {
-    return parse_list<data::data_expression>(node, "DataExpr", boost::bind(&data_expression_actions::parse_DataExpr, this, _1));
+    return parse_list<data::data_expression>(node, "DataExpr", std::bind(&data_expression_actions::parse_DataExpr, this, std::placeholders::_1));
   }
 
   data::data_expression_list parse_BagEnumEltList(const core::parse_node& node)
@@ -341,7 +341,7 @@ struct data_specification_actions: public data_expression_actions
   std::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node)
   {
     std::vector<atermpp::aterm_appl> result;
-    traverse(node, boost::bind(&data_specification_actions::callback_SortDecl, this, _1, boost::ref(result)));
+    traverse(node, std::bind(&data_specification_actions::callback_SortDecl, this, std::placeholders::_1, std::ref(result)));
     return result;
   }
 
@@ -368,7 +368,7 @@ struct data_specification_actions: public data_expression_actions
   data::function_symbol_vector parse_IdsDeclList(const core::parse_node& node)
   {
     function_symbol_vector result;
-    traverse(node, boost::bind(&data_specification_actions::callback_IdsDecl, this, _1, boost::ref(result)));
+    traverse(node, std::bind(&data_specification_actions::callback_IdsDecl, this, std::placeholders::_1, std::ref(result)));
     return result;
   }
 
@@ -411,7 +411,7 @@ struct data_specification_actions: public data_expression_actions
   data::data_equation_vector parse_EqnDeclList(const core::parse_node& node, const variable_list& variables)
   {
     data_equation_vector result;
-    traverse(node, boost::bind(&data_specification_actions::callback_EqnDecl, this, _1, boost::ref(variables), boost::ref(result)));
+    traverse(node, std::bind(&data_specification_actions::callback_EqnDecl, this, std::placeholders::_1, std::ref(variables), std::ref(result)));
     return result;
   }
 
@@ -473,7 +473,7 @@ struct data_specification_actions: public data_expression_actions
   data::data_specification parse_DataSpec(const core::parse_node& node)
   {
     data_specification result;
-    traverse(node, boost::bind(&data_specification_actions::callback_DataSpecElement, this, _1, boost::ref(result)));
+    traverse(node, std::bind(&data_specification_actions::callback_DataSpecElement, this, std::placeholders::_1, std::ref(result)));
     return result;
   }
 };

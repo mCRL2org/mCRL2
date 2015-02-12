@@ -16,7 +16,7 @@
 #include <iterator>
 #include <set>
 #include <utility>
-#include "boost/bind.hpp"
+#include "functional"
 
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard_utility.h"
@@ -108,7 +108,7 @@ inline bool check_sort(sort_expression s, const SortContainer& sorts)
   };
 
   std::set<sort_expression> s_sorts = data::find_sort_expressions(s);
-  set_remove_if(s_sorts, boost::bind(&local::is_not_function_sort, _1));
+  set_remove_if(s_sorts, std::bind(&local::is_not_function_sort, std::placeholders::_1));
   for (std::set<sort_expression>::const_iterator i = s_sorts.begin(); i != s_sorts.end(); ++i)
   {
     if (std::find(sorts.begin(), sorts.end(), *i) == sorts.end())

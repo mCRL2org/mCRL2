@@ -165,8 +165,9 @@ const std::set<lts_type> &supported_lts_formats()
 
 std::string supported_lts_formats_text(lts_type default_format, const std::set<lts_type> &supported)
 {
-  vector<lts_type> types(supported.begin(),supported.end());
-  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,type_strings,_1,_2));
+  vector<lts_type> types(supported.begin(), supported.end());
+  std::sort(types.begin(), types.end(),
+            std::bind(lts_named_cmp<lts_type>, type_strings, std::placeholders::_1, std::placeholders::_2));
 
   string r;
   for (vector<lts_type>::iterator i=types.begin(); i!=types.end(); ++i)
@@ -200,8 +201,9 @@ std::string supported_lts_formats_text(const std::set<lts_type> &supported)
 
 std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_type> &supported)
 {
-  vector<lts_type> types(supported.begin(),supported.end());
-  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,extension_strings,_1,_2));
+  vector<lts_type> types(supported.begin(), supported.end());
+  std::sort(types.begin(), types.end(),
+            std::bind(lts_named_cmp<lts_type>, extension_strings, std::placeholders::_1, std::placeholders::_2));
 
   string r, prev;
   bool first = true;

@@ -16,7 +16,7 @@
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/bind.hpp>
+#include <functional>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/rewrite.h"
@@ -139,10 +139,10 @@ class lps_algorithm
     void remove_unused_summand_variables()
     {
       auto& v = m_spec.process().action_summands();
-      std::for_each(v.begin(), v.end(), boost::bind(&lps_algorithm::summand_remove_unused_summand_variables<typename Specification::process_type::action_summand_type>, this, _1));
+      std::for_each(v.begin(), v.end(), std::bind(&lps_algorithm::summand_remove_unused_summand_variables<typename Specification::process_type::action_summand_type>, this, std::placeholders::_1));
 
       auto& w = m_spec.process().deadlock_summands();
-      std::for_each(w.begin(), w.end(), boost::bind(&lps_algorithm::summand_remove_unused_summand_variables<deadlock_summand>, this, _1));
+      std::for_each(w.begin(), w.end(), std::bind(&lps_algorithm::summand_remove_unused_summand_variables<deadlock_summand>, this, std::placeholders::_1));
     }
 };
 

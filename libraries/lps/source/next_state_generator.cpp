@@ -172,7 +172,7 @@ next_state_generator::summand_subset_t::summand_subset_t(
   if (m_use_summand_pruning)
   {
     atermpp::shared_subset<summand_t> full_set(generator->m_summands);
-    m_pruning_tree.summand_subset =  atermpp::shared_subset<summand_t>(full_set, boost::bind(next_state_generator::summand_subset_t::summand_set_contains, summand_set, _1));
+    m_pruning_tree.summand_subset =  atermpp::shared_subset<summand_t>(full_set, std::bind(next_state_generator::summand_subset_t::summand_set_contains, summand_set, std::placeholders::_1));
     build_pruning_parameters(summands);
   }
   else
@@ -308,7 +308,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
     if (position == node->children.end())
     {
       pruning_tree_node_t child;
-      child.summand_subset = atermpp::shared_subset<summand_t>(node->summand_subset, boost::bind(&next_state_generator::summand_subset_t::is_not_false, this, _1));
+      child.summand_subset = atermpp::shared_subset<summand_t>(node->summand_subset, std::bind(&next_state_generator::summand_subset_t::is_not_false, this, std::placeholders::_1));
       node->children[argument] = child;
       node = &node->children[argument];
     }

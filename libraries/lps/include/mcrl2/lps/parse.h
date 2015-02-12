@@ -96,7 +96,7 @@ struct action_rename_actions: public process::action_actions
 
   std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)
   {
-    return parse_vector<lps::action_rename_rule>(node, "ActionRenameRule", boost::bind(&action_rename_actions::parse_ActionRenameRule, this, _1));
+    return parse_vector<lps::action_rename_rule>(node, "ActionRenameRule", std::bind(&action_rename_actions::parse_ActionRenameRule, this, std::placeholders::_1));
   }
 
   std::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node)
@@ -145,7 +145,7 @@ struct action_rename_actions: public process::action_actions
   lps::action_rename_specification parse_ActionRenameSpec(const core::parse_node& node)
   {
     lps::action_rename_specification result;
-    traverse(node, boost::bind(&action_rename_actions::callback_ActionRenameSpec, this, _1, boost::ref(result)));
+    traverse(node, std::bind(&action_rename_actions::callback_ActionRenameSpec, this, std::placeholders::_1, std::ref(result)));
     return result;
   }
 };

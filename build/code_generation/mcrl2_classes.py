@@ -1173,7 +1173,7 @@ function_pointer fp = &Derived::apply;
    static_cast<Derived&>(*this).apply(x.head()),
    x.begin(),
    x.end(),
-   boost::bind(fp, static_cast<Derived*>(this), _1)
+   std::bind(fp, static_cast<Derived*>(this), std::placeholders::_1)
 );''' % return_type
                     # special case for stochastic distribution
                     elif return_type == 'lps::stochastic_distribution':

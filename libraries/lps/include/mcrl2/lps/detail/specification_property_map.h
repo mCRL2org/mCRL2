@@ -20,7 +20,7 @@
 #include <utility>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/lps/specification.h"

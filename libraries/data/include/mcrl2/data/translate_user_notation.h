@@ -110,7 +110,7 @@ public:
        derived().apply(x.head()),
        x.begin(),
        x.end(),
-       boost::bind(fp, derived(), _1)
+       std::bind(fp, derived(), std::placeholders::_1)
     );
     derived().leave(x);
     return result;

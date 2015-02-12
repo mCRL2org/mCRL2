@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <map>
 #include <vector>
-#include <boost/bind.hpp>
+#include <functional>
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/builder.h"

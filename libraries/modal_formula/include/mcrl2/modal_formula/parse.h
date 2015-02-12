@@ -142,7 +142,7 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
 
   data::assignment_list parse_StateVarAssignmentList(const core::parse_node& node)
   {
-    return parse_list<data::assignment>(node, "StateVarAssignment", boost::bind(&state_formula_actions::parse_StateVarAssignment, this, _1));
+    return parse_list<data::assignment>(node, "StateVarAssignment", std::bind(&state_formula_actions::parse_StateVarAssignment, this, std::placeholders::_1));
   }
 
   state_formulas::state_formula parse_StateFrm(const core::parse_node& node)
