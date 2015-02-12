@@ -105,7 +105,7 @@ struct parser_actions
 
   // starts a traversal in node, and calls the function f to each subnode of the given type
   template <typename Function>
-  void traverse(const parse_node& node, Function f)
+  void traverse(const parse_node& node, const Function& f)
   {
     if (!node)
     {
@@ -126,9 +126,9 @@ struct parser_actions
   {
     const parser_table& table;
     const std::string& type;
-    Function f;
+    const Function& f;
 
-    visitor(const parser_table& table_, const std::string& type_, Function f_)
+    visitor(const parser_table& table_, const std::string& type_, const Function& f_)
       : table(table_),
         type(type_),
         f(f_)
@@ -146,7 +146,7 @@ struct parser_actions
   };
 
   template <typename Function>
-  visitor<Function> make_visitor(const parser_table& table, const std::string& type, Function f)
+  visitor<Function> make_visitor(const parser_table& table, const std::string& type, const Function& f)
   {
     return visitor<Function>(table, type, f);
   }
@@ -158,9 +158,9 @@ struct parser_actions
     const parser_table& table;
     const std::string& type;
     Container& container;
-    Function f;
+    const Function& f;
 
-    collector(const parser_table& table_, const std::string& type_, Container& container_, Function f_)
+    collector(const parser_table& table_, const std::string& type_, Container& container_, const Function& f_)
       : table(table_),
         type(type_),
         container(container_),
@@ -179,7 +179,7 @@ struct parser_actions
   };
 
   template <typename Container, typename Function>
-  collector<Container, Function> make_collector(const parser_table& table, const std::string& type, Container& container, Function f)
+  collector<Container, Function> make_collector(const parser_table& table, const std::string& type, Container& container, const Function& f)
   {
     return collector<Container, Function>(table, type, container, f);
   }
@@ -191,9 +191,9 @@ struct parser_actions
     const parser_table& table;
     const std::string& type;
     SetContainer& container;
-    Function f;
+    const Function& f;
 
-    set_collector(const parser_table& table_, const std::string& type_, SetContainer& container_, Function f_)
+    set_collector(const parser_table& table_, const std::string& type_, SetContainer& container_, const Function& f_)
       : table(table_),
         type(type_),
         container(container_),
@@ -212,7 +212,7 @@ struct parser_actions
   };
 
   template <typename SetContainer, typename Function>
-  set_collector<SetContainer, Function> make_set_collector(const parser_table& table, const std::string& type, SetContainer& container, Function f)
+  set_collector<SetContainer, Function> make_set_collector(const parser_table& table, const std::string& type, SetContainer& container, const Function& f)
   {
     return set_collector<SetContainer, Function>(table, type, container, f);
   }
@@ -230,7 +230,7 @@ struct default_parser_actions: public parser_actions
   {}
 
   template <typename T, typename Function>
-  atermpp::term_list<T> parse_list(const parse_node& node, const std::string& type, Function f)
+  atermpp::term_list<T> parse_list(const parse_node& node, const std::string& type, const Function& f)
   {
     std::vector<T> result;
     traverse(node, make_collector(m_parser.symbol_table(), type, result, f));
@@ -238,7 +238,7 @@ struct default_parser_actions: public parser_actions
   }
 
   template <typename T, typename Function>
-  std::vector<T> parse_vector(const parse_node& node, const std::string& type, Function f)
+  std::vector<T> parse_vector(const parse_node& node, const std::string& type, const Function& f)
   {
     std::vector<T> result;
     traverse(node, make_collector(m_parser.symbol_table(), type, result, f));
