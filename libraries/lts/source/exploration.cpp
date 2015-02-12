@@ -827,7 +827,7 @@ bool lps2lts_algorithm::add_transition(const storage_state_t& source_state, next
     // Close transition.
     if (m_options.outformat == lts_aut) 
     { 
-      m_aut_file << ")" << std::endl;
+      m_aut_file << ")\n"; // Intentionally do not use std::endl to avoid flushing.
     }
   }
   else 
