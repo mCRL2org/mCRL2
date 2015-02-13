@@ -2575,23 +2575,31 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   jittyc_eqns.clear();
 
-  ar_size = 0;
-  int2ar_idx.clear();
 
-  function_symbol_vector all_function_symbols=m_data_specification_for_enumeration.constructors();
+  // - Store all function symbols in a vector
+  function_symbol_vector all_function_symbols = m_data_specification_for_enumeration.constructors();
   all_function_symbols.insert(all_function_symbols.begin(),
                               m_data_specification_for_enumeration.mappings().begin(),
                               m_data_specification_for_enumeration.mappings().end());
 
-  for(function_symbol_vector::const_iterator l = all_function_symbols.begin()
-        ; l != all_function_symbols.end()
-        ; ++l)
+  // - Calculate maximum occurring arity
+  // - Construct int2ar_idx
+  size_t max_arity = 0;
+  ar_size = 0;
+  int2ar_idx.clear();
+  for(function_symbol_vector::const_iterator l = all_function_symbols.begin();
+      l != all_function_symbols.end(); ++l)
   {
-    if (int2ar_idx.count(*l) == 0)
+    const data::function_symbol fs = *l;
+    if (int2ar_idx.count(fs) == 0)
     {
-      size_t arity = getArity(*l);
-      int2ar_idx[*l]=ar_size;
-      ar_size += (arity*(arity+1))/2;
+      size_t arity = getArity(fs);
+      int2ar_idx[fs] = ar_size;
+      ar_size += (arity * (arity + 1)) / 2;
+      if (arity > max_arity)
+      {
+        max_arity = arity;
+      }
     }
   }
 
@@ -2605,72 +2613,36 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   f = MakeTempFiles();
 
   //  Print includes
-  fprintf(f, "#include \"mcrl2/data/detail/rewrite/jittycpreamble.h\"\n");
+  fprintf(f, "#define ADDR_OPID %ld\n"
+             "#define INDEX_BOUND %zu\n"
+             "#define ARITY_BOUND %zu\n"
+             "#include \"mcrl2/data/detail/rewrite/jittycpreamble.h\"\n"
+             "\n",
+          atermpp::detail::addressf(sort_bool::true_().function()),
+          core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
+          max_arity+1);
 
-  // Print defs
-  fprintf(f,
-          "using namespace mcrl2::data;\n"
-         );
-
-  // Make a functional push_front to be used in the where clause.
-  fprintf(f,"static mcrl2::data::assignment_expression_list jittyc_local_push_front(mcrl2::data::assignment_expression_list l, const mcrl2::data::assignment& e)\n"
-            "{\n"
-            "  l.push_front(atermpp::deprecated_cast<assignment_expression>(e));\n"
-            "  return l;\n"
-            "}\n");
-
-  // - Calculate maximum occurring arity
   // - Forward declarations of rewr_* functions
-  size_t max_arity = 0;
-  for(function_symbol_vector::const_iterator l = all_function_symbols.begin()
-        ; l != all_function_symbols.end()
-        ; ++l)
+  for(function_symbol_vector::const_iterator l = all_function_symbols.begin();
+      l != all_function_symbols.end(); ++l)
   {
     const data::function_symbol fs=*l;
-    size_t arity = getArity(fs);
-    if (arity > max_arity)
-    {
-      max_arity = arity;
-    }
     if (data_equation_selector(fs))
     {
-      declare_rewr_functions(f, fs, arity);
+      declare_rewr_functions(f, fs, getArity(fs));
     }
   }
-
-  fprintf(f,  "\n\n");
-
-  fprintf(f, "const data_expression& pass_on(const data_expression& t)\n");
-  fprintf(f, "{\n");
-  fprintf(f, "  return t;\n");
-  fprintf(f, "}\n");
-
-  fprintf(f, "data_expression do_nothing(const data_expression& t)\n");
-  fprintf(f, "{\n");
-  fprintf(f, "  return t;\n");
-  fprintf(f, "}\n");
-
-
-  // Declare function types
-  fprintf(f,  "typedef data_expression (*func_type)(const data_expression& );\n");
-  fprintf(f,  "func_type* int2func[%zu];\n", max_arity+1);
-  fprintf(f,  "func_type* int2func_head_in_nf[%zu];\n", max_arity+1);
-
-  // Set this rewriter, to use its functions.
-  fprintf(f,  "mcrl2::data::detail::RewriterCompilingJitty *this_rewriter;\n");
-
 
   // Make functions that construct applications with arity n where 5< n <= max_arity.
   for (size_t i=5; i<=max_arity; ++i)
   {
-    fprintf(f,
-            "static application make_term_with_many_arguments(const data_expression& head");
+    fprintf(f, "static application make_term_with_many_arguments(const data_expression& head");
     for (size_t j=1; j<=i; ++j)
     {
       fprintf(f, ", const data_expression& arg%zu",j);
     }
     fprintf(f, ")\n"
-            "{\n");
+               "{\n");
 
     // Currently data_expressions are stored in this array. If reference or pointers are stored,
     // no explicit destroy is needed anymore.
@@ -2685,8 +2657,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f, "  return application(head,(mcrl2::data::data_expression*)&buffer[0],(mcrl2::data::data_expression*)&buffer[%ld]);\n",i);
     fprintf(f, "}\n\n");
   }
-
-
 
   // Implement the equations of every operation. -------------------------------
   //
@@ -2775,9 +2745,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Generate the entries for int2func.
   for (size_t i=0; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",
+    fprintf(f,  "  int2func[%zu] = new rewriter_function[%zu];\n",
                           i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1);
-    fprintf(f,  "for(size_t j=0; j<%zu; ++j){ int2func[%zu][j]=do_nothing; };\n",
+    fprintf(f,  "for(size_t j=0; j<%zu; ++j){ int2func[%zu][j] = do_nothing; };\n",
                           core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,i);
     for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
                         j!=all_function_symbols.end(); ++j)
@@ -2795,7 +2765,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           const size_t aaa_position=function_name.find("@@@");
           std::stringstream ss;
           ss << function_name.substr(2,aaa_position-2) << i << function_name.substr(aaa_position+3);
-          fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;   //Part.rewritten %s\n",
+          fprintf(f,  "  int2func[%zu][%zu] = (rewriter_function)%s;   //Part.rewritten %s\n",
                                          i,
                                          core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                                          // c_function_name.substr(2,c_function_name.size()-2).c_str(),
@@ -2805,7 +2775,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       }
       else if (data_equation_selector(fs) && arity_is_allowed(fs,i))
       {
-        fprintf(f,  "  int2func[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",
+        fprintf(f,  "  int2func[%zu][%zu] = (rewriter_function)rewr_%zu_%zu_0_term;\n",
                         i,
                         core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                         core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
@@ -2816,9 +2786,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Generate the entries for int2func_head_in_nf. Entries for constants (with arity 0) are not required.
   for (size_t i=1; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",
+    fprintf(f,  "  int2func_head_in_nf[%zu] = new rewriter_function[%zu];\n",
                                i,core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1);
-    fprintf(f,  "for(size_t j=0; j<%zu; ++j){ int2func_head_in_nf[%zu][j]=do_nothing; };\n",
+    fprintf(f,  "for(size_t j=0; j<%zu; ++j){ int2func_head_in_nf[%zu][j] = do_nothing; };\n",
                                core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,i);
     for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
                         j!=all_function_symbols.end(); ++j)
@@ -2837,219 +2807,21 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       {
         if (i<=NF_MAX_ARITY)
         {
-          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (func_type)rewr_%zu_%zu_1_term;\n",i,
+          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (rewriter_function)rewr_%zu_%zu_1_term;\n",i,
                         core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                         core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),i);
         }
         else
         {
           // If i>NF_MAX_ARITY no compiled rewrite function where the head is already in nf is available.
-          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",i,
+          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_0_term;\n",i,
                                 core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                                 core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),i);
         }
       }
     }
   }
-  // Generate code to cleanup int2func.
-  fprintf(f,  "}\n"
-          "\n"
-          "void rewrite_cleanup()\n"
-          "{\n"
-         );
-  fprintf(f,  "\n");
-  for (size_t i=0; i<=max_arity; i++)
-  {
-    fprintf(f,  "  free(int2func[%zu]);\n",i);
-    fprintf(f,  "  free(int2func_head_in_nf[%zu]);\n",i);
-  }
-  fprintf(f,  "}\n"
-          "\n"
-
-         );
-
-  fprintf(f,
-      "struct argument_rewriter_struct\n"
-      "{\n"
-      "  argument_rewriter_struct()\n"
-      "  {}\n"
-      "\n"
-      "  data_expression operator()(const data_expression& arg) const\n"
-      "  {\n"
-      "    return rewrite(arg);\n"
-      "  }\n"
-      "};\n\n");
-
-  fprintf(f,
-      "data_expression rewrite_appl_aux(const application& t)\n"
-      "{\n"
-// "std::cerr << \"REWR_APPL_AUX \" << t << \"\\n\";"
-      "  mcrl2::data::function_symbol thead;\n"
-      "  if (mcrl2::data::detail::head_is_function_symbol(t,thead))\n"
-      "  {\n"
-      "    const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(thead);\n"
-      "    const size_t total_arity=recursive_number_of_args(t);\n"
-      "    if (function_index < %zu)\n"
-      "    {\n"
-      "      assert(total_arity < %zu);\n"
-      "      assert(int2func[total_arity][function_index] != NULL);\n"
-      "      return int2func[total_arity][function_index](t);\n"
-      "    }\n"
-      "    else\n"
-      "    {\n"
-      "      const argument_rewriter_struct argument_rewriter;\n"
-      "      return mcrl2::data::application(rewrite(t.head()),t.begin(),t.end(),argument_rewriter);\n"
-      "    }\n"
-      "  }\n"
-      "  // Here the head symbol of, which can be deeply nested, is not a function_symbol. \n"
-      "  using namespace mcrl2::data;\n"
-      "  using namespace mcrl2::data::detail;\n"
-      "  const data_expression& head0=get_nested_head(t);\n"
-      "  const data_expression head=\n"
-      "       (is_variable(head0)?\n"
-      "            (*(this_rewriter->global_sigma))(down_cast<const variable>(head0)):\n"
-      "       (is_where_clause(head0)?\n"
-      "            this_rewriter->rewrite_where(atermpp::down_cast<where_clause>(head0),*(this_rewriter->global_sigma)):\n"
-      "             head0));\n"
-      "  \n"
-      "  // Reconstruct term t.\n"
-      "  const application t1((head0==head)?t:replace_nested_head(t,head));\n"
-
-      "  const data_expression head1(get_nested_head(t1));\n"
-      "  // Here head1 has the shape\n"
-      "  // variable, function_symbol, lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,\n"
-      "  if (is_abstraction(head1))\n"
-      "  {\n"
-      "    const abstraction& heada(head1);\n"
-      "    const binder_type& binder(heada.binding_operator());\n"
-      "    if (is_lambda_binder(binder))\n"
-      "    {\n"
-      "      return this_rewriter->rewrite_lambda_application(t1,*(this_rewriter->global_sigma));\n"
-      "    }\n"
-      "    if (is_exists_binder(binder))\n"
-      "    {\n"
-      "      return this_rewriter->existential_quantifier_enumeration(head1,*(this_rewriter->global_sigma));\n"
-      "    }\n"
-      "    assert(is_forall_binder(binder));\n"
-      "    return this_rewriter->universal_quantifier_enumeration(head1,*(this_rewriter->global_sigma));\n"
-      "  }\n"
-      "  \n"
-      "  if (is_variable(head1))\n"
-      "  {\n"
-      "    const argument_rewriter_struct argument_rewriter;\n"
-      "    return rewrite_all_arguments(t1,argument_rewriter);\n"
-      "  }\n"
-      "  \n"
-      "  \n"
-      "  // Here t1 has the shape application(u0,u1,...,un).\n"
-      "  // Moreover, the head symbol of t1, head1, is a function symbol.\n"
-      "  const mcrl2::data::function_symbol& f=atermpp::down_cast<const mcrl2::data::function_symbol>(head1);\n"
-      "  const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(f);\n"
-      "  assert(function_index < %zu);\n"
-      "  const size_t total_arity=recursive_number_of_args(t1);\n"
-      "  assert( int2func_head_in_nf[total_arity][function_index] != NULL);\n"
-      "  return  int2func_head_in_nf[total_arity][function_index](t1);\n"
-      "}\n\n",
-      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
-      max_arity+1,
-      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1
-      );
-
-  fprintf(f,
-      "data_expression rewrite_external(const data_expression& t)\n"
-      "{\n"
-      "  return rewrite(t);\n"
-      "}\n\n"
-       );
-
-  // Moved part of the rewrite function to rewrite_aux, such that the compiler
-  // can inline rewrite more often, and so gain some performance.
-  fprintf(f,
-      "data_expression rewrite_aux(const data_expression& t)\n"
-      "{\n"
-      "  using namespace mcrl2::data;\n"
-      "  // Term t does not have the shape application(t1,...,tn)\n"
-      "  if (is_variable(t))\n"
-      "  {\n"
-      "    const variable& v=atermpp::down_cast<const variable>(t);\n"
-      "    return (*(this_rewriter->global_sigma))(v);\n"
-      "  }\n"
-      "  if (mcrl2::data::is_abstraction(t))\n"
-      "  {\n"
-      "    const abstraction& ta(t);\n"
-      "    const binder_type& binder(ta.binding_operator());\n"
-      "    if (is_exists_binder(binder))\n"
-      "    {\n"
-      "      return this_rewriter->existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
-      "    }\n"
-      "    if (is_forall_binder(binder))\n"
-      "    {\n"
-      "      return this_rewriter->universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
-      "    }\n"
-      "    assert(mcrl2::data::is_lambda_binder(binder));\n"
-      "    return this_rewriter->rewrite_single_lambda(\n"
-      "               ta.variables(),ta.body(),false,*(this_rewriter->global_sigma));\n"
-      "  }\n"
-      "  assert(mcrl2::data::is_where_clause(t));\n"
-      "  const where_clause& tw=atermpp::down_cast<const where_clause>(t);\n"
-      "  return this_rewriter->rewrite_where(tw,*(this_rewriter->global_sigma));\n"
-      "}\n\n");
-
-  fprintf(f,
-      "static inline data_expression rewrite(const data_expression& t)\n"
-      "{\n"
-// "std::cerr << \"REWRITE \" << t << \"\\n\";\n"
-      "  using namespace mcrl2::data;\n"
-      "  if (atermpp::detail::addressf(t.function())==%ld)\n" // if (is_function_symbol(t))
-      "  {\n"
-      "    // Term t is a function_symbol\n"
-      "    const mcrl2::data::function_symbol& f=atermpp::down_cast<const mcrl2::data::function_symbol>(t);\n"
-      "    const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(f);\n"
-      "    if (function_index < %zu)\n"
-      "    {\n"
-      "      const size_t arity=0;\n"
-      "      assert(int2func[arity][function_index] != NULL);\n"
-      "      return int2func[arity][function_index](t);\n"
-      "    }\n"
-      "    else\n"
-      "    {\n"
-      "      return t;\n"
-      "    }\n"
-      "  }\n"
-      "  \n"
-      "  else if (is_application_no_check(t))\n"
-      "  {\n"
-      "    const application& ta=atermpp::down_cast<const application>(t);\n"
-      "    const mcrl2::data::function_symbol& head=atermpp::down_cast<const mcrl2::data::function_symbol>(ta.head());\n"
-      " if (atermpp::detail::addressf(head.function())==%ld)\n" // if (is_function_symbol(head))
-      "    {\n"
-      "      const size_t function_index = mcrl2::core::index_traits<mcrl2::data::function_symbol,function_symbol_key_type, 2>::index(head);\n"
-      "      const size_t total_arity=ta.size();\n"
-      "      if (function_index < %zu)\n"
-      "      {\n"
-      "        assert(total_arity < %zu);\n"
-      "        assert(int2func[total_arity][function_index] != NULL);\n"
-      "        return int2func[total_arity][function_index](t);\n"
-      "      }\n"
-      "      else\n"
-      "      {\n"
-      "        const argument_rewriter_struct argument_rewriter;\n"
-      "        return mcrl2::data::application(rewrite(ta.head()),ta.begin(),ta.end(),argument_rewriter);\n"
-      "      }\n"
-      "    }\n"
-      "    else\n"
-      "    {\n"
-      "      return rewrite_appl_aux(ta);\n"
-      "    }\n"
-      "  }\n"
-      "  \n"
-      "  return rewrite_aux(t);\n"
-      "}\n",
-      atermpp::detail::addressf(sort_bool::true_().function()),
-      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
-      atermpp::detail::addressf(sort_bool::true_().function()),
-      core::index_traits<data::function_symbol,function_symbol_key_type, 2>::max_index()+1,
-      max_arity+1);
+  fprintf(f, "}\n");
 
 
   fclose(f);
