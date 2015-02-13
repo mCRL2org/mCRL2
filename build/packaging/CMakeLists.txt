@@ -54,17 +54,19 @@ if(APPLE)
   install(FILES ${CMAKE_SOURCE_DIR}/build/packaging/icons/mcrl2-orange.icns
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/Resources)
 
-  set(EXECUTABLES "")
-  foreach(EXECUTABLE ${MCRL2_QT_APPS})
-    set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
-  endforeach()
-  install(CODE "
-    message(STATUS \"Executing macdeployqt mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
-    execute_process(
-      COMMAND macdeployqt mCRL2.app ${EXECUTABLES}
-      WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
-    )
-  ")
+  if(MCRL2_ENABLE_GUI_TOOLS)
+    set(EXECUTABLES "")
+    foreach(EXECUTABLE ${MCRL2_QT_APPS})
+      set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
+    endforeach()
+    install(CODE "
+      message(STATUS \"Executing macdeployqt mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+      execute_process(
+        COMMAND macdeployqt mCRL2.app ${EXECUTABLES}
+        WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
+      )
+    ")
+  endif()
 endif()
 
 # Branding image displayed inside the installer
