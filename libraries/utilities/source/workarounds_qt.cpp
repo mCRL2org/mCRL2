@@ -9,6 +9,6 @@ void work_around_qtbug_38598()
   QDir dir = QDir(QString::fromStdString(mcrl2::utilities::get_executable_basename()));
   dir.cdUp();
   dir.cd("PlugIns");
-  QApplication::setLibraryPaths(QStringList(dir.absolutePath()) + QApplication::libraryPaths());
+  QApplication::setLibraryPaths(QStringList(dir.absolutePath())); // + QApplication::libraryPaths());
 #endif
 }
