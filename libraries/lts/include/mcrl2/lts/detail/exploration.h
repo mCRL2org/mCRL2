@@ -65,7 +65,6 @@ class lps2lts_algorithm
 
     size_t m_num_states;
     size_t m_num_transitions;
-    // size_t m_initial_state_number;
     next_state_generator::transition_t::state_probability_list m_initial_states;
     size_t m_level;
 

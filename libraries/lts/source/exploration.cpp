@@ -467,6 +467,10 @@ void lps2lts_algorithm::value_prioritize(std::vector<next_state_generator::trans
           }
           else if (!data::sort_bool::is_false_function_symbol(result))
           {
+            if (m_options.outformat == lts_aut) 
+            {
+              m_aut_file.flush();
+            }
             throw mcrl2::runtime_error("Fail to rewrite term " + data::pp(result) + " to true or false.");
           }
         }
@@ -503,6 +507,10 @@ void lps2lts_algorithm::value_prioritize(std::vector<next_state_generator::trans
       }
       else
       {
+        if (m_options.outformat == lts_aut) 
+        {
+          m_aut_file.flush();
+        }
         throw mcrl2::runtime_error("Fail to rewrite term " + data::pp(result) + " to true or false.");
       }
     }
@@ -771,6 +779,10 @@ void lps2lts_algorithm::print_target_distribution_in_aut_format(
       const std::pair<size_t, bool> probability_destination_state_number=add_target_state(source_state,probability_destination);
       if (is_application(i->probability()) && atermpp::down_cast<data::application>(i->probability()).head().size()!=3)
       {
+        if (m_options.outformat == lts_aut) 
+        {
+          m_aut_file.flush();
+        }
         throw mcrl2::runtime_error("The probability " + data::pp(i->probability()) + " is not a proper rational number.");
       }
       const data::application& prob=atermpp::down_cast<data::application>(i->probability());
@@ -884,6 +896,10 @@ void lps2lts_algorithm::get_transitions(const storage_state_t& state,
   {
     mCRL2log(error) << "Error while exploring state space: " << e.what() << "\n";
     save_error(state);
+    if (m_options.outformat == lts_aut) 
+    {
+      m_aut_file.flush();
+    }
     exit(EXIT_FAILURE);
   }
 
