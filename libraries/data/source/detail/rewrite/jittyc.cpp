@@ -2814,7 +2814,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
         else
         {
           // If i>NF_MAX_ARITY no compiled rewrite function where the head is already in nf is available.
-          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_0_term;\n",i,
+          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (rewriter_function)rewr_%zu_%zu_0_term;\n",i,
                                 core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),
                                 core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs),i);
         }
