@@ -201,7 +201,11 @@ struct fsm_actions: public core::default_parser_actions
 
   std::vector<std::string> parse_IdList(const core::parse_node& node)
   {
+#ifdef _MSC_VER
+    return parse_vector<std::string>(node, "Id", [&](const core::parse_node& node) { return parse_Id(node); });
+#else
     return parse_vector<std::string>(node, "Id", std::bind(&fsm_actions::parse_Id, this, std::placeholders::_1));
+#endif    
   }
 
   std::string parse_QuotedString(const core::parse_node& node)
@@ -217,7 +221,11 @@ struct fsm_actions: public core::default_parser_actions
 
   std::vector<std::string> parse_NumberList(const core::parse_node& node)
   {
+#ifdef _MSC_VER
+    return parse_vector<std::string>(node, "Number", [&](const core::parse_node& node) { return parse_Number(node); });
+#else
     return parse_vector<std::string>(node, "Number", std::bind(&fsm_actions::parse_Number, this, std::placeholders::_1));
+#endif    
   }
 
   std::string parse_ParameterName(const core::parse_node& node)
@@ -247,7 +255,11 @@ struct fsm_actions: public core::default_parser_actions
 
   std::vector<std::string> parse_DomainValueList(const core::parse_node& node)
   {
+#ifdef _MSC_VER
+    return parse_vector<std::string>(node, "QuotedString", [&](const core::parse_node& node) { return parse_QuotedString(node); });
+#else
     return parse_vector<std::string>(node, "QuotedString", std::bind(&fsm_actions::parse_QuotedString, this, std::placeholders::_1));
+#endif    
   }
 
   void parse_Parameter(const core::parse_node& node)
@@ -257,7 +269,11 @@ struct fsm_actions: public core::default_parser_actions
 
   void parse_ParameterList(const core::parse_node& node)
   {
+#ifdef _MSC_VER
+    traverse(node, make_visitor(m_parser.symbol_table(), "Parameter", [&](const core::parse_node& node) { return parse_Parameter(node); }));
+#else
     traverse(node, make_visitor(m_parser.symbol_table(), "Parameter", std::bind(&fsm_actions::parse_Parameter, this, std::placeholders::_1)));
+#endif    
   }
 
   void parse_State(const core::parse_node& node)
@@ -280,7 +296,11 @@ struct fsm_actions: public core::default_parser_actions
 
   void parse_StateList(const core::parse_node& node)
   {
+#ifdef _MSC_VER
+    traverse(node, make_visitor(m_parser.symbol_table(), "State", [&](const core::parse_node& node) { return parse_State(node); }));
+#else
     traverse(node, make_visitor(m_parser.symbol_table(), "State", std::bind(&fsm_actions::parse_State, this, std::placeholders::_1)));
+#endif    
   }
 
   void add_transition(const fsm_transition& t)
@@ -311,7 +331,11 @@ struct fsm_actions: public core::default_parser_actions
 
   void parse_TransitionList(const core::parse_node& node)
   {
+#ifdef _MSC_VER
+    traverse(node, make_visitor(m_parser.symbol_table(), "Transition", [&](const core::parse_node& node) { return parse_Transition(node); }));
+#else
     traverse(node, make_visitor(m_parser.symbol_table(), "Transition", std::bind(&fsm_actions::parse_Transition, this, std::placeholders::_1)));
+#endif    
   }
 
   std::string parse_Source(const core::parse_node& node)

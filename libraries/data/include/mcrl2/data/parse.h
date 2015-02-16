@@ -127,7 +127,11 @@ struct sort_expression_actions: public core::default_parser_actions
 
   data::structured_sort_constructor_list parse_ConstrDeclList(const core::parse_node& node) const
   {
+#ifdef _MSC_VER
+    return parse_list<data::structured_sort_constructor>(node, "ConstrDecl", [&](const core::parse_node& node) { return parse_ConstrDecl(node); });
+#else
     return parse_list<data::structured_sort_constructor>(node, "ConstrDecl", std::bind(&sort_expression_actions::parse_ConstrDecl, this, std::placeholders::_1));
+#endif    
   }
 
   data::structured_sort_constructor_argument parse_ProjDecl(const core::parse_node& node) const
@@ -144,7 +148,11 @@ struct sort_expression_actions: public core::default_parser_actions
 
   data::structured_sort_constructor_argument_list parse_ProjDeclList(const core::parse_node& node) const
   {
+#ifdef _MSC_VER
+    return parse_list<data::structured_sort_constructor_argument>(node, "ProjDecl", [&](const core::parse_node& node) { return parse_ProjDecl(node); });
+#else
     return parse_list<data::structured_sort_constructor_argument>(node, "ProjDecl", std::bind(&sort_expression_actions::parse_ProjDecl, this, std::placeholders::_1));
+#endif
   }
 };
 
@@ -216,7 +224,11 @@ struct data_expression_actions: public sort_expression_actions
   data::variable_list parse_VarsDeclList(const core::parse_node& node) const
   {
     variable_vector result;
+#ifdef _MSC_VER
+    traverse(node, [&](const core::parse_node& node) { return callback_VarsDecl(node, result); });
+#else
     traverse(node, std::bind(&data_expression_actions::callback_VarsDecl, this, std::placeholders::_1, std::ref(result)));
+#endif
     return data::variable_list(result.begin(), result.end());
   }
 
@@ -293,12 +305,20 @@ struct data_expression_actions: public sort_expression_actions
 
   data::untyped_identifier_assignment_list parse_AssignmentList(const core::parse_node& node) const
   {
+#ifdef _MSC_VER
+    return parse_list<data::untyped_identifier_assignment>(node, "Assignment", [&](const core::parse_node& node) { return parse_Assignment(node); });
+#else
     return parse_list<data::untyped_identifier_assignment>(node, "Assignment", std::bind(&data_expression_actions::parse_Assignment, this, std::placeholders::_1));
+#endif    
   }
 
   data::data_expression_list parse_DataExprList(const core::parse_node& node) const
   {
+#ifdef _MSC_VER
+    return parse_list<data::data_expression>(node, "DataExpr", [&](const core::parse_node& node) { return parse_DataExpr(node); });
+#else
     return parse_list<data::data_expression>(node, "DataExpr", std::bind(&data_expression_actions::parse_DataExpr, this, std::placeholders::_1));
+#endif    
   }
 
   data::data_expression_list parse_BagEnumEltList(const core::parse_node& node) const
@@ -341,7 +361,11 @@ struct data_specification_actions: public data_expression_actions
   std::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node) const
   {
     std::vector<atermpp::aterm_appl> result;
+#ifdef _MSC_VER
+    traverse(node, [&](const core::parse_node& node) { return callback_SortDecl(node, result); });
+#else
     traverse(node, std::bind(&data_specification_actions::callback_SortDecl, this, std::placeholders::_1, std::ref(result)));
+#endif
     return result;
   }
 
@@ -368,7 +392,11 @@ struct data_specification_actions: public data_expression_actions
   data::function_symbol_vector parse_IdsDeclList(const core::parse_node& node) const
   {
     function_symbol_vector result;
+#ifdef _MSC_VER
+    traverse(node, [&](const core::parse_node& node) { return callback_IdsDecl(node, result); });
+#else
     traverse(node, std::bind(&data_specification_actions::callback_IdsDecl, this, std::placeholders::_1, std::ref(result)));
+#endif
     return result;
   }
 
@@ -411,7 +439,11 @@ struct data_specification_actions: public data_expression_actions
   data::data_equation_vector parse_EqnDeclList(const core::parse_node& node, const variable_list& variables) const
   {
     data_equation_vector result;
+#ifdef _MSC_VER
+    traverse(node, [&](const core::parse_node& node) { return callback_EqnDecl(node, variables, result); });
+#else
     traverse(node, std::bind(&data_specification_actions::callback_EqnDecl, this, std::placeholders::_1, std::ref(variables), std::ref(result)));
+#endif
     return result;
   }
 
@@ -473,7 +505,11 @@ struct data_specification_actions: public data_expression_actions
   data::data_specification parse_DataSpec(const core::parse_node& node) const
   {
     data_specification result;
+#ifdef _MSC_VER
+    traverse(node, [&](const core::parse_node& node) { return callback_DataSpecElement(node, result); });
+#else
     traverse(node, std::bind(&data_specification_actions::callback_DataSpecElement, this, std::placeholders::_1, std::ref(result)));
+#endif
     return result;
   }
 };

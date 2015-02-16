@@ -34,7 +34,11 @@ struct action_actions: public data::data_specification_actions
 
   untyped_action_list parse_ActionList(const core::parse_node& node) const
   {
+#ifdef _MSC_VER
+    return parse_list<process::untyped_action>(node, "Action", [&](const core::parse_node& node) { return parse_Action(node); });
+#else
     return parse_list<process::untyped_action>(node, "Action", std::bind(&action_actions::parse_Action, this, std::placeholders::_1));
+#endif    
   }
 
   bool callback_ActDecl(const core::parse_node& node, action_label_vector& result) const
@@ -59,7 +63,11 @@ struct action_actions: public data::data_specification_actions
   action_label_list parse_ActDeclList(const core::parse_node& node) const
   {
     action_label_vector result;
+#ifdef _MSC_VER
+    traverse(node, [&](const core::parse_node& node) { return callback_ActDecl(node, result); });
+#else
     traverse(node, std::bind(&action_actions::callback_ActDecl, this, std::placeholders::_1, std::ref(result)));
+#endif    
     return process::action_label_list(result.begin(), result.end());
   }
 

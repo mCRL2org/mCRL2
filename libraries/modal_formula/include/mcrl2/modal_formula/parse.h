@@ -142,7 +142,11 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
 
   data::assignment_list parse_StateVarAssignmentList(const core::parse_node& node) const
   {
+#ifdef _MSC_VER
+    return parse_list<data::assignment>(node, "StateVarAssignment", [&](const core::parse_node& node) { return parse_StateVarAssignment(node); });
+#else
     return parse_list<data::assignment>(node, "StateVarAssignment", std::bind(&state_formula_actions::parse_StateVarAssignment, this, std::placeholders::_1));
+#endif    
   }
 
   state_formulas::state_formula parse_StateFrm(const core::parse_node& node) const

@@ -257,7 +257,11 @@ struct default_parser_actions: public parser_actions
 
   core::identifier_string_list parse_IdList(const parse_node& node) const
   {
+#ifdef _MSC_VER
+    return parse_list<core::identifier_string>(node, "Id", [&](const core::parse_node& node) { return parse_Id(node); });
+#else
     return parse_list<core::identifier_string>(node, "Id", std::bind(&default_parser_actions::parse_Id, this, std::placeholders::_1));
+#endif    
   }
 };
 

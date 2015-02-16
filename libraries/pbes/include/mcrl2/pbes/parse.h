@@ -85,7 +85,11 @@ struct pbes_actions: public data::data_specification_actions
 
   std::vector<pbes_equation> parse_PbesEqnDeclList(const core::parse_node& node) const
   {
+#ifdef _MSC_VER
+    return parse_vector<pbes_equation>(node, "PbesEqnDecl", [&](const core::parse_node& node) { return parse_PbesEqnDecl(node); });
+#else
     return parse_vector<pbes_equation>(node, "PbesEqnDecl", std::bind(&pbes_actions::parse_PbesEqnDecl, this, std::placeholders::_1));
+#endif    
   }
 
   std::vector<pbes_equation> parse_PbesEqnSpec(const core::parse_node& node) const
