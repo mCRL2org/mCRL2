@@ -381,6 +381,12 @@ struct fsm_actions: public core::default_parser_actions
     // parse transitions
     parse_TransitionList(node.child(4));
 
+    // guarantee that the LTS has at least one state
+    if (fsm.num_states() == 0)
+    {
+      fsm.add_state();
+    }
+ 
     fsm.set_initial_state(0);
   }
 };
