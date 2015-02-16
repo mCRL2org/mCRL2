@@ -133,6 +133,17 @@ void test_fsm()
   text1 = print_fsm(fsm1);
   text2 = print_fsm(fsm2);
   BOOST_CHECK(text1 == text2);
+
+  FSM =
+    "---         \n"
+    "---         \n"
+    "1 1 \"tau\" \n"
+    ;
+  lts::parse_fsm_specification(FSM, fsm1);
+  parse_fsm(FSM, fsm2);
+  text1 = print_fsm(fsm1);
+  text2 = print_fsm(fsm2);
+  BOOST_CHECK(text1 == text2);
 }
 
 int test_main(int argc, char** argv)
