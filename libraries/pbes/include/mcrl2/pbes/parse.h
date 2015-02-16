@@ -40,7 +40,7 @@ struct pbes_actions: public data::data_specification_actions
     : data::data_specification_actions(parser_)
   {}
 
-  pbes_system::pbes_expression parse_PbesExpr(const core::parse_node& node)
+  pbes_system::pbes_expression parse_PbesExpr(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return pbes_system::true_(); }
@@ -56,44 +56,44 @@ struct pbes_actions: public data::data_specification_actions
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
-  pbes_system::propositional_variable parse_PropVarDecl(const core::parse_node& node)
+  pbes_system::propositional_variable parse_PropVarDecl(const core::parse_node& node) const
   {
     return pbes_system::propositional_variable(parse_Id(node.child(0)), parse_VarsDeclList(node.child(1)));
   }
 
-  pbes_system::propositional_variable_instantiation parse_PropVarInst(const core::parse_node& node)
+  pbes_system::propositional_variable_instantiation parse_PropVarInst(const core::parse_node& node) const
   {
     return pbes_system::propositional_variable_instantiation(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
-  pbes_system::propositional_variable_instantiation parse_PbesInit(const core::parse_node& node)
+  pbes_system::propositional_variable_instantiation parse_PbesInit(const core::parse_node& node) const
   {
     return parse_PropVarInst(node.child(1));
   }
 
-  pbes_system::fixpoint_symbol parse_FixedPointOperator(const core::parse_node& node)
+  pbes_system::fixpoint_symbol parse_FixedPointOperator(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "mu")) { return fixpoint_symbol::mu(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nu")) { return fixpoint_symbol::nu(); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
-  pbes_equation parse_PbesEqnDecl(const core::parse_node& node)
+  pbes_equation parse_PbesEqnDecl(const core::parse_node& node) const
   {
     return pbes_equation(parse_FixedPointOperator(node.child(0)), parse_PropVarDecl(node.child(1)), parse_PbesExpr(node.child(3)));
   }
 
-  std::vector<pbes_equation> parse_PbesEqnDeclList(const core::parse_node& node)
+  std::vector<pbes_equation> parse_PbesEqnDeclList(const core::parse_node& node) const
   {
     return parse_vector<pbes_equation>(node, "PbesEqnDecl", std::bind(&pbes_actions::parse_PbesEqnDecl, this, std::placeholders::_1));
   }
 
-  std::vector<pbes_equation> parse_PbesEqnSpec(const core::parse_node& node)
+  std::vector<pbes_equation> parse_PbesEqnSpec(const core::parse_node& node) const
   {
     return parse_PbesEqnDeclList(node.child(1));
   }
 
-  pbes_system::pbes parse_PbesSpec(const core::parse_node& node)
+  pbes_system::pbes parse_PbesSpec(const core::parse_node& node) const
   {
     const data::variable_list l=parse_GlobVarSpec(node.child(1));
     return pbes(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), std::set<data::variable>(l.begin(),l.end()), parse_PbesInit(node.child(3)));

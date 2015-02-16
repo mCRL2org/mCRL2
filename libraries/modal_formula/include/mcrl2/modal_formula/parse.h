@@ -33,7 +33,7 @@ struct action_formula_actions: public lps::detail::multi_action_actions
     : lps::detail::multi_action_actions(parser_)
   {}
 
-  action_formulas::action_formula parse_ActFrm(const core::parse_node& node)
+  action_formulas::action_formula parse_ActFrm(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "MultAct")) { return action_formulas::untyped_multi_action(parse_ActionList(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
@@ -75,7 +75,7 @@ struct regular_formula_actions: public action_formulas::action_formula_actions
     : action_formulas::action_formula_actions(parser_)
   {}
 
-  regular_formulas::regular_formula parse_RegFrm(const core::parse_node& node)
+  regular_formulas::regular_formula parse_RegFrm(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActFrm")) { return parse_ActFrm(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nil")) { return regular_formulas::nil(); }
@@ -111,7 +111,7 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
     : regular_formulas::regular_formula_actions(parser_)
   {}
 
-  state_formula make_delay(const core::parse_node& node)
+  state_formula make_delay(const core::parse_node& node) const
   {
     if (node.child(0))
     {
@@ -123,7 +123,7 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
     }
   }
 
-  state_formula make_yaled(const core::parse_node& node)
+  state_formula make_yaled(const core::parse_node& node) const
   {
     if (node.child(0))
     {
@@ -135,17 +135,17 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
     }
   }
 
-  data::assignment parse_StateVarAssignment(const core::parse_node& node)
+  data::assignment parse_StateVarAssignment(const core::parse_node& node) const
   {
     return data::assignment(data::variable(parse_Id(node.child(0)), parse_SortExpr(node.child(2))), parse_DataExpr(node.child(4)));
   }
 
-  data::assignment_list parse_StateVarAssignmentList(const core::parse_node& node)
+  data::assignment_list parse_StateVarAssignmentList(const core::parse_node& node) const
   {
     return parse_list<data::assignment>(node, "StateVarAssignment", std::bind(&state_formula_actions::parse_StateVarAssignment, this, std::placeholders::_1));
   }
 
-  state_formulas::state_formula parse_StateFrm(const core::parse_node& node)
+  state_formulas::state_formula parse_StateFrm(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return state_formulas::true_(); }

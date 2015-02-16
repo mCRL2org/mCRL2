@@ -38,7 +38,7 @@ struct multi_action_actions: public process::action_actions
     : process::action_actions(parser_)
   {}
 
-  lps::untyped_multi_action parse_MultAct(const core::parse_node& node)
+  lps::untyped_multi_action parse_MultAct(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::untyped_multi_action(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList"))
@@ -76,7 +76,7 @@ struct action_rename_actions: public process::action_actions
     : process::action_actions(parser_)
   {}
 
-  lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node)
+  lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return action_rename_rule_rhs(parse_Action(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Tau())); }
@@ -84,7 +84,7 @@ struct action_rename_actions: public process::action_actions
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
-  lps::action_rename_rule parse_ActionRenameRule(const core::parse_node& node)
+  lps::action_rename_rule parse_ActionRenameRule(const core::parse_node& node) const
   {
     data::data_expression condition = data::sort_bool::true_();
     if (node.child(0).child(0))
@@ -94,12 +94,12 @@ struct action_rename_actions: public process::action_actions
     return action_rename_rule(atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRule(), data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
   }
 
-  std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)
+  std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node) const
   {
     return parse_vector<lps::action_rename_rule>(node, "ActionRenameRule", std::bind(&action_rename_actions::parse_ActionRenameRule, this, std::placeholders::_1));
   }
 
-  std::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node)
+  std::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node) const
   {
     data::variable_list variables = parse_VarSpec(node.child(0));
     std::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleList(node.child(2));
@@ -110,7 +110,7 @@ struct action_rename_actions: public process::action_actions
     return rules;
   }
 
-  bool callback_ActionRenameSpec(const core::parse_node& node, lps::action_rename_specification& result)
+  bool callback_ActionRenameSpec(const core::parse_node& node, lps::action_rename_specification& result) const
   {
     if (symbol_name(node) == "SortSpec")
     {
@@ -142,7 +142,7 @@ struct action_rename_actions: public process::action_actions
     return false;
   }
 
-  lps::action_rename_specification parse_ActionRenameSpec(const core::parse_node& node)
+  lps::action_rename_specification parse_ActionRenameSpec(const core::parse_node& node) const
   {
     lps::action_rename_specification result;
     traverse(node, std::bind(&action_rename_actions::callback_ActionRenameSpec, this, std::placeholders::_1, std::ref(result)));

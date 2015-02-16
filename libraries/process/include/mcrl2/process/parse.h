@@ -35,27 +35,27 @@ struct process_actions: public process::action_actions
     : process::action_actions(parser_)
   {}
 
-  core::identifier_string_list parse_ActIdSet(const core::parse_node& node)
+  core::identifier_string_list parse_ActIdSet(const core::parse_node& node) const
   {
     return parse_IdList(node.child(1));
   }
 
-  process::action_name_multiset parse_MultActId(const core::parse_node& node)
+  process::action_name_multiset parse_MultActId(const core::parse_node& node) const
   {
     return action_name_multiset(parse_IdList(node));
   }
 
-  process::action_name_multiset_list parse_MultActIdList(const core::parse_node& node)
+  process::action_name_multiset_list parse_MultActIdList(const core::parse_node& node) const
   {
     return parse_list<process::action_name_multiset>(node, "MultActId", std::bind(&process_actions::parse_MultActId, this, std::placeholders::_1));
   }
 
-  process::action_name_multiset_list parse_MultActIdSet(const core::parse_node& node)
+  process::action_name_multiset_list parse_MultActIdSet(const core::parse_node& node) const
   {
     return parse_MultActIdList(node.child(1));
   }
 
-  process::communication_expression parse_CommExpr(const core::parse_node& node)
+  process::communication_expression parse_CommExpr(const core::parse_node& node) const
   {
     core::identifier_string id = parse_Id(node.child(0));
     core::identifier_string_list ids = parse_IdList(node.child(2));
@@ -65,27 +65,27 @@ struct process_actions: public process::action_actions
     return process::communication_expression(lhs, rhs);
   }
 
-  process::communication_expression_list parse_CommExprList(const core::parse_node& node)
+  process::communication_expression_list parse_CommExprList(const core::parse_node& node) const
   {
     return parse_list<process::communication_expression>(node, "CommExpr", std::bind(&process_actions::parse_CommExpr, this, std::placeholders::_1));
   }
 
-  process::communication_expression_list parse_CommExprSet(const core::parse_node& node)
+  process::communication_expression_list parse_CommExprSet(const core::parse_node& node) const
   {
     return parse_CommExprList(node.child(1));
   }
 
-  process::rename_expression parse_RenExpr(const core::parse_node& node)
+  process::rename_expression parse_RenExpr(const core::parse_node& node) const
   {
     return process::rename_expression(parse_Id(node.child(0)), parse_Id(node.child(2)));
   }
 
-  process::rename_expression_list parse_RenExprList(const core::parse_node& node)
+  process::rename_expression_list parse_RenExprList(const core::parse_node& node) const
   {
     return parse_list<process::rename_expression>(node, "RenExpr", std::bind(&process_actions::parse_RenExpr, this, std::placeholders::_1));
   }
 
-  process::rename_expression_list parse_RenExprSet(const core::parse_node& node)
+  process::rename_expression_list parse_RenExprSet(const core::parse_node& node) const
   {
     return parse_RenExprList(node.child(1));
   }
@@ -112,12 +112,12 @@ struct process_actions: public process::action_actions
   }
 
   // override
-  untyped_parameter_identifier parse_Action(const core::parse_node& node)
+  untyped_parameter_identifier parse_Action(const core::parse_node& node) const
   {
     return untyped_parameter_identifier(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
-  process::process_expression parse_ProcExpr(const core::parse_node& node)
+  process::process_expression parse_ProcExpr(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return untyped_process_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2))); }
@@ -143,7 +143,7 @@ struct process_actions: public process::action_actions
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
-  process::process_equation parse_ProcDecl(const core::parse_node& node)
+  process::process_equation parse_ProcDecl(const core::parse_node& node) const
   {
     core::identifier_string name = parse_Id(node.child(0));
     data::variable_list variables = parse_VarsDeclList(node.child(1));
@@ -151,22 +151,22 @@ struct process_actions: public process::action_actions
     return process::process_equation(id, variables, parse_ProcExpr(node.child(3)));
   }
 
-  std::vector<process::process_equation> parse_ProcDeclList(const core::parse_node& node)
+  std::vector<process::process_equation> parse_ProcDeclList(const core::parse_node& node) const
   {
     return parse_vector<process::process_equation>(node, "ProcDecl", std::bind(&process_actions::parse_ProcDecl, this, std::placeholders::_1));
   }
 
-  std::vector<process::process_equation> parse_ProcSpec(const core::parse_node& node)
+  std::vector<process::process_equation> parse_ProcSpec(const core::parse_node& node) const
   {
     return parse_ProcDeclList(node.child(1));
   }
 
-  process::process_expression parse_Init(const core::parse_node& node)
+  process::process_expression parse_Init(const core::parse_node& node) const
   {
     return parse_ProcExpr(node.child(1));
   }
 
-  bool callback_mCRL2Spec(const core::parse_node& node, process::process_specification& result)
+  bool callback_mCRL2Spec(const core::parse_node& node, process::process_specification& result) const
   {
     if (symbol_name(node) == "SortSpec")
     {
@@ -208,7 +208,7 @@ struct process_actions: public process::action_actions
     return false;
   }
 
-  process::process_specification parse_mCRL2Spec(const core::parse_node& node)
+  process::process_specification parse_mCRL2Spec(const core::parse_node& node) const
   {
     process::process_specification result;
     traverse(node, std::bind(&process_actions::callback_mCRL2Spec, this, std::placeholders::_1, std::ref(result)));

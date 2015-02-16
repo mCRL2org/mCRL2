@@ -44,7 +44,7 @@ struct sort_expression_actions: public core::default_parser_actions
     : core::default_parser_actions(parser_)
   {}
 
-  data::sort_expression parse_SortExpr(const core::parse_node& node, data::sort_expression_list* product=NULL)
+  data::sort_expression parse_SortExpr(const core::parse_node& node, data::sort_expression_list* product=NULL) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Bool")) { return sort_bool::bool_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Pos")) { return sort_pos::pos(); }
@@ -85,7 +85,7 @@ struct sort_expression_actions: public core::default_parser_actions
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
-  data::sort_expression_list parse_SortExpr_as_SortProduct(const core::parse_node& node)
+  data::sort_expression_list parse_SortExpr_as_SortProduct(const core::parse_node& node) const
   {
     data::sort_expression_list result;
     data::sort_expression new_element = parse_SortExpr(node, &result);
@@ -96,7 +96,7 @@ struct sort_expression_actions: public core::default_parser_actions
     return result;
   }
 
-  data::sort_expression_list parse_SortProduct(const core::parse_node& node)
+  data::sort_expression_list parse_SortProduct(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "SortExpr"))
     {
@@ -105,7 +105,7 @@ struct sort_expression_actions: public core::default_parser_actions
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
-  data::structured_sort_constructor parse_ConstrDecl(const core::parse_node& node)
+  data::structured_sort_constructor parse_ConstrDecl(const core::parse_node& node) const
   {
     core::identifier_string name = parse_Id(node.child(0));
     data::structured_sort_constructor_argument_list arguments;
@@ -125,12 +125,12 @@ struct sort_expression_actions: public core::default_parser_actions
     return structured_sort_constructor(name, arguments, recogniser);
   }
 
-  data::structured_sort_constructor_list parse_ConstrDeclList(const core::parse_node& node)
+  data::structured_sort_constructor_list parse_ConstrDeclList(const core::parse_node& node) const
   {
     return parse_list<data::structured_sort_constructor>(node, "ConstrDecl", std::bind(&sort_expression_actions::parse_ConstrDecl, this, std::placeholders::_1));
   }
 
-  data::structured_sort_constructor_argument parse_ProjDecl(const core::parse_node& node)
+  data::structured_sort_constructor_argument parse_ProjDecl(const core::parse_node& node) const
   {
     core::identifier_string name = atermpp::empty_string();
     sort_expression sort = parse_SortExpr(node.child(1));
@@ -142,7 +142,7 @@ struct sort_expression_actions: public core::default_parser_actions
     return structured_sort_constructor_argument(name, sort);
   }
 
-  data::structured_sort_constructor_argument_list parse_ProjDeclList(const core::parse_node& node)
+  data::structured_sort_constructor_argument_list parse_ProjDeclList(const core::parse_node& node) const
   {
     return parse_list<data::structured_sort_constructor_argument>(node, "ProjDecl", std::bind(&sort_expression_actions::parse_ProjDecl, this, std::placeholders::_1));
   }
@@ -154,30 +154,30 @@ struct data_expression_actions: public sort_expression_actions
     : sort_expression_actions(parser_)
   {}
 
-  data_expression make_untyped_set_or_bag_comprehension(const variable& v, const data_expression& x)
+  data_expression make_untyped_set_or_bag_comprehension(const variable& v, const data_expression& x) const
   {
     return abstraction(untyped_set_or_bag_comprehension_binder(), atermpp::make_list(v), x);
   }
 
-  data_expression make_list_enumeration(const data_expression_list& x)
+  data_expression make_list_enumeration(const data_expression_list& x) const
   {
     assert(!x.empty());
     return sort_list::list_enumeration(untyped_sort(),x);
   }
 
-  data_expression make_set_enumeration(const data_expression_list& x)
+  data_expression make_set_enumeration(const data_expression_list& x) const
   {
     assert(!x.empty());
     return sort_set::set_enumeration(untyped_sort(),x);
   }
 
-  data_expression make_bag_enumeration(const data_expression_list& x)
+  data_expression make_bag_enumeration(const data_expression_list& x) const
   {
     assert(!x.empty());
     return sort_bag::bag_enumeration(untyped_sort(),x);
   }
 
-  data_expression make_function_update(const data_expression& x, const data_expression& y, const data_expression& z)
+  data_expression make_function_update(const data_expression& x, const data_expression& y, const data_expression& z) const
   {
     return application(function_symbol(mcrl2::data::function_update_name(),untyped_sort()), x, y, z);
   }
@@ -186,19 +186,19 @@ struct data_expression_actions: public sort_expression_actions
   data::sort_expression_list get_sorts(const ExpressionContainer& x) const
   {
     data::sort_expression_vector result;
-    for (typename ExpressionContainer::const_iterator i = x.begin(); i != x.end(); ++i)
+    for (auto i = x.begin(); i != x.end(); ++i)
     {
       result.push_back(i->sort());
     }
     return data::sort_expression_list(result.begin(), result.end());
   }
 
-  data::variable parse_VarDecl(const core::parse_node& node)
+  data::variable parse_VarDecl(const core::parse_node& node) const
   {
     return variable(parse_Id(node.child(0)), parse_SortExpr(node.child(2)));
   }
 
-  bool callback_VarsDecl(const core::parse_node& node, variable_vector& result)
+  bool callback_VarsDecl(const core::parse_node& node, variable_vector& result) const
   {
     if (symbol_name(node) == "VarsDecl")
     {
@@ -213,14 +213,14 @@ struct data_expression_actions: public sort_expression_actions
     return false;
   };
 
-  data::variable_list parse_VarsDeclList(const core::parse_node& node)
+  data::variable_list parse_VarsDeclList(const core::parse_node& node) const
   {
     variable_vector result;
     traverse(node, std::bind(&data_expression_actions::callback_VarsDecl, this, std::placeholders::_1, std::ref(result)));
     return data::variable_list(result.begin(), result.end());
   }
 
-  data::data_expression parse_DataExpr(const core::parse_node& node)
+  data::data_expression parse_DataExpr(const core::parse_node& node) const
   {
     assert(symbol_name(node) == "DataExpr");
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return untyped_identifier(parse_Id(node.child(0))); }
@@ -267,7 +267,7 @@ struct data_expression_actions: public sort_expression_actions
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
-  data::data_expression parse_DataExprUnit(const core::parse_node& node)
+  data::data_expression parse_DataExprUnit(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return untyped_identifier(parse_Id(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return untyped_identifier(parse_Number(node.child(0))); }
@@ -281,27 +281,27 @@ struct data_expression_actions: public sort_expression_actions
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
-  data::data_expression parse_DataValExpr(const core::parse_node& node)
+  data::data_expression parse_DataValExpr(const core::parse_node& node) const
   {
     return parse_DataExpr(node.child(2));
   }
 
-  data::untyped_identifier_assignment parse_Assignment(const core::parse_node& node)
+  data::untyped_identifier_assignment parse_Assignment(const core::parse_node& node) const
   {
     return untyped_identifier_assignment(parse_Id(node.child(0)), parse_DataExpr(node.child(2)));
   }
 
-  data::untyped_identifier_assignment_list parse_AssignmentList(const core::parse_node& node)
+  data::untyped_identifier_assignment_list parse_AssignmentList(const core::parse_node& node) const
   {
     return parse_list<data::untyped_identifier_assignment>(node, "Assignment", std::bind(&data_expression_actions::parse_Assignment, this, std::placeholders::_1));
   }
 
-  data::data_expression_list parse_DataExprList(const core::parse_node& node)
+  data::data_expression_list parse_DataExprList(const core::parse_node& node) const
   {
     return parse_list<data::data_expression>(node, "DataExpr", std::bind(&data_expression_actions::parse_DataExpr, this, std::placeholders::_1));
   }
 
-  data::data_expression_list parse_BagEnumEltList(const core::parse_node& node)
+  data::data_expression_list parse_BagEnumEltList(const core::parse_node& node) const
   {
     return parse_DataExprList(node);
   }
@@ -313,7 +313,7 @@ struct data_specification_actions: public data_expression_actions
     : data_expression_actions(parser_)
   {}
 
-  bool callback_SortDecl(const core::parse_node& node, std::vector<atermpp::aterm_appl>& result)
+  bool callback_SortDecl(const core::parse_node& node, std::vector<atermpp::aterm_appl>& result) const
   {
     if (symbol_name(node) == "SortDecl")
     {
@@ -338,19 +338,19 @@ struct data_specification_actions: public data_expression_actions
     return false;
   }
 
-  std::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node)
+  std::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node) const
   {
     std::vector<atermpp::aterm_appl> result;
     traverse(node, std::bind(&data_specification_actions::callback_SortDecl, this, std::placeholders::_1, std::ref(result)));
     return result;
   }
 
-  std::vector<atermpp::aterm_appl> parse_SortSpec(const core::parse_node& node)
+  std::vector<atermpp::aterm_appl> parse_SortSpec(const core::parse_node& node) const
   {
     return parse_SortDeclList(node.child(1));
   }
 
-  bool callback_IdsDecl(const core::parse_node& node, function_symbol_vector& result)
+  bool callback_IdsDecl(const core::parse_node& node, function_symbol_vector& result) const
   {
     if (symbol_name(node) == "IdsDecl")
     {
@@ -365,34 +365,34 @@ struct data_specification_actions: public data_expression_actions
     return false;
   }
 
-  data::function_symbol_vector parse_IdsDeclList(const core::parse_node& node)
+  data::function_symbol_vector parse_IdsDeclList(const core::parse_node& node) const
   {
     function_symbol_vector result;
     traverse(node, std::bind(&data_specification_actions::callback_IdsDecl, this, std::placeholders::_1, std::ref(result)));
     return result;
   }
 
-  data::function_symbol_vector parse_ConsSpec(const core::parse_node& node)
+  data::function_symbol_vector parse_ConsSpec(const core::parse_node& node) const
   {
     return parse_IdsDeclList(node);
   }
 
-  data::function_symbol_vector parse_MapSpec(const core::parse_node& node)
+  data::function_symbol_vector parse_MapSpec(const core::parse_node& node) const
   {
     return parse_IdsDeclList(node);
   }
 
-  data::variable_list parse_GlobVarSpec(const core::parse_node& node)
+  data::variable_list parse_GlobVarSpec(const core::parse_node& node) const
   {
     return parse_VarsDeclList(node);
   }
 
-  data::variable_list parse_VarSpec(const core::parse_node& node)
+  data::variable_list parse_VarSpec(const core::parse_node& node) const
   {
     return parse_VarsDeclList(node);
   }
 
-  bool callback_EqnDecl(const core::parse_node& node, const variable_list& variables, data_equation_vector& result)
+  bool callback_EqnDecl(const core::parse_node& node, const variable_list& variables, data_equation_vector& result) const
   {
     if (symbol_name(node) == "EqnDecl")
     {
@@ -408,21 +408,21 @@ struct data_specification_actions: public data_expression_actions
     return false;
   }
 
-  data::data_equation_vector parse_EqnDeclList(const core::parse_node& node, const variable_list& variables)
+  data::data_equation_vector parse_EqnDeclList(const core::parse_node& node, const variable_list& variables) const
   {
     data_equation_vector result;
     traverse(node, std::bind(&data_specification_actions::callback_EqnDecl, this, std::placeholders::_1, std::ref(variables), std::ref(result)));
     return result;
   }
 
-  data::data_equation_vector parse_EqnSpec(const core::parse_node& node)
+  data::data_equation_vector parse_EqnSpec(const core::parse_node& node) const
   {
     assert(symbol_name(node) == "EqnSpec");
     variable_list variables = parse_VarSpec(node.child(0));
     return parse_EqnDeclList(node.child(2), variables);
   }
 
-  bool callback_DataSpecElement(const core::parse_node& node, data_specification& result)
+  bool callback_DataSpecElement(const core::parse_node& node, data_specification& result) const
   {
     if (symbol_name(node) == "SortSpec")
     {
@@ -470,7 +470,7 @@ struct data_specification_actions: public data_expression_actions
     return false;
   }
 
-  data::data_specification parse_DataSpec(const core::parse_node& node)
+  data::data_specification parse_DataSpec(const core::parse_node& node) const
   {
     data_specification result;
     traverse(node, std::bind(&data_specification_actions::callback_DataSpecElement, this, std::placeholders::_1, std::ref(result)));

@@ -27,17 +27,17 @@ struct action_actions: public data::data_specification_actions
     : data::data_specification_actions(parser_)
   {}
 
-  untyped_action parse_Action(const core::parse_node& node)
+  untyped_action parse_Action(const core::parse_node& node) const
   {
     return process::untyped_action(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
-  untyped_action_list parse_ActionList(const core::parse_node& node)
+  untyped_action_list parse_ActionList(const core::parse_node& node) const
   {
     return parse_list<process::untyped_action>(node, "Action", std::bind(&action_actions::parse_Action, this, std::placeholders::_1));
   }
 
-  bool callback_ActDecl(const core::parse_node& node, action_label_vector& result)
+  bool callback_ActDecl(const core::parse_node& node, action_label_vector& result) const
   {
     if (symbol_name(node) == "ActDecl")
     {
@@ -56,14 +56,14 @@ struct action_actions: public data::data_specification_actions
     return false;
   };
 
-  action_label_list parse_ActDeclList(const core::parse_node& node)
+  action_label_list parse_ActDeclList(const core::parse_node& node) const
   {
     action_label_vector result;
     traverse(node, std::bind(&action_actions::callback_ActDecl, this, std::placeholders::_1, std::ref(result)));
     return process::action_label_list(result.begin(), result.end());
   }
 
-  action_label_list parse_ActSpec(const core::parse_node& node)
+  action_label_list parse_ActSpec(const core::parse_node& node) const
   {
     return parse_ActDeclList(node.child(1));
   }
