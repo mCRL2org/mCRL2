@@ -138,16 +138,16 @@ private:
   const node_t m_true, m_false;
   std::map<mcrl2::data::function_symbol, size_t> m_indices;
 
-  static variable_list dep_vars(const data_equation& eqn)
+  static std::vector<bool> dep_vars(const data_equation& eqn)
   {
+    std::vector<bool> result(recursive_number_of_args(eqn.lhs()), false);
     std::set<variable> condition_vars = find_free_variables(eqn.condition());
     double_variable_traverser<data::variable_traverser> lhs_doubles;
     double_variable_traverser<data::variable_traverser> rhs_doubles;
     lhs_doubles.apply(eqn.lhs());
     rhs_doubles.apply(eqn.rhs());
 
-    variable_list result;
-    for (size_t i = 0; i < recursive_number_of_args(eqn.lhs()); ++i)
+    for (size_t i = 0; i < result.size(); ++i)
     {
       const data_expression& arg_i = get_argument_of_higher_order_term(eqn.lhs(), i);
       if (is_variable(arg_i))
@@ -155,7 +155,7 @@ private:
         const variable& v = down_cast<variable>(arg_i);
         if (condition_vars.count(v) > 0 || lhs_doubles.result().count(v) > 0 || rhs_doubles.result().count(v) > 0)
         {
-          result.push_front(v);
+          result[i] = true;
         }
       }
     }
@@ -272,18 +272,12 @@ private:
 
     // Here we know that eqn.lhs() must be an application. If it were a function symbol
     // it would have been dealt with above.
-    const application& lhs = down_cast<application>(eqn.lhs());
-    const data_expression& arg_term = get_argument_of_higher_order_term(lhs, arg);
-    if (is_variable(arg_term))
+    if (dep_vars(eqn)[arg])
     {
-      const variable_list l = dep_vars(eqn);
-      const variable& v = down_cast<variable>(arg_term);
-      if (std::find(l.begin(), l.end(), v) == l.end())
-      {
-        return build_expr_internal(eqn.rhs(), v);
-      }
+      const application& lhs = down_cast<application>(eqn.lhs());
+      const data_expression& arg_term = get_argument_of_higher_order_term(lhs, arg);
+      return build_expr_internal(eqn.rhs(), down_cast<variable>(arg_term));
     }
-
     return m_true;
   }
 
@@ -1119,88 +1113,85 @@ match_tree_list RewriterCompilingJitty::create_strategy(
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
     const size_t rule_arity = recursive_number_of_args(it->lhs());
-    if (rule_arity > arity)
+    if (rule_arity <= arity)
     {
-      continue;
-    }
+      std::vector<bool> bs(arity, false);
 
-    // Process all (applicable) rules
-    std::vector<bool> bs(arity, false);
+      const data_expression& lhs_internal = it->lhs();
+      // List of variables occurring in each argument of the lhs
+      // (except the first element which contains variables from the
+      // condition and variables which occur more than once in the result)
+      variable_list_list vars = make_list<variable_list>(find_double_variables(it->rhs()) + get_free_vars(it->condition()));
 
-    const data_expression& lhs_internal = it->lhs();
-    // List of variables occurring in each argument of the lhs
-    // (except the first element which contains variables from the
-    // condition and variables which occur more than once in the result)
-    variable_list_list vars = make_list<variable_list>(find_double_variables(it->rhs()) + get_free_vars(it->condition()));
-
-    // Check all arguments
-    for (size_t i = 0; i < rule_arity; i++)
-    {
-      if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i)))
+      // Check all arguments
+      for (size_t i = 0; i < rule_arity; i++)
       {
-        // Argument is not a variable, so it needs to be rewritten
-        bs[i] = true;
-        variable_list evars = get_free_vars(get_argument_of_higher_order_term(lhs_internal,i));
-        for (; !evars.empty(); evars=evars.tail())
+        if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i)))
         {
-          int j=i-1;
-          for (variable_list_list o=vars; !o.tail().empty(); o=o.tail())
+          // Argument is not a variable, so it needs to be rewritten
+          bs[i] = true;
+          variable_list evars = get_free_vars(get_argument_of_higher_order_term(lhs_internal,i));
+          for (; !evars.empty(); evars=evars.tail())
+          {
+            int j=i-1;
+            for (variable_list_list o=vars; !o.tail().empty(); o=o.tail())
+            {
+              const variable_list l=o.front();
+              if (std::find(l.begin(),l.end(),evars.front()) != l.end())
+              {
+                bs[j] = true;
+              }
+              --j;
+            }
+          }
+        }
+        else
+        {
+          // Argument is a variable; check whether it occurred before
+          int j = i-1; // vars.size()-1-1
+          bool b = false;
+          for (variable_list_list o=vars; !o.empty(); o=o.tail())
           {
             const variable_list l=o.front();
-            if (std::find(l.begin(),l.end(),evars.front()) != l.end())
+            if (std::find(l.begin(),l.end(),get_argument_of_higher_order_term(lhs_internal,i)) != l.end())
             {
-              bs[j] = true;
+              // Same variable, mark it
+              if (j >= 0)
+              {
+                bs[j] = true;
+              }
+              b = true;
             }
             --j;
           }
-        }
-      }
-      else
-      {
-        // Argument is a variable; check whether it occurred before
-        int j = i-1; // vars.size()-1-1
-        bool b = false;
-        for (variable_list_list o=vars; !o.empty(); o=o.tail())
-        {
-          const variable_list l=o.front();
-          if (std::find(l.begin(),l.end(),get_argument_of_higher_order_term(lhs_internal,i)) != l.end())
+          if (b)
           {
-            // Same variable, mark it
-            if (j >= 0)
-            {
-              bs[j] = true;
-            }
-            b = true;
+            // Found same variable(s), so mark this one as well
+            bs[i] = true;
           }
-          --j;
         }
-        if (b)
-        {
-          // Found same variable(s), so mark this one as well
-          bs[i] = true;
-        }
+        // Add vars used in expression
+        vars.push_front(get_free_vars(get_argument_of_higher_order_term(lhs_internal,i)));
       }
-      // Add vars used in expression
-      vars.push_front(get_free_vars(get_argument_of_higher_order_term(lhs_internal,i)));
-    }
 
-    // Create dependency list for this rule
-    atermpp::aterm_list deps;
-    for (size_t i = 0; i < rule_arity; i++)
-    {
-      // Only if needed and not already rewritten
-      if (bs[i] && !nfs[i])
+      // Create dependency list for this rule
+      atermpp::aterm_list deps;
+      for (size_t i = 0; i < rule_arity; i++)
       {
-        deps.push_front(atermpp::aterm_int(i));
-        // Increase dependency count
-        args[i] += 1;
-        //fprintf(stderr,"dep of arg %i\n",i);
+        // Only if needed and not already rewritten
+        if (bs[i] && !nfs[i])
+        {
+          deps.push_front(atermpp::aterm_int(i));
+          // Increase dependency count
+          args[i] += 1;
+          //fprintf(stderr,"dep of arg %i\n",i);
+        }
       }
-    }
-    deps = reverse(deps);
+      deps = reverse(deps);
 
-    // Add rule with its dependencies
-    dep_list.push_front(make_list<aterm>( deps, (atermpp::aterm_appl)*it));
+      // Add rule with its dependencies
+      dep_list.push_front(make_list<aterm>( deps, (atermpp::aterm_appl)*it));
+    }
   }
 
   // Process all rules with their dependencies
