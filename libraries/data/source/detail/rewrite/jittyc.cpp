@@ -121,12 +121,28 @@ struct double_variable_traverser : public Traverser<double_variable_traverser<Tr
   }
 };
 
-static inline
-variable_list find_double_variables(const data::data_expression& e)
+static std::vector<bool> dep_vars(const data_equation& eqn)
 {
-  double_variable_traverser<data::variable_traverser> dvt;
-  dvt.apply(e);
-  return variable_list(dvt.result().begin(), dvt.result().end());
+  std::vector<bool> result(recursive_number_of_args(eqn.lhs()), true);
+  std::set<variable> condition_vars = find_free_variables(eqn.condition());
+  double_variable_traverser<data::variable_traverser> lhs_doubles;
+  double_variable_traverser<data::variable_traverser> rhs_doubles;
+  lhs_doubles.apply(eqn.lhs());
+  rhs_doubles.apply(eqn.rhs());
+
+  for (size_t i = 0; i < result.size(); ++i)
+  {
+    const data_expression& arg_i = get_argument_of_higher_order_term(eqn.lhs(), i);
+    if (is_variable(arg_i))
+    {
+      const variable& v = down_cast<variable>(arg_i);
+      if (condition_vars.count(v) == 0 && lhs_doubles.result().count(v) == 0 && rhs_doubles.result().count(v) == 0)
+      {
+        result[i] = false;
+      }
+    }
+  }
+  return result;
 }
 
 class always_rewrite_array : public std::vector<atermpp::aterm_appl>
@@ -137,30 +153,6 @@ private:
   const atermpp::function_symbol m_f_true, m_f_false, m_f_and, m_f_or, m_f_var;
   const node_t m_true, m_false;
   std::map<mcrl2::data::function_symbol, size_t> m_indices;
-
-  static std::vector<bool> dep_vars(const data_equation& eqn)
-  {
-    std::vector<bool> result(recursive_number_of_args(eqn.lhs()), false);
-    std::set<variable> condition_vars = find_free_variables(eqn.condition());
-    double_variable_traverser<data::variable_traverser> lhs_doubles;
-    double_variable_traverser<data::variable_traverser> rhs_doubles;
-    lhs_doubles.apply(eqn.lhs());
-    rhs_doubles.apply(eqn.rhs());
-
-    for (size_t i = 0; i < result.size(); ++i)
-    {
-      const data_expression& arg_i = get_argument_of_higher_order_term(eqn.lhs(), i);
-      if (is_variable(arg_i))
-      {
-        const variable& v = down_cast<variable>(arg_i);
-        if (condition_vars.count(v) > 0 || lhs_doubles.result().count(v) > 0 || rhs_doubles.result().count(v) > 0)
-        {
-          result[i] = true;
-        }
-      }
-    }
-    return result;
-  }
 
   bool eval(const node_t& expr) const
   {
@@ -276,7 +268,10 @@ private:
     {
       const application& lhs = down_cast<application>(eqn.lhs());
       const data_expression& arg_term = get_argument_of_higher_order_term(lhs, arg);
-      return build_expr_internal(eqn.rhs(), down_cast<variable>(arg_term));
+      if (is_variable(arg_term))
+      {
+        return build_expr_internal(eqn.rhs(), down_cast<variable>(arg_term));
+      }
     }
     return m_true;
   }
@@ -1100,160 +1095,88 @@ data_equation_list RewriterCompilingJitty::lift_rewrite_rules_to_right_arity(con
   return data_equation_list(result.begin(),result.end());
 }
 
-match_tree_list RewriterCompilingJitty::create_strategy(
-        const data_equation_list& rules,
-        const size_t arity,
-        nfs_array& nfs)
+variable_list find_double_variables(const data_expression& e)
 {
+  double_variable_traverser<variable_traverser> dvt;
+  dvt.apply(e);
+  return variable_list(dvt.result().begin(), dvt.result().end());
+}
+
+match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list& rules, const size_t arity, const nfs_array& nfs)
+{
+  typedef std::list<size_t> dep_list_t;
   match_tree_list strat;
 
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
-  std::vector<int> args(arity, -1);
-  atermpp::aterm_list dep_list;
-  for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
+  std::vector<size_t> arg_use_count(arity, 0);
+  std::list<std::pair<data_equation, dep_list_t> > rule_deps;
+  for (auto it = rules.begin(); it != rules.end(); ++it)
   {
-    const size_t rule_arity = recursive_number_of_args(it->lhs());
-    if (rule_arity <= arity)
+    if (recursive_number_of_args(it->lhs()) <= arity)
     {
-      std::vector<bool> bs(arity, false);
+      rule_deps.push_front(std::make_pair(*it, dep_list_t()));
+      dep_list_t& deps = rule_deps.front().second;
 
-      const data_expression& lhs_internal = it->lhs();
-      // List of variables occurring in each argument of the lhs
-      // (except the first element which contains variables from the
-      // condition and variables which occur more than once in the result)
-      variable_list_list vars = make_list<variable_list>(find_double_variables(it->rhs()) + get_free_vars(it->condition()));
-
-      // Check all arguments
-      for (size_t i = 0; i < rule_arity; i++)
-      {
-        if (!is_variable(get_argument_of_higher_order_term(lhs_internal,i)))
-        {
-          // Argument is not a variable, so it needs to be rewritten
-          bs[i] = true;
-          variable_list evars = get_free_vars(get_argument_of_higher_order_term(lhs_internal,i));
-          for (; !evars.empty(); evars=evars.tail())
-          {
-            int j=i-1;
-            for (variable_list_list o=vars; !o.tail().empty(); o=o.tail())
-            {
-              const variable_list l=o.front();
-              if (std::find(l.begin(),l.end(),evars.front()) != l.end())
-              {
-                bs[j] = true;
-              }
-              --j;
-            }
-          }
-        }
-        else
-        {
-          // Argument is a variable; check whether it occurred before
-          int j = i-1; // vars.size()-1-1
-          bool b = false;
-          for (variable_list_list o=vars; !o.empty(); o=o.tail())
-          {
-            const variable_list l=o.front();
-            if (std::find(l.begin(),l.end(),get_argument_of_higher_order_term(lhs_internal,i)) != l.end())
-            {
-              // Same variable, mark it
-              if (j >= 0)
-              {
-                bs[j] = true;
-              }
-              b = true;
-            }
-            --j;
-          }
-          if (b)
-          {
-            // Found same variable(s), so mark this one as well
-            bs[i] = true;
-          }
-        }
-        // Add vars used in expression
-        vars.push_front(get_free_vars(get_argument_of_higher_order_term(lhs_internal,i)));
-      }
-
-      // Create dependency list for this rule
-      atermpp::aterm_list deps;
-      for (size_t i = 0; i < rule_arity; i++)
+      const std::vector<bool> is_dependent_arg = dep_vars(*it);
+      for (size_t i = 0; i < is_dependent_arg.size(); i++)
       {
         // Only if needed and not already rewritten
-        if (bs[i] && !nfs[i])
+        if (is_dependent_arg[i] && !nfs[i])
         {
-          deps.push_front(atermpp::aterm_int(i));
+          deps.push_back(i);
           // Increase dependency count
-          args[i] += 1;
-          //fprintf(stderr,"dep of arg %i\n",i);
+          arg_use_count[i] += 1;
         }
       }
-      deps = reverse(deps);
-
-      // Add rule with its dependencies
-      dep_list.push_front(make_list<aterm>( deps, (atermpp::aterm_appl)*it));
     }
   }
 
   // Process all rules with their dependencies
-  while (1)
+  while (!rule_deps.empty())
   {
-    // First collect rules without dependencies to the strategy
     data_equation_list no_deps;
-    atermpp::aterm_list has_deps;
-    for (; !dep_list.empty(); dep_list=dep_list.tail())
+    for (auto it = rule_deps.begin(); it != rule_deps.end(); )
     {
-      if (down_cast<atermpp::aterm_list>(down_cast<atermpp::aterm_list>(dep_list.front()).front()).empty())
+      if (it->second.empty())
       {
-        no_deps.push_front(data_equation(down_cast<atermpp::aterm_list>(dep_list.front()).tail().front()));
+        no_deps.push_front(it->first);
+        it = rule_deps.erase(it);
       }
       else
       {
-        has_deps.push_front(dep_list.front());
+        ++it;
       }
     }
-    dep_list = reverse(has_deps);
 
     // Create and add tree of collected rules
     if (!no_deps.empty())
     {
-      strat.push_front(create_tree(lift_rewrite_rules_to_right_arity(no_deps,arity)));
+      strat.push_front(create_tree(lift_rewrite_rules_to_right_arity(no_deps, arity)));
     }
 
-    // Stop if there are no more rules left
-    if (dep_list.empty())
-    {
-      break;
-    }
-
-    // Otherwise, figure out which argument is most useful to rewrite
-    int max = -1;
-    int maxidx = -1;
+    // Figure out which argument is most useful to rewrite
+    size_t max = 0;
+    size_t maxidx = 0;
     for (size_t i = 0; i < arity; i++)
     {
-      if (args[i] > max)
+      if (arg_use_count[i] > max)
       {
         maxidx = i;
-        max = args[i];
+        max = arg_use_count[i];
       }
     }
 
-    // If there is a maximum (which should always be the case), add it to the strategy and remove it from the dependency lists
-    assert(maxidx >= 0);
-    if (maxidx >= 0)
+    // If there is a maximum, add it to the strategy and remove it from the dependency lists
+    assert(rule_deps.empty() || max > 0);
+    if (max > 0)
     {
-      args[maxidx] = -1;
-      atermpp::aterm_int rewr_arg = atermpp::aterm_int(maxidx);
-
+      assert(!rule_deps.empty());
+      arg_use_count[maxidx] = 0;
       strat.push_front(match_tree_A(maxidx));
-
-      atermpp::aterm_list l;
-      for (; !dep_list.empty(); dep_list=dep_list.tail())
+      for (auto it = rule_deps.begin(); it != rule_deps.end(); ++it)
       {
-        atermpp::aterm_list temp= atermpp::down_cast<atermpp::aterm_list>(dep_list.front()).tail();
-        temp.push_front(remove_one_element<aterm>(down_cast<atermpp::aterm_list>(down_cast<atermpp::aterm_list>(dep_list.front()).front()), rewr_arg));
-        l.push_front(temp);
+        it->second.remove(maxidx);
       }
-      dep_list = reverse(l);
     }
   }
   return reverse(strat);
@@ -2426,6 +2349,8 @@ void filter_function_symbols(const function_symbol_vector& source, function_symb
 ///
 static void generate_make_appl_functions(std::ostream& s, size_t max_arity)
 {
+  // The casting magic in these functions is done to avoid triggering the ATerm
+  // reference counting mechanism.
   for (size_t i = 5; i <= max_arity; ++i)
   {
     s << "static application make_term_with_many_arguments(const data_expression& head";
@@ -2439,7 +2364,7 @@ static void generate_make_appl_functions(std::ostream& s, size_t max_arity)
     {
       s << "  buffer[" << j << "] = atermpp::detail::address(arg" << j + 1 << ");\n";
     }
-    s << "  return application(head, buffer, buffer + " << i << ");\n"
+    s << "  return application(head, reinterpret_cast<data_expression*>(buffer), reinterpret_cast<data_expression*>(buffer) + " << i << ");\n"
          "}\n"
          "\n";
   }

@@ -168,7 +168,7 @@ class RewriterCompilingJitty: public Rewriter
     bool lift_rewrite_rule_to_right_arity(data_equation& e, const size_t requested_arity);
     sort_list_vector get_residual_sorts(const sort_expression& s, const size_t actual_arity, const size_t requested_arity);
     data_equation_list lift_rewrite_rules_to_right_arity(const data_equation_list& eqns,const size_t arity);
-    match_tree_list create_strategy(const data_equation_list& rules, const size_t arity, nfs_array& nfs);
+    match_tree_list create_strategy(const data_equation_list& rules, const size_t arity, const nfs_array &nfs);
 
 };
 
