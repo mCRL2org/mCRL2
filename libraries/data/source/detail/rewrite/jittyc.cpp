@@ -1112,37 +1112,26 @@ match_tree_list RewriterCompilingJitty::create_strategy(
         nfs_array& nfs)
 {
   match_tree_list strat;
-  // Array to keep note of the used parameters
-  std::vector <bool> used;
-  for (size_t i = 0; i < arity; i++)
-  {
-    used.push_back(nfs.get(i));
-  }
 
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
-  std::vector<int> args(arity,-1);
-  // Process all (applicable) rules
-  std::vector<bool> bs(arity);
+  std::vector<int> args(arity, -1);
   atermpp::aterm_list dep_list;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
-    size_t rule_arity = recursive_number_of_args(it->lhs());
+    const size_t rule_arity = recursive_number_of_args(it->lhs());
     if (rule_arity > arity)
     {
       continue;
     }
+
+    // Process all (applicable) rules
+    std::vector<bool> bs(arity, false);
 
     const data_expression& lhs_internal = it->lhs();
     // List of variables occurring in each argument of the lhs
     // (except the first element which contains variables from the
     // condition and variables which occur more than once in the result)
     variable_list_list vars = make_list<variable_list>(find_double_variables(it->rhs()) + get_free_vars(it->condition()));
-
-    // Indices of arguments that need to be rewritten
-    for (size_t i = 0; i < rule_arity; i++)
-    {
-      bs[i] = false;
-    }
 
     // Check all arguments
     for (size_t i = 0; i < rule_arity; i++)
@@ -1200,7 +1189,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(
     for (size_t i = 0; i < rule_arity; i++)
     {
       // Only if needed and not already rewritten
-      if (bs[i] && !used[i])
+      if (bs[i] && !nfs[i])
       {
         deps.push_front(atermpp::aterm_int(i));
         // Increase dependency count
@@ -1262,7 +1251,6 @@ match_tree_list RewriterCompilingJitty::create_strategy(
     if (maxidx >= 0)
     {
       args[maxidx] = -1;
-      used[maxidx] = true;
       atermpp::aterm_int rewr_arg = atermpp::aterm_int(maxidx);
 
       strat.push_front(match_tree_A(maxidx));
