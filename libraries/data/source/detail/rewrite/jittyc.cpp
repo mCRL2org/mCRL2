@@ -105,17 +105,17 @@ struct double_variable_traverser : public Traverser<double_variable_traverser<Tr
   using super::apply;
 
   std::set<variable> m_seen;
-  variable_list m_doubles;
+  std::set<variable> m_doubles;
 
   void apply(const variable& v)
   {
     if (!m_seen.insert(v).second)
     {
-      m_doubles.push_front(v);
+      m_doubles.insert(v);
     }
   }
 
-  const variable_list& result()
+  const std::set<variable>& result()
   {
     return m_doubles;
   }
@@ -126,7 +126,7 @@ variable_list find_double_variables(const data::data_expression& e)
 {
   double_variable_traverser<data::variable_traverser> dvt;
   dvt.apply(e);
-  return dvt.result();
+  return variable_list(dvt.result().begin(), dvt.result().end());
 }
 
 class always_rewrite_array : public std::vector<atermpp::aterm_appl>
@@ -140,61 +140,26 @@ private:
 
   static variable_list dep_vars(const data_equation& eqn)
   {
-    size_t rule_arity = recursive_number_of_args(eqn.lhs());
-    std::vector<bool> bs(rule_arity, false);
+    std::set<variable> condition_vars = find_free_variables(eqn.condition());
+    double_variable_traverser<data::variable_traverser> lhs_doubles;
+    double_variable_traverser<data::variable_traverser> rhs_doubles;
+    lhs_doubles.apply(eqn.lhs());
+    rhs_doubles.apply(eqn.rhs());
 
-    // We construct a list 'vars' of free variables occurring in each argument of the lhs
-    // (except the first element which contains free variables from the
-    // condition and variables which occur more than once in the result)
-    variable_list_list vars = make_list<variable_list>(find_double_variables(eqn.rhs()) + get_free_vars(eqn.condition()));
-
-    // Check all arguments
-    for (size_t i = 0; i < rule_arity; i++)
+    variable_list result;
+    for (size_t i = 0; i < recursive_number_of_args(eqn.lhs()); ++i)
     {
       const data_expression& arg_i = get_argument_of_higher_order_term(eqn.lhs(), i);
-      const variable_list arg_i_vars = get_free_vars(arg_i);
       if (is_variable(arg_i))
       {
-        auto l = vars.begin();
-        for (size_t j = i; j > 0; --j, ++l)
+        const variable& v = down_cast<variable>(arg_i);
+        if (condition_vars.count(v) > 0 || lhs_doubles.result().count(v) > 0 || rhs_doubles.result().count(v) > 0)
         {
-          if (std::find(l->begin(), l->end(), arg_i) != l->end())
-          {
-            bs[j - 1] = true;
-            bs[i] = true;
-          }
+          result.push_front(v);
         }
       }
-      else
-      {
-        // Argument is not a variable, so it needs to be rewritten
-        bs[i] = true;
-        for (auto var = arg_i_vars.begin(); var != arg_i_vars.end(); ++var)
-        {
-          size_t j = i - 1;
-          for (auto l = ++vars.begin(); l != vars.end(); ++l, --j)
-          {
-            if (std::find(l->begin(), l->end(), *var) != l->end())
-            {
-              bs[j] = true;
-            }
-          }
-        }
-      }
-      vars.push_front(arg_i_vars);
     }
-
-    variable_list deps;
-    for (size_t i = 0; i < rule_arity; i++)
-    {
-      const data_expression& arg_i = get_argument_of_higher_order_term(eqn.lhs(), i);
-      if (bs[i] && is_variable(arg_i))
-      {
-        deps.push_front(down_cast<variable>(arg_i));
-      }
-    }
-
-    return deps;
+    return result;
   }
 
   bool eval(const node_t& expr) const
