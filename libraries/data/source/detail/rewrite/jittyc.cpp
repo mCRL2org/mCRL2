@@ -272,7 +272,7 @@ private:
 
     // Here we know that eqn.lhs() must be an application. If it were a function symbol
     // it would have been dealt with above.
-    if (dep_vars(eqn)[arg])
+    if (!dep_vars(eqn)[arg])
     {
       const application& lhs = down_cast<application>(eqn.lhs());
       const data_expression& arg_term = get_argument_of_higher_order_term(lhs, arg);
