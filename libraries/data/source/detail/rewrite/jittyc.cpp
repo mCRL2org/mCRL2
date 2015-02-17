@@ -1080,28 +1080,6 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
   return true;
 }
 
-/// Adapt the equation in eqns such that they have exactly arity arguments.
-data_equation_list RewriterCompilingJitty::lift_rewrite_rules_to_right_arity(const data_equation_list& eqns,const size_t arity)
-{
-  data_equation_vector result;
-  for(data_equation_list::const_iterator i=eqns.begin(); i!=eqns.end(); ++i)
-  {
-    data_equation e=*i;
-    if (lift_rewrite_rule_to_right_arity(e,arity))
-    {
-      result.push_back(e);
-    }
-  }
-  return data_equation_list(result.begin(),result.end());
-}
-
-variable_list find_double_variables(const data_expression& e)
-{
-  double_variable_traverser<variable_traverser> dvt;
-  dvt.apply(e);
-  return variable_list(dvt.result().begin(), dvt.result().end());
-}
-
 match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list& rules, const size_t arity, const nfs_array& nfs)
 {
   typedef std::list<size_t> dep_list_t;
@@ -1139,6 +1117,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
     {
       if (it->second.empty())
       {
+        lift_rewrite_rule_to_right_arity(it->first, arity);
         no_deps.push_front(it->first);
         it = rule_deps.erase(it);
       }
@@ -1151,7 +1130,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
     // Create and add tree of collected rules
     if (!no_deps.empty())
     {
-      strat.push_front(create_tree(lift_rewrite_rules_to_right_arity(no_deps, arity)));
+      strat.push_front(create_tree(no_deps));
     }
 
     // Figure out which argument is most useful to rewrite
@@ -2197,7 +2176,7 @@ static std::string generate_cpp_filename(size_t unique)
   if (env_dir)
   {
     filedir = env_dir;
-    if (filedir.back() != '/')
+    if (*filedir.rbegin() != '/')
     {
       filedir.append("/");
     }
