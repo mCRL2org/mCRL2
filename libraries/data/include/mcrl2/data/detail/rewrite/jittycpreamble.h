@@ -1,15 +1,10 @@
 /// The following defines are required to be set before loading this header file:
-///   ADDR_OPID   -- The atermpp::detail::addressf() of the OpId function symbol.
 ///   ARITY_BOUND -- The maximum occurring arity + 1
 ///   INDEX_BOUND -- The maximum occurring index + 1
 
-#include <cstdlib>
-#include <cstring>
 #include <cassert>
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/toolset_version_const.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
-#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 
 using namespace mcrl2::data::detail;
@@ -40,7 +35,7 @@ static data_expression rewrite(const data_expression& t);
 //
 typedef data_expression (*rewriter_function)(const data_expression&);
 
-struct argument_rewriter_struct
+struct rewrite_functor
 {
   data_expression operator()(const data_expression& arg) const
   {
@@ -65,150 +60,130 @@ const data_expression& pass_on(const data_expression& t)
 }
 
 static inline
-data_expression do_nothing(const data_expression& t)
-{
-  return t;
-}
-
-static inline
 assignment_expression_list jittyc_local_push_front(assignment_expression_list l, const assignment& e)
 {
   l.push_front(atermpp::deprecated_cast<assignment_expression>(e));
   return l;
 }
 
+static inline
+size_t get_index(const function_symbol& func)
+{
+  return mcrl2::core::index_traits<function_symbol, function_symbol_key_type, 2>::index(func);
+}
+
+static inline
+RewriterCompilingJitty::substitution_type& sigma()
+{
+  return *(this_rewriter->global_sigma);
+}
+
 //
 // Rewriting functions
 //
+
+static inline
+data_expression rewrite(size_t arity, size_t index, const data_expression& t)
+{
+  assert(arity < ARITY_BOUND);
+  assert(index < INDEX_BOUND);
+  rewriter_function f = int2func[arity][index];
+  if (f != NULL)
+  {
+    return f(t);
+  }
+  return t;
+}
+
 static inline
 data_expression rewrite_appl_aux(const application& t)
 {
-  mcrl2::data::function_symbol thead;
-  if (mcrl2::data::detail::head_is_function_symbol(t,thead))
+  function_symbol thead;
+  if (head_is_function_symbol(t, thead))
   {
-    const size_t function_index = mcrl2::core::index_traits<function_symbol, function_symbol_key_type, 2>::index(thead);
-    const size_t total_arity = recursive_number_of_args(t);
-    if (function_index < INDEX_BOUND)
+    const size_t index = get_index(thead);
+    if (index < INDEX_BOUND)
     {
-      assert(total_arity < ARITY_BOUND);
-      assert(int2func[total_arity][function_index] != NULL);
-      return int2func[total_arity][function_index](t);
+      return rewrite(recursive_number_of_args(t), index, t);
     }
     else
     {
-      return mcrl2::data::application(rewrite(t.head()), t.begin(), t.end(), argument_rewriter_struct());
+      return application(rewrite(t.head()), t.begin(), t.end(), rewrite_functor());
     }
   }
   // Here the head symbol of, which can be deeply nested, is not a function_symbol.
-  const data_expression& head0=get_nested_head(t);
-  const data_expression head=
-       (is_variable(head0)?
-            (*(this_rewriter->global_sigma))(down_cast<const variable>(head0)):
-       (is_where_clause(head0)?
-            this_rewriter->rewrite_where(atermpp::down_cast<where_clause>(head0),*(this_rewriter->global_sigma)):
-             head0));
+  const data_expression& head0 = get_nested_head(t);
+  const data_expression head = (is_variable(head0)
+                             ? sigma()(down_cast<const variable>(head0))
+                             : (is_where_clause(head0)
+                               ? this_rewriter->rewrite_where(atermpp::down_cast<where_clause>(head0), sigma())
+                               : head0));
 
   // Reconstruct term t.
-  const application t1((head0==head)?t:replace_nested_head(t,head));
+  const application t1((head0 == head) ? t : replace_nested_head(t, head));
 
   const data_expression head1(get_nested_head(t1));
   // Here head1 has the shape
   // variable, function_symbol, lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,
+  if (is_variable(head1))
+  {
+    return rewrite_all_arguments(t1, rewrite_functor());
+  }
+  else
   if (is_abstraction(head1))
   {
+    assert(is_abstraction(head1));
     const abstraction& heada(head1);
     const binder_type& binder(heada.binding_operator());
     if (is_lambda_binder(binder))
     {
-      return this_rewriter->rewrite_lambda_application(t1,*(this_rewriter->global_sigma));
+      return this_rewriter->rewrite_lambda_application(t1, sigma());
     }
     if (is_exists_binder(binder))
     {
-      return this_rewriter->existential_quantifier_enumeration(head1,*(this_rewriter->global_sigma));
+      return this_rewriter->existential_quantifier_enumeration(head1, sigma());
     }
     assert(is_forall_binder(binder));
-    return this_rewriter->universal_quantifier_enumeration(head1,*(this_rewriter->global_sigma));
+    return this_rewriter->universal_quantifier_enumeration(head1, sigma());
   }
-
-  if (is_variable(head1))
+  else
   {
-    return rewrite_all_arguments(t1, argument_rewriter_struct());
+    assert(is_function_symbol(head1));
+    return rewrite(recursive_number_of_args(t1), get_index(down_cast<function_symbol>(head1)), t1);
   }
-
-  // Here t1 has the shape application(u0,u1,...,un).
-  // Moreover, the head symbol of t1, head1, is a function symbol.
-  const function_symbol& f = down_cast<function_symbol>(head1);
-  const size_t function_index = mcrl2::core::index_traits<function_symbol, function_symbol_key_type, 2>::index(f);
-  assert(function_index < INDEX_BOUND);
-  const size_t total_arity = recursive_number_of_args(t1);
-  assert(int2func_head_in_nf[total_arity][function_index] != NULL);
-  return int2func_head_in_nf[total_arity][function_index](t1);
-}
-
-static inline
-data_expression rewrite_aux(const data_expression& t)
-{
-  // Term t does not have the shape application(t1,...,tn)
-  auto& sigma = *(this_rewriter->global_sigma);
-  if (is_variable(t))
-  {
-    return sigma(down_cast<variable>(t));
-  }
-  if (is_abstraction(t))
-  {
-    const abstraction& ta(t);
-    const binder_type& binder(ta.binding_operator());
-    if (is_exists_binder(binder))
-    {
-      return this_rewriter->existential_quantifier_enumeration(t, sigma);
-    }
-    if (is_forall_binder(binder))
-    {
-      return this_rewriter->universal_quantifier_enumeration(t, sigma);
-    }
-    assert(is_lambda_binder(binder));
-    return this_rewriter->rewrite_single_lambda(ta.variables(), ta.body(), false, sigma);
-  }
-  assert(is_where_clause(t));
-  return this_rewriter->rewrite_where(down_cast<where_clause>(t), sigma);
 }
 
 static
 data_expression rewrite(const data_expression& t)
 {
-  if (atermpp::detail::addressf(t.function()) == ADDR_OPID)
+  if (is_function_symbol(t))
   {
     // Term t is a function_symbol
-    const function_symbol& f = down_cast<function_symbol>(t);
-    const size_t function_index = mcrl2::core::index_traits<function_symbol, function_symbol_key_type, 2>::index(f);
-    if (function_index < INDEX_BOUND)
+    const size_t index = get_index(down_cast<function_symbol>(t));
+    if (index < INDEX_BOUND)
     {
-      const size_t arity = 0;
-      assert(int2func[arity][function_index] != NULL);
-      return int2func[arity][function_index](t);
+      return rewrite(0, index, t);
     }
     else
     {
       return t;
     }
   }
-  else if (is_application_no_check(t))
+  else
+  if (is_application_no_check(t))
   {
     const application& appl = down_cast<application>(t);
     const function_symbol& head = down_cast<function_symbol>(appl.head());
-    if (atermpp::detail::addressf(head.function()) == ADDR_OPID)
+    const size_t index = get_index(head);
+    if (is_function_symbol(head))
     {
-      const size_t function_index = mcrl2::core::index_traits<function_symbol, function_symbol_key_type, 2>::index(head);
-      const size_t total_arity = appl.size();
-      if (function_index < INDEX_BOUND)
+      if (index < INDEX_BOUND)
       {
-        assert(total_arity < ARITY_BOUND);
-        assert(int2func[total_arity][function_index] != NULL);
-        return int2func[total_arity][function_index](t);
+        return rewrite(appl.size(), index, t);
       }
       else
       {
-        return application(rewrite(appl.head()), appl.begin(), appl.end(), argument_rewriter_struct());
+        return application(rewrite(appl.head()), appl.begin(), appl.end(), rewrite_functor());
       }
     }
     else
@@ -217,8 +192,30 @@ data_expression rewrite(const data_expression& t)
     }
   }
   else
+  if (is_variable(t))
   {
-    return rewrite_aux(t);
+    return sigma()(down_cast<variable>(t));
+  }
+  else
+  if (is_abstraction(t))
+  {
+    const abstraction& abstr(t);
+    const binder_type& binder(abstr.binding_operator());
+    if (is_exists_binder(binder))
+    {
+      return this_rewriter->existential_quantifier_enumeration(t, sigma());
+    }
+    if (is_forall_binder(binder))
+    {
+      return this_rewriter->universal_quantifier_enumeration(t, sigma());
+    }
+    assert(is_lambda_binder(binder));
+    return this_rewriter->rewrite_single_lambda(abstr.variables(), abstr.body(), false, sigma());
+  }
+  else
+  {
+    assert(is_where_clause(t));
+    return this_rewriter->rewrite_where(down_cast<where_clause>(t), sigma());
   }
 }
 

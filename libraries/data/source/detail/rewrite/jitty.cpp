@@ -75,7 +75,7 @@ atermpp::aterm_list RewriterJitty::create_strategy(const data_equation_list& rul
       if ((is_function_symbol(this_rule_lhs)?1:detail::recursive_number_of_args(this_rule_lhs)+1) == arity + 1)
       {
         const data_expression& cond = atermpp::down_cast<data_expression>(element_at(this_rule,1));
-        atermpp::term_list <variable_list> vars = atermpp::make_list<variable_list>(get_vars(cond));
+        atermpp::term_list <variable_list> vars = atermpp::make_list<variable_list>(get_free_vars(cond));
 
         std::vector < bool> bs(arity,false);
 
@@ -85,7 +85,7 @@ atermpp::aterm_list RewriterJitty::create_strategy(const data_equation_list& rul
           if (!is_variable(this_rule_lhs_iplus1_arg))
           {
             bs[i] = true;
-            const variable_list evars = get_vars(this_rule_lhs_iplus1_arg);
+            const variable_list evars = get_free_vars(this_rule_lhs_iplus1_arg);
             for (variable_list::const_iterator v=evars.begin(); v!=evars.end(); ++v)
             {
               int j=0;
@@ -99,7 +99,7 @@ atermpp::aterm_list RewriterJitty::create_strategy(const data_equation_list& rul
                 j++;
               }
             }
-            vars=push_back(vars,get_vars(this_rule_lhs_iplus1_arg));
+            vars=push_back(vars,get_free_vars(this_rule_lhs_iplus1_arg));
           }
           else
           {
@@ -121,7 +121,7 @@ atermpp::aterm_list RewriterJitty::create_strategy(const data_equation_list& rul
             {
               bs[i] = true;
             }
-            vars=push_back(vars,get_vars(this_rule_lhs_iplus1_arg));
+            vars=push_back(vars,get_free_vars(this_rule_lhs_iplus1_arg));
           }
         }
 

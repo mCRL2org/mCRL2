@@ -76,6 +76,13 @@ public:
   }
 };
 
+///
+/// \brief The always_rewrite_array class judges whether a certain argument of a
+///        certain function symbol should always be rewritten, or that it should
+///        only be rewritten if a subexpression changes.
+///
+class always_rewrite_array;
+
 class RewriterCompilingJitty: public Rewriter
 {
   public:
@@ -135,18 +142,8 @@ class RewriterCompilingJitty: public Rewriter
     std::map < function_symbol, data_equation_list >  jittyc_eqns;
 
     normal_form_cache m_nf_cache;
+    always_rewrite_array* m_always_rewrite;
 
-    std::map <mcrl2::data::function_symbol,size_t> int2ar_idx;
-    size_t ar_size;
-    std::vector<atermpp::aterm_appl> ar;
-    atermpp::aterm_appl build_ar_expr_internal(const data_expression& expr, const variable& var);
-    atermpp::aterm_appl build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity);
-    atermpp::aterm_appl build_ar_expr(const data_equation_list& eqns, const size_t arg, const size_t arity);
-    bool always_rewrite_argument(const function_symbol& opid, const size_t arity, const size_t arg);
-    bool calc_ar(const atermpp::aterm_appl &expr);
-    void fill_always_rewrite_array();
-
-    std::string rewriter_source;
     uncompiled_library *rewriter_so;
 
     void (*so_rewr_cleanup)();
@@ -160,20 +157,18 @@ class RewriterCompilingJitty: public Rewriter
     std::string calc_inner_terms(nfs_array &nfs, const application& args, const size_t startarg, variable_or_number_list nnfvars, const nfs_array& rewr);
     std::pair<bool,std::string> calc_inner_term(const data_expression &t, 
                 const size_t startarg, variable_or_number_list nnfvars, const bool rewr = true);
-    void implement_tree(FILE* f, const match_tree& tree, const size_t arity, size_t d, 
+    void implement_tree(std::ostream& s, const match_tree& tree, const size_t arity, size_t d,
                         const std::vector<bool> &used);
-    void implement_strategy(FILE* f, match_tree_list strat, size_t arity, size_t d, const mcrl2::data::function_symbol& opid, const nfs_array& nf_args);
+    void implement_strategy(std::ostream& s, match_tree_list strat, size_t arity, size_t d, const mcrl2::data::function_symbol& opid, const nfs_array& nf_args);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
-    FILE* MakeTempFiles();
-    void finish_function(FILE* f, size_t arity, const data::function_symbol& opid, const std::vector<bool>& used);
+    void generate_code(const std::string& filename);
+    void generate_rewr_functions(std::ostream& s, const data::function_symbol& func, const data_equation_list& eqs);
+    void finish_function(std::ostream& s, size_t arity, const data::function_symbol& opid, const std::vector<bool>& used);
     bool lift_rewrite_rule_to_right_arity(data_equation& e, const size_t requested_arity);
     sort_list_vector get_residual_sorts(const sort_expression& s, const size_t actual_arity, const size_t requested_arity);
     data_equation_list lift_rewrite_rules_to_right_arity(const data_equation_list& eqns,const size_t arity);
     match_tree_list create_strategy(const data_equation_list& rules, const size_t arity, nfs_array& nfs);
-    size_t ar_index( const data::function_symbol& f, const size_t arity, const size_t arg);
-    atermpp::aterm_appl get_ar_array( const data::function_symbol& f, const size_t arity, const size_t arg);
-    void set_ar_array( const data::function_symbol& f, const size_t arity, const size_t index, const atermpp::aterm_appl ar_expression);
 
 };
 

@@ -21,10 +21,10 @@ namespace data
 namespace detail
 {
 
-inline variable_list get_vars(const data_expression& a)
+inline variable_list get_free_vars(const data_expression& a)
 {
-  const std::set<variable> s=find_free_variables(a);
-  return variable_list(s.begin(),s.end());
+  const std::set<variable> s = find_free_variables(a);
+  return variable_list(s.begin(), s.end());
 }
 
 inline sort_expression residual_sort(const sort_expression& s, size_t no_of_initial_arguments)
