@@ -48,12 +48,17 @@ class Test:
         # Add tool arguments specified in settings
         if 'tools' in settings:
             for tool in settings['tools']:
-                data['tools'][tool]['args'] += settings['tools'][tool]['args']
+                if 'args' in settings['tools'][tool]:
+                    data['tools'][tool]['args'] += settings['tools'][tool]['args']
 
-        # Add node values specified in settings
+        # Overwrite node values specified in settings
         if 'nodes' in settings:
             for label in settings['nodes']:
                 data['nodes'][label]['value'] = settings['nodes'][label]['value']
+
+        # Overwrite result value with the one specified in settings
+        if 'result' in settings:
+            data['result'] = settings['result']
 
         #print yaml.dump(data)
 

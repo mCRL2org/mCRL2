@@ -894,7 +894,7 @@ def main():
             infile = open(infilename)
             outfile = open(outfilename, "w")
         except IOError, e:
-            print "Unable to open file ", filename, " ", e
+            print "Unable to open file ", infilename, "or", outfilename, " ", e
             return
 
         # Parse specification in infilename and write the code to outfile

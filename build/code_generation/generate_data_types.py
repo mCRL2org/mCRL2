@@ -30,10 +30,12 @@ def main():
   if options.debug:
     arguments += " -d"
 
+  # N.B. The script only works if the .spec files are in the current directory!
+  os.chdir('data_types')
   specs = get_specifications()
   for spec in specs:
     print "Generating code for %s" % (spec)
-    cmd = "python ./codegen.py %s %s.spec ../include/mcrl2/data/%s.h" % (arguments, spec, spec)
+    cmd = "python ./codegen.py %s %s.spec ../../../libraries/data/include/mcrl2/data/%s.h" % (arguments, spec, spec)
     retcode = call(cmd, shell=True)
     if retcode <> 0:
       raise Exception("Failed to generate code for %s. Aborting... (while executing command %s)" % (spec, cmd))
