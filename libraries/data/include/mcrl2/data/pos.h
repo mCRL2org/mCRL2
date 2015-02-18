@@ -388,6 +388,64 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@auxiliary_equality
+      /// \return Identifier \@auxiliary_equality
+      inline
+      core::identifier_string const& auxiliary_equality_function_name()
+      {
+        static core::identifier_string auxiliary_equality_function_name = core::identifier_string("@auxiliary_equality");
+        return auxiliary_equality_function_name;
+      }
+
+      /// \brief Constructor for function symbol \@auxiliary_equality
+      
+      /// \return Function symbol auxiliary_equality_function
+      inline
+      function_symbol const& auxiliary_equality_function()
+      {
+        static function_symbol auxiliary_equality_function(auxiliary_equality_function_name(), make_function_sort(sort_bool::bool_(), pos(), pos(), sort_bool::bool_()));
+        return auxiliary_equality_function;
+      }
+
+      /// \brief Recogniser for function \@auxiliary_equality
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@auxiliary_equality
+      inline
+      bool is_auxiliary_equality_function_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == auxiliary_equality_function();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@auxiliary_equality
+      
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \return Application of \@auxiliary_equality to a number of arguments
+      inline
+      application auxiliary_equality_function(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        return sort_pos::auxiliary_equality_function()(arg0, arg1, arg2);
+      }
+
+      /// \brief Recogniser for application of \@auxiliary_equality
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol auxiliary_equality_function to a
+      ///     number of arguments
+      inline
+      bool is_auxiliary_equality_function_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_auxiliary_equality_function_function_symbol(application(e).head());
+        }
+        return false;
+      }
+
       /// \brief Generate identifier +
       /// \return Identifier +
       inline
@@ -625,6 +683,7 @@ namespace mcrl2 {
         result.push_back(sort_pos::minimum());
         result.push_back(sort_pos::succ());
         result.push_back(sort_pos::pos_predecessor());
+        result.push_back(sort_pos::auxiliary_equality_function());
         result.push_back(sort_pos::plus());
         result.push_back(sort_pos::add_with_carry());
         result.push_back(sort_pos::times());
@@ -651,7 +710,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_add_with_carry_application(e));
+        assert(is_auxiliary_equality_function_application(e) || is_add_with_carry_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 
@@ -663,7 +722,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_add_with_carry_application(e));
+        assert(is_auxiliary_equality_function_application(e) || is_add_with_carry_application(e));
         return atermpp::down_cast<const application >(e)[1];
       }
 
@@ -675,7 +734,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_add_with_carry_application(e));
+        assert(is_auxiliary_equality_function_application(e) || is_add_with_carry_application(e));
         return atermpp::down_cast<const application >(e)[2];
       }
 
@@ -718,7 +777,9 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(atermpp::make_vector(vb, vp), equal_to(c1(), cdub(vb, vp)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp), equal_to(cdub(vb, vp), c1()), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool::and_(equal_to(vb, vc), equal_to(vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), equal_to(cdub(vb, vp), cdub(vc, vq)), auxiliary_equality_function(equal_to(vb, vc), vp, vq)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), auxiliary_equality_function(sort_bool::false_(), vp, vq), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), auxiliary_equality_function(sort_bool::true_(), vp, vq), equal_to(vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vp), equal_to(succ(vp), c1()), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vq), equal_to(c1(), succ(vq)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vc, vp, vq), equal_to(succ(vp), cdub(vc, vq)), equal_to(vp, pos_predecessor(cdub(vc, vq)))));
