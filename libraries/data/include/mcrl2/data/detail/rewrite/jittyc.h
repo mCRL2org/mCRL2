@@ -157,14 +157,10 @@ class RewriterCompilingJitty: public Rewriter
     std::string calc_inner_terms(nfs_array &nfs, const application& args, const size_t startarg, variable_or_number_list nnfvars, const nfs_array& rewr);
     std::pair<bool,std::string> calc_inner_term(const data_expression &t, 
                 const size_t startarg, variable_or_number_list nnfvars, const bool rewr = true);
-    void implement_tree(std::ostream& s, const match_tree& tree, const size_t arity, size_t d,
-                        const std::vector<bool> &used);
-    void implement_strategy(std::ostream& s, match_tree_list strat, size_t arity, size_t d, const mcrl2::data::function_symbol& opid, const nfs_array& nf_args);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
     void generate_code(const std::string& filename);
     void generate_rewr_functions(std::ostream& s, const data::function_symbol& func, const data_equation_list& eqs);
-    void finish_function(std::ostream& s, size_t arity, const data::function_symbol& opid, const std::vector<bool>& used);
     bool lift_rewrite_rule_to_right_arity(data_equation& e, const size_t requested_arity);
     sort_list_vector get_residual_sorts(const sort_expression& s, const size_t actual_arity, const size_t requested_arity);
     match_tree_list create_strategy(const data_equation_list& rules, const size_t arity, const nfs_array &nfs);

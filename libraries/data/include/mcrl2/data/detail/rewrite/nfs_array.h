@@ -30,54 +30,57 @@ namespace data
 namespace detail
 {
 
-class nfs_array:public std::vector<bool>
+class nfs_array : public std::vector<bool>
 {
 public:
-  nfs_array(size_t size): 
-       std::vector<bool>(size,false)
-  {
-  }
+  nfs_array(size_t size)
+    : std::vector<bool>(size, false)
+  { }
 
   void fill(bool val = true)
   {
-    assign(size(),val);
+    assign(size(), val);
   }
 
-  // Return the values of this vector as if it encodes a number in bits..
-  size_t get_encoded_number() const
+  ///
+  /// \brief next iterates to the next combination of booleans (in terms of bit vectors:
+  ///        if the nfs_array represents integer i, it computes i + 1).
+  /// \return true if the operation was successful, false if an overflow occurred (i.e.,
+  ///        if the bit vector was is_filled(), in which case after calling next(), it is
+  ///        is_clear().
+  ///
+  bool next()
   {
-    size_t result=0;
-    for(size_t i=0; i<size(); ++i)
+    size_t index = 0;
+    while (index < size())
     {
-      if ((*this)[i])
-      { 
-        result=result+(1<<i);
+      if (at(index))
+      {
+        at(index) = false;
+        ++index;
+      }
+      else
+      {
+        at(index) = true;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  operator size_t() const
+  {
+    assert(8 * sizeof(size_t) > size());
+    size_t result = 0;
+    size_t mask = 1;
+    for (size_t i = 0; i < size(); ++i, mask <<= 1)
+    {
+      if (at(i))
+      {
+        result |= mask;
       }
     }
     return result;
-  }
-
-  // Set the values of this vector by viewing val as a binary number.
-  // Position 0 contains the least significant bit.
-  void set_encoded_number(size_t val)
-  {
-    for(size_t i=0; i<size(); ++i)
-    {
-      (*this)[i]=((val & 1)==1);
-      val=val>>1;
-    }
-  } 
-
-  bool get(size_t i) const
-  {
-    assert(i<size());
-    return (*this)[i];
-  }
-
-  void set(size_t i, bool val = true)
-  {
-    assert(i<size());
-    (*this)[i]=val;
   }
 
   bool is_clear() const

@@ -544,11 +544,88 @@ typedef std::vector < match_tree > match_tree_vector;
 typedef atermpp::term_list < match_tree_list > match_tree_list_list;
 typedef atermpp::term_list < match_tree_list_list > match_tree_list_list_list;
 
+inline
+std::ostream& operator<<(std::ostream& s, const match_tree& t)
+{
+  using atermpp::down_cast;
+  if (t.isS())
+  {
+    const match_tree_S& tS = down_cast<match_tree_S>(t);
+    s << "@@S(" << tS.target_variable() << ", " << tS.subtree() << ")";
+  }
+  else
+  if (t.isA())
+  {
+    const match_tree_A& tA = down_cast<match_tree_A>(t);
+    s << "@@A(" << tA.variable_index() << ")";
+  }
+  else
+  if (t.isM())
+  {
+    const match_tree_M& tM = down_cast<match_tree_M>(t);
+    s << "@@M(" << tM.match_variable() << ", " << tM.true_tree() << ", " << tM.false_tree() << ")";
+  }
+  else
+  if (t.isF())
+  {
+    const match_tree_F& tF = down_cast<match_tree_F>(t);
+    s << "@@F(" << tF.function() << ", " << tF.true_tree() << ", " << tF.false_tree() << ")";
+  }
+  else
+  if (t.isN())
+  {
+    const match_tree_N& tN = down_cast<match_tree_N>(t);
+    s << "@@N(" << tN.subtree() << ")";
+  }
+  else
+  if (t.isD())
+  {
+    const match_tree_D& tD = down_cast<match_tree_D>(t);
+    s << "@@D(" << tD.subtree() << ")";
+  }
+  else
+  if (t.isR())
+  {
+    const match_tree_R& tR = down_cast<match_tree_R>(t);
+    s << "@@R(" << tR.result() << ")";
+  }
+  else
+  if (t.isC())
+  {
+    const match_tree_C& tC = down_cast<match_tree_C>(t);
+    s << "@@C(" << tC.condition() << ", " << tC.true_tree() << ", " << tC.false_tree() << ")";
+  }
+  else
+  if (t.isX())
+  {
+    s << "@@X";
+  }
+  else
+  if (t.isRe())
+  {
+    const match_tree_Re& tRe = down_cast<match_tree_Re>(t);
+    s << "@@Re(" << tRe.result() << ", " << tRe.variables() << ")";
+  }
+  else
+  if (t.isCRe())
+  {
+    const match_tree_CRe& tCRe = down_cast<match_tree_CRe>(t);
+    s << "@@CRe(" << tCRe.condition() << ", " << tCRe.result() << ", "
+      << tCRe.variables_condition() << ", " << tCRe.variables_result() << ")";
+  }
+  else
+  if (t.isMe())
+  {
+    const match_tree_Me& tMe = down_cast<match_tree_Me>(t);
+    s << "@@Me(" << tMe.match_variable() << ", " << tMe.variable_index() << ")";
+  }
+  return s;
+}
+
 } // namespace detail
 
 } // namespace data
 
 } // namespace mcrl2
-
 
 #endif // __MATCH_TREE_H

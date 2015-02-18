@@ -27,13 +27,13 @@ extern "C" {
 //
 // Forward declarations
 //
-static void rewrite_init(RewriterCompilingJitty*);
+static void fill_int2func();
 static data_expression rewrite(const data_expression& t);
 
 //
 // Type definitions
 //
-typedef data_expression (*rewriter_function)(const data_expression&);
+typedef data_expression (*rewriter_function)(const application&);
 
 struct rewrite_functor
 {
@@ -46,9 +46,10 @@ struct rewrite_functor
 //
 // Declaration of global variables
 //
-RewriterCompilingJitty *this_rewriter;
-rewriter_function* int2func[ARITY_BOUND];
-rewriter_function* int2func_head_in_nf[ARITY_BOUND];
+static RewriterCompilingJitty *this_rewriter;
+static rewriter_function int2func[ARITY_BOUND * INDEX_BOUND] = {};
+//static rewriter_function int2func_head_in_nf[ARITY_BOUND * INDEX_BOUND];
+static const application dummy_application;
 
 //
 // Miscellaneous helper functions
@@ -78,16 +79,34 @@ RewriterCompilingJitty::substitution_type& sigma()
   return *(this_rewriter->global_sigma);
 }
 
+static inline
+uintptr_t uint_address(const atermpp::aterm& t)
+{
+  return reinterpret_cast<uintptr_t>(atermpp::detail::address(t));
+}
+
 //
 // Rewriting functions
 //
 
+///
+/// \brief rewrite calls the function in the int2func table, with the given application t
+///        as its argument. If t is not given, then a dummy application is passed. This
+///        happens when a rewrite function is called on a function symbol. This strange
+///        behaviour is due to the fact that rewriting of function symbols (constants) and
+///        of applications is treated in the same way. A better solution would be to have
+///        a separate int2func table of type (data_expression (*rewriter_function)(void))*.
+/// \param arity The arity of the rewrite rule.
+/// \param index The index of the outer function symbol of the rule.
+/// \param t The parameter to pass to the rewr_*_*_term function.
+/// \return The rewritten term.
+///
 static inline
-data_expression rewrite(size_t arity, size_t index, const data_expression& t)
+data_expression rewrite(size_t arity, size_t index, const application& t = dummy_application)
 {
   assert(arity < ARITY_BOUND);
   assert(index < INDEX_BOUND);
-  rewriter_function f = int2func[arity][index];
+  rewriter_function f = int2func[ARITY_BOUND * index + arity];
   if (f != NULL)
   {
     return f(t);
@@ -153,16 +172,15 @@ data_expression rewrite_appl_aux(const application& t)
   }
 }
 
-static
+static inline
 data_expression rewrite(const data_expression& t)
 {
   if (is_function_symbol(t))
   {
-    // Term t is a function_symbol
     const size_t index = get_index(down_cast<function_symbol>(t));
     if (index < INDEX_BOUND)
     {
-      return rewrite(0, index, t);
+      return rewrite(0, index);
     }
     else
     {
@@ -179,7 +197,7 @@ data_expression rewrite(const data_expression& t)
     {
       if (index < INDEX_BOUND)
       {
-        return rewrite(appl.size(), index, t);
+        return rewrite(appl.size(), index, appl);
       }
       else
       {
@@ -223,11 +241,6 @@ data_expression rewrite(const data_expression& t)
 static
 void rewrite_cleanup()
 {
-  for (size_t i = 0; i < ARITY_BOUND; ++i)
-  {
-    delete[] int2func[i];
-    delete[] int2func_head_in_nf[i];
-  }
 }
 
 bool init(rewriter_interface* i)
@@ -239,7 +252,8 @@ bool init(rewriter_interface* i)
   }
   i->rewrite_external = &rewrite;
   i->rewrite_cleanup = &rewrite_cleanup;
-  rewrite_init(i->rewriter);
+  this_rewriter = i->rewriter;
+  fill_int2func();
   i->status = "rewriter loaded successfully.";
   return true;
 }
