@@ -4,9 +4,9 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import os.path
 import re
 import sys
-from path import *
 from mcrl2_classes import *
 from mcrl2_utility import *
 
@@ -25,9 +25,9 @@ def make_classes(all_classes, filename, class_text, namespace, add_constructor_o
     classes = [all_classes[c.classname(True)] for c in classes]
 
     result = True
-    if path(filename).isdir():
+    if os.path.isdir(filename):
         for c in classes:
-            fname = path(filename).normcase() / ('%s.h' % c.name())
+            fname = os.path.join(os.path.normcase(filename), ('%s.h' % c.name()))
             text = c.class_inline_definition(all_classes)
             result = insert_text_in_file(fname, text, 'generated class %s' % c.name(), handle_user_sections = True) and result
     else:

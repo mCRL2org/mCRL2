@@ -5,7 +5,15 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import re
-from path import *
+
+# TODO: put these functions in a central place
+def read_text(filename):
+    with open(filename, 'r') as f:
+        return f.read()
+
+def write_text(filename, text):
+    with open(filename, 'w') as f:
+        f.write(text)
 
 # searches for sections of text between pairs of lines like this, and returns them as a mapping
 #
@@ -44,7 +52,7 @@ def insert_text_in_file(filename, text, label, handle_user_sections = False):
     src = r'//--- start %s ---//.*//--- end %s ---//' % (label, label)
     dest = ('//--- start %s ---//' + text + '//--- end %s ---//') % (label, label)
     try:
-        old_text = path(filename).text()
+        old_text = read_text(filename)
         new_text = re.compile(src, re.S).sub(dest, old_text)
         if handle_user_sections:
             labels = extract_user_sections(new_text).keys()
@@ -57,7 +65,7 @@ def insert_text_in_file(filename, text, label, handle_user_sections = False):
             else:
                 print 'Warning: nothing has changed in file %s' % filename
         else:
-            path(filename).write_text(new_text)
+            write_text(filename, new_text)
             print 'Updated file %s' % filename
         return True
     except IOError, e:

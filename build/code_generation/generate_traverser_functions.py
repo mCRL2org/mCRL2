@@ -7,7 +7,6 @@
 import os
 import re
 import sys
-from path import *
 from mcrl2_utility import *
 
 MCRL2_ROOT = '../../'

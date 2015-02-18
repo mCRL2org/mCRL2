@@ -8,7 +8,6 @@ import re
 import sys
 from mcrl2_parser import *
 from mcrl2_utility import *
-from path import *
 
 MCRL2_ROOT = '../../'
 
