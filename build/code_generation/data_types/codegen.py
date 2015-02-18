@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # Author(s): Jeroen Keiren
 # Copyright: see the accompanying file COPYING or copy at
 # https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
