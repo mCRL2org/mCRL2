@@ -315,11 +315,11 @@ class function_declaration_list():
       projection = []
 
       if len(index_table) == 1:
-        projection.append("return atermpp::aterm_cast<const application >(e)[{0}];".format(index_table.keys()[0]))
+        projection.append("return atermpp::down_cast<const application >(e)[{0}];".format(index_table.keys()[0]))
       else:
         projection_case = '''        if ({0})
         {
-          return atermpp::aterm_cast<const application >(e)[%s];\n" % (i)
+          return atermpp::down_cast<const application >(e)[%s];\n" % (i)
         }'''.format(" || ".join(["is_{0}_application(e)".format(c[1] for c in index_table[i])]), i)
         projection.append(projection_case)
 
