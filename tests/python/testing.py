@@ -141,8 +141,6 @@ class Test:
 
     def result(self):
         # Returns the result of the test after all tools have been executed
-        if self.verbose:
-            print 'Validating result'
         exec(self.res, self.globals)
         return self.globals['result']
 
@@ -151,12 +149,13 @@ class Test:
         return [tool for tool in self.tools if tool.can_execute()]
 
     def cleanup(self):
-        for node in self.nodes:
-            try:
-                os.remove(node.filename())
-            except Exception as e:
-                if self.verbose:
-                    print e
+        if self.cleanup_files:
+            for node in self.nodes:
+                try:
+                    os.remove(node.filename())
+                except Exception as e:
+                    if self.verbose:
+                        print e
 
     def run(self):
         # Singlecore run
@@ -185,7 +184,7 @@ class Test:
                 if not os.path.exists(node.filename()):
                     raise RuntimeError('Error in test {}: output file {} is missing!'.format(self.name, node.filename()))
             result = self.result()
-            if result and self.cleanup_files:
+            if result:
                 self.cleanup()
             return result
 

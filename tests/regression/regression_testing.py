@@ -45,11 +45,10 @@ class CountStatesTest(YmlTest):
         super(CountStatesTest, self).__init__(name, ymlfile('countstates'), inputfiles, settings)
 
 if __name__ == '__main__':
-    import copy
     settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False, 'cleanup_files': True}
     testdir = 'output'
     if not os.path.exists(testdir):
         os.mkdir(testdir)
     os.chdir(testdir)
-    LpsconfcheckTest('lpsconfcheck_triangular', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], ['-xT'], (0, 10), copy.deepcopy(settings)).execute()
-    CountStatesTest('countstates_abp', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'], 74, copy.deepcopy(settings)).execute()
+    LpsconfcheckTest('lpsconfcheck_triangular', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], ['-xT'], (0, 10), settings).execute()
+    CountStatesTest('countstates_abp', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'], 74, settings).execute()
