@@ -27,7 +27,7 @@ class TestRunner(testrunner.TestRunner):
                        YmlTest('ticket_325' , ymlfile('alphabet'),          [abspath('tickets/325/1.mcrl2')]),
                        YmlTest('ticket_1090', ymlfile('ticket_1090'),       [abspath('tickets/1090/1.mcrl2'), abspath('tickets/1090/1.mcf')]),
                        YmlTest('ticket_1093', ymlfile('alphabet'),          [abspath('tickets/1093/1.mcrl2')], { 'timeout': 300, 'memlimit': 500000000 }),
-                       YmlTest('ticket_1122', ymlfile('ticket_1122'),       [abspath('tickets/1122/1.mcrl2')]),
+                       # YmlTest('ticket_1122', ymlfile('ticket_1122'),       [abspath('tickets/1122/1.mcrl2')]), # specification is not well typed
                        YmlTest('ticket_1127', ymlfile('mcrl22lps'),         [abspath('tickets/1127/1.mcrl2')]),
                        YmlTest('ticket_1143', ymlfile('pbesrewr-onepoint'), [abspath('tickets/1143/1.txt')]),
                        YmlTest('ticket_1144', ymlfile('lpsbisim2pbes'),     [abspath('tickets/1144/test1.txt'), abspath('tickets/1144/test2.txt')]),
