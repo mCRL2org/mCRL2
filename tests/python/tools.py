@@ -9,7 +9,7 @@ from popen import Popen, MemoryExceededError, TimeExceededError
 from subprocess import  PIPE
 import os.path
 import re
-from text_utility import write_text
+from text_utility import read_text, write_text
 
 def is_list_of(l, types):
     if not isinstance(l, list):
@@ -89,14 +89,14 @@ class Tool(object):
             if node.value == '':
                 node.value = 'executed'
 
-    def execute(self, dir, timeout, memlimit, verbose, maxVirtLimit = 100000000, usrTimeLimit = 5):
+    def execute(self, dir, timeout, memlimit, verbose):
         args = self.arguments()
         if dir == None:
             dir = ''
         name = os.path.join(dir, self.name)
         if verbose:
             print 'Executing ' + ' '.join([name] + args + self.args)
-        process = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=maxVirtLimit, usrTimeLimit=usrTimeLimit)
+        process = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=memlimit, usrTimeLimit=timeout)
 
         input = None
         if not self.has_input_nodes:
@@ -122,6 +122,16 @@ class Tool(object):
         out.write('has_input_nodes  = ' + str(self.has_input_nodes)  + '\n')
         out.write('has_output_nodes = ' + str(self.has_output_nodes) + '\n')
         return out.getvalue()
+
+class PrintTool(Tool):
+    def __init__(self, label, name, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 1
+        assert len(output_nodes) == 1
+        super(PrintTool, self).__init__(label, name, input_nodes, output_nodes, args)
+
+    def assign_outputs(self):
+        text = read_text(self.output_nodes[0].filename())
+        self.output_nodes[0].value = text
 
 class Pbes2BoolTool(Tool):
     def __init__(self, label, name, input_nodes, output_nodes, args):
@@ -269,5 +279,7 @@ class ToolFactory(object):
             return BesSolveTool(label, name, input_nodes, output_nodes, args)
         elif name == 'ltscompare':
             return LtsCompareTool(label, name, input_nodes, output_nodes, args)
+        elif name in ['bespp', 'lpspp', 'pbespp']:
+            return PrintTool(label, name, input_nodes, output_nodes, args)
         return Tool(label, name, input_nodes, output_nodes, args)
 

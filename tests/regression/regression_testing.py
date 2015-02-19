@@ -27,6 +27,16 @@ def run_lpsconfcheck_test(name, inputfiles, command_line_options, expected_resul
     testfile = ymlfile('lpsconfcheck')
     run_yml_test(name, testfile, inputfiles, settings)
 
+# Example:
+# inputfiles: ['1.mcrl2']
+# command_line_options: ['-xT']
+# expected_result: (0, 10) meaning 0 confluent tau summands (out of 10)
+def run_lpsconfcheck_ctau_test(name, inputfiles, command_line_options, expected_result, settings):
+    settings.update({'tools': {'t3': {'args': command_line_options}}})
+    settings.update({'result': "result = l7.value and l8.value['confluent_tau_summands'] == {}".format(expected_result)})
+    testfile = ymlfile('lpsconfcheck_ctau')
+    run_yml_test(name, testfile, inputfiles, settings)
+
 # expected_result is the expected number of states
 def run_countstates_test(name, inputfiles, expected_result, settings):
     settings.update({'nodes': {'l5': {'value': expected_result}}})

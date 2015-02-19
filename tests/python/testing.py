@@ -40,6 +40,12 @@ class Test:
     def __init__(self, file, settings):
         from collections import Counter
 
+        self.verbose = settings['verbose']
+        self.toolpath = settings['toolpath']
+        self.cleanup_files = settings['cleanup_files']
+        self.timeout = 5
+        self.memlimit = 100000000
+
         # Reads a test from a YAML file
         self.name = file
         f = open(file)
@@ -60,11 +66,13 @@ class Test:
         if 'result' in settings:
             data['result'] = settings['result']
 
-        #print yaml.dump(data)
+        if 'memlimit' in settings:
+            self.memlimit = settings['memlimit']
 
-        self.verbose = settings['verbose']
-        self.toolpath = settings['toolpath']
-        self.cleanup_files = settings['cleanup_files']
+        if 'timeout' in settings:
+            self.timeout = settings['timeout']
+
+        #print yaml.dump(data)
 
         self.nodes = []
         for label in data['nodes']: # create nodes
@@ -160,7 +168,7 @@ class Test:
         while len(tasks) > 0:
             tool = tasks[0]
             try:
-                tool.execute(self.toolpath, timeout = 5, memlimit = 100000000, verbose = self.verbose)
+                tool.execute(self.toolpath, timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
             except MemoryExceededError as e:
                 if self.verbose:
                     print 'Memory limit exceeded: ' + str(e)
