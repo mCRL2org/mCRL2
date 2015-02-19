@@ -40,9 +40,9 @@ class Test:
     def __init__(self, file, settings):
         from collections import Counter
 
-        self.verbose = settings['verbose']
-        self.toolpath = settings['toolpath']
-        self.cleanup_files = settings['cleanup_files']
+        self.verbose = settings.get('verbose', True)
+        self.toolpath = settings.get('toolpath', '')
+        self.cleanup_files = settings.get('cleanup_files', False)
         self.timeout = 5
         self.memlimit = 100000000
 
@@ -130,7 +130,7 @@ class Test:
         name = data['name']
         if platform.system() == 'Windows':
             name = name + '.exe'
-        self.tools.append(ToolFactory().create_tool(label, data['name'], input, output, data['args']))
+        self.tools.append(ToolFactory().create_tool(label, data['name'], self.toolpath, input, output, data['args']))
 
     def setup(self, inputfiles):
         for node in self.input_nodes:
@@ -168,7 +168,7 @@ class Test:
         while len(tasks) > 0:
             tool = tasks[0]
             try:
-                tool.execute(self.toolpath, timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
+                tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
             except MemoryExceededError as e:
                 if self.verbose:
                     print 'Memory limit exceeded: ' + str(e)
@@ -199,6 +199,24 @@ class Test:
             return next(tool for tool in self.tools if tool.label == label)
         except StopIteration:
             raise RuntimeError("could not find model a tool with label '{0}'".format(label))
+
+    def print_commands(self, runpath):
+        from topological_sort import topological_sort, insert_edge
+        G = {}
+        for node in self.nodes:
+            G[node.label] = (set(), set())
+        for tool in self.tools:
+            G[tool.label] = (set(), set())
+        for tool in self.tools:
+            for node in tool.input_nodes:
+                insert_edge(G, node.label, tool.label)
+            for node in tool.output_nodes:
+                insert_edge(G, tool.label, node.label)
+        labels = topological_sort(G)
+        toolmap = {}
+        for tool in self.tools:
+            toolmap[tool.label] = tool
+        print '\n'.join([toolmap[label].command(runpath) for label in labels if label in toolmap])
 
 def run_replay(testfile, inputfiles, settings, remove_files = True):
     for filename in [testfile] + inputfiles:
