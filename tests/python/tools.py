@@ -39,14 +39,11 @@ class Tool(object):
         import platform
         self.label = label
         self.name = name
-        self.runpath = None
         self.toolpath = toolpath
         self.input_nodes = input_nodes
         self.output_nodes = output_nodes
         self.args = args
         self.executed = False
-        self.has_input_nodes = True
-        self.has_output_nodes = True
         if platform.system() == 'Windows':
             # Don't display the Windows GPF dialog if the invoked program dies.
             # See comp.os.ms-windows.programmer.win32
@@ -78,11 +75,8 @@ class Tool(object):
     def arguments(self, runpath = None):
         if not runpath:
             runpath = os.getcwd()
-        args = []
-        if self.has_input_nodes:
-            args = [os.path.join(runpath, node.filename()) for node in self.input_nodes]
-        if self.has_output_nodes:
-            args = args + [os.path.join(runpath, node.filename()) for node in self.output_nodes]
+        args = [os.path.join(runpath, node.filename()) for node in self.input_nodes]
+        args = args + [os.path.join(runpath, node.filename()) for node in self.output_nodes if node.type != 'Bool']
         return args
 
     def assign_outputs(self):
@@ -106,9 +100,6 @@ class Tool(object):
         process = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=memlimit, usrTimeLimit=timeout)
 
         input = None
-        if not self.has_input_nodes:
-            input = (b' ').join([i.value for i in self.input_nodes])
-
         self.stdout, self.stderr = process.communicate(input)
         self.assign_outputs()
         self.executed = True
@@ -126,8 +117,6 @@ class Tool(object):
         out.write('args     = ' + str(self.args)     + '\n')
         out.write('stderr   = ' + str(self.stderr)    + '\n')
         out.write('executed = ' + str(self.executed) + '\n')
-        out.write('has_input_nodes  = ' + str(self.has_input_nodes)  + '\n')
-        out.write('has_output_nodes = ' + str(self.has_output_nodes) + '\n')
         return out.getvalue()
 
 class PrintTool(Tool):

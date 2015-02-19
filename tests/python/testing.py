@@ -83,10 +83,6 @@ class Test:
             assert isinstance(data['tools'], dict)
             self._add_tool(data['tools'][label], label)
 
-        for tool in self.tools:
-            if any(x for x in tool.output_nodes if x.type == 'Bool'):
-                tool.has_output_nodes = False
-
         self.res = data['result']
         f.close()
 
