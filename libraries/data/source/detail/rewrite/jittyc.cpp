@@ -1152,139 +1152,8 @@ void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& o
   }
 }
 
-// Determine whether the opid is a normal form, with the given number of arguments.
-bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_args)
-{
-  // Check whether there are applicable rewrite rules.
-  data_equation_list l = jittyc_eqns[opid];
 
-  if (l.empty())
-  {
-    return true;
-  }
-
-  for (data_equation_list::const_iterator it=l.begin(); it!=l.end(); ++it)
-  {
-    if (recursive_number_of_args(it->lhs()) <= num_args)
-    {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-void RewriterCompilingJitty::calc_nfs_list(
-                nfs_array& nfs,
-                const application& appl,
-                variable_or_number_list nnfvars)
-{
-  for(size_t i=0; i<recursive_number_of_args(appl); ++i)
-  {
-    nfs.at(i) = calc_nfs(get_argument_of_higher_order_term(appl,i),nnfvars);
-  }
-}
-
-/// This function returns true if it knows for sure that the data_expresson t is in normal form.
-bool RewriterCompilingJitty::calc_nfs(const data_expression& t, variable_or_number_list nnfvars)
-{
-  if (is_function_symbol(t))
-  {
-    return opid_is_nf(down_cast<function_symbol>(t),0);
-  }
-  else if (is_variable(t))
-  {
-    return (std::find(nnfvars.begin(),nnfvars.end(),variable(t)) == nnfvars.end());
-  }
-  else if (is_abstraction(t))
-  {
-    // It the term has the shape lambda x:D.t and t is a normal form, then the whole
-    // term is a normal form. An expression with an exists/forall is never a normal form.
-    const abstraction& ta(t);
-    if (is_lambda_binder(ta.binding_operator()))
-    {
-      return calc_nfs(ta.body(),nnfvars);
-    }
-    return false;
-  }
-  else if (is_where_clause(t))
-  {
-    return false; // I assume that a where clause is not in normal form by default.
-                  // This might be too weak, and may require to be reinvestigated later.
-  }
-
-  // t has the shape application(head,t1,...,tn)
-  const application ta(t);
-  const size_t arity = recursive_number_of_args(ta);
-  const data_expression& head=ta.head();
-  function_symbol dummy;
-  if (head_is_function_symbol(head,dummy))
-  {
-    assert(arity!=0);
-    if (opid_is_nf(down_cast<function_symbol>(head),arity))
-    {
-      nfs_array args(arity);
-      calc_nfs_list(args,ta,nnfvars);
-      bool b = args.is_filled();
-      return b;
-    }
-    else
-    {
-      return false;
-    }
-  }
-  else
-  {
-    return false;
-  }
-}
-
-string RewriterCompilingJitty::calc_inner_terms(
-              nfs_array& nfs,
-              const application& appl,
-              const size_t startarg,
-              variable_or_number_list nnfvars,
-              const nfs_array& rewr)
-{
-  size_t j=0;
-  string result="";
-  for(application::const_iterator i=appl.begin(); i!=appl.end(); ++i, ++j)
-  {
-    pair<bool,string> head = calc_inner_term(*i, startarg+j,nnfvars,rewr.at(j));
-    nfs.at(j) = head.first;
-
-    result=result + (j==0?"":",") + head.second;
-  }
-  return result;
-}
-
-// arity is one if there is a single head. Arity is two is there is a head and one argument, etc.
-static string calc_inner_appl_head(size_t arity)
-{
-  stringstream ss;
-  if (arity == 1)
-  {
-    ss << "pass_on(";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
-  }
-  else if (arity <= 5)
-  {
-    ss << "application(";
-  }
-  else
-  {
-    ss << "make_term_with_many_arguments(";
-  }
-  return ss.str();
-}
-
-/// This function generates a string of C++ code to calculate the data_expression t.
-/// If the result is a normal form the resulting boolean is true, otherwise it is false.
-/// The data expression t is the term for which C code is generated.
-/// The size_t start_arg gives the index of the position of the current term in the surrounding application.
-//                 The head has index 0. The first argument has index 1, etc.
-/// The variable_or_number_list nnfvars contains variables that are in normal form, and indices that are not in normal form.
-/// The bool rewr indicates whether a normal form is requested. If rewr is valid, then yes.
-
+/*
 pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                              const data_expression& t,
                              const size_t startarg,
@@ -1303,30 +1172,30 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
   if (is_function_symbol(t))
   {
-    const function_symbol& f = atermpp::down_cast<function_symbol>(t);
-    bool b = opid_is_nf(f,0);
+    const function_symbol& f = down_cast<function_symbol>(t);
+    bool nf = !opid_is_nf(f,0);
 
-    if (rewr && !b)
+    if (rewr && !nf)
     {
       ss << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(f) << "_0_0()";
     }
     else
     {
-      ss << "atermpp::down_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(t) << ")))";
+      ss << "data_expression(reinterpret_cast<const data_expression*>(" << atermpp::detail::address(t) << "))";
     }
-    return pair<bool,string>(rewr || b, ss.str());
+    return pair<bool,string>(rewr || nf, ss.str());
 
   }
   else if (is_variable(t))
   {
-    const variable v(t);
-    const bool b = (std::find(nnfvars.begin(),nnfvars.end(),v) != nnfvars.end());
+    const variable& v = down_cast<variable>(t);
+    const bool nf = (std::find(nnfvars.begin(), nnfvars.end(), v) == nnfvars.end());
     const string variable_name=v.name();
     // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
     // by this rewriter.
     if (variable_name[0]=='@')
     {
-      if (rewr && b)
+      if (rewr && !nf)
       {
         ss << "rewrite(" << variable_name.substr(1) << ")";
       }
@@ -1339,7 +1208,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       ss << "this_rewriter->bound_variable_get(" << bound_variable_index(v) << ")";
     }
-    return pair<bool,string>(rewr || !b, ss.str());
+    return pair<bool,string>(rewr || nf, ss.str());
   }
   else if (is_abstraction(t))
   {
@@ -1674,6 +1543,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
   return pair<bool,string>(b,ss.str());
 }
+*/
 
 class RewriterCompilingJitty::ImplementTree
 {
@@ -1704,50 +1574,510 @@ private:
   std::vector<int> m_stack;
   padding m_padding;
   variable_or_number_list m_nnfvars;
-  
-  // Print code representing tree to f.
-  //
-  // cur_arg   Indices refering to the variable that contains the current
-  // parent    term. For level 0 this means arg<cur_arg>, for level 1 it
-  //           means arg<parent>(<cur_arg) and for higher
-  //           levels it means t<parent>(<cur_arg>)
-  //
-  // parent    Index of cur_arg in the previous level
-  //
-  // level     Indicates the how deep we are in the term (e.g. in
-  //           f(.g(x),y) . indicates level 0 and in f(g(.x),y) level 1
-  //
-  // cnt       Counter indicating the number of variables t<i> (0<=i<cnt)
-  //           used so far (in the current scope)
-  void implement_tree_aux(const match_tree& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+
+  ///
+  /// \brief opid_is_nf establishes whether a function symbol is always in normal form.
+  ///        this is the case when there are no rewrite rules for the symbol.
+  /// \param opid The symbol to investigate.
+  /// \param num_args The arity of the function symbol.
+  /// \return true if the function symbol is always in normal form, false otherwise.
+  ///
+  bool opid_is_nf(const function_symbol& opid, size_t num_args)
+  {
+    data_equation_list l = m_rewriter.jittyc_eqns[opid];
+    for (data_equation_list::const_iterator it = l.begin(); it != l.end(); ++it)
+    {
+      if (recursive_number_of_args(it->lhs()) <= num_args)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  ///
+  /// \brief calc_nfs tries to establish whether t is in normal form.
+  /// \param t the data expression to investigate.
+  /// \param nnfvars a list of variables that is known not to be in normal form.
+  /// \return false if t is not in normal form, true or false otherwise.
+  ///
+  bool calc_nfs(const data_expression& t, variable_or_number_list nnfvars)
+  {
+    if (is_function_symbol(t))
+    {
+      return opid_is_nf(down_cast<function_symbol>(t), 0);
+    }
+    else if (is_variable(t))
+    {
+      return std::find(nnfvars.begin(), nnfvars.end(), down_cast<variable>(t)) == nnfvars.end();
+    }
+    else if (is_abstraction(t))
+    {
+      // It the term has the shape lambda x:D.t and t is a normal form, then the whole
+      // term is a normal form.
+      const abstraction& abstr = down_cast<abstraction>(t);
+      if (is_lambda_binder(abstr.binding_operator()))
+      {
+        return calc_nfs(abstr.body(), nnfvars);
+      }
+      // An expression with an exists/forall is never a normal form.
+      return false;
+    }
+    else if (is_where_clause(t))
+    {
+      // I assume that a where clause is not in normal form by default.
+      // This might be too weak, and may require to be reinvestigated later.
+      return false;
+    }
+    else
+    {
+      assert(is_application(t));
+      // t has the shape application(head,t1,...,tn)
+      const application& appl = down_cast<application>(t);
+      const size_t arity = recursive_number_of_args(appl);
+      const data_expression& head = appl.head();
+      function_symbol dummy;
+      if (!head_is_function_symbol(head, dummy))
+      {
+        return false;
+      }
+      assert(arity != 0);
+      if (!opid_is_nf(down_cast<function_symbol>(head), arity))
+      {
+        return false;
+      }
+      return calc_nfs_list(appl, nnfvars).is_filled();
+    }
+  }
+
+  ///
+  /// \brief calc_nfs_list applies calc_nfs to all elements of an application, and
+  ///        returns the results as a vector.
+  ///
+  nfs_array calc_nfs_list(const application& appl, variable_or_number_list nnfvars)
+  {
+    const size_t arity = recursive_number_of_args(appl);
+    nfs_array result(arity);
+    for(size_t i = 0; i < arity; ++i)
+    {
+      result.at(i) = calc_nfs(get_argument_of_higher_order_term(appl, i), nnfvars);
+    }
+    return result;
+  }
+
+  ///
+  /// \brief appl_function returns the name of a function that can construct a data::application of
+  ///        arity `arity`.
+  /// \param arity the arity of the application that is to be constructed with the function.
+  /// \return the name of a function/constructor that creates an application (either of 'pass_on',
+  ///         'application' or 'make_term_with_many_arguments').
+  ///
+  static inline
+  const std::string appl_function(size_t arity)
+  {
+    if (arity == 0)
+    {
+      return "pass_on";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
+    }
+    if (arity <= 4)
+    {
+      return "application";
+    }
+    return "make_term_with_many_arguments";
+  }
+
+  /*
+   * calc_inner_term helper methods
+   *
+   */
+
+  bool calc_inner_term(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity=0)
+  {
+    const bool nf = !opid_is_nf(f, arity);
+    if (rewr && !nf)
+    {
+      s << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(f) << "_0_0()";
+    }
+    else
+    {
+      s << "function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(f) << ")))";
+    }
+    return rewr || nf;
+  }
+
+  bool calc_inner_term(std::ostream& s, const variable& v, const variable_or_number_list nnfvars, const bool rewr)
+  {
+    const bool nf = std::find(nnfvars.begin(), nnfvars.end(), v) == nnfvars.end();
+    const std::string variable_name = v.name();
+    // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
+    // by this rewriter.
+    if (variable_name[0] == '@')
+    {
+      if (rewr && !nf)
+      {
+        s << "rewrite(" << variable_name.substr(1) << ")";
+      }
+      else
+      {
+        s << variable_name.substr(1);
+      }
+    }
+    else
+    {
+      s << "this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << ")";
+    }
+    return rewr || nf;
+  }
+
+  bool calc_inner_term(std::ostream& s, const abstraction& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  {
+    std::string binder_constructor;
+    std::string rewriter_function;
+    if (is_lambda_binder(a.binding_operator()))
+    {
+      binder_constructor = "lambda_binder";
+      rewriter_function = "rewrite_single_lambda";
+    }
+    else
+    if (is_forall_binder(a.binding_operator()))
+    {
+      binder_constructor = "forall_binder";
+      rewriter_function = "universal_quantifier_enumeration";
+    }
+    else
+    {
+      assert(is_exists_binder(a.binding_operator()));
+      binder_constructor = "exists_binder";
+      rewriter_function = "existential_quantifier_enumeration";
+    }
+    if (rewr)
+    {
+      s << "this_rewriter->" << rewriter_function << "("
+           "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
+      bool nf = calc_inner_term(s, a.body(), startarg, nnfvars, true);
+      s << ", " << nf << ", sigma())";
+      return true;
+    }
+    else
+    {
+      s << "abstraction(" << binder_constructor << "(), "
+           "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
+      calc_inner_term(s, a.body(), startarg, nnfvars, false);
+      s << ")";
+      return false;
+    }
+  }
+
+  bool calc_inner_term(std::ostream& s, const where_clause& w, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  {
+    if (rewr)
+    {
+      s << "this_rewriter->rewrite_where(";
+    }
+    // A rewritten result is expected.
+    s << "where_clause(";
+    calc_inner_term(s, w.body(), startarg, nnfvars, true);
+    s << ",";
+    for(size_t i = w.assignments().size(); i > 0; --i)
+    {
+      s << "jittyc_local_push_front(";
+    }
+    s << "assignment_expression_list()";
+    for(assignment_list::const_iterator i = w.assignments().begin(); i != w.assignments().end(); ++i)
+    {
+      s << ", assignment(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(i->lhs()) << "), ";
+      calc_inner_term(s, i->rhs(), startarg, nnfvars, true);
+      s << "))";
+    }
+    s << ")";
+    if (rewr)
+    {
+      s << ", sigma())";
+    }
+    return rewr;
+  }
+
+  bool calc_inner_term_appl(std::ostream& s, const application& a, const function_symbol& head, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  {
+    const function_symbol& headfs = down_cast<function_symbol>(a.head());
+    const size_t headfs_index = core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(headfs);
+    const size_t arity = a.size();
+    const bool head_nf = opid_is_nf(headfs, arity + 1);
+    const bool must_rewrite = rewr && !head_nf;
+
+    if (!rewr || head_nf)
+    {
+      s << appl_function(arity) << "(";
+    }
+
+    if (arity == 0)
+    {
+      calc_inner_term(s, head, rewr, arity + 1); // TODO: check if this should really be +1
+    }
+    else
+    {
+      // arity > 0
+      nfs_array args_nfs = calc_nfs_list(a, nnfvars);
+      if (rewr && !head_nf)
+      {
+        m_rewriter.add_base_nfs(args_nfs, headfs, arity);
+        m_rewriter.extend_nfs(args_nfs, headfs, arity);
+      }
+      if (arity > NF_MAX_ARITY || head_nf || rewr || args_nfs.is_clear())
+      {
+        if (!rewr || head_nf)
+        {
+          s << "function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << (void*)atermpp::detail::address(headfs) << "))), ";
+        }
+      }
+      else
+        /* TODO: this branch used to be here, but it is unreachable (because !b && !rewr holds at this point...)
+         *
+      {
+        if (must_rewrite)
+        {
+          ss << "rewr_" << (headfs_index + ((1 << arity) - arity - 1) + static_cast<size_t>(args_nfs));
+        }
+        else
+        {
+          // here came the "if (data_equation_selector(headfs)) { }" that follows
+        }
+      }
+        */
+      if (m_rewriter.data_equation_selector(headfs))
+      {
+        std::stringstream new_name;
+        new_name << "@_rewr" << "_" << headfs_index << "_@@@_"
+                 << (getArity(headfs) > NF_MAX_ARITY ? 0 : static_cast<size_t>(args_nfs)) << "_term";
+        const function_symbol f(new_name.str(), headfs.sort());
+        m_rewriter.partially_rewritten_functions.insert(f);
+        s << "function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << (void*)atermpp::detail::address(f) << "))), ";
+      }
+
+      if (rewr && head_nf)
+      {
+        args_nfs.fill(arity > 0);
+      }
+
+      if (must_rewrite)
+      {
+        s << "rewr_" << headfs_index << "_" << arity << "_" << (arity <= NF_MAX_ARITY ? static_cast<size_t>(args_nfs) : 0) << "(";
+      }
+      calc_inner_terms(s, a, startarg, nnfvars, args_nfs);
+      s <<  ")";
+
+      if (!args_nfs.is_filled())
+      {
+        return rewr;
+      }
+    }
+    return rewr || head_nf;
+  }
+
+  bool calc_inner_term_appl(std::ostream& s, const application& a, const abstraction& head, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  {
+    assert(a.size() > 0);
+    assert(is_lambda_binder(head.binding_operator()));
+    const size_t arity = a.size();
+
+    nfs_array args_nfs(arity);
+    if (arity > NF_MAX_ARITY)
+    {
+      args_nfs.fill(false);
+    }
+    else
+    if (rewr)
+    {
+      args_nfs.fill(true);
+    }
+    else
+    {
+      args_nfs = calc_nfs_list(a, nnfvars);
+    }
+
+    if (rewr)
+    {
+      s << "rewrite(";
+    }
+    s << appl_function(arity) << "(";
+    calc_inner_term(s, head, startarg, nnfvars, false);
+    s << ", ";
+    calc_inner_terms(s, a, startarg, nnfvars, args_nfs);
+    s << ")";
+    if (rewr)
+    {
+      s << ")";
+    }
+    return rewr;
+  }
+
+  bool calc_inner_term_appl(std::ostream& s, const application& a, const application& head, const size_t startarg, const variable_or_number_list nnfvars, bool rewr)
+  {
+    const nfs_array rewr_args(recursive_number_of_args(a));
+    if (rewr)
+    {
+      s << "rewrite(";
+    }
+    s << appl_function(a.size()) << "(";
+    calc_inner_term(s, head, startarg, nnfvars, false);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
+    s << ", ";
+    calc_inner_terms(s, a, startarg, nnfvars, rewr_args);
+    s << ")";
+    if (rewr)
+    {
+      s << ")";
+    }
+    return rewr;
+  }
+
+  bool calc_inner_term_appl(std::ostream& s, const application& a, const variable& head, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  {
+    const size_t arity = a.size();
+    nfs_array rewr_args(arity);
+    s << "!is_variable(";
+    calc_inner_term(s, head, startarg, nnfvars, false);
+    s << (rewr
+       ? ") ? rewrite("
+       : ") ? ")
+      << appl_function(arity) << "(";
+    calc_inner_term(s, head, startarg, nnfvars, false);
+    s << ", ";
+    calc_inner_terms(s, a, startarg, nnfvars, rewr_args);
+    s << (rewr
+       ? ")) : "
+       : ") : ");
+    const bool startarg_nnf = std::find(nnfvars.begin(), nnfvars.end(), atermpp::aterm_int(startarg)) != nnfvars.end();
+    s << (rewr && startarg_nnf ? "rewrite(" : "pass_on(") << appl_function(arity) << "(";
+    calc_inner_term(s, head, startarg, nnfvars, false);
+    s << ", ";
+    if (rewr && !startarg_nnf)
+    {
+      rewr_args.fill();
+    }
+    calc_inner_terms(s, a, startarg, nnfvars, rewr_args);
+    s << "))";
+    return rewr;
+  }
+
+  bool calc_inner_term(std::ostream& s, const application& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  {
+    if (is_function_symbol(a.head()))  // Determine whether the topmost symbol is a function symbol.
+    {
+      return calc_inner_term_appl(s, a, down_cast<function_symbol>(a.head()), startarg, nnfvars, rewr);
+    }
+    else
+    if (is_abstraction(a.head()))
+    {
+      return calc_inner_term_appl(s, a, down_cast<abstraction>(a.head()), startarg, nnfvars, rewr);
+    }
+    else
+    if (is_application(a.head()))
+    {
+      return calc_inner_term_appl(s, a, down_cast<application>(a.head()), startarg, nnfvars, rewr);
+    }
+    else
+    {
+      assert(is_variable(a.head()));
+      return calc_inner_term_appl(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr);
+    }
+  }
+
+  ///
+  /// \brief calc_inner_term generates C++ code that reconstructs data expression t.
+  /// \param s is the stream to write the generated code to.
+  /// \param t is the data expression to be reconstructed in the generated code.
+  /// \param startarg gives the index of the position of t in the surrounding application (0 for head position, 1 for first argument, etc.)
+  /// \param nnfvars contains variables and indices that are not in normal form.
+  /// \param rewr indicates whether the reconstructed data expression should be rewritten to normal form.
+  /// \return True if the result is in normal form, false otherwise.
+  ///
+  bool calc_inner_term(std::ostream& s, const data_expression& t, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  {
+    if (find_free_variables(t).empty())
+    {
+      s << m_rewriter.m_nf_cache.insert(t);
+      return true;
+    }
+    else
+    if (is_function_symbol(t))
+    {
+      return calc_inner_term(s, down_cast<function_symbol>(t), rewr);
+    }
+    else
+    if (is_variable(t))
+    {
+      return calc_inner_term(s, down_cast<variable>(t), nnfvars, rewr);
+    }
+    else
+    if (is_abstraction(t))
+    {
+      return calc_inner_term(s, down_cast<abstraction>(t), startarg, nnfvars, rewr);
+    }
+    else
+    if (is_where_clause(t))
+    {
+      return calc_inner_term(s, down_cast<where_clause>(t), startarg, nnfvars, rewr);
+    }
+    else
+    {
+      assert(is_application(t));
+      return calc_inner_term(s, down_cast<application>(t), startarg, nnfvars, rewr);
+    }
+  }
+
+  ///
+  /// \brief calc_inner_terms calls calc_inner_term on all arguments of t, passing the corresponding
+  ///        bools in the rewr array as the rewr parameter. Returns the booleans returned by those
+  ///        calls as a vector.
+  ///
+  nfs_array calc_inner_terms(std::ostream& s, const application& appl, const size_t startarg, const variable_or_number_list nnfvars, nfs_array rewr)
+  {
+    size_t j = 0;
+    for(application::const_iterator i = appl.begin(); i != appl.end(); ++i, ++j)
+    {
+      if (j > 0)
+      {
+        s << ", ";
+      }
+      calc_inner_term(s, *i, startarg + j, nnfvars, rewr.at(j));
+    }
+    return rewr;
+  }
+
+  /*
+   * implement_tree helper methods
+   *
+   */
+
+  void implement_tree(const match_tree& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     if (tree.isS())
     {
-      implement_tree_aux(atermpp::down_cast<match_tree_S>(tree), cur_arg, parent, level, cnt);
+      implement_tree(atermpp::down_cast<match_tree_S>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isM())
     {
-      implement_tree_aux(atermpp::down_cast<match_tree_M>(tree), cur_arg, parent, level, cnt);
+      implement_tree(atermpp::down_cast<match_tree_M>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isF())
     {
-      implement_tree_aux(atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt);
+      implement_tree(atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isD())
     {
-      implement_tree_aux(atermpp::down_cast<match_tree_D>(tree), level, cnt);
+      implement_tree(atermpp::down_cast<match_tree_D>(tree), level, cnt);
     }
     else if (tree.isN())
     {
-      implement_tree_aux(atermpp::down_cast<match_tree_N>(tree), cur_arg, parent, level, cnt);
+      implement_tree(atermpp::down_cast<match_tree_N>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isC())
     {
-      implement_tree_aux(atermpp::down_cast<match_tree_C>(tree), cur_arg, parent, level, cnt);
+      implement_tree(atermpp::down_cast<match_tree_C>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isR())
     {
-      implement_tree_aux(atermpp::down_cast<match_tree_R>(tree), cur_arg, level);
+      implement_tree(atermpp::down_cast<match_tree_R>(tree), cur_arg, level);
     }
     else 
     {
@@ -1756,7 +2086,7 @@ private:
     }    
   }
   
-  void implement_tree_aux(const match_tree_S& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_tree(const match_tree_S& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     const match_tree_S& treeS(tree);
     m_stream << m_padding << "const data_expression& " << string(treeS.target_variable().name()).c_str() + 1 << " = ";
@@ -1778,10 +2108,10 @@ private:
                << (level == 1 ? "arg" : "t") << parent << "[" << cur_arg << "]"
                << "); // S2\n";
     }
-    implement_tree_aux(tree.subtree(), cur_arg, parent, level, cnt);
+    implement_tree(tree.subtree(), cur_arg, parent, level, cnt);
   }
   
-  void implement_tree_aux(const match_tree_M& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_tree(const match_tree_M& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     m_stream << m_padding << "if (" << string(tree.match_variable().name()).c_str() + 1 << " == ";
     if (level == 0)
@@ -1795,20 +2125,20 @@ private:
     m_stream << ") // M\n" << m_padding 
              << "{\n";
     m_padding.indent();
-    implement_tree_aux(tree.true_tree(), cur_arg, parent, level, cnt);
+    implement_tree(tree.true_tree(), cur_arg, parent, level, cnt);
     m_padding.unindent();
     m_stream << m_padding
              << "}\n" << m_padding 
              << "else\n" << m_padding
              << "{\n";
     m_padding.indent();
-    implement_tree_aux(tree.false_tree(), cur_arg, parent, level, cnt);
+    implement_tree(tree.false_tree(), cur_arg, parent, level, cnt);
     m_padding.unindent();
     m_stream << m_padding
              << "}\n";
   }
   
-  void implement_tree_aux(const match_tree_F& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_tree(const match_tree_F& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     const void* func = (void*)(atermpp::detail::address(tree.function()));
     const char* s_arg = "arg";
@@ -1850,7 +2180,7 @@ private:
     m_stack.push_back(cur_arg);
     m_stack.push_back(parent);
     m_padding.indent();
-    implement_tree_aux(tree.true_tree(), 1, level == 0 ? cur_arg : cnt, level + 1, cnt + 1);
+    implement_tree(tree.true_tree(), 1, level == 0 ? cur_arg : cnt, level + 1, cnt + 1);
     m_padding.unindent();
     m_stack.pop_back();
     m_stack.pop_back();
@@ -1859,37 +2189,38 @@ private:
              << "else\n" << m_padding
              << "{\n";
     m_padding.indent();
-    implement_tree_aux(tree.false_tree(), cur_arg, parent, level, cnt);
+    implement_tree(tree.false_tree(), cur_arg, parent, level, cnt);
     m_padding.unindent();
     m_stream << m_padding
              << "}\n";
   }
   
-  void implement_tree_aux(const match_tree_D& tree, size_t level, size_t cnt)
+  void implement_tree(const match_tree_D& tree, size_t level, size_t cnt)
   {
     int i = m_stack.back();
     m_stack.pop_back();
     int j = m_stack.back();
     m_stack.pop_back();
-    implement_tree_aux(tree.subtree(), j, i, level - 1, cnt);
+    implement_tree(tree.subtree(), j, i, level - 1, cnt);
     m_stack.push_back(j);
     m_stack.push_back(i);
   }
 
-  void implement_tree_aux(const match_tree_N& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_tree(const match_tree_N& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
-    implement_tree_aux(tree.subtree(), cur_arg + 1, parent, level, cnt);
+    implement_tree(tree.subtree(), cur_arg + 1, parent, level, cnt);
   }
 
-  void implement_tree_aux(const match_tree_C& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_tree(const match_tree_C& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
-    pair<bool, string> p = m_rewriter.calc_inner_term(tree.condition(), 0, m_nnfvars);
     m_stream << m_padding
-             << "if (" << p.second << " == sort_bool::true_()) // C\n" << m_padding
+             << "if (";
+    calc_inner_term(m_stream, tree.condition(), 0, m_nnfvars, true);
+    m_stream << " == sort_bool::true_()) // C\n" << m_padding
              << "{\n";
     
     m_padding.indent();
-    implement_tree_aux(tree.true_tree(), cur_arg, parent, level, cnt);
+    implement_tree(tree.true_tree(), cur_arg, parent, level, cnt);
     m_padding.unindent();
     
     m_stream << m_padding
@@ -1898,32 +2229,35 @@ private:
              << "{\n";
           
     m_padding.indent();
-    implement_tree_aux(tree.false_tree(), cur_arg, parent, level, cnt);
+    implement_tree(tree.false_tree(), cur_arg, parent, level, cnt);
     m_padding.unindent();
     
     m_stream << m_padding
              << "}\n";
   }
   
-  void implement_tree_aux(const match_tree_R& tree, size_t cur_arg, size_t level)
+  void implement_tree(const match_tree_R& tree, size_t cur_arg, size_t level)
   {
     if (level > 0)
     {
       cur_arg = m_stack[2 * level - 1];
     }
-    pair<bool, string> p = m_rewriter.calc_inner_term(tree.result(), cur_arg + 1, m_nnfvars);
-    m_stream << m_padding << "return " << p.second << "; // R1\n";
+    m_stream << m_padding << "return ";
+    calc_inner_term(m_stream, tree.result(), cur_arg + 1, m_nnfvars, true);
+    m_stream << "; // R1\n";
   }
 
   const match_tree& implement_tree(const match_tree_C& tree)
   {
     assert(tree.true_tree().isR());
-    pair<bool, string> p = m_rewriter.calc_inner_term(tree.condition(), 0, variable_or_number_list());
-    pair<bool, string> r = m_rewriter.calc_inner_term(match_tree_R(tree.true_tree()).result(), 0, m_nnfvars);
     m_stream << m_padding
-             << "if (" << p.second << " == sort_bool::true_()) // C\n" << m_padding
+             << "if (";
+    calc_inner_term(m_stream, tree.condition(), 0, variable_or_number_list(), true);
+    m_stream << " == sort_bool::true_()) // C\n" << m_padding
              << "{\n" << m_padding
-             << "  return " << r.second << ";\n" << m_padding
+             << "  return ";
+    calc_inner_term(m_stream, match_tree_R(tree.true_tree()).result(), 0, m_nnfvars, true);
+    m_stream << ";\n" << m_padding
              << "}\n" << m_padding
              << "else\n" << m_padding
              << "{\n" << m_padding;
@@ -1933,19 +2267,22 @@ private:
   
   void implement_tree(const match_tree_R& tree, size_t arity)
   {
-    pair<bool, string> p = m_rewriter.calc_inner_term(tree.result(), 0, m_nnfvars);
     if (arity == 0)
     { 
       // return a reference to an atermpp::aterm_appl
       m_stream << m_padding
-               << "static data_expression static_term(rewrite(" << p.second << "));\n" << m_padding
+               << "static data_expression static_term(rewrite(";
+      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true);
+      m_stream << "));\n" << m_padding
                << "return static_term; // R2a\n";
     }
     else
     { 
       // arity>0
       m_stream << m_padding
-               << "return " << p.second << "; // R2b\n";
+               << "return ";
+      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true);
+      m_stream << "; // R2b\n";
     }
   }
   
@@ -1954,6 +2291,11 @@ public:
     : m_rewriter(rewr), m_stream(stream), m_padding(0)
   { }
   
+  ///
+  /// \brief implement_tree
+  /// \param tree
+  /// \param arity
+  ///
   void implement_tree(match_tree tree, const size_t arity)
   {
     size_t l = 0;
@@ -1978,7 +2320,7 @@ public:
     }
     else
     {
-      implement_tree_aux(tree, 0, 0, 0, 0);
+      implement_tree(tree, 0, 0, 0, 0);
     }
     
     // Close braces opened by implement_tree(const match_tree_C&)
