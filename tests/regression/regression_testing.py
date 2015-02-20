@@ -30,6 +30,11 @@ class LpsconfcheckCtauTest(YmlTest):
         self.set_command_line_options('t3', ['-x' + confluence_type])
         self.settings.update({'result': "result = l7.value and l8.value['confluent_tau_summands'] == {0}".format(expected_result)})
 
+class PbesrewrTest(YmlTest):
+    def __init__(self, name, inputfiles, rewriter, settings = dict()):
+        super(PbesrewrTest, self).__init__(name, ymlfile('pbesrewr'), inputfiles, settings)
+        self.set_command_line_options('t2', ['-p' + rewriter])
+
 class CountStatesTest(YmlTest):
     # expected_result is the expected number of states
     def __init__(self, name, inputfiles, expected_result, settings = dict()):

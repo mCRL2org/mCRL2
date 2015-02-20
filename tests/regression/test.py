@@ -25,7 +25,7 @@ class TestRunner(testing.TestRunner):
                        #YmlTest('ticket_1093', ymlfile('alphabet'),          [abspath('tickets/1093/1.mcrl2')], { 'timeout': 300, 'memlimit': 500000000 }),
                        # YmlTest('ticket_1122', ymlfile('ticket_1122'),       [abspath('tickets/1122/1.mcrl2')]), # specification is not well typed
                        YmlTest('ticket_1127', ymlfile('mcrl22lps'),         [abspath('tickets/1127/1.mcrl2')]),
-                       YmlTest('ticket_1143', ymlfile('pbesrewr-onepoint'), [abspath('tickets/1143/1.txt')]),
+                       PbesrewrTest('ticket_1143', [abspath('tickets/1143/1.txt')], 'quantifier-one-point'),
                        YmlTest('ticket_1144', ymlfile('lpsbisim2pbes'),     [abspath('tickets/1144/test1.txt'), abspath('tickets/1144/test2.txt')]),
                        CountStatesTest('ticket_1167', [mcrl2file('/examples/academic/abp/abp.mcrl2')], 74),
                        YmlTest('ticket_1218', ymlfile('alphabet'),          [abspath('tickets/1218/1.mcrl2')]),
@@ -37,6 +37,7 @@ class TestRunner(testing.TestRunner):
                        YmlTest('ticket_1317', ymlfile('alphabet'),          [abspath('tickets/1317/1.mcrl2')]),
                        YmlTest('ticket_1318', ymlfile('alphabet'),          [abspath('tickets/1318/1.mcrl2')]),
                        YmlTest('ticket_1319', ymlfile('alphabet'),          [abspath('tickets/1319/1.mcrl2')]),
+                       YmlTest('ticket_1322', ymlfile('pbesstategraph'),    [abspath('tickets/1322/1.txt')]),
                        LpsconfcheckCtauTest('lpsconfcheck_1', [mcrl2file('/examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18)),
                        LpsconfcheckCtauTest('lpsconfcheck_2', [mcrl2file('/examples/academic/trains/trains.mcrl2')], 'T', (0, 9)),
                        #LpsconfcheckCtauTest('lpsconfcheck_3', [mcrl2file('/examples/industrial/chatbox/chatbox.mcrl2')], 'x', (40, 72), { 'timeout': 300, 'memlimit': 500000000 } ),
