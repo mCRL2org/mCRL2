@@ -5,6 +5,7 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import os
+import os.path
 import sys
 sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
 
@@ -12,252 +13,182 @@ from random_bes_generator import make_bes
 from random_pbes_generator import make_pbes
 from random_process_generator import make_process_specification, generator_map, make_action, make_delta, make_tau, \
     make_process_instance, make_sum, make_if_then, make_if_then_else, make_choice, make_seq
+from testing import run_pbes_test_with_counter_example_minimization
+from testcommand import YmlTest
 from text_utility import write_text
-from testing import run_yml_test, run_pbes_test_with_counter_example_minimization, cleanup_files
 
 MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
 
-lpsconfcheck_generator_map = {
-    make_action: 8,
-    make_delta: 1,
-    make_tau: 1,
-    make_process_instance: 1,
-    make_sum: 0,
-    make_if_then: 0,
-    make_if_then_else: 0,
-    make_choice: 5,
-    make_seq: 5,
-}
+def ymlfile(file):
+    return '{}/tests/specifications/{}.yml'.format(MCRL2_ROOT, file)
 
-def run_alphabet_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'alphabet.yml')
-    actions = ['a', 'b', 'c', 'd']
-    process_identifiers = ['P', 'Q', 'R']
-    size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size)
-    filename = '{0}.mcrl2'.format(name, settings)
-    write_text(filename, str(p))
-    inputfiles = [filename]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, inputfiles, settings)
+def mcrl2file(file):
+    return os.path.join(MCRL2_ROOT, file)
 
-def run_lpssuminst_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpssuminst.yml')
-    actions = ['a', 'b', 'c', 'd']
-    process_identifiers = ['P', 'Q', 'R']
-    size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
-    filename = '{0}.mcrl2'.format(name, settings)
-    write_text(filename, str(p))
-    inputfiles = [filename]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, inputfiles, settings)
+class RandomTest(YmlTest):
+    def __init__(self, name, ymlfile, settings = dict()):
+        super(RandomTest, self).__init__(name, ymlfile, [], settings)
 
-def run_lpssumelm_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpssumelm.yml')
-    actions = ['a', 'b', 'c', 'd']
-    process_identifiers = ['P', 'Q', 'R']
-    size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
-    filename = '{0}.mcrl2'.format(name, settings)
-    write_text(filename, str(p))
-    inputfiles = [filename]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, inputfiles, settings)
+    # create input files for the random test, and add the filenames to self.inputfiles
+    def create_inputfiles(self, runpath = '.'):
+        raise NotImplemented
 
-def run_lpsparelm_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsparelm.yml')
-    actions = ['a', 'b', 'c', 'd']
-    process_identifiers = ['P', 'Q', 'R']
-    size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
-    filename = '{0}.mcrl2'.format(name, settings)
-    write_text(filename, str(p))
-    inputfiles = [filename]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, inputfiles, settings)
+    # removes input files that are in the runpath directory
+    def remove_inputfiles(self, runpath = '.'):
+        for filename in self.inputfiles:
+            if os.path.abspath(runpath) == os.path.abspath(os.path.dirname(filename)):
+                os.remove(filename)
 
-def run_lpsconfcheck(source_path, name, settings, testfile):
-    testfile = '{}/tests/specifications/{}'.format(source_path, testfile)
-    actions = ['a', 'b', 'c']
-    process_identifiers = ['P', 'Q', 'R']
-    size = 13
-    p = make_process_specification(lpsconfcheck_generator_map, actions, process_identifiers, size, init='hide({a}, allow({a, b, c}, P || Q || R))')
-    filename = '{0}.mcrl2'.format(name, settings)
-    write_text(filename, str(p))
-    inputfiles = [filename]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, inputfiles, settings)
+    def execute(self, runpath = '.'):
+        self.create_inputfiles(runpath)
+        super(RandomTest, self).execute(runpath)
+        self.remove_inputfiles(runpath)
 
-def run_lpsconfcheck_c_test(source_path, name, settings):
-    run_lpsconfcheck(source_path, name, settings, 'lpsconfcheck_c.yml')
+class ProcessTest(RandomTest):
+    def __init__(self, name, ymlfile, settings = dict()):
+        super(ProcessTest, self).__init__(name, ymlfile, settings)
+        self.generator_map = generator_map
+        self.actions = ['a', 'b', 'c', 'd']
+        self.process_identifiers = ['P', 'Q', 'R']
+        self.process_size = 13
+        self.init = None
+        self.generate_process_parameters = False
 
-def run_lpsconfcheck_capital_c_test(source_path, name, settings):
-    run_lpsconfcheck(source_path, name, settings, 'lpsconfcheck_capital_c.yml')
+    def create_inputfiles(self, runpath = '.'):
+        filename = '{0}.mcrl2'.format(self.name, self.settings)
+        p = make_process_specification(self.generator_map, self.actions, self.process_identifiers, self.process_size, init = self.init, generate_process_parameters = self.generate_process_parameters)
+        write_text(filename, str(p))
+        self.inputfiles += [filename]
 
-def run_lpsconfcheck_d_test(source_path, name, settings):
-    run_lpsconfcheck(source_path, name, settings, 'lpsconfcheck_d.yml')
+class AlphabetTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(AlphabetTest, self).__init__(name, ymlfile('alphabet'), settings)
 
-def run_lpsconfcheck_t_test(source_path, name, settings):
-    run_lpsconfcheck(source_path, name, settings, 'lpsconfcheck_t.yml')
+class LpsSuminstTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(LpsSuminstTest, self).__init__(name, ymlfile('lpssuminst'), settings)
 
-def run_lpsconfcheck_z_test(source_path, name, settings):
-    run_lpsconfcheck(source_path, name, settings, 'lpsconfcheck_z.yml')
+class LpsSumelmTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(LpsSumelmTest, self).__init__(name, ymlfile('lpssumelm'), settings)
 
-def run_lpsconstelm_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsconstelm.yml')
-    actions = ['a', 'b', 'c', 'd']
-    process_identifiers = ['P', 'Q', 'R']
-    size = 13
-    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
-    filename = '{0}.mcrl2'.format(name, settings)
-    write_text(filename, str(p))
-    inputfiles = [filename]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, inputfiles, settings)
+class LpsParelmTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(LpsParelmTest, self).__init__(name, ymlfile('lpsparelm'), settings)
+        self.generate_process_parameters = True
 
-def run_lpsbinary_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'lpsbinary.yml')
-    actions = ['a', 'b', 'c', 'd']
-    process_identifiers = ['P', 'Q', 'R']
-    size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size, generate_process_parameters = True)
-    filename = '{0}.mcrl2'.format(name, settings)
-    write_text(filename, str(p))
-    inputfiles = [filename]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, inputfiles, settings)
+class LpsConfcheckTest(ProcessTest):
+    def __init__(self, name, confluence_type, settings = dict()):
+        assert confluence_type in 'cdCTZ'
+        super(LpsConfcheckTest, self).__init__(name, ymlfile('lpsconfcheck'), settings)
+        self.set_command_line_options('t2', ['-x' + confluence_type])
+        self.actions = ['a', 'b', 'c']
+        self.init = 'hide({a}, allow({a, b, c}, P || Q || R))'
+        self.generator_map = {
+                               make_action: 8,
+                               make_delta: 1,
+                               make_tau: 1,
+                               make_process_instance: 1,
+                               make_sum: 0,
+                               make_if_then: 0,
+                               make_if_then_else: 0,
+                               make_choice: 5,
+                               make_seq: 5,
+                             }
 
-def run_bessolve_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'bessolve.yml')
-    filename = '{0}.txt'.format(name, settings)
-    equation_count = 4
-    term_size = 3
-    p = make_bes(equation_count, term_size)
-    write_text(filename, str(p))
-    inputfiles = [filename]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, inputfiles, settings)
+class LpsConstelmTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(LpsConstelmTest, self).__init__(name, ymlfile('lpsconstelm'), settings)
+        self.generate_process_parameters = True
 
-def run_lps2pbes_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'lps2pbes.yml')
-    actions = ['a', 'b', 'c', 'd']
-    process_identifiers = ['P', 'Q', 'R']
-    size = 10
-    p = make_process_specification(generator_map, actions, process_identifiers, size)
-    filename = '{0}.mcrl2'.format(name, settings)
-    write_text(filename, str(p))
-    nodeadlock = os.path.join(MCRL2_ROOT, 'examples', 'modal-formulas', 'nodeadlock.mcf')
-    inputfiles = [filename, nodeadlock]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, [filename], settings)
+class LpsBinaryTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(LpsBinaryTest, self).__init__(name, ymlfile('lpsbinary'), settings)
+        self.generate_process_parameters = True
+
+class Lps2pbesTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(Lps2pbesTest, self).__init__(name, ymlfile('lps2pbes'), settings)
+
+    def create_inputfiles(self, runpath = '.'):
+        super(Lps2pbesTest, self).create_inputfiles(runpath)
+        self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
+
+class PbesTest(RandomTest):
+    def __init__(self, name, ymlfile, settings = dict()):
+        super(PbesTest, self).__init__(name, ymlfile, settings)
+        self.equation_count = 4
+        self.atom_count = 4
+        self.propvar_count = 3
+        self.use_quantifiers = True
+
+    def execute(self, runpath = '.'):
+        p = make_pbes(self.equation_count, self.atom_count, self.propvar_count, self.use_quantifiers)
+        run_pbes_test_with_counter_example_minimization(self.name, self.ymlfile, p, self.settings)
 
 # N.B. does not work yet due to unusable abstraction map
-def run_pbesabsinthe_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesabsinthe.yml')
-    equation_count = 2
-    atom_count = 2
-    propvar_count = 2
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    settings = dict()
-    abstraction = '-a{0}'.format(os.path.join(os.path.dirname(__file__), 'formulas', 'abstraction.txt'))
-    settings['tools'] = {'t2': {'args': [abstraction]}, 't3': {'args': [abstraction]}}
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class PbesabsintheTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(PbesabsintheTest, self).__init__(name, ymlfile('pbesabsinthe'), settings)
 
-def run_pbesabstract_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesabstract.yml')
-    equation_count = 2
-    atom_count = 2
-    propvar_count = 2
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class PbesabstractTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(PbesabstractTest, self).__init__(name, ymlfile('pbesabstract'), settings)
 
-def run_pbesconstelm_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesconstelm.yml')
-    equation_count = 3
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class PbesconstelmTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(PbesconstelmTest, self).__init__(name, ymlfile('pbesconstelm'), settings)
 
-def run_pbesparelm_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesparelm.yml')
-    equation_count = 3
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class PbesparelmTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(PbesparelmTest, self).__init__(name, ymlfile('pbesparelm'), settings)
 
-def run_pbespareqelm_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbespareqelm.yml')
-    equation_count = 3
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class PbespareqelmTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(PbespareqelmTest, self).__init__(name, ymlfile('pbespareqelm'), settings)
 
-# N.B. does not work since the generated PBES is not in BQNF format!
-def run_pbesrewr_test(source_path, name, rewriter, settings):
-    name = '{0}_{1}'.format(name, rewriter)
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesrewr-{0}.yml'.format(rewriter))
-    equation_count = 3
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class PbesrewrTest(PbesTest):
+    def __init__(self, name, rewriter, settings = dict()):
+        super(PbesrewrTest, self).__init__(name + '_' + rewriter, ymlfile('pbesrewr'), settings)
+        self.set_command_line_options('t2', ['-p' + rewriter])
 
-def run_pbesinst_lazy_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesinst_lazy.yml')
-    equation_count = 3
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class Pbesinst_lazyTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(Pbesinst_lazyTest, self).__init__(name, ymlfile('pbesinst_lazy'), settings)
 
-def run_pbesinst_finite_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesinst_finite.yml')
-    equation_count = 3
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class Pbesinst_finiteTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(Pbesinst_finiteTest, self).__init__(name, ymlfile('pbesinst_finite'), settings)
+
+class PbessolveTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(PbessolveTest, self).__init__(name, ymlfile('pbessolve'), settings)
+
+class PbesstategraphTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(PbesstategraphTest, self).__init__(name, ymlfile('pbesstategraph'), settings)
 
 # N.B does not work due to unknown expressions (F_or)
-def run_symbolic_exploration_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'symbolic_exploration.yml')
-    equation_count = 3
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class SymbolicExplorationTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(SymbolicExplorationTest, self).__init__(name, ymlfile('symbolic_exploration'), settings)
 
-def run_pbessolve_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbessolve.yml')
-    equation_count = 5
-    atom_count = 4
-    propvar_count = 3
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+class BesTest(RandomTest):
+    def __init__(self, name, ymlfile, settings = dict()):
+        super(BesTest, self).__init__(name, ymlfile, settings)
+        self.equation_count = 4
+        self.term_size = 3
 
-def run_pbesstategraph_test(source_path, name, settings):
-    testfile = '{}/tests/specifications/{}'.format(source_path, 'pbesstategraph.yml')
-    equation_count = 4
-    atom_count = 5
-    propvar_count = 4
-    use_quantifiers = True
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
+    def create_inputfiles(self, runpath = '.'):
+        filename = '{0}.txt'.format(self.name, self.settings)
+        p = make_bes(self.equation_count, self.term_size)
+        write_text(filename, str(p))
+        self.inputfiles += [filename]
+
+class BessolveTest(BesTest):
+    def __init__(self, name, settings = dict()):
+        super(BessolveTest, self).__init__(name, ymlfile('bessolve'), settings)
 
 if __name__ == '__main__':
     settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False, 'cleanup_files': False}
@@ -265,35 +196,34 @@ if __name__ == '__main__':
     if not os.path.exists(testdir):
         os.mkdir(testdir)
     os.chdir(testdir)
-    source_path = MCRL2_ROOT
 
-    run_lpsconfcheck_c_test(source_path, 'lpsconfcheck_c', settings)
-    run_lpsconfcheck_capital_c_test(source_path, 'lpsconfcheck_capital_c', settings)
-    run_lpsconfcheck_d_test(source_path, 'lpsconfcheck_d', settings)
-    run_lpsconfcheck_t_test(source_path, 'lpsconfcheck_t', settings)
-    run_lpsconfcheck_z_test(source_path, 'lpsconfcheck_z', settings)
-    run_lps2pbes_test(source_path, 'lps2pbes', settings)
-    run_pbesabstract_test(source_path, 'pbesabstract', settings)
-    run_pbesconstelm_test(source_path, 'pbesconstelm', settings)
-    run_pbesinst_finite_test(source_path, 'pbesinst_finite', settings)
-    run_pbesinst_lazy_test(source_path, 'pbesinst_lazy', settings)
-    run_pbesparelm_test(source_path, 'pbesparelm', settings)
-    run_pbespareqelm_test(source_path, 'pbespareqelm', settings)
-    run_pbesrewr_test(source_path, 'pbesrewr', 'simplify', settings)
-    run_pbesrewr_test(source_path, 'pbesrewr', 'pfnf', settings)
-    run_pbesrewr_test(source_path, 'pbesrewr', 'quantifier-all', settings)
-    run_pbesrewr_test(source_path, 'pbesrewr', 'quantifier-finite', settings)
-    run_pbesrewr_test(source_path, 'pbesrewr', 'quantifier-one-point', settings)
-    run_pbessolve_test(source_path, 'pbessolve', settings)
-    run_pbesstategraph_test(source_path, 'pbesstategraph', settings)
-    run_alphabet_test(source_path, 'alphabet', settings)
-    run_lpsbinary_test(source_path, 'lpsbinary', settings)
-    run_lpsconstelm_test(source_path, 'lpsconstelm', settings)
-    run_lpsparelm_test(source_path, 'lpsparelm', settings)
-    run_lpssumelm_test(source_path, 'lpssumelm', settings)
-    run_lpssuminst_test(source_path, 'lpssuminst', settings)
-    run_bessolve_test(source_path, 'bessolve', settings)
+    AlphabetTest('alphabet', settings).execute_in_sandbox()
+    LpsSuminstTest('lpssuminst', settings).execute_in_sandbox()
+    LpsSumelmTest('lpssumelm', settings).execute_in_sandbox()
+    LpsParelmTest('lpsparelm', settings).execute_in_sandbox()
+    LpsConfcheckTest('lpsconfcheck_c', 'c', settings).execute_in_sandbox()
+    LpsConfcheckTest('lpsconfcheck_capital_c', 'C', settings).execute_in_sandbox()
+    LpsConfcheckTest('lpsconfcheck_d', 'd', settings).execute_in_sandbox()
+    LpsConfcheckTest('lpsconfcheck_t', 'T', settings).execute_in_sandbox()
+    LpsConfcheckTest('lpsconfcheck_z', 'Z', settings).execute_in_sandbox()
+    LpsConstelmTest('lpsconstelm', settings).execute_in_sandbox()
+    LpsBinaryTest('lpsbinary', settings).execute_in_sandbox()
+    Lps2pbesTest('lps2pbes', settings).execute_in_sandbox()
+    PbesabstractTest('pbesabstract', settings).execute_in_sandbox()
+    PbesconstelmTest('pbesconstelm', settings).execute_in_sandbox()
+    PbesparelmTest('pbesparelm', settings).execute_in_sandbox()
+    PbespareqelmTest('pbespareqelm', settings).execute_in_sandbox()
+    PbesrewrTest('pbesrewr', 'simplify', settings).execute_in_sandbox()
+    PbesrewrTest('pbesrewr', 'pfnf', settings).execute_in_sandbox()
+    PbesrewrTest('pbesrewr', 'quantifier-all', settings).execute_in_sandbox()
+    PbesrewrTest('pbesrewr', 'quantifier-finite', settings).execute_in_sandbox()
+    PbesrewrTest('pbesrewr', 'quantifier-one-point', settings).execute_in_sandbox()
+    Pbesinst_lazyTest('pbesinst_lazy', settings).execute_in_sandbox()
+    Pbesinst_finiteTest('pbesinst_finite', settings).execute_in_sandbox()
+    PbessolveTest('pbessolve', settings).execute_in_sandbox()
+    PbesstategraphTest('pbesstategraph', settings).execute_in_sandbox()
+    BessolveTest('bessolve', settings).execute_in_sandbox()
 
-    # run_pbesabsinthe_test(source_path, 'pbesabsinthe', settings)
-    # run_pbesrewr_test(source_path, 'pbesrewr', 'bqnf-quantifier', settings)
-    # run_symbolic_exploration_test(source_path, 'symbolic_exploration', settings)
+    # SymbolicExplorationTest('symbolic_exploration', settings).execute_in_sandbox()
+    # PbesrewrTest('pbesrewr', 'bqnf-quantifier', settings).execute_in_sandbox()
+    # PbesabstractTest('pbesabsinthe', settings).execute_in_sandbox()

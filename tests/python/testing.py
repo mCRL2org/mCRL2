@@ -9,6 +9,9 @@ import os
 import os.path
 import shutil
 import yaml
+import sys
+sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
+import testrunner
 from popen import Popen, MemoryExceededError, TimeExceededError
 from subprocess import  PIPE, STDOUT
 from text_utility import read_text, write_text
@@ -213,21 +216,16 @@ class Test:
             toolmap[tool.label] = tool
         print '\n'.join([toolmap[label].command(runpath) for label in labels if label in toolmap])
 
-def run_replay(testfile, inputfiles, settings, remove_files = True):
+def run_yml_test(name, testfile, inputfiles, settings):
     for filename in [testfile] + inputfiles:
         if not os.path.isfile(filename):
             print('Error:', filename, 'does not exist!')
             return
-
     t = Test(testfile, settings)
-
     if 'verbose' in settings and settings['verbose']:
         print 'Running test ' + testfile
     t.setup(inputfiles)
-    return t.run()
-
-def run_yml_test(name, testfile, inputfiles, settings):
-    result = run_replay(testfile, inputfiles, settings)
+    result = t.run()
     print name, result
     if result == False:
         for filename in inputfiles:
@@ -235,17 +233,12 @@ def run_yml_test(name, testfile, inputfiles, settings):
             print '- file {}\n{}\n'.format(filename, text)
     return result
 
-def cleanup_files(result, files, settings):
-    if result != False and settings['cleanup_files']:
-        for filename in files:
-            os.remove(filename)
-
 def run_pbes_test(name, testfile, p, settings):
     filename = '{0}.txt'.format(name)
     write_text(filename, str(p))
     inputfiles = [filename]
     result = run_yml_test(name, testfile, inputfiles, settings)
-    cleanup_files(result, inputfiles, settings)
+    os.remove(filename)
 
 def run_pbes_test_with_counter_example_minimization(name, testfile, p, settings):
     result = run_pbes_test(name, testfile, p, settings)
@@ -254,3 +247,53 @@ def run_pbes_test_with_counter_example_minimization(name, testfile, p, settings)
         m.minimize()
         raise RuntimeError('Test {0} failed'.format(name))
     return result
+
+class TestRunner(testrunner.TestRunner):
+    def __init__(self):
+        super(TestRunner, self).__init__()
+        self.settings = {'toolpath': self._tool_path,
+                         'verbose': self._args.verbose,
+                         'cleanup_files': not self._args.keep_files}
+        self.tests = []
+
+    def main(self):
+        if self._args.print_names:
+            self.print_names()
+        if self._args.command is not None:
+            try:
+                test = self.tests[self._args.command]
+                test.print_commands(os.path.join(os.getcwd(), test.name))
+            except Exception as e:
+                sys.exit(str(e))
+        super(TestRunner, self).main()
+
+    def ymlfile(self, name):
+        return '{}/tests/specifications/{}.yml'.format(self._source_path, name)
+
+    def mcrl2file(self, file):
+        return self._source_path + file
+
+    def _get_commandline_parser(self):
+        parser = super(TestRunner, self)._get_commandline_parser()
+        parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Display additional progress messages.')
+        parser.add_argument('-k', '--keep-files', dest='keep_files', action='store_true', help='Keep the files produced by the test')
+        parser.add_argument('-p', '--print-names', dest='print_names', action='store_true', help='Print the names and the numbers of the tests')
+        parser.add_argument('-c', '--print-commands', dest='command', metavar='N', type=int, action='store', help='Print the commands of test N, or exit with return value 1 if N is too large.')
+        return parser
+
+    def names(self):
+        for test in self.tests:
+            yield test.name
+
+    # displays names and numbers of the tests
+    def print_names(self):
+        for i, test in enumerate(self.tests):
+            print '{} {}'.format(i, test.name)
+
+    def run(self, testnum):
+        if testnum < len(self.tests):
+            test = self.tests[testnum]
+            test.settings.update(self.settings)
+            test.execute_in_sandbox()
+        else:
+            raise RuntimeError('Invalid test number')
