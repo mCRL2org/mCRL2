@@ -154,6 +154,12 @@ bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIt
   return true;
 }
 
+template <typename T>
+bool has_empty_intersection(const std::set<T>& s1, const std::set<T>& s2)
+{
+  return has_empty_intersection(s1.begin(), s1.end(), s2.begin(), s2.end());
+}
+
 } // namespace detail
 
 } // namespace utilities

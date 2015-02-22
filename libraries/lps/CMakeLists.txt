@@ -6,7 +6,6 @@ add_mcrl2_library(lps
     linearise.cpp
     lpsparunfoldlib.cpp
     next_state_generator.cpp
-    disjointness_checker.cpp
     simulation.cpp
     typecheck.cpp
   DEPENDS
