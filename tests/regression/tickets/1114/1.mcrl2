@@ -1,0 +1,10 @@
+act
+  a,b,c,d;
+
+proc
+  P = (((tau) . (d)) . (a)) . (b);
+  Q = (true) -> (d) <> (d);
+  R = (a) . (Q);
+
+init
+  allow({b | c, c, b}, hide({a}, rename({d -> b}, ((R) || (P)) || (Q))));
