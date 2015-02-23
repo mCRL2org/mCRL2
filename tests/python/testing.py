@@ -8,7 +8,6 @@
 import os
 import os.path
 import shutil
-import platform
 import yaml
 import sys
 sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
@@ -124,6 +123,7 @@ class Test:
         self.nodes.append(Node(label, data['type'], value))
 
     def _add_tool(self, data, label):
+        import platform
         input = sorted([node for node in self.nodes if node.label in data['input']], key = lambda node: node.label)
         output = sorted([node for node in self.nodes if node.label in data['output']], key = lambda node: node.label)
         name = data['name']
