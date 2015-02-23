@@ -105,7 +105,7 @@ class LpsConfcheckTest(ProcessTauTest):
 class LtscompareTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings = dict()):
         assert equivalence_type in ['bisim', 'branching-bisim', 'dpbranching-bisim', 'weak-bisim', 'dpweak-bisim', 'sim', 'trace', 'weak-trace']
-        super(LtscompareTest, self).__init__(name, ymlfile('ltscompare'), settings)
+        super(LtscompareTest, self).__init__(name + '_' + equivalence_type, ymlfile('ltscompare'), settings)
         self.set_command_line_options('t3', ['-e' + equivalence_type])
         self.set_command_line_options('t4', ['-e' + equivalence_type])
 
