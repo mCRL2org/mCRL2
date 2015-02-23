@@ -45,4 +45,12 @@ class YmlTest(TestCommand):
         test.print_commands(runpath)
 
     def set_command_line_options(self, tool_label, options):
-        self.settings.update({'tools': {tool_label: {'args': options}}})
+        if not 'tools' in self.settings:
+            self.settings['tools'] = {}
+        settings = self.settings['tools']
+        if not tool_label in settings:
+            settings[tool_label] = {}
+        settings = settings[tool_label]
+        if not 'args' in settings:
+            settings['args'] = []
+        settings['args'] += options

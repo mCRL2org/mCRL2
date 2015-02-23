@@ -214,6 +214,20 @@ class Lps2PbesTool(Tool):
                 os.path.join(runpath, self.output_nodes[0].filename())
                ]
 
+class Lts2LpsTool(Tool):
+    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 2
+        assert len(output_nodes) == 1
+        super(Lts2LpsTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
+
+    def arguments(self, runpath = None):
+        if not runpath:
+            runpath = os.getcwd()
+        return [os.path.join(runpath, self.input_nodes[0].filename()),
+                '-l' + os.path.join(runpath, self.input_nodes[1].filename()),
+                os.path.join(runpath, self.output_nodes[0].filename())
+               ]
+
 class Lps2LtsTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         assert len(input_nodes) == 1
@@ -283,6 +297,8 @@ class ToolFactory(object):
             return BesSolveTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'ltscompare':
             return LtsCompareTool(label, name, toolpath, input_nodes, output_nodes, args)
+        elif name == 'lts2lps':
+            return Lts2LpsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['bespp', 'lpspp', 'pbespp']:
             return PrintTool(label, name, toolpath, input_nodes, output_nodes, args)
         return Tool(label, name, toolpath, input_nodes, output_nodes, args)

@@ -7,7 +7,7 @@
 import os
 import os.path
 import sys
-sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
+sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
 
 from random_bes_generator import make_bes
 from random_pbes_generator import make_pbes
@@ -108,6 +108,17 @@ class LtscompareTest(ProcessTauTest):
         super(LtscompareTest, self).__init__(name + '_' + equivalence_type, ymlfile('ltscompare'), settings)
         self.set_command_line_options('t3', ['-e' + equivalence_type])
         self.set_command_line_options('t4', ['-e' + equivalence_type])
+
+class BisimulationTest(ProcessTauTest):
+    def __init__(self, name, equivalence_type, settings = dict()):
+        assert equivalence_type in ['bisim', 'branching-bisim', 'weak-bisim']
+        bisimulation_type = equivalence_type
+        if bisimulation_type == 'bisim':
+            bisimulation_type = 'strong-bisim'
+        super(BisimulationTest, self).__init__(name + '_' + equivalence_type, ymlfile('bisimulation'), settings)
+        self.set_command_line_options('t3', ['-e' + equivalence_type])
+        self.set_command_line_options('t4', ['-e' + equivalence_type])
+        self.set_command_line_options('t7', ['-b' + bisimulation_type])
 
 class LpsConstelmTest(ProcessTest):
     def __init__(self, name, settings = dict()):
@@ -221,14 +232,17 @@ if __name__ == '__main__':
     LpsConstelmTest('lpsconstelm', settings).execute_in_sandbox()
     LpsBinaryTest('lpsbinary', settings).execute_in_sandbox()
     Lps2pbesTest('lps2pbes', settings).execute_in_sandbox()
-    LtscompareTest('ltscompare_bisim'            , 'bisim'            , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare_branching_bisim'  , 'branching-bisim'  , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare_dpbranching_bisim', 'dpbranching-bisim', settings).execute_in_sandbox()
-    LtscompareTest('ltscompare_weak_bisim'       , 'weak-bisim'       , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare_dpweak_bisim'     , 'dpweak-bisim'     , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare_sim'              , 'sim'              , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare_trace'            , 'trace'            , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare_weak_trace'       , 'weak-trace'       , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare', 'bisim'            , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare', 'branching-bisim'  , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare', 'dpbranching-bisim', settings).execute_in_sandbox()
+    LtscompareTest('ltscompare', 'weak-bisim'       , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare', 'dpweak-bisim'     , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare', 'sim'              , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare', 'trace'            , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare', 'weak-trace'       , settings).execute_in_sandbox()
+    BisimulationTest('bisimulation', 'bisim'          , settings).execute_in_sandbox()
+    BisimulationTest('bisimulation', 'branching-bisim', settings).execute_in_sandbox()
+    BisimulationTest('bisimulation', 'weak-bisim'     , settings).execute_in_sandbox()
     PbesabstractTest('pbesabstract', settings).execute_in_sandbox()
     PbesconstelmTest('pbesconstelm', settings).execute_in_sandbox()
     PbesparelmTest('pbesparelm', settings).execute_in_sandbox()

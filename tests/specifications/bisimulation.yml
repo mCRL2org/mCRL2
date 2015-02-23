@@ -1,0 +1,64 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: LTS
+  l4:
+    type: LTS
+  l5:
+    type: Bool
+  l6:
+    type: LPS
+  l7:
+    type: LPS
+  l8:
+    type: PBES
+  l9:
+    type: Bool
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lps2lts
+  t3:
+    input: [l3]
+    output: [l4]
+    args: []
+    name: ltsconvert
+  t4:
+    input: [l3, l4]
+    output: [l5]
+    args: []
+    name: ltscompare
+  t5:
+    input: [l3, l2]
+    output: [l6]
+    args: []
+    name: lts2lps
+  t6:
+    input: [l4, l2]
+    output: [l7]
+    args: []
+    name: lts2lps
+  t7:
+    input: [l6, l7]
+    output: [l8]
+    args: []
+    name: lpsbisim2pbes
+  t8:
+    input: [l8]
+    output: [l9]
+    args: []
+    name: pbes2bool
+
+result: |
+  result = l5.value == l9.value == True

@@ -122,14 +122,17 @@ class Test:
             value = data['value']
         self.nodes.append(Node(label, data['type'], value))
 
+    def _find_node(self, label):
+        return
+
     def _add_tool(self, data, label):
         import platform
-        input = sorted([node for node in self.nodes if node.label in data['input']], key = lambda node: node.label)
-        output = sorted([node for node in self.nodes if node.label in data['output']], key = lambda node: node.label)
+        input_nodes = [next(node for node in self.nodes if node.label == label) for label in data['input']]
+        output_nodes = sorted([node for node in self.nodes if node.label in data['output']], key = lambda node: node.label)
         name = data['name']
         if platform.system() == 'Windows':
             name = name + '.exe'
-        self.tools.append(ToolFactory().create_tool(label, data['name'], self.toolpath, input, output, data['args']))
+        self.tools.append(ToolFactory().create_tool(label, data['name'], self.toolpath, input_nodes, output_nodes, data['args']))
 
     def setup(self, inputfiles):
         for node in self.input_nodes:
@@ -199,7 +202,7 @@ class Test:
             raise RuntimeError("could not find model a tool with label '{0}'".format(label))
 
     def print_commands(self, runpath):
-        from topological_sort import topological_sort, insert_edge
+        from graph_algorithms import topological_sort, insert_edge
         G = {}
         for node in self.nodes:
             G[node.label] = (set(), set())
