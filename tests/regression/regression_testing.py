@@ -41,6 +41,11 @@ class CountStatesTest(YmlTest):
         super(CountStatesTest, self).__init__(name, ymlfile('countstates'), inputfiles, settings)
         self.settings.update({'nodes': {'l5': {'value': expected_result}}})
 
+class PbesstategraphTest(YmlTest):
+    def __init__(self, name, inputfiles, command_line_options, settings = dict()):
+        super(PbesstategraphTest, self).__init__(name, ymlfile('pbesstategraph'), inputfiles, settings)
+        self.set_command_line_options('t2', command_line_options)
+
 if __name__ == '__main__':
     settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False, 'cleanup_files': True}
     testdir = 'output'

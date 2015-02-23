@@ -1,0 +1,2 @@
+mu X(n: Nat = 0) .
+nu Y(n: Nat = n) . val(n > 0)
