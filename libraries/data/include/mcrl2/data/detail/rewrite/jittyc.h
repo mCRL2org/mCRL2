@@ -107,18 +107,6 @@ class RewriterCompilingJitty: public Rewriter
       return (rewriter_binding_variable_lists[i]);
     }
 
-    // The set below contains function symbols that are locally used
-    // in the compiling rewriter to represent functions of which it is
-    // known that some of the arguments are in normal form. These are
-    // used inside the compiling rewriter, but should never be returned
-    // and show up in any normal form being returned from the rewriter.
-    // The arity is given by a separate map, and represents
-    // the total number of arguments that the function has,
-    // after currying. So, f(x,y)(z) typically has three arguments.
-    
-    std::set < function_symbol > partially_rewritten_functions;
-    std::map < function_symbol, size_t > total_arity_of_partially_rewritten_functions;
-
     // The data structures below are used to store single variables
     // that are bound in lambda, forall and exist operators. When required
     // in the compiled required, these variables can be retrieved from
@@ -139,7 +127,8 @@ class RewriterCompilingJitty: public Rewriter
     RewriterJitty jitty_rewriter;
     std::set < data_equation > rewrite_rules;
     bool made_files;
-    std::map < function_symbol, data_equation_list >  jittyc_eqns;
+    std::map<function_symbol, data_equation_list> jittyc_eqns;
+    std::set<function_symbol> m_extra_symbols;
 
     normal_form_cache m_nf_cache;
     always_rewrite_array* m_always_rewrite;
