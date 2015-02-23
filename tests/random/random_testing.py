@@ -61,6 +61,24 @@ class ProcessTest(RandomTest):
         write_text(filename, str(p))
         self.inputfiles += [filename]
 
+# generates random process with higher probability of tau transitions
+class ProcessTauTest(ProcessTest):
+    def __init__(self, name, testfile, settings = dict()):
+        super(ProcessTauTest, self).__init__(name, testfile, settings)
+        self.actions = ['a', 'b', 'c']
+        self.init = 'hide({a}, allow({a, b, c}, P || Q || R))'
+        self.generator_map = {
+                               make_action: 8,
+                               make_delta: 1,
+                               make_tau: 4,
+                               make_process_instance: 1,
+                               make_sum: 0,
+                               make_if_then: 0,
+                               make_if_then_else: 0,
+                               make_choice: 5,
+                               make_seq: 5,
+                             }
+
 class AlphabetTest(ProcessTest):
     def __init__(self, name, settings = dict()):
         super(AlphabetTest, self).__init__(name, ymlfile('alphabet'), settings)
@@ -78,24 +96,18 @@ class LpsParelmTest(ProcessTest):
         super(LpsParelmTest, self).__init__(name, ymlfile('lpsparelm'), settings)
         self.generate_process_parameters = True
 
-class LpsConfcheckTest(ProcessTest):
+class LpsConfcheckTest(ProcessTauTest):
     def __init__(self, name, confluence_type, settings = dict()):
         assert confluence_type in 'cdCTZ'
         super(LpsConfcheckTest, self).__init__(name, ymlfile('lpsconfcheck'), settings)
         self.set_command_line_options('t2', ['-x' + confluence_type])
-        self.actions = ['a', 'b', 'c']
-        self.init = 'hide({a}, allow({a, b, c}, P || Q || R))'
-        self.generator_map = {
-                               make_action: 8,
-                               make_delta: 1,
-                               make_tau: 1,
-                               make_process_instance: 1,
-                               make_sum: 0,
-                               make_if_then: 0,
-                               make_if_then_else: 0,
-                               make_choice: 5,
-                               make_seq: 5,
-                             }
+
+class LtscompareTest(ProcessTauTest):
+    def __init__(self, name, equivalence_type, settings = dict()):
+        assert equivalence_type in ['bisim', 'branching-bisim', 'dpbranching-bisim', 'weak-bisim', 'dpweak-bisim', 'sim', 'trace', 'weak-trace']
+        super(LtscompareTest, self).__init__(name, ymlfile('ltscompare'), settings)
+        self.set_command_line_options('t3', ['-e' + equivalence_type])
+        self.set_command_line_options('t4', ['-e' + equivalence_type])
 
 class LpsConstelmTest(ProcessTest):
     def __init__(self, name, settings = dict()):
@@ -209,6 +221,14 @@ if __name__ == '__main__':
     LpsConstelmTest('lpsconstelm', settings).execute_in_sandbox()
     LpsBinaryTest('lpsbinary', settings).execute_in_sandbox()
     Lps2pbesTest('lps2pbes', settings).execute_in_sandbox()
+    LtscompareTest('ltscompare_bisim'            , 'bisim'            , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare_branching_bisim'  , 'branching-bisim'  , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare_dpbranching_bisim', 'dpbranching-bisim', settings).execute_in_sandbox()
+    LtscompareTest('ltscompare_weak_bisim'       , 'weak-bisim'       , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare_dpweak_bisim'     , 'dpweak-bisim'     , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare_sim'              , 'sim'              , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare_trace'            , 'trace'            , settings).execute_in_sandbox()
+    LtscompareTest('ltscompare_weak_trace'       , 'weak-trace'       , settings).execute_in_sandbox()
     PbesabstractTest('pbesabstract', settings).execute_in_sandbox()
     PbesconstelmTest('pbesconstelm', settings).execute_in_sandbox()
     PbesparelmTest('pbesparelm', settings).execute_in_sandbox()
