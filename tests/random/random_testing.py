@@ -251,7 +251,7 @@ available_tests = {
     'pbesrewr_quantifier-finite'        : lambda name, settings: PbesrewrTest(name, 'quantifier-finite', settings)           ,
     'pbesrewr_quantifier-one-point'     : lambda name, settings: PbesrewrTest(name, 'quantifier-one-point', settings)        ,
     'pbesinst_lazy'                     : lambda name, settings: PbesinstTest(name, ['-slazy'], settings)                    ,
-    'pbesinst_finite'                   : lambda name, settings: PbesinstTest(name, ['-sfinite', '"-f*(*:Bool)"'], settings) ,
+    'pbesinst_finite'                   : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)   ,
     'pbessolve'                         : lambda name, settings: PbessolveTest(name, settings)                               ,
     'pbesstategraph'                    : lambda name, settings: PbesstategraphTest(name, settings)                          ,
     'bessolve'                          : lambda name, settings: BessolveTest(name, settings)                                ,
