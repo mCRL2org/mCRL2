@@ -330,7 +330,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
                   if  (w.has_variable())
                   {
                     auto const& r = w.value();
-                    condition.insert(data::equal_to(d_Y[p], r));
+                    condition.insert(data::equal_to(nth_element(e, p), r));
                   }
                 }
               }

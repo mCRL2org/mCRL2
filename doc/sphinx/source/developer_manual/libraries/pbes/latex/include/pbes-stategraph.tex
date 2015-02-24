@@ -320,7 +320,7 @@ $\qquad \qquad e^{\prime }[j]:=\mathrm{dest}(X,i,p)$ \\
 $\text{\textbf{return} }Y(e^{\prime })$%
 \end{tabular}%
 \end{equation*}%
-\newpage 
+\newpage
 
 \subsubsection{Global control flow graph (2)}
 
@@ -382,7 +382,7 @@ Note that $\mathrm{copy}(X,i,\downarrow _{Y}l)=\downarrow _{X}k$ implies
 that parameters $(X,\downarrow _{X}k)$ and $(Y,\downarrow _{Y}l)$ are
 related.
 
-\newpage 
+\newpage
 
 \subsubsection{Global control flow marking}
 
@@ -681,9 +681,9 @@ $\qquad \qquad \qquad $\textbf{else} \\
 $\qquad \qquad \qquad \qquad relevant:=relevant\wedge (\left(
 Y,d_{Y}[k]\right) \in B_{j}\Rightarrow \exists r:d_{Y}[k]\in marking(Y,p,r))$
 \\ 
-$\qquad \qquad \qquad \qquad condition+=$ $[d_{Y}[p]=r\mid \left(
+$\qquad \qquad \qquad \qquad condition+=$ $\{e[p]=r\mid \left(
 Y,d_{Y}[k]\right) \in B_{j}\wedge (Y,p,r)\in V_{j}\wedge d_{Y}[k]\notin
-marking(Y,p,r)]$ \\ 
+marking(Y,p,r)\}$ \\ 
 $\qquad $\textbf{if} $\lnot relevant$ \textbf{then} \\ 
 $\qquad \qquad e^{\prime }[k]:=default\_value(d_{Y}[k])$ \\ 
 $\qquad $\textbf{else if} $condition\neq \{\}$ \textbf{then} \\ 
@@ -692,4 +692,4 @@ $\qquad \qquad e^{\prime
 \textbf{return }$Y(e^{\prime })$%
 \end{tabular}%
 \end{equation*}%
-\newpage
+\newpage 
