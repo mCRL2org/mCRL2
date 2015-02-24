@@ -37,9 +37,11 @@ class PbesrewrTest(YmlTest):
 
 class CountStatesTest(YmlTest):
     # expected_result is the expected number of states
-    def __init__(self, name, inputfiles, expected_result, settings = dict()):
+    def __init__(self, name, inputfiles, expected_result, lps2lts_options = [], settings = dict()):
         super(CountStatesTest, self).__init__(name, ymlfile('countstates'), inputfiles, settings)
         self.settings.update({'nodes': {'l5': {'value': expected_result}}})
+        if lps2lts_options:
+            self.set_command_line_options('t2', lps2lts_options)
 
 class PbesstategraphTest(YmlTest):
     def __init__(self, name, inputfiles, command_line_options, settings = dict()):
@@ -52,6 +54,6 @@ if __name__ == '__main__':
     if not os.path.exists(testdir):
         os.mkdir(testdir)
     os.chdir(testdir)
-    LpsconfcheckTest('lpsconfcheck_1', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], 'T', (0, 10), settings).execute_in_sandbox()
-    LpsconfcheckCtauTest('lpsconfcheck_2', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], 'T', (0, 18), settings).execute_in_sandbox()
-    CountStatesTest('countstates_abp', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'], 74, settings).execute_in_sandbox()
+    LpsconfcheckTest('lpsconfcheck_1', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], 'T', (0, 10), settings = settings).execute_in_sandbox()
+    LpsconfcheckCtauTest('lpsconfcheck_2', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], 'T', (0, 18), settings = settings).execute_in_sandbox()
+    CountStatesTest('countstates_abp', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'], 74, settings = settings).execute_in_sandbox()

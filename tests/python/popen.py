@@ -4,7 +4,6 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-import sys
 import time
 import psutil
 import threading
@@ -64,24 +63,24 @@ class Popen(subprocess.Popen):
             pass
 
     @property
-    def userTime(self):
+    def user_time(self):
         return self.__usrTime
 
     @property
-    def systemTime(self):
+    def system_time(self):
         return self.__sysTime
 
     @property
-    def maxVirtualMem(self):
+    def max_virtual_memory(self):
         return self.__maxVirt
 
     @property
-    def maxResidentMem(self):
+    def max_resident_memory(self):
         return self.__maxResident
 
 # This requires python3
 #if __name__ == '__main__':
 #  proc = Popen(sys.argv[1:])
 #  ret = proc.wait()
-#  print('usr/sys/virt/res: {0}/{1}/{2}/{3}'.format(proc.userTime, proc.systemTime, proc.maxVirtualMem, proc.maxResidentMem), file=sys.stderr)
+#  print('usr/sys/virt/res: {0}/{1}/{2}/{3}'.format(proc.user_time, proc.system_time, proc.max_virtual_memory, proc.max_resident_memory), file=sys.stderr)
 #  sys.exit(ret)

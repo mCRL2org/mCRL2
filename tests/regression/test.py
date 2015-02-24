@@ -11,12 +11,14 @@ import testing
 from regression_testing import *
 from testcommand import YmlTest
 
+def abspath(file):
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), file))
+
 class TestRunner(testing.TestRunner):
     def __init__(self):
         super(TestRunner, self).__init__()
         ymlfile = self.ymlfile
         mcrl2file = self.mcrl2file
-        abspath = self.abspath
         pbessolve_files = sorted(os.listdir(abspath('pbessolve')))
         self.tests = [
                        YmlTest('ticket_283',  ymlfile('mcrl22lps'),         [abspath('tickets/283/1.mcrl2')]),
@@ -57,9 +59,6 @@ class TestRunner(testing.TestRunner):
                      ]
         for test in self.tests:
             test.name = 'regression_' + test.name
-
-    def abspath(self, file):
-        return os.path.abspath(os.path.join(os.path.dirname(__file__), file))
 
 if __name__ == "__main__":
     sys.exit(TestRunner().main())

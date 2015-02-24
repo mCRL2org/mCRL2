@@ -4,17 +4,16 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-import os
 import random
 
-class predvar:
+class PredicateVariable:
     def __init__(self, name):
         self.name = name
 
     def __repr__(self):
         return self.name
 
-class equation:
+class Equation:
     def __init__(self, sigma, var, formula):
         self.sigma = sigma
         self.var = var
@@ -23,16 +22,16 @@ class equation:
     def __repr__(self):
         return '%s %s = %s;' % (self.sigma, self.var, self.formula)
 
-class bes:
+class BooleanEquationSystem:
     def __init__(self, equations, init):
         self.equations = equations
         self.init = init
 
     def __repr__(self):
-        # Note: for the moment we use pbes instead of bes, since there is no parser for BESs
+        # Note: for the moment we use pbes instead of BooleanEquationSystem, since there is no parser for BESs
         return 'pbes\n%s\n\ninit %s;' % ('\n'.join(map(str, self.equations)), self.init)
 
-class unary_operator:
+class UnaryOperator:
     def __init__(self, op, x):
         self.op = op
         self.x = x
@@ -42,7 +41,7 @@ class unary_operator:
         op = self.op
         return '%s(%s)' % (op, x)
 
-class binary_operator:
+class BinaryOperator:
     def __init__(self, op, x, y):
         self.op = op
         self.x = x
@@ -55,16 +54,16 @@ class binary_operator:
         return '(%s) %s (%s)' % (x, op, y)
 
 def not_(x):
-    return unary_operator('!', x)
+    return UnaryOperator('!', x)
 
 def and_(x, y):
-    return binary_operator('&&', x, y)
+    return BinaryOperator('&&', x, y)
 
 def or_(x, y):
-    return binary_operator('||', x, y)
+    return BinaryOperator('||', x, y)
 
 def implies(x, y):
-    return binary_operator('=>', x, y)
+    return BinaryOperator('=>', x, y)
 
 operators = [implies, not_, and_, or_]
 operators = [and_, or_]
@@ -84,7 +83,7 @@ def pick_element(s):
 # returns a sequence with the selected elements
 def pick_elements(s, n):
     result = []
-    for i in range(n):
+    for _ in range(n):
         x, s = pick_element(s)
         result.append(x)
     return result
@@ -92,7 +91,7 @@ def pick_elements(s, n):
 # Creates n terms
 def make_terms(predvars, n):
     result = []
-    for i in range(n):
+    for _ in range(n):
         result.append(predvars[random.randint(0, len(predvars) - 1)])
     return result
 
@@ -109,16 +108,16 @@ def join_terms(terms):
     return terms
 
 def make_bes(equation_count, term_size = 3):
-    predvars = [predvar('X%d' % i) for i in range(1, equation_count + 1)]
+    predvars = [PredicateVariable('X%d' % i) for i in range(1, equation_count + 1)]
     equations = []
     for i in range(equation_count):
         terms = make_terms(predvars, random.randint(1, term_size))
         while len(terms) > 1:
             terms = join_terms(terms)
         sigma, dummy = pick_element(['mu', 'nu'])
-        equations.append(equation(sigma, predvars[i], terms[0]))
+        equations.append(Equation(sigma, predvars[i], terms[0]))
     init = predvars[0]
-    return bes(equations, init)
+    return BooleanEquationSystem(equations, init)
 
 if __name__ == "__main__":
     b = make_bes(4, 5)

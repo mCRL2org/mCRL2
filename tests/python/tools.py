@@ -65,10 +65,10 @@ class Tool(object):
 
     # Raises an exception if the execution was aborted or produced an error
     def check_execution(self, process, timeout, memlimit):
-        if process.maxVirtualMem > memlimit:
-            raise MemoryExceededError(process.maxVirtualMem)
-        if process.userTime > timeout:
-            raise TimeExceededError(process.userTime)
+        if process.max_virtual_memory > memlimit:
+            raise MemoryExceededError(process.max_virtual_memory)
+        if process.user_time > timeout:
+            raise TimeExceededError(process.user_time)
         if self.stderr and 'error' in self.stderr:
             raise RuntimeError('Tool {} failed: {}'.format(self.name, self.stderr))
 
@@ -103,8 +103,8 @@ class Tool(object):
         self.stdout, self.stderr = process.communicate(input)
         self.assign_outputs()
         self.executed = True
-        self.userTime = process.userTime
-        self.maxVirtualMem = process.maxVirtualMem
+        self.user_time = process.user_time
+        self.max_virtual_memory = process.max_virtual_memory
         self.check_execution(process, timeout, memlimit)
 
     def __str__(self):

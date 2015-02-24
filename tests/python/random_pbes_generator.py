@@ -25,7 +25,7 @@ def add_type(var):
         return '%s:Nat' % var
     return None
 
-class bool:
+class Boolean:
     def __init__(self, value = None):
         self.value = value
 
@@ -53,7 +53,7 @@ class bool:
             call_back()
             self.value = value
 
-class nat:
+class Natural:
     def __init__(self, value = None):
         self.value = value
 
@@ -81,11 +81,11 @@ class nat:
             call_back()
             self.value = value
 
-class propvar:
+class PropositionalVariable:
     def __init__(self, name, args):
         self.name = name
         self.args = args
-        self.prefix = ''   # sometimes we need to add a '!' to make a pbes monotonic
+        self.prefix = ''   # sometimes we need to add a '!' to make a PBES monotonic
 
     def __repr__(self):
         if len(self.args) == 0:
@@ -113,7 +113,7 @@ class propvar:
             for a in self.args:
                 a.minimize(call_back, level - 1)
 
-class predvar:
+class PredicateVariable:
     def __init__(self, name, args):
         self.name = name
         self.args = args
@@ -127,7 +127,7 @@ class predvar:
     def finish(self, freevars, negated):
         pass
 
-class equation:
+class Equation:
     def __init__(self, sigma, var, formula):
         self.sigma = sigma
         self.var = var
@@ -150,13 +150,13 @@ class equation:
         if level == 0:
             if not is_boolean_constant(self.formula):
                 formula = self.formula
-                self.formula = bool('true')
+                self.formula = Boolean('true')
                 call_back()
                 self.formula = formula
         else:
             self.formula.minimize(call_back, level - 1)
 
-class pbes:
+class PBES:
     def __init__(self, equations, init):
         self.equations = equations
         self.init = init
@@ -181,7 +181,7 @@ class pbes:
         for e in self.equations:
             e.minimize(call_back, level - 1)
 
-class unary_operator:
+class UnaryOperator:
     def __init__(self, op, x):
         self.op = op
         self.x = x
@@ -198,7 +198,7 @@ class unary_operator:
 
     # returns True if the argument is minimal
     def is_minimal(self):
-        result = self.x.is_minimal() and isinstance(self.x, bool)
+        result = self.x.is_minimal() and isinstance(self.x, Boolean)
         return result
 
     # minimizes the argument
@@ -206,15 +206,15 @@ class unary_operator:
         if level == 0:
             if not is_boolean_constant(self.x):
                 x = self.x
-                self.x = bool('true')
+                self.x = Boolean('true')
                 call_back()
-                self.x = bool('false')
+                self.x = Boolean('false')
                 call_back()
                 self.x = x
         else:
             self.x.minimize(call_back, level - 1)
 
-class binary_operator:
+class BinaryOperator:
     def __init__(self, op, x, y):
         self.op = op
         self.x = x
@@ -243,23 +243,23 @@ class binary_operator:
         if level == 0:
             if not is_boolean_constant(self.x):
                 x = self.x
-                self.x = bool('true')
+                self.x = Boolean('true')
                 call_back()
-                self.x = bool('false')
+                self.x = Boolean('false')
                 call_back()
                 self.x = x
             if not is_boolean_constant(self.y):
                 y = self.y
-                self.y = bool('true')
+                self.y = Boolean('true')
                 call_back()
-                self.y = bool('false')
+                self.y = Boolean('false')
                 call_back()
                 self.y = y
         else:
             self.x.minimize(call_back, level - 1)
             self.y.minimize(call_back, level - 1)
 
-class quantifier:
+class Quantifier:
     def __init__(self, quantor, x, y):
         self.quantor = quantor
         self.x = x    # the bound variable
@@ -277,18 +277,18 @@ class quantifier:
             if not q in freevars:
                 qvar.append(q)
         if len(qvar) == 0:
-            raise RuntimeError('warning: quantifier nesting depth exceeded')
+            raise RuntimeError('warning: Quantifier nesting depth exceeded')
         var, dummy = pick_element(qvar)
         self.x = var
         if self.quantor == 'exists':
-            self.y = or_(bool('val(%s < 3)' % var), self.y)
+            self.y = or_(Boolean('val(%s < 3)' % var), self.y)
         else:
-            self.y = and_(bool('val(%s < 3)' % var), self.y)
+            self.y = and_(Boolean('val(%s < 3)' % var), self.y)
         self.y.finish(freevars + [self.x], negated)
 
     # returns True if the formula is minimal
     def is_minimal(self):
-        result = self.y.is_minimal() and isinstance(self.y, bool)
+        result = self.y.is_minimal() and isinstance(self.y, Boolean)
         return result
 
     # minimizes the formula
@@ -296,50 +296,50 @@ class quantifier:
         if level == 0:
             if not is_boolean_constant(self.y):
                 y = self.y
-                self.y = bool('true')
+                self.y = Boolean('true')
                 call_back()
-                self.y = bool('false')
+                self.y = Boolean('false')
                 call_back()
                 self.y = y
         else:
             self.y.minimize(call_back, level - 1)
 
 def not_(x):
-    return unary_operator('!', x)
+    return UnaryOperator('!', x)
 
 def and_(x, y):
-    return binary_operator('&&', x, y)
+    return BinaryOperator('&&', x, y)
 
 def or_(x, y):
-    return binary_operator('||', x, y)
+    return BinaryOperator('||', x, y)
 
 def implies(x, y):
-    return binary_operator('=>', x, y)
+    return BinaryOperator('=>', x, y)
 
 def forall(x):
-    var = nat()
+    var = Natural()
     phi = x
-    return quantifier('forall', var, phi)
+    return Quantifier('forall', var, phi)
 
 def exists(x):
-    var = nat()
+    var = Natural()
     phi = x
-    return quantifier('exists', var, phi)
+    return Quantifier('exists', var, phi)
 
 def equal_to(x, y):
-    return binary_operator('==', x, y)
+    return BinaryOperator('==', x, y)
 
 def not_equal_to(x, y):
-    return binary_operator('!=', x, y)
+    return BinaryOperator('!=', x, y)
 
 #operators = [not_, forall, exists, and_, or_, implies, equal_to, not_equal_to]
 operators = [not_, and_, or_, implies, forall, exists]
 
 def is_boolean_constant(x):
-    return isinstance(x, bool) and x.value in ['false', 'true']
+    return isinstance(x, Boolean) and x.value in ['false', 'true']
 
 def is_natural_constant(x):
-    return isinstance(x, nat) and x.value in ['0', '1']
+    return isinstance(x, Natural) and x.value in ['0', '1']
 
 def is_unary(op):
     return op in [not_, forall, exists]
@@ -368,7 +368,7 @@ def make_predvar(n, size = random.randint(0, 2)):
     for i in range(size):
         v, variables = pick_element(variables)
         arguments.append(v)
-    return predvar(name, arguments)
+    return PredicateVariable(name, arguments)
 
 # Generates n random predicate variables with 0, 1 or 2 parameters
 def make_predvars(n):
@@ -420,17 +420,17 @@ def make_predvar_instantiations(predvars):
         args = []
         for a in X.args:
             if a in BOOLEANS:
-                args.append(bool())
+                args.append(Boolean())
             elif a in INTEGERS:
-                args.append(nat())
-        result.append(propvar(X.name, args))
+                args.append(Natural())
+        result.append(PropositionalVariable(X.name, args))
     return result
 
 # Creates m boolean terms, and n propositional variable instantiations.
 def make_terms(predvars, m, n):
     result = []
     for i in range(m):
-        result.append(bool())
+        result.append(Boolean())
     inst  = make_predvar_instantiations(predvars)
     result = result + pick_elements(inst, n)
     return result
@@ -462,7 +462,7 @@ def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers
                 while len(terms) > 1:
                     terms = join_terms(terms)
                 sigma, dummy = pick_element(['mu', 'nu'])
-                equations.append(equation(sigma, predvars[i], terms[0]))
+                equations.append(Equation(sigma, predvars[i], terms[0]))
             X = predvars[0]
             args = []
             for a in X.args:
@@ -470,8 +470,8 @@ def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers
                     args.append('true')
                 elif a in INTEGERS:
                     args.append('0')
-            init = propvar(X.name, args)
-            p = pbes(equations, init)
+            init = PropositionalVariable(X.name, args)
+            p = PBES(equations, init)
             p.finish()
             return p
         except Exception as inst:
