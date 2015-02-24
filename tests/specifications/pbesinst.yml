@@ -19,7 +19,7 @@ tools:
   t2:
     input: [l2]
     output: [l3]
-    args: [-slazy]
+    args: []
     name: pbesinst
   t3:
     input: [l2]
