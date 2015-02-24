@@ -6,6 +6,7 @@
 
 import os
 import os.path
+import re
 import sys
 sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
 
@@ -98,14 +99,20 @@ class LpsParelmTest(ProcessTest):
 
 class LpsConfcheckTest(ProcessTauTest):
     def __init__(self, name, confluence_type, settings = dict()):
-        assert confluence_type in 'cdCTZ'
+        self.option_map = { 'commutative' : 'C',
+                            'commutative-disjoint' : 'c',
+                            'disjoint' : 'd',
+                            'triangular' : 'T',
+                            'trivial' : 'Z'
+                          }
+        assert confluence_type in self.option_map
         super(LpsConfcheckTest, self).__init__(name, ymlfile('lpsconfcheck'), settings)
-        self.set_command_line_options('t2', ['-x' + confluence_type])
+        self.set_command_line_options('t2', ['-x' + self.option_map[confluence_type]])
 
 class LtscompareTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings = dict()):
         assert equivalence_type in ['bisim', 'branching-bisim', 'dpbranching-bisim', 'weak-bisim', 'dpweak-bisim', 'sim', 'trace', 'weak-trace']
-        super(LtscompareTest, self).__init__(name + '_' + equivalence_type, ymlfile('ltscompare'), settings)
+        super(LtscompareTest, self).__init__(name, ymlfile('ltscompare'), settings)
         self.set_command_line_options('t3', ['-e' + equivalence_type])
         self.set_command_line_options('t4', ['-e' + equivalence_type])
 
@@ -115,7 +122,7 @@ class BisimulationTest(ProcessTauTest):
         bisimulation_type = equivalence_type
         if bisimulation_type == 'bisim':
             bisimulation_type = 'strong-bisim'
-        super(BisimulationTest, self).__init__(name + '_' + equivalence_type, ymlfile('bisimulation'), settings)
+        super(BisimulationTest, self).__init__(name, ymlfile('bisimulation'), settings)
         self.set_command_line_options('t3', ['-e' + equivalence_type])
         self.set_command_line_options('t4', ['-e' + equivalence_type])
         self.set_command_line_options('t7', ['-b' + bisimulation_type])
@@ -173,7 +180,7 @@ class PbespareqelmTest(PbesTest):
 
 class PbesrewrTest(PbesTest):
     def __init__(self, name, rewriter, settings = dict()):
-        super(PbesrewrTest, self).__init__(name + '_' + rewriter, ymlfile('pbesrewr'), settings)
+        super(PbesrewrTest, self).__init__(name, ymlfile('pbesrewr'), settings)
         self.set_command_line_options('t2', ['-p' + rewriter])
 
 class Pbesinst_lazyTest(PbesTest):
@@ -213,51 +220,76 @@ class BessolveTest(BesTest):
     def __init__(self, name, settings = dict()):
         super(BessolveTest, self).__init__(name, ymlfile('bessolve'), settings)
 
+available_tests = {
+    'alphabet'                          : lambda name, settings: AlphabetTest(name, settings)                            ,
+    'lpssuminst'                        : lambda name, settings: LpsSuminstTest(name, settings)                          ,
+    'lpssumelm'                         : lambda name, settings: LpsSumelmTest(name, settings)                           ,
+    'lpsparelm'                         : lambda name, settings: LpsParelmTest(name, settings)                           ,
+    'lpsconfcheck_commutative'          : lambda name, settings: LpsConfcheckTest(name, 'commutative', settings)         ,
+    'lpsconfcheck_commutative-disjoint' : lambda name, settings: LpsConfcheckTest(name, 'commutative-disjoint', settings),
+    'lpsconfcheck_disjoint'             : lambda name, settings: LpsConfcheckTest(name, 'disjoint', settings)            ,
+    'lpsconfcheck_triangular'           : lambda name, settings: LpsConfcheckTest(name, 'triangular', settings)          ,
+    'lpsconfcheck_trivial'              : lambda name, settings: LpsConfcheckTest(name, 'trivial', settings)             ,
+    'lpsconstelm'                       : lambda name, settings: LpsConstelmTest(name, settings)                         ,
+    'lpsbinary'                         : lambda name, settings: LpsBinaryTest(name, settings)                           ,
+    'lps2pbes'                          : lambda name, settings: Lps2pbesTest(name, settings)                            ,
+    'ltscompare_bisim'                  : lambda name, settings: LtscompareTest(name, 'bisim', settings)                 ,
+    'ltscompare_branching-bisim'        : lambda name, settings: LtscompareTest(name, 'branching-bisim', settings)       ,
+    'ltscompare_dpbranching-bisim'      : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim', settings)     ,
+    'ltscompare_weak-bisim'             : lambda name, settings: LtscompareTest(name, 'weak-bisim', settings)            ,
+    'ltscompare_dpweak-bisim'           : lambda name, settings: LtscompareTest(name, 'dpweak-bisim', settings)          ,
+    'ltscompare_sim'                    : lambda name, settings: LtscompareTest(name, 'sim', settings)                   ,
+    'ltscompare_trace'                  : lambda name, settings: LtscompareTest(name, 'trace', settings)                 ,
+    'ltscompare_weak-trace'             : lambda name, settings: LtscompareTest(name, 'weak-trace', settings)            ,
+    'bisimulation_bisim'                : lambda name, settings: BisimulationTest(name, 'bisim', settings)               ,
+    'bisimulation_branching-bisim'      : lambda name, settings: BisimulationTest(name, 'branching-bisim', settings)     ,
+    'bisimulation_weak-bisim'           : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)          ,
+    'pbesabstract'                      : lambda name, settings: PbesabstractTest(name, settings)                        ,
+    'pbesconstelm'                      : lambda name, settings: PbesconstelmTest(name, settings)                        ,
+    'pbesparelm'                        : lambda name, settings: PbesparelmTest(name, settings)                          ,
+    'pbespareqelm'                      : lambda name, settings: PbespareqelmTest(name, settings)                        ,
+    'pbesrewr_simplify'                 : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                ,
+    'pbesrewr_pfnf'                     : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                    ,
+    'pbesrewr_quantifier-all'           : lambda name, settings: PbesrewrTest(name, 'quantifier-all', settings)          ,
+    'pbesrewr_quantifier-finite'        : lambda name, settings: PbesrewrTest(name, 'quantifier-finite', settings)       ,
+    'pbesrewr_quantifier-one-point'     : lambda name, settings: PbesrewrTest(name, 'quantifier-one-point', settings)    ,
+    'pbesinst_lazy'                     : lambda name, settings: Pbesinst_lazyTest(name, settings)                       ,
+    'pbesinst_finite'                   : lambda name, settings: Pbesinst_finiteTest(name, settings)                     ,
+    'pbessolve'                         : lambda name, settings: PbessolveTest(name, settings)                           ,
+    'pbesstategraph'                    : lambda name, settings: PbesstategraphTest(name, settings)                      ,
+    'bessolve'                          : lambda name, settings: BessolveTest(name, settings)                            ,
+}
+
 if __name__ == '__main__':
-    settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': False, 'cleanup_files': False}
+    import argparse
+    cmdline_parser = argparse.ArgumentParser()
+    cmdline_parser.add_argument('-t', '--toolpath', dest='toolpath', help='The path where the mCRL2 tools are installed')
+    cmdline_parser.add_argument('-r', '--repetitions', dest='repetitions', metavar='N', default='10', help='Perform N repetitions of each test')
+    cmdline_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Display additional progress messages.')
+    cmdline_parser.add_argument('-k', '--keep-files', dest='keep_files', action='store_true', help='Keep the files produced by the test')
+    cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
+    args = cmdline_parser.parse_args()
+    toolpath = args.toolpath
+    if not toolpath:
+        toolpath = MCRL2_INSTALL_DIR
+    settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files}
+    I = range(int(args.repetitions))
+
+    settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': args.verbose, 'cleanup_files': not args.keep_files}
+
     testdir = 'output'
     if not os.path.exists(testdir):
         os.mkdir(testdir)
     os.chdir(testdir)
 
-    AlphabetTest('alphabet', settings).execute_in_sandbox()
-    LpsSuminstTest('lpssuminst', settings).execute_in_sandbox()
-    LpsSumelmTest('lpssumelm', settings).execute_in_sandbox()
-    LpsParelmTest('lpsparelm', settings).execute_in_sandbox()
-    LpsConfcheckTest('lpsconfcheck_c', 'c', settings).execute_in_sandbox()
-    LpsConfcheckTest('lpsconfcheck_capital_c', 'C', settings).execute_in_sandbox()
-    LpsConfcheckTest('lpsconfcheck_d', 'd', settings).execute_in_sandbox()
-    LpsConfcheckTest('lpsconfcheck_t', 'T', settings).execute_in_sandbox()
-    LpsConfcheckTest('lpsconfcheck_z', 'Z', settings).execute_in_sandbox()
-    LpsConstelmTest('lpsconstelm', settings).execute_in_sandbox()
-    LpsBinaryTest('lpsbinary', settings).execute_in_sandbox()
-    Lps2pbesTest('lps2pbes', settings).execute_in_sandbox()
-    LtscompareTest('ltscompare', 'bisim'            , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare', 'branching-bisim'  , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare', 'dpbranching-bisim', settings).execute_in_sandbox()
-    LtscompareTest('ltscompare', 'weak-bisim'       , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare', 'dpweak-bisim'     , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare', 'sim'              , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare', 'trace'            , settings).execute_in_sandbox()
-    LtscompareTest('ltscompare', 'weak-trace'       , settings).execute_in_sandbox()
-    BisimulationTest('bisimulation', 'bisim'          , settings).execute_in_sandbox()
-    BisimulationTest('bisimulation', 'branching-bisim', settings).execute_in_sandbox()
-    BisimulationTest('bisimulation', 'weak-bisim'     , settings).execute_in_sandbox()
-    PbesabstractTest('pbesabstract', settings).execute_in_sandbox()
-    PbesconstelmTest('pbesconstelm', settings).execute_in_sandbox()
-    PbesparelmTest('pbesparelm', settings).execute_in_sandbox()
-    PbespareqelmTest('pbespareqelm', settings).execute_in_sandbox()
-    PbesrewrTest('pbesrewr', 'simplify', settings).execute_in_sandbox()
-    PbesrewrTest('pbesrewr', 'pfnf', settings).execute_in_sandbox()
-    PbesrewrTest('pbesrewr', 'quantifier-all', settings).execute_in_sandbox()
-    PbesrewrTest('pbesrewr', 'quantifier-finite', settings).execute_in_sandbox()
-    PbesrewrTest('pbesrewr', 'quantifier-one-point', settings).execute_in_sandbox()
-    Pbesinst_lazyTest('pbesinst_lazy', settings).execute_in_sandbox()
-    Pbesinst_finiteTest('pbesinst_finite', settings).execute_in_sandbox()
-    PbessolveTest('pbessolve', settings).execute_in_sandbox()
-    PbesstategraphTest('pbesstategraph', settings).execute_in_sandbox()
-    BessolveTest('bessolve', settings).execute_in_sandbox()
+    tests = []
+    for name in sorted(available_tests):
+        if re.search(args.pattern, name):
+            for i in I:
+                tests.append(available_tests[name]('{}_{}'.format(name, i), settings))
+    for test in tests:
+        test.execute_in_sandbox()
 
-    # SymbolicExplorationTest('symbolic_exploration', settings).execute_in_sandbox()
-    # PbesrewrTest('pbesrewr', 'bqnf-quantifier', settings).execute_in_sandbox()
-    # PbesabstractTest('pbesabsinthe', settings).execute_in_sandbox()
+    # SymbolicExplorationTest('symbolic_exploration', settings)
+    # PbesrewrTest('pbesrewr', 'bqnf-quantifier', settings)
+    # PbesabstractTest('pbesabsinthe', settings)
