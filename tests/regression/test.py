@@ -27,7 +27,6 @@ class TestRunner(testing.TestRunner):
                        YmlTest('ticket_952' , ymlfile('txt2pbes'),          [abspath('tickets/952/1.txt')]),
                        YmlTest('ticket_1090', ymlfile('ticket_1090'),       [abspath('tickets/1090/1.mcrl2'), abspath('tickets/1090/1.mcf')]),
                        #YmlTest('ticket_1093', ymlfile('alphabet'),          [abspath('tickets/1093/1.mcrl2')], { 'timeout': 300, 'memlimit': 500000000 }),
-                       YmlTest('ticket_1241', ymlfile('alphabet'),          [abspath('tickets/1241/1.mcrl2')]),
                        YmlTest('ticket_1114a', ymlfile('alphabet'),         [abspath('tickets/1114/1.mcrl2')]),
                        YmlTest('ticket_1114b', ymlfile('alphabet'),         [abspath('tickets/1114/2.mcrl2')]),
                        PbesrewrTest('ticket_1143', [abspath('tickets/1143/1.txt')], 'quantifier-one-point'),
