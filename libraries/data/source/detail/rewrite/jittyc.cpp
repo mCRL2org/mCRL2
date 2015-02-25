@@ -191,7 +191,7 @@ private:
   atermpp::aterm_appl build_expr(const data_equation_list& eqns, const size_t arg, const size_t arity) const
   {
     atermpp::aterm_appl result = m_true;
-    for (auto i = eqns.begin(); i != eqns.end(); ++i)
+    for (data_equation_list::const_iterator i = eqns.begin(); i != eqns.end(); ++i)
     {
       result = and_(build_expr_aux(*i, arg, arity), result);
     }
@@ -303,7 +303,7 @@ public:
   {
     size_t max_arity = 0;
     size_t size = 0;
-    for (auto it = symbols.begin(); it != symbols.end(); ++it)
+    for (function_symbol_vector::const_iterator it = symbols.begin(); it != symbols.end(); ++it)
     {
       if (m_indices.insert(std::make_pair(*it, size)).second)
       {
@@ -314,7 +314,7 @@ public:
     }
 
     resize(size);
-    for (auto it = m_indices.begin(); it != m_indices.end(); ++it)
+    for (std::map<mcrl2::data::function_symbol, size_t>::const_iterator it = m_indices.begin(); it != m_indices.end(); ++it)
     {
       for (size_t i = 1; i <= getArity(it->first); ++i)
       {
@@ -1052,7 +1052,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
   std::vector<size_t> arg_use_count(arity, 0);
   std::list<std::pair<data_equation, dep_list_t> > rule_deps;
-  for (auto it = rules.begin(); it != rules.end(); ++it)
+  for (data_equation_list::const_iterator it = rules.begin(); it != rules.end(); ++it)
   {
     if (recursive_number_of_args(it->lhs()) <= arity)
     {
@@ -1077,7 +1077,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
   while (!rule_deps.empty())
   {
     data_equation_list no_deps;
-    for (auto it = rule_deps.begin(); it != rule_deps.end(); )
+    for (std::list<std::pair<data_equation, dep_list_t> >::iterator it = rule_deps.begin(); it != rule_deps.end(); )
     {
       if (it->second.empty())
       {
@@ -1116,7 +1116,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
       assert(!rule_deps.empty());
       arg_use_count[maxidx] = 0;
       strat.push_front(match_tree_A(maxidx));
-      for (auto it = rule_deps.begin(); it != rule_deps.end(); ++it)
+      for (std::list<std::pair<data_equation, dep_list_t> >::iterator it = rule_deps.begin(); it != rule_deps.end(); ++it)
       {
         it->second.remove(maxidx);
       }
@@ -1325,7 +1325,7 @@ private:
     {
       return "pass_on";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
     }
-    if (arity <= 4)
+    if (arity <= 5)
     {
       return "application";
     }
@@ -1357,24 +1357,25 @@ private:
 
   bool calc_inner_term(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity=0)
   {
-    const bool nf = !opid_is_nf(f, arity);
+    const bool nf = opid_is_nf(f, arity);
     const nfs_array nfs(arity);
     if (rewr && !nf)
     {
       s << rewr_function_name(f, 0, nfs) << "()";
+      return true;
     }
     else
     {
       s << "function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(f) << ")))";
+      return rewr || nf;
     }
-    return rewr || nf;
   }
 
   bool calc_inner_term(std::ostream& s, const variable& v, const variable_or_number_list nnfvars, const bool rewr)
   {
     const bool nf = std::find(nnfvars.begin(), nnfvars.end(), v) == nnfvars.end();
     const std::string variable_name = v.name();
-    // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
+    // Remove the initial @ if it is present in the variable name, because then it is a variable introduced
     // by this rewriter.
     if (variable_name[0] == '@')
     {
@@ -1462,7 +1463,12 @@ private:
     return rewr;
   }
 
-  bool calc_inner_term_appl(std::ostream& s, const application& a, const function_symbol& head, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  bool calc_inner_term_appl(std::ostream& s, 
+                            const application& a, 
+                            const function_symbol& head, 
+                            const size_t startarg, 
+                            const variable_or_number_list nnfvars, 
+                            const bool rewr)
   {
     const size_t arity = recursive_number_of_args(a);
     const bool head_nf = opid_is_nf(head, arity + 1);
@@ -1483,6 +1489,12 @@ private:
       }
     }
 
+    // First calculate the code to be generated for the arguments.
+    // This provides the information which arguments are certainly in normal
+    // form, which can be used to optimise the result.
+
+    stringstream code_for_arguments;
+    args_nfs=calc_inner_terms(code_for_arguments, a, startarg, nnfvars, args_nfs);
     if (!rewr || head_nf)
     {
       s << appl_function(arity) << "(";
@@ -1502,13 +1514,18 @@ private:
     {
       s << rewr_function_name(head, arity, args_nfs) << "(";
     }
-    calc_inner_terms(s, a, startarg, nnfvars, args_nfs);
+    s << code_for_arguments.str();
     s <<  ")";
 
     return rewr || (head_nf && args_nfs.is_filled());
   }
 
-  bool calc_inner_term_appl(std::ostream& s, const application& a, const abstraction& head, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  bool calc_inner_term_appl(std::ostream& s, 
+                            const application& a, 
+                            const abstraction& head, 
+                            const size_t startarg, 
+                            const variable_or_number_list nnfvars, 
+                            const bool rewr)
   {
     assert(a.size() > 0);
     assert(is_lambda_binder(head.binding_operator()));
@@ -1625,7 +1642,11 @@ private:
   /// \param rewr indicates whether the reconstructed data expression should be rewritten to normal form.
   /// \return True if the result is in normal form, false otherwise.
   ///
-  bool calc_inner_term(std::ostream& s, const data_expression& t, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  bool calc_inner_term(std::ostream& s, 
+                       const data_expression& t, 
+                       const size_t startarg, 
+                       const variable_or_number_list nnfvars, 
+                       const bool rewr)
   {
     if (find_free_variables(t).empty())
     {
@@ -1664,7 +1685,11 @@ private:
   ///        bools in the rewr array as the rewr parameter. Returns the booleans returned by those
   ///        calls as a vector.
   ///
-  nfs_array calc_inner_terms(std::ostream& s, const application& appl, const size_t startarg, const variable_or_number_list nnfvars, nfs_array rewr)
+  nfs_array calc_inner_terms(std::ostream& s, 
+                             const application& appl, 
+                             const size_t startarg, 
+                             const variable_or_number_list nnfvars, 
+                             nfs_array rewr)
   {
     size_t j = 0;
     for(application::const_iterator i = appl.begin(); i != appl.end(); ++i, ++j)
@@ -1673,7 +1698,7 @@ private:
       {
         s << ", ";
       }
-      calc_inner_term(s, *i, startarg + j, nnfvars, rewr.at(j));
+      rewr.at(j)=calc_inner_term(s, *i, startarg + j, nnfvars, rewr.at(j));
     }
     return rewr;
   }
@@ -1921,10 +1946,10 @@ private:
   }
   
 public:
-  ImplementTree(RewriterCompilingJitty& rewr, std::ostream& stream, std::vector<function_symbol>& function_symbols)
+  ImplementTree(RewriterCompilingJitty& rewr, std::ostream& stream, function_symbol_vector& function_symbols)
     : m_rewriter(rewr), m_stream(stream), m_padding(2)
   {
-    for (auto it = function_symbols.begin(); it != function_symbols.end(); ++it)
+    for (function_symbol_vector::const_iterator it = function_symbols.begin(); it != function_symbols.end(); ++it)
     {
       const size_t max_arity = getArity(*it);
       for (size_t arity = 0; arity <= max_arity; ++arity)
@@ -2228,7 +2253,7 @@ static std::string generate_cpp_filename(size_t unique)
 template <class Filter>
 void filter_function_symbols(const function_symbol_vector& source, function_symbol_vector& dest, Filter filter)
 {
-  for (auto it = source.begin(); it != source.end(); ++it)
+  for (function_symbol_vector::const_iterator it = source.begin(); it != source.end(); ++it)
   {
     if (filter(*it))
     {
@@ -2306,7 +2331,9 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
               "{\n";
 
   // Fill tables with the rewrite functions
-  for (auto it = code_generator.implemented_rewrs().begin(); it != code_generator.implemented_rewrs().end(); ++it)
+  for (std::set<rewr_function_spec>::const_iterator 
+            it = code_generator.implemented_rewrs().begin(); 
+            it != code_generator.implemented_rewrs().end(); ++it)
   {
     if (it->nfs.is_clear())
     {
@@ -2319,7 +2346,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
 
   m_extra_symbols = code_generator.partials();
   // Fill tables with the rewrite functions
-  for (auto it = m_extra_symbols.begin(); it != m_extra_symbols.end(); ++it)
+  for (std::set<function_symbol>::const_iterator it = m_extra_symbols.begin(); it != m_extra_symbols.end(); ++it)
   {
     std::string fs_name = it->name();
     cpp_file << "  int2func[ARITY_BOUND * "
@@ -2364,7 +2391,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
 
   jittyc_eqns.clear();
-  for(auto it = rewrite_rules.begin(); it != rewrite_rules.end(); ++it)
+  for(std::set < data_equation >::const_iterator it = rewrite_rules.begin(); it != rewrite_rules.end(); ++it)
   {
     jittyc_eqns[get_function_symbol_of_head(it->lhs())].push_front(*it);
   }
