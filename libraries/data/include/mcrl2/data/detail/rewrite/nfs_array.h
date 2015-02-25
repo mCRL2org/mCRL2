@@ -85,7 +85,7 @@ public:
 
   bool is_clear() const
   {
-    for(auto i=begin(); i!=end(); ++i)
+    for(std::vector<bool>::const_iterator i=begin(); i!=end(); ++i)
     {
       if (*i)
       {
@@ -97,7 +97,7 @@ public:
 
   bool is_filled() const
   {
-    for(auto i=begin(); i!=end(); ++i)
+    for(std::vector<bool>::const_iterator i=begin(); i!=end(); ++i)
     {
       if (!*i)
       {
@@ -106,7 +106,6 @@ public:
     }
     return true;
   }
-
 };
 
 }
