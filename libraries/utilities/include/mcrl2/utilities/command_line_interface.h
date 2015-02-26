@@ -21,7 +21,6 @@
 #include <sstream>
 #include <cstring>
 
-#include "boost/algorithm/string.hpp"
 #include "mcrl2/utilities/toolset_version.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -376,12 +375,28 @@ class interface_description
         }
     };
 
+    /**
+     * \brief Compare identifiers using case insensitive compare.
+     */
     struct option_identifier_less
     {
+      bool operator()(char const& c1, char const& c2) const
+      {
+        char c1u = toupper(c1);
+        char c2u = toupper(c2);
+
+        return c1u < c2u || (c1u == c2u && c2 < c1);
+      }
+
       template < typename S >
       bool operator()(S const& s1, S const& s2) const
       {
-        return boost::is_iless()(s1, s2) || (boost::is_iequal()(s1, s2) && s2 < s1);
+        std::string s1u = s1;
+        std::string s2u = s2;
+        std::transform(s1u.begin(), s1u.end(), s1u.begin(), ::toupper);
+        std::transform(s2u.begin(), s2u.end(), s2u.begin(), ::toupper);
+
+        return s1u < s2u || (s1u == s2u && s2 < s1);
       }
     };
     /// \endcond

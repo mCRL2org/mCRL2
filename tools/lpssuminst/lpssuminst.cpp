@@ -11,6 +11,7 @@
 #include "mcrl2/lps/tools.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/rewriter_tool.h"
 
 using namespace mcrl2::utilities;
@@ -48,7 +49,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
       if(parser.options.count("sorts"))
       {
         m_sorts_string = parser.option_argument("sorts");
-        boost::trim(m_sorts_string);
+        remove_whitespace(m_sorts_string);
       }
 
       if(m_finite_sorts_only && !m_sorts_string.empty())
