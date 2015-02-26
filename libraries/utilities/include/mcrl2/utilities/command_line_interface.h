@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <memory>
 #include <fstream>
 #include <cassert>
 #include <cstdlib>
