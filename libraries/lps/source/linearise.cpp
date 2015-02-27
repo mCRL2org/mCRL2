@@ -4892,7 +4892,7 @@ class specification_basic_type:public boost::noncopyable
             /* regular and singlestate */
             condition1=lazy::and_(localcondition,condition1);
           }
-          summandterm=f_then(summandterm).then_case();
+          summandterm=if_then(summandterm).then_case();
         }
         else
         {
