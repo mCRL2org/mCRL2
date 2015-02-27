@@ -4892,7 +4892,7 @@ class specification_basic_type:public boost::noncopyable
             /* regular and singlestate */
             condition1=lazy::and_(localcondition,condition1);
           }
-          summandterm=if_then(summandterm).then_case();
+          summandterm=f_then(summandterm).then_case();
         }
         else
         {
@@ -5191,7 +5191,7 @@ class specification_basic_type:public boost::noncopyable
         }
       };
 
-      throw mcrl2::runtime_error("searching for nonexisting case function on sort " + data::pp(sort) +".");
+      throw mcrl2::runtime_error("searching for a nonexisting case function on sort " + data::pp(sort) +".");
       return data::function_symbol();
     }
 
@@ -6124,9 +6124,16 @@ class specification_basic_type:public boost::noncopyable
           {
             if (all_equal(stochastic_conditionlist))
             {
-              resulting_distribution=sort_real::times(
+              if (stochastic_conditionlist.front()==sort_bool::true_())
+              {
+                resulting_distribution=equalterm;
+              }
+              else 
+              {
+                resulting_distribution=sort_real::times(
                                                   if_(stochastic_conditionlist.front(),real_one(),real_zero()), 
                                                   equalterm);
+              }
             }
             else
             {
@@ -6150,9 +6157,18 @@ class specification_basic_type:public boost::noncopyable
                               tempauxresult);
             if (all_equal(stochastic_conditionlist))
             {
-             resulting_distribution=sort_real::times(
+              if (stochastic_conditionlist.front()==sort_bool::true_())
+              {
+               resulting_distribution=sort_real::times(
                                                  if_(stochastic_conditionlist.front(),real_one(),real_zero()),
                                                  resulting_distribution);
+              }
+              else 
+              {
+               resulting_distribution=sort_real::times(
+                                                 if_(stochastic_conditionlist.front(),real_one(),real_zero()),
+                                                 resulting_distribution);
+              }
             }
             else
             {
