@@ -2168,16 +2168,17 @@ public:
   void rewr_function_implementation(const data::function_symbol& func, size_t arity, const nfs_array& nfs, match_tree_list strategy)
   {
     size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
-    m_stream << "// [" << index << "] " << func << ": " << func.sort() << "\n";
+    m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     m_stream << m_padding;
     rewr_function_signature(index, arity, nfs);
     m_stream << "\n" << m_padding << "{\n";
     m_padding.indent();
     implement_strategy(strategy, arity, func, nfs);
     m_padding.unindent();
-    m_stream << "}\n\n";
+    m_stream << m_padding << "}\n\n";
 
-    m_stream << "static inline data_expression rewr_" << index << "_" << arity << "_" << nfs << "_term"
+    m_stream << m_padding << 
+                  "static inline data_expression rewr_" << index << "_" << arity << "_" << nfs << "_term"
                   "(const application&" << (arity == 0 ? "" : " t") << ") "
                   "{ return rewr_" << index << "_" << arity << "_" << nfs << "(";
     for(size_t i = 0; i < arity; ++i)
@@ -2195,7 +2196,7 @@ public:
     {
       rewr_function_spec spec = m_rewr_functions.top();
       m_rewr_functions.pop();
-      match_tree_list strategy = m_rewriter.create_strategy(m_rewriter.jittyc_eqns[spec.fs], spec.arity, spec.nfs);
+      const match_tree_list strategy = m_rewriter.create_strategy(m_rewriter.jittyc_eqns[spec.fs], spec.arity, spec.nfs);
       rewr_function_implementation(spec.fs, spec.arity, spec.nfs, strategy);
     }
   }
