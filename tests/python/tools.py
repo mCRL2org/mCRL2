@@ -106,6 +106,7 @@ class Tool(object):
         self.user_time = process.user_time
         self.max_virtual_memory = process.max_virtual_memory
         self.check_execution(process, timeout, memlimit)
+        return process.returncode
 
     def __str__(self):
         import StringIO

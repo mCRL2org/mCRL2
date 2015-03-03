@@ -169,7 +169,9 @@ class Test:
         while len(tasks) > 0:
             tool = tasks[0]
             try:
-                tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
+                returncode = tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
+                if returncode != 0:
+                    raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
             except MemoryExceededError as e:
                 if self.verbose:
                     print 'Memory limit exceeded: ' + str(e)
