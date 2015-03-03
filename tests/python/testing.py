@@ -8,7 +8,6 @@
 import os
 import os.path
 import shutil
-import yaml
 import sys
 sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
 import testrunner
@@ -41,6 +40,7 @@ class ToolCrashedError(Exception):
 
 class Test:
     def __init__(self, file, settings):
+        import yaml
         from collections import Counter
 
         self.verbose = settings.get('verbose', True)
