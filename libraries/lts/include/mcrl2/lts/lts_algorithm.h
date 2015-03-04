@@ -130,7 +130,7 @@ bool destructive_compare(LTS_TYPE& l1,
       // Run the partitioning algorithm on this merged LTS
       size_t init_l2 = l2.initial_state() + l1.num_states();
       detail::merge(l1,l2);
-      l2.clear(); // l is not needed anymore.
+      l2.clear(); // l2 is not needed anymore.
       detail::sim_partitioner<LTS_TYPE> sp(l1);
       sp.partitioning_algorithm();
 
@@ -281,7 +281,8 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
     std::map < size_t , size_t > state_map;
     std::map < size_t , size_t > label_map;
 
-    LTS_TYPE new_lts;
+    LTS_TYPE new_lts=l; // In this way set data specification and action declarations in the new lts.
+    new_lts.clear();
 
     size_t new_nstates = 0;
     for (size_t i=0; i<l.num_states(); i++)
