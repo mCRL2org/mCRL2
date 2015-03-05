@@ -40,4 +40,7 @@ tools:
     args: []
     name: pbes2bool
 result: |
-  result = t4.value['solution'] == t5.value['solution'] == t6.value['solution']
+  s = t4.value['solution']
+  s1 = t5.value['solution']
+  s2 = t6.value['solution']
+  result = (not s or not s1 or s == s1) and (not s or not s2 or s == s2)
