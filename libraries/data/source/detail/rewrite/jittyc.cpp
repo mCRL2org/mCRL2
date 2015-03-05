@@ -1358,16 +1358,15 @@ private:
   bool calc_inner_term(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity=0)
   {
     const bool nf = opid_is_nf(f, arity);
-    const nfs_array nfs(arity);
-    if (rewr && !nf)
+    if (rewr || nf)
     {
-      s << rewr_function_name(f, 0, nfs) << "()";
+      s << m_rewriter.m_nf_cache.insert(f);
       return true;
     }
     else
     {
       s << "function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(f) << ")))";
-      return rewr || nf;
+      return false;
     }
   }
 
