@@ -5,8 +5,6 @@ nodes:
     type: LPS
   l3:
     type: LTS
-  l4:
-    type: INFO
   l5:
     type: NUMBER
 
@@ -23,9 +21,9 @@ tools:
     name: lps2lts
   t3:
     input: [l3]
-    output: [l4]
+    output: []
     args: []
     name: ltsinfo
 
 result: |
-  result = l4.value['states'] == l5.value
+  result = t3.value['states'] == l5.value

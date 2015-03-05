@@ -133,8 +133,6 @@ class PrintTool(Tool):
 
 class Pbes2BoolTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        assert len(input_nodes) == 1
-        assert len(output_nodes) == 0
         super(Pbes2BoolTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
@@ -149,8 +147,6 @@ class Pbes2BoolTool(Tool):
 
 class PbesPgSolveTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        assert len(input_nodes) == 1
-        assert len(output_nodes) == 0
         super(PbesPgSolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
@@ -165,8 +161,6 @@ class PbesPgSolveTool(Tool):
 
 class BesSolveTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        assert len(input_nodes) == 1
-        assert len(output_nodes) == 0
         super(BesSolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
@@ -181,23 +175,12 @@ class BesSolveTool(Tool):
 
 class LtsInfoTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        assert len(input_nodes) == 1
-        assert len(output_nodes) == 1
         super(LtsInfoTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
-    def arguments(self, runpath = None):
-        if not runpath:
-            runpath = os.getcwd()
-        return [os.path.join(runpath, node.filename()) for node in self.input_nodes]
-
     def assign_outputs(self):
-        node = self.output_nodes[0]
-        result = {}
         lines = self.stdout.splitlines()
         m = re.search('Number of states: (\d+)', lines[0])
-        result['states'] = int(m.group(1))
-        node.value = result
-        write_text(node.filename(), str(result))
+        self.value['states'] = int(m.group(1))
 
 class Lps2PbesTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
@@ -229,48 +212,31 @@ class Lts2LpsTool(Tool):
 
 class Lps2LtsTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        assert len(input_nodes) == 1
-        assert len(output_nodes) in [1, 2]
         super(Lps2LtsTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
-        if '-D' in self.args and len(self.output_nodes) > 1:
-            value = { 'deadlock': re.search('deadlock-detect: deadlock found', self.stderr) != None }
-            self.output_nodes[1].value = value
-            write_text(self.output_nodes[1].filename(), str(value))
-        self.output_nodes[0].value = 'executed'
-
-    def arguments(self, runpath = None):
-        if not runpath:
-            runpath = os.getcwd()
-        return [os.path.join(runpath, self.input_nodes[0].filename()), os.path.join(runpath, self.output_nodes[0].filename())]
+        super(Lps2LtsTool, self).assign_outputs()
+        if '-D' in self.args:
+            self.value['deadlock'] = re.search('deadlock-detect: deadlock found', self.stderr) != None
 
 class LpsConfcheckTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        assert len(input_nodes) == 1
-        assert len(output_nodes) in [1, 2]
         super(LpsConfcheckTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
         super(LpsConfcheckTool, self).assign_outputs()
-        if len(self.output_nodes) > 1:
-            text = self.stderr
-            value = {}
-            m = re.search(r'(\d+) of (\d+) tau summands were found to be confluent', text)
-            if m:
-                value['confluent_tau_summands'] = (int(m.group(1)), int(m.group(2)))
-            self.output_nodes[1].value = value
-            write_text(self.output_nodes[1].filename(), str(value))
+        m = re.search(r'(\d+) of (\d+) tau summands were found to be confluent', self.stdout + self.stderr)
+        if m:
+            self.value['confluent_tau_summands'] = (int(m.group(1)), int(m.group(2)))
 
     def arguments(self, runpath = None):
         if not runpath:
             runpath = os.getcwd()
         return [os.path.join(runpath, self.input_nodes[0].filename()), os.path.join(runpath, self.output_nodes[0].filename())]
 
+
 class LtsCompareTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        assert len(input_nodes) == 2
-        assert len(output_nodes) == 0
         super(LtsCompareTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):

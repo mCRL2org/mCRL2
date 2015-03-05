@@ -5,8 +5,6 @@ nodes:
     type: LPS
   l3:
     type: LTS
-  l4:
-    type: INFO
   l5:
     type: StateFrm
   l6:
@@ -22,7 +20,7 @@ tools:
     name: mcrl22lps
   t2:
     input: [l2]
-    output: [l3, l4]
+    output: [l3]
     args: [-D]
     name: lps2lts
   t3:
@@ -47,5 +45,5 @@ tools:
     name: pbes2bool
 
 result: |
-  result = t4.value['solution'] == t6.value['solution'] == (not l4.value['deadlock'])
+  result = t4.value['solution'] == t6.value['solution'] == (not t2.value['deadlock'])
 
