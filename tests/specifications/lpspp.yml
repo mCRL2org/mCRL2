@@ -11,8 +11,6 @@ nodes:
     type: LPS
   l6:
     type: LTS
-  l7:
-    type: Bool
 
 tools:
   t1:
@@ -42,10 +40,10 @@ tools:
     name: lps2lts
   t6:
     input: [l3, l6]
-    output: [l7]
+    output: []
     args: [-ebisim]
     name: ltscompare
 
 result: |
-  result = 'not' not in l7.value
+  result = t6.value['result']
 

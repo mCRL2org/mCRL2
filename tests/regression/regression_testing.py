@@ -34,7 +34,7 @@ class LpsconfcheckCtauTest(YmlTest):
         assert confluence_type in 'cdCTZ'
         super(LpsconfcheckCtauTest, self).__init__(name, ymlfile('lpsconfcheck_ctau'), inputfiles, settings)
         self.set_command_line_options('t3', ['-x' + confluence_type])
-        self.settings.update({'result': "result = l7.value and l8.value['confluent_tau_summands'] == {0}".format(expected_result)})
+        self.settings.update({'result': "result = t6.value['result'] and l8.value['confluent_tau_summands'] == {0}".format(expected_result)})
 
 class PbesrewrTest(YmlTest):
     def __init__(self, name, inputfiles, rewriter, settings = dict()):

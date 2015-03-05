@@ -11,16 +11,6 @@ nodes:
     type: PBES
   l6:
     type: PBES
-  l7:
-    type: Bool
-  l8:
-    type: Bool
-  l9:
-    type: Bool
-  l10:
-    type: Bool
-  l11:
-    type: Bool
 
 tools:
   t1:
@@ -50,30 +40,30 @@ tools:
     name: symbolic_exploration
   t6:
     input: [l2]
-    output: [l7]
+    output: []
     args: []
     name: pbes2bool
   t7:
     input: [l3]
-    output: [l8]
+    output: []
     args: []
     name: pbes2bool
   t8:
     input: [l4]
-    output: [l9]
+    output: []
     args: []
     name: pbes2bool
   t9:
     input: [l5]
-    output: [l10]
+    output: []
     args: []
     name: pbes2bool
   t10:
     input: [l6]
-    output: [l11]
+    output: []
     args: []
     name: pbes2bool
 result: |
-  answers = [l7.value, l8.value, l9.value, l10.value, l11.value]
+  answers = [t6.value['solution'], t7.value['solution'], t8.value['solution'], t9.value['solution'], t10.value['solution']]
   result = not (True in answers and False in answers)
 

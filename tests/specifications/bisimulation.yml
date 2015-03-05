@@ -7,16 +7,12 @@ nodes:
     type: LTS
   l4:
     type: LTS
-  l5:
-    type: Bool
   l6:
     type: LPS
   l7:
     type: LPS
   l8:
     type: PBES
-  l9:
-    type: Bool
 
 tools:
   t1:
@@ -36,7 +32,7 @@ tools:
     name: ltsconvert
   t4:
     input: [l3, l4]
-    output: [l5]
+    output: []
     args: []
     name: ltscompare
   t5:
@@ -56,9 +52,9 @@ tools:
     name: lpsbisim2pbes
   t8:
     input: [l8]
-    output: [l9]
+    output: []
     args: []
     name: pbes2bool
 
 result: |
-  result = l5.value == l9.value == True
+  result = t4.value['result'] == t8.value['solution'] == True

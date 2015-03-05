@@ -5,8 +5,6 @@ nodes:
     type: LPS
   l3:
     type: PBES
-  l4:
-    type: Bool
 
 tools:
   t1:
@@ -21,7 +19,7 @@ tools:
     name: lps2pbes
   t3:
     input: [l3]
-    output: [l4]
+    output: []
     args: []
     name: pbes2bool
 result: |

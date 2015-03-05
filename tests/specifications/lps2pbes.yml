@@ -11,12 +11,8 @@ nodes:
     type: StateFrm
   l6:
     type: PBES
-  l7:
-    type: Bool
   l8:
     type: PBES
-  l9:
-    type: Bool
 
 tools:
   t1:
@@ -36,7 +32,7 @@ tools:
     name: lps2pbes
   t4:
     input: [l6]
-    output: [l7]
+    output: []
     args: []
     name: pbes2bool
   t5:
@@ -46,10 +42,10 @@ tools:
     name: lps2pbes
   t6:
     input: [l8]
-    output: [l9]
+    output: []
     args: []
     name: pbes2bool
 
 result: |
-  result = l7.value == l9.value == (not l4.value['deadlock'])
+  result = t4.value['solution'] == t6.value['solution'] == (not l4.value['deadlock'])
 

@@ -9,8 +9,6 @@ nodes:
     type: LTS
   l5:
     type: LTS
-  l6:
-    type: Bool
   l7:
     type: INFO
 
@@ -37,9 +35,9 @@ tools:
     name: lps2lts
   t5:
     input: [l4, l5]
-    output: [l6]
+    output: []
     args: [-ebranching-bisim]
     name: ltscompare
 
 result: |
-  result = l6.value
+  result = t5.value['result']

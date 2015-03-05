@@ -7,10 +7,6 @@ nodes:
     type: BesSpec
   l4:
     type: BES
-  l5:
-    type: Bool
-  l6:
-    type: Bool
 
 tools:
   t1:
@@ -30,14 +26,14 @@ tools:
     name: txt2pbes
   t4:
     input: [l2]
-    output: [l5]
+    output: []
     args: []
     name: pbes2bool
   t5:
     input: [l4]
-    output: [l6]
+    output: []
     args: []
     name: pbes2bool
 result: |
-  result = l5.value == l6.value
+  result = t4.value['solution'] == t5.value['solution']
 

@@ -7,8 +7,6 @@ nodes:
     type: LPS
   l4:
     type: PBES
-  l5:
-    type: Bool
 
 tools:
   t1:
@@ -28,9 +26,9 @@ tools:
     name: lpsbisim2pbes
   t4:
     input: [l4]
-    output: [l5]
+    output: []
     args: []
     name: pbes2bool
 
 result: |
-  result = l5.value
+  result = t4.value['solution']

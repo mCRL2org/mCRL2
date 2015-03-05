@@ -7,8 +7,6 @@ nodes:
     type: LTS
   l4:
     type: LTS
-  l5:
-    type: Bool
 
 tools:
   t1:
@@ -28,9 +26,9 @@ tools:
     name: ltsconvert
   t4:
     input: [l3, l4]
-    output: [l5]
+    output: []
     args: []
     name: ltscompare
 
 result: |
-  result = l5.value
+  result = t4.value['result']

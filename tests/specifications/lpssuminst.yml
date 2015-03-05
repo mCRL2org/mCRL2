@@ -9,8 +9,6 @@ nodes:
     type: LPS
   l5:
     type: LTS
-  l6:
-    type: Bool
 
 tools:
   t1:
@@ -35,10 +33,9 @@ tools:
     name: lps2lts
   t5:
     input: [l3, l5]
-    output: [l6]
+    output: []
     args: [-ebisim]
     name: ltscompare
 
 result: |
-  result = l6.value
-
+  result = t5.value['result']

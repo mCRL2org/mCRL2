@@ -5,10 +5,6 @@ nodes:
     type: PBES
   l3:
     type: PBES
-  l4:
-    type: Bool
-  l5:
-    type: Bool
 
 tools:
   t1:
@@ -23,14 +19,14 @@ tools:
     name: pbesrewr
   t3:
     input: [l2]
-    output: [l4]
+    output: []
     args: []
     name: pbes2bool
   t4:
     input: [l3]
-    output: [l5]
+    output: []
     args: []
     name: pbes2bool
 result: |
-  result =  l4.value == l5.value
+  result = t3.value['solution'] == t4.value['solution']
 

@@ -3,12 +3,6 @@ nodes:
     type: BesSpec
   l2:
     type: BES
-  l3:
-    type: Bool
-  l4:
-    type: Bool
-  l5:
-    type: Bool
 
 tools:
   t1:
@@ -18,18 +12,18 @@ tools:
     name: txt2bes
   t2:
     input: [l2]
-    output: [l3]
+    output: []
     args: [-sgauss]
     name: bessolve
   t3:
     input: [l2]
-    output: [l4]
+    output: []
     args: [-sspm]
     name: bessolve
   t4:
     input: [l2]
-    output: [l5]
+    output: []
     args: []
     name: pbes2bool
 result: |
-  result = l3.value == l4.value == l5.value
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution']

@@ -7,12 +7,6 @@ nodes:
     type: PBES
   l4:
     type: PBES
-  l5:
-    type: Bool
-  l6:
-    type: Bool
-  l7:
-    type: Bool
 
 tools:
   t1:
@@ -32,18 +26,18 @@ tools:
     name: pbesabsinthe
   t4:
     input: [l2]
-    output: [l5]
+    output: []
     args: []
     name: pbes2bool
   t5:
     input: [l3]
-    output: [l6]
+    output: []
     args: []
     name: pbes2bool
   t6:
     input: [l4]
-    output: [l7]
+    output: []
     args: []
     name: pbes2bool
 result: |
-  result = (not l5.value or not l6.value or l5.value == l6.value) and (not l5.value or not l7.value or l5.value == l7.value)
+  result = t4.value['solution'] == t5.value['solution'] == t6.value['solution']

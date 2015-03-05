@@ -44,6 +44,7 @@ class Tool(object):
         self.output_nodes = output_nodes
         self.args = args
         self.executed = False
+        self.value = {}
         if platform.system() == 'Windows':
             # Don't display the Windows GPF dialog if the invoked program dies.
             # See comp.os.ms-windows.programmer.win32
@@ -133,7 +134,7 @@ class PrintTool(Tool):
 class Pbes2BoolTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         assert len(input_nodes) == 1
-        assert len(output_nodes) == 1
+        assert len(output_nodes) == 0
         super(Pbes2BoolTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
@@ -144,13 +145,12 @@ class Pbes2BoolTool(Tool):
             value = False
         else:
             value = None
-        self.output_nodes[0].value = value
-        write_text(self.output_nodes[0].filename(), str(value))
+        self.value['solution'] = value
 
 class PbesPgSolveTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         assert len(input_nodes) == 1
-        assert len(output_nodes) == 1
+        assert len(output_nodes) == 0
         super(PbesPgSolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
@@ -161,13 +161,12 @@ class PbesPgSolveTool(Tool):
             value = False
         else:
             value = None
-        self.output_nodes[0].value = value
-        write_text(self.output_nodes[0].filename(), str(value))
+        self.value['solution'] = value
 
 class BesSolveTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         assert len(input_nodes) == 1
-        assert len(output_nodes) == 1
+        assert len(output_nodes) == 0
         super(BesSolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
@@ -178,8 +177,7 @@ class BesSolveTool(Tool):
             value = False
         else:
             value = None
-        self.output_nodes[0].value = value
-        write_text(self.output_nodes[0].filename(), str(value))
+        self.value['solution'] = value
 
 class LtsInfoTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
@@ -272,13 +270,12 @@ class LpsConfcheckTool(Tool):
 class LtsCompareTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         assert len(input_nodes) == 2
-        assert len(output_nodes) == 1
+        assert len(output_nodes) == 0
         super(LtsCompareTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
         value = not 'not' in self.stdout
-        self.output_nodes[0].value = value
-        write_text(self.output_nodes[0].filename(), str(value))
+        self.value['result'] = value
 
 class ToolFactory(object):
     def create_tool(self, label, name, toolpath, input_nodes, output_nodes, args):

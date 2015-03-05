@@ -93,6 +93,8 @@ class Test:
         self.globals = {}
         for node in self.nodes:
             self.globals[node.label] = node
+        for tool in self.tools:
+            self.globals[tool.label] = tool
 
         # Contains a list of input nodes of this test, sorted by label
         self.input_nodes = self.compute_input_nodes()
@@ -127,7 +129,7 @@ class Test:
 
     def _add_tool(self, data, label):
         import platform
-        input_nodes = [next(node for node in self.nodes if node.label == label) for label in data['input']]
+        input_nodes = [next(node for node in self.nodes if node.label == key) for key in data['input']]
         output_nodes = sorted([node for node in self.nodes if node.label in data['output']], key = lambda node: node.label)
         name = data['name']
         if platform.system() == 'Windows':
