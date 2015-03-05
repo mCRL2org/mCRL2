@@ -8,7 +8,7 @@ tools:
   t1:
     input: [l1]
     output: [l2]
-    args: []
+    args: [-lstack]
     name: mcrl22lps
 
 result: |

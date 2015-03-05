@@ -272,8 +272,6 @@ if __name__ == '__main__':
     settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files}
     I = range(int(args.repetitions))
 
-    settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': args.verbose, 'cleanup_files': not args.keep_files}
-
     testdir = 'output'
     if not os.path.exists(testdir):
         os.mkdir(testdir)
