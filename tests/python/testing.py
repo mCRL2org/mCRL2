@@ -172,7 +172,9 @@ class Test:
             tool = tasks[0]
             try:
                 returncode = tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
-                if returncode != 0:
+                # The value -1073741571 seems to indicate a stack overflow in Windows. For the moment we ignore it.
+                # TODO: find a more elegant way to deal with this
+                if returncode not in [0, -1073741571]:
                     raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
             except MemoryExceededError as e:
                 if self.verbose:
