@@ -233,7 +233,7 @@ class Lps2LtsTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         super(Lps2LtsTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
-    def parse_outputs(self):
+    def parse_output(self):
         super(Lps2LtsTool, self).parse_output()
         # The tool lps2lts does not print a message if no deadlock is found...
         if '-D' in self.args and not 'has-deadlock' in self.value:
