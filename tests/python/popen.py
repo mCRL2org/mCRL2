@@ -26,6 +26,14 @@ class MemoryExceededError(Exception):
         return repr(self.value)
 
 
+class StackOverflowError(Exception):
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return 'Stack overflow'
+
+
 class Popen(subprocess.Popen):
     def __init__(self, *args, **kwargs):
         self.__maxVirtLimit = kwargs.setdefault('maxVirtLimit', 100000000)

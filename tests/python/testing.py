@@ -11,7 +11,7 @@ import shutil
 import sys
 sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
 import testrunner
-from popen import Popen, MemoryExceededError, TimeExceededError
+from popen import Popen, MemoryExceededError, TimeExceededError, StackOverflowError
 from subprocess import  PIPE, STDOUT
 from text_utility import read_text, write_text
 from tools import Node, Tool, ToolFactory
@@ -172,9 +172,7 @@ class Test:
             tool = tasks[0]
             try:
                 returncode = tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
-                # The value -1073741571 seems to indicate a stack overflow in Windows. For the moment we ignore it.
-                # TODO: find a more elegant way to deal with this
-                if returncode not in [0, -1073741571]:
+                if returncode != 0:
                     raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
             except MemoryExceededError as e:
                 if self.verbose:
@@ -184,6 +182,11 @@ class Test:
             except TimeExceededError as e:
                 if self.verbose:
                     print 'Time limit exceeded: ' + str(e)
+                self.cleanup()
+                return None
+            except StackOverflowError as e:
+                if self.verbose:
+                    print 'Stack overflow detected during execution of the tool ' + tool.name
                 self.cleanup()
                 return None
             tasks = self.remaining_tasks()
