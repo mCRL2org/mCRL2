@@ -26,4 +26,4 @@ tools:
     name: ltsinfo
 
 result: |
-  result = t3.value['states'] == l5.value
+  result = t3.value['state-count'] == l5.value

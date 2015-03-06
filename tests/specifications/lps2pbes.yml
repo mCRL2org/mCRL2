@@ -45,5 +45,5 @@ tools:
     name: pbes2bool
 
 result: |
-  result = t4.value['solution'] == t6.value['solution'] == (not t2.value['deadlock'])
+  result = t4.value['solution'] == t6.value['solution'] == (not t2.value['has-deadlock'])
 

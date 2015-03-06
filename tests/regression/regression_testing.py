@@ -27,14 +27,14 @@ class LpsconfcheckTest(YmlTest):
         assert confluence_type in 'cdCTZ'
         super(LpsconfcheckTest, self).__init__(name, ymlfile('lpsconfcheck'), inputfiles, settings)
         self.set_command_line_options('t2', ['-x' + confluence_type])
-        self.settings.update({'result': "result = t5.value['result'] and t2.value['confluent_tau_summands'] == {}".format(expected_result)})
+        self.settings.update({'result': "result = t5.value['result'] and t2.value['confluent-tau-summand-count'] == {}  and t2.value['tau-summand-count'] == {}".format(expected_result[0], expected_result[1])})
 
 class LpsconfcheckCtauTest(YmlTest):
     def __init__(self, name, inputfiles, confluence_type, expected_result, settings = dict()):
         assert confluence_type in 'cdCTZ'
         super(LpsconfcheckCtauTest, self).__init__(name, ymlfile('lpsconfcheck_ctau'), inputfiles, settings)
         self.set_command_line_options('t3', ['-x' + confluence_type])
-        self.settings.update({'result': "result = t6.value['result'] and t3.value['confluent_tau_summands'] == {0}".format(expected_result)})
+        self.settings.update({'result': "result = t6.value['result'] and t3.value['confluent-tau-summand-count'] == {}  and t3.value['tau-summand-count'] == {}".format(expected_result[0], expected_result[1])})
 
 class PbesrewrTest(YmlTest):
     def __init__(self, name, inputfiles, rewriter, settings = dict()):

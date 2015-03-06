@@ -87,11 +87,61 @@ class Tool(object):
 
     def assign_outputs(self):
         for node in self.output_nodes:
-            node.value = self.stdout
-            if node.value == '':
-                node.value = self.stderr
-            if node.value == '':
-                node.value = 'executed'
+            node.value = 'executed'
+
+    def parse_number(self, text, key, regex):
+        m = re.search(regex, text)
+        if m != None:
+            self.value[key] = int(m.group(1))
+
+    def parse_numbers(self, text, key1, key2, regex):
+        m = re.search(regex, text)
+        if m != None:
+            self.value[key1] = int(m.group(1))
+            self.value[key2] = int(m.group(2))
+
+    def parse_boolean(self, text, key, regex, negated_regex = None):
+        if negated_regex:
+            m = re.search(regex, text, re.DOTALL)
+            if m != None:
+                self.value[key] = False
+        if regex:
+            m = re.search(regex, text, re.DOTALL)
+            if m != None:
+                self.value[key] = True
+
+    def parse_output(self):
+        text = self.stdout + self.stderr
+        self.parse_number(text, 'summand-count'               , 'Number of summands                  : (\d+)')
+        self.parse_number(text, 'tau-summand-count'           , 'Number of tau-summands              : (\d+)')
+        self.parse_number(text, 'global-variable-count'       , 'Number of declared global variables : (\d+)')
+        self.parse_number(text, 'process-parameter-count'     , 'Number of process parameters        : (\d+)')
+        self.parse_number(text, 'action-label-count'          , 'Number of declared action labels    : (\d+)')
+        self.parse_number(text, 'used-action-label-count'     , 'Number of used actions              : (\d+)')
+        self.parse_number(text, 'used-multi-action-count'     , 'Number of used multi-actions        : (\d+)')
+        self.parse_number(text, 'state-count'                 , 'Number of states: (\d+)')
+        self.parse_number(text, 'state-label-count'           , 'Number of state labels: (\d+)')
+        self.parse_number(text, 'action-label-count'          , 'Number of action labels: (\d+)')
+        self.parse_number(text, 'transition-count'            , 'Number of transitions: (\d+)')
+        self.parse_number(text, 'equation-count'              , "Number of equations: (\d+)")
+        self.parse_number(text, 'mu-count'                    , "Number of mu's:      (\d+)")
+        self.parse_number(text, 'nu-count'                    , "Number of nu's:      (\d+)")
+        self.parse_number(text, 'block-nesting-depth'         , "Block nesting depth: (\d+)")
+        self.parse_numbers(text, 'confluent-tau-summand-count', 'tau-summand-count', '(\d+) of (\d+) tau summands were found to be confluent')
+        self.parse_boolean(text, 'has-state-labels'           , 'Has state labels.', 'Does not have state labels.')
+        self.parse_boolean(text, 'has-action-labels'          , 'Has action labels.')
+        self.parse_boolean(text, 'is-deterministic'           , 'LTS is deterministic.', 'LTS is not deterministic.')
+        self.parse_boolean(text, 'is-closed'                  , 'is closed', 'is not closed')
+        self.parse_boolean(text, 'is-well-formed'             , 'well formed', 'not well formed')
+        self.parse_boolean(text, 'has-deadlock'               , 'deadlock-detect: deadlock found')
+        self.parse_boolean(text, 'result'                     , 'LTSs are strongly bisimilar', 'LTSs are not strongly bisimilar')
+        self.parse_boolean(text, 'result'                     , 'LTSs are branching bisimilar', 'LTSs are not branching bisimilar')
+        self.parse_boolean(text, 'result'                     , 'LTSs are divergence preserving branching bisimilar', 'LTSs are not divergence preserving branching bisimilar')
+        self.parse_boolean(text, 'result'                     , 'LTSs are weak bisimilar', 'LTSs are not weak bisimilar')
+        self.parse_boolean(text, 'result'                     , 'LTSs are divergence preserving weak bisimilar', 'LTSs are not divergence preserving weak bisimilar')
+        self.parse_boolean(text, 'result'                     , 'LTSs are strongly simulation equivalent', 'LTSs are not strongly simulation equivalent')
+        self.parse_boolean(text, 'result'                     , 'LTSs are strongly trace equivalent', 'LTSs are not strongly trace equivalent')
+        self.parse_boolean(text, 'result'                     , 'LTSs are weak trace equivalent', 'LTSs are not weak trace equivalent')
 
     def command(self, runpath):
         args = self.arguments(runpath)
@@ -107,11 +157,12 @@ class Tool(object):
 
         input = None
         self.stdout, self.stderr = process.communicate(input)
-        self.assign_outputs()
         self.executed = True
         self.user_time = process.user_time
         self.max_virtual_memory = process.max_virtual_memory
         self.check_execution(process, timeout, memlimit, process.returncode)
+        self.assign_outputs()
+        self.parse_output()
         return process.returncode
 
     def __str__(self):
@@ -136,9 +187,9 @@ class PrintTool(Tool):
         text = read_text(self.output_nodes[0].filename())
         self.output_nodes[0].value = text
 
-class Pbes2BoolTool(Tool):
+class SolveTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        super(Pbes2BoolTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
+        super(SolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
         text = self.stdout.strip()
@@ -149,43 +200,6 @@ class Pbes2BoolTool(Tool):
         else:
             value = None
         self.value['solution'] = value
-
-class PbesPgSolveTool(Tool):
-    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        super(PbesPgSolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
-
-    def assign_outputs(self):
-        text = self.stdout.strip()
-        if text.endswith('true'):
-            value = True
-        elif text.endswith('false'):
-            value = False
-        else:
-            value = None
-        self.value['solution'] = value
-
-class BesSolveTool(Tool):
-    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        super(BesSolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
-
-    def assign_outputs(self):
-        text = self.stdout.strip()
-        if text.endswith('true'):
-            value = True
-        elif text.endswith('false'):
-            value = False
-        else:
-            value = None
-        self.value['solution'] = value
-
-class LtsInfoTool(Tool):
-    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        super(LtsInfoTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
-
-    def assign_outputs(self):
-        lines = self.stdout.splitlines()
-        m = re.search('Number of states: (\d+)', lines[0])
-        self.value['states'] = int(m.group(1))
 
 class Lps2PbesTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
@@ -219,56 +233,22 @@ class Lps2LtsTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         super(Lps2LtsTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
-    def assign_outputs(self):
-        super(Lps2LtsTool, self).assign_outputs()
-        if '-D' in self.args:
-            self.value['deadlock'] = re.search('deadlock-detect: deadlock found', self.stderr) != None
-
-class LpsConfcheckTool(Tool):
-    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        super(LpsConfcheckTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
-
-    def assign_outputs(self):
-        super(LpsConfcheckTool, self).assign_outputs()
-        m = re.search(r'(\d+) of (\d+) tau summands were found to be confluent', self.stdout + self.stderr)
-        if m:
-            self.value['confluent_tau_summands'] = (int(m.group(1)), int(m.group(2)))
-
-    def arguments(self, runpath = None):
-        if not runpath:
-            runpath = os.getcwd()
-        return [os.path.join(runpath, self.input_nodes[0].filename()), os.path.join(runpath, self.output_nodes[0].filename())]
-
-
-class LtsCompareTool(Tool):
-    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        super(LtsCompareTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
-
-    def assign_outputs(self):
-        value = not 'not' in self.stdout
-        self.value['result'] = value
+    def parse_outputs(self):
+        super(Lps2LtsTool, self).parse_output()
+        # The tool lps2lts does not print a message if no deadlock is found...
+        if '-D' in self.args and not 'has-deadlock' in self.value:
+            self.value['has-deadlock'] = False
 
 class ToolFactory(object):
     def create_tool(self, label, name, toolpath, input_nodes, output_nodes, args):
         if name == 'lps2pbes':
             return Lps2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name == 'pbespgsolve':
-            return PbesPgSolveTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lps2lts':
             return Lps2LtsTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name == 'lpsconfcheck':
-            return LpsConfcheckTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name == 'ltsinfo':
-            return LtsInfoTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name == 'pbes2bool':
-            return Pbes2BoolTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name == 'bessolve':
-            return BesSolveTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name == 'ltscompare':
-            return LtsCompareTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2lps':
             return Lts2LpsTool(label, name, toolpath, input_nodes, output_nodes, args)
+        elif name in ['pbespgsolve', 'pbes2bool', 'bessolve']:
+            return SolveTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['bespp', 'lpspp', 'pbespp']:
             return PrintTool(label, name, toolpath, input_nodes, output_nodes, args)
         return Tool(label, name, toolpath, input_nodes, output_nodes, args)
-
