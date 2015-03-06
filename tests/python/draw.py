@@ -39,7 +39,7 @@ def generate_dotfile(ymlfile):
     # draw the nodes
     nodes = data['nodes']
     for node in sorted(nodes):
-        attributes = ['label="{0}: {1}"'.format(node, nodes[node]['type'])]
+        attributes = ['label="{0}: {1}"'.format(node, nodes[node]['type']), 'style=filled', 'fillcolor=papayawhip']
         add_vertex(out, node, attributes)
 
     # draw the tools
@@ -47,7 +47,7 @@ def generate_dotfile(ymlfile):
     for name in tools:
         tool = tools[name]
         label_attribute = 'label="{0}"'.format(name + ': ' + tool['name'] + ' ' + ' '.join(tool['args']))
-        add_vertex(out, name, ['shape=box', label_attribute])
+        add_vertex(out, name, ['shape=box', 'style=filled', 'fillcolor=tan1', label_attribute])
         for src in tool['input']:
             add_edge(out, src, name)
         for dest in tool['output']:
@@ -57,8 +57,8 @@ def generate_dotfile(ymlfile):
     result_text = data['result']
     name = 'result'
     label_attribute = 'label="{0}"'.format(result_text)
-    add_vertex(out, name, ['shape=box', label_attribute])
-    for label in result_nodes(nodes, result_text):
+    add_vertex(out, name, ['shape=box', 'style=filled', 'fillcolor=lightblue', label_attribute])
+    for label in result_nodes(nodes.keys() + tools.keys(), result_text):
         add_edge(out, label, name)
 
     out.write('}\n')
