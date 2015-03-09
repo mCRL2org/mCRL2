@@ -31,6 +31,7 @@
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/basename.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
@@ -1044,7 +1045,7 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
   return true;
 }
 
-match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list& rules, const size_t arity, const nfs_array& nfs)
+match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list& rules, const size_t arity)
 {
   typedef std::list<size_t> dep_list_t;
   match_tree_list strat;
@@ -1063,7 +1064,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
       for (size_t i = 0; i < is_dependent_arg.size(); i++)
       {
         // Only if needed and not already rewritten
-        if (is_dependent_arg[i] && !nfs[i])
+        if (is_dependent_arg[i])
         {
           deps.push_back(i);
           // Increase dependency count
@@ -1144,7 +1145,7 @@ void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& o
     nfs.fill(arity);
     return;
   }
-  match_tree_list strat = create_strategy(eqns,arity,nfs);
+  match_tree_list strat = create_strategy(eqns,arity);
   while (!strat.empty() && strat.front().isA())
   {
     nfs.at(match_tree_A(strat.front()).variable_index()) = true;
@@ -1152,40 +1153,56 @@ void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& o
   }
 }
 
-struct rewr_function_spec
+class rewr_function_spec
 {
-  function_symbol fs;
-  size_t arity;
-  nfs_array nfs;
+  protected:
+    const function_symbol m_fs;
+    const size_t m_arity;
+    const bool m_delayed;
 
-  rewr_function_spec(function_symbol fs, size_t arity, const nfs_array& nfs)
-    : fs(fs), arity(arity), nfs(nfs)
-  { }
+  public:
+    rewr_function_spec(function_symbol fs, size_t arity, const bool delayed)
+      : m_fs(fs), m_arity(arity), m_delayed(delayed)
+    { }
 
-  rewr_function_spec(function_symbol fs, size_t arity, nfs_array&& nfs)
-    : fs(fs), arity(arity), nfs(nfs)
-  { }
+    bool operator<(const rewr_function_spec& other) const
+    {
+      return m_fs < other.m_fs ||
+             (m_fs == other.m_fs && m_arity < other.m_arity) ||
+             (m_fs == other.m_fs && m_arity == other.m_arity && m_delayed<other.m_delayed);
+    }
+    
+    function_symbol fs() const 
+    {
+      return m_fs;
+    }
 
-  bool operator<(const rewr_function_spec& other) const
-  {
-    return fs < other.fs ||
-           (fs == other.fs && arity < other.arity) ||
-           (fs == other.fs && arity == other.arity && static_cast<size_t>(nfs) < static_cast<size_t>(other.nfs));
-  }
+    size_t arity() const 
+    {
+      return m_arity;
+    }
 
-  bool operator==(const rewr_function_spec& other) const
-  {
-    return (fs == other.fs && arity == other.arity && static_cast<size_t>(nfs) == static_cast<size_t>(other.nfs));
-  }
+    bool delayed() const
+    {
+      return m_delayed;
+    }
 
-  std::string name() const
-  {
-    std::stringstream name;
-    name << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(fs)
-         << "_" << arity
-         << "_" << (arity <= NF_MAX_ARITY ? static_cast<size_t>(nfs) : 0);
-    return name.str();
-  }
+    bool operator==(const rewr_function_spec& other) const
+    {
+      return m_fs == other.m_fs && m_arity == other.m_arity && m_delayed==other.m_delayed;
+    }
+
+    std::string name() const
+    {
+      std::stringstream name;
+      if (m_delayed)
+      {
+        name << "delayed_";
+      }
+      name << "rewr_" << core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(m_fs)
+           << "_" << m_arity;
+      return name.str();
+    }
 };
 
 class RewriterCompilingJitty::ImplementTree
@@ -1215,7 +1232,6 @@ private:
   std::ostream& m_stream;
   std::stack<rewr_function_spec> m_rewr_functions;
   std::set<rewr_function_spec> m_rewr_functions_implemented;
-  std::set<function_symbol> m_partials;
   std::vector<bool> m_used;
   std::vector<int> m_stack;
   padding m_padding;
@@ -1333,9 +1349,9 @@ private:
   }
 
   inline
-  const std::string rewr_function_name(const function_symbol& f, size_t arity, const nfs_array& nfs)
+  const std::string rewr_function_name(const function_symbol& f, size_t arity)
   {
-    rewr_function_spec spec(f, arity, nfs);
+    rewr_function_spec spec(f, arity, false);
     if (m_rewr_functions_implemented.insert(spec).second)
     {
       m_rewr_functions.push(spec);
@@ -1343,11 +1359,16 @@ private:
     return spec.name();
   }
 
-  function_symbol create_partial(const function_symbol& f, size_t arity, const nfs_array& nfs)
+  inline
+  const std::string delayed_rewr_function_name(const function_symbol& f, size_t arity)
   {
-    function_symbol new_fs("@_" + rewr_function_name(f, arity, nfs), f.sort());
-    m_partials.insert(new_fs);
-    return new_fs;
+    rewr_function_spec spec(f, arity, true);
+    if (m_rewr_functions_implemented.insert(spec).second)
+    {
+      m_rewr_functions.push(spec);
+    }
+    rewr_function_name(f,arity); // Also declare the non delayed function.
+    return spec.name();
   }
 
   /*
@@ -1355,46 +1376,44 @@ private:
    *
    */
 
-  bool calc_inner_term(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity=0)
+  bool calc_inner_term(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity, std::ostream& result_type)
   {
     const bool nf = opid_is_nf(f, arity);
     if (rewr || nf)
     {
       s << m_rewriter.m_nf_cache.insert(f);
+      result_type << "data_expression";
       return true;
     }
     else
     {
-      s << "function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(f) << ")))";
+      s << "term_not_in_normal_form(function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(f) << "))))";
+      result_type << "term_not_in_normal_form";
       return false;
     }
   }
 
-  bool calc_inner_term(std::ostream& s, const variable& v, const variable_or_number_list nnfvars, const bool rewr)
+  bool calc_inner_term(std::ostream& s, const variable& v, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
-    const bool nf = std::find(nnfvars.begin(), nnfvars.end(), v) == nnfvars.end();
+    const bool nf = std::find(nnfvars.begin(), nnfvars.end(), v) != nnfvars.end();
     const std::string variable_name = v.name();
     // Remove the initial @ if it is present in the variable name, because then it is a variable introduced
     // by this rewriter.
     if (variable_name[0] == '@')
     {
-      if (rewr && !nf)
-      {
-        s << "rewrite(" << variable_name.substr(1) << ")";
-      }
-      else
-      {
-        s << variable_name.substr(1);
-      }
+      s << variable_name.substr(1);
+      result_type << "data_expression";
+      return true;
     }
     else
     {
       s << "this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << ")";
+      result_type << "data_expression";
+      return true;
     }
-    return rewr || nf;
   }
 
-  bool calc_inner_term(std::ostream& s, const abstraction& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  bool calc_inner_term(std::ostream& s, const abstraction& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     std::string binder_constructor;
     std::string rewriter_function;
@@ -1419,29 +1438,37 @@ private:
     {
       s << "this_rewriter->" << rewriter_function << "("
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
-      bool nf = calc_inner_term(s, a.body(), startarg, nnfvars, true);
+      bool nf = calc_inner_term(s, a.body(), startarg, nnfvars, true, result_type);
       s << ", " << nf << ", sigma())";
+      result_type << "data_expression";
       return true;
     }
     else
     {
-      s << "abstraction(" << binder_constructor << "(), "
+      s << "term_not_in_normal_form(abstraction(" << binder_constructor << "(), "
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
-      calc_inner_term(s, a.body(), startarg, nnfvars, false);
-      s << ")";
+      calc_inner_term(s, a.body(), startarg, nnfvars, false, result_type);
+      s << "))";
+      result_type << "term_not_in_normal_form";
       return false;
     }
   }
 
-  bool calc_inner_term(std::ostream& s, const where_clause& w, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  bool calc_inner_term(std::ostream& s, const where_clause& w, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     if (rewr)
     {
       s << "this_rewriter->rewrite_where(";
+      result_type << "data_expression";
+    }
+    else
+    {
+      s << "term_not_in_normal_form(";
+      result_type << "term_not_in_normal_form";
     }
     // A rewritten result is expected.
     s << "where_clause(";
-    calc_inner_term(s, w.body(), startarg, nnfvars, true);
+    calc_inner_term(s, w.body(), startarg, nnfvars, true, result_type);
     s << ",";
     for(size_t i = w.assignments().size(); i > 0; --i)
     {
@@ -1451,13 +1478,17 @@ private:
     for(assignment_list::const_iterator i = w.assignments().begin(); i != w.assignments().end(); ++i)
     {
       s << ", assignment(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(i->lhs()) << "), ";
-      calc_inner_term(s, i->rhs(), startarg, nnfvars, true);
+      calc_inner_term(s, i->rhs(), startarg, nnfvars, true, result_type);
       s << "))";
     }
     s << ")";
     if (rewr)
     {
       s << ", sigma())";
+    }
+    else
+    {
+      s << ")";
     }
     return rewr;
   }
@@ -1467,25 +1498,16 @@ private:
                             const function_symbol& head, 
                             const size_t startarg, 
                             const variable_or_number_list nnfvars, 
-                            const bool rewr)
+                            const bool rewr,
+                            std::ostream& result_type)
   {
     const size_t arity = recursive_number_of_args(a);
-    const bool head_nf = opid_is_nf(head, arity + 1);
 
     assert(arity > 0);
-
-    nfs_array args_nfs = calc_nfs_list(a, nnfvars);
+    nfs_array args_nfs(arity); 
     if (rewr)
     {
-      if (head_nf)
-      {
-        args_nfs.fill();
-      }
-      else
-      {
-        m_rewriter.add_base_nfs(args_nfs, head, arity);
-        m_rewriter.extend_nfs(args_nfs, head, arity);
-      }
+      m_rewriter.extend_nfs(args_nfs, head, arity);  // Is this still needed?
     }
 
     // First calculate the code to be generated for the arguments.
@@ -1493,30 +1515,29 @@ private:
     // form, which can be used to optimise the result.
 
     stringstream code_for_arguments;
-    args_nfs=calc_inner_terms(code_for_arguments, a, startarg, nnfvars, args_nfs);
-    if (!rewr || head_nf)
+    stringstream types_for_arguments;
+    args_nfs=calc_inner_terms(code_for_arguments, a, startarg, nnfvars, args_nfs, types_for_arguments);
+
+    if (rewr)
     {
-      s << appl_function(arity) << "(";
-      if (arity > NF_MAX_ARITY || head_nf || rewr || args_nfs.is_clear())
-      {
-        s << "function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>("
-          << (void*)atermpp::detail::address(head) << "))), ";
-      }
-      else
-      {
-        assert(m_rewriter.data_equation_selector(head));
-        s << "function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>("
-          << (void*)atermpp::detail::address(create_partial(head, arity, args_nfs)) << "))), ";
-      }
-    }
+      result_type << "data_expression";
+      s << rewr_function_name(head, arity) << "(";
+    } 
     else
     {
-      s << rewr_function_name(head, arity, args_nfs) << "(";
+      s << delayed_rewr_function_name(head, arity);  
+      result_type << delayed_rewr_function_name(head, arity);
+      if (arity>0)
+      {
+        s << "<" << types_for_arguments.str() << ">";
+        result_type << "<" << types_for_arguments.str() << ">";
+      }
+      s << "(";
     }
     s << code_for_arguments.str();
     s <<  ")";
 
-    return rewr || (head_nf && args_nfs.is_filled());
+    return rewr;
   }
 
   bool calc_inner_term_appl(std::ostream& s, 
@@ -1524,18 +1545,14 @@ private:
                             const abstraction& head, 
                             const size_t startarg, 
                             const variable_or_number_list nnfvars, 
-                            const bool rewr)
+                            const bool rewr,
+                            std::ostream& result_type)
   {
     assert(a.size() > 0);
     assert(is_lambda_binder(head.binding_operator()));
     const size_t arity = a.size();
 
     nfs_array args_nfs(arity);
-    if (arity > NF_MAX_ARITY)
-    {
-      args_nfs.fill(false);
-    }
-    else
     if (rewr)
     {
       args_nfs.fill(true);
@@ -1547,12 +1564,18 @@ private:
 
     if (rewr)
     {
-      s << "rewrite(";
+      s << "local_rewrite(";
+      result_type << "data_expression";
     }
     s << appl_function(arity) << "(";
-    calc_inner_term(s, head, startarg, nnfvars, false);
+    stringstream types_for_arguments;
+    calc_inner_term(s, head, startarg, nnfvars, false, types_for_arguments);
     s << ", ";
-    calc_inner_terms(s, a, startarg, nnfvars, args_nfs);
+    if (arity>0)
+    {
+      types_for_arguments << ", ";
+    }
+    calc_inner_terms(s, a, startarg, nnfvars, args_nfs,types_for_arguments);
     s << ")";
     if (rewr)
     {
@@ -1561,74 +1584,90 @@ private:
     return rewr;
   }
 
-  bool calc_inner_term_appl(std::ostream& s, const application& a, const application& head, const size_t startarg, const variable_or_number_list nnfvars, bool rewr)
+  bool calc_inner_term_appl(std::ostream& s, 
+                            const application& a, 
+                            const application& head, 
+                            const size_t startarg, 
+                            const variable_or_number_list nnfvars, 
+                            bool rewr, 
+                            std::ostream& result_type)
   {
     const nfs_array rewr_args(recursive_number_of_args(a));
     if (rewr)
     {
       s << "rewrite(";
+      result_type << "data_expression";
+    }
+    else
+    {
+      s << "term_not_in_normalform(";
+      result_type << "term_not_in_normal_form";
     }
     s << appl_function(a.size()) << "(";
-    calc_inner_term(s, head, startarg, nnfvars, false);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
+    stringstream dummy_head_type;
+    calc_inner_term(s, head, startarg, nnfvars, true, dummy_head_type);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
     s << ", ";
-    calc_inner_terms(s, a, startarg, nnfvars, rewr_args);
-    s << ")";
-    if (rewr)
-    {
-      s << ")";
-    }
-    return rewr;
-  }
-
-  bool calc_inner_term_appl(std::ostream& s, const application& a, const variable& head, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
-  {
-    const size_t arity = a.size();
-    nfs_array rewr_args(arity);
-    s << "!is_variable(";
-    calc_inner_term(s, head, startarg, nnfvars, false);
-    s << (rewr
-       ? ") ? rewrite("
-       : ") ? ")
-      << appl_function(arity) << "(";
-    calc_inner_term(s, head, startarg, nnfvars, false);
-    s << ", ";
-    calc_inner_terms(s, a, startarg, nnfvars, rewr_args);
-    s << (rewr
-       ? ")) : "
-       : ") : ");
-    const bool startarg_nnf = std::find(nnfvars.begin(), nnfvars.end(), atermpp::aterm_int(startarg)) != nnfvars.end();
-    s << (rewr && startarg_nnf ? "rewrite(" : "pass_on(") << appl_function(arity) << "(";
-    calc_inner_term(s, head, startarg, nnfvars, false);
-    s << ", ";
-    if (rewr && !startarg_nnf)
-    {
-      rewr_args.fill();
-    }
-    calc_inner_terms(s, a, startarg, nnfvars, rewr_args);
+    stringstream types_for_arguments;
+    calc_inner_terms(s, a, startarg, nnfvars, rewr_args,types_for_arguments);
     s << "))";
     return rewr;
   }
 
-  bool calc_inner_term(std::ostream& s, const application& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr)
+  bool calc_inner_term_appl(std::ostream& s, 
+                            const application& a, 
+                            const variable& head, 
+                            const size_t startarg, 
+                            const variable_or_number_list nnfvars, 
+                            const bool rewr, 
+                            std::ostream& result_type)
+  {
+    if (!rewr)
+    {
+      mCRL2log(warning) << "For higher order terms we always deliver a normal form, even if this is not required. This should be reconsidered in due time.\n";
+    }
+
+    result_type << "data_expression";
+    const size_t arity = a.size();
+    nfs_array rewr_args(arity);
+    rewr_args.fill();
+    s << "(is_variable(";
+    stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
+    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
+    s << ") ? ";
+    s << appl_function(arity) << "(";
+    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
+    s << ", ";
+    calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type);
+    s << ")";
+    const bool startarg_nnf = std::find(nnfvars.begin(), nnfvars.end(), atermpp::aterm_int(startarg)) != nnfvars.end();
+    s << ": rewrite(" << appl_function(arity) << "(";
+    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
+    s << ", ";
+    calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type); // Here, terms are rewritten twice.
+    s << ")))";
+    return true;
+  } 
+
+  bool calc_inner_term(std::ostream& s, const application& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     if (is_function_symbol(a.head()))  // Determine whether the topmost symbol is a function symbol.
     {
-      return calc_inner_term_appl(s, a, down_cast<function_symbol>(a.head()), startarg, nnfvars, rewr);
+      return calc_inner_term_appl(s, a, down_cast<function_symbol>(a.head()), startarg, nnfvars, rewr, result_type);
     }
     else
     if (is_abstraction(a.head()))
     {
-      return calc_inner_term_appl(s, a, down_cast<abstraction>(a.head()), startarg, nnfvars, rewr);
+      return calc_inner_term_appl(s, a, down_cast<abstraction>(a.head()), startarg, nnfvars, rewr, result_type);
     }
     else
     if (is_application(a.head()))
     {
-      return calc_inner_term_appl(s, a, down_cast<application>(a.head()), startarg, nnfvars, rewr);
+      return calc_inner_term_appl(s, a, down_cast<application>(a.head()), startarg, nnfvars, rewr, result_type);
     }
     else
     {
       assert(is_variable(a.head()));
-      return calc_inner_term_appl(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr);
+      return calc_inner_term_appl(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr, result_type);
     }
   }
 
@@ -1645,37 +1684,39 @@ private:
                        const data_expression& t, 
                        const size_t startarg, 
                        const variable_or_number_list nnfvars, 
-                       const bool rewr)
+                       const bool rewr,
+                       std::ostream& result_type)
   {
     if (find_free_variables(t).empty())
     {
       s << m_rewriter.m_nf_cache.insert(t);
+      result_type << "data_expression";
       return true;
     }
     else
     if (is_function_symbol(t))
     {
-      return calc_inner_term(s, down_cast<function_symbol>(t), rewr);
+      return calc_inner_term(s, down_cast<function_symbol>(t), rewr, 0, result_type);
     }
     else
     if (is_variable(t))
     {
-      return calc_inner_term(s, down_cast<variable>(t), nnfvars, rewr);
+      return calc_inner_term(s, down_cast<variable>(t), nnfvars, rewr, result_type);
     }
     else
     if (is_abstraction(t))
     {
-      return calc_inner_term(s, down_cast<abstraction>(t), startarg, nnfvars, rewr);
+      return calc_inner_term(s, down_cast<abstraction>(t), startarg, nnfvars, rewr, result_type);
     }
     else
     if (is_where_clause(t))
     {
-      return calc_inner_term(s, down_cast<where_clause>(t), startarg, nnfvars, rewr);
+      return calc_inner_term(s, down_cast<where_clause>(t), startarg, nnfvars, rewr, result_type);
     }
     else
     {
       assert(is_application(t));
-      return calc_inner_term(s, down_cast<application>(t), startarg, nnfvars, rewr);
+      return calc_inner_term(s, down_cast<application>(t), startarg, nnfvars, rewr, result_type);
     }
   }
 
@@ -1688,7 +1729,8 @@ private:
                              const application& appl, 
                              const size_t startarg, 
                              const variable_or_number_list nnfvars, 
-                             nfs_array rewr)
+                             nfs_array rewr,
+                             std::ostream& argument_types)
   {
     size_t j = 0;
     for(application::const_iterator i = appl.begin(); i != appl.end(); ++i, ++j)
@@ -1696,8 +1738,13 @@ private:
       if (j > 0)
       {
         s << ", ";
+        argument_types << ", ";
       }
-      rewr.at(j)=calc_inner_term(s, *i, startarg + j, nnfvars, rewr.at(j));
+      stringstream argument_string;
+      stringstream argument_type;
+      rewr.at(j)=calc_inner_term(argument_string, *i, startarg + j, nnfvars, rewr.at(j),argument_type);
+      s << argument_string.str();
+      argument_types << argument_type.str();
     }
     return rewr;
   }
@@ -1743,28 +1790,47 @@ private:
       assert(tree.isA() || tree.isX() || tree.isMe()); 
     }    
   }
+
+  class matches
+  {
+    protected:
+     const aterm m_matchterm;
+
+    public:
+      matches(const aterm& matchterm)
+       : m_matchterm(matchterm)
+      {}
+
+      bool operator ()(const atermpp::aterm& t) const
+      {
+        return t==m_matchterm;
+      }
+  };
   
   void implement_tree(const match_tree_S& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     const match_tree_S& treeS(tree);
-    m_stream << m_padding << "const data_expression& " << string(treeS.target_variable().name()).c_str() + 1 << " = ";
-    if (level == 0)
-    {
-      if (m_used[cur_arg])
+    if (find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm_appl()) // treeS.target_variable occurs in treeS.subtree
+    { 
+      m_stream << m_padding << "const data_expression& " << string(treeS.target_variable().name()).c_str() + 1 << " = ";
+      if (level == 0)
       {
-        m_stream << "arg" << cur_arg << "; // S1\n";
+        if (m_used[cur_arg])
+        {
+          m_stream << "arg" << cur_arg << "; // S1\n";
+        }
+        else
+        {
+          m_stream << "local_rewrite(arg_not_nf" << cur_arg << "); // S1\n";
+          m_nnfvars.push_front(treeS.target_variable());
+        }
       }
       else
       {
-        m_stream << "arg_not_nf" << cur_arg << "; // S1\n";
-        m_nnfvars.push_front(treeS.target_variable());
+        m_stream << "down_cast<data_expression>("
+                 << (level == 1 ? "arg" : "t") << parent << "[" << cur_arg << "]"
+                 << "); // S2\n";
       }
-    }
-    else
-    {
-      m_stream << "down_cast<data_expression>("
-               << (level == 1 ? "arg" : "t") << parent << "[" << cur_arg << "]"
-               << "); // S2\n";
     }
     implement_tree(tree.subtree(), cur_arg, parent, level, cnt);
   }
@@ -1871,9 +1937,10 @@ private:
 
   void implement_tree(const match_tree_C& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
+    stringstream result_type_string;
     m_stream << m_padding
              << "if (";
-    calc_inner_term(m_stream, tree.condition(), 0, m_nnfvars, true);
+    calc_inner_term(m_stream, tree.condition(), 0, m_nnfvars, true, result_type_string);
     m_stream << " == sort_bool::true_()) // C\n" << m_padding
              << "{\n";
     
@@ -1901,20 +1968,22 @@ private:
       cur_arg = m_stack[2 * level - 1];
     }
     m_stream << m_padding << "return ";
-    calc_inner_term(m_stream, tree.result(), cur_arg + 1, m_nnfvars, true);
+    stringstream result_type_string;
+    calc_inner_term(m_stream, tree.result(), cur_arg + 1, m_nnfvars, true, result_type_string);
     m_stream << "; // R1\n";
   }
 
   const match_tree& implement_tree(const match_tree_C& tree)
   {
+    stringstream result_type_string;
     assert(tree.true_tree().isR());
     m_stream << m_padding
              << "if (";
-    calc_inner_term(m_stream, tree.condition(), 0, variable_or_number_list(), true);
+    calc_inner_term(m_stream, tree.condition(), 0, variable_or_number_list(), true, result_type_string);
     m_stream << " == sort_bool::true_()) // C\n" << m_padding
              << "{\n" << m_padding
              << "  return ";
-    calc_inner_term(m_stream, match_tree_R(tree.true_tree()).result(), 0, m_nnfvars, true);
+    calc_inner_term(m_stream, match_tree_R(tree.true_tree()).result(), 0, m_nnfvars, true, result_type_string);
     m_stream << ";\n" << m_padding
              << "}\n" << m_padding
              << "else\n" << m_padding
@@ -1925,12 +1994,13 @@ private:
   
   void implement_tree(const match_tree_R& tree, size_t arity)
   {
+    stringstream result_type_string;
     if (arity == 0)
     { 
       // return a reference to an atermpp::aterm_appl
       m_stream << m_padding
-               << "static data_expression static_term(rewrite(";
-      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true);
+               << "static data_expression static_term(local_rewrite(";
+      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true, result_type_string);
       m_stream << "));\n" << m_padding
                << "return static_term; // R2a\n";
     }
@@ -1939,7 +2009,7 @@ private:
       // arity>0
       m_stream << m_padding
                << "return ";
-      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true);
+      calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true, result_type_string);
       m_stream << "; // R2b\n";
     }
   }
@@ -1953,11 +2023,10 @@ public:
       const size_t max_arity = getArity(*it);
       for (size_t arity = 0; arity <= max_arity; ++arity)
       {
-        nfs_array nfs(arity);
         if (arity_is_allowed(it->sort(), arity))
         {
           // Register this <symbol, arity, nfs> tuple as a function that needs to be generated
-          static_cast<void>(rewr_function_name(*it, arity, nfs));
+          static_cast<void>(rewr_function_name(*it, arity));
         }
       }
     }
@@ -1966,11 +2035,6 @@ public:
   const std::set<rewr_function_spec>& implemented_rewrs()
   {
     return m_rewr_functions_implemented;
-  }
-
-  const std::set<function_symbol>& partials()
-  {
-    return m_partials;
   }
 
   ///
@@ -2013,9 +2077,9 @@ public:
     }
   }
 
-  void implement_strategy(match_tree_list strat, size_t arity, const function_symbol& opid, const nfs_array& nf_args)
+  void implement_strategy(match_tree_list strat, size_t arity, const function_symbol& opid)
   {
-    m_used = nf_args; // This vector maintains which arguments are in normal form. Initially only those in nf_args are in normal form.
+    m_used=nfs_array(arity); // This vector maintains which arguments are in normal form. 
     while (!strat.empty())
     {
       m_stream << m_padding << "// " << strat.front() << "\n";
@@ -2024,7 +2088,7 @@ public:
         size_t arg = match_tree_A(strat.front()).variable_index();
         if (!m_used[arg])
         {
-          m_stream << m_padding << "const data_expression arg" << arg << " = rewrite(arg_not_nf" << arg << ");\n";
+          m_stream << m_padding << "const data_expression arg" << arg << " = local_rewrite(arg_not_nf" << arg << ");\n";
           m_used[arg] = true;
         }
         m_stream << m_padding << "// Considering argument " << arg << "\n";
@@ -2086,7 +2150,7 @@ public:
 
     const size_t domain_size = s.domain().size();
     stringstream ss;
-    ss << (domain_size > 5 ? "make_term_with_many_arguments(" : "application(") << head;
+    ss << appl_function(arity) << "(" << head;
 
     for (size_t i = 0; i < domain_size; ++i)
     {
@@ -2096,7 +2160,7 @@ public:
       }
       else
       {
-        ss << ", rewrite(arg_not_nf" << used_arguments + i << ")";
+        ss << ", local_rewrite(arg_not_nf" << used_arguments + i << ")";
       }
     }
     ss << ")";
@@ -2111,6 +2175,7 @@ public:
       return ss.str();
     }
   }
+
 
   void rewr_function_finish(size_t arity, const data::function_symbol& opid)
   {
@@ -2130,63 +2195,111 @@ public:
     }
   }
 
-  void rewr_function_signature(size_t index, size_t arity, const nfs_array& nfs)
+  void rewr_function_signature(size_t index, size_t arity)
   {
     // Constant function symbols (a == 0) can be passed by reference
-    m_stream << "static inline "
+    if (arity>0)
+    {
+      m_stream << m_padding << "template < ";
+      for (size_t i = 0; i < arity; ++i)
+      {
+        m_stream << (i == 0 ? "" : ", ")
+                 << "class DATA_EXPR" << i;
+      }
+      m_stream << ">\n";
+    }
+    m_stream << m_padding << "static inline "
              << (arity == 0 ? "const data_expression&" : "data_expression")
-             << " rewr_" << index << "_" << arity << "_" << static_cast<size_t>(nfs) << "(";
+             << " rewr_" << index << "_" << arity << "(";
 
     for (size_t i = 0; i < arity; ++i)
     {
       m_stream << (i == 0 ? "" : ", ")
-               << "const data_expression& arg"
-               << (nfs.at(i) ? "" : "_not_nf")
+               << "const DATA_EXPR" << i << "& arg_not_nf"
                << i;
     }
-    m_stream << ")";
+    m_stream << ")\n";
   }
 
-  void rewr_function_declaration(const data::function_symbol& func, size_t arity, const nfs_array& nfs)
-  {
-    size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
-    rewr_function_signature(index, arity, nfs);
-    m_stream << ";\n"
-                "static inline data_expression rewr_" << index << "_" << arity << "_" << nfs << "_term"
-                  "(const application&" << (arity == 0 ? "" : " t") << ") "
-                  "{ return rewr_" << index << "_" << arity << "_" << nfs << "(";
-    for(size_t i = 0; i < arity; ++i)
-    {
-      assert(is_function_sort(func.sort()));
-      m_stream << (i == 0 ? "" : ", ");
-      get_recursive_argument(down_cast<function_sort>(func.sort()), i, "t", arity);
-    }
-    m_stream << "); }\n";
-  }
-
-  void rewr_function_implementation(const data::function_symbol& func, size_t arity, const nfs_array& nfs, match_tree_list strategy)
+  void rewr_function_implementation(const data::function_symbol& func, size_t arity, match_tree_list strategy)
   {
     size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
-    m_stream << m_padding;
-    rewr_function_signature(index, arity, nfs);
+    rewr_function_signature(index, arity);
     m_stream << "\n" << m_padding << "{\n";
     m_padding.indent();
-    implement_strategy(strategy, arity, func, nfs);
+    implement_strategy(strategy, arity, func);
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 
     m_stream << m_padding << 
-                  "static inline data_expression rewr_" << index << "_" << arity << "_" << nfs << "_term"
+                  "static inline data_expression rewr_" << index << "_" << arity << "_term"
                   "(const application&" << (arity == 0 ? "" : " t") << ") "
-                  "{ return rewr_" << index << "_" << arity << "_" << nfs << "(";
+                  "{ return rewr_" << index << "_" << arity << "(";
     for(size_t i = 0; i < arity; ++i)
     {
       assert(is_function_sort(func.sort()));
       m_stream << (i == 0 ? "" : ", ");
+      m_stream << "term_not_in_normal_form(";
       get_recursive_argument(down_cast<function_sort>(func.sort()), i, "t", arity);
+      m_stream << ")";
     }
     m_stream << "); }\n\n";
+  }
+  
+  void generate_delayed_normal_form_generating_function(const data::function_symbol& func, size_t arity)
+  {
+    size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
+    m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
+    if (arity>0)
+    {
+      m_stream << m_padding << "template < ";
+      for (size_t i = 0; i < arity; ++i)
+      {
+        m_stream << (i == 0 ? "" : ", ")
+                 << "class DATA_EXPR" << i;
+      }
+      m_stream << ">\n";
+    }
+    m_stream << m_padding << "class delayed_rewr_" << index << "_" << arity << "\n";
+    m_stream << m_padding << "{\n";
+    m_padding.indent();
+    m_stream << m_padding << "protected:\n";
+    m_padding.indent();
+    for(size_t i = 0; i < arity; ++i)
+    {
+      m_stream << m_padding << "const DATA_EXPR" << i << "& m_t" << i << ";\n";
+    }
+    
+    m_padding.unindent();
+    m_stream << m_padding << "public:\n";
+    m_padding.indent();
+    m_stream << m_padding << "delayed_rewr_" << index << "_" << arity << "(";
+    for(size_t i = 0; i < arity; ++i)
+    {
+      m_stream << (i==0?"":", ") << "const DATA_EXPR" << i << "& t" << i;
+    }
+    m_stream << ")\n" << m_padding << (arity==0?"":"  : "); 
+    for(size_t i = 0; i < arity; ++i)
+    {
+      m_stream << (i==0?"":", ") << "m_t" << i << "(t" << i << ")";
+    }
+    m_stream << (arity==0?"":"\n") << m_padding << "{}\n\n";
+    m_stream << m_padding << "data_expression normal_form() const\n";
+    m_stream << m_padding << "{\n";
+    m_stream << m_padding << "  return rewr_" << index << "_" << arity << "(";
+    for(size_t i = 0; i < arity; ++i)
+    {
+      m_stream << (i==0?"":", ") << "m_t" << i;
+    }
+    
+    m_stream << ");\n";
+    m_stream << m_padding << "}\n";
+    
+    m_padding.unindent();
+    m_padding.unindent();
+    m_stream << m_padding << "};\n";
+    m_stream << m_padding << "\n";
   }
 
   void generate_rewr_functions()
@@ -2195,8 +2308,15 @@ public:
     {
       rewr_function_spec spec = m_rewr_functions.top();
       m_rewr_functions.pop();
-      const match_tree_list strategy = m_rewriter.create_strategy(m_rewriter.jittyc_eqns[spec.fs], spec.arity, spec.nfs);
-      rewr_function_implementation(spec.fs, spec.arity, spec.nfs, strategy);
+      if (spec.delayed())
+      {
+        generate_delayed_normal_form_generating_function(spec.fs(), spec.arity());
+      }
+      else
+      {
+        const match_tree_list strategy = m_rewriter.create_strategy(m_rewriter.jittyc_eqns[spec.fs()], spec.arity());
+        rewr_function_implementation(spec.fs(), spec.arity(), strategy);
+      }
     }
   }
 };
@@ -2272,7 +2392,7 @@ static void generate_make_appl_functions(std::ostream& s, size_t max_arity)
 {
   // The casting magic in these functions is done to avoid triggering the ATerm
   // reference counting mechanism.
-  for (size_t i = 5; i <= max_arity; ++i)
+  for (size_t i = 6; i <= max_arity; ++i)
   {
     s << "static application make_term_with_many_arguments(const data_expression& head";
     for (size_t j = 1; j <= i; ++j)
@@ -2314,7 +2434,37 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
                "\n"
                "struct rewr_functions\n"
                "{\n"
-               "  // We're declaring static members in a struct rather than simple functions in\n"
+
+               "  // A rewrite_term is a term that may or may not be in normal form. If the method\n"
+               "  // normal_form is invoked, it will calculate a normal form for itself as efficiently as possible.\n"
+               "  template <class REWRITE_TERM>\n"
+               "  static data_expression local_rewrite(const REWRITE_TERM& t)\n"
+               "  {\n"
+               "    return t.normal_form();\n"
+               "  }\n"
+               "\n"
+               "  static const data_expression& local_rewrite(const data_expression& t)\n"
+               "  {\n"
+               "    return t;\n"
+               "  }\n"
+               "\n"
+               "  class term_not_in_normal_form\n"
+               "  {\n"
+               "    private:\n"
+               "      const data_expression& m_term;\n"
+               "    public:\n"
+               "      term_not_in_normal_form(const data_expression& term)\n"
+               "         : m_term(term)\n"
+               "      {}\n"
+               "\n"
+               "      data_expression normal_form() const\n"
+               "      {\n"
+               "        return rewrite(m_term);\n"
+               "      }\n"
+               "  };\n"
+               "\n";
+  
+  rewr_code << "  // We're declaring static members in a struct rather than simple functions in\n"
                "  // the global scope, so that we don't have to worry about forward declarations.\n";
   code_generator.generate_rewr_functions();
   rewr_code << "};\n"
@@ -2335,16 +2485,16 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
             it = code_generator.implemented_rewrs().begin(); 
             it != code_generator.implemented_rewrs().end(); ++it)
   {
-    if (it->nfs.is_clear())
+    if (!it->delayed())
     {
       cpp_file << "  int2func[ARITY_BOUND * "
-               << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs)
-               << " + " << it->arity << "] = rewr_functions::"
+               << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
+               << " + " << it->arity() << "] = rewr_functions::"
                << it->name() << "_term;\n";
     }
   }
 
-  m_extra_symbols = code_generator.partials();
+  /* m_extra_symbols = code_generator.partials();
   // Fill tables with the rewrite functions
   for (std::set<function_symbol>::const_iterator it = m_extra_symbols.begin(); it != m_extra_symbols.end(); ++it)
   {
@@ -2353,7 +2503,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
              << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(*it)
              << " + " << getArity(*it) << "] = rewr_functions::"
              << fs_name.substr(2) << "_term;\n";
-  }
+  } */
 
   cpp_file << "}\n";
   cpp_file.close();

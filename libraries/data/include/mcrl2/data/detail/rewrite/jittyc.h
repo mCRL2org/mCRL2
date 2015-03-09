@@ -149,7 +149,7 @@ class RewriterCompilingJitty: public Rewriter
     void generate_rewr_functions(std::ostream& s, const data::function_symbol& func, const data_equation_list& eqs);
     bool lift_rewrite_rule_to_right_arity(data_equation& e, const size_t requested_arity);
     sort_list_vector get_residual_sorts(const sort_expression& s, const size_t actual_arity, const size_t requested_arity);
-    match_tree_list create_strategy(const data_equation_list& rules, const size_t arity, const nfs_array &nfs);
+    match_tree_list create_strategy(const data_equation_list& rules, const size_t arity);
 
 };
 
