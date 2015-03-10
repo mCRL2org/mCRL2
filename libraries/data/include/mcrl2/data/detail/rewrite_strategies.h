@@ -40,7 +40,7 @@ std::vector<data::rewrite_strategy> initialise_test_rewrite_strategies(const boo
   {
     result.push_back(data::jitty_prover);
   }
-#ifdef MCRL2_TEST_COMPILERS
+#ifdef MCRL2_TEST_JITTYC
 #ifdef MCRL2_JITTYC_AVAILABLE
   result.push_back(data::jitty_compiling);
   if (with_prover)
@@ -48,7 +48,7 @@ std::vector<data::rewrite_strategy> initialise_test_rewrite_strategies(const boo
     result.push_back(data::jitty_compiling_prover);
   }
 #endif // MCRL2_JITTYC_AVAILABLE
-#endif // MCRL2_TEST_COMPILERS
+#endif // MCRL2_TEST_JITTYC
 
   return result;
 }

@@ -38,7 +38,3 @@ add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_definitions(-DBOOST_ALL_NO_LIB=1)
 add_definitions(-DWIN32)
 
-# The following flag prevents compiling rewriter code from being compiled.
-# TODO: rename NO_DYNLOAD to MCRL2_NO_DYNLOAD, or replace it with a check for Windows. We want to
-#       compile the compiling rewriter stuff for all other platforms anyway.
-add_definitions(-DNO_DYNLOAD)
