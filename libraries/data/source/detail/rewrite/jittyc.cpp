@@ -1810,7 +1810,7 @@ private:
   void implement_tree(const match_tree_S& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     const match_tree_S& treeS(tree);
-    if (find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm_appl()) // treeS.target_variable occurs in treeS.subtree
+    if (atermpp::find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm_appl()) // treeS.target_variable occurs in treeS.subtree
     { 
       m_stream << m_padding << "const data_expression& " << string(treeS.target_variable().name()).c_str() + 1 << " = ";
       if (level == 0)
@@ -2447,21 +2447,6 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
                "  {\n"
                "    return t;\n"
                "  }\n"
-               "\n"
-               "  class term_not_in_normal_form\n"
-               "  {\n"
-               "    private:\n"
-               "      const data_expression& m_term;\n"
-               "    public:\n"
-               "      term_not_in_normal_form(const data_expression& term)\n"
-               "         : m_term(term)\n"
-               "      {}\n"
-               "\n"
-               "      data_expression normal_form() const\n"
-               "      {\n"
-               "        return rewrite(m_term);\n"
-               "      }\n"
-               "  };\n"
                "\n";
   
   rewr_code << "  // We're declaring static members in a struct rather than simple functions in\n"

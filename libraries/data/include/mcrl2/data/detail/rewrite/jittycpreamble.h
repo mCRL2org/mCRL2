@@ -35,6 +35,22 @@ static data_expression rewrite(const data_expression& t);
 //
 typedef data_expression (*rewriter_function)(const application&);
 
+class term_not_in_normal_form
+{
+  private:
+    const data_expression& m_term;
+  public:
+    term_not_in_normal_form(const data_expression& term)
+       : m_term(term)
+    {}
+
+    data_expression normal_form() const
+    {
+      return rewrite(m_term);
+    }
+};
+
+
 struct rewrite_functor
 {
   data_expression operator()(const data_expression& arg) const
