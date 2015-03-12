@@ -159,9 +159,10 @@ class Test:
 
     def cleanup(self):
         if self.cleanup_files:
-            for node in self.nodes:
+            filenames = [node.filename() for node in self.nodes] + ['commands']
+            for filename in filenames:
                 try:
-                    os.remove(node.filename())
+                    os.remove(filename)
                 except Exception as e:
                     if self.verbose:
                         print e
@@ -169,9 +170,11 @@ class Test:
     def run(self):
         # Singlecore run
         tasks = self.remaining_tasks()
+        commands = []
         while len(tasks) > 0:
             tool = tasks[0]
             try:
+                commands.append(tool.command())
                 returncode = tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
                 if returncode != 0 and not self.allow_non_zero_return_values:
                     raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
@@ -199,9 +202,9 @@ class Test:
             for node in self.nodes:
                 if not os.path.exists(node.filename()):
                     raise RuntimeError('Error in test {}: output file {} is missing!'.format(self.name, node.filename()))
+            write_text('commands', '\n'.join(commands))
             result = self.result()
-            if result:
-                self.cleanup()
+            self.cleanup()
             return result
 
     # Returns the tool with the given label
