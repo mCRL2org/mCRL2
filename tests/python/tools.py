@@ -5,7 +5,7 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-from popen import Popen, MemoryExceededError, TimeExceededError, StackOverflowError
+from popen import Popen, MemoryExceededError, TimeExceededError, StackOverflowError, ToolNotFoundError
 from subprocess import  PIPE
 import os.path
 import re
@@ -148,11 +148,22 @@ class Tool(object):
         name = os.path.join(self.toolpath, self.name)
         return ' '.join([name] + args + self.args)
 
+    def check_exists(self, name):
+        import platform
+        if os.path.exists(name):
+            return True
+        if not name.endswith('.exe') and platform.system() == 'Windows':
+            if os.path.exists(name + '.exe'):
+                return True
+        return False
+
     def execute(self, timeout, memlimit, verbose):
         args = self.arguments()
         name = os.path.join(self.toolpath, self.name)
         if verbose:
             print 'Executing ' + ' '.join([name] + args + self.args)
+        if not self.check_exists(name):
+            raise ToolNotFoundError(name)
         process = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=memlimit, usrTimeLimit=timeout)
 
         input = None

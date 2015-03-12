@@ -34,6 +34,14 @@ class StackOverflowError(Exception):
         return 'Stack overflow'
 
 
+class ToolNotFoundError(Exception):
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return 'Tool {} does not exist!'.format(self.name)
+
+
 class Popen(subprocess.Popen):
     def __init__(self, *args, **kwargs):
         self.__maxVirtLimit = kwargs.setdefault('maxVirtLimit', 100000000)
