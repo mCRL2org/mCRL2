@@ -102,7 +102,7 @@ class Tool(object):
 
     def parse_boolean(self, text, key, regex, negated_regex = None):
         if negated_regex:
-            m = re.search(regex, text, re.DOTALL)
+            m = re.search(negated_regex, text, re.DOTALL)
             if m != None:
                 self.value[key] = False
         if regex:
