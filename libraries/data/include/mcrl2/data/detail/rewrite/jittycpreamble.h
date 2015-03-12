@@ -1,3 +1,18 @@
+// Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+// 
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/data/detail/rewrite/jittyc.h
+
+#ifndef __REWR_JITTYC_PREAMBLE_H
+#define __REWR_JITTYC_PREAMBLE_H
+
+
+
 /// The following defines are required to be set before loading this header file:
 ///   ARITY_BOUND -- The maximum occurring arity + 1
 ///   INDEX_BOUND -- The maximum occurring index + 1
@@ -24,6 +39,20 @@ extern "C" {
   DLLEXPORT bool init(rewriter_interface* i);
 }
 
+
+// A rewrite_term is a term that may or may not be in normal form. If the method\n"
+// normal_form is invoked, it will calculate a normal form for itself as efficiently as possible.\n"
+template <class REWRITE_TERM>
+static data_expression local_rewrite(const REWRITE_TERM& t)
+{
+  return t.normal_form();
+}
+
+static const data_expression& local_rewrite(const data_expression& t)
+{
+  return t;
+}
+
 //
 // Forward declarations
 //
@@ -35,9 +64,12 @@ static data_expression rewrite(const data_expression& t);
 //
 typedef data_expression (*rewriter_function)(const application&);
 
+// A class that contains terms which are explicitly tagged to be 
+// not in normal form. By invoking normal_form the normalform
+// of this term is calculated.
 class term_not_in_normal_form
 {
-  private:
+  protected:
     const data_expression& m_term;
   public:
     term_not_in_normal_form(const data_expression& term)
@@ -47,6 +79,26 @@ class term_not_in_normal_form
     data_expression normal_form() const
     {
       return rewrite(m_term);
+    }
+};
+
+// This is an abstraction, of which the arguments are not yet
+// in normal form. This is done when the method "normal_form" is invoked.
+template <class TERM_TO_BE_REWRITTEN>
+class delayed_abstraction
+{
+  protected:
+    const binder_type& m_binding_operator; 
+    const variable_list& m_variables; 
+    const TERM_TO_BE_REWRITTEN& m_body;
+  public:
+    delayed_abstraction(const binder_type& binding_operator, const variable_list& variables, const TERM_TO_BE_REWRITTEN& body)
+       : m_binding_operator(binding_operator), m_variables(variables), m_body(body)
+    {}
+
+    data_expression normal_form() const
+    {
+      return abstraction(m_binding_operator,m_variables,local_rewrite(m_body));
     }
 };
 
@@ -64,7 +116,6 @@ struct rewrite_functor
 //
 static RewriterCompilingJitty *this_rewriter;
 static rewriter_function int2func[ARITY_BOUND * INDEX_BOUND] = {};
-//static rewriter_function int2func_head_in_nf[ARITY_BOUND * INDEX_BOUND];
 static const application dummy_application;
 
 //
@@ -196,7 +247,8 @@ data_expression rewrite(const data_expression& t)
     const size_t index = get_index(down_cast<function_symbol>(t));
     if (index < INDEX_BOUND)
     {
-      return rewrite(0, index);
+      data_expression u=rewrite(0, index);
+      return u;
     }
     else
     {
@@ -214,10 +266,14 @@ data_expression rewrite(const data_expression& t)
     {
       if (index < INDEX_BOUND)
       {
+        data_expression u=rewrite(appl.size(), index, appl);
+        return u;
         return rewrite(appl.size(), index, appl);
       }
       else
       {
+       data_expression u=application(rewrite(appl.head()), appl.begin(), appl.end(), rewrite_functor());
+        return u;
         return application(rewrite(appl.head()), appl.begin(), appl.end(), rewrite_functor());
       }
     }
@@ -275,3 +331,4 @@ bool init(rewriter_interface* i)
   return true;
 }
 
+#endif // __REWR_JITTYC_PREAMBLE_H

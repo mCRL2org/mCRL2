@@ -61,6 +61,8 @@ typedef atermpp::term_list<variable_list> variable_list_list;
 
 static const match_tree dummy=match_tree();
 
+std::set< size_t > m_required_appl_functions;
+
 template <template <class> class Traverser>
 struct double_variable_traverser : public Traverser<double_variable_traverser<Traverser> >
 {
@@ -1345,6 +1347,9 @@ private:
     {
       return "application";
     }
+    
+    // Take care that the required function is generated.
+    m_required_appl_functions.insert(arity);
     return "make_term_with_many_arguments";
   }
 
@@ -1407,7 +1412,7 @@ private:
     }
     else
     {
-      s << "this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << ")";
+      s << "static_cast<data_expression>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << "))";
       result_type << "data_expression";
       return true;
     }
@@ -1445,11 +1450,13 @@ private:
     }
     else
     {
-      s << "term_not_in_normal_form(abstraction(" << binder_constructor << "(), "
+      stringstream argument_type;
+      stringstream argument_string;
+      calc_inner_term(argument_string, a.body(), startarg, nnfvars, false, argument_type);
+      s << "delayed_abstraction<" << argument_type.str() << ">(" << binder_constructor << "(), "
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
-      calc_inner_term(s, a.body(), startarg, nnfvars, false, result_type);
-      s << "))";
-      result_type << "term_not_in_normal_form";
+      s << argument_string.str() << ")";
+      result_type << "delayed_abstraction<" << argument_type.str() << ">";
       return false;
     }
   }
@@ -1548,10 +1555,11 @@ private:
                             const bool rewr,
                             std::ostream& result_type)
   {
-    assert(a.size() > 0);
+    assert(a.size() > 0);    // TODO Take care that the application of this lambda is done without unnecessary rewriting.
     assert(is_lambda_binder(head.binding_operator()));
     const size_t arity = a.size();
 
+     // !rewr
     nfs_array args_nfs(arity);
     if (rewr)
     {
@@ -1564,12 +1572,12 @@ private:
 
     if (rewr)
     {
-      s << "local_rewrite(";
+      s << "local_rewrite(static_cast<data_expression>(";
       result_type << "data_expression";
     }
     s << appl_function(arity) << "(";
     stringstream types_for_arguments;
-    calc_inner_term(s, head, startarg, nnfvars, false, types_for_arguments);
+    calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
     s << ", ";
     if (arity>0)
     {
@@ -1579,9 +1587,10 @@ private:
     s << ")";
     if (rewr)
     {
-      s << ")";
+      s << "))";
     }
     return rewr;
+    
   }
 
   bool calc_inner_term_appl(std::ostream& s, 
@@ -2082,7 +2091,7 @@ public:
     m_used=nfs_array(arity); // This vector maintains which arguments are in normal form. 
     while (!strat.empty())
     {
-      m_stream << m_padding << "// " << strat.front() << "\n";
+      m_stream << m_padding << "// " << strat.front() <<  "\n";
       if (strat.front().isA())
       {
         size_t arg = match_tree_A(strat.front()).variable_index();
@@ -2150,7 +2159,7 @@ public:
 
     const size_t domain_size = s.domain().size();
     stringstream ss;
-    ss << appl_function(arity) << "(" << head;
+    ss << appl_function(domain_size) << "(" << head;  
 
     for (size_t i = 0; i < domain_size; ++i)
     {
@@ -2394,20 +2403,23 @@ static void generate_make_appl_functions(std::ostream& s, size_t max_arity)
   // reference counting mechanism.
   for (size_t i = 6; i <= max_arity; ++i)
   {
-    s << "static application make_term_with_many_arguments(const data_expression& head";
-    for (size_t j = 1; j <= i; ++j)
+    if (m_required_appl_functions.count(i)>0)
     {
-      s << ", const data_expression& arg" << j;
+      s << "static application make_term_with_many_arguments(const data_expression& head";
+      for (size_t j = 1; j <= i; ++j)
+      {
+        s << ", const data_expression& arg" << j;
+      }
+      s << ")\n{\n";
+      s << "  const atermpp::detail::_aterm* buffer[" << i << "];\n";
+      for (size_t j=0; j<i; ++j)
+      {
+        s << "  buffer[" << j << "] = atermpp::detail::address(arg" << j + 1 << ");\n";
+      }
+      s << "  return application(head, reinterpret_cast<data_expression*>(buffer), reinterpret_cast<data_expression*>(buffer) + " << i << ");\n"
+           "}\n"
+           "\n";
     }
-    s << ")\n{\n";
-    s << "  const atermpp::detail::_aterm* buffer[" << i << "];\n";
-    for (size_t j=0; j<i; ++j)
-    {
-      s << "  buffer[" << j << "] = atermpp::detail::address(arg" << j + 1 << ");\n";
-    }
-    s << "  return application(head, reinterpret_cast<data_expression*>(buffer), reinterpret_cast<data_expression*>(buffer) + " << i << ");\n"
-         "}\n"
-         "\n";
   }
 }
 
@@ -2459,7 +2471,9 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   cpp_file << "#define INDEX_BOUND " << index_bound << "\n"
               "#define ARITY_BOUND " << max_arity + 1 << "\n";
   cpp_file << "#include \"mcrl2/data/detail/rewrite/jittycpreamble.h\"\n";
+
   generate_make_appl_functions(cpp_file, max_arity);
+
   cpp_file << rewr_code.str();
 
   cpp_file << "void fill_int2func()\n"
@@ -2479,16 +2493,6 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
     }
   }
 
-  /* m_extra_symbols = code_generator.partials();
-  // Fill tables with the rewrite functions
-  for (std::set<function_symbol>::const_iterator it = m_extra_symbols.begin(); it != m_extra_symbols.end(); ++it)
-  {
-    std::string fs_name = it->name();
-    cpp_file << "  int2func[ARITY_BOUND * "
-             << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(*it)
-             << " + " << getArity(*it) << "] = rewr_functions::"
-             << fs_name.substr(2) << "_term;\n";
-  } */
 
   cpp_file << "}\n";
   cpp_file.close();
