@@ -150,7 +150,14 @@ class Test:
 
     def result(self):
         # Returns the result of the test after all tools have been executed
-        exec(self.res, self.globals)
+        try:
+            exec(self.res, self.globals)
+        except Exception as e:
+            if isinstance(e, KeyError):
+                print 'A KeyError occurred during evaluation of the test result: {}'.format(e)
+            else:
+                print 'An exception occurred during evaluation of the test result: {}'.format(e)
+            return False
         return self.globals['result']
 
     def remaining_tasks(self):
