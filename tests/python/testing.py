@@ -48,6 +48,7 @@ class Test:
         self.cleanup_files = settings.get('cleanup_files', False)
         self.timeout = 5
         self.memlimit = 100000000
+        self.allow_non_zero_return_values = settings.get('allow-non-zero-return-values', False)
 
         # Reads a test from a YAML file
         self.name = file
@@ -172,7 +173,7 @@ class Test:
             tool = tasks[0]
             try:
                 returncode = tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
-                if returncode != 0:
+                if returncode != 0 and not self.allow_non_zero_return_values:
                     raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
             except MemoryExceededError as e:
                 if self.verbose:

@@ -269,7 +269,7 @@ if __name__ == '__main__':
     toolpath = args.toolpath
     if not toolpath:
         toolpath = MCRL2_INSTALL_DIR
-    settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files}
+    settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
     I = range(int(args.repetitions))
 
     testdir = 'output'
