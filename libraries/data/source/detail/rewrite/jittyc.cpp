@@ -1441,10 +1441,10 @@ private:
     }
     if (rewr)
     {
-      s << "this_rewriter->" << rewriter_function << "("
+      s << "static_cast<data_expression>(this_rewriter->" << rewriter_function << "("
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
       bool nf = calc_inner_term(s, a.body(), startarg, nnfvars, true, result_type);
-      s << ", " << nf << ", sigma())";
+      s << ", " << nf << ", sigma()))";
       result_type << "data_expression";
       return true;
     }
@@ -1572,7 +1572,7 @@ private:
 
     if (rewr)
     {
-      s << "local_rewrite(static_cast<data_expression>(";
+      s << "this_rewriter->rewrite_lambda_application(";
       result_type << "data_expression";
     }
     s << appl_function(arity) << "(";
@@ -1587,7 +1587,7 @@ private:
     s << ")";
     if (rewr)
     {
-      s << "))";
+      s << ", sigma())";
     }
     return rewr;
     
