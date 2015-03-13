@@ -27,11 +27,19 @@ class MemoryExceededError(Exception):
 
 
 class StackOverflowError(Exception):
-    def __init__(self):
-        pass
+    def __init__(self, name):
+        self.name = name
 
     def __str__(self):
-        return 'Stack overflow'
+        return 'Stack overflow in tool {}'.format(self.name)
+
+
+class SegmentationFault(Exception):
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return 'Segmentation fault in tool {}'.format(self.name)
 
 
 class ToolNotFoundError(Exception):

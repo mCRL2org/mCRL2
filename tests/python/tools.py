@@ -5,7 +5,7 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-from popen import Popen, MemoryExceededError, TimeExceededError, StackOverflowError, ToolNotFoundError
+from popen import Popen, MemoryExceededError, TimeExceededError, StackOverflowError, ToolNotFoundError, SegmentationFault
 from subprocess import  PIPE
 import os.path
 import re
@@ -66,6 +66,8 @@ class Tool(object):
 
     # Raises an exception if the execution was aborted or produced an error
     def check_execution(self, process, timeout, memlimit, returncode):
+        if returncode != 0:
+            print 'warning: tool {} ended with return code {}'.format(self.name, returncode)
         import platform
         if process.max_virtual_memory > memlimit:
             raise MemoryExceededError(process.max_virtual_memory)
@@ -74,7 +76,9 @@ class Tool(object):
         if platform.system() == 'Windows' and returncode == -1073741571:
             # N.B. This is not a robust check for stack overflow, but it is added to deal
             # with problems on Windows machines.
-            raise StackOverflowError()
+            raise StackOverflowError(self.name)
+        if platform.system() == 'Linux' and returncode == -11:
+            raise SegmentationFault(self.name)
         if self.stderr and 'error' in self.stderr:
             raise RuntimeError('Tool {} failed: {}'.format(self.name, self.stderr))
 
