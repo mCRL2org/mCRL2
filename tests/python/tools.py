@@ -74,8 +74,6 @@ class Tool(object):
         if process.user_time > timeout:
             raise TimeExceededError(process.user_time)
         if platform.system() == 'Windows' and returncode == -1073741571:
-            # N.B. This is not a robust check for stack overflow, but it is added to deal
-            # with problems on Windows machines.
             raise StackOverflowError(self.name)
         if platform.system() == 'Linux' and returncode == -11:
             raise SegmentationFault(self.name)

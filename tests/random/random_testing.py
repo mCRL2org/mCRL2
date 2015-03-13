@@ -280,10 +280,13 @@ if __name__ == '__main__':
     tests = []
     for name in sorted(available_tests):
         if re.search(args.pattern, name):
-            for i in I:
-                tests.append(available_tests[name]('{}_{}'.format(name, i), settings))
-    for test in tests:
-        test.execute_in_sandbox()
+            try:
+                for i in I:
+                    test = available_tests[name]('{}_{}'.format(name, i), settings)
+                    test.execute_in_sandbox()
+            except Exception as e:
+                print 'Test {} failed!'.format(test.name)
+                print e
 
     # SymbolicExplorationTest('symbolic_exploration', settings)
     # PbesrewrTest('pbesrewr', 'bqnf-quantifier', settings)
