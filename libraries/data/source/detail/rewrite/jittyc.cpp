@@ -1173,13 +1173,13 @@ class rewr_function_spec
              (m_fs == other.m_fs && m_arity < other.m_arity) ||
              (m_fs == other.m_fs && m_arity == other.m_arity && m_delayed<other.m_delayed);
     }
-    
-    function_symbol fs() const 
+
+    function_symbol fs() const
     {
       return m_fs;
     }
 
-    size_t arity() const 
+    size_t arity() const
     {
       return m_arity;
     }
@@ -1218,7 +1218,7 @@ private:
     padding(size_t indent) : m_indent(indent) { }
     void indent() { m_indent += 2; }
     void unindent() { m_indent -= 2; }
-    
+
     friend
     std::ostream& operator<<(std::ostream& stream, const padding& p)
     {
@@ -1229,7 +1229,7 @@ private:
       return stream;
     }
   };
-  
+
   RewriterCompilingJitty& m_rewriter;
   std::ostream& m_stream;
   std::stack<rewr_function_spec> m_rewr_functions;
@@ -1347,7 +1347,7 @@ private:
     {
       return "application";
     }
-    
+
     // Take care that the required function is generated.
     m_required_appl_functions.insert(arity);
     return "make_term_with_many_arguments";
@@ -1500,18 +1500,18 @@ private:
     return rewr;
   }
 
-  bool calc_inner_term_appl(std::ostream& s, 
-                            const application& a, 
-                            const function_symbol& head, 
-                            const size_t startarg, 
-                            const variable_or_number_list nnfvars, 
+  bool calc_inner_term_appl(std::ostream& s,
+                            const application& a,
+                            const function_symbol& head,
+                            const size_t startarg,
+                            const variable_or_number_list nnfvars,
                             const bool rewr,
                             std::ostream& result_type)
   {
     const size_t arity = recursive_number_of_args(a);
 
     assert(arity > 0);
-    nfs_array args_nfs(arity); 
+    nfs_array args_nfs(arity);
     if (rewr)
     {
       m_rewriter.extend_nfs(args_nfs, head, arity);  // Is this still needed?
@@ -1529,10 +1529,10 @@ private:
     {
       result_type << "data_expression";
       s << rewr_function_name(head, arity) << "(";
-    } 
+    }
     else
     {
-      s << delayed_rewr_function_name(head, arity);  
+      s << delayed_rewr_function_name(head, arity);
       result_type << delayed_rewr_function_name(head, arity);
       if (arity>0)
       {
@@ -1547,11 +1547,11 @@ private:
     return rewr;
   }
 
-  bool calc_inner_term_appl(std::ostream& s, 
-                            const application& a, 
-                            const abstraction& head, 
-                            const size_t startarg, 
-                            const variable_or_number_list nnfvars, 
+  bool calc_inner_term_appl(std::ostream& s,
+                            const application& a,
+                            const abstraction& head,
+                            const size_t startarg,
+                            const variable_or_number_list nnfvars,
                             const bool rewr,
                             std::ostream& result_type)
   {
@@ -1590,15 +1590,15 @@ private:
       s << ", sigma())";
     }
     return rewr;
-    
+
   }
 
-  bool calc_inner_term_appl(std::ostream& s, 
-                            const application& a, 
-                            const application& head, 
-                            const size_t startarg, 
-                            const variable_or_number_list nnfvars, 
-                            bool rewr, 
+  bool calc_inner_term_appl(std::ostream& s,
+                            const application& a,
+                            const application& head,
+                            const size_t startarg,
+                            const variable_or_number_list nnfvars,
+                            bool rewr,
                             std::ostream& result_type)
   {
     const nfs_array rewr_args(recursive_number_of_args(a));
@@ -1622,12 +1622,12 @@ private:
     return rewr;
   }
 
-  bool calc_inner_term_appl(std::ostream& s, 
-                            const application& a, 
-                            const variable& head, 
-                            const size_t startarg, 
-                            const variable_or_number_list nnfvars, 
-                            const bool rewr, 
+  bool calc_inner_term_appl(std::ostream& s,
+                            const application& a,
+                            const variable& head,
+                            const size_t startarg,
+                            const variable_or_number_list nnfvars,
+                            const bool rewr,
                             std::ostream& result_type)
   {
     if (!rewr)
@@ -1655,7 +1655,7 @@ private:
     calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type); // Here, terms are rewritten twice.
     s << ")))";
     return true;
-  } 
+  }
 
   bool calc_inner_term(std::ostream& s, const application& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
@@ -1689,10 +1689,10 @@ private:
   /// \param rewr indicates whether the reconstructed data expression should be rewritten to normal form.
   /// \return True if the result is in normal form, false otherwise.
   ///
-  bool calc_inner_term(std::ostream& s, 
-                       const data_expression& t, 
-                       const size_t startarg, 
-                       const variable_or_number_list nnfvars, 
+  bool calc_inner_term(std::ostream& s,
+                       const data_expression& t,
+                       const size_t startarg,
+                       const variable_or_number_list nnfvars,
                        const bool rewr,
                        std::ostream& result_type)
   {
@@ -1734,10 +1734,10 @@ private:
   ///        bools in the rewr array as the rewr parameter. Returns the booleans returned by those
   ///        calls as a vector.
   ///
-  nfs_array calc_inner_terms(std::ostream& s, 
-                             const application& appl, 
-                             const size_t startarg, 
-                             const variable_or_number_list nnfvars, 
+  nfs_array calc_inner_terms(std::ostream& s,
+                             const application& appl,
+                             const size_t startarg,
+                             const variable_or_number_list nnfvars,
                              nfs_array rewr,
                              std::ostream& argument_types)
   {
@@ -1793,11 +1793,11 @@ private:
     {
       implement_tree(atermpp::down_cast<match_tree_R>(tree), cur_arg, level);
     }
-    else 
+    else
     {
       // These are the only remaining case, where we do not have to do anything.
-      assert(tree.isA() || tree.isX() || tree.isMe()); 
-    }    
+      assert(tree.isA() || tree.isX() || tree.isMe());
+    }
   }
 
   class matches
@@ -1815,12 +1815,12 @@ private:
         return t==m_matchterm;
       }
   };
-  
+
   void implement_tree(const match_tree_S& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     const match_tree_S& treeS(tree);
     if (atermpp::find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm_appl()) // treeS.target_variable occurs in treeS.subtree
-    { 
+    {
       m_stream << m_padding << "const data_expression& " << string(treeS.target_variable().name()).c_str() + 1 << " = ";
       if (level == 0)
       {
@@ -1843,7 +1843,7 @@ private:
     }
     implement_tree(tree.subtree(), cur_arg, parent, level, cnt);
   }
-  
+
   void implement_tree(const match_tree_M& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     m_stream << m_padding << "if (" << string(tree.match_variable().name()).c_str() + 1 << " == ";
@@ -1855,13 +1855,13 @@ private:
     {
       m_stream << (level == 1 ? "arg" : "t") << parent << "[" << cur_arg << "]";
     }
-    m_stream << ") // M\n" << m_padding 
+    m_stream << ") // M\n" << m_padding
              << "{\n";
     m_padding.indent();
     implement_tree(tree.true_tree(), cur_arg, parent, level, cnt);
     m_padding.unindent();
     m_stream << m_padding
-             << "}\n" << m_padding 
+             << "}\n" << m_padding
              << "else\n" << m_padding
              << "{\n";
     m_padding.indent();
@@ -1870,7 +1870,7 @@ private:
     m_stream << m_padding
              << "}\n";
   }
-  
+
   void implement_tree(const match_tree_F& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     const void* func = (void*)(atermpp::detail::address(tree.function()));
@@ -1902,7 +1902,7 @@ private:
                  << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << array << parent << "[" << cur_arg << "]);\n";
       }
       else
-      { 
+      {
         m_stream << "if (is_application_no_check(down_cast<data_expression>(" << array << parent << "[" << cur_arg << "])) && "
                  <<     "uint_address(down_cast<data_expression>(" << array << parent << "[" << cur_arg << "])[0]) == "
                  << func << ") // F2b " << tree.function().name() << "\n" << m_padding
@@ -1927,7 +1927,7 @@ private:
     m_stream << m_padding
              << "}\n";
   }
-  
+
   void implement_tree(const match_tree_D& tree, size_t level, size_t cnt)
   {
     int i = m_stack.back();
@@ -1952,24 +1952,24 @@ private:
     calc_inner_term(m_stream, tree.condition(), 0, m_nnfvars, true, result_type_string);
     m_stream << " == sort_bool::true_()) // C\n" << m_padding
              << "{\n";
-    
+
     m_padding.indent();
     implement_tree(tree.true_tree(), cur_arg, parent, level, cnt);
     m_padding.unindent();
-    
+
     m_stream << m_padding
              << "}\n" << m_padding
              << "else\n" << m_padding
              << "{\n";
-          
+
     m_padding.indent();
     implement_tree(tree.false_tree(), cur_arg, parent, level, cnt);
     m_padding.unindent();
-    
+
     m_stream << m_padding
              << "}\n";
   }
-  
+
   void implement_tree(const match_tree_R& tree, size_t cur_arg, size_t level)
   {
     if (level > 0)
@@ -2000,12 +2000,12 @@ private:
     m_padding.indent();
     return tree.false_tree();
   }
-  
+
   void implement_tree(const match_tree_R& tree, size_t arity)
   {
     stringstream result_type_string;
     if (arity == 0)
-    { 
+    {
       // return a reference to an atermpp::aterm_appl
       m_stream << m_padding
                << "static data_expression static_term(local_rewrite(";
@@ -2014,7 +2014,7 @@ private:
                << "return static_term; // R2a\n";
     }
     else
-    { 
+    {
       // arity>0
       m_stream << m_padding
                << "return ";
@@ -2022,7 +2022,7 @@ private:
       m_stream << "; // R2b\n";
     }
   }
-  
+
 public:
   ImplementTree(RewriterCompilingJitty& rewr, std::ostream& stream, function_symbol_vector& function_symbols)
     : m_rewriter(rewr), m_stream(stream), m_padding(2)
@@ -2054,7 +2054,7 @@ public:
   void implement_tree(match_tree tree, const size_t arity)
   {
     size_t l = 0;
-    
+
     for (size_t i = 0; i < arity; ++i)
     {
       if (!m_used[i])
@@ -2062,13 +2062,13 @@ public:
         m_nnfvars.push_front(atermpp::aterm_int(i));
       }
     }
-    
+
     while (tree.isC())
     {
       tree = implement_tree(down_cast<match_tree_C>(tree));
       l++;
     }
-    
+
     if (tree.isR())
     {
       implement_tree(down_cast<match_tree_R>(tree), arity);
@@ -2077,7 +2077,7 @@ public:
     {
       implement_tree(tree, 0, 0, 0, 0);
     }
-    
+
     // Close braces opened by implement_tree(const match_tree_C&)
     while (0 < l--)
     {
@@ -2088,7 +2088,7 @@ public:
 
   void implement_strategy(match_tree_list strat, size_t arity, const function_symbol& opid)
   {
-    m_used=nfs_array(arity); // This vector maintains which arguments are in normal form. 
+    m_used=nfs_array(arity); // This vector maintains which arguments are in normal form.
     while (!strat.empty())
     {
       m_stream << m_padding << "// " << strat.front() <<  "\n";
@@ -2159,7 +2159,7 @@ public:
 
     const size_t domain_size = s.domain().size();
     stringstream ss;
-    ss << appl_function(domain_size) << "(" << head;  
+    ss << appl_function(domain_size) << "(" << head;
 
     for (size_t i = 0; i < domain_size; ++i)
     {
@@ -2241,7 +2241,7 @@ public:
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 
-    m_stream << m_padding << 
+    m_stream << m_padding <<
                   "static inline data_expression rewr_" << index << "_" << arity << "_term"
                   "(const application&" << (arity == 0 ? "" : " t") << ") "
                   "{ return rewr_" << index << "_" << arity << "(";
@@ -2255,7 +2255,7 @@ public:
     }
     m_stream << "); }\n\n";
   }
-  
+
   void generate_delayed_normal_form_generating_function(const data::function_symbol& func, size_t arity)
   {
     size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
@@ -2279,7 +2279,7 @@ public:
     {
       m_stream << m_padding << "const DATA_EXPR" << i << "& m_t" << i << ";\n";
     }
-    
+
     m_padding.unindent();
     m_stream << m_padding << "public:\n";
     m_padding.indent();
@@ -2288,7 +2288,7 @@ public:
     {
       m_stream << (i==0?"":", ") << "const DATA_EXPR" << i << "& t" << i;
     }
-    m_stream << ")\n" << m_padding << (arity==0?"":"  : "); 
+    m_stream << ")\n" << m_padding << (arity==0?"":"  : ");
     for(size_t i = 0; i < arity; ++i)
     {
       m_stream << (i==0?"":", ") << "m_t" << i << "(t" << i << ")";
@@ -2301,10 +2301,10 @@ public:
     {
       m_stream << (i==0?"":", ") << "m_t" << i;
     }
-    
+
     m_stream << ");\n";
     m_stream << m_padding << "}\n";
-    
+
     m_padding.unindent();
     m_padding.unindent();
     m_stream << m_padding << "};\n";
@@ -2460,7 +2460,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
                "    return t;\n"
                "  }\n"
                "\n";
-  
+
   rewr_code << "  // We're declaring static members in a struct rather than simple functions in\n"
                "  // the global scope, so that we don't have to worry about forward declarations.\n";
   code_generator.generate_rewr_functions();
@@ -2480,8 +2480,8 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
               "{\n";
 
   // Fill tables with the rewrite functions
-  for (std::set<rewr_function_spec>::const_iterator 
-            it = code_generator.implemented_rewrs().begin(); 
+  for (std::set<rewr_function_spec>::const_iterator
+            it = code_generator.implemented_rewrs().begin();
             it != code_generator.implemented_rewrs().end(); ++it)
   {
     if (!it->delayed())
@@ -2561,7 +2561,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   catch(std::runtime_error& e)
   {
     rewriter_so->leave_files();
+#ifndef MCRL2_DISABLE_JITTYC_VERSION_CHECK
     throw mcrl2::runtime_error(std::string("Could not load rewriter: ") + e.what());
+#endif
   }
 
 #ifdef NDEBUG // In non debug mode clear compiled files directly after loading.
@@ -2577,7 +2579,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   if (!init(&interface))
   {
+#ifndef MCRL2_DISABLE_JITTYC_VERSION_CHECK
     throw mcrl2::runtime_error(std::string("Could not load rewriter: ") + interface.status);
+#endif
   }
   so_rewr_cleanup = interface.rewrite_cleanup;
   so_rewr = interface.rewrite_external;
