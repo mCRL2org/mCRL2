@@ -1392,8 +1392,8 @@ private:
     }
     else
     {
-      s << "term_not_in_normal_form(function_symbol(atermpp::aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(f) << "))))";
-      result_type << "term_not_in_normal_form";
+      s << delayed_rewr_function_name(f, 0);
+      result_type << delayed_rewr_function_name(f, 0);
       return false;
     }
   }
@@ -1463,7 +1463,7 @@ private:
 
   bool calc_inner_term(std::ostream& s, const where_clause& w, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
-    if (rewr)
+    if (rewr)  // TODO Take into account that some arguments are already in normal form.
     {
       s << "this_rewriter->rewrite_where(";
       result_type << "data_expression";
@@ -1514,7 +1514,9 @@ private:
     nfs_array args_nfs(arity);
     if (rewr)
     {
-      m_rewriter.extend_nfs(args_nfs, head, arity);  // Is this still needed?
+      // Take care that arguments that need to be rewritten,
+      // are rewritten immediately.
+      m_rewriter.extend_nfs(args_nfs, head, arity);  
     }
 
     // First calculate the code to be generated for the arguments.
@@ -1523,7 +1525,7 @@ private:
 
     stringstream code_for_arguments;
     stringstream types_for_arguments;
-    args_nfs=calc_inner_terms(code_for_arguments, a, startarg, nnfvars, args_nfs, types_for_arguments);
+    calc_inner_terms(code_for_arguments, a, startarg, nnfvars, args_nfs, types_for_arguments);
 
     if (rewr)
     {
@@ -1559,38 +1561,45 @@ private:
     assert(is_lambda_binder(head.binding_operator()));
     const size_t arity = a.size();
 
-     // !rewr
-    nfs_array args_nfs(arity);
     if (rewr)
     {
+      nfs_array args_nfs(arity);
       args_nfs.fill(true);
+
+      s << "this_rewriter->rewrite_lambda_application(";
+      result_type << "data_expression";
+      
+      s << appl_function(arity) << "(";
+      stringstream types_for_arguments;
+      calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
+      s << ", ";
+      if (arity>0)
+      {
+        types_for_arguments << ", ";
+      }
+      calc_inner_terms(s, a, startarg, nnfvars, args_nfs,types_for_arguments);
+      s << ")";
+      s << ", sigma())";
+      return rewr;
     }
     else
     {
+      // !rewr
+      nfs_array args_nfs(arity);
       args_nfs = calc_nfs_list(a, nnfvars);
-    }
 
-    if (rewr)
-    {
-      s << "this_rewriter->rewrite_lambda_application(";
-      result_type << "data_expression";
+      s << appl_function(arity) << "(";
+      stringstream types_for_arguments;
+      calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
+      s << ", ";
+      if (arity>0)
+      {
+        types_for_arguments << ", ";
+      }
+      calc_inner_terms(s, a, startarg, nnfvars, args_nfs,types_for_arguments);
+      s << ")";
+      return rewr;
     }
-    s << appl_function(arity) << "(";
-    stringstream types_for_arguments;
-    calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
-    s << ", ";
-    if (arity>0)
-    {
-      types_for_arguments << ", ";
-    }
-    calc_inner_terms(s, a, startarg, nnfvars, args_nfs,types_for_arguments);
-    s << ")";
-    if (rewr)
-    {
-      s << ", sigma())";
-    }
-    return rewr;
-
   }
 
   bool calc_inner_term_appl(std::ostream& s,
@@ -1601,25 +1610,38 @@ private:
                             bool rewr,
                             std::ostream& result_type)
   {
-    const nfs_array rewr_args(recursive_number_of_args(a));
+
     if (rewr)
     {
       s << "rewrite(";
       result_type << "data_expression";
+      s << appl_function(a.size()) << "(";
+      stringstream dummy_head_type;
+      calc_inner_term(s, head, startarg, nnfvars, true, dummy_head_type);  
+      s << ", ";
+      stringstream types_for_arguments;
+      nfs_array rewr_args(recursive_number_of_args(a));
+      rewr_args.fill();
+      calc_inner_terms(s, a, startarg, nnfvars, rewr_args,types_for_arguments);
+      s << "))";
+      return true;
     }
     else
     {
-      s << "term_not_in_normalform(";
+      // !rewr
+      mCRL2log(warning) << "For nested applications we do not deliver optimally rewritten terms. This should be reconsidered in due time.\n";
+      const nfs_array rewr_args(recursive_number_of_args(a));
+      s << "delayed_application(";
       result_type << "term_not_in_normal_form";
+      s << appl_function(a.size()) << "(";
+      stringstream head_type;
+      calc_inner_term(s, head, startarg, nnfvars, false, head_type);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
+      s << ", ";
+      stringstream types_for_arguments;
+      calc_inner_terms(s, a, startarg, nnfvars, rewr_args,types_for_arguments);
+      s << "))";
+      return rewr;
     }
-    s << appl_function(a.size()) << "(";
-    stringstream dummy_head_type;
-    calc_inner_term(s, head, startarg, nnfvars, true, dummy_head_type);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
-    s << ", ";
-    stringstream types_for_arguments;
-    calc_inner_terms(s, a, startarg, nnfvars, rewr_args,types_for_arguments);
-    s << "))";
-    return rewr;
   }
 
   bool calc_inner_term_appl(std::ostream& s,
@@ -1734,11 +1756,11 @@ private:
   ///        bools in the rewr array as the rewr parameter. Returns the booleans returned by those
   ///        calls as a vector.
   ///
-  nfs_array calc_inner_terms(std::ostream& s,
-                             const application& appl,
-                             const size_t startarg,
-                             const variable_or_number_list nnfvars,
-                             nfs_array rewr,
+  void calc_inner_terms(std::ostream& s, 
+                             const application& appl, 
+                             const size_t startarg, 
+                             const variable_or_number_list nnfvars, 
+                             const nfs_array& rewr,
                              std::ostream& argument_types)
   {
     size_t j = 0;
@@ -1751,11 +1773,10 @@ private:
       }
       stringstream argument_string;
       stringstream argument_type;
-      rewr.at(j)=calc_inner_term(argument_string, *i, startarg + j, nnfvars, rewr.at(j),argument_type);
+      calc_inner_term(argument_string, *i, startarg + j, nnfvars, rewr.at(j),argument_type);
       s << argument_string.str();
       argument_types << argument_type.str();
     }
-    return rewr;
   }
 
   /*
@@ -2006,7 +2027,6 @@ private:
     stringstream result_type_string;
     if (arity == 0)
     {
-      // return a reference to an atermpp::aterm_appl
       m_stream << m_padding
                << "static data_expression static_term(local_rewrite(";
       calc_inner_term(m_stream, tree.result(), 0, m_nnfvars, true, result_type_string);
