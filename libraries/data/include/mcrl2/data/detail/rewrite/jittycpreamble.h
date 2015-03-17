@@ -260,20 +260,16 @@ data_expression rewrite(const data_expression& t)
   if (is_application_no_check(t))
   {
     const application& appl = down_cast<application>(t);
-    const function_symbol& head = down_cast<function_symbol>(appl.head());
-    const size_t index = get_index(head);
+    const data_expression& head = appl.head();
     if (is_function_symbol(head))
     {
+      const size_t index = get_index(down_cast<function_symbol>(head));
       if (index < INDEX_BOUND)
       {
-        data_expression u=rewrite(appl.size(), index, appl);
-        return u;
         return rewrite(appl.size(), index, appl);
       }
       else
       {
-       data_expression u=application(rewrite(appl.head()), appl.begin(), appl.end(), rewrite_functor());
-        return u;
         return application(rewrite(appl.head()), appl.begin(), appl.end(), rewrite_functor());
       }
     }

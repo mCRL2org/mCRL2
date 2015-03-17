@@ -1500,13 +1500,13 @@ private:
     return rewr;
   }
 
-  bool calc_inner_term_appl(std::ostream& s,
-                            const application& a,
-                            const function_symbol& head,
-                            const size_t startarg,
-                            const variable_or_number_list nnfvars,
-                            const bool rewr,
-                            std::ostream& result_type)
+  bool calc_inner_term_appl_function(std::ostream& s,
+                                     const application& a,
+                                     const function_symbol& head,
+                                     const size_t startarg,
+                                     const variable_or_number_list nnfvars,
+                                     const bool rewr,
+                                     std::ostream& result_type)
   {
     const size_t arity = recursive_number_of_args(a);
 
@@ -1549,7 +1549,8 @@ private:
     return rewr;
   }
 
-  bool calc_inner_term_appl(std::ostream& s,
+  bool calc_inner_term_appl_lambda_abstraction(
+                            std::ostream& s,
                             const application& a,
                             const abstraction& head,
                             const size_t startarg,
@@ -1679,26 +1680,34 @@ private:
     return true;
   }
 
-  bool calc_inner_term(std::ostream& s, const application& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  bool calc_inner_term_application(std::ostream& s, 
+                                   const application& a, 
+                                   const size_t startarg, 
+                                   const variable_or_number_list nnfvars, 
+                                   const bool rewr, 
+                                   std::ostream& result_type)
   {
-    if (is_function_symbol(a.head()))  // Determine whether the topmost symbol is a function symbol.
+    const data_expression head=get_nested_head(a);  
+
+    if (is_function_symbol(head))  // Determine whether the topmost symbol is a function symbol.
     {
-      return calc_inner_term_appl(s, a, down_cast<function_symbol>(a.head()), startarg, nnfvars, rewr, result_type);
+      return calc_inner_term_appl_function(s, a, down_cast<function_symbol>(head), startarg, nnfvars, rewr, result_type);
     }
-    else
-    if (is_abstraction(a.head()))
+    
+    if (is_abstraction(a.head())) // Here we must consider the case where head is an abstraction.
     {
-      return calc_inner_term_appl(s, a, down_cast<abstraction>(a.head()), startarg, nnfvars, rewr, result_type);
+      return calc_inner_term_appl_lambda_abstraction(s, a, down_cast<abstraction>(a.head()), startarg, nnfvars, rewr, result_type);
     }
-    else
-    if (is_application(a.head()))
-    {
-      return calc_inner_term_appl(s, a, down_cast<application>(a.head()), startarg, nnfvars, rewr, result_type);
-    }
-    else
+    
+    if (is_variable(a.head())) // Here we must consider the case where head is variable.
     {
       assert(is_variable(a.head()));
       return calc_inner_term_appl(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr, result_type);
+    }
+    
+    if (is_application(a.head())) // Ultimately, this case ought to become unreachable.
+    {
+      return calc_inner_term_appl(s, a, down_cast<application>(a.head()), startarg, nnfvars, rewr, result_type);
     }
   }
 
@@ -1724,31 +1733,25 @@ private:
       result_type << "data_expression";
       return true;
     }
-    else
-    if (is_function_symbol(t))
+    if (is_function_symbol(t))  
     {
       return calc_inner_term(s, down_cast<function_symbol>(t), rewr, 0, result_type);
     }
-    else
     if (is_variable(t))
     {
       return calc_inner_term(s, down_cast<variable>(t), nnfvars, rewr, result_type);
     }
-    else
     if (is_abstraction(t))
     {
       return calc_inner_term(s, down_cast<abstraction>(t), startarg, nnfvars, rewr, result_type);
     }
-    else
     if (is_where_clause(t))
     {
       return calc_inner_term(s, down_cast<where_clause>(t), startarg, nnfvars, rewr, result_type);
     }
-    else
-    {
-      assert(is_application(t));
-      return calc_inner_term(s, down_cast<application>(t), startarg, nnfvars, rewr, result_type);
-    }
+  
+    assert(is_application(t));
+    return calc_inner_term_application(s, down_cast<application>(t), startarg, nnfvars, rewr, result_type);
   }
 
   ///
@@ -1763,17 +1766,16 @@ private:
                              const nfs_array& rewr,
                              std::ostream& argument_types)
   {
-    size_t j = 0;
-    for(application::const_iterator i = appl.begin(); i != appl.end(); ++i, ++j)
+    for(size_t i=0; i<recursive_number_of_args(appl); ++i)
     {
-      if (j > 0)
+      if (i > 0)
       {
         s << ", ";
         argument_types << ", ";
       }
       stringstream argument_string;
       stringstream argument_type;
-      calc_inner_term(argument_string, *i, startarg + j, nnfvars, rewr.at(j),argument_type);
+      calc_inner_term(argument_string,  get_argument_of_higher_order_term(appl,i), startarg + i, nnfvars, rewr.at(i),argument_type);
       s << argument_string.str();
       argument_types << argument_type.str();
     }
@@ -2000,7 +2002,7 @@ private:
     m_stream << m_padding << "return ";
     stringstream result_type_string;
     calc_inner_term(m_stream, tree.result(), cur_arg + 1, m_nnfvars, true, result_type_string);
-    m_stream << "; // R1\n";
+    m_stream << "; // R1 " << tree.result() << "\n";
   }
 
   const match_tree& implement_tree(const match_tree_C& tree)
