@@ -6112,7 +6112,6 @@ class specification_basic_type:public boost::noncopyable
           }
           mutable_map_substitution<> mutable_sigma(sigma);
 
-std::cerr << "DIST " << dist << "\n";
           const data_expression auxresult1=data::replace_variables_capture_avoiding(dist,mutable_sigma,variables_in_rhs_of_sigma);
           if (equalterm==data_expression()||is_global_variable(equalterm))
           {
@@ -6129,7 +6128,6 @@ std::cerr << "DIST " << dist << "\n";
         }
         if (options.binary)
         {
-std::cerr << "BINARY CASE TREE " << n << "\n" << resultsum << "\n" << aux_result << "\n" << "\n";
           resulting_distribution=construct_binary_case_tree(n,
                           resultsum,aux_result,sort_real::real_(),e);
           resulting_distribution=lazy::and_(
