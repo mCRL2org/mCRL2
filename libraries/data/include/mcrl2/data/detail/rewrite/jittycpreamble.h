@@ -1,7 +1,7 @@
 // Author(s): Muck van Weerdenburg
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-// 
+//
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
@@ -64,7 +64,7 @@ static data_expression rewrite(const data_expression& t);
 //
 typedef data_expression (*rewriter_function)(const application&);
 
-// A class that contains terms which are explicitly tagged to be 
+// A class that contains terms which are explicitly tagged to be
 // not in normal form. By invoking normal_form the normalform
 // of this term is calculated.
 class term_not_in_normal_form
@@ -88,8 +88,8 @@ template <class TERM_TO_BE_REWRITTEN>
 class delayed_abstraction
 {
   protected:
-    const binder_type& m_binding_operator; 
-    const variable_list& m_variables; 
+    const binder_type& m_binding_operator;
+    const variable_list& m_variables;
     const TERM_TO_BE_REWRITTEN& m_body;
   public:
     delayed_abstraction(const binder_type& binding_operator, const variable_list& variables, const TERM_TO_BE_REWRITTEN& body)
@@ -318,11 +318,13 @@ void rewrite_cleanup()
 
 bool init(rewriter_interface* i)
 {
+#ifndef MCRL2_DISABLE_JITTYC_VERSION_CHECK
   if (mcrl2::utilities::MCRL2_VERSION != i->caller_toolset_version)
   {
     i->status = "rewriter version does not match the version of the calling application.";
     return false;
   }
+#endif
   i->rewrite_external = &rewrite;
   i->rewrite_cleanup = &rewrite_cleanup;
   this_rewriter = i->rewriter;
