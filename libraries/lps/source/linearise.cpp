@@ -287,6 +287,23 @@ class specification_basic_type:public boost::noncopyable
       return one;
     }
 
+    data_expression real_times_optimized(const data_expression& r1, const data_expression& r2)
+    {
+      if (r1==real_zero() || r2==real_zero())
+      {
+        return real_zero();
+      }
+      if (r1==real_one())
+      {
+        return r2;
+      }
+      if (r2==real_one())
+      {
+        return r1;
+      }
+      return sort_real::times(r1,r2);
+    }
+
     process_expression delta_at_zero(void)
     {
       return at(delta(), data::sort_real::real_(0));
@@ -4899,8 +4916,8 @@ class specification_basic_type:public boost::noncopyable
           const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(summandterm);
           cumulative_distribution=stochastic_distribution(
                                     cumulative_distribution.variables()+sto.variables(),
-                                    sort_real::times(cumulative_distribution.distribution(),
-                                                     sto.distribution()));
+                                    real_times_optimized(cumulative_distribution.distribution(),
+                                                         sto.distribution()));
           summandterm=sto.operand();
         }
       }
@@ -6095,6 +6112,7 @@ class specification_basic_type:public boost::noncopyable
           }
           mutable_map_substitution<> mutable_sigma(sigma);
 
+std::cerr << "DIST " << dist << "\n";
           const data_expression auxresult1=data::replace_variables_capture_avoiding(dist,mutable_sigma,variables_in_rhs_of_sigma);
           if (equalterm==data_expression()||is_global_variable(equalterm))
           {
@@ -6111,6 +6129,7 @@ class specification_basic_type:public boost::noncopyable
         }
         if (options.binary)
         {
+std::cerr << "BINARY CASE TREE " << n << "\n" << resultsum << "\n" << aux_result << "\n" << "\n";
           resulting_distribution=construct_binary_case_tree(n,
                           resultsum,aux_result,sort_real::real_(),e);
           resulting_distribution=lazy::and_(
@@ -6130,7 +6149,7 @@ class specification_basic_type:public boost::noncopyable
               }
               else 
               {
-                resulting_distribution=sort_real::times(
+                resulting_distribution=real_times_optimized(
                                                   if_(stochastic_conditionlist.front(),real_one(),real_zero()), 
                                                   equalterm);
               }
@@ -6139,7 +6158,7 @@ class specification_basic_type:public boost::noncopyable
             {
               data_expression_list temp_stochastic_conditionlist=stochastic_conditionlist;
               temp_stochastic_conditionlist.push_front(data_expression(e.var));
-              resulting_distribution=sort_real::times(
+              resulting_distribution=real_times_optimized(
                                 if_(application(
                                       find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                                       temp_stochastic_conditionlist),
@@ -6159,13 +6178,13 @@ class specification_basic_type:public boost::noncopyable
             {
               if (stochastic_conditionlist.front()==sort_bool::true_())
               {
-               resulting_distribution=sort_real::times(
+               resulting_distribution=real_times_optimized(
                                                  if_(stochastic_conditionlist.front(),real_one(),real_zero()),
                                                  resulting_distribution);
               }
               else 
               {
-               resulting_distribution=sort_real::times(
+               resulting_distribution=real_times_optimized(
                                                  if_(stochastic_conditionlist.front(),real_one(),real_zero()),
                                                  resulting_distribution);
               }
@@ -6174,7 +6193,7 @@ class specification_basic_type:public boost::noncopyable
             {
              data_expression_list temp_stochastic_conditionlist=stochastic_conditionlist;
              temp_stochastic_conditionlist.push_front(data_expression(e.var));
-             resulting_distribution=sort_real::times(
+             resulting_distribution=real_times_optimized(
                               if_(application(
                                      find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                                      temp_stochastic_conditionlist),
@@ -8636,7 +8655,7 @@ class specification_basic_type:public boost::noncopyable
             const assignment_list nextstate3=nextstate1+nextstate2;
             const stochastic_distribution distribution3(
                                               distribution1.variables()+distribution2.variables(),
-                                              sort_real::times(distribution1.distribution(),distribution2.distribution()));
+                                              real_times_optimized(distribution1.distribution(),distribution2.distribution()));
 
             condition3=RewriteTerm(condition3);
             if (condition3!=sort_bool::false_())
@@ -9343,7 +9362,7 @@ class specification_basic_type:public boost::noncopyable
                    process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
 
             return stochastic_operator(r1.variables() + stochvars, 
-                                       sort_real::times(r1.distribution(),new_distribution),
+                                       real_times_optimized(r1.distribution(),new_distribution),
                                        merge(new_body1,new_body2));
           }
           /* r1 is and r2_ is not a stochastic operator */
@@ -9469,7 +9488,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
                    process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
 
             return stochastic_operator(r1.variables() + stochvars, 
-                                       sort_real::times(r1.distribution(),new_distribution),
+                                       real_times_optimized(r1.distribution(),new_distribution),
                                        choice(new_body1,new_body2));
           }
           /* r1 is and r2_ is not a stochastic operator */
@@ -9530,7 +9549,7 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
                    process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
 
             return stochastic_operator(r1.variables() + stochvars,
-                                       sort_real::times(r1.distribution(),new_distribution),
+                                       real_times_optimized(r1.distribution(),new_distribution),
                                        if_then_else(if_then_else(t).condition(),new_body1,new_body2));
           }
           /* r1 is and r2_ is not a stochastic operator */
@@ -9582,7 +9601,7 @@ std::cerr << "TODO: Warning: variables of stoch.operator and sum operator can cl
 std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
           return stochastic_operator(sto.variables()+r.variables(),
-                                     sort_real::times(sto.distribution(),r.distribution()),
+                                     real_times_optimized(sto.distribution(),r.distribution()),
                                      r.operand());
         }
         return stochastic_operator(sto.variables(),sto.distribution(),r_);
