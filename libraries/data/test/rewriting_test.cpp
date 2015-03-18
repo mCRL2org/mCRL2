@@ -1393,6 +1393,70 @@ BOOST_AUTO_TEST_CASE(check_whether_higher_order_function_are_dealt_with_appropri
   }
 }
 
+BOOST_AUTO_TEST_CASE(check_whether_higher_order_function_are_dealt_with_appropriately_in_rhs_of_rewrite_rules)
+{
+  std::string s(
+  "map f:Pos->Pos->Pos->Pos->Pos->Bool;\n"
+  "    g:Pos->Pos->Pos->Pos->Pos->Bool;\n"
+  "var x,y,z,u,v:Pos;\n"
+  "eqn f(x)(2)(z)(u)(v)=(u==2);\n"
+  "    g(3)(y)(z)(u)(v)=f(3)(y)(z)(u)(v) || f(2)(y)(z)(u)(u);\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy28: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("g(1)(2)(1)(1)(1)", specification));
+    data::data_expression f(parse_data_expression("g(1)(2)(1)(1)(1)", specification));
+    data_rewrite_test(R, e, f);
+
+    e(parse_data_expression("g(3)(2)(1)(1)(1)", specification));
+    f(parse_data_expression("false", specification));
+    data_rewrite_test(R, e, f);
+
+  }
+}
+
+BOOST_AUTO_TEST_CASE(check_higher_order_functions_with_multiple_arguments)
+{
+  std::string s(
+  "map f:Pos->(Pos#Pos)->Pos->Pos->Pos;\n"
+  "    g:Pos->(Pos#Pos)->Pos->Pos->Pos;\n"
+  "var x,y,z,u,v:Pos;\n"
+  "eqn f(x)(2,z)(u)(v)= g(x)(3,z)(u)(v)+g(x)(4,z)(v)(u);\n"
+  "    g(3)(y,z)(u)(v)=1;\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy29: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("g(3)(2,1)(1)(1)", specification));
+    data::data_expression f(parse_data_expression("1", specification));
+    data_rewrite_test(R, e, f);
+
+    e(parse_data_expression("g(4)(2,1)(1)(1)", specification));
+    f(parse_data_expression("g(4)(2,1)(1)(1)", specification));
+    data_rewrite_test(R, e, f);
+
+    e(parse_data_expression("f(3)(2,1)(1)(1)", specification));
+    f(parse_data_expression("2", specification));
+    data_rewrite_test(R, e, f);
+
+  }
+}
+
+
+
 
 
 

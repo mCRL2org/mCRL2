@@ -1381,7 +1381,7 @@ private:
    *
    */
 
-  bool calc_inner_term(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity, std::ostream& result_type)
+  bool calc_inner_term_function(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity, std::ostream& result_type)
   {
     const bool nf = opid_is_nf(f, arity);
     if (rewr || nf)
@@ -1398,7 +1398,7 @@ private:
     }
   }
 
-  bool calc_inner_term(std::ostream& s, const variable& v, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  bool calc_inner_term_variable(std::ostream& s, const variable& v, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     const bool nf = std::find(nnfvars.begin(), nnfvars.end(), v) != nnfvars.end();
     const std::string variable_name = v.name();
@@ -1418,7 +1418,7 @@ private:
     }
   }
 
-  bool calc_inner_term(std::ostream& s, const abstraction& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  bool calc_inner_term_abstraction(std::ostream& s, const abstraction& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     std::string binder_constructor;
     std::string rewriter_function;
@@ -1461,7 +1461,7 @@ private:
     }
   }
 
-  bool calc_inner_term(std::ostream& s, const where_clause& w, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  bool calc_inner_term_where_clause(std::ostream& s, const where_clause& w, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     if (rewr)  // TODO Take into account that some arguments are already in normal form.
     {
@@ -1735,19 +1735,21 @@ private:
     }
     if (is_function_symbol(t))  
     {
-      return calc_inner_term(s, down_cast<function_symbol>(t), rewr, 0, result_type);
+      // This will never be reached, as it is dealt with in the if clause above.
+      assert(0);
+      return calc_inner_term_function(s, down_cast<function_symbol>(t), rewr, 0, result_type);
     }
     if (is_variable(t))
     {
-      return calc_inner_term(s, down_cast<variable>(t), nnfvars, rewr, result_type);
+      return calc_inner_term_variable(s, down_cast<variable>(t), nnfvars, rewr, result_type);
     }
     if (is_abstraction(t))
     {
-      return calc_inner_term(s, down_cast<abstraction>(t), startarg, nnfvars, rewr, result_type);
+      return calc_inner_term_abstraction(s, down_cast<abstraction>(t), startarg, nnfvars, rewr, result_type);
     }
     if (is_where_clause(t))
     {
-      return calc_inner_term(s, down_cast<where_clause>(t), startarg, nnfvars, rewr, result_type);
+      return calc_inner_term_where_clause(s, down_cast<where_clause>(t), startarg, nnfvars, rewr, result_type);
     }
   
     assert(is_application(t));
