@@ -76,13 +76,6 @@ public:
   }
 };
 
-///
-/// \brief The always_rewrite_array class judges whether a certain argument of a
-///        certain function symbol should always be rewritten, or that it should
-///        only be rewritten if a subexpression changes.
-///
-class always_rewrite_array;
-
 class RewriterCompilingJitty: public Rewriter
 {
   public:
@@ -131,7 +124,6 @@ class RewriterCompilingJitty: public Rewriter
     std::set<function_symbol> m_extra_symbols;
 
     normal_form_cache m_nf_cache;
-    always_rewrite_array* m_always_rewrite;
 
     uncompiled_library *rewriter_so;
 

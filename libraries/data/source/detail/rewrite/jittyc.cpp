@@ -112,240 +112,18 @@ static std::vector<bool> dep_vars(const data_equation& eqn)
   return result;
 }
 
-class always_rewrite_array : public std::vector<atermpp::aterm_appl>
+size_t calc_max_arity(const function_symbol_vector& symbols)
 {
-public:
-  typedef atermpp::aterm_appl node_t;
-private:
-  const atermpp::function_symbol m_f_true, m_f_false, m_f_and, m_f_or, m_f_var;
-  const node_t m_true, m_false;
-  std::map<mcrl2::data::function_symbol, size_t> m_indices;
-
-  bool eval(const node_t& expr) const
+  size_t max_arity = 0;
+  for (function_symbol_vector::const_iterator it = symbols.begin(); it != symbols.end(); ++it)
   {
-    if (expr == m_true)
-    {
-      return true;
-    }
-    if (expr == m_false)
-    {
-      return false;
-    }
-    if (expr.function() == m_f_and)
-    {
-      return eval(down_cast<node_t>(expr[0])) && eval(down_cast<node_t>(expr[1]));
-    }
-    if (expr.function() == m_f_or)
-    {
-      return eval(down_cast<node_t>(expr[0])) || eval(down_cast<node_t>(expr[1]));
-    }
-    assert(expr.function() == m_f_var);
-    return at(down_cast<atermpp::aterm_int>(expr[0]).value()) != m_false;
+    size_t arity = getArity(*it);
+    max_arity = std::max(max_arity, arity);
   }
 
-  inline
-  size_t index(const function_symbol& f, const size_t arity, const size_t arg) const
-  {
-    assert(arg < arity);
-    assert(m_indices.find(f) != m_indices.end());
-    assert((m_indices.at(f) + ((arity - 1) * arity) / 2 + arg) < size());
-    return (m_indices.at(f) + ((arity - 1) * arity) / 2) + arg;
-  }
+  return max_arity;
+}
 
-  atermpp::aterm_appl and_(const atermpp::aterm_appl& x, const atermpp::aterm_appl& y) const
-  {
-    if (x == m_true)
-    {
-      return y;
-    }
-    if (y == m_true)
-    {
-      return x;
-    }
-    if (x == m_false || y == m_false)
-    {
-      return m_false;
-    }
-    return atermpp::aterm_appl(m_f_and, x, y);
-  }
-
-  atermpp::aterm_appl or_(const atermpp::aterm_appl& x, const atermpp::aterm_appl& y) const
-  {
-    if (x == m_false)
-    {
-      return y;
-    }
-    else if (y == m_false)
-    {
-      return x;
-    }
-    else if (x == m_true || y == m_true)
-    {
-      return m_true;
-    }
-    return atermpp::aterm_appl(m_f_or, x, y);
-  }
-
-  atermpp::aterm_appl var_(const function_symbol& f, const size_t arity, const size_t arg) const
-  {
-    return atermpp::aterm_appl(m_f_var, atermpp::aterm_int(index(f, arity, arg)));
-  }
-
-  atermpp::aterm_appl build_expr(const data_equation_list& eqns, const size_t arg, const size_t arity) const
-  {
-    atermpp::aterm_appl result = m_true;
-    for (data_equation_list::const_iterator i = eqns.begin(); i != eqns.end(); ++i)
-    {
-      result = and_(build_expr_aux(*i, arg, arity), result);
-    }
-    return result;
-  }
-
-  atermpp::aterm_appl build_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity) const
-  {
-    size_t eqn_arity = recursive_number_of_args(eqn.lhs());
-    if (eqn_arity > arity)
-    {
-      return m_true;
-    }
-    if (eqn_arity <= arg)
-    {
-      const data_expression& rhs = eqn.rhs();
-      if (is_function_symbol(rhs))
-      {
-        return var_(down_cast<function_symbol>(rhs), arity, arg);
-      }
-      function_symbol head;
-      if (head_is_function_symbol(rhs,head))
-      {
-        int rhs_arity = recursive_number_of_args(rhs) - 1;
-        size_t diff_arity = arity - eqn_arity;
-        int rhs_new_arity = rhs_arity + diff_arity;
-        return var_(head, rhs_new_arity, arg - eqn_arity + rhs_arity);
-      }
-      else
-      {
-        return m_false;
-      }
-    }
-
-    // Here we know that eqn.lhs() must be an application. If it were a function symbol
-    // it would have been dealt with above.
-    if (!dep_vars(eqn)[arg])
-    {
-      const application& lhs = down_cast<application>(eqn.lhs());
-      const data_expression& arg_term = get_argument_of_higher_order_term(lhs, arg);
-      if (is_variable(arg_term))
-      {
-        return build_expr_internal(eqn.rhs(), down_cast<variable>(arg_term));
-      }
-    }
-    return m_true;
-  }
-
-  // The function build_expr_internal returns an and/or tree indicating on which function symbol with which
-  // arity the variable var depends. The idea is that if var must be a normal form if any of these arguments
-  // must be a normal form. In this way the reduction to normal forms of these argument is not unnecessarily
-  // postponed. For example in the expression if(!b,1,0) the typical result is @@and(@@var(149),@@var(720))
-  // indicating that b must not be rewritten to a normal form anyhow if the first argument of ! must not always be rewritten
-  // to a normalform and the first argument of if must not always be rewritten to normal form.
-  atermpp::aterm_appl build_expr_internal(const data_expression& expr, const variable& var) const
-  {
-    if (is_function_symbol(expr))
-    {
-      return m_false;
-    }
-    if (is_variable(expr))
-    {
-      return expr == var ? m_true : m_false;
-    }
-    if (is_where_clause(expr) || is_abstraction(expr))
-    {
-      return m_false;
-    }
-
-    assert(is_application(expr));
-    const application& appl = atermpp::down_cast<application>(expr);
-    function_symbol head;
-    if (!head_is_function_symbol(appl, head))
-    {
-      if (head_is_variable(appl))
-      {
-        if (get_variable_of_head(appl) == var)
-        {
-          return m_true;
-        }
-      }
-      return m_false;
-    }
-
-    atermpp::aterm_appl result = m_false;
-    size_t arity = recursive_number_of_args(appl);
-    for (size_t i = 0; i < arity; ++i)
-    {
-      result = or_(result,
-                   and_(var_(head, arity, i),
-                        build_expr_internal(get_argument_of_higher_order_term(appl, i), var)));
-    }
-    return result;
-  }
-
-public:
-
-  always_rewrite_array()
-    : m_f_true("@@true", 0), m_f_false("@@false", 0), m_f_and("@@and", 2), m_f_or("@@or", 2), m_f_var("@@var", 1),
-      m_true(m_f_true), m_false(m_f_false)
-  { }
-
-  bool always_rewrite(const function_symbol& f, const size_t arity,  const size_t arg) const
-  {
-    return at(index(f, arity, arg)) != m_false;
-  }
-
-  size_t init(const function_symbol_vector& symbols, std::map<function_symbol, data_equation_list> equations)
-  {
-    size_t max_arity = 0;
-    size_t size = 0;
-    for (function_symbol_vector::const_iterator it = symbols.begin(); it != symbols.end(); ++it)
-    {
-      if (m_indices.insert(std::make_pair(*it, size)).second)
-      {
-        size_t arity = getArity(*it);
-        size += (arity * (arity + 1)) / 2;
-        max_arity = std::max(max_arity, arity);
-      }
-    }
-
-    resize(size);
-    for (std::map<mcrl2::data::function_symbol, size_t>::const_iterator it = m_indices.begin(); it != m_indices.end(); ++it)
-    {
-      for (size_t i = 1; i <= getArity(it->first); ++i)
-      {
-        for (size_t j = 0; j < i; ++j)
-        {
-          at(index(it->first, i, j)) = build_expr(equations[it->first], j, i);
-        }
-      }
-    }
-
-    bool notdone = true;
-    while (notdone)
-    {
-      notdone = false;
-      for (size_t i = 0; i < size; ++i)
-      {
-        if (at(i) != m_false && !eval(at(i)))
-        {
-          at(i) = m_false;
-          notdone = true;
-        }
-      }
-    }
-
-    return max_arity;
-  }
-
-};
 
 ///
 /// \brief arity_is_allowed yields true if the function indicated by the function index can
@@ -1128,17 +906,6 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
   return reverse(strat);
 }
 
-void RewriterCompilingJitty::add_base_nfs(nfs_array& nfs, const function_symbol& opid, size_t arity)
-{
-  for (size_t i=0; i<arity; i++)
-  {
-    if (m_always_rewrite->always_rewrite(opid, arity, i))
-    {
-      nfs.at(i) = true;
-    }
-  }
-}
-
 void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& opid, size_t arity)
 {
   data_equation_list eqns = jittyc_eqns[opid];
@@ -1705,10 +1472,8 @@ private:
       return calc_inner_term_appl(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr, result_type);
     }
     
-    if (is_application(a.head())) // Ultimately, this case ought to become unreachable.
-    {
-      return calc_inner_term_appl(s, a, down_cast<application>(a.head()), startarg, nnfvars, rewr, result_type);
-    }
+    assert(is_application(a.head())); // Ultimately, this case ought to become unreachable.
+    return calc_inner_term_appl(s, a, down_cast<application>(a.head()), startarg, nnfvars, rewr, result_type);
   }
 
   ///
@@ -2457,7 +2222,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   filter_function_symbols(m_data_specification_for_enumeration.constructors(), function_symbols, data_equation_selector);
   filter_function_symbols(m_data_specification_for_enumeration.mappings(), function_symbols, data_equation_selector);
 
-  size_t max_arity = m_always_rewrite->init(function_symbols, jittyc_eqns);
+  size_t max_arity = calc_max_arity(function_symbols);
 
   // The rewrite functions are first stored in a separate buffer (rewrite_functions),
   // because during the generation process, new function symbols are created. This
@@ -2622,7 +2387,6 @@ RewriterCompilingJitty::RewriterCompilingJitty(
 {
   so_rewr_cleanup = NULL;
   rewriter_so = NULL;
-  m_always_rewrite = new always_rewrite_array();
 
   made_files = false;
   rewrite_rules.clear();
@@ -2654,7 +2418,6 @@ RewriterCompilingJitty::RewriterCompilingJitty(
 
 RewriterCompilingJitty::~RewriterCompilingJitty()
 {
-  delete m_always_rewrite;
   CleanupRewriteSystem();
 }
 
