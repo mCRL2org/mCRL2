@@ -925,6 +925,35 @@ BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
   run_linearisation_test_case(spec,true);
 }
 
+BOOST_AUTO_TEST_CASE(Check_whether_the_sum_variable_will_not_get_the_same_name_as_the_newly_introduced_process_parameter)
+{
+  const std::string spec =
+     "act  base ;\n"
+     "     exponent: Real;\n"
+     "proc Test_exponentation =\n"
+     "       sum r: Real. base . exponent(r).delta ;\n"
+     "\n"
+     "init Test_exponentation+delta;\n";
+
+  run_linearisation_test_case(spec,true);
+}
+
+BOOST_AUTO_TEST_CASE(Check_whether_the_sum_variable_will_not_get_the_same_name_as_the_newly_introduced_process_parameter2)
+{
+  const std::string spec =
+     "act\n"
+     "  a,c,b,d;\n"
+     "\n"
+     "proc\n"
+     "  P = b;\n"
+     "  Q = (((tau) . (sum b1: Bool . (sum b2: Bool . (R)))) . (tau)) + (((delta) . (tau)) . (R));\n"
+     "  R = ((true) -> (a)) + ((true) -> (sum b1: Bool . ((d) + ((d) + (a)))) <> ((d) + (a)));\n"
+     "\n"
+     "init\n"
+     "  hide({b}, ((R) || (Q)) || (P));\n";
+
+  run_linearisation_test_case(spec,true);
+}
 #else // ndef MCRL2_SKIP_LONG_TESTS
 
 BOOST_AUTO_TEST_CASE(skip_linearization_test)

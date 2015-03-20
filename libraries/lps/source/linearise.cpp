@@ -4851,7 +4851,8 @@ class specification_basic_type:public boost::noncopyable
       const std::vector < process_identifier>& pCRLprocs,
       const stacklisttype& stack,
       const bool regular,
-      const bool singlestate)
+      const bool singlestate,
+      const variable_list& process_parameters)
     {
       data_expression atTime;
       action_list multiAction;
@@ -4873,6 +4874,14 @@ class specification_basic_type:public boost::noncopyable
         sumvars=sum(summandterm).variables() + sumvars;
         summandterm=sum(summandterm).operand();
       }
+
+      // Check whether the variables in sumvars clash with the parameter list,
+      // and rename the summandterm accordingly. 
+      mutable_map_substitution<> local_sigma;
+      std::set<variable> local_rhs_variables_in_sigma;
+      alphaconvert(sumvars,local_sigma,process_parameters,data_expression_list(),local_rhs_variables_in_sigma); 
+      summandterm=substitute_pCRLproc(summandterm, local_sigma, local_rhs_variables_in_sigma);
+
 
       /* translate the condition */
 
@@ -5082,7 +5091,7 @@ class specification_basic_type:public boost::noncopyable
       else
       {
         add_summands(procId,action_summands,deadlock_summands,body,pCRLprocs,stack,
-                     regular,singlestate);
+                     regular,singlestate,pars);
       }
     }
 
@@ -10087,7 +10096,11 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
         objectdata[n].parameters=data::replace_variables(parameters,parameter_mapping);
         objectdata[n].processbody=guarantee_that_parameters_have_unique_type_body(
                                          objectdata[n].processbody,
-                                         visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping);
+                                         visited_processes,
+                                         used_variable_names,
+                                         parameter_mapping,
+                                         variables_in_lhs_of_parameter_mapping,
+                                         variables_in_rhs_of_parameter_mapping);
       }
     }
 
@@ -10098,7 +10111,12 @@ std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
       mutable_map_substitution<> parameter_mapping;
       std::set<variable> variables_in_lhs_of_parameter_mapping;
       std::set<variable> variables_in_rhs_of_parameter_mapping;
-      guarantee_that_parameters_have_unique_type(procId,visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping);
+      guarantee_that_parameters_have_unique_type(procId,
+                                                 visited_processes,
+                                                 used_variable_names,
+                                                 parameter_mapping,
+                                                 variables_in_lhs_of_parameter_mapping,
+                                                 variables_in_rhs_of_parameter_mapping);
     }
 
     process_expression guarantee_that_parameters_have_unique_type_body(
