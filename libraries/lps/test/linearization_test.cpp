@@ -237,9 +237,9 @@ BOOST_AUTO_TEST_CASE(test_no_free_variables)
   BOOST_CHECK(spec.global_variables().empty());
 }
 
-/* Here various testcases are checked, which have been used in
-     debugging the translation of the linearizer to the new data
-     library. */
+// Here various testcases are checked, which have been used in
+// debugging the translation of the linearizer to the new data
+// library. 
 BOOST_AUTO_TEST_CASE(various_case_1)
 {
   run_linearisation_test_case(
@@ -424,7 +424,7 @@ BOOST_AUTO_TEST_CASE(various_case_20)
     "  (n>25) -> a(n).X(n);"
     "init X(1);";
   run_linearisation_test_case(various_case_20);
-}
+} 
 
 BOOST_AUTO_TEST_CASE(various_case_21)
 {
@@ -550,15 +550,15 @@ BOOST_AUTO_TEST_CASE(various_case_31)
   run_linearisation_test_case(various_case_31);
 }
 
-/* Original name: LR2plus.mcrl2
- This example can only be parsed unambiguously by an LR(k) parser generator
- for the current grammar, where k > 1. Namely, process expression 'a + tau'
- cannot be parsed unambiguously. After parsing the identifier 'a', it has to
- be determined if 'a' is an action or process reference, or if 'a' is a data
- expression, viz. part of the left hand side of a conditional process
- expression. With a lookahead of 1, we may only use the '+' as extra
- information, which is not enough, because this symbol is also ambiguous.
-*/
+// Original name: LR2plus.mcrl2
+// This example can only be parsed unambiguously by an LR(k) parser generator
+// for the current grammar, where k > 1. Namely, process expression 'a + tau'
+// cannot be parsed unambiguously. After parsing the identifier 'a', it has to
+// be determined if 'a' is an action or process reference, or if 'a' is a data
+// expression, viz. part of the left hand side of a conditional process
+// expression. With a lookahead of 1, we may only use the '+' as extra
+// information, which is not enough, because this symbol is also ambiguous.
+
 BOOST_AUTO_TEST_CASE(various_case_LR2plus)
 {
   const std::string various_case_LR2plus=
@@ -569,15 +569,15 @@ BOOST_AUTO_TEST_CASE(various_case_LR2plus)
   run_linearisation_test_case(various_case_LR2plus);
 }
 
-/* Original name: LR2par.mcrl2
- This example can only be parsed unambiguously by an LR(k) parser generator
- for the current grammar, where k > 1. Namely, process expression '(a)'
- cannot be parsed unambiguously. After parsing the left parenthesis '(', it
- has to be determined if it is part of a process or data expression, viz.
- part of the left hand side of a conditional process expression. With a
- lookahead of 1, we may only use the identifier 'a' as extra information,
- which is not enough, because this symbol is also ambiguous.
-*/
+// Original name: LR2par.mcrl2
+// This example can only be parsed unambiguously by an LR(k) parser generator
+// for the current grammar, where k > 1. Namely, process expression '(a)'
+// cannot be parsed unambiguously. After parsing the left parenthesis '(', it
+// has to be determined if it is part of a process or data expression, viz.
+// part of the left hand side of a conditional process expression. With a
+// lookahead of 1, we may only use the identifier 'a' as extra information,
+// which is not enough, because this symbol is also ambiguous.
+
 BOOST_AUTO_TEST_CASE(various_case_LR2par)
 {
   const std::string various_case_LR2par=
@@ -589,8 +589,8 @@ BOOST_AUTO_TEST_CASE(various_case_LR2par)
 }
 
 
-/* This test case is a simple test to test sort normalisation in the lineariser,
-   added because assertion failures in the domineering example were observed */
+// This test case is a simple test to test sort normalisation in the lineariser,
+// added because assertion failures in the domineering example were observed 
 BOOST_AUTO_TEST_CASE(various_case_32)
 {
   const std::string various_case_32 =
@@ -603,10 +603,10 @@ BOOST_AUTO_TEST_CASE(various_case_32)
   run_linearisation_test_case(various_case_32);
 }
 
-/* This test case is a test to check whether constant elimination in the
-   linearizer goes well. This testcase is inspired by an example by Chilo
-   van Best. The problem is that the constant x:Nat below may not be
-   recorded in the assignment list of process P, and therefore forgotten */
+// This test case is a test to check whether constant elimination in the
+// linearizer goes well. This testcase is inspired by an example by Chilo
+// van Best. The problem is that the constant x:Nat below may not be
+// recorded in the assignment list of process P, and therefore forgotten 
 BOOST_AUTO_TEST_CASE(various_case_33)
 {
   const std::string various_case_33 =
@@ -618,9 +618,9 @@ BOOST_AUTO_TEST_CASE(various_case_33)
   run_linearisation_test_case(various_case_33);
 }
 
-/* The test case below checks whether the alphabet conversion does not accidentally
- * reverse the order of hide and sum operators. If this happens the linearizer will
- * not be able to linearize this process */
+// The test case below checks whether the alphabet conversion does not accidentally
+// reverse the order of hide and sum operators. If this happens the linearizer will
+// not be able to linearize this process 
 BOOST_AUTO_TEST_CASE(various_case_34)
 {
   const std::string various_case_34 =
@@ -953,7 +953,7 @@ BOOST_AUTO_TEST_CASE(Check_whether_the_sum_variable_will_not_get_the_same_name_a
      "  hide({b}, ((R) || (Q)) || (P));\n";
 
   run_linearisation_test_case(spec,true);
-}
+} 
 #else // ndef MCRL2_SKIP_LONG_TESTS
 
 BOOST_AUTO_TEST_CASE(skip_linearization_test)

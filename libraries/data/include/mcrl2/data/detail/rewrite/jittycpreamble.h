@@ -116,7 +116,7 @@ struct rewrite_functor
 //
 static RewriterCompilingJitty *this_rewriter;
 static rewriter_function int2func[ARITY_BOUND * INDEX_BOUND] = {};
-static const application dummy_application;
+// static const application dummy_application;
 
 //
 // Miscellaneous helper functions
@@ -156,31 +156,6 @@ uintptr_t uint_address(const atermpp::aterm& t)
 // Rewriting functions
 //
 
-///
-/// \brief rewrite calls the function in the int2func table, with the given application t
-///        as its argument. If t is not given, then a dummy application is passed. This
-///        happens when a rewrite function is called on a function symbol. This strange
-///        behaviour is due to the fact that rewriting of function symbols (constants) and
-///        of applications is treated in the same way. A better solution would be to have
-///        a separate int2func table of type (data_expression (*rewriter_function)(void))*.
-/// \param arity The arity of the rewrite rule.
-/// \param index The index of the outer function symbol of the rule.
-/// \param t The parameter to pass to the rewr_*_*_term function.
-/// \return The rewritten term.
-///
-static inline
-data_expression rewrite(size_t arity, size_t index, const application& t = dummy_application)
-{
-  assert(arity < ARITY_BOUND);
-  assert(index < INDEX_BOUND);
-  rewriter_function f = int2func[ARITY_BOUND * index + arity];
-  if (f != NULL)
-  {
-    return f(t);
-  }
-  return t;
-}
-
 static inline
 data_expression rewrite_appl_aux(const application& t)
 {
@@ -190,12 +165,15 @@ data_expression rewrite_appl_aux(const application& t)
     const size_t index = get_index(thead);
     if (index < INDEX_BOUND)
     {
-      return rewrite(recursive_number_of_args(t), index, t);
+      const size_t arity=0;
+      assert(ARITY_BOUND>arity);
+      const rewriter_function f = int2func[ARITY_BOUND * index + arity];
+      if (f != NULL)
+      {
+        return f(t);
+      }
     }
-    else
-    {
-      return application(rewrite(t.head()), t.begin(), t.end(), rewrite_functor());
-    }
+    return application(rewrite(t.head()), t.begin(), t.end(), rewrite_functor());
   }
   // Here the head symbol of, which can be deeply nested, is not a function_symbol.
   const data_expression& head0 = get_nested_head(t);
@@ -235,7 +213,17 @@ data_expression rewrite_appl_aux(const application& t)
   else
   {
     assert(is_function_symbol(head1));
-    return rewrite(recursive_number_of_args(t1), get_index(down_cast<function_symbol>(head1)), t1);
+    const size_t index = get_index(down_cast<function_symbol>(head1));
+    const size_t arity = recursive_number_of_args(t1);
+    if (index < INDEX_BOUND && arity < ARITY_BOUND)
+    {
+      const rewriter_function f = int2func[ARITY_BOUND * index + arity];
+      if (f != NULL)
+      {
+        return f(t1);
+      }
+    }
+    return application(rewrite(head1), t1.begin(), t1.end(), rewrite_functor()); 
   }
 }
 
@@ -247,14 +235,14 @@ data_expression rewrite(const data_expression& t)
     const size_t index = get_index(down_cast<function_symbol>(t));
     if (index < INDEX_BOUND)
     {
-      data_expression u=rewrite(0, index);
-      return u;
+      const size_t arity=0;
+      const rewriter_function f = int2func[ARITY_BOUND * index + arity];
+      if (f != NULL)
+      {
+        return f(application()); // The argument is not used.
+      }
     }
-    else
-    {
-      return t;
-
-    }
+    return t;
   }
   else
   if (is_application_no_check(t))
@@ -264,14 +252,17 @@ data_expression rewrite(const data_expression& t)
     if (is_function_symbol(head))
     {
       const size_t index = get_index(down_cast<function_symbol>(head));
-      if (index < INDEX_BOUND)
+      const size_t appl_size=appl.size();
+      if (index < INDEX_BOUND && appl_size<ARITY_BOUND)  // If this does not hold, we are dealing with a function symbol
+                                                         // unknown to the jittyc rewriter.
       {
-        return rewrite(appl.size(), index, appl);
+        const rewriter_function f = int2func[ARITY_BOUND * index + appl_size];
+        if (f != NULL)
+        {
+          return f(appl);
+        }
       }
-      else
-      {
-        return application(rewrite(appl.head()), appl.begin(), appl.end(), rewrite_functor());
-      }
+      return application(rewrite(appl.head()), appl.begin(), appl.end(), rewrite_functor());
     }
     else
     {
