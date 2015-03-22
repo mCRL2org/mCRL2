@@ -165,7 +165,7 @@ data_expression rewrite_appl_aux(const application& t)
     const size_t index = get_index(thead);
     if (index < INDEX_BOUND)
     {
-      const size_t arity=0;
+      const size_t arity=recursive_number_of_args(t);
       assert(ARITY_BOUND>arity);
       const rewriter_function f = int2func[ARITY_BOUND * index + arity];
       if (f != NULL)
