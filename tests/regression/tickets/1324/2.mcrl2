@@ -1,0 +1,10 @@
+act
+  a,c,b,d;
+
+proc
+  P = (((d) . (sum b1: Bool . (Q))) . (b)) . ((a) + (tau));
+  Q = (((true) -> (d)) + ((sum b1: Bool . (a)) + ((sum b1: Bool . (a)) . (c)))) . ((true) -> (P));
+  R = c;
+
+init
+  ((P) || (R)) || (Q);
