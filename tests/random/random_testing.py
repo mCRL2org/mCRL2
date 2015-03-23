@@ -257,7 +257,7 @@ available_tests = {
     'bessolve'                          : lambda name, settings: BessolveTest(name, settings)                                ,
 }
 
-if __name__ == '__main__':
+def main(tests):
     import argparse
     cmdline_parser = argparse.ArgumentParser()
     cmdline_parser.add_argument('-t', '--toolpath', dest='toolpath', help='The path where the mCRL2 tools are installed')
@@ -277,12 +277,11 @@ if __name__ == '__main__':
         os.mkdir(testdir)
     os.chdir(testdir)
 
-    tests = []
-    for name in sorted(available_tests):
+    for name in sorted(tests):
         if re.search(args.pattern, name):
             try:
                 for i in I:
-                    test = available_tests[name]('{}_{}'.format(name, i), settings)
+                    test = tests[name]('{}_{}'.format(name, i), settings)
                     test.execute_in_sandbox()
             except Exception as e:
                 print 'Test {} failed!'.format(test.name)
@@ -291,3 +290,6 @@ if __name__ == '__main__':
     # SymbolicExplorationTest('symbolic_exploration', settings)
     # PbesrewrTest('pbesrewr', 'bqnf-quantifier', settings)
     # PbesabstractTest('pbesabsinthe', settings)
+
+if __name__ == '__main__':
+    main(available_tests)

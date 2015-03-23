@@ -138,9 +138,6 @@ class Test:
         self.tools.append(ToolFactory().create_tool(label, data['name'], self.toolpath, input_nodes, output_nodes, data['args']))
 
     def setup(self, inputfiles):
-        for node in self.input_nodes:
-            if node.value:
-                write_text(node.filename(), str(node.value))
         input_nodes = [node for node in self.input_nodes if node.value == None]
         if len(input_nodes) != len(inputfiles):
             raise RuntimeError('Invalid number of input files provided: expected {0}, got {1}'.format(len(input_nodes), len(inputfiles)))

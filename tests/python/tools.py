@@ -66,13 +66,13 @@ class Tool(object):
 
     # Raises an exception if the execution was aborted or produced an error
     def check_execution(self, process, timeout, memlimit, returncode):
-        if returncode != 0:
-            print 'warning: tool {} ended with return code {}'.format(self.name, returncode)
         import platform
-        if process.max_virtual_memory > memlimit:
-            raise MemoryExceededError(process.max_virtual_memory)
         if process.user_time > timeout:
             raise TimeExceededError(process.user_time)
+        if process.max_virtual_memory > memlimit:
+            raise MemoryExceededError(process.max_virtual_memory)
+        if returncode != 0:
+            print 'warning: tool {} ended with return code {}'.format(self.name, returncode)
         if platform.system() == 'Windows' and returncode == -1073741571:
             raise StackOverflowError(self.name)
         if platform.system() == 'Linux' and returncode == -11:
@@ -135,6 +135,7 @@ class Tool(object):
         self.parse_boolean(text, 'is-deterministic'           , 'LTS is deterministic.', 'LTS is not deterministic.')
         self.parse_boolean(text, 'is-closed'                  , 'is closed', 'is not closed')
         self.parse_boolean(text, 'is-well-formed'             , 'well formed', 'not well formed')
+        self.parse_boolean(text, 'is-well-typed'              , 'is well typed', 'is not well typed')
         self.parse_boolean(text, 'has-deadlock'               , 'deadlock-detect: deadlock found')
         self.parse_boolean(text, 'result'                     , 'LTSs are strongly bisimilar', 'LTSs are not strongly bisimilar')
         self.parse_boolean(text, 'result'                     , 'LTSs are branching bisimilar', 'LTSs are not branching bisimilar')

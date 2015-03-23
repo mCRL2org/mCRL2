@@ -5,8 +5,6 @@ nodes:
     type: LPS
   l3:
     type: LTS
-  l5:
-    type: NUMBER
 
 tools:
   t1:
@@ -26,4 +24,4 @@ tools:
     name: ltsinfo
 
 result: |
-  result = t3.value['state-count'] == l5.value
+  result = t3.value['state-count'] == t3.value['state-count']

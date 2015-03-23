@@ -45,7 +45,6 @@ class CountStatesTest(YmlTest):
     # expected_result is the expected number of states
     def __init__(self, name, inputfiles, expected_result, lps2lts_options = [], settings = dict()):
         super(CountStatesTest, self).__init__(name, ymlfile('countstates'), inputfiles, settings)
-        self.settings.update({'nodes': {'l5': {'value': expected_result}}})
         if lps2lts_options:
             self.set_command_line_options('t2', lps2lts_options)
 
