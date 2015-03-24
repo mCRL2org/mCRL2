@@ -96,11 +96,7 @@ struct action_rename_actions: public process::action_actions
 
   std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node) const
   {
-#ifdef _MSC_VER
     return parse_vector<lps::action_rename_rule>(node, "ActionRenameRule", [&](const core::parse_node& node) { return parse_ActionRenameRule(node); });
-#else
-    return parse_vector<lps::action_rename_rule>(node, "ActionRenameRule", std::bind(&action_rename_actions::parse_ActionRenameRule, this, std::placeholders::_1));
-#endif    
   }
 
   std::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node) const
@@ -149,11 +145,7 @@ struct action_rename_actions: public process::action_actions
   lps::action_rename_specification parse_ActionRenameSpec(const core::parse_node& node) const
   {
     lps::action_rename_specification result;
-#ifdef _MSC_VER
     traverse(node, [&](const core::parse_node& node) { return callback_ActionRenameSpec(node, result); });
-#else
-    traverse(node, std::bind(&action_rename_actions::callback_ActionRenameSpec, this, std::placeholders::_1, std::ref(result)));
-#endif    
     return result;
   }
 };

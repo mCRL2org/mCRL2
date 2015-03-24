@@ -47,11 +47,7 @@ struct process_actions: public process::action_actions
 
   process::action_name_multiset_list parse_MultActIdList(const core::parse_node& node) const
   {
-#ifdef _MSC_VER
     return parse_list<process::action_name_multiset>(node, "MultActId", [&](const core::parse_node& node) { return parse_MultActId(node); });
-#else
-    return parse_list<process::action_name_multiset>(node, "MultActId", std::bind(&process_actions::parse_MultActId, this, std::placeholders::_1));
-#endif    
   }
 
   process::action_name_multiset_list parse_MultActIdSet(const core::parse_node& node) const
@@ -71,11 +67,7 @@ struct process_actions: public process::action_actions
 
   process::communication_expression_list parse_CommExprList(const core::parse_node& node) const
   {
-#ifdef _MSC_VER
     return parse_list<process::communication_expression>(node, "CommExpr", [&](const core::parse_node& node) { return parse_CommExpr(node); });
-#else
-    return parse_list<process::communication_expression>(node, "CommExpr", std::bind(&process_actions::parse_CommExpr, this, std::placeholders::_1));
-#endif    
   }
 
   process::communication_expression_list parse_CommExprSet(const core::parse_node& node) const
@@ -90,11 +82,7 @@ struct process_actions: public process::action_actions
 
   process::rename_expression_list parse_RenExprList(const core::parse_node& node) const
   {
-#ifdef _MSC_VER
     return parse_list<process::rename_expression>(node, "RenExpr", [&](const core::parse_node& node) { return parse_RenExpr(node); });
-#else
-    return parse_list<process::rename_expression>(node, "RenExpr", std::bind(&process_actions::parse_RenExpr, this, std::placeholders::_1));
-#endif    
   }
 
   process::rename_expression_list parse_RenExprSet(const core::parse_node& node) const
@@ -165,11 +153,7 @@ struct process_actions: public process::action_actions
 
   std::vector<process::process_equation> parse_ProcDeclList(const core::parse_node& node) const
   {
-#ifdef _MSC_VER
     return parse_vector<process::process_equation>(node, "ProcDecl", [&](const core::parse_node& node) { return parse_ProcDecl(node); });
-#else
-    return parse_vector<process::process_equation>(node, "ProcDecl", std::bind(&process_actions::parse_ProcDecl, this, std::placeholders::_1));
-#endif    
   }
 
   std::vector<process::process_equation> parse_ProcSpec(const core::parse_node& node) const
@@ -227,11 +211,7 @@ struct process_actions: public process::action_actions
   process::process_specification parse_mCRL2Spec(const core::parse_node& node) const
   {
     process::process_specification result;
-#ifdef _MSC_VER
     traverse(node, [&](const core::parse_node& node) { return callback_mCRL2Spec(node, result); });
-#else
-    traverse(node, std::bind(&process_actions::callback_mCRL2Spec, this, std::placeholders::_1, std::ref(result)));
-#endif    
     return result;
   }
 };

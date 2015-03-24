@@ -171,11 +171,7 @@ struct pg_actions: public core::default_parser_actions
 
   void parse_NodeSpecList(const core::parse_node& node)
   {
-#ifdef _MSC_VER
     traverse(node, make_visitor(m_parser.symbol_table(), "NodeSpec", [&](const core::parse_node& node) { return parse_NodeSpec(node); }));
-#else
-    traverse(node, make_visitor(m_parser.symbol_table(), "NodeSpec", std::bind(&pg_actions::parse_NodeSpec, this, std::placeholders::_1)));
-#endif    
   }
 
   identifier_t parse_Id(const core::parse_node& node)
@@ -196,11 +192,7 @@ struct pg_actions: public core::default_parser_actions
   std::set<identifier_t> parse_Successors(const core::parse_node& node)
   {
     std::set<identifier_t> result;
-#ifdef _MSC_VER
     traverse(node, make_set_collector(m_parser.symbol_table(), "Id", result, [&](const core::parse_node& node) { return parse_Id(node); }));
-#else
-    traverse(node, make_set_collector(m_parser.symbol_table(), "Id", result, std::bind(&pg_actions::parse_Id, this, std::placeholders::_1)));
-#endif    
     return result;
   }
 
