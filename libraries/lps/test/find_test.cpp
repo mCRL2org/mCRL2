@@ -101,7 +101,7 @@ void test_free_variables()
   BOOST_CHECK(free_variables.size() == 1);
   BOOST_CHECK(free_variables.find(data::variable("z", data::sort_bool::bool_())) != free_variables.end());
 
-  BOOST_CHECK(is_well_typed(specification));
+  BOOST_CHECK(check_well_typedness(specification));
 }
 
 void test_search()

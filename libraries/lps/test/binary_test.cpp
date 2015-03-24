@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(abp)
   rewriter r(spec.data());
   binary_algorithm<rewriter, specification>(spec, r).run();
   std::clog << "--- after ---\n" << lps::pp(spec) << std::endl;
-  BOOST_CHECK(is_well_typed(spec));
+  BOOST_CHECK(check_well_typedness(spec));
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

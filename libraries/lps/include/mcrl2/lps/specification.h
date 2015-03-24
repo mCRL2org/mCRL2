@@ -37,14 +37,14 @@ namespace lps
 {
 
 // prototype definitions
-template <typename Object> bool is_well_typed(const Object& o);
+template <typename Object> bool check_well_typedness(const Object& o);
 template <typename LinearProcess, typename InitialProcessExpression> class specification_base;
 template <typename LinearProcess, typename InitialProcessExpression> atermpp::aterm_appl specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec);
 class specification;
 void complete_data_specification(specification& spec);
 
 // template function overloads
-bool is_well_typed(const specification& spec);
+bool check_well_typedness(const specification& spec);
 
 /// \brief Test for a specification expression
 /// \param x A term
@@ -296,7 +296,7 @@ class specification: public specification_base<linear_process, process_initializ
 
     void save(std::ostream& stream, bool binary = true) const
     {
-      assert(is_well_typed(*this));
+      assert(check_well_typedness(*this));
       super::save(stream, binary);
     }
 
@@ -304,7 +304,7 @@ class specification: public specification_base<linear_process, process_initializ
     {
       super::load(stream, binary);
       complete_data_specification(*this);
-      assert(is_well_typed(*this));
+      assert(check_well_typedness(*this));
     }
 };
 

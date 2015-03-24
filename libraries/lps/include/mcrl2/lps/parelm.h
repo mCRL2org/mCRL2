@@ -166,7 +166,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);
-      assert(is_well_typed(m_spec));
+      assert(check_well_typedness(m_spec));
     }
 
     /// \brief Second version of parelm that builds a dependency graph
@@ -252,7 +252,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);
-      assert(is_well_typed(m_spec));
+      assert(check_well_typedness(m_spec));
     }
 
   public:

@@ -58,12 +58,12 @@ void test_context_sorts()
 
   specification spec = parse_linear_process_specification(text);
   std::cout << "spec = " << spec << std::endl;
-  BOOST_CHECK(is_well_typed(spec));
+  BOOST_CHECK(check_well_typedness(spec));
 
   stochastic_specification sspec;
   parse_lps(text, sspec);
   std::cout << "sspec = " << sspec << std::endl;
-  BOOST_CHECK(is_well_typed(sspec));
+  BOOST_CHECK(check_well_typedness(sspec));
 }
 
 int test_main(int argc, char* argv[])

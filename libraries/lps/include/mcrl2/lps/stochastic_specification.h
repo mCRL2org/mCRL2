@@ -36,7 +36,7 @@ std::set<data::function_symbol> find_function_symbols(const lps::stochastic_spec
 std::set<core::identifier_string> find_identifiers(const lps::stochastic_specification& x);
 
 // template function overloads
-bool is_well_typed(const stochastic_specification& spec);
+bool check_well_typedness(const stochastic_specification& spec);
 
 /// \brief Linear process specification.
 class stochastic_specification: public specification_base<stochastic_linear_process, stochastic_process_initializer>
@@ -85,7 +85,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
 
     void save(std::ostream& stream, bool binary=true) const
     {
-      assert(is_well_typed(*this));
+      assert(check_well_typedness(*this));
       super::save(stream, binary);
     }
 
@@ -93,7 +93,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     {
       super::load(stream, binary);
       complete_data_specification(*this);
-      assert(is_well_typed(*this));
+      assert(check_well_typedness(*this));
     }
 };
 

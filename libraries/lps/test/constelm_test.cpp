@@ -423,7 +423,7 @@ void test_abp()
   data::rewriter R(spec.data());
   bool instantiate_free_variables = false;
   constelm(spec, R, instantiate_free_variables);
-  BOOST_CHECK(is_well_typed(spec));
+  BOOST_CHECK(check_well_typedness(spec));
 }
 
 void test_stochastic_specification()

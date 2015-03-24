@@ -6,23 +6,22 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/lps_well_typed_checker.h
+/// \file mcrl2/lps/is_well_typed.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
-#define MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
+#ifndef MCRL2_LPS_IS_WELL_TYPED_H
+#define MCRL2_LPS_IS_WELL_TYPED_H
 
+#include <sstream>
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/detail/action_utility.h"
 
-namespace mcrl2
-{
+namespace mcrl2 {
 
-namespace lps
-{
+namespace lps {
 
 template <typename T>
 std::string pp(const T&);
@@ -33,12 +32,22 @@ namespace detail
 /// \brief Function object for applying a substitution to LPS data types.
 struct lps_well_typed_checker
 {
+  // The result of the last well typedness check.
+  bool result;
+
+  // Error message are written to the output stream error.
+  mutable std::ostringstream error;
+
+  lps_well_typed_checker()
+    : result(false)
+  {}
+
   /// \brief Checks if the sort of t has type real
   bool check_time(const data::data_expression& t, const std::string& type) const
   {
     if (!data::sort_real::is_real(t.sort()))
     {
-      mCRL2log(log::info) << "is_well_typed(" << type << ") failed: time " << data::pp(t) << " doesn't have sort real." << std::endl;
+      error << "is_well_typed(" << type << ") failed: time " << t << " doesn't have sort real." << std::endl;
       return false;
     }
     return true;
@@ -49,7 +58,7 @@ struct lps_well_typed_checker
   {
     if (!data::sort_bool::is_bool(t.sort()))
     {
-      mCRL2log(log::info) << "is_well_typed(" << type << ") failed: condition " << data::pp(t) << " doesn't have sort bool." << std::endl;
+      error << "is_well_typed(" << type << ") failed: condition " << t << " doesn't have sort bool." << std::endl;
       return false;
     }
     return true;
@@ -60,7 +69,7 @@ struct lps_well_typed_checker
   {
     if (!is_well_typed_container(l))
     {
-      mCRL2log(log::info) << "is_well_typed(" << type << ") failed: the assignments " << data::pp(l) << " are not well typed." << std::endl;
+      error << "is_well_typed(" << type << ") failed: the assignments " << l << " are not well typed." << std::endl;
       return false;
     }
     if (data::detail::sequence_contains_duplicates(
@@ -69,7 +78,7 @@ struct lps_well_typed_checker
         )
        )
     {
-      mCRL2log(log::info) << "is_well_typed(" << type << ") failed: data assignments " << data::pp(l) << " don't have unique left hand sides." << std::endl;
+      error << "is_well_typed(" << type << ") failed: data assignments " << l << " don't have unique left hand sides." << std::endl;
       return false;
     }
     return true;
@@ -117,7 +126,7 @@ struct lps_well_typed_checker
     if (a.lhs().sort() != a.rhs().sort())
     {
       std::clog << "is_well_typed(data_assignment) failed: the left and right hand sides "
-                << data::pp(a.lhs()) << " and " << data::pp(a.rhs()) << " have different sorts." << std::endl;
+                << a.lhs() << " and " << a.rhs() << " have different sorts." << std::endl;
       return false;
     }
     return true;
@@ -172,7 +181,7 @@ struct lps_well_typed_checker
   {
     if (!data::detail::unique_names(s.summation_variables()))
     {
-      mCRL2log(log::info) << "is_well_typed(action_summand) failed: summation variables " << data::pp(s.summation_variables()) << " don't have unique names." << std::endl;
+      error << "is_well_typed(action_summand) failed: summation variables " << data::pp(s.summation_variables()) << " don't have unique names." << std::endl;
       return false;
     }
     if (!check_condition(s.condition(), "action_summand"))
@@ -234,7 +243,7 @@ struct lps_well_typed_checker
     // check 2)
     if (!data::detail::unique_names(p.process_parameters()))
     {
-      mCRL2log(log::info) << "is_well_typed(linear_process) failed: process parameters " << data::pp(p.process_parameters()) << " don't have unique names." << std::endl;
+      error << "is_well_typed(linear_process) failed: process parameters " << data::pp(p.process_parameters()) << " don't have unique names." << std::endl;
       return false;
     }
 
@@ -248,7 +257,7 @@ struct lps_well_typed_checker
     {
       if (!data::detail::check_variable_names(i->summation_variables(), names))
       {
-        mCRL2log(log::info) << "is_well_typed(linear_process) failed: some of the names of the summation variables " << data::pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
+        error << "is_well_typed(linear_process) failed: some of the names of the summation variables " << data::pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
         return false;
       }
     }
@@ -258,7 +267,7 @@ struct lps_well_typed_checker
     {
       if (!data::detail::check_assignment_variables(i->assignments(), p.process_parameters()))
       {
-        mCRL2log(log::info) << "is_well_typed(linear_process) failed: some left hand sides of the assignments " << data::pp(i->assignments()) << " do not appear as process parameters." << std::endl;
+        error << "is_well_typed(linear_process) failed: some left hand sides of the assignments " << data::pp(i->assignments()) << " do not appear as process parameters." << std::endl;
         return false;
       }
     }
@@ -303,7 +312,7 @@ struct lps_well_typed_checker
     {
       if (!(data::detail::check_variable_sorts(i->summation_variables(), declared_sorts)))
       {
-        mCRL2log(log::info) << "is_well_typed(specification) failed: some of the sorts of the summation variables " << data::pp(i->summation_variables()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+        error << "is_well_typed(specification) failed: some of the sorts of the summation variables " << data::pp(i->summation_variables()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
         return false;
       }
     }
@@ -311,21 +320,21 @@ struct lps_well_typed_checker
     // check 2)
     if (!(data::detail::check_variable_sorts(spec.process().process_parameters(), declared_sorts)))
     {
-      mCRL2log(log::info) << "is_well_typed(specification) failed: some of the sorts of the process parameters " << data::pp(spec.process().process_parameters()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+      error << "is_well_typed(specification) failed: some of the sorts of the process parameters " << data::pp(spec.process().process_parameters()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
       return false;
     }
 
     // check 3)
     if (!(data::detail::check_variable_sorts(spec.global_variables(), declared_sorts)))
     {
-      mCRL2log(log::info) << "is_well_typed(specification) failed: some of the sorts of the free variables " << data::pp(spec.global_variables()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+      error << "is_well_typed(specification) failed: some of the sorts of the free variables " << data::pp(spec.global_variables()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
       return false;
     }
 
     // check 4)
     if (!(detail::check_action_label_sorts(spec.action_labels(), declared_sorts)))
     {
-      mCRL2log(log::info) << "is_well_typed(specification) failed: some of the sorts occurring in the action labels " << lps::pp(spec.action_labels()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+      error << "is_well_typed(specification) failed: some of the sorts occurring in the action labels " << lps::pp(spec.action_labels()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
       return false;
     }
 
@@ -334,7 +343,7 @@ struct lps_well_typed_checker
     {
       if (!(detail::check_action_labels(i->multi_action().actions(), declared_labels)))
       {
-        mCRL2log(log::info) << "is_well_typed(specification) failed: some of the labels occurring in the actions " << lps::pp(i->multi_action().actions()) << " are not declared in the action specification " << lps::pp(spec.action_labels()) << std::endl;
+        error << "is_well_typed(specification) failed: some of the labels occurring in the actions " << lps::pp(i->multi_action().actions()) << " are not declared in the action specification " << lps::pp(spec.action_labels()) << std::endl;
         return false;
       }
     }
@@ -353,16 +362,16 @@ struct lps_well_typed_checker
 
     if (!free_variables.empty())
     {
-      mCRL2log(log::info) << "is_well_typed(specification) failed: some of the free variables were not declared\n";
-      mCRL2log(log::info) << "declared global variables: " << data::pp(spec.global_variables()) << std::endl;
-      mCRL2log(log::info) << "occurring free variables: " << data::pp(free_variables) << std::endl;
+      error << "is_well_typed(specification) failed: some of the free variables were not declared\n";
+      error << "declared global variables: " << data::pp(spec.global_variables()) << std::endl;
+      error << "occurring free variables: " << data::pp(free_variables) << std::endl;
       return false;
     }
 
     // check 3)
     if (!data::detail::unique_names(spec.global_variables()))
     {
-      mCRL2log(log::info) << "is_well_typed(specification) failed: global variables " << data::pp(spec.global_variables()) << " don't have unique names." << std::endl;
+      error << "is_well_typed(specification) failed: global variables " << data::pp(spec.global_variables()) << " don't have unique names." << std::endl;
       return false;
     }
 
@@ -389,11 +398,24 @@ struct lps_well_typed_checker
 };
 
 /// \brief Checks well typedness of an LPS object.
-template <typename Object>
-bool is_well_typed(const Object& o)
+template <typename T>
+bool is_well_typed(const T& x)
 {
   lps::detail::lps_well_typed_checker checker;
-  return checker(o);
+  return checker(x);
+}
+
+/// \brief Checks well typedness of an LPS object, and will print error messages to stderr.
+template <typename T>
+bool check_well_typedness(const T& x)
+{
+  lps::detail::lps_well_typed_checker checker;
+  bool result = checker(x);
+  if (!result)
+  {
+    mCRL2log(log::error) << checker.error.str();
+  }
+  return result;
 }
 
 } // namespace detail
@@ -402,4 +424,4 @@ bool is_well_typed(const Object& o)
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
+#endif // MCRL2_LPS_IS_WELL_TYPED_H

@@ -14,7 +14,7 @@
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/translate_user_notation.h"
-#include "mcrl2/lps/detail/lps_well_typed_checker.h"
+#include "mcrl2/lps/is_well_typed.h"
 
 namespace mcrl2
 {
@@ -84,24 +84,24 @@ std::string pp_with_summand_numbers(const stochastic_specification& x)
   return out.str();
 }
 
-bool is_well_typed(const linear_process& x)
+bool check_well_typedness(const linear_process& x)
 {
-  return lps::detail::is_well_typed(x);
+  return lps::detail::check_well_typedness(x);
 }
 
-bool is_well_typed(const stochastic_linear_process& x)
+bool check_well_typedness(const stochastic_linear_process& x)
 {
-  return lps::detail::is_well_typed(x);
+  return lps::detail::check_well_typedness(x);
 }
 
-bool is_well_typed(const specification& x)
+bool check_well_typedness(const specification& x)
 {
-  return lps::detail::is_well_typed(x);
+  return lps::detail::check_well_typedness(x);
 }
 
-bool is_well_typed(const stochastic_specification& x)
+bool check_well_typedness(const stochastic_specification& x)
 {
-  return lps::detail::is_well_typed(x);
+  return lps::detail::check_well_typedness(x);
 }
 
 } // namespace lps

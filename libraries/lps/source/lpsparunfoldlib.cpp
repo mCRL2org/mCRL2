@@ -555,7 +555,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
 
   mCRL2log(debug) << "\nNew LPS:\n" <<  lps::pp(new_lps) << std::endl;
 
-  assert(is_well_typed(new_lps));
+  assert(check_well_typedness(new_lps));
 
   return new_lps;
 }
@@ -951,7 +951,7 @@ mcrl2::lps::specification lpsparunfold::algorithm(size_t parameter_at_index)
 
   mcrl2::lps::specification new_spec = mcrl2::lps::specification(m_data_specification, m_action_label_list, m_glob_vars, new_lps, new_init);
 
-  assert(is_well_typed(new_spec));
+  assert(check_well_typedness(new_spec));
 
   return new_spec;
 }

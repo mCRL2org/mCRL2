@@ -60,7 +60,7 @@ action_summand make_action_summand<action_summand>(const data::variable_list& su
 } // namespace detail
 
 class linear_process; // prototype declaration
-bool is_well_typed(const linear_process& proc);
+bool check_well_typedness(const linear_process& proc);
 
 template <typename ActionSummand>
 class linear_process_base
