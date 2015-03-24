@@ -19,8 +19,8 @@ if compiler == 'clang':
   cc = which('clang')
   cpp = which('clang++')
 elif compiler == 'gcc-oldest':
-  cc = which('gcc-4.4')
-  cpp = which('g++-4.4')
+  cc = which('gcc-4.6')
+  cpp = which('g++-4.6')
 elif compiler == 'gcc-latest':
   cc = which('gcc-4.9')
   cpp = which('g++-4.9')
