@@ -58,6 +58,7 @@ static const data_expression& local_rewrite(const data_expression& t)
 //
 static void set_the_precompiled_rewrite_functions_in_a_lookup_table();
 static data_expression rewrite_aux(const data_expression& t, const bool arguments_in_normal_form);
+static inline data_expression rewrite_abstraction_aux(const abstraction& a);
 static data_expression rewrite_with_arguments_in_normal_form(const data_expression& t)
 {
   return rewrite_aux(t,true);
@@ -106,7 +107,7 @@ class delayed_abstraction
 
     data_expression normal_form() const
     {
-      return abstraction(m_binding_operator,m_variables,local_rewrite(m_body));
+      return rewrite_abstraction_aux(abstraction(m_binding_operator,m_variables,local_rewrite(m_body)));
     }
 };
 
@@ -180,6 +181,29 @@ static inline rewriter_function get_precompiled_rewrite_function(const function_
   return functions_when_arguments_are_not_in_normal_form[ARITY_BOUND * index + arity];
 }
 
+static inline 
+data_expression rewrite_abstraction_aux(const abstraction& a)
+{
+  const binder_type& binder(a.binding_operator());
+  if (is_lambda_binder(binder))
+  {
+    const data_expression& result=this_rewriter->rewrite_lambda_application(a, sigma());
+    assert(result.sort()==a.sort());
+    return result;
+  }
+  if (is_exists_binder(binder))
+  {
+    const data_expression& result=this_rewriter->existential_quantifier_enumeration(a, sigma());
+    assert(result.sort()==a.sort());
+    return result;
+  }
+  assert(is_forall_binder(binder));
+  const data_expression& result=this_rewriter->universal_quantifier_enumeration(a, sigma());
+  assert(result.sort()==a.sort());
+  return result;
+}
+
+
 static inline
 data_expression rewrite_appl_aux(const application& t)
 {
@@ -217,25 +241,7 @@ data_expression rewrite_appl_aux(const application& t)
   else
   if (is_abstraction(head1))
   {
-    assert(is_abstraction(head1));
-    const abstraction& heada(head1);
-    const binder_type& binder(heada.binding_operator());
-    if (is_lambda_binder(binder))
-    {
-      const data_expression& result=this_rewriter->rewrite_lambda_application(t1, sigma());
-      assert(result.sort()==t1.sort());
-      return result;
-    }
-    if (is_exists_binder(binder))
-    {
-      const data_expression& result=this_rewriter->existential_quantifier_enumeration(head1, sigma());
-      assert(result.sort()==head1.sort());
-      return result;
-    }
-    assert(is_forall_binder(binder));
-    const data_expression& result=this_rewriter->universal_quantifier_enumeration(head1, sigma());
-    assert(result.sort()==head1.sort());
-    return result;
+    return rewrite_abstraction_aux(down_cast<abstraction>(head1));
   }
   else
   {

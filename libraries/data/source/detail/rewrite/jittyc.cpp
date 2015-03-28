@@ -997,6 +997,7 @@ private:
   std::ostream& m_stream;
   std::stack<rewr_function_spec> m_rewr_functions;
   std::set<rewr_function_spec> m_rewr_functions_implemented;
+  std::set<size_t>m_delayed_application_functions; // Recalls the arities of the required functions 'delayed_application';
   std::vector<bool> m_used;
   std::vector<int> m_stack;
   padding m_padding;
@@ -1321,6 +1322,9 @@ private:
                             std::ostream& result_type)
   {
     assert(a.size() > 0);    // TODO Take care that the application of this lambda is done without unnecessary rewriting.
+                             // The problem is that the function rewrite_lambda_application rewrites all its arguments.
+                             // This should be lifted to a templated function. Furthermore, in the not rewritten variant,
+                             // all arguments are also rewritten to normal form, to guarantee that they are of sort dataexpression.
     assert(is_lambda_binder(head.binding_operator()));
     const size_t arity = a.size();
 
@@ -1349,9 +1353,9 @@ private:
     {
       // !rewr
       nfs_array args_nfs(arity);
-      args_nfs = calc_nfs_list(a, nnfvars);
+      args_nfs.fill(); 
 
-      s << appl_function(arity) << "(";
+      s << "term_not_in_normalform(" << appl_function(arity) << "(";
       stringstream types_for_arguments;
       calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
       s << ", ";
@@ -1360,49 +1364,8 @@ private:
         types_for_arguments << ", ";
       }
       calc_inner_terms(s, a, startarg, nnfvars, args_nfs,types_for_arguments);
-      s << ")";
-      return rewr;
-    }
-  }
-
-  bool calc_inner_term_appl(std::ostream& s,
-                            const application& a,
-                            const application& head,
-                            const size_t startarg,
-                            const variable_or_number_list nnfvars,
-                            bool rewr,
-                            std::ostream& result_type)
-  {
-
-    if (rewr)
-    {
-      s << "rewrite(";
-      result_type << "data_expression";
-      s << appl_function(a.size()) << "(";
-      stringstream dummy_head_type;
-      calc_inner_term(s, head, startarg, nnfvars, true, dummy_head_type);  
-      s << ", ";
-      stringstream types_for_arguments;
-      nfs_array rewr_args(recursive_number_of_args(a));
-      rewr_args.fill();
-      calc_inner_terms(s, a, startarg, nnfvars, rewr_args,types_for_arguments);
       s << "))";
-      return true;
-    }
-    else
-    {
-      // !rewr
-      mCRL2log(warning) << "For nested applications we do not deliver optimally rewritten terms. This should be reconsidered in due time.\n";
-      const nfs_array rewr_args(recursive_number_of_args(a));
-      s << "delayed_application(";
-      result_type << "term_not_in_normal_form";
-      s << appl_function(a.size()) << "(";
-      stringstream head_type;
-      calc_inner_term(s, head, startarg, nnfvars, false, head_type);  // XXXX TODO TAKE CARE THAT NORMAL FORMS ADMINISTRATION IS DEALT WITH PROPERLY FOR HIGHER ORDER TERMS.
-      s << ", ";
-      stringstream types_for_arguments;
-      calc_inner_terms(s, a, startarg, nnfvars, rewr_args,types_for_arguments);
-      s << "))";
+      result_type << "term_not_in_normalform";
       return rewr;
     }
   }
@@ -1438,7 +1401,15 @@ private:
     s << ")";
   }
 
-  /* void write_delayed_application_to_stream_in_normal_form(
+  string delayed_application(const size_t arity)
+  {
+    m_delayed_application_functions.insert(arity);
+    stringstream s;
+    s << "delayed_application" << arity;
+    return s.str();
+  }
+
+  void write_delayed_application_to_stream_in_normal_form(
                             std::ostream& s, 
                             const application& a,
                             const size_t startarg,
@@ -1450,114 +1421,56 @@ private:
     const size_t arity = a.size();
     nfs_array rewr_args(arity);
     rewr_args.fill();
-    stringstream result_code;
+    stringstream code_string;
     stringstream result_types;  
-    calc_inner_term(result_code, t, startarg, nnfvars, rewr_args, result_types);
-    s << delayed_appl_function(arity) << "<" << result_types ">(";
 
-    stringstream head_result_type;  
     if (is_variable(a.head()))
     {
-      calc_inner_term(s, down_cast<variable>(a.head()), startarg, nnfvars, true, head_result_type);
+      calc_inner_term(code_string, down_cast<variable>(a.head()), startarg, nnfvars, true, result_types);
     }
     else
     {
       assert(is_application(a.head()));
-      write_application_to_stream_in_normal_form(s,down_cast<application>(a.head()),startarg,nnfvars,head_result_type);
+      write_delayed_application_to_stream_in_normal_form(code_string,down_cast<application>(a.head()),startarg,nnfvars,result_types);
     }
+
     for(const data_expression& t: a)
     { 
-      s << ", ";
-      s << result_code.str();
+      result_types << ",";
+      code_string << ",";
+      calc_inner_term(code_string, t, startarg, nnfvars, rewr_args, result_types);
     }
+
+    s << delayed_application(arity) << "<" << result_types.str() << ">(";
+    s << code_string.str();
     s << ")";
-  } */
+
+    result_type << "delayed_application" << arity << "<" << result_types.str() << ">";
+  } 
 
   bool calc_inner_term_appl_variable
                            (std::ostream& s,
                             const application& a,
-                            const variable& head,
+                            const variable& ,
                             const size_t startarg,
                             const variable_or_number_list nnfvars,
                             const bool rewr,
                             std::ostream& result_type)
   {
-    if (!rewr)
-    {
-      mCRL2log(warning) << "For higher order terms we always deliver a normal form, even if this is not required. This should be reconsidered in due time." << std::endl;
-    }
-
-    // if (rewr)
+    if (rewr)
     {
       result_type << "data_expression";
-      const size_t arity = a.size();
       s << "rewrite_with_arguments_in_normal_form("; 
       write_application_to_stream_in_normal_form(s,a,startarg,nnfvars);
       s << ")";
       return true;
     }
 
-    // write_delayed_application_to_stream_in_normal_form(s,a,startarg,nnfvars,result_type);
+    // Generate an application which is rewritten when it is needed.
+    write_delayed_application_to_stream_in_normal_form(s,a,startarg,nnfvars,result_type);
     return false;
 
-    /* CODE TO BE ACTIVATED.
- *  result_type << "data_expression";
-    const size_t arity = a.size();
-    nfs_array rewr_args(arity);
-    rewr_args.fill();
-    s << "(is_variable(";
-    stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
-    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
-    s << ") ? ";
-    s << appl_function(arity) << "(";
-    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
-    s << ", ";
-    calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type);
-    s << ")";
-    s << ": rewrite(" << appl_function(arity) << "(";
-    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
-    s << ", ";
-    calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type); // Here, terms are rewritten twice.
-    s << ")))";
-    return true; */
-  }
-
-  /* TO BE REMOVED.
- *    bool calc_inner_term_appl_variable
-                           (std::ostream& s,
-                            const application& a,
-                            const variable& head,
-                            const size_t startarg,
-                            const variable_or_number_list nnfvars,
-                            const bool rewr,
-                            std::ostream& result_type)
-  {
-    if (!rewr)
-    {
-      mCRL2log(warning) << "For higher order terms we always deliver a normal form, even if this is not required. This should be reconsidered in due time.\n";
-    }
-
-    result_type << "data_expression";
-    const size_t arity = a.size();
-    nfs_array rewr_args(arity);
-    rewr_args.fill();
-    s << "(is_variable(";
-    stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
-    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
-    s << ") ? ";
-    s << appl_function(arity) << "(";
-    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
-    s << ", ";
-    calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type);
-    s << ")";
-    // const bool startarg_nnf = std::find(nnfvars.begin(), nnfvars.end(), atermpp::aterm_int(startarg)) != nnfvars.end();
-    s << ": rewrite(" << appl_function(arity) << "(";
-    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
-    s << ", ";
-    calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type); // Here, terms are rewritten twice.
-    s << ")))";
-    return true;
-  } */
+  } 
 
   bool calc_inner_term_application(std::ostream& s, 
                                    const application& a, 
@@ -1573,18 +1486,13 @@ private:
       return calc_inner_term_appl_function(s, a, down_cast<function_symbol>(head), startarg, nnfvars, rewr, result_type);
     }
     
-    if (is_abstraction(a.head())) // Here we must consider the case where head is an abstraction.
+    if (is_abstraction(head)) // Here we must consider the case where head is an abstraction, and hence it must be a lambda abstraction.
     {
-      return calc_inner_term_appl_lambda_abstraction(s, a, down_cast<abstraction>(a.head()), startarg, nnfvars, rewr, result_type);
+      return calc_inner_term_appl_lambda_abstraction(s, a, down_cast<abstraction>(head), startarg, nnfvars, rewr, result_type);
     }
     
-    if (is_variable(head)) // Here we must consider the case where head is variable.
-    {
-      return calc_inner_term_appl_variable(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr, result_type);
-    }
-    
-    assert(is_application(a.head())); // Ultimately, this case ought to become unreachable.
-    return calc_inner_term_appl(s, a, down_cast<application>(a.head()), startarg, nnfvars, rewr, result_type);
+    assert(is_variable(head)); // Here we must consider the case where head is variable.
+    return calc_inner_term_appl_variable(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr, result_type);
   }
 
   ///
@@ -2047,6 +1955,69 @@ public:
     m_stream << get_heads(s.codomain(), base_string, number_of_arguments - s.domain().size()) << "[" << index << "]";
   }
 
+  void generate_delayed_application_functions(ostream& ss)
+  {
+    for(size_t arity: m_delayed_application_functions)
+    {
+      assert(arity>0);
+      ss << m_padding << "template < class HEAD";
+      for (size_t i = 0; i < arity; ++i)
+      {
+        ss << ", class DATA_EXPR" << i;
+      }
+      ss << " >\n";
+  
+      ss << m_padding << "class delayed_application" << arity << "\n"
+         << m_padding << "{\n";
+      m_padding.indent();
+      ss << m_padding << "protected:\n";
+      m_padding.indent();
+
+      ss << m_padding << "const HEAD& m_head;\n";
+      for (size_t i = 0; i < arity; ++i)
+      {
+        ss  << m_padding << "const DATA_EXPR" << i << "& m_arg" << i << ";\n";
+      }
+      ss << "\n";
+      m_padding.unindent();
+      ss << m_padding << "public:\n";
+      m_padding.indent();
+
+      ss << m_padding << "delayed_application" << arity << "(const HEAD& head";
+      for (size_t i = 0; i < arity; ++i)
+      {
+        ss << ", const DATA_EXPR" << i << "& arg" << i;
+      }
+      ss << ")\n";
+      ss << m_padding << "  : m_head(head)";
+
+      for (size_t i = 0; i < arity; ++i)
+      {
+        ss << ", m_arg" << i << "(arg" << i << ")";
+      }
+      ss << "\n" << m_padding << "{}\n\n";
+
+      ss << m_padding << "data_expression normal_form() const\n";
+      ss << m_padding << "{\n";
+      m_padding.indent();
+
+      ss << m_padding << "return rewrite_with_arguments_in_normal_form(" << appl_function(arity) << "(local_rewrite(m_head)";
+      for (size_t i = 0; i < arity; ++i)
+      {
+        ss << ", local_rewrite(m_arg" << i << ")"; 
+      }
+      ss << "));\n";
+
+      m_padding.unindent();
+      ss << m_padding << "}\n\n";
+
+      m_padding.unindent();
+      m_padding.unindent();
+      ss << m_padding <<  "};\n";
+    }
+
+  }
+
   std::string rewr_function_finish_term(const size_t arity, const std::string& head, const function_sort& s, size_t& used_arguments)
   {
     if (arity == 0)
@@ -2349,7 +2320,13 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   // affects the value that the macro INDEX_BOUND should have before loading
   // jittycpreamble.h.
   ImplementTree code_generator(*this, rewr_code, function_symbols);
-  rewr_code << "namespace {\n"
+
+  const size_t index_bound = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::max_index() + 1;
+  cpp_file << "#define INDEX_BOUND " << index_bound << "\n"
+              "#define ARITY_BOUND " << max_arity + 1 << "\n";
+  cpp_file << "#include \"mcrl2/data/detail/rewrite/jittycpreamble.h\"\n";
+
+  cpp_file << "namespace {\n"
                "// Anonymous namespace so the compiler uses internal linkage for the generated\n"
                "// rewrite code.\n"
                "\n"
@@ -2376,12 +2353,8 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   rewr_code << "};\n"
                "} // namespace\n";
 
-  const size_t index_bound = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::max_index() + 1;
-  cpp_file << "#define INDEX_BOUND " << index_bound << "\n"
-              "#define ARITY_BOUND " << max_arity + 1 << "\n";
-  cpp_file << "#include \"mcrl2/data/detail/rewrite/jittycpreamble.h\"\n";
-
   generate_make_appl_functions(cpp_file, max_arity);
+  code_generator.generate_delayed_application_functions(cpp_file);
 
   cpp_file << rewr_code.str();
 
