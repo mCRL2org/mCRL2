@@ -166,11 +166,12 @@ sort_expression data_expression::sort() const
   }
   else if (is_application(*this))
   {
-    const data_expression &head = atermpp::down_cast<const data_expression>((*this)[0]);
+    const data_expression& head = atermpp::down_cast<const data_expression>((*this)[0]);
     sort_expression s(head.sort());
     if (is_function_sort(s))
     {
       const function_sort& fs = atermpp::down_cast<function_sort>(s);
+      assert(fs.domain().size()+1==this->size());
       return (fs.codomain());
     }
     return s;

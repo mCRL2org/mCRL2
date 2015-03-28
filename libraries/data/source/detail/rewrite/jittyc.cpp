@@ -673,13 +673,9 @@ static match_tree build_tree(build_pars pars, size_t i)
 }
 
 static match_tree create_tree(const data_equation_list& rules)
-// Create a match tree for OpId int2term[opid] and update the value of
-// *max_vars accordingly.
+// Create a match tree for OpId int2term[opid].
 //
 // Pre:  rules is a list of rewrite rules for some function symbol f.
-//       max_vars is a valid pointer to an integer
-// Post: *max_vars is the maximum of the original *max_vars value and
-//       the number of variables in the result tree
 // Ret:  A match tree for function symbol f.
 {
   // Create sequences representing the trees for each rewrite rule and
@@ -1165,9 +1161,8 @@ private:
     }
   }
 
-  bool calc_inner_term_variable(std::ostream& s, const variable& v, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  bool calc_inner_term_variable(std::ostream& s, const variable& v, std::ostream& result_type)
   {
-    const bool nf = std::find(nnfvars.begin(), nnfvars.end(), v) != nnfvars.end();
     const std::string variable_name = v.name();
     // Remove the initial @ if it is present in the variable name, because then it is a variable introduced
     // by this rewriter.
@@ -1412,7 +1407,124 @@ private:
     }
   }
 
-  bool calc_inner_term_appl(std::ostream& s,
+  void write_application_to_stream_in_normal_form(
+                            std::ostream& s, 
+                            const application& a,
+                            const size_t startarg,
+                            const variable_or_number_list nnfvars)
+  {
+    // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
+    
+    const size_t arity = a.size();
+    nfs_array rewr_args(arity);
+    rewr_args.fill();
+    s << appl_function(arity) << "(";
+    stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
+    if (is_variable(a.head()))
+    {
+      calc_inner_term(s, down_cast<variable>(a.head()), startarg, nnfvars, true, dummy_result_type);
+    }
+    else
+    {
+      assert(is_application(a.head()));
+      write_application_to_stream_in_normal_form(s,down_cast<application>(a.head()),startarg,nnfvars);
+    }
+    for(const data_expression& t: a)
+    { 
+      s << ", ";
+    
+      calc_inner_term(s, t, startarg, nnfvars, rewr_args, dummy_result_type);
+    }
+    s << ")";
+  }
+
+  /* void write_delayed_application_to_stream_in_normal_form(
+                            std::ostream& s, 
+                            const application& a,
+                            const size_t startarg,
+                            const variable_or_number_list nnfvars,
+                            std::ostream& result_type)
+  {
+    // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
+    
+    const size_t arity = a.size();
+    nfs_array rewr_args(arity);
+    rewr_args.fill();
+    stringstream result_code;
+    stringstream result_types;  
+    calc_inner_term(result_code, t, startarg, nnfvars, rewr_args, result_types);
+    s << delayed_appl_function(arity) << "<" << result_types ">(";
+
+    stringstream head_result_type;  
+    if (is_variable(a.head()))
+    {
+      calc_inner_term(s, down_cast<variable>(a.head()), startarg, nnfvars, true, head_result_type);
+    }
+    else
+    {
+      assert(is_application(a.head()));
+      write_application_to_stream_in_normal_form(s,down_cast<application>(a.head()),startarg,nnfvars,head_result_type);
+    }
+    for(const data_expression& t: a)
+    { 
+      s << ", ";
+      s << result_code.str();
+    }
+    s << ")";
+  } */
+
+  bool calc_inner_term_appl_variable
+                           (std::ostream& s,
+                            const application& a,
+                            const variable& head,
+                            const size_t startarg,
+                            const variable_or_number_list nnfvars,
+                            const bool rewr,
+                            std::ostream& result_type)
+  {
+    if (!rewr)
+    {
+      mCRL2log(warning) << "For higher order terms we always deliver a normal form, even if this is not required. This should be reconsidered in due time." << std::endl;
+    }
+
+    // if (rewr)
+    {
+      result_type << "data_expression";
+      const size_t arity = a.size();
+      s << "rewrite_with_arguments_in_normal_form("; 
+      write_application_to_stream_in_normal_form(s,a,startarg,nnfvars);
+      s << ")";
+      return true;
+    }
+
+    // write_delayed_application_to_stream_in_normal_form(s,a,startarg,nnfvars,result_type);
+    return false;
+
+    /* CODE TO BE ACTIVATED.
+ *  result_type << "data_expression";
+    const size_t arity = a.size();
+    nfs_array rewr_args(arity);
+    rewr_args.fill();
+    s << "(is_variable(";
+    stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
+    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
+    s << ") ? ";
+    s << appl_function(arity) << "(";
+    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
+    s << ", ";
+    calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type);
+    s << ")";
+    s << ": rewrite(" << appl_function(arity) << "(";
+    calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
+    s << ", ";
+    calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type); // Here, terms are rewritten twice.
+    s << ")))";
+    return true; */
+  }
+
+  /* TO BE REMOVED.
+ *    bool calc_inner_term_appl_variable
+                           (std::ostream& s,
                             const application& a,
                             const variable& head,
                             const size_t startarg,
@@ -1438,14 +1550,14 @@ private:
     s << ", ";
     calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type);
     s << ")";
-    const bool startarg_nnf = std::find(nnfvars.begin(), nnfvars.end(), atermpp::aterm_int(startarg)) != nnfvars.end();
+    // const bool startarg_nnf = std::find(nnfvars.begin(), nnfvars.end(), atermpp::aterm_int(startarg)) != nnfvars.end();
     s << ": rewrite(" << appl_function(arity) << "(";
     calc_inner_term(s, head, startarg, nnfvars, true, dummy_result_type);
     s << ", ";
     calc_inner_terms(s, a, startarg, nnfvars, rewr_args, dummy_result_type); // Here, terms are rewritten twice.
     s << ")))";
     return true;
-  }
+  } */
 
   bool calc_inner_term_application(std::ostream& s, 
                                    const application& a, 
@@ -1466,10 +1578,9 @@ private:
       return calc_inner_term_appl_lambda_abstraction(s, a, down_cast<abstraction>(a.head()), startarg, nnfvars, rewr, result_type);
     }
     
-    if (is_variable(a.head())) // Here we must consider the case where head is variable.
+    if (is_variable(head)) // Here we must consider the case where head is variable.
     {
-      assert(is_variable(a.head()));
-      return calc_inner_term_appl(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr, result_type);
+      return calc_inner_term_appl_variable(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr, result_type);
     }
     
     assert(is_application(a.head())); // Ultimately, this case ought to become unreachable.
@@ -1506,7 +1617,7 @@ private:
     }
     if (is_variable(t))
     {
-      return calc_inner_term_variable(s, down_cast<variable>(t), nnfvars, rewr, result_type);
+      return calc_inner_term_variable(s, down_cast<variable>(t), result_type);
     }
     if (is_abstraction(t))
     {
@@ -1557,31 +1668,31 @@ private:
   {
     if (tree.isS())
     {
-      implement_tree(atermpp::down_cast<match_tree_S>(tree), cur_arg, parent, level, cnt);
+      implement_treeS(atermpp::down_cast<match_tree_S>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isM())
     {
-      implement_tree(atermpp::down_cast<match_tree_M>(tree), cur_arg, parent, level, cnt);
+      implement_treeM(atermpp::down_cast<match_tree_M>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isF())
     {
-      implement_tree(atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt);
+      implement_treeF(atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isD())
     {
-      implement_tree(atermpp::down_cast<match_tree_D>(tree), level, cnt);
+      implement_treeD(atermpp::down_cast<match_tree_D>(tree), level, cnt);
     }
     else if (tree.isN())
     {
-      implement_tree(atermpp::down_cast<match_tree_N>(tree), cur_arg, parent, level, cnt);
+      implement_treeN(atermpp::down_cast<match_tree_N>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isC())
     {
-      implement_tree(atermpp::down_cast<match_tree_C>(tree), cur_arg, parent, level, cnt);
+      implement_treeC(atermpp::down_cast<match_tree_C>(tree), cur_arg, parent, level, cnt);
     }
     else if (tree.isR())
     {
-      implement_tree(atermpp::down_cast<match_tree_R>(tree), cur_arg, level);
+      implement_treeR(atermpp::down_cast<match_tree_R>(tree), cur_arg, level);
     }
     else
     {
@@ -1606,7 +1717,7 @@ private:
       }
   };
 
-  void implement_tree(const match_tree_S& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeS(const match_tree_S& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     const match_tree_S& treeS(tree);
     if (atermpp::find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm_appl()) // treeS.target_variable occurs in treeS.subtree
@@ -1634,7 +1745,7 @@ private:
     implement_tree(tree.subtree(), cur_arg, parent, level, cnt);
   }
 
-  void implement_tree(const match_tree_M& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeM(const match_tree_M& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     m_stream << m_padding << "if (" << string(tree.match_variable().name()).c_str() + 1 << " == ";
     if (level == 0)
@@ -1661,11 +1772,9 @@ private:
              << "}\n";
   }
 
-  void implement_tree(const match_tree_F& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeF(const match_tree_F& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     const void* func = (void*)(atermpp::detail::address(tree.function()));
-    const char* s_arg = "arg";
-    const char* s_t = "t";
     m_stream << m_padding;
     if (level == 0)
     {
@@ -1683,21 +1792,21 @@ private:
     }
     else
     {
-      const char* array = level == 1 ? s_arg : s_t;
+      const char* arg_or_t = level == 1 ? "arg" : "t";
       if (!is_function_sort(tree.function().sort()))
       {
-        m_stream << "if (uint_address(" << array << parent << "[" << cur_arg << "]) == "
+        m_stream << "if (uint_address(" << arg_or_t << parent << "[" << cur_arg << "]) == "
                  << func << ") // F2a " << tree.function().name() << "\n" << m_padding
                  << "{\n" << m_padding
-                 << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << array << parent << "[" << cur_arg << "]);\n";
+                 << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "]);\n";
       }
       else
       {
-        m_stream << "if (is_application_no_check(down_cast<data_expression>(" << array << parent << "[" << cur_arg << "])) && "
-                 <<     "uint_address(down_cast<data_expression>(" << array << parent << "[" << cur_arg << "])[0]) == "
+        m_stream << "if (is_application_no_check(down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "])) && "
+                 <<     "uint_address(down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "])[0]) == "
                  << func << ") // F2b " << tree.function().name() << "\n" << m_padding
                  << "{\n" << m_padding
-                 << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << array << parent << "[" << cur_arg << "]);\n";
+                 << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "]);\n";
       }
     }
     m_stack.push_back(cur_arg);
@@ -1718,7 +1827,7 @@ private:
              << "}\n";
   }
 
-  void implement_tree(const match_tree_D& tree, size_t level, size_t cnt)
+  void implement_treeD(const match_tree_D& tree, size_t level, size_t cnt)
   {
     int i = m_stack.back();
     m_stack.pop_back();
@@ -1729,12 +1838,12 @@ private:
     m_stack.push_back(i);
   }
 
-  void implement_tree(const match_tree_N& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeN(const match_tree_N& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     implement_tree(tree.subtree(), cur_arg + 1, parent, level, cnt);
   }
 
-  void implement_tree(const match_tree_C& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeC(const match_tree_C& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
   {
     stringstream result_type_string;
     m_stream << m_padding
@@ -1760,7 +1869,7 @@ private:
              << "}\n";
   }
 
-  void implement_tree(const match_tree_R& tree, size_t cur_arg, size_t level)
+  void implement_treeR(const match_tree_R& tree, size_t cur_arg, size_t level)
   {
     if (level > 0)
     {
@@ -1772,7 +1881,7 @@ private:
     m_stream << "; // R1 " << tree.result() << "\n";
   }
 
-  const match_tree& implement_tree(const match_tree_C& tree)
+  const match_tree& implement_treeC(const match_tree_C& tree)
   {
     stringstream result_type_string;
     assert(tree.true_tree().isR());
@@ -1791,7 +1900,7 @@ private:
     return tree.false_tree();
   }
 
-  void implement_tree(const match_tree_R& tree, size_t arity)
+  void implement_treeR(const match_tree_R& tree, size_t arity)
   {
     stringstream result_type_string;
     if (arity == 0)
@@ -1842,8 +1951,6 @@ public:
   ///
   void implement_tree(match_tree tree, const size_t arity)
   {
-    size_t l = 0;
-
     for (size_t i = 0; i < arity; ++i)
     {
       if (!m_used[i])
@@ -1852,15 +1959,16 @@ public:
       }
     }
 
+    size_t l = 0;
     while (tree.isC())
     {
-      tree = implement_tree(down_cast<match_tree_C>(tree));
+      tree = implement_treeC(down_cast<match_tree_C>(tree));
       l++;
     }
 
     if (tree.isR())
     {
-      implement_tree(down_cast<match_tree_R>(tree), arity);
+      implement_treeR(down_cast<match_tree_R>(tree), arity);
     }
     else
     {
@@ -2041,6 +2149,18 @@ public:
       m_stream << "term_not_in_normal_form(";
       get_recursive_argument(down_cast<function_sort>(func.sort()), i, "t", arity);
       m_stream << ")";
+    }
+    m_stream << "); }\n\n";
+
+    m_stream << m_padding <<
+                  "static inline data_expression rewr_" << index << "_" << arity << "_term_arg_in_normal_form"
+                  "(const application&" << (arity == 0 ? "" : " t") << ") "
+                  "{ return rewr_" << index << "_" << arity << "(";
+    for(size_t i = 0; i < arity; ++i)
+    {
+      assert(is_function_sort(func.sort()));
+      m_stream << (i == 0 ? "" : ", ");
+      get_recursive_argument(down_cast<function_sort>(func.sort()), i, "t", arity);
     }
     m_stream << "); }\n\n";
   }
@@ -2265,7 +2385,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
 
   cpp_file << rewr_code.str();
 
-  cpp_file << "void fill_int2func()\n"
+  cpp_file << "void set_the_precompiled_rewrite_functions_in_a_lookup_table()\n"
               "{\n";
 
   // Fill tables with the rewrite functions
@@ -2275,10 +2395,14 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   {
     if (!it->delayed())
     {
-      cpp_file << "  int2func[ARITY_BOUND * "
+      cpp_file << "  functions_when_arguments_are_not_in_normal_form[ARITY_BOUND * "
                << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
                << " + " << it->arity() << "] = rewr_functions::"
                << it->name() << "_term;\n";
+      cpp_file << "  functions_when_arguments_are_in_normal_form[ARITY_BOUND * "
+               << core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(it->fs())
+               << " + " << it->arity() << "] = rewr_functions::"
+               << it->name() << "_term_arg_in_normal_form;\n";
     }
   }
 

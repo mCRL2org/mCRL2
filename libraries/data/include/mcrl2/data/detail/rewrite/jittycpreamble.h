@@ -56,8 +56,16 @@ static const data_expression& local_rewrite(const data_expression& t)
 //
 // Forward declarations
 //
-static void fill_int2func();
-static data_expression rewrite(const data_expression& t);
+static void set_the_precompiled_rewrite_functions_in_a_lookup_table();
+static data_expression rewrite_aux(const data_expression& t, const bool arguments_in_normal_form);
+static data_expression rewrite_with_arguments_in_normal_form(const data_expression& t)
+{
+  return rewrite_aux(t,true);
+}
+static data_expression rewrite(const data_expression& t)
+{
+  return rewrite_aux(t,false);
+}
 
 //
 // Type definitions
@@ -115,7 +123,8 @@ struct rewrite_functor
 // Declaration of global variables
 //
 static RewriterCompilingJitty *this_rewriter;
-static rewriter_function int2func[ARITY_BOUND * INDEX_BOUND] = {};
+static rewriter_function functions_when_arguments_are_not_in_normal_form[ARITY_BOUND * INDEX_BOUND] = {};
+static rewriter_function functions_when_arguments_are_in_normal_form[ARITY_BOUND * INDEX_BOUND] = {};
 // static const application dummy_application;
 
 //
@@ -156,22 +165,34 @@ uintptr_t uint_address(const atermpp::aterm& t)
 // Rewriting functions
 //
 
+static inline rewriter_function get_precompiled_rewrite_function(const function_symbol& f, const size_t arity, const bool arguments_in_normal_form)
+{
+  const size_t index = get_index(f);
+  if (index>=INDEX_BOUND || arity>=ARITY_BOUND)
+  {
+    return NULL;
+  }
+
+  if (arguments_in_normal_form)
+  {
+    return functions_when_arguments_are_in_normal_form[ARITY_BOUND * index + arity]; 
+  }
+  return functions_when_arguments_are_not_in_normal_form[ARITY_BOUND * index + arity];
+}
+
 static inline
 data_expression rewrite_appl_aux(const application& t)
 {
   function_symbol thead;
   if (head_is_function_symbol(t, thead))
   {
-    const size_t index = get_index(thead);
-    if (index < INDEX_BOUND)
+    const size_t arity=recursive_number_of_args(t);
+    const rewriter_function f = get_precompiled_rewrite_function(thead,arity,false);
+    if (f != NULL)
     {
-      const size_t arity=recursive_number_of_args(t);
-      assert(ARITY_BOUND>arity);
-      const rewriter_function f = int2func[ARITY_BOUND * index + arity];
-      if (f != NULL)
-      {
-        return f(t);
-      }
+      const data_expression& result=f(t);
+      assert(t.sort()==result.sort());
+      return result;
     }
     return application(rewrite(t.head()), t.begin(), t.end(), rewrite_functor());
   }
@@ -201,46 +222,48 @@ data_expression rewrite_appl_aux(const application& t)
     const binder_type& binder(heada.binding_operator());
     if (is_lambda_binder(binder))
     {
-      return this_rewriter->rewrite_lambda_application(t1, sigma());
+      const data_expression& result=this_rewriter->rewrite_lambda_application(t1, sigma());
+      assert(result.sort()==t1.sort());
+      return result;
     }
     if (is_exists_binder(binder))
     {
-      return this_rewriter->existential_quantifier_enumeration(head1, sigma());
+      const data_expression& result=this_rewriter->existential_quantifier_enumeration(head1, sigma());
+      assert(result.sort()==head1.sort());
+      return result;
     }
     assert(is_forall_binder(binder));
-    return this_rewriter->universal_quantifier_enumeration(head1, sigma());
+    const data_expression& result=this_rewriter->universal_quantifier_enumeration(head1, sigma());
+    assert(result.sort()==head1.sort());
+    return result;
   }
   else
   {
     assert(is_function_symbol(head1));
-    const size_t index = get_index(down_cast<function_symbol>(head1));
     const size_t arity = recursive_number_of_args(t1);
-    if (index < INDEX_BOUND && arity < ARITY_BOUND)
+    const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(head1),arity,false);
+    if (f != NULL)
     {
-      const rewriter_function f = int2func[ARITY_BOUND * index + arity];
-      if (f != NULL)
-      {
-        return f(t1);
-      }
+      const data_expression& result=f(t1);
+      assert(t1.sort()==result.sort());
+      return result;
     }
     return application(rewrite(head1), t1.begin(), t1.end(), rewrite_functor()); 
   }
 }
 
 static inline
-data_expression rewrite(const data_expression& t)
+data_expression rewrite_aux(const data_expression& t, const bool arguments_in_normal_form )
 {
   if (is_function_symbol(t))
   {
-    const size_t index = get_index(down_cast<function_symbol>(t));
-    if (index < INDEX_BOUND)
+    const size_t arity=0;
+    const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(t), arity, false);
+    if (f != NULL)
     {
-      const size_t arity=0;
-      const rewriter_function f = int2func[ARITY_BOUND * index + arity];
-      if (f != NULL)
-      {
-        return f(application()); // The argument is not used.
-      }
+      const data_expression& result=f(application()); // The argument is not used.
+      assert(result.sort()==t.sort());
+      return result;
     }
     return t;
   }
@@ -251,22 +274,21 @@ data_expression rewrite(const data_expression& t)
     const data_expression& head = appl.head();
     if (is_function_symbol(head))
     {
-      const size_t index = get_index(down_cast<function_symbol>(head));
       const size_t appl_size=appl.size();
-      if (index < INDEX_BOUND && appl_size<ARITY_BOUND)  // If this does not hold, we are dealing with a function symbol
-                                                         // unknown to the jittyc rewriter.
+      const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(head), appl_size, arguments_in_normal_form);
+      if (f != NULL)
       {
-        const rewriter_function f = int2func[ARITY_BOUND * index + appl_size];
-        if (f != NULL)
-        {
-          return f(appl);
-        }
+        const data_expression& result= f(appl);
+        assert(result.sort()==t.sort());
+        return result;
       }
       return application(rewrite(appl.head()), appl.begin(), appl.end(), rewrite_functor());
     }
     else
     {
-      return rewrite_appl_aux(appl);
+      const data_expression& result=rewrite_appl_aux(appl);
+      assert(result.sort()==t.sort());
+      return result;
     }
   }
   else
@@ -281,11 +303,15 @@ data_expression rewrite(const data_expression& t)
     const binder_type& binder(abstr.binding_operator());
     if (is_exists_binder(binder))
     {
-      return this_rewriter->existential_quantifier_enumeration(t, sigma());
+      const data_expression& result=this_rewriter->existential_quantifier_enumeration(t, sigma());
+      assert(result.sort()==t.sort());
+      return result;
     }
     if (is_forall_binder(binder))
     {
-      return this_rewriter->universal_quantifier_enumeration(t, sigma());
+      const data_expression& result=this_rewriter->universal_quantifier_enumeration(t, sigma());
+      assert(result.sort()==t.sort());
+      return result;
     }
     assert(is_lambda_binder(binder));
     return this_rewriter->rewrite_single_lambda(abstr.variables(), abstr.body(), false, sigma());
@@ -297,7 +323,6 @@ data_expression rewrite(const data_expression& t)
   }
 }
 
-// Generate code to cleanup int2func.
 static
 void rewrite_cleanup()
 {
@@ -315,7 +340,7 @@ bool init(rewriter_interface* i)
   i->rewrite_external = &rewrite;
   i->rewrite_cleanup = &rewrite_cleanup;
   this_rewriter = i->rewriter;
-  fill_int2func();
+  set_the_precompiled_rewrite_functions_in_a_lookup_table();
   i->status = "rewriter loaded successfully.";
   return true;
 }
