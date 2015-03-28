@@ -2913,7 +2913,6 @@ class specification_basic_type:public boost::noncopyable
           is_action(body1)||
           is_tau(body1)||
           is_at(body1)||
-          //is_process_instance(body1)||
           is_process_instance_assignment(body1)||
           isDeltaAtZero(body1))
       {
@@ -2922,9 +2921,12 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(body1))
       {
-        return sum(
-                 sumvars+sum(body1).variables(),
-                 sum(body1).operand());
+        mutable_map_substitution<> sigma;
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
+        variable_list inner_sumvars=sum(body1).variables();
+        alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
+        const process_expression new_body1=substitute_pCRLproc(sum(body1).operand(), sigma, variables_occurring_in_rhs_of_sigma);
+        return sum(sumvars+inner_sumvars,new_body1);
       }
 
       if (is_delta(body1)||
