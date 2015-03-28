@@ -124,6 +124,22 @@ BOOST_AUTO_TEST_CASE(Check_whether_the_sum_variable_will_not_get_the_same_name_a
 
   run_linearisation_test_case(spec,true);
 } 
+
+BOOST_AUTO_TEST_CASE(linearisation_of_the_enclosed_spec_caused_a_name_conflict_with_the_option_lstack)
+{
+  const std::string spec =
+     "act\n"
+     "  c;\n"
+     "\n"
+     "proc\n"
+     "  Q = sum b1: Bool . R;\n"
+     "  R = sum b1: Bool . c.delta;\n"
+     "\n"
+     "init Q;\n";
+
+  run_linearisation_test_case(spec,true);
+} 
+
 #else // ndef MCRL2_SKIP_LONG_TESTS
 
 BOOST_AUTO_TEST_CASE(skip_linearization_test)

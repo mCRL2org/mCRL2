@@ -58,7 +58,7 @@ static const data_expression& local_rewrite(const data_expression& t)
 //
 static void set_the_precompiled_rewrite_functions_in_a_lookup_table();
 static data_expression rewrite_aux(const data_expression& t, const bool arguments_in_normal_form);
-static inline data_expression rewrite_abstraction_aux(const abstraction& a);
+static inline data_expression rewrite_abstraction_aux(const abstraction& a, const data_expression& t);
 static data_expression rewrite_with_arguments_in_normal_form(const data_expression& t)
 {
   return rewrite_aux(t,true);
@@ -107,7 +107,8 @@ class delayed_abstraction
 
     data_expression normal_form() const
     {
-      return rewrite_abstraction_aux(abstraction(m_binding_operator,m_variables,local_rewrite(m_body)));
+      const abstraction t(m_binding_operator,m_variables,local_rewrite(m_body));
+      return rewrite_abstraction_aux(t,t);
     }
 };
 
@@ -182,9 +183,9 @@ static inline rewriter_function get_precompiled_rewrite_function(const function_
 }
 
 static inline 
-data_expression rewrite_abstraction_aux(const abstraction& a)
+data_expression rewrite_abstraction_aux(const abstraction& head, const data_expression& a)
 {
-  const binder_type& binder(a.binding_operator());
+  const binder_type& binder(head.binding_operator());
   if (is_lambda_binder(binder))
   {
     const data_expression& result=this_rewriter->rewrite_lambda_application(a, sigma());
@@ -241,7 +242,7 @@ data_expression rewrite_appl_aux(const application& t)
   else
   if (is_abstraction(head1))
   {
-    return rewrite_abstraction_aux(down_cast<abstraction>(head1));
+    return rewrite_abstraction_aux(head1,t1);
   }
   else
   {
@@ -293,7 +294,7 @@ data_expression rewrite_aux(const data_expression& t, const bool arguments_in_no
     else
     {
       const data_expression& result=rewrite_appl_aux(appl);
-      assert(result.sort()==t.sort());
+      assert(result.sort()==appl.sort());
       return result;
     }
   }
