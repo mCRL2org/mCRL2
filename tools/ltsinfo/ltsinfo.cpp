@@ -122,7 +122,16 @@ class ltsinfo_tool : public ltsinfo_base
       {
         std::cout << "Does not have state labels." << std::endl;
       }
-      std::cout << "Has action labels." << std::endl;
+
+      if (l.has_action_info())
+      {
+        std::cout << "Has action labels." << std::endl;
+      }
+      else
+      {
+        std::cout << "Does not have action labels." << std::endl;
+      }
+
 
       mCRL2log(verbose) << "checking reachability..." << std::endl;
       if (!reachability_check(l))

@@ -564,6 +564,15 @@ class lts
       return m_state_labels.size() > 0;
     }
 
+    /** \brief Checks whether this LTS has labels associated with its actions, which are numbers.
+     * \retval true if the LTS has values for labels;
+     * \retval false otherwise.
+    */
+    bool has_action_info() const
+    {
+      return m_action_labels.size() > 0;
+    }
+
     /** \brief Sorts the transitions using a sort style.
      * \param[in] ts The sort style to use.
      * \note Deprecated */
