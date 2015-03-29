@@ -1145,24 +1145,24 @@ private:
    *
    */
 
-  bool calc_inner_term_function(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity, std::ostream& result_type)
+  void calc_inner_term_function(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity, std::ostream& result_type)
   {
     const bool nf = opid_is_nf(f, arity);
     if (rewr || nf)
     {
       s << m_rewriter.m_nf_cache.insert(f);
       result_type << "data_expression";
-      return true;
+      return;
     }
     else
     {
       s << delayed_rewr_function_name(f, 0);
       result_type << delayed_rewr_function_name(f, 0);
-      return false;
+      return;
     }
   }
 
-  bool calc_inner_term_variable(std::ostream& s, const variable& v, std::ostream& result_type)
+  void calc_inner_term_variable(std::ostream& s, const variable& v, std::ostream& result_type)
   {
     const std::string variable_name = v.name();
     // Remove the initial @ if it is present in the variable name, because then it is a variable introduced
@@ -1171,17 +1171,17 @@ private:
     {
       s << variable_name.substr(1);
       result_type << "data_expression";
-      return true;
+      return;
     }
     else
     {
       s << "static_cast<data_expression>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << "))";
       result_type << "data_expression";
-      return true;
+      return;
     }
   }
 
-  bool calc_inner_term_abstraction(std::ostream& s, const abstraction& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  void calc_inner_term_abstraction(std::ostream& s, const abstraction& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     std::string binder_constructor;
     std::string rewriter_function;
@@ -1206,10 +1206,10 @@ private:
     {
       s << "static_cast<data_expression>(this_rewriter->" << rewriter_function << "("
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
-      bool nf = calc_inner_term(s, a.body(), startarg, nnfvars, true, result_type);
-      s << ", " << nf << ", sigma()))";
+      calc_inner_term(s, a.body(), startarg, nnfvars, true, result_type);
+      s << ", true, sigma()))";
       result_type << "data_expression";
-      return true;
+      return;
     }
     else
     {
@@ -1220,11 +1220,11 @@ private:
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
       s << argument_string.str() << ")";
       result_type << "delayed_abstraction<" << argument_type.str() << ">";
-      return false;
+      return;
     }
   }
 
-  bool calc_inner_term_where_clause(std::ostream& s, const where_clause& w, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  void calc_inner_term_where_clause(std::ostream& s, const where_clause& w, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     if (rewr)  // TODO Take into account that some arguments are already in normal form.
     {
@@ -1260,7 +1260,6 @@ private:
     {
       s << ")";
     }
-    return rewr;
   }
 
   bool calc_inner_term_appl_function(std::ostream& s,
@@ -1330,7 +1329,7 @@ private:
 
     if (rewr)
     {
-      nfs_array args_nfs(arity);
+      nfs_array args_nfs(recursive_number_of_args(a));
       args_nfs.fill(true);
 
       s << "this_rewriter->rewrite_lambda_application(";
@@ -1504,7 +1503,7 @@ private:
   /// \param rewr indicates whether the reconstructed data expression should be rewritten to normal form.
   /// \return True if the result is in normal form, false otherwise.
   ///
-  bool calc_inner_term(std::ostream& s,
+  void calc_inner_term(std::ostream& s,
                        const data_expression& t,
                        const size_t startarg,
                        const variable_or_number_list nnfvars,
@@ -1515,29 +1514,33 @@ private:
     {
       s << m_rewriter.m_nf_cache.insert(t);
       result_type << "data_expression";
-      return true;
+      return;
     }
     if (is_function_symbol(t))  
     {
       // This will never be reached, as it is dealt with in the if clause above.
       assert(0);
-      return calc_inner_term_function(s, down_cast<function_symbol>(t), rewr, 0, result_type);
+      calc_inner_term_function(s, down_cast<function_symbol>(t), rewr, 0, result_type);
+      return;
     }
     if (is_variable(t))
     {
-      return calc_inner_term_variable(s, down_cast<variable>(t), result_type);
+      calc_inner_term_variable(s, down_cast<variable>(t), result_type);
+      return;
     }
     if (is_abstraction(t))
     {
-      return calc_inner_term_abstraction(s, down_cast<abstraction>(t), startarg, nnfvars, rewr, result_type);
+      calc_inner_term_abstraction(s, down_cast<abstraction>(t), startarg, nnfvars, rewr, result_type);
+      return;
     }
     if (is_where_clause(t))
     {
-      return calc_inner_term_where_clause(s, down_cast<where_clause>(t), startarg, nnfvars, rewr, result_type);
+      calc_inner_term_where_clause(s, down_cast<where_clause>(t), startarg, nnfvars, rewr, result_type);
+      return;
     }
   
     assert(is_application(t));
-    return calc_inner_term_application(s, down_cast<application>(t), startarg, nnfvars, rewr, result_type);
+    calc_inner_term_application(s, down_cast<application>(t), startarg, nnfvars, rewr, result_type);
   }
 
   ///
@@ -1561,6 +1564,7 @@ private:
       }
       stringstream argument_string;
       stringstream argument_type;
+      assert(i<rewr.size());
       calc_inner_term(argument_string,  get_argument_of_higher_order_term(appl,i), startarg + i, nnfvars, rewr.at(i),argument_type);
       s << argument_string.str();
       argument_types << argument_type.str();
