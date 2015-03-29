@@ -6,7 +6,7 @@ generate_tool_tests(${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2 "")
 if(MCRL2_EXTRA_TOOL_TESTS)
   set(MCRL2_DIR ${CMAKE_SOURCE_DIR}/examples/language) 
   generate_tool_tests(${MCRL2_DIR}/list.mcrl2 "")
-  generate_tool_tests(${MCRL2_DIR}/funccomp.mcrl2 "")
+  generate_tool_tests(${MCRL2_DIR}/funccomp.mcrl2 "lpsparunfold")
   # lpsrealelm cannot deal with "P / 2" in the following
   generate_tool_tests(${MCRL2_DIR}/divide2_10.mcrl2 "lpsrealelm")
   # Disable lts2*, because LTS contains a "Terminate" actions, which 
