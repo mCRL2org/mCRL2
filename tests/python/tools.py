@@ -5,7 +5,6 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-from popen import Popen, MemoryExceededError, TimeExceededError, StackOverflowError, ToolNotFoundError, SegmentationFault
 from subprocess import  PIPE
 import os.path
 import re
@@ -67,16 +66,17 @@ class Tool(object):
     # Raises an exception if the execution was aborted or produced an error
     def check_execution(self, process, timeout, memlimit, returncode):
         import platform
+        import popen
         if process.user_time > timeout:
-            raise TimeExceededError(process.user_time)
+            raise popen.TimeExceededError(process.user_time)
         if process.max_virtual_memory > memlimit:
-            raise MemoryExceededError(process.max_virtual_memory)
+            raise popen.MemoryExceededError(process.max_virtual_memory)
         if returncode != 0:
             print 'warning: tool {} ended with return code {}'.format(self.name, returncode)
         if platform.system() == 'Windows' and returncode == -1073741571:
-            raise StackOverflowError(self.name)
+            raise popen.StackOverflowError(self.name)
         if platform.system() == 'Linux' and returncode == -11:
-            raise SegmentationFault(self.name)
+            raise popen.SegmentationFault(self.name)
         if self.stderr and 'error' in self.stderr:
             raise RuntimeError('Tool {} failed: {}'.format(self.name, self.stderr))
 
@@ -161,13 +161,14 @@ class Tool(object):
         return False
 
     def execute(self, timeout, memlimit, verbose):
+        import popen
         args = self.arguments()
         name = os.path.join(self.toolpath, self.name)
         if verbose:
             print 'Executing ' + ' '.join([name] + args + self.args)
         if not self.check_exists(name):
-            raise ToolNotFoundError(name)
-        process = Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=memlimit, usrTimeLimit=timeout)
+            raise popen.ToolNotFoundError(name)
+        process = popen.Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=memlimit, usrTimeLimit=timeout)
 
         input = None
         self.stdout, self.stderr = process.communicate(input)

@@ -19,7 +19,7 @@ from testcommand import YmlTest
 from text_utility import write_text
 
 MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
+MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'install', 'bin')
 
 def ymlfile(file):
     return '{}/tests/specifications/{}.yml'.format(MCRL2_ROOT, file)

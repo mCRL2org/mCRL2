@@ -7,7 +7,7 @@
 import copy
 import os
 import sys
-sys.path += [os.path.join(os.path.dirname(__file__), '..', 'python')]
+sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
 from testcommand import YmlTest
 
 MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

@@ -11,7 +11,6 @@ import shutil
 import sys
 sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
 import testrunner
-from popen import Popen, MemoryExceededError, TimeExceededError, StackOverflowError
 from subprocess import  PIPE, STDOUT
 from text_utility import read_text, write_text
 from tools import Node, Tool, ToolFactory
@@ -172,6 +171,8 @@ class Test:
                         print e
 
     def run(self):
+        import popen
+
         # Singlecore run
         tasks = self.remaining_tasks()
         commands = []
@@ -182,17 +183,17 @@ class Test:
                 returncode = tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
                 if returncode != 0 and not self.allow_non_zero_return_values:
                     raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
-            except MemoryExceededError as e:
+            except popen.MemoryExceededError as e:
                 if self.verbose:
                     print 'Memory limit exceeded: ' + str(e)
                 self.cleanup()
                 return None
-            except TimeExceededError as e:
+            except popen.TimeExceededError as e:
                 if self.verbose:
                     print 'Time limit exceeded: ' + str(e)
                 self.cleanup()
                 return None
-            except StackOverflowError as e:
+            except popen.StackOverflowError as e:
                 if self.verbose:
                     print 'Stack overflow detected during execution of the tool ' + tool.name
                 self.cleanup()
