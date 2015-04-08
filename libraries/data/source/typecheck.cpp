@@ -3923,9 +3923,7 @@ void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(functio
     for (std::map<core::identifier_string,sort_expression>::const_iterator i=defined_sorts.begin();
               i!=defined_sorts.end(); ++i)
     {
-      // const basic_sort s(core::identifier_string(UnwindType(i->second)));
       const sort_expression reference=i->second;
-      // if (is_container_sort(i->first) || is_function_sort(i->first))
       find_sort_expressions<sort_expression>(reference, std::inserter(all_sorts, all_sorts.end()));
     }
 
@@ -3939,18 +3937,6 @@ void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(functio
           constructor_list.push_front(*j);
         }
       }
-
-      // Why is this code duplicated? Beats me... (JK)
-      if (is_structured_sort(*i))
-      {
-        const function_symbol_vector r=structured_sort(*i).constructor_functions();
-        for (function_symbol_vector::const_iterator i=r.begin();
-             i!=r.end(); ++i)
-        {
-          constructor_list.push_front(*i);
-        }
-      }
-
     }
 
     std::set < sort_expression > possibly_empty_constructor_sorts;
