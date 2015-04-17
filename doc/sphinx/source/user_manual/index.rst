@@ -18,7 +18,7 @@
    .. admonition:: Release
    
       Latest `development version documentation <http://www.mcrl2.org/dev>`_ is also available.
-  
+
 .. ifconfig:: release != version
 
    .. warning::
@@ -33,6 +33,17 @@
    .. admonition:: Release
    
       For the documentation of the latest release: |release|_ check out `mcrl2.org <http://www.mcrl2.org>`_.
+
+--------
+
+mCRL2 received a price for the Distinguished user-assistance tool feature in the 
+`VerifyThis verification challenge <http:/etaps2015.verifythis.org/>`
+held at `ETAPS2015 <http://www.etaps.org/>`
+, in London. mCRL2 combined a rich specification language with excellent automatic reasoning 
+features that made it an excellent tool to obtain
+insight in complex data structures and behaviours.
+
+--------
 
 .. list-table::
    :class: frontpage-table
