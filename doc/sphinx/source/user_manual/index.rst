@@ -34,6 +34,17 @@
    
       For the documentation of the latest release: |release|_ check out `mcrl2.org <http://www.mcrl2.org>`_.
 
+.. note::
+
+   mCRL2 received a price for the distinguished user-assistance tool feature in the 
+   `VerifyThis verification challenge <http://etaps2015.verifythis.org/>`_
+   held at `ETAPS2015 <http://www.etaps.org/>`_, in London. mCRL2 combined a rich specification 
+   language with excellent automatic reasoning 
+   features that made it an excellent tool to obtain
+   insight in complex data structures and behaviours.
+
+.. admonition:: 
+
 .. list-table::
    :class: frontpage-table
    :widths: 40,60
