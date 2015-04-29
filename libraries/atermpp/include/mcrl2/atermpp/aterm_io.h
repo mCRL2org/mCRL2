@@ -87,7 +87,7 @@ public:
   {
     std::stringstream ss;
     ss << std::internal << std::showbase << std::hex << std::setfill('0') << std::setw(4)
-       << aterm_io_error::what() << " (got " << version << ", expected" << expected_version << ")";
+       << aterm_io_error::what() << " (got " << version << ", expected " << expected_version << ")";
     return ss.str().c_str();
   }
 };
