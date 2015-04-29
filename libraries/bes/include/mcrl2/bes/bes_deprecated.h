@@ -34,6 +34,9 @@
 
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
+#include "mcrl2/bes/transformation_strategy.h"
+#include "mcrl2/bes/remove_level.h"
+#include "mcrl2/bes/search_strategy.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
@@ -69,252 +72,22 @@ typedef enum reason { UNKNOWN,
                     } reason;
 
 
-/// \brief Strategies for the generation of a BES from a PBES
-enum transformation_strategy
-{
-  lazy,          // generate equations but do not optimize on the fly
-  optimize,      // optimize by substituting true and false for already
-  // investigated variables in a rhs, while generating this rhs.
-  on_the_fly,    // make a distinction between variables that occur somewhere,
-  // and variables that do not occur somewhere. When generating
-  // a rhs, optimize this rhs as in "optimize". If the rhs is
-  // equal to T or F, substitute this value throughout the
-  // equation system, and maintain which variables become unused
-  // by doing so, as these do not have to be investigated further.
-  // E.g. if a rhs is  X1 && X2, X1 does not occur elsewhere and
-  // X2 turns out to be equal to false, then X1 is moved to the
-  // set of irrelevant variables, and not investigated further.
-  on_the_fly_with_fixed_points
-  // Do the same as with on the fly, but for each generated variable
-  // in the rhs, investigate whether this variable lies on a loop
-  // such that depending on its fixed point, it can be set to true
-  // or false. Due to the breadth first nature of the main algorithm
-  // the existence of such loops must be investigated separately
-  // for each variable, which can take a lot of time.
-};
+using mcrl2::bes::transformation_strategy;
+using mcrl2::bes::lazy;
+using mcrl2::bes::optimize;
+using mcrl2::bes::on_the_fly;
+using mcrl2::bes::on_the_fly_with_fixed_points;
 
-inline
-transformation_strategy parse_transformation_strategy(const std::string& s)
-{
-  if (s == "0") return lazy;
-  else if (s == "1") return optimize;
-  else if (s == "2") return on_the_fly;
-  else if (s == "3") return on_the_fly_with_fixed_points;
-  else throw mcrl2::runtime_error("unknown transformation strategy " + s);
-}
+using mcrl2::bes::remove_level;
+using mcrl2::bes::none;
+using mcrl2::bes::some;
+using mcrl2::bes::all;
 
-inline
-std::string print_transformation_strategy(const transformation_strategy s)
-{
-  switch(s)
-  {
-    case lazy: return "0";
-    case optimize: return "1";
-    case on_the_fly: return "2";
-    case on_the_fly_with_fixed_points: return "3";
-  }
-  throw mcrl2::runtime_error("unknown transformation strategy");
-}
-
-inline
-std::istream& operator>>(std::istream& is, transformation_strategy& strategy)
-{
-  try
-  {
-    std::string s;
-    is >> s;
-    strategy = parse_transformation_strategy(s);
-  }
-  catch(mcrl2::runtime_error&)
-  {
-    is.setstate(std::ios_base::failbit);
-  }
-  return is;
-}
-
-inline
-std::ostream& operator<<(std::ostream& os, const transformation_strategy s)
-{
-  os << print_transformation_strategy(s);
-  return os;
-}
-
-inline
-std::string description(const transformation_strategy s)
-{
-  switch(s)
-  {
-    case lazy: return "Compute all boolean equations which can be reached"
-        " from the initial state, without optimization."
-        " This is is the most data efficient"
-        " option per generated equation.";
-    case optimize: return "Optimize by immediately substituting the right"
-        " hand sides for already investigated variables"
-        " that are true or false when generating an"
-        " expression. This is as memory efficient as 0.";
-    case on_the_fly: return "In addition to 1, also substitute variables that"
-        " are true or false into an already generated right"
-        " hand side. This can mean that certain variables"
-        " become unreachable (e.g. X0 in X0 and X1, when X1"
-        " becomes false, assuming X0 does not occur"
-        " elsewhere. It will be maintained which variables"
-        " have become unreachable as these do not have to be"
-        " investigated. Depending on the PBES, this can"
-        " reduce the size of the generated BES substantially"
-        " but requires a larger memory footprint.";
-    case on_the_fly_with_fixed_points: return "In addition to 2, investigate for generated"
-        " variables whether they occur on a loop, such that"
-        " they can be set to true or false, depending on the"
-        " fixed point symbol. This can increase the time"
-        " needed to generate an equation substantially.";
-  }
-  throw mcrl2::runtime_error("unknown transformation strategy");
-}
-
-
-/// \brief BES variable remove level when generating a BES from a PBES.
-enum remove_level
-{
-  none,   // Do not remove bes variables.
-  some,   // Remove bes variables that are not used, and of which
-          // the rhs of its equation is not equal to true and false.
-  all     // Remove all bes variables whenever they are not used in
-          // any other equation.
-};
-
-inline
-remove_level parse_remove_level(const std::string& s)
-{
-  if (s == "none") return none;
-  else if (s == "some") return some;
-  else if (s == "all") return all;
-  else throw mcrl2::runtime_error("unknown bes variables remove level " + s);
-}
-
-inline
-std::string print_remove_level(const remove_level s)
-{
-  switch(s)
-  {
-    case none: return "none";
-    case some: return "some";
-    case all: return "all";
-  }
-  throw mcrl2::runtime_error("unknown remove_level");
-}
-
-inline
-std::istream& operator>>(std::istream& is, remove_level& level)
-{
-  try
-  {
-    std::string s;
-    is >> s;
-    level = parse_remove_level(s);
-  }
-  catch(mcrl2::runtime_error&)
-  {
-    is.setstate(std::ios_base::failbit);
-  }
-  return is;
-}
-
-inline
-std::ostream& operator<<(std::ostream& os, const remove_level s)
-{
-  os << print_remove_level(s);
-  return os;
-}
-
-inline
-std::string description(const remove_level s)
-{
-  switch(s)
-  {
-    case none: return "do not remove generated bes variables. This can lead to excessive"
-        " usage of memory.";
-    case some: return "remove generated bes variables that are not used, except if"
-        " the right hand side of its equation is true or false. The rhss of variables"
-        " must have to be recalculated, if encountered again, which is quite normal.";
-    case all: return "remove every bes variable that is not used anymore in any equation."
-        " This is quite memory efficient, but it can be very time consuming as the rhss of removed bes"
-        " variables may have to be recalculated quite often.";
-  }
-  throw mcrl2::runtime_error("unknown remove level");
-}
-
-/// \brief Search strategy when generating a BES from a PBES.
-enum search_strategy
-{
-  breadth_first, // Generate the rhs of the last generated BES variable last.
-  depth_first,   // Generate the rhs of the last generated BES variable first.
-  breadth_first_short,
-  depth_first_short
-};
-
-inline
-search_strategy parse_search_strategy(const std::string& s)
-{
-  if (s == "breadth-first") return breadth_first;
-  else if (s == "b") return breadth_first_short;
-  else if (s == "depth-first") return depth_first;
-  else if (s == "d") return depth_first_short;
-  else throw mcrl2::runtime_error("unknown search strategy " + s);
-}
-
-inline
-std::string print_search_strategy(const search_strategy s)
-{
-  switch(s)
-  {
-    case breadth_first: return "breadth-first";
-    case depth_first: return "depth-first";
-    case breadth_first_short: return "b";
-    case depth_first_short: return "d";
-  }
-  throw mcrl2::runtime_error("unknown search strategy");
-}
-
-inline
-std::istream& operator>>(std::istream& is, search_strategy& strategy)
-{
-  try
-  {
-    std::string s;
-    is >> s;
-    strategy = parse_search_strategy(s);
-  }
-  catch(mcrl2::runtime_error&)
-  {
-    is.setstate(std::ios_base::failbit);
-  }
-  return is;
-}
-
-inline
-std::ostream& operator<<(std::ostream& os, const search_strategy s)
-{
-  os << print_search_strategy(s);
-  return os;
-}
-
-inline
-std::string description(const search_strategy s)
-{
-  switch(s)
-  {
-    case breadth_first: return "Compute the right hand side of the boolean variables"
-        " in a first come first served basis. This is comparable with a breadth-first search."
-        " This is good for generating counter examples. ";
-    case depth_first: return "Compute the right hand side of a boolean variables where "
-        " the last generated variable is investigated first. This corresponds to a depth-first "
-        " search. This can substantially outperform breadth-first search when the validity of a"
-        " formula is determined after a larger depths. ";
-    case breadth_first_short: return "Short hand for breadth-first.";
-    case depth_first_short: return "Short hand for depth-first.";
-  }
-  throw mcrl2::runtime_error("unknown search strategy");
-}
+using mcrl2::bes::search_strategy;
+using mcrl2::bes::breadth_first;
+using mcrl2::bes::depth_first;
+using mcrl2::bes::breadth_first_short;
+using mcrl2::bes::depth_first_short;
 
 // The class below contains a pbes_instantiation consisting of an identifier_string and the parameters,
 // where the parameters are stored as a tree.
