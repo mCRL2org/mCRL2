@@ -533,6 +533,13 @@ BOOST_AUTO_TEST_CASE(test_precedence)
   data::data_expression x = parse_data_expression("exists b:Bool. true");
   BOOST_CHECK(is_exists(x));
   BOOST_CHECK(left_precedence(x) == 1);
+
+  data::variable a("a", sort_real::real_());
+  data::variable b("b", sort_real::real_());
+  std::vector<data::variable> variables = { a, b };
+  data::data_expression y = parse_data_expression("-(a + b)", variables.begin(), variables.end());
+  std::string py = data::pp(y);
+  BOOST_CHECK(py == "-(a + b)");
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

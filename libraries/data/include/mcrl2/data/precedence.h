@@ -69,7 +69,7 @@ namespace detail {
   inline
   bool is_negate(const application& x)
   {
-    return is_unary_operator(x) &&
+    return is_unary_operator(remove_numeric_casts(x)) &&
            (
              sort_int::is_negate_application(remove_numeric_casts(x)) ||
              sort_real::is_negate_application(remove_numeric_casts(x))
@@ -79,7 +79,7 @@ namespace detail {
   inline
   bool is_plus(const application& x)
   {
-    return is_binary_operator(x) &&
+    return is_binary_operator(remove_numeric_casts(x)) &&
            (
              sort_int::is_plus_application(remove_numeric_casts(x)) ||
              sort_nat::is_plus_application(remove_numeric_casts(x)) ||
@@ -91,7 +91,7 @@ namespace detail {
   inline
   bool is_minus(const application& x)
   {
-    return is_binary_operator(x) &&
+    return is_binary_operator(remove_numeric_casts(x)) &&
            (
              sort_int::is_minus_application(remove_numeric_casts(x)) ||
              sort_real::is_minus_application(remove_numeric_casts(x))
