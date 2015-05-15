@@ -1905,24 +1905,7 @@ class boolean_equation_system
       assert(pbes_spec.is_well_typed());
       assert(pbes_spec.is_closed());
 
-      // Verbose msg: doing naive algorithm
-
-      // Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
-      // This can be removed if the jittyc compiler is not in use anymore.
-      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_all_variables(pbes_spec);
-      std::set < mcrl2::data::variable > vfset=mcrl2::pbes_system::find_free_variables(pbes_spec);
-      std::set < mcrl2::data::variable > diff_set;
-      std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));
-
-      // Declare two variable substitutions for use in the rewriters. Only one is necessary if precompilation
-      // can be switched off.
       substitution_type sigma;
-
-      std::set < sort_expression > bounded_sorts;
-      for(std::set < mcrl2::data::variable > :: const_iterator i=diff_set.begin(); i!=diff_set.end(); ++i)
-      {
-        bounded_sorts.insert(i->sort());
-      }
 
       // Variables in which the result is stored
       propositional_variable_instantiation new_initial_state;
