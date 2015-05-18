@@ -19,6 +19,8 @@
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
 #ifndef MCRL2_PBES_PBESINST_ALGORITHM_H
@@ -162,6 +164,20 @@ class pbesinst_algorithm
       using utilities::detail::contains;
 
       pbes_system::detail::instantiate_global_variables(p);
+
+      // simplify all right hand sides of p
+      //
+      // NOTE: This is not just an optimization. There are certain PBES
+      // equations for which applying enumerate_quantifiers_rewriter directly
+      // won't terminate, like:
+      //
+      // forall m: Nat . exists k: Nat . val(m == k)
+      pbes_system::one_point_rule_rewriter one_point_rule_rewriter;
+      pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
+      for (auto eqi = p.equations().begin(); eqi != p.equations().end(); eqi++)
+      {
+        eqi->formula() = one_point_rule_rewriter(simplify_rewriter(eqi->formula()));
+      }
 
       // initialize equation_index and E
       int eqn_index = 0;
