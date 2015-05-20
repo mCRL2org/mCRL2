@@ -27,6 +27,7 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
+#include "mcrl2/pbes/pbesinst_alternative_lazy_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/bes/io.h"
@@ -54,6 +55,8 @@ class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
     pbesinst_strategy m_strategy;
     std::string m_finite_parameter_selection;
     bool m_remove_redundant_equations;
+    search_strategy m_search_strategy;
+    transformation_strategy m_transformation_strategy;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
@@ -73,6 +76,8 @@ class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
 
       m_strategy = parser.option_argument_as<pbesinst_strategy>("strategy");
       m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
+      m_search_strategy = parser.option_argument_as<search_strategy>("search");
+      m_transformation_strategy = parser.option_argument_as<transformation_strategy>("transformation");
     }
 
     void add_options(interface_description& desc)
@@ -82,8 +87,23 @@ class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       add_option("strategy",
                  make_enum_argument<pbesinst_strategy>("NAME")
                  .add_value(pbesinst_lazy_strategy, true)
+                 .add_value(pbesinst_alternative_lazy_strategy)
                  .add_value(pbesinst_finite_strategy),
                  "compute the BES using strategy NAME:", 's').
+      add_option("search",
+                 make_enum_argument<search_strategy>("NAME")
+                 .add_value(breadth_first, true)
+                 .add_value(depth_first)
+                 .add_value(breadth_first_short)
+                 .add_value(depth_first_short),
+                 "search the state space using strategy NAME:", 'z').
+      add_option("transformation",
+                 make_enum_argument<transformation_strategy>("NAME")
+                 .add_value(lazy, true)
+                 .add_value(optimize)
+                 .add_value(on_the_fly)
+                 .add_value(on_the_fly_with_fixed_points),
+                 "optimize the BES using strategy NAME:", 'O').
       add_option("select",
                  make_optional_argument("PARAMS", ""),
                  "select finite parameters that need to be expanded\n"
@@ -151,6 +171,16 @@ class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
           algorithms::normalize(p);
         }
         pbesinst_algorithm algorithm(p.data(), m_rewrite_strategy, false);
+        algorithm.run(p);
+        p = algorithm.get_result();
+      }
+      else if (m_strategy == pbesinst_alternative_lazy_strategy)
+      {
+        if (!is_normalized(p))
+        {
+          algorithms::normalize(p);
+        }
+        pbesinst_alternative_lazy_algorithm algorithm(p.data(), m_rewrite_strategy, false, m_search_strategy, m_transformation_strategy);
         algorithm.run(p);
         p = algorithm.get_result();
       }
