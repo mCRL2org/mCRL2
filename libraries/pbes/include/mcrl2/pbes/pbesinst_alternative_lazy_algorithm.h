@@ -157,7 +157,8 @@ class pbesinst_alternative_lazy_algorithm
         m_search_strategy = depth_first;
     }
 
-    inline propositional_variable_instantiation next_todo() {
+    inline propositional_variable_instantiation next_todo()
+    {
       if (m_search_strategy == breadth_first)
       {
         auto X_e = todo.front();
