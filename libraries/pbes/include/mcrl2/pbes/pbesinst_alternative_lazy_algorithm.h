@@ -50,6 +50,25 @@ using mcrl2::bes::optimize;
 using mcrl2::bes::on_the_fly;
 using mcrl2::bes::on_the_fly_with_fixed_points;
 
+// Used for printing justifications.
+// Maybe should be moved to a more generic place.
+template <typename T>
+inline
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
+{
+  os << "[";
+  for (auto i = v.begin(); i != v.end(); i++)
+  {
+    if (i != v.begin())
+    {
+      os << " ";
+    }
+    os << *i;
+  }
+  os << "]";
+  return os;
+}
+
 /// \brief An alternative lazy algorithm for instantiating a PBES, ported from
 ///         bes_deprecated.h.
 class pbesinst_alternative_lazy_algorithm
@@ -86,6 +105,18 @@ class pbesinst_alternative_lazy_algorithm
     /// \brief Propositional variable instantiations that are reachable from
     ///        init.
     std::set<propositional_variable_instantiation> reachable;
+
+    /// \brief Map an instantiation X to a list of other instantiations that
+    ///        are found true of false and thus may justify the ultimate
+    ///        outcome of the value of X.
+    ///
+    ///        This can be used later to build counter-examples. Only
+    ///        relevant when optimization level >= 1.
+    ///
+    ///        Note: Currently this map only exists in memory and is
+    ///        ouputted as debug logs in result(). Later the PBES and BES
+    ///        equations should be able to store justification maps.
+    std::map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> > justification;
 
     /// \brief Map a variable instantiation to a set of other variable
     ///        instantiations on whose right hand sides it appears.
@@ -366,7 +397,7 @@ class pbesinst_alternative_lazy_algorithm
         if (m_transformation_strategy >= optimize)
         {
           // Substitute all trivial variable instantiations by their values
-          psi_e = propositional_variable_rewriter<std::map<propositional_variable_instantiation, pbes_expression>>(trivial)(psi_e);
+          psi_e = make_propositional_variable_rewriter(trivial, justification[X_e])(psi_e);
         }
 
         if (m_transformation_strategy >= on_the_fly_with_fixed_points)
@@ -428,7 +459,7 @@ class pbesinst_alternative_lazy_algorithm
               {
                 auto Y = *i;
                 pbes_expression &f = equation[Y];
-                f = propositional_variable_rewriter<std::map<propositional_variable_instantiation, pbes_expression>>(trivial_X)(f);
+                f = make_propositional_variable_rewriter(trivial_X, justification[Y])(f);
                 if (is_true(f) || is_false(f))
                 {
                   trivial[Y] = f;
@@ -440,10 +471,13 @@ class pbesinst_alternative_lazy_algorithm
           }
         }
 
-        if (++regeneration_count == regeneration_period)
+        if (m_transformation_strategy >= on_the_fly)
         {
-          regeneration_count = 0;
-          regenerate_states();
+          if (++regeneration_count == regeneration_period)
+          {
+            regeneration_count = 0;
+            regenerate_states();
+          }
         }
 
         if (m_print_equations)
@@ -475,6 +509,8 @@ class pbesinst_alternative_lazy_algorithm
           auto lhs = propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list());
           auto rhs = rho(equation[X_e]);
           result.equations().push_back(pbes_equation(symbol, lhs, rhs));
+          mCRL2log(log::debug) << "Equation: " << symbol << " " << X_e << " = " << equation[X_e] << std::endl;
+          mCRL2log(log::debug) << "Obtained justification of " << X_e << ": " << justification[X_e] << std::endl;
         }
       }
 

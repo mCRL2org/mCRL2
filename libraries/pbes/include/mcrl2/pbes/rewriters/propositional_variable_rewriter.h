@@ -21,7 +21,7 @@ namespace pbes_system {
 
 namespace detail {
 
-template <template <class> class Builder, class Derived, class Map>
+template <template <class> class Builder, class Derived, class Map, class Justification>
 struct add_propositional_variable_rewriter: public Builder<Derived>
 {
   typedef Builder<Derived> super;
@@ -30,9 +30,10 @@ struct add_propositional_variable_rewriter: public Builder<Derived>
   typedef core::term_traits<pbes_expression> tr;
 
   const Map &map;
+  Justification &justification;
 
-  add_propositional_variable_rewriter(const Map& m)
-    : map(m)
+  add_propositional_variable_rewriter(const Map& m, Justification &j)
+    : map(m), justification(j)
   {}
 
   pbes_expression apply(const propositional_variable_instantiation& x)
@@ -44,34 +45,43 @@ struct add_propositional_variable_rewriter: public Builder<Derived>
     }
     else
     {
+      justification.push_back(x);
       return expr->second;
     }
   }
 };
 
-template <typename Map>
-struct propositional_variable_rewriter_builder: public add_propositional_variable_rewriter<simplify_builder, propositional_variable_rewriter_builder<Map>, Map>
+template <typename Map, typename Justification>
+struct propositional_variable_rewriter_builder: public add_propositional_variable_rewriter<simplify_builder, propositional_variable_rewriter_builder<Map, Justification>, Map, Justification>
 {
-  typedef add_propositional_variable_rewriter<simplify_builder, propositional_variable_rewriter_builder<Map>, Map> super;
+  typedef add_propositional_variable_rewriter<simplify_builder, propositional_variable_rewriter_builder<Map, Justification>, Map, Justification> super;
   using super::super;
 };
 
 } // namespace detail
 
-template <typename Map>
+template <typename Map, typename Justification>
 struct propositional_variable_rewriter
 {
   const Map& map;
+  Justification &justification;
 
-  propositional_variable_rewriter(const Map& m)
-    : map(m)
+  propositional_variable_rewriter(const Map& m, Justification &j)
+    : map(m), justification(j)
   {}
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    return detail::propositional_variable_rewriter_builder<Map>(map).apply(x);
+    return detail::propositional_variable_rewriter_builder<Map, Justification>(map, justification).apply(x);
   }
 };
+
+template <typename Map, typename Justification>
+propositional_variable_rewriter<Map, Justification>
+make_propositional_variable_rewriter(const Map &m, Justification &j)
+{
+  return propositional_variable_rewriter<Map, Justification>(m, j);
+}
 
 } // namespace pbes_system
 
