@@ -13,6 +13,7 @@
 #include <cassert>
 #include <set>
 #include <deque>
+#include <stack>
 #include <iostream>
 #include <sstream>
 #include "mcrl2/data/rewriter.h"
@@ -65,15 +66,26 @@ class pbesinst_alternative_lazy_algorithm
     /// \brief The number of generated equations.
     int m_equation_count;
 
+    /// \brief The number of equations generated since last state space
+    ///        regeneration.
+    int regeneration_count;
+
+    /// \brief The number of equations to generate before regenerating the
+    ///        state space.
+    int regeneration_period = 100;
+
     /// \brief Propositional variable instantiations that need to be handled.
     std::deque<propositional_variable_instantiation> todo;
+
+    /// \brief The content of todo as a set.
+    std::set<propositional_variable_instantiation> todo_set;
 
     /// \brief Propositional variable instantiations that have been handled.
     std::set<propositional_variable_instantiation> done;
 
-    /// \brief Propositional variable instantiations that have been generated,
-    ///        namely either in todo or done.
-    std::set<propositional_variable_instantiation> generated;
+    /// \brief Propositional variable instantiations that are reachable from
+    ///        init.
+    std::set<propositional_variable_instantiation> reachable;
 
     /// \brief Map a variable instantiation to a set of other variable
     ///        instantiations on whose right hand sides it appears.
@@ -147,6 +159,7 @@ class pbesinst_alternative_lazy_algorithm
         datar(data_spec, rewrite_strategy),
         R(datar, data_spec),
         m_equation_count(0),
+        regeneration_count(0),
         m_print_equations(print_equations),
         m_search_strategy(search_strategy),
         m_transformation_strategy(transformation_strategy)
@@ -171,6 +184,13 @@ class pbesinst_alternative_lazy_algorithm
         todo.pop_back();
         return X_e;
       }
+    }
+
+    inline void add_todo(const propositional_variable_instantiation &X)
+    {
+      todo.push_back(X);
+      todo_set.insert(X);
+      reachable.insert(X);
     }
 
     int get_rank(propositional_variable_instantiation X)
@@ -251,6 +271,43 @@ class pbesinst_alternative_lazy_algorithm
       return find_loop_rec<is_mu>(expr, X, get_rank(X), visited);
     }
 
+    void regenerate_states()
+    {
+      todo.clear();
+      todo_set.clear();
+      reachable.clear();
+
+      std::stack<pbes_expression> stack;
+      stack.push(init);
+
+      while (!stack.empty())
+      {
+        const pbes_expression expr = stack.top();
+        stack.pop();
+
+        if (is_propositional_variable_instantiation(expr))
+        {
+          auto X = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
+          if (done.count(X))
+          {
+            stack.push(equation[X]);
+            reachable.insert(X);
+          }
+          else
+          {
+            add_todo(X);
+          }
+        }
+        else if (is_and(expr) || is_or(expr))
+        {
+          using accessors::left;
+          using accessors::right;
+          stack.push(left(expr));
+          stack.push(right(expr));
+        }
+      }
+    }
+
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     /// \param p A PBES
     void run(pbes& p)
@@ -292,8 +349,7 @@ class pbesinst_alternative_lazy_algorithm
       }
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(p.initial_state()));
-      todo.push_back(init);
-      generated.insert(init);
+      add_todo(init);
       while (!todo.empty())
       {
         auto const X_e = next_todo();
@@ -337,10 +393,9 @@ class pbesinst_alternative_lazy_algorithm
         std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi_e);
         for (auto i = psi_variables.begin(); i != psi_variables.end(); ++i)
         {
-          if (generated.count(*i) == 0)
+          if (todo_set.count(*i) == 0 && done.count(*i) == 0)
           {
-            todo.push_back(*i);
-            generated.insert(*i);
+            add_todo(*i);
           }
           occurrence[*i].insert(X_e);
         }
@@ -385,6 +440,12 @@ class pbesinst_alternative_lazy_algorithm
           }
         }
 
+        if (++regeneration_count == regeneration_period)
+        {
+          regeneration_count = 0;
+          regenerate_states();
+        }
+
         if (m_print_equations)
         {
           mCRL2log(log::info) << eqn.symbol() << " " << X_e << " = " << psi_e << std::endl;
@@ -407,6 +468,10 @@ class pbesinst_alternative_lazy_algorithm
         for (auto j = i->begin(); j != i->end(); j++)
         {
           auto X_e = *j;
+          if (reachable.count(X_e) == 0)
+          {
+            continue;
+          }
           auto lhs = propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list());
           auto rhs = rho(equation[X_e]);
           result.equations().push_back(pbes_equation(symbol, lhs, rhs));
