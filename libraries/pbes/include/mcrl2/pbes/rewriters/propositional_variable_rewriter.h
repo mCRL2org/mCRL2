@@ -55,7 +55,6 @@ template <typename Map, typename Justification>
 struct propositional_variable_rewriter_builder: public add_propositional_variable_rewriter<simplify_builder, propositional_variable_rewriter_builder<Map, Justification>, Map, Justification>
 {
   typedef add_propositional_variable_rewriter<simplify_builder, propositional_variable_rewriter_builder<Map, Justification>, Map, Justification> super;
-  using super::super;
   propositional_variable_rewriter_builder(const Map& m, Justification &j)
     : super(m, j)
   {}
