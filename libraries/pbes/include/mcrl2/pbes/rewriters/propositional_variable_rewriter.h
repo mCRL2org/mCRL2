@@ -13,6 +13,7 @@
 #define MCRL2_PBES_REWRITERS_PROPOSITIONAL_VARIABLE_REWRITER_H
 
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 
 namespace mcrl2 {
 
