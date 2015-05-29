@@ -319,14 +319,17 @@ class pbesinst_alternative_lazy_algorithm
         if (is_propositional_variable_instantiation(expr))
         {
           auto X = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
-          if (done.count(X))
+          if (reachable.count(X) == 0)
           {
-            stack.push(equation[X]);
-            reachable.insert(X);
-          }
-          else
-          {
-            add_todo(X);
+            if (done.count(X))
+            {
+              stack.push(equation[X]);
+              reachable.insert(X);
+            }
+            else
+            {
+              add_todo(X);
+            }
           }
         }
         else if (is_and(expr) || is_or(expr))
