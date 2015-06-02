@@ -980,7 +980,7 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
     }
 
     const sort_expression_list &ProcType=get_sorts(Proc.identifier().variables());
-    IsSortExprListDeclared(ProcType);
+    check_sort_list_is_declared(ProcType);
 
     const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=processes.find(ProcName);
     term_list<sort_expression_list> Types;
@@ -1031,7 +1031,7 @@ void mcrl2::process::process_type_checker::ReadInActs(const action_label_list &A
     core::identifier_string ActName=Act.name();
     sort_expression_list ActType=Act.sorts();
 
-    IsSortExprListDeclared(ActType);
+    check_sort_list_is_declared(ActType);
 
     const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=actions.find(ActName);
     term_list<sort_expression_list> Types;

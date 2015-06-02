@@ -371,7 +371,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
       sort_expression VarType=o.lhs().sort();
       try
       {
-        IsSortExprDeclared(VarType);
+        check_sort_is_declared(VarType);
       }
       catch (mcrl2::runtime_error &e)
       {
@@ -448,7 +448,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
       sort_expression VarType=o.lhs().sort();
       try
       {
-        IsSortExprDeclared(VarType);
+        check_sort_is_declared(VarType);
       }
       catch (mcrl2::runtime_error &e)
       {

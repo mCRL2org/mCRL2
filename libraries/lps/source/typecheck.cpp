@@ -177,7 +177,7 @@ void mcrl2::lps::action_type_checker::ReadInActs(const process::action_label_lis
     core::identifier_string ActName=Act.name();
     sort_expression_list ActType=Act.sorts();
 
-    IsSortExprListDeclared(ActType);
+    check_sort_list_is_declared(ActType);
 
     const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=actions.find(ActName);
     term_list<sort_expression_list> Types;

@@ -370,83 +370,77 @@ mcrl2::data::sort_type_checker::sort_type_checker(const sort_expression_vector& 
   }
 }
 
-void mcrl2::data::sort_type_checker::IsSortDeclared(const basic_sort &SortName)
+// Throws an exception if the sort x is not declared
+void mcrl2::data::sort_type_checker::check_basic_sort_is_declared(const basic_sort& x)
 {
-
-  if (sort_bool::is_bool(SortName) ||
-      sort_pos::is_pos(SortName) ||
-      sort_nat::is_nat(SortName) ||
-      sort_int::is_int(SortName) ||
-      sort_real::is_real(SortName))
+  if (sort_bool::is_bool(x) ||
+      sort_pos::is_pos(x) ||
+      sort_nat::is_nat(x) ||
+      sort_int::is_int(x) ||
+      sort_real::is_real(x))
   {
     return;
   }
-  if (m_basic_sorts.count(SortName)>0)
+  if (m_basic_sorts.count(x) > 0)
   {
     return;
   }
-  if (m_aliases.count(SortName)>0)
+  if (m_aliases.count(x) > 0)
   {
     return;
   }
-  throw mcrl2::runtime_error("basic or defined sort " + data::pp(SortName) + " is not declared");
+  throw mcrl2::runtime_error("basic or defined sort " + data::pp(x) + " is not declared");
 }
 
-void mcrl2::data::sort_type_checker::IsSortExprListDeclared(const sort_expression_list &SortExprList)
+void mcrl2::data::sort_type_checker::check_sort_list_is_declared(const sort_expression_list &SortExprList)
 {
   for (const sort_expression& s: SortExprList)
   {
-    IsSortExprDeclared(s);
+    check_sort_is_declared(s);
   }
 }
 
-
-
-void mcrl2::data::sort_type_checker::IsSortExprDeclared(const sort_expression &SortExpr)
+void mcrl2::data::sort_type_checker::check_sort_is_declared(const sort_expression& x)
 {
-  if (is_basic_sort(SortExpr))
+  if (is_basic_sort(x))
   {
-    IsSortDeclared(down_cast<basic_sort>(SortExpr));
-    return;
+    const basic_sort& bs = atermpp::down_cast<basic_sort>(x);
+    check_basic_sort_is_declared(bs);
   }
-
-  if (is_container_sort(SortExpr))
+  else if (is_container_sort(x))
   {
-    IsSortExprDeclared(down_cast<container_sort>(SortExpr).element_sort());
-    return;
+    const container_sort& cs = atermpp::down_cast<container_sort>(x);
+    check_sort_is_declared(cs.element_sort());
   }
-
-  if (is_function_sort(SortExpr))
+  else if (is_function_sort(x))
   {
-    IsSortExprDeclared(down_cast<function_sort>(SortExpr).codomain());
-
-    IsSortExprListDeclared(down_cast<function_sort>(SortExpr).domain());
-    return;
-  }
-
-  if (is_structured_sort(SortExpr))
-  {
-    const structured_sort& ssort = atermpp::down_cast<structured_sort>(SortExpr);
-    const structured_sort_constructor_list &constructors(ssort.constructors());
-    for (structured_sort_constructor_list::const_iterator i=constructors.begin(); i!=constructors.end(); ++i)
+    const function_sort& fs = atermpp::down_cast<function_sort>(x);
+    check_sort_is_declared(fs.codomain());
+    for (const sort_expression& s: fs.domain())
     {
-      const structured_sort_constructor &Constr(*i);
-
-      const structured_sort_constructor_argument_list &Projs(Constr.arguments());
-      for (structured_sort_constructor_argument_list::const_iterator j=Projs.begin(); j!=Projs.end(); ++j)
+      check_sort_is_declared(s);
+    }
+  }
+  else if (is_structured_sort(x))
+  {
+    const structured_sort& ss = atermpp::down_cast<structured_sort>(x);
+    for (const structured_sort_constructor& constructor: ss.constructors())
+    {
+      for (const structured_sort_constructor_argument& arg: constructor.arguments())
       {
-        IsSortExprDeclared(j->sort());
+        check_sort_is_declared(arg.sort());
       }
     }
-    return;
   }
-
-  throw mcrl2::runtime_error("this is not a sort expression " + data::pp(SortExpr));
+  else
+  {
+    throw mcrl2::runtime_error("this is not a sort expression " + data::pp(x));
+  }
 }
 
 void mcrl2::data::sort_type_checker::operator ()(const sort_expression &sort_expr)
 {
-  IsSortExprDeclared(sort_expr);
+  check_sort_is_declared(sort_expr);
 }
 
 // ------------------------------  Here ends the new class based sort expression checker -----------------------
@@ -2905,7 +2899,7 @@ void mcrl2::data::data_type_checker::AddVars2Table(
     core::identifier_string VarName=VarDecl.name();
     sort_expression VarType=VarDecl.sort();
     //test the type
-    IsSortExprDeclared(VarType);
+    check_sort_is_declared(VarType);
 
     // if already defined -- replace (other option -- warning)
     // if variable name is a constant name -- it has more priority (other options -- warning, error)
@@ -3808,7 +3802,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 }
 
 
-std::map < data::sort_expression, data::basic_sort > mcrl2::data::data_type_checker::construct_normalised_aliases()
+std::map<data::sort_expression, data::basic_sort> mcrl2::data::sort_type_checker::construct_normalised_aliases()
 {
   // This function does the same as data_specification::reconstruct_m_normalised_aliases().
   // Therefore, it should be replaced by that function, after restructuring the type checker.
@@ -3897,36 +3891,34 @@ static sort_expression mapping(sort_expression s,std::map < sort_expression, bas
 }
 
 
-void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(function_symbol_list constructor_list)
+void mcrl2::data::sort_type_checker::check_for_empty_constructor_domains(function_symbol_list constructors)
 {
   // First add the constructors for structured sorts to the constructor list;
   try
   {
-    std::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
-    std::set< sort_expression > all_sorts;
+    std::map<sort_expression, basic_sort> normalised_aliases = construct_normalised_aliases();
+    std::set<sort_expression> all_sorts;
     for (std::map<basic_sort, sort_expression>::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
     {
-      const sort_expression reference=i->second;
+      const sort_expression& reference = i->second;
       find_sort_expressions<sort_expression>(reference, std::inserter(all_sorts, all_sorts.end()));
     }
 
-    for (std::set< sort_expression > ::const_iterator i=all_sorts.begin(); i!=all_sorts.end(); ++i)
+    for (const sort_expression& sort: all_sorts)
     {
-      if (is_structured_sort(*i))
+      if (is_structured_sort(sort))
       {
-        const function_symbol_vector r=structured_sort(*i).constructor_functions();
-        for (function_symbol_vector::const_iterator j=r.begin(); j!=r.end(); ++j)
+        for (const function_symbol& f: structured_sort(sort).constructor_functions())
         {
-          constructor_list.push_front(*j);
+          constructors.push_front(f);
         }
       }
     }
 
-    std::set < sort_expression > possibly_empty_constructor_sorts;
-    for (function_symbol_list::const_iterator constructor_list_walker=constructor_list.begin();
-         constructor_list_walker!=constructor_list.end(); ++constructor_list_walker)
+    std::set<sort_expression> possibly_empty_constructor_sorts;
+    for (const function_symbol& constructor: constructors)
     {
-      const sort_expression s=data::function_symbol(*constructor_list_walker).sort();
+      const sort_expression& s = constructor.sort();
       if (is_function_sort(s))
       {
         // if s is a constant sort, nothing needs to be added.
@@ -3939,10 +3931,9 @@ void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(functio
     for (bool stable=false ; !stable ;)
     {
       stable=true;
-      for (function_symbol_list::const_iterator constructor_list_walker=constructor_list.begin();
-           constructor_list_walker!=constructor_list.end(); ++constructor_list_walker)
+      for (const function_symbol& constructor: constructors)
       {
-        const sort_expression s=constructor_list_walker->sort();
+        const sort_expression& s = constructor.sort();
         if (!is_function_sort(s))
         {
           if (possibly_empty_constructor_sorts.erase(mapping(s,normalised_aliases))==1) // True if one element has been removed.
@@ -3952,12 +3943,10 @@ void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(functio
         }
         else
         {
-          sort_expression_list r=function_sort(s).domain();
           bool has_a_domain_sort_possibly_empty_sorts=false;
-          for (sort_expression_list::const_iterator i=r.begin();
-               i!=r.end(); ++i)
+          for (const sort_expression& sort: function_sort(s).domain())
           {
-            if (possibly_empty_constructor_sorts.find(mapping(*i,normalised_aliases))!=possibly_empty_constructor_sorts.end())
+            if (possibly_empty_constructor_sorts.find(mapping(sort, normalised_aliases))!=possibly_empty_constructor_sorts.end())
             {
               //
               has_a_domain_sort_possibly_empty_sorts=true;
@@ -3983,10 +3972,9 @@ void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(functio
     else
     {
       std::string reason="the following domains are empty due to recursive constructors:";
-      for (std::set < sort_expression >:: const_iterator i=possibly_empty_constructor_sorts.begin();
-           i!=possibly_empty_constructor_sorts.end(); ++i)
+      for (const sort_expression& sort: possibly_empty_constructor_sorts)
       {
-        reason = reason + "\n" + data::pp(*i);
+        reason = reason + "\n" + data::pp(sort);
       }
       throw mcrl2::runtime_error(reason);
     }
@@ -4010,7 +3998,7 @@ void mcrl2::data::data_type_checker::read_constructors_and_mappings(const functi
     const core::identifier_string FuncName=Func.name();
     sort_expression FuncType=Func.sort();
 
-    IsSortExprDeclared(FuncType);
+    check_sort_is_declared(FuncType);
 
     //if FuncType is a defined function sort, unwind it
     if (is_basic_sort(FuncType))
@@ -4613,7 +4601,7 @@ void mcrl2::data::data_type_checker::read_sort(const sort_expression &SortExpr)
 {
   if (is_basic_sort(SortExpr))
   {
-    IsSortDeclared(down_cast<basic_sort>(SortExpr).name());
+    check_basic_sort_is_declared(down_cast<basic_sort>(SortExpr).name());
     return;
   }
 

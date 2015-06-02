@@ -36,7 +36,7 @@ class sort_type_checker
     *  Throws an exception if the expression is not well typed.
     *  \param[in] s A sort expression that has not been type checked.
     **/
-    void operator ()(const sort_expression &s);
+    void operator()(const sort_expression& s);
 
   protected:
     // Auxiliary functions
@@ -49,11 +49,13 @@ class sort_type_checker
     bool check_for_sort_alias_loop_through_function_sort(
              const basic_sort& start_search,
              const basic_sort& end_search,
-             std::set < basic_sort > &visited,
+             std::set<basic_sort> &visited,
              const bool observed_a_sort_constructor);
-    void IsSortExprDeclared(const sort_expression &SortExpr);
-    void IsSortExprListDeclared(const sort_expression_list &SortExprList);
-    void IsSortDeclared(const basic_sort &SortName);
+    void check_sort_is_declared(const sort_expression& x);
+    void check_sort_list_is_declared(const sort_expression_list& x);
+    void check_basic_sort_is_declared(const basic_sort& x);
+    std::map<data::sort_expression, data::basic_sort> construct_normalised_aliases();
+    void check_for_empty_constructor_domains(function_symbol_list constructors);
 };
 
 
@@ -64,7 +66,7 @@ class data_type_checker:public sort_type_checker
     bool was_ambiguous;
     std::map<core::identifier_string,sort_expression_list> system_constants;   //name -> Set(sort expression)
     std::map<core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)
-    std::map<core::identifier_string,sort_expression> user_constants;     //name -> sort expression
+    std::map<core::identifier_string,sort_expression> user_constants;          //name -> sort expression
     std::map<core::identifier_string,sort_expression_list> user_functions;     //name -> Set(sort expression)
     data_specification type_checked_data_spec;
 
@@ -98,7 +100,7 @@ class data_type_checker:public sort_type_checker
     const data_specification operator()();
 
   protected:
-    void read_sort(const sort_expression &SortExpr);
+    void read_sort(const sort_expression& SortExpr);
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings);
     void add_function(const data::function_symbol &f, const std::string msg, bool allow_double_decls=false);
     void add_constant(const data::function_symbol &OpId, const std::string msg);
@@ -120,8 +122,6 @@ class data_type_checker:public sort_type_checker
       return atermpp::term_list<T>(result.begin(),result.end());
     }
 
-    void check_for_empty_constructor_domains(function_symbol_list constructor_list);
-    std::map < data::sort_expression, data::basic_sort > construct_normalised_aliases();
     sort_expression TraverseVarConsTypeD(
                         const std::map<core::identifier_string,sort_expression> &DeclaredVars,
                         const std::map<core::identifier_string,sort_expression> &AllowedVars,
