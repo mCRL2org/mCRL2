@@ -98,14 +98,13 @@ class data_type_checker:public sort_type_checker
     const data_specification operator()();
 
   protected:
-    void ReadInConstructors(const std::map<basic_sort, sort_expression>& aliases);
-    void ReadInSortStruct(const sort_expression &SortExpr);
-    void ReadInFuncs(const function_symbol_vector &Cons, const function_symbol_vector &Maps);
-    void AddFunction(const data::function_symbol &f, const std::string msg, bool allow_double_decls=false);
-    void AddConstant(const data::function_symbol &OpId, const std::string msg);
+    void read_sort(const sort_expression &SortExpr);
+    void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings);
+    void add_function(const data::function_symbol &f, const std::string msg, bool allow_double_decls=false);
+    void add_constant(const data::function_symbol &OpId, const std::string msg);
     void initialise_system_defined_functions(void);
-    void AddSystemConstant(const data::function_symbol& f);
-    void AddSystemFunction(const data::function_symbol& f);
+    void add_system_constant(const data::function_symbol& f);
+    void add_system_function(const data::function_symbol& f);
     bool TypeMatchA(const sort_expression& Type_in, const sort_expression& PosType_in, sort_expression& result);
     bool TypeMatchL(const sort_expression_list& TypeList, const sort_expression_list &PosTypeList, sort_expression_list& result);
     sort_expression UnwindType(const sort_expression& Type);
