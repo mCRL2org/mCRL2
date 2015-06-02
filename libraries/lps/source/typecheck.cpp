@@ -16,18 +16,11 @@ using namespace mcrl2::log;
 using namespace mcrl2::lps;
 using namespace mcrl2::data;
 
-static process::action MakeAction(
-               const identifier_string &Name,
-               const sort_expression_list &FormParList,
-               const data_expression_list &FactParList)
+template <typename MapContainer>
+MapContainer list_minus(const MapContainer& l, const MapContainer &m)
 {
-  return process::action(process::action_label(Name,FormParList),FactParList);
-}
-
-static std::map<identifier_string,sort_expression> list_minus(const std::map<identifier_string,sort_expression> &l, const std::map<identifier_string,sort_expression> &m)
-{
-  std::map<identifier_string,sort_expression> n;
-  for (std::map<identifier_string,sort_expression>::const_reverse_iterator i=l.rbegin(); i!=l.rend(); ++i)
+  MapContainer n;
+  for (typename MapContainer::const_reverse_iterator i=l.rbegin(); i!=l.rend(); ++i)
   {
     if (m.count(i->first)==0)
     {
@@ -36,7 +29,6 @@ static std::map<identifier_string,sort_expression> list_minus(const std::map<ide
   }
   return n;
 }
-
 
 process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const process::untyped_action &act)
 {
@@ -82,13 +74,14 @@ process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::id
 
   if (ParList.size()==1)
   {
-    Result=MakeAction(Name,ParList.front(),act.arguments());
+
+    Result = process::action(process::action_label(Name, ParList.front()), act.arguments());
   }
   else
   {
     // we need typechecking to find the correct type of the action.
     // make the list of possible types for the parameters
-    Result=MakeAction(Name,GetNotInferredList(ParList),act.arguments());
+    Result = process::action(process::action_label(Name, GetNotInferredList(ParList)), act.arguments());
   }
 
   //process the arguments
@@ -164,7 +157,7 @@ process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::id
     throw mcrl2::runtime_error("ambiguous action " + std::string(Name));
   }
 
-  Result=MakeAction(Name,PosTypeList,NewPars);
+  Result = process::action(process::action_label(Name, PosTypeList), NewPars);
   return Result;
 }
 
@@ -272,7 +265,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
 
   data_specification data_spec = ar_spec.data();
 
-  std::map<core::identifier_string,sort_expression> LPSSorts=m_aliases; // remember the sorts from the LPS.
+  std::map<basic_sort, sort_expression> LPSSorts=m_aliases; // remember the sorts from the LPS.
   sort_expression_vector sorts=data_spec.user_defined_sorts();
   for (sort_expression_vector::const_iterator i=sorts.begin(); i!=sorts.end(); ++i)
   {
@@ -286,14 +279,14 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
   for (alias_vector::const_iterator i=aliases.begin(); i!=aliases.end(); ++i)
   {
     add_basic_sort(i->name());
-    m_aliases[i->name().name()]=i->reference();
+    m_aliases[i->name()] = i->reference();
   }
 
   mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file sorts finished" << std::endl;
 
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
-  const std::map<core::identifier_string,sort_expression> difference_sorts_set=list_minus(m_aliases, LPSSorts);
+  const std::map<basic_sort, sort_expression> difference_sorts_set=list_minus(m_aliases, LPSSorts);
   ReadInConstructors(difference_sorts_set);
 
   ReadInFuncs(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());

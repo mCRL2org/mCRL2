@@ -26,7 +26,7 @@ class sort_type_checker
 {
   protected:
     std::set<basic_sort> m_basic_sorts;
-    std::map<core::identifier_string,sort_expression> m_aliases;
+    std::map<basic_sort, sort_expression> m_aliases;
 
   public:
     /// \brief constructs a sort expression checker.
@@ -98,7 +98,7 @@ class data_type_checker:public sort_type_checker
     const data_specification operator()();
 
   protected:
-    void ReadInConstructors(const std::map<core::identifier_string,sort_expression>& aliases);
+    void ReadInConstructors(const std::map<basic_sort, sort_expression>& aliases);
     void ReadInSortStruct(const sort_expression &SortExpr);
     void ReadInFuncs(const function_symbol_vector &Cons, const function_symbol_vector &Maps);
     void AddFunction(const data::function_symbol &f, const std::string msg, bool allow_double_decls=false);
