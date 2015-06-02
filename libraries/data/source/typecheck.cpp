@@ -368,6 +368,18 @@ mcrl2::data::sort_type_checker::sort_type_checker(const sort_expression_vector& 
       throw mcrl2::runtime_error("sort " + core::pp(i->first) + " is recursively defined via a function sort, or a set or a bag type container");
     }
   }
+
+  try
+  {
+    for (const alias& a: aliases)
+    {
+      (*this)(a.reference()); // Type check sort expression.
+    }
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of aliases failed");
+  }
 }
 
 // Throws an exception if the sort x is not declared
@@ -4831,7 +4843,6 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification &data
   {
     for (auto i = m_aliases.begin(); i != m_aliases.end(); ++i)
     {
-      static_cast<sort_type_checker>(*this)(i->second); // Type check sort expression.
       read_sort(i->second);
     }
     read_constructors_and_mappings(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());

@@ -98,7 +98,7 @@ class pbes_type_checker:public data::data_type_checker
           PBType.push_front(l->sort());
         }
         PBType = atermpp::reverse(PBType);
-        IsSortExprListDeclared(PBType);
+        check_sort_list_is_declared(PBType);
         PBs[i->name()] = atermpp::make_list<data::sort_expression_list>(PBType);
       }
     }
@@ -193,7 +193,7 @@ class pbes_type_checker:public data::data_type_checker
           }
           PBType=reverse(PBType);
 
-          IsSortExprListDeclared(PBType);
+          check_sort_list_is_declared(PBType);
 
           const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator i=PBs.find(PBName);
           term_list<sort_expression_list> Types;

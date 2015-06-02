@@ -40,7 +40,7 @@ class sort_type_checker
 
   protected:
     // Auxiliary functions
-    void add_basic_sort(const basic_sort &n);
+    void add_basic_sort(const basic_sort& n);
     bool check_for_sort_alias_loop_through_function_sort_via_expression(
              const sort_expression& sort_expression_start_search,
              const basic_sort& end_search,
@@ -49,7 +49,7 @@ class sort_type_checker
     bool check_for_sort_alias_loop_through_function_sort(
              const basic_sort& start_search,
              const basic_sort& end_search,
-             std::set<basic_sort> &visited,
+             std::set<basic_sort>& visited,
              const bool observed_a_sort_constructor);
     void check_sort_is_declared(const sort_expression& x);
     void check_sort_list_is_declared(const sort_expression_list& x);
