@@ -30,18 +30,7 @@ class sort_type_checker
 
   public:
     /// \brief constructs a sort expression checker.
-    sort_type_checker(const sort_expression_vector::const_iterator sorts_begin,
-                      const sort_expression_vector::const_iterator sorts_end,
-                      const alias_vector::const_iterator aliases_begin,
-                      const alias_vector::const_iterator aliases_end);
-
-
-    /* sort_type_checker(const data_specification &data_spec)
-      :  sort_type_checker(data_spec.user_defined_sorts().begin(),
-                                data_spec.user_defined_sorts().end(),
-                                data_spec.user_defined_aliases().begin(),
-                                data_spec.user_defined_aliases().end())
-    {} */
+    sort_type_checker(const sort_expression_vector& sorts, const alias_vector& aliases);
 
     /** \brief     Type check a sort expression.
     *  Throws an exception if the expression is not well typed.
@@ -73,8 +62,8 @@ class data_type_checker:public sort_type_checker
   protected:
     bool was_warning_upcasting;
     bool was_ambiguous;
-    std::map <core::identifier_string,sort_expression_list> system_constants;   //name -> Set(sort expression)
-    std::map <core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)
+    std::map<core::identifier_string,sort_expression_list> system_constants;   //name -> Set(sort expression)
+    std::map<core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)
     std::map<core::identifier_string,sort_expression> user_constants;     //name -> sort expression
     std::map<core::identifier_string,sort_expression_list> user_functions;     //name -> Set(sort expression)
     data_specification type_checked_data_spec;
@@ -109,10 +98,7 @@ class data_type_checker:public sort_type_checker
     const data_specification operator()();
 
   protected:
-    void ReadInConstructors(const std::map<core::identifier_string,sort_expression>::const_iterator begin,
-                            const std::map<core::identifier_string,sort_expression>::const_iterator end);
-    /* void ReadInConstructors(const sort_expression_list::const_iterator begin,
-                                   const sort_expression_list::const_iterator end); */
+    void ReadInConstructors(const std::map<core::identifier_string,sort_expression>& aliases);
     void ReadInSortStruct(const sort_expression &SortExpr);
     void ReadInFuncs(const function_symbol_vector &Cons, const function_symbol_vector &Maps);
     void AddFunction(const data::function_symbol &f, const std::string msg, bool allow_double_decls=false);
@@ -239,10 +225,7 @@ void type_check(const sort_expression& sort_expr, const data_specification& data
 {
   try
   {
-    sort_type_checker type_checker(data_spec.user_defined_sorts().begin(),
-                                         data_spec.user_defined_sorts().end(),
-                                         data_spec.user_defined_aliases().begin(),
-                                         data_spec.user_defined_aliases().end());
+    sort_type_checker type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases());
     type_checker(sort_expr);
   }
   catch (mcrl2::runtime_error &e)

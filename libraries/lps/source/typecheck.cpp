@@ -294,7 +294,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
   const std::map<core::identifier_string,sort_expression> difference_sorts_set=list_minus(m_aliases, LPSSorts);
-  ReadInConstructors(difference_sorts_set.begin(),difference_sorts_set.end());
+  ReadInConstructors(difference_sorts_set);
 
   ReadInFuncs(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
 

@@ -345,32 +345,27 @@ void mcrl2::data::sort_type_checker::add_basic_sort(const basic_sort &sort)
   m_basic_sorts.insert(sort);
 }
 
-mcrl2::data::sort_type_checker::sort_type_checker(
-                const sort_expression_vector::const_iterator sorts_begin,
-                const sort_expression_vector::const_iterator sorts_end,
-                const alias_vector::const_iterator aliases_begin,
-                const alias_vector::const_iterator aliases_end)
+mcrl2::data::sort_type_checker::sort_type_checker(const sort_expression_vector& sorts, const alias_vector& aliases)
 {
-  for (sort_expression_vector::const_iterator i=sorts_begin; i!=sorts_end; ++i)
+  for (const sort_expression& s: sorts)
   {
-    assert(is_basic_sort(*i));
-    const basic_sort& bsort = atermpp::down_cast<basic_sort>(*i);
+    assert(is_basic_sort(s));
+    const basic_sort& bsort = atermpp::down_cast<basic_sort>(s);
     add_basic_sort(bsort);
   }
 
-  for (alias_vector::const_iterator i=aliases_begin; i!=aliases_end; ++i)
+  for (const alias& a: aliases)
   {
-    add_basic_sort(i->name());
-    m_aliases[i->name().name()]=i->reference();
-    mCRL2log(debug) << "Add sort alias " << i->name() << "  " << i->reference() << "" << std::endl;
+    add_basic_sort(a.name());
+    m_aliases[a.name().name()]=a.reference();
+    mCRL2log(debug) << "Add sort alias " << a.name() << "  " << a.reference() << "" << std::endl;
   }
 
   // Check for sorts that are recursive through container sorts.
   // E.g. sort L=List(L);
   // This is forbidden.
 
-  for (std::map<core::identifier_string,sort_expression>::const_iterator i=m_aliases.begin();
-              i!=m_aliases.end(); ++i)
+  for (std::map<core::identifier_string,sort_expression>::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
   {
     std::set < basic_sort > visited;
     const basic_sort s(core::identifier_string(i->first));
@@ -467,9 +462,8 @@ bool mcrl2::data::data_type_checker::VarsUnique(const variable_list &VarDecls)
 {
   std::set<core::identifier_string> Temp;
 
-  for (variable_list::const_iterator i=VarDecls.begin(); i!=VarDecls.end(); ++i)
+  for (const variable& VarDecl: VarDecls)
   {
-    variable VarDecl= *i;
     core::identifier_string VarName=VarDecl.name();
     // if already defined -- replace (other option -- warning)
     // if variable name is a constant name -- it has more priority (other options -- warning, error)
@@ -2913,9 +2907,8 @@ void mcrl2::data::data_type_checker::AddVars2Table(
                    variable_list VarDecls,
                    std::map<core::identifier_string,sort_expression> &result)
 {
-  for (variable_list::const_iterator i=VarDecls.begin(); i!=VarDecls.end(); ++i)
+  for (const variable& VarDecl: VarDecls)
   {
-    variable VarDecl= *i;
     core::identifier_string VarName=VarDecl.name();
     sort_expression VarType=VarDecl.sort();
     //test the type
@@ -4850,10 +4843,9 @@ sort_expression_list mcrl2::data::data_type_checker::GetNotInferredList(const te
   return Result;
 }
 
-void mcrl2::data::data_type_checker::ReadInConstructors(const std::map<core::identifier_string,sort_expression>::const_iterator begin,
-                        const std::map<core::identifier_string,sort_expression>::const_iterator end)
+void mcrl2::data::data_type_checker::ReadInConstructors(const std::map<core::identifier_string,sort_expression>& aliases)
 {
-  for (std::map<core::identifier_string,sort_expression>::const_iterator i=begin; i!=end; ++i)
+  for (auto i = aliases.begin(); i != aliases.end(); ++i)
   {
     static_cast<sort_type_checker>(*this)(i->second); // Type check sort expression.
     ReadInSortStruct(i->second);
@@ -4861,10 +4853,7 @@ void mcrl2::data::data_type_checker::ReadInConstructors(const std::map<core::ide
 }
 
 mcrl2::data::data_type_checker::data_type_checker(const data_specification &data_spec)
-      : sort_type_checker(data_spec.user_defined_sorts().begin(),
-                          data_spec.user_defined_sorts().end(),
-                          data_spec.user_defined_aliases().begin(),
-                          data_spec.user_defined_aliases().end()),
+      : sort_type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases()),
         was_warning_upcasting(false),
         was_ambiguous(false)
 
@@ -4873,7 +4862,7 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification &data
 
   try
   {
-    ReadInConstructors(m_aliases.begin(),m_aliases.end());
+    ReadInConstructors(m_aliases);
     ReadInFuncs(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
   }
   catch (mcrl2::runtime_error &e)
@@ -5103,9 +5092,9 @@ static std::map<core::identifier_string,sort_expression> RemoveVars(
 static sort_expression_list GetVarTypes(variable_list VarDecls)
 {
   sort_expression_list Result;
-  for (variable_list::const_iterator i=VarDecls.begin(); i!=VarDecls.end(); ++i)
+  for (const variable& VarDecl: VarDecls)
   {
-    Result.push_front(i->sort());
+    Result.push_front(VarDecl.sort());
   }
   return reverse(Result);
 }

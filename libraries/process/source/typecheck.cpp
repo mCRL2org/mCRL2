@@ -483,9 +483,9 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
         variable_list FormalPars=proc_pars[std::pair<core::identifier_string,sort_expression_list>(Name,UnwindType(Par))];
         // we only need the names of the parameters, not the types
         identifier_string_list FormalParNames;
-        for (variable_list::const_iterator i=FormalPars.begin(); i!=FormalPars.end(); ++i)
+        for (const variable& par: FormalPars)
         {
-          FormalParNames.push_front(i->name());
+          FormalParNames.push_front(par.name());
         }
 
         identifier_string_list As_lhss;
@@ -521,9 +521,9 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     const variable_list& FormalPars=proc_pars[std::pair<identifier_string,sort_expression_list>(Name,UnwindType(ParList.front()))];
     {
       // we only need the names of the parameters, not the types
-      for (variable_list::const_iterator l=FormalPars.begin(); l!=FormalPars.end(); ++l)
+      for (const variable& par: FormalPars)
       {
-        const identifier_string& FormalParName=l->name();
+        const identifier_string& FormalParName=par.name();
         data_expression ActualPar;
         const std::map <identifier_string,data_expression> ::const_iterator i=As.find(FormalParName);
         if (i==As.end())  // Not found.
