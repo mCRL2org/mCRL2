@@ -272,28 +272,28 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
 
   data_specification data_spec = ar_spec.data();
 
-  std::map<core::identifier_string,sort_expression> LPSSorts=defined_sorts; // remember the sorts from the LPS.
+  std::map<core::identifier_string,sort_expression> LPSSorts=m_aliases; // remember the sorts from the LPS.
   sort_expression_vector sorts=data_spec.user_defined_sorts();
   for (sort_expression_vector::const_iterator i=sorts.begin(); i!=sorts.end(); ++i)
   {
     assert(is_basic_sort(*i));
     const basic_sort& bsort = atermpp::down_cast<basic_sort>(*i);
     add_basic_sort(bsort);
-    basic_sorts.insert(bsort.name());
+    m_basic_sorts.insert(bsort.name());
   }
 
   alias_vector aliases=data_spec.user_defined_aliases();
   for (alias_vector::const_iterator i=aliases.begin(); i!=aliases.end(); ++i)
   {
     add_basic_sort(i->name());
-    defined_sorts[i->name().name()]=i->reference();
+    m_aliases[i->name().name()]=i->reference();
   }
 
   mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file sorts finished" << std::endl;
 
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
-  const std::map<core::identifier_string,sort_expression> difference_sorts_set=list_minus(defined_sorts, LPSSorts);
+  const std::map<core::identifier_string,sort_expression> difference_sorts_set=list_minus(m_aliases, LPSSorts);
   ReadInConstructors(difference_sorts_set.begin(),difference_sorts_set.end());
 
   ReadInFuncs(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());

@@ -212,9 +212,9 @@ bool mcrl2::data::sort_type_checker::check_for_sort_alias_loop_through_function_
   std::set < basic_sort > &visited,
   const bool observed_a_sort_constructor)
 {
-  const std::map<core::identifier_string,sort_expression>::const_iterator i=defined_sorts.find(start_search.name());
+  const std::map<core::identifier_string,sort_expression>::const_iterator i=m_aliases.find(start_search.name());
 
-  if (i==defined_sorts.end())
+  if (i==m_aliases.end())
   {
     // start_search is not a sort alias, and hence not a recursive sort.
     return false;
@@ -338,11 +338,11 @@ void mcrl2::data::sort_type_checker::add_basic_sort(const basic_sort &sort)
   {
     throw mcrl2::runtime_error("attempt to redeclare sort Real");
   }
-  if (basic_sorts.count(sort.name())>0 || defined_sorts.count(sort.name())>0)
+  if (m_basic_sorts.count(sort)>0 || m_aliases.count(sort.name())>0)
   {
     throw mcrl2::runtime_error("double declaration of sort " + core::pp(sort.name()));
   }
-  basic_sorts.insert(sort.name());
+  m_basic_sorts.insert(sort);
 }
 
 mcrl2::data::sort_type_checker::sort_type_checker(
@@ -361,7 +361,7 @@ mcrl2::data::sort_type_checker::sort_type_checker(
   for (alias_vector::const_iterator i=aliases_begin; i!=aliases_end; ++i)
   {
     add_basic_sort(i->name());
-    defined_sorts[i->name().name()]=i->reference();
+    m_aliases[i->name().name()]=i->reference();
     mCRL2log(debug) << "Add sort alias " << i->name() << "  " << i->reference() << "" << std::endl;
   }
 
@@ -369,8 +369,8 @@ mcrl2::data::sort_type_checker::sort_type_checker(
   // E.g. sort L=List(L);
   // This is forbidden.
 
-  for (std::map<core::identifier_string,sort_expression>::const_iterator i=defined_sorts.begin();
-              i!=defined_sorts.end(); ++i)
+  for (std::map<core::identifier_string,sort_expression>::const_iterator i=m_aliases.begin();
+              i!=m_aliases.end(); ++i)
   {
     std::set < basic_sort > visited;
     const basic_sort s(core::identifier_string(i->first));
@@ -393,11 +393,11 @@ void mcrl2::data::sort_type_checker::IsSortDeclared(const basic_sort &SortName)
   {
     return;
   }
-  if (basic_sorts.count(SortName.name())>0)
+  if (m_basic_sorts.count(SortName)>0)
   {
     return;
   }
-  if (defined_sorts.count(SortName.name())>0)
+  if (m_aliases.count(SortName.name())>0)
   {
     return;
   }
@@ -406,9 +406,9 @@ void mcrl2::data::sort_type_checker::IsSortDeclared(const basic_sort &SortName)
 
 void mcrl2::data::sort_type_checker::IsSortExprListDeclared(const sort_expression_list &SortExprList)
 {
-  for (sort_expression_list::const_iterator i=SortExprList.begin(); i!=SortExprList.end(); ++i)
+  for (const sort_expression& s: SortExprList)
   {
-    IsSortExprDeclared(*i);
+    IsSortExprDeclared(s);
   }
 }
 
@@ -3833,8 +3833,8 @@ std::map < data::sort_expression, data::basic_sort > mcrl2::data::data_type_chec
   // Fill normalised_aliases. Simple aliases are stored from left to
   // right. If the right hand side is non trivial (struct, list, set or bag)
   // the alias is stored from right to left.
-  for (std::map<core::identifier_string,sort_expression>::const_iterator sort_walker=defined_sorts.begin();
-               sort_walker!=defined_sorts.end(); ++sort_walker)
+  for (std::map<core::identifier_string,sort_expression>::const_iterator sort_walker=m_aliases.begin();
+               sort_walker!=m_aliases.end(); ++sort_walker)
   {
     const core::identifier_string sort_name(sort_walker->first);
     const data::basic_sort first(sort_name);
@@ -3920,8 +3920,8 @@ void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(functio
   {
     std::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
     std::set< sort_expression > all_sorts;
-    for (std::map<core::identifier_string,sort_expression>::const_iterator i=defined_sorts.begin();
-              i!=defined_sorts.end(); ++i)
+    for (std::map<core::identifier_string,sort_expression>::const_iterator i=m_aliases.begin();
+              i!=m_aliases.end(); ++i)
     {
       const sort_expression reference=i->second;
       find_sort_expressions<sort_expression>(reference, std::inserter(all_sorts, all_sorts.end()));
@@ -4158,8 +4158,8 @@ sort_expression mcrl2::data::data_type_checker::UnwindType(const sort_expression
   if (is_basic_sort(Type))
   {
     const basic_sort &bs=down_cast<const basic_sort>(Type);
-    std::map<core::identifier_string,sort_expression>::const_iterator i=defined_sorts.find(bs.name());
-    if (i==defined_sorts.end())
+    std::map<core::identifier_string,sort_expression>::const_iterator i=m_aliases.find(bs.name());
+    if (i==m_aliases.end())
     {
       return Type;
     }
@@ -4873,7 +4873,7 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification &data
 
   try
   {
-    ReadInConstructors(defined_sorts.begin(),defined_sorts.end());
+    ReadInConstructors(m_aliases.begin(),m_aliases.end());
     ReadInFuncs(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
   }
   catch (mcrl2::runtime_error &e)

@@ -25,8 +25,8 @@ namespace data
 class sort_type_checker
 {
   protected:
-    std::set <core::identifier_string> basic_sorts;                  // contains basic_sorts.
-    std::map<core::identifier_string,sort_expression> defined_sorts; //name -> sort expression
+    std::set<basic_sort> m_basic_sorts;
+    std::map<core::identifier_string,sort_expression> m_aliases;
 
   public:
     /// \brief constructs a sort expression checker.
@@ -124,7 +124,7 @@ class data_type_checker:public sort_type_checker
     bool TypeMatchL(const sort_expression_list& TypeList, const sort_expression_list &PosTypeList, sort_expression_list& result);
     sort_expression UnwindType(const sort_expression& Type);
     variable UnwindType(const variable& Type);
-    template <class T> 
+    template <class T>
     atermpp::term_list<T> UnwindType(const atermpp::term_list<T>& l)
     {
       std::vector<T> result;
@@ -205,9 +205,9 @@ class data_type_checker:public sort_type_checker
     bool UnList(sort_expression PosType, sort_expression &result);
     void ErrorMsgCannotCast(sort_expression CandidateType, data_expression_list Arguments, sort_expression_list ArgumentTypes,std::string previous_reason);
     sort_expression UpCastNumericType(
-                    sort_expression NeededType, 
-                    sort_expression Type, 
-                    data_expression &Par, 
+                    sort_expression NeededType,
+                    sort_expression Type,
+                    data_expression &Par,
                     const std::map<core::identifier_string,sort_expression> &DeclaredVars,
                     const std::map<core::identifier_string,sort_expression> &AllowedVars,
                     std::map<core::identifier_string,sort_expression> &FreeVars,
@@ -280,7 +280,7 @@ void type_check(data_expression& data_expr,
     data_type_checker type_checker(data_spec);
     data_expr = type_checker(data_expr,variables);
 #ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
-    // assert(!search_sort_expression(data_expr, untyped_sort())); Terms with untyped sorts, such as [], {} and {:} are 
+    // assert(!search_sort_expression(data_expr, untyped_sort())); Terms with untyped sorts, such as [], {} and {:} are
     // returned by the typechecker.
 #endif
   }
