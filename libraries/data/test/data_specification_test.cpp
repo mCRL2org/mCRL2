@@ -195,9 +195,7 @@ void test_aliases()
 
   // BOOST_CHECK(boost::distance(spec.aliases()) == 0);
 
-  std::set< sort_expression > sorts;
-  sorts.insert(s);
-  sorts.insert(t);
+  std::set<basic_sort> sorts = { s, t };
   std::for_each(sorts.begin(), sorts.end(), std::bind(&data_specification::add_sort, &spec, std::placeholders::_1));
 
   /* std::set< sort_expression > aliases;
@@ -419,7 +417,7 @@ void test_is_certainly_finite()
   // structured sort
   /* This test should be reconsidered, as it does not work in this way.
  *   Having a test for structured sort is good.
- 
+
   std::vector< data::structured_sort_constructor_argument > arguments;
 
   arguments.push_back(data::structured_sort_constructor_argument(s));
