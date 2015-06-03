@@ -16,6 +16,7 @@
 #include <vector>
 #include <unordered_set>
 #include <map>
+#include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/utilities/logger.h"
 
