@@ -23,6 +23,7 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/small_progress_measures.h"
+#include "mcrl2/bes/local_fixpoints.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
@@ -31,7 +32,7 @@ using namespace mcrl2::core;
 using namespace mcrl2;
 using bes::tools::bes_input_tool;
 
-typedef enum { gauss, spm } solution_strategy_t;
+typedef enum { gauss, spm, lf } solution_strategy_t;
 
 static
 std::string solution_strategy_to_string(const solution_strategy_t s)
@@ -43,6 +44,9 @@ std::string solution_strategy_to_string(const solution_strategy_t s)
       break;
     case spm:
       return "spm";
+      break;
+    case lf:
+      return "lf";
       break;
   }
   throw mcrl2::runtime_error("unknown solution strategy");
@@ -65,6 +69,10 @@ solution_strategy_t parse_solution_strategy(const std::string& s)
   else if (s == "spm")
   {
     return spm;
+  }
+  else if (s == "lf")
+  {
+    return lf;
   }
   else
   {
@@ -98,6 +106,9 @@ std::string description(const solution_strategy_t s)
       break;
     case spm:
       return "Small Progress Measures";
+      break;
+    case lf:
+      return "Local Fixpoints";
       break;
   }
   throw mcrl2::runtime_error("unknown solution strategy");
@@ -139,6 +150,9 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
         case spm:
           result = small_progress_measures(bes);
           break;
+        case lf:
+          result = local_fixpoints(bes);
+          break;
         default:
           throw mcrl2::runtime_error("unhandled strategy provided");
           break;
@@ -158,7 +172,8 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
       input_output_tool::add_options(desc);
       desc.add_option("strategy", make_enum_argument<solution_strategy_t>("STRATEGY")
                       .add_value(spm, true)
-                      .add_value(gauss),
+                      .add_value(gauss)
+                      .add_value(lf),
                       "solve the BES using the specified STRATEGY:", 's');
     }
 
