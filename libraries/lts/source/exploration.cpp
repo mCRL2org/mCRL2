@@ -947,6 +947,7 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos()
     current_state++;
     if (current_state == start_level_seen)
     {
+      mCRL2log(debug) << "Number of states at level " << m_level << " is " << m_num_states - start_level_seen << "\n";
       m_level++;
       start_level_seen = m_num_states;
       start_level_transitions = m_num_transitions;
