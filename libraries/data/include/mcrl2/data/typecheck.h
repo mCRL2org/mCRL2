@@ -30,7 +30,7 @@ class sort_type_checker
 
   public:
     /// \brief constructs a sort expression checker.
-    sort_type_checker(const sort_expression_vector& sorts, const alias_vector& aliases);
+    sort_type_checker(const basic_sort_vector& sorts, const alias_vector& aliases);
 
     /** \brief     Type check a sort expression.
     *  Throws an exception if the expression is not well typed.

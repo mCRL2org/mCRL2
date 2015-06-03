@@ -900,8 +900,8 @@ struct absinthe_algorithm
     std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
 
     // add List containers for user defined sorts, since they are used in the translation
-    const data::sort_expression_vector& sorts = dataspec.user_defined_sorts();
-    for (auto i = sorts.begin(); i != sorts.end(); ++i)
+    const data::basic_sort_vector& sorts = dataspec.user_defined_sorts();
+    for (data::basic_sort_vector::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
     {
       data::sort_expression s = data::container_sort(data::list_container(), *i);
       dataspec.add_context_sort(s);

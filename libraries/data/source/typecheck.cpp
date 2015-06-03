@@ -338,7 +338,7 @@ void mcrl2::data::sort_type_checker::add_basic_sort(const basic_sort &sort)
   m_basic_sorts.insert(sort);
 }
 
-mcrl2::data::sort_type_checker::sort_type_checker(const sort_expression_vector& sorts, const alias_vector& aliases)
+mcrl2::data::sort_type_checker::sort_type_checker(const basic_sort_vector& sorts, const alias_vector& aliases)
 {
   for (const sort_expression& s: sorts)
   {
@@ -4927,7 +4927,7 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
 
   //Create a new specification; admittedly, this is somewhat clumsy.
   data_specification new_specification;
-  for(sort_expression_vector::const_iterator i=data_spec.user_defined_sorts().begin(); i!=data_spec.user_defined_sorts().end(); ++i)
+  for(basic_sort_vector::const_iterator i=data_spec.user_defined_sorts().begin(); i!=data_spec.user_defined_sorts().end(); ++i)
   {
     new_specification.add_sort(*i);
   }

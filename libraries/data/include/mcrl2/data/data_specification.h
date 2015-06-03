@@ -192,7 +192,7 @@ class data_specification
     mutable bool m_normalised_data_is_up_to_date;
 
     /// \brief The basic sorts and structured sorts in the specification.
-    sort_expression_vector     m_sorts;
+    basic_sort_vector     m_sorts;
 
     /// \brief The sorts that occur in the context of this data specification.
     /// The normalised sorts, constructors, mappings and equations are complete
@@ -439,7 +439,7 @@ class data_specification
     /// \details The time complexity of this operation is constant.
     /// \return The user defined sort declaration.
     inline
-    const sort_expression_vector& user_defined_sorts() const
+    const basic_sort_vector& user_defined_sorts() const
     {
       return m_sorts;
     }
@@ -571,7 +571,7 @@ class data_specification
     /// \brief Adds a sort to this specification
     ///
     /// \param[in] s A sort expression.
-    void add_sort(const sort_expression& s)
+    void add_sort(const basic_sort& s)
     {
       assert(m_data_specification_is_type_checked);
       m_sorts.push_back(s);
@@ -680,7 +680,7 @@ class data_specification
       m_normalised_equations.clear();
       std::set < sort_expression > sorts_already_added_to_m_normalised_sorts;
       reconstruct_m_normalised_aliases();
-      for (std::vector< sort_expression >::const_iterator i=m_sorts.begin();
+      for (basic_sort_vector::const_iterator i=m_sorts.begin();
            i!=m_sorts.end(); ++i)
       {
         add_system_defined_sort(*i);
@@ -1004,7 +1004,7 @@ class data_specification
     void remove_sort(const sort_expression& s)
     {
       assert(m_data_specification_is_type_checked);
-      const std::vector<sort_expression>::iterator i = std::find(m_sorts.begin(), m_sorts.end(), s);
+      const basic_sort_vector::iterator i = std::find(m_sorts.begin(), m_sorts.end(), s);
       if(i != m_sorts.end())
       {
         m_sorts.erase(i);
@@ -1021,7 +1021,7 @@ class data_specification
     void remove_alias(alias const& a)
     {
       assert(m_data_specification_is_type_checked);
-      const std::vector<sort_expression>::iterator i = std::find(m_sorts.begin(), m_sorts.end(), a.name());
+      const basic_sort_vector::iterator i = std::find(m_sorts.begin(), m_sorts.end(), a.name());
       if(i != m_sorts.end())
       {
         m_sorts.erase(i);
@@ -1181,8 +1181,8 @@ std::ostream& operator<<(std::ostream& out, const data_specification& x)
 /// \return A specification that is merged.
 inline data_specification operator +(data_specification spec1, const data_specification &spec2)
 {
-  const sort_expression_vector sv=spec2.user_defined_sorts();
-  for(sort_expression_vector::const_iterator i=sv.begin(); i!=sv.end(); ++i)
+  const basic_sort_vector sv=spec2.user_defined_sorts();
+  for(basic_sort_vector::const_iterator i=sv.begin(); i!=sv.end(); ++i)
   {
     spec1.add_sort(*i);
   }
