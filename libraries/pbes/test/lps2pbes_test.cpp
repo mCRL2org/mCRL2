@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(test_timed)
 
   pbes p = test_lps2pbes(TIMED_SPECIFICATION, TRIVIAL_FORMULA);
 
-  const std::vector<sort_expression> user_def_sorts(p.data().user_defined_sorts());
+  const basic_sort_vector user_def_sorts(p.data().user_defined_sorts());
   BOOST_CHECK(std::find(user_def_sorts.begin(), user_def_sorts.end(), sort_real::real_()) == user_def_sorts.end());
 
   const std::vector<sort_expression> sorts(p.data().sorts());
