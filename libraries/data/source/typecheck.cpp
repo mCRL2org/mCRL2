@@ -338,13 +338,11 @@ void mcrl2::data::sort_type_checker::add_basic_sort(const basic_sort &sort)
   m_basic_sorts.insert(sort);
 }
 
-mcrl2::data::sort_type_checker::sort_type_checker(const basic_sort_vector& sorts, const alias_vector& aliases)
+mcrl2::data::sort_type_checker::sort_type_checker(const basic_sort_vector& sorts, const alias_vector& aliases, bool check_aliases)
 {
-  for (const sort_expression& s: sorts)
+  for (const basic_sort& s: sorts)
   {
-    assert(is_basic_sort(s));
-    const basic_sort& bsort = atermpp::down_cast<basic_sort>(s);
-    add_basic_sort(bsort);
+    add_basic_sort(s);
   }
 
   for (const alias& a: aliases)
@@ -354,31 +352,30 @@ mcrl2::data::sort_type_checker::sort_type_checker(const basic_sort_vector& sorts
     mCRL2log(debug) << "Add sort alias " << a.name() << "  " << a.reference() << "" << std::endl;
   }
 
-  // Check for sorts that are recursive through container sorts.
-  // E.g. sort L=List(L);
-  // This is forbidden.
-
-  for (std::map<basic_sort, sort_expression>::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
+  if (check_aliases)
   {
-    std::set<basic_sort> visited;
-    const basic_sort& s = i->first;
-    const sort_expression& ar = i->second;
-    if (check_for_sort_alias_loop_through_function_sort_via_expression(ar,s,visited,false))
+    for (std::map<basic_sort, sort_expression>::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
     {
-      throw mcrl2::runtime_error("sort " + core::pp(i->first) + " is recursively defined via a function sort, or a set or a bag type container");
+      std::set<basic_sort> visited;
+      const basic_sort& s = i->first;
+      const sort_expression& ar = i->second;
+      if (check_for_sort_alias_loop_through_function_sort_via_expression(ar,s,visited,false))
+      {
+        throw mcrl2::runtime_error("sort " + core::pp(i->first) + " is recursively defined via a function sort, or a set or a bag type container");
+      }
     }
-  }
 
-  try
-  {
-    for (const alias& a: aliases)
+    try
     {
-      (*this)(a.reference()); // Type check sort expression.
+      for (const alias& a: aliases)
+      {
+        (*this)(a.reference()); // Type check sort expression.
+      }
     }
-  }
-  catch (mcrl2::runtime_error &e)
-  {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of aliases failed");
+    catch (mcrl2::runtime_error &e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of aliases failed");
+    }
   }
 }
 
@@ -450,7 +447,7 @@ void mcrl2::data::sort_type_checker::check_sort_is_declared(const sort_expressio
   }
 }
 
-void mcrl2::data::sort_type_checker::operator ()(const sort_expression &sort_expr)
+void mcrl2::data::sort_type_checker::operator()(const sort_expression& sort_expr)
 {
   check_sort_is_declared(sort_expr);
 }
@@ -4872,7 +4869,7 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification &data
   mCRL2log(debug) << "type checking phase finished" << std::endl;
 }
 
-data_expression mcrl2::data::data_type_checker::operator ()(
+data_expression mcrl2::data::data_type_checker::operator()(
            const data_expression &data_expr,
            const std::map<core::identifier_string,sort_expression> &Vars)
 {
@@ -4896,7 +4893,7 @@ data_expression mcrl2::data::data_type_checker::operator ()(
 }
 
 
-variable_list mcrl2::data::data_type_checker::operator ()(
+variable_list mcrl2::data::data_type_checker::operator()(
            const variable_list &l)
 {
   mCRL2log(debug) << "type checking of data variables read-in phase finished" << std::endl;

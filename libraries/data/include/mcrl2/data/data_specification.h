@@ -167,7 +167,7 @@ class data_specification
     // is thrown.
     void check_for_alias_loop(
       const sort_expression s,
-      std::set < sort_expression > sorts_already_seen,
+      std::set<sort_expression> sorts_already_seen,
       const bool toplevel=true) const;
 
   protected:
@@ -615,7 +615,7 @@ class data_specification
     {
       assert(m_data_specification_is_type_checked);
       if (std::find(m_mappings.begin(),m_mappings.end(),f)==m_mappings.end())
-      { 
+      {
         m_mappings.push_back(f);
         data_is_not_necessarily_normalised_anymore();
       }
@@ -896,7 +896,7 @@ class data_specification
         {
           const function_symbol_vector f = function_update_generate_functions_code(l.front(),t);
           add_system_defined_mappings(f.begin(),f.end());
- 
+
           data_equation_vector e(function_update_generate_equations_code(l.front(),t));
           add_system_defined_equations(e.begin(),e.end());
         }
@@ -1301,18 +1301,18 @@ data_equation_vector find_equations(data_specification const& specification, con
 //  \detail This routine is experimental, and may benefit from further investigation. The rule of thumb that is
 //          now used is that first variables of enumerated types are put in the variable list. These are sorts with
 //          constructors that have no arguments, typically resulting from declarations such as sort Enum = struct e1 | e2 | e3.
-//          The variables with the largest number of elements are put in front. 
+//          The variables with the largest number of elements are put in front.
 //          Subsequently, the other data types with a finite number of elements are listed, in arbitrary sequence. At the
 //          end all other variables are put in an arbitrary sequence.
 /// \param[in] l A list of variables that are to be sorted.
 /// \param[in] d A data specification containing the constructors that are used to determine efficiency.
-/// \return The same list of variables but ordered in such a way that 
+/// \return The same list of variables but ordered in such a way that
 
 
 inline variable_list order_variables_to_optimise_enumeration(const variable_list& l, const data_specification& data_spec)
 {
   // Put variables with enumerated types with the largest number of elements in front.
-  // Put variables of finite types as second. 
+  // Put variables of finite types as second.
   // Finally put the other variables in the list.
   std::map < size_t,variable_list> vars_of_enumerated_type;
   variable_list vars_of_finite_type;
@@ -1344,7 +1344,7 @@ inline variable_list order_variables_to_optimise_enumeration(const variable_list
     {
       // variable *i has no finite type
       rest_vars.push_front(*i);
-    } 
+    }
   }
 
   // Accumulate the result in rest_vars

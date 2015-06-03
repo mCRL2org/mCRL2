@@ -1606,6 +1606,159 @@ BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos1)
   );
 }
 
+class testable_sort_type_checker: public data::sort_type_checker
+{
+  public:
+    /// \brief constructs a sort expression checker.
+    testable_sort_type_checker(const data::basic_sort_vector& sorts, const data::alias_vector& aliases)
+      : data::sort_type_checker(sorts, aliases, false)
+    {}
+
+    void add_alias(const data::alias& a)
+    {
+      add_basic_sort(a.name());
+      m_aliases[a.name()] = a.reference();
+    }
+
+    bool check_recursion(const data::alias& a)
+    {
+      std::set<data::basic_sort> visited;
+      return !check_for_sort_alias_loop_through_function_sort_via_expression(a.reference(), a.name(), visited, false);
+    }
+
+    bool check_for_empty_constructor_domain(const data::function_symbol& f)
+    {
+      data::function_symbol_list constructors;
+      constructors.push_front(f);
+      try
+      {
+        check_for_empty_constructor_domains(constructors);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        std::clog << "FOUND EMPTY CONSTRUCTOR DOMAIN in function symbol " << f << " " << e.what() << std::endl;
+        return true;
+      }
+      return false;
+    }
+
+    std::map<data::sort_expression, data::basic_sort> normalize_aliases()
+    {
+      return construct_normalised_aliases();
+    }
+
+    void check_alias_impl(const data::sort_expression& lhs, const data::basic_sort& rhs, const std::map<data::sort_expression, data::basic_sort>& normalized_aliases)
+    {
+      std::set<data::sort_expression> sort_already_seen;
+      data::sort_expression result_sort = lhs;
+
+      std::set<data::sort_expression> all_sorts;
+      if (data::is_container_sort(lhs) || data::is_function_sort(lhs))
+      {
+        data::find_sort_expressions<data::sort_expression>(rhs, std::inserter(all_sorts, all_sorts.end()));
+      }
+      while (normalized_aliases.count(result_sort) > 0)
+      {
+        sort_already_seen.insert(result_sort);
+        result_sort = normalized_aliases.find(result_sort)->second;
+        if (sort_already_seen.count(result_sort))
+        {
+          throw mcrl2::runtime_error("Sort alias " + data::pp(result_sort) + " is defined in terms of itself.");
+        }
+
+        for (const data::sort_expression& sort: all_sorts)
+        {
+          if (sort == result_sort)
+          {
+            throw mcrl2::runtime_error("Sort alias " + data::pp(rhs) + " depends on sort " + data::pp(result_sort) + ", which is circularly defined.\n");
+          }
+        }
+      }
+    }
+
+    bool check_alias(const data::alias& a)
+    {
+      std::map<data::sort_expression, data::basic_sort> normalized_aliases;
+
+      // preprocessing
+      for (auto i = m_aliases.begin(); i != m_aliases.end(); ++i)
+      {
+        const data::basic_sort& first = i->first;
+        const data::sort_expression& second = i->second;
+        if (data::is_structured_sort(second) || data::is_function_sort(second) || data::is_container_sort(second))
+        {
+          auto j = normalized_aliases.find(second);
+          if (j != normalized_aliases.end())
+          {
+            normalized_aliases[first] = j->second;
+          }
+          else
+          {
+            normalized_aliases[second] = first;
+          }
+        }
+        else
+        {
+          normalized_aliases[first] = atermpp::deprecated_cast<data::basic_sort>(second);
+        }
+      }
+
+      // search for the alias a
+      auto a_iter = normalized_aliases.end();
+      for (auto i = normalized_aliases.begin(); i != normalized_aliases.end(); ++i)
+      {
+        if (i->first == a.name() || i->second == a.name())
+        {
+          a_iter = i;
+          break;
+        }
+      }
+      if (a_iter == normalized_aliases.end())
+      {
+        throw mcrl2::runtime_error("could not find alias " + data::pp(a));
+      }
+      try
+      {
+        check_alias_impl(a_iter->first, a_iter->second, normalized_aliases);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        std::clog << e.what() << std::endl;
+        return false;
+      }
+      return true;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(test_sort_aliases)
+{
+  std::pair<data::basic_sort_vector, data::alias_vector> sortspec = data::parse_sort_specification(
+      "sort                           \n"
+      "  A;                           \n"
+      "  B;                           \n"
+      "  C;                           \n"
+      "  A1  = A1;                    \n"
+      "  A2  = List(A2);              \n"
+      "  A3  = Set(A3);               \n"
+      "  A4  = Bag(A4);               \n"
+      "  A5  = A5 -> B;               \n"
+      "  A6  = B -> A6;               \n"
+      "  A7  = struct f(A7);          \n"
+      "  A8  = struct f(Nat -> A8);   \n"
+      "  A9  = struct f(x: List(A9)); \n"
+      "  A10 = List(struct f(A10));   \n"
+      "  A11 = struct A11 | B;        \n"
+  );
+  testable_sort_type_checker checker(sortspec.first, sortspec.second);
+  std::cout << "--- is recursively defined ---" << std::endl;
+  for (const data::alias& a: sortspec.second)
+  {
+    bool result1 = checker.check_alias(a);
+    bool result2 = checker.check_recursion(a);
+    std::cout << a << " -> " << std::boolalpha << result1 << " " << std::boolalpha << result2 << std::endl;
+  }
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;

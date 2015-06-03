@@ -181,7 +181,7 @@ bool data_specification::is_certainly_finite(const sort_expression& s) const
 // is thrown.
 void data_specification::check_for_alias_loop(
   const sort_expression s,
-  std::set < sort_expression > sorts_already_seen,
+  std::set<sort_expression> sorts_already_seen,
   const bool toplevel) const
 {
   if (is_basic_sort(s))
@@ -190,12 +190,12 @@ void data_specification::check_for_alias_loop(
     {
       throw mcrl2::runtime_error("Sort alias " + to_string(s) + " is defined in terms of itself.");
     }
-    for(alias_vector::const_iterator i = m_aliases.begin(); i != m_aliases.end(); ++i)
+    for (const alias& a: m_aliases)
     {
-      if(i->name() == s)
+      if (a.name() == s)
       {
         sorts_already_seen.insert(s);
-        check_for_alias_loop(i->reference(),sorts_already_seen,true);
+        check_for_alias_loop(a.reference(), sorts_already_seen, true);
         sorts_already_seen.erase(s);
         return;
       }

@@ -528,6 +528,32 @@ data_specification parse_data_specification_new(const std::string& text)
   return result;
 }
 
+inline
+std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("SortSpec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  std::vector<atermpp::aterm_appl> elements = data_specification_actions(p).parse_SortSpec(node);
+  basic_sort_vector sorts;
+  alias_vector aliases;
+  for (const atermpp::aterm_appl& x: elements)
+  {
+    if (is_basic_sort(x))
+    {
+      sorts.push_back(atermpp::down_cast<basic_sort>(x));
+    }
+    else if (is_alias(x))
+    {
+      aliases.push_back(atermpp::down_cast<alias>(x));
+    }
+  }
+  auto result = std::make_pair(sorts, aliases);
+  p.destroy_parse_node(node);
+  return result;
+}
+
 /// \cond INTERNAL_DOCS
 namespace detail
 {
