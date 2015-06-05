@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jan Friso Groote, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -27,6 +27,7 @@ class sort_type_checker
   protected:
     std::set<basic_sort> m_basic_sorts;
     std::map<basic_sort, sort_expression> m_aliases;
+    std::map<sort_expression, basic_sort> m_normalized_aliases;
 
   public:
     /// \brief constructs a sort expression checker.
@@ -41,6 +42,7 @@ class sort_type_checker
   protected:
     // Auxiliary functions
     void add_basic_sort(const basic_sort& n);
+    void add_alias(const data::alias& x);
     bool check_for_sort_alias_loop_through_function_sort_via_expression(
              const sort_expression& sort_expression_start_search,
              const basic_sort& end_search,
@@ -54,12 +56,24 @@ class sort_type_checker
     void check_sort_is_declared(const sort_expression& x);
     void check_sort_list_is_declared(const sort_expression_list& x);
     void check_basic_sort_is_declared(const basic_sort& x);
-    std::map<data::sort_expression, data::basic_sort> construct_normalised_aliases();
     void check_for_empty_constructor_domains(function_symbol_list constructors);
+
+    // Throws a runtime_error if a rewriting loop is detected.
+    // Also closes the mapping m_normalized_aliases under itself(!)
+    void check_alias_circularity(const data::basic_sort& lhs, const data::sort_expression& rhs);
+
+    // Throws an exception if the alias lhs -> rhs is recursively defined
+    void check_alias_recursion(const data::basic_sort& lhs, const data::sort_expression& rhs);
+
+    // Throws an exception if there is a problem with the alias
+    void check_alias(const data::basic_sort& lhs, const data::sort_expression& rhs);
+
+    // Normalizes alias x, and adds it to m_normalized_aliases
+    void normalize_alias(const data::alias& x);
 };
 
 
-class data_type_checker:public sort_type_checker
+class data_type_checker: public sort_type_checker
 {
   protected:
     bool was_warning_upcasting;

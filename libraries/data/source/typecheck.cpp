@@ -1,4 +1,4 @@
-// Author(s): Yaroslav Usenko
+// Author(s): Yaroslav Usenko, Jan Friso Groote, Wieger Wesselink (2015)
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -205,6 +205,96 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
 } // namespace data
 // ------------------------------  Here starts the new class based sort expression checker -----------------------
 
+// Fill m_normalized_aliases. Simple aliases are stored from left to
+// right. If the right hand side is non trivial (struct, list, set or bag)
+// the alias is stored from right to left.
+void mcrl2::data::sort_type_checker::normalize_alias(const data::alias& x)
+{
+  const data::basic_sort& lhs = x.name();
+  const data::sort_expression& rhs = x.reference();
+  if (data::is_structured_sort(rhs) || data::is_function_sort(rhs) || data::is_container_sort(rhs))
+  {
+    // We deal here with a declaration of the shape sort A=ComplexType.
+    // Rewrite every occurrence of ComplexType to A. Suppose that there are
+    // two declarations of the shape sort A=ComplexType; B=ComplexType then
+    // ComplexType is rewritten to A and B is also rewritten to A.
+
+    auto j = m_normalized_aliases.find(rhs);
+    if (j != m_normalized_aliases.end())
+    {
+      m_normalized_aliases[lhs] = j->second;
+    }
+    else
+    {
+      m_normalized_aliases[rhs] = lhs;
+    }
+  }
+  else
+  {
+    // We are dealing with a sort declaration of the shape sort A=B.
+    // Every occurrence of sort A is normalised to sort B.
+    m_normalized_aliases[lhs] = atermpp::down_cast<data::basic_sort>(rhs);
+  }
+}
+
+void mcrl2::data::sort_type_checker::add_alias(const data::alias& x)
+{
+  mCRL2log(log::debug) << "Add sort alias " << x.name() << "  " << x.reference() << "" << std::endl;
+  add_basic_sort(x.name());
+  m_aliases[x.name()] = x.reference();
+  normalize_alias(x);
+}
+
+void mcrl2::data::sort_type_checker::check_alias_circularity(const data::basic_sort& lhs, const data::sort_expression& rhs)
+{
+  std::set<data::sort_expression> sort_already_seen;
+  data::sort_expression result_sort = rhs;
+
+  std::set<data::sort_expression> all_sorts;
+  if (data::is_container_sort(rhs) || data::is_function_sort(rhs))
+  {
+    all_sorts = data::find_sort_expressions(lhs);
+  }
+  auto i = m_normalized_aliases.find(result_sort);
+  while (i != m_normalized_aliases.end())
+  {
+    sort_already_seen.insert(result_sort);
+    result_sort = i->second;
+    if (sort_already_seen.count(result_sort))
+    {
+      throw mcrl2::runtime_error("Sort alias " + data::pp(result_sort) + " is defined in terms of itself.");
+    }
+
+    for (const data::sort_expression& sort: all_sorts)
+    {
+      if (sort == result_sort)
+      {
+        throw mcrl2::runtime_error("Sort alias " + data::pp(lhs) + " depends on sort " + data::pp(result_sort) + ", which is circularly defined.\n");
+      }
+    }
+    i = m_normalized_aliases.find(result_sort);
+  }
+
+  // So the normalised sort of lhs is result_sort.
+  m_normalized_aliases[lhs] = atermpp::down_cast<basic_sort>(result_sort);
+}
+
+// throws an exception if the alias lhs -> rhs is recursively defined
+void mcrl2::data::sort_type_checker::check_alias_recursion(const data::basic_sort& lhs, const data::sort_expression& rhs)
+{
+  std::set<data::basic_sort> visited;
+  if (check_for_sort_alias_loop_through_function_sort_via_expression(rhs, lhs, visited, false))
+  {
+    throw mcrl2::runtime_error("sort " + data::pp(lhs) + " is recursively defined via a function sort, or a set or a bag type container");
+  }
+}
+
+// throws an exception if there is a problem with the alias
+void mcrl2::data::sort_type_checker::check_alias(const data::basic_sort& lhs, const data::sort_expression& rhs)
+{
+  check_alias_recursion(lhs, rhs);
+  check_alias_circularity(lhs, rhs);
+}
 
 bool mcrl2::data::sort_type_checker::check_for_sort_alias_loop_through_function_sort(
   const basic_sort& start_search,
@@ -347,22 +437,14 @@ mcrl2::data::sort_type_checker::sort_type_checker(const basic_sort_vector& sorts
 
   for (const alias& a: aliases)
   {
-    add_basic_sort(a.name());
-    m_aliases[a.name()] = a.reference();
-    mCRL2log(debug) << "Add sort alias " << a.name() << "  " << a.reference() << "" << std::endl;
+    add_alias(a);
   }
 
   if (check_aliases)
   {
-    for (std::map<basic_sort, sort_expression>::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
+    for (auto i = m_aliases.begin(); i != m_aliases.end(); ++i)
     {
-      std::set<basic_sort> visited;
-      const basic_sort& s = i->first;
-      const sort_expression& ar = i->second;
-      if (check_for_sort_alias_loop_through_function_sort_via_expression(ar,s,visited,false))
-      {
-        throw mcrl2::runtime_error("sort " + core::pp(i->first) + " is recursively defined via a function sort, or a set or a bag type container");
-      }
+      check_alias(i->first, i->second);
     }
 
     try
@@ -3811,85 +3893,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 }
 
 
-std::map<data::sort_expression, data::basic_sort> mcrl2::data::sort_type_checker::construct_normalised_aliases()
-{
-  // This function does the same as data_specification::reconstruct_m_normalised_aliases().
-  // Therefore, it should be replaced by that function, after restructuring the type checker.
-  // First reset the normalised aliases and the mappings and constructors that have been
-  // inherited to basic sort aliases during a previous round of sort normalisation.
-  std::map < data::sort_expression, data::basic_sort > normalised_aliases;
-
-  // Fill normalised_aliases. Simple aliases are stored from left to
-  // right. If the right hand side is non trivial (struct, list, set or bag)
-  // the alias is stored from right to left.
-  for (std::map<basic_sort, sort_expression>::const_iterator sort_walker=m_aliases.begin(); sort_walker!=m_aliases.end(); ++sort_walker)
-  {
-    const data::basic_sort& first = sort_walker->first;
-    const data::sort_expression second(sort_walker->second);
-    if (is_structured_sort(second) ||
-        is_function_sort(second) ||
-        is_container_sort(second))
-    {
-      // We deal here with a declaration of the shape sort A=ComplexType.
-      // Rewrite every occurrence of ComplexType to A. Suppose that there are
-      // two declarations of the shape sort A=ComplexType; B=ComplexType then
-      // ComplexType is rewritten to A and B is also rewritten to A.
-      const std::map< sort_expression, basic_sort >::const_iterator j=normalised_aliases.find(second);
-      if (j!=normalised_aliases.end())
-      {
-        normalised_aliases[first]=j->second;
-      }
-      else
-      {
-        normalised_aliases[second]=first;
-      }
-    }
-    else
-    {
-      // We are dealing with a sort declaration of the shape sort A=B.
-      // Every occurrence of sort A is normalised to sort B.
-      normalised_aliases[first] = atermpp::deprecated_cast<basic_sort>(second);
-    }
-  }
-
-  // Close the mapping normalised_aliases under itself. If a rewriting
-  // loop is detected, throw a runtime error.
-
-  for (std::map< sort_expression, basic_sort >::iterator i=normalised_aliases.begin();
-       i!=normalised_aliases.end(); i++)
-  {
-    std::set < sort_expression > sort_already_seen;
-    sort_expression result_sort=i->second;
-
-    std::set< sort_expression > all_sorts;
-    if (is_container_sort(i->first) || is_function_sort(i->first))
-    {
-      find_sort_expressions<sort_expression>(i->first, std::inserter(all_sorts, all_sorts.end()));
-    }
-    while (normalised_aliases.count(result_sort)>0)
-    {
-      sort_already_seen.insert(result_sort);
-      result_sort= normalised_aliases.find(result_sort)->second;
-      if (sort_already_seen.count(result_sort))
-      {
-        throw mcrl2::runtime_error("Sort alias " + data::pp(result_sort) + " is defined in terms of itself.");
-      }
-
-      for (std::set< sort_expression >::const_iterator j = all_sorts.begin(); j != all_sorts.end(); ++j)
-      {
-        if (*j==result_sort)
-        {
-          throw mcrl2::runtime_error("Sort alias " + data::pp(i->first) + " depends on sort" +
-                                     data::pp(result_sort) + ", which is circularly defined.\n");
-        }
-      }
-    }
-    // So the normalised sort of i->first is result_sort.
-    i->second = atermpp::down_cast<basic_sort>(result_sort);
-  }
-  return normalised_aliases;
-}
-
 static sort_expression mapping(sort_expression s,std::map < sort_expression, basic_sort > &m)
 {
   if (m.find(s)==m.end())
@@ -3905,7 +3908,7 @@ void mcrl2::data::sort_type_checker::check_for_empty_constructor_domains(functio
   // First add the constructors for structured sorts to the constructor list;
   try
   {
-    std::map<sort_expression, basic_sort> normalised_aliases = construct_normalised_aliases();
+    std::map<sort_expression, basic_sort> normalised_aliases = m_normalized_aliases;
     std::set<sort_expression> all_sorts;
     for (std::map<basic_sort, sort_expression>::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
     {
