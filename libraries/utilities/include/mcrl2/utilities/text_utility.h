@@ -95,6 +95,11 @@ std::string regex_replace(const std::string& src, const std::string& dest, const
 /// \return The splitted string
 std::vector<std::string> regex_split(const std::string& text, const std::string& sep);
 
+/// \brief Remove all trailing and leading spaces from the input.
+/// \param text A string
+/// \return The trimmed string
+std::string trim_copy(const std::string& text);
+
 /// \brief Joins a sequence of strings. This is a replacement for
 /// boost::algorithm::join, since it gives stack overflow errors with
 /// Visual C++ express 9.0 under some circumstances.
@@ -142,7 +147,7 @@ char* number2string(std::size_t number, char* buffer)
     for(size_t copy=number ; copy!=0; ++number_of_digits, copy=copy/10)
     {}
   }
- 
+
   // Put the number in the buffer at the right position.
   size_t position=number_of_digits;
   buffer[position] = '\0'; // end of string marker.
@@ -164,7 +169,6 @@ std::string number2string(std::size_t number)
   number2string(number, _buffer);
   return std::string(_buffer);
 }
-
 
 } // namespace utilities
 

@@ -20,6 +20,7 @@
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 
@@ -1691,11 +1692,48 @@ BOOST_AUTO_TEST_CASE(test_sort_aliases)
       "  A10 = List(struct f(A10));   \n"
       "  A11 = struct A11 | B;        \n"
   );
+
+  std::string expected_results(
+      "  A1  true false  \n"
+      "  A2  true true   \n"
+      "  A3  false true  \n"
+      "  A4  false true  \n"
+      "  A5  false true  \n"
+      "  A6  false true  \n"
+      "  A7  true true   \n"
+      "  A8  false true  \n"
+      "  A9  true true   \n"
+      "  A10 true true   \n"
+      "  A11 true true   \n"
+  );
+
+  std::map<std::string, std::pair<bool, bool> > expected_result_map;
+  for (std::string line: utilities::regex_split(expected_results, "\\n"))
+  {
+    auto words = utilities::regex_split(utilities::trim_copy(line), "\\s+");
+    if (words.size() == 3)
+    {
+      std::string name = words[0];
+      bool result1 = words[1] == "true";
+      bool result2 = words[2] == "true";
+      expected_result_map[name] = std::make_pair(result1, result2);
+    }
+  }
+
   testable_sort_type_checker checker(sortspec.first, sortspec.second);
   for (const data::alias& a: sortspec.second)
   {
     std::pair<bool, bool> result = checker.check_alias(a);
-    std::cout << a << " -> " << std::boolalpha << result.first << " " << std::boolalpha << result.second << std::endl;
+    std::string name = core::pp(a.name().name());
+    std::pair<bool, bool> expected_result = expected_result_map[name];
+    if (result != expected_result)
+    {
+      std::clog << "ERROR: alias " << a
+                << " result = " << std::boolalpha << result.first << " " << std::boolalpha << result.second
+                << " expected result = " << std::boolalpha << expected_result.first << " " << std::boolalpha << expected_result.second
+                << std::endl;
+    }
+    BOOST_CHECK(result == expected_result);
   }
 }
 

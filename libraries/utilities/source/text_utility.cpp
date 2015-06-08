@@ -221,6 +221,11 @@ bool is_numeric_string(const std::string& s)
   return boost::xpressive::regex_match(s, re);
 }
 
+std::string trim_copy(const std::string& text)
+{
+  return boost::trim_copy(text);
+}
+
 } // namespace utilities
 
 } // namespace mcrl2
