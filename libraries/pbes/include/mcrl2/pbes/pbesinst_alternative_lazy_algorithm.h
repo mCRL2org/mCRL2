@@ -91,7 +91,10 @@ class pbesinst_alternative_lazy_algorithm
 
     /// \brief The number of equations to generate before regenerating the
     ///        state space.
-    enum { regeneration_period = 100 };
+    int regeneration_period;
+
+    /// \brief Initial value for regeneration_period.
+    enum { regeneration_period_init = 100 };
 
     /// \brief Propositional variable instantiations that need to be handled.
     std::deque<propositional_variable_instantiation> todo;
@@ -191,6 +194,7 @@ class pbesinst_alternative_lazy_algorithm
         R(datar, data_spec),
         m_equation_count(0),
         regeneration_count(0),
+        regeneration_period(regeneration_period_init),
         m_print_equations(print_equations),
         m_search_strategy(search_strategy),
         m_transformation_strategy(transformation_strategy)
@@ -479,6 +483,7 @@ class pbesinst_alternative_lazy_algorithm
           if (++regeneration_count == regeneration_period)
           {
             regeneration_count = 0;
+            regeneration_period = equation.size() / 2;
             regenerate_states();
           }
         }
