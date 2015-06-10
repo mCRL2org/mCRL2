@@ -48,7 +48,6 @@ class local_fixpoints_algorithm
       max_rank = ranks[eqs.size()-1];
     }
 
-    template <bool rexact>
     boolean_expression evaluate(boolean_expression expr, size_t r, const std::vector<boolean_expression> approx)
     {
       if (is_true(expr) || is_false(expr))
@@ -58,33 +57,22 @@ class local_fixpoints_algorithm
       if (is_boolean_variable(expr))
       {
         auto i = indices[atermpp::down_cast<boolean_variable>(expr)];
-        if (rexact)
+        if (ranks[i] == r)
         {
-          if (ranks[i] == r)
-          {
-            return approx[i];
-          }
-          return expr;
+          return approx[i];
         }
-        else
-        {
-          if (ranks[i] >= r)
-          {
-            return approx[i];
-          }
-          return expr;
-        }
+        return expr;
       }
       using accessors::left;
       using accessors::right;
       if (is_and(expr))
       {
-        auto eval_left = evaluate<rexact>(left(expr), r, approx);
+        auto eval_left = evaluate(left(expr), r, approx);
         if (is_false(eval_left))
         {
           return false_();
         }
-        auto eval_right = evaluate<rexact>(right(expr), r, approx);
+        auto eval_right = evaluate(right(expr), r, approx);
         if (is_false(eval_right))
         {
           return false_();
@@ -101,12 +89,12 @@ class local_fixpoints_algorithm
       }
       if (is_or(expr))
       {
-        auto eval_left = evaluate<rexact>(left(expr), r, approx);
+        auto eval_left = evaluate(left(expr), r, approx);
         if (is_true(eval_left))
         {
           return true_();
         }
-        auto eval_right = evaluate<rexact>(right(expr), r, approx);
+        auto eval_right = evaluate(right(expr), r, approx);
         if (is_true(eval_right))
         {
           return true_();
@@ -155,7 +143,7 @@ class local_fixpoints_algorithm
         while (!todo.empty())
         {
           auto i = todo.begin();
-          auto t = evaluate<false>(eqs[*i].formula(), ranks[*i], approx);
+          auto t = evaluate(eqs[*i].formula(), ranks[*i], approx);
           if (t == eqs[*i])
           {
             todo.erase(i);
@@ -168,7 +156,7 @@ class local_fixpoints_algorithm
 
         for (size_t i = 0; i < eqs.size(); i++)
         {
-          eqs[i] = evaluate<true>(eqs[i].formula(), ranks[i], approx);
+          eqs[i] = evaluate(eqs[i].formula(), ranks[i], approx);
         }
       }
       return is_true(eqs[0].formula());
