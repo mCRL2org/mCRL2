@@ -180,7 +180,7 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      parser.option_argument_as<solution_strategy_t>("strategy");
+      strategy = parser.option_argument_as<solution_strategy_t>("strategy");
     }
 };
 
