@@ -91,7 +91,7 @@ typedef std::vector< real_representing_variable > context_type;
 class summand_information
 {
 
-  private:
+  protected:
     mcrl2::lps::summand_base m_smd;
     bool m_is_delta_summand;
     assignment_list m_assignments;
