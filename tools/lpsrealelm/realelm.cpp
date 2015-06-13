@@ -756,7 +756,7 @@ static void add_inequalities_to_context_postponed(
 ///      nextstate determined by i.
 static void add_summand(summand_information& summand_info,
                         const data_expression& new_condition,
-                        std::vector <linear_inequality> &nextstate_condition,
+                        std::vector <linear_inequality>& nextstate_condition,
                         const context_type& complete_context,
                         const rewriter& r,
                         process::action_label_list& a,
@@ -839,46 +839,44 @@ static void add_summand(summand_information& summand_info,
 
   nextstate = reverse(nextstate);
 
-  process::action_list new_actions;
-  if (!summand_info.is_delta_summand() && is_may_summand)
-  {
-    new_actions=summand_info.get_multi_action().actions();
-    process::action_list resulting_actions;
-    for (process::action_list::const_iterator i=new_actions.begin(); i!=new_actions.end(); i++)
-    {
-      // put "_MAY" behind each action, and add its declaration to the action declarations.
-      data_expression_list args=i->arguments();
-      sort_expression_list sorts=i->label().sorts(); // get_sorts(args);
-      std::map < std::pair< std::string, sort_expression_list >,
-          std::string> ::iterator action_label_it=
-            action_label_map.find(std::pair< std::string, sort_expression_list >
-                                  (std::string(i->label().name()),sorts));
-      if (action_label_it==action_label_map.end())
-      {
-        std::string may_action_label=variable_generator(std::string(i->label().name())+"_MAY");
-        std::pair< std::string, sort_expression_list > p(std::string(i->label().name()),sorts);
-        action_label_it=(action_label_map.insert(
-                           std::pair< std::pair< std::string, sort_expression_list >,std::string>
-                           (p,may_action_label))).first;
-        a.push_front(process::action_label(may_action_label,sorts));
-        protect_against_garbage_collect.push_back(sorts);
-      }
-
-      process::action_label may_action_label(action_label_it->second,sorts);
-      resulting_actions.push_front(process::action(may_action_label,args));
-    }
-    new_actions=reverse(resulting_actions);
-  }
-
-  const lps::summand_base s=summand_info.get_summand();
   if (summand_info.is_delta_summand())
   {
-    deadlock_summands.push_back(deadlock_summand(get_nonreal_variables(s.summation_variables()),
+    deadlock_summands.push_back(deadlock_summand(get_nonreal_variables(summand_info.get_summand().summation_variables()),
                                                  new_condition,
                                                  deadlock(summand_info.get_deadlock()).time()));
   }
   else
-  {
+  { // Summand is not delta.
+    process::action_list new_actions=summand_info.get_multi_action().actions();
+    if (!summand_info.is_delta_summand() && is_may_summand)
+    {
+      process::action_list resulting_actions;
+      for (process::action_list::const_iterator i=new_actions.begin(); i!=new_actions.end(); i++)
+      {
+        // put "_MAY" behind each action, and add its declaration to the action declarations.
+        data_expression_list args=i->arguments();
+        sort_expression_list sorts=i->label().sorts(); // get_sorts(args);
+        std::map < std::pair< std::string, sort_expression_list >,
+            std::string> ::iterator action_label_it=
+              action_label_map.find(std::pair< std::string, sort_expression_list >
+                                    (std::string(i->label().name()),sorts));
+        if (action_label_it==action_label_map.end())
+        {
+          std::string may_action_label=variable_generator(std::string(i->label().name())+"_MAY");
+          std::pair< std::string, sort_expression_list > p(std::string(i->label().name()),sorts);
+          action_label_it=(action_label_map.insert(
+                             std::pair< std::pair< std::string, sort_expression_list >,std::string>
+                             (p,may_action_label))).first;
+          a.push_front(process::action_label(may_action_label,sorts));
+          protect_against_garbage_collect.push_back(sorts);
+        }
+
+        process::action_label may_action_label(action_label_it->second,sorts);
+        resulting_actions.push_front(process::action(may_action_label,args));
+      }
+      new_actions=reverse(resulting_actions);
+    }
+    const lps::summand_base s=summand_info.get_summand();
     action_summands.push_back(action_summand(get_nonreal_variables(s.summation_variables()),
                                              new_condition,
                                              multi_action(new_actions,summand_info.get_multi_action().time()),
