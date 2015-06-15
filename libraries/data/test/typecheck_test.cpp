@@ -26,13 +26,16 @@ using namespace mcrl2;
 
 // Expected failures, these are not going to be fixed in the current
 // implementation of the type checker
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_list_pos_nat, 2)
+
+// BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_list_pos_nat, 2)
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables, 1)
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables_reversed, 1)
-//BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( test_matching_ambiguous, 1 ) //succeeds
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4, 1)  // Fails because of silly reordering in type checker
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1) // Fails because of silly reordering in type checker
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_projection_function, 1)    // Fails because of silly reordering in type checker
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_matching_ambiguous, 1)               // Fails because of reordering in type checker / pretty printer
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_matching_ambiguous_rhs, 1)           // Fails because of reordering in type checker / pretty printer
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4, 1)  // Fails because of reordering in type checker / pretty printer
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1) // Fails because of reordering in type checker / pretty printer
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_projection_function, 2)    // Fails because of reordering in type checker / pretty printer
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_alias_loop, 1)
 
 // Parse functions that do not change any context (i.e. do not typecheck and
 // normalise sorts).
@@ -87,15 +90,18 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
   data::data_specification result;
   try {
     result = data::parse_data_specification_new(de_in);
-#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
+#ifndef MCRL2_ENABLE_TYPECHECK_PP_TESTS
     std::string de_out = data::pp(result);
-    if (de_in != de_out)
+
+    std::string input = utilities::trim_copy(de_in);
+    std::string output = utilities::trim_copy(de_out);
+    if (input != output)
     {
       std::clog << "aterm : " << data::detail::data_specification_to_aterm_data_spec(result) << std::endl;
       std::clog << "de_in : " << de_in << std::endl;
       std::clog << "de_out: " << de_out << std::endl;
       std::clog << "The following data specifications should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-      BOOST_CHECK_EQUAL(de_in, de_out);
+      BOOST_CHECK_EQUAL(input, output);
     }
 #endif
   }
@@ -777,7 +783,7 @@ BOOST_AUTO_TEST_CASE(test_eqn_set_where)
 {
   test_data_specification(
     "map  f_dot: Set(Bool);\n\n"
-    "eqn  f_dot  =  if(true, {}, { o: Bool | true whr z = true end });\n",
+    "eqn  f_dot  =  if(true, {}, { o: Bool | true whr z=true end });\n",
     true
   );
 }
