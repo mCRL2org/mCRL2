@@ -90,7 +90,6 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
   data::data_specification result;
   try {
     result = data::parse_data_specification_new(de_in);
-#ifndef MCRL2_ENABLE_TYPECHECK_PP_TESTS
     std::string de_out = data::pp(result);
 
     std::string input = utilities::trim_copy(de_in);
@@ -103,7 +102,6 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
       std::clog << "The following data specifications should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
       BOOST_CHECK_EQUAL(input, output);
     }
-#endif
   }
   catch (...)
   {
@@ -140,9 +138,9 @@ void test_data_expression(const std::string& de_in,
 
       std::string de_out = data::pp(x);
       //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
+//#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
       BOOST_CHECK_EQUAL(de_in, de_out);
-#endif
+//#endif
       // TODO: this check should be uncommented
       //BOOST_CHECK(!search_sort_expression(x.sort(), data::untyped_sort()));
       if (expected_sort != "")
@@ -343,12 +341,12 @@ BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset_reverse)
 
 BOOST_AUTO_TEST_CASE(test_set_true_false)
 {
-  test_data_expression("{true, false}", true, "FSet(Bool)");
+  test_data_expression("{ true, false }", true, "FSet(Bool)");
 }
 
 BOOST_AUTO_TEST_CASE(test_set_numbers)
 {
-  test_data_expression("{1, 2, -7}", true, "FSet(Int)");
+  test_data_expression("{ 1, 2, (-7) }", true, "FSet(Int)");
 }
 
 BOOST_AUTO_TEST_CASE(test_set_comprehension)
@@ -367,12 +365,12 @@ BOOST_AUTO_TEST_CASE(test_emptybag_complement)
 }
 BOOST_AUTO_TEST_CASE(test_bag_true_false)
 {
-  test_data_expression("{true: 1, false: 2}", true, "FBag(Bool)");
+  test_data_expression("{ true: 1, false: 2 }", true, "FBag(Bool)");
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_numbers)
 {
-  test_data_expression("{1: 1, 2: 2, -8: 8}", true, "FBag(Int)");
+  test_data_expression("{ 1: 1, 2: 2, -8: 8 }", true, "FBag(Int)");
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_comprehension)
@@ -1555,7 +1553,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_term_with_wrong_number_of_arguments)
 {
   /* The typechecker couldn't catch the wrongly typed term below in november 2012,
      which led to a core dump */
-  test_data_expression("((lambda x:Nat.x)(1,2)>0)",false);
+  test_data_expression("((lambda x: Nat. x)(1, 2) > 0)",false);
 }
 
 /* The example below has the nasty feature that the sort of
