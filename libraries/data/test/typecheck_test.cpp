@@ -30,8 +30,9 @@ BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_list_pos_nat, 2)
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables, 1)
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables_reversed, 1)
 //BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( test_matching_ambiguous, 1 ) //succeeds
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4, 1)   // Fails because of silly reordering in type checker
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1)   // Fails because of silly reordering in type checker
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4, 1)  // Fails because of silly reordering in type checker
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1) // Fails because of silly reordering in type checker
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_projection_function, 1)    // Fails because of silly reordering in type checker
 
 // Parse functions that do not change any context (i.e. do not typecheck and
 // normalise sorts).
@@ -855,18 +856,12 @@ void test_data_expression_in_specification_context(const std::string& de_in,
   if (test_type_checker)
   {
     data::type_check(ds);
-
-    // This is outcommented, because a data specification cannot be printed
-    // anymore from 1/8/2010. This has been disabled to make pretty printing
-    // independent of a data specification. Should be re-installed at some time
-    // JFG.
-    //std::string ds_out = data::pp(ds);
-    //if(ds_in != ds_out)
-    //{
-    //  std::clog << "Warning, ds_in != ds_out; [" << ds_in << " != " << ds_out << "]" << std::endl;
-    //}
-    //BOOST_CHECK_EQUAL(ds_in, ds_out);
-    //
+    std::string ds_out = data::pp(ds);
+    if (utilities::trim_copy(ds_in) != utilities::trim_copy(ds_out))
+    {
+      std::clog << "Warning, ds_in != ds_out; [" << utilities::trim_copy(ds_in) << " != " << utilities::trim_copy(ds_out) << "]" << std::endl;
+    }
+    BOOST_CHECK_EQUAL(utilities::trim_copy(ds_in), utilities::trim_copy(ds_out));
   }
 
   data::data_expression de(parse_data_expression(de_in));
@@ -1580,7 +1575,7 @@ BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos)
   data::variable_vector v;
   test_data_expression_in_specification_context(
     "f(Int2Pos(-1))",
-    "map f:Pos->Bool;\n",
+    "map  f: Pos -> Bool;\n",
     v.begin(), v.end(),
     true,
     "Bool"
@@ -1596,9 +1591,9 @@ BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos1)
     "fpos(Nat2Pos(0)) && fpos(Int2Pos(-1)) && fpos(Real2Pos(1 / 2)) && "
     "fnat(Int2Nat(-1)) && fnat(Real2Nat(1 / 2)) && "
     "fint(Real2Int(1 / 2))",
-    "map fpos:Pos->Bool;\n"
-    "    fnat:Nat->Bool;\n"
-    "    fint:Int->Bool;\n",
+    "map  fpos: Pos -> Bool;\n"
+    "     fnat: Nat -> Bool;\n"
+    "     fint: Int -> Bool;\n",
     v.begin(), v.end(),
     true,
     "Bool"
