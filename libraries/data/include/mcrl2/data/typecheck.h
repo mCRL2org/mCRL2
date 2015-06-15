@@ -13,8 +13,6 @@
 #define MCRL2_DATA_TYPECHECK_H
 
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/untyped_sort.h"
-#include "mcrl2/data/find.h"
 
 namespace mcrl2
 {
