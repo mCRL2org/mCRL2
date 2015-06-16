@@ -14,12 +14,17 @@
 
 #include "mcrl2/data/data_specification.h"
 
+#ifdef MCRL2_USE_NEW_SORT_TYPE_CHECKER
+#include "mcrl2/data/sort_type_checker.h"
+#endif
+
 namespace mcrl2
 {
 
 namespace data
 {
 
+#ifndef MCRL2_USE_NEW_SORT_TYPE_CHECKER
 class sort_type_checker
 {
   protected:
@@ -69,8 +74,9 @@ class sort_type_checker
     // Normalizes alias x, and adds it to m_normalized_aliases
     void normalize_alias(const data::alias& x);
 };
+#endif // MCRL2_USE_NEW_SORT_TYPE_CHECKER
 
-
+#ifndef MCRL2_USE_NEW_DATA_TYPE_CHECKER
 class data_type_checker: public sort_type_checker
 {
   protected:
@@ -223,7 +229,7 @@ class data_type_checker: public sort_type_checker
     bool IsNotInferredL(sort_expression_list TypeList);
     bool strict_type_check(const data_expression& d);
 };
-
+#endif // MCRL2_USE_NEW_DATA_TYPE_CHECKER
 
 /** \brief     Type check a sort expression.
  *  Throws an exception if something went wrong.
