@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DATA_TYPE_CHECKER_H
 #define MCRL2_DATA_DATA_TYPE_CHECKER_H
 
+#include <algorithm>
 #include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/standard_container_utility.h"
 
@@ -22,6 +23,23 @@ namespace mcrl2 {
 namespace data {
 
 namespace detail {
+
+inline
+function_sort make_function_sort(const sort_expression& domain, const sort_expression& codomain)
+{
+  return function_sort(atermpp::make_list<sort_expression>(domain), codomain);
+}
+
+template <typename Function, typename T>
+atermpp::term_list<T> transform_aterm_list(const Function& f, const atermpp::term_list<T>& x)
+{
+  atermpp::term_list<T> result;
+  for (T t: x)
+  {
+    result.push_front(f(t));
+  }
+  return atermpp::reverse(result);
+}
 
 // Insert an element in the list provided, it did not already occur in the list.
 template<class S>
@@ -39,8 +57,8 @@ inline atermpp::term_list<S> insert_sort_unique(const atermpp::term_list<S>& lis
 inline
 bool IsPos(const core::identifier_string& Number)
 {
-  char c=Number.function().name()[0];
-  return isdigit(c) && c>'0';
+  char c = Number.function().name()[0];
+  return isdigit(c) && c > '0';
 }
 
 inline
@@ -71,7 +89,7 @@ sort_expression_list GetVarTypes(variable_list VarDecls)
   {
     Result.push_front(VarDecl.sort());
   }
-  return reverse(Result);
+  return atermpp::reverse(Result);
 }
 
 // Replace occurrences of untyped_possible_sorts([s1,...,sn]) by selecting
@@ -111,7 +129,7 @@ sort_expression replace_possible_sorts(const sort_expression &Type)
       NewTypeList.push_front(replace_possible_sorts(*TypeList));
     }
     sort_expression ResultType=s.codomain();
-    return function_sort(reverse(NewTypeList),replace_possible_sorts(ResultType));
+    return function_sort(atermpp::reverse(NewTypeList),replace_possible_sorts(ResultType));
   }
   assert(0); // All cases are dealt with above.
   return Type; // Avoid compiler warnings.
@@ -152,25 +170,17 @@ bool HasUnknown(const sort_expression &Type)
 }
 
 inline
-bool IsNumericType(const sort_expression &Type)
+bool is_numeric_type(const sort_expression& x)
 {
-  //returns true if Type is Bool,Pos,Nat,Int or Real
-  //otherwise return fase
-  if (data::is_untyped_sort(Type))
+  if (data::is_untyped_sort(x))
   {
     return false;
   }
-  return (bool)(sort_bool::is_bool(Type)||
-                  sort_pos::is_pos(Type)||
-                  sort_nat::is_nat(Type)||
-                  sort_int::is_int(Type)||
-                  sort_real::is_real(Type));
-}
-
-inline
-sort_expression MinType(const sort_expression_list &TypeList)
-{
-  return TypeList.front();
+  return sort_bool::is_bool(x)  ||
+         sort_pos::is_pos(x)    ||
+         sort_nat::is_nat(x)    ||
+         sort_int::is_int(x)    ||
+         sort_real::is_real(x);
 }
 
 } // namespace detail
@@ -183,40 +193,30 @@ class data_type_checker_base: public sort_type_checker
     std::map<core::identifier_string,sort_expression> m_user_constants;          //name -> sort expression
     std::map<core::identifier_string,sort_expression_list> m_user_functions;     //name -> Set(sort expression)
 
-    void add_system_constant(const data::function_symbol &f)
+    void add_system_constant(const data::function_symbol& f)
     {
       // append the Type to the entry of the Name of the OpId in system constants table
-
-      const core::identifier_string &OpIdName = f.name();
-      const sort_expression &Type = f.sort();
-
-      std::map<core::identifier_string,sort_expression_list>::const_iterator i=m_system_constants.find(OpIdName);
-
-      sort_expression_list Types;
-      if (i!=m_system_constants.end())
+      auto i = m_system_constants.find(f.name());
+      sort_expression_list sorts;
+      if (i != m_system_constants.end())
       {
-        Types=i->second;
+        sorts = i->second;
       }
-      Types=push_back(Types,Type);
-      m_system_constants[OpIdName]=Types;
+      sorts = push_back(sorts, f.sort());
+      m_system_constants[f.name()] = sorts;
     }
 
-    void add_system_function(const data::function_symbol &f)
+    void add_system_function(const data::function_symbol& f)
     {
-      //Pre: OpId is an OpId
-      // append the Type to the entry of the Name of the OpId in gssystem.functions table
-      const core::identifier_string &OpIdName = f.name();
-      const sort_expression & Type = f.sort();
-      assert(is_function_sort(Type));
-
-      auto j = m_system_functions.find(OpIdName);
-      sort_expression_list Types;
+      assert(is_function_sort(f.sort()));
+      auto j = m_system_functions.find(f.name());
+      sort_expression_list sorts;
       if (j != m_system_functions.end())
       {
-        Types = j->second;
+        sorts = j->second;
       }
-      Types = Types + atermpp::make_list<sort_expression>(Type);  // TODO: Avoid concatenate but the order is essential.
-      m_system_functions[OpIdName]=Types;
+      sorts = sorts + atermpp::make_list<sort_expression>(f.sort());  // TODO: Avoid concatenate but the order is essential.
+      m_system_functions[f.name()] = sorts;
     }
 
     sort_expression unwind_sort_expression(const sort_expression& x) const
@@ -226,21 +226,15 @@ class data_type_checker_base: public sort_type_checker
         const container_sort& cs = atermpp::down_cast<const container_sort>(x);
         return container_sort(cs.container_name(), unwind_sort_expression(cs.element_sort()));
       }
-      if (is_function_sort(x))
+      else if (is_function_sort(x))
       {
         const function_sort& fs = atermpp::down_cast<function_sort>(x);
-        sort_expression_list NewArgs;
-        for (const sort_expression& sort: fs.domain())
-        {
-          NewArgs.push_front(unwind_sort_expression(sort));
-        }
-        NewArgs = reverse(NewArgs);
-        return function_sort(NewArgs,unwind_sort_expression(fs.codomain()));
+        auto new_arguments = detail::transform_aterm_list([&](const sort_expression& s) { return unwind_sort_expression(s); }, fs.domain());
+        return function_sort(new_arguments, unwind_sort_expression(fs.codomain()));
       }
-
-      if (is_basic_sort(x))
+      else if (is_basic_sort(x))
       {
-        const basic_sort &bs=atermpp::down_cast<const basic_sort>(x);
+        const basic_sort& bs = atermpp::down_cast<const basic_sort>(x);
         auto i = m_aliases.find(bs.name());
         if (i == m_aliases.end())
         {
@@ -260,16 +254,9 @@ class data_type_checker_base: public sort_type_checker
       return unwind_sort_expression(x1) == unwind_sort_expression(x2);
     }
 
-    bool in_types(const sort_expression& x, sort_expression_list sorts) const
+    bool find_sort(const sort_expression& x, const sort_expression_list& sorts) const
     {
-      for (; !sorts.empty(); sorts = sorts.tail())
-      {
-        if (equal_types(x, sorts.front()))
-        {
-          return true;
-        }
-      }
-      return false;
+      return std::any_of(sorts.begin(), sorts.end(), [&](const sort_expression& s) { return equal_types(x, s); });
     }
 
     void initialise_system_defined_functions()
@@ -453,7 +440,7 @@ class data_type_checker_base: public sort_type_checker
       add_system_function(data::function_update(data::untyped_sort(),data::untyped_sort()));
     }
 
-    void add_constant(const data::function_symbol &f, const std::string msg)
+    void add_constant(const data::function_symbol& f, const std::string& msg)
     {
       if (m_user_constants.count(f.name()) > 0)
       {
@@ -466,114 +453,100 @@ class data_type_checker_base: public sort_type_checker
       m_user_constants[f.name()] = f.sort();
     }
 
-    void add_function(const data::function_symbol &f, const std::string msg, bool allow_double_decls = false)
+    void add_function(const data::function_symbol& f, const std::string& msg, bool allow_double_decls = false)
     {
-      const sort_expression_list domain = function_sort(f.sort()).domain();
-      const core::identifier_string Name = f.name();
-      const sort_expression Sort = f.sort();
+      const sort_expression_list& domain = function_sort(f.sort()).domain();
 
-      if (m_system_constants.count(Name)>0)
+      if (m_system_constants.count(f.name()) > 0)
       {
         throw mcrl2::runtime_error("attempt to redeclare the system constant with a " + msg + " " + data::pp(f));
       }
 
-      if (m_system_functions.count(Name)>0)
+      if (m_system_functions.count(f.name()) > 0)
       {
         throw mcrl2::runtime_error("attempt to redeclare a system function with a " + msg + " " + data::pp(f));
       }
 
-      std::map <core::identifier_string,sort_expression_list>::const_iterator j = m_user_functions.find(Name);
+      auto j = m_user_functions.find(f.name());
 
       // the table m_user_functions contains a list of types for each
       // function name. We need to check if there is already such a type
       // in the list. If so -- error, otherwise -- add
-      if (j!=m_user_functions.end())
+      if (j != m_user_functions.end())
       {
-        sort_expression_list Types = j->second;
-        if (in_types(Sort, Types))
+        sort_expression_list sorts = j->second;
+        if (find_sort(f.sort(), sorts))
         {
           if (!allow_double_decls)
           {
-            throw mcrl2::runtime_error("double declaration of " + msg + " " + core::pp(Name));
+            throw mcrl2::runtime_error("double declaration of " + msg + " " + core::pp(f.name()));
           }
         }
-        Types=Types+atermpp::make_list<sort_expression>(Sort);
-        m_user_functions[Name]=Types;
+        sorts = sorts + atermpp::make_list<sort_expression>(f.sort());
+        m_user_functions[f.name()] = sorts;
       }
       else
       {
-        m_user_functions[Name]=atermpp::make_list<sort_expression>(Sort);
+        m_user_functions[f.name()] = atermpp::make_list<sort_expression>(f.sort());
       }
     }
 
-    void read_sort(const sort_expression& SortExpr)
+    // Adds constants and functions corresponding to the sort x
+    void read_sort(const sort_expression& x)
     {
-      if (is_basic_sort(SortExpr))
+      if (is_basic_sort(x))
       {
-        check_basic_sort_is_declared(atermpp::down_cast<basic_sort>(SortExpr).name());
-        return;
+        // This should be checked elsewhere
+        // check_basic_sort_is_declared(atermpp::down_cast<basic_sort>(x).name());
       }
-
-      if (is_container_sort(SortExpr))
+      else if (is_container_sort(x))
       {
-        return read_sort(atermpp::down_cast<container_sort>(SortExpr).element_sort());
+        read_sort(atermpp::down_cast<container_sort>(x).element_sort());
       }
-
-      if (is_function_sort(SortExpr))
+      else if (is_function_sort(x))
       {
-        const function_sort& fs = atermpp::down_cast<function_sort>(SortExpr);
+        const function_sort& fs = atermpp::down_cast<function_sort>(x);
         read_sort(fs.codomain());
-
-        for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+        for (const sort_expression& sort: fs.domain())
         {
-          read_sort(*i);
+          read_sort(sort);
         }
-        return;
       }
-
-      if (is_structured_sort(SortExpr))
+      else if (is_structured_sort(x))
       {
-        const structured_sort& struct_sort = atermpp::down_cast<structured_sort>(SortExpr);
-        for (structured_sort_constructor_list::const_iterator i=struct_sort.constructors().begin(); i!=struct_sort.constructors().end(); ++i)
+        const structured_sort& struct_sort = atermpp::down_cast<structured_sort>(x);
+        for (const structured_sort_constructor& Constr: struct_sort.constructors())
         {
-          const structured_sort_constructor &Constr(*i);
-
           // recognizer -- if present -- a function from SortExpr to Bool
-          core::identifier_string Name=Constr.recogniser();
-          if (Name!=core::empty_identifier_string())
+          core::identifier_string name = Constr.recogniser();
+          if (Constr.recogniser() != core::empty_identifier_string())
           {
-            add_function(data::function_symbol(Name,function_sort(atermpp::make_list<sort_expression>(SortExpr),sort_bool::bool_())),"recognizer");
+            add_function(data::function_symbol(Constr.recogniser(), make_function_sort(x, sort_bool::bool_())), "recognizer");
           }
 
           // constructor type and projections
-          structured_sort_constructor_argument_list Projs=Constr.arguments();
-          Name=Constr.name();
+          structured_sort_constructor_argument_list Projs = Constr.arguments();
+          name = Constr.name();
           if (Projs.empty())
           {
-            add_constant(data::function_symbol(Name,SortExpr),"constructor constant");
+            add_constant(data::function_symbol(name, x), "constructor constant");
             continue;
           }
 
           sort_expression_list ConstructorType;
-          for (structured_sort_constructor_argument_list::const_iterator j=Projs.begin(); j!=Projs.end(); ++j)
+          for (const structured_sort_constructor_argument& arg: Projs)
           {
-            structured_sort_constructor_argument Proj= *j;
-            sort_expression ProjSort=Proj.sort();
-
-            // not to forget, recursive call for ProjSort ;-)
-            read_sort(ProjSort);
-
-            core::identifier_string ProjName=Proj.name();
-            if (ProjName!=core::empty_identifier_string())
+            read_sort(arg.sort());
+            if (arg.name() != core::empty_identifier_string())
             {
-              add_function(function_symbol(ProjName,function_sort(atermpp::make_list(SortExpr),ProjSort)),"projection",true);
+              add_function(function_symbol(arg.name(), function_sort(atermpp::make_list(x), arg.sort())), "projection", true);
             }
-            ConstructorType.push_front(ProjSort);
+            ConstructorType.push_front(arg.sort());
           }
-          add_function(data::function_symbol(Name,function_sort(reverse(ConstructorType),SortExpr)),"constructor");
+          add_function(data::function_symbol(name, function_sort(atermpp::reverse(ConstructorType), x)), "constructor");
         }
-        return;
       }
+      // other sorts can be ignored
     }
 
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings)
@@ -585,18 +558,19 @@ class data_type_checker_base: public sort_type_checker
       functions_and_constructors.insert(functions_and_constructors.end(),mappings.begin(),mappings.end());
       for (const function_symbol& Func: functions_and_constructors)
       {
-        const core::identifier_string FuncName=Func.name();
-        sort_expression FuncType=Func.sort();
+        const core::identifier_string FuncName = Func.name();
+        sort_expression FuncType = Func.sort();
 
-        check_sort_is_declared(FuncType);
+        // This should be checked elsewhere
+        // check_sort_is_declared(FuncType);
 
         //if FuncType is a defined function sort, unwind it
         if (is_basic_sort(FuncType))
         {
-          const sort_expression NewFuncType=unwind_sort_expression(FuncType);
+          const sort_expression NewFuncType = unwind_sort_expression(FuncType);
           if (is_function_sort(NewFuncType))
           {
-            FuncType=NewFuncType;
+            FuncType = NewFuncType;
           }
         }
 
@@ -608,7 +582,7 @@ class data_type_checker_base: public sort_type_checker
         {
           try
           {
-            add_constant(data::function_symbol(FuncName,FuncType),"constant");
+            add_constant(data::function_symbol(FuncName, FuncType),"constant");
           }
           catch (mcrl2::runtime_error &e)
           {
@@ -645,8 +619,7 @@ class data_type_checker_base: public sort_type_checker
       // Check that the constructors are defined such that they cannot generate an empty sort.
       // E.g. in the specification sort D; cons f:D->D; the sort D must be necessarily empty, which is
       // forbidden. The function below checks whether such malicious specifications occur.
-
-      check_for_empty_constructor_domains(function_symbol_list(constructors.begin(),constructors.end())); // throws exception if not ok.
+      check_for_empty_constructor_domains(function_symbol_list(constructors.begin(), constructors.end())); // throws exception if not ok.
     }
 
   public:
@@ -1289,7 +1262,7 @@ bool data_type_checker::UnFSet(sort_expression PosType, sort_expression &result)
       }
       NewPosTypes.push_front(NewPosType);
     }
-    NewPosTypes=reverse(NewPosTypes);
+    NewPosTypes=atermpp::reverse(NewPosTypes);
     result=untyped_possible_sorts(sort_expression_list(NewPosTypes));
     return true;
   }
@@ -1336,7 +1309,7 @@ bool data_type_checker::UnFBag(sort_expression PosType, sort_expression &result)
       }
       NewPosTypes.push_front(NewPosType);
     }
-    NewPosTypes=reverse(NewPosTypes);
+    NewPosTypes=atermpp::reverse(NewPosTypes);
     result=untyped_possible_sorts(sort_expression_list(NewPosTypes));
     return true;
   }
@@ -1383,7 +1356,7 @@ bool data_type_checker::UnList(sort_expression PosType, sort_expression &result)
       }
       NewPosTypes.push_front(NewPosType);
     }
-    NewPosTypes=reverse(NewPosTypes);
+    NewPosTypes=atermpp::reverse(NewPosTypes);
     result=untyped_possible_sorts(sort_expression_list(NewPosTypes));
     return true;
   }
@@ -1462,7 +1435,7 @@ bool data_type_checker::UnArrowProd(sort_expression_list ArgTypes, sort_expressi
       }
       NewPosTypes=detail::insert_sort_unique(NewPosTypes,NewPosType);
     }
-    NewPosTypes=reverse(NewPosTypes);
+    NewPosTypes=atermpp::reverse(NewPosTypes);
     result=untyped_possible_sorts(sort_expression_list(NewPosTypes));
     return true;
   }
@@ -2185,7 +2158,7 @@ bool data_type_checker::MatchSetBagOpUnionDiffIntersect(const function_sort &typ
   {
     Res=UnwindType(Res);
   }
-  if (data::detail::IsNumericType(Res))
+  if (data::detail::is_numeric_type(Res))
   {
     result=type;
     return true;
@@ -2206,7 +2179,7 @@ bool data_type_checker::MatchSetBagOpUnionDiffIntersect(const function_sort &typ
   {
     Arg1=UnwindType(Arg1);
   }
-  if (data::detail::IsNumericType(Arg1))
+  if (data::detail::is_numeric_type(Arg1))
   {
     result=type;
     return true;
@@ -2224,7 +2197,7 @@ bool data_type_checker::MatchSetBagOpUnionDiffIntersect(const function_sort &typ
   {
     Arg2=UnwindType(Arg2);
   }
-  if (detail::IsNumericType(Arg2))
+  if (detail::is_numeric_type(Arg2))
   {
     result=type;
     return true;
@@ -2282,7 +2255,7 @@ bool data_type_checker::MatchSetOpSetCompl(const function_sort &type, sort_expre
   {
     Res=UnwindType(Res);
   }
-  // if (detail::IsNumericType(Res))
+  // if (detail::is_numeric_type(Res))
   if (Res==sort_bool::bool_())
   {
     result=type;
@@ -2300,7 +2273,7 @@ bool data_type_checker::MatchSetOpSetCompl(const function_sort &type, sort_expre
   {
     Arg=UnwindType(Arg);
   }
-  // if (detail::IsNumericType(Arg))
+  // if (detail::is_numeric_type(Arg))
   if (Arg==sort_bool::bool_())
   {
     result=type;
@@ -2662,11 +2635,11 @@ sort_expression data_type_checker::ExpandNumTypesUp(sort_expression Type)
     sort_expression ResultType=t.codomain();
     if (!is_function_sort(ResultType))
     {
-      return function_sort(reverse(NewTypeList),ResultType);
+      return function_sort(atermpp::reverse(NewTypeList),ResultType);
     }
     else
     {
-      return function_sort(reverse(NewTypeList),ExpandNumTypesUp(UnwindType(ResultType)));
+      return function_sort(atermpp::reverse(NewTypeList),ExpandNumTypesUp(UnwindType(ResultType)));
     }
   }
 
@@ -3247,7 +3220,7 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
           }
           NewParList.push_front(Par);
         }
-        ParList=reverse(NewParList);
+        ParList=atermpp::reverse(NewParList);
       }
 
       if (!ParList.empty())
@@ -3275,7 +3248,7 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
           // Ignore the error. Just do not add the type to NewParList
         }
       }
-      NewParList=reverse(NewParList);
+      NewParList=atermpp::reverse(NewParList);
 
       mCRL2log(log::debug) << "Possible matches w/o casting for Op/Var " << Name << " with "<< nFactPars <<
                 " argument are (ParList: " << data::pp(NewParList) << "; PosType: " << PosType << "" << std::endl;
@@ -3301,11 +3274,11 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
             NewParList=detail::insert_sort_unique(NewParList,result);
           }
         }
-        NewParList=reverse(NewParList);
+        NewParList=atermpp::reverse(NewParList);
         mCRL2log(log::debug) << "The result of casting is [1] " << data::pp(NewParList) << "" << std::endl;
         if (NewParList.size()>1)
         {
-          NewParList=atermpp::make_list(detail::MinType(NewParList));
+          NewParList=atermpp::make_list(NewParList.front());
         }
       }
 
@@ -3327,11 +3300,11 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
             NewParList=detail::insert_sort_unique(NewParList,result);
           }
         }
-        NewParList=reverse(NewParList);
+        NewParList=atermpp::reverse(NewParList);
         mCRL2log(log::debug) << "The result of casting is [2]" << data::pp(NewParList) << "" << std::endl;
         if (NewParList.size()>1)
         {
-          NewParList=atermpp::make_list(detail::MinType(NewParList));
+          NewParList=atermpp::make_list(NewParList.front());
         }
       }
 
@@ -3651,12 +3624,12 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       WhereVarList.push_front(NewWhereVar);
       NewWhereList.push_front(assignment(NewWhereVar,WhereTerm));
     }
-    NewWhereList=reverse(NewWhereList);
+    NewWhereList=atermpp::reverse(NewWhereList);
 
     std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
     std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
 
-    variable_list VarList=reverse(WhereVarList);
+    variable_list VarList=atermpp::reverse(WhereVarList);
     std::map<core::identifier_string,sort_expression> NewAllowedVars;
     AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
 
@@ -3729,7 +3702,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         }
 
         Type=sort_list::list(sort_expression(Type));
-        DataTerm=sort_list::list_enumeration(sort_expression(Type), data_expression_list(reverse(NewArguments)));
+        DataTerm=sort_list::list_enumeration(sort_expression(Type), data_expression_list(atermpp::reverse(NewArguments)));
         return Type;
       }
       if (Name == sort_set::set_enumeration_name())
@@ -3797,7 +3770,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
           NewArguments.push_front(Argument);
           Type=Type0;
         }
-        DataTerm=sort_set::set_enumeration(sort_expression(Type),data_expression_list(reverse(NewArguments)));
+        DataTerm=sort_set::set_enumeration(sort_expression(Type),data_expression_list(atermpp::reverse(NewArguments)));
         if (sort_set::is_set(PosType))
         {
           DataTerm=sort_set::constructor(Type, sort_set::false_function(Type),DataTerm);
@@ -3914,7 +3887,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
           NewArguments.push_front(Argument1);
           Type=Type0;
         }
-        DataTerm=sort_bag::bag_enumeration(Type, data_expression_list(reverse(NewArguments)));
+        DataTerm=sort_bag::bag_enumeration(Type, data_expression_list(atermpp::reverse(NewArguments)));
         if (sort_bag::is_bag(PosType))
         {
           DataTerm=sort_bag::constructor(Type, sort_bag::zero_function(Type),DataTerm);
@@ -3935,8 +3908,8 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       NewArguments.push_front(Arg);
       NewArgumentTypes.push_front(Type);
     }
-    data_expression_list Arguments=reverse(NewArguments);
-    sort_expression_list ArgumentTypes=reverse(NewArgumentTypes);
+    data_expression_list Arguments=atermpp::reverse(NewArguments);
+    sort_expression_list ArgumentTypes=atermpp::reverse(NewArgumentTypes);
 
     //function
     data_expression Data=appl.head();
@@ -4025,8 +3998,8 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         NewArguments.push_front(Arg);
         NewArgumentTypes.push_front(Type);
       }
-      Arguments=reverse(NewArguments);
-      ArgumentTypes=reverse(NewArgumentTypes);
+      Arguments=atermpp::reverse(NewArguments);
+      ArgumentTypes=atermpp::reverse(NewArgumentTypes);
     }
 
     //the function again
@@ -4100,8 +4073,8 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         NewArguments.push_front(Arg);
         NewArgumentTypes.push_front(Type);
       }
-      Arguments=reverse(NewArguments);
-      ArgumentTypes=reverse(NewArgumentTypes);
+      Arguments=atermpp::reverse(NewArguments);
+      ArgumentTypes=atermpp::reverse(NewArgumentTypes);
     }
 
     mCRL2log(log::debug) << "Arguments after once more: Arguments " << data::pp(Arguments) << ", ArgumentTypes: " << data::pp(ArgumentTypes) << "" << std::endl;
@@ -4249,7 +4222,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
           NewParList.push_front(result);
         }
       }
-      sort_expression_list ParList=reverse(NewParList);
+      sort_expression_list ParList=atermpp::reverse(NewParList);
       if (ParList.empty())
       {
         // Try to do the matching again with relaxed typing.
@@ -4268,7 +4241,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
             NewParList.push_front(result);
           }
         }
-        ParList=reverse(NewParList);
+        ParList=atermpp::reverse(NewParList);
       }
 
       if (ParList.empty())
@@ -4374,7 +4347,7 @@ bool data_type_checker::TypeMatchL(
     }
     Result.push_front(Type);
   }
-  result=reverse(Result);
+  result=atermpp::reverse(Result);
   return true;
 }
 
@@ -4389,13 +4362,13 @@ sort_expression data_type_checker::UnwindType(const sort_expression &Type)
   if (is_function_sort(Type))
   {
     const function_sort &fs=atermpp::down_cast<function_sort>(Type);
-    sort_expression_list NewArgs;
+    sort_expression_list new_arguments;
     for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
     {
-      NewArgs.push_front(UnwindType(*i));
+      new_arguments.push_front(UnwindType(*i));
     }
-    NewArgs=reverse(NewArgs);
-    return function_sort(NewArgs,UnwindType(fs.codomain()));
+    new_arguments=atermpp::reverse(new_arguments);
+    return function_sort(new_arguments,UnwindType(fs.codomain()));
   }
 
   if (is_basic_sort(Type))
@@ -4480,7 +4453,7 @@ bool data_type_checker::TypeMatchA(
       return true;
     }
 
-    result=untyped_possible_sorts(sort_expression_list(reverse(NewTypeList)));
+    result=untyped_possible_sorts(sort_expression_list(atermpp::reverse(NewTypeList)));
     return true;
   }
 
@@ -4717,7 +4690,7 @@ std::pair<bool,sort_expression_list> data_type_checker::AdjustNotInferredList(
   }
 
   // otherwise return not inferred.
-  return std::make_pair(true,GetNotInferredList(reverse(NewTypeListList)));
+  return std::make_pair(true,GetNotInferredList(atermpp::reverse(NewTypeListList)));
 }
 
 inline
@@ -4756,7 +4729,7 @@ sort_expression_list data_type_checker::GetNotInferredList(const atermpp::term_l
     }
     else
     {
-      Sort=untyped_possible_sorts(sort_expression_list(reverse(Pars[i-1])));
+      Sort=untyped_possible_sorts(sort_expression_list(atermpp::reverse(Pars[i-1])));
     }
     Result.push_front(Sort);
   }
