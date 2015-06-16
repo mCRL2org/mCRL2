@@ -49,9 +49,7 @@ bool IsNat(const core::identifier_string& Number)
 }
 
 inline
-std::map<core::identifier_string,sort_expression> RemoveVars(
-                      std::map<core::identifier_string,sort_expression> &Vars,
-                      variable_list VarDecls)
+std::map<core::identifier_string, sort_expression> RemoveVars(std::map<core::identifier_string,sort_expression> &Vars, variable_list VarDecls)
 {
   for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
   {
@@ -176,15 +174,506 @@ sort_expression MinType(const sort_expression_list &TypeList)
 
 } // namespace detail
 
-class data_type_checker: public sort_type_checker
+class data_type_checker_base: public sort_type_checker
+{
+  protected:
+    std::map<core::identifier_string,sort_expression_list> m_system_constants;   //name -> Set(sort expression)
+    std::map<core::identifier_string,sort_expression_list> m_system_functions;   //name -> Set(sort expression)
+    std::map<core::identifier_string,sort_expression> m_user_constants;          //name -> sort expression
+    std::map<core::identifier_string,sort_expression_list> m_user_functions;     //name -> Set(sort expression)
+
+    void add_system_constant(const data::function_symbol &f)
+    {
+      // append the Type to the entry of the Name of the OpId in system constants table
+
+      const core::identifier_string &OpIdName = f.name();
+      const sort_expression &Type = f.sort();
+
+      std::map<core::identifier_string,sort_expression_list>::const_iterator i=m_system_constants.find(OpIdName);
+
+      sort_expression_list Types;
+      if (i!=m_system_constants.end())
+      {
+        Types=i->second;
+      }
+      Types=push_back(Types,Type);
+      m_system_constants[OpIdName]=Types;
+    }
+
+    void add_system_function(const data::function_symbol &f)
+    {
+      //Pre: OpId is an OpId
+      // append the Type to the entry of the Name of the OpId in gssystem.functions table
+      const core::identifier_string &OpIdName = f.name();
+      const sort_expression & Type = f.sort();
+      assert(is_function_sort(Type));
+
+      const std::map <core::identifier_string,sort_expression_list>::const_iterator j=m_system_functions.find(OpIdName);
+
+      sort_expression_list Types;
+      if (j!=m_system_functions.end())
+      {
+        Types=j->second;
+      }
+      Types=Types+atermpp::make_list<sort_expression>(Type);  // TODO: Avoid concatenate but the order is essential.
+      m_system_functions[OpIdName]=Types;
+    }
+
+    sort_expression unwind_sort_expression(const sort_expression &Type) const
+    {
+      if (is_container_sort(Type))
+      {
+        const container_sort &cs=atermpp::down_cast<const container_sort>(Type);
+        return container_sort(cs.container_name(),unwind_sort_expression(cs.element_sort()));
+      }
+      if (is_function_sort(Type))
+      {
+        const function_sort &fs=atermpp::down_cast<function_sort>(Type);
+        sort_expression_list NewArgs;
+        for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+        {
+          NewArgs.push_front(unwind_sort_expression(*i));
+        }
+        NewArgs=reverse(NewArgs);
+        return function_sort(NewArgs,unwind_sort_expression(fs.codomain()));
+      }
+
+      if (is_basic_sort(Type))
+      {
+        const basic_sort &bs=atermpp::down_cast<const basic_sort>(Type);
+        std::map<basic_sort, sort_expression>::const_iterator i=m_aliases.find(bs.name()); if (i==m_aliases.end())
+        {
+          return Type;
+        }
+        return unwind_sort_expression(i->second);
+      }
+
+      return Type;
+    }
+
+    bool equal_types(const sort_expression& x1, const sort_expression& x2) const
+    {
+      if (x1 == x2)
+      {
+        return true;
+      }
+      return unwind_sort_expression(x1) == unwind_sort_expression(x2);
+    }
+
+    bool in_types(const sort_expression& x, sort_expression_list sorts) const
+    {
+      for (; !sorts.empty(); sorts = sorts.tail())
+      {
+        if (equal_types(x, sorts.front()))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    void initialise_system_defined_functions()
+    {
+      //Creation of operation identifiers for system defined operations.
+      //Bool
+      add_system_constant(sort_bool::true_());
+      add_system_constant(sort_bool::false_());
+      add_system_function(sort_bool::not_());
+      add_system_function(sort_bool::and_());
+      add_system_function(sort_bool::or_());
+      add_system_function(sort_bool::implies());
+      add_system_function(equal_to(data::untyped_sort()));
+      add_system_function(not_equal_to(data::untyped_sort()));
+      add_system_function(if_(data::untyped_sort()));
+      add_system_function(less(data::untyped_sort()));
+      add_system_function(less_equal(data::untyped_sort()));
+      add_system_function(greater_equal(data::untyped_sort()));
+      add_system_function(greater(data::untyped_sort()));
+      //Numbers
+      add_system_function(sort_nat::pos2nat());
+      add_system_function(sort_nat::cnat());
+      add_system_function(sort_real::pos2real());
+      add_system_function(sort_nat::nat2pos());
+      add_system_function(sort_int::nat2int());
+      add_system_function(sort_int::cint());
+      add_system_function(sort_real::nat2real());
+      add_system_function(sort_int::int2pos());
+      add_system_function(sort_int::int2nat());
+      add_system_function(sort_real::int2real());
+      add_system_function(sort_real::creal());
+      add_system_function(sort_real::real2pos());
+      add_system_function(sort_real::real2nat());
+      add_system_function(sort_real::real2int());
+      add_system_constant(sort_pos::c1());
+      //Square root for the natural numbers.
+      add_system_function(sort_nat::sqrt());
+      //more about numbers
+      add_system_function(sort_real::maximum(sort_pos::pos(),sort_pos::pos()));
+      add_system_function(sort_real::maximum(sort_pos::pos(),sort_nat::nat()));
+      add_system_function(sort_real::maximum(sort_nat::nat(),sort_pos::pos()));
+      add_system_function(sort_real::maximum(sort_nat::nat(),sort_nat::nat()));
+      add_system_function(sort_real::maximum(sort_pos::pos(),sort_int::int_()));
+      add_system_function(sort_real::maximum(sort_int::int_(),sort_pos::pos()));
+      add_system_function(sort_real::maximum(sort_nat::nat(),sort_int::int_()));
+      add_system_function(sort_real::maximum(sort_int::int_(),sort_nat::nat()));
+      add_system_function(sort_real::maximum(sort_int::int_(),sort_int::int_()));
+      add_system_function(sort_real::maximum(sort_real::real_(),sort_real::real_()));
+      //more
+      add_system_function(sort_real::minimum(sort_pos::pos(), sort_pos::pos()));
+      add_system_function(sort_real::minimum(sort_nat::nat(), sort_nat::nat()));
+      add_system_function(sort_real::minimum(sort_int::int_(), sort_int::int_()));
+      add_system_function(sort_real::minimum(sort_real::real_(), sort_real::real_()));
+      //more
+      // add_system_function(sort_real::abs(sort_pos::pos()));
+      // add_system_function(sort_real::abs(sort_nat::nat()));
+      add_system_function(sort_real::abs(sort_int::int_()));
+      add_system_function(sort_real::abs(sort_real::real_()));
+      //more
+      add_system_function(sort_real::negate(sort_pos::pos()));
+      add_system_function(sort_real::negate(sort_nat::nat()));
+      add_system_function(sort_real::negate(sort_int::int_()));
+      add_system_function(sort_real::negate(sort_real::real_()));
+      add_system_function(sort_real::succ(sort_pos::pos()));
+      add_system_function(sort_real::succ(sort_nat::nat()));
+      add_system_function(sort_real::succ(sort_int::int_()));
+      add_system_function(sort_real::succ(sort_real::real_()));
+      add_system_function(sort_real::pred(sort_pos::pos()));
+      add_system_function(sort_real::pred(sort_nat::nat()));
+      add_system_function(sort_real::pred(sort_int::int_()));
+      add_system_function(sort_real::pred(sort_real::real_()));
+      add_system_function(sort_real::plus(sort_pos::pos(),sort_pos::pos()));
+      add_system_function(sort_real::plus(sort_pos::pos(),sort_nat::nat()));
+      add_system_function(sort_real::plus(sort_nat::nat(),sort_pos::pos()));
+      add_system_function(sort_real::plus(sort_nat::nat(),sort_nat::nat()));
+      add_system_function(sort_real::plus(sort_int::int_(),sort_int::int_()));
+      add_system_function(sort_real::plus(sort_real::real_(),sort_real::real_()));
+      //more
+      add_system_function(sort_real::minus(sort_pos::pos(), sort_pos::pos()));
+      add_system_function(sort_real::minus(sort_nat::nat(), sort_nat::nat()));
+      add_system_function(sort_real::minus(sort_int::int_(), sort_int::int_()));
+      add_system_function(sort_real::minus(sort_real::real_(), sort_real::real_()));
+      add_system_function(sort_real::times(sort_pos::pos(), sort_pos::pos()));
+      add_system_function(sort_real::times(sort_nat::nat(), sort_nat::nat()));
+      add_system_function(sort_real::times(sort_int::int_(), sort_int::int_()));
+      add_system_function(sort_real::times(sort_real::real_(), sort_real::real_()));
+      //more
+      // add_system_function(sort_int::div(sort_pos::pos(), sort_pos::pos()));
+      add_system_function(sort_int::div(sort_nat::nat(), sort_pos::pos()));
+      add_system_function(sort_int::div(sort_int::int_(), sort_pos::pos()));
+      // add_system_function(sort_int::mod(sort_pos::pos(), sort_pos::pos()));
+      add_system_function(sort_int::mod(sort_nat::nat(), sort_pos::pos()));
+      add_system_function(sort_int::mod(sort_int::int_(), sort_pos::pos()));
+      add_system_function(sort_real::divides(sort_pos::pos(), sort_pos::pos()));
+      add_system_function(sort_real::divides(sort_nat::nat(), sort_nat::nat()));
+      add_system_function(sort_real::divides(sort_int::int_(), sort_int::int_()));
+      add_system_function(sort_real::divides(sort_real::real_(), sort_real::real_()));
+      add_system_function(sort_real::exp(sort_pos::pos(), sort_nat::nat()));
+      add_system_function(sort_real::exp(sort_nat::nat(), sort_nat::nat()));
+      add_system_function(sort_real::exp(sort_int::int_(), sort_nat::nat()));
+      add_system_function(sort_real::exp(sort_real::real_(), sort_int::int_()));
+      add_system_function(sort_real::floor());
+      add_system_function(sort_real::ceil());
+      add_system_function(sort_real::round());
+      //Lists
+      add_system_constant(sort_list::empty(data::untyped_sort()));
+      add_system_function(sort_list::cons_(data::untyped_sort()));
+      add_system_function(sort_list::count(data::untyped_sort()));
+      add_system_function(sort_list::snoc(data::untyped_sort()));
+      add_system_function(sort_list::concat(data::untyped_sort()));
+      add_system_function(sort_list::element_at(data::untyped_sort()));
+      add_system_function(sort_list::head(data::untyped_sort()));
+      add_system_function(sort_list::tail(data::untyped_sort()));
+      add_system_function(sort_list::rhead(data::untyped_sort()));
+      add_system_function(sort_list::rtail(data::untyped_sort()));
+      add_system_function(sort_list::in(data::untyped_sort()));
+
+      //Sets
+
+      add_system_function(sort_bag::set2bag(data::untyped_sort()));
+      add_system_function(sort_set::in(data::untyped_sort(), data::untyped_sort(), sort_fset::fset(data::untyped_sort())));
+      add_system_function(sort_set::in(data::untyped_sort(), data::untyped_sort(), sort_set::set_(data::untyped_sort())));
+      add_system_function(sort_set::union_(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
+      add_system_function(sort_set::union_(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
+      add_system_function(sort_set::difference(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
+      add_system_function(sort_set::difference(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
+      add_system_function(sort_set::intersection(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
+      add_system_function(sort_set::intersection(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
+      add_system_function(sort_set::false_function(data::untyped_sort())); // Needed as it is used within the typechecker.
+      add_system_function(sort_set::constructor(data::untyped_sort())); // Needed as it is used within the typechecker.
+      //**** add_system_function(sort_bag::set2bag(data::untyped_sort()));
+      // add_system_constant(sort_set::empty(data::untyped_sort()));
+      // add_system_function(sort_set::in(data::untyped_sort()));
+      // add_system_function(sort_set::union_(data::untyped_sort()));
+      // add_system_function(sort_set::difference(data::untyped_sort()));
+      // add_system_function(sort_set::intersection(data::untyped_sort()));
+      add_system_function(sort_set::complement(data::untyped_sort()));
+
+      //FSets
+      add_system_constant(sort_fset::empty(data::untyped_sort()));
+      // add_system_function(sort_fset::in(data::untyped_sort()));
+      // add_system_function(sort_fset::union_(data::untyped_sort()));
+      // add_system_function(sort_fset::intersection(data::untyped_sort()));
+      // add_system_function(sort_fset::difference(data::untyped_sort()));
+      add_system_function(sort_fset::count(data::untyped_sort()));
+      add_system_function(sort_fset::insert(data::untyped_sort())); // Needed as it is used within the typechecker.
+
+      //Bags
+      add_system_function(sort_bag::bag2set(data::untyped_sort()));
+      add_system_function(sort_bag::in(data::untyped_sort(), data::untyped_sort(), sort_fbag::fbag(data::untyped_sort())));
+      add_system_function(sort_bag::in(data::untyped_sort(), data::untyped_sort(), sort_bag::bag(data::untyped_sort())));
+      add_system_function(sort_bag::union_(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
+      add_system_function(sort_bag::union_(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
+      add_system_function(sort_bag::difference(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
+      add_system_function(sort_bag::difference(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
+      add_system_function(sort_bag::intersection(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
+      add_system_function(sort_bag::intersection(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
+      add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_fbag::fbag(data::untyped_sort())));
+      add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_bag::bag(data::untyped_sort())));
+      // add_system_constant(sort_bag::empty(data::untyped_sort()));
+      // add_system_function(sort_bag::in(data::untyped_sort()));
+      //**** add_system_function(sort_bag::count(data::untyped_sort()));
+      // add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_fset::fset(data::untyped_sort())));
+      //add_system_function(sort_bag::join(data::untyped_sort()));
+      // add_system_function(sort_bag::difference(data::untyped_sort()));
+      // add_system_function(sort_bag::intersection(data::untyped_sort()));
+      add_system_function(sort_bag::zero_function(data::untyped_sort())); // Needed as it is used within the typechecker.
+      add_system_function(sort_bag::constructor(data::untyped_sort())); // Needed as it is used within the typechecker.
+
+      //FBags
+      add_system_constant(sort_fbag::empty(data::untyped_sort()));
+      // add_system_function(sort_fbag::count(data::untyped_sort()));
+      // add_system_function(sort_fbag::in(data::untyped_sort()));
+      // add_system_function(sort_fbag::union_(data::untyped_sort()));
+      // add_system_function(sort_fbag::intersection(data::untyped_sort()));
+      // add_system_function(sort_fbag::difference(data::untyped_sort()));
+      add_system_function(sort_fbag::count_all(data::untyped_sort()));
+      add_system_function(sort_fbag::cinsert(data::untyped_sort())); // Needed as it is used within the typechecker.
+
+      // function update
+      add_system_function(data::function_update(data::untyped_sort(),data::untyped_sort()));
+    }
+
+    void add_constant(const data::function_symbol &f, const std::string msg)
+    {
+      if (m_user_constants.count(f.name()) > 0)
+      {
+        throw mcrl2::runtime_error("double declaration of " + msg + " " + core::pp(f.name()));
+      }
+      if (m_system_constants.count(f.name()) > 0 || m_system_functions.count(f.name()) > 0)
+      {
+        throw mcrl2::runtime_error("attempt to declare a constant with the name that is a built-in identifier (" + core::pp(f.name()) + ")");
+      }
+      m_user_constants[f.name()] = f.sort();
+    }
+
+    void add_function(const data::function_symbol &f, const std::string msg, bool allow_double_decls = false)
+    {
+      const sort_expression_list domain = function_sort(f.sort()).domain();
+      const core::identifier_string Name = f.name();
+      const sort_expression Sort = f.sort();
+
+      if (m_system_constants.count(Name)>0)
+      {
+        throw mcrl2::runtime_error("attempt to redeclare the system constant with a " + msg + " " + data::pp(f));
+      }
+
+      if (m_system_functions.count(Name)>0)
+      {
+        throw mcrl2::runtime_error("attempt to redeclare a system function with a " + msg + " " + data::pp(f));
+      }
+
+      std::map <core::identifier_string,sort_expression_list>::const_iterator j = m_user_functions.find(Name);
+
+      // the table m_user_functions contains a list of types for each
+      // function name. We need to check if there is already such a type
+      // in the list. If so -- error, otherwise -- add
+      if (j!=m_user_functions.end())
+      {
+        sort_expression_list Types = j->second;
+        if (in_types(Sort, Types))
+        {
+          if (!allow_double_decls)
+          {
+            throw mcrl2::runtime_error("double declaration of " + msg + " " + core::pp(Name));
+          }
+        }
+        Types=Types+atermpp::make_list<sort_expression>(Sort);
+        m_user_functions[Name]=Types;
+      }
+      else
+      {
+        m_user_functions[Name]=atermpp::make_list<sort_expression>(Sort);
+      }
+    }
+
+    void read_sort(const sort_expression& SortExpr)
+    {
+      if (is_basic_sort(SortExpr))
+      {
+        check_basic_sort_is_declared(atermpp::down_cast<basic_sort>(SortExpr).name());
+        return;
+      }
+
+      if (is_container_sort(SortExpr))
+      {
+        return read_sort(atermpp::down_cast<container_sort>(SortExpr).element_sort());
+      }
+
+      if (is_function_sort(SortExpr))
+      {
+        const function_sort& fs = atermpp::down_cast<function_sort>(SortExpr);
+        read_sort(fs.codomain());
+
+        for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+        {
+          read_sort(*i);
+        }
+        return;
+      }
+
+      if (is_structured_sort(SortExpr))
+      {
+        const structured_sort& struct_sort = atermpp::down_cast<structured_sort>(SortExpr);
+        for (structured_sort_constructor_list::const_iterator i=struct_sort.constructors().begin(); i!=struct_sort.constructors().end(); ++i)
+        {
+          const structured_sort_constructor &Constr(*i);
+
+          // recognizer -- if present -- a function from SortExpr to Bool
+          core::identifier_string Name=Constr.recogniser();
+          if (Name!=core::empty_identifier_string())
+          {
+            add_function(data::function_symbol(Name,function_sort(atermpp::make_list<sort_expression>(SortExpr),sort_bool::bool_())),"recognizer");
+          }
+
+          // constructor type and projections
+          structured_sort_constructor_argument_list Projs=Constr.arguments();
+          Name=Constr.name();
+          if (Projs.empty())
+          {
+            add_constant(data::function_symbol(Name,SortExpr),"constructor constant");
+            continue;
+          }
+
+          sort_expression_list ConstructorType;
+          for (structured_sort_constructor_argument_list::const_iterator j=Projs.begin(); j!=Projs.end(); ++j)
+          {
+            structured_sort_constructor_argument Proj= *j;
+            sort_expression ProjSort=Proj.sort();
+
+            // not to forget, recursive call for ProjSort ;-)
+            read_sort(ProjSort);
+
+            core::identifier_string ProjName=Proj.name();
+            if (ProjName!=core::empty_identifier_string())
+            {
+              add_function(function_symbol(ProjName,function_sort(atermpp::make_list(SortExpr),ProjSort)),"projection",true);
+            }
+            ConstructorType.push_front(ProjSort);
+          }
+          add_function(data::function_symbol(Name,function_sort(reverse(ConstructorType),SortExpr)),"constructor");
+        }
+        return;
+      }
+    }
+
+    void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings)
+    {
+      mCRL2log(log::debug) << "Start Read-in Func" << std::endl;
+
+      size_t constr_number=constructors.size();
+      function_symbol_vector functions_and_constructors=constructors;
+      functions_and_constructors.insert(functions_and_constructors.end(),mappings.begin(),mappings.end());
+      for (const function_symbol& Func: functions_and_constructors)
+      {
+        const core::identifier_string FuncName=Func.name();
+        sort_expression FuncType=Func.sort();
+
+        check_sort_is_declared(FuncType);
+
+        //if FuncType is a defined function sort, unwind it
+        if (is_basic_sort(FuncType))
+        {
+          const sort_expression NewFuncType=unwind_sort_expression(FuncType);
+          if (is_function_sort(NewFuncType))
+          {
+            FuncType=NewFuncType;
+          }
+        }
+
+        if (is_function_sort(FuncType))
+        {
+          add_function(data::function_symbol(FuncName,FuncType),"function");
+        }
+        else
+        {
+          try
+          {
+            add_constant(data::function_symbol(FuncName,FuncType),"constant");
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not add constant");
+          }
+        }
+
+        if (constr_number)
+        {
+          constr_number--;
+
+          //Here checks for the constructors
+          sort_expression ConstructorType=FuncType;
+          if (is_function_sort(ConstructorType))
+          {
+            ConstructorType=atermpp::down_cast<function_sort>(ConstructorType).codomain();
+          }
+          ConstructorType=unwind_sort_expression(ConstructorType);
+          if (!is_basic_sort(ConstructorType) ||
+              sort_bool::is_bool(sort_expression(ConstructorType)) ||
+              sort_pos::is_pos(sort_expression(ConstructorType)) ||
+              sort_nat::is_nat(sort_expression(ConstructorType)) ||
+              sort_int::is_int(sort_expression(ConstructorType)) ||
+              sort_real::is_real(sort_expression(ConstructorType))
+              )
+          {
+            throw mcrl2::runtime_error("Could not add constructor " + core::pp(FuncName) + " of sort " + data::pp(FuncType) + ". Constructors of built-in sorts are not allowed.");
+          }
+        }
+
+        mCRL2log(log::debug) << "Read-in Func " << FuncName << ", Types " << FuncType << "" << std::endl;
+      }
+
+      // Check that the constructors are defined such that they cannot generate an empty sort.
+      // E.g. in the specification sort D; cons f:D->D; the sort D must be necessarily empty, which is
+      // forbidden. The function below checks whether such malicious specifications occur.
+
+      check_for_empty_constructor_domains(function_symbol_list(constructors.begin(),constructors.end())); // throws exception if not ok.
+    }
+
+  public:
+    data_type_checker_base(const data_specification& data_spec)
+      : sort_type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases())
+    {
+      initialise_system_defined_functions();
+      try
+      {
+        for (auto i = m_aliases.begin(); i != m_aliases.end(); ++i)
+        {
+          read_sort(i->second);
+        }
+        read_constructors_and_mappings(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
+      }
+    }
+};
+
+class data_type_checker: public data_type_checker_base
 {
   protected:
     bool was_warning_upcasting;
     bool was_ambiguous;
-    std::map<core::identifier_string,sort_expression_list> system_constants;   //name -> Set(sort expression)
-    std::map<core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)
-    std::map<core::identifier_string,sort_expression> user_constants;          //name -> sort expression
-    std::map<core::identifier_string,sort_expression_list> user_functions;     //name -> Set(sort expression)
     data_specification type_checked_data_spec;
 
   public:
@@ -193,7 +682,30 @@ class data_type_checker: public sort_type_checker
      *  \param[in] data_spec A data specification that does not need to have been type checked.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
-    data_type_checker(const data_specification &data_spec);
+    data_type_checker(const data_specification& data_spec)
+      : data_type_checker_base(data_spec),
+        was_warning_upcasting(false),
+        was_ambiguous(false)
+    {
+      type_checked_data_spec=data_spec;
+      type_checked_data_spec.declare_data_specification_to_be_type_checked();
+
+      // Type check equations and add them to the specification.
+      try
+      {
+        TransformVarConsTypeData(type_checked_data_spec);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        type_checked_data_spec=data_specification(); // Type checking failed. Data specification is not usable.
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nFailed to type check data specification");
+      }
+
+
+      // type_checked_data_spec = FoldSortRefs(type_checked_spec); TODO OUGHT TO BE ADDED
+
+      mCRL2log(log::debug) << "type checking phase finished" << std::endl;
+    }
 
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -220,13 +732,6 @@ class data_type_checker: public sort_type_checker
     }
 
   protected:
-    void read_sort(const sort_expression& SortExpr);
-    void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings);
-    void add_function(const data::function_symbol &f, const std::string msg, bool allow_double_decls=false);
-    void add_constant(const data::function_symbol &OpId, const std::string msg);
-    void initialise_system_defined_functions(void);
-    void add_system_constant(const data::function_symbol& f);
-    void add_system_function(const data::function_symbol& f);
     bool TypeMatchA(const sort_expression& Type_in, const sort_expression& PosType_in, sort_expression& result);
     bool TypeMatchL(const sort_expression_list& TypeList, const sort_expression_list &PosTypeList, sort_expression_list& result);
     sort_expression UnwindType(const sort_expression& Type);
@@ -2642,8 +3147,8 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
       }
       else
       {
-        std::map<core::identifier_string,sort_expression>::const_iterator i=user_constants.find(Name);
-        if (i!=user_constants.end())
+        std::map<core::identifier_string,sort_expression>::const_iterator i=m_user_constants.find(Name);
+        if (i!=m_user_constants.end())
         {
           TypeA=i->second;
           TypeADefined=true;
@@ -2658,9 +3163,9 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
         }
         else
         {
-          std::map<core::identifier_string,sort_expression_list>::const_iterator j=system_constants.find(Name);
+          std::map<core::identifier_string,sort_expression_list>::const_iterator j=m_system_constants.find(Name);
 
-          if (j!=system_constants.end())
+          if (j!=m_system_constants.end())
           {
             ParList=j->second;
             if (ParList.size()==1)
@@ -2689,12 +3194,12 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
     }
     else
     {
-      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=user_functions.find(Name);
-      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=system_functions.find(Name);
+      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=m_user_functions.find(Name);
+      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=m_system_functions.find(Name);
 
-      if (j_context==user_functions.end())
+      if (j_context==m_user_functions.end())
       {
-        if (j_gssystem!=system_functions.end())
+        if (j_gssystem!=m_system_functions.end())
         {
           ParList=j_gssystem->second; // The function only occurs in the system.
         }
@@ -2710,7 +3215,7 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
           }
         }
       }
-      else if (j_gssystem==system_functions.end())
+      else if (j_gssystem==m_system_functions.end())
       {
         ParList=j_context->second; // only the context sorts are defined.
       }
@@ -3703,8 +4208,8 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       return Type;
     }
 
-    std::map<core::identifier_string,sort_expression>::const_iterator i=user_constants.find(Name);
-    if (i!=user_constants.end())
+    std::map<core::identifier_string,sort_expression>::const_iterator i=m_user_constants.find(Name);
+    if (i!=m_user_constants.end())
     {
       sort_expression Type=i->second;
       sort_expression NewType;
@@ -3729,8 +4234,8 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       }
     }
 
-    std::map<core::identifier_string,sort_expression_list>::const_iterator j=system_constants.find(Name);
-    if (j!=system_constants.end())
+    std::map<core::identifier_string,sort_expression_list>::const_iterator j=m_system_constants.find(Name);
+    if (j!=m_system_constants.end())
     {
       sort_expression_list TypeList=j->second;
       sort_expression_list NewParList;
@@ -3797,13 +4302,13 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       }
     }
 
-    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=user_functions.find(Name);
-    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=system_functions.find(Name);
+    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=m_user_functions.find(Name);
+    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=m_system_functions.find(Name);
 
     sort_expression_list ParList;
-    if (j_context==user_functions.end())
+    if (j_context==m_user_functions.end())
     {
-      if (j_gssystem!=system_functions.end())
+      if (j_gssystem!=m_system_functions.end())
       {
         ParList=j_gssystem->second; // The function only occurs in the system.
       }
@@ -3813,7 +4318,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         throw mcrl2::runtime_error("unknown operation " + core::pp(Name));
       }
     }
-    else if (j_gssystem==system_functions.end())
+    else if (j_gssystem==m_system_functions.end())
     {
       ParList=j_context->second; // only the context sorts are defined.
     }
@@ -3844,100 +4349,6 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
 
   throw mcrl2::runtime_error("Internal type checking error: " + data::pp(DataTerm) + " does not match any type checking case." );
 }
-
-inline
-void data_type_checker::read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings)
-{
-  mCRL2log(log::debug) << "Start Read-in Func" << std::endl;
-
-  size_t constr_number=constructors.size();
-  function_symbol_vector functions_and_constructors=constructors;
-  functions_and_constructors.insert(functions_and_constructors.end(),mappings.begin(),mappings.end());
-  for (const function_symbol& Func: functions_and_constructors)
-  {
-    const core::identifier_string FuncName=Func.name();
-    sort_expression FuncType=Func.sort();
-
-    check_sort_is_declared(FuncType);
-
-    //if FuncType is a defined function sort, unwind it
-    if (is_basic_sort(FuncType))
-    {
-      const sort_expression NewFuncType=UnwindType(FuncType);
-      if (is_function_sort(NewFuncType))
-      {
-        FuncType=NewFuncType;
-      }
-    }
-
-    if (is_function_sort(FuncType))
-    {
-      add_function(data::function_symbol(FuncName,FuncType),"function");
-    }
-    else
-    {
-      try
-      {
-        add_constant(data::function_symbol(FuncName,FuncType),"constant");
-      }
-      catch (mcrl2::runtime_error &e)
-      {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not add constant");
-      }
-    }
-
-    if (constr_number)
-    {
-      constr_number--;
-
-      //Here checks for the constructors
-      sort_expression ConstructorType=FuncType;
-      if (is_function_sort(ConstructorType))
-      {
-        ConstructorType=atermpp::down_cast<function_sort>(ConstructorType).codomain();
-      }
-      ConstructorType=UnwindType(ConstructorType);
-      if (!is_basic_sort(ConstructorType) ||
-          sort_bool::is_bool(sort_expression(ConstructorType)) ||
-          sort_pos::is_pos(sort_expression(ConstructorType)) ||
-          sort_nat::is_nat(sort_expression(ConstructorType)) ||
-          sort_int::is_int(sort_expression(ConstructorType)) ||
-          sort_real::is_real(sort_expression(ConstructorType))
-          )
-      {
-        throw mcrl2::runtime_error("Could not add constructor " + core::pp(FuncName) + " of sort " + data::pp(FuncType) + ". Constructors of built-in sorts are not allowed.");
-      }
-    }
-
-    mCRL2log(log::debug) << "Read-in Func " << FuncName << ", Types " << FuncType << "" << std::endl;
-  }
-
-  // Check that the constructors are defined such that they cannot generate an empty sort.
-  // E.g. in the specification sort D; cons f:D->D; the sort D must be necessarily empty, which is
-  // forbidden. The function below checks whether such malicious specifications occur.
-
-  check_for_empty_constructor_domains(function_symbol_list(constructors.begin(),constructors.end())); // throws exception if not ok.
-}
-
-inline
-void data_type_checker::add_constant(const data::function_symbol &f, const std::string msg)
-{
-  core::identifier_string Name = f.name();
-  sort_expression Sort = f.sort();
-
-  if (user_constants.count(Name)>0)
-  {
-    throw mcrl2::runtime_error("double declaration of " + msg + " " + core::pp(Name));
-  }
-
-  if (system_constants.count(Name)>0 || system_functions.count(Name)>0)
-  {
-    throw mcrl2::runtime_error("attempt to declare a constant with the name that is a built-in identifier (" + core::pp(Name) + ")");
-  }
-
-  user_constants[Name]=Sort;
-}
-
 
 inline
 bool data_type_checker::TypeMatchL(
@@ -4202,340 +4613,6 @@ bool data_type_checker::TypeMatchA(
 }
 
 inline
-void data_type_checker::add_system_constant(const data::function_symbol &f)
-{
-  // append the Type to the entry of the Name of the OpId in system constants table
-
-  const core::identifier_string &OpIdName = f.name();
-  const sort_expression &Type = f.sort();
-
-  std::map<core::identifier_string,sort_expression_list>::const_iterator i=system_constants.find(OpIdName);
-
-  sort_expression_list Types;
-  if (i!=system_constants.end())
-  {
-    Types=i->second;
-  }
-  Types=push_back(Types,Type);
-  system_constants[OpIdName]=Types;
-}
-
-inline
-void data_type_checker::add_system_function(const data::function_symbol &f)
-{
-  //Pre: OpId is an OpId
-  // append the Type to the entry of the Name of the OpId in gssystem.functions table
-  const core::identifier_string &OpIdName = f.name();
-  const sort_expression & Type = f.sort();
-  assert(is_function_sort(Type));
-
-  const std::map <core::identifier_string,sort_expression_list>::const_iterator j=system_functions.find(OpIdName);
-
-  sort_expression_list Types;
-  if (j!=system_functions.end())
-  {
-    Types=j->second;
-  }
-  Types=Types+atermpp::make_list<sort_expression>(Type);  // TODO: Avoid concatenate but the order is essential.
-  system_functions[OpIdName]=Types;
-}
-
-inline
-void data_type_checker::initialise_system_defined_functions(void)
-{
-  //Creation of operation identifiers for system defined operations.
-  //Bool
-  add_system_constant(sort_bool::true_());
-  add_system_constant(sort_bool::false_());
-  add_system_function(sort_bool::not_());
-  add_system_function(sort_bool::and_());
-  add_system_function(sort_bool::or_());
-  add_system_function(sort_bool::implies());
-  add_system_function(equal_to(data::untyped_sort()));
-  add_system_function(not_equal_to(data::untyped_sort()));
-  add_system_function(if_(data::untyped_sort()));
-  add_system_function(less(data::untyped_sort()));
-  add_system_function(less_equal(data::untyped_sort()));
-  add_system_function(greater_equal(data::untyped_sort()));
-  add_system_function(greater(data::untyped_sort()));
-  //Numbers
-  add_system_function(sort_nat::pos2nat());
-  add_system_function(sort_nat::cnat());
-  add_system_function(sort_real::pos2real());
-  add_system_function(sort_nat::nat2pos());
-  add_system_function(sort_int::nat2int());
-  add_system_function(sort_int::cint());
-  add_system_function(sort_real::nat2real());
-  add_system_function(sort_int::int2pos());
-  add_system_function(sort_int::int2nat());
-  add_system_function(sort_real::int2real());
-  add_system_function(sort_real::creal());
-  add_system_function(sort_real::real2pos());
-  add_system_function(sort_real::real2nat());
-  add_system_function(sort_real::real2int());
-  add_system_constant(sort_pos::c1());
-  //Square root for the natural numbers.
-  add_system_function(sort_nat::sqrt());
-  //more about numbers
-  add_system_function(sort_real::maximum(sort_pos::pos(),sort_pos::pos()));
-  add_system_function(sort_real::maximum(sort_pos::pos(),sort_nat::nat()));
-  add_system_function(sort_real::maximum(sort_nat::nat(),sort_pos::pos()));
-  add_system_function(sort_real::maximum(sort_nat::nat(),sort_nat::nat()));
-  add_system_function(sort_real::maximum(sort_pos::pos(),sort_int::int_()));
-  add_system_function(sort_real::maximum(sort_int::int_(),sort_pos::pos()));
-  add_system_function(sort_real::maximum(sort_nat::nat(),sort_int::int_()));
-  add_system_function(sort_real::maximum(sort_int::int_(),sort_nat::nat()));
-  add_system_function(sort_real::maximum(sort_int::int_(),sort_int::int_()));
-  add_system_function(sort_real::maximum(sort_real::real_(),sort_real::real_()));
-  //more
-  add_system_function(sort_real::minimum(sort_pos::pos(), sort_pos::pos()));
-  add_system_function(sort_real::minimum(sort_nat::nat(), sort_nat::nat()));
-  add_system_function(sort_real::minimum(sort_int::int_(), sort_int::int_()));
-  add_system_function(sort_real::minimum(sort_real::real_(), sort_real::real_()));
-  //more
-  // add_system_function(sort_real::abs(sort_pos::pos()));
-  // add_system_function(sort_real::abs(sort_nat::nat()));
-  add_system_function(sort_real::abs(sort_int::int_()));
-  add_system_function(sort_real::abs(sort_real::real_()));
-  //more
-  add_system_function(sort_real::negate(sort_pos::pos()));
-  add_system_function(sort_real::negate(sort_nat::nat()));
-  add_system_function(sort_real::negate(sort_int::int_()));
-  add_system_function(sort_real::negate(sort_real::real_()));
-  add_system_function(sort_real::succ(sort_pos::pos()));
-  add_system_function(sort_real::succ(sort_nat::nat()));
-  add_system_function(sort_real::succ(sort_int::int_()));
-  add_system_function(sort_real::succ(sort_real::real_()));
-  add_system_function(sort_real::pred(sort_pos::pos()));
-  add_system_function(sort_real::pred(sort_nat::nat()));
-  add_system_function(sort_real::pred(sort_int::int_()));
-  add_system_function(sort_real::pred(sort_real::real_()));
-  add_system_function(sort_real::plus(sort_pos::pos(),sort_pos::pos()));
-  add_system_function(sort_real::plus(sort_pos::pos(),sort_nat::nat()));
-  add_system_function(sort_real::plus(sort_nat::nat(),sort_pos::pos()));
-  add_system_function(sort_real::plus(sort_nat::nat(),sort_nat::nat()));
-  add_system_function(sort_real::plus(sort_int::int_(),sort_int::int_()));
-  add_system_function(sort_real::plus(sort_real::real_(),sort_real::real_()));
-  //more
-  add_system_function(sort_real::minus(sort_pos::pos(), sort_pos::pos()));
-  add_system_function(sort_real::minus(sort_nat::nat(), sort_nat::nat()));
-  add_system_function(sort_real::minus(sort_int::int_(), sort_int::int_()));
-  add_system_function(sort_real::minus(sort_real::real_(), sort_real::real_()));
-  add_system_function(sort_real::times(sort_pos::pos(), sort_pos::pos()));
-  add_system_function(sort_real::times(sort_nat::nat(), sort_nat::nat()));
-  add_system_function(sort_real::times(sort_int::int_(), sort_int::int_()));
-  add_system_function(sort_real::times(sort_real::real_(), sort_real::real_()));
-  //more
-  // add_system_function(sort_int::div(sort_pos::pos(), sort_pos::pos()));
-  add_system_function(sort_int::div(sort_nat::nat(), sort_pos::pos()));
-  add_system_function(sort_int::div(sort_int::int_(), sort_pos::pos()));
-  // add_system_function(sort_int::mod(sort_pos::pos(), sort_pos::pos()));
-  add_system_function(sort_int::mod(sort_nat::nat(), sort_pos::pos()));
-  add_system_function(sort_int::mod(sort_int::int_(), sort_pos::pos()));
-  add_system_function(sort_real::divides(sort_pos::pos(), sort_pos::pos()));
-  add_system_function(sort_real::divides(sort_nat::nat(), sort_nat::nat()));
-  add_system_function(sort_real::divides(sort_int::int_(), sort_int::int_()));
-  add_system_function(sort_real::divides(sort_real::real_(), sort_real::real_()));
-  add_system_function(sort_real::exp(sort_pos::pos(), sort_nat::nat()));
-  add_system_function(sort_real::exp(sort_nat::nat(), sort_nat::nat()));
-  add_system_function(sort_real::exp(sort_int::int_(), sort_nat::nat()));
-  add_system_function(sort_real::exp(sort_real::real_(), sort_int::int_()));
-  add_system_function(sort_real::floor());
-  add_system_function(sort_real::ceil());
-  add_system_function(sort_real::round());
-  //Lists
-  add_system_constant(sort_list::empty(data::untyped_sort()));
-  add_system_function(sort_list::cons_(data::untyped_sort()));
-  add_system_function(sort_list::count(data::untyped_sort()));
-  add_system_function(sort_list::snoc(data::untyped_sort()));
-  add_system_function(sort_list::concat(data::untyped_sort()));
-  add_system_function(sort_list::element_at(data::untyped_sort()));
-  add_system_function(sort_list::head(data::untyped_sort()));
-  add_system_function(sort_list::tail(data::untyped_sort()));
-  add_system_function(sort_list::rhead(data::untyped_sort()));
-  add_system_function(sort_list::rtail(data::untyped_sort()));
-  add_system_function(sort_list::in(data::untyped_sort()));
-
-  //Sets
-
-  add_system_function(sort_bag::set2bag(data::untyped_sort()));
-  add_system_function(sort_set::in(data::untyped_sort(), data::untyped_sort(), sort_fset::fset(data::untyped_sort())));
-  add_system_function(sort_set::in(data::untyped_sort(), data::untyped_sort(), sort_set::set_(data::untyped_sort())));
-  add_system_function(sort_set::union_(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
-  add_system_function(sort_set::union_(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
-  add_system_function(sort_set::difference(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
-  add_system_function(sort_set::difference(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
-  add_system_function(sort_set::intersection(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
-  add_system_function(sort_set::intersection(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
-  add_system_function(sort_set::false_function(data::untyped_sort())); // Needed as it is used within the typechecker.
-  add_system_function(sort_set::constructor(data::untyped_sort())); // Needed as it is used within the typechecker.
-  //**** add_system_function(sort_bag::set2bag(data::untyped_sort()));
-  // add_system_constant(sort_set::empty(data::untyped_sort()));
-  // add_system_function(sort_set::in(data::untyped_sort()));
-  // add_system_function(sort_set::union_(data::untyped_sort()));
-  // add_system_function(sort_set::difference(data::untyped_sort()));
-  // add_system_function(sort_set::intersection(data::untyped_sort()));
-  add_system_function(sort_set::complement(data::untyped_sort()));
-
-  //FSets
-  add_system_constant(sort_fset::empty(data::untyped_sort()));
-  // add_system_function(sort_fset::in(data::untyped_sort()));
-  // add_system_function(sort_fset::union_(data::untyped_sort()));
-  // add_system_function(sort_fset::intersection(data::untyped_sort()));
-  // add_system_function(sort_fset::difference(data::untyped_sort()));
-  add_system_function(sort_fset::count(data::untyped_sort()));
-  add_system_function(sort_fset::insert(data::untyped_sort())); // Needed as it is used within the typechecker.
-
-  //Bags
-  add_system_function(sort_bag::bag2set(data::untyped_sort()));
-  add_system_function(sort_bag::in(data::untyped_sort(), data::untyped_sort(), sort_fbag::fbag(data::untyped_sort())));
-  add_system_function(sort_bag::in(data::untyped_sort(), data::untyped_sort(), sort_bag::bag(data::untyped_sort())));
-  add_system_function(sort_bag::union_(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
-  add_system_function(sort_bag::union_(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
-  add_system_function(sort_bag::difference(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
-  add_system_function(sort_bag::difference(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
-  add_system_function(sort_bag::intersection(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
-  add_system_function(sort_bag::intersection(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
-  add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_fbag::fbag(data::untyped_sort())));
-  add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_bag::bag(data::untyped_sort())));
-  // add_system_constant(sort_bag::empty(data::untyped_sort()));
-  // add_system_function(sort_bag::in(data::untyped_sort()));
-  //**** add_system_function(sort_bag::count(data::untyped_sort()));
-  // add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_fset::fset(data::untyped_sort())));
-  //add_system_function(sort_bag::join(data::untyped_sort()));
-  // add_system_function(sort_bag::difference(data::untyped_sort()));
-  // add_system_function(sort_bag::intersection(data::untyped_sort()));
-  add_system_function(sort_bag::zero_function(data::untyped_sort())); // Needed as it is used within the typechecker.
-  add_system_function(sort_bag::constructor(data::untyped_sort())); // Needed as it is used within the typechecker.
-
-  //FBags
-  add_system_constant(sort_fbag::empty(data::untyped_sort()));
-  // add_system_function(sort_fbag::count(data::untyped_sort()));
-  // add_system_function(sort_fbag::in(data::untyped_sort()));
-  // add_system_function(sort_fbag::union_(data::untyped_sort()));
-  // add_system_function(sort_fbag::intersection(data::untyped_sort()));
-  // add_system_function(sort_fbag::difference(data::untyped_sort()));
-  add_system_function(sort_fbag::count_all(data::untyped_sort()));
-  add_system_function(sort_fbag::cinsert(data::untyped_sort())); // Needed as it is used within the typechecker.
-
-  // function update
-  add_system_function(data::function_update(data::untyped_sort(),data::untyped_sort()));
-}
-
-inline
-void data_type_checker::add_function(const data::function_symbol &f, const std::string msg, bool allow_double_decls)
-{
-  const sort_expression_list domain=function_sort(f.sort()).domain();
-  const core::identifier_string Name = f.name();
-  const sort_expression Sort = f.sort();
-
-  if (system_constants.count(Name)>0)
-  {
-    throw mcrl2::runtime_error("attempt to redeclare the system constant with a " + msg + " " + data::pp(f));
-  }
-
-  if (system_functions.count(Name)>0)
-  {
-    throw mcrl2::runtime_error("attempt to redeclare a system function with a " + msg + " " + data::pp(f));
-  }
-
-  std::map <core::identifier_string,sort_expression_list>::const_iterator j=user_functions.find(Name);
-
-  // the table user_functions contains a list of types for each
-  // function name. We need to check if there is already such a type
-  // in the list. If so -- error, otherwise -- add
-  if (j!=user_functions.end())
-  {
-    sort_expression_list Types=j->second;
-    if (InTypesA(Sort, Types))
-    {
-      if (!allow_double_decls)
-      {
-        throw mcrl2::runtime_error("double declaration of " + msg + " " + core::pp(Name));
-      }
-    }
-    Types=Types+atermpp::make_list<sort_expression>(Sort);
-    user_functions[Name]=Types;
-  }
-  else
-  {
-    user_functions[Name]=atermpp::make_list<sort_expression>(Sort);
-  }
-}
-
-inline
-void data_type_checker::read_sort(const sort_expression &SortExpr)
-{
-  if (is_basic_sort(SortExpr))
-  {
-    check_basic_sort_is_declared(atermpp::down_cast<basic_sort>(SortExpr).name());
-    return;
-  }
-
-  if (is_container_sort(SortExpr))
-  {
-    return read_sort(atermpp::down_cast<container_sort>(SortExpr).element_sort());
-  }
-
-  if (is_function_sort(SortExpr))
-  {
-    const function_sort& fs = atermpp::down_cast<function_sort>(SortExpr);
-    read_sort(fs.codomain());
-
-    for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
-    {
-      read_sort(*i);
-    }
-    return;
-  }
-
-  if (is_structured_sort(SortExpr))
-  {
-    const structured_sort& struct_sort = atermpp::down_cast<structured_sort>(SortExpr);
-    for (structured_sort_constructor_list::const_iterator i=struct_sort.constructors().begin();
-               i!=struct_sort.constructors().end(); ++i)
-    {
-      const structured_sort_constructor &Constr(*i);
-
-      // recognizer -- if present -- a function from SortExpr to Bool
-      core::identifier_string Name=Constr.recogniser();
-      if (Name!=core::empty_identifier_string())
-      {
-        add_function(data::function_symbol(Name,function_sort(atermpp::make_list<sort_expression>(SortExpr),sort_bool::bool_())),"recognizer");
-      }
-
-      // constructor type and projections
-      structured_sort_constructor_argument_list Projs=Constr.arguments();
-      Name=Constr.name();
-      if (Projs.empty())
-      {
-        add_constant(data::function_symbol(Name,SortExpr),"constructor constant");
-        continue;
-      }
-
-      sort_expression_list ConstructorType;
-      for (structured_sort_constructor_argument_list::const_iterator j=Projs.begin(); j!=Projs.end(); ++j)
-      {
-        structured_sort_constructor_argument Proj= *j;
-        sort_expression ProjSort=Proj.sort();
-
-        // not to forget, recursive call for ProjSort ;-)
-        read_sort(ProjSort);
-
-        core::identifier_string ProjName=Proj.name();
-        if (ProjName!=core::empty_identifier_string())
-        {
-          add_function(function_symbol(ProjName,function_sort(atermpp::make_list(SortExpr),ProjSort)),"projection",true);
-        }
-        ConstructorType.push_front(ProjSort);
-      }
-      add_function(data::function_symbol(Name,function_sort(reverse(ConstructorType),SortExpr)),"constructor");
-    }
-    return;
-  }
-}
-
-inline
 sort_expression_list data_type_checker::InsertType(const sort_expression_list TypeList, const sort_expression Type)
 {
   for (sort_expression_list OldTypeList=TypeList; !OldTypeList.empty(); OldTypeList=OldTypeList.tail())
@@ -4684,48 +4761,6 @@ sort_expression_list data_type_checker::GetNotInferredList(const atermpp::term_l
     Result.push_front(Sort);
   }
   return Result;
-}
-
-inline
-data_type_checker::data_type_checker(const data_specification &data_spec)
-      : sort_type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases()),
-        was_warning_upcasting(false),
-        was_ambiguous(false)
-
-{
-  initialise_system_defined_functions();
-
-  try
-  {
-    for (auto i = m_aliases.begin(); i != m_aliases.end(); ++i)
-    {
-      read_sort(i->second);
-    }
-    read_constructors_and_mappings(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
-  }
-  catch (mcrl2::runtime_error &e)
-  {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
-  }
-
-  type_checked_data_spec=data_spec;
-  type_checked_data_spec.declare_data_specification_to_be_type_checked();
-
-  // Type check equations and add them to the specification.
-  try
-  {
-    TransformVarConsTypeData(type_checked_data_spec);
-  }
-  catch (mcrl2::runtime_error &e)
-  {
-    type_checked_data_spec=data_specification(); // Type checking failed. Data specification is not usable.
-    throw mcrl2::runtime_error(std::string(e.what()) + "\nFailed to type check data specification");
-  }
-
-
-  // type_checked_data_spec = FoldSortRefs(type_checked_spec); TODO OUGHT TO BE ADDED
-
-  mCRL2log(log::debug) << "type checking phase finished" << std::endl;
 }
 
 inline
