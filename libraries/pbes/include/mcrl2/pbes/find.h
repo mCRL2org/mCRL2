@@ -16,6 +16,7 @@
 #include <iterator>
 #include <functional>
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/traverser.h"
