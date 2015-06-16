@@ -12,9 +12,10 @@
 #ifndef MCRL2_DATA_DATA_TYPE_CHECKER_H
 #define MCRL2_DATA_DATA_TYPE_CHECKER_H
 
-#define MCRL2_USE_NEW_DATA_TYPE_CHECKER
 #include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/standard_container_utility.h"
+
+#ifdef MCRL2_USE_NEW_TYPE_CHECKER
 
 namespace mcrl2 {
 
@@ -24,7 +25,7 @@ namespace detail {
 
 // Insert an element in the list provided, it did not already occur in the list.
 template<class S>
-inline atermpp::term_list<S> insert_sort_unique(const atermpp::term_list<S> &list, const S &el)
+inline atermpp::term_list<S> insert_sort_unique(const atermpp::term_list<S>& list, const S& el)
 {
   if (std::find(list.begin(),list.end(), el) == list.end())
   {
@@ -208,47 +209,46 @@ class data_type_checker_base: public sort_type_checker
       const sort_expression & Type = f.sort();
       assert(is_function_sort(Type));
 
-      const std::map <core::identifier_string,sort_expression_list>::const_iterator j=m_system_functions.find(OpIdName);
-
+      auto j = m_system_functions.find(OpIdName);
       sort_expression_list Types;
-      if (j!=m_system_functions.end())
+      if (j != m_system_functions.end())
       {
-        Types=j->second;
+        Types = j->second;
       }
-      Types=Types+atermpp::make_list<sort_expression>(Type);  // TODO: Avoid concatenate but the order is essential.
+      Types = Types + atermpp::make_list<sort_expression>(Type);  // TODO: Avoid concatenate but the order is essential.
       m_system_functions[OpIdName]=Types;
     }
 
-    sort_expression unwind_sort_expression(const sort_expression &Type) const
+    sort_expression unwind_sort_expression(const sort_expression& x) const
     {
-      if (is_container_sort(Type))
+      if (is_container_sort(x))
       {
-        const container_sort &cs=atermpp::down_cast<const container_sort>(Type);
-        return container_sort(cs.container_name(),unwind_sort_expression(cs.element_sort()));
+        const container_sort& cs = atermpp::down_cast<const container_sort>(x);
+        return container_sort(cs.container_name(), unwind_sort_expression(cs.element_sort()));
       }
-      if (is_function_sort(Type))
+      if (is_function_sort(x))
       {
-        const function_sort &fs=atermpp::down_cast<function_sort>(Type);
+        const function_sort& fs = atermpp::down_cast<function_sort>(x);
         sort_expression_list NewArgs;
-        for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+        for (const sort_expression& sort: fs.domain())
         {
-          NewArgs.push_front(unwind_sort_expression(*i));
+          NewArgs.push_front(unwind_sort_expression(sort));
         }
-        NewArgs=reverse(NewArgs);
+        NewArgs = reverse(NewArgs);
         return function_sort(NewArgs,unwind_sort_expression(fs.codomain()));
       }
 
-      if (is_basic_sort(Type))
+      if (is_basic_sort(x))
       {
-        const basic_sort &bs=atermpp::down_cast<const basic_sort>(Type);
-        std::map<basic_sort, sort_expression>::const_iterator i=m_aliases.find(bs.name()); if (i==m_aliases.end())
+        const basic_sort &bs=atermpp::down_cast<const basic_sort>(x);
+        auto i = m_aliases.find(bs.name());
+        if (i == m_aliases.end())
         {
-          return Type;
+          return x;
         }
         return unwind_sort_expression(i->second);
       }
-
-      return Type;
+      return x;
     }
 
     bool equal_types(const sort_expression& x1, const sort_expression& x2) const
@@ -4936,5 +4936,7 @@ void data_type_checker::TransformVarConsTypeData(data_specification &data_spec)
 } // namespace data
 
 } // namespace mcrl2
+
+#endif // MCRL2_USE_NEW_TYPE_CHECKER
 
 #endif // MCRL2_DATA_DATA_TYPE_CHECKER_H

@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#ifndef MCRL2_USE_NEW_TYPE_CHECKER
+
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
@@ -87,7 +89,6 @@ static sort_expression mapping(sort_expression s, std::map<sort_expression, basi
 
 } // namespace data
 // ------------------------------  Here starts the new class based sort expression checker -----------------------
-#ifndef MCRL2_USE_NEW_SORT_TYPE_CHECKER
 
 // Fill m_normalized_aliases. Simple aliases are stored from left to
 // right. If the right hand side is non trivial (struct, list, set or bag)
@@ -511,11 +512,9 @@ void mcrl2::data::sort_type_checker::check_for_empty_constructor_domains(functio
     throw mcrl2::runtime_error(e.what());
   }
 }
-#endif // MCRL2_USE_NEW_SORT_TYPE_CHECKER
 
 // ------------------------------  Here ends the new class based sort expression checker -----------------------
 // ------------------------------  Here starts the new class based data expression checker -----------------------
-#ifndef MCRL2_USE_NEW_DATA_TYPE_CHECKER
 
 // The function below is used to check whether a term is well typed.
 // It always yields true, but if the dataterm is not properly typed, using the types
@@ -5176,8 +5175,8 @@ static sort_expression MinType(const sort_expression_list &TypeList)
   return TypeList.front();
 }
 
-#endif // MCRL2_USE_NEW_DATA_TYPE_CHECKER
-
 } //namespace detail
 } //namespace data
 }
+
+#endif // MCRL2_USE_NEW_TYPE_CHECKER

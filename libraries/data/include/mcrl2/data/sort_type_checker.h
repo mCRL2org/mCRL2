@@ -12,11 +12,11 @@
 #ifndef MCRL2_DATA_SORT_TYPE_CHECKER_H
 #define MCRL2_DATA_SORT_TYPE_CHECKER_H
 
-#define MCRL2_USE_NEW_SORT_TYPE_CHECKER
-
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/utilities/logger.h"
+
+#ifdef MCRL2_USE_NEW_TYPE_CHECKER
 
 namespace mcrl2
 {
@@ -482,5 +482,7 @@ class sort_type_checker
 } // namespace data
 
 } // namespace mcrl2
+
+#endif // MCRL2_USE_NEW_TYPE_CHECKER
 
 #endif // MCRL2_DATA_SORT_TYPE_CHECKER_H
