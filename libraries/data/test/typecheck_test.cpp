@@ -24,6 +24,30 @@
 
 using namespace mcrl2;
 
+inline
+data::sort_expression pos()
+{
+  return data::sort_pos::pos();
+}
+
+inline
+data::sort_expression nat()
+{
+  return data::sort_nat::nat();
+}
+
+inline
+data::sort_expression list(const data::sort_expression& x)
+{
+  return data::sort_list::list(x);
+}
+
+inline
+data::variable var(const std::string& name, const data::sort_expression& sort)
+{
+  return data::variable(name, sort);
+}
+
 // Expected failures, these are not going to be fixed in the current
 // implementation of the type checker
 
@@ -110,10 +134,8 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
   return result;
 }
 
-template <typename VariableIterator>
 void test_data_expression(const std::string& de_in,
-                          const VariableIterator begin,
-                          const VariableIterator end,
+                          const data::variable_vector& variable_context,
                           bool expect_success = true,
                           const std::string& expected_sort = "",
                           bool test_type_checker = true)
@@ -133,7 +155,7 @@ void test_data_expression(const std::string& de_in,
   {
     if (expect_success)
     {
-      BOOST_CHECK_NO_THROW(data::type_check(x, begin, end));
+      BOOST_CHECK_NO_THROW(data::type_check(x, variable_context.begin(), variable_context.end()));
       BOOST_CHECK_NE(x, data::data_expression());
 
       std::string de_out = data::pp(x);
@@ -166,7 +188,7 @@ void test_data_expression(const std::string& de_in,
                           bool test_type_checker = true)
 {
   data::variable_vector v;
-  test_data_expression(de_in, v.begin(), v.end(), expect_success, expected_sort, test_type_checker);
+  test_data_expression(de_in, v, expect_success, expected_sort, test_type_checker);
 }
 
 BOOST_AUTO_TEST_CASE(test_true)
@@ -277,46 +299,33 @@ BOOST_AUTO_TEST_CASE(test_list_pos_nat)
 
 BOOST_AUTO_TEST_CASE(test_list_nat_concat_one_two)
 {
-  data::variable_vector v;
-  v.push_back(data::parse_variable("l: List(Nat)"));
-  test_data_expression("l ++ [1, 2]", v.begin(), v.end(), true, "List(Nat)");
+  test_data_expression("l ++ [1, 2]", { var("l", list(nat())) }, true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_pos_concat_one_two)
 {
-  data::variable_vector v;
-  v.push_back(data::parse_variable("l: List(Pos)"));
-  test_data_expression("l ++ [1, 2]", v.begin(), v.end(), true, "List(Pos)");
+
+  test_data_expression("l ++ [1, 2]", { var("l", list(pos())) }, true, "List(Pos)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_zero_concat_list_pos)
 {
-  data::variable_vector v;
-  v.push_back(data::parse_variable("l: List(Pos)"));
-  test_data_expression("[0] ++ l", v.begin(), v.end(), false);
+  test_data_expression("[0] ++ l", { var("l", list(pos())) }, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_list_zero_concat_list_nat)
 {
-  data::variable_vector v;
-  v.push_back(data::parse_variable("l: List(Nat)"));
-  test_data_expression("[0] ++ l", v.begin(), v.end(), true, "List(Nat)");
+  test_data_expression("[0] ++ l", { var("l", list(nat())) }, true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_pos_concat_list_nat)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_list::list(data::sort_pos::pos())));
-  v.push_back(data::variable("y", data::sort_list::list(data::sort_nat::nat())));
-  test_data_expression("x ++ y", v.begin(), v.end(), false);
+  test_data_expression("x ++ y", { var("x", list(pos())), var("y", list(nat())) }, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_list_is_list_nat)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_list::list(data::sort_pos::pos())));
-  v.push_back(data::variable("y", data::sort_list::list(data::sort_nat::nat())));
-  test_data_expression("x == y", v.begin(), v.end(), false);
+  test_data_expression("x == y", { var("x", list(pos())),  var("y", list(nat())) }, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_emptyset)
@@ -439,18 +448,12 @@ BOOST_AUTO_TEST_CASE(test_exists_simple)
 
 BOOST_AUTO_TEST_CASE(test_equal_context)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", parse_sort_expression("struct t?is_t")));
-  v.push_back(data::variable("y", parse_sort_expression("struct t?is_t")));
-  test_data_expression("x == y", v.begin(), v.end(), true, "Bool");
+  test_data_expression("x == y", { var("x", parse_sort_expression("struct t?is_t")), var("y", parse_sort_expression("struct t?is_t")) }, true, "Bool");
 }
 
 BOOST_AUTO_TEST_CASE(test_not_equal_context)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", parse_sort_expression("struct t")));
-  v.push_back(data::variable("y", parse_sort_expression("struct t?is_t")));
-  test_data_expression("x == y", v.begin(), v.end(), false);
+  test_data_expression("x == y", { var("x", parse_sort_expression("struct t")), var("y", parse_sort_expression("struct t?is_t")) }, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_where)
@@ -480,67 +483,43 @@ BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_and_vice_versa)
 
 BOOST_AUTO_TEST_CASE(test_where_in_context)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = 3, y = 10 end", v.begin(), v.end(), true, "Pos");
+  test_data_expression("x + y whr x = 3, y = 10 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_in_context)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = 3, y = x + 10 end", v.begin(), v.end(), true, "Pos");
+  test_data_expression("x + y whr x = 3, y = x + 10 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_and_two_occur_in_two_in_context)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = 3, y = x + y + 10 end", v.begin(), v.end(), true, "Pos");
+  test_data_expression("x + y whr x = 3, y = x + y + 10 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_two_occurs_in_one_in_context)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = y + 10, y = 3 end", v.begin(), v.end(), true, "Pos");
+  test_data_expression("x + y whr x = y + 10, y = 3 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_and_vice_versa_in_context)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = y + 10, y = x + 3 end", v.begin(), v.end(), true, "Pos");
+  test_data_expression("x + y whr x = y + 10, y = x + 3 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_mix_nat_pos_list)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x ++ y whr x = [0, y], y = [x] end", v.begin(), v.end(), false);
+  test_data_expression("x ++ y whr x = [0, y], y = [x] end", { var("x", pos()), var("y", nat()) }, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_where_mix_nat_list)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_nat::nat()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x ++ y whr x = [0, y], y = [x] end", v.begin(), v.end(), true, "List(Nat)");
+  test_data_expression("x ++ y whr x = [0, y], y = [x] end", { var("x", nat()), var("y", nat()) }, true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_upcast_pos2nat)
 {
-  data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y", v.begin(), v.end(), true, "Pos");
-  test_data_expression("x == y", v.begin(), v.end(), true, "Bool");
+  test_data_expression("x + y", { var("x", pos()), var("y", nat()) }, true, "Pos");
+  test_data_expression("x == y", { var("x", pos()), var("y", nat()) }, true, "Bool");
 }
 
 void test_data_specification(const std::string& ds_in,
@@ -846,11 +825,9 @@ BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker 
 }
 
 
-template <typename VariableIterator>
 void test_data_expression_in_specification_context(const std::string& de_in,
     const std::string& ds_in,
-    const VariableIterator begin,
-    const VariableIterator end,
+    const data::variable_vector& variable_context,
     bool expect_success = true,
     const std::string& expected_sort = "",
     bool test_type_checker = true)
@@ -874,7 +851,7 @@ void test_data_expression_in_specification_context(const std::string& de_in,
   {
     if (expect_success)
     {
-      data::type_check(de, begin, end, ds);
+      data::type_check(de, variable_context.begin(), variable_context.end(), ds);
 
       std::string de_out = data::pp(de);
 
@@ -886,7 +863,7 @@ void test_data_expression_in_specification_context(const std::string& de_in,
     }
     else
     {
-      BOOST_CHECK_THROW(data::type_check(de, begin, end, ds), mcrl2::runtime_error);
+      BOOST_CHECK_THROW(data::type_check(de, variable_context.begin(), variable_context.end(), ds), mcrl2::runtime_error);
     }
   }
 }
@@ -898,7 +875,7 @@ void test_data_expression_in_specification_context(const std::string& de_in,
     bool test_type_checker = true)
 {
   data::variable_vector v;
-  test_data_expression_in_specification_context(de_in, ds_in, v.begin(), v.end(), expect_success, expected_sort, test_type_checker);
+  test_data_expression_in_specification_context(de_in, ds_in, v, expect_success, expected_sort, test_type_checker);
 }
 
 BOOST_AUTO_TEST_CASE(test_data_expressions_different_signature)
@@ -919,12 +896,12 @@ BOOST_AUTO_TEST_CASE(test_data_expressions_struct)
 {
   data::variable_vector v;
   data::basic_sort s("S");
-  v.push_back(data::variable("x", s));
+  v.push_back(var("x", s));
 
   test_data_expression_in_specification_context(
     "x == t(e(3))",
     "sort S = struct t(struct e(Nat));\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Bool"
   );
@@ -934,12 +911,12 @@ BOOST_AUTO_TEST_CASE(test_lambda_variable_aliasing)
 {
   data::variable_vector v;
   data::function_sort s = make_function_sort(data::basic_sort("S"), data::basic_sort("T"));
-  v.push_back(data::variable("x", s));
+  v.push_back(var("x", s));
   test_data_expression_in_specification_context(
     "lambda x: S. x(x)",
     "sort S;\n"
     "     T;\n",
-    v.begin(), v.end(),
+    v,
     false);
 }
 
@@ -1089,12 +1066,12 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_pos_constant
 BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_nat_variable)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_nat::nat()));
+  v.push_back(var("x", nat()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Pos -> Nat;\n"
     "     f: Nat -> Pos;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Pos"
   );
@@ -1103,12 +1080,12 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_nat_variable
 BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_pos_variable)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Pos -> Nat;\n"
     "     f: Nat -> Pos;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Nat"
   );
@@ -1156,11 +1133,11 @@ BOOST_AUTO_TEST_CASE(test_function_application_int_constant)
 BOOST_AUTO_TEST_CASE(test_function_application_pos_variable)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Nat -> Bool;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Bool"
   );
@@ -1169,11 +1146,11 @@ BOOST_AUTO_TEST_CASE(test_function_application_pos_variable)
 BOOST_AUTO_TEST_CASE(test_function_application_nat_variable)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_nat::nat()));
+  v.push_back(var("x", nat()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Nat -> Bool;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Bool"
   );
@@ -1182,11 +1159,11 @@ BOOST_AUTO_TEST_CASE(test_function_application_nat_variable)
 BOOST_AUTO_TEST_CASE(test_function_application_int_variable)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_int::int_()));
+  v.push_back(var("x", data::sort_int::int_()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Nat -> Bool;\n",
-    v.begin(), v.end(),
+    v,
     false
   );
 }
@@ -1233,11 +1210,11 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_int_constant)
 BOOST_AUTO_TEST_CASE(test_struct_constructor_application_pos_variable)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "c(x)",
     "sort S = struct c(Nat);\n",
-    v.begin(), v.end(),
+    v,
     true,
     "struct c(Nat)"
   );
@@ -1246,11 +1223,11 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_pos_variable)
 BOOST_AUTO_TEST_CASE(test_struct_constructor_application_nat_variable)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_nat::nat()));
+  v.push_back(var("x", nat()));
   test_data_expression_in_specification_context(
     "c(x)",
     "sort S = struct c(Nat);\n",
-    v.begin(), v.end(),
+    v,
     true,
     "struct c(Nat)"
   );
@@ -1259,11 +1236,11 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_nat_variable)
 BOOST_AUTO_TEST_CASE(test_struct_constructor_application_int_variable)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_int::int_()));
+  v.push_back(var("x", data::sort_int::int_()));
   test_data_expression_in_specification_context(
     "c(x)",
     "sort S = struct c(Nat);\n",
-    v.begin(), v.end(),
+    v,
     false
   );
 }
@@ -1287,8 +1264,8 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application1)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
+  v.push_back(var("x", pos()));
+  v.push_back(var("y", nat()));
 
   test_data_expression_in_specification_context(
     "f(x, x)",
@@ -1299,7 +1276,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application1)
     "     f: Pos # Nat -> U;\n"
     "     f: Pos # Pos -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "S"
   );
@@ -1308,8 +1285,8 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application1)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application2)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
+  v.push_back(var("x", pos()));
+  v.push_back(var("y", nat()));
 
   test_data_expression_in_specification_context(
     "f(x, y)",
@@ -1320,7 +1297,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application2)
     "     f: Pos # Nat -> U;\n"
     "     f: Pos # Pos -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "U"
   );
@@ -1329,8 +1306,8 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application2)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application3)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
+  v.push_back(var("x", pos()));
+  v.push_back(var("y", nat()));
 
   test_data_expression_in_specification_context(
     "f(y, x)",
@@ -1341,7 +1318,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application3)
     "     f: Pos # Nat -> U;\n"
     "     f: Pos # Pos -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "T"
   );
@@ -1350,8 +1327,8 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application3)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
+  v.push_back(var("x", pos()));
+  v.push_back(var("y", nat()));
 
   test_data_expression_in_specification_context(
     "f(x, x)",
@@ -1362,7 +1339,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4)
     "     f: Pos # Nat -> U;\n"
     "     f: Nat # Nat -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "S"
   );
@@ -1371,8 +1348,8 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4a)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
+  v.push_back(var("x", pos()));
+  v.push_back(var("y", nat()));
 
   test_data_expression_in_specification_context(
     "f(x, x)",
@@ -1383,7 +1360,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4a)
     "     f: Pos # Nat -> U;\n"
     "     f: Nat # Nat -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "S"
   );
@@ -1392,8 +1369,8 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4a)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application5)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
-  v.push_back(data::variable("y", data::sort_nat::nat()));
+  v.push_back(var("x", pos()));
+  v.push_back(var("y", nat()));
 
   test_data_expression_in_specification_context(
     "f(x, x)",
@@ -1404,7 +1381,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application5)
     "     f: Nat # Nat -> S;\n"
     "     f: Nat # Pos -> T;\n"
     "     f: Pos # Nat -> U;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "S"
   );
@@ -1413,13 +1390,13 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application5)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "g(f(x))",
     "map  g: Int -> Bool;\n"
     "     f: Pos -> Nat;\n"
     "     f: Pos -> Int;\n",
-    v.begin(), v.end(),
+    v,
     false
   );
 }
@@ -1427,14 +1404,14 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive2)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "g(f(x))",
     "map  g: Int -> Bool;\n"
     "     f: Pos -> Nat;\n"
     "     f: Pos -> Int;\n"
     "     g: Int -> Int;\n",
-    v.begin(), v.end(),
+    v,
     false
   );
 }
@@ -1442,13 +1419,13 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive2)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive3)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "g(f(x))",
     "map  g: Int -> Bool;\n"
     "     f: Pos -> Nat;\n"
     "     f,g: Int -> Int;\n",
-    v.begin(), v.end(),
+    v,
     false,
     "Bool"
   );
@@ -1457,14 +1434,14 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive3)
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive4)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "g(f(x))",
     "map  g: Int -> Bool;\n"
     "     f: Pos -> Nat;\n"
     "     f: Pos -> Int;\n"
     "     g: Nat -> Int;\n",
-    v.begin(), v.end(),
+    v,
     false
   );
 }
@@ -1472,14 +1449,14 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive4)
 BOOST_AUTO_TEST_CASE(test_aliases)
 {
   data::variable_vector v;
-  v.push_back(data::variable("f", data::basic_sort("A")));
-  v.push_back(data::variable("g", data::sort_list::list(data::basic_sort("C"))));
+  v.push_back(var("f", data::basic_sort("A")));
+  v.push_back(var("g", list(data::basic_sort("C"))));
   test_data_expression_in_specification_context(
     "f == g",
     "sort A = List(List(B));\n"
     "     C = List(B);\n"
     "     B;\n",
-    v.begin(), v.end(),
+    v,
     true
   );
 }
@@ -1490,7 +1467,7 @@ BOOST_AUTO_TEST_CASE(test_bag_with_pos_as_argument)
   test_data_expression_in_specification_context(
     "{ n: Pos | n + 1 }",
     "sort dummy;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Bag(Pos)"
   );
@@ -1502,7 +1479,7 @@ BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument1)
   test_data_expression_in_specification_context(
     "{ n: Pos | 0 }",
     "sort dummy;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Bag(Pos)"
   );
@@ -1514,7 +1491,7 @@ BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument2)
   test_data_expression_in_specification_context(
     "{ n: Nat | n }",
     "sort dummy;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Bag(Nat)"
   );
@@ -1526,7 +1503,7 @@ BOOST_AUTO_TEST_CASE(test_bag_with_real_as_argument)
   test_data_expression_in_specification_context(
     "{ n: Pos | 2 / 3 }",
     "sort dummy;\n",
-    v.begin(), v.end(),
+    v,
     false
   );
 }
@@ -1537,13 +1514,13 @@ BOOST_AUTO_TEST_CASE(test_bag_with_real_as_argument)
 BOOST_AUTO_TEST_CASE(test_ambiguous_projection_function)
 {
   data::variable_vector v;
-  v.push_back(data::variable("p", data::basic_sort("T")));
+  v.push_back(var("p", data::basic_sort("T")));
   test_data_expression_in_specification_context(
     "R(pi_1(p)) && IS_T1(p)",
     "sort S;\n"
     "     T = struct T0 | T1(pi_1: T)?IS_T1 | T2(pi_1: S)?IS_T2;\n\n"
     "map  R: T -> Bool;\n",
-    v.begin(),v.end(),
+    v,
     false     // <-------------- Should be set to true with a new typechecker ---------------------------------------
   );
 }
@@ -1567,7 +1544,7 @@ BOOST_AUTO_TEST_CASE(test_avoidance_of_possible_types)
   test_data_expression_in_specification_context(
     "#[0, 1] == -1",
     "sort dummy;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Bool"
   );
@@ -1580,7 +1557,7 @@ BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos)
   test_data_expression_in_specification_context(
     "f(Int2Pos(-1))",
     "map  f: Pos -> Bool;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Bool"
   );
@@ -1598,7 +1575,7 @@ BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos1)
     "map  fpos: Pos -> Bool;\n"
     "     fnat: Nat -> Bool;\n"
     "     fint: Int -> Bool;\n",
-    v.begin(), v.end(),
+    v,
     true,
     "Bool"
   );
