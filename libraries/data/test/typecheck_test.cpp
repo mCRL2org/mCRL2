@@ -894,14 +894,10 @@ BOOST_AUTO_TEST_CASE(test_data_expressions_different_signature)
 
 BOOST_AUTO_TEST_CASE(test_data_expressions_struct)
 {
-  data::variable_vector v;
-  data::basic_sort s("S");
-  v.push_back(var("x", s));
-
   test_data_expression_in_specification_context(
     "x == t(e(3))",
     "sort S = struct t(struct e(Nat));\n",
-    v,
+    { var("x", data::basic_sort("S")) },
     true,
     "Bool"
   );
@@ -909,14 +905,11 @@ BOOST_AUTO_TEST_CASE(test_data_expressions_struct)
 
 BOOST_AUTO_TEST_CASE(test_lambda_variable_aliasing)
 {
-  data::variable_vector v;
-  data::function_sort s = make_function_sort(data::basic_sort("S"), data::basic_sort("T"));
-  v.push_back(var("x", s));
   test_data_expression_in_specification_context(
     "lambda x: S. x(x)",
     "sort S;\n"
     "     T;\n",
-    v,
+    { var("x", make_function_sort(data::basic_sort("S"), data::basic_sort("T"))) },
     false);
 }
 
@@ -1065,13 +1058,11 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_pos_constant
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_nat_variable)
 {
-  data::variable_vector v;
-  v.push_back(var("x", nat()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Pos -> Nat;\n"
     "     f: Nat -> Pos;\n",
-    v,
+    { var("x", nat()) },
     true,
     "Pos"
   );
@@ -1079,13 +1070,11 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_nat_variable
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_pos_variable)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Pos -> Nat;\n"
     "     f: Nat -> Pos;\n",
-    v,
+    { var("x", pos()) },
     true,
     "Nat"
   );
@@ -1132,12 +1121,10 @@ BOOST_AUTO_TEST_CASE(test_function_application_int_constant)
 
 BOOST_AUTO_TEST_CASE(test_function_application_pos_variable)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Nat -> Bool;\n",
-    v,
+    { var("x", pos()) },
     true,
     "Bool"
   );
@@ -1145,12 +1132,10 @@ BOOST_AUTO_TEST_CASE(test_function_application_pos_variable)
 
 BOOST_AUTO_TEST_CASE(test_function_application_nat_variable)
 {
-  data::variable_vector v;
-  v.push_back(var("x", nat()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Nat -> Bool;\n",
-    v,
+    { var("x", nat()) },
     true,
     "Bool"
   );
@@ -1158,12 +1143,10 @@ BOOST_AUTO_TEST_CASE(test_function_application_nat_variable)
 
 BOOST_AUTO_TEST_CASE(test_function_application_int_variable)
 {
-  data::variable_vector v;
-  v.push_back(var("x", data::sort_int::int_()));
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Nat -> Bool;\n",
-    v,
+    { var("x", data::sort_int::int_()) },
     false
   );
 }
@@ -1209,12 +1192,10 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_int_constant)
 
 BOOST_AUTO_TEST_CASE(test_struct_constructor_application_pos_variable)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "c(x)",
     "sort S = struct c(Nat);\n",
-    v,
+    { var("x", pos()) },
     true,
     "struct c(Nat)"
   );
@@ -1222,12 +1203,10 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_pos_variable)
 
 BOOST_AUTO_TEST_CASE(test_struct_constructor_application_nat_variable)
 {
-  data::variable_vector v;
-  v.push_back(var("x", nat()));
   test_data_expression_in_specification_context(
     "c(x)",
     "sort S = struct c(Nat);\n",
-    v,
+    { var("x", nat()) },
     true,
     "struct c(Nat)"
   );
@@ -1235,12 +1214,10 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_nat_variable)
 
 BOOST_AUTO_TEST_CASE(test_struct_constructor_application_int_variable)
 {
-  data::variable_vector v;
-  v.push_back(var("x", data::sort_int::int_()));
   test_data_expression_in_specification_context(
     "c(x)",
     "sort S = struct c(Nat);\n",
-    v,
+    { var("x", data::sort_int::int_()) },
     false
   );
 }
@@ -1263,10 +1240,6 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function)
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application1)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
-  v.push_back(var("y", nat()));
-
   test_data_expression_in_specification_context(
     "f(x, x)",
     "sort U;\n"
@@ -1276,7 +1249,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application1)
     "     f: Pos # Nat -> U;\n"
     "     f: Pos # Pos -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v,
+    { var("x", pos()), var("y", nat()) },
     true,
     "S"
   );
@@ -1284,10 +1257,6 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application1)
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application2)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
-  v.push_back(var("y", nat()));
-
   test_data_expression_in_specification_context(
     "f(x, y)",
     "sort U;\n"
@@ -1297,7 +1266,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application2)
     "     f: Pos # Nat -> U;\n"
     "     f: Pos # Pos -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v,
+    { var("x", pos()), var("y", nat()) },
     true,
     "U"
   );
@@ -1305,10 +1274,6 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application2)
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application3)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
-  v.push_back(var("y", nat()));
-
   test_data_expression_in_specification_context(
     "f(y, x)",
     "sort U;\n"
@@ -1318,7 +1283,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application3)
     "     f: Pos # Nat -> U;\n"
     "     f: Pos # Pos -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v,
+    { var("x", pos()), var("y", nat()) },
     true,
     "T"
   );
@@ -1326,10 +1291,6 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application3)
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
-  v.push_back(var("y", nat()));
-
   test_data_expression_in_specification_context(
     "f(x, x)",
     "sort S;\n"
@@ -1339,7 +1300,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4)
     "     f: Pos # Nat -> U;\n"
     "     f: Nat # Nat -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v,
+    { var("x", pos()), var("y", nat()) },
     true,
     "S"
   );
@@ -1347,10 +1308,6 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4)
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4a)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
-  v.push_back(var("y", nat()));
-
   test_data_expression_in_specification_context(
     "f(x, x)",
     "sort U;\n"
@@ -1360,7 +1317,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4a)
     "     f: Pos # Nat -> U;\n"
     "     f: Nat # Nat -> S;\n"
     "     f: Nat # Pos -> T;\n",
-    v,
+    { var("x", pos()), var("y", nat()) },
     true,
     "S"
   );
@@ -1368,10 +1325,6 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4a)
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application5)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
-  v.push_back(var("y", nat()));
-
   test_data_expression_in_specification_context(
     "f(x, x)",
     "sort S;\n"
@@ -1381,7 +1334,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application5)
     "     f: Nat # Nat -> S;\n"
     "     f: Nat # Pos -> T;\n"
     "     f: Pos # Nat -> U;\n",
-    v,
+    { var("x", pos()), var("y", nat()) },
     true,
     "S"
   );
@@ -1389,43 +1342,37 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application5)
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "g(f(x))",
     "map  g: Int -> Bool;\n"
     "     f: Pos -> Nat;\n"
     "     f: Pos -> Int;\n",
-    v,
+    { var("x", pos()) },
     false
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive2)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "g(f(x))",
     "map  g: Int -> Bool;\n"
     "     f: Pos -> Nat;\n"
     "     f: Pos -> Int;\n"
     "     g: Int -> Int;\n",
-    v,
+    { var("x", pos()) },
     false
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive3)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "g(f(x))",
     "map  g: Int -> Bool;\n"
     "     f: Pos -> Nat;\n"
     "     f,g: Int -> Int;\n",
-    v,
+    { var("x", pos()) },
     false,
     "Bool"
   );
@@ -1433,41 +1380,35 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive3)
 
 BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive4)
 {
-  data::variable_vector v;
-  v.push_back(var("x", pos()));
   test_data_expression_in_specification_context(
     "g(f(x))",
     "map  g: Int -> Bool;\n"
     "     f: Pos -> Nat;\n"
     "     f: Pos -> Int;\n"
     "     g: Nat -> Int;\n",
-    v,
+    { var("x", pos()) },
     false
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_aliases)
 {
-  data::variable_vector v;
-  v.push_back(var("f", data::basic_sort("A")));
-  v.push_back(var("g", list(data::basic_sort("C"))));
   test_data_expression_in_specification_context(
     "f == g",
     "sort A = List(List(B));\n"
     "     C = List(B);\n"
     "     B;\n",
-    v,
+    { var("f", data::basic_sort("A")), var("g", list(data::basic_sort("C"))) },
     true
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_with_pos_as_argument)
 {
-  data::variable_vector v;
   test_data_expression_in_specification_context(
     "{ n: Pos | n + 1 }",
     "sort dummy;\n",
-    v,
+    { },
     true,
     "Bag(Pos)"
   );
@@ -1475,11 +1416,10 @@ BOOST_AUTO_TEST_CASE(test_bag_with_pos_as_argument)
 
 BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument1)
 {
-  data::variable_vector v;
   test_data_expression_in_specification_context(
     "{ n: Pos | 0 }",
     "sort dummy;\n",
-    v,
+    { },
     true,
     "Bag(Pos)"
   );
@@ -1487,11 +1427,10 @@ BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument1)
 
 BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument2)
 {
-  data::variable_vector v;
   test_data_expression_in_specification_context(
     "{ n: Nat | n }",
     "sort dummy;\n",
-    v,
+    { },
     true,
     "Bag(Nat)"
   );
@@ -1499,11 +1438,10 @@ BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument2)
 
 BOOST_AUTO_TEST_CASE(test_bag_with_real_as_argument)
 {
-  data::variable_vector v;
   test_data_expression_in_specification_context(
     "{ n: Pos | 2 / 3 }",
     "sort dummy;\n",
-    v,
+    data::variable_vector(),
     false
   );
 }
@@ -1513,14 +1451,12 @@ BOOST_AUTO_TEST_CASE(test_bag_with_real_as_argument)
  * be enabled with a new typechecker. */
 BOOST_AUTO_TEST_CASE(test_ambiguous_projection_function)
 {
-  data::variable_vector v;
-  v.push_back(var("p", data::basic_sort("T")));
   test_data_expression_in_specification_context(
     "R(pi_1(p)) && IS_T1(p)",
     "sort S;\n"
     "     T = struct T0 | T1(pi_1: T)?IS_T1 | T2(pi_1: S)?IS_T2;\n\n"
     "map  R: T -> Bool;\n",
-    v,
+    { var("p", data::basic_sort("T")) },
     false     // <-------------- Should be set to true with a new typechecker ---------------------------------------
   );
 }
@@ -1540,11 +1476,10 @@ BOOST_AUTO_TEST_CASE(test_lambda_term_with_wrong_number_of_arguments)
       causing confusion in the other tools */
 BOOST_AUTO_TEST_CASE(test_avoidance_of_possible_types)
 {
-  data::variable_vector v;
   test_data_expression_in_specification_context(
     "#[0, 1] == -1",
     "sort dummy;\n",
-    v,
+    { },
     true,
     "Bool"
   );
@@ -1553,11 +1488,10 @@ BOOST_AUTO_TEST_CASE(test_avoidance_of_possible_types)
 /* The next example checks whether Int2Pos is properly typed. */
 BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos)
 {
-  data::variable_vector v;
   test_data_expression_in_specification_context(
     "f(Int2Pos(-1))",
     "map  f: Pos -> Bool;\n",
-    v,
+    { },
     true,
     "Bool"
   );
@@ -1567,7 +1501,6 @@ BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos)
  * numbers are properly typable.*/
 BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos1)
 {
-  data::variable_vector v;
   test_data_expression_in_specification_context(
     "fpos(Nat2Pos(0)) && fpos(Int2Pos(-1)) && fpos(Real2Pos(1 / 2)) && "
     "fnat(Int2Nat(-1)) && fnat(Real2Nat(1 / 2)) && "
@@ -1575,7 +1508,7 @@ BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos1)
     "map  fpos: Pos -> Bool;\n"
     "     fnat: Nat -> Bool;\n"
     "     fint: Int -> Bool;\n",
-    v,
+    { },
     true,
     "Bool"
   );
