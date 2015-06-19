@@ -41,6 +41,175 @@ atermpp::term_list<T> transform_aterm_list(const Function& f, const atermpp::ter
   return atermpp::reverse(result);
 }
 
+inline
+sort_expression unwind_sort_expression(const sort_expression& x, const std::map<basic_sort, sort_expression>& aliases)
+{
+  if (is_container_sort(x))
+  {
+    const container_sort& cs = atermpp::down_cast<const container_sort>(x);
+    return container_sort(cs.container_name(), unwind_sort_expression(cs.element_sort(), aliases));
+  }
+  else if (is_function_sort(x))
+  {
+    const function_sort& fs = atermpp::down_cast<function_sort>(x);
+    auto new_arguments = detail::transform_aterm_list([&](const sort_expression& s) { return unwind_sort_expression(s, aliases); }, fs.domain());
+    return function_sort(new_arguments, unwind_sort_expression(fs.codomain(), aliases));
+  }
+  else if (is_basic_sort(x))
+  {
+    const basic_sort& bs = atermpp::down_cast<const basic_sort>(x);
+    auto i = aliases.find(bs.name());
+    if (i == aliases.end())
+    {
+      return x;
+    }
+    return unwind_sort_expression(i->second, aliases);
+  }
+  return x;
+}
+
+template <template <class> class Traverser, class Derived>
+struct strict_typecheck_traverser: public Traverser<Derived>
+{
+  typedef Traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  bool result;
+  const std::map<basic_sort, sort_expression>& aliases;
+
+  strict_typecheck_traverser(const std::map<basic_sort, sort_expression>& aliases_)
+    : result(true), aliases(aliases_)
+  {}
+
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
+  void enter(const lambda& x)
+  {
+    if (x.variables().empty())
+    {
+      result = false;
+    }
+  }
+
+  void enter(const forall& x)
+  {
+    if (x.variables().empty())
+    {
+      result = false;
+    }
+    if (x.sort() != sort_bool::bool_())
+    {
+      result = false;
+    }
+  }
+
+  void enter(const exists& x)
+  {
+    if (x.variables().empty())
+    {
+      result = false;
+    }
+    if (x.sort() != sort_bool::bool_())
+    {
+      result = false;
+    }
+  }
+
+  void enter(const application& x)
+  {
+    if (is_function_symbol(x.head()))
+    {
+      const function_symbol& fs = atermpp::down_cast<function_symbol>(x.head());
+      if (fs.name() == sort_list::list_enumeration_name())
+      {
+        if (!sort_list::is_list(x.sort()))
+        {
+          result = false;
+        }
+      }
+      else if (fs.name() == sort_set::set_enumeration_name())
+      {
+        const sort_expression& element_sort = atermpp::down_cast<container_sort>(x.sort()).element_sort();
+        if (!sort_fset::is_fset(x.sort()))
+        {
+          result = false;
+        }
+        for (const data_expression& arg: x)
+        {
+          if (arg.sort() != element_sort)
+          {
+            result = false;
+          }
+        }
+      }
+      else if (fs.name() == sort_bag::bag_enumeration_name())
+      {
+        const sort_expression& element_sort = atermpp::down_cast<container_sort>(x.sort()).element_sort();
+        if (!sort_fbag::is_fbag(x.sort()))
+        {
+          result = false;
+        }
+        for (auto i = x.begin(); i != x.end(); ++i)
+        {
+          if (i->sort() != element_sort)
+          {
+            result = false;
+          }
+          // Every second element in a bag enumeration should be of type Nat.
+          ++i;
+          if (i->sort() != sort_nat::nat())
+          {
+            result = false;
+          }
+        }
+      }
+    }
+    if (is_function_sort(x.head().sort()))
+    {
+      const function_sort& hs = atermpp::down_cast<function_sort>(x.head().sort());
+      const sort_expression_list& domain = hs.domain();
+      if (x.sort() != hs.codomain())
+      {
+        result = false;
+      }
+      if (x.size() != domain.size())
+      {
+        result = false;
+      }
+      auto j = x.begin();
+      for (auto i = domain.begin(); i != domain.end(); ++i, ++j)
+      {
+        if (unwind_sort_expression(*i, aliases) != unwind_sort_expression(j->sort(), aliases))
+        {
+          result = false;
+        }
+      }
+    }
+    else
+    {
+      result = false;
+    }
+  }
+};
+
+struct strict_typecheck_traverser_inst: public strict_typecheck_traverser<data::data_expression_traverser, strict_typecheck_traverser_inst>
+{
+  typedef strict_typecheck_traverser<data::data_expression_traverser, strict_typecheck_traverser_inst> super;
+
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  strict_typecheck_traverser_inst(const std::map<basic_sort, sort_expression>& aliases)
+    : super(aliases)
+  { }
+};
+
 // Insert an element in the list provided, it did not already occur in the list.
 template<class S>
 inline atermpp::term_list<S> insert_sort_unique(const atermpp::term_list<S>& list, const S& el)
@@ -221,28 +390,7 @@ class data_type_checker_base: public sort_type_checker
 
     sort_expression unwind_sort_expression(const sort_expression& x) const
     {
-      if (is_container_sort(x))
-      {
-        const container_sort& cs = atermpp::down_cast<const container_sort>(x);
-        return container_sort(cs.container_name(), unwind_sort_expression(cs.element_sort()));
-      }
-      else if (is_function_sort(x))
-      {
-        const function_sort& fs = atermpp::down_cast<function_sort>(x);
-        auto new_arguments = detail::transform_aterm_list([&](const sort_expression& s) { return unwind_sort_expression(s); }, fs.domain());
-        return function_sort(new_arguments, unwind_sort_expression(fs.codomain()));
-      }
-      else if (is_basic_sort(x))
-      {
-        const basic_sort& bs = atermpp::down_cast<const basic_sort>(x);
-        auto i = m_aliases.find(bs.name());
-        if (i == m_aliases.end())
-        {
-          return x;
-        }
-        return unwind_sort_expression(i->second);
-      }
-      return x;
+      return detail::unwind_sort_expression(x, m_aliases);
     }
 
     bool equal_types(const sort_expression& x1, const sort_expression& x2) const
@@ -622,6 +770,16 @@ class data_type_checker_base: public sort_type_checker
       check_for_empty_constructor_domains(function_symbol_list(constructors.begin(), constructors.end())); // throws exception if not ok.
     }
 
+    // Check if x is well typed
+    bool strict_type_check(const data_expression& x)
+    {
+      mCRL2log(log::debug) << "Strict type check: " << x << std::endl;
+      detail::strict_typecheck_traverser_inst f(m_aliases);
+      f.apply(x);
+      assert(f.result);
+      return true;
+    }
+
   public:
     data_type_checker_base(const data_specification& data_spec)
       : sort_type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases())
@@ -807,130 +965,7 @@ class data_type_checker: public data_type_checker_base
     bool IsTypeAllowedA(const sort_expression &Type, const sort_expression &PosType);
     bool IsTypeAllowedL(const sort_expression_list &TypeList, const sort_expression_list PosTypeList);
     bool IsNotInferredL(sort_expression_list TypeList);
-    bool strict_type_check(const data_expression& d);
 };
-
-// that are included inside the term it calls an assert. This function is useful to check
-// whether typing was succesful, using assert(strict_type_check(d)).
-
-inline
-bool data_type_checker::strict_type_check(const data_expression& d)
-{
-  mCRL2log(log::debug) << "Strict type check: " << d << "\n" << d << "\n";
-
-  if (is_abstraction(d))
-  {
-    const abstraction& abstr=atermpp::down_cast<const abstraction>(d);
-    assert(abstr.variables().size()>0);
-    binder_type BindingOperator = abstr.binding_operator();
-
-    if (is_forall_binder(BindingOperator) || is_exists_binder(BindingOperator))
-    {
-      assert(d.sort()==sort_bool::bool_());
-      strict_type_check(abstr.body());
-    }
-
-    if (is_lambda_binder(BindingOperator))
-    {
-      variable_list VarList=abstr.variables();
-      strict_type_check(abstr.body());
-    }
-    return true;
-  }
-
-  if (is_where_clause(d))
-  {
-    const where_clause &where=atermpp::down_cast<const where_clause>(d);
-    const assignment_expression_list& where_asss=where.declarations();
-    for (assignment_expression_list::const_iterator i=where_asss.begin(); i!=where_asss.end(); ++i)
-    {
-      const assignment_expression WhereElem= *i;
-      const assignment& t=atermpp::down_cast<const assignment>(WhereElem);
-      strict_type_check(t.rhs());
-    }
-    strict_type_check(where.body());
-    return true;
-  }
-
-  if (is_application(d))
-  {
-    application appl=atermpp::down_cast<application>(d);
-    data_expression head = appl.head();
-
-    if (data::is_function_symbol(head))
-    {
-      core::identifier_string name = function_symbol(head).name();
-      if (name == sort_list::list_enumeration_name())
-      {
-        const sort_expression s=d.sort();
-        assert(sort_list::is_list(s));
-        const sort_expression s1=container_sort(s).element_sort();
-
-        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
-        {
-          strict_type_check(*i);
-          assert(i->sort()==s1);
-
-        }
-        return true;
-      }
-      if (name == sort_set::set_enumeration_name())
-      {
-        const sort_expression s=d.sort();
-        assert(sort_fset::is_fset(s));
-        const sort_expression s1=container_sort(s).element_sort();
-
-        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
-        {
-          strict_type_check(*i);
-          assert(i->sort()==s1);
-
-        }
-        return true;
-      }
-      if (name == sort_bag::bag_enumeration_name())
-      {
-        const sort_expression s=d.sort();
-        assert(sort_fbag::is_fbag(s));
-        const sort_expression s1=container_sort(s).element_sort();
-
-        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
-        {
-          strict_type_check(*i);
-          assert(i->sort()==s1);
-          // Every second element in a bag enumeration should be of type Nat.
-          ++i;
-          strict_type_check(*i);
-          assert(i->sort()==sort_nat::nat());
-
-        }
-        return true;
-
-      }
-    }
-    strict_type_check(head);
-    const sort_expression &s=head.sort();
-    assert(is_function_sort(s));
-    assert(d.sort()==function_sort(s).codomain());
-    sort_expression_list argument_sorts=function_sort(s).domain();
-    assert(appl.size()==argument_sorts.size());
-    application::const_iterator j=appl.begin();
-    for(sort_expression_list::const_iterator i=argument_sorts.begin(); i!=argument_sorts.end(); ++i,++j)
-    {
-      assert(UnwindType(j->sort())==UnwindType(*i));
-      strict_type_check(*j);
-    }
-    return true;
-  }
-
-  if (data::is_function_symbol(d)||is_variable(d))
-  {
-    return true;
-  }
-
-  assert(0); // Unexpected data_expression.
-  return true;
-}
 
 inline
 bool data_type_checker::VarsUnique(const variable_list &VarDecls)
