@@ -530,12 +530,13 @@ class lts
       map < labels_size_type, labels_size_type> map_multiaction_indices;
       for (labels_size_type i=0; i<num_action_labels(); ++i)
       {
-        for (labels_size_type j=0; j!=i; ++j)
+        for (labels_size_type j=0; j<i; ++j)
         {
           if (action_label(i)==action_label(j))
           {
             assert(map_multiaction_indices.count(i)==0);
-            map_multiaction_indices.insert(pair<labels_size_type, labels_size_type>(i,j));
+            assert(is_tau(i)==is_tau(j));
+            map_multiaction_indices[i]=j;
             break;
           }
         }

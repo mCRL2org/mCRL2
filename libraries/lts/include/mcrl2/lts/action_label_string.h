@@ -108,7 +108,7 @@ class action_label_string: public std::string
       else
       {
         assign(ns);
-        return false;
+        return (ns=="tau");
       }
     }
 
