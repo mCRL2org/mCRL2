@@ -167,9 +167,17 @@ class data_type_checker: public sort_type_checker
                            const size_t nFactPars=std::string::npos,
                            const bool warn_upcasting=false,
                            const bool print_cast_error=true);
-    void AddVars2Table(std::map<core::identifier_string,sort_expression> &Vars,
-                       variable_list VarDecls,
-                       std::map<core::identifier_string,sort_expression> &result);
+    void AddVars2Table(std::map<core::identifier_string, sort_expression>& variable_map, const variable_list& declared_variables)
+    {
+      for (const variable& v: declared_variables)
+      {
+        // TODO: this should be checked elsewhere
+        check_sort_is_declared(v.sort());
+        variable_map[v.name()] = v.sort();
+      }
+      result = variable_map;
+    }
+
     bool InTypesA(sort_expression Type, sort_expression_list Types);
     bool EqTypesA(sort_expression Type1, sort_expression Type2);
     bool InTypesL(sort_expression_list Type, atermpp::term_list<sort_expression_list> Types);

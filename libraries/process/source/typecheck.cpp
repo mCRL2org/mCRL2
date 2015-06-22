@@ -911,7 +911,8 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     process_expression NewProc;
     try
     {
-      AddVars2Table(CopyVars,t.variables(),NewVars);
+      AddVars2Table(CopyVars, t.variables());
+      NewVars = CopyVars;
       NewProc=TraverseActProcVarConstP(NewVars,t.operand());
     }
     catch (mcrl2::runtime_error &e)
@@ -927,11 +928,11 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     CopyVars=Vars;
 
     data_expression distribution=t.distribution();
-    std::map<identifier_string,sort_expression> NewVars;
     process_expression NewProc;
     try
     {
-      AddVars2Table(CopyVars,t.variables(),NewVars);
+      AddVars2Table(CopyVars,t.variables());
+      std::map<identifier_string,sort_expression> NewVars = CopyVars;
       TraverseVarConsTypeD(NewVars,NewVars,distribution,sort_real::real_());
       NewProc=TraverseActProcVarConstP(NewVars,t.operand());
     }
@@ -955,11 +956,7 @@ void mcrl2::process::process_type_checker::TransformActProcVarConst(void)
   for (std::map <std::pair<core::identifier_string,sort_expression_list>,variable_list>::const_iterator i=proc_pars.begin(); i!=proc_pars.end(); ++i)
   {
     Vars=glob_vars;
-
-    std::map<core::identifier_string,sort_expression> NewVars;
-    AddVars2Table(Vars,i->second,NewVars);
-    Vars=NewVars;
-
+    AddVars2Table(Vars, i->second);
     assert(proc_bodies.count(i->first)>0);
     const process_expression NewProcTerm=TraverseActProcVarConstP(Vars,proc_bodies[i->first]);
     proc_bodies[i->first]=NewProcTerm;
@@ -1074,8 +1071,7 @@ mcrl2::process::process_type_checker::process_type_checker(const process_specifi
   ReadInActs(proc_spec.action_labels());
 
   const std::set<data::variable> glob_vars_set = proc_spec.global_variables();
-  std::map<core::identifier_string,sort_expression> dummy;
-  AddVars2Table(glob_vars, variable_list(glob_vars_set.begin(),glob_vars_set.end()),dummy);
+  AddVars2Table(glob_vars, variable_list(glob_vars_set.begin(),glob_vars_set.end()));
 
   ReadInProcsAndInit(proc_spec.equations(), proc_spec.init());
 

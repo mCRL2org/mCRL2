@@ -108,7 +108,8 @@ action_formulas::action_formula mcrl2::state_formulas::state_formula_type_checke
 
     const variable_list& VarList=t.variables();
     std::map<core::identifier_string,sort_expression> NewVars;
-    AddVars2Table(CopyVars,VarList,NewVars);
+    AddVars2Table(CopyVars,VarList);
+    NewVars=CopyVars;
 
     return action_formulas::forall(VarList, TraverseActFrm(NewVars,t.body()));
   }
@@ -120,7 +121,8 @@ action_formulas::action_formula mcrl2::state_formulas::state_formula_type_checke
 
     const variable_list& VarList=t.variables();
     std::map<core::identifier_string,sort_expression> NewVars;
-    AddVars2Table(CopyVars,VarList,NewVars);
+    AddVars2Table(CopyVars,VarList);
+    NewVars=CopyVars;
 
     return action_formulas::exists(VarList, TraverseActFrm(NewVars,t.body()));
   }
@@ -218,7 +220,8 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
     std::map<core::identifier_string,sort_expression> NewVars;
-    AddVars2Table(CopyVars,t.variables(),NewVars);
+    AddVars2Table(CopyVars,t.variables());
+    NewVars=CopyVars;
 
     return forall(t.variables(),TraverseStateFrm(NewVars,StateVars,t.body()));
   }
@@ -229,7 +232,8 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
     std::map<core::identifier_string,sort_expression> NewVars;
-    AddVars2Table(CopyVars,t.variables(),NewVars);
+    AddVars2Table(CopyVars,t.variables());
+    NewVars=CopyVars;
 
     return exists(t.variables(),TraverseStateFrm(NewVars,StateVars,t.body()));
   }

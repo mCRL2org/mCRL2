@@ -321,7 +321,8 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     }
 
     std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-    AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
+    AddVars2Table(DeclaredVars,VarList);
+    NewDeclaredVars=DeclaredVars;
 
     DeclaredVars=NewDeclaredVars;
     process::untyped_action Left(Rule.lhs());

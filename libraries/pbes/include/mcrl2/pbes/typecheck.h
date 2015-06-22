@@ -53,8 +53,7 @@ class pbes_type_checker:public data::data_type_checker
 
       mCRL2log(debug) << "type checking of PBES specification read-in phase of functions finished" << std::endl;
 
-      std::map<core::identifier_string,sort_expression> dummy;
-      AddVars2Table(glob_vars, variable_list(glob_var_spec.begin(),glob_var_spec.end()),dummy);
+      AddVars2Table(glob_vars, variable_list(glob_var_spec.begin(),glob_var_spec.end()));
 
       mCRL2log(debug) << "type checking of PBES specification read-in phase of global variables finished" << std::endl;
 
@@ -147,7 +146,8 @@ class pbes_type_checker:public data::data_type_checker
           Vars=glob_vars;
 
           std::map<core::identifier_string,sort_expression> NewVars;
-          AddVars2Table(Vars,PBVar.parameters(),NewVars);
+          AddVars2Table(Vars,PBVar.parameters());
+          NewVars=Vars;
           Vars=NewVars;
 
           pbes_expression NewPBTerm=TraversePBESVarConstPB(Vars,i->second);
@@ -272,7 +272,8 @@ class pbes_type_checker:public data::data_type_checker
           std::map<core::identifier_string,sort_expression> NewVars;
           try
           {
-            AddVars2Table(CopyVars,t.variables(),NewVars);
+            AddVars2Table(CopyVars,t.variables());
+            NewVars = CopyVars;
           }
           catch (mcrl2::runtime_error &e)
           {
@@ -296,7 +297,8 @@ class pbes_type_checker:public data::data_type_checker
           std::map<core::identifier_string,sort_expression> NewVars;
           try
           {
-            AddVars2Table(CopyVars,t.variables(),NewVars);
+            AddVars2Table(CopyVars,t.variables());
+            NewVars = CopyVars;
           }
           catch (mcrl2::runtime_error &e)
           {

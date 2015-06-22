@@ -3083,26 +3083,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
 }
 
 
-void mcrl2::data::data_type_checker::AddVars2Table(
-                   std::map<core::identifier_string,sort_expression> &Vars,
-                   variable_list VarDecls,
-                   std::map<core::identifier_string,sort_expression> &result)
-{
-  for (const variable& VarDecl: VarDecls)
-  {
-    core::identifier_string VarName=VarDecl.name();
-    sort_expression VarType=VarDecl.sort();
-    //test the type
-    check_sort_is_declared(VarType);
-
-    // if already defined -- replace (other option -- warning)
-    // if variable name is a constant name -- it has more priority (other options -- warning, error)
-    Vars[VarName]=VarType;
-  }
-  result=Vars;
-}
-
-
 sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
   const std::map<core::identifier_string,sort_expression> &DeclaredVars,
   const std::map<core::identifier_string,sort_expression> &AllowedVars,
@@ -3154,10 +3134,12 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       sort_expression NewType=VarDecl.sort();
       variable_list VarList=make_list(VarDecl);
       std::map<core::identifier_string,sort_expression> NewAllowedVars;
-      AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+      AddVars2Table(CopyAllowedVars,VarList);
+      NewAllowedVars=CopyAllowedVars;
 
       std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-      AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+      AddVars2Table(CopyDeclaredVars,VarList);
+      NewDeclaredVars=CopyDeclaredVars;
 
       data_expression Data=abstr.body();
 
@@ -3206,10 +3188,13 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     {
       variable_list VarList=abstr.variables();
       std::map<core::identifier_string,sort_expression> NewAllowedVars;
-      AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+      AddVars2Table(CopyAllowedVars,VarList);
+      VarList=CopyAllowedVars;
+      NewAllowedVars=CopyAllowedVars;
 
       std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-      AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+      AddVars2Table(CopyDeclaredVars,VarList);
+      NewDeclaredVars=CopyDeclaredVars;
 
       data_expression Data=abstr.body();
       sort_expression temp;
@@ -3234,10 +3219,12 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     {
       variable_list VarList=abstr.variables();
       std::map<core::identifier_string,sort_expression> NewAllowedVars;
-      AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+      AddVars2Table(CopyAllowedVars,VarList);
+      NewAllowedVars=CopyAllowedVars;
 
       std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-      AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+      AddVars2Table(CopyDeclaredVars,VarList);
+      NewDeclaredVars=CopyDeclaredVars;
 
       sort_expression_list ArgTypes=detail::GetVarTypes(VarList);
       sort_expression NewType;
@@ -3303,10 +3290,12 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
     variable_list VarList=reverse(WhereVarList);
     std::map<core::identifier_string,sort_expression> NewAllowedVars;
-    AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+    AddVars2Table(CopyAllowedVars,VarList);
+    NewAllowedVars=CopyAllowedVars;
 
     std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-    AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+    AddVars2Table(CopyDeclaredVars,VarList);
+    NewDeclaredVars=CopyDeclaredVars;
 
     data_expression Data=where.body();
     sort_expression NewType=TraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,PosType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
@@ -4903,7 +4892,8 @@ variable_list mcrl2::data::data_type_checker::operator()(
   variable_list data_vars=l;
   try
   {
-    AddVars2Table(Vars,data_vars,NewVars);
+    AddVars2Table(Vars,data_vars);
+    NewVars=Vars;
   }
   catch (mcrl2::runtime_error &e)
   {
@@ -4953,7 +4943,8 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
     }
 
     std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-    AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
+    AddVars2Table(DeclaredVars,VarList);
+    NewDeclaredVars=DeclaredVars;
     DeclaredVars=NewDeclaredVars;
 
     data_expression Left=Eqn.lhs();

@@ -93,35 +93,35 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       return false;
     }
     return
-      (name == data::sort_bool::implies_name())          ||
+      (name == data::sort_bool::implies_name())      ||
       (name == data::sort_bool::and_name())          ||
       (name == data::sort_bool::or_name())           ||
-      (name == data::detail::equal_symbol())           ||
-      (name == data::detail::not_equal_symbol())          ||
-      (name == data::detail::less_symbol())           ||
-      (name == data::detail::less_equal_symbol())          ||
-      (name == data::detail::greater_symbol())           ||
-      (name == data::detail::greater_equal_symbol())          ||
-      (name == data::sort_list::in_name())        ||
+      (name == data::detail::equal_symbol())         ||
+      (name == data::detail::not_equal_symbol())     ||
+      (name == data::detail::less_symbol())          ||
+      (name == data::detail::less_equal_symbol())    ||
+      (name == data::detail::greater_symbol())       ||
+      (name == data::detail::greater_equal_symbol()) ||
+      (name == data::sort_list::in_name())           ||
       (name == data::sort_list::cons_name())         ||
       (name == data::sort_list::snoc_name())         ||
       (name == data::sort_list::concat_name())       ||
-      (name == data::sort_real::plus_name())          ||
-      (name == data::sort_real::minus_name())         ||
-      (name == data::sort_set::union_name())     ||
-      (name == data::sort_fset::union_name())     ||
-      (name == data::sort_set::difference_name())      ||
-      (name == data::sort_fset::difference_name())      ||
-      (name == data::sort_bag::union_name())      ||
-      (name == data::sort_fbag::union_name())      ||
-      (name == data::sort_bag::difference_name())      ||
-      (name == data::sort_fbag::difference_name())      ||
-      (name == data::sort_int::div_name())          ||
-      (name == data::sort_int::mod_name())          ||
-      (name == data::sort_real::divides_name())       ||
+      (name == data::sort_real::plus_name())         ||
+      (name == data::sort_real::minus_name())        ||
+      (name == data::sort_set::union_name())         ||
+      (name == data::sort_fset::union_name())        ||
+      (name == data::sort_set::difference_name())    ||
+      (name == data::sort_fset::difference_name())   ||
+      (name == data::sort_bag::union_name())         ||
+      (name == data::sort_fbag::union_name())        ||
+      (name == data::sort_bag::difference_name())    ||
+      (name == data::sort_fbag::difference_name())   ||
+      (name == data::sort_int::div_name())           ||
+      (name == data::sort_int::mod_name())           ||
+      (name == data::sort_real::divides_name())      ||
       (name == data::sort_int::times_name())         ||
-      (name == data::sort_list::element_at_name())        ||
-      (name == data::sort_set::intersection_name()) ||
+      (name == data::sort_list::element_at_name())   ||
+      (name == data::sort_set::intersection_name())  ||
       (name == data::sort_bag::intersection_name());
   }
 
@@ -129,9 +129,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     data::set_identifier_generator generator;
     std::set<variable> variables = data::find_all_variables(context);
-    for (std::set<variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+    for (const variable& v: variables)
     {
-      generator.add_identifier(i->name());
+      generator.add_identifier(v.name());
     }
     return generator(prefix);
   }
@@ -144,7 +144,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                        const std::string& close_bracket = ")"
                       )
   {
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       if (i != container.begin())
       {
@@ -223,7 +223,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       // in the order they are encountered in container
       std::vector<sort_expression> sorts;
 
-      for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+      for (auto i = container.begin(); i != container.end(); ++i)
       {
         if (sort_map.find(i->sort()) == sort_map.end())
         {
@@ -233,7 +233,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
 
       // do the actual printing
-      for (std::vector<sort_expression>::iterator i = sorts.begin(); i != sorts.end(); ++i)
+      for (auto i = sorts.begin(); i != sorts.end(); ++i)
       {
         if (i != sorts.begin())
         {
@@ -331,7 +331,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       return;
     }
     derived().print(opener);
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       if (i != container.begin())
       {
@@ -369,7 +369,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       return;
     }
     derived().print(opener);
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       if (i != container.begin())
       {
@@ -1867,8 +1867,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                        const std::string& separator = ", "
                       )
   {
-    typename Container::const_iterator first = equations.begin();
-    typename Container::const_iterator last = equations.end();
+    auto first = equations.begin();
+    auto last = equations.end();
 
     Container normalized_equations = equations;
     data::normalize_sorts(normalized_equations, data_spec);
@@ -1876,13 +1876,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     while (first != last)
     {
       std::vector<variable> variables;
-      typename Container::const_iterator i = find_conflicting_equation(first, last, variables);
+      auto i = find_conflicting_equation(first, last, variables);
       print_variables(variables, true, true, true, "var  ", ";\n", ";\n     ");
 
       // N.B. We print normalized equations instead of user defined equations.
       // print_list(std::vector<data_equation>(first, i), opener, closer, separator);
-      typename Container::const_iterator first1 = normalized_equations.begin() + (first - equations.begin());
-      typename Container::const_iterator i1 = normalized_equations.begin() + (i - equations.begin());
+      auto first1 = normalized_equations.begin() + (first - equations.begin());
+      auto i1 = normalized_equations.begin() + (i - equations.begin());
       print_list(std::vector<data_equation>(first1, i1), opener, closer, separator);
 
       first = i;

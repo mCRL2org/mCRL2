@@ -15,6 +15,7 @@
 #include <algorithm>
 #include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/standard_container_utility.h"
+#include "mcrl2/data/builder.h"
 
 #ifdef MCRL2_USE_NEW_TYPE_CHECKER
 
@@ -23,6 +24,91 @@ namespace mcrl2 {
 namespace data {
 
 namespace detail {
+
+template <template <class> class Builder, class Derived>
+struct typecheck_builder: public Builder<Derived>
+{
+  typedef Builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  const std::map<core::identifier_string, sort_expression>& declared_variables;
+  const std::map<core::identifier_string, sort_expression>& allowed_variables;
+
+  typecheck_builder()
+  {}
+
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
+  template <typename Abstraction>
+  void check_abstraction_variables(const Abstraction& x)
+  {
+    if (x.variables().empty())
+    {
+      throw mcrl2::runtime_error("binder " + data::pp(x) + " should have at least one declared variable");
+    }
+  }
+
+  template <typename SetBagComprehension>
+  void check_set_bag_comprehension_variables(const SetBagComprehension& x)
+  {
+    if (x.variables().size() != 1)
+    {
+      throw mcrl2::runtime_error("set/bag comprehension " + data::pp(x) + " should have exactly one declared variable");
+    }
+  }
+
+  void enter(const lambda& x)
+  {
+    check_abstraction_variables(x);
+  }
+
+  void enter(const forall& x)
+  {
+    check_abstraction_variables(x);
+  }
+
+  void enter(const exists& x)
+  {
+    check_abstraction_variables(x);
+  }
+
+  void enter(const untyped_set_or_bag_comprehension& x)
+  {
+    check_set_bag_comprehension_variables(x);
+  }
+
+  void enter(const set_comprehension& x)
+  {
+    check_set_bag_comprehension_variables(x);
+  }
+
+  void enter(const bag_comprehension& x)
+  {
+    check_set_bag_comprehension_variables(x);
+  }
+
+  void enter(const data::untyped_identifier_assignment& x)
+  {
+  }
+
+  void enter(const data::untyped_identifier& x)
+  {
+  }
+};
+
+struct typecheck_builder_inst: public typecheck_builder<data::data_expression_builder, typecheck_builder_inst>
+{
+  typedef typecheck_builder<data::data_expression_builder, typecheck_builder_inst> super;
+
+  using super::enter;
+  using super::leave;
+  using super::apply;
+};
 
 inline
 function_sort make_function_sort(const sort_expression& domain, const sort_expression& codomain)
@@ -237,17 +323,17 @@ bool IsNat(const core::identifier_string& Number)
 }
 
 inline
-std::map<core::identifier_string, sort_expression> RemoveVars(std::map<core::identifier_string,sort_expression> &Vars, variable_list VarDecls)
+std::map<core::identifier_string, sort_expression> RemoveVars(std::map<core::identifier_string,sort_expression>& variables, variable_list VarDecls)
 {
   for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
   {
     variable VarDecl=VarDecls.front();
     core::identifier_string VarName=VarDecl.name();
 
-    Vars.erase(VarName);
+    variables.erase(VarName);
   }
 
-  return Vars;
+  return variables;
 }
 
 inline
@@ -663,35 +749,35 @@ class data_type_checker_base: public sort_type_checker
       else if (is_structured_sort(x))
       {
         const structured_sort& struct_sort = atermpp::down_cast<structured_sort>(x);
-        for (const structured_sort_constructor& Constr: struct_sort.constructors())
+        for (const structured_sort_constructor& constructor: struct_sort.constructors())
         {
           // recognizer -- if present -- a function from SortExpr to Bool
-          core::identifier_string name = Constr.recogniser();
-          if (Constr.recogniser() != core::empty_identifier_string())
+          core::identifier_string name = constructor.recogniser();
+          if (name != core::empty_identifier_string())
           {
-            add_function(data::function_symbol(Constr.recogniser(), make_function_sort(x, sort_bool::bool_())), "recognizer");
+            add_function(data::function_symbol(name, make_function_sort(x, sort_bool::bool_())), "recognizer");
           }
 
           // constructor type and projections
-          structured_sort_constructor_argument_list Projs = Constr.arguments();
-          name = Constr.name();
-          if (Projs.empty())
+          structured_sort_constructor_argument_list arguments = constructor.arguments();
+          name = constructor.name();
+          if (arguments.empty())
           {
             add_constant(data::function_symbol(name, x), "constructor constant");
             continue;
           }
 
-          sort_expression_list ConstructorType;
-          for (const structured_sort_constructor_argument& arg: Projs)
+          sort_expression_list sorts;
+          for (const structured_sort_constructor_argument& arg: arguments)
           {
             read_sort(arg.sort());
             if (arg.name() != core::empty_identifier_string())
             {
               add_function(function_symbol(arg.name(), function_sort(atermpp::make_list(x), arg.sort())), "projection", true);
             }
-            ConstructorType.push_front(arg.sort());
+            sorts.push_front(arg.sort());
           }
-          add_function(data::function_symbol(name, function_sort(atermpp::reverse(ConstructorType), x)), "constructor");
+          add_function(data::function_symbol(name, function_sort(atermpp::reverse(sorts), x)), "constructor");
         }
       }
       // other sorts can be ignored
@@ -704,35 +790,34 @@ class data_type_checker_base: public sort_type_checker
       size_t constr_number=constructors.size();
       function_symbol_vector functions_and_constructors=constructors;
       functions_and_constructors.insert(functions_and_constructors.end(),mappings.begin(),mappings.end());
-      for (const function_symbol& Func: functions_and_constructors)
+      for (const function_symbol& f: functions_and_constructors)
       {
-        const core::identifier_string FuncName = Func.name();
-        sort_expression FuncType = Func.sort();
+        sort_expression fsort = f.sort();
 
         // This should be checked elsewhere
-        // check_sort_is_declared(FuncType);
+        // check_sort_is_declared(fsort);
 
-        //if FuncType is a defined function sort, unwind it
-        if (is_basic_sort(FuncType))
+        //if fsort is a defined function sort, unwind it
+        if (is_basic_sort(fsort))
         {
-          const sort_expression NewFuncType = unwind_sort_expression(FuncType);
-          if (is_function_sort(NewFuncType))
+          const sort_expression s = unwind_sort_expression(fsort);
+          if (is_function_sort(s))
           {
-            FuncType = NewFuncType;
+            fsort = s;
           }
         }
 
-        if (is_function_sort(FuncType))
+        if (is_function_sort(fsort))
         {
-          add_function(data::function_symbol(FuncName,FuncType),"function");
+          add_function(data::function_symbol(f.name(), fsort), "function");
         }
         else
         {
           try
           {
-            add_constant(data::function_symbol(FuncName, FuncType),"constant");
+            add_constant(data::function_symbol(f.name(), fsort), "constant");
           }
-          catch (mcrl2::runtime_error &e)
+          catch (mcrl2::runtime_error& e)
           {
             throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not add constant");
           }
@@ -743,25 +828,25 @@ class data_type_checker_base: public sort_type_checker
           constr_number--;
 
           //Here checks for the constructors
-          sort_expression ConstructorType=FuncType;
-          if (is_function_sort(ConstructorType))
+          sort_expression s = fsort;
+          if (is_function_sort(s))
           {
-            ConstructorType=atermpp::down_cast<function_sort>(ConstructorType).codomain();
+            s = atermpp::down_cast<function_sort>(s).codomain();
           }
-          ConstructorType=unwind_sort_expression(ConstructorType);
-          if (!is_basic_sort(ConstructorType) ||
-              sort_bool::is_bool(sort_expression(ConstructorType)) ||
-              sort_pos::is_pos(sort_expression(ConstructorType)) ||
-              sort_nat::is_nat(sort_expression(ConstructorType)) ||
-              sort_int::is_int(sort_expression(ConstructorType)) ||
-              sort_real::is_real(sort_expression(ConstructorType))
+          s = unwind_sort_expression(s);
+          if (!is_basic_sort(s) ||
+              sort_bool::is_bool(sort_expression(s)) ||
+              sort_pos::is_pos(sort_expression(s)) ||
+              sort_nat::is_nat(sort_expression(s)) ||
+              sort_int::is_int(sort_expression(s)) ||
+              sort_real::is_real(sort_expression(s))
               )
           {
-            throw mcrl2::runtime_error("Could not add constructor " + core::pp(FuncName) + " of sort " + data::pp(FuncType) + ". Constructors of built-in sorts are not allowed.");
+            throw mcrl2::runtime_error("Could not add constructor " + core::pp(f.name()) + " of sort " + data::pp(fsort) + ". Constructors of built-in sorts are not allowed.");
           }
         }
 
-        mCRL2log(log::debug) << "Read-in Func " << FuncName << ", Types " << FuncType << "" << std::endl;
+        mCRL2log(log::debug) << "Read-in Func " << f.name() << ", Types " << fsort << "" << std::endl;
       }
 
       // Check that the constructors are defined such that they cannot generate an empty sort.
@@ -793,7 +878,7 @@ class data_type_checker_base: public sort_type_checker
         }
         read_constructors_and_mappings(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
       }
-      catch (mcrl2::runtime_error &e)
+      catch (mcrl2::runtime_error& e)
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
       }
@@ -841,17 +926,51 @@ class data_type_checker: public data_type_checker_base
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
      *  \param[in] d A data expression that has not been type checked.
-     *  \param[in] Vars a mapping of variable names to their types.
+     *  \param[in] variables a mapping of variable names to their types.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
-    data_expression operator()(const data_expression &d,const std::map<core::identifier_string,sort_expression> &Vars);
+    data_expression operator()(const data_expression& x, const std::map<core::identifier_string,sort_expression>& variables)
+    {
+      data_expression data = x;
+      sort_expression sort;
+      try
+      {
+        sort = TraverseVarConsTypeD(variables, variables, data, data::untyped_sort());
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
+      }
+      if (data::is_untyped_sort(sort))
+      {
+        throw mcrl2::runtime_error("type checking of data expression failed. Result is an unknown sort.");
+      }
+
+      assert(strict_type_check(data));
+      return data;
+    }
 
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
      *  \param[in] l A list of variables that has not been type checked.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
-    variable_list operator()(const variable_list &l);
+    variable_list operator()(const variable_list& l)
+    {
+      mCRL2log(log::debug) << "type checking of data variables read-in phase finished" << std::endl;
+
+      std::map<core::identifier_string,sort_expression> variables;
+      variable_list data_vars = l;
+      try
+      {
+        AddVars2Table(variables, data_vars);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking data variables");
+      }
+      return data_vars;
+    }
 
     /** \brief     Yields a type checked data specification, provided typechecking was successful.
      *  \return    a data specification where all untyped identifiers have been replace by typed ones.
@@ -906,9 +1025,16 @@ class data_type_checker: public data_type_checker_base
                            const size_t nFactPars=std::string::npos,
                            const bool warn_upcasting=false,
                            const bool print_cast_error=true);
-    void AddVars2Table(std::map<core::identifier_string,sort_expression> &Vars,
-                       variable_list VarDecls,
-                       std::map<core::identifier_string,sort_expression> &result);
+    void AddVars2Table(std::map<core::identifier_string, sort_expression>& variable_map, const variable_list& declared_variables)
+    {
+      for (const variable& v: declared_variables)
+      {
+        // TODO: this should be checked elsewhere
+        check_sort_is_declared(v.sort());
+        variable_map[v.name()] = v.sort();
+      }
+    }
+
     bool InTypesA(sort_expression Type, sort_expression_list Types);
     bool EqTypesA(sort_expression Type1, sort_expression Type2);
     bool InTypesL(sort_expression_list Type, atermpp::term_list<sort_expression_list> Types);
@@ -3443,28 +3569,6 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
   }
 }
 
-
-inline
-void data_type_checker::AddVars2Table(
-                   std::map<core::identifier_string,sort_expression> &Vars,
-                   variable_list VarDecls,
-                   std::map<core::identifier_string,sort_expression> &result)
-{
-  for (const variable& VarDecl: VarDecls)
-  {
-    core::identifier_string VarName=VarDecl.name();
-    sort_expression VarType=VarDecl.sort();
-    //test the type
-    check_sort_is_declared(VarType);
-
-    // if already defined -- replace (other option -- warning)
-    // if variable name is a constant name -- it has more priority (other options -- warning, error)
-    Vars[VarName]=VarType;
-  }
-  result=Vars;
-}
-
-
 inline
 sort_expression data_type_checker::TraverseVarConsTypeD(
   const std::map<core::identifier_string,sort_expression> &DeclaredVars,
@@ -3517,10 +3621,12 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       sort_expression NewType=VarDecl.sort();
       variable_list VarList=atermpp::make_list(VarDecl);
       std::map<core::identifier_string,sort_expression> NewAllowedVars;
-      AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+      AddVars2Table(CopyAllowedVars,VarList);
+      NewAllowedVars=CopyAllowedVars;
 
       std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-      AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+      AddVars2Table(CopyDeclaredVars,VarList);
+      NewDeclaredVars=CopyDeclaredVars;
 
       data_expression Data=abstr.body();
 
@@ -3569,10 +3675,12 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     {
       variable_list VarList=abstr.variables();
       std::map<core::identifier_string,sort_expression> NewAllowedVars;
-      AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+      AddVars2Table(CopyAllowedVars,VarList);
+      NewAllowedVars=CopyAllowedVars;
 
       std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-      AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+      AddVars2Table(CopyDeclaredVars,VarList);
+      NewDeclaredVars=CopyDeclaredVars;
 
       data_expression Data=abstr.body();
       sort_expression temp;
@@ -3597,10 +3705,12 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     {
       variable_list VarList=abstr.variables();
       std::map<core::identifier_string,sort_expression> NewAllowedVars;
-      AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+      AddVars2Table(CopyAllowedVars,VarList);
+      NewAllowedVars=CopyAllowedVars;
 
       std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-      AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+      AddVars2Table(CopyDeclaredVars,VarList);
+      NewDeclaredVars=CopyDeclaredVars;
 
       sort_expression_list ArgTypes=detail::GetVarTypes(VarList);
       sort_expression NewType;
@@ -3666,10 +3776,12 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
 
     variable_list VarList=atermpp::reverse(WhereVarList);
     std::map<core::identifier_string,sort_expression> NewAllowedVars;
-    AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+    AddVars2Table(CopyAllowedVars,VarList);
+    NewAllowedVars=CopyAllowedVars;
 
     std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-    AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+    AddVars2Table(CopyDeclaredVars,VarList);
+    NewDeclaredVars=CopyDeclaredVars;
 
     data_expression Data=where.body();
     sort_expression NewType=TraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,PosType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
@@ -4771,51 +4883,6 @@ sort_expression_list data_type_checker::GetNotInferredList(const atermpp::term_l
   return Result;
 }
 
-inline
-data_expression data_type_checker::operator()(
-           const data_expression &data_expr,
-           const std::map<core::identifier_string,sort_expression> &Vars)
-{
-  data_expression data=data_expr;
-  sort_expression Type;
-  try
-  {
-    Type=TraverseVarConsTypeD(Vars,Vars,data,data::untyped_sort());
-  }
-  catch (mcrl2::runtime_error &e)
-  {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
-  }
-  if (data::is_untyped_sort(Type))
-  {
-    throw mcrl2::runtime_error("type checking of data expression failed. Result is an unknown sort.");
-  }
-
-  assert(strict_type_check(data));
-  return data;
-}
-
-inline
-variable_list data_type_checker::operator()(
-           const variable_list &l)
-{
-  mCRL2log(log::debug) << "type checking of data variables read-in phase finished" << std::endl;
-
-  std::map<core::identifier_string,sort_expression> Vars;
-  std::map<core::identifier_string,sort_expression> NewVars;
-  variable_list data_vars=l;
-  try
-  {
-    AddVars2Table(Vars,data_vars,NewVars);
-  }
-  catch (mcrl2::runtime_error &e)
-  {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking data variables");
-  }
-
-  return data_vars;
-}
-
 // ------------------------------  Here ends the new class based data expression checker -----------------------
 // ------------------------------  Here starts the new class based data specification checker -----------------------
 
@@ -4857,7 +4924,8 @@ void data_type_checker::TransformVarConsTypeData(data_specification &data_spec)
     }
 
     std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-    AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
+    AddVars2Table(DeclaredVars,VarList);
+    NewDeclaredVars=DeclaredVars;
     DeclaredVars=NewDeclaredVars;
 
     data_expression Left=Eqn.lhs();
