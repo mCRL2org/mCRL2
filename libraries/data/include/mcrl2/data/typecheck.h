@@ -175,7 +175,6 @@ class data_type_checker: public sort_type_checker
         check_sort_is_declared(v.sort());
         variable_map[v.name()] = v.sort();
       }
-      result = variable_map;
     }
 
     bool InTypesA(sort_expression Type, sort_expression_list Types);
