@@ -3189,7 +3189,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       variable_list VarList=abstr.variables();
       std::map<core::identifier_string,sort_expression> NewAllowedVars;
       AddVars2Table(CopyAllowedVars,VarList);
-      VarList=CopyAllowedVars;
       NewAllowedVars=CopyAllowedVars;
 
       std::map<core::identifier_string,sort_expression> NewDeclaredVars;
