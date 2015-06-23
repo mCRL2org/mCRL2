@@ -206,6 +206,7 @@ template <typename Term> bool check_rule_BES(Term t);
 template <typename Term> bool check_rule_BooleanEquation(Term t);
 template <typename Term> bool check_rule_BooleanVariable(Term t);
 template <typename Term> bool check_rule_BooleanExpression(Term t);
+template <typename Term> bool check_rule_BddExpression(Term t);
 template <typename Term> bool check_term_BooleanOr(Term t);
 template <typename Term> bool check_term_StateOr(Term t);
 template <typename Term> bool check_term_Hide(Term t);
@@ -239,6 +240,7 @@ template <typename Term> bool check_term_LinearProcessSummand(Term t);
 template <typename Term> bool check_term_SortSpec(Term t);
 template <typename Term> bool check_term_ActionRenameRules(Term t);
 template <typename Term> bool check_term_UntypedParamId(Term t);
+template <typename Term> bool check_term_BddFalse(Term t);
 template <typename Term> bool check_term_BooleanEquation(Term t);
 template <typename Term> bool check_term_ConsSpec(Term t);
 template <typename Term> bool check_term_SortList(Term t);
@@ -275,6 +277,7 @@ template <typename Term> bool check_term_ActExists(Term t);
 template <typename Term> bool check_term_ProcSpec(Term t);
 template <typename Term> bool check_term_UntypedSortsPossible(Term t);
 template <typename Term> bool check_term_StateMu(Term t);
+template <typename Term> bool check_term_BddIf(Term t);
 template <typename Term> bool check_term_StateFalse(Term t);
 template <typename Term> bool check_term_PBESFalse(Term t);
 template <typename Term> bool check_term_PBESForall(Term t);
@@ -332,6 +335,7 @@ template <typename Term> bool check_term_ActFalse(Term t);
 template <typename Term> bool check_term_ActId(Term t);
 template <typename Term> bool check_term_StateYaled(Term t);
 template <typename Term> bool check_term_PBESOr(Term t);
+template <typename Term> bool check_term_BddTrue(Term t);
 template <typename Term> bool check_term_UntypedProcessAssignment(Term t);
 template <typename Term> bool check_term_SortFBag(Term t);
 template <typename Term> bool check_term_Allow(Term t);
@@ -1057,6 +1061,18 @@ bool check_rule_BooleanExpression(Term t)
          || check_term_BooleanAnd(t)
          || check_term_BooleanOr(t)
          || check_term_BooleanImp(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_BddExpression(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_BddTrue(t)
+         || check_term_BddFalse(t)
+         || check_term_BddIf(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -2289,6 +2305,33 @@ bool check_term_UntypedParamId(Term t)
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BddFalse()
+template <typename Term>
+bool check_term_BddFalse(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BddFalse)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
@@ -3621,6 +3664,50 @@ bool check_term_StateMu(Term t)
   if (!check_term_argument(a[2], check_rule_StateFrm<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BddIf(String, BddExpression, BddExpression)
+template <typename Term>
+bool check_term_BddIf(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BddIf)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 3)
+  {
+    return false;
+  }
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_BddExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BddExpression" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_BddExpression<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_BddExpression" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5706,6 +5793,33 @@ bool check_term_PBESOr(Term t)
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// BddTrue()
+template <typename Term>
+bool check_term_BddTrue(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::BddTrue)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 0)
+  {
+    return false;
+  }
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;

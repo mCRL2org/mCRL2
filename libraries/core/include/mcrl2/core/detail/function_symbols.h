@@ -281,6 +281,30 @@ const atermpp::function_symbol& function_symbol_BagComp()
   return function_symbol_BagComp;
 }
 
+// BddFalse
+inline
+const atermpp::function_symbol& function_symbol_BddFalse()
+{
+  static const atermpp::function_symbol function_symbol_BddFalse = atermpp::function_symbol("BddFalse", 0);
+  return function_symbol_BddFalse;
+}
+
+// BddIf
+inline
+const atermpp::function_symbol& function_symbol_BddIf()
+{
+  static const atermpp::function_symbol function_symbol_BddIf = atermpp::function_symbol("BddIf", 3);
+  return function_symbol_BddIf;
+}
+
+// BddTrue
+inline
+const atermpp::function_symbol& function_symbol_BddTrue()
+{
+  static const atermpp::function_symbol function_symbol_BddTrue = atermpp::function_symbol("BddTrue", 0);
+  return function_symbol_BddTrue;
+}
+
 // Binder
 inline
 const atermpp::function_symbol& function_symbol_Binder()
@@ -1250,6 +1274,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol SortSpec;
   static const atermpp::function_symbol ActionRenameRules;
   static const atermpp::function_symbol UntypedParamId;
+  static const atermpp::function_symbol BddFalse;
   static const atermpp::function_symbol BooleanEquation;
   static const atermpp::function_symbol ConsSpec;
   static const atermpp::function_symbol SortList;
@@ -1286,6 +1311,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol ProcSpec;
   static const atermpp::function_symbol UntypedSortsPossible;
   static const atermpp::function_symbol StateMu;
+  static const atermpp::function_symbol BddIf;
   static const atermpp::function_symbol StateFalse;
   static const atermpp::function_symbol PBESFalse;
   static const atermpp::function_symbol PBESForall;
@@ -1343,6 +1369,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol ActId;
   static const atermpp::function_symbol StateYaled;
   static const atermpp::function_symbol PBESOr;
+  static const atermpp::function_symbol BddTrue;
   static const atermpp::function_symbol UntypedProcessAssignment;
   static const atermpp::function_symbol SortFBag;
   static const atermpp::function_symbol Allow;

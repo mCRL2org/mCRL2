@@ -230,6 +230,13 @@ imp(const boolean_expression& left, const boolean_expression& right)  : public b
 boolean_variable(const core::identifier_string& name)                 : public bes::boolean_expression | EIUs | BooleanVariable      | A boolean variable
 '''
 
+BDD_EXPRESSION_CLASSES = r'''
+bdd_expression()                                                                                  : public atermpp::aterm_appl | XCI  | BddExpression | A bdd expression
+true_()                                                                                           : public bdd::bdd_expression | EI   | BddTrue       | The value true for bdd expressions
+false_()                                                                                          : public bdd::bdd_expression | EI   | BddFalse      | The value false for bdd expressions
+if_(const core::identifier_string& name, const bdd_expression& left, const bdd_expression& right) : public bdd::bdd_expression | EI   | BddIf         | The if operator for bdd expressions
+'''
+
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
   'state_formulas::state_formula'     : [ 'data::data_expression' ],
   'action_formulas::action_formula'   : [ 'data::data_expression' ],
@@ -1393,5 +1400,6 @@ def mcrl2_class_map():
           'lps'              : LPS_CLASSES,
           'process'          : PROCESS_CLASSES + PROCESS_EXPRESSION_CLASSES,
           'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
-          'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES
+          'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES,
+          'bdd'              : BDD_EXPRESSION_CLASSES
         }

@@ -97,6 +97,7 @@ const atermpp::aterm_appl& default_value_LinearProcessSummand();
 const atermpp::aterm_appl& default_value_SortSpec();
 const atermpp::aterm_appl& default_value_ActionRenameRules();
 const atermpp::aterm_appl& default_value_UntypedParamId();
+const atermpp::aterm_appl& default_value_BddFalse();
 const atermpp::aterm_appl& default_value_BooleanEquation();
 const atermpp::aterm_appl& default_value_ConsSpec();
 const atermpp::aterm_appl& default_value_SortList();
@@ -133,6 +134,7 @@ const atermpp::aterm_appl& default_value_ActExists();
 const atermpp::aterm_appl& default_value_ProcSpec();
 const atermpp::aterm_appl& default_value_UntypedSortsPossible();
 const atermpp::aterm_appl& default_value_StateMu();
+const atermpp::aterm_appl& default_value_BddIf();
 const atermpp::aterm_appl& default_value_StateFalse();
 const atermpp::aterm_appl& default_value_PBESFalse();
 const atermpp::aterm_appl& default_value_PBESForall();
@@ -190,6 +192,7 @@ const atermpp::aterm_appl& default_value_ActFalse();
 const atermpp::aterm_appl& default_value_ActId();
 const atermpp::aterm_appl& default_value_StateYaled();
 const atermpp::aterm_appl& default_value_PBESOr();
+const atermpp::aterm_appl& default_value_BddTrue();
 const atermpp::aterm_appl& default_value_UntypedProcessAssignment();
 const atermpp::aterm_appl& default_value_SortFBag();
 const atermpp::aterm_appl& default_value_Allow();
@@ -219,6 +222,7 @@ const atermpp::aterm_appl& default_value_ActionRenameRuleRHS();
 const atermpp::aterm_appl& default_value_FixPoint();
 const atermpp::aterm_appl& default_value_PBExpr();
 const atermpp::aterm_appl& default_value_BooleanExpression();
+const atermpp::aterm_appl& default_value_BddExpression();
 
 // BooleanOr
 inline
@@ -481,6 +485,14 @@ inline
 const atermpp::aterm_appl& default_value_UntypedParamId()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedParamId(), default_value_String(), default_value_List());
+  return t;
+}
+
+// BddFalse
+inline
+const atermpp::aterm_appl& default_value_BddFalse()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BddFalse());
   return t;
 }
 
@@ -769,6 +781,14 @@ inline
 const atermpp::aterm_appl& default_value_StateMu()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateMu(), default_value_String(), default_value_List(), default_value_StateFrm());
+  return t;
+}
+
+// BddIf
+inline
+const atermpp::aterm_appl& default_value_BddIf()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BddIf(), default_value_String(), default_value_BddExpression(), default_value_BddExpression());
   return t;
 }
 
@@ -1228,6 +1248,14 @@ const atermpp::aterm_appl& default_value_PBESOr()
   return t;
 }
 
+// BddTrue
+inline
+const atermpp::aterm_appl& default_value_BddTrue()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BddTrue());
+  return t;
+}
+
 // UntypedProcessAssignment
 inline
 const atermpp::aterm_appl& default_value_UntypedProcessAssignment()
@@ -1441,6 +1469,13 @@ const atermpp::aterm_appl& default_value_BooleanExpression()
 {
   return default_value_BooleanTrue();
 }
+
+// BddExpression
+inline
+const atermpp::aterm_appl& default_value_BddExpression()
+{
+  return default_value_BddTrue();
+}
 //--- end generated constructors ---//
 
 //----------------------------------------------------------------------------------------------//
@@ -1483,6 +1518,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl SortSpec;
   static const atermpp::aterm_appl ActionRenameRules;
   static const atermpp::aterm_appl UntypedParamId;
+  static const atermpp::aterm_appl BddFalse;
   static const atermpp::aterm_appl BooleanEquation;
   static const atermpp::aterm_appl ConsSpec;
   static const atermpp::aterm_appl SortList;
@@ -1519,6 +1555,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl ProcSpec;
   static const atermpp::aterm_appl UntypedSortsPossible;
   static const atermpp::aterm_appl StateMu;
+  static const atermpp::aterm_appl BddIf;
   static const atermpp::aterm_appl StateFalse;
   static const atermpp::aterm_appl PBESFalse;
   static const atermpp::aterm_appl PBESForall;
@@ -1576,6 +1613,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl ActId;
   static const atermpp::aterm_appl StateYaled;
   static const atermpp::aterm_appl PBESOr;
+  static const atermpp::aterm_appl BddTrue;
   static const atermpp::aterm_appl UntypedProcessAssignment;
   static const atermpp::aterm_appl SortFBag;
   static const atermpp::aterm_appl Allow;
@@ -1605,6 +1643,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl FixPoint;
   static const atermpp::aterm_appl PBExpr;
   static const atermpp::aterm_appl BooleanExpression;
+  static const atermpp::aterm_appl BddExpression;
 //--- end generated variables ---//
 };
 

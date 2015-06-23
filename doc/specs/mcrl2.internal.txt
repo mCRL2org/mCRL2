@@ -349,3 +349,12 @@
                       | BooleanAnd(<BooleanExpression>, <BooleanExpression>)
                       | BooleanOr(<BooleanExpression>, <BooleanExpression>)
                       | BooleanImp(<BooleanExpression>, <BooleanExpression>)
+
+//BDDs
+//-------------------
+
+// bdd expression
+<BddExpression> ::= BddTrue
+                  | BddFalse
+                  | BddIf(<String>, <BddExpression>, <BddExpression>)
+

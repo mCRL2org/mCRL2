@@ -183,7 +183,8 @@ def generate_traverser_overloads(classnames, function, return_type, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         text = re.sub('>>', '> >', '%s %s(const %s& x) { return %s::%s< %s >(x); }\n' % (return_type, function, classname, namespace, function, classname))
-        code_map[namespace].append(text)
+        if namespace in code_map:
+            code_map[namespace].append(text)
 
 def generate_builder_overloads(classnames, function, code_map):
     for classname in classnames:
@@ -192,14 +193,16 @@ def generate_builder_overloads(classnames, function, code_map):
             text = 'void %s(%s& x) { %s::%s< %s >(x); }\n' % (function, classname, namespace, function, classname)
         else:
             text = '%s %s(const %s& x) { return %s::%s< %s >(x); }\n' % (classname, function, classname, namespace, function, classname)
-        code_map[namespace].append(text)
+        if namespace in code_map:
+            code_map[namespace].append(text)
 
 # special because of additional variable argument
 def generate_search_variable_overloads(classnames, function, return_type, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         text = re.sub('>>', '> >', '%s %s(const %s& x, const data::variable& v) { return %s::%s< %s >(x, v); }\n' % (return_type, function, classname, namespace, function, classname))
-        code_map[namespace].append(text)
+        if namespace in code_map:
+            code_map[namespace].append(text)
 
 # special because of additional data_specification argument
 def generate_normalize_sorts_overloads(classnames, code_map):
@@ -212,7 +215,8 @@ def generate_normalize_sorts_overloads(classnames, code_map):
         if has_specification(classname):
             text = re.sub('x, dataspec', 'x, x.data()', text)
             text = re.sub('& dataspec', '& /* dataspec */', text)
-        code_map[namespace].append(text)
+        if namespace in code_map:
+            code_map[namespace].append(text)
 
 code_map = {}
 for namespace in file_map:
