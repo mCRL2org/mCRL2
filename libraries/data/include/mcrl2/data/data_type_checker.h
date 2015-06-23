@@ -3570,6 +3570,34 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
 }
 
 inline
+const sort_expression& report_result(
+                                     const std::map<core::identifier_string,sort_expression>& DeclaredVars,
+                                     const std::map<core::identifier_string,sort_expression>& AllowedVars,
+                                     const data_expression& expr,
+                                     const sort_expression& sort
+                                    )
+{
+  if (expr.sort() != sort)
+  {
+    std::cout << "--- TraverseVarConsTypeD ---" << std::endl;
+    std::cout << " expr = " << expr << std::endl;
+    std::cout << " declared variables:" << std::endl;
+    for (auto i = DeclaredVars.begin(); i != DeclaredVars.end(); ++i)
+    {
+      std::cout << "  " << i->first << " -> " << i->second << std::endl;
+    }
+    std::cout << " allowed variables:" << std::endl;
+    for (auto i = AllowedVars.begin(); i != AllowedVars.end(); ++i)
+    {
+      std::cout << "  " << i->first << " -> " << i->second << std::endl;
+    }
+    std::cout << expr.sort() << " ==> " << sort << std::endl;
+    std::cout << atermpp::aterm(expr.sort()) << " ==> " << atermpp::aterm(sort) << std::endl;
+  }
+  return sort;
+}
+
+inline
 sort_expression data_type_checker::TraverseVarConsTypeD(
   const std::map<core::identifier_string,sort_expression> &DeclaredVars,
   const std::map<core::identifier_string,sort_expression> &AllowedVars,
@@ -3580,6 +3608,8 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
   const bool warn_upcasting,
   const bool print_cast_error)
 {
+  data_expression input = DataTerm;
+
   //Type checks and transforms *DataTerm replacing Unknown datatype with other ones.
   //Returns the type of the term
   //which should match the PosType
@@ -3668,7 +3698,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       }
 
       detail::RemoveVars(FreeVars,VarList);
-      return NewType;
+      return report_result(DeclaredVars, AllowedVars, input, NewType);
     }
 
     if (is_forall_binder(BindingOperator) || is_exists_binder(BindingOperator))
@@ -3698,7 +3728,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       detail::RemoveVars(FreeVars,VarList);
 
       DataTerm=abstraction(BindingOperator,VarList,Data);
-      return sort_bool::bool_();
+      return report_result(DeclaredVars, AllowedVars, input, sort_bool::bool_());
     }
 
     if (is_lambda_binder(BindingOperator))
@@ -3734,7 +3764,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       detail::RemoveVars(FreeVars,VarList);
 
       DataTerm=abstraction(BindingOperator,VarList,Data);
-      return function_sort(ArgTypes,NewType);
+      return report_result(DeclaredVars, AllowedVars, input, function_sort(ArgTypes,NewType));
     }
   }
 
@@ -3789,7 +3819,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     detail::RemoveVars(FreeVars,VarList);
 
     DataTerm=where_clause(Data,NewWhereList);
-    return NewType;
+    return report_result(DeclaredVars, AllowedVars, input, NewType);
   }
 
   if (is_application(DataTerm))
@@ -3850,7 +3880,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
 
         Type=sort_list::list(sort_expression(Type));
         DataTerm=sort_list::list_enumeration(sort_expression(Type), data_expression_list(atermpp::reverse(NewArguments)));
-        return Type;
+        return report_result(DeclaredVars, AllowedVars, input, Type);
       }
       if (Name == sort_set::set_enumeration_name())
       {
@@ -3922,9 +3952,9 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         {
           DataTerm=sort_set::constructor(Type, sort_set::false_function(Type),DataTerm);
 
-          return sort_set::set_(Type);
+          return report_result(DeclaredVars, AllowedVars, input, sort_set::set_(Type));
         }
-        return sort_fset::fset(Type);
+        return report_result(DeclaredVars, AllowedVars, input, sort_fset::fset(Type));
       }
       if (Name == sort_bag::bag_enumeration_name())
       {
@@ -4039,9 +4069,9 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         {
           DataTerm=sort_bag::constructor(Type, sort_bag::zero_function(Type),DataTerm);
 
-          return sort_bag::bag(Type);
+          return report_result(DeclaredVars, AllowedVars, input, sort_bag::bag(Type));
         }
-        return sort_fbag::fbag(Type);
+        return report_result(DeclaredVars, AllowedVars, input, sort_fbag::fbag(Type));
       }
     }
     sort_expression_list NewArgumentTypes;
@@ -4230,7 +4260,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
 
     if (is_function_sort(UnwindType(NewType)))
     {
-      return atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain();
+      return report_result(DeclaredVars, AllowedVars, input, atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain());
     }
 
     sort_expression temp_type;
@@ -4242,7 +4272,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     {
       throw mcrl2::runtime_error("Fail to properly type " + data::pp(DataTerm));
     }
-    return temp_type;
+    return report_result(DeclaredVars, AllowedVars, input, temp_type);
   }
 
   if (data::is_untyped_identifier(DataTerm)||data::is_function_symbol(DataTerm)||is_variable(DataTerm))
@@ -4267,7 +4297,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       sort_expression temp;
       if (TypeMatchA(Sort,PosType,temp))
       {
-        return Sort;
+        return report_result(DeclaredVars, AllowedVars, input, Sort);
       }
 
       //upcasting
@@ -4280,7 +4310,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast number " + data::pp(DataTerm) + " to type " + data::pp(PosType));
       }
-      return CastedNewType;
+      return report_result(DeclaredVars, AllowedVars, input, CastedNewType);
     }
 
     std::map<core::identifier_string,sort_expression>::const_iterator it=DeclaredVars.find(Name);
@@ -4325,7 +4355,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
 
       //Add to free variables list
       FreeVars[Name]=Type;
-      return Type;
+      return report_result(DeclaredVars, AllowedVars, input, Type);
     }
 
     std::map<core::identifier_string,sort_expression>::const_iterator i=m_user_constants.find(Name);
@@ -4337,7 +4367,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       {
         Type=NewType;
         DataTerm=data::function_symbol(Name,Type);
-        return Type;
+        return report_result(DeclaredVars, AllowedVars, input, Type);
       }
       else
       {
@@ -4345,7 +4375,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         DataTerm=data::function_symbol(Name,Type);
         try
         {
-          return UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          return report_result(DeclaredVars, AllowedVars, input, UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error));
         }
         catch (mcrl2::runtime_error &e)
         {
@@ -4408,7 +4438,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         try
         {
           sort_expression r= UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
-          return r;
+          return report_result(DeclaredVars, AllowedVars, input, r);
         }
         catch (mcrl2::runtime_error &e)
         {
@@ -4418,7 +4448,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       else
       {
         DataTerm=data::function_symbol(Name,data::untyped_sort());
-        return data::untyped_sort();
+        return report_result(DeclaredVars, AllowedVars, input, data::untyped_sort());
       }
     }
 
@@ -4454,7 +4484,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       DataTerm=data::function_symbol(Name,Type);
       try
       {
-        return UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+        return report_result(DeclaredVars, AllowedVars, input, UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error));
       }
       catch (mcrl2::runtime_error &e)
       {
@@ -4463,7 +4493,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     }
     else
     {
-      return TraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strictly_ambiguous, std::string::npos, warn_upcasting,print_cast_error);
+      return report_result(DeclaredVars, AllowedVars, input, TraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strictly_ambiguous, std::string::npos, warn_upcasting,print_cast_error));
     }
   }
 
