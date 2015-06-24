@@ -18,6 +18,7 @@
 #include <map>
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/find.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -127,7 +128,11 @@ class local_fixpoints_algorithm
           approx[i] = false_();
         }
       }
-      for (auto r = max_rank; r >= 0; r--)
+      // r goes from max_rank to 0.
+      // We have to use this construct since r needs to be unsigned and
+      // max_rank may be 0.
+      size_t r = max_rank;
+      do
       {
         // Find the fix point of all equations of rank r
 
@@ -136,30 +141,51 @@ class local_fixpoints_algorithm
         {
           if (ranks[i] == r)
           {
-            todo.insert(i);
+            auto t = evaluate(eqs[i].formula(), r, approx);
+            if (t != approx[i])
+            {
+              approx[i] = t;
+              todo.insert(i);
+            }
           }
         }
 
         while (!todo.empty())
         {
-          auto i = todo.begin();
-          auto t = evaluate(eqs[*i].formula(), ranks[*i], approx);
-          if (t == eqs[*i])
+          auto p = todo.begin();
+          todo.erase(p);
+          auto i = *p;
+          for (size_t v = 0; v < eqs.size(); v++)
           {
-            todo.erase(i);
-          }
-          else
-          {
-            approx[*i] = t;
+            if (ranks[v] == r && search_boolean_variable(eqs[v].formula(), eqs[i].variable()))
+            {
+              auto t = evaluate(eqs[v].formula(), r, approx);
+              if (t != approx[v])
+              {
+                approx[v] = t;
+                todo.insert(v);
+              }
+            }
           }
         }
 
         for (size_t i = 0; i < eqs.size(); i++)
         {
-          eqs[i] = evaluate(eqs[i].formula(), ranks[i], approx);
+          if (ranks[i] == r)
+          {
+            eqs[i].formula() = approx[i];
+          }
+          else
+          {
+            eqs[i].formula() = evaluate(eqs[i].formula(), r, approx);
+          }
         }
       }
-      return is_true(eqs[0].formula());
+      while (r-- != 0);
+      auto f0 = eqs[0].formula();
+      mCRL2log(log::verbose) << "f0 = " << f0 << std::endl;
+      assert(is_true(f0) || is_false(f0));
+      return is_true(f0);
     }
 };
 
