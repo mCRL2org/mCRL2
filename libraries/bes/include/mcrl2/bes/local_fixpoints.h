@@ -49,7 +49,7 @@ class local_fixpoints_algorithm
       max_rank = ranks[eqs.size()-1];
     }
 
-    boolean_expression evaluate(boolean_expression expr, size_t r, const std::vector<boolean_expression> approx)
+    boolean_expression evaluate(boolean_expression expr, size_t r, const std::vector<boolean_expression>& approx)
     {
       if (is_true(expr) || is_false(expr))
       {
