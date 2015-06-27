@@ -63,31 +63,6 @@ static const match_tree dummy=match_tree();
 
 std::set< size_t > m_required_appl_functions;
 
-template <template <class> class Traverser>
-struct double_variable_traverser : public Traverser<double_variable_traverser<Traverser> >
-{
-  typedef Traverser<double_variable_traverser<Traverser> > super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-
-  std::set<variable> m_seen;
-  std::set<variable> m_doubles;
-
-  void apply(const variable& v)
-  {
-    if (!m_seen.insert(v).second)
-    {
-      m_doubles.insert(v);
-    }
-  }
-
-  const std::set<variable>& result()
-  {
-    return m_doubles;
-  }
-};
-
 static std::vector<bool> dep_vars(const data_equation& eqn)
 {
   std::vector<bool> result(recursive_number_of_args(eqn.lhs()), true);

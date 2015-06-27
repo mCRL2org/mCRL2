@@ -21,6 +21,32 @@ namespace data
 namespace detail
 {
 
+template <template <class> class Traverser>
+struct double_variable_traverser : public Traverser<double_variable_traverser<Traverser> >
+{
+  typedef Traverser<double_variable_traverser<Traverser> > super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  std::set<variable> m_seen;
+  std::set<variable> m_doubles;
+
+  void apply(const variable& v)
+  {
+    if (!m_seen.insert(v).second)
+    {
+      m_doubles.insert(v);
+    }
+  }
+
+  const std::set<variable>& result()
+  {
+    return m_doubles;
+  }
+};
+
+
 inline variable_list get_free_vars(const data_expression& a)
 {
   const std::set<variable> s = find_free_variables(a);
