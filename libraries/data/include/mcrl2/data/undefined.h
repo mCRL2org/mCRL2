@@ -42,6 +42,14 @@ const data::variable& undefined_real_variable()
   return v;
 }
 
+/// \brief Returns a sort expression that corresponds to 'undefined'
+inline
+const data::sort_expression& undefined_sort_expression()
+{
+  static data::basic_sort v("@undefined_sort_expression");
+  return v;
+}
+
 /// \brief Returns a data expression that corresponds to 'undefined'
 inline
 const data::data_expression& undefined_data_expression()

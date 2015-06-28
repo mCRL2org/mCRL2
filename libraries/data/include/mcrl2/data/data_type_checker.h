@@ -13,9 +13,10 @@
 #define MCRL2_DATA_DATA_TYPE_CHECKER_H
 
 #include <algorithm>
+#include "mcrl2/data/builder.h"
 #include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/standard_container_utility.h"
-#include "mcrl2/data/builder.h"
+#include "mcrl2/data/undefined.h"
 
 #ifdef MCRL2_USE_NEW_TYPE_CHECKER
 
@@ -24,6 +25,19 @@ namespace mcrl2 {
 namespace data {
 
 namespace detail {
+
+inline
+bool is_pos(const core::identifier_string& Number)
+{
+  char c = Number.function().name()[0];
+  return isdigit(c) && c > '0';
+}
+
+inline
+bool is_nat(const core::identifier_string& Number)
+{
+  return isdigit(Number.function().name()[0]) != 0;
+}
 
 template <template <class> class Builder, class Derived>
 struct typecheck_builder: public Builder<Derived>
@@ -34,9 +48,10 @@ struct typecheck_builder: public Builder<Derived>
   using super::apply;
 
   const std::map<core::identifier_string, sort_expression>& declared_variables;
-  const std::map<core::identifier_string, sort_expression>& allowed_variables;
+  // const std::map<core::identifier_string, sort_expression>& allowed_variables;
 
-  typecheck_builder()
+  typecheck_builder(const std::map<core::identifier_string, sort_expression>& variables)
+    : declared_variables(variables)
   {}
 
   Derived& derived()
@@ -99,6 +114,34 @@ struct typecheck_builder: public Builder<Derived>
   void enter(const data::untyped_identifier& x)
   {
   }
+
+  data_expression apply(const data::untyped_identifier& x)
+  {
+    std::string name = x.name().function().name();
+    sort_expression sort = undefined_sort_expression();
+    if (utilities::is_numeric_string(name))
+    {
+      sort = sort_int::int_();
+      if (detail::is_pos(name))
+      {
+        sort = sort_pos::pos();
+      }
+      else if (detail::is_nat(name))
+      {
+        sort = sort_nat::nat();
+      }
+      else
+      {
+        throw mcrl2::runtime_error("unknown numeric string " + name);
+      }
+    }
+
+    if (sort != undefined_sort_expression())
+    {
+      return data::function_symbol(name, sort);
+    }
+    return x;
+  }
 };
 
 struct typecheck_builder_inst: public typecheck_builder<data::data_expression_builder, typecheck_builder_inst>
@@ -108,6 +151,10 @@ struct typecheck_builder_inst: public typecheck_builder<data::data_expression_bu
   using super::enter;
   using super::leave;
   using super::apply;
+
+  typecheck_builder_inst(const std::map<core::identifier_string, sort_expression>& variables)
+    : super(variables)
+  {}
 };
 
 inline
@@ -310,19 +357,6 @@ inline atermpp::term_list<S> insert_sort_unique(const atermpp::term_list<S>& lis
 }
 
 inline
-bool IsPos(const core::identifier_string& Number)
-{
-  char c = Number.function().name()[0];
-  return isdigit(c) && c > '0';
-}
-
-inline
-bool IsNat(const core::identifier_string& Number)
-{
-  return isdigit(Number.function().name()[0]) != 0;
-}
-
-inline
 std::map<core::identifier_string, sort_expression> RemoveVars(std::map<core::identifier_string,sort_expression>& variables, variable_list VarDecls)
 {
   for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
@@ -443,10 +477,10 @@ bool is_numeric_type(const sort_expression& x)
 class data_type_checker_base: public sort_type_checker
 {
   protected:
-    std::map<core::identifier_string,sort_expression_list> m_system_constants;   //name -> Set(sort expression)
-    std::map<core::identifier_string,sort_expression_list> m_system_functions;   //name -> Set(sort expression)
-    std::map<core::identifier_string,sort_expression> m_user_constants;          //name -> sort expression
-    std::map<core::identifier_string,sort_expression_list> m_user_functions;     //name -> Set(sort expression)
+    std::map<core::identifier_string, sort_expression_list> m_system_constants;
+    std::map<core::identifier_string, function_sort_list> m_system_functions;
+    std::map<core::identifier_string, sort_expression> m_user_constants;
+    std::map<core::identifier_string, function_sort_list> m_user_functions;
 
     void add_system_constant(const data::function_symbol& f)
     {
@@ -463,15 +497,7 @@ class data_type_checker_base: public sort_type_checker
 
     void add_system_function(const data::function_symbol& f)
     {
-      assert(is_function_sort(f.sort()));
-      auto j = m_system_functions.find(f.name());
-      sort_expression_list sorts;
-      if (j != m_system_functions.end())
-      {
-        sorts = j->second;
-      }
-      sorts = sorts + atermpp::make_list<sort_expression>(f.sort());  // TODO: Avoid concatenate but the order is essential.
-      m_system_functions[f.name()] = sorts;
+      m_system_functions[f.name()] = m_system_functions[f.name()] + atermpp::make_list<function_sort>(atermpp::down_cast<function_sort>(f.sort()));
     }
 
     sort_expression unwind_sort_expression(const sort_expression& x) const
@@ -488,9 +514,9 @@ class data_type_checker_base: public sort_type_checker
       return unwind_sort_expression(x1) == unwind_sort_expression(x2);
     }
 
-    bool find_sort(const sort_expression& x, const sort_expression_list& sorts) const
+    bool find_sort(const sort_expression& x, const function_sort_list& sorts) const
     {
-      return std::any_of(sorts.begin(), sorts.end(), [&](const sort_expression& s) { return equal_types(x, s); });
+      return std::any_of(sorts.begin(), sorts.end(), [&](const function_sort& s) { return equal_types(x, s); });
     }
 
     void initialise_system_defined_functions()
@@ -689,8 +715,6 @@ class data_type_checker_base: public sort_type_checker
 
     void add_function(const data::function_symbol& f, const std::string& msg, bool allow_double_decls = false)
     {
-      const sort_expression_list& domain = function_sort(f.sort()).domain();
-
       if (m_system_constants.count(f.name()) > 0)
       {
         throw mcrl2::runtime_error("attempt to redeclare the system constant with a " + msg + " " + data::pp(f));
@@ -702,27 +726,23 @@ class data_type_checker_base: public sort_type_checker
       }
 
       auto j = m_user_functions.find(f.name());
+      const function_sort& fsort = atermpp::down_cast<function_sort>(f.sort());
 
       // the table m_user_functions contains a list of types for each
       // function name. We need to check if there is already such a type
       // in the list. If so -- error, otherwise -- add
       if (j != m_user_functions.end())
       {
-        sort_expression_list sorts = j->second;
-        if (find_sort(f.sort(), sorts))
+        auto& sorts = j->second;
+        if (find_sort(fsort, sorts))
         {
           if (!allow_double_decls)
           {
             throw mcrl2::runtime_error("double declaration of " + msg + " " + core::pp(f.name()));
           }
         }
-        sorts = sorts + atermpp::make_list<sort_expression>(f.sort());
-        m_user_functions[f.name()] = sorts;
       }
-      else
-      {
-        m_user_functions[f.name()] = atermpp::make_list<sort_expression>(f.sort());
-      }
+      m_user_functions[f.name()] = m_user_functions[f.name()] + atermpp::make_list<function_sort>(fsort);
     }
 
     // Adds constants and functions corresponding to the sort x
@@ -883,6 +903,26 @@ class data_type_checker_base: public sort_type_checker
         throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
       }
     }
+
+    const std::map<core::identifier_string, sort_expression_list>& system_constants() const
+    {
+      return m_system_constants;
+    }
+
+    const std::map<core::identifier_string, function_sort_list>& system_functions() const
+    {
+      return m_system_functions;
+    }
+
+    const std::map<core::identifier_string, sort_expression>& user_constants() const
+    {
+      return m_user_constants;
+    }
+
+    const std::map<core::identifier_string, function_sort_list>& user_functions() const
+    {
+      return m_user_functions;
+    }
 };
 
 class data_type_checker: public data_type_checker_base
@@ -929,13 +969,13 @@ class data_type_checker: public data_type_checker_base
      *  \param[in] variables a mapping of variable names to their types.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
-    data_expression operator()(const data_expression& x, const std::map<core::identifier_string,sort_expression>& variables)
+    data_expression operator()(const data_expression& x, const std::map<core::identifier_string, sort_expression>& variables)
     {
-      data_expression data = x;
+      data_expression x1 = x;
       sort_expression sort;
       try
       {
-        sort = TraverseVarConsTypeD(variables, variables, data, data::untyped_sort());
+        sort = TraverseVarConsTypeD(variables, variables, x1, data::untyped_sort());
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -946,8 +986,17 @@ class data_type_checker: public data_type_checker_base
         throw mcrl2::runtime_error("type checking of data expression failed. Result is an unknown sort.");
       }
 
-      assert(strict_type_check(data));
-      return data;
+      assert(strict_type_check(x1));
+
+      detail::typecheck_builder_inst f(variables);
+      auto y1 = f.apply(x);
+      if (y1 != x)
+      {
+        std::cout << "X  = " << atermpp::aterm(x) << std::endl;
+        std::cout << "Y1 = " << atermpp::aterm(y1) << std::endl;
+      }
+
+      return x1;
     }
 
     /** \brief     Type check a data expression.
@@ -3217,8 +3266,8 @@ sort_expression data_type_checker::determine_allowed_type(const data_expression 
 
 inline
 sort_expression data_type_checker::TraverseVarConsTypeDN(
-  const std::map<core::identifier_string,sort_expression> &DeclaredVars,
-  const std::map<core::identifier_string,sort_expression> &AllowedVars,
+  const std::map<core::identifier_string,sort_expression>& DeclaredVars,
+  const std::map<core::identifier_string,sort_expression>& AllowedVars,
   data_expression &DataTerm,
   sort_expression PosType,
   std::map<core::identifier_string,sort_expression> &FreeVars,
@@ -3328,14 +3377,14 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
     }
     else
     {
-      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=m_user_functions.find(Name);
-      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=m_system_functions.find(Name);
+      auto j_context=m_user_functions.find(Name);
+      auto j_gssystem=m_system_functions.find(Name);
 
       if (j_context==m_user_functions.end())
       {
         if (j_gssystem!=m_system_functions.end())
         {
-          ParList=j_gssystem->second; // The function only occurs in the system.
+          ParList = atermpp::deprecated_cast<sort_expression_list>(j_gssystem->second); // The function only occurs in the system.
         }
         else // None are defined.
         {
@@ -3351,11 +3400,11 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
       }
       else if (j_gssystem==m_system_functions.end())
       {
-        ParList=j_context->second; // only the context sorts are defined.
+        ParList = atermpp::deprecated_cast<sort_expression_list>(j_context->second); // only the context sorts are defined.
       }
       else  // Both are defined.
       {
-        ParList=j_gssystem->second+j_context->second;
+        ParList = atermpp::deprecated_cast<sort_expression_list>(j_gssystem->second+j_context->second);
       }
     }
     mCRL2log(log::debug) << "Possible types for Op/Var " << Name << " with " << nFactPars <<
@@ -3571,6 +3620,7 @@ sort_expression data_type_checker::TraverseVarConsTypeDN(
 
 inline
 const sort_expression& report_result(
+                                     const data_expression& DataTerm,
                                      const std::map<core::identifier_string,sort_expression>& DeclaredVars,
                                      const std::map<core::identifier_string,sort_expression>& AllowedVars,
                                      const data_expression& expr,
@@ -3593,6 +3643,10 @@ const sort_expression& report_result(
     }
     std::cout << expr.sort() << " ==> " << sort << std::endl;
     std::cout << atermpp::aterm(expr.sort()) << " ==> " << atermpp::aterm(sort) << std::endl;
+    if (DataTerm.sort() != sort)
+    {
+      std::cout << "DIFFERENT SORT! " << DataTerm.sort() << " ==> " << sort << std::endl;
+    }
   }
   return sort;
 }
@@ -3601,7 +3655,7 @@ inline
 sort_expression data_type_checker::TraverseVarConsTypeD(
   const std::map<core::identifier_string,sort_expression> &DeclaredVars,
   const std::map<core::identifier_string,sort_expression> &AllowedVars,
-  data_expression &DataTerm,
+  data_expression& DataTerm,
   sort_expression PosType,
   std::map<core::identifier_string,sort_expression> &FreeVars,
   const bool strictly_ambiguous,
@@ -3698,7 +3752,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       }
 
       detail::RemoveVars(FreeVars,VarList);
-      return report_result(DeclaredVars, AllowedVars, input, NewType);
+      return report_result(DataTerm, DeclaredVars, AllowedVars, input, NewType);
     }
 
     if (is_forall_binder(BindingOperator) || is_exists_binder(BindingOperator))
@@ -3728,7 +3782,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       detail::RemoveVars(FreeVars,VarList);
 
       DataTerm=abstraction(BindingOperator,VarList,Data);
-      return report_result(DeclaredVars, AllowedVars, input, sort_bool::bool_());
+      return report_result(DataTerm, DeclaredVars, AllowedVars, input, sort_bool::bool_());
     }
 
     if (is_lambda_binder(BindingOperator))
@@ -3764,7 +3818,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       detail::RemoveVars(FreeVars,VarList);
 
       DataTerm=abstraction(BindingOperator,VarList,Data);
-      return report_result(DeclaredVars, AllowedVars, input, function_sort(ArgTypes,NewType));
+      return report_result(DataTerm, DeclaredVars, AllowedVars, input, function_sort(ArgTypes,NewType));
     }
   }
 
@@ -3819,7 +3873,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     detail::RemoveVars(FreeVars,VarList);
 
     DataTerm=where_clause(Data,NewWhereList);
-    return report_result(DeclaredVars, AllowedVars, input, NewType);
+    return report_result(DataTerm, DeclaredVars, AllowedVars, input, NewType);
   }
 
   if (is_application(DataTerm))
@@ -3880,7 +3934,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
 
         Type=sort_list::list(sort_expression(Type));
         DataTerm=sort_list::list_enumeration(sort_expression(Type), data_expression_list(atermpp::reverse(NewArguments)));
-        return report_result(DeclaredVars, AllowedVars, input, Type);
+        return report_result(DataTerm, DeclaredVars, AllowedVars, input, Type);
       }
       if (Name == sort_set::set_enumeration_name())
       {
@@ -3952,9 +4006,9 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         {
           DataTerm=sort_set::constructor(Type, sort_set::false_function(Type),DataTerm);
 
-          return report_result(DeclaredVars, AllowedVars, input, sort_set::set_(Type));
+          return report_result(DataTerm, DeclaredVars, AllowedVars, input, sort_set::set_(Type));
         }
-        return report_result(DeclaredVars, AllowedVars, input, sort_fset::fset(Type));
+        return report_result(DataTerm, DeclaredVars, AllowedVars, input, sort_fset::fset(Type));
       }
       if (Name == sort_bag::bag_enumeration_name())
       {
@@ -4069,9 +4123,9 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         {
           DataTerm=sort_bag::constructor(Type, sort_bag::zero_function(Type),DataTerm);
 
-          return report_result(DeclaredVars, AllowedVars, input, sort_bag::bag(Type));
+          return report_result(DataTerm, DeclaredVars, AllowedVars, input, sort_bag::bag(Type));
         }
-        return report_result(DeclaredVars, AllowedVars, input, sort_fbag::fbag(Type));
+        return report_result(DataTerm, DeclaredVars, AllowedVars, input, sort_fbag::fbag(Type));
       }
     }
     sort_expression_list NewArgumentTypes;
@@ -4260,7 +4314,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
 
     if (is_function_sort(UnwindType(NewType)))
     {
-      return report_result(DeclaredVars, AllowedVars, input, atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain());
+      return report_result(DataTerm, DeclaredVars, AllowedVars, input, atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain());
     }
 
     sort_expression temp_type;
@@ -4272,7 +4326,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     {
       throw mcrl2::runtime_error("Fail to properly type " + data::pp(DataTerm));
     }
-    return report_result(DeclaredVars, AllowedVars, input, temp_type);
+    return report_result(DataTerm, DeclaredVars, AllowedVars, input, temp_type);
   }
 
   if (data::is_untyped_identifier(DataTerm)||data::is_function_symbol(DataTerm)||is_variable(DataTerm))
@@ -4284,11 +4338,11 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     if (utilities::is_numeric_string(Name.function().name()))
     {
       sort_expression Sort=sort_int::int_();
-      if (detail::IsPos(Name))
+      if (detail::is_pos(Name))
       {
         Sort=sort_pos::pos();
       }
-      else if (detail::IsNat(Name))
+      else if (detail::is_nat(Name))
       {
         Sort=sort_nat::nat();
       }
@@ -4297,7 +4351,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       sort_expression temp;
       if (TypeMatchA(Sort,PosType,temp))
       {
-        return report_result(DeclaredVars, AllowedVars, input, Sort);
+        return report_result(DataTerm, DeclaredVars, AllowedVars, input, Sort);
       }
 
       //upcasting
@@ -4310,7 +4364,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast number " + data::pp(DataTerm) + " to type " + data::pp(PosType));
       }
-      return report_result(DeclaredVars, AllowedVars, input, CastedNewType);
+      return report_result(DataTerm, DeclaredVars, AllowedVars, input, CastedNewType);
     }
 
     std::map<core::identifier_string,sort_expression>::const_iterator it=DeclaredVars.find(Name);
@@ -4355,7 +4409,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
 
       //Add to free variables list
       FreeVars[Name]=Type;
-      return report_result(DeclaredVars, AllowedVars, input, Type);
+      return report_result(DataTerm, DeclaredVars, AllowedVars, input, Type);
     }
 
     std::map<core::identifier_string,sort_expression>::const_iterator i=m_user_constants.find(Name);
@@ -4367,7 +4421,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       {
         Type=NewType;
         DataTerm=data::function_symbol(Name,Type);
-        return report_result(DeclaredVars, AllowedVars, input, Type);
+        return report_result(DataTerm, DeclaredVars, AllowedVars, input, Type);
       }
       else
       {
@@ -4375,7 +4429,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         DataTerm=data::function_symbol(Name,Type);
         try
         {
-          return report_result(DeclaredVars, AllowedVars, input, UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error));
+          return report_result(DataTerm, DeclaredVars, AllowedVars, input, UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error));
         }
         catch (mcrl2::runtime_error &e)
         {
@@ -4438,7 +4492,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
         try
         {
           sort_expression r= UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
-          return report_result(DeclaredVars, AllowedVars, input, r);
+          return report_result(DataTerm, DeclaredVars, AllowedVars, input, r);
         }
         catch (mcrl2::runtime_error &e)
         {
@@ -4448,19 +4502,19 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       else
       {
         DataTerm=data::function_symbol(Name,data::untyped_sort());
-        return report_result(DeclaredVars, AllowedVars, input, data::untyped_sort());
+        return report_result(DataTerm, DeclaredVars, AllowedVars, input, data::untyped_sort());
       }
     }
 
-    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=m_user_functions.find(Name);
-    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=m_system_functions.find(Name);
+    auto j_context=m_user_functions.find(Name);
+    auto j_gssystem=m_system_functions.find(Name);
 
     sort_expression_list ParList;
     if (j_context==m_user_functions.end())
     {
       if (j_gssystem!=m_system_functions.end())
       {
-        ParList=j_gssystem->second; // The function only occurs in the system.
+        ParList = atermpp::deprecated_cast<sort_expression_list>(j_gssystem->second); // The function only occurs in the system.
       }
       else
       {
@@ -4470,11 +4524,11 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     }
     else if (j_gssystem==m_system_functions.end())
     {
-      ParList=j_context->second; // only the context sorts are defined.
+      ParList = atermpp::deprecated_cast<sort_expression_list>(j_context->second); // only the context sorts are defined.
     }
     else  // Both are defined.
     {
-      ParList=j_gssystem->second+j_context->second;
+      ParList = atermpp::deprecated_cast<sort_expression_list>(j_gssystem->second+j_context->second);
     }
 
 
@@ -4484,7 +4538,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
       DataTerm=data::function_symbol(Name,Type);
       try
       {
-        return report_result(DeclaredVars, AllowedVars, input, UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error));
+        return report_result(DataTerm, DeclaredVars, AllowedVars, input, UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error));
       }
       catch (mcrl2::runtime_error &e)
       {
@@ -4493,7 +4547,7 @@ sort_expression data_type_checker::TraverseVarConsTypeD(
     }
     else
     {
-      return report_result(DeclaredVars, AllowedVars, input, TraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strictly_ambiguous, std::string::npos, warn_upcasting,print_cast_error));
+      return report_result(DataTerm, DeclaredVars, AllowedVars, input, TraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strictly_ambiguous, std::string::npos, warn_upcasting,print_cast_error));
     }
   }
 
