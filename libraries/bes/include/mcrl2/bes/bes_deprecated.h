@@ -92,6 +92,8 @@ using mcrl2::bes::depth_first_short;
 // The class below contains a pbes_instantiation consisting of an identifier_string and the parameters,
 // where the parameters are stored as a tree.
 
+using mcrl2::pbes_system::propositional_variable_instantiation;
+
 class propositional_variable_instantiation_as_tree
 {
   protected:
@@ -1094,7 +1096,7 @@ class boolean_equation_system
     std::vector < std::deque < counter_example> > data_to_construct_counter_example;
     bool construct_counter_example;
     remove_level remove_unused_bes_variables;
-    atermpp::indexed_set< propositional_variable_instantiation_as_tree > variable_index;  //Used for constructing counter examples
+    atermpp::indexed_set< propositional_variable_instantiation > variable_index;  //Used for constructing counter examples
     typedef mcrl2::data::rewriter::substitution_type substitution_type;
 
   protected:
@@ -1671,7 +1673,7 @@ class boolean_equation_system
     //and translate to pbes expression to a bes_expression in BDD format.
     bes_expression add_propositional_variable_instantiations_to_indexed_set_and_translate(
       const mcrl2::pbes_system::pbes_expression& p,
-      atermpp::indexed_set<propositional_variable_instantiation_as_tree>& variable_index,
+      atermpp::indexed_set<propositional_variable_instantiation>& variable_index,
       size_t& nr_of_generated_variables,
       const bool to_bdd,
       const transformation_strategy strategy,
@@ -1682,7 +1684,7 @@ class boolean_equation_system
       if (is_propositional_variable_instantiation(p))
       {
         const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
-        std::pair<size_t,bool> pr=variable_index.put(propositional_variable_instantiation_as_tree(p1));
+        std::pair<size_t,bool> pr=variable_index.put(p1);
         if (pr.second) /* p is added to the indexed set, so it is a new variable */
         {
           nr_of_generated_variables++;
@@ -1914,8 +1916,8 @@ class boolean_equation_system
       // In order to generate a counterexample, this must also be known outside
       // this procedure.
       // variable_index.put(true_());
-      variable_index.put(propositional_variable_instantiation_as_tree(mcrl2::core::identifier_string("Initial_pbes1"),data_expression_list()));
-      variable_index.put(propositional_variable_instantiation_as_tree(mcrl2::core::identifier_string("Initial_pbes2"),data_expression_list()));
+      variable_index.put(propositional_variable_instantiation(mcrl2::core::identifier_string("Initial_pbes1"),data_expression_list()));
+      variable_index.put(propositional_variable_instantiation(mcrl2::core::identifier_string("Initial_pbes2"),data_expression_list()));
       
                                         /* Put first two dummy terms that
                                            gets index 0 and 1 in the indexed set, to
@@ -1938,7 +1940,7 @@ class boolean_equation_system
       pbes_expression p=pbes_expression_order_quantified_variables(pbes_one_point_rule_rewriter(pbes_simplify_rewriter(pbes_spec.initial_state())),pbes_spec.data());
 
       const propositional_variable_instantiation& p1 = atermpp::down_cast<propositional_variable_instantiation>(p);
-      variable_index.put(propositional_variable_instantiation_as_tree(p1));
+      variable_index.put(p1);
 
       if (opt_transformation_strategy>=on_the_fly || opt_search_strategy==depth_first || maximal_todo_size!=atermpp::npos)
       {
@@ -2041,10 +2043,14 @@ class boolean_equation_system
 
           // Add the required substitutions
           // The current variable instantiation is stored as a tree, and this tree must be unfolded.
-          const propositional_variable_instantiation_as_tree& t=variable_index.get(variable_to_be_processed);
+          const propositional_variable_instantiation& t=variable_index.get(variable_to_be_processed);
           current_pbeq = pbes_equations[t.name()];
           variable_list::iterator iter=current_pbeq.variable().parameters().begin();
-          t.assign_variables_in_tree(iter,sigma);
+          // t.assign_variables_in_tree(iter,sigma);
+          for (auto i = t.parameters().begin(); i != t.parameters().end(); ++i, ++iter)
+          {
+            sigma[*iter] = *i;
+          }
 
           bes_expression new_bes_expression;
           try
@@ -2062,10 +2068,10 @@ class boolean_equation_system
           }
           catch (mcrl2::runtime_error& e)
           {
-            const propositional_variable_instantiation_as_tree& t=variable_index.get(variable_to_be_processed);
-            propositional_variable_instantiation prop_var(t.name(),data_expression_list(t.arguments().begin(), t.arguments().end()));
+            const propositional_variable_instantiation& t=variable_index.get(variable_to_be_processed);
+            // propositional_variable_instantiation prop_var(t.name(),data_expression_list(t.arguments().begin(), t.arguments().end()));
             throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred when investigating " +
-                  mcrl2::pbes_system::pp(prop_var));
+                  mcrl2::pbes_system::pp(t));
           }
 
           for (variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
@@ -2227,14 +2233,15 @@ class boolean_equation_system
       using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
       using namespace atermpp;
-      const propositional_variable_instantiation_as_tree& t=variable_index.get(current_var);
+      const propositional_variable_instantiation& t=variable_index.get(current_var);
       f << t.name();
-      if (!t.arguments().empty())
+      if (!t.parameters().empty())
       {
         f << "("; 
-        for(atermpp::term_balanced_tree<mcrl2::data::data_expression>::iterator i=t.arguments().begin(); i!=t.arguments().end(); ++i)
+        // for(atermpp::term_balanced_tree<mcrl2::data::data_expression>::iterator i=t.parameters().begin(); i!=t.parameters().end(); ++i)
+        for(auto i=t.parameters().begin(); i!=t.parameters().end(); ++i)
         {
-          f << (i==t.arguments().begin()?"":",") << *i;
+          f << (i==t.parameters().begin()?"":",") << *i;
          
         }
         f << ")";
@@ -2298,12 +2305,12 @@ namespace std
 {
 /// Template specialisation for 
 template<>
-struct hash<bes::propositional_variable_instantiation_as_tree >
+struct hash<bes::propositional_variable_instantiation>
 {
-  std::size_t operator()(const bes::propositional_variable_instantiation_as_tree& t) const
+  std::size_t operator()(const bes::propositional_variable_instantiation& t) const
   {
     size_t seed=std::hash<atermpp::aterm>()(t.name());
-    return std::hash<atermpp::aterm>()(t.arguments()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    return std::hash<atermpp::aterm>()(t.parameters()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
   }
 };
 

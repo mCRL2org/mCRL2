@@ -19,6 +19,7 @@
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
+#include "mcrl2/bes/to_bdd.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -142,7 +143,7 @@ class local_fixpoints_algorithm
           if (ranks[i] == r)
           {
             auto t = evaluate(eqs[i].formula(), r, approx);
-            if (t != approx[i])
+            if (!bdd_equal(t, approx[i]))
             {
               approx[i] = t;
               todo.insert(i);
@@ -160,7 +161,7 @@ class local_fixpoints_algorithm
             if (ranks[v] == r && search_boolean_variable(eqs[v].formula(), eqs[i].variable()))
             {
               auto t = evaluate(eqs[v].formula(), r, approx);
-              if (t != approx[v])
+              if (!bdd_equal(t, approx[v]))
               {
                 approx[v] = t;
                 todo.insert(v);
