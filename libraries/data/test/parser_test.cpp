@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/standard_utility.h"

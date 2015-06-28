@@ -100,6 +100,10 @@ std::vector<std::string> regex_split(const std::string& text, const std::string&
 /// \return The trimmed string
 std::string trim_copy(const std::string& text);
 
+/// \brief Remove all trailing and leading spaces from the input.
+/// \param text A string
+void trim(std::string& text);
+
 /// \brief Joins a sequence of strings. This is a replacement for
 /// boost::algorithm::join, since it gives stack overflow errors with
 /// Visual C++ express 9.0 under some circumstances.

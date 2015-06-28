@@ -226,6 +226,11 @@ std::string trim_copy(const std::string& text)
   return boost::trim_copy(text);
 }
 
+void trim(std::string& text)
+{
+  boost::trim(text);
+}
+
 } // namespace utilities
 
 } // namespace mcrl2

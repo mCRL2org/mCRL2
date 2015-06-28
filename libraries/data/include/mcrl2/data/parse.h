@@ -17,7 +17,6 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "boost/algorithm/string.hpp"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/parse.h"
@@ -32,8 +31,6 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
-
-#include <boost/algorithm/string/trim.hpp>
 
 namespace mcrl2
 {
@@ -609,7 +606,7 @@ inline
 data_specification parse_data_specification(const std::string& text)
 {
   // handle empty data specification
-  if (boost::trim_copy(text).empty())
+  if (utilities::trim_copy(text).empty())
   {
     return data_specification();
   }
@@ -648,7 +645,7 @@ void parse_variables(std::istream& in,
                      const data_specification& data_spec = detail::default_specification())
 {
   std::string text = utilities::read_text(in);
-  boost::trim(text);
+  utilities::trim(text);
   variable_list data_vars;
 
   if (!text.empty())
@@ -968,9 +965,9 @@ inline
 data::function_symbol parse_function_symbol(std::string text, const std::string& dataspec_text = "")
 {
   const std::string prefix = "UNIQUE_FUNCTION_SYMBOL_PREFIX";
-  boost::algorithm::trim(text);
+  utilities::trim(text);
   std::string::size_type pos = text.find_first_of(':');
-  std::string name = boost::algorithm::trim_copy(text.substr(0, pos));
+  std::string name = utilities::trim_copy(text.substr(0, pos));
   std::string type = prefix + text.substr(pos);
   std::string spec_text = dataspec_text + "\nmap " + prefix + type + ";\n";
   data::data_specification dataspec = data::parse_data_specification(spec_text);
@@ -990,9 +987,6 @@ namespace detail
 inline
 std::pair<std::string, data_expression_list> parse_variable(std::string const& s)
 {
-  using boost::algorithm::split;
-  using boost::algorithm::is_any_of;
-
   std::string name;
   data_expression_vector variables;
 
@@ -1005,19 +999,11 @@ std::pair<std::string, data_expression_list> parse_variable(std::string const& s
   {
     name = s.substr(0, idx);
     assert(*s.rbegin() == ')');
-    std::vector<std::string> v;
     std::string w = s.substr(idx + 1, s.size() - idx - 2);
-    split(v, w, is_any_of(","));
-    // This doesn't compile in combination with 'using namespace std::rel_ops'
-    // for Visual C++ 8.0 (looks like a compiler bug)
-    // for (std::vector<std::string>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i)
-    // {
-    //   data_expression d = variable(*i);
-    //   variables = push_front(variables, d);
-    // }
-    for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
+    std::vector<std::string> v = utilities::split(w, ",");
+    for (const std::string& s: v)
     {
-      variables.push_back(data::parse_variable(*i));
+      variables.push_back(data::parse_variable(s));
     }
   }
   return std::make_pair(name, data_expression_list(variables.begin(), variables.end()));
