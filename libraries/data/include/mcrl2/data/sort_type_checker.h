@@ -16,8 +16,6 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/utilities/logger.h"
 
-#ifdef MCRL2_USE_NEW_TYPE_CHECKER
-
 namespace mcrl2
 {
 
@@ -38,7 +36,7 @@ namespace detail
 
 }; // namespace detail
 
-class sort_type_checker
+class sort_type_checker_new
 {
   protected:
     std::set<basic_sort> m_basic_sorts;
@@ -47,7 +45,7 @@ class sort_type_checker
 
   public:
     /// \brief constructs a sort expression checker.
-    sort_type_checker(const basic_sort_vector& sorts, const alias_vector& aliases, bool check_aliases = true)
+    sort_type_checker_new(const basic_sort_vector& sorts, const alias_vector& aliases, bool check_aliases = true)
     {
       for (const basic_sort& s: sorts)
       {
@@ -482,7 +480,5 @@ class sort_type_checker
 } // namespace data
 
 } // namespace mcrl2
-
-#endif // MCRL2_USE_NEW_TYPE_CHECKER
 
 #endif // MCRL2_DATA_SORT_TYPE_CHECKER_H

@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MCRL2_USE_NEW_TYPE_CHECKER
-
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
@@ -5168,5 +5166,3 @@ static sort_expression MinType(const sort_expression_list &TypeList)
 } //namespace detail
 } //namespace data
 }
-
-#endif // MCRL2_USE_NEW_TYPE_CHECKER

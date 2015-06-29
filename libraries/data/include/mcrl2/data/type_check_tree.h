@@ -15,7 +15,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
-#include "mcrl2/data/data_type_checker.h"
+#include "mcrl2/data/type_checker.h"
 #include "mcrl2/data/parse.h"
 
 namespace mcrl2 {
@@ -49,7 +49,7 @@ struct type_check_context
       declared_variables(declared_variables_)
   { }
 
-  type_check_context(const data_type_checker_base& checker, const std::map<core::identifier_string, sort_expression>& declared_variables_)
+  type_check_context(const type_checker& checker, const std::map<core::identifier_string, sort_expression>& declared_variables_)
     : system_constants(checker.system_constants()),
       system_functions(checker.system_functions()),
       user_constants(checker.user_constants()),

@@ -20,9 +20,7 @@
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
-#ifdef MCRL2_USE_NEW_TYPE_CHECKER
 #include "mcrl2/data/type_check_tree.h"
-#endif
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
@@ -88,29 +86,8 @@ data::sort_expression parse_sort_expression(const std::string& de_in)
   return result;
 }
 
-#ifdef MCRL2_USE_NEW_TYPE_CHECKER
-void test_data_expression(const std::string& text, const data::data_specification& dataspec = data::data_specification())
-{
-  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
-  unsigned int start_symbol_index = p.start_symbol_index("DataExpr");
-  bool partial_parses = false;
-  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  core::warn_and_or(node);
-  data::type_check_node_ptr tnode = data::type_check_tree_generator(p).parse_DataExpr(node);
-  data::data_type_checker_base checker(dataspec);
-  std::map<core::identifier_string, data::sort_expression> declared_variables;
-  data::type_check_context context(checker, declared_variables);
-  tnode->set_constraints(context);
-  data::print_node(tnode);
-  p.destroy_parse_node(node);
-}
-#endif
-
 data::data_expression parse_data_expression(const std::string& de_in)
 {
-#ifdef MCRL2_USE_NEW_TYPE_CHECKER
-  test_data_expression(de_in);
-#endif
   data::data_expression result;
   try {
     result = data::parse_data_expression_new(de_in);
