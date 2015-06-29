@@ -40,7 +40,7 @@ class RewriterJitty: public Rewriter
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
     size_t MAX_LEN; 
-    data_expression rewrite_aux(const data_expression &term, substitution_type &sigma);
+    data_expression rewrite_aux(const data_expression& term, substitution_type& sigma);
     void build_strategies();
 
     data_expression rewrite_aux_function_symbol(
@@ -54,7 +54,6 @@ class RewriterJitty: public Rewriter
     void make_jitty_strat_sufficiently_larger(const size_t i);
     strategy create_strategy(const data_equation_list& rules1);
     void rebuild_strategy();
-
 };
 }
 }

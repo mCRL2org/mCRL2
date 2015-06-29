@@ -113,6 +113,22 @@ data_expression remove_normal_form_function(const data_expression& t)
   return abstraction(binder, bound_variables, remove_normal_form_function(body));
 }
 
+class jitty_argument_rewriter
+{
+  protected:
+    mutable_indexed_substitution<>& m_sigma;
+    RewriterJitty& m_r;
+  public:
+    jitty_argument_rewriter(mutable_indexed_substitution<>& sigma, RewriterJitty& r)
+     : m_sigma(sigma), m_r(r)
+    {}
+
+  data_expression operator()(const data_expression& t)
+  {
+    return m_r.rewrite(t, m_sigma);
+  }
+};
+
 class dependencies_rewrite_rule_pair
 {
   protected:
@@ -675,37 +691,14 @@ data_expression RewriterJitty::rewrite_aux(
   {
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
     // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
-
-    const size_t arity=term.size()-1;
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,data_expression, arity);
-    for(size_t i=0; i<arity; ++i)
-    {
-      new (&args[i]) data_expression(atermpp::down_cast<data_expression>(term[i+1]));
-    }
-    const data_expression result=application(t,&args[0],&args[0]+arity);
-    for(size_t i=0; i<arity; ++i)
-    {
-      args[i].~data_expression();
-    }
-
+    const data_expression result=application(t,tapp.begin(), tapp.end());
     return rewrite_aux_function_symbol(head,result,sigma,true);
   }
   else if (head_is_variable(t))
   {
     // return appl(t,t1,...,tn) where t1,...,tn still need to be rewritten.
-    const size_t arity=term.size()-1;
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,data_expression, arity);
-    for(size_t i=0; i<arity; ++i)
-    {
-      new (&args[i]) data_expression(rewrite_aux(atermpp::down_cast<data_expression>(term[i+1]),sigma));
-
-    }
-    const data_expression result=application(t,&args[0],&args[0]+arity);
-    for(size_t i=0; i<arity; ++i)
-    {
-      args[i].~data_expression();
-    }
-    return result;
+    jitty_argument_rewriter r(sigma,*this);
+    return application(t,tapp.begin(),tapp.end(),r);
   }
   assert(is_abstraction(t));
   const abstraction& ta(t);
@@ -755,9 +748,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,data_expression,max_vars);
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(variable_is_in_normal_form,bool,max_vars);
     size_t no_assignments=0;
-    for (strategy::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
+    for (const strategy_rule& rule: strat)
     {
-      const strategy_rule rule = *strategy_it;
       if (rule.is_rewrite_index())
       {
         const size_t i = rule.rewrite_index()+1;
