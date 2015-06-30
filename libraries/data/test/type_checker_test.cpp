@@ -34,7 +34,7 @@ void test_data_expression(const std::string& text, const data::data_specificatio
   data::type_checker checker(dataspec);
   std::map<core::identifier_string, data::sort_expression> declared_variables;
   data::type_check_context context(checker, declared_variables);
-  tnode->set_constraints(context);
+  tnode->set_constraint(context);
   data::print_node(tnode);
   p.destroy_parse_node(node);
 }
