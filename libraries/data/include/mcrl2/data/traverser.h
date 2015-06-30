@@ -30,6 +30,7 @@
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/untyped_set_or_bag_comprehension.h"
 #include "mcrl2/data/untyped_sort.h"
+#include "mcrl2/data/untyped_sort_variable.h"
 
 namespace mcrl2
 {
@@ -139,6 +140,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.sorts());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const data::untyped_sort_variable& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -291,6 +299,10 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (data::is_untyped_possible_sorts(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_possible_sorts>(x));
+    }
+    else if (data::is_untyped_sort_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_sort_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -849,6 +861,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const data::untyped_sort_variable& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const data::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1002,6 +1021,10 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (data::is_untyped_possible_sorts(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_possible_sorts>(x));
+    }
+    else if (data::is_untyped_sort_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_sort_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

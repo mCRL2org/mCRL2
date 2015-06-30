@@ -29,6 +29,7 @@
                 | SortArrow(<SortExpr>+, <SortExpr>)
                 | UntypedSortUnknown
                 | UntypedSortsPossible(<SortExpr>+)
+                | UntypedSortVariable(<Number>)
 
 //sort identifier
 <SortId>       ::= SortId(<String>)

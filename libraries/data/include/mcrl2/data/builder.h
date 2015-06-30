@@ -36,6 +36,7 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/untyped_sort.h"
+#include "mcrl2/data/untyped_sort_variable.h"
 #include "mcrl2/data/untyped_set_or_bag_comprehension.h"
 #include "mcrl2/data/untyped_identifier.h"
 
@@ -166,6 +167,14 @@ struct add_sort_expressions: public Builder<Derived>
     data::untyped_possible_sorts result = data::untyped_possible_sorts(static_cast<Derived&>(*this).apply(x.sorts()));
     static_cast<Derived&>(*this).leave(x);
     return result;
+  }
+
+  data::untyped_sort_variable apply(const data::untyped_sort_variable& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
   }
 
   data::forall apply(const data::forall& x)
@@ -323,6 +332,10 @@ struct add_sort_expressions: public Builder<Derived>
     else if (data::is_untyped_possible_sorts(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_possible_sorts>(x));
+    }
+    else if (data::is_untyped_sort_variable(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_sort_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;

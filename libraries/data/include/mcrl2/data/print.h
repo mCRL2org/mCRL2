@@ -1060,6 +1060,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
+  void apply(const data::untyped_sort_variable& x)
+  {
+    derived().enter(x);
+    derived().print("@sort(");
+    derived().apply(x.value());
+    derived().print(")");
+    derived().leave(x);
+  }
+
   void apply(const data::untyped_identifier& x)
   {
     derived().enter(x);

@@ -1217,6 +1217,14 @@ const atermpp::function_symbol& function_symbol_UntypedSortUnknown()
   return function_symbol_UntypedSortUnknown;
 }
 
+// UntypedSortVariable
+inline
+const atermpp::function_symbol& function_symbol_UntypedSortVariable()
+{
+  static const atermpp::function_symbol function_symbol_UntypedSortVariable = atermpp::function_symbol("UntypedSortVariable", 1);
+  return function_symbol_UntypedSortVariable;
+}
+
 // UntypedSortsPossible
 inline
 const atermpp::function_symbol& function_symbol_UntypedSortsPossible()
@@ -1359,6 +1367,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol MultActName;
   static const atermpp::function_symbol IfThenElse;
   static const atermpp::function_symbol Nil;
+  static const atermpp::function_symbol UntypedSortVariable;
   static const atermpp::function_symbol ProcEqn;
   static const atermpp::function_symbol StructProj;
   static const atermpp::function_symbol PBEqn;

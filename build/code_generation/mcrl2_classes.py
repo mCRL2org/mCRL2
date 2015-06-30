@@ -52,6 +52,7 @@ structured_sort(const structured_sort_constructor_list& constructors)           
 function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO   | SortArrow            | A function sort
 untyped_sort()                                                                            : public data::sort_expression | EO   | UntypedSortUnknown   | Unknown sort expression
 untyped_possible_sorts(const sort_expression_list& sorts)                                 : public data::sort_expression | EO   | UntypedSortsPossible | Multiple possible sorts
+untyped_sort_variable(const atermpp::aterm_int& value)                                    : public data::sort_expression | EIOU | UntypedSortVariable  | Untyped sort variable
 '''
 
 BINDER_TYPES = r'''

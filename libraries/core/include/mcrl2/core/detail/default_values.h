@@ -182,6 +182,7 @@ const atermpp::aterm_appl& default_value_PBESTrue();
 const atermpp::aterm_appl& default_value_MultActName();
 const atermpp::aterm_appl& default_value_IfThenElse();
 const atermpp::aterm_appl& default_value_Nil();
+const atermpp::aterm_appl& default_value_UntypedSortVariable();
 const atermpp::aterm_appl& default_value_ProcEqn();
 const atermpp::aterm_appl& default_value_StructProj();
 const atermpp::aterm_appl& default_value_PBEqn();
@@ -1168,6 +1169,14 @@ const atermpp::aterm_appl& default_value_Nil()
   return t;
 }
 
+// UntypedSortVariable
+inline
+const atermpp::aterm_appl& default_value_UntypedSortVariable()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedSortVariable(), default_value_Number());
+  return t;
+}
+
 // ProcEqn
 inline
 const atermpp::aterm_appl& default_value_ProcEqn()
@@ -1603,6 +1612,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl MultActName;
   static const atermpp::aterm_appl IfThenElse;
   static const atermpp::aterm_appl Nil;
+  static const atermpp::aterm_appl UntypedSortVariable;
   static const atermpp::aterm_appl ProcEqn;
   static const atermpp::aterm_appl StructProj;
   static const atermpp::aterm_appl PBEqn;

@@ -17,10 +17,45 @@
 #include <sstream>
 #include "mcrl2/data/type_checker.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/untyped_sort_variable.h"
 
 namespace mcrl2 {
 
 namespace data {
+
+template <typename Container>
+std::string print_node_vector(const std::string& name, const Container& nodes)
+{
+  std::ostringstream out;
+  out << name << "(";
+  for (auto i = nodes.begin(); i != nodes.end(); ++i)
+  {
+    if (i != nodes.begin())
+    {
+      out << ", ";
+    }
+    out << (*i)->print();
+  }
+  out << ")";
+  return out.str();
+}
+
+template <typename Container>
+std::string print_vector(const std::string& name, const Container& nodes)
+{
+  std::ostringstream out;
+  out << name << "(";
+  for (auto i = nodes.begin(); i != nodes.end(); ++i)
+  {
+    if (i != nodes.begin())
+    {
+      out << ", ";
+    }
+    out << *i;
+  }
+  out << ")";
+  return out.str();
+}
 
 struct type_check_node;
 
@@ -28,12 +63,15 @@ typedef std::shared_ptr<type_check_node> type_check_node_ptr;
 
 struct type_check_context
 {
-  std::map<core::identifier_string, sort_expression_list> system_constants;
-  std::map<core::identifier_string, function_sort_list> system_functions;
-  std::map<core::identifier_string, sort_expression> user_constants;
-  std::map<core::identifier_string, function_sort_list> user_functions;
+  const std::map<core::identifier_string, sort_expression_list>& system_constants;
+  const std::map<core::identifier_string, function_sort_list>& system_functions;
+  const std::map<core::identifier_string, sort_expression>& user_constants;
+  const std::map<core::identifier_string, function_sort_list>& user_functions;
   std::map<core::identifier_string, sort_expression> declared_variables;
   // const std::map<core::identifier_string, sort_expression>& allowed_variables;
+
+  std::map<untyped_sort_variable, sort_expression> sort_variables;
+  std::size_t sort_variable_index;
 
   type_check_context(
                      const std::map<core::identifier_string, sort_expression_list>& system_constants_,
@@ -46,7 +84,8 @@ struct type_check_context
       system_functions(system_functions_),
       user_constants(user_constants_),
       user_functions(user_functions_),
-      declared_variables(declared_variables_)
+      declared_variables(declared_variables_),
+      sort_variable_index(0)
   { }
 
   type_check_context(const type_checker& checker, const std::map<core::identifier_string, sort_expression>& declared_variables_)
@@ -54,7 +93,8 @@ struct type_check_context
       system_functions(checker.system_functions()),
       user_constants(checker.user_constants()),
       user_functions(checker.user_functions()),
-      declared_variables(declared_variables_)
+      declared_variables(declared_variables_),
+      sort_variable_index(0)
   {}
 
   // Returns the system defined constants and the user defined constants matching with name
@@ -65,6 +105,13 @@ struct type_check_context
 
   // Returns the variables matching with name
   std::vector<sort_expression> find_matching_variable(const std::string& name) const;
+
+  untyped_sort_variable create_sort_variable()
+  {
+    untyped_sort_variable result(sort_variable_index++);
+    sort_variables[result] = untyped_sort();
+    return result;
+  }
 };
 
 struct type_check_constraint
@@ -74,83 +121,51 @@ struct type_check_constraint
 
 typedef std::shared_ptr<type_check_constraint> constraint_ptr;
 
-// The sort of the corresponding data expression should be a subsort of 'sort'.
+// The sort variable s1 should be a subsort of s2.
 struct subsort_constraint: public type_check_constraint
 {
-  sort_expression sort;
+  untyped_sort_variable s1;
+  sort_expression s2;
 
-  subsort_constraint(const sort_expression& sort_)
-    : sort(sort_)
+  subsort_constraint(const untyped_sort_variable& s1_, const sort_expression& s2_)
+    : s1(s1_), s2(s2_)
   {}
 
   std::string print() const
   {
-    return "subsort(" + data::pp(sort) + ")";
+    return "subsort(" + data::pp(s1) + ", " + data::pp(s2) + ")";
+  }
+};
+
+// The sort variable s1 should be a subsort of s2.
+struct supersort_constraint: public type_check_constraint
+{
+  untyped_sort_variable s1;
+  sort_expression s2;
+
+  supersort_constraint(const untyped_sort_variable& s1_, const sort_expression& s2_)
+    : s1(s1_), s2(s2_)
+  {}
+
+  std::string print() const
+  {
+    return "supersort(" + data::pp(s1) + ", " + data::pp(s2) + ")";
   }
 };
 
 // The sort of the corresponding data expression should be equal to 'sort'.
 struct is_sort_constraint: public type_check_constraint
 {
-  sort_expression sort;
+  sort_expression s1;
+  sort_expression s2;
 
-  is_sort_constraint(const sort_expression& sort_)
-    : sort(sort_)
+  is_sort_constraint(const sort_expression& s1_, const sort_expression& s2_)
+    : s1(s1_), s2(s2_)
   {}
 
   std::string print() const
   {
-    return "is_sort(" + data::pp(sort) + ")";
-  }
-};
-
-struct constant_constraint: public type_check_constraint
-{
-  sort_expression_list possible_sorts;
-
-  constant_constraint(const sort_expression_list& possible_sorts_)
-    : possible_sorts(possible_sorts_)
-  {}
-
-  std::string print() const
-  {
-    std::ostringstream out;
-    out << "constant_constraint(";
-    for (auto i = possible_sorts.begin(); i != possible_sorts.end(); ++i)
-    {
-      if (i != possible_sorts.begin())
-      {
-        out << ", ";
-      }
-      out << *i;
-    }
-    out << ")";
-    return out.str();
-  }
-};
-
-struct function_constraint: public type_check_constraint
-{
-  function_sort_list possible_sorts;
-
-  function_constraint(const function_sort_list& possible_sorts_)
-    : possible_sorts(possible_sorts_)
-  {}
-
-  std::string print() const
-  {
-    std::ostringstream out;
-    out << "function_constraint(";
-    for (auto i = possible_sorts.begin(); i != possible_sorts.end(); ++i)
-    {
-      if (i != possible_sorts.begin())
-      {
-        out << ", ";
-      }
-      out << *i;
-    }
-    out << ")";
-    return out.str();
+    return "is_sort(" + data::pp(s1) + ", " + data::pp(s2) + ")";
   }
 };
 
@@ -167,7 +182,10 @@ struct application_constraint: public type_check_constraint
     arguments.insert(arguments.begin(), nodes.begin() + 1, nodes.end());
   }
 
-  std::string print() const;
+  std::string print() const
+  {
+    return print_node_vector("application_constraint", arguments);
+  }
 };
 
 struct list_enumeration_constraint: public type_check_constraint
@@ -178,7 +196,10 @@ struct list_enumeration_constraint: public type_check_constraint
     : arguments(arguments_)
   {}
 
-  std::string print() const;
+  std::string print() const
+  {
+    return print_node_vector("list_enumeration_constraint", arguments);
+  }
 };
 
 struct set_enumeration_constraint: public type_check_constraint
@@ -189,7 +210,10 @@ struct set_enumeration_constraint: public type_check_constraint
     : arguments(arguments_)
   {}
 
-  std::string print() const;
+  std::string print() const
+  {
+    return print_node_vector("set_enumeration_constraint", arguments);
+  }
 };
 
 struct bag_enumeration_constraint: public type_check_constraint
@@ -200,7 +224,10 @@ struct bag_enumeration_constraint: public type_check_constraint
     : arguments(arguments_)
   {}
 
-  std::string print() const;
+  std::string print() const
+  {
+    return print_node_vector("bag_enumeration_constraint", arguments);
+  }
 };
 
 struct bag_or_set_enumeration_constraint: public type_check_constraint
@@ -211,27 +238,80 @@ struct bag_or_set_enumeration_constraint: public type_check_constraint
     : arguments(arguments_)
   {}
 
-  std::string print() const;
+  std::string print() const
+  {
+    return print_node_vector("bag_or_set_enumeration_constraint", arguments);
+  }
 };
+
+struct or_constraint: public type_check_constraint
+{
+  std::vector<constraint_ptr> alternatives;
+
+  or_constraint(const std::vector<constraint_ptr>& alternatives_)
+    : alternatives(alternatives_)
+  {}
+
+  std::string print() const
+  {
+    return print_node_vector("or", alternatives);
+  }
+};
+
+inline
+constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternatives)
+{
+  if (alternatives.size() == 1)
+  {
+    return alternatives.front();
+  }
+  return constraint_ptr(new or_constraint(alternatives));
+}
+
+struct and_constraint: public type_check_constraint
+{
+  std::vector<constraint_ptr> alternatives;
+
+  and_constraint(const std::vector<constraint_ptr>& alternatives_)
+    : alternatives(alternatives_)
+  {}
+
+  std::string print() const
+  {
+    return print_node_vector("and", alternatives);
+  }
+};
+
+inline
+constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternatives)
+{
+  if (alternatives.size() == 1)
+  {
+    return alternatives.front();
+  }
+  return constraint_ptr(new and_constraint(alternatives));
+}
 
 struct type_check_node
 {
   std::vector<type_check_node_ptr> children;
   std::vector<constraint_ptr> constraints;
+  sort_expression sort;
 
   type_check_node()
+    : sort(undefined_sort_expression())
   {}
 
   type_check_node(const std::vector<type_check_node_ptr>& children_)
-    : children(children_)
+    : children(children_), sort(undefined_sort_expression())
   {}
 
+  // Adds a value to the 'sort' attribute
   // Adds constraints that apply to this node to 'constraints'
-  virtual
-  void set_constraints(const type_check_context& context)
+  virtual void set_constraints(type_check_context& context)
   {}
 
-  void set_children_constraints(const type_check_context& context)
+  void set_children_constraints(type_check_context& context)
   {
     for (type_check_node_ptr child: children)
     {
@@ -240,8 +320,7 @@ struct type_check_node
   }
 
   // Throws an exception if the node violates a well typedness rule
-  virtual
-  void check_well_typedness(const type_check_context& context)
+  virtual void check_well_typedness(const type_check_context& context)
   {}
 
   virtual std::string print() const = 0;
@@ -269,22 +348,22 @@ struct number_node: public type_check_node
     : value(value_)
   {}
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    sort_expression sort;
+    untyped_sort_variable sv = context.create_sort_variable();
+    sort = sv;
     if (detail::is_pos(value))
     {
-      sort = sort_pos::pos();
+      constraints.push_back(constraint_ptr(new supersort_constraint(sv, sort_pos::pos())));
     }
     else if (detail::is_nat(value))
     {
-      sort = sort_nat::nat();
+      constraints.push_back(constraint_ptr(new supersort_constraint(sv, sort_nat::nat())));
     }
     else
     {
       throw mcrl2::runtime_error("unknown numeric string " + value);
     }
-    constraints.push_back(constraint_ptr(new subsort_constraint(sort)));
   }
 
   std::string print() const
@@ -301,10 +380,17 @@ struct constant_node: public type_check_node
     : name(name_)
   {}
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    auto p = context.find_matching_constants(name);
-    constraints.push_back(constraint_ptr(new constant_constraint(p.first + p.second)));
+    untyped_sort_variable sv = context.create_sort_variable();
+    sort = sv;
+    std::pair<sort_expression_list, sort_expression_list> p = context.find_matching_constants(name);
+    std::vector<constraint_ptr> alternatives;
+    for (const sort_expression& s: p.first + p.second)
+    {
+      alternatives.push_back(constraint_ptr(new supersort_constraint(sv, s)));
+    }
+    constraints.push_back(make_or_constraint(alternatives));
     set_children_constraints(context);
   }
 
@@ -334,9 +420,11 @@ struct empty_list_node: public constant_node
     : constant_node("[]")
   { }
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    constraints.push_back(constraint_ptr(new subsort_constraint(sort_list::list(untyped_sort()))));
+    untyped_sort_variable sv = context.create_sort_variable();
+    sort = sort_list::list(sv);
+    constraints.push_back(constraint_ptr(new supersort_constraint(sv, untyped_sort())));
   }
 };
 
@@ -346,9 +434,11 @@ struct empty_set_node: public constant_node
     : constant_node("{}")
   { }
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    constraints.push_back(constraint_ptr(new subsort_constraint(sort_set::set_(untyped_sort()))));
+    untyped_sort_variable sv = context.create_sort_variable();
+    sort = sort_set::set_(sv);
+    constraints.push_back(constraint_ptr(new supersort_constraint(sv, untyped_sort())));
   }
 };
 
@@ -358,9 +448,11 @@ struct empty_bag_node: public constant_node
     : constant_node("{:}")
   { }
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    constraints.push_back(constraint_ptr(new subsort_constraint(sort_bag::bag(untyped_sort()))));
+    untyped_sort_variable sv = context.create_sort_variable();
+    sort = sort_bag::bag(sv);
+    constraints.push_back(constraint_ptr(new supersort_constraint(sv, untyped_sort())));
   }
 };
 
@@ -370,7 +462,7 @@ struct list_enumeration_node: public type_check_node
     : type_check_node(children)
   {}
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
     constraints.push_back(constraint_ptr(new list_enumeration_constraint(children)));
     set_children_constraints(context);
@@ -378,18 +470,7 @@ struct list_enumeration_node: public type_check_node
 
   std::string print() const
   {
-    std::ostringstream out;
-    out << "list_enumeration(";
-    for (auto i = children.begin(); i != children.end(); ++i)
-    {
-      if (i != children.begin())
-      {
-        out << ", ";
-      }
-      out << (*i)->print();
-    }
-    out << ")";
-    return out.str();
+    return print_node_vector("list_enumeration", children);
   }
 };
 
@@ -399,7 +480,7 @@ struct bag_enumeration_node: public type_check_node
     : type_check_node(children)
   {}
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
     constraints.push_back(constraint_ptr(new bag_enumeration_constraint(children)));
     set_children_constraints(context);
@@ -407,18 +488,7 @@ struct bag_enumeration_node: public type_check_node
 
   std::string print() const
   {
-    std::ostringstream out;
-    out << "bag_enumeration(";
-    for (auto i = children.begin(); i != children.end(); ++i)
-    {
-      if (i != children.begin())
-      {
-        out << ", ";
-      }
-      out << (*i)->print();
-    }
-    out << ")";
-    return out.str();
+    return print_node_vector("bag_enumeration", children);
   }
 };
 
@@ -428,7 +498,7 @@ struct set_enumeration_node: public type_check_node
     : type_check_node(children)
   {}
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
     constraints.push_back(constraint_ptr(new set_enumeration_constraint(children)));
     set_children_constraints(context);
@@ -436,18 +506,7 @@ struct set_enumeration_node: public type_check_node
 
   std::string print() const
   {
-    std::ostringstream out;
-    out << "set_enumeration(";
-    for (auto i = children.begin(); i != children.end(); ++i)
-    {
-      if (i != children.begin())
-      {
-        out << ", ";
-      }
-      out << (*i)->print();
-    }
-    out << ")";
-    return out.str();
+    return print_node_vector("set_enumeration", children);
   }
 };
 
@@ -461,7 +520,7 @@ struct bag_or_set_enumeration_node: public type_check_node
     children.push_back(x);
   }
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
     constraints.push_back(constraint_ptr(new bag_or_set_enumeration_constraint(children)));
     set_children_constraints(context);
@@ -469,18 +528,7 @@ struct bag_or_set_enumeration_node: public type_check_node
 
   std::string print() const
   {
-    std::ostringstream out;
-    out << "bag_or_set_enumeration(";
-    for (auto i = children.begin(); i != children.end(); ++i)
-    {
-      if (i != children.begin())
-      {
-        out << ", ";
-      }
-      out << (*i)->print();
-    }
-    out << ")";
-    return out.str();
+    return print_node_vector("bag_or_set_enumeration", children);
   }
 };
 
@@ -495,24 +543,16 @@ struct function_update_node: public type_check_node
 
   std::string print() const
   {
-    std::ostringstream out;
-    out << "function_update(";
-    for (auto i = children.begin(); i != children.end(); ++i)
-    {
-      if (i != children.begin())
-      {
-        out << ", ";
-      }
-      out << (*i)->print();
-    }
-    out << ")";
-    return out.str();
+    return print_node_vector("function_update", children);
   }
 };
 
 struct application_node: public type_check_node
 {
+  std::size_t arity;
+
   application_node(type_check_node_ptr head, const std::vector<type_check_node_ptr>& arguments)
+    : arity(arguments.size())
   {
     children.push_back(head);
     for (auto arg: arguments)
@@ -521,26 +561,29 @@ struct application_node: public type_check_node
     }
   }
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    constraints.push_back(constraint_ptr(new application_constraint(children)));
     set_children_constraints(context);
+    untyped_sort_variable codomain = context.create_sort_variable();
+    std::vector<untyped_sort_variable> domain;
+    for (std::size_t i = 0; i < arity; i++)
+    {
+      domain.push_back(context.create_sort_variable());
+    }
+    sort = function_sort(sort_expression_list(domain.begin(), domain.end()), codomain);
+
+    std::vector<constraint_ptr> alternatives;
+    for (std::size_t i = 0; i < domain.size(); ++i)
+    {
+      alternatives.push_back(constraint_ptr(new subsort_constraint(domain[i], children[i+1]->sort)));
+    }
+    alternatives.push_back(constraint_ptr(new supersort_constraint(codomain, children[0]->sort)));
+    constraints.push_back(make_and_constraint(alternatives));
   }
 
   std::string print() const
   {
-    std::ostringstream out;
-    out << "application(";
-    for (auto i = children.begin(); i != children.end(); ++i)
-    {
-      if (i != children.begin())
-      {
-        out << ", ";
-      }
-      out << (*i)->print();
-    }
-    out << ")";
-    return out.str();
+    return print_node_vector("application", children);
   }
 };
 
@@ -552,10 +595,17 @@ struct unary_operator_node: public type_check_node
     : type_check_node({ arg }), name(name_)
   {}
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    auto p = context.find_matching_functions(name, 1);
-    constraints.push_back(constraint_ptr(new function_constraint(p.first + p.second)));
+    untyped_sort_variable sv = context.create_sort_variable();
+    sort = sv;
+    std::pair<function_sort_list, function_sort_list> p = context.find_matching_functions(name, 1);
+    std::vector<constraint_ptr> alternatives;
+    for (const sort_expression& s: p.first + p.second)
+    {
+      alternatives.push_back(constraint_ptr(new supersort_constraint(sv, s)));
+    }
+    constraints.push_back(make_or_constraint(alternatives));
     set_children_constraints(context);
   }
 
@@ -567,19 +617,18 @@ struct unary_operator_node: public type_check_node
   }
 };
 
-struct forall_node: public unary_operator_node
+struct forall_node: public type_check_node
 {
   variable_list v;
 
   forall_node(const variable_list& v_, type_check_node_ptr arg)
-    : unary_operator_node("forall", arg), v(v_)
+    : type_check_node({ arg }), v(v_)
   {}
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    unary_operator_node::set_constraints(context);
-    children[0]->constraints.push_back(constraint_ptr(new is_sort_constraint(sort_bool::bool_())));
-    // TODO: update context
+    sort = context.create_sort_variable();
+    constraints.push_back(constraint_ptr(new is_sort_constraint(sort, sort_bool::bool_())));
     set_children_constraints(context);
   }
 
@@ -591,19 +640,18 @@ struct forall_node: public unary_operator_node
   }
 };
 
-struct exists_node: public unary_operator_node
+struct exists_node: public type_check_node
 {
   variable_list v;
 
   exists_node(const variable_list& v_, type_check_node_ptr arg)
-    : unary_operator_node("exists", arg), v(v_)
+    : type_check_node({ arg }), v(v_)
   {}
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    unary_operator_node::set_constraints(context);
-    children[0]->constraints.push_back(constraint_ptr(new is_sort_constraint(sort_bool::bool_())));
-    // TODO: update context
+    sort = context.create_sort_variable();
+    constraints.push_back(constraint_ptr(new is_sort_constraint(sort, sort_bool::bool_())));
     set_children_constraints(context);
   }
 
@@ -639,10 +687,17 @@ struct binary_operator_node: public type_check_node
     : type_check_node({ left, right }), name(name_)
   {}
 
-  void set_constraints(const type_check_context& context)
+  void set_constraints(type_check_context& context)
   {
-    auto p = context.find_matching_functions(name, 2);
-    constraints.push_back(constraint_ptr(new function_constraint(p.first + p.second)));
+    untyped_sort_variable sv = context.create_sort_variable();
+    sort = sv;
+    std::pair<function_sort_list, function_sort_list> p = context.find_matching_functions(name, 2);
+    std::vector<constraint_ptr> alternatives;
+    for (const sort_expression& s: p.first + p.second)
+    {
+      alternatives.push_back(constraint_ptr(new supersort_constraint(sv, s)));
+    }
+    constraints.push_back(make_or_constraint(alternatives));
     set_children_constraints(context);
   }
 
@@ -827,87 +882,6 @@ void print_node(type_check_node_ptr node)
   {
     print_node(child);
   }
-}
-
-inline
-std::string application_constraint::print() const
-{
-  std::ostringstream out;
-  out << "application_constraint(";
-  out << head->print() << ", ";
-  for (auto i = arguments.begin(); i != arguments.end(); ++i)
-  {
-    if (i != arguments.begin())
-    {
-      out << ", ";
-    }
-    out << (*i)->print();
-  }
-  return out.str();
-}
-
-inline
-std::string list_enumeration_constraint::print() const
-{
-  std::ostringstream out;
-  out << "list_enumeration_constraint(";
-  for (auto i = arguments.begin(); i != arguments.end(); ++i)
-  {
-    if (i != arguments.begin())
-    {
-      out << ", ";
-    }
-    out << (*i)->print();
-  }
-  return out.str();
-}
-
-inline
-std::string set_enumeration_constraint::print() const
-{
-  std::ostringstream out;
-  out << "set_enumeration_constraint(";
-  for (auto i = arguments.begin(); i != arguments.end(); ++i)
-  {
-    if (i != arguments.begin())
-    {
-      out << ", ";
-    }
-    out << (*i)->print();
-  }
-  return out.str();
-}
-
-inline
-std::string bag_enumeration_constraint::print() const
-{
-  std::ostringstream out;
-  out << "bag_enumeration_constraint(";
-  for (auto i = arguments.begin(); i != arguments.end(); ++i)
-  {
-    if (i != arguments.begin())
-    {
-      out << ", ";
-    }
-    out << (*i)->print();
-  }
-  return out.str();
-}
-
-inline
-std::string bag_or_set_enumeration_constraint::print() const
-{
-  std::ostringstream out;
-  out << "bag_or_set_enumeration_constraint(";
-  for (auto i = arguments.begin(); i != arguments.end(); ++i)
-  {
-    if (i != arguments.begin())
-    {
-      out << ", ";
-    }
-    out << (*i)->print();
-  }
-  return out.str();
 }
 
 } // namespace data

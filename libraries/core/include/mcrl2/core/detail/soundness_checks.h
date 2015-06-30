@@ -325,6 +325,7 @@ template <typename Term> bool check_term_PBESTrue(Term t);
 template <typename Term> bool check_term_MultActName(Term t);
 template <typename Term> bool check_term_IfThenElse(Term t);
 template <typename Term> bool check_term_Nil(Term t);
+template <typename Term> bool check_term_UntypedSortVariable(Term t);
 template <typename Term> bool check_term_ProcEqn(Term t);
 template <typename Term> bool check_term_StructProj(Term t);
 template <typename Term> bool check_term_PBEqn(Term t);
@@ -357,7 +358,8 @@ bool check_rule_SortExpr(Term t)
          || check_term_SortStruct(t)
          || check_term_SortArrow(t)
          || check_term_UntypedSortUnknown(t)
-         || check_term_UntypedSortsPossible(t);
+         || check_term_UntypedSortsPossible(t)
+         || check_term_UntypedSortVariable(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -5424,6 +5426,40 @@ bool check_term_Nil(Term t)
   {
     return false;
   }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedSortVariable(Number)
+template <typename Term>
+bool check_term_UntypedSortVariable(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedSortVariable)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    return false;
+  }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;

@@ -179,21 +179,28 @@ struct printer: public core::traverser<Derived>
     derived().leave(x);
   }
 
-  void apply(atermpp::aterm x)
+  void apply(const atermpp::aterm& x)
   {
     derived().enter(x);
     derived().print(utilities::to_string(x));
     derived().leave(x);
   }
 
-  void apply(atermpp::aterm_list x)
+  void apply(const atermpp::aterm_list& x)
   {
     derived().enter(x);
     derived().print(utilities::to_string(x));
     derived().leave(x);
   }
 
-  void apply(atermpp::aterm_appl x)
+  void apply(const atermpp::aterm_appl& x)
+  {
+    derived().enter(x);
+    derived().print(utilities::to_string(x));
+    derived().leave(x);
+  }
+
+  void apply(const atermpp::aterm_int& x)
   {
     derived().enter(x);
     derived().print(utilities::to_string(x));
