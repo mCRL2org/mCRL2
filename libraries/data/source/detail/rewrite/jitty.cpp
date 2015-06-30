@@ -42,6 +42,10 @@ namespace data
 namespace detail
 {
 
+
+typedef const atermpp::detail::_aterm* unprotected_variable;           // Variable that is not protected (so a copy should exist at some other place)
+typedef const atermpp::detail::_aterm* unprotected_data_expression;    // Idem, but now a data expression.
+
 // The function symbol below is used to administrate that a term is in normal form. It is put around a term.
 // Terms with this auxiliary function symbol cannot be printed using the pretty printer for data expressions.
 static const function_symbol this_term_is_in_normal_form(std::string("Rewritten@@term"),function_sort(make_list(untyped_sort()),untyped_sort()));
@@ -396,22 +400,22 @@ RewriterJitty::~RewriterJitty()
 }
 
 void reset_vars_and_terms(
-            variable* vars,
-            data_expression* terms,
+            unprotected_variable* vars,
+            unprotected_data_expression* terms,
             size_t& assignment_size)
             
 {
-  for(size_t i=0; i<assignment_size; ++i)
+  /* for(size_t i=0; i<assignment_size; ++i)
   {
     vars[i].~variable();
     terms[i].~data_expression();
-  }
+  } */
   assignment_size=0;
 }
 
 static data_expression subst_values(
-            const variable* vars,
-            const data_expression* terms,
+            const unprotected_variable* vars,
+            const unprotected_data_expression* terms,
             const bool* variable_is_a_normal_form,
             const size_t assignment_size,
             const data_expression& t,
@@ -420,15 +424,15 @@ static data_expression subst_values(
 class subst_values_argument
 {
   private:
-    const variable* m_vars;
-    const data_expression* m_terms;
+    const unprotected_variable* m_vars;
+    const unprotected_data_expression* m_terms;
     const bool* m_variable_is_a_normal_form;
     const size_t m_assignment_size;
     data::set_identifier_generator& m_generator;
 
   public:
-    subst_values_argument(const variable* vars,
-                          const data_expression* terms,
+    subst_values_argument(const unprotected_variable* vars,
+                          const unprotected_data_expression* terms,
                           const bool* variable_is_a_normal_form,
                           const size_t assignment_size,
                           data::set_identifier_generator& generator)
@@ -446,8 +450,8 @@ class subst_values_argument
 };
 
 static data_expression subst_values(
-            const variable* vars,
-            const data_expression* terms,
+            const unprotected_variable* vars,
+            const unprotected_data_expression* terms,
             const bool* variable_is_a_normal_form,
             const size_t assignment_size,
             const data_expression& t,
@@ -465,12 +469,12 @@ static data_expression subst_values(
       {
         if (variable_is_a_normal_form[i])
         {
-          return application(this_term_is_in_normal_form,terms[i]);  // Variables that are in normal form get a tag that they are in normal form.
+          return application(this_term_is_in_normal_form,data_expression(terms[i]));  // Variables that are in normal form get a tag that they are in normal form.
         }
-        return terms[i];
+        return data_expression(terms[i]);
       }
     }
-    return t;
+    return data_expression(t);
   }
   else if (is_abstraction(t))
   {
@@ -554,8 +558,8 @@ static data_expression subst_values(
 static bool match_jitty(
                     const data_expression& t,
                     const data_expression& p,
-                    variable* vars,
-                    data_expression* terms,
+                    unprotected_variable* vars,
+                    unprotected_data_expression* terms,
                     bool* variable_is_in_normal_form,
                     size_t& assignment_size,
                     const bool term_context_guarantees_normal_form)
@@ -582,8 +586,10 @@ static bool match_jitty(
       }
     }
     
-    new (&vars[assignment_size]) variable(atermpp::down_cast<variable>(p)); 
-    new (&terms[assignment_size]) data_expression(t); 
+    /* new (&vars[assignment_size]) variable(atermpp::down_cast<variable>(p)); 
+    new (&terms[assignment_size]) data_expression(t); */
+    vars[assignment_size]=atermpp::detail::address(p); 
+    terms[assignment_size]=atermpp::detail::address(t); 
     variable_is_in_normal_form[assignment_size]=term_context_guarantees_normal_form;    
     assignment_size++;
     return true;
@@ -744,8 +750,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   const strategy strat=jitty_strat[op_value];
   if (!strat.empty())
   {
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,variable,max_vars);
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,data_expression,max_vars);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,unprotected_variable,max_vars);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,unprotected_data_expression,max_vars);
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(variable_is_in_normal_form,bool,max_vars);
     size_t no_assignments=0;
     for (const strategy_rule& rule: strat)
@@ -926,7 +932,7 @@ data_expression RewriterJitty::rewrite(
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif
-  const data_expression& t=rewrite_aux(term, sigma);
+  const data_expression t=rewrite_aux(term, sigma);
   assert(remove_normal_form_function(t)==t);
   return t;
 }
