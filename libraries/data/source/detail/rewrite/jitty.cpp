@@ -723,7 +723,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
   
-  const size_t arity=(is_function_symbol(term)?1:detail::recursive_number_of_args(term)+1);
+  const size_t arity=(is_function_symbol(term)?0:detail::recursive_number_of_args(term));
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,data_expression, arity);
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten_defined,bool, arity);
@@ -731,6 +731,12 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   for(size_t i=0; i<arity; ++i)
   {
     rewritten_defined[i]=false;
+  }
+  if (first_term_is_a_normal_form)
+  {
+    assert(arity>0);
+    new (&rewritten[0]) data_expression(detail::get_argument_of_higher_order_term(term,0));
+    rewritten_defined[0]=true;
   }
 
   const size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
@@ -750,18 +756,14 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     {
       if (rule.is_rewrite_index())
       {
-        const size_t i = rule.rewrite_index()+1;
+        const size_t i = rule.rewrite_index();
         if (i < arity)
         {
-          assert(!rewritten_defined[i]);
-          rewritten_defined[i]=true;
-          if (i==1 && first_term_is_a_normal_form)
+          assert(!rewritten_defined[i]||i==0);
+          if (!rewritten_defined[i])
           {
-            new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(term,i-1));
-          }
-          else
-          {
-            new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i-1),sigma));
+            new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
+            rewritten_defined[i]=true;
           }
           assert(rewritten[i].defined());
         }
@@ -774,7 +776,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       {
         const data_equation rule1=rule.equation();
         const data_expression lhs=rule1.lhs();
-        size_t rule_arity = (is_function_symbol(lhs)?1:detail::recursive_number_of_args(lhs)+1);
+        size_t rule_arity = (is_function_symbol(lhs)?0:detail::recursive_number_of_args(lhs));
 
         if (rule_arity > arity)
         {
@@ -784,11 +786,11 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         assert(no_assignments==0); 
 
         bool matches = true;
-        for (size_t i=1; i<rule_arity; i++)
+        for (size_t i=0; i<rule_arity; i++)
         {
           assert(i<arity);
-          if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(term,i-1),
-                           detail::get_argument_of_higher_order_term(lhs,i-1),
+          if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(term,i),
+                           detail::get_argument_of_higher_order_term(lhs,i),
                            vars,terms,variable_is_in_normal_form,no_assignments,rewritten_defined[i]))
           {
             matches = false;
@@ -821,41 +823,31 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
               // There are more arguments than those that have been rewritten.
               // Get those, put them in rewritten.
 
-              if (rewritten_defined[rule_arity-1])
-              {
-                rewritten[rule_arity-1]=subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,generator);
-              }
-              else
-              {
-                new (&rewritten[rule_arity-1]) data_expression(subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,generator));
-                rewritten_defined[rule_arity-1]=true;
-              }
+              data_expression result=subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,generator);
 
               for(size_t i=rule_arity; i<arity; ++i)
               {
                 if (rewritten_defined[i])
                 {
-                  rewritten[i]=detail::get_argument_of_higher_order_term(term,i-1);
+                  rewritten[i]=detail::get_argument_of_higher_order_term(term,i);
                 }
                 else
                 {
-                  new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(term,i-1));
+                  new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(term,i));
                   rewritten_defined[i]=true;
                 }
               }
-              size_t i = rule_arity-1;
+              size_t i = rule_arity;
               sort_expression sort = detail::residual_sort(op.sort(),i);
               while (is_function_sort(sort) && (i < arity))
               {
-                const sort_expression_list& sort_dom = atermpp::down_cast<function_sort>(sort).domain();
-                size_t a=sort_dom.size()+1;
-                const size_t end=i+a;
+                const function_sort& fsort =  atermpp::down_cast<function_sort>(sort);
+                const size_t end=i+fsort.domain().size();
                 assert(end-1<arity);
-                rewritten[end-1] = application(rewritten[i],&rewritten[0]+i+1,&rewritten[0]+end);
-                i=end-1;
-                sort = atermpp::down_cast<function_sort>(sort).codomain();
+                result = application(result,&rewritten[0]+i,&rewritten[0]+end);
+                i=end;
+                sort = fsort.codomain();
               }
-              const data_expression result=rewrite_aux(rewritten[i],sigma);
 
               for (size_t i=0; i<arity; ++i)
               {
@@ -864,7 +856,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                   rewritten[i].~data_expression();
                 }
               }
-              return result;
+              return rewrite_aux(result,sigma);
             }
           }
         }
@@ -875,37 +867,27 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
   // No rewrite rule is applicable. Rewrite the not yet rewritten arguments.
   // As we rewrite all, we do not record anymore whether terms are rewritten.
-  assert(!rewritten_defined[0]);
-  new (&rewritten[0]) data_expression(op);
-  for (size_t i=1; i<arity; i++)
+
+  for (size_t i=0; i<arity; i++)
   {
     if (!rewritten_defined[i])
     {
-      new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i-1),sigma));
+      new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
     }
   }
 
   //Construct this potential higher order term.
-  data_expression result;
-  if (is_function_symbol(term))
+  data_expression result=data_expression(op);
+  size_t i = 0;
+  sort_expression sort = op.sort();
+  while (is_function_sort(sort) && (i < arity))
   {
-    result=rewritten[0];
-  }
-  else
-  {
-    size_t i = 0;
-    sort_expression sort = op.sort();
-    while (is_function_sort(sort) && (i+1 < arity))
-    {
-      const sort_expression_list& sort_dom = atermpp::down_cast<function_sort>(sort).domain();
-      const size_t a=sort_dom.size()+1;
-      const size_t end=i+a;
-      assert(end-1<arity);
-      rewritten[end-1] = application(rewritten[i],&rewritten[0]+i+1,&rewritten[0]+end);
-      i=end-1;
-      sort = atermpp::down_cast<function_sort>(sort).codomain();
-    }
-    result=rewritten[i];
+    const function_sort& fsort=atermpp::down_cast<function_sort>(sort);
+    const size_t end=i+fsort.domain().size();
+    assert(end-1<arity);
+    result = application(result,&rewritten[0]+i,&rewritten[0]+end);
+    i=end;
+    sort = fsort.codomain();
   }
 
   for (size_t i=0; i<arity; i++)
