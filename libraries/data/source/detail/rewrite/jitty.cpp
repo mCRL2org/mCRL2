@@ -48,7 +48,13 @@ typedef const atermpp::detail::_aterm* unprotected_data_expression;    // Idem, 
 
 // The function symbol below is used to administrate that a term is in normal form. It is put around a term.
 // Terms with this auxiliary function symbol cannot be printed using the pretty printer for data expressions.
-static const function_symbol this_term_is_in_normal_form(std::string("Rewritten@@term"),function_sort(make_list(untyped_sort()),untyped_sort()));
+
+
+const function_symbol this_term_is_in_normal_form()
+{
+  static const function_symbol this_term_is_in_normal_form(std::string("Rewritten@@term"),function_sort(make_list(untyped_sort()),untyped_sort()));
+  return this_term_is_in_normal_form;
+}
 
 // The function below is intended to remove the auxiliary function this_term_is_in_normal_form from a term
 // such that it can for instance be pretty printed. 
@@ -62,14 +68,14 @@ data_expression remove_normal_form_function(const data_expression& t)
 
   if (is_function_symbol(t))
   {
-    assert(t!=this_term_is_in_normal_form);
+    assert(t!=this_term_is_in_normal_form());
     return t;
   }
   
   if (is_application(t))
   {
     const application& ta=atermpp::down_cast<application>(t);
-    if (ta.head()==this_term_is_in_normal_form)
+    if (ta.head()==this_term_is_in_normal_form())
     {
       assert(ta.size()==1);
       return ta[0];
@@ -399,20 +405,6 @@ RewriterJitty::~RewriterJitty()
 {
 }
 
-void reset_vars_and_terms(
-            unprotected_variable* vars,
-            unprotected_data_expression* terms,
-            size_t& assignment_size)
-            
-{
-  /* for(size_t i=0; i<assignment_size; ++i)
-  {
-    vars[i].~variable();
-    terms[i].~data_expression();
-  } */
-  assignment_size=0;
-}
-
 static data_expression subst_values(
             const unprotected_variable* vars,
             const unprotected_data_expression* terms,
@@ -469,7 +461,7 @@ static data_expression subst_values(
       {
         if (variable_is_a_normal_form[i])
         {
-          return application(this_term_is_in_normal_form,data_expression(terms[i]));  // Variables that are in normal form get a tag that they are in normal form.
+          return application(this_term_is_in_normal_form(),data_expression(terms[i]));  // Variables that are in normal form get a tag that they are in normal form.
         }
         return data_expression(terms[i]);
       }
@@ -637,7 +629,7 @@ data_expression RewriterJitty::rewrite_aux(
   if (is_application(term))
   {
     const application terma=atermpp::down_cast<application>(term);
-    if (terma.head()==this_term_is_in_normal_form)
+    if (terma.head()==this_term_is_in_normal_form())
     {
       assert(terma.size()==1);
       return terma[0];
@@ -645,7 +637,7 @@ data_expression RewriterJitty::rewrite_aux(
   }
   if (is_function_symbol(term))
   {
-    assert(term!=this_term_is_in_normal_form);
+    assert(term!=this_term_is_in_normal_form());
     return rewrite_aux_function_symbol(atermpp::down_cast<const function_symbol>(term),term,sigma,false);
   }
   if (is_variable(term))
@@ -681,7 +673,7 @@ data_expression RewriterJitty::rewrite_aux(
 
   function_symbol head;
 
-  if (detail::head_is_function_symbol(term,head) && head!=this_term_is_in_normal_form)
+  if (detail::head_is_function_symbol(term,head) && head!=this_term_is_in_normal_form())
   {
     return rewrite_aux_function_symbol(head,term,sigma,false);
   }
@@ -820,7 +812,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                   rewritten[i].~data_expression();
                 }
               }
-              reset_vars_and_terms(vars,terms,no_assignments);
               return result;
             }
             else
@@ -873,12 +864,11 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                   rewritten[i].~data_expression();
                 }
               }
-              reset_vars_and_terms(vars,terms,no_assignments);
               return result;
             }
           }
         }
-        reset_vars_and_terms(vars,terms,no_assignments);
+        no_assignments=0; 
       }
     }
   }
