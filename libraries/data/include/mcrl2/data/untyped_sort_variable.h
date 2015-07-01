@@ -12,6 +12,8 @@
 #ifndef MCRL2_DATA_UNTYPED_SORT_VARIABLE_H
 #define MCRL2_DATA_UNTYPED_SORT_VARIABLE_H
 
+#include "mcrl2/data/sort_expression.h"
+
 namespace mcrl2 {
 
 namespace data {
