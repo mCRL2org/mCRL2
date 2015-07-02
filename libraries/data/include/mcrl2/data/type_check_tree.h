@@ -117,34 +117,20 @@ struct type_check_context
   }
 };
 
+struct type_check_constraint;
+typedef std::shared_ptr<type_check_constraint> constraint_ptr;
+constraint_ptr expand_constraint(constraint_ptr p);
+
 struct type_check_constraint
 {
   virtual std::string print() const = 0;
 };
-
-typedef std::shared_ptr<type_check_constraint> constraint_ptr;
 
 struct no_constraint: public type_check_constraint
 {
   std::string print() const
   {
     return "no_constraint()";
-  }
-};
-
-// The sort variable s1 should be a subsort of s2.
-struct subsort_constraint: public type_check_constraint
-{
-  sort_expression s1;
-  sort_expression s2;
-
-  subsort_constraint(const sort_expression& s1_, const sort_expression& s2_)
-    : s1(s1_), s2(s2_)
-  {}
-
-  std::string print() const
-  {
-    return "subsort(" + data::pp(s1) + ", " + data::pp(s2) + ")";
   }
 };
 
@@ -163,6 +149,34 @@ struct is_sort_constraint: public type_check_constraint
     return "is_sort(" + data::pp(s1) + ", " + data::pp(s2) + ")";
   }
 };
+
+inline
+constraint_ptr make_is_sort_constraint(const sort_expression& s1, const sort_expression& s2)
+{
+  return constraint_ptr(new is_sort_constraint(s1, s2));
+}
+
+// The sort variable s1 should be a subsort of s2.
+struct subsort_constraint: public type_check_constraint
+{
+  sort_expression s1;
+  sort_expression s2;
+
+  subsort_constraint(const sort_expression& s1_, const sort_expression& s2_)
+    : s1(s1_), s2(s2_)
+  {}
+
+  std::string print() const
+  {
+    return "subsort(" + data::pp(s1) + ", " + data::pp(s2) + ")";
+  }
+};
+
+inline
+constraint_ptr make_subsort_constraint(const sort_expression& s1, const sort_expression& s2)
+{
+  return constraint_ptr(new subsort_constraint(s1, s2));
+}
 
 struct or_constraint: public type_check_constraint
 {
@@ -252,6 +266,15 @@ struct type_check_node
   {}
 
   virtual std::string print() const = 0;
+
+  void expand_constraints()
+  {
+    for (type_check_node_ptr child: children)
+    {
+      child->expand_constraints();
+    }
+    constraint = expand_constraint(constraint);
+  }
 };
 
 struct id_node: public type_check_node
@@ -264,8 +287,7 @@ struct id_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    untyped_sort_variable sv = context.create_sort_variable();
-    sort = sv;
+    sort = context.create_sort_variable();
 
     std::vector<constraint_ptr> alternatives;
 
@@ -273,21 +295,21 @@ struct id_node: public type_check_node
     std::vector<sort_expression> variable_sorts = context.find_matching_variables(value);
     if (variable_sorts.size() == 1)
     {
-      alternatives.push_back(constraint_ptr(new is_sort_constraint(sv, variable_sorts.front())));
+      alternatives.push_back(constraint_ptr(new is_sort_constraint(sort, variable_sorts.front())));
     }
 
     // it is a constant
     std::pair<sort_expression_list, sort_expression_list> p = context.find_matching_constants(value);
     for (const sort_expression& s: p.first + p.second)
     {
-      alternatives.push_back(constraint_ptr(new is_sort_constraint(sv, s)));
+      alternatives.push_back(constraint_ptr(new is_sort_constraint(sort, s)));
     }
 
     // it is a function
     std::pair<function_sort_list, function_sort_list> q = context.find_matching_functions(value);
     for (const function_sort& s: q.first + q.second)
     {
-      alternatives.push_back(constraint_ptr(new is_sort_constraint(sv, s)));
+      alternatives.push_back(constraint_ptr(new is_sort_constraint(sort, s)));
     }
     constraint = make_or_constraint(alternatives);
   }
@@ -308,15 +330,14 @@ struct number_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    untyped_sort_variable sv = context.create_sort_variable();
-    sort = sv;
+    sort = context.create_sort_variable();
     if (detail::is_pos(value))
     {
-      constraint = constraint_ptr(new subsort_constraint(sort_pos::pos(), sv));
+      constraint = make_subsort_constraint(sort_pos::pos(), sort);
     }
     else if (detail::is_nat(value))
     {
-      constraint = constraint_ptr(new subsort_constraint(sort_nat::nat(), sv));
+      constraint = make_subsort_constraint(sort_nat::nat(), sort);
     }
     else
     {
@@ -340,13 +361,12 @@ struct constant_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    untyped_sort_variable sv = context.create_sort_variable();
-    sort = sv;
+    sort = context.create_sort_variable();
     std::pair<sort_expression_list, sort_expression_list> p = context.find_matching_constants(name);
     std::vector<constraint_ptr> alternatives;
     for (const sort_expression& s: p.first + p.second)
     {
-      alternatives.push_back(constraint_ptr(new subsort_constraint(s, sv)));
+      alternatives.push_back(make_subsort_constraint(s, sort));
     }
     constraint = make_or_constraint(alternatives);
     set_children_constraints(context);
@@ -380,8 +400,7 @@ struct empty_list_node: public constant_node
 
   void set_constraint(type_check_context& context)
   {
-    untyped_sort_variable sv = context.create_sort_variable();
-    sort = sort_list::list(sv);
+    sort = sort_list::list(context.create_sort_variable());
   }
 };
 
@@ -393,8 +412,7 @@ struct empty_set_node: public constant_node
 
   void set_constraint(type_check_context& context)
   {
-    untyped_sort_variable sv = context.create_sort_variable();
-    sort = sort_set::set_(sv);
+    sort = sort_set::set_(context.create_sort_variable());
   }
 };
 
@@ -406,8 +424,7 @@ struct empty_bag_node: public constant_node
 
   void set_constraint(type_check_context& context)
   {
-    untyped_sort_variable sv = context.create_sort_variable();
-    sort = sort_bag::bag(sv);
+    sort = sort_bag::bag(context.create_sort_variable());
   }
 };
 
@@ -425,7 +442,7 @@ struct list_enumeration_node: public type_check_node
     std::vector<constraint_ptr> alternatives;
     for (type_check_node_ptr child: children)
     {
-      alternatives.push_back(constraint_ptr(new subsort_constraint(element_sort, child->sort)));
+      alternatives.push_back(make_subsort_constraint(element_sort, child->sort));
     }
     constraint = make_and_constraint(alternatives);
   }
@@ -452,11 +469,11 @@ struct bag_enumeration_node: public type_check_node
     {
       if (i % 2 == 0)
       {
-        alternatives.push_back(constraint_ptr(new subsort_constraint(element_sort, children[i]->sort)));
+        alternatives.push_back(make_subsort_constraint(element_sort, children[i]->sort));
       }
       else
       {
-        alternatives.push_back(constraint_ptr(new subsort_constraint(sort_nat::nat(), children[i]->sort)));
+        alternatives.push_back(make_subsort_constraint(sort_nat::nat(), children[i]->sort));
       }
     }
     constraint = make_and_constraint(alternatives);
@@ -482,7 +499,7 @@ struct set_enumeration_node: public type_check_node
     std::vector<constraint_ptr> alternatives;
     for (type_check_node_ptr child: children)
     {
-      alternatives.push_back(constraint_ptr(new subsort_constraint(element_sort, child->sort)));
+      alternatives.push_back(make_subsort_constraint(element_sort, child->sort));
     }
     constraint = make_and_constraint(alternatives);
   }
@@ -514,7 +531,7 @@ struct bag_or_set_enumeration_node: public type_check_node
     });
     constraint_ptr bag_constraint = make_and_constraint({
         constraint_ptr(new is_sort_constraint(sort, sort_bag::bag(element_sort))),
-        constraint_ptr(new subsort_constraint(sort_nat::nat(), children.front()->sort))
+        make_subsort_constraint(sort_nat::nat(), children.front()->sort)
        });
     constraint = make_or_constraint({ set_constraint, bag_constraint });
   }
@@ -568,7 +585,7 @@ struct application_node: public type_check_node
     std::vector<constraint_ptr> alternatives;
     for (std::size_t i = 0; i < domain.size(); ++i)
     {
-      alternatives.push_back(constraint_ptr(new subsort_constraint(children[i+1]->sort, domain[i])));
+      alternatives.push_back(make_subsort_constraint(children[i+1]->sort, domain[i]));
     }
     alternatives.push_back(constraint_ptr(new is_sort_constraint(children[0]->sort, function_sort(sort_expression_list(domain.begin(), domain.end()), codomain))));
     constraint = make_and_constraint(alternatives);
@@ -590,13 +607,12 @@ struct unary_operator_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    untyped_sort_variable sv = context.create_sort_variable();
-    sort = sv;
+    sort = context.create_sort_variable();
     std::pair<function_sort_list, function_sort_list> p = context.find_matching_functions(name, 1);
     std::vector<constraint_ptr> alternatives;
     for (const sort_expression& s: p.first + p.second)
     {
-      alternatives.push_back(constraint_ptr(new subsort_constraint(s, sv)));
+      alternatives.push_back(make_subsort_constraint(s, sort));
     }
     constraint = make_or_constraint(alternatives);
     set_children_constraints(context);
@@ -682,13 +698,12 @@ struct binary_operator_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    untyped_sort_variable sv = context.create_sort_variable();
-    sort = sv;
+    sort = context.create_sort_variable();
     std::pair<function_sort_list, function_sort_list> p = context.find_matching_functions(name, 2);
     std::vector<constraint_ptr> alternatives;
     for (const sort_expression& s: p.first + p.second)
     {
-      alternatives.push_back(constraint_ptr(new subsort_constraint(s, sv)));
+      alternatives.push_back(make_subsort_constraint(s, sort));
     }
     constraint = make_or_constraint(alternatives);
     set_children_constraints(context);
@@ -890,6 +905,47 @@ void print_node(type_check_node_ptr node)
   {
     print_node(child);
   }
+}
+
+// TODO: This design is ugly, but for the moment it seems the easiest solution to modify
+// the constraint tree
+inline
+constraint_ptr expand_constraint(constraint_ptr p)
+{
+  {
+    or_constraint* x = dynamic_cast<or_constraint*>(p.get());
+    if (x)
+    {
+      for (constraint_ptr& q: x->alternatives)
+      {
+        q = expand_constraint(q);
+      }
+      return p;
+    }
+  }
+  {
+    and_constraint* x = dynamic_cast<and_constraint*>(p.get());
+    if (x)
+    {
+      for (constraint_ptr& q: x->alternatives)
+      {
+        q = expand_constraint(q);
+      }
+      return p;
+    }
+  }
+  {
+    subsort_constraint* x = dynamic_cast<subsort_constraint*>(p.get());
+    if (x)
+    {
+      if (x->s1 == sort_bool::bool_())
+      {
+        return constraint_ptr(new is_sort_constraint(x->s2, x->s1));
+      }
+      return p;
+    }
+  }
+  return p;
 }
 
 } // namespace data
