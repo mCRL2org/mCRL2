@@ -104,12 +104,21 @@ inline data_expression get_argument_of_higher_order_term(const data_expression& 
 {
   // t is a aterm of the shape application(application(...application(f,t1,...tn),tn+1....),tm...).
   // Return the i-th argument t_i. NOTE: The first argument has index 1.
+  
+  const application& ta=atermpp::down_cast<application>(t);
+  if (!is_application(ta.head()) && ta.size()>i) // This first case applies to the majority of cases.
+                                                 // Therefore this cheap check is done first, before 
+                                                 // going into a recursive algorithm.
+  {
+    return ta[i];
+  }
+
 
   data_expression result;
 #ifndef NDEBUG // avoid a warning.
   bool b=
 #endif
-          get_argument_of_higher_order_term_helper(atermpp::down_cast<application>(t),i,result);
+          get_argument_of_higher_order_term_helper(ta,i,result);
   assert(b);
   return result;
 }
