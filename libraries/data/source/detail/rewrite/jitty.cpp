@@ -189,7 +189,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
 
         for (size_t i = 0; i < arity; i++)
         {
-          const data_expression this_rule_lhs_iplus1_arg=detail::get_argument_of_higher_order_term(this_rule_lhs,i);
+          const data_expression this_rule_lhs_iplus1_arg=detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(this_rule_lhs),i);
           if (!is_variable(this_rule_lhs_iplus1_arg))
           {
             bs[i] = true;
@@ -249,7 +249,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
           // Check whether argument i is a variable that occurs more than once in 
           // the left or right hand side, or occurs in the condition. It is not clear whether it is 
           // useful to check that it occurs in the condition, but this is what the jittyc rewriter also does.
-          const data_expression& arg_i = get_argument_of_higher_order_term(this_rule.lhs(), i);
+          const data_expression& arg_i = get_argument_of_higher_order_term(atermpp::down_cast<application>(this_rule.lhs()), i);
           if ((bs[i] || 
                (is_variable(arg_i) && (lhs_doubles.result().count(atermpp::down_cast<variable>(arg_i)) > 0 || 
                                        condition_vars.count(atermpp::down_cast<variable>(arg_i)) > 0 ||
@@ -735,7 +735,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   if (first_term_is_a_normal_form)
   {
     assert(arity>0);
-    new (&rewritten[0]) data_expression(detail::get_argument_of_higher_order_term(term,0));
+    new (&rewritten[0]) data_expression(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),0));
     rewritten_defined[0]=true;
   }
 
@@ -762,7 +762,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           assert(!rewritten_defined[i]||i==0);
           if (!rewritten_defined[i])
           {
-            new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
+            new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),sigma));
             rewritten_defined[i]=true;
           }
           assert(rewritten[i].defined());
@@ -789,8 +789,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         for (size_t i=0; i<rule_arity; i++)
         {
           assert(i<arity);
-          if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(term,i),
-                           detail::get_argument_of_higher_order_term(lhs,i),
+          if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),
+                           detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(lhs),i),
                            vars,terms,variable_is_in_normal_form,no_assignments,rewritten_defined[i]))
           {
             matches = false;
@@ -829,11 +829,11 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
               {
                 if (rewritten_defined[i])
                 {
-                  rewritten[i]=detail::get_argument_of_higher_order_term(term,i);
+                  rewritten[i]=detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i);
                 }
                 else
                 {
-                  new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(term,i));
+                  new (&rewritten[i]) data_expression(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i));
                   rewritten_defined[i]=true;
                 }
               }
@@ -872,7 +872,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   {
     if (!rewritten_defined[i])
     {
-      new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
+      new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),sigma));
     }
   }
 

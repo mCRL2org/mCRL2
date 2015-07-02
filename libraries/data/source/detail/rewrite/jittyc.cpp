@@ -74,7 +74,7 @@ static std::vector<bool> dep_vars(const data_equation& eqn)
 
   for (size_t i = 0; i < result.size(); ++i)
   {
-    const data_expression& arg_i = get_argument_of_higher_order_term(eqn.lhs(), i);
+    const data_expression& arg_i = get_argument_of_higher_order_term(atermpp::down_cast<application>(eqn.lhs()), i);
     if (is_variable(arg_i))
     {
       const variable& v = down_cast<variable>(arg_i);

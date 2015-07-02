@@ -100,17 +100,16 @@ inline bool get_argument_of_higher_order_term_helper(const application& t, size_
   return false;
 }
 
-inline data_expression get_argument_of_higher_order_term(const data_expression& t, size_t i)
+inline data_expression get_argument_of_higher_order_term(const application& t, size_t i)
 {
   // t is a aterm of the shape application(application(...application(f,t1,...tn),tn+1....),tm...).
   // Return the i-th argument t_i. NOTE: The first argument has index 1.
   
-  const application& ta=atermpp::down_cast<application>(t);
-  if (!is_application(ta.head()) && ta.size()>i) // This first case applies to the majority of cases.
+  if (!is_application(t.head()) && t.size()>i) // This first case applies to the majority of cases.
                                                  // Therefore this cheap check is done first, before 
                                                  // going into a recursive algorithm.
   {
-    return ta[i];
+    return t[i];
   }
 
 
@@ -118,7 +117,7 @@ inline data_expression get_argument_of_higher_order_term(const data_expression& 
 #ifndef NDEBUG // avoid a warning.
   bool b=
 #endif
-          get_argument_of_higher_order_term_helper(ta,i,result);
+          get_argument_of_higher_order_term_helper(t,i,result);
   assert(b);
   return result;
 }
