@@ -23,6 +23,14 @@ namespace mcrl2 {
 
 namespace data {
 
+// Represents an arbitrary sort
+inline
+const basic_sort& any_sort()
+{
+  static const basic_sort t("@any_sort");
+  return t;
+}
+
 template <typename Container>
 std::string print_node_vector(const std::string& name, const Container& nodes)
 {
@@ -67,7 +75,7 @@ struct type_check_context
   const std::map<core::identifier_string, function_sort_list>& system_functions;
   const std::map<core::identifier_string, sort_expression>& user_constants;
   const std::map<core::identifier_string, function_sort_list>& user_functions;
-  std::map<core::identifier_string, sort_expression> declared_variables;
+  std::map<core::identifier_string, std::vector<sort_expression> > declared_variables;
   // const std::map<core::identifier_string, sort_expression>& allowed_variables;
 
   std::map<untyped_sort_variable, sort_expression> sort_variables;
@@ -78,7 +86,7 @@ struct type_check_context
                      const std::map<core::identifier_string, function_sort_list>& system_functions_,
                      const std::map<core::identifier_string, sort_expression>& user_constants_,
                      const std::map<core::identifier_string, function_sort_list>& user_functions_,
-                     const std::map<core::identifier_string, sort_expression>& declared_variables_
+                     const std::map<core::identifier_string, std::vector<sort_expression> >& declared_variables_
                     )
     : system_constants(system_constants_),
       system_functions(system_functions_),
@@ -88,7 +96,7 @@ struct type_check_context
       sort_variable_index(0)
   { }
 
-  type_check_context(const type_checker& checker, const std::map<core::identifier_string, sort_expression>& declared_variables_)
+  type_check_context(const type_checker& checker, const std::map<core::identifier_string, std::vector<sort_expression> >& declared_variables_)
     : system_constants(checker.system_constants()),
       system_functions(checker.system_functions()),
       user_constants(checker.user_constants()),
@@ -114,6 +122,40 @@ struct type_check_context
     untyped_sort_variable result(sort_variable_index++);
     sort_variables[result] = untyped_sort();
     return result;
+  }
+
+  void add_context_variable(const variable& v)
+  {
+    declared_variables[v.name()].push_back(v.sort());
+  }
+
+  void add_context_variables(const variable_list& variables)
+  {
+    for (const variable& v: variables)
+    {
+      add_context_variable(v);
+    }
+  }
+
+  void remove_context_variable(const variable& v)
+  {
+    auto i = declared_variables.find(v.name());
+    if (i->second.size() <= 1)
+    {
+      declared_variables.erase(i);
+    }
+    else
+    {
+      i->second.pop_back();
+    }
+  }
+
+  void remove_context_variables(const variable_list& variables)
+  {
+    for (const variable& v: variables) // N.B. the order of insertion and removal should not matter
+    {
+      remove_context_variable(v);
+    }
   }
 };
 
@@ -195,15 +237,31 @@ struct or_constraint: public type_check_constraint
 inline
 constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternatives)
 {
-  if (alternatives.size() == 0)
+  std::vector<constraint_ptr> v;
+  for (constraint_ptr p: alternatives)
+  {
+    no_constraint* x_no = dynamic_cast<no_constraint*>(p.get());
+    if (x_no)
+    {
+      continue;
+    }
+    or_constraint* x_or = dynamic_cast<or_constraint*>(p.get());
+    if (x_or)
+    {
+      v.insert(v.end(), x_or->alternatives.begin(), x_or->alternatives.end());
+      continue;
+    }
+    v.push_back(p);
+  }
+  if (v.size() == 0)
   {
     return constraint_ptr(new no_constraint());
   }
   else if (alternatives.size() == 1)
   {
-    return alternatives.front();
+    return v.front();
   }
-  return constraint_ptr(new or_constraint(alternatives));
+  return constraint_ptr(new or_constraint(v));
 }
 
 struct and_constraint: public type_check_constraint
@@ -223,15 +281,31 @@ struct and_constraint: public type_check_constraint
 inline
 constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternatives)
 {
-  if (alternatives.size() == 0)
+  std::vector<constraint_ptr> v;
+  for (constraint_ptr p: alternatives)
+  {
+    no_constraint* x_no = dynamic_cast<no_constraint*>(p.get());
+    if (x_no)
+    {
+      continue;
+    }
+    and_constraint* x_and = dynamic_cast<and_constraint*>(p.get());
+    if (x_and)
+    {
+      v.insert(v.end(), x_and->alternatives.begin(), x_and->alternatives.end());
+      continue;
+    }
+    v.push_back(p);
+  }
+  if (v.size() == 0)
   {
     return constraint_ptr(new no_constraint());
   }
   else if (alternatives.size() == 1)
   {
-    return alternatives.front();
+    return v.front();
   }
-  return constraint_ptr(new and_constraint(alternatives));
+  return constraint_ptr(new and_constraint(v));
 }
 
 struct type_check_node
@@ -311,6 +385,12 @@ struct id_node: public type_check_node
     {
       alternatives.push_back(constraint_ptr(new is_sort_constraint(sort, s)));
     }
+
+//    if (alternatives.empty())
+//    {
+//      throw mcrl2::runtime_error("Could not type check the identifier " + value + ". There is no matching variable or function");
+//    }
+
     constraint = make_or_constraint(alternatives);
   }
 
@@ -400,7 +480,9 @@ struct empty_list_node: public constant_node
 
   void set_constraint(type_check_context& context)
   {
-    sort = sort_list::list(context.create_sort_variable());
+    untyped_sort_variable element_sort = context.create_sort_variable();
+    sort = sort_list::list(element_sort);
+    constraint = make_subsort_constraint(any_sort(), element_sort);
   }
 };
 
@@ -412,7 +494,9 @@ struct empty_set_node: public constant_node
 
   void set_constraint(type_check_context& context)
   {
-    sort = sort_set::set_(context.create_sort_variable());
+    untyped_sort_variable element_sort = context.create_sort_variable();
+    sort = sort_set::set_(element_sort);
+    constraint = make_subsort_constraint(any_sort(), element_sort);
   }
 };
 
@@ -424,7 +508,9 @@ struct empty_bag_node: public constant_node
 
   void set_constraint(type_check_context& context)
   {
-    sort = sort_bag::bag(context.create_sort_variable());
+    untyped_sort_variable element_sort = context.create_sort_variable();
+    sort = sort_bag::bag(element_sort);
+    constraint = make_subsort_constraint(any_sort(), element_sort);
   }
 };
 
@@ -522,6 +608,7 @@ struct bag_or_set_enumeration_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
+    context.add_context_variable(v);
     set_children_constraints(context);
     sort = context.create_sort_variable();
     auto element_sort = v.sort();
@@ -534,6 +621,7 @@ struct bag_or_set_enumeration_node: public type_check_node
         make_subsort_constraint(sort_nat::nat(), children.front()->sort)
        });
     constraint = make_or_constraint({ set_constraint, bag_constraint });
+    context.remove_context_variable(v);
   }
 
   std::string print() const
@@ -628,62 +716,75 @@ struct unary_operator_node: public type_check_node
 
 struct forall_node: public type_check_node
 {
-  variable_list v;
+  variable_list variables;
 
-  forall_node(const variable_list& v_, type_check_node_ptr arg)
-    : type_check_node({ arg }), v(v_)
+  forall_node(const variable_list& variables_, type_check_node_ptr arg)
+    : type_check_node({ arg }), variables(variables_)
   {}
 
   void set_constraint(type_check_context& context)
   {
+    context.add_context_variables(variables);
     sort = context.create_sort_variable();
     constraint = constraint_ptr(new is_sort_constraint(sort, sort_bool::bool_()));
     set_children_constraints(context);
+    context.remove_context_variables(variables);
   }
 
   std::string print() const
   {
     std::ostringstream out;
-    out << "forall(" << data::pp(v) << ". " << children.front()->print() << ")";
+    out << "forall(" << data::pp(variables) << ". " << children.front()->print() << ")";
     return out.str();
   }
 };
 
 struct exists_node: public type_check_node
 {
-  variable_list v;
+  variable_list variables;
 
-  exists_node(const variable_list& v_, type_check_node_ptr arg)
-    : type_check_node({ arg }), v(v_)
+  exists_node(const variable_list& variables_, type_check_node_ptr arg)
+    : type_check_node({ arg }), variables(variables_)
   {}
 
   void set_constraint(type_check_context& context)
   {
+    context.add_context_variables(variables);
     sort = context.create_sort_variable();
     constraint = constraint_ptr(new is_sort_constraint(sort, sort_bool::bool_()));
     set_children_constraints(context);
+    context.remove_context_variables(variables);
   }
 
   std::string print() const
   {
     std::ostringstream out;
-    out << "exists(" << data::pp(v) << ". " << children.front()->print() << ")";
+    out << "exists(" << data::pp(variables) << ". " << children.front()->print() << ")";
     return out.str();
   }
 };
 
 struct lambda_node: public unary_operator_node
 {
-  variable_list v;
+  variable_list variables;
 
-  lambda_node(const variable_list& v_, type_check_node_ptr arg)
-    : unary_operator_node("lambda", arg), v(v_)
+  lambda_node(const variable_list& variables_, type_check_node_ptr arg)
+    : unary_operator_node("lambda", arg), variables(variables_)
   {}
+
+  void set_constraint(type_check_context& context)
+  {
+    context.add_context_variables(variables);
+    set_children_constraints(context);
+    sort = context.create_sort_variable();
+    constraint = constraint_ptr(new subsort_constraint(any_sort(), sort));
+    context.remove_context_variables(variables);
+  }
 
   std::string print() const
   {
     std::ostringstream out;
-    out << "lambda(" << data::pp(v) << ". " << children.front()->print() << ")";
+    out << "lambda(" << data::pp(variables) << ". " << children.front()->print() << ")";
     return out.str();
   }
 };
@@ -889,7 +990,7 @@ std::vector<sort_expression> type_check_context::find_matching_variables(const s
   auto i = declared_variables.find(core::identifier_string(name));
   if (i != declared_variables.end())
   {
-    result.push_back(i->second);
+    result.push_back(i->second.back());
   }
   return result;
 }
