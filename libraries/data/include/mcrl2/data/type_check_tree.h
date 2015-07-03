@@ -280,9 +280,15 @@ struct and_constraint: public type_check_constraint
 
 struct false_constraint: public type_check_constraint
 {
+  std::string message;
+
+  false_constraint(const std::string& message_)
+    : message(message_)
+  {}
+
   std::string print() const
   {
-    return "false";
+    return "false(" + message + ")";
   }
 };
 
@@ -396,7 +402,7 @@ struct id_node: public type_check_node
 
     if (alternatives.empty())
     {
-      constraint = constraint_ptr(new false_constraint());
+      constraint = constraint_ptr(new false_constraint("The id " + value + " is not declared!"));
     }
     else
     {
@@ -830,7 +836,7 @@ struct binary_operator_node: public type_check_node
 
 struct where_clause_node: public type_check_node
 {
-  std::vector<std::string> variables;
+  std::vector<std::string> variable_names;
 
   where_clause_node(type_check_node_ptr body, const std::vector<std::pair<std::string, type_check_node_ptr> >& assignments)
   {
@@ -838,15 +844,35 @@ struct where_clause_node: public type_check_node
     variable_vector v;
     for (const std::pair<std::string, type_check_node_ptr>& a: assignments)
     {
-      variables.push_back(a.first);
+      variable_names.push_back(a.first);
       children.push_back(a.second);
     }
+  }
+
+  void set_constraint(type_check_context& context)
+  {
+    variable_list variables;
+    for (const std::string& name: variable_names)
+    {
+      variables.push_front(variable(name, any_sort()));
+    }
+    context.add_context_variables(variables);
+    set_children_constraints(context);
+    sort = context.create_sort_variable();
+
+    std::vector<constraint_ptr> constraints = { make_subsort_constraint(any_sort(), sort) };
+    for (type_check_node_ptr child: children)
+    {
+      constraints.push_back(make_subsort_constraint(any_sort(), child->sort));
+    }
+    constraint = make_and_constraint(constraints);
+    context.remove_context_variables(variables);
   }
 
   std::string print() const
   {
     std::ostringstream out;
-    out << "where_clause()";
+    return print_node_vector("where_clause", children);
     return out.str();
   }
 };
