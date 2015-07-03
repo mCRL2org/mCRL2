@@ -278,6 +278,14 @@ struct and_constraint: public type_check_constraint
   }
 };
 
+struct false_constraint: public type_check_constraint
+{
+  std::string print() const
+  {
+    return "false";
+  }
+};
+
 inline
 constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternatives)
 {
@@ -386,12 +394,14 @@ struct id_node: public type_check_node
       alternatives.push_back(constraint_ptr(new is_sort_constraint(sort, s)));
     }
 
-//    if (alternatives.empty())
-//    {
-//      throw mcrl2::runtime_error("Could not type check the identifier " + value + ". There is no matching variable or function");
-//    }
-
-    constraint = make_or_constraint(alternatives);
+    if (alternatives.empty())
+    {
+      constraint = constraint_ptr(new false_constraint());
+    }
+    else
+    {
+      constraint = make_or_constraint(alternatives);
+    }
   }
 
   std::string print() const
