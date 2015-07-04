@@ -546,7 +546,7 @@ class data_specification
     ///    sort Tree=struct leaf | node(Tree,Tree) then there are different representations
     ///    for each sort. The normalisation mapping maps each sort to a unique representant.
     ///    Moreover, it is this unique sort that it provides in internal mappings.
-    const std::map< sort_expression, sort_expression > &sort_alias_map() const
+    const std::map< sort_expression, sort_expression >& sort_alias_map() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();

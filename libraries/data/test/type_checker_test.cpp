@@ -32,7 +32,7 @@ void test_data_expression(const std::string& text, const data::data_specificatio
   core::warn_and_or(node);
   data::type_check_node_ptr tnode = data::type_check_tree_generator(p).parse_DataExpr(node);
   data::type_checker checker(dataspec);
-  std::map<core::identifier_string, data::sort_expression> declared_variables;
+  std::map<core::identifier_string, data::sort_expression_vector> declared_variables;
   data::type_check_context context(checker, declared_variables);
   tnode->set_constraint(context);
   data::print_node(tnode);

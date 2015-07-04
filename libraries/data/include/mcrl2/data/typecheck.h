@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_TYPECHECK_H
 #define MCRL2_DATA_TYPECHECK_H
 
+#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
@@ -19,56 +20,6 @@ namespace mcrl2
 
 namespace data
 {
-
-class sort_type_checker
-{
-  protected:
-    std::set<basic_sort> m_basic_sorts;
-    std::map<basic_sort, sort_expression> m_aliases;
-    std::map<sort_expression, basic_sort> m_normalized_aliases;
-
-  public:
-    /// \brief constructs a sort expression checker.
-    sort_type_checker(const basic_sort_vector& sorts, const alias_vector& aliases, bool check_aliases = true);
-
-    /** \brief     Type check a sort expression.
-    *  Throws an exception if the expression is not well typed.
-    *  \param[in] s A sort expression that has not been type checked.
-    **/
-    void operator()(const sort_expression& s);
-
-  protected:
-    // Auxiliary functions
-    void add_basic_sort(const basic_sort& n);
-    void add_alias(const data::alias& x);
-    bool check_for_sort_alias_loop_through_function_sort_via_expression(
-             const sort_expression& sort_expression_start_search,
-             const basic_sort& end_search,
-             std::set < basic_sort > &visited,
-             const bool observed_a_sort_constructor);
-    bool check_for_sort_alias_loop_through_function_sort(
-             const basic_sort& start_search,
-             const basic_sort& end_search,
-             std::set<basic_sort>& visited,
-             const bool observed_a_sort_constructor);
-    void check_sort_is_declared(const sort_expression& x);
-    void check_sort_list_is_declared(const sort_expression_list& x);
-    void check_basic_sort_is_declared(const basic_sort& x);
-    void check_for_empty_constructor_domains(function_symbol_list constructors);
-
-    // Throws a runtime_error if a rewriting loop is detected.
-    // Also closes the mapping m_normalized_aliases under itself(!)
-    void check_alias_circularity(const data::basic_sort& lhs, const data::sort_expression& rhs);
-
-    // Throws an exception if the alias lhs -> rhs is recursively defined
-    void check_alias_recursion(const data::basic_sort& lhs, const data::sort_expression& rhs);
-
-    // Throws an exception if there is a problem with the alias
-    void check_alias(const data::basic_sort& lhs, const data::sort_expression& rhs);
-
-    // Normalizes alias x, and adds it to m_normalized_aliases
-    void normalize_alias(const data::alias& x);
-};
 
 class data_type_checker: public sort_type_checker
 {
@@ -166,7 +117,7 @@ class data_type_checker: public sort_type_checker
       for (const variable& v: declared_variables)
       {
         // TODO: this should be checked elsewhere
-        check_sort_is_declared(v.sort());
+        sort_type_checker::check_sort_is_declared(v.sort());
         variable_map[v.name()] = v.sort();
       }
     }

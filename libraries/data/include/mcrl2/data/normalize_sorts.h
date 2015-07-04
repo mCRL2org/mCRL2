@@ -28,7 +28,7 @@ namespace detail
 struct normalize_sorts_function: public std::unary_function<data::sort_expression, data::sort_expression>
 {
   /* const data_specification& m_data_spec; */
-  const std::map< sort_expression, sort_expression > &m_normalised_aliases;
+  const std::map< sort_expression, sort_expression >& m_normalised_aliases;
 
   normalize_sorts_function(const data_specification& data_spec)
     : m_normalised_aliases(data_spec.sort_alias_map())
@@ -99,7 +99,6 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
     {
       new_sort=this->operator()(i2->second); // rewrite the result until normal form.
     }
-    // m_normalised_aliases[e]=new_sort; // recall for later use. Note that e==new_sort is a possibility.
     return new_sort;
   }
 
@@ -107,25 +106,6 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
 
 } // namespace detail
 
-/* template <typename T>
-void normalize_sorts(T& x,
-                     const data::data_specification& data_spec,
-                     typename std::disable_if<typename std::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                    )
-{
-  core::make_update_apply_builder<data::sort_expression_builder>
-  (data::detail::normalize_sorts_function(data_spec))(x);
-} 
-
-template <typename T>
-T normalize_sorts(const T& x,
-                  const data::data_specification& data_spec,
-                  typename std::enable_if<typename std::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                 )
-{
-  return core::make_update_apply_builder<data::sort_expression_builder>
-         (data::detail::normalize_sorts_function(data_spec))(x);
-} */
 
 template <typename T>
 void normalize_sorts(T& x,

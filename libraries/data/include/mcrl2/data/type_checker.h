@@ -95,7 +95,7 @@ bool is_numeric_type(const sort_expression& x)
 
 } // namespace detail
 
-class type_checker: public sort_type_checker_new
+class type_checker: public sort_type_checker
 {
   protected:
     std::map<core::identifier_string, sort_expression_list> m_system_constants;
@@ -498,7 +498,7 @@ class type_checker: public sort_type_checker_new
 
   public:
     type_checker(const data_specification& data_spec)
-      : sort_type_checker_new(data_spec.user_defined_sorts(), data_spec.user_defined_aliases())
+      : sort_type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases())
     {
       initialise_system_defined_functions();
       try

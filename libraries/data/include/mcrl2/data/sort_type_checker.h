@@ -36,7 +36,7 @@ namespace detail
 
 }; // namespace detail
 
-class sort_type_checker_new
+class sort_type_checker
 {
   protected:
     std::set<basic_sort> m_basic_sorts;
@@ -45,7 +45,7 @@ class sort_type_checker_new
 
   public:
     /// \brief constructs a sort expression checker.
-    sort_type_checker_new(const basic_sort_vector& sorts, const alias_vector& aliases, bool check_aliases = true)
+    sort_type_checker(const basic_sort_vector& sorts, const alias_vector& aliases, bool check_aliases = true)
     {
       for (const basic_sort& s: sorts)
       {

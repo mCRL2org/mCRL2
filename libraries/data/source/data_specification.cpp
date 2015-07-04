@@ -250,8 +250,8 @@ void data_specification::check_for_alias_loop(
 static
 sort_expression find_normal_form(
   const sort_expression& e,
-  const std::multimap< sort_expression, sort_expression >  &map1,
-  const std::multimap< sort_expression, sort_expression >  &map2,
+  const std::multimap< sort_expression, sort_expression >& map1,
+  const std::multimap< sort_expression, sort_expression >& map2,
   std::set < sort_expression > sorts_already_seen = std::set < sort_expression >())
 {
   assert(sorts_already_seen.find(e)==sorts_already_seen.end()); // e has not been seen already.
