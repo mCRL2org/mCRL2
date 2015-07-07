@@ -29,6 +29,7 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/function_update.h"
+#include "mcrl2/data/sort_specification.h"
 
 // sorts
 #include "mcrl2/data/sort_expression.h"
@@ -93,7 +94,7 @@ atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specificati
 
 /// \brief data specification.
 
-class data_specification
+class data_specification: public sort_specification
 {
   private:
 
@@ -156,20 +157,6 @@ class data_specification
     ///\brief Builds a specification from aterm
     void build_from_aterm(const atermpp::aterm_appl& t);
 
-    // The function below recalculates m_normalised_aliases, such that
-    // it forms a confluent terminating rewriting system using which
-    // sorts can be normalised.
-    void reconstruct_m_normalised_aliases() const;
-
-    // The function below checks whether there is an alias loop, e.g. aliases
-    // of the form A=B; B=A; or more complex A=B->C; B=Set(D); D=List(A); Loops
-    // through structured sorts are allowed. If a loop is detected, an exception
-    // is thrown.
-    void check_for_alias_loop(
-      const sort_expression s,
-      std::set<sort_expression> sorts_already_seen,
-      const bool toplevel=true) const;
-
   protected:
 
     /// \brief The variable data_specification_is_type_checked indicates
@@ -191,16 +178,10 @@ class data_specification
     /// m_normalised_aliases.
     mutable bool m_normalised_data_is_up_to_date;
 
-    /// \brief The basic sorts and structured sorts in the specification.
-    basic_sort_vector     m_sorts;
-
     /// \brief The sorts that occur in the context of this data specification.
     /// The normalised sorts, constructors, mappings and equations are complete
     /// with respect to these sorts.
     mutable std::set< sort_expression >     m_sorts_in_context;
-
-    /// \brief The basic sorts and structured sorts in the specification.
-    alias_vector                     m_aliases;
 
     /// \brief A mapping of sort expressions to the constructors corresponding to that sort.
     function_symbol_vector             m_constructors;
@@ -210,9 +191,6 @@ class data_specification
 
     /// \brief The equations of the specification.
     std::vector< data_equation >       m_equations;
-
-    /// \brief Set containing all the sorts, including the system defined ones.
-    mutable sort_expression_vector         m_normalised_sorts;
 
     /// \brief Set containing all constructors, including the system defined ones.
     /// The types in these constructors are normalised.
@@ -231,10 +209,6 @@ class data_specification
     /// \brief Table containing all equations, including the system defined ones.
     ///        The sorts in these equations are normalised.
     mutable data_equation_vector           m_normalised_equations;
-
-    /// \brief Table containing how sorts should be mapped to normalised sorts.
-    // sort_normaliser               m_sort_normaliser;
-    mutable std::map< sort_expression, sort_expression > m_normalised_aliases;
 
     void data_is_not_necessarily_normalised_anymore() const
     {
@@ -553,14 +527,6 @@ class data_specification
       return m_normalised_aliases;
     }
 
-    /// \brief Gets the user defined aliases.
-    /// \details The time complexity is constant.
-    inline
-    const alias_vector& user_defined_aliases() const
-    {
-      return m_aliases;
-    }
-
     /// \brief Return the user defined context sorts of the current specification.
     /// \details Time complexity is constant.
     const std::set<sort_expression>& context_sorts() const
@@ -679,7 +645,7 @@ class data_specification
       m_normalised_mappings.clear();
       m_normalised_equations.clear();
       std::set < sort_expression > sorts_already_added_to_m_normalised_sorts;
-      reconstruct_m_normalised_aliases();
+      sort_specification::reconstruct_m_normalised_aliases();
       for (basic_sort_vector::const_iterator i=m_sorts.begin();
            i!=m_sorts.end(); ++i)
       {

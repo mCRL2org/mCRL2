@@ -9,11 +9,6 @@
 /// \file mcrl2/data/traverser.h
 /// \brief add your file description here.
 
-// To avoid circular header dependency problems
-#ifndef MCRL2_DATA_DATA_SPECIFICATION_H
-#include "mcrl2/data/data_specification.h"
-#endif
-
 #ifndef MCRL2_DATA_TRAVERSER_H
 #define MCRL2_DATA_TRAVERSER_H
 
@@ -21,7 +16,6 @@
 
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/data/assignment.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/lambda.h"
@@ -31,6 +25,9 @@
 #include "mcrl2/data/untyped_set_or_bag_comprehension.h"
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/untyped_sort_variable.h"
+#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/alias.h"
+#include "mcrl2/data/where_clause.h"
 
 namespace mcrl2
 {

@@ -179,7 +179,7 @@ bool data_specification::is_certainly_finite(const sort_expression& s) const
 // of the form A=B; B=A; or more complex A=B->C; B=Set(D); D=List(A); Loops
 // through structured sorts are allowed. If a loop is detected, an exception
 // is thrown.
-void data_specification::check_for_alias_loop(
+void sort_specification::check_for_alias_loop(
   const sort_expression s,
   std::set<sort_expression> sorts_already_seen,
   const bool toplevel) const
@@ -342,7 +342,7 @@ sort_expression find_normal_form(
 // The function below recalculates m_normalised_aliases, such that
 // it forms a confluent terminating rewriting system using which
 // sorts can be normalised.
-void data_specification::reconstruct_m_normalised_aliases() const
+void sort_specification::reconstruct_m_normalised_aliases() const
 {
   // First reset the normalised aliases and the mappings and constructors that have been
   // inherited to basic sort aliases during a previous round of sort normalisation.
