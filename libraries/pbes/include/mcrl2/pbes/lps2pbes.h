@@ -106,22 +106,22 @@ class lps2pbes_algorithm
         propvar_generator.add_identifiers(names);
         if (unoptimized)
         {
-          eqn = detail::E_structured(f, f, spec.process(), id_generator, propvar_generator, T, core::term_traits<pbes_expression>());
+          detail::E_structured(f, f, spec.process(), id_generator, propvar_generator, T, eqn, core::term_traits<pbes_expression>());
         }
         else
         {
-          eqn = detail::E_structured(f, f, spec.process(), id_generator, propvar_generator, T, core::term_traits_optimized<pbes_expression>());
+          detail::E_structured(f, f, spec.process(), id_generator, propvar_generator, T, eqn, core::term_traits_optimized<pbes_expression>());
         }
       }
       else
       {
         if (unoptimized)
         {
-          eqn = detail::E(f, f, spec.process(), id_generator, T, core::term_traits<pbes_expression>());
+          detail::E(f, f, spec.process(), id_generator, T, eqn, core::term_traits<pbes_expression>());
         }
         else
         {
-          eqn = detail::E(f, f, spec.process(), id_generator, T, core::term_traits_optimized<pbes_expression>());
+          detail::E(f, f, spec.process(), id_generator, T, eqn, core::term_traits_optimized<pbes_expression>());
         }
       }
 

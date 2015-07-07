@@ -37,6 +37,14 @@ data::variable_list rhs_structured_compute_variables(const state_formulas::state
   return data::variable_list(fv.begin(), fv.end());
 }
 
+inline
+void add_annotation(pbes_expression& x, const lps::multi_action& a, const data::data_expression& t)
+{
+  // skip
+}
+
+//--- RHS default variant ---//
+
 template <typename TermTraits>
 typename TermTraits::term_type RHS(const state_formulas::state_formula& x0,
                                    const state_formulas::state_formula& x,
@@ -177,25 +185,24 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   // This function is overridden in the structured variant of the algorithm
   template <typename MustMayExpression>
-  expression_type handle_must_may_rhs(const MustMayExpression& x)
+  expression_type apply_must_may_rhs(const MustMayExpression& x)
   {
     return RHS(phi0, x.operand(), lps, id_generator, T, TermTraits());
   }
 
   // This function is overridden in the structured variant of the algorithm
-  expression_type handle_must_may_result(const expression_type& p)
+  expression_type apply_must_may_result(const expression_type& p)
   {
     return p;
   }
 
   // share code between must and may
   template <typename MustMayExpression>
-  void handle_must_may(const MustMayExpression& x, bool is_must)
+  void apply_must_may(const MustMayExpression& x, bool is_must)
   {
     bool timed = is_timed();
     std::vector<expression_type> v;
-    // expression_type rhs0 = RHS(phi0, x.operand(), lps, id_generator, T, TermTraits());
-    expression_type rhs0 = derived().handle_must_may_rhs(x);
+    expression_type rhs0 = derived().apply_must_may_rhs(x);
     assert(action_formulas::is_action_formula(x.formula()));
     const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
 
@@ -230,8 +237,9 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
         p = tr::and_(p, data::greater(ti, T));
       }
       data::variable_list y = data::replace_variables(yi, sigma_yi);
+      add_annotation(rhs, ai, ti);
       p = is_must ? tr::forall(y, tr::imp(p, rhs)) : tr::exists(y, tr::and_(p, rhs));
-      v.push_back(derived().handle_must_may_result(p));
+      v.push_back(derived().apply_must_may_result(p));
     }
 
     expression_type result = is_must ? tr::join_and(v.begin(), v.end()) : tr::join_or(v.begin(), v.end());
@@ -240,12 +248,12 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   void apply(const state_formulas::must& x)
   {
-    handle_must_may(x, true);
+    apply_must_may(x, true);
   }
 
   void apply(const state_formulas::may& x)
   {
-    handle_must_may(x, false);
+    apply_must_may(x, false);
   }
 
   void leave(const state_formulas::yaled&)
@@ -384,6 +392,8 @@ typename TermTraits::term_type RHS(const state_formulas::state_formula& x0,
   return f.top();
 }
 
+//--- RHS_structured variant ---//
+
 template <typename TermTraits>
 inline
 typename TermTraits::term_type RHS_structured(const state_formulas::state_formula& x0,
@@ -416,7 +426,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
   using super::lps;
   using super::id_generator;
   using super::T;
-  using super::handle_must_may;
+  using super::apply_must_may;
 
   std::multiset<data::variable> variables;
   const fixpoint_symbol& sigma;
@@ -469,13 +479,13 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
 
   // override
   template <typename MustMayExpression>
-  expression_type handle_must_may_rhs(const MustMayExpression& x)
+  expression_type apply_must_may_rhs(const MustMayExpression& x)
   {
     return RHS_structured(phi0, x.operand(), lps, id_generator, propvar_generator, rhs_structured_compute_variables(x.operand(), variables), sigma, Z, T, TermTraits());
   }
 
   // override
-  expression_type handle_must_may_result(const expression_type& p)
+  expression_type apply_must_may_result(const expression_type& p)
   {
     // generate a new equation 'Y(d) = p', and add Y(d) to v
     core::identifier_string Y = propvar_generator("Y");
@@ -488,12 +498,12 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
 
   void apply(const state_formulas::must& x)
   {
-    handle_must_may(x, true);
+    apply_must_may(x, true);
   }
 
   void apply(const state_formulas::may& x)
   {
-    handle_must_may(x, false);
+    apply_must_may(x, false);
   }
 };
 
@@ -537,10 +547,6 @@ typename TermTraits::term_type RHS_structured(const state_formulas::state_formul
   f.apply(x);
   return f.top();
 }
-
-//--- PBES with actions ---//
-
-
 
 } // namespace detail
 
