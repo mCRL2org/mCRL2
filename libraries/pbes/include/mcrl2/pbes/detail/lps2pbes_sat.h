@@ -26,17 +26,18 @@ namespace pbes_system {
 namespace detail {
 
 template <typename TermTraits>
-pbes_expression Sat(const lps::multi_action& a,
-                    const action_formulas::action_formula& x,
-                    data::set_identifier_generator& id_generator,
-                    TermTraits tr
-                   );
+typename TermTraits::term_type Sat(const lps::multi_action& a,
+                                   const action_formulas::action_formula& x,
+                                   data::set_identifier_generator& id_generator,
+                                   TermTraits tr
+                                  );
 
 template <typename Derived, typename TermTraits>
 struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 {
   typedef action_formulas::action_formula_traverser<Derived> super;
   typedef TermTraits tr;
+  typedef typename tr::term_type expression_type;
 
   using super::enter;
   using super::leave;
@@ -44,7 +45,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 
   const lps::multi_action& a;
   data::set_identifier_generator& id_generator;
-  std::vector<pbes_expression> result_stack;
+  std::vector<expression_type> result_stack;
 
   sat_traverser(const lps::multi_action& a_, data::set_identifier_generator& id_generator_, TermTraits)
     : a(a_), id_generator(id_generator_)
@@ -55,19 +56,19 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     return static_cast<Derived&>(*this);
   }
 
-  void push(const pbes_expression& x)
+  void push(const expression_type& x)
   {
     result_stack.push_back(x);
   }
 
-  const pbes_expression& top() const
+  const expression_type& top() const
   {
     return result_stack.back();
   }
 
-  pbes_expression pop()
+  expression_type pop()
   {
-    pbes_expression result = top();
+    expression_type result = top();
     result_stack.pop_back();
     return result;
   }
@@ -99,22 +100,22 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 
   void leave(const action_formulas::and_&)
   {
-    pbes_expression right = pop();
-    pbes_expression left = pop();
+    expression_type right = pop();
+    expression_type left = pop();
     push(tr::and_(left, right));
   }
 
   void leave(const action_formulas::or_&)
   {
-    pbes_expression right = pop();
-    pbes_expression left = pop();
+    expression_type right = pop();
+    expression_type left = pop();
     push(tr::or_(left, right));
   }
 
   void leave(const action_formulas::imp&)
   {
-    pbes_expression right = pop();
-    pbes_expression left = pop();
+    expression_type right = pop();
+    expression_type left = pop();
     push(tr::imp(left, right));
   }
 
@@ -160,11 +161,11 @@ struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser, Term
 };
 
 template <typename TermTraits>
-pbes_expression Sat(const lps::multi_action& a,
-                    const action_formulas::action_formula& x,
-                    data::set_identifier_generator& id_generator,
-                    TermTraits tr
-                   )
+typename TermTraits::term_type Sat(const lps::multi_action& a,
+                                   const action_formulas::action_formula& x,
+                                   data::set_identifier_generator& id_generator,
+                                   TermTraits tr
+                                  )
 {
   apply_sat_traverser<sat_traverser, TermTraits> f(a, id_generator, tr);
   f.apply(x);
