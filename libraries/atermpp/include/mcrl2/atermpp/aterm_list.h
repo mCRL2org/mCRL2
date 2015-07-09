@@ -13,6 +13,7 @@
 #define MCRL2_ATERMPP_ATERM_LIST_H
 
 #include <cassert>
+#include <initializer_list>
 #include <limits>
 #include <type_traits>
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
@@ -141,6 +142,12 @@ class term_list:public aterm
                        >::value>::type* = 0):
          aterm(detail::make_list_forward<Term,Iter,ATermConverter>
                                  (first, last, convert_to_aterm))
+    {
+      assert(!defined() || type_is_list());
+    }
+
+    term_list(std::initializer_list<Term> init)
+      : aterm(detail::make_list_backward<Term, typename std::initializer_list<Term>::const_iterator, detail::do_not_convert_term<Term> >(init.begin(), init.end(), detail::do_not_convert_term<Term>()))
     {
       assert(!defined() || type_is_list());
     }
