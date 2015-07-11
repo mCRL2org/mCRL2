@@ -306,7 +306,7 @@ struct e_structured_traverser: public e_traverser<Derived, TermTraits, EquationT
     pbes_expression expr = detail::RHS_structured(phi0, phi, lps, id_generator, propvar_generator, d, sigma, Z, T, TermTraits());
     EquationType eqn(sigma, v, expr);
     std::vector<EquationType> result = { eqn };
-    result.insert(Z.begin(), Z.end(), result.end());
+    result.insert(result.end(), Z.begin(), Z.end());
     E_structured(phi0, phi, lps, id_generator, propvar_generator, T, result, TermTraits());
     push(result);
   }
