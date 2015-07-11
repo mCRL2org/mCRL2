@@ -44,12 +44,12 @@ class aterm
     friend void detail::initialise_aterm_administration();
 
     template <class Term, class Iter, class ATermConverter>
-    friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+    friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
     template <class Term, class Iter, class ATermConverter>
-    friend const detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+    friend const detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
-    friend const detail::_aterm* detail::address(const aterm &t);
+    friend const detail::_aterm* detail::address(const aterm& t);
   protected:
     const detail::_aterm* m_term;
 
@@ -72,7 +72,7 @@ class aterm
       m_term->increase_reference_count();
     }
 
-    void copy_term(const aterm &t)
+    void copy_term(const aterm& t)
     {
       t.increase_reference_count<true>();
       decrease_reference_count();
@@ -81,7 +81,7 @@ class aterm
 
     // An aterm has a function symbol, which can also be an AS_EMPTY_LIST,
     // AS_INT and AS_LIST.
-    const function_symbol &function() const
+    const function_symbol& function() const
     {
       return m_term->function();
     }
@@ -104,14 +104,14 @@ class aterm
     }
 
     /// \brief Copy constructor
-    aterm(const aterm &t):m_term(t.m_term)
+    aterm(const aterm& t):m_term(t.m_term)
     {
       increase_reference_count<true>();
     }
 
     /// \brief Assignment operator.
     /// \param t a term to be assigned.
-    aterm &operator=(const aterm &t)
+    aterm& operator=(const aterm& t)
     {
       copy_term(t);
       return *this;
@@ -119,7 +119,7 @@ class aterm
 
     /// \brief Move assignment operator.
     /// \param t a term to be assigned.
-    aterm& operator=(aterm &&t)
+    aterm& operator=(aterm&& t)
     {
       swap(t);
       return *this;
@@ -153,7 +153,7 @@ class aterm
     /// \return True iff term is an term_list.
     bool type_is_list() const
     {
-      const function_symbol &f=m_term->function();
+      const function_symbol& f=m_term->function();
       return f==detail::function_adm.AS_LIST|| f==detail::function_adm.AS_EMPTY_LIST;
     }
 
@@ -163,7 +163,7 @@ class aterm
     ///         in constant time.
     /// \param t A term to which the current term is compared.
     /// \return true iff t is equal to the current term.
-    bool operator ==(const aterm &t) const
+    bool operator ==(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -174,7 +174,7 @@ class aterm
     /// \details See note at the == operator. This operator requires constant time.
     /// \param t A term to which the current term is compared.
     /// \return false iff t is equal to the current term.
-    bool operator !=(const aterm &t) const
+    bool operator !=(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -188,7 +188,7 @@ class aterm
     ///         as long as aterms are not garbage collected.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is smaller than the argument.
-    bool operator <(const aterm &t) const
+    bool operator <(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -199,7 +199,7 @@ class aterm
     /// \details This operator requires constant time. See note at the operator <.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is larger than the argument.
-    bool operator >(const aterm &t) const
+    bool operator >(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -210,7 +210,7 @@ class aterm
     /// \details This operator requires constant time. See note at the operator <.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is smaller or equal than the argument.
-    bool operator <=(const aterm &t) const
+    bool operator <=(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -221,7 +221,7 @@ class aterm
     /// \details This operator requires constant time. See note at the operator <.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is larger or equalthan the argument.
-    bool operator >=(const aterm &t) const
+    bool operator >=(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -245,7 +245,7 @@ class aterm
     /// \details This operation is more efficient than exchanging terms by an assignment,
     ///          as swapping does not require to change the protection of terms.
     /// \param t The term with which this term is swapped.
-    void swap(aterm &t)
+    void swap(aterm& t)
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -350,7 +350,7 @@ namespace std
 /// \param t2 The second term
 
 template <>
-inline void swap(atermpp::aterm &t1, atermpp::aterm &t2)
+inline void swap(atermpp::aterm& t1, atermpp::aterm& t2)
 {
   t1.swap(t2);
 }
