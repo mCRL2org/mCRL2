@@ -42,8 +42,8 @@ atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specificati
   if (s.m_data_specification_is_type_checked)
   {
     return atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
-             atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.m_sorts.begin(),s.m_sorts.end()) +
-                            atermpp::aterm_list(s.m_aliases.begin(),s.m_aliases.end())),
+             atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.user_defined_sorts().begin(),s.user_defined_sorts().end()) +
+                            atermpp::aterm_list(s.user_defined_aliases().begin(),s.user_defined_aliases().end())),
              atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), atermpp::aterm_list(s.m_constructors.begin(),s.m_constructors.end())),
              atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), atermpp::aterm_list(s.m_mappings.begin(),s.m_mappings.end())),
              atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), atermpp::aterm_list(s.m_equations.begin(),s.m_equations.end())));
@@ -61,7 +61,7 @@ class finiteness_helper
 {
   protected:
 
-    data_specification const& m_specification;
+    const data_specification& m_specification;
     std::set< sort_expression > m_visiting;
 
     bool is_finite_aux(const sort_expression s)
@@ -93,7 +93,7 @@ class finiteness_helper
 
   public:
 
-    finiteness_helper(data_specification const& specification) : m_specification(specification)
+    finiteness_helper(const data_specification& specification) : m_specification(specification)
     { }
 
     bool is_finite(const sort_expression& s)
@@ -190,7 +190,7 @@ void sort_specification::check_for_alias_loop(
     {
       throw mcrl2::runtime_error("Sort alias " + to_string(s) + " is defined in terms of itself.");
     }
-    for (const alias& a: m_aliases)
+    for (const alias& a: m_user_defined_aliases)
     {
       if (a.name() == s)
       {
@@ -350,10 +350,10 @@ void sort_specification::reconstruct_m_normalised_aliases() const
 
   // Check for loops in the aliases. The type checker should already have done this,
   // but we check it again here.
-  for (alias_vector::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
+  for (const alias& a: m_user_defined_aliases)
   {
     std::set < sort_expression > sorts_already_seen; // Empty set.
-    check_for_alias_loop(i->name(),sorts_already_seen,true);
+    check_for_alias_loop(a.name(),sorts_already_seen,true);
   }
 
   // Copy m_normalised_aliases. All aliases are stored from left to right,
@@ -362,15 +362,15 @@ void sort_specification::reconstruct_m_normalised_aliases() const
   // rewritten from left to right, as this can cause sorts to be infinitely rewritten.
 
   std::multimap< sort_expression, sort_expression > sort_aliases_to_be_investigated;
-  for (alias_vector::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
+  for (const alias& a: m_user_defined_aliases)
   {
-    if (is_structured_sort(i->reference()))
+    if (is_structured_sort(a.reference()))
     {
-      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->reference(),i->name()));
+      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(a.reference(),a.name()));
     }
     else
     {
-      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->name(),i->reference()));
+      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(a.name(),a.reference()));
     }
   }
 
@@ -453,18 +453,18 @@ void sort_specification::reconstruct_m_normalised_aliases() const
 bool data_specification::is_well_typed() const
 {
   // check 1)
-  if (!detail::check_data_spec_sorts(constructors(), m_sorts))
+  if (!detail::check_data_spec_sorts(constructors(), sorts()))
   {
     std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors "
-              << data::pp(constructors()) << " are declared in " << data::pp(m_sorts) << std::endl;
+              << data::pp(constructors()) << " are declared in " << data::pp(sorts()) << std::endl;
     return false;
   }
 
   // check 2)
-  if (!detail::check_data_spec_sorts(mappings(), m_sorts))
+  if (!detail::check_data_spec_sorts(mappings(), sorts()))
   {
     std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings "
-              << data::pp(mappings()) << " are declared in " << data::pp(m_sorts) << std::endl;
+              << data::pp(mappings()) << " are declared in " << data::pp(sorts()) << std::endl;
     return false;
   }
 
@@ -479,7 +479,7 @@ bool data_specification::is_well_typed() const
 /// The last type must eventually disappear but is unfortunately still in
 /// use in a substantial amount of source code.
 /// Note, all sorts with name prefix \@legacy_ are eliminated
-void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
+void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
 {
   assert(core::detail::check_rule_DataSpec(term));
   assert(m_data_specification_is_type_checked); // It is not allowed to build up the data
@@ -495,37 +495,37 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   data::data_equation_list                term_equations(atermpp::down_cast<atermpp::aterm_appl>(term[3])[0]);
 
   // Store the sorts and aliases.
-  for (auto i = term_sorts.begin(); i != term_sorts.end(); ++i)
+  for (const atermpp::aterm_appl& t: term_sorts)
   {
-    if (data::is_alias(*i)) // Compatibility with legacy code
+    if (data::is_alias(t)) // Compatibility with legacy code
     {
-      add_alias(atermpp::down_cast<data::alias>(*i));
+      add_alias(atermpp::down_cast<data::alias>(t));
     }
     else
     {
-      add_sort(atermpp::down_cast<const basic_sort>(*i));
+      add_sort(atermpp::down_cast<basic_sort>(t));
     }
   }
 
   // Store the constructors.
-  for (auto i = term_constructors.begin(); i != term_constructors.end(); ++i)
+  for (const function_symbol& f: term_constructors)
   {
-    add_constructor(*i);
+    add_constructor(f);
   }
 
   // Store the mappings.
-  for (auto i = term_mappings.begin(); i != term_mappings.end(); ++i)
+  // for (const function_symbol f: term_mappings) //This code leads to a crash for unclear reasons. 
+  // The code below appears to work.
+  for (function_symbol_list::const_iterator i=term_mappings.begin(); i!=term_mappings.end(); ++i)
   {
     add_mapping(*i);
   }
 
   // Store the equations.
-  for (auto i = term_equations.begin(); i != term_equations.end(); ++i)
+  for (const data_equation& e: term_equations)
   {
-    add_equation(*i);
+    add_equation(e);
   }
-
-  //data_is_not_necessarily_normalised_anymore();
 }
 } // namespace data
 } // namespace mcrl2

@@ -32,14 +32,14 @@ namespace lps
 inline
 std::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 {
-  data::sort_expression_vector sorts = s.sorts();
+  const std::set<data::sort_expression>& sorts = s.sorts();
   std::set<data::sort_expression> result;
 
-  for(data::sort_expression_vector::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+  for(const data::sort_expression& sort : sorts)
   {
-    if(s.is_certainly_finite(*i))
+    if(s.is_certainly_finite(sort))
     {
-      result.insert(*i);
+      result.insert(sort);
     }
   }
   return result;

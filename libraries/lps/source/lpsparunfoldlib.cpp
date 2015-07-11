@@ -45,13 +45,11 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
 
   m_identifier_generator.add_identifiers(mcrl2::lps::find_identifiers(spec));
 
-  for (std::vector<sort_expression>::const_iterator i =  m_data_specification.sorts().begin();
-       i != m_data_specification.sorts().end();
-       ++i)
+  for (const sort_expression& s:  m_data_specification.sorts())
   {
-    if (is_basic_sort(*i))
+    if (is_basic_sort(s))
     {
-      sort_names.insert((basic_sort(*i)).name());
+      sort_names.insert((basic_sort(s)).name());
     }
   };
 

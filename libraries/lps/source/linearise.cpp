@@ -4136,9 +4136,11 @@ class specification_basic_type:public boost::noncopyable
         function_symbol_list l(enumeratedtypes[e].elementnames);
         for (; i>0 ; i--)
         {
+          assert(l.size()>0);
           l.pop_front();
         }
         assignment_list result=t;
+        assert(l.size()>0);
         result.push_front(assignment(stack.stackvar,l.front()));
         return result;
       }
@@ -5141,7 +5143,8 @@ class specification_basic_type:public boost::noncopyable
           if (n==2)
           {
             sortId = sort_bool::bool_();
-            elementnames = make_list(data_expression(sort_bool::false_()),data_expression(sort_bool::true_()));
+            // elementnames = make_list(data_expression(sort_bool::false_()),data_expression(sort_bool::true_()));
+            elementnames = { sort_bool::false_(), sort_bool::true_()};
           }
           else
           {
@@ -5167,9 +5170,10 @@ class specification_basic_type:public boost::noncopyable
             //store new declarations in return value w
             sortId = sort_id;
             const function_symbol_vector& constructors=spec.data.constructors(sort_id);
+            assert(constructors.size()==n);
             elementnames = data::data_expression_list(constructors.begin(),constructors.end());
           }
-        }
+        }  
 
         enumeratedtype(const enumeratedtype& e)
         {

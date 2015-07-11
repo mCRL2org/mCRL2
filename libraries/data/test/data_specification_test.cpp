@@ -12,7 +12,7 @@
 #include <iostream>
 #include <functional>
 #include <boost/test/minimal.hpp>
-#include <boost/range/iterator_range.hpp>
+// #include <boost/range/iterator_range.hpp>
 
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/basic_sort.h"
@@ -194,7 +194,7 @@ void test_aliases()
 
   data_specification spec;
 
-  // BOOST_CHECK(boost::distance(spec.aliases()) == 0);
+  // BOOST_CHECK(spec.aliases().size()) == 0);
 
   std::set<basic_sort> sorts = { s, t };
   std::for_each(sorts.begin(), sorts.end(), std::bind(&data_specification::add_sort, &spec, std::placeholders::_1));
@@ -204,8 +204,8 @@ void test_aliases()
   aliases.insert(s2);
   spec.add_aliases(aliases);
 
-  BOOST_CHECK(boost::distance(spec.aliases(s)) == 2);
-  BOOST_CHECK(boost::distance(spec.aliases(t)) == 0);
+  BOOST_CHECK(spec.aliases(s).size()) == 2);
+  BOOST_CHECK(spec.aliases(t).size()) == 0);
   BOOST_CHECK(spec.aliases(s) == aliases); */
 }
 
@@ -234,7 +234,7 @@ void test_constructors()
   data_specification spec1(spec);
   std::for_each(fghl.begin(), fghl.end(), std::bind(&data_specification::add_constructor, &spec1, std::placeholders::_1));
 
-  function_symbol_vector constructors(boost::copy_range< function_symbol_vector >(spec.constructors()));
+  function_symbol_vector constructors(spec.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl);
   BOOST_CHECK(constructors.size() == 7); // f,g,h, true, false.
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), f) != constructors.end());
@@ -287,8 +287,8 @@ void test_functions()
   data_specification spec1(spec);
   std::for_each(fghl.begin(), fghl.end(), std::bind(&data_specification::add_mapping, &spec1, std::placeholders::_1));
 
-std::cerr << "#mappings " << boost::distance(spec.mappings()) << "\n";
-  BOOST_CHECK(boost::distance(spec.mappings()) == 51);
+std::cerr << "#mappings " << spec.mappings().size() << "\n";
+  BOOST_CHECK(spec.mappings().size() == 51);
 
   function_symbol_vector mappings(spec.mappings());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) != mappings.end());
@@ -296,11 +296,11 @@ std::cerr << "#mappings " << boost::distance(spec.mappings()) << "\n";
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), h) != mappings.end());
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
-  BOOST_CHECK(boost::distance(spec.mappings(s)) == 3);
+  BOOST_CHECK(spec.mappings(s).size() == 3);
   BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), f) != spec.mappings(s).end());
   BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), g) != spec.mappings(s).end());
   BOOST_CHECK(std::find(spec.mappings(s0).begin(), spec.mappings(s0).end(), h) != spec.mappings(s0).end());
-  BOOST_CHECK(boost::distance(spec1.mappings(s)) == 3);
+  BOOST_CHECK(spec1.mappings(s).size() == 3);
   BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), f) != spec1.mappings(s).end());
   BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), g) != spec1.mappings(s).end());
   BOOST_CHECK(std::find(spec1.mappings(s0).begin(), spec1.mappings(s0).end(), h) != spec1.mappings(s0).end());
@@ -564,7 +564,7 @@ void test_utility_functionality()
   data::function_symbol h("h", s0);
 
   {
-    const std::vector<sort_expression> sorts(spec.sorts());
+    const std::set<sort_expression> sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) == sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) == sorts.end());
     function_symbol_vector constructors(spec.constructors());
@@ -579,7 +579,7 @@ void test_utility_functionality()
   spec.add_mapping(g);
 
   {
-    const std::vector<sort_expression> sorts(spec.sorts());
+    const std::set<sort_expression> sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) != sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) != sorts.end()); // Automatically added!
     function_symbol_vector constructors(spec.constructors());
@@ -594,7 +594,7 @@ void test_utility_functionality()
   spec.add_sort(s);
   spec.add_alias(alias(basic_sort("a"),s));
 
-  const std::vector<sort_expression> sorts(spec.sorts());
+  const std::set<sort_expression> sorts(spec.sorts());
   function_symbol_vector constructors(spec.constructors());
   function_symbol_vector mappings(spec.mappings());
 
@@ -660,7 +660,7 @@ void test_normalisation()
   structured_sort sA(data::structured_sort(structured_sort_constructor_list(constructors.begin(), constructors.begin() + 1)));
   structured_sort sB(data::structured_sort(structured_sort_constructor_list(constructors.begin() + 1, constructors.end())));
 
-  const std::vector<sort_expression> sorts(specification.sorts());
+  const std::set<sort_expression> sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sA,specification)) != sorts.end());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sB,specification)) != sorts.end());
 
@@ -714,14 +714,13 @@ void test_copy()
 
   BOOST_CHECK(normalize_sorts(basic_sort("A"),other) == normalize_sorts(basic_sort("S"),other));
 
-  const std::vector<sort_expression> sorts(specification.sorts());
+  const std::set<sort_expression> sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), basic_sort("A")) == sorts.end());
 }
 
 void test_specification()
 {
   data_specification spec = parse_data_specification("sort D = struct d1|d2;");
-
   BOOST_CHECK(spec.constructors(basic_sort("D")).size() == 2);
 }
 

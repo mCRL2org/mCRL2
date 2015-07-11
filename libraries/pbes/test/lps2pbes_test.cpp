@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_timed)
   const basic_sort_vector user_def_sorts(p.data().user_defined_sorts());
   BOOST_CHECK(std::find(user_def_sorts.begin(), user_def_sorts.end(), sort_real::real_()) == user_def_sorts.end());
 
-  const std::vector<sort_expression> sorts(p.data().sorts());
+  const std::set<sort_expression> sorts(p.data().sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), sort_real::real_()) != sorts.end());
 }
 

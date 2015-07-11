@@ -269,8 +269,8 @@ void lpssuminst(const std::string& input_filename,
   }
   else
   {
-    const data::sort_expression_vector& sort_vector=spec.data().sorts();
-    sorts = std::set<data::sort_expression>(sort_vector.begin(),sort_vector.end());
+    const std::set<data::sort_expression>& sort_set=spec.data().sorts();
+    sorts = std::set<data::sort_expression>(sort_set.begin(),sort_set.end());
   }
 
   mCRL2log(log::verbose, "lpssuminst") << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;

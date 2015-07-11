@@ -101,6 +101,7 @@ class structured_sort: public sort_expression
 //--- start user section structured_sort ---//
 
     friend class data_specification;
+    friend class sort_specification;
 
   private:
 
