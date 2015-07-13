@@ -151,29 +151,30 @@ class sort_specification
       }
     }
 
-    /// \brief Removes sort from specification.
-    /// Note that this also removes aliases for the sort but does not remove
-    /// constructors, mappings and equations.
+    /// \brief Removes sort from the user defined sorts in the specification.
+    /// Note that this does not remove aliases for the sort, and it does not remove
+    /// constructors, mappings and equations, and also keeps the sort as
+    /// defined in the context.
     /// \param[in] s A sort expression.
     /// \post s does not occur in this specification.
     void remove_sort(const sort_expression& s)
     {
-      const basic_sort_vector::iterator i = std::find(m_user_defined_sorts.begin(), m_user_defined_sorts.end(), s);
-      if(i != m_user_defined_sorts.end())
-      {
-        m_user_defined_sorts.erase(i);
-      }
-      const sort_expression normalised(normalize_sorts(s,*this));
-      m_normalised_sorts.erase(normalised);
+      detail::remove(m_user_defined_sorts,s);
+      sorts_are_not_necessarily_normalised_anymore();
     }
 
-    /// \brief Gets all sort declarations including those that are system defined.
+    /// \brief Gets the normalised sort declarations including those that are system defined.
+    ///        This is the set with all sorts that occur in a data_specification, or that
+    ///        have been registered as sorts used in the context.
     ///
     /// \details The time complexity of this operation is constant, except when
     ///      the data specification has been changed, in which case it can be that
-    ///      it must be normalised again. This operation is linear in the size of
+    ///      the sorts must be renormalised. This operation is linear in the size of
     ///      the specification.
-    /// \return The sort declarations of this specification.
+    /// \return The sort normalised using the aliases occurring in this specification,
+    ///         including the built in sorts such as Bool and Nat, and complex
+    ///         sorts that are used in the user defined aliases and sorts, but
+    ///         also that are registered as sorts used in the context of the specification.
     inline
     const std::set<sort_expression>& sorts() const
     {
@@ -183,6 +184,7 @@ class sort_specification
 
     /// \brief Return the user defined context sorts of the current specification.
     /// \details Time complexity is constant.
+    /// \return The set with sorts used in the context.
     const std::set<sort_expression>& context_sorts() const
     {
       return m_sorts_in_context;
@@ -200,9 +202,6 @@ class sort_specification
     
     /// \brief Adds an alias (new name for a sort) to this specification
     /// \param[in] a an alias
-    /// \pre !search_sort(s.name()) || is_alias(s.name()) || constructors(s.name()).empty()
-    /// \note this operation does not invalidate iterators of aliases_const_range
-    /// \post is_alias(s.name()) && normalize_sorts(s.name(),*this) = normalize_sorts(s.reference(),*this)
     void add_alias(alias const& a)
     {
       m_user_defined_aliases.push_back(a);
@@ -212,15 +211,12 @@ class sort_specification
     }
 
 
-    /// \brief Removes alias from specification.
-    /// \post !search_sort(a.name()) && !is_alias(a.name())
+    /// \brief Removes a user defined //alias from specification.
+    /// \details This also removes the defined sort of this alias from the set of user defined sorts.
+    ///          This routine does not check whether the alias, or name was in the user defined sets.
     void remove_alias(alias const& a)
     {
-      const basic_sort_vector::iterator i = std::find(m_user_defined_sorts.begin(), m_user_defined_sorts.end(), a.name());
-      if(i != m_user_defined_sorts.end())
-      {
-        m_user_defined_sorts.erase(i);
-      }
+      detail::remove(m_user_defined_sorts, a.name());
       detail::remove(m_user_defined_aliases, a);
       sorts_are_not_necessarily_normalised_anymore();
     }
@@ -236,7 +232,8 @@ class sort_specification
 
 
     /// \brief Gets a normalisation mapping that maps each sort to its unique normalised sort
-    /// \details When in a specification sort aliases are used, like sort A=B or
+    /// \details This map is required in functions with the name normalize_sorts.
+    ///    When in a specification sort aliases are used, like sort A=B or
     ///    sort Tree=struct leaf | node(Tree,Tree) then there are different representations
     ///    for each sort. The normalisation mapping maps each sort to a unique representant.
     ///    Moreover, it is this unique sort that it provides in internal mappings.
@@ -249,9 +246,7 @@ class sort_specification
     bool operator==(const sort_specification& other) const
     {
       return m_user_defined_sorts==other.m_user_defined_sorts &&
-             // m_normalised_sorts==other.m_normalised_sorts &&
              m_sorts_in_context == other.m_sorts_in_context &&
-             // m_normalised_aliases==other.m_normalised_aliases &&
              m_user_defined_aliases==other.m_user_defined_aliases;
     }
 
@@ -267,8 +262,6 @@ class sort_specification
     {
       m_normalised_data_is_up_to_date=false;
     }
-
-
 
     void normalise_sort_specification_if_required() const
     {
@@ -313,6 +306,12 @@ class sort_specification
     /// (positive numbers) are defined.
     void import_system_defined_sort(const sort_expression& sort)
     {
+
+      if (is_untyped_sort(sort) || is_untyped_possible_sorts(sort))
+      {
+        mCRL2log(mcrl2::log::debug) << "Erroneous attempt to insert an untyped sort into the a sort specification\n";
+        return;
+      }
       // Add an element, and stop if it was already added.
       if (!m_sorts_in_context.insert(sort).second)
       {
@@ -320,7 +319,7 @@ class sort_specification
       }
 
       sorts_are_not_necessarily_normalised_anymore();
-      // add the subsorts of this sort.
+      // add the sorts on which this sorts depends.
       if (sort == sort_real::real_())
       {
         // Int is required as the rewrite rules of Real rely on it.
@@ -338,13 +337,9 @@ class sort_specification
       }
       else if (is_function_sort(sort))
       {
-        const sort_expression& t=function_sort(sort).codomain();
-        import_system_defined_sort(t);
-        const sort_expression_list& l=function_sort(sort).domain();
-        for (const sort_expression& s : l)
-        {
-          import_system_defined_sort(s);
-        }
+        const function_sort& fsort=atermpp::down_cast<function_sort>(sort);
+        import_system_defined_sorts(fsort.domain());
+        import_system_defined_sort(fsort.codomain());
       }
       else if (is_container_sort(sort))
       {
@@ -378,33 +373,19 @@ class sort_specification
           import_system_defined_sort(sort_nat::nat()); // Required for bags.
 
           // Add the function sort element_sort->Nat to the specification
-          sort_expression_list element_sorts;
+          sort_expression_list element_sorts ;
           element_sorts.push_front(element_sort);
           import_system_defined_sort(function_sort(element_sorts,sort_nat::nat()));
         }
       }
       else if (is_structured_sort(sort))
       {
-        // Todo: Types occurring in a structured sort must be added.
         structured_sort s_sort(sort);
         function_symbol_vector f(s_sort.constructor_functions(sort));
         for(const function_symbol& f: s_sort.constructor_functions(sort))
         {
           import_system_defined_sort(f.sort());
         }
-        // Code below does not lead to the addition of new sorts.
-        /* for(const function_symbol& f: s_sort.projection_functions(sort))
-        {
-          import_system_defined_sort(f.sort());
-        }
-        for(const function_symbol& f: s_sort.recogniser_functions(sort))
-        {
-          import_system_defined_sort(f.sort());
-        }
-        for(const function_symbol& f: s_sort.comparison_functions(sort))
-        {
-          import_system_defined_sort(f.sort());
-        } */
       }
     }
     
@@ -412,7 +393,6 @@ class sort_specification
     // it forms a confluent terminating rewriting system using which
     // sorts can be normalised.
     void reconstruct_m_normalised_aliases() const;
-    
     
     // The function below checks whether there is an alias loop, e.g. aliases
     // of the form A=B; B=A; or more complex A=B->C; B=Set(D); D=List(A); Loops

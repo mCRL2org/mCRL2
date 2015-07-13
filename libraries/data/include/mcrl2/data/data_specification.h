@@ -26,11 +26,7 @@
 #include "mcrl2/data/sort_specification.h"
 
 // data expressions
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/function_update.h"
 
 
@@ -55,14 +51,6 @@ std::string pp(const data::data_specification& x);
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-template < typename Container, typename Sequence >
-inline
-void insert(Container& container, Sequence sequence)
-{
-  container.insert(sequence.begin(), sequence.end());
-}
-
-
 atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&);
 
 }
@@ -74,6 +62,8 @@ class data_specification: public sort_specification
 {
   private:
 
+    /// \cond INTERNAL_DOCS
+    /// \brief Cached constructors by target sort
     struct target_sort_to_function_map
     {
       bool _outdated;
@@ -122,32 +112,14 @@ class data_specification: public sort_specification
       }
     };
 
-    /// \brief Cached constructors by target sort
-
-    /// \endcond
-
-  private:
-
     friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&);
 
     ///\brief Builds a specification from aterm
     void build_from_aterm(const atermpp::aterm_appl& t);
+    /// \endcond
+
 
   protected:
-
-    /// \brief The variable data_specification_is_type_checked indicates
-    /// whether a typechecked data specification is used to construct the
-    /// data specification, or not. If not, the data specification is stored
-    /// in non_type_checked_data_spec. It is only returned using the function
-    /// data_specification_to_aterm_data_spec. Other functions to access the
-    /// data structures cannot be used. If the specification is type
-    /// checked, non_type_checked_data_spec is not used, but the specification
-    /// is put into all the other data structures. The function declare_data_specification_to_be_type_checked
-    /// sets the boolean data_specification_is_type_checked and takes care that all
-    /// data types are properly constructed.
-
-    bool m_data_specification_is_type_checked;
-    atermpp::aterm_appl m_non_typed_checked_data_spec;
 
     /// \brief A mapping of sort expressions to the constructors corresponding to that sort.
     function_symbol_vector m_constructors;
@@ -293,11 +265,10 @@ class data_specification: public sort_specification
         }
       }
 
-      data_equation_vector equations(standard_generate_equations_code(sort));
-
-      for (data_equation_vector::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      const data_equation_vector equations(standard_generate_equations_code(sort));
+      for (const data_equation& eq: equations)
       {
-        add_normalised_equation(*i);
+        add_normalised_equation(eq);
       }
     }
 
@@ -306,16 +277,14 @@ class data_specification: public sort_specification
     ///\brief Default constructor. Generate a data specification that contains
     ///       only booleans and positive numbers.
     data_specification()
-      : m_data_specification_is_type_checked(true)
     {
     }
 
     ///\brief Constructor from an aterm.
     /// \param[in] t a term adhering to the internal format.
     data_specification(const atermpp::aterm_appl& t)
-      : m_data_specification_is_type_checked(false)
     {
-      m_non_typed_checked_data_spec=t;
+      build_from_aterm(t);
     }
 
     /// \brief Indicates that the data specification is type checked.
@@ -323,13 +292,7 @@ class data_specification: public sort_specification
     ///  access to the data specification using all the utility functions.
     void declare_data_specification_to_be_type_checked()
     {
-      //type checked once.
-      if (!m_data_specification_is_type_checked) //A data specification can only be declared
-      {
-        m_data_specification_is_type_checked=true;
-        build_from_aterm(m_non_typed_checked_data_spec);
-        m_non_typed_checked_data_spec=atermpp::aterm_appl();
-      }
+      // This is now an empty deprecated method.
     }
 
     /// \brief Gets all constructors including those that are system defined.
@@ -339,7 +302,6 @@ class data_specification: public sort_specification
     inline
     const function_symbol_vector& constructors() const
     {
-      assert(m_data_specification_is_type_checked);
       normalise_data_specification_if_required();
       return m_normalised_constructors;
     }
@@ -361,7 +323,6 @@ class data_specification: public sort_specification
     inline
     const function_symbol_vector& constructors(const sort_expression& s) const
     {
-      assert(m_data_specification_is_type_checked);
       normalise_data_specification_if_required();
       m_grouped_normalised_constructors.reset(constructors());
       return m_grouped_normalised_constructors.mapping()[normalize_sorts(s,*this)];
@@ -375,7 +336,6 @@ class data_specification: public sort_specification
     inline
     const function_symbol_vector& mappings() const
     {
-      assert(m_data_specification_is_type_checked);
       normalise_data_specification_if_required();
       return m_normalised_mappings;
     }
@@ -399,7 +359,6 @@ class data_specification: public sort_specification
     inline
     const function_symbol_vector& mappings(const sort_expression& s) const
     {
-      assert(m_data_specification_is_type_checked);
       normalise_data_specification_if_required();
       m_grouped_normalised_mappings.reset(mappings());
       return m_grouped_normalised_mappings.mapping()[normalize_sorts(s, *this)];
@@ -413,7 +372,6 @@ class data_specification: public sort_specification
     inline
     const data_equation_vector& equations() const
     {
-      assert(m_data_specification_is_type_checked);
       normalise_data_specification_if_required();
       return m_normalised_equations;
     }
@@ -436,7 +394,6 @@ class data_specification: public sort_specification
     /// \note this operation does not invalidate iterators of constructors_const_range
     void add_constructor(const function_symbol& f)
     {
-      assert(m_data_specification_is_type_checked);
       if (std::find(m_constructors.begin(),m_constructors.end(),f)==m_constructors.end())
       {
         m_constructors.push_back(f);
@@ -452,7 +409,6 @@ class data_specification: public sort_specification
     /// \note this operation does not invalidate iterators of mappings_const_range
     void add_mapping(const function_symbol& f)
     {
-      assert(m_data_specification_is_type_checked);
       if (std::find(m_mappings.begin(),m_mappings.end(),f)==m_mappings.end())
       {
         m_mappings.push_back(f);
@@ -468,7 +424,6 @@ class data_specification: public sort_specification
     /// \note this operation does not invalidate iterators of equations_const_range
     void add_equation(const data_equation& e)
     {
-      assert(m_data_specification_is_type_checked);
       import_system_defined_sorts(find_sort_expressions(e));
       // m_equations.push_back(data::translate_user_notation(e));
       m_equations.push_back(e);
@@ -484,7 +439,6 @@ class data_specification: public sort_specification
     void add_data_types_for_sorts() const
     {
       // Normalise the sorts of the constructors.
-      assert(m_data_specification_is_type_checked);
       m_normalised_constructors.clear();
       m_normalised_mappings.clear();
       m_normalised_equations.clear();
@@ -501,39 +455,21 @@ class data_specification: public sort_specification
 
 
       // Normalise the constructors.
-      for (function_symbol_vector::const_iterator i=m_constructors.begin();
-           i!=m_constructors.end(); ++i)
+      for (const function_symbol& f: m_constructors)
       {
-        const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
-        function_symbol normalised_constructor(normalize_sorts(*i, *this));
-
-        if (std::find(m_normalised_constructors.begin(),m_normalised_constructors.end(),*i)==m_normalised_constructors.end()) // not found
-        {
-          m_normalised_constructors.push_back(*i);
-        }
-        // add_system_defined_sort(normalised_sort);
+        add_normalised_constructor(f);
       }
 
       // Normalise the sorts of the mappings.
-      for (function_symbol_vector::const_iterator i=m_mappings.begin();
-           i!=m_mappings.end(); ++i)
+      for (const function_symbol& f: m_mappings)
       {
-        const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
-        function_symbol normalised_mapping(normalize_sorts(*i, *this));
-
-        if (std::find(m_normalised_mappings.begin(),m_normalised_mappings.end(),normalised_mapping)==m_normalised_mappings.end())
-        {
-          m_normalised_mappings.push_back(normalised_mapping);
-        }
-
-        // add_system_defined_sort(normalised_sort);
+        add_normalised_mapping(f);
       }
 
       // Normalise the sorts of the expressions and variables in equations.
-      for (std::vector< data_equation >::const_iterator i=m_equations.begin();
-           i!=m_equations.end(); ++i)
+      for (const data_equation& eq: m_equations)
       {
-        add_normalised_equation(data::translate_user_notation(*i));
+        add_normalised_equation(data::translate_user_notation(eq));
       }
     }
 
@@ -559,8 +495,6 @@ class data_specification: public sort_specification
     /// (positive numbers) are defined.
     void import_data_type_for_system_defined_sort(const sort_expression& sort) const
     {
-      assert(m_data_specification_is_type_checked);
-
       // add sorts, constructors, mappings and equations
       if (sort == sort_bool::bool_())
       {
@@ -693,7 +627,6 @@ class data_specification: public sort_specification
     /// only if they point to the element that is removed
     void remove_constructor(const function_symbol& f)
     {
-      assert(m_data_specification_is_type_checked);
       detail::remove(m_normalised_constructors, normalize_sorts(f,*this));
       detail::remove(m_constructors, f);
     }
@@ -707,7 +640,6 @@ class data_specification: public sort_specification
     /// only if they point to the element that is removed
     void remove_mapping(const function_symbol& f)
     {
-      assert(m_data_specification_is_type_checked);
       detail::remove(m_normalised_mappings, normalize_sorts(f,*this));
       detail::remove(m_mappings, f);
     }
@@ -720,7 +652,6 @@ class data_specification: public sort_specification
     /// only if they point to the element that is removed
     void remove_equation(const data_equation& e)
     {
-      assert(m_data_specification_is_type_checked);
       const data_equation e1=data::translate_user_notation(e);
 
       detail::remove(m_normalised_equations, normalize_sorts(e1,*this));
@@ -733,7 +664,6 @@ class data_specification: public sort_specification
     /// \param[in] s2 A sort expression
     bool equal_sorts(sort_expression const& s1, sort_expression const& s2) const
     {
-      assert(m_data_specification_is_type_checked);
       normalise_data_specification_if_required();
       const sort_expression normalised_sort1=normalize_sorts(s1,*this);
       const sort_expression normalised_sort2=normalize_sorts(s2,*this);
@@ -753,7 +683,6 @@ class data_specification: public sort_specification
     /// \return true if s is a constructor sort
     bool is_constructor_sort(const sort_expression& s) const
     {
-      assert(m_data_specification_is_type_checked);
       normalise_data_specification_if_required();
       const sort_expression normalised_sort=normalize_sorts(s,*this);
       return !is_function_sort(normalised_sort) && !constructors(normalised_sort).empty();
@@ -769,20 +698,10 @@ class data_specification: public sort_specification
 
     bool operator==(const data_specification& other) const
     {
-      if (!m_data_specification_is_type_checked)
-      {
-        if (other.m_data_specification_is_type_checked)
-        {
-          return false;
-        }
-        return m_non_typed_checked_data_spec==other.m_non_typed_checked_data_spec;
-      }
       normalise_data_specification_if_required();
       other.normalise_data_specification_if_required();
       return
         sort_specification::operator==(other) &&
-        other.m_data_specification_is_type_checked &&
-        m_non_typed_checked_data_spec == other.m_non_typed_checked_data_spec &&
         m_normalised_constructors == other.m_normalised_constructors &&
         m_normalised_mappings == other.m_normalised_mappings &&
         m_normalised_equations == other.m_normalised_equations;
@@ -791,8 +710,6 @@ class data_specification: public sort_specification
     data_specification& operator=(const data_specification& other)
     {
       sort_specification::operator=(other);
-      m_data_specification_is_type_checked=other.m_data_specification_is_type_checked;
-      m_non_typed_checked_data_spec=other.m_non_typed_checked_data_spec;
       m_constructors=other.m_constructors;
       m_mappings=other.m_mappings;
       m_equations=other.m_equations;
@@ -828,40 +745,34 @@ std::ostream& operator<<(std::ostream& out, const data_specification& x)
 /// \return A specification that is merged.
 inline data_specification operator +(data_specification spec1, const data_specification& spec2)
 {
-  const basic_sort_vector sv=spec2.user_defined_sorts();
-  for(basic_sort_vector::const_iterator i=sv.begin(); i!=sv.end(); ++i)
+  for(const basic_sort& bsort: spec2.user_defined_sorts())
   {
-    spec1.add_sort(*i);
+    spec1.add_sort(bsort);
   }
 
-  const std::set<sort_expression>& cs2=spec2.context_sorts();
-  for(std::set<sort_expression>::const_iterator i=cs2.begin(); i!=cs2.end(); ++i)
+  for(const sort_expression& sort: spec2.context_sorts())
   {
-    spec1.add_context_sort(*i);
+    spec1.add_context_sort(sort);
   }
 
-  const alias_vector av=spec2.user_defined_aliases();
-  for(alias_vector::const_iterator i=av.begin(); i!=av.end(); ++i)
+  for(const alias& a: spec2.user_defined_aliases())
   {
-    spec1.add_alias(*i);
+    spec1.add_alias(a);
   }
 
-  const function_symbol_vector cv=spec2.user_defined_constructors();
-  for(function_symbol_vector::const_iterator i=cv.begin(); i!=cv.end(); ++i)
+  for(const function_symbol& f: spec2.user_defined_constructors())
   {
-    spec1.add_constructor(*i);
+    spec1.add_constructor(f);
   }
 
-  const function_symbol_vector mv=spec2.user_defined_mappings();
-  for(function_symbol_vector::const_iterator i=mv.begin(); i!=mv.end(); ++i)
+  for(const function_symbol& f: spec2.user_defined_mappings())
   {
-    spec1.add_mapping(*i);
+    spec1.add_mapping(f);
   }
 
-  const data_equation_vector ev=spec2.user_defined_equations();
-  for(data_equation_vector::const_iterator i=ev.begin(); i!=ev.end(); ++i)
+  for(const data_equation& e: spec2.user_defined_equations())
   {
-    spec1.add_equation(*i);
+    spec1.add_equation(e);
   }
 
   return spec1;
@@ -917,25 +828,24 @@ inline
 data_equation_vector find_equations(data_specification const& specification, const data_expression& d)
 {
   data_equation_vector result;
-  const std::vector< data_equation > equations(specification.equations());
-  for (std::vector< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  for (const data_equation& eq: specification.equations())
   {
-    if (i->lhs() == d || i->rhs() == d)
+    if (eq.lhs() == d || eq.rhs() == d)
     {
-      result.push_back(*i);
+      result.push_back(eq);
     }
-    else if (is_application(i->lhs()))
+    else if (is_application(eq.lhs()))
     {
-      if (atermpp::down_cast<application>(i->lhs()).head() == d)
+      if (atermpp::down_cast<application>(eq.lhs()).head() == d)
       {
-        result.push_back(*i);
+        result.push_back(eq);
       }
     }
-    else if (is_application(i->rhs()))
+    else if (is_application(eq.rhs()))
     {
-      if (atermpp::down_cast<application>(i->rhs()).head() == d)
+      if (atermpp::down_cast<application>(eq.rhs()).head() == d)
       {
-        result.push_back(*i);
+        result.push_back(eq);
       }
     }
   }
@@ -964,15 +874,14 @@ inline variable_list order_variables_to_optimise_enumeration(const variable_list
   std::map < size_t,variable_list> vars_of_enumerated_type;
   variable_list vars_of_finite_type;
   variable_list rest_vars;
-  for(variable_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+  for(const variable& v: l)
   {
-    if (data_spec.is_certainly_finite(i->sort()))
+    if (data_spec.is_certainly_finite(v.sort()))
     {
-      function_symbol_vector constructors=data_spec.constructors(i->sort());
       bool is_enumerated_type=true;
-      for(function_symbol_vector::const_iterator j=constructors.begin(); j!=constructors.end(); ++j)
+      for(const function_symbol& f: data_spec.constructors(v.sort()))
       {
-        if (is_function_sort(j->sort()) && function_sort(j->sort()).domain().size()>0)
+        if (is_function_sort(f.sort()) && function_sort(f.sort()).domain().size()>0)
         {
           is_enumerated_type=false;
           break;
@@ -980,17 +889,17 @@ inline variable_list order_variables_to_optimise_enumeration(const variable_list
       }
       if (is_enumerated_type)
       {
-        vars_of_enumerated_type[constructors.size()].push_front(*i);
+        vars_of_enumerated_type[data_spec.constructors(v.sort()).size()].push_front(v);
       }
       else
       {
-        vars_of_finite_type.push_front(*i);
+        vars_of_finite_type.push_front(v);
       }
     }
     else
     {
       // variable *i has no finite type
-      rest_vars.push_front(*i);
+      rest_vars.push_front(v);
     }
   }
 

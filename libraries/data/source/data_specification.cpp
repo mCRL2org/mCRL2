@@ -39,19 +39,12 @@ namespace detail
  **/
 atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
 {
-  if (s.m_data_specification_is_type_checked)
-  {
-    return atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
-             atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.user_defined_sorts().begin(),s.user_defined_sorts().end()) +
-                            atermpp::aterm_list(s.user_defined_aliases().begin(),s.user_defined_aliases().end())),
-             atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), atermpp::aterm_list(s.m_constructors.begin(),s.m_constructors.end())),
-             atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), atermpp::aterm_list(s.m_mappings.begin(),s.m_mappings.end())),
-             atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), atermpp::aterm_list(s.m_equations.begin(),s.m_equations.end())));
-  }
-  else
-  {
-    return s.m_non_typed_checked_data_spec;
-  }
+  return atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
+           atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.user_defined_sorts().begin(),s.user_defined_sorts().end()) +
+                              atermpp::aterm_list(s.user_defined_aliases().begin(),s.user_defined_aliases().end())),
+           atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), atermpp::aterm_list(s.m_constructors.begin(),s.m_constructors.end())),
+           atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), atermpp::aterm_list(s.m_mappings.begin(),s.m_mappings.end())),
+           atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), atermpp::aterm_list(s.m_equations.begin(),s.m_equations.end())));
 }
 } // namespace detail
 /// \endcond
@@ -72,7 +65,7 @@ class finiteness_helper
         return false;
       }
 
-      for (function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
+      for(function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
       {
         if (is_function_sort(i->sort()))
         {
@@ -482,11 +475,6 @@ bool data_specification::is_well_typed() const
 void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
 {
   assert(core::detail::check_rule_DataSpec(term));
-  assert(m_data_specification_is_type_checked); // It is not allowed to build up the data
-  // structures on the basis of a non type checked
-  // data specification. It may contain undefined types
-  // and non typed identifiers, with which the data
-  // specification cannot deal properly.
 
   // Note backwards compatibility measure: alias is no longer a sort_expression
   atermpp::term_list<atermpp::aterm_appl> term_sorts(atermpp::down_cast<atermpp::aterm_appl>(term[0])[0]);
@@ -514,12 +502,12 @@ void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
   }
 
   // Store the mappings.
-  // for (const function_symbol f: term_mappings) //This code leads to a crash for unclear reasons. 
+  for (const function_symbol& f: term_mappings) //This code leads to a crash for unclear reasons. 
   // The code below appears to work.
-  for (function_symbol_list::const_iterator i=term_mappings.begin(); i!=term_mappings.end(); ++i)
+  // for (function_symbol_list::const_iterator i=term_mappings.begin(); i!=term_mappings.end(); ++i)
   {
-    add_mapping(*i);
-  }
+    add_mapping(f);
+  } 
 
   // Store the equations.
   for (const data_equation& e: term_equations)
