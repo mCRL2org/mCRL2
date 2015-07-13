@@ -204,9 +204,9 @@ struct data_expression_actions: public sort_expression_actions
     {
       core::identifier_string_list names = parse_IdList(node.child(0));
       data::sort_expression sort = parse_SortExpr(node.child(2));
-      for (core::identifier_string_list::iterator i = names.begin(); i != names.end(); ++i)
+      for (const core::identifier_string& name: names)
       {
-        result.push_back(variable(*i, sort));
+        result.push_back(variable(name, sort));
       }
       return true;
     }
@@ -320,9 +320,9 @@ struct data_specification_actions: public data_expression_actions
       if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "IdList") && (symbol_name(node.child(1)) == ";"))
       {
         core::identifier_string_list ids = parse_IdList(node.child(0));
-        for (core::identifier_string_list::iterator i = ids.begin(); i != ids.end(); ++i)
+        for (const core::identifier_string& id: ids)
         {
-          result.push_back(basic_sort(*i));
+          result.push_back(basic_sort(id));
         }
       }
       else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "=") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ";"))
@@ -356,9 +356,9 @@ struct data_specification_actions: public data_expression_actions
     {
       core::identifier_string_list names = parse_IdList(node.child(0));
       data::sort_expression sort = parse_SortExpr(node.child(2));
-      for (core::identifier_string_list::iterator i = names.begin(); i != names.end(); ++i)
+      for (const core::identifier_string& name: names)
       {
-        result.push_back(function_symbol(*i, sort));
+        result.push_back(function_symbol(name, sort));
       }
       return true;
     }
@@ -426,44 +426,44 @@ struct data_specification_actions: public data_expression_actions
   {
     if (symbol_name(node) == "SortSpec")
     {
-      std::vector<atermpp::aterm_appl> v = parse_SortSpec(node);
-      for (std::vector<atermpp::aterm_appl>::iterator i = v.begin(); i != v.end(); ++i)
+      std::vector<atermpp::aterm_appl> sorts = parse_SortSpec(node);
+      for (const atermpp::aterm_appl& t: sorts)
       {
-        if (is_alias(*i))
+        if (is_alias(t))
         {
-          result.add_alias(alias(*i));
+          result.add_alias(alias(t));
         }
         else
         {
-          result.add_sort(basic_sort(*i));
+          result.add_sort(basic_sort(t));
         }
       }
       return true;
     }
     else if (symbol_name(node) == "ConsSpec")
     {
-      function_symbol_vector v = parse_ConsSpec(node);
-      for (function_symbol_vector::iterator i = v.begin(); i != v.end(); ++i)
+      function_symbol_vector functions = parse_ConsSpec(node);
+      for (const function_symbol& f: functions)
       {
-        result.add_constructor(*i);
+        result.add_constructor(f);
       }
       return true;
     }
     else if (symbol_name(node) == "MapSpec")
     {
-      function_symbol_vector v = parse_MapSpec(node);
-      for (function_symbol_vector::iterator i = v.begin(); i != v.end(); ++i)
+      function_symbol_vector functions = parse_MapSpec(node);
+      for (const function_symbol& f: functions)
       {
-        result.add_mapping(*i);
+        result.add_mapping(f);
       }
       return true;
     }
     else if (symbol_name(node) == "EqnSpec")
     {
-      data_equation_vector v = parse_EqnSpec(node);
-      for (data_equation_vector::iterator i = v.begin(); i != v.end(); ++i)
+      data_equation_vector equations = parse_EqnSpec(node);
+      for (const data_equation& eq: equations)
       {
-        result.add_equation(*i);
+        result.add_equation(eq);
       }
       return true;
     }
@@ -637,7 +637,7 @@ data_specification parse_data_specification(const std::string& text)
 /// \param[in]  end   The end of the variable range against which the parsed variables are checked.
 /// \param[in] data_spec The data specification that is used for type checking.
 
-template < typename Output_iterator, typename Variable_iterator >
+template <typename Output_iterator, typename Variable_iterator>
 void parse_variables(std::istream& in,
                      Output_iterator o,
                      const Variable_iterator begin,
@@ -660,28 +660,28 @@ void parse_variables(std::istream& in,
     {
       throw mcrl2::runtime_error("Error while type checking data variable declarations.");
     }
-    data_vars=variable_list(temporary_data_vars);
+    data_vars = variable_list(temporary_data_vars);
 
     // Undo sort renamings for compatibility with type checker
     // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
     data_vars = atermpp::reverse(data_vars);
-    data_vars = normalize_sorts(data_vars,data_spec);
+    data_vars = normalize_sorts(data_vars, data_spec);
 
     // Check that variables do not have equal names.
-    for (auto v = data_vars.begin(); v != data_vars.end(); ++v)
+    for (const variable& v: data_vars)
     {
       for (Variable_iterator i = begin; i != end; ++i)
       {
-        if (v->name()==i->name())
+        if (v.name()==i->name())
         {
-          throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*i) + " and " + data::pp(*v) + ".");
+          throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*i) + " and " + data::pp(v) + ".");
         }
       }
-      for (auto v1 = data_vars.begin(); v1 != data_vars.end(); ++v1)
+      for (const variable& v1: data_vars)
       {
-        if (((*v1)!=(*v)) && (v1->name()==v->name()))
+        if ((v1 != v) && (v1.name() == v.name()))
         {
-          throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*v1) + " and " + data::pp(*v) + ".");
+          throw mcrl2::runtime_error("Name conflict of variables " + data::pp(v1) + " and " + data::pp(v) + ".");
         }
       }
     }
