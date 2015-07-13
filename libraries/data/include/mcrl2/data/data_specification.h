@@ -122,13 +122,13 @@ class data_specification: public sort_specification
   protected:
 
     /// \brief A mapping of sort expressions to the constructors corresponding to that sort.
-    function_symbol_vector m_constructors;
+    function_symbol_vector m_user_defined_constructors;
 
     /// \brief The mappings of the specification.
-    function_symbol_vector m_mappings;
+    function_symbol_vector m_user_defined_mappings;
 
     /// \brief The equations of the specification.
-    std::vector< data_equation > m_equations;
+    std::vector< data_equation > m_user_defined_equations;
 
     /// \brief Set containing all constructors, including the system defined ones.
     /// The types in these constructors are normalised.
@@ -312,7 +312,7 @@ class data_specification: public sort_specification
     inline
     const function_symbol_vector& user_defined_constructors() const
     {
-      return m_constructors;
+      return m_user_defined_constructors;
     }
 
     /// \brief Gets all constructors of a sort including those that are system defined.
@@ -348,7 +348,7 @@ class data_specification: public sort_specification
     inline
     const function_symbol_vector& user_defined_mappings() const
     {
-      return m_mappings;
+      return m_user_defined_mappings;
     }
 
     /// \brief Gets all mappings of a sort including those that are system defined
@@ -384,7 +384,7 @@ class data_specification: public sort_specification
     inline
     const data_equation_vector& user_defined_equations() const
     {
-      return m_equations;
+      return m_user_defined_equations;
     }
 
     /// \brief Adds a constructor to this specification
@@ -394,9 +394,9 @@ class data_specification: public sort_specification
     /// \note this operation does not invalidate iterators of constructors_const_range
     void add_constructor(const function_symbol& f)
     {
-      if (std::find(m_constructors.begin(),m_constructors.end(),f)==m_constructors.end())
+      if (std::find(m_user_defined_constructors.begin(),m_user_defined_constructors.end(),f)==m_user_defined_constructors.end())
       {
-        m_constructors.push_back(f);
+        m_user_defined_constructors.push_back(f);
         import_system_defined_sort(f.sort());
         data_is_not_necessarily_normalised_anymore();
       }
@@ -409,9 +409,9 @@ class data_specification: public sort_specification
     /// \note this operation does not invalidate iterators of mappings_const_range
     void add_mapping(const function_symbol& f)
     {
-      if (std::find(m_mappings.begin(),m_mappings.end(),f)==m_mappings.end())
+      if (std::find(m_user_defined_mappings.begin(),m_user_defined_mappings.end(),f)==m_user_defined_mappings.end())
       {
-        m_mappings.push_back(f);
+        m_user_defined_mappings.push_back(f);
         import_system_defined_sort(f.sort());
         data_is_not_necessarily_normalised_anymore();
       }
@@ -425,8 +425,8 @@ class data_specification: public sort_specification
     void add_equation(const data_equation& e)
     {
       import_system_defined_sorts(find_sort_expressions(e));
-      // m_equations.push_back(data::translate_user_notation(e));
-      m_equations.push_back(e);
+      // m_user_defined_equations.push_back(data::translate_user_notation(e));
+      m_user_defined_equations.push_back(e);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -455,19 +455,19 @@ class data_specification: public sort_specification
 
 
       // Normalise the constructors.
-      for (const function_symbol& f: m_constructors)
+      for (const function_symbol& f: m_user_defined_constructors)
       {
         add_normalised_constructor(f);
       }
 
       // Normalise the sorts of the mappings.
-      for (const function_symbol& f: m_mappings)
+      for (const function_symbol& f: m_user_defined_mappings)
       {
         add_normalised_mapping(f);
       }
 
       // Normalise the sorts of the expressions and variables in equations.
-      for (const data_equation& eq: m_equations)
+      for (const data_equation& eq: m_user_defined_equations)
       {
         add_normalised_equation(data::translate_user_notation(eq));
       }
@@ -628,7 +628,7 @@ class data_specification: public sort_specification
     void remove_constructor(const function_symbol& f)
     {
       detail::remove(m_normalised_constructors, normalize_sorts(f,*this));
-      detail::remove(m_constructors, f);
+      detail::remove(m_user_defined_constructors, f);
     }
 
     /// \brief Removes mapping from specification.
@@ -641,7 +641,7 @@ class data_specification: public sort_specification
     void remove_mapping(const function_symbol& f)
     {
       detail::remove(m_normalised_mappings, normalize_sorts(f,*this));
-      detail::remove(m_mappings, f);
+      detail::remove(m_user_defined_mappings, f);
     }
 
     /// \brief Removes equation from specification.
@@ -655,7 +655,7 @@ class data_specification: public sort_specification
       const data_equation e1=data::translate_user_notation(e);
 
       detail::remove(m_normalised_equations, normalize_sorts(e1,*this));
-      detail::remove(m_equations, e);
+      detail::remove(m_user_defined_equations, e);
     }
 
     /// \brief Checks whether two sort expressions represent the same sort
@@ -710,9 +710,9 @@ class data_specification: public sort_specification
     data_specification& operator=(const data_specification& other)
     {
       sort_specification::operator=(other);
-      m_constructors=other.m_constructors;
-      m_mappings=other.m_mappings;
-      m_equations=other.m_equations;
+      m_user_defined_constructors=other.m_user_defined_constructors;
+      m_user_defined_mappings=other.m_user_defined_mappings;
+      m_user_defined_equations=other.m_user_defined_equations;
       m_normalised_mappings=other.m_normalised_mappings;
       m_normalised_constructors=other.m_normalised_constructors;
       m_grouped_normalised_mappings=other.m_grouped_normalised_mappings;

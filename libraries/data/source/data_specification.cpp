@@ -42,9 +42,9 @@ atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specificati
   return atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
            atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.user_defined_sorts().begin(),s.user_defined_sorts().end()) +
                               atermpp::aterm_list(s.user_defined_aliases().begin(),s.user_defined_aliases().end())),
-           atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), atermpp::aterm_list(s.m_constructors.begin(),s.m_constructors.end())),
-           atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), atermpp::aterm_list(s.m_mappings.begin(),s.m_mappings.end())),
-           atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), atermpp::aterm_list(s.m_equations.begin(),s.m_equations.end())));
+           atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), atermpp::aterm_list(s.m_user_defined_constructors.begin(),s.m_user_defined_constructors.end())),
+           atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), atermpp::aterm_list(s.m_user_defined_mappings.begin(),s.m_user_defined_mappings.end())),
+           atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), atermpp::aterm_list(s.m_user_defined_equations.begin(),s.m_user_defined_equations.end())));
 }
 } // namespace detail
 /// \endcond
@@ -278,12 +278,10 @@ sort_expression find_normal_form(
     for(const structured_sort_constructor& constructor: constructors)
     {
       structured_sort_constructor_argument_list normalised_ssa;
-      structured_sort_constructor_argument_list ssca=constructor.arguments();
-      for(structured_sort_constructor_argument_list::const_iterator j=ssca.begin();
-           j!=ssca.end(); ++j)
+      for(const structured_sort_constructor_argument& a: constructor.arguments())
       {
-        normalised_ssa.push_front(structured_sort_constructor_argument(j->name(),
-                                      find_normal_form(j->sort(),map1,map2,sorts_already_seen)));
+        normalised_ssa.push_front(structured_sort_constructor_argument(a.name(),
+                                      find_normal_form(a.sort(),map1,map2,sorts_already_seen)));
       }
 
       normalised_constructors.push_front(
@@ -372,11 +370,9 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     const sort_expression rhs=p->second;
     sort_aliases_to_be_investigated.erase(p);
 
-    for(std::multimap< sort_expression, sort_expression >::const_iterator
-         i=resulting_normalized_sort_aliases.begin();
-         i!=resulting_normalized_sort_aliases.end(); ++i)
+    for(const std::pair< sort_expression, sort_expression >& p: resulting_normalized_sort_aliases)
     {
-      const sort_expression s1=data::replace_sort_expressions(lhs,sort_expression_assignment(i->first,i->second), true);
+      const sort_expression s1=data::replace_sort_expressions(lhs,sort_expression_assignment(p.first,p.second), true);
 
       if (s1!=lhs)
       {
@@ -389,7 +385,6 @@ void sort_specification::reconstruct_m_normalised_aliases() const
         const sort_expression left_hand_side=(rhs_to_s1?rhs:s1);
         const sort_expression pre_normal_form=(rhs_to_s1?s1:rhs);
         assert(is_basic_sort(pre_normal_form));
-        // const sort_expression e1=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
         const sort_expression e1=pre_normal_form;
         if (e1!=left_hand_side)
         {
@@ -398,18 +393,16 @@ void sort_specification::reconstruct_m_normalised_aliases() const
       }
       else
       {
-        const sort_expression s2 = data::replace_sort_expressions(i->first,sort_expression_assignment(lhs,rhs), true);
-        if (s2!=i->first)
+        const sort_expression s2 = data::replace_sort_expressions(p.first,sort_expression_assignment(lhs,rhs), true);
+        if (s2!=p.first)
         {
-          assert(is_basic_sort(i->second));
+          assert(is_basic_sort(p.second));
           // Choose the normal form on the basis of a lexicographical ordering. This guarantees
           // uniqueness of normal forms over different tools.
-          const bool i_second_to_s2 = is_basic_sort(s2) && to_string(basic_sort(s2))<=to_string(i->second);
-          const sort_expression left_hand_side=(i_second_to_s2?i->second:s2);
-          const sort_expression pre_normal_form=(i_second_to_s2?s2:i->second);
+          const bool i_second_to_s2 = is_basic_sort(s2) && to_string(basic_sort(s2))<=to_string(p.second);
+          const sort_expression left_hand_side=(i_second_to_s2?p.second:s2);
+          const sort_expression pre_normal_form=(i_second_to_s2?s2:p.second);
           assert(is_basic_sort(pre_normal_form));
-          // const sort_expression e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,
-          //             sort_aliases_to_be_investigated);
           const sort_expression e2=pre_normal_form;
           if (e2!=left_hand_side)
           {
@@ -427,13 +420,10 @@ void sort_specification::reconstruct_m_normalised_aliases() const
   // right hand side to normal form.
 
   const std::multimap< sort_expression, sort_expression > empty_multimap;
-  for(std::multimap< sort_expression, sort_expression >::const_iterator
-       i=resulting_normalized_sort_aliases.begin();
-       i!=resulting_normalized_sort_aliases.end(); ++i)
+  for(const std::pair< sort_expression,sort_expression>& p: resulting_normalized_sort_aliases)
   {
-    m_normalised_aliases.insert(std::pair< sort_expression,sort_expression>(i->first,
-                                find_normal_form(i->second,resulting_normalized_sort_aliases,empty_multimap)));
-    assert(i->first!=i->second);
+    m_normalised_aliases[p.first]=find_normal_form(p.second,resulting_normalized_sort_aliases,empty_multimap);
+    assert(p.first!=p.second);
   }
 }
 
