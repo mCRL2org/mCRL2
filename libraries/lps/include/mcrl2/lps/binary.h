@@ -146,7 +146,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
           data::mutable_indexed_substitution<> local_sigma;
-          const data::variable_list vl=atermpp::make_list<data::variable>(par);
+        const data::variable_list vl = { par };
           std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
           for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end() ; ++j)
           {
@@ -277,7 +277,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     {
       return process_initializer(replace_enumerated_parameters_in_assignments(init.assignments()));
     }
-    
+
     stochastic_process_initializer update_initial_process(const stochastic_process_initializer& init)
     {
       return stochastic_process_initializer(replace_enumerated_parameters_in_assignments(init.assignments()),
@@ -307,7 +307,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;
- 
+
       auto& action_summands = m_spec.process().action_summands();
       for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
       {

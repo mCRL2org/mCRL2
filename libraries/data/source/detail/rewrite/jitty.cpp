@@ -52,12 +52,12 @@ typedef const atermpp::detail::_aterm* unprotected_data_expression;    // Idem, 
 
 const function_symbol this_term_is_in_normal_form()
 {
-  static const function_symbol this_term_is_in_normal_form(std::string("Rewritten@@term"),function_sort(make_list(untyped_sort()),untyped_sort()));
+  static const function_symbol this_term_is_in_normal_form(std::string("Rewritten@@term"),function_sort({ untyped_sort() },untyped_sort()));
   return this_term_is_in_normal_form;
 }
 
 // The function below is intended to remove the auxiliary function this_term_is_in_normal_form from a term
-// such that it can for instance be pretty printed. 
+// such that it can for instance be pretty printed.
 
 data_expression remove_normal_form_function(const data_expression& t)
 {
@@ -71,7 +71,7 @@ data_expression remove_normal_form_function(const data_expression& t)
     assert(t!=this_term_is_in_normal_form());
     return t;
   }
-  
+
   if (is_application(t))
   {
     const application& ta=atermpp::down_cast<application>(t);
@@ -106,11 +106,11 @@ data_expression remove_normal_form_function(const data_expression& t)
   }
 
   assert(is_abstraction(t));
-  
+
   const abstraction& t1=atermpp::down_cast<abstraction>(t);
   const binder_type& binder=t1.binding_operator();
   const variable_list& bound_variables=t1.variables();
-  
+
   variable_vector new_variables;
   mutable_map_substitution<> sigma;
   bool sigma_trivial=true;
@@ -119,7 +119,7 @@ data_expression remove_normal_form_function(const data_expression& t)
   {
     body=replace_variables(body,sigma);
   }
-  
+
   return abstraction(binder, bound_variables, remove_normal_form_function(body));
 }
 
@@ -179,11 +179,11 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
     for (data_equation_list::const_iterator i=rules.begin(); i!=rules.end(); ++i)
     {
       const data_equation& this_rule = *i;
-      const data_expression& this_rule_lhs = this_rule.lhs(); 
+      const data_expression& this_rule_lhs = this_rule.lhs();
       if ((is_function_symbol(this_rule_lhs)?1:detail::recursive_number_of_args(this_rule_lhs)+1) == arity + 1)
       {
         const data_expression& cond = this_rule.condition();
-        atermpp::term_list <variable_list> vars = atermpp::make_list<variable_list>(get_free_vars(cond));
+        atermpp::term_list<variable_list> vars = { get_free_vars(cond) };
 
         std::vector < bool> bs(arity,false);
 
@@ -246,12 +246,12 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
           {
             used.resize(i+1,false);
           }
-          // Check whether argument i is a variable that occurs more than once in 
-          // the left or right hand side, or occurs in the condition. It is not clear whether it is 
+          // Check whether argument i is a variable that occurs more than once in
+          // the left or right hand side, or occurs in the condition. It is not clear whether it is
           // useful to check that it occurs in the condition, but this is what the jittyc rewriter also does.
           const data_expression& arg_i = get_argument_of_higher_order_term(atermpp::down_cast<application>(this_rule.lhs()), i);
-          if ((bs[i] || 
-               (is_variable(arg_i) && (lhs_doubles.result().count(atermpp::down_cast<variable>(arg_i)) > 0 || 
+          if ((bs[i] ||
+               (is_variable(arg_i) && (lhs_doubles.result().count(atermpp::down_cast<variable>(arg_i)) > 0 ||
                                        condition_vars.count(atermpp::down_cast<variable>(arg_i)) > 0 ||
                                        rhs_doubles.result().count(atermpp::down_cast<variable>(arg_i)) > 0))
               ) && !used[i])
@@ -278,7 +278,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
         {
           const data_equation rule = i->equation();
           strat.push_back(strategy_rule(rule));
-          size_t len = rule.variables().size(); 
+          size_t len = rule.variables().size();
           if (len>MAX_LEN)
           {
             MAX_LEN=len;
@@ -411,7 +411,7 @@ static data_expression subst_values(
             const bool* variable_is_a_normal_form,
             const size_t assignment_size,
             const data_expression& t,
-            data::set_identifier_generator& generator); // prototype; 
+            data::set_identifier_generator& generator); // prototype;
 
 class subst_values_argument
 {
@@ -428,10 +428,10 @@ class subst_values_argument
                           const bool* variable_is_a_normal_form,
                           const size_t assignment_size,
                           data::set_identifier_generator& generator)
-      : m_vars(vars), 
-        m_terms(terms), 
+      : m_vars(vars),
+        m_terms(terms),
         m_variable_is_a_normal_form(variable_is_a_normal_form),
-        m_assignment_size(assignment_size), 
+        m_assignment_size(assignment_size),
         m_generator(generator)
     {}
 
@@ -577,12 +577,12 @@ static bool match_jitty(
         }
       }
     }
-    
-    /* new (&vars[assignment_size]) variable(atermpp::down_cast<variable>(p)); 
+
+    /* new (&vars[assignment_size]) variable(atermpp::down_cast<variable>(p));
     new (&terms[assignment_size]) data_expression(t); */
-    vars[assignment_size]=atermpp::detail::address(p); 
-    terms[assignment_size]=atermpp::detail::address(t); 
-    variable_is_in_normal_form[assignment_size]=term_context_guarantees_normal_form;    
+    vars[assignment_size]=atermpp::detail::address(p);
+    terms[assignment_size]=atermpp::detail::address(t);
+    variable_is_in_normal_form[assignment_size]=term_context_guarantees_normal_form;
     assignment_size++;
     return true;
   }
@@ -608,7 +608,7 @@ static bool match_jitty(
     {
       return false;
     }
-    
+
     size_t arity = pa.size();
     for (size_t i=0; i<arity; i++)
     {
@@ -722,7 +722,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                       const bool first_term_is_a_normal_form)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
-  
+
   const size_t arity=(is_function_symbol(term)?0:detail::recursive_number_of_args(term));
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,data_expression, arity);
@@ -783,7 +783,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
 
-        assert(no_assignments==0); 
+        assert(no_assignments==0);
 
         bool matches = true;
         for (size_t i=0; i<rule_arity; i++)
@@ -860,7 +860,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
             }
           }
         }
-        no_assignments=0; 
+        no_assignments=0;
       }
     }
   }

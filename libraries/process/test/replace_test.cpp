@@ -12,7 +12,6 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"

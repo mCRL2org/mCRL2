@@ -248,7 +248,7 @@ static void initialise_build_pars(build_pars* p)
   p->Flist = match_tree_list_list();
   p->Slist = match_tree_list_list();
   p->Mlist = match_tree_list_list();
-  p->stack = make_list<match_tree_list_list>(match_tree_list_list());
+  p->stack = { match_tree_list_list() };
   p->upstack = match_tree_list_list();
 }
 
@@ -1253,7 +1253,7 @@ private:
     {
       // Take care that arguments that need to be rewritten,
       // are rewritten immediately.
-      m_rewriter.extend_nfs(args_nfs, head, arity);  
+      m_rewriter.extend_nfs(args_nfs, head, arity);
     }
 
     // First calculate the code to be generated for the arguments.
@@ -1309,7 +1309,7 @@ private:
 
       s << "this_rewriter->rewrite_lambda_application(";
       result_type << "data_expression";
-      
+
       s << appl_function(arity) << "(";
       stringstream types_for_arguments;
       calc_inner_term(s, head, startarg, nnfvars, true, types_for_arguments);
@@ -1327,7 +1327,7 @@ private:
     {
       // !rewr
       nfs_array args_nfs(arity);
-      args_nfs.fill(); 
+      args_nfs.fill();
 
       s << "term_not_in_normalform(" << appl_function(arity) << "(";
       stringstream types_for_arguments;
@@ -1345,13 +1345,13 @@ private:
   }
 
   void write_application_to_stream_in_normal_form(
-                            std::ostream& s, 
+                            std::ostream& s,
                             const application& a,
                             const size_t startarg,
                             const variable_or_number_list nnfvars)
   {
     // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
-    
+
     const size_t arity = a.size();
     nfs_array rewr_args(arity);
     rewr_args.fill();
@@ -1367,9 +1367,9 @@ private:
       write_application_to_stream_in_normal_form(s,down_cast<application>(a.head()),startarg,nnfvars);
     }
     for(const data_expression& t: a)
-    { 
+    {
       s << ", ";
-    
+
       calc_inner_term(s, t, startarg, nnfvars, rewr_args, dummy_result_type);
     }
     s << ")";
@@ -1384,19 +1384,19 @@ private:
   }
 
   void write_delayed_application_to_stream_in_normal_form(
-                            std::ostream& s, 
+                            std::ostream& s,
                             const application& a,
                             const size_t startarg,
                             const variable_or_number_list nnfvars,
                             std::ostream& result_type)
   {
     // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
-    
+
     const size_t arity = a.size();
     nfs_array rewr_args(arity);
     rewr_args.fill();
     stringstream code_string;
-    stringstream result_types;  
+    stringstream result_types;
 
     if (is_variable(a.head()))
     {
@@ -1409,7 +1409,7 @@ private:
     }
 
     for(const data_expression& t: a)
-    { 
+    {
       result_types << ",";
       code_string << ",";
       calc_inner_term(code_string, t, startarg, nnfvars, rewr_args, result_types);
@@ -1420,7 +1420,7 @@ private:
     s << ")";
 
     result_type << "delayed_application" << arity << "<" << result_types.str() << ">";
-  } 
+  }
 
   bool calc_inner_term_appl_variable
                            (std::ostream& s,
@@ -1434,7 +1434,7 @@ private:
     if (rewr)
     {
       result_type << "data_expression";
-      s << "rewrite_with_arguments_in_normal_form("; 
+      s << "rewrite_with_arguments_in_normal_form(";
       write_application_to_stream_in_normal_form(s,a,startarg,nnfvars);
       s << ")";
       return true;
@@ -1444,27 +1444,27 @@ private:
     write_delayed_application_to_stream_in_normal_form(s,a,startarg,nnfvars,result_type);
     return false;
 
-  } 
+  }
 
-  bool calc_inner_term_application(std::ostream& s, 
-                                   const application& a, 
-                                   const size_t startarg, 
-                                   const variable_or_number_list nnfvars, 
-                                   const bool rewr, 
+  bool calc_inner_term_application(std::ostream& s,
+                                   const application& a,
+                                   const size_t startarg,
+                                   const variable_or_number_list nnfvars,
+                                   const bool rewr,
                                    std::ostream& result_type)
   {
-    const data_expression head=get_nested_head(a);  
+    const data_expression head=get_nested_head(a);
 
     if (is_function_symbol(head))  // Determine whether the topmost symbol is a function symbol.
     {
       return calc_inner_term_appl_function(s, a, down_cast<function_symbol>(head), startarg, nnfvars, rewr, result_type);
     }
-    
+
     if (is_abstraction(head)) // Here we must consider the case where head is an abstraction, and hence it must be a lambda abstraction.
     {
       return calc_inner_term_appl_lambda_abstraction(s, a, down_cast<abstraction>(head), startarg, nnfvars, rewr, result_type);
     }
-    
+
     assert(is_variable(head)); // Here we must consider the case where head is variable.
     return calc_inner_term_appl_variable(s, a, down_cast<variable>(a.head()), startarg, nnfvars, rewr, result_type);
   }
@@ -1491,7 +1491,7 @@ private:
       result_type << "data_expression";
       return;
     }
-    if (is_function_symbol(t))  
+    if (is_function_symbol(t))
     {
       // This will never be reached, as it is dealt with in the if clause above.
       assert(0);
@@ -1513,7 +1513,7 @@ private:
       calc_inner_term_where_clause(s, down_cast<where_clause>(t), startarg, nnfvars, rewr, result_type);
       return;
     }
-  
+
     assert(is_application(t));
     calc_inner_term_application(s, down_cast<application>(t), startarg, nnfvars, rewr, result_type);
   }
@@ -1523,10 +1523,10 @@ private:
   ///        bools in the rewr array as the rewr parameter. Returns the booleans returned by those
   ///        calls as a vector.
   ///
-  void calc_inner_terms(std::ostream& s, 
-                             const application& appl, 
-                             const size_t startarg, 
-                             const variable_or_number_list nnfvars, 
+  void calc_inner_terms(std::ostream& s,
+                             const application& appl,
+                             const size_t startarg,
+                             const variable_or_number_list nnfvars,
                              const nfs_array& rewr,
                              std::ostream& argument_types)
   {
@@ -1945,7 +1945,7 @@ public:
         ss << ", class DATA_EXPR" << i;
       }
       ss << " >\n";
-  
+
       ss << m_padding << "class delayed_application" << arity << "\n"
          << m_padding << "{\n";
       m_padding.indent();
@@ -1983,7 +1983,7 @@ public:
       ss << m_padding << "return rewrite_with_arguments_in_normal_form(" << appl_function(arity) << "(local_rewrite(m_head)";
       for (size_t i = 0; i < arity; ++i)
       {
-        ss << ", local_rewrite(m_arg" << i << ")"; 
+        ss << ", local_rewrite(m_arg" << i << ")";
       }
       ss << "));\n";
 

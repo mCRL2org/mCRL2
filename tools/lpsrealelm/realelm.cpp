@@ -262,12 +262,12 @@ static void split_condition(
     }
     if (negate)
     {
-      real_conditions.push_back(make_list(negate_inequality(e)));
+      real_conditions.push_back({ negate_inequality(e) });
       non_real_conditions.push_back(data_expression_list());
     }
     else
     {
-      real_conditions.push_back(make_list(e));
+      real_conditions.push_back({ e });
       non_real_conditions.push_back(data_expression_list());
     }
   }
@@ -285,12 +285,12 @@ static void split_condition(
     }
     if (negate)
     {
-      non_real_conditions.push_back(make_list(data_expression(sort_bool::not_(e))));
+      non_real_conditions.push_back({ data_expression(sort_bool::not_(e)) });
       real_conditions.push_back(data_expression_list());
     }
     else
     {
-      non_real_conditions.push_back(make_list(e));
+      non_real_conditions.push_back({ e });
       real_conditions.push_back(data_expression_list());
     }
   }
@@ -557,7 +557,7 @@ static void normalize_specification(
   } // Finished dealing with action summands.
 
 
-  
+
   const lps::deadlock_summand_vector &deadlock_smds = s.process().deadlock_summands();
   for (lps::deadlock_summand_vector::const_iterator i = deadlock_smds.begin(); i != deadlock_smds.end(); ++i)
   {

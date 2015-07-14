@@ -38,7 +38,7 @@ bool is_nat(const core::identifier_string& Number)
 inline
 function_sort make_function_sort(const sort_expression& domain, const sort_expression& codomain)
 {
-  return function_sort(atermpp::make_list<sort_expression>(domain), codomain);
+  return function_sort({ domain }, codomain);
 }
 
 template <typename Function, typename T>
@@ -118,7 +118,7 @@ class type_checker: public sort_type_checker
 
     void add_system_function(const data::function_symbol& f)
     {
-      m_system_functions[f.name()] = m_system_functions[f.name()] + atermpp::make_list<function_sort>(atermpp::down_cast<function_sort>(f.sort()));
+      m_system_functions[f.name()] = m_system_functions[f.name()] + function_sort_list({ atermpp::down_cast<function_sort>(f.sort()) });
     }
 
     sort_expression unwind_sort_expression(const sort_expression& x) const
@@ -363,7 +363,7 @@ class type_checker: public sort_type_checker
           }
         }
       }
-      m_user_functions[f.name()] = m_user_functions[f.name()] + atermpp::make_list<function_sort>(fsort);
+      m_user_functions[f.name()] = m_user_functions[f.name()] + function_sort_list({ fsort });
     }
 
     // Adds constants and functions corresponding to the sort x
@@ -414,7 +414,7 @@ class type_checker: public sort_type_checker
             read_sort(arg.sort());
             if (arg.name() != core::empty_identifier_string())
             {
-              add_function(function_symbol(arg.name(), function_sort(atermpp::make_list(x), arg.sort())), "projection", true);
+              add_function(function_symbol(arg.name(), function_sort({ x }, arg.sort())), "projection", true);
             }
             sorts.push_front(arg.sort());
           }

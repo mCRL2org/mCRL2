@@ -542,12 +542,12 @@ class enumerator_algorithm
         const sort_expression element_sort = container_sort(sort).element_sort();
         if (dataspec.is_certainly_finite(element_sort))
         {
-          const data_expression lambda_term = abstraction(lambda_binder(), atermpp::make_list<variable>(variable(id_generator("x"), element_sort)), sort_bool::false_());
+          const data_expression lambda_term = abstraction(lambda_binder(), { variable(id_generator("x"), element_sort) }, sort_bool::false_());
           const variable fset_variable(id_generator("@var_fset@", false), sort_fset::fset(element_sort));
           const data_expression term = sort_set::constructor(element_sort, lambda_term, fset_variable);
           const data_expression old_substituted_value = sigma(v1);
           sigma[v1] = term;
-          add_element(P, sigma, accept, vtail, atermpp::make_list(fset_variable), phi, p, v1, term);
+          add_element(P, sigma, accept, vtail, { fset_variable }, phi, p, v1, term);
           sigma[v1] = old_substituted_value;
         }
         else
@@ -801,7 +801,7 @@ data_expression_vector enumerate_expressions(const sort_expression& s, const dat
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);
-  const variable_list vl = atermpp::make_list<variable>(v);
+  const variable_list vl = { v };
   std::deque<enumerator_element> P;
   P.emplace_back(enumerator_element(vl, sort_bool::true_()));
   for (auto i = E.begin(sigma, P); i != E.end(); ++i)

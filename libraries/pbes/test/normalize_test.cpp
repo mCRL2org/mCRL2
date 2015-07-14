@@ -99,7 +99,7 @@ void test_normalize1()
   std::cout << "x = " << x << std::endl;
   std::cout << "y = " << y << std::endl;
 
-  data::variable_list ab = make_list(data::variable("s", data::basic_sort("S")));
+  data::variable_list ab = { data::variable("s", data::basic_sort("S")) };
   x = propositional_variable_instantiation("x:X");
   y = and_(x, imp(pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p::false_(), p::false_())), p::false_()));
   z = pbes_system::normalize(y);

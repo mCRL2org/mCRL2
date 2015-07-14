@@ -164,7 +164,7 @@ void test_my_assignment_sequence_substitution()
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l(make_list(xy, uz));
+  assignment_list l({ xy, uz });
 
   my_assignment_sequence_substitution f(l);
 
@@ -174,7 +174,7 @@ void test_my_assignment_sequence_substitution()
   BOOST_CHECK(f(u) == z);
 
   assignment yz(y,z);
-  l = make_list(xy, uz, yz);
+  l = { xy, uz, yz };
   my_assignment_sequence_substitution g(l);
 
   BOOST_CHECK(g(x) == y); // Assignments are not simultaneous, hence we expect y
@@ -199,8 +199,8 @@ void test_my_list_substitution()
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l(make_list(xy, uz));
-  assignment_list r = make_list(assignment(x, y1));
+  assignment_list l = { xy, uz };
+  assignment_list r = { assignment(x, y1) };
 
 // TODO: This does not longer work, can it be fixed?
 //  BOOST_CHECK(replace_variables(x,  my_assignment_sequence_substitution(r)) == v1);
@@ -219,7 +219,7 @@ void test_assignment_sequence_substitution()
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l(make_list(xy, uz));
+  assignment_list l = { xy, uz };
 
   assignment_sequence_substitution f(l);
 
@@ -229,7 +229,7 @@ void test_assignment_sequence_substitution()
   BOOST_CHECK(f(u) == z);
 
   assignment yz(y,z);
-  l = make_list(xy, uz, yz);
+  l = { xy, uz, yz };
   assignment_sequence_substitution g(l);
 
   BOOST_CHECK(g(x) == y); // Assignments are not simultaneous, hence we expect y
@@ -249,8 +249,8 @@ void test_list_substitution()
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l(make_list(xy, uz));
-  assignment_list r = make_list(assignment(x, y1));
+  assignment_list l = { xy, uz };
+  assignment_list r = { assignment(x, y1) };
 
 // TODO: This does not longer work, can it be fixed?
 //  BOOST_CHECK(replace_variables(x, assignment_sequence_substitution(r)) == y1);

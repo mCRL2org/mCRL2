@@ -16,7 +16,6 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/parse.h"

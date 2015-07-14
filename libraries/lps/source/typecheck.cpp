@@ -183,7 +183,7 @@ void mcrl2::lps::action_type_checker::ReadInActs(const process::action_label_lis
     term_list<sort_expression_list> Types;
     if (j==actions.end())
     {
-      Types=make_list<sort_expression_list>(ActType);
+      Types = { ActType };
     }
     else
     {
@@ -198,7 +198,7 @@ void mcrl2::lps::action_type_checker::ReadInActs(const process::action_label_lis
       }
       else
       {
-        Types=Types+make_list<sort_expression_list>(ActType);
+        Types = Types + term_list<sort_expression_list>({ ActType });
       }
     }
     actions[ActName]=Types;

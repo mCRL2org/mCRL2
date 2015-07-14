@@ -12,7 +12,6 @@
 #ifndef MCRL2_MODAL_FORMULA_PREPROCESS_STATE_FORMULA_H
 #define MCRL2_MODAL_FORMULA_PREPROCESS_STATE_FORMULA_H
 
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/xyz_identifier_generator.h"

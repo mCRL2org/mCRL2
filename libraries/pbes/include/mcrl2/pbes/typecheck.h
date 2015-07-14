@@ -98,7 +98,7 @@ class pbes_type_checker:public data::data_type_checker
         }
         PBType = atermpp::reverse(PBType);
         check_sort_list_is_declared(PBType);
-        PBs[i->name()] = atermpp::make_list<data::sort_expression_list>(PBType);
+        PBs[i->name()] = atermpp::term_list<data::sort_expression_list>({ PBType });
       }
     }
 
@@ -199,7 +199,7 @@ class pbes_type_checker:public data::data_type_checker
           term_list<sort_expression_list> Types;
           if (i==PBs.end())
           {
-            Types=make_list<sort_expression_list>(PBType);
+            Types = term_list<sort_expression_list>({ PBType });
           }
           else
           {
@@ -216,7 +216,7 @@ class pbes_type_checker:public data::data_type_checker
             }
             else
             {
-              Types=Types+make_list(PBType);
+              Types = Types + term_list<sort_expression_list>({ PBType });
             }
           }
           PBs[PBName]=Types;

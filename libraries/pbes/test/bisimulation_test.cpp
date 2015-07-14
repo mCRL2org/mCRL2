@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(buffers_explicit_lose)
 
 BOOST_AUTO_TEST_CASE(test_fresh_variables)
 {
-  data::variable_list w = atermpp::make_list(data::variable("d", data::basic_sort("D")), data::variable("e", data::basic_sort("E")), data::variable("f", data::basic_sort("F")));
+  data::variable_list w = { data::variable("d", data::basic_sort("D")), data::variable("e", data::basic_sort("E")), data::variable("f", data::basic_sort("F")) };
   std::set<std::string> context;
   context.insert("e");
   context.insert("f_00");
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_fresh_variables)
   context.insert("n_S");
   context.insert("s3_S");
   std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
-  data::variable_list yi = atermpp::make_list(data::variable("e3_S", data::basic_sort("A")));
+  data::variable_list yi = { data::variable("e3_S", data::basic_sort("A")) };
   std::cout << "\nyi " << data::pp(yi) << std::endl;
   data::variable_list y = pbes_system::detail::fresh_variables(yi, context);
   std::cout << "\ny " << data::pp(y) << std::endl;

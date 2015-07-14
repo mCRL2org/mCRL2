@@ -14,7 +14,6 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/find.h"
@@ -76,7 +75,7 @@ void test_free_variables()
   data::variable b = bool_("b");
   data::variable c = bool_("c");
   data::data_expression phi = data::equal_to(b, c);
-  data::variable_list v = atermpp::make_list(b);
+  data::variable_list v { b };
   state_formula f = forall(v, phi);
   std::set<data::variable> free_variables = state_formulas::find_free_variables(f);
   std::cout << "free variables: " << core::detail::print_set(free_variables) << std::endl;

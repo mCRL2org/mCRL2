@@ -432,7 +432,7 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
     variable f("f",s);
     variable g("g",s);
     variable_list xvar_list=variable_list(xvars.begin(),xvars.end());
-    result.push_back(data_equation(atermpp::make_list(f,g)+xvar_list,
+    result.push_back(data_equation(variable_list({ f, g }) + xvar_list,
                                    equal_to(f,g),
                                    abstraction(forall_binder(),xvar_list,
                                       equal_to(

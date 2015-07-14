@@ -22,7 +22,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"
@@ -272,7 +271,7 @@ struct absinthe_algorithm
         abstraction_map::const_iterator i = sigmaH.find(x.sort());
         if (i != sigmaH.end() && data::find_all_variables(x).empty())
         {
-          data::data_expression_list args = atermpp::make_list(x);
+          data::data_expression_list args = { x };
           result = data::detail::create_finite_set(data::application(i->second, args));
           //pbes_system::detail::absinthe_check_expression(result);
         }
@@ -684,7 +683,7 @@ struct absinthe_algorithm
         else
         {
           data::function_symbol h = i->second;
-          rhs = data::application(h, atermpp::make_list(f1));
+          rhs = data::application(h, { f1 });
           //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }
@@ -720,7 +719,7 @@ struct absinthe_algorithm
         else
         {
           data::function_symbol h = i->second;
-          rhs = data::detail::create_finite_set(data::application(h, atermpp::make_list(f_x)));
+          rhs = data::detail::create_finite_set(data::application(h, { f_x }));
           //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }

@@ -984,7 +984,7 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
     term_list<sort_expression_list> Types;
     if (j==processes.end())
     {
-      Types=make_list<sort_expression_list>(ProcType);
+      Types = { ProcType };
     }
     else
     {
@@ -998,7 +998,7 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
       }
       else
       {
-        Types=Types+make_list<sort_expression_list>(ProcType);
+        Types = Types + term_list<sort_expression_list>({ ProcType });
       }
     }
     processes[ProcName]=Types;
@@ -1035,8 +1035,7 @@ void mcrl2::process::process_type_checker::ReadInActs(const action_label_list &A
     term_list<sort_expression_list> Types;
     if (j==actions.end())
     {
-      // Types=make_list<sort_expression_list>(ActType);
-      Types=make_list<sort_expression_list>(ActType);
+      Types = { ActType };
     }
     else
     {
@@ -1051,7 +1050,7 @@ void mcrl2::process::process_type_checker::ReadInActs(const action_label_list &A
       }
       else
       {
-        Types=Types+make_list<sort_expression_list>(ActType);
+        Types = Types + term_list<sort_expression_list>({ ActType });
       }
     }
     actions[ActName]=Types;

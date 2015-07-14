@@ -18,7 +18,6 @@
 #define MCRL2_DATA_APPLICATION_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/utilities/workarounds.h" // for nullptr on older compilers
 
 namespace mcrl2
@@ -91,7 +90,7 @@ class term_appl_prepend_iterator
       m_prepend=other.m_prepend;
       return *this;
     }
-    
+
     /// \brief The dereference operator.
     /// \return The dereferenced term.
     reference operator*() const
@@ -124,7 +123,7 @@ class term_appl_prepend_iterator
       }
       else
       {
-        ++(this->m_it); 
+        ++(this->m_it);
       }
       return *this;
     }
@@ -195,7 +194,7 @@ class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator
     transforming_term_appl_prepend_iterator(ForwardIterator it,
                                             const data_expression* prepend,
                                             const ArgumentConverter arg_convert)
-      : term_appl_prepend_iterator<ForwardIterator>(it,prepend), 
+      : term_appl_prepend_iterator<ForwardIterator>(it,prepend),
         m_argument_converter(arg_convert)
     {}
 
@@ -218,7 +217,7 @@ class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator
       m_argument_converter=other.m_argument_converter;
       return *this;
     }
-    
+
     /// \brief The dereference operator.
     /// \return The dereferenced term.
     typename term_appl_prepend_iterator<ForwardIterator>::reference operator*()
@@ -333,7 +332,7 @@ class application: public data_expression
     ///          the arguments of an aterm_appl from which an application is derived.
     ///          As an application has a head as its first argument, the iterator
     ///          of the aterm_appl starts at this head, where the iterator of the
-    ///          application starts at the first argument. This also means that 
+    ///          application starts at the first argument. This also means that
     ///          t[n] for t an application is equal to t[n+1] if t is interpreted as an
     ///          aterm_appl.
     class const_iterator : public atermpp::term_appl_iterator<const data_expression>
@@ -341,7 +340,7 @@ class application: public data_expression
       public:
         /// \brief Constructor from a data_expression::const_iterator
         explicit const_iterator(const data_expression::const_iterator& p)
-          : atermpp::term_appl_iterator<const data_expression>(static_cast<const data_expression*>(&*p)) 
+          : atermpp::term_appl_iterator<const data_expression>(static_cast<const data_expression*>(&*p))
         {}
 
     };

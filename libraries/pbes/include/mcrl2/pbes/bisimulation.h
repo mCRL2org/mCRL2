@@ -16,7 +16,6 @@
 #include <set>
 #include <vector>
 #include <sstream>
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/detail/data_functional.h"

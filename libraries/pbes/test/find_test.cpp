@@ -67,8 +67,6 @@ void test_find()
 
 void test_free_variables()
 {
-  using atermpp::make_list;
-
   const std::string VARSPEC =
     "datavar         \n"
     "  n: Nat;       \n"

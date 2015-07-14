@@ -237,11 +237,11 @@ class lts2lps_tool : public input_output_tool
 
       action_summand_vector action_summands;
       const variable process_parameter("x",mcrl2::data::sort_pos::pos());
-      const variable_list process_parameters=make_list(process_parameter);
+      const variable_list process_parameters = { process_parameter };
       const std::set< data::variable> global_variables;
       // Add a single delta.
       const deadlock_summand_vector deadlock_summands(1,deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
-      const process_initializer initial_process(make_list(assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
+      const process_initializer initial_process({ assignment(process_parameter,sort_pos::pos(l.initial_state()+1)) });
 
       const std::vector<transition> &trans=l.get_transitions();
       for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)

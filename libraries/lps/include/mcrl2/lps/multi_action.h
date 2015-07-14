@@ -15,7 +15,6 @@
 #include <iterator>
 #include <stdexcept>
 #include <sstream>
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/process/process_expression.h"
@@ -63,7 +62,7 @@ class multi_action
 
     /// \brief Constructor
     multi_action(const process::action& l)
-      : m_actions(atermpp::make_list<process::action>(l)),
+      : m_actions({ l }),
         m_time(data::undefined_real())
     {}
 
