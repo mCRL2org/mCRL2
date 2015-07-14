@@ -897,7 +897,7 @@ struct where_clause_node: public type_check_node
   }
 };
 
-struct type_check_tree_generator: public data_expression_actions
+struct type_check_tree_generator: public detail::data_expression_actions
 {
   type_check_tree_generator(const core::parser& parser_)
     : data_expression_actions(parser_)

@@ -488,7 +488,7 @@ class mcrl2parse_tool : public input_tool
             case actfrm_e   :
             {
               separate_action_specification(text, "actfrm", lpsspec, text);
-              action_formulas::action_formula x = action_formulas::parse_action_formula_new(text);
+              action_formulas::action_formula x = action_formulas::detail::parse_action_formula_new(text);
               atermpp::aterm_appl a = x;
               if (aterm_format)
               {
@@ -502,7 +502,7 @@ class mcrl2parse_tool : public input_tool
             }
             case besexpr_e  :
             {
-              bes::boolean_expression x = bes::parse_boolean_expression_new(text);
+              bes::boolean_expression x = bes::detail::parse_boolean_expression_new(text);
               atermpp::aterm_appl a = x;
               if (aterm_format)
               {
@@ -516,7 +516,7 @@ class mcrl2parse_tool : public input_tool
             }
             case besspec_e  :
             {
-              bes::boolean_equation_system x = bes::parse_boolean_equation_system_new(text);
+              bes::boolean_equation_system x = bes::detail::parse_boolean_equation_system_new(text);
               atermpp::aterm_appl a = bes::boolean_equation_system_to_aterm(x);
               if (aterm_format)
               {
@@ -559,8 +559,8 @@ class mcrl2parse_tool : public input_tool
             }
             case mcrl2spec_e:
             {
-              process::process_specification x = process::parse_process_specification_new(text);
-              process::complete_process_specification(x, false);
+              process::process_specification x = process::detail::parse_process_specification_new(text);
+              process::detail::complete_process_specification(x, false);
               if (aterm_format)
               {
                 std::cout << process::process_specification_to_aterm(x) << std::endl;
@@ -589,7 +589,7 @@ class mcrl2parse_tool : public input_tool
             case pbesexpr_e :
             {
               separate_pbes_specification(text, "pbesexpr", pbesspec, text);
-              pbes_system::pbes_expression x = pbes_system::parse_pbes_expression_new(text);
+              pbes_system::pbes_expression x = pbes_system::detail::parse_pbes_expression_new(text);
               if (aterm_format)
               {
                 std::cout << x << std::endl;
@@ -602,8 +602,8 @@ class mcrl2parse_tool : public input_tool
             }
             case pbesspec_e :
             {
-              pbes_system::pbes x = pbes_system::parse_pbes_new(text);
-              pbes_system::complete_pbes(x);
+              pbes_system::pbes x = pbes_system::detail::parse_pbes_new(text);
+              pbes_system::detail::complete_pbes(x);
               if (aterm_format)
               {
                 std::cout << pbes_system::pbes_to_aterm(x) << std::endl;
@@ -617,7 +617,7 @@ class mcrl2parse_tool : public input_tool
             case procexpr_e :
             {
               separate_process_specification(text, "procexpr", procspec, text);
-              process::process_expression x = process::parse_process_expression_new(text);
+              process::process_expression x = process::detail::parse_process_expression_new(text);
               if (aterm_format)
               {
                 std::cout << x << std::endl;
@@ -631,7 +631,7 @@ class mcrl2parse_tool : public input_tool
             case regfrm_e   :
             {
               separate_action_specification(text, "regfrm", lpsspec, text);
-              regular_formulas::regular_formula x = regular_formulas::parse_regular_formula_new(text);
+              regular_formulas::regular_formula x = regular_formulas::detail::parse_regular_formula_new(text);
               if (aterm_format)
               {
                 std::cout << x << std::endl;
@@ -685,19 +685,19 @@ class mcrl2parse_tool : public input_tool
             case actfrm_e   :
             {
               separate_action_specification(text, "actfrm", lpsspec, text);
-              action_formulas::action_formula x = action_formulas::parse_action_formula_new(text);
+              action_formulas::action_formula x = action_formulas::detail::parse_action_formula_new(text);
               std::cout << action_formulas::pp(x) << std::endl;
               break;
             }
             case besexpr_e  :
             {
-              bes::boolean_expression x = bes::parse_boolean_expression_new(text);
+              bes::boolean_expression x = bes::detail::parse_boolean_expression_new(text);
               std::cout << bes::pp(x) << std::endl;
               break;
             }
             case besspec_e  :
             {
-              bes::boolean_equation_system x = bes::parse_boolean_equation_system_new(text);
+              bes::boolean_equation_system x = bes::detail::parse_boolean_equation_system_new(text);
               std::cout << bes::pp(x) << std::endl;
               break;
             }
@@ -733,7 +733,7 @@ class mcrl2parse_tool : public input_tool
             {
               std::cout << "Warning: this test may fail due to the absence of a type checker" << std::endl;
               separate_pbes_specification(text, "pbesexpr", pbesspec, text);
-              pbes_system::pbes_expression x = pbes_system::parse_pbes_expression_new(text);
+              pbes_system::pbes_expression x = pbes_system::detail::parse_pbes_expression_new(text);
               std::cout << pbes_system::pp(x) << std::endl;
               break;
             }
@@ -753,7 +753,7 @@ class mcrl2parse_tool : public input_tool
             case regfrm_e   :
             {
               separate_action_specification(text, "regfrm", lpsspec, text);
-              regular_formulas::regular_formula x = regular_formulas::parse_regular_formula_new(text);
+              regular_formulas::regular_formula x = regular_formulas::detail::parse_regular_formula_new(text);
               std::cout << regular_formulas::pp(x) << std::endl;
               break;
             }

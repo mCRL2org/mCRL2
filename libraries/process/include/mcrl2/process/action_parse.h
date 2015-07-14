@@ -21,10 +21,12 @@ namespace mcrl2 {
 
 namespace process {
 
-struct action_actions: public data::data_specification_actions
+namespace detail {
+
+struct action_actions: public data::detail::data_specification_actions
 {
   action_actions(const core::parser& parser_)
-    : data::data_specification_actions(parser_)
+    : data::detail::data_specification_actions(parser_)
   {}
 
   untyped_action parse_Action(const core::parse_node& node) const
@@ -69,6 +71,8 @@ struct action_actions: public data::data_specification_actions
   }
 };
 
+} // namespace detail
+
 /// \brief Parses an action declaration from a string
 /// \param text A string containing an action declaration
 /// \param[in] data_spec A data specification used for sort normalization
@@ -82,7 +86,7 @@ process::action_label_list parse_action_declaration(const std::string& text, con
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   action_label_vector result;
-  action_actions(p).callback_ActDecl(node, result);
+  detail::action_actions(p).callback_ActDecl(node, result);
   p.destroy_parse_node(node);
   process::action_label_list v(result.begin(), result.end());
   v = process::normalize_sorts(v, data_spec);

@@ -24,6 +24,8 @@ namespace mcrl2
 namespace bes
 {
 
+namespace detail {
+
 struct bes_actions: public core::default_parser_actions
 {
   bes_actions(const core::parser& parser_)
@@ -107,6 +109,8 @@ boolean_equation_system parse_boolean_equation_system_new(const std::string& tex
   return result;
 }
 
+} // namespace detail
+
 /// \brief Reads a boolean equation system from an input stream.
 /// \param from An input stream
 /// \param b A boolean equation system
@@ -122,11 +126,11 @@ std::istream& operator>>(std::istream& from, boolean_equation_system& b)
   }
 
   std::vector<boolean_equation> equations;
-  for (std::vector<pbes_system::pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (const pbes_system::pbes_equation& eqn: p.equations())
   {
-    boolean_variable v(i->variable().name());
-    boolean_expression rhs = bes::pbes_expression2boolean_expression(i->formula());
-    equations.push_back(boolean_equation(i->symbol(), v, rhs));
+    boolean_variable v(eqn.variable().name());
+    boolean_expression rhs = bes::pbes_expression2boolean_expression(eqn.formula());
+    equations.push_back(boolean_equation(eqn.symbol(), v, rhs));
   }
 
   boolean_expression init = bes::pbes_expression2boolean_expression(p.initial_state());

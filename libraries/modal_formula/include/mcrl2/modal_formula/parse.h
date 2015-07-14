@@ -27,6 +27,9 @@ namespace mcrl2
 namespace action_formulas
 {
 
+namespace detail
+{
+
 struct action_formula_actions: public lps::detail::multi_action_actions
 {
   action_formula_actions(const core::parser& parser_)
@@ -64,15 +67,20 @@ action_formula parse_action_formula_new(const std::string& text)
   return result;
 }
 
+} // namespace detail
+
 } // namespace action_formulas
 
 namespace regular_formulas
 {
 
-struct regular_formula_actions: public action_formulas::action_formula_actions
+namespace detail
+{
+
+struct regular_formula_actions: public action_formulas::detail::action_formula_actions
 {
   regular_formula_actions(const core::parser& parser_)
-    : action_formulas::action_formula_actions(parser_)
+    : action_formulas::detail::action_formula_actions(parser_)
   {}
 
   regular_formulas::regular_formula parse_RegFrm(const core::parse_node& node) const
@@ -100,15 +108,20 @@ regular_formula parse_regular_formula_new(const std::string& text)
   return result;
 }
 
+} // namespace detail
+
 } // namespace regular_formulas
 
 namespace state_formulas
 {
 
-struct state_formula_actions: public regular_formulas::regular_formula_actions
+namespace detail
+{
+
+struct state_formula_actions: public regular_formulas::detail::regular_formula_actions
 {
   state_formula_actions(const core::parser& parser_)
-    : regular_formulas::regular_formula_actions(parser_)
+    : regular_formulas::detail::regular_formula_actions(parser_)
   {}
 
   state_formula make_delay(const core::parse_node& node) const
@@ -181,6 +194,8 @@ state_formula parse_state_formula_new(const std::string& text)
   return result;
 }
 
+} // namespace detail
+
 /// \brief Parses a state formula from an input stream
 // spec may be updated as the data implementation of the state formula
 // may cause internal names to change.
@@ -193,7 +208,7 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
                                   bool type_check = true, bool translate_user_notation = true, bool normalize_sorts = true)
 {
   std::string text = utilities::read_text(in);
-  state_formula x = parse_state_formula_new(text);
+  state_formula x = detail::parse_state_formula_new(text);
   if (find_nil(x))
   {
     throw mcrl2::runtime_error("regular formulas containing nil are unsupported!");

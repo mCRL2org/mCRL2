@@ -48,10 +48,13 @@ struct untyped_process_specification: public data::untyped_data_specification
   }
 };
 
-struct process_actions: public process::action_actions
+namespace detail
+{
+
+struct process_actions: public process::detail::action_actions
 {
   process_actions(const core::parser& parser_)
-    : process::action_actions(parser_)
+    : process::detail::action_actions(parser_)
   {}
 
   core::identifier_string_list parse_ActIdSet(const core::parse_node& node) const
@@ -142,11 +145,11 @@ struct process_actions: public process::action_actions
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return untyped_process_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return tau(); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "allow") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "MultActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return allow(parse_MultActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "hide") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return hide(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "rename") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "RenExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return rename(parse_RenExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "comm") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "CommExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return comm(parse_CommExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "allow") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "MultActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::allow(parse_MultActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "hide") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::hide(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "rename") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "RenExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::rename(parse_RenExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "comm") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "CommExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::comm(parse_CommExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "ProcExpr") && (symbol_name(node.child(2)) == ")")) { return parse_ProcExpr(node.child(1)); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "ProcExpr")) { return choice(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "ProcExpr")) { return merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
@@ -275,6 +278,8 @@ void complete_process_specification(process_specification& x, bool alpha_reduce 
   process::normalize_sorts(x, x.data());
 }
 
+} // namespace detail
+
 /// \brief Parses a process specification from an input stream
 /// \param in An input stream
 /// \param alpha_reduce Indicates whether alphabet reductions need to be performed
@@ -283,8 +288,8 @@ inline
 process_specification parse_process_specification(std::istream& in, bool alpha_reduce = false)
 {
   std::string text = utilities::read_text(in);
-  process_specification result = parse_process_specification_new(text);
-  complete_process_specification(result, alpha_reduce);
+  process_specification result = detail::parse_process_specification_new(text);
+  detail::complete_process_specification(result, alpha_reduce);
   return result;
 }
 

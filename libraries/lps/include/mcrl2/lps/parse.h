@@ -32,10 +32,10 @@ namespace lps
 namespace detail
 {
 
-struct multi_action_actions: public process::action_actions
+struct multi_action_actions: public process::detail::action_actions
 {
   multi_action_actions(const core::parser& parser_)
-    : process::action_actions(parser_)
+    : process::detail::action_actions(parser_)
   {}
 
   lps::untyped_multi_action parse_MultAct(const core::parse_node& node) const
@@ -70,10 +70,10 @@ multi_action complete_multi_action(untyped_multi_action& x, const process::actio
   return result;
 }
 
-struct action_rename_actions: public process::action_actions
+struct action_rename_actions: public process::detail::action_actions
 {
   action_rename_actions(const core::parser& parser_)
-    : process::action_actions(parser_)
+    : process::detail::action_actions(parser_)
   {}
 
   lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node) const

@@ -79,6 +79,8 @@ struct untyped_data_specification
   }
 };
 
+namespace detail {
+
 struct sort_expression_actions: public core::default_parser_actions
 {
   sort_expression_actions(const core::parser& parser_)
@@ -570,6 +572,15 @@ data_specification parse_data_specification_new(const std::string& text)
   return result;
 }
 
+inline static data_specification const& default_specification()
+{
+  static data_specification specification;
+
+  return specification;
+}
+} // namespace detail
+/// \endcond
+
 inline
 std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::string& text)
 {
@@ -577,7 +588,7 @@ std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::s
   unsigned int start_symbol_index = p.start_symbol_index("SortSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  std::vector<atermpp::aterm_appl> elements = data_specification_actions(p).parse_SortSpec(node);
+  std::vector<atermpp::aterm_appl> elements = detail::data_specification_actions(p).parse_SortSpec(node);
   basic_sort_vector sorts;
   alias_vector aliases;
   for (const atermpp::aterm_appl& x: elements)
@@ -595,18 +606,6 @@ std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::s
   p.destroy_parse_node(node);
   return result;
 }
-
-/// \cond INTERNAL_DOCS
-namespace detail
-{
-inline static data_specification const& default_specification()
-{
-  static data_specification specification;
-
-  return specification;
-}
-} // namespace detail
-/// \endcond
 
 /// \brief Parses a and type checks a data specification.
 /// \details This function reads a data specification in
@@ -632,7 +631,7 @@ inline
 data_specification parse_data_specification(std::istream& in)
 {
   std::string text = utilities::read_text(in);
-  data_specification result = parse_data_specification_new(text);
+  data_specification result = detail::parse_data_specification_new(text);
   type_check(result);
   return result;
 }
@@ -692,7 +691,7 @@ void parse_variables(std::istream& in,
 
   if (!text.empty())
   {
-    data_vars = parse_variables_new(text);
+    data_vars = detail::parse_variables_new(text);
 
     atermpp::aterm_list temporary_data_vars = data_vars;
     data_type_checker type_checker(data_spec);
@@ -856,7 +855,7 @@ data_expression parse_data_expression(std::istream& in,
                                      )
 {
   std::string text = utilities::read_text(in);
-  data_expression x = parse_data_expression_new(text);
+  data_expression x = detail::parse_data_expression_new(text);
   if (type_check)
   {
     data::type_check(x, first, last, data_spec);
@@ -960,7 +959,7 @@ sort_expression parse_sort_expression(std::istream& in,
                                       const data_specification& data_spec = detail::default_specification())
 {
   std::string text = utilities::read_text(in);
-  sort_expression x = parse_sort_expression_new(text);
+  sort_expression x = detail::parse_sort_expression_new(text);
   type_check(x, data_spec);
   x = normalize_sorts(x, data_spec);
   return x;

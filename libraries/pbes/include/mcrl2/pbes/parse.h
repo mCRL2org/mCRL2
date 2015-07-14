@@ -34,10 +34,13 @@ namespace mcrl2
 namespace pbes_system
 {
 
-struct pbes_actions: public data::data_specification_actions
+namespace detail
+{
+
+struct pbes_actions: public data::detail::data_specification_actions
 {
   pbes_actions(const core::parser& parser_)
-    : data::data_specification_actions(parser_)
+    : data::detail::data_specification_actions(parser_)
   {}
 
   pbes_system::pbes_expression parse_PbesExpr(const core::parse_node& node) const
@@ -137,12 +140,14 @@ void complete_pbes(pbes& x)
   complete_data_specification(x);
 }
 
+} // namespace detail
+
 inline
 pbes parse_pbes(std::istream& in)
 {
   std::string text = utilities::read_text(in);
-  pbes result = parse_pbes_new(text);
-  complete_pbes(result);
+  pbes result = detail::parse_pbes_new(text);
+  detail::complete_pbes(result);
   return result;
 }
 
@@ -175,7 +180,7 @@ propositional_variable parse_propositional_variable(const std::string& text,
   unsigned int start_symbol_index = p.start_symbol_index("PropVarDecl");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  propositional_variable result = pbes_actions(p).parse_PropVarDecl(node);
+  propositional_variable result = detail::pbes_actions(p).parse_PropVarDecl(node);
   p.destroy_parse_node(node);
   return type_check(result, variables, dataspec);
 }
@@ -201,7 +206,7 @@ pbes_expression parse_pbes_expression(const std::string& text,
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  pbes_expression x = pbes_actions(p).parse_PbesExpr(node);
+  pbes_expression x = detail::pbes_actions(p).parse_PbesExpr(node);
   p.destroy_parse_node(node);
   if (type_check)
   {
