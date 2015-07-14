@@ -34,6 +34,24 @@ namespace mcrl2
 namespace pbes_system
 {
 
+struct untyped_pbes
+{
+  data::untyped_data_specification dataspec;
+  data::variable_list global_variables;
+  std::vector<pbes_equation> equations;
+  propositional_variable_instantiation initial_state;
+
+  pbes construct_pbes() const
+  {
+    pbes result;
+    result.data() = dataspec.construct_data_specification();
+    result.global_variables() = std::set<data::variable>(global_variables.begin(), global_variables.end());
+    result.equations() = equations;
+    result.initial_state() = initial_state;
+    return result;
+  }
+};
+
 namespace detail
 {
 
@@ -96,12 +114,14 @@ struct pbes_actions: public data::detail::data_specification_actions
     return parse_PbesEqnDeclList(node.child(1));
   }
 
-  pbes_system::pbes parse_PbesSpec(const core::parse_node& node) const
+  untyped_pbes parse_PbesSpec(const core::parse_node& node) const
   {
-    const data::variable_list l=parse_GlobVarSpec(node.child(1));
-    data::untyped_data_specification untyped_dataspec = parse_DataSpec(node.child(0));
-    data::data_specification dataspec = untyped_dataspec.construct_data_specification();
-    return pbes(dataspec, parse_PbesEqnSpec(node.child(2)), std::set<data::variable>(l.begin(),l.end()), parse_PbesInit(node.child(3)));
+    untyped_pbes result;
+    result.dataspec = parse_DataSpec(node.child(0));
+    result.global_variables = parse_GlobVarSpec(node.child(1));
+    result.equations = parse_PbesEqnSpec(node.child(2));
+    result.initial_state = parse_PbesInit(node.child(3));
+    return result;
   }
 };
 
@@ -119,14 +139,14 @@ pbes_expression parse_pbes_expression_new(const std::string& text)
 }
 
 inline
-pbes parse_pbes_new(const std::string& text)
+untyped_pbes parse_pbes_new(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("PbesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  pbes result = pbes_actions(p).parse_PbesSpec(node);
+  untyped_pbes result = pbes_actions(p).parse_PbesSpec(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -146,7 +166,7 @@ inline
 pbes parse_pbes(std::istream& in)
 {
   std::string text = utilities::read_text(in);
-  pbes result = detail::parse_pbes_new(text);
+  pbes result = detail::parse_pbes_new(text).construct_pbes();
   detail::complete_pbes(result);
   return result;
 }

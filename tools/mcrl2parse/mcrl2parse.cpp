@@ -602,7 +602,7 @@ class mcrl2parse_tool : public input_tool
             }
             case pbesspec_e :
             {
-              pbes_system::pbes x = pbes_system::detail::parse_pbes_new(text);
+              pbes_system::pbes x = pbes_system::detail::parse_pbes_new(text).construct_pbes();
               pbes_system::detail::complete_pbes(x);
               if (aterm_format)
               {
