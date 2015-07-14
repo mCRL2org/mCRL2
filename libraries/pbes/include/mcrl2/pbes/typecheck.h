@@ -22,61 +22,50 @@ namespace mcrl2
 namespace pbes_system
 {
 
-class pbes_type_checker:public data::data_type_checker
+class pbes_type_checker: public data::data_type_checker
 {
   protected:
-    pbes type_checked_pbes_spec;
-    std::map<core::identifier_string,data::sort_expression> glob_vars;      //name -> Type: global variables (for proc, pbes and init)
-    std::map <propositional_variable,pbes_expression> pbes_bodies;          //propositional_variable -> pbes_expression
-    std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > PBs;
+    pbes m_type_checked_pbes_spec;
+    std::map<core::identifier_string, data::sort_expression> m_global_variables;
+    std::map<core::identifier_string, atermpp::term_list<data::sort_expression_list> > m_equation_sorts;
+
+    // Returns m_global_variables with variables inserted into it
+    std::map<core::identifier_string, data::sort_expression> declared_variables(const data::variable_list& variables)
+    {
+      std::map<core::identifier_string, data::sort_expression> result = m_global_variables;
+      for (const data::variable& v: variables)
+      {
+        result[v.name()] = v.sort();
+      }
+      return result;
+    }
 
   public:
     pbes_type_checker(const pbes& pbes_spec)
       : data::data_type_checker(pbes_spec.data())
     {
-      using namespace log;
-      using namespace atermpp;
-      using namespace data;
-      //check correctness of the PBES specification in pbes_spec
+      mCRL2log(log::verbose) << "type checking PBES specification..." << std::endl;
 
-      mCRL2log(verbose) << "type checking PBES specification..." << std::endl;
+      ReadInPBESAndInit(pbes_spec.global_variables(), pbes_spec.equations(), pbes_spec.initial_state());
 
-      std::vector<pbes_equation> pb_eqn_spec = pbes_spec.equations();
-      propositional_variable_instantiation pb_init = pbes_spec.initial_state();
-      std::set<data::variable> glob_var_spec = pbes_spec.global_variables();
+      mCRL2log(log::debug) << "type checking PBES read-in phase finished" << std::endl;
+      mCRL2log(log::debug) << "type checking transform Data+PBES phase started" << std::endl;
 
+      std::vector<pbes_equation> equations = pbes_spec.equations();
+      auto const& globvars = pbes_spec.global_variables();
+      m_global_variables = declared_variables(data::variable_list(globvars.begin(), globvars.end()));
 
-      mCRL2log(debug) << "type checking of PBES specification read-in phase of sorts finished" << std::endl;
+      for (pbes_equation& eqn: equations)
+      {
+        eqn.formula() = TraversePBESVarConstPB(declared_variables(eqn.variable().parameters()), eqn.formula());
+      }
+      pbes_expression initial_state = TraversePBESVarConstPB(m_global_variables, pbes_spec.initial_state());
 
-      // Check sorts for loops
-      // Unwind sorts to enable equiv and subtype relations
+      mCRL2log(log::debug) << "type checking transform Data+PBES phase finished" << std::endl;
 
-      mCRL2log(debug) << "type checking of PBES specification read-in phase of functions finished" << std::endl;
+      m_type_checked_pbes_spec = pbes(type_checked_data_spec, equations, pbes_spec.global_variables(), atermpp::down_cast<propositional_variable_instantiation>(initial_state));
 
-      AddVars2Table(glob_vars, variable_list(glob_var_spec.begin(),glob_var_spec.end()));
-
-      mCRL2log(debug) << "type checking of PBES specification read-in phase of global variables finished" << std::endl;
-
-      std::vector<pbes_equation> pbes_equations(pb_eqn_spec.begin(),pb_eqn_spec.end());
-      ReadInPBESAndInit(pbes_equations,pb_init);
-
-      mCRL2log(debug) << "type checking PBES read-in phase finished" << std::endl;
-
-      mCRL2log(debug) << "type checking transform Data+PBES phase started" << std::endl;
-
-      TransformPBESVarConst();
-
-      mCRL2log(debug) << "type checking transform Data+PBES phase finished" << std::endl;
-
-      pbes_equations=WritePBES(pbes_equations);
-      pb_eqn_spec=std::vector<pbes_equation>(pbes_equations.begin(),pbes_equations.end());
-
-      pb_init=propositional_variable_instantiation(pbes_bodies[INIT_PBES()]);
-
-      type_checked_pbes_spec=pbes(type_checked_data_spec,pb_eqn_spec,glob_var_spec,pb_init);
-
-      // type_checked_pbes_spec=gstcFoldSortRefs(type_checked_pbes_spec);
-      normalize_sorts(type_checked_pbes_spec,type_checked_data_spec);
+      normalize_sorts(m_type_checked_pbes_spec, type_checked_data_spec);
     }
 
 
@@ -86,19 +75,19 @@ class pbes_type_checker:public data::data_type_checker
     {
       for (auto i = variables.begin(); i != variables.end(); ++i)
       {
-        glob_vars[i->name()] = i->sort();
+        m_global_variables[i->name()] = i->sort();
       }
       for (auto i = propositional_variables.begin(); i != propositional_variables.end(); ++i)
       {
-        const data::variable_list& PBVars = i->parameters();
-        data::sort_expression_list PBType;
-        for (auto l = PBVars.begin(); l != PBVars.end(); ++l)
+        const data::variable_list& parameters = i->parameters();
+        data::sort_expression_list sorts;
+        for (auto l = parameters.begin(); l != parameters.end(); ++l)
         {
-          PBType.push_front(l->sort());
+          sorts.push_front(l->sort());
         }
-        PBType = atermpp::reverse(PBType);
-        check_sort_list_is_declared(PBType);
-        PBs[i->name()] = atermpp::term_list<data::sort_expression_list>({ PBType });
+        sorts = atermpp::reverse(sorts);
+        check_sort_list_is_declared(sorts);
+        m_equation_sorts[i->name()] = atermpp::term_list<data::sort_expression_list>({ sorts });
       }
     }
 
@@ -109,7 +98,7 @@ class pbes_type_checker:public data::data_type_checker
       **/
     pbes operator()()
     {
-      return type_checked_pbes_spec;
+      return m_type_checked_pbes_spec;
     }
 
      /** \brief     Type check a process expression.
@@ -117,119 +106,70 @@ class pbes_type_checker:public data::data_type_checker
       *  \param[in] d A process expression that has not been type checked.
       *  \return    a process expression where all untyped identifiers have been replace by typed ones.
       **/
-    pbes_expression operator()(const pbes_expression &d)
+    pbes_expression operator()(const pbes_expression& x)
     {
-      return TraversePBESVarConstPB(glob_vars,d);
+      return TraversePBESVarConstPB(m_global_variables, x);
     }
 
     protected:
-
-      /* void TransformPBESVarConst(void);
-      std::vector<pbes_equation> WritePBES(const std::vector<pbes_equation>& oldPBES);
-      void ReadInPBESAndInit(std::vector<pbes_equation> PBEqnSpec, propositional_variable_instantiation PBInit); */
-      const propositional_variable INIT_PBES(void)
+      pbes_expression typecheck(const pbes_expression& x, const data::variable_list& parameters)
       {
-        static propositional_variable init_pbes(core::identifier_string("init"),data::variable_list());
-        return init_pbes;
+
+        std::map<core::identifier_string, data::sort_expression> variables = m_global_variables;
+        AddVars2Table(variables, parameters);
+        return TraversePBESVarConstPB(variables, x);
       }
 
-      void TransformPBESVarConst(void)
+      void ReadInPBESAndInit(const std::set<data::variable>& global_variables, const std::vector<pbes_equation>& equations, const propositional_variable_instantiation& initial_state)
       {
-        using namespace data;
-        std::map<core::identifier_string,sort_expression> Vars;
-
-        //PBEs and data terms in PBEqns and init
-        for (std::map <propositional_variable,pbes_expression>::const_iterator i=pbes_bodies.begin(); i!=pbes_bodies.end(); ++i)
+        for (const data::variable& v: global_variables)
         {
-          propositional_variable PBVar=i->first;
-
-          Vars=glob_vars;
-
-          std::map<core::identifier_string,sort_expression> NewVars;
-          AddVars2Table(Vars,PBVar.parameters());
-          NewVars=Vars;
-          Vars=NewVars;
-
-          pbes_expression NewPBTerm=TraversePBESVarConstPB(Vars,i->second);
-          pbes_bodies[PBVar]=NewPBTerm;
+          sort_type_checker::check_sort_is_declared(v.sort());
         }
-      }
 
-      std::vector<pbes_equation> WritePBES(const std::vector<pbes_equation>& oldPBES)
-      {
-        using namespace data;
-        std::vector<pbes_equation> Result;
-        for (std::vector<pbes_equation>::const_iterator PBEqns=oldPBES.begin(); PBEqns!=oldPBES.end(); ++PBEqns)
+        for (const pbes_equation& eqn: equations)
         {
-          const pbes_equation PBEqn=*PBEqns;
-          const propositional_variable PBESVar=PBEqn.variable();
+          core::identifier_string name = eqn.variable().name();
+          const data::variable_list& parameters = eqn.variable().parameters();
 
-          if (PBESVar==INIT_PBES())
+          data::sort_expression_list sorts;
+          for (const data::variable& v: parameters)
           {
-            continue;
+            sorts.push_front(v.sort());
           }
-          Result.push_back(pbes_equation(PBEqn.symbol(),PBESVar,pbes_bodies[PBESVar]));
-        }
-        return Result;
-      }
+          sorts = atermpp::reverse(sorts);
+          check_sort_list_is_declared(sorts);
 
-
-      void ReadInPBESAndInit(const std::vector<pbes_equation> &PBEqns, const propositional_variable_instantiation &PBInit)
-      {
-        using namespace data;
-        using namespace atermpp;
-
-        for (std::vector<pbes_equation>::const_iterator j=PBEqns.begin(); j!=PBEqns.end(); ++j)
-        {
-          const pbes_equation PBEqn= *j;
-          core::identifier_string PBName=PBEqn.variable().name();
-
-          const variable_list &PBVars=PBEqn.variable().parameters();
-
-          sort_expression_list PBType;
-          for (variable_list::const_iterator l=PBVars.begin(); l!=PBVars.end(); ++l)
+          auto i = m_equation_sorts.find(name);
+          atermpp::term_list<data::sort_expression_list> Types;
+          if (i == m_equation_sorts.end())
           {
-            PBType.push_front(l->sort());
-          }
-          PBType=reverse(PBType);
-
-          check_sort_list_is_declared(PBType);
-
-          const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator i=PBs.find(PBName);
-          term_list<sort_expression_list> Types;
-          if (i==PBs.end())
-          {
-            Types = term_list<sort_expression_list>({ PBType });
+            Types = atermpp::term_list<data::sort_expression_list>({ sorts });
           }
           else
           {
-            Types=i->second;
+            Types = i->second;
             // temporarily prohibit overloading here
-            throw mcrl2::runtime_error("attempt to overload propositional variable " + core::pp(PBName));
+            throw mcrl2::runtime_error("attempt to overload propositional variable " + core::pp(name));
 
-            // the table PBs contains a list of types for each
+            // the table m_equation_sorts contains a list of types for each
             // PBES name. We need to check if there is already such a type
             // in the list. If so -- error, otherwise -- add
-            if (InTypesL(PBType, Types))
+            if (InTypesL(sorts, Types))
             {
-              throw mcrl2::runtime_error("double declaration of propositional variable " + core::pp(PBName));
+              throw mcrl2::runtime_error("double declaration of propositional variable " + core::pp(name));
             }
             else
             {
-              Types = Types + term_list<sort_expression_list>({ PBType });
+              Types = Types + atermpp::term_list<data::sort_expression_list>({ sorts });
             }
           }
-          PBs[PBName]=Types;
-
-          //This is a fake ProcVarId (There is no PBVarId)
-
-          pbes_bodies[PBEqn.variable()]=PBEqn.formula();
+          m_equation_sorts[name] = Types;
         }
-        pbes_bodies[INIT_PBES()]=PBInit;
       }
 
 
-      pbes_expression TraversePBESVarConstPB(const std::map<core::identifier_string,data::sort_expression> &Vars, const pbes_expression &PBESTerm)
+      pbes_expression TraversePBESVarConstPB(const std::map<core::identifier_string,data::sort_expression>& Vars, const pbes_expression &PBESTerm)
       {
         using namespace data;
         using namespace atermpp;
@@ -324,7 +264,7 @@ class pbes_type_checker:public data::data_type_checker
 
 
       propositional_variable_instantiation RewrPbes(
-              const std::map<core::identifier_string,data::sort_expression> &Vars,
+              const std::map<core::identifier_string,data::sort_expression>& Vars,
               const propositional_variable_instantiation& ProcTerm)
       {
         using namespace data;
@@ -333,8 +273,8 @@ class pbes_type_checker:public data::data_type_checker
         core::identifier_string Name=ProcTerm.name();
 
 
-        const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=PBs.find(Name);
-        if (j==PBs.end())
+        auto j = m_equation_sorts.find(Name);
+        if (j == m_equation_sorts.end())
         {
           throw mcrl2::runtime_error("propositional variable " + core::pp(Name) + " not declared");
         }
@@ -349,7 +289,7 @@ class pbes_type_checker:public data::data_type_checker
           term_list <sort_expression_list> NewParList;
           for (; !ParList.empty(); ParList=ParList.tail())
           {
-            sort_expression_list Par=ParList.front();
+            data::sort_expression_list Par=ParList.front();
             if (Par.size()==nFactPars)
             {
               NewParList.push_front(Par);
@@ -365,7 +305,7 @@ class pbes_type_checker:public data::data_type_checker
                           + " is declared (while typechecking " + pbes_system::pp(ProcTerm) + ")");
         }
 
-        sort_expression_list Result;
+        data::sort_expression_list Result;
         if (ParList.size()==1)
         {
           Result=ParList.front();
@@ -380,16 +320,16 @@ class pbes_type_checker:public data::data_type_checker
         //process the arguments
 
         //possible types for the arguments of the action. (not inferred if ambiguous action).
-        sort_expression_list PosTypeList=Result;
+        data::sort_expression_list PosTypeList=Result;
 
-        data_expression_list NewPars;
-        sort_expression_list NewPosTypeList;
+        data::data_expression_list NewPars;
+        data::sort_expression_list NewPosTypeList;
         for (data_expression_list Pars=ProcTerm.parameters(); !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
         {
-          data_expression Par=Pars.front();
-          sort_expression PosType=PosTypeList.front();
+          data::data_expression Par=Pars.front();
+          data::sort_expression PosType=PosTypeList.front();
 
-          sort_expression NewPosType;
+          data::sort_expression NewPosType;
           try
           {
             NewPosType=TraverseVarConsTypeD(Vars,Vars,Par,PosType); //gstcExpandNumTypesDown(PosType));
@@ -410,16 +350,16 @@ class pbes_type_checker:public data::data_type_checker
         if (!p.first)
         {
           PosTypeList=Result;
-          data_expression_list Pars=NewPars;
-          NewPars=data_expression_list();
-          sort_expression_list CastedPosTypeList;
+          data::data_expression_list Pars = NewPars;
+          NewPars = data::data_expression_list();
+          data::sort_expression_list CastedPosTypeList;
           for (; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail(),NewPosTypeList=NewPosTypeList.tail())
           {
-            data_expression Par=Pars.front();
-            sort_expression PosType=PosTypeList.front();
-            sort_expression NewPosType=NewPosTypeList.front();
+            data::data_expression Par=Pars.front();
+            data::sort_expression PosType=PosTypeList.front();
+            data::sort_expression NewPosType=NewPosTypeList.front();
 
-            sort_expression CastedNewPosType;
+            data::sort_expression CastedNewPosType;
             try
             {
               std::map<core::identifier_string,sort_expression> dummy_table;
@@ -433,10 +373,10 @@ class pbes_type_checker:public data::data_type_checker
             NewPars.push_front(Par);
             CastedPosTypeList.push_front(CastedNewPosType);
           }
-          NewPars=reverse(NewPars);
-          NewPosTypeList=reverse(CastedPosTypeList);
+          NewPars = atermpp::reverse(NewPars);
+          NewPosTypeList = atermpp::reverse(CastedPosTypeList);
 
-          std::pair<bool,sort_expression_list>p=AdjustNotInferredList(NewPosTypeList,ParList);
+          std::pair<bool, data::sort_expression_list>p=AdjustNotInferredList(NewPosTypeList,ParList);
           PosTypeList=p.second;
 
           if (!p.first)
