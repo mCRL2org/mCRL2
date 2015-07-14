@@ -96,7 +96,9 @@ struct pbes_actions: public data::data_specification_actions
   pbes_system::pbes parse_PbesSpec(const core::parse_node& node) const
   {
     const data::variable_list l=parse_GlobVarSpec(node.child(1));
-    return pbes(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), std::set<data::variable>(l.begin(),l.end()), parse_PbesInit(node.child(3)));
+    data::untyped_data_specification untyped_dataspec = parse_DataSpec(node.child(0));
+    data::data_specification dataspec = untyped_dataspec.construct_data_specification();
+    return pbes(dataspec, parse_PbesEqnSpec(node.child(2)), std::set<data::variable>(l.begin(),l.end()), parse_PbesInit(node.child(3)));
   }
 };
 

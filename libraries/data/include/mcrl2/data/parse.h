@@ -38,6 +38,47 @@ namespace mcrl2
 namespace data
 {
 
+struct untyped_data_specification
+{
+  std::vector<basic_sort> basic_sorts;
+  std::vector<alias> aliases;
+  std::vector<function_symbol>  constructors;
+  std::vector<function_symbol> mappings;
+  std::vector<data_equation> equations;
+
+  void add_sort(const basic_sort& x) { basic_sorts.push_back(x); }
+  void add_alias(const alias& x) { aliases.push_back(x); }
+  void add_constructor(const function_symbol& x) { constructors.push_back(x); }
+  void add_mapping(const function_symbol& x) { mappings.push_back(x); }
+  void add_equation(const data_equation& x) { equations.push_back(x); }
+
+  data_specification construct_data_specification() const
+  {
+    data_specification dataspec;
+    for (const basic_sort& x: basic_sorts)
+    {
+      dataspec.add_sort(x);
+    }
+    for (const alias& x: aliases)
+    {
+      dataspec.add_alias(x);
+    }
+    for (const function_symbol& x: constructors)
+    {
+      dataspec.add_constructor(x);
+    }
+    for (const function_symbol& x: mappings)
+    {
+      dataspec.add_mapping(x);
+    }
+    for (const data_equation& x: equations)
+    {
+      dataspec.add_equation(x);
+    }
+    return dataspec;
+  }
+};
+
 struct sort_expression_actions: public core::default_parser_actions
 {
   sort_expression_actions(const core::parser& parser_)
@@ -422,7 +463,7 @@ struct data_specification_actions: public data_expression_actions
     return parse_EqnDeclList(node.child(2), variables);
   }
 
-  bool callback_DataSpecElement(const core::parse_node& node, data_specification& result) const
+  bool callback_DataSpecElement(const core::parse_node& node, untyped_data_specification& result) const
   {
     if (symbol_name(node) == "SortSpec")
     {
@@ -470,9 +511,9 @@ struct data_specification_actions: public data_expression_actions
     return false;
   }
 
-  data::data_specification parse_DataSpec(const core::parse_node& node) const
+  untyped_data_specification parse_DataSpec(const core::parse_node& node) const
   {
-    data_specification result;
+    untyped_data_specification result;
     traverse(node, [&](const core::parse_node& node) { return callback_DataSpecElement(node, result); });
     return result;
   }
@@ -523,7 +564,8 @@ data_specification parse_data_specification_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("DataSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  data_specification result = data_specification_actions(p).parse_DataSpec(node);
+  untyped_data_specification untyped_dataspec = data_specification_actions(p).parse_DataSpec(node);
+  data_specification result = untyped_dataspec.construct_data_specification();
   p.destroy_parse_node(node);
   return result;
 }

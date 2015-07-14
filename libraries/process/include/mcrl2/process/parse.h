@@ -29,6 +29,25 @@ namespace mcrl2
 namespace process
 {
 
+struct untyped_process_specification: public data::untyped_data_specification
+{
+  data::variable_list global_variables;
+  action_label_list action_labels;
+  std::vector<process::process_equation> equations;
+  process_expression init;
+
+  process_specification construct_process_specification()
+  {
+    process_specification result;
+    result.data() = construct_data_specification();
+    result.global_variables() = std::set<data::variable>(global_variables.begin(), global_variables.end());
+    result.action_labels() = action_labels;
+    result.equations() = equations;
+    result.init() = init;
+    return result;
+  }
+};
+
 struct process_actions: public process::action_actions
 {
   process_actions(const core::parser& parser_)
@@ -166,51 +185,50 @@ struct process_actions: public process::action_actions
     return parse_ProcExpr(node.child(1));
   }
 
-  bool callback_mCRL2Spec(const core::parse_node& node, process::process_specification& result) const
+  bool callback_mCRL2Spec(const core::parse_node& node, untyped_process_specification& result) const
   {
     if (symbol_name(node) == "SortSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, result);
     }
     else if (symbol_name(node) == "ConsSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, result);
     }
     else if (symbol_name(node) == "MapSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, result);
     }
     else if (symbol_name(node) == "EqnSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, result);
     }
     else if (symbol_name(node) == "GlobVarSpec")
     {
-      data::variable_list variables = parse_GlobVarSpec(node);
-      result.global_variables() = std::set<data::variable>(variables.begin(), variables.end());
+      result.global_variables = parse_GlobVarSpec(node);
       return true;
     }
     else if (symbol_name(node) == "ActSpec")
     {
-      result.action_labels() = result.action_labels() + parse_ActSpec(node);
+      result.action_labels = result.action_labels + parse_ActSpec(node);
       return true;
     }
     else if (symbol_name(node) == "ProcSpec")
     {
       std::vector<process::process_equation> eqn = parse_ProcSpec(node);
-      result.equations().insert(result.equations().end(), eqn.begin(), eqn.end());
+      result.equations.insert(result.equations.end(), eqn.begin(), eqn.end());
       return true;
     }
     else if (symbol_name(node) == "Init")
     {
-      result.init() = parse_Init(node);
+      result.init = parse_Init(node);
     }
     return false;
   }
 
-  process::process_specification parse_mCRL2Spec(const core::parse_node& node) const
+  untyped_process_specification parse_mCRL2Spec(const core::parse_node& node) const
   {
-    process::process_specification result;
+    untyped_process_specification result;
     traverse(node, [&](const core::parse_node& node) { return callback_mCRL2Spec(node, result); });
     return result;
   }
@@ -239,7 +257,8 @@ process_specification parse_process_specification_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   core::warn_left_merge_merge(node);
-  process_specification result = process_actions(p).parse_mCRL2Spec(node);
+  untyped_process_specification untyped_procspec = process_actions(p).parse_mCRL2Spec(node);
+  process_specification result = untyped_procspec.construct_process_specification();
   p.destroy_parse_node(node);
   return result;
 }

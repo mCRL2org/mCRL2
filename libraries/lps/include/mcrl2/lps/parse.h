@@ -110,23 +110,23 @@ struct action_rename_actions: public process::action_actions
     return rules;
   }
 
-  bool callback_ActionRenameSpec(const core::parse_node& node, lps::action_rename_specification& result) const
+  bool callback_ActionRenameSpec(const core::parse_node& node, data::untyped_data_specification& dataspec_result, lps::action_rename_specification& result) const
   {
     if (symbol_name(node) == "SortSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, dataspec_result);
     }
     else if (symbol_name(node) == "ConsSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, dataspec_result);
     }
     else if (symbol_name(node) == "MapSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, dataspec_result);
     }
     else if (symbol_name(node) == "EqnSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, dataspec_result);
     }
     else if (symbol_name(node) == "ActSpec")
     {
@@ -144,8 +144,10 @@ struct action_rename_actions: public process::action_actions
 
   lps::action_rename_specification parse_ActionRenameSpec(const core::parse_node& node) const
   {
+    data::untyped_data_specification dataspec_result;
     lps::action_rename_specification result;
-    traverse(node, [&](const core::parse_node& node) { return callback_ActionRenameSpec(node, result); });
+    traverse(node, [&](const core::parse_node& node) { return callback_ActionRenameSpec(node, dataspec_result, result); });
+    result.data() = dataspec_result.construct_data_specification();
     return result;
   }
 };
