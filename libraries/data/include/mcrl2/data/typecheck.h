@@ -28,7 +28,7 @@ class data_type_checker: public sort_type_checker
     bool was_ambiguous;
     std::map<core::identifier_string,sort_expression_list> system_constants;   //name -> Set(sort expression)
     std::map<core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)
-    std::map<core::identifier_string,sort_expression> user_constants;          /g/name -> sort expression
+    std::map<core::identifier_string,sort_expression> user_constants;          //name -> sort expression
     std::map<core::identifier_string,sort_expression_list> user_functions;     //name -> Set(sort expression)
     data_specification type_checked_data_spec;
 
