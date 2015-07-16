@@ -26,17 +26,60 @@ namespace pbes_system
 namespace detail
 {
 
-template <typename DataExpressionTypeChecker>
-struct typecheck_builder: public pbes_expression_builder<typecheck_builder<DataExpressionTypeChecker> >
+struct data_expression_typechecker: protected data::data_type_checker
 {
-  typedef pbes_expression_builder<typecheck_builder<DataExpressionTypeChecker> > super;
+  /** \brief     make a data type checker.
+   *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
+   *  \param[in] data_spec A data specification that does not need to have been type checked.
+   *  \return    a data expression where all untyped identifiers have been replace by typed ones.
+   **/
+  data_expression_typechecker(const data::data_specification& dataspec)
+    : data::data_type_checker(dataspec)
+  {}
+
+  void check_sort_list_is_declared(const data::sort_expression_list& x)
+  {
+    return sort_type_checker::check_sort_list_is_declared(x);
+  }
+
+  void check_sort_is_declared(const data::sort_expression& x)
+  {
+    return data::data_type_checker::check_sort_is_declared(x);
+  }
+
+  /** \brief     Type check a data expression.
+   *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
+   *  \param[in] x A data expression that has not been type checked.
+   *  \param[in] expected_sort The expected sort of the data expression.
+   *  \param[in] variable_constext a mapping of variable names to their types.
+   *  \return the type checked data expression.
+   **/
+  data::data_expression operator()(const data::data_expression& x,
+                                   const data::sort_expression& expected_sort,
+                                   const std::map<core::identifier_string, data::sort_expression>& variable_context
+                                  )
+  {
+    data::data_expression x1 = x;
+    TraverseVarConsTypeD(variable_context, variable_context, x1, expected_sort);
+    return x1;
+  }
+
+  data::data_specification typechecked_data_specification()
+  {
+    return type_checked_data_spec;
+  }
+};
+
+struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
+{
+  typedef pbes_expression_builder<typecheck_builder> super;
   using super::apply;
 
-  DataExpressionTypeChecker& m_data_typechecker;
+  data_expression_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variables;
   const std::map<core::identifier_string, data::sort_expression_list>& m_equation_sorts;
 
-  typecheck_builder(DataExpressionTypeChecker& data_typechecker,
+  typecheck_builder(data_expression_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
                     const std::map<core::identifier_string, data::sort_expression_list>& equation_sorts
                    )
@@ -47,7 +90,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder<DataE
 
   pbes_expression apply(const data::data_expression& x)
   {
-    return m_data_typechecker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variables);
+    return m_data_typechecker(x, data::sort_bool::bool_(), m_variables);
   }
 
   pbes_expression apply(const forall& x)
@@ -111,7 +154,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder<DataE
     {
       try
       {
-        *xi = m_data_typechecker.typecheck_data_expression(*xi, *ei, m_variables);
+        *xi = m_data_typechecker(*xi, *ei, m_variables);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -122,22 +165,22 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder<DataE
   }
 };
 
-template <typename DataExpressionTypeChecker>
-typecheck_builder<DataExpressionTypeChecker> make_typecheck_builder(
-                    DataExpressionTypeChecker& data_typechecker,
+inline
+typecheck_builder make_typecheck_builder(
+                    data_expression_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
                     const std::map<core::identifier_string, data::sort_expression_list>& equation_sorts
                    )
 {
-  return typecheck_builder<DataExpressionTypeChecker>(data_typechecker, variables, equation_sorts);
+  return typecheck_builder(data_typechecker, variables, equation_sorts);
 }
 
 } // namespace detail
 
-class pbes_type_checker: public data::data_type_checker
+class pbes_type_checker
 {
   protected:
-    pbes m_type_checked_pbes_spec;
+    detail::data_expression_typechecker m_data_type_checker;
     std::map<core::identifier_string, data::sort_expression> m_global_variables;
     std::map<core::identifier_string, data::sort_expression_list> m_equation_sorts;
 
@@ -159,71 +202,57 @@ class pbes_type_checker: public data::data_type_checker
       {
         sorts.push_front(v.sort());
       }
-      sorts = atermpp::reverse(sorts);
-      return sorts;
+      return atermpp::reverse(sorts);
+    }
+
+    std::vector<propositional_variable> equation_variables(const std::vector<pbes_equation>& equations)
+    {
+      std::vector<propositional_variable> result;
+      for (const pbes_equation& eqn: equations)
+      {
+        result.push_back(eqn.variable());
+      }
+      return result;
     }
 
   public:
-    pbes_type_checker(const pbes& pbes_spec)
-      : data::data_type_checker(pbes_spec.data())
+    /// \brief Default constructor
+    pbes_type_checker(const data::data_specification& dataspec = data::data_specification())
+      : m_data_type_checker(dataspec)
+    {}
+
+    /// \brief Constructor
+    template <typename VariableContainer, typename PropositionalVariableContainer>
+    pbes_type_checker(const data::data_specification& dataspec, const VariableContainer& global_variables, const PropositionalVariableContainer& propositional_variables)
+      : m_data_type_checker(dataspec)
+    {
+      add_global_variables(global_variables);
+      add_propositional_variables(propositional_variables);
+    }
+
+    /// \brief Typecheck the pbes pbesspec
+    void operator()(pbes& pbesspec)
     {
       mCRL2log(log::verbose) << "type checking PBES specification..." << std::endl;
 
-      initialize(pbes_spec.global_variables(), pbes_spec.equations(), pbes_spec.initial_state());
+      // reset the context
+      m_data_type_checker = detail::data_expression_typechecker(pbesspec.data());
+      m_global_variables.clear();
+      m_equation_sorts.clear();
+      add_global_variables(pbesspec.global_variables());
+      add_propositional_variables(equation_variables(pbesspec.equations()));
 
-      mCRL2log(log::debug) << "type checking PBES read-in phase finished" << std::endl;
-      mCRL2log(log::debug) << "type checking transform Data+PBES phase started" << std::endl;
-
-      std::vector<pbes_equation> equations = pbes_spec.equations();
-      for (pbes_equation& eqn: equations)
+      // typecheck the equations
+      for (pbes_equation& eqn: pbesspec.equations())
       {
-        eqn.formula() = detail::make_typecheck_builder(*this, declared_variables(eqn.variable().parameters()), m_equation_sorts).apply(eqn.formula());
+        eqn.formula() = detail::make_typecheck_builder(m_data_type_checker, declared_variables(eqn.variable().parameters()), m_equation_sorts).apply(eqn.formula());
       }
 
-      pbes_expression initial_state = detail::make_typecheck_builder(*this, m_global_variables, m_equation_sorts).apply(pbes_spec.initial_state());
+      // typecheck the initial state
+      pbesspec.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(detail::make_typecheck_builder(m_data_type_checker, m_global_variables, m_equation_sorts).apply(pbesspec.initial_state()));
 
-      mCRL2log(log::debug) << "type checking transform Data+PBES phase finished" << std::endl;
-
-      m_type_checked_pbes_spec = pbes(type_checked_data_spec, equations, pbes_spec.global_variables(), atermpp::down_cast<propositional_variable_instantiation>(initial_state));
-
-      normalize_sorts(m_type_checked_pbes_spec, type_checked_data_spec);
-    }
-
-
-    template <typename VariableContainer, typename PropositionalVariableContainer>
-    pbes_type_checker(const data::data_specification& dataspec, const VariableContainer& variables, const PropositionalVariableContainer& propositional_variables)
-    : data::data_type_checker(dataspec)
-    {
-      for (auto i = variables.begin(); i != variables.end(); ++i)
-      {
-        m_global_variables[i->name()] = i->sort();
-      }
-      for (auto i = propositional_variables.begin(); i != propositional_variables.end(); ++i)
-      {
-        data::sort_expression_list sorts = variable_sorts(i->parameters());
-        check_sort_list_is_declared(sorts);
-        m_equation_sorts[i->name()] = sorts;
-      }
-    }
-
-    data::data_expression typecheck_data_expression(const data::data_expression& x,
-                                                    const data::sort_expression& expected_sort,
-                                                    const std::map<core::identifier_string, data::sort_expression>& variable_context
-                                                   )
-    {
-      data::data_expression x1 = x;
-      TraverseVarConsTypeD(variable_context, variable_context, x1, expected_sort);
-      return x1;
-    }
-
-     /** \brief     Type check a process expression.
-      * Throws a mcrl2::runtime_error exception if the expression is not well typed.
-      *  \param[in] d A process expression that has not been type checked.
-      *  \return    a process expression where all untyped identifiers have been replace by typed ones.
-      **/
-    pbes operator()()
-    {
-      return m_type_checked_pbes_spec;
+      // typecheck the data specification
+      pbesspec.data() = m_data_type_checker.typechecked_data_specification();
     }
 
      /** \brief     Type check a process expression.
@@ -233,40 +262,49 @@ class pbes_type_checker: public data::data_type_checker
       **/
     pbes_expression operator()(const pbes_expression& x)
     {
-      return detail::make_typecheck_builder(*this, m_global_variables, m_equation_sorts).apply(x);
+      return detail::make_typecheck_builder(m_data_type_checker, m_global_variables, m_equation_sorts).apply(x);
     }
 
     protected:
       pbes_expression typecheck(const pbes_expression& x, const data::variable_list& parameters)
       {
-        return detail::make_typecheck_builder(*this, declared_variables(parameters), m_equation_sorts).apply(x);
+        return detail::make_typecheck_builder(m_data_type_checker, declared_variables(parameters), m_equation_sorts).apply(x);
       }
 
-      void initialize(const std::set<data::variable>& global_variables, const std::vector<pbes_equation>& equations, const propositional_variable_instantiation& initial_state)
+      template <typename VariableContainer>
+      void add_global_variables(const VariableContainer& global_variables)
       {
         for (const data::variable& v: global_variables)
         {
-          sort_type_checker::check_sort_is_declared(v.sort());
-        }
-
-        m_global_variables = declared_variables(data::variable_list(global_variables.begin(), global_variables.end()));
-
-        for (const pbes_equation& eqn: equations)
-        {
-          const core::identifier_string& name = eqn.variable().name();
-          const data::variable_list& parameters = eqn.variable().parameters();
-
-          data::sort_expression_list sorts = variable_sorts(parameters);
-          check_sort_list_is_declared(sorts);
-
-          auto i = m_equation_sorts.find(name);
-          if (i == m_equation_sorts.end())
+          m_data_type_checker.check_sort_is_declared(v.sort());
+          auto i = m_global_variables.find(v.name());
+          if (i == m_global_variables.end())
           {
-            m_equation_sorts[name] = sorts;
+            m_global_variables[v.name()] = v.sort();
           }
           else
           {
-            throw mcrl2::runtime_error("attempt to overload propositional variable " + core::pp(name));
+            throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
+          }
+        }
+      }
+
+      template <typename PropositionalVariableContainer>
+      void add_propositional_variables(const PropositionalVariableContainer& propositional_variables)
+      {
+        for (const propositional_variable& v: propositional_variables)
+        {
+          data::sort_expression_list sorts = variable_sorts(v.parameters());
+          m_data_type_checker.check_sort_list_is_declared(sorts);
+
+          auto i = m_equation_sorts.find(v.name());
+          if (i == m_equation_sorts.end())
+          {
+            m_equation_sorts[v.name()] = sorts;
+          }
+          else
+          {
+            throw mcrl2::runtime_error("attempt to overload propositional variable " + core::pp(v.name()));
           }
         }
       }
@@ -274,21 +312,21 @@ class pbes_type_checker: public data::data_type_checker
 
 /** \brief     Type check a parsed mCRL2 pbes specification.
  *  Throws an exception if something went wrong.
- *  \param[in] pbes_spec A process specification  that has not been type checked.
- *  \post      pbes_spec is type checked.
+ *  \param[in] pbesspec A process specification  that has not been type checked.
+ *  \post      pbesspec is type checked.
  **/
 
 inline
-void type_check(pbes& pbes_spec)
+void type_check(pbes& pbesspec)
 {
-  pbes_type_checker type_checker(pbes_spec);
+  pbes_type_checker type_checker;
   try
   {
-    pbes_spec=type_checker(); // Get the type checked specification back.
+    type_checker(pbesspec);
   }
   catch (mcrl2::runtime_error &e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pbes_system::pp(pbes_spec));
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pbes_system::pp(pbesspec));
   }
 }
 
