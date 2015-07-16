@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(test_typecheck)
     "proc P(b,c: Bool) = a . P(c = true);\n"
     "init delta;\n"
     ;
-  process::process_specification procspec = process::parse_process_specification_new(text);
+  process::process_specification procspec = process::detail::parse_process_specification_new(text);
   process::type_check(procspec);
 }
 

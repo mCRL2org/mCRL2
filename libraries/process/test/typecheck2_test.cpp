@@ -21,7 +21,7 @@ using namespace mcrl2;
 
 void test_process_specification(const std::string& ps_in, bool const expected_result = true, bool const test_type_checker = true)
 {
-  process::process_specification p = process::parse_process_specification_new(ps_in);
+  process::process_specification p = process::detail::parse_process_specification_new(ps_in);
   std::string ps_out;
   if (test_type_checker)
   {
