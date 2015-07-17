@@ -193,7 +193,7 @@ void type_check(const sort_expression& sort_expr, const data_specification& data
   try
   {
     // sort_type_checker type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases());
-    sort_type_checker type_checker(data_spec);
+    sort_type_checker type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases());
     type_checker(sort_expr);
   }
   catch (mcrl2::runtime_error& e)
