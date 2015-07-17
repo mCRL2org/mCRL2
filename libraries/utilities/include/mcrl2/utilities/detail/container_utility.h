@@ -32,7 +32,7 @@ typename Map::mapped_type map_element(const Map& m, const typename Map::key_type
   if (i == m.end())
   {
     std::ostringstream out;
-    out << "map_element: key " << key << " not found!";
+    out << "missing key in map!";
     throw mcrl2::runtime_error(out.str());
   }
   return i->second;
