@@ -264,7 +264,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       // Add a single delta.
       const deadlock_summand_vector deadlock_summands(1, deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
       const linear_process lps(process_parameters,deadlock_summands,action_summand_vector());
-      const process_initializer initial_process({ assignment(process_parameter,sort_pos::pos(l.initial_state()+1)) });
+      const process_initializer initial_process(assignment_list({ assignment(process_parameter,sort_pos::pos(l.initial_state()+1)) }));
       return lps::specification(l.data(),l.action_labels(),global_variables,lps,initial_process);
     }
 
