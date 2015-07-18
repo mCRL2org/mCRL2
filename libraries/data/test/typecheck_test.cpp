@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_matching_ambiguous, 1)              
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_matching_ambiguous_rhs, 1)           // Fails because of reordering in type checker / pretty printer
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4, 1)  // Fails because of reordering in type checker / pretty printer
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1) // Fails because of reordering in type checker / pretty printer
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_projection_function, 2)    // Fails because of reordering in type checker / pretty printer
+// BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_projection_function, 2)    // Fails because of reordering in type checker / pretty printer
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_alias_loop, 1)
 
 // Parse functions that do not change any context (i.e. do not typecheck and
@@ -1396,9 +1396,9 @@ BOOST_AUTO_TEST_CASE(test_aliases)
 {
   test_data_expression_in_specification_context(
     "f == g",
-    "sort A = List(List(B));\n"
-    "     C = List(B);\n"
-    "     B;\n",
+    "sort B;\n"
+    "     A = List(List(B));\n"
+    "     C = List(B);\n",
     { var("f", data::basic_sort("A")), var("g", list(data::basic_sort("C"))) },
     true
   );

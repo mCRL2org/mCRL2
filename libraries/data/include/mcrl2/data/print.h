@@ -1842,8 +1842,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     bool first_element = true;
     derived().print(opener);
 
-    // print aliases
-    for (typename AliasContainer::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
+    // print sorts
+    for (typename SortContainer::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
     {
       if (!first_element)
       {
@@ -1853,8 +1853,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       first_element = false;
     }
 
-    // print sorts
-    for (typename SortContainer::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+    // print aliases
+    for (typename AliasContainer::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
     {
       if (!first_element)
       {
