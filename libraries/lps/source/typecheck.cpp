@@ -17,7 +17,7 @@ using namespace mcrl2::lps;
 using namespace mcrl2::data;
 
 template <typename MapContainer>
-MapContainer list_minus(const MapContainer& l, const MapContainer &m)
+MapContainer list_minus(const MapContainer& l, const MapContainer& m)
 {
   MapContainer n;
   for (typename MapContainer::const_reverse_iterator i=l.rbegin(); i!=l.rend(); ++i)
@@ -30,7 +30,7 @@ MapContainer list_minus(const MapContainer& l, const MapContainer &m)
   return n;
 }
 
-process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const process::untyped_action &act)
+process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression>& Vars, const process::untyped_action& act)
 {
   process::action Result;
   core::identifier_string Name(act.name());
@@ -101,7 +101,7 @@ process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::id
     {
       NewPosType=TraverseVarConsTypeD(Vars,Vars,Par,PosType);
     }
-    catch (mcrl2::runtime_error &e)
+    catch (mcrl2::runtime_error& e)
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + pp(Par) + " as type " + pp(ExpandNumTypesDown(PosType)) + " (while typechecking " + pp(act) + ")");
     }
@@ -132,7 +132,7 @@ process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::id
         std::map<core::identifier_string,sort_expression> dummy_table;
         CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par,Vars,Vars,dummy_table,false);
       }
-      catch (mcrl2::runtime_error &e)
+      catch (mcrl2::runtime_error& e)
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + pp(NewPosType) + " to " + pp(PosType) + "(while typechecking " + pp(Par) + " in " + pp(act));
       }
@@ -163,13 +163,13 @@ process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::id
 
 
 
-process::action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const process::untyped_action &ma)
+process::action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression>& Vars, const process::untyped_action& ma)
 {
   return RewrAct(Vars,ma);
 }
 
 
-void mcrl2::lps::action_type_checker::ReadInActs(const process::action_label_list &Acts)
+void mcrl2::lps::action_type_checker::ReadInActs(const process::action_label_list& Acts)
 {
   for (auto i=Acts.begin(); i!=Acts.end(); ++i)
   {
@@ -207,7 +207,7 @@ void mcrl2::lps::action_type_checker::ReadInActs(const process::action_label_lis
 
 
 mcrl2::lps::action_type_checker::action_type_checker(
-            const data::data_specification &data_spec,
+            const data::data_specification& data_spec,
             const process::action_label_list& action_decls)
   : data_type_checker(data_spec)
 {
@@ -218,13 +218,13 @@ mcrl2::lps::action_type_checker::action_type_checker(
   {
     ReadInActs(action_decls);
   }
-  catch (mcrl2::runtime_error &e)
+  catch (mcrl2::runtime_error& e)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\nreading from LPS failed");
   }
 }
 
-lps::multi_action mcrl2::lps::action_type_checker::operator()(const lps::untyped_multi_action &ma)
+lps::multi_action mcrl2::lps::action_type_checker::operator()(const lps::untyped_multi_action& ma)
 {
   try
   {
@@ -245,7 +245,7 @@ lps::multi_action mcrl2::lps::action_type_checker::operator()(const lps::untyped
 //    }
     return lps::multi_action(reverse(r));
   }
-  catch (mcrl2::runtime_error &e)
+  catch (mcrl2::runtime_error& e)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of multiaction failed (" + pp(ma) + ")");
   }
@@ -253,7 +253,7 @@ lps::multi_action mcrl2::lps::action_type_checker::operator()(const lps::untyped
 
 /*************************   Here starts the action_rename_typechecker  ************************************/
 
-action_rename_specification mcrl2::lps::action_type_checker::operator()(const action_rename_specification &ar_spec)
+action_rename_specification mcrl2::lps::action_type_checker::operator()(const action_rename_specification& ar_spec)
 {
   mCRL2log(verbose) << "type checking action rename specification..." << std::endl;
 
@@ -261,37 +261,12 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
 
   mCRL2log(debug) << "type checking phase started" << std::endl;
 
+  data_specification data_spec = ar_spec.data();
+  type_checked_data_spec=type_checked_data_spec+ar_spec.data();
+
   std::map<core::identifier_string,term_list<sort_expression_list> > actions_from_lps;
 
-  data_specification data_spec = ar_spec.data();
-
-  std::map<basic_sort, sort_expression> LPSSorts=m_aliases; // remember the sorts from the LPS.
-  for (const sort_expression& s: data_spec.user_defined_sorts())
-  {
-    assert(is_basic_sort(s));
-    const basic_sort& bsort = atermpp::down_cast<basic_sort>(s);
-    add_basic_sort(bsort);
-    m_basic_sorts.insert(bsort.name());
-  }
-
-  for (const alias& a: data_spec.user_defined_aliases())
-  {
-    add_basic_sort(a.name());
-    m_aliases[a.name()] = a.reference();
-  }
-
-  mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file sorts finished" << std::endl;
-
-  // Check sorts for loops
-  // Unwind sorts to enable equiv and subtype relations
-  const std::map<basic_sort, sort_expression> difference_sorts_set=list_minus(m_aliases, LPSSorts);
-  for (auto i = difference_sorts_set.begin(); i != difference_sorts_set.end(); ++i)
-  {
-    static_cast<sort_type_checker>(*this)(i->second); // Type check sort expression.
-    read_sort(i->second);
-  }
-
-  read_constructors_and_mappings(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
+  read_constructors_and_mappings(data_spec.user_defined_constructors(),data_spec.user_defined_mappings(),data_spec.constructors());
 
   TransformVarConsTypeData(data_spec);
 

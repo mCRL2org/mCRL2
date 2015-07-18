@@ -63,7 +63,7 @@ class data_type_checker: public sort_type_checker
 
   protected:
     void read_sort(const sort_expression& SortExpr);
-    void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings);
+    void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors);
     void add_function(const data::function_symbol& f, const std::string msg, bool allow_double_decls=false);
     void add_constant(const data::function_symbol& OpId, const std::string msg);
     void initialise_system_defined_functions(void);
@@ -193,7 +193,7 @@ void type_check(const sort_expression& sort_expr, const data_specification& data
   try
   {
     // sort_type_checker type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases());
-    sort_type_checker type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases());
+    sort_type_checker type_checker(data_spec);
     type_checker(sort_expr);
   }
   catch (mcrl2::runtime_error& e)

@@ -103,6 +103,23 @@ class sort_specification
       add_predefined_basic_sorts();
     }
 
+    sort_specification(const basic_sort_vector& sorts, const alias_vector& aliases)
+     : m_normalised_sorts_are_up_to_date(false),
+       m_normalised_data_is_up_to_date(false)
+    {
+      add_predefined_basic_sorts();
+
+      for(const basic_sort& sort: sorts)
+      {
+        add_sort(sort);
+      }
+      for(const alias& a: aliases)
+      {
+        add_alias(a);
+      }
+    } 
+
+
     /// \brief Adds a sort to this specification
     /// \param[in] s A sort expression.
     void add_sort(const basic_sort& s)
@@ -402,6 +419,8 @@ class sort_specification
       const sort_expression s,
       std::set<sort_expression> sorts_already_seen,
       const bool toplevel=true) const;
+
+
 }
 ;
 

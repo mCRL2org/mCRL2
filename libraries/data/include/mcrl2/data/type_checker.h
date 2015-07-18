@@ -13,6 +13,7 @@
 #define MCRL2_DATA_TYPE_CHECKER_H
 
 #include <algorithm>
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/standard_container_utility.h"
 
@@ -53,7 +54,7 @@ atermpp::term_list<T> transform_aterm_list(const Function& f, const atermpp::ter
 }
 
 inline
-sort_expression unwind_sort_expression(const sort_expression& x, const std::map<basic_sort, sort_expression>& aliases)
+sort_expression unwind_sort_expression(const sort_expression& x, const alias_vector& aliases)
 {
   if (is_container_sort(x))
   {
@@ -69,12 +70,14 @@ sort_expression unwind_sort_expression(const sort_expression& x, const std::map<
   else if (is_basic_sort(x))
   {
     const basic_sort& bs = atermpp::down_cast<const basic_sort>(x);
-    auto i = aliases.find(bs.name());
-    if (i == aliases.end())
-    {
+    for(const alias& a: aliases)
+    { 
+      if (bs == a.name())
+      {
+        return unwind_sort_expression(a.reference(), aliases);
+      }
       return x;
     }
-    return unwind_sort_expression(i->second, aliases);
   }
   return x;
 }
@@ -123,7 +126,7 @@ class type_checker: public sort_type_checker
 
     sort_expression unwind_sort_expression(const sort_expression& x) const
     {
-      return detail::unwind_sort_expression(x, m_aliases);
+      return detail::unwind_sort_expression(x, get_sort_specification().user_defined_aliases());
     }
 
     bool equal_types(const sort_expression& x1, const sort_expression& x2) const
@@ -424,7 +427,7 @@ class type_checker: public sort_type_checker
       // other sorts can be ignored
     }
 
-    void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings)
+    void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors)
     {
       mCRL2log(log::debug) << "Start Read-in Func" << std::endl;
 
@@ -493,21 +496,21 @@ class type_checker: public sort_type_checker
       // Check that the constructors are defined such that they cannot generate an empty sort.
       // E.g. in the specification sort D; cons f:D->D; the sort D must be necessarily empty, which is
       // forbidden. The function below checks whether such malicious specifications occur.
-      check_for_empty_constructor_domains(function_symbol_list(constructors.begin(), constructors.end())); // throws exception if not ok.
+      check_for_empty_constructor_domains(normalized_constructors); // throws exception if not ok.
     }
 
   public:
     type_checker(const data_specification& data_spec)
-      : sort_type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases())
+      : sort_type_checker(data_spec)
     {
       initialise_system_defined_functions();
       try
       {
-        for (auto i = m_aliases.begin(); i != m_aliases.end(); ++i)
+        for (const alias& a: get_sort_specification().user_defined_aliases())
         {
-          read_sort(i->second);
+          read_sort(a.reference());
         }
-        read_constructors_and_mappings(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
+        read_constructors_and_mappings(data_spec.user_defined_constructors(),data_spec.user_defined_mappings(),data_spec.constructors());
       }
       catch (mcrl2::runtime_error& e)
       {

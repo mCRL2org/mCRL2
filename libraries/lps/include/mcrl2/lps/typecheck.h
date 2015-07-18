@@ -37,26 +37,26 @@ class action_type_checker:public data::data_type_checker
     *  \param[in] action_decls A list of action declarations
     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
     **/
-    action_type_checker(const data::data_specification &data_spec, const process::action_label_list& action_decls);
+    action_type_checker(const data::data_specification& data_spec, const process::action_label_list& action_decls);
 
     /** \brief     Type check a multi action.
     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
     *  \param[in] ma A multi action that has not been type checked.
     *  \return    a multi action where all untyped identifiers have been replace by typed ones.
     **/
-    multi_action operator()(const untyped_multi_action &ma);
+    multi_action operator()(const untyped_multi_action& ma);
 
     /** \brief     Type check a action_rename_specification;
     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
     *  \param[in] ars An action rename specification that has not been type checked.
     *  \return    a action rename specification where all untyped identifiers have been replace by typed ones.
     **/
-    action_rename_specification operator()(const action_rename_specification &ars);
+    action_rename_specification operator()(const action_rename_specification& ars);
 
   protected:
-    void ReadInActs(const process::action_label_list &Acts);
-    process::action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::untyped_action &ma);
-    process::action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::untyped_action &ma);
+    void ReadInActs(const process::action_label_list& Acts);
+    process::action TraverseAct(const std::map<core::identifier_string,data::sort_expression>& Vars, const process::untyped_action& ma);
+    process::action RewrAct(const std::map<core::identifier_string,data::sort_expression>& Vars, const process::untyped_action& ma);
 };
 
 
@@ -79,7 +79,7 @@ multi_action type_check(
   {
    result=type_checker(mult_act);
   }
-  catch (mcrl2::runtime_error &e)
+  catch (mcrl2::runtime_error& e)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check multi action " + pp(mult_act));
   }
@@ -92,7 +92,7 @@ multi_action type_check(
 /// \return A type checked rename specification.
 
 inline
-action_rename_specification type_check_action_rename_specification(const action_rename_specification &ar_spec, const lps::specification &spec)
+action_rename_specification type_check_action_rename_specification(const action_rename_specification& ar_spec, const lps::specification& spec)
 {
   lps::action_type_checker type_checker(spec.data(),spec.action_labels());
   return type_checker(ar_spec);

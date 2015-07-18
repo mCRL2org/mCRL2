@@ -63,9 +63,9 @@ struct data_expression_typechecker: protected data::data_type_checker
     return data_type_checker::check_sort_is_declared(x);
   }
 
-  const std::map<basic_sort, sort_expression>& aliases() const
+  const std::map<sort_expression, sort_expression>& aliases() const
   {
-    return m_aliases;
+    return get_sort_specification().sort_alias_map();
   }
 
   sort_expression unwind_sort_expression(const sort_expression& x)
@@ -84,8 +84,8 @@ struct data_expression_typechecker: protected data::data_type_checker
     else if (is_basic_sort(x))
     {
       const basic_sort& bs = atermpp::down_cast<const basic_sort>(x);
-      auto i = m_aliases.find(bs.name());
-      if (i == m_aliases.end())
+      auto i = get_sort_specification().sort_alias_map().find(bs);
+      if (i == get_sort_specification().sort_alias_map().end())
       {
         return x;
       }

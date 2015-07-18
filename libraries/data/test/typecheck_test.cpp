@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_matching_ambiguous_rhs, 1)          
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4, 1)  // Fails because of reordering in type checker / pretty printer
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1) // Fails because of reordering in type checker / pretty printer
 // BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_projection_function, 2)    // Fails because of reordering in type checker / pretty printer
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_alias_loop, 1)
+// BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_alias_loop, 1)
 
 // Parse functions that do not change any context (i.e. do not typecheck and
 // normalise sorts).
@@ -817,10 +817,18 @@ BOOST_AUTO_TEST_CASE(test_recursive_struct_list_indirect)
   );
 }
 
-BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker does not detect this.
+BOOST_AUTO_TEST_CASE(test_alias_loop) // This is a correct declaration, Typical elements of sort B are [], [f([])].
 {
   test_data_specification(
     "sort B = List(struct f(B));\n",
+    true
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_alias_loop_extended) 
+{
+  test_data_specification(
+    "sort B = List(struct f(B) | c);\n",
     true
   );
 }
@@ -1521,25 +1529,38 @@ class testable_sort_type_checker: public data::sort_type_checker
     std::pair<bool, bool> check_alias(const data::alias& x)
     {
       // search for the alias x
-      auto x_iter = m_normalized_aliases.end();
-      for (auto i = m_normalized_aliases.begin(); i != m_normalized_aliases.end(); ++i)
+      // auto x_iter = m_normalized_aliases.end();
+      // for (auto i = m_normalized_aliases.begin(); i != m_normalized_aliases.end(); ++i)
+      bool found=false;
+      for (const data::alias& a: get_sort_specification().user_defined_aliases())
       {
-        if (i->first == x.name() || i->second == x.name())
+        if (a == x)
         {
-          x_iter = i;
+          found=true;
           break;
         }
       }
-      if (x_iter == m_normalized_aliases.end())
+      // if (x_iter == m_normalized_aliases.end())
+      if (!found)
       {
         throw mcrl2::runtime_error("could not find alias " + data::pp(x));
       }
+
+      std::map < data::basic_sort, data::sort_expression > alias_map;
+      for(const data::alias& a: get_sort_specification().user_defined_aliases())
+      {
+        alias_map[a.name()]=a.reference();
+      }
+      std::set<data::basic_sort> sort_already_seen;
 
       bool first, second;
       try
       {
         first = true;
-        check_alias_recursion(x.name(), x.reference());
+        
+        // check_alias_recursion(x.name(), x.reference());
+        check_for_sort_alias_loop_through_function_sort(x.name(),x.reference(),sort_already_seen, false, alias_map);
+        assert(sort_already_seen.size()==0);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -1549,7 +1570,9 @@ class testable_sort_type_checker: public data::sort_type_checker
       try
       {
         second = true;
-        check_alias_circularity(x.name(), x.reference());
+        // check_alias_circularity(x.name(), x.reference());
+        check_alias_circularity(x.name(), x.reference(),sort_already_seen, alias_map);
+        assert(sort_already_seen.size()==0);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -1560,25 +1583,10 @@ class testable_sort_type_checker: public data::sort_type_checker
     }
 
     /// \brief constructs a sort expression checker.
-    testable_sort_type_checker(const data::basic_sort_vector& sorts, const data::alias_vector& aliases)
-      : data::sort_type_checker(sorts, aliases, false)
-    {}
+    testable_sort_type_checker(const data::sort_specification sort_spec) 
+      : data::sort_type_checker(sort_spec, false)
+    {} 
 
-    bool check_for_empty_constructor_domain(const data::function_symbol& f)
-    {
-      data::function_symbol_list constructors;
-      constructors.push_front(f);
-      try
-      {
-        check_for_empty_constructor_domains(constructors);
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        std::clog << "FOUND EMPTY CONSTRUCTOR DOMAIN in function symbol " << f << " " << e.what() << std::endl;
-        return true;
-      }
-      return false;
-    }
 };
 
 BOOST_AUTO_TEST_CASE(test_sort_aliases)
@@ -1599,20 +1607,28 @@ BOOST_AUTO_TEST_CASE(test_sort_aliases)
       "  A9  = struct f(x: List(A9)); \n"
       "  A10 = List(struct f(A10));   \n"
       "  A11 = struct A11 | B;        \n"
+      "  A12 = FSet(A12);             \n"
+      "  A13 = FBag(A13);             \n"
+      "  A14 = struct f(FSet(A14)) | c;\n"
+      "  A15 = struct f(FSet(A15)) | g(FBag(A15)) | c;\n"
   );
 
   std::string expected_results(
       "  A1  true false  \n"
-      "  A2  true true   \n"
-      "  A3  false true  \n"
-      "  A4  false true  \n"
-      "  A5  false true  \n"
-      "  A6  false true  \n"
+      "  A2  true false  \n"
+      "  A3  false false  \n"
+      "  A4  false false  \n"
+      "  A5  false false  \n"
+      "  A6  false false  \n"
       "  A7  true true   \n"
       "  A8  false true  \n"
       "  A9  true true   \n"
       "  A10 true true   \n"
       "  A11 true true   \n"
+      "  A12 true false  \n"
+      "  A13 true false  \n"
+      "  A14 true true  \n"
+      "  A15 true true  \n"
   );
 
   std::map<std::string, std::pair<bool, bool> > expected_result_map;
@@ -1628,7 +1644,8 @@ BOOST_AUTO_TEST_CASE(test_sort_aliases)
     }
   }
 
-  testable_sort_type_checker checker(sortspec.first, sortspec.second);
+  data::sort_specification sp(sortspec.first,sortspec.second);
+  testable_sort_type_checker checker(sp);
   for (const data::alias& a: sortspec.second)
   {
     std::pair<bool, bool> result = checker.check_alias(a);
