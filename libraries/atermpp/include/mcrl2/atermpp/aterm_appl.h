@@ -67,7 +67,7 @@ class term_appl:public aterm
 
     /// \brief Copy constructor from an aterm_appl.
     /// \param t The aterm.
-    term_appl (const term_appl &t):aterm(t)
+    term_appl (const term_appl& t):aterm(t)
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
@@ -75,7 +75,7 @@ class term_appl:public aterm
 
     /// \brief Explicit constructor from an aterm.
     /// \param t The aterm.
-    explicit term_appl (const aterm &t):aterm(t)
+    explicit term_appl (const aterm& t):aterm(t)
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
@@ -91,7 +91,7 @@ class term_appl:public aterm
     /// \param end The end of a range of elements.
 
     template <class ForwardIterator>
-    term_appl(const function_symbol &sym,
+    term_appl(const function_symbol& sym,
               const ForwardIterator begin,
               const ForwardIterator end,
               typename std::enable_if< !std::is_base_of<atermpp::aterm, ForwardIterator>::value>::type* = 0)
@@ -111,10 +111,10 @@ class term_appl:public aterm
     /// \param convert_to_aterm An optional translator that is applied to each element in the iterator range,
     //                              and which must translate these elements to type Term.
     template <class InputIterator, class ATermConverter>
-    term_appl(const function_symbol &sym,
+    term_appl(const function_symbol& sym,
               InputIterator begin,
               InputIterator end,
-              const ATermConverter &convert_to_aterm,
+              const ATermConverter& convert_to_aterm,
               typename std::enable_if< !std::is_base_of<atermpp::aterm, InputIterator>::value>::type* = 0,
               typename std::enable_if< !std::is_base_of<atermpp::aterm, ATermConverter>::value>::type* = 0)
          :aterm(detail::local_term_appl_with_converter<Term,InputIterator,ATermConverter>(sym,begin,end,convert_to_aterm))
@@ -125,7 +125,7 @@ class term_appl:public aterm
 
     /// \brief Constructor.
     /// \param sym A function symbol.
-    term_appl(const function_symbol &sym)
+    term_appl(const function_symbol& sym)
          :aterm(detail::term_appl0(sym))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
@@ -135,7 +135,7 @@ class term_appl:public aterm
     /// \brief Constructor for a unary function application.
     /// \param sym A function symbol.
     /// \param t1 The first argument.
-    term_appl(const function_symbol &sym, const Term &t1)
+    term_appl(const function_symbol& sym, const Term& t1)
          :aterm(detail::term_appl1<Term>(sym,t1))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
@@ -146,7 +146,7 @@ class term_appl:public aterm
     /// \param sym A function symbol.
     /// \param t1 The first argument.
     /// \param t2 The second argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2)
+    term_appl(const function_symbol& sym, const Term& t1, const Term& t2)
          :aterm(detail::term_appl2<Term>(sym,t1,t2))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
@@ -158,7 +158,7 @@ class term_appl:public aterm
     /// \param t1 The first argument.
     /// \param t2 The second argument.
     /// \param t3 The third argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3)
+    term_appl(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3)
          :aterm(detail::term_appl3<Term>(sym,t1,t2,t3))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
@@ -171,7 +171,7 @@ class term_appl:public aterm
     /// \param t2 The second argument.
     /// \param t3 The third argument.
     /// \param t4 The fourth argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4)
+    term_appl(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3, const Term& t4)
          :aterm(detail::term_appl4<Term>(sym,t1,t2,t3,t4))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
@@ -185,7 +185,7 @@ class term_appl:public aterm
     /// \param t3 The third argument.
     /// \param t4 The fourth argument.
     /// \param t5 The fifth argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5)
+    term_appl(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3, const Term& t4, const Term& t5)
          :aterm(detail::term_appl5<Term>(sym,t1,t2,t3,t4,t5))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
@@ -200,7 +200,7 @@ class term_appl:public aterm
     /// \param t4 The fourth argument.
     /// \param t5 The fifth argument.
     /// \param t6 The sixth argument.
-    term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5, const Term &t6)
+    term_appl(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3, const Term& t4, const Term& t5, const Term& t6)
          :aterm(detail::term_appl6<Term>(sym,t1,t2,t3,t4,t5,t6))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
@@ -210,7 +210,7 @@ class term_appl:public aterm
     /// \brief The assignment operator
     /// \param t The assigned term
     /// \return A reference to the term to which an assignment took place.
-    term_appl &operator=(const term_appl &t)
+    term_appl& operator=(const term_appl& t)
     {
       copy_term(t);
       return *this;
@@ -218,7 +218,7 @@ class term_appl:public aterm
 
     /// \brief Returns the function symbol belonging to an aterm_appl.
     /// \return The function symbol of this term.
-    const function_symbol &function() const
+    const function_symbol& function() const
     {
       return m_term->function();
     }
@@ -261,7 +261,7 @@ class term_appl:public aterm
     /// \brief Returns the i-th argument.
     /// \param i A positive integer
     /// \return The argument with the given index.
-    const Term &operator[](const size_type i) const
+    const Term& operator[](const size_type i) const
     {
       assert(i<m_term->function().arity());
       return reinterpret_cast<const detail::_aterm_appl<Term>*>(m_term)->arg[i];
@@ -280,7 +280,7 @@ namespace std
 /// \param t1 The first term
 /// \param t2 The second term
 template <class T>
-inline void swap(atermpp::term_appl<T> &t1, atermpp::term_appl<T> &t2)
+inline void swap(atermpp::term_appl<T>& t1, atermpp::term_appl<T>& t2)
 {
   t1.swap(t2);
 }

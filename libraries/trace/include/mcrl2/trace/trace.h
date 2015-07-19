@@ -24,7 +24,6 @@
 #include <string>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/function_symbols.h"
-// #include "mcrl2/core/detail/construction_utility.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/process/action_parse.h"
