@@ -97,8 +97,8 @@ process_expression process_type_checker::MakeActionOrProc(
   }
   else
   {
-    assert(m_process_parameters.count(std::pair<core::identifier_string,data::sort_expression_list>(Name,UnwindType(FormParList)))>0);
-    const data::variable_list& FormalVars=m_process_parameters[std::pair<core::identifier_string,data::sort_expression_list>(Name,UnwindType(FormParList))];
+    assert(m_process_parameters.count(std::pair<core::identifier_string,data::sort_expression_list>(Name, m_data_type_checker.UnwindType(FormParList)))>0);
+    const data::variable_list& FormalVars=m_process_parameters[std::pair<core::identifier_string,data::sort_expression_list>(Name,m_data_type_checker.UnwindType(FormParList))];
     return process_instance(process_identifier(Name,FormalVars),FactParList);
   }
 }
@@ -114,7 +114,7 @@ sorts_list mcrl2::process::process_type_checker::TypeListsIntersect(
   for (sorts_list::const_iterator i=TypeListList2.begin(); i!=TypeListList2.end(); ++i)
   {
     const data::sort_expression_list TypeList2= *i;
-    if (InTypesL(TypeList2,TypeListList1))
+    if (m_data_type_checker.InTypesL(TypeList2,TypeListList1))
     {
       Result.push_front(TypeList2);
     }
@@ -175,11 +175,11 @@ bool mcrl2::process::process_type_checker::IsTypeAllowedA(const data::sort_expre
   if (is_untyped_possible_sorts(PosType))
   {
     const data::untyped_possible_sorts& s=atermpp::down_cast<data::untyped_possible_sorts>(PosType);
-    return InTypesA(Type,s.sorts());
+    return m_data_type_checker.InTypesA(Type,s.sorts());
   }
 
   //PosType is a normal type
-  return EqTypesA(Type,PosType);
+  return m_data_type_checker.EqTypesA(Type,PosType);
 }
 
 
@@ -201,7 +201,7 @@ data::sort_expression_list mcrl2::process::process_type_checker::InsertType(cons
 {
   for (data::sort_expression_list OldTypeList=TypeList; !OldTypeList.empty(); OldTypeList=OldTypeList.tail())
   {
-    if (EqTypesA(OldTypeList.front(),Type))
+    if (m_data_type_checker.EqTypesA(OldTypeList.front(),Type))
     {
       return TypeList;
     }
@@ -225,7 +225,7 @@ std::pair<bool,data::sort_expression_list> mcrl2::process::process_type_checker:
   //if so return PosTypeList, otherwise return false.
   if (!IsNotInferredL(PosTypeList))
   {
-    if (InTypesL(PosTypeList,TypeListList))
+    if (m_data_type_checker.InTypesL(PosTypeList,TypeListList))
     {
       return std::make_pair(true,PosTypeList);
     }
@@ -344,11 +344,11 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
     data::sort_expression NewPosType;
     try
     {
-      NewPosType=TraverseVarConsTypeD(Vars,Vars,Par,PosType);
+      NewPosType=m_data_type_checker.TraverseVarConsTypeD(Vars,Vars,Par,PosType);
     }
     catch (mcrl2::runtime_error &e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(Par) + " as type " + data::pp(ExpandNumTypesDown(PosType)) + " (while typechecking " + core::pp(Name) +
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(Par) + " as type " + data::pp(m_data_type_checker.ExpandNumTypesDown(PosType)) + " (while typechecking " + core::pp(Name) +
             "(" + data::pp(pars) + "))");
     }
     NewPars.push_front(Par);
@@ -378,7 +378,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
       try
       {
         std::map<core::identifier_string,data::sort_expression> dummy_table;
-        CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par,Vars,Vars,dummy_table,false);
+        CastedNewPosType=m_data_type_checker.UpCastNumericType(PosType,NewPosType,Par,Vars,Vars,dummy_table,false);
       }
       catch (mcrl2::runtime_error &e)
       {
@@ -459,8 +459,8 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
         data::sort_expression_list Par=ParList.front();
 
         // get the formal parameter names
-        assert(m_process_parameters.count(std::pair<core::identifier_string,data::sort_expression_list>(Name,UnwindType(Par)))>0);
-        data::variable_list FormalPars=m_process_parameters[std::pair<core::identifier_string,data::sort_expression_list>(Name,UnwindType(Par))];
+        assert(m_process_parameters.count(std::pair<core::identifier_string,data::sort_expression_list>(Name,m_data_type_checker.UnwindType(Par)))>0);
+        data::variable_list FormalPars=m_process_parameters[std::pair<core::identifier_string,data::sort_expression_list>(Name,m_data_type_checker.UnwindType(Par))];
         // we only need the names of the parameters, not the types
         core::identifier_string_list FormalParNames;
         for (const data::variable& par: FormalPars)
@@ -497,8 +497,8 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
     // get the formal parameter names
     data::data_expression_list ActualPars;
-    assert(m_process_parameters.count(std::pair<core::identifier_string,data::sort_expression_list>(Name,UnwindType(ParList.front())))>0);
-    const data::variable_list& FormalPars=m_process_parameters[std::pair<core::identifier_string,data::sort_expression_list>(Name,UnwindType(ParList.front()))];
+    assert(m_process_parameters.count(std::pair<core::identifier_string,data::sort_expression_list>(Name,m_data_type_checker.UnwindType(ParList.front())))>0);
+    const data::variable_list& FormalPars=m_process_parameters[std::pair<core::identifier_string,data::sort_expression_list>(Name,m_data_type_checker.UnwindType(ParList.front()))];
     {
       // we only need the names of the parameters, not the types
       for (const data::variable& par: FormalPars)
@@ -840,17 +840,17 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     const at& t=atermpp::down_cast<const at>(ProcTerm);
     const process_expression NewProc=TraverseActProcVarConstP(Vars,t.operand());
     data::data_expression Time=t.time_stamp();
-    const data::sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(data::sort_real::real_()));
+    const data::sort_expression NewType=m_data_type_checker.TraverseVarConsTypeD(Vars,Vars,Time,m_data_type_checker.ExpandNumTypesDown(data::sort_real::real_()));
 
     data::sort_expression temp;
-    if (!TypeMatchA(data::sort_real::real_(),NewType,temp))
+    if (!m_data_type_checker.TypeMatchA(data::sort_real::real_(),NewType,temp))
     {
       //upcasting
       data::sort_expression CastedNewType;
       try
       {
         std::map<core::identifier_string,data::sort_expression> dummy_table;
-        CastedNewType=UpCastNumericType(data::sort_real::real_(),NewType,Time,Vars,Vars,dummy_table,false);
+        CastedNewType=m_data_type_checker.UpCastNumericType(data::sort_real::real_(),NewType,Time,Vars,Vars,dummy_table,false);
       }
       catch (mcrl2::runtime_error &e)
       {
@@ -865,7 +865,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   {
     const if_then& t=atermpp::down_cast<const if_then>(ProcTerm);
     data::data_expression Cond=t.condition();
-    TraverseVarConsTypeD(Vars,Vars,Cond,data::sort_bool::bool_());
+    m_data_type_checker.TraverseVarConsTypeD(Vars,Vars,Cond,data::sort_bool::bool_());
     const process_expression NewThen=TraverseActProcVarConstP(Vars,t.then_case());
     return if_then(Cond,NewThen);
   }
@@ -874,7 +874,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   {
     const if_then_else& t=atermpp::down_cast<const if_then_else>(ProcTerm);
     data::data_expression Cond=t.condition();
-    TraverseVarConsTypeD(Vars,Vars,Cond,data::sort_bool::bool_());
+    m_data_type_checker.TraverseVarConsTypeD(Vars,Vars,Cond,data::sort_bool::bool_());
     const process_expression NewThen=TraverseActProcVarConstP(Vars,t.then_case());
     const process_expression NewElse=TraverseActProcVarConstP(Vars,t.else_case());
     return if_then_else(Cond,NewThen,NewElse);
@@ -890,7 +890,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     process_expression NewProc;
     try
     {
-      AddVars2Table(CopyVars, t.variables());
+      m_data_type_checker.AddVars2Table(CopyVars, t.variables());
       NewVars = CopyVars;
       NewProc=TraverseActProcVarConstP(NewVars,t.operand());
     }
@@ -910,9 +910,9 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     process_expression NewProc;
     try
     {
-      AddVars2Table(CopyVars,t.variables());
+      m_data_type_checker.AddVars2Table(CopyVars,t.variables());
       std::map<core::identifier_string,data::sort_expression> NewVars = CopyVars;
-      TraverseVarConsTypeD(NewVars,NewVars,distribution,data::sort_real::real_());
+      m_data_type_checker.TraverseVarConsTypeD(NewVars,NewVars,distribution,data::sort_real::real_());
       NewProc=TraverseActProcVarConstP(NewVars,t.operand());
     }
     catch (mcrl2::runtime_error &e)

@@ -68,6 +68,45 @@ struct data_expression_typechecker: protected data::data_type_checker
     return get_sort_specification().sort_alias_map();
   }
 
+  sort_expression TraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression>& DeclaredVars,
+                                       const std::map<core::identifier_string,sort_expression>& AllowedVars,
+                                       data_expression& t1,
+                                       sort_expression t2
+                                      )
+  {
+    return data_type_checker::TraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2);
+  }
+
+  void AddVars2Table(std::map<core::identifier_string, sort_expression>& variable_map, const variable_list& declared_variables)
+  {
+    data_type_checker::AddVars2Table(variable_map, declared_variables);
+  }
+
+  bool TypeMatchA(const sort_expression& Type_in, const sort_expression& PosType_in, sort_expression& result)
+  {
+    return data_type_checker::TypeMatchA(Type_in, PosType_in, result);
+  }
+
+  bool VarsUnique(const variable_list& VarDecls)
+  {
+    return data_type_checker::VarsUnique(VarDecls);
+  }
+
+  sort_expression UnwindType(const sort_expression& x)
+  {
+    return data_type_checker::UnwindType(x);
+  }
+
+  sort_expression_list UnwindType(const sort_expression_list& x)
+  {
+    return data_type_checker::UnwindType(x);
+  }
+
+  variable_list UnwindType(const variable_list& x)
+  {
+    return data_type_checker::UnwindType(x);
+  }
+
   sort_expression unwind_sort_expression(const sort_expression& x)
   {
     if (is_container_sort(x))
@@ -118,163 +157,175 @@ struct data_expression_typechecker: protected data::data_type_checker
     return data::data_type_checker::UpCastNumericType(NeededType, Type, Par, DeclaredVars, AllowedVars, FreeVars, strictly_ambiguous, warn_upcasting, print_cast_error);
   }
 
+  bool InTypesA(sort_expression Type, sort_expression_list Types)
+  {
+    return data_type_checker::InTypesA(Type, Types);
+  }
+
   bool EqTypesA(const sort_expression& x1, const sort_expression& x2)
   {
-    if (x1 == x2)
-    {
-      return true;
-    }
-    return unwind_sort_expression(x1) == unwind_sort_expression(x2);
+    // if (x1 == x2)
+    // {
+    //   return true;
+    // }
+    // return unwind_sort_expression(x1) == unwind_sort_expression(x2);
+    return data_type_checker::EqTypesA(x1, x2);
   }
 
   bool EqTypesL(sort_expression_list Type1, sort_expression_list Type2)
   {
-    if (Type1==Type2)
-    {
-      return true;
-    }
-    if (Type1.size()!=Type2.size())
-    {
-      return false;
-    }
-    for (; !Type1.empty(); Type1=Type1.tail(),Type2=Type2.tail())
-    {
-      if (!EqTypesA(Type1.front(),Type2.front()))
-      {
-        return false;
-      }
-    }
-    return true;
+    //if (Type1==Type2)
+    //{
+    //  return true;
+    //}
+    //if (Type1.size()!=Type2.size())
+    //{
+    //  return false;
+    //}
+    //for (; !Type1.empty(); Type1=Type1.tail(),Type2=Type2.tail())
+    //{
+    //  if (!EqTypesA(Type1.front(),Type2.front()))
+    //  {
+    //    return false;
+    //  }
+    //}
+    //return true;
+    return data_type_checker::EqTypesL(Type1, Type2);
   }
 
   bool InTypesL(sort_expression_list Type, sorts_list Types)
   {
-    for (; !Types.empty(); Types=Types.tail())
-      if (EqTypesL(Type, Types.front()))
-      {
-        return true;
-      }
-    return false;
+    //for (; !Types.empty(); Types=Types.tail())
+    //  if (EqTypesL(Type, Types.front()))
+    //  {
+    //    return true;
+    //  }
+    //return false;
+    return data_type_checker::InTypesL(Type, Types);
   }
 
   bool IsTypeAllowedA(const data::sort_expression &Type, const data::sort_expression &PosType)
   {
-    //Checks if Type is allowed by PosType
-    if (data::is_untyped_sort(data::sort_expression(PosType)))
-    {
-      return true;
-    }
-    if (is_untyped_possible_sorts(PosType))
-    {
-      const data::untyped_possible_sorts& s=atermpp::down_cast<data::untyped_possible_sorts>(PosType);
-      return InTypesA(Type,s.sorts());
-    }
-
-    //PosType is a normal type
-    return EqTypesA(Type,PosType);
+    ////Checks if Type is allowed by PosType
+    //if (data::is_untyped_sort(data::sort_expression(PosType)))
+    //{
+    //  return true;
+    //}
+    //if (is_untyped_possible_sorts(PosType))
+    //{
+    //  const data::untyped_possible_sorts& s=atermpp::down_cast<data::untyped_possible_sorts>(PosType);
+    //  return InTypesA(Type,s.sorts());
+    //}
+    //
+    ////PosType is a normal type
+    //return EqTypesA(Type,PosType);
+    return data_type_checker::IsTypeAllowedA(Type, PosType);
   }
 
 
   bool IsTypeAllowedL(const data::sort_expression_list &TypeList, const data::sort_expression_list PosTypeList)
   {
-    //Checks if TypeList is allowed by PosTypeList (each respective element)
-    assert(TypeList.size()==PosTypeList.size());
-    auto j = PosTypeList.begin();
-    for (auto i = TypeList.begin(); i != TypeList.end(); ++i, ++j)
-    {
-      if (!IsTypeAllowedA(*i,*j))
-      {
-        return false;
-      }
-    }
-    return true;
+    ////Checks if TypeList is allowed by PosTypeList (each respective element)
+    //assert(TypeList.size()==PosTypeList.size());
+    //auto j = PosTypeList.begin();
+    //for (auto i = TypeList.begin(); i != TypeList.end(); ++i, ++j)
+    //{
+    //  if (!IsTypeAllowedA(*i,*j))
+    //  {
+    //    return false;
+    //  }
+    //}
+    //return true;
+    return data_type_checker::IsTypeAllowedL(TypeList, PosTypeList);
   }
 
   sort_expression_list InsertType(const sort_expression_list TypeList, const sort_expression Type)
   {
-    for (sort_expression_list OldTypeList=TypeList; !OldTypeList.empty(); OldTypeList=OldTypeList.tail())
-    {
-      if (EqTypesA(OldTypeList.front(),Type))
-      {
-        return TypeList;
-      }
-    }
-    sort_expression_list result=TypeList;
-    result.push_front(Type);
-    return result;
+    //for (sort_expression_list OldTypeList=TypeList; !OldTypeList.empty(); OldTypeList=OldTypeList.tail())
+    //{
+    //  if (EqTypesA(OldTypeList.front(),Type))
+    //  {
+    //    return TypeList;
+    //  }
+    //}
+    //sort_expression_list result=TypeList;
+    //result.push_front(Type);
+    //return result;
+    return data_type_checker::InsertType(TypeList, Type);
   }
 
   sort_expression ExpandNumTypesDown(sort_expression Type)
   {
-    // Expand Numeric types down
-    if (data::is_untyped_sort(data::sort_expression(Type)))
-    {
-      return Type;
-    }
-    if (is_basic_sort(Type))
-    {
-      Type=UnwindType(Type);
-    }
-
-    bool function=false;
-    sort_expression_list Args;
-    if (is_function_sort(Type))
-    {
-      const function_sort fs=atermpp::down_cast<const function_sort>(Type);
-      function=true;
-      Args=fs.domain();
-      Type=fs.codomain();
-    }
-
-    if (EqTypesA(sort_real::real_(),Type))
-    {
-      Type=untyped_possible_sorts({ sort_pos::pos(),sort_nat::nat(),sort_int::int_(),sort_real::real_() });
-    }
-    if (EqTypesA(sort_int::int_(),Type))
-    {
-      Type=untyped_possible_sorts({ sort_pos::pos(),sort_nat::nat(),sort_int::int_() } );
-    }
-    if (EqTypesA(sort_nat::nat(),Type))
-    {
-      Type=untyped_possible_sorts({ sort_pos::pos(),sort_nat::nat() } );
-    }
-    if (is_container_sort(Type))
-    {
-      const container_sort& s=atermpp::down_cast<container_sort>(Type);
-      const container_type& ConsType = s.container_name();
-      if (is_list_container(ConsType))
-      {
-        Type=container_sort(s.container_name(),ExpandNumTypesDown(s.element_sort()));
-      }
-
-      if (is_fset_container(ConsType))
-      {
-        Type=container_sort(s.container_name(),ExpandNumTypesDown(s.element_sort()));
-      }
-
-      if (is_fbag_container(ConsType))
-      {
-        Type=container_sort(s.container_name(),ExpandNumTypesDown(s.element_sort()));
-      }
-
-      if (is_set_container(ConsType))
-      {
-        const sort_expression shrinked_sorts=ExpandNumTypesDown(s.element_sort());
-        Type=untyped_possible_sorts({
-                       container_sort(s.container_name(),shrinked_sorts),
-                       container_sort(set_container(),shrinked_sorts) } );
-      }
-
-      if (is_bag_container(ConsType))
-      {
-        const sort_expression shrinked_sorts=ExpandNumTypesDown(s.element_sort());
-        Type=untyped_possible_sorts({
-                       container_sort(s.container_name(),shrinked_sorts),
-                       container_sort(bag_container(),shrinked_sorts) } );
-      }
-    }
-
-    return (function)?function_sort(Args,Type):Type;
+    //// Expand Numeric types down
+    //if (data::is_untyped_sort(data::sort_expression(Type)))
+    //{
+    //  return Type;
+    //}
+    //if (is_basic_sort(Type))
+    //{
+    //  Type=UnwindType(Type);
+    //}
+    //
+    //bool function=false;
+    //sort_expression_list Args;
+    //if (is_function_sort(Type))
+    //{
+    //  const function_sort fs=atermpp::down_cast<const function_sort>(Type);
+    //  function=true;
+    //  Args=fs.domain();
+    //  Type=fs.codomain();
+    //}
+    //
+    //if (EqTypesA(sort_real::real_(),Type))
+    //{
+    //  Type=untyped_possible_sorts({ sort_pos::pos(),sort_nat::nat(),sort_int::int_(),sort_real::real_() });
+    //}
+    //if (EqTypesA(sort_int::int_(),Type))
+    //{
+    //  Type=untyped_possible_sorts({ sort_pos::pos(),sort_nat::nat(),sort_int::int_() } );
+    //}
+    //if (EqTypesA(sort_nat::nat(),Type))
+    //{
+    //  Type=untyped_possible_sorts({ sort_pos::pos(),sort_nat::nat() } );
+    //}
+    //if (is_container_sort(Type))
+    //{
+    //  const container_sort& s=atermpp::down_cast<container_sort>(Type);
+    //  const container_type& ConsType = s.container_name();
+    //  if (is_list_container(ConsType))
+    //  {
+    //    Type=container_sort(s.container_name(),ExpandNumTypesDown(s.element_sort()));
+    //  }
+    //
+    //  if (is_fset_container(ConsType))
+    //  {
+    //    Type=container_sort(s.container_name(),ExpandNumTypesDown(s.element_sort()));
+    //  }
+    //
+    //  if (is_fbag_container(ConsType))
+    //  {
+    //    Type=container_sort(s.container_name(),ExpandNumTypesDown(s.element_sort()));
+    //  }
+    //
+    //  if (is_set_container(ConsType))
+    //  {
+    //    const sort_expression shrinked_sorts=ExpandNumTypesDown(s.element_sort());
+    //    Type=untyped_possible_sorts({
+    //                   container_sort(s.container_name(),shrinked_sorts),
+    //                   container_sort(set_container(),shrinked_sorts) } );
+    //  }
+    //
+    //  if (is_bag_container(ConsType))
+    //  {
+    //    const sort_expression shrinked_sorts=ExpandNumTypesDown(s.element_sort());
+    //    Type=untyped_possible_sorts({
+    //                   container_sort(s.container_name(),shrinked_sorts),
+    //                   container_sort(bag_container(),shrinked_sorts) } );
+    //  }
+    //}
+    //
+    //return (function)?function_sort(Args,Type):Type;
+    return data_type_checker::ExpandNumTypesDown(Type);
   }
 
   sorts_list TypeListsIntersect(const sorts_list& TypeListList1, const sorts_list& TypeListList2)
@@ -1171,9 +1222,10 @@ typecheck_builder make_typecheck_builder(
 
 } // namespace detail
 
-class process_type_checker: public data::data_type_checker
+class process_type_checker
 {
   protected:
+    data::data_expression_typechecker m_data_type_checker;
     std::map<core::identifier_string, sorts_list> m_actions;
     std::map<core::identifier_string, sorts_list> m_equation_sorts;
     std::map<core::identifier_string, data::sort_expression> m_global_variables;
@@ -1181,7 +1233,6 @@ class process_type_checker: public data::data_type_checker
     process_equation_list equations;
     std::map<std::pair<core::identifier_string,data::sort_expression_list>,data::variable_list> m_process_parameters; // process_identifier -> variable_list
     std::map<std::pair<core::identifier_string,data::sort_expression_list>,process_expression> m_process_bodies;  // process_identifier -> rhs
-    process_specification type_checked_process_spec;
 
     std::vector<process_identifier> equation_identifiers(const std::vector<process_equation>& equations)
     {
@@ -1202,7 +1253,7 @@ class process_type_checker: public data::data_type_checker
       for (std::map <std::pair<core::identifier_string,data::sort_expression_list>,data::variable_list>::const_iterator i=m_process_parameters.begin(); i!=m_process_parameters.end(); ++i)
       {
         Vars=m_global_variables;
-        AddVars2Table(Vars, i->second);
+        m_data_type_checker.AddVars2Table(Vars, i->second);
         assert(m_process_bodies.count(i->first)>0);
         const process_expression NewProcTerm=TraverseActProcVarConstP(Vars,m_process_bodies[i->first]);
         m_process_bodies[i->first]=NewProcTerm;
@@ -1219,7 +1270,7 @@ class process_type_checker: public data::data_type_checker
         {
           continue;
         }
-        Result.push_front(process_equation(ProcVar, ProcVar.variables(), m_process_bodies[std::pair<core::identifier_string,data::sort_expression_list>(ProcVar.name(), UnwindType(get_sorts(ProcVar.variables())))]));
+        Result.push_front(process_equation(ProcVar, ProcVar.variables(), m_process_bodies[std::pair<core::identifier_string,data::sort_expression_list>(ProcVar.name(), m_data_type_checker.UnwindType(get_sorts(ProcVar.variables())))]));
       }
       return Result;
     }
@@ -1230,7 +1281,7 @@ class process_type_checker: public data::data_type_checker
       for (const data::variable& v: global_variables)
       {
         // m_data_type_checker.check_sort_is_declared(v.sort());
-        check_sort_is_declared(v.sort());
+        m_data_type_checker.check_sort_is_declared(v.sort());
 
         auto i = m_global_variables.find(v.name());
         if (i == m_global_variables.end())
@@ -1251,9 +1302,9 @@ class process_type_checker: public data::data_type_checker
         core::identifier_string ActName=Act.name();
         data::sort_expression_list ActType=Act.sorts();
 
-        check_sort_list_is_declared(ActType);
+        m_data_type_checker.check_sort_list_is_declared(ActType);
 
-        const std::map<core::identifier_string,sorts_list >::const_iterator j=m_actions.find(ActName);
+        auto j = m_actions.find(ActName);
         sorts_list Types;
         if (j==m_actions.end())
         {
@@ -1266,7 +1317,7 @@ class process_type_checker: public data::data_type_checker
           // action name. We need to check if there is already such a type
           // in the list. If so -- error, otherwise -- add
 
-          if (InTypesL(ActType, Types))
+          if (m_data_type_checker.InTypesL(ActType, Types))
           {
             throw mcrl2::runtime_error("double declaration of action " + core::pp(ActName));
           }
@@ -1291,7 +1342,7 @@ class process_type_checker: public data::data_type_checker
         }
 
         const data::sort_expression_list& ProcType=get_sorts(Proc.identifier().variables());
-        check_sort_list_is_declared(ProcType);
+        m_data_type_checker.check_sort_list_is_declared(ProcType);
 
         auto j = m_equation_sorts.find(ProcName);
         sorts_list Types;
@@ -1305,7 +1356,7 @@ class process_type_checker: public data::data_type_checker
           // the table m_equation_sorts contains a list of types for each
           // process name. We need to check if there is already such a type
           // in the list. If so -- error, otherwise -- add
-          if (InTypesL(ProcType, Types))
+          if (m_data_type_checker.InTypesL(ProcType, Types))
           {
             throw mcrl2::runtime_error("double declaration of process " + std::string(ProcName));
           }
@@ -1317,16 +1368,16 @@ class process_type_checker: public data::data_type_checker
         m_equation_sorts[ProcName] = Types;
 
         //check that all formal parameters of the process are unique.
-        if (!VarsUnique(Proc.formal_parameters()))
+        if (!m_data_type_checker.VarsUnique(Proc.formal_parameters()))
         {
           throw mcrl2::runtime_error("the formal variables in process " + process::pp(Proc) + " are not unique");
         }
 
-        std::pair<core::identifier_string,data::sort_expression_list> p(Proc.identifier().name(),UnwindType(get_sorts(Proc.identifier().variables())));
-        m_process_parameters[p]=UnwindType(Proc.formal_parameters());
+        std::pair<core::identifier_string,data::sort_expression_list> p(Proc.identifier().name(), m_data_type_checker.UnwindType(get_sorts(Proc.identifier().variables())));
+        m_process_parameters[p] = m_data_type_checker.UnwindType(Proc.formal_parameters());
         m_process_bodies[p]=Proc.expression();
       }
-      std::pair<core::identifier_string,data::sort_expression_list> p(initial_process().name(), UnwindType(get_sorts(initial_process().variables())));
+      std::pair<core::identifier_string,data::sort_expression_list> p(initial_process().name(), m_data_type_checker.UnwindType(get_sorts(initial_process().variables())));
       m_process_parameters[p] = data::variable_list();
       m_process_bodies[p]=Init;
     }
@@ -1340,35 +1391,10 @@ class process_type_checker: public data::data_type_checker
 //      add_process_identifiers(process_identifiers);
 //    }
 
-    process_type_checker(const process_specification& proc_spec)
-      : data_type_checker(proc_spec.data())
-    {
-      mCRL2log(log::verbose) << "type checking process specification..." << std::endl;
-      mCRL2log(log::debug) << "type checking phase started: " << process::pp(proc_spec) << "" << std::endl;
-
-      add_action_labels(proc_spec.action_labels());
-      add_global_variables(proc_spec.global_variables());
-      add_process_identifiers(proc_spec.equations(), proc_spec.init());
-
-      mCRL2log(log::debug) << "type checking read-in phase finished" << std::endl;
-
-      TransformActProcVarConst();
-
-      mCRL2log(log::debug) << "type checking transform ActProc+VarConst phase finished" << std::endl;
-      mCRL2log(log::debug) << "type checking phase finished" << std::endl;
-
-      process_equation_list type_checked_process_equations = WriteProcs(proc_spec.equations());
-
-      type_checked_process_spec=
-                    process_specification(type_checked_data_spec,
-                                          proc_spec.action_labels(),
-                                          data::variable_list(proc_spec.global_variables().begin(),proc_spec.global_variables().end()),
-                                          type_checked_process_equations,
-                                          m_process_bodies[std::pair<core::identifier_string,data::sort_expression_list>(initial_process().name(), get_sorts(initial_process().variables()))]
-                                         );
-
-      normalize_sorts(type_checked_process_spec, type_checked_process_spec.data());
-    }
+    /// \brief Default constructor
+    process_type_checker(const data::data_specification& dataspec = data::data_specification())
+      : m_data_type_checker(dataspec)
+    {}
 
     /** \brief     Type check a process expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -1380,9 +1406,39 @@ class process_type_checker: public data::data_type_checker
       return TraverseActProcVarConstP(m_global_variables, d);
     }
 
-    process_specification operator()()
+    /// \brief Typecheck the process specification procspec
+    void operator()(process_specification& procspec)
     {
-      return type_checked_process_spec;
+      mCRL2log(log::verbose) << "type checking process specification..." << std::endl;
+      mCRL2log(log::debug) << "type checking phase started: " << process::pp(procspec) << "" << std::endl;
+
+      // reset the context
+      m_data_type_checker = data::data_expression_typechecker(procspec.data());
+      m_actions.clear();
+      m_global_variables.clear();
+      m_equation_sorts.clear();
+      add_action_labels(procspec.action_labels());
+      add_global_variables(procspec.global_variables());
+      add_process_identifiers(procspec.equations(), procspec.init());
+
+      mCRL2log(log::debug) << "type checking read-in phase finished" << std::endl;
+
+      TransformActProcVarConst();
+
+      mCRL2log(log::debug) << "type checking transform ActProc+VarConst phase finished" << std::endl;
+      mCRL2log(log::debug) << "type checking phase finished" << std::endl;
+
+      process_equation_list type_checked_process_equations = WriteProcs(procspec.equations());
+
+      procspec =
+                    process_specification(m_data_type_checker.typechecked_data_specification(),
+                                          procspec.action_labels(),
+                                          data::variable_list(procspec.global_variables().begin(), procspec.global_variables().end()),
+                                          type_checked_process_equations,
+                                          m_process_bodies[std::pair<core::identifier_string,data::sort_expression_list>(initial_process().name(), get_sorts(initial_process().variables()))]
+                                         );
+
+      normalize_sorts(procspec, m_data_type_checker.typechecked_data_specification());
     }
 
   protected:
@@ -1426,8 +1482,8 @@ class process_type_checker: public data::data_type_checker
 inline
 void type_check(process_specification& proc_spec)
 {
-  process_type_checker type_checker(proc_spec);
-  proc_spec = type_checker();
+  process_type_checker type_checker;
+  type_checker(proc_spec);
 }
 
 } // namespace process
