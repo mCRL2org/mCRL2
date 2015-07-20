@@ -15,5 +15,4 @@ add_mcrl2_library(lts
   DEPENDS
     mcrl2_data
     mcrl2_lps
-    mcrl2_svc
 )

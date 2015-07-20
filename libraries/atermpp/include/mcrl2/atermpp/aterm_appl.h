@@ -207,6 +207,22 @@ class term_appl:public aterm
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
     }
 
+    /// \brief Constructor for a function application to seven arguments.
+    /// \param sym A function symbol.
+    /// \param t1 The first argument.
+    /// \param t2 The second argument.
+    /// \param t3 The third argument.
+    /// \param t4 The fourth argument.
+    /// \param t5 The fifth argument.
+    /// \param t6 The sixth argument.
+    /// \param t7 The seventh argument.
+    term_appl(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3, const Term& t4, const Term& t5, const Term& t6, const Term& t7)
+         :aterm(detail::term_appl7<Term>(sym,t1,t2,t3,t4,t5,t6,t7))
+    {
+      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+    }
+
     /// \brief The assignment operator
     /// \param t The assigned term
     /// \return A reference to the term to which an assignment took place.

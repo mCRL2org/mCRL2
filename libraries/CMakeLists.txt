@@ -10,7 +10,6 @@ set(MCRL2_LIBRARIES
   lps
   lts
   modal_formula
-  svc
   pbes
   process
   trace
