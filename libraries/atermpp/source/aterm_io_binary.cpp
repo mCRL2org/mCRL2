@@ -71,9 +71,9 @@ s
 }
 
 static size_t calcUniqueAFuns(
-                  const aterm &t,
-                  std::set<aterm> &visited,
-                  std::vector<size_t> &count)
+                  const aterm& t,
+                  std::set<aterm>& visited,
+                  std::vector<size_t>& count)
 {
   size_t nr_unique = 0;
 
@@ -129,7 +129,7 @@ static size_t calcUniqueAFuns(
   return nr_unique;
 }
 
-static size_t AT_calcUniqueAFuns(const aterm &t, std::vector<size_t> &count)
+static size_t AT_calcUniqueAFuns(const aterm& t, std::vector<size_t>& count)
 {
   std::set<aterm> visited;
   size_t result = calcUniqueAFuns(t,visited,count);
@@ -257,7 +257,7 @@ static size_t text_buffer_size = 0;
 static unsigned char bit_buffer = '\0';
 static size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
-static void writeBits(size_t val, const size_t nr_bits, ostream &os)
+static void writeBits(size_t val, const size_t nr_bits, ostream& os)
 {
   for (size_t cur_bit=0; cur_bit<nr_bits; cur_bit++)
   {
@@ -276,7 +276,7 @@ static void writeBits(size_t val, const size_t nr_bits, ostream &os)
 }
 
 
-static int flushBitsToWriter(ostream &os)
+static int flushBitsToWriter(ostream& os)
 {
   int result = 0;
   if (bits_in_buffer > 0)
@@ -300,7 +300,7 @@ static int flushBitsToWriter(ostream &os)
  * @return true on success, false on failure (EOF).
  */
 static
-bool readBits(size_t& val, const size_t nr_bits, istream &is)
+bool readBits(size_t& val, const size_t nr_bits, istream& is)
 {
   size_t cur_bit, mask = 1;
 
@@ -325,7 +325,7 @@ bool readBits(size_t& val, const size_t nr_bits, istream &is)
   return true;
 }
 
-static void writeString(const char* str, const size_t len, ostream &os)
+static void writeString(const char* str, const size_t len, ostream& os)
 {
   /* Write length. */
   writeInt(len, os);
@@ -335,7 +335,7 @@ static void writeString(const char* str, const size_t len, ostream &os)
 }
 
 
-static size_t readString(istream &is)
+static size_t readString(istream& is)
 {
   size_t len;
 
@@ -364,7 +364,7 @@ static size_t readString(istream &is)
  * Write a symbol to file.
  */
 
-static void write_symbol(const function_symbol sym, ostream &os)
+static void write_symbol(const function_symbol sym, ostream& os)
 {
   const char* name = sym.name().c_str();
   writeString(name, strlen(name), os);
@@ -377,7 +377,7 @@ static void write_symbol(const function_symbol sym, ostream &os)
  * (AS_INT, etc) when the term is not an application.
  */
 
-static sym_entry* get_top_symbol(const aterm &t, const std::vector<size_t> &index)
+static sym_entry* get_top_symbol(const aterm& t, const std::vector<size_t>& index)
 {
   function_symbol sym;
 
@@ -466,9 +466,8 @@ static void gather_top_symbols(sym_entry* cur_entry,
   }
 }
 
-static void build_arg_tables(const std::vector<size_t> &index)
+static void build_arg_tables(const std::vector<size_t>& index)
 {
-  // function_symbol cur_sym;
   size_t cur_trm;
   size_t cur_arg;
   sym_entry* topsym;
@@ -482,46 +481,49 @@ static void build_arg_tables(const std::vector<size_t> &index)
 
     cur_entry->top_symbols = std::vector<top_symbols_t>(arity);
 
-    for (cur_arg=0; cur_arg<arity; cur_arg++)
+    if (cur_entry->id!=detail::function_adm.AS_INT)
     {
-      size_t total_top_symbols = 0;
-      first_topsym = NULL;
-      for (cur_trm=0; cur_trm<cur_entry->nr_terms; cur_trm++)
+      for (cur_arg=0; cur_arg<arity; cur_arg++)
       {
-        aterm term = cur_entry->terms[cur_trm].t;
-        aterm arg;
-        if (term.type_is_list())
+        size_t total_top_symbols = 0;
+        first_topsym = NULL;
+        for (cur_trm=0; cur_trm<cur_entry->nr_terms; cur_trm++)
         {
-          aterm_list list(term);
-          assert(list!=aterm_list());
-          assert(arity == 2);
-          if (cur_arg == 0)
+          aterm term = cur_entry->terms[cur_trm].t;
+          aterm arg;
+          if (term.type_is_list())
           {
-            arg = list.front();
+            aterm_list list(term);
+            assert(list!=aterm_list());
+            assert(arity == 2);
+            if (cur_arg == 0)
+            {
+              arg = list.front();
+            }
+            else
+            {
+              arg = (aterm)(list.tail());
+            }
+          }
+          else if (term.type_is_appl())
+          {
+            arg = down_cast<const aterm_appl>(term)[cur_arg];
           }
           else
           {
-            arg = (aterm)(list.tail());
+            throw aterm_io_error("build_arg_tables: illegal term");
+          }
+          topsym = get_top_symbol(arg,index);
+          if (!topsym->nr_times_top++)
+          {
+            total_top_symbols++;
+            topsym->next_topsym = first_topsym;
+            first_topsym = topsym;
           }
         }
-        else if (term.type_is_appl())
-        {
-          arg = down_cast<const aterm_appl>(term)[cur_arg];
-        }
-        else
-        {
-          throw aterm_io_error("build_arg_tables: illegal term");
-        }
-        topsym = get_top_symbol(arg,index);
-        if (!topsym->nr_times_top++)
-        {
-          total_top_symbols++;
-          topsym->next_topsym = first_topsym;
-          first_topsym = topsym;
-        }
-      }
 
-      gather_top_symbols(cur_entry, cur_arg, total_top_symbols);
+        gather_top_symbols(cur_entry, cur_arg, total_top_symbols);
+      }
     }
   }
 }
@@ -530,7 +532,7 @@ static void build_arg_tables(const std::vector<size_t> &index)
 /**
   * Add a term to the termtable of a symbol.
   */
-static void add_term(sym_entry* entry, const aterm &t)
+static void add_term(sym_entry* entry, const aterm& t)
 {
   size_t hnr = hash_number(detail::address(t)) % entry->termtable_size;
   entry->terms[entry->cur_index].t = t;
@@ -561,7 +563,7 @@ static const aterm& subterm(const aterm& t, size_t i)
 
 typedef struct { aterm term; sym_entry* entry; size_t arg; } write_todo;
 
-static void collect_terms(const aterm& t, const std::vector<size_t> &index)
+static void collect_terms(const aterm& t, const std::vector<size_t>& index)
 {
   std::stack<write_todo> stack;
   std::set<aterm> visited;
@@ -571,7 +573,13 @@ static void collect_terms(const aterm& t, const std::vector<size_t> &index)
   do
   {
     write_todo& current = stack.top();
-    if (current.arg < current.entry->arity)
+    if (current.term.type_is_int())
+    {
+      add_term(current.entry, current.term);
+      visited.insert(current.term);
+      stack.pop();
+    }
+    else if (current.arg < current.entry->arity)
     {
       item.term = subterm(current.term, current.arg++);
       if (visited.count(item.term) == 0)
@@ -594,7 +602,7 @@ static void collect_terms(const aterm& t, const std::vector<size_t> &index)
  * Write all symbols in a term to file.
  */
 
-static void write_symbols(ostream &os)
+static void write_symbols(ostream& os)
 {
   for (size_t sym_idx=0; sym_idx<nr_unique_symbols; sym_idx++)
   {
@@ -658,7 +666,7 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol sy
  * Write a term using a writer.
  */
 
-static bool write_term(const aterm t, const std::vector<size_t> &index, ostream &os)
+static bool write_term(const aterm t, const std::vector<size_t>& index, ostream& os)
 {
   std::stack<write_todo> stack;
 
@@ -671,10 +679,8 @@ static bool write_term(const aterm t, const std::vector<size_t> &index, ostream 
 
     if (current.term.type_is_int())
     {
-      /* WARNING: the following comment was taken from the original source code.
-       *          I have no idea what it means. [scranen] */
-      // If aterm integers are > 32 bits, then this can fail.
-      writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, os);
+      // If aterm integers are > 32 bits, then they cannot be read on a 32 bit machine.
+      writeBits(aterm_int(current.term).value(), INT_SIZE_IN_BAF, os);
     }
     else
     if (current.arg < current.entry->arity)
@@ -735,7 +741,7 @@ static void free_write_space()
 
 
 static bool
-write_baf(const aterm &t, ostream &os)
+write_baf(const aterm& t, ostream& os)
 {
   size_t nr_unique_terms = 0;
   const size_t nr_symbols = detail::function_symbol_index_table_number_of_elements*FUNCTION_SYMBOL_BLOCK_SIZE;
@@ -756,7 +762,7 @@ write_baf(const aterm &t, ostream &os)
   size_t cur;
   for (size_t lcv=cur=0; lcv<nr_symbols; lcv++)
   {
-    const detail::_function_symbol &entry = detail::function_symbol_index_table[lcv >> FUNCTION_SYMBOL_BLOCK_CLASS][lcv & FUNCTION_SYMBOL_BLOCK_MASK];
+    const detail::_function_symbol& entry = detail::function_symbol_index_table[lcv >> FUNCTION_SYMBOL_BLOCK_CLASS][lcv & FUNCTION_SYMBOL_BLOCK_MASK];
     if (entry.reference_count>0 && count[lcv]>0)
     {
       nr_unique_terms += count[lcv];
@@ -822,7 +828,7 @@ write_baf(const aterm &t, ostream &os)
   return true;
 }
 
-void write_term_to_binary_stream(const aterm &t, std::ostream &os)
+void write_term_to_binary_stream(const aterm& t, std::ostream& os)
 {
   aterm_io_init(os);
   if (!write_baf(t, os))
@@ -835,7 +841,7 @@ void write_term_to_binary_stream(const aterm &t, std::ostream &os)
   * Read a single symbol from file.
   */
 
-static function_symbol read_symbol(istream &is)
+static function_symbol read_symbol(istream& is)
 {
   std::size_t len;
   if ((len = readString(is)) == atermpp::npos)
@@ -855,7 +861,7 @@ static function_symbol read_symbol(istream &is)
  * Read all symbols from file.
  */
 
-static bool read_all_symbols(istream &is)
+static bool read_all_symbols(istream& is)
 {
   size_t k, val;
   size_t i, j, arity;
@@ -936,7 +942,7 @@ static bool read_all_symbols(istream &is)
 
 typedef struct { sym_read_entry* sym; size_t arg; std::vector<aterm> args; aterm* result; aterm* callresult; } read_todo;
 
-static aterm read_term(sym_read_entry* sym, istream &is)
+static aterm read_term(sym_read_entry* sym, istream& is)
 {
   aterm result;
   size_t value;
@@ -955,7 +961,8 @@ static aterm read_term(sym_read_entry* sym, istream &is)
       current.args[current.arg++] = *current.callresult;
       current.callresult = NULL;
     }
-    if (current.arg < current.sym->arity)
+    // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
+    if (current.sym->sym != detail::function_adm.AS_INT && current.arg < current.sym->arity)
     {
       if (readBits(value, current.sym->sym_width[current.arg], is) &&
           value < current.sym->nr_topsyms[current.arg])
@@ -1048,7 +1055,7 @@ static void free_read_space()
  */
 
 static
-aterm read_baf(istream &is)
+aterm read_baf(istream& is)
 {
   size_t val;
   aterm result;
@@ -1092,7 +1099,7 @@ aterm read_baf(istream &is)
 }
 
 
-aterm read_term_from_binary_stream(istream &is)
+aterm read_term_from_binary_stream(istream& is)
 {
   aterm_io_init(is);
   aterm result=read_baf(is);

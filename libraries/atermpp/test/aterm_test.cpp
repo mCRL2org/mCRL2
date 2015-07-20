@@ -16,6 +16,7 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 
 using namespace std;
@@ -41,20 +42,51 @@ void test_aterm_string()
   BOOST_CHECK(out.str() == "");
 }
 
+void test_aterm_io(const std::string input_string)
+{
+  const aterm input=read_term_from_string(input_string);
+  std::ostringstream out;
+  write_term_to_text_stream(input, out);
+  std::istringstream in(out.str());
+  const aterm text_output = read_term_from_text_stream(in);
+  if (input!=text_output)
+  {
+    std::cerr << "Expected the following terms to be the same (aterm textual save and load):\n";
+    std::cerr << "Input " << input << "\n";
+    std::cerr << "Output " << text_output << "\n";
+    std::cerr << "----------------------------------------------------------------- (textual save/load)\n";
+  }
+  BOOST_CHECK(input == text_output);
+
+  std::stringbuf buf;
+  std::iostream binary_stream(&buf);
+  write_term_to_binary_stream(input, binary_stream);
+  const aterm binary_output = read_term_from_binary_stream(binary_stream);
+  if (input!=binary_output)
+  {
+    std::cerr << "Expected the following terms to be the same (aterm binary save and load):\n";
+    std::cerr << "Input " << input << "\n";
+    std::cerr << "Output " << binary_output << "\n";
+    std::cerr << "----------------------------------------------------------------- (binary save/load)\n";
+  }
+  BOOST_CHECK(input == binary_output);
+}
+
 void test_aterm_io()
 {
-  aterm_string empty = empty_string();
-  std::ostringstream out;
-  write_term_to_text_stream(empty, out);
-  std::istringstream in(out.str());
-  aterm_string empty2 = down_cast<aterm_string>(read_term_from_text_stream(in));
-  BOOST_CHECK(empty == empty2);
+  test_aterm_io("17");
+  test_aterm_io("a_somewhat_longer_constant_name_with_some_blah_blah_at_the_end_to_make_it_longer");
+  test_aterm_io("f(g,h)");
+  test_aterm_io("[]");
+  test_aterm_io("[a]");
+  test_aterm_io("[a,b,[]]");
+  test_aterm_io("f([a,f(x),[]],2,[g,g(34566)])"); 
 }
 
 int test_main(int argc, char* argv[])
 {
   test_aterm();
-  test_aterm_string();
+  test_aterm_string(); 
   test_aterm_io();
 
   return 0;
