@@ -1171,7 +1171,7 @@ typecheck_builder make_typecheck_builder(
 
 } // namespace detail
 
-class process_type_checker:public data::data_type_checker
+class process_type_checker: public data::data_type_checker
 {
   protected:
     std::map<core::identifier_string, sorts_list> m_actions;
@@ -1183,26 +1183,215 @@ class process_type_checker:public data::data_type_checker
     std::map<std::pair<core::identifier_string,data::sort_expression_list>,process_expression> m_process_bodies;  // process_identifier -> rhs
     process_specification type_checked_process_spec;
 
+    std::vector<process_identifier> equation_identifiers(const std::vector<process_equation>& equations)
+    {
+      std::vector<process_identifier> result;
+      for (const process_equation& eqn: equations)
+      {
+        result.push_back(eqn.identifier());
+      }
+      return result;
+    }
+
+    void TransformActProcVarConst()
+    {
+      std::map<core::identifier_string,data::sort_expression> Vars;
+
+      //process and data terms in m_equation_sorts and init
+      assert(m_process_parameters.size()==m_process_bodies.size());
+      for (std::map <std::pair<core::identifier_string,data::sort_expression_list>,data::variable_list>::const_iterator i=m_process_parameters.begin(); i!=m_process_parameters.end(); ++i)
+      {
+        Vars=m_global_variables;
+        AddVars2Table(Vars, i->second);
+        assert(m_process_bodies.count(i->first)>0);
+        const process_expression NewProcTerm=TraverseActProcVarConstP(Vars,m_process_bodies[i->first]);
+        m_process_bodies[i->first]=NewProcTerm;
+      }
+    }
+
+    process_equation_list WriteProcs(const process_equation_vector& oldprocs)
+    {
+      process_equation_list Result;
+      for (process_equation_vector::const_reverse_iterator i = oldprocs.rbegin(); i != oldprocs.rend(); ++i)
+      {
+        const process_identifier& ProcVar=i->identifier();
+        if (ProcVar == initial_process())
+        {
+          continue;
+        }
+        Result.push_front(process_equation(ProcVar, ProcVar.variables(), m_process_bodies[std::pair<core::identifier_string,data::sort_expression_list>(ProcVar.name(), UnwindType(get_sorts(ProcVar.variables())))]));
+      }
+      return Result;
+    }
+
+    template <typename VariableContainer>
+    void add_global_variables(const VariableContainer& global_variables)
+    {
+      for (const data::variable& v: global_variables)
+      {
+        // m_data_type_checker.check_sort_is_declared(v.sort());
+        check_sort_is_declared(v.sort());
+
+        auto i = m_global_variables.find(v.name());
+        if (i == m_global_variables.end())
+        {
+          m_global_variables[v.name()] = v.sort();
+        }
+        else
+        {
+          throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
+        }
+      }
+    }
+
+    void add_action_labels(const process::action_label_list &Acts)
+    {
+      for (const action_label& Act: Acts)
+      {
+        core::identifier_string ActName=Act.name();
+        data::sort_expression_list ActType=Act.sorts();
+
+        check_sort_list_is_declared(ActType);
+
+        const std::map<core::identifier_string,sorts_list >::const_iterator j=m_actions.find(ActName);
+        sorts_list Types;
+        if (j==m_actions.end())
+        {
+          Types = { ActType };
+        }
+        else
+        {
+          Types=j->second;
+          // the table actions contains a list of types for each
+          // action name. We need to check if there is already such a type
+          // in the list. If so -- error, otherwise -- add
+
+          if (InTypesL(ActType, Types))
+          {
+            throw mcrl2::runtime_error("double declaration of action " + core::pp(ActName));
+          }
+          else
+          {
+            Types = Types + sorts_list({ ActType });
+          }
+        }
+        m_actions[ActName]=Types;
+      }
+    }
+
+    void add_process_identifiers(const std::vector<process_equation>& Procs, const process_expression& Init)
+    {
+      for (const process_equation& Proc: Procs)
+      {
+        core::identifier_string ProcName = Proc.identifier().name();
+
+        if (m_actions.count(ProcName)>0)
+        {
+          throw mcrl2::runtime_error("declaration of both process and action " + std::string(ProcName));
+        }
+
+        const data::sort_expression_list& ProcType=get_sorts(Proc.identifier().variables());
+        check_sort_list_is_declared(ProcType);
+
+        auto j = m_equation_sorts.find(ProcName);
+        sorts_list Types;
+        if (j == m_equation_sorts.end())
+        {
+          Types = { ProcType };
+        }
+        else
+        {
+          Types = j->second;
+          // the table m_equation_sorts contains a list of types for each
+          // process name. We need to check if there is already such a type
+          // in the list. If so -- error, otherwise -- add
+          if (InTypesL(ProcType, Types))
+          {
+            throw mcrl2::runtime_error("double declaration of process " + std::string(ProcName));
+          }
+          else
+          {
+            Types = Types + sorts_list({ ProcType });
+          }
+        }
+        m_equation_sorts[ProcName] = Types;
+
+        //check that all formal parameters of the process are unique.
+        if (!VarsUnique(Proc.formal_parameters()))
+        {
+          throw mcrl2::runtime_error("the formal variables in process " + process::pp(Proc) + " are not unique");
+        }
+
+        std::pair<core::identifier_string,data::sort_expression_list> p(Proc.identifier().name(),UnwindType(get_sorts(Proc.identifier().variables())));
+        m_process_parameters[p]=UnwindType(Proc.formal_parameters());
+        m_process_bodies[p]=Proc.expression();
+      }
+      std::pair<core::identifier_string,data::sort_expression_list> p(initial_process().name(), UnwindType(get_sorts(initial_process().variables())));
+      m_process_parameters[p] = data::variable_list();
+      m_process_bodies[p]=Init;
+    }
+
   public:
-    process_type_checker(const process_specification &proc_spec);
+//    process_type_checker(const data::data_specification& dataspec, const std::vector<action_label>& action_labels, const std::vector<data::variable>& global_variables, const std::vector<process_identifier>& process_identifiers)
+//      : m_data_type_checker(dataspec)
+//    {
+//      add_action_labels(action_labels);
+//      add_global_variables(global_variables);
+//      add_process_identifiers(process_identifiers);
+//    }
+
+    process_type_checker(const process_specification& proc_spec)
+      : data_type_checker(proc_spec.data())
+    {
+      mCRL2log(log::verbose) << "type checking process specification..." << std::endl;
+      mCRL2log(log::debug) << "type checking phase started: " << process::pp(proc_spec) << "" << std::endl;
+
+      add_action_labels(proc_spec.action_labels());
+      add_global_variables(proc_spec.global_variables());
+      add_process_identifiers(proc_spec.equations(), proc_spec.init());
+
+      mCRL2log(log::debug) << "type checking read-in phase finished" << std::endl;
+
+      TransformActProcVarConst();
+
+      mCRL2log(log::debug) << "type checking transform ActProc+VarConst phase finished" << std::endl;
+      mCRL2log(log::debug) << "type checking phase finished" << std::endl;
+
+      process_equation_list type_checked_process_equations = WriteProcs(proc_spec.equations());
+
+      type_checked_process_spec=
+                    process_specification(type_checked_data_spec,
+                                          proc_spec.action_labels(),
+                                          data::variable_list(proc_spec.global_variables().begin(),proc_spec.global_variables().end()),
+                                          type_checked_process_equations,
+                                          m_process_bodies[std::pair<core::identifier_string,data::sort_expression_list>(initial_process().name(), get_sorts(initial_process().variables()))]
+                                         );
+
+      normalize_sorts(type_checked_process_spec, type_checked_process_spec.data());
+    }
 
     /** \brief     Type check a process expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
      *  \param[in] d A process expression that has not been type checked.
      *  \return    a process expression where all untyped identifiers have been replace by typed ones.
-     **/
-    process_expression operator()(const process_expression &d);
-    process_specification operator()();
+     **/    /// \brief Typecheck the pbes pbesspec
+    process_expression operator()(const process_expression& d)
+    {
+      return TraverseActProcVarConstP(m_global_variables, d);
+    }
+
+    process_specification operator()()
+    {
+      return type_checked_process_spec;
+    }
 
   protected:
-    void ReadInActs(const process::action_label_list &Acts);
-    void ReadInProcsAndInit(const std::vector<process_equation>& Procs, const process_expression &Init);
-    const process_identifier initial_process(void)
+    const process_identifier initial_process()
     {
       static process_identifier init_process(core::identifier_string("init"),data::variable_list());
       return init_process;
     }
-    void TransformActProcVarConst(void);
+
     process_expression TraverseActProcVarConstP(
           const std::map<core::identifier_string,data::sort_expression> &Vars,
           const process_expression &ProcTerm);
@@ -1221,7 +1410,6 @@ class process_type_checker:public data::data_type_checker
     sorts_list TypeListsIntersect(
                                   const sorts_list &TypeListList1,
                                   const sorts_list &TypeListList2);
-    process_equation_list WriteProcs(const process_equation_vector &oldprocs);
     process_expression MakeActionOrProc(bool is_action,
                                         const core::identifier_string &Name,
                                         const data::sort_expression_list &FormParList,
@@ -1239,7 +1427,7 @@ inline
 void type_check(process_specification& proc_spec)
 {
   process_type_checker type_checker(proc_spec);
-  proc_spec=type_checker();
+  proc_spec = type_checker();
 }
 
 } // namespace process
