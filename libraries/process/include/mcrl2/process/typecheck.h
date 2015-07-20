@@ -606,7 +606,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     for (const data::sort_expression_list& parameters: parameter_lists)
     {
       // get the formal parameter names
-      data::variable_list formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), unwind_sort_expression_list(parameters)));
+      data::variable_list formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.UnwindType(parameters)));
 
       // we only need the names of the parameters, not the types
       core::identifier_string_list formal_parameter_names;
@@ -741,7 +741,9 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
     else
     {
-      const data::variable_list& FormalVars = utilities::detail::map_element(m_process_parameters, std::make_pair(Name, unwind_sort_expression_list(FormParList)));
+      auto i = m_process_parameters.find(std::make_pair(Name, m_data_typechecker.UnwindType(FormParList)));
+      assert(i != m_process_parameters.end());
+      const data::variable_list& FormalVars = i->second;
       return process_instance(process_identifier(Name,FormalVars),FactParList);
     }
   }
@@ -910,7 +912,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
     // get the formal parameter names
     data::data_expression_list ActualPars;
-    const data::variable_list& FormalPars = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), unwind_sort_expression_list(ParList.front())));
+    const data::variable_list& FormalPars = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.UnwindType(ParList.front())));
     {
       // we only need the names of the parameters, not the types
       for (const data::variable& par: FormalPars)
@@ -970,8 +972,8 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
   process_expression apply(const untyped_parameter_identifier& x)
   {
-    // process_expression result = RewrActProc(Vars, t.name(), t.arguments());
-    return x;
+    process_expression result = RewrActProc(m_variables, x.name(), x.arguments());
+    return result;
   }
 
   process_expression apply(const process::hide& x)
@@ -1116,28 +1118,27 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
   process_expression apply(const process::at& x)
   {
-    // const process_expression NewProc=TraverseActProcVarConstP(Vars,t.operand());
-    // data::data_expression Time=t.time_stamp();
-    // const data::sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(data::sort_real::real_()));
-    //
-    // data::sort_expression temp;
-    // if (!TypeMatchA(data::sort_real::real_(),NewType,temp))
-    // {
-    //   //upcasting
-    //   data::sort_expression CastedNewType;
-    //   try
-    //   {
-    //     std::map<core::identifier_string,data::sort_expression> dummy_table;
-    //     CastedNewType=UpCastNumericType(data::sort_real::real_(),NewType,Time,Vars,Vars,dummy_table,false);
-    //   }
-    //   catch (mcrl2::runtime_error &e)
-    //   {
-    //     throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast time value " + data::pp(Time) + " to type Real");
-    //   }
-    // }
-    //
-    // return at(NewProc,Time);
-    return x;
+//    const process_expression NewProc = (*this).apply(x.operand());
+    data::data_expression new_time = m_data_typechecker(x.time_stamp(), data::sort_real::real_(), m_variables);
+//    data::data_expression Time = t.time_stamp();
+//    const data::sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(data::sort_real::real_()));
+//    data::sort_expression temp;
+//    if (!TypeMatchA(data::sort_real::real_(),NewType,temp))
+//    {
+//      //upcasting
+//      data::sort_expression CastedNewType;
+//      try
+//      {
+//        std::map<core::identifier_string,data::sort_expression> dummy_table;
+//        CastedNewType=UpCastNumericType(data::sort_real::real_(),NewType,Time,Vars,Vars,dummy_table,false);
+//      }
+//      catch (mcrl2::runtime_error &e)
+//      {
+//        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast time value " + data::pp(Time) + " to type Real");
+//      }
+//    }
+//    return at(NewProc,Time);
+    return at((*this).apply(x.operand()), new_time);
   }
 
   process_expression apply(const process::if_then& x)
@@ -1190,22 +1191,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + process::pp(x));
     }
   }
-
-//  process_expression apply(const data::data_expression& x)
-//  {
-//    return m_data_typechecker(x, data::sort_bool::bool_(), m_variables);
-//  }
-
-//  process_expression apply(const & x)
-//  {
-//    try
-//    {
-//    }
-//    catch (mcrl2::runtime_error& e)
-//    {
-//      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + process_system::pp(x));
-//    }
-//  }
 };
 
 inline
@@ -1244,18 +1229,27 @@ class process_type_checker
       return result;
     }
 
+    // Returns m_global_variables with variables inserted into it
+    std::map<core::identifier_string, data::sort_expression> declared_variables(const data::variable_list& variables)
+    {
+      std::map<core::identifier_string, data::sort_expression> result = m_global_variables;
+      for (const data::variable& v: variables)
+      {
+        result[v.name()] = v.sort();
+      }
+      return result;
+    }
+
     void TransformActProcVarConst()
     {
       std::map<core::identifier_string,data::sort_expression> Vars;
 
       //process and data terms in m_equation_sorts and init
       assert(m_process_parameters.size()==m_process_bodies.size());
-      for (std::map <std::pair<core::identifier_string,data::sort_expression_list>,data::variable_list>::const_iterator i=m_process_parameters.begin(); i!=m_process_parameters.end(); ++i)
+      for (auto i = m_process_parameters.begin(); i != m_process_parameters.end(); ++i)
       {
-        Vars=m_global_variables;
-        m_data_type_checker.AddVars2Table(Vars, i->second);
         assert(m_process_bodies.count(i->first)>0);
-        const process_expression NewProcTerm=TraverseActProcVarConstP(Vars,m_process_bodies[i->first]);
+        const process_expression NewProcTerm = TraverseActProcVarConstP(declared_variables(i->second), m_process_bodies[i->first]);
         m_process_bodies[i->first]=NewProcTerm;
       }
     }
@@ -1441,6 +1435,16 @@ class process_type_checker
       normalize_sorts(procspec, m_data_type_checker.typechecked_data_specification());
     }
 
+    void print_variables(const std::map<core::identifier_string,data::sort_expression>& variables)
+    {
+      std::cout << "variables: ";
+      for (auto i = variables.begin(); i != variables.end(); ++i)
+      {
+        std::cout << i->first << ": " << i->second << ",  ";
+      }
+      std::cout << std::endl;
+    }
+
   protected:
     const process_identifier initial_process()
     {
@@ -1449,8 +1453,13 @@ class process_type_checker
     }
 
     process_expression TraverseActProcVarConstP(
-          const std::map<core::identifier_string,data::sort_expression> &Vars,
-          const process_expression &ProcTerm);
+          const std::map<core::identifier_string,data::sort_expression>& Vars,
+          const process_expression& x)
+    {
+      std::cout << "Traverse " << x << std::endl;
+      print_variables(Vars);
+      return detail::make_typecheck_builder(m_data_type_checker, Vars, m_equation_sorts, m_actions, m_process_parameters).apply(x);
+    }
     process_expression RewrActProc(
                const std::map<core::identifier_string,data::sort_expression> &Vars,
                const core::identifier_string& Name,
