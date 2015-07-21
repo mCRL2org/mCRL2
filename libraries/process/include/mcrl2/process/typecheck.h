@@ -1159,7 +1159,7 @@ class process_type_checker
       // typecheck the equations
       for (process_equation& eqn: procspec.equations())
       {
-        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(declared_variables(eqn.identifier().variables()), eqn.expression()));
+        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(declared_variables(m_data_type_checker.UnwindType(eqn.identifier().variables())), eqn.expression()));
       }
 
       // typecheck the initial state
