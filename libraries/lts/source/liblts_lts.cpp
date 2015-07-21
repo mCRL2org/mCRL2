@@ -72,7 +72,7 @@ class aterm_transition: public atermpp::aterm_appl
 };
 
 typedef term_list<aterm_transition> aterm_transition_list;
-typedef term_list<aterm_appl> state_labels_t; // The state labels have the shape STATE(a1,...,an).
+typedef term_list<term_balanced_tree<data::data_expression> > state_labels_t; // The state labels have the shape STATE(a1,...,an).
 typedef term_list<process::action_list> action_labels_t; // An action label is a lists of actions.
 
 class aterm_labelled_transition_system: public atermpp::aterm_appl
@@ -220,7 +220,7 @@ static void read_from_lts(lts_lts_t& l, const std::string& filename)
   else
   {
     assert(input_lts.num_states()==input_lts.get_state_labels().size());
-    for (const aterm_appl& state_label:input_lts.get_state_labels())
+    for (const term_balanced_tree<data::data_expression>& state_label:input_lts.get_state_labels())
     {
       l.add_state(state_label);
     }

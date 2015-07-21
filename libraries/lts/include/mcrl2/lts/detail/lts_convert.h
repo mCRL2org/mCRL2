@@ -138,9 +138,9 @@ class lts_fsm_convertor
     state_label_fsm translate_state(const state_label_lts& l)
     {
       std::vector < size_t > result;
-      for (size_t i=0; i<l.size(); ++i)
+      size_t i=0;
+      for (const data::data_expression& t: l)
       {
-        const data::data_expression t=l[i];
         std::map <data::data_expression , size_t >::const_iterator index=state_element_values_sets[i].find(t);
         if (index==state_element_values_sets[i].end())
         {
@@ -153,6 +153,7 @@ class lts_fsm_convertor
         {
           result.push_back(index->second);
         }
+      ++i;
       }
       return result;
     }

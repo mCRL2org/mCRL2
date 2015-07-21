@@ -45,70 +45,34 @@ namespace detail
 extern std::vector < atermpp::function_symbol > state_function_symbols;
 
 /** \brief This class contains state labels for an labelled transition system in .lts format.
-    \details A state label in .lts format consists of a term of the form
-             STATE(t1,...,tn) where ti are the data expressions.
+    \details A state label in .lts format consists of balanced tree of data expressions.
 */
-class state_label_lts : public atermpp::aterm_appl
+class state_label_lts : public atermpp::term_balanced_tree< data::data_expression >
 {
-  protected:
-
-    /** \brief We store functions symbols with varying arity and string "STATE"
-        in this atermpp::aterm_appl array, as they are automatically protected.
-    */
-
-    /** \brief A function to get a protected STATE function symbol of the
-               indicated arity.
-    */
-
-    static atermpp::function_symbol get_STATE_function_symbol(const size_t arity)
-    {
-
-      if (arity>=state_function_symbols.size())
-      {
-        state_function_symbols.resize(arity+1);
-      }
-      if (state_function_symbols[arity]==atermpp::function_symbol())
-      {
-        state_function_symbols[arity]=atermpp::function_symbol("STATE",arity);
-      }
-      return state_function_symbols[arity];
-    }
 
   public:
 
     /** \brief Default constructor. The state label becomes some default aterm.
     */
     state_label_lts()
-    {
-    }
-
-    /** \brief Constructor. Set the state label to the aterm a.
-        \details The aterm a must have the shape "STATE(t1,...,tn).*/
-    state_label_lts(const atermpp::aterm_appl& a):atermpp::aterm_appl(a)
-    {
-      assert(a.function()== get_STATE_function_symbol(a.function().arity()));
-
-      // Take care that the STATE function symbol with the desired arity exists.
-      /* const size_t arity=a.function().arity();
-      get_STATE_function_symbol(arity); */
-    }
+    {}
 
     /** \brief Construct a state label out of a data_expression_list.
     */
-    state_label_lts(const mcrl2::data::data_expression_list& l):
-      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
-    {}
+    state_label_lts(const mcrl2::data::data_expression_list& l)
+      : term_balanced_tree<data::data_expression>(l.begin(),l.size())
+    {} 
 
     /** \brief Construct a state label out of a data_expression_vector.
     */
-    state_label_lts(const std::vector < mcrl2::data::data_expression >& l):
-      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
+    state_label_lts(const std::vector < mcrl2::data::data_expression >& l)
+      : term_balanced_tree<data::data_expression>(l.begin(),l.size())
     {}
 
     /** \brief Construct a state label out of a balanced tree of data expressions, representing a state label.
     */
-    state_label_lts(const atermpp::term_balanced_tree<mcrl2::data::data_expression>& l):
-      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
+    state_label_lts(const atermpp::term_balanced_tree<mcrl2::data::data_expression>& l)
+      : atermpp::term_balanced_tree<mcrl2::data::data_expression>(l)
     {}
 
     /** \brief Get the i-th element of this state label.
@@ -118,8 +82,8 @@ class state_label_lts : public atermpp::aterm_appl
     const mcrl2::data::data_expression& operator [](const size_t i) const
     {
       assert(i<size());
-      return atermpp::down_cast<mcrl2::data::data_expression>(atermpp::aterm_appl::operator[](i));
-    }
+      return atermpp::term_balanced_tree<mcrl2::data::data_expression>::operator[](i);
+    } 
 
     /** \brief Set the i-th element of this state label to the indicated value.
         \param[in] e The expression to which the i-th element must be set.
@@ -129,7 +93,7 @@ class state_label_lts : public atermpp::aterm_appl
       assert(i<this->size());
       std::vector<data::data_expression> v(this->begin(),this->end());
       v[i]=e;
-      *this=atermpp::aterm_appl(get_STATE_function_symbol(v.size()),v.begin(),v.end());
+      *this=term_balanced_tree<data::data_expression>(v.begin(),v.size());
     }
 };
 
