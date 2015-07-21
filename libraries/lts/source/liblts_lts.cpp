@@ -179,15 +179,46 @@ static void read_from_lts(lts_lts_t& l, const std::string& filename)
   else 
   {
     std::ifstream stream;
-    stream.open(filename, std::ofstream::in | std::ofstream::binary);
-    input=atermpp::read_term_from_binary_stream(stream);
-    stream.close();
+    stream.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
+    try
+    {  
+      stream.open(filename, std::ifstream::in | std::ifstream::binary);
+    }
+    catch (std::ifstream::failure)
+    {
+      if (filename=="")
+      {
+        throw mcrl2::runtime_error("Fail to open standard input to read an lts.");
+      }
+      else 
+      {
+        throw mcrl2::runtime_error("Fail to open file " + filename + " to read an lts.");
+      }
+    }
+
+    try
+    {
+      input=atermpp::read_term_from_binary_stream(stream);
+      stream.close();
+    }
+    catch (std::ifstream::failure)
+    {
+      if (filename=="")
+      {
+        throw mcrl2::runtime_error("Fail to correctly read an lts from standard input.");
+      }
+      else
+      {
+        throw mcrl2::runtime_error("Fail to correctly read an lts from the file " + filename + ".");
+      }
+    }
+    
   }
   input=data::detail::add_index(input);
   
   if (!input.type_is_appl() || down_cast<aterm_appl>(input).function()!=lts_header())
   {
-    throw runtime_error("The input file " + filename + " is not in proper .lts format.\n");
+    throw runtime_error("The input file " + filename + " is not in proper .lts format.");
   }
   
   const aterm_labelled_transition_system input_lts(input);
@@ -282,9 +313,24 @@ static void write_to_lts(const lts_lts_t& l, const std::string& filename)
   else 
   {
     std::ofstream stream;
-    stream.open(filename, std::ofstream::out | std::ofstream::binary);
-    atermpp::write_term_to_binary_stream(t1, stream);
-    stream.close();
+    stream.exceptions ( std::ofstream::failbit | std::ofstream::badbit );
+    try
+    {
+      stream.open(filename, std::ofstream::out | std::ofstream::binary);
+    }
+    catch (std::ofstream::failure )
+    {
+      throw mcrl2::runtime_error("Fail to open file " + filename + " for writing.");
+    }
+    try
+    { 
+      atermpp::write_term_to_binary_stream(t1, stream);
+      stream.close();
+    }
+    catch (std::ofstream::failure)
+    {
+      throw mcrl2::runtime_error("Fail to write lts correctly to the file " + filename + ".");
+    }
   }
 }
 
