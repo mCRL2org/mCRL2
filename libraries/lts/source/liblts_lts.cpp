@@ -13,7 +13,6 @@
 #include <sstream>
 #include "mcrl2/core/nil.h"
 #include "mcrl2/atermpp/aterm_int.h"
-//#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lps/multi_action.h"
@@ -233,9 +232,10 @@ static void read_from_lts(lts_lts_t& l, const std::string& filename)
   else
   {
     assert(input_lts.num_action_labels()==input_lts.get_action_labels().size());
+    const process::action_list tau = process::action_list();
     for (const process::action_list& action_label:input_lts.get_action_labels())
     {
-      l.add_action(lps::multi_action(action_label));
+      l.add_action(lps::multi_action(action_label), action_label == tau); 
     }
   }
 
