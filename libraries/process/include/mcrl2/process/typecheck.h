@@ -70,32 +70,22 @@ struct data_expression_typechecker: protected data::data_type_checker
 
   sort_expression UnwindType(const sort_expression& x)
   {
-    return data_type_checker::UnwindType(x);
+    return normalize_sorts(x, get_sort_specification());
   }
 
   sort_expression_list UnwindType(const sort_expression_list& x)
   {
-    return data_type_checker::UnwindType(x);
+    return data::detail::transform_aterm_list([&](const sort_expression& y) { return normalize_sorts(y, get_sort_specification()); }, x);
   }
 
   variable_list UnwindType(const variable_list& x)
   {
-    return data_type_checker::UnwindType(x);
-  }
-
-  sort_expression unwind_sort_expression(const sort_expression& x)
-  {
-    return normalize_sorts(x, get_sort_specification());
-  }
-
-  sort_expression_list unwind_sort_expression_list(const sort_expression_list& x)
-  {
-    std::vector<sort_expression> result;
-    for (const sort_expression& s: x)
-    {
-      result.push_back(unwind_sort_expression(s));
-    }
-    return sort_expression_list(result.begin(), result.end());
+    return data::detail::transform_aterm_list([&](const variable& y)
+      {
+        data_expression z = normalize_sorts(y, get_sort_specification());
+        return atermpp::down_cast<variable>(z);
+      },
+      x);
   }
 
   sort_expression UpCastNumericType(
@@ -320,16 +310,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     auto i = m_actions.find(x);
     assert(i != m_actions.end());
     return i->second;
-  }
-
-  data::sort_expression unwind_sort_expression(const data::sort_expression& x)
-  {
-    return m_data_typechecker.unwind_sort_expression(x);
-  }
-
-  data::sort_expression_list unwind_sort_expression_list(const data::sort_expression_list& x)
-  {
-    return m_data_typechecker.unwind_sort_expression_list(x);
   }
 
   void check_action_declared(const core::identifier_string& a, const process_expression& x)
@@ -1149,12 +1129,16 @@ class process_type_checker
 
       // reset the context
       m_data_type_checker = data::data_expression_typechecker(procspec.data());
+
+      normalize_sorts(procspec, m_data_type_checker.typechecked_data_specification());
+
       m_actions.clear();
       m_global_variables.clear();
       m_equation_sorts.clear();
       add_action_labels(procspec.action_labels());
       add_global_variables(procspec.global_variables());
       add_process_identifiers(equation_identifiers(procspec.equations()));
+
 
       // typecheck the equations
       for (process_equation& eqn: procspec.equations())
@@ -1169,8 +1153,6 @@ class process_type_checker
       procspec.data() = m_data_type_checker.typechecked_data_specification();
 
       mCRL2log(log::debug) << "type checking process specification finished" << std::endl;
-
-      normalize_sorts(procspec, m_data_type_checker.typechecked_data_specification());
     }
 
   protected:
