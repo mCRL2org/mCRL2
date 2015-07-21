@@ -68,20 +68,6 @@ struct data_expression_typechecker: protected data::data_type_checker
     return get_sort_specification().sort_alias_map();
   }
 
-  sort_expression TraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression>& DeclaredVars,
-                                       const std::map<core::identifier_string,sort_expression>& AllowedVars,
-                                       data_expression& t1,
-                                       sort_expression t2
-                                      )
-  {
-    return data_type_checker::TraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2);
-  }
-
-  void AddVars2Table(std::map<core::identifier_string, sort_expression>& variable_map, const variable_list& declared_variables)
-  {
-    data_type_checker::AddVars2Table(variable_map, declared_variables);
-  }
-
   bool TypeMatchA(const sort_expression& Type_in, const sort_expression& PosType_in, sort_expression& result)
   {
     return data_type_checker::TypeMatchA(Type_in, PosType_in, result);
@@ -1435,16 +1421,6 @@ class process_type_checker
       normalize_sorts(procspec, m_data_type_checker.typechecked_data_specification());
     }
 
-    void print_variables(const std::map<core::identifier_string,data::sort_expression>& variables)
-    {
-      std::cout << "variables: ";
-      for (auto i = variables.begin(); i != variables.end(); ++i)
-      {
-        std::cout << i->first << ": " << i->second << ",  ";
-      }
-      std::cout << std::endl;
-    }
-
   protected:
     const process_identifier initial_process()
     {
@@ -1456,30 +1432,8 @@ class process_type_checker
           const std::map<core::identifier_string,data::sort_expression>& Vars,
           const process_expression& x)
     {
-      std::cout << "Traverse " << x << std::endl;
-      print_variables(Vars);
       return detail::make_typecheck_builder(m_data_type_checker, Vars, m_equation_sorts, m_actions, m_process_parameters).apply(x);
     }
-    process_expression RewrActProc(
-               const std::map<core::identifier_string,data::sort_expression> &Vars,
-               const core::identifier_string& Name,
-               const data::data_expression_list& pars);
-
-    data::sort_expression_list InsertType(const data::sort_expression_list TypeList, const data::sort_expression Type);
-    std::pair<bool,data::sort_expression_list> AdjustNotInferredList(
-                                  const data::sort_expression_list &PosTypeList,
-                                  const sorts_list &TypeListList);
-    bool IsTypeAllowedA(const data::sort_expression &Type, const data::sort_expression &PosType);
-    bool IsTypeAllowedL(const data::sort_expression_list &TypeList, const data::sort_expression_list PosTypeList);
-    data::sort_expression_list GetNotInferredList(const sorts_list &TypeListList);
-    sorts_list TypeListsIntersect(
-                                  const sorts_list &TypeListList1,
-                                  const sorts_list &TypeListList2);
-    process_expression MakeActionOrProc(bool is_action,
-                                        const core::identifier_string &Name,
-                                        const data::sort_expression_list &FormParList,
-                                        const data::data_expression_list FactParList);
-
 };
 
 /** \brief     Type check a parsed mCRL2 process specification.
