@@ -708,34 +708,34 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
     if (NewTypeListList.size()==1)
     {
-      return std::make_pair(true,NewTypeListList.front());
+      return std::make_pair(true, NewTypeListList.front());
     }
 
     // otherwise return not inferred.
-    return std::make_pair(true,GetNotInferredList(atermpp::reverse(NewTypeListList)));
+    return std::make_pair(true, GetNotInferredList(atermpp::reverse(NewTypeListList)));
   }
 
   process_expression MakeActionOrProc(bool is_action,
-                                      const core::identifier_string& Name,
-                                      const data::sort_expression_list& FormParList,
+                                      const core::identifier_string& name,
+                                      const data::sort_expression_list& formal_parameters,
                                       const data::data_expression_list FactParList
                                      )
   {
     if (is_action)
     {
-      return action(action_label(Name,FormParList),FactParList);
+      return action(action_label(name, formal_parameters), FactParList);
     }
     else
     {
-      auto i = m_process_parameters.find(std::make_pair(Name, m_data_typechecker.UnwindType(FormParList)));
+      auto i = m_process_parameters.find(std::make_pair(name, m_data_typechecker.UnwindType(formal_parameters)));
       assert(i != m_process_parameters.end());
       const data::variable_list& FormalVars = i->second;
-      return process_instance(process_identifier(Name,FormalVars),FactParList);
+      return process_instance(process_identifier(name, FormalVars), FactParList);
     }
   }
 
   process_expression RewrActProc(const std::map<core::identifier_string,data::sort_expression>& Vars,
-                                 const core::identifier_string& Name,
+                                 const core::identifier_string& name,
                                  const data::data_expression_list& pars
                                 )
   {
@@ -744,7 +744,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
     bool action=false;
 
-    auto j = m_actions.find(Name);
+    auto j = m_actions.find(name);
     if (j != m_actions.end())
     {
       ParList = j->second;
@@ -752,7 +752,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
     else
     {
-      auto j = m_equation_sorts.find(Name);
+      auto j = m_equation_sorts.find(name);
       if ( j !=  m_equation_sorts.end())
       {
         ParList = j->second;
@@ -760,7 +760,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
       else
       {
-        throw mcrl2::runtime_error("action or process " + core::pp(Name) + " not declared");
+        throw mcrl2::runtime_error("action or process " + core::pp(name) + " not declared");
       }
     }
     assert(!ParList.empty());
@@ -784,20 +784,20 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
     if (ParList.empty())
     {
-      throw mcrl2::runtime_error("no " + msg + " " + core::pp(Name)
+      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
                       + " with " + atermpp::to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":"")
-                      + " is declared (while typechecking " + core::pp(Name) + "(" + data::pp(pars) + "))");
+                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(pars) + "))");
     }
 
     if (ParList.size()==1)
     {
-      Result = MakeActionOrProc(action, Name, ParList.front(), pars);
+      Result = MakeActionOrProc(action, name, ParList.front(), pars);
     }
     else
     {
       // we need typechecking to find the correct type of the action.
       // make the list of possible types for the parameters
-      Result = MakeActionOrProc(action, Name, GetNotInferredList(ParList), pars);
+      Result = MakeActionOrProc(action, name, GetNotInferredList(ParList), pars);
     }
 
     //process the arguments
@@ -821,7 +821,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
       catch (mcrl2::runtime_error &e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(Par) + " as type " + data::pp(m_data_typechecker.ExpandNumTypesDown(PosType)) + " (while typechecking " + core::pp(Name) + "(" + data::pp(pars) + "))");
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(Par) + " as type " + data::pp(m_data_typechecker.ExpandNumTypesDown(PosType)) + " (while typechecking " + core::pp(name) + "(" + data::pp(pars) + "))");
       }
       NewPars.push_front(Par);
       NewPosTypeList.push_front(NewPosType);
@@ -855,7 +855,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         catch (mcrl2::runtime_error &e)
         {
           throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + data::pp(NewPosType) + " to " + data::pp(PosType) + "(while typechecking " + data::pp(Par) + " in " +
-                     core::pp(Name) + "(" + data::pp(pars) + ")");
+                     core::pp(name) + "(" + data::pp(pars) + ")");
         }
 
         NewPars.push_front(Par);
@@ -869,16 +869,16 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
       if (!p.first)
       {
-        throw mcrl2::runtime_error("no " + msg + " " + core::pp(Name) + "with type " + data::pp(NewPosTypeList) + " is declared (while typechecking " +
-                core::pp(Name) + "(" + data::pp(pars) + "))");
+        throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(NewPosTypeList) + " is declared (while typechecking " +
+                core::pp(name) + "(" + data::pp(pars) + "))");
       }
     }
 
     if (IsNotInferredL(PosTypeList))
     {
-      throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(Name));
+      throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(name));
     }
-    return MakeActionOrProc(action, Name, PosTypeList, NewPars);
+    return MakeActionOrProc(action, name, PosTypeList, NewPars);
   }
 
   process_expression apply(const untyped_process_assignment& x)
@@ -1200,10 +1200,7 @@ class process_type_checker
     std::map<core::identifier_string, sorts_list> m_actions;
     std::map<core::identifier_string, sorts_list> m_equation_sorts;
     std::map<core::identifier_string, data::sort_expression> m_global_variables;
-
-    process_equation_list equations;
-    std::map<std::pair<core::identifier_string,data::sort_expression_list>,data::variable_list> m_process_parameters; // process_identifier -> variable_list
-    std::map<std::pair<core::identifier_string,data::sort_expression_list>,process_expression> m_process_bodies;  // process_identifier -> rhs
+    std::map<std::pair<core::identifier_string,data::sort_expression_list>,data::variable_list> m_process_parameters;
 
     std::vector<process_identifier> equation_identifiers(const std::vector<process_equation>& equations)
     {
@@ -1224,35 +1221,6 @@ class process_type_checker
         result[v.name()] = v.sort();
       }
       return result;
-    }
-
-    void TransformActProcVarConst()
-    {
-      std::map<core::identifier_string,data::sort_expression> Vars;
-
-      //process and data terms in m_equation_sorts and init
-      assert(m_process_parameters.size()==m_process_bodies.size());
-      for (auto i = m_process_parameters.begin(); i != m_process_parameters.end(); ++i)
-      {
-        assert(m_process_bodies.count(i->first)>0);
-        const process_expression NewProcTerm = TraverseActProcVarConstP(declared_variables(i->second), m_process_bodies[i->first]);
-        m_process_bodies[i->first]=NewProcTerm;
-      }
-    }
-
-    process_equation_list WriteProcs(const process_equation_vector& oldprocs)
-    {
-      process_equation_list Result;
-      for (process_equation_vector::const_reverse_iterator i = oldprocs.rbegin(); i != oldprocs.rend(); ++i)
-      {
-        const process_identifier& ProcVar=i->identifier();
-        if (ProcVar == initial_process())
-        {
-          continue;
-        }
-        Result.push_front(process_equation(ProcVar, ProcVar.variables(), m_process_bodies[std::pair<core::identifier_string,data::sort_expression_list>(ProcVar.name(), m_data_type_checker.UnwindType(get_sorts(ProcVar.variables())))]));
-      }
-      return Result;
     }
 
     template <typename VariableContainer>
@@ -1310,25 +1278,25 @@ class process_type_checker
       }
     }
 
-    void add_process_identifiers(const std::vector<process_equation>& Procs, const process_expression& Init)
+    void add_process_identifiers(const std::vector<process_identifier>& ids)
     {
-      for (const process_equation& Proc: Procs)
+      for (const process_identifier& id: ids)
       {
-        core::identifier_string ProcName = Proc.identifier().name();
+        const core::identifier_string& name = id.name();
 
-        if (m_actions.count(ProcName)>0)
+        if (m_actions.count(name) > 0)
         {
-          throw mcrl2::runtime_error("declaration of both process and action " + std::string(ProcName));
+          throw mcrl2::runtime_error("declaration of both process and action " + std::string(name));
         }
 
-        const data::sort_expression_list& ProcType=get_sorts(Proc.identifier().variables());
+        data::sort_expression_list ProcType = get_sorts(id.variables());
         m_data_type_checker.check_sort_list_is_declared(ProcType);
 
-        auto j = m_equation_sorts.find(ProcName);
+        auto j = m_equation_sorts.find(name);
         sorts_list Types;
         if (j == m_equation_sorts.end())
         {
-          Types = { ProcType };
+          Types = sorts_list({ ProcType });
         }
         else
         {
@@ -1338,28 +1306,26 @@ class process_type_checker
           // in the list. If so -- error, otherwise -- add
           if (m_data_type_checker.InTypesL(ProcType, Types))
           {
-            throw mcrl2::runtime_error("double declaration of process " + std::string(ProcName));
+            throw mcrl2::runtime_error("double declaration of process " + std::string(name));
           }
           else
           {
             Types = Types + sorts_list({ ProcType });
           }
         }
-        m_equation_sorts[ProcName] = Types;
+        m_equation_sorts[name] = Types;
 
         //check that all formal parameters of the process are unique.
-        if (!m_data_type_checker.VarsUnique(Proc.formal_parameters()))
+        if (!m_data_type_checker.VarsUnique(id.variables()))
         {
-          throw mcrl2::runtime_error("the formal variables in process " + process::pp(Proc) + " are not unique");
+          throw mcrl2::runtime_error("the formal variables in process " + process::pp(id) + " are not unique");
         }
 
-        std::pair<core::identifier_string,data::sort_expression_list> p(Proc.identifier().name(), m_data_type_checker.UnwindType(get_sorts(Proc.identifier().variables())));
-        m_process_parameters[p] = m_data_type_checker.UnwindType(Proc.formal_parameters());
-        m_process_bodies[p]=Proc.expression();
+        std::pair<core::identifier_string, data::sort_expression_list> p(id.name(), m_data_type_checker.UnwindType(get_sorts(id.variables())));
+        m_process_parameters[p] = m_data_type_checker.UnwindType(id.variables());
       }
-      std::pair<core::identifier_string,data::sort_expression_list> p(initial_process().name(), m_data_type_checker.UnwindType(get_sorts(initial_process().variables())));
+      std::pair<core::identifier_string, data::sort_expression_list> p(initial_process().name(), m_data_type_checker.UnwindType(get_sorts(initial_process().variables())));
       m_process_parameters[p] = data::variable_list();
-      m_process_bodies[p]=Init;
     }
 
   public:
@@ -1390,7 +1356,6 @@ class process_type_checker
     void operator()(process_specification& procspec)
     {
       mCRL2log(log::verbose) << "type checking process specification..." << std::endl;
-      mCRL2log(log::debug) << "type checking phase started: " << process::pp(procspec) << "" << std::endl;
 
       // reset the context
       m_data_type_checker = data::data_expression_typechecker(procspec.data());
@@ -1399,24 +1364,21 @@ class process_type_checker
       m_equation_sorts.clear();
       add_action_labels(procspec.action_labels());
       add_global_variables(procspec.global_variables());
-      add_process_identifiers(procspec.equations(), procspec.init());
+      add_process_identifiers(equation_identifiers(procspec.equations()));
 
-      mCRL2log(log::debug) << "type checking read-in phase finished" << std::endl;
+      // typecheck the equations
+      for (process_equation& eqn: procspec.equations())
+      {
+        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), TraverseActProcVarConstP(declared_variables(eqn.identifier().variables()), eqn.expression()));
+      }
 
-      TransformActProcVarConst();
+      // typecheck the initial state
+      procspec.init() = TraverseActProcVarConstP(m_global_variables, procspec.init());
 
-      mCRL2log(log::debug) << "type checking transform ActProc+VarConst phase finished" << std::endl;
-      mCRL2log(log::debug) << "type checking phase finished" << std::endl;
+      // typecheck the data specification
+      procspec.data() = m_data_type_checker.typechecked_data_specification();
 
-      process_equation_list type_checked_process_equations = WriteProcs(procspec.equations());
-
-      procspec =
-                    process_specification(m_data_type_checker.typechecked_data_specification(),
-                                          procspec.action_labels(),
-                                          data::variable_list(procspec.global_variables().begin(), procspec.global_variables().end()),
-                                          type_checked_process_equations,
-                                          m_process_bodies[std::pair<core::identifier_string,data::sort_expression_list>(initial_process().name(), get_sorts(initial_process().variables()))]
-                                         );
+      mCRL2log(log::debug) << "type checking process specification finished" << std::endl;
 
       normalize_sorts(procspec, m_data_type_checker.typechecked_data_specification());
     }
@@ -1428,11 +1390,9 @@ class process_type_checker
       return init_process;
     }
 
-    process_expression TraverseActProcVarConstP(
-          const std::map<core::identifier_string,data::sort_expression>& Vars,
-          const process_expression& x)
+    process_expression TraverseActProcVarConstP(const std::map<core::identifier_string, data::sort_expression>& variables, const process_expression& x)
     {
-      return detail::make_typecheck_builder(m_data_type_checker, Vars, m_equation_sorts, m_actions, m_process_parameters).apply(x);
+      return detail::make_typecheck_builder(m_data_type_checker, variables, m_equation_sorts, m_actions, m_process_parameters).apply(x);
     }
 };
 
