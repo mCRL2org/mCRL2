@@ -802,6 +802,11 @@ struct absinthe_algorithm
         data::function_sort fs2(f2.sort());
         data::function_sort fs3(f3.sort());
 
+        if (!data::is_container_sort(fs2.codomain()))
+        {
+          throw mcrl2::runtime_error("The codomain " + data::pp(fs2.codomain()) + " of function " + data::pp(f2.name()) +  " should be a container sort!");
+        }
+
         // TODO: generate these variables in a proper way
         std::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
         std::vector<data::variable> X = make_variables(fs3.domain(), "X", sigma);
