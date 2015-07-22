@@ -112,9 +112,27 @@ struct data_expression_typechecker: protected data::data_type_checker
     return data_type_checker::IsTypeAllowedL(TypeList, PosTypeList);
   }
 
-  sort_expression_list InsertType(const sort_expression_list TypeList, const sort_expression Type)
+  bool equal_sorts(const sort_expression& s1, const sort_expression& s2)
   {
-    return data_type_checker::InsertType(TypeList, Type);
+    if (s1 == s2)
+    {
+      return true;
+    }
+    return UnwindType(s1) == UnwindType(s2);
+  }
+
+  sort_expression_list insert_type(const sort_expression_list TypeList, const sort_expression Type)
+  {
+    for (sort_expression_list OldTypeList = TypeList; !OldTypeList.empty(); OldTypeList = OldTypeList.tail())
+    {
+      if (equal_sorts(OldTypeList.front(), Type))
+      {
+        return TypeList;
+      }
+    }
+    sort_expression_list result = TypeList;
+    result.push_front(Type);
+    return result;
   }
 
   sort_expression ExpandNumTypesDown(sort_expression Type)
@@ -157,7 +175,7 @@ inline
 sorts_list sorts_list_intersection(const sorts_list& sorts1, const sorts_list& sorts2)
 {
   sorts_list result;
-  for (const sort_expression_list& s: sorts2)
+  for (const data::sort_expression_list& s: sorts2)
   {
     // if (InTypesL(s, sorts1))
     if (std::find(sorts1.begin(), sorts1.end(), s) != sorts1.end())
@@ -427,45 +445,41 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return result;
   }
 
-  data::sort_expression_list GetNotInferredList(const sorts_list &sorts)
+  data::sort_expression_list GetNotInferredList(const sorts_list& sorts)
   {
     //we get: List of Lists of SortExpressions
     //Outer list: possible parameter types 0..nPosParsVectors-1
-    //inner lists: parameter types vectors 0..nFormPars-1
+    //inner lists: parameter types vectors 0..n-1
 
     //we constuct 1 vector (list) of sort expressions (NotInferred if ambiguous)
-    //0..nFormPars-1
+    //0..n-1
 
-    data::sort_expression_list Result;
-    size_t nFormPars=(sorts.front()).size();
-    std::vector<data::sort_expression_list> Pars(nFormPars);
-    for (size_t i=0; i<nFormPars; i++)
-    {
-      Pars[i]=data::sort_expression_list();
-    }
+    data::sort_expression_list result;
+    size_t n = sorts.front().size();
+    std::vector<data::sort_expression_list> parameter_lists(n, data::sort_expression_list());
 
-    for (data::sort_expression_list TypeList: sorts)
+    for (data::sort_expression_list s: sorts)
     {
-      for (size_t i=0; i<nFormPars; TypeList = TypeList.tail(),i++)
+      for (size_t i = 0; i < n; s = s.tail(), i++)
       {
-        Pars[i] = m_data_typechecker.InsertType(Pars[i],TypeList.front());
+        parameter_lists[i] = m_data_typechecker.insert_type(parameter_lists[i], s.front());
       }
     }
 
-    for (size_t i=nFormPars; i>0; i--)
+    for (size_t i = n; i > 0; i--)
     {
-      data::sort_expression Sort;
-      if (Pars[i-1].size()==1)
+      data::sort_expression sort;
+      if (parameter_lists[i - 1].size() == 1)
       {
-        Sort=Pars[i-1].front();
+        sort = parameter_lists[i - 1].front();
       }
       else
       {
-        Sort = data::untyped_possible_sorts(data::sort_expression_list(atermpp::reverse(Pars[i-1])));
+        sort = data::untyped_possible_sorts(data::sort_expression_list(atermpp::reverse(parameter_lists[i - 1])));
       }
-      Result.push_front(Sort);
+      result.push_front(sort);
     }
-    return Result;
+    return result;
   }
 
   std::pair<bool,data::sort_expression_list> AdjustNotInferredList(const data::sort_expression_list& PosTypeList, const sorts_list& sorts)
@@ -531,28 +545,41 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
+  sorts_list filter_parameters_on_size(sorts_list parameter_list, std::size_t n)
+  {
+    sorts_list result;
+    for (const data::sort_expression_list& sorts: parameter_list)
+    {
+      if (sorts.size() == n)
+      {
+        result.push_front(sorts);
+      }
+    }
+    return atermpp::reverse(result);
+  }
+
   process_expression RewrActProc(const std::map<core::identifier_string,data::sort_expression>& Vars,
                                  const core::identifier_string& name,
-                                 const data::data_expression_list& pars
+                                 const data::data_expression_list& parameters
                                 )
   {
     process_expression Result;
-    sorts_list ParList;
+    sorts_list parameter_list;
 
-    bool action=false;
+    bool action = false;
 
     auto j = m_actions.find(name);
     if (j != m_actions.end())
     {
-      ParList = j->second;
+      parameter_list = j->second;
       action = true;
     }
     else
     {
       auto j = m_equation_sorts.find(name);
-      if ( j !=  m_equation_sorts.end())
+      if (j !=  m_equation_sorts.end())
       {
-        ParList = j->second;
+        parameter_list = j->second;
         action = false;
       }
       else
@@ -560,41 +587,29 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         throw mcrl2::runtime_error("action or process " + core::pp(name) + " not declared");
       }
     }
-    assert(!ParList.empty());
+    assert(!parameter_list.empty());
 
-    size_t nFactPars = pars.size();
-    const std::string msg = action? "action" : "process";
+    const std::string msg = action ? "action" : "process";
 
-    //filter the list of lists ParList to keep only the lists of lenth nFactPars
-    {
-      atermpp::term_list <data::sort_expression_list> NewParList;
-      for (; !ParList.empty(); ParList=ParList.tail())
-      {
-        data::sort_expression_list Par=ParList.front();
-        if (Par.size()==nFactPars)
-        {
-          NewParList.push_front(Par);
-        }
-      }
-      ParList=atermpp::reverse(NewParList);
-    }
+    //filter the list of lists parameter_list to keep only the lists of length parameters.size()
+    parameter_list = filter_parameters_on_size(parameter_list, parameters.size());
 
-    if (ParList.empty())
+    if (parameter_list.empty())
     {
       throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
-                      + " with " + atermpp::to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":"")
-                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(pars) + "))");
+                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
+                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
     }
 
-    if (ParList.size()==1)
+    if (parameter_list.size() == 1)
     {
-      Result = MakeActionOrProc(action, name, ParList.front(), pars);
+      Result = MakeActionOrProc(action, name, parameter_list.front(), parameters);
     }
     else
     {
       // we need typechecking to find the correct type of the action.
       // make the list of possible types for the parameters
-      Result = MakeActionOrProc(action, name, GetNotInferredList(ParList), pars);
+      Result = MakeActionOrProc(action, name, GetNotInferredList(parameter_list), parameters);
     }
 
     //process the arguments
@@ -605,7 +620,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
                   get_sorts(atermpp::down_cast<const process_instance>(Result).identifier().variables());
     data::data_expression_list NewPars;
     data::sort_expression_list NewPosTypeList;
-    for (data::data_expression_list Pars=pars; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
+    for (data::data_expression_list Pars=parameters; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
     {
       data::data_expression Par=Pars.front();
       data::sort_expression PosType=PosTypeList.front();
@@ -618,7 +633,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
       catch (mcrl2::runtime_error &e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(Par) + " as type " + data::pp(m_data_typechecker.ExpandNumTypesDown(PosType)) + " (while typechecking " + core::pp(name) + "(" + data::pp(pars) + "))");
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(Par) + " as type " + data::pp(m_data_typechecker.ExpandNumTypesDown(PosType)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
       }
       NewPars.push_front(Par);
       NewPosTypeList.push_front(NewPosType);
@@ -626,7 +641,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     NewPars=atermpp::reverse(NewPars);
     NewPosTypeList=atermpp::reverse(NewPosTypeList);
 
-    std::pair<bool,data::sort_expression_list>p=AdjustNotInferredList(NewPosTypeList,ParList);
+    std::pair<bool,data::sort_expression_list>p=AdjustNotInferredList(NewPosTypeList,parameter_list);
     PosTypeList=p.second;
 
     if (!p.first)
@@ -652,7 +667,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         catch (mcrl2::runtime_error &e)
         {
           throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + data::pp(NewPosType) + " to " + data::pp(PosType) + "(while typechecking " + data::pp(Par) + " in " +
-                     core::pp(name) + "(" + data::pp(pars) + ")");
+                     core::pp(name) + "(" + data::pp(parameters) + ")");
         }
 
         NewPars.push_front(Par);
@@ -661,13 +676,13 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       NewPars=atermpp::reverse(NewPars);
       NewPosTypeList=atermpp::reverse(CastedPosTypeList);
 
-      std::pair<bool,data::sort_expression_list>p=AdjustNotInferredList(NewPosTypeList,ParList);
+      std::pair<bool,data::sort_expression_list>p=AdjustNotInferredList(NewPosTypeList,parameter_list);
       PosTypeList=p.second;
 
       if (!p.first)
       {
         throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(NewPosTypeList) + " is declared (while typechecking " +
-                core::pp(name) + "(" + data::pp(pars) + "))");
+                core::pp(name) + "(" + data::pp(parameters) + "))");
       }
     }
 
@@ -687,62 +702,61 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     {
       throw mcrl2::runtime_error("process " + core::pp(x.name()) + " not declared");
     }
-    sorts_list ParList = j->second;
+    sorts_list parameter_list = j->second;
 
-    std::map<core::identifier_string, data::data_expression> As = assignment_map(x.assignments());
+    std::map<core::identifier_string, data::data_expression> assignments = assignment_map(x.assignments());
 
-    ParList = filter_parameters(ParList, As, x);
+    parameter_list = filter_parameters(parameter_list, assignments, x);
 
     // get the formal parameter names
-    data::data_expression_list ActualPars;
-    const data::variable_list& FormalPars = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.UnwindType(ParList.front())));
+    data::data_expression_list actual_parameters;
+    const data::variable_list& formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.UnwindType(parameter_list.front())));
     {
       // we only need the names of the parameters, not the types
-      for (const data::variable& par: FormalPars)
+      for (const data::variable& d: formal_parameters)
       {
-        const core::identifier_string& FormalParName=par.name();
-        data::data_expression ActualPar;
-        auto i = As.find(FormalParName);
-        if (i == As.end())
+        data::data_expression e;
+        auto i = assignments.find(d.name());
+        if (i == assignments.end())
         {
-          ActualPar = data::untyped_identifier(FormalParName);
+          e = data::untyped_identifier(d.name());
         }
         else
         {
-          ActualPar = i->second;
+          e = i->second;
         }
-        ActualPars.push_front(ActualPar);
+        actual_parameters.push_front(e);
       }
-      ActualPars = atermpp::reverse(ActualPars);
+      actual_parameters = atermpp::reverse(actual_parameters);
     }
 
     process_expression TypeCheckedProcTerm;
     try
     {
-      TypeCheckedProcTerm = RewrActProc(m_variables, x.name(), ActualPars);
+      TypeCheckedProcTerm = RewrActProc(m_variables, x.name(), actual_parameters);
     }
-    catch (mcrl2::runtime_error &e)
+    catch (mcrl2::runtime_error& e)
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
     }
 
     //atermpp::reverse the assignments
-    As.clear();
-    std::map <core::identifier_string,data::assignment> As_new;
-    data::variable_list m = FormalPars;
+    assignments.clear();
+    std::map<core::identifier_string,data::assignment> new_assignments;
+    data::variable_list m = formal_parameters;
     data::data_expression_list l = atermpp::down_cast<const process_instance>(TypeCheckedProcTerm).actual_parameters();
-    for ( ; !l.empty(); l=l.tail(),m=m.tail())
+    for ( ; !l.empty(); l = l.tail(), m = m.tail())
     {
       const data::data_expression act_par = l.front();
       const data::variable form_par = m.front();
-      As_new[form_par.name()] = data::assignment(form_par, act_par);
+      new_assignments[form_par.name()] = data::assignment(form_par, act_par);
     }
 
     data::assignment_list TypedAssignments;
     for (const data::untyped_identifier_assignment& a: x.assignments())
     {
-      auto i = As_new.find(a.lhs());
-      if (i == As_new.end())
+      auto i = new_assignments.find(a.lhs());
+      if (i == new_assignments.end())
       {
         continue;
       }
