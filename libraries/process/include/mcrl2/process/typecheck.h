@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_TYPECHECK_H
 #define MCRL2_PROCESS_TYPECHECK_H
 
+#include <algorithm>
 #include <iostream>
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/builder.h"
@@ -130,6 +131,31 @@ struct data_expression_typechecker: protected data::data_type_checker
     return result;
   }
 
+  bool equal_sort_lists(const sort_expression_list& x1, const sort_expression_list& x2)
+  {
+    if (x1 == x2)
+    {
+      return true;
+    }
+    if (x1.size() != x2.size())
+    {
+      return false;
+    }
+    return std::equal(x1.begin(), x1.end(), x2.begin(), [&](const sort_expression& s1, const sort_expression& s2) { return equal_sorts(s1, s2); });
+  }
+
+  // returns true if l is (after unwinding) contained in sorts
+  bool is_contained_in(const sort_expression_list& l, const sorts_list& sorts)
+  {
+    for (const sort_expression_list& m: sorts)
+    {
+      if (equal_sort_lists(l, m))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
   sort_expression ExpandNumTypesDown(sort_expression Type)
   {
     return data_type_checker::ExpandNumTypesDown(Type);
@@ -503,7 +529,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     //if so return possible_sorts, otherwise return false.
     if (!IsNotInferredL(possible_sorts))
     {
-      if (m_data_typechecker.InTypesL(possible_sorts,sorts))
+      if (m_data_typechecker.is_contained_in(possible_sorts,sorts))
       {
         return std::make_pair(true,possible_sorts);
       }
@@ -1067,7 +1093,7 @@ class process_type_checker
           // action name. We need to check if there is already such a type
           // in the list. If so -- error, otherwise -- add
 
-          if (m_data_type_checker.InTypesL(ActType, sorts))
+          if (m_data_type_checker.is_contained_in(ActType, sorts))
           {
             throw mcrl2::runtime_error("double declaration of action " + core::pp(ActName));
           }
@@ -1106,7 +1132,7 @@ class process_type_checker
           // the table m_equation_sorts contains a list of types for each
           // process name. We need to check if there is already such a type
           // in the list. If so -- error, otherwise -- add
-          if (m_data_type_checker.InTypesL(ProcType, sorts))
+          if (m_data_type_checker.is_contained_in(ProcType, sorts))
           {
             throw mcrl2::runtime_error("double declaration of process " + std::string(name));
           }
