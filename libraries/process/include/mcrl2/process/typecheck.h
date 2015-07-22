@@ -122,20 +122,18 @@ struct data_expression_typechecker: protected data::data_type_checker
     return data_type_checker::ExpandNumTypesDown(Type);
   }
 
-  sorts_list TypeListsIntersect(const sorts_list& TypeListList1, const sorts_list& TypeListList2)
+  // returns the intersection of the 2 type list lists
+  sorts_list TypeListsIntersect(const sorts_list& sorts1, const sorts_list& sorts2)
   {
-    // returns the intersection of the 2 type list lists
-    sorts_list Result;
-
-    for (auto i = TypeListList2.begin(); i != TypeListList2.end(); ++i)
+    sorts_list result;
+    for (const sort_expression_list& s: sorts2)
     {
-      const sort_expression_list TypeList2= *i;
-      if (InTypesL(TypeList2,TypeListList1))
+      if (InTypesL(s, sorts1))
       {
-        Result.push_front(TypeList2);
+        result.push_front(s);
       }
     }
-    return atermpp::reverse(Result);
+    return atermpp::reverse(result);
   }
 
   /** \brief     Type check a data expression.
@@ -427,7 +425,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return result;
   }
 
-  data::sort_expression_list GetNotInferredList(const sorts_list &TypeListList)
+  data::sort_expression_list GetNotInferredList(const sorts_list &sorts)
   {
     //we get: List of Lists of SortExpressions
     //Outer list: possible parameter types 0..nPosParsVectors-1
@@ -437,14 +435,14 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     //0..nFormPars-1
 
     data::sort_expression_list Result;
-    size_t nFormPars=(TypeListList.front()).size();
+    size_t nFormPars=(sorts.front()).size();
     std::vector<data::sort_expression_list> Pars(nFormPars);
     for (size_t i=0; i<nFormPars; i++)
     {
       Pars[i]=data::sort_expression_list();
     }
 
-    for (data::sort_expression_list TypeList: TypeListList)
+    for (data::sort_expression_list TypeList: sorts)
     {
       for (size_t i=0; i<nFormPars; TypeList = TypeList.tail(),i++)
       {
@@ -468,18 +466,18 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return Result;
   }
 
-  std::pair<bool,data::sort_expression_list> AdjustNotInferredList(const data::sort_expression_list& PosTypeList, const sorts_list& TypeListList)
+  std::pair<bool,data::sort_expression_list> AdjustNotInferredList(const data::sort_expression_list& PosTypeList, const sorts_list& sorts)
   {
     // PosTypeList -- List of Sortexpressions (possibly NotInferred(List Sortexpr))
-    // TypeListList -- List of (Lists of sorts)
-    // returns: PosTypeList, adjusted to the elements of TypeListList
+    // sorts -- List of (Lists of sorts)
+    // returns: PosTypeList, adjusted to the elements of sorts
     // NULL if cannot be ajusted.
 
-    //if PosTypeList has only normal types -- check if it is in TypeListList,
+    //if PosTypeList has only normal types -- check if it is in sorts,
     //if so return PosTypeList, otherwise return false.
     if (!IsNotInferredL(PosTypeList))
     {
-      if (m_data_typechecker.InTypesL(PosTypeList,TypeListList))
+      if (m_data_typechecker.InTypesL(PosTypeList,sorts))
       {
         return std::make_pair(true,PosTypeList);
       }
@@ -489,27 +487,27 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
     }
 
-    //Filter TypeListList to contain only compatible with TypeList lists of parameters.
-    sorts_list NewTypeListList;
-    for (auto i=TypeListList.begin(); i!=TypeListList.end(); ++i)
+    //Filter sorts to contain only compatible with TypeList lists of parameters.
+    sorts_list Newsorts;
+    for (auto i=sorts.begin(); i!=sorts.end(); ++i)
     {
       data::sort_expression_list TypeList= *i;
       if (m_data_typechecker.IsTypeAllowedL(TypeList,PosTypeList))
       {
-        NewTypeListList.push_front(TypeList);
+        Newsorts.push_front(TypeList);
       }
     }
-    if (NewTypeListList.empty())
+    if (Newsorts.empty())
     {
       return std::make_pair(false, data::sort_expression_list());
     }
-    if (NewTypeListList.size()==1)
+    if (Newsorts.size()==1)
     {
-      return std::make_pair(true, NewTypeListList.front());
+      return std::make_pair(true, Newsorts.front());
     }
 
     // otherwise return not inferred.
-    return std::make_pair(true, GetNotInferredList(atermpp::reverse(NewTypeListList)));
+    return std::make_pair(true, GetNotInferredList(atermpp::reverse(Newsorts)));
   }
 
   process_expression MakeActionOrProc(bool is_action,
@@ -836,7 +834,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
 
       //the multiactions in the lhss of comm should not intersect.
-      for (const core::identifier_string& a: cnames)
+      for (const core::identifier_string& a: std::set<core::identifier_string>(cnames.begin(), cnames.end()))
       {
         if (left_hand_side_actions.find(a) != left_hand_side_actions.end())
         {
