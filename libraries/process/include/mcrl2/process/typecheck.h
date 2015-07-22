@@ -555,17 +555,87 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
-  sorts_list filter_parameters_on_size(sorts_list parameter_list, std::size_t n)
+  sorts_list filter_parameters_on_size(sorts_list parameter_list, const data::data_expression_list& parameters, const core::identifier_string& name, const std::string& msg)
   {
     sorts_list result;
     for (const data::sort_expression_list& sorts: parameter_list)
     {
-      if (sorts.size() == n)
+      if (sorts.size() == parameters.size())
       {
         result.push_front(sorts);
       }
     }
-    return atermpp::reverse(result);
+    result = atermpp::reverse(result);
+
+    if (result.empty())
+    {
+      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
+                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
+                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    }
+    return result;
+  }
+
+  action make_action(const core::identifier_string& name, const data::sort_expression_list& formal_parameters, const data::data_expression_list& actual_parameters)
+  {
+    return action(action_label(name, formal_parameters), actual_parameters);
+  }
+
+  process_instance make_process_instance(const core::identifier_string& name, const data::sort_expression_list& formal_parameters, const data::data_expression_list& actual_parameters)
+  {
+    auto i = m_process_parameters.find(std::make_pair(name, m_data_typechecker.UnwindType(formal_parameters)));
+    assert(i != m_process_parameters.end());
+    return process_instance(process_identifier(name, i->second), actual_parameters);
+  }
+
+  bool is_action_name(const core::identifier_string& name)
+  {
+    return m_actions.find(name) != m_actions.end();
+  }
+
+  process_expression typecheck_action(const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
+  {
+    auto j = m_actions.find(name);
+    assert(j != m_actions.end());
+    sorts_list parameter_list = j->second;
+    assert(!parameter_list.empty());
+    std::string msg = "action";
+    parameter_list = filter_parameters_on_size(parameter_list, parameters, name, msg);
+    if (parameter_list.empty())
+    {
+      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
+                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
+                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    }
+    action Result = make_action(name, GetNotInferredList(parameter_list), parameters);
+    auto p = match_parameters(parameters, Result.label().sorts(), parameter_list, variables, name, msg);
+    return make_action(name, p.second, p.first);
+  }
+
+  process_expression typecheck_process_instance(const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
+  {
+    sorts_list parameter_list;
+    auto j = m_equation_sorts.find(name);
+    if (j !=  m_equation_sorts.end())
+    {
+      parameter_list = j->second;
+    }
+    else
+    {
+      throw mcrl2::runtime_error("action or process " + core::pp(name) + " not declared");
+    }
+    assert(!parameter_list.empty());
+    std::string msg = "process";
+    parameter_list = filter_parameters_on_size(parameter_list, parameters, name, msg);
+    if (parameter_list.empty())
+    {
+      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
+                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
+                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    }
+    process_instance Result = make_process_instance(name, GetNotInferredList(parameter_list), parameters);
+    auto p = match_parameters(parameters, get_sorts(Result.identifier().variables()), parameter_list, variables, name, msg);
+    return make_process_instance(name, p.second, p.first);
   }
 
   data::data_expression typecheck_data_expression(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
@@ -641,56 +711,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return std::make_pair(data::data_expression_list(new_parameters.begin(), new_parameters.end()), possible_sorts);
   }
 
-  process_expression RewrActProc(const std::map<core::identifier_string,data::sort_expression>& Vars,
-                                 const core::identifier_string& name,
-                                 const data::data_expression_list& parameters
-                                )
-  {
-    sorts_list parameter_list;
-
-    bool action = false;
-
-    auto j = m_actions.find(name);
-    if (j != m_actions.end())
-    {
-      parameter_list = j->second;
-      action = true;
-    }
-    else
-    {
-      auto j = m_equation_sorts.find(name);
-      if (j !=  m_equation_sorts.end())
-      {
-        parameter_list = j->second;
-        action = false;
-      }
-      else
-      {
-        throw mcrl2::runtime_error("action or process " + core::pp(name) + " not declared");
-      }
-    }
-    assert(!parameter_list.empty());
-
-    const std::string msg = action ? "action" : "process";
-
-    //filter the list of lists parameter_list to keep only the lists of length parameters.size()
-    parameter_list = filter_parameters_on_size(parameter_list, parameters.size());
-
-    if (parameter_list.empty())
-    {
-      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
-                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
-                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-    }
-
-    // we need typechecking to find the correct type of the action.
-    // make the list of possible types for the parameters
-    process_expression Result = MakeActionOrProc(action, name, GetNotInferredList(parameter_list), parameters);
-    data::sort_expression_list ResultSorts = is_action(Result) ? atermpp::down_cast<const process::action>(Result).label().sorts() : get_sorts(atermpp::down_cast<const process_instance>(Result).identifier().variables());
-    auto p = match_parameters(parameters, ResultSorts, parameter_list, Vars, name, msg);
-    return MakeActionOrProc(action, name, p.second, p.first);
-  }
-
   process_expression apply(const untyped_process_assignment& x)
   {
     mCRL2log(log::debug) << "typechecking a process call with short-hand assignments " << x << "" << std::endl;
@@ -731,7 +751,14 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     process_expression TypeCheckedProcTerm;
     try
     {
-      TypeCheckedProcTerm = RewrActProc(m_variables, x.name(), actual_parameters);
+      if (is_action_name(x.name()))
+      {
+        TypeCheckedProcTerm = typecheck_action(m_variables, x.name(), actual_parameters);
+      }
+      else
+      {
+        TypeCheckedProcTerm = typecheck_process_instance(m_variables, x.name(), actual_parameters);
+      }
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -767,8 +794,14 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
   process_expression apply(const untyped_parameter_identifier& x)
   {
-    process_expression result = RewrActProc(m_variables, x.name(), x.arguments());
-    return result;
+    if (is_action_name(x.name()))
+    {
+      return typecheck_action(m_variables, x.name(), x.arguments());
+    }
+    else
+    {
+      return typecheck_process_instance(m_variables, x.name(), x.arguments());
+    }
   }
 
   process_expression apply(const process::hide& x)
