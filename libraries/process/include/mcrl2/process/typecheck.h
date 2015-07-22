@@ -102,9 +102,9 @@ struct data_expression_typechecker: protected data::data_type_checker
     return data::data_type_checker::UpCastNumericType(NeededType, Type, Par, DeclaredVars, AllowedVars, FreeVars, strictly_ambiguous, warn_upcasting, print_cast_error);
   }
 
-  bool InTypesL(sort_expression_list Type, sorts_list Types)
+  bool InTypesL(sort_expression_list Type, sorts_list sorts)
   {
-    return data_type_checker::InTypesL(Type, Types);
+    return data_type_checker::InTypesL(Type, sorts);
   }
 
   bool IsTypeAllowedL(const data::sort_expression_list &TypeList, const data::sort_expression_list PosTypeList)
@@ -127,7 +127,7 @@ struct data_expression_typechecker: protected data::data_type_checker
     // returns the intersection of the 2 type list lists
     sorts_list Result;
 
-    for (auto i=TypeListList2.begin(); i!=TypeListList2.end(); ++i)
+    for (auto i = TypeListList2.begin(); i != TypeListList2.end(); ++i)
     {
       const sort_expression_list TypeList2= *i;
       if (InTypesL(TypeList2,TypeListList1))
@@ -322,11 +322,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
   void check_actions_declared(const core::identifier_string_list& act_list, const process_expression& x)
   {
-    std::set<core::identifier_string> Acts;
+    std::set<core::identifier_string> actions;
     for (const core::identifier_string& a: act_list)
     {
       check_action_declared(a, x);
-      if (!Acts.insert(a).second)  // The action was already in the set.
+      if (!actions.insert(a).second)  // The action was already in the set.
       {
         mCRL2log(log::warning) << "Used action " << a << " twice (typechecking " << x << ")" << std::endl;
       }
@@ -471,7 +471,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   std::pair<bool,data::sort_expression_list> AdjustNotInferredList(const data::sort_expression_list& PosTypeList, const sorts_list& TypeListList)
   {
     // PosTypeList -- List of Sortexpressions (possibly NotInferred(List Sortexpr))
-    // TypeListList -- List of (Lists of Types)
+    // TypeListList -- List of (Lists of sorts)
     // returns: PosTypeList, adjusted to the elements of TypeListList
     // NULL if cannot be ajusted.
 
@@ -796,72 +796,59 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   process_expression apply(const process::comm& x)
   {
     check_not_empty(x.comm_set(), "synchronizing empty set of (multi)actions", x);
-    if (!x.comm_set().empty())
+
+    std::set<core::identifier_string> left_hand_side_actions;
+    for (const communication_expression& c: x.comm_set())
     {
-      core::identifier_string_list ActsFrom;
+      const core::identifier_string_list& cnames = c.action_name().names();
+      assert(!cnames.empty());
 
-      for (const communication_expression& c: x.comm_set())
+      if (cnames.size() == 1)
       {
-        const core::identifier_string_list& cnames = c.action_name().names();
-        assert(!cnames.empty());
+        throw mcrl2::runtime_error("using synchronization as renaming/hiding of action " + core::pp(cnames.front()) + " into " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ")");
+      }
 
-        if (cnames.size() == 1)
+      //Actions must be declared
+      sorts_list c_sorts;
+      if (!core::is_nil(c.name()))
+      {
+        auto j = m_actions.find(c.name());
+        if (j == m_actions.end())
         {
-          throw mcrl2::runtime_error("using synchronization as renaming/hiding of action " + core::pp(cnames.front()) + " into " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ")");
+          throw mcrl2::runtime_error("synchronizing to an undefined action " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ")");
         }
+        c_sorts = j->second;
+      }
 
-        //Actions must be declared
-        sorts_list ResTypes;
-        if (!core::is_nil(c.name()))
+      for (const core::identifier_string& a: cnames)
+      {
+        auto j = m_actions.find(a);
+        if (j == m_actions.end())
         {
-          const std::map<core::identifier_string,sorts_list >::const_iterator j=m_actions.find(c.name());
-          if (j == m_actions.end())
-          {
-            throw mcrl2::runtime_error("synchronizing to an undefined action " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ")");
-          }
-          ResTypes = j->second;
+          throw mcrl2::runtime_error("synchronizing an undefined action " + core::pp(a) + " in (multi)action " + core::pp(cnames) + " (typechecking " + process::pp(x) + ")");
         }
+        c_sorts = m_data_typechecker.TypeListsIntersect(c_sorts, j->second);
+        if (c_sorts.empty())
+        {
+          throw mcrl2::runtime_error("synchronizing action " + core::pp(a) + " from (multi)action " + core::pp(cnames) +
+                            " into action " + core::pp(c.name()) + ": these have no common type (typechecking " + process::pp(x) + ")");
+        }
+      }
 
-        for (const core::identifier_string& Act: cnames)
+      //the multiactions in the lhss of comm should not intersect.
+      for (const core::identifier_string& a: cnames)
+      {
+        if (left_hand_side_actions.find(a) != left_hand_side_actions.end())
         {
-          auto j = m_actions.find(Act);
-          sorts_list Types;
-          if (j == m_actions.end())
-          {
-            throw mcrl2::runtime_error("synchronizing an undefined action " + core::pp(Act) + " in (multi)action " + core::pp(cnames) + " (typechecking " + process::pp(x) + ")");
-          }
-          Types = j->second;
-          ResTypes = m_data_typechecker.TypeListsIntersect(ResTypes, Types);
-          if (ResTypes.empty())
-          {
-            throw mcrl2::runtime_error("synchronizing action " + core::pp(Act) + " from (multi)action " + core::pp(cnames) +
-                              " into action " + core::pp(c.name()) + ": these have no common type (typechecking " + process::pp(x) + ")");
-          }
+          throw mcrl2::runtime_error("synchronizing action " + core::pp(a) + " in different ways (typechecking " + process::pp(x) + ")");
         }
-
-        //the multiactions in the lhss of comm should not intersect.
-        //make the list of unique actions
-        core::identifier_string_list Acts;
-        for (const core::identifier_string& Act: cnames)
+        else
         {
-          if (std::find(Acts.begin(), Acts.end(), Act) == Acts.end())
-          {
-            Acts.push_front(Act);
-          }
-        }
-        for (const core::identifier_string& Act: Acts)
-        {
-          if (std::find(ActsFrom.begin(), ActsFrom.end(), Act) != ActsFrom.end())
-          {
-            throw mcrl2::runtime_error("synchronizing action " + core::pp(Act) + " in different ways (typechecking " + process::pp(x) + ")");
-          }
-          else
-          {
-            ActsFrom.push_front(Act);
-          }
+          left_hand_side_actions.insert(a);
         }
       }
     }
+
     return comm(x.comm_set(), (*this).apply(x.operand()));
   }
 
@@ -872,11 +859,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     for (const action_name_multiset& A: x.allow_set())
     {
       //Actions must be declared
-      for (const core::identifier_string& Act: A.names())
+      for (const core::identifier_string& a: A.names())
       {
-        if (m_actions.count(Act) == 0)
+        if (m_actions.count(a) == 0)
         {
-          throw mcrl2::runtime_error("allowing an undefined action " + core::pp(Act) + " in (multi)action " + core::pp(A.names()) + " (typechecking " + process::pp(x) + ")");
+          throw mcrl2::runtime_error("allowing an undefined action " + core::pp(a) + " in (multi)action " + core::pp(A.names()) + " (typechecking " + process::pp(x) + ")");
         }
       }
       if (MActIn(A.names(), MActs))
@@ -1013,38 +1000,38 @@ class process_type_checker
       }
     }
 
-    void add_action_labels(const process::action_label_list &Acts)
+    void add_action_labels(const process::action_label_list& actions)
     {
-      for (const action_label& Act: Acts)
+      for (const action_label& a: actions)
       {
-        core::identifier_string ActName=Act.name();
-        data::sort_expression_list ActType=Act.sorts();
+        core::identifier_string ActName = a.name();
+        data::sort_expression_list ActType = a.sorts();
 
         m_data_type_checker.check_sort_list_is_declared(ActType);
 
         auto j = m_actions.find(ActName);
-        sorts_list Types;
+        sorts_list sorts;
         if (j==m_actions.end())
         {
-          Types = { ActType };
+          sorts = { ActType };
         }
         else
         {
-          Types=j->second;
+          sorts = j->second;
           // the table actions contains a list of types for each
           // action name. We need to check if there is already such a type
           // in the list. If so -- error, otherwise -- add
 
-          if (m_data_type_checker.InTypesL(ActType, Types))
+          if (m_data_type_checker.InTypesL(ActType, sorts))
           {
             throw mcrl2::runtime_error("double declaration of action " + core::pp(ActName));
           }
           else
           {
-            Types = Types + sorts_list({ ActType });
+            sorts = sorts + sorts_list({ ActType });
           }
         }
-        m_actions[ActName] = Types;
+        m_actions[ActName] = sorts;
       }
     }
 
@@ -1063,27 +1050,27 @@ class process_type_checker
         m_data_type_checker.check_sort_list_is_declared(ProcType);
 
         auto j = m_equation_sorts.find(name);
-        sorts_list Types;
+        sorts_list sorts;
         if (j == m_equation_sorts.end())
         {
-          Types = sorts_list({ ProcType });
+          sorts = sorts_list({ ProcType });
         }
         else
         {
-          Types = j->second;
+          sorts = j->second;
           // the table m_equation_sorts contains a list of types for each
           // process name. We need to check if there is already such a type
           // in the list. If so -- error, otherwise -- add
-          if (m_data_type_checker.InTypesL(ProcType, Types))
+          if (m_data_type_checker.InTypesL(ProcType, sorts))
           {
             throw mcrl2::runtime_error("double declaration of process " + std::string(name));
           }
           else
           {
-            Types = Types + sorts_list({ ProcType });
+            sorts = sorts + sorts_list({ ProcType });
           }
         }
-        m_equation_sorts[name] = Types;
+        m_equation_sorts[name] = sorts;
 
         //check that all formal parameters of the process are unique.
         if (!m_data_type_checker.VarsUnique(id.variables()))
