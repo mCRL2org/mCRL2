@@ -568,16 +568,77 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return atermpp::reverse(result);
   }
 
+  data::data_expression typecheck_data_expression(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
+  {
+    try
+    {
+      return m_data_typechecker(d, expected_sort, variables);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(m_data_typechecker.ExpandNumTypesDown(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    }
+  }
+
   data::data_expression upcast_numeric_type(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
   {
     try
     {
       return m_data_typechecker(d, expected_sort, variables);
     }
-    catch (mcrl2::runtime_error &e)
+    catch (mcrl2::runtime_error& e)
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(m_data_typechecker.ExpandNumTypesDown(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
     }
+  }
+
+  std::pair<data::data_expression_list, data::sort_expression_list> match_parameters(const data::data_expression_list& parameters,
+                                                                                     const data::sort_expression_list& expected_sorts,
+                                                                                     const sorts_list& parameter_list,
+                                                                                     const std::map<core::identifier_string, data::sort_expression>& variables,
+                                                                                     const core::identifier_string& name,
+                                                                                     const std::string& msg
+                                                                                    )
+  {
+    data::sort_expression_list possible_sorts = expected_sorts;
+    data::data_expression_vector new_parameters(parameters.begin(), parameters.end());
+    auto p1 = new_parameters.begin();
+    auto p2 = possible_sorts.begin();
+    for (; p1 != new_parameters.end(); ++p1, ++p2)
+    {
+      data::data_expression& e = *p1;
+      const data::sort_expression& expected_sort = *p2;
+      e = typecheck_data_expression(e, expected_sort, variables, name, parameters);
+    }
+
+    std::pair<bool, data::sort_expression_list> p = AdjustNotInferredList(parameter_sorts(new_parameters), parameter_list);
+    possible_sorts = p.second;
+
+    if (!p.first)
+    {
+      possible_sorts = expected_sorts;
+      auto q1 = new_parameters.begin();
+      auto q2 = possible_sorts.begin();
+      for (; q1 != new_parameters.end(); ++q1, ++q2)
+      {
+        data::data_expression& e = *q1;
+        data::sort_expression expected_sort = *q2;
+        e = upcast_numeric_type(e, expected_sort, variables, name, parameters);
+      }
+
+      std::pair<bool, data::sort_expression_list> p = AdjustNotInferredList(parameter_sorts(new_parameters), parameter_list);
+      possible_sorts = p.second;
+
+      if (!p.first)
+      {
+        throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(parameter_sorts(new_parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+      }
+    }
+    if (IsNotInferredL(possible_sorts))
+    {
+      throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(name));
+    }
+    return std::make_pair(data::data_expression_list(new_parameters.begin(), new_parameters.end()), possible_sorts);
   }
 
   process_expression RewrActProc(const std::map<core::identifier_string,data::sort_expression>& Vars,
@@ -585,7 +646,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
                                  const data::data_expression_list& parameters
                                 )
   {
-    process_expression Result;
     sorts_list parameter_list;
 
     bool action = false;
@@ -625,60 +685,10 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
     // we need typechecking to find the correct type of the action.
     // make the list of possible types for the parameters
-    Result = MakeActionOrProc(action, name, GetNotInferredList(parameter_list), parameters);
-
-    //process the arguments
-
-    //possible types for the arguments of the action. (not inferred if ambiguous action).
-    data::sort_expression_list possible_sorts = is_action(Result) ? atermpp::down_cast<const process::action>(Result).label().sorts() : get_sorts(atermpp::down_cast<const process_instance>(Result).identifier().variables());
-    data::data_expression_vector new_parameters;
-    auto p1 = parameters.begin();
-    auto p2 = possible_sorts.begin();
-    for (; p1 != parameters.end(); ++p1, ++p2)
-    {
-      data::data_expression Par = *p1;
-      data::sort_expression PosType = *p2;
-      try
-      {
-        Par = m_data_typechecker(Par, PosType, Vars);
-        new_parameters.push_back(Par);
-      }
-      catch (mcrl2::runtime_error &e)
-      {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(Par) + " as type " + data::pp(m_data_typechecker.ExpandNumTypesDown(PosType)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-      }
-    }
-
-    std::pair<bool, data::sort_expression_list> p = AdjustNotInferredList(parameter_sorts(new_parameters), parameter_list);
-    possible_sorts = p.second;
-
-    if (!p.first)
-    {
-      possible_sorts = is_action(Result) ? atermpp::down_cast<const process::action>(Result).label().sorts() : get_sorts(atermpp::down_cast<const process_instance>(Result).identifier().variables());
-      auto q1 = new_parameters.begin();
-      auto q2 = possible_sorts.begin();
-      for (; q1 != new_parameters.end(); ++q1, ++q2)
-      {
-        data::data_expression& Par = *q1;
-        data::sort_expression expected_sort = *q2;
-        data::sort_expression ParSort = Par.sort();
-        Par = upcast_numeric_type(Par, expected_sort, Vars, name, parameters);
-      }
-
-      std::pair<bool, data::sort_expression_list> p = AdjustNotInferredList(parameter_sorts(new_parameters), parameter_list);
-      possible_sorts = p.second;
-
-      if (!p.first)
-      {
-        throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(parameter_sorts(new_parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-      }
-    }
-
-    if (IsNotInferredL(possible_sorts))
-    {
-      throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(name));
-    }
-    return MakeActionOrProc(action, name, possible_sorts, data::data_expression_list(new_parameters.begin(), new_parameters.end()));
+    process_expression Result = MakeActionOrProc(action, name, GetNotInferredList(parameter_list), parameters);
+    data::sort_expression_list ResultSorts = is_action(Result) ? atermpp::down_cast<const process::action>(Result).label().sorts() : get_sorts(atermpp::down_cast<const process_instance>(Result).identifier().variables());
+    auto p = match_parameters(parameters, ResultSorts, parameter_list, Vars, name, msg);
+    return MakeActionOrProc(action, name, p.second, p.first);
   }
 
   process_expression apply(const untyped_process_assignment& x)
