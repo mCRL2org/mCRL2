@@ -654,7 +654,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     try
     {
-      return m_data_typechecker(d, expected_sort, variables);
+      return m_data_typechecker.UpCastNumericType(d, expected_sort, variables);
     }
     catch (mcrl2::runtime_error& e)
     {
