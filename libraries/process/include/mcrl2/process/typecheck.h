@@ -88,18 +88,13 @@ struct data_expression_typechecker: protected data::data_type_checker
       x);
   }
 
-  sort_expression UpCastNumericType(
-                        sort_expression NeededType,
-                        sort_expression Type,
-                        data_expression &Par,
-                        const std::map<core::identifier_string,sort_expression> &DeclaredVars,
-                        const std::map<core::identifier_string,sort_expression> &AllowedVars,
-                        std::map<core::identifier_string,sort_expression> &FreeVars,
-                        const bool strictly_ambiguous,
-                        bool warn_upcasting = false,
-                        const bool print_cast_error = false)
+  data_expression UpCastNumericType(const data_expression& Par, const sort_expression& NeededType, const std::map<core::identifier_string,sort_expression>& variables)
   {
-    return data::data_type_checker::UpCastNumericType(NeededType, Type, Par, DeclaredVars, AllowedVars, FreeVars, strictly_ambiguous, warn_upcasting, print_cast_error);
+    std::map<core::identifier_string,data::sort_expression> dummy_table;
+    data_expression Par1 = Par;
+    sort_expression s = data::data_type_checker::UpCastNumericType(NeededType, Par.sort(), Par1, variables, variables, dummy_table, false, false, false);
+    assert(s == Par1.sort());
+    return Par1;
   }
 
   bool InTypesL(sort_expression_list Type, sorts_list sorts)
@@ -328,6 +323,17 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     auto i = m_actions.find(x);
     assert(i != m_actions.end());
     return i->second;
+  }
+
+  template <typename Container>
+  data::sort_expression_list parameter_sorts(const Container& parameters)
+  {
+    data::sort_expression_list sorts;
+    for (const data::data_expression& e: parameters)
+    {
+      sorts.push_front(e.sort());
+    }
+    return atermpp::reverse(sorts);
   }
 
   void check_action_declared(const core::identifier_string& a, const process_expression& x)
@@ -562,6 +568,18 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return atermpp::reverse(result);
   }
 
+  data::data_expression upcast_numeric_type(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
+  {
+    try
+    {
+      return m_data_typechecker(d, expected_sort, variables);
+    }
+    catch (mcrl2::runtime_error &e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(m_data_typechecker.ExpandNumTypesDown(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    }
+  }
+
   process_expression RewrActProc(const std::map<core::identifier_string,data::sort_expression>& Vars,
                                  const core::identifier_string& name,
                                  const data::data_expression_list& parameters
@@ -614,7 +632,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     //possible types for the arguments of the action. (not inferred if ambiguous action).
     data::sort_expression_list possible_sorts = is_action(Result) ? atermpp::down_cast<const process::action>(Result).label().sorts() : get_sorts(atermpp::down_cast<const process_instance>(Result).identifier().variables());
     data::data_expression_vector new_parameters;
-    data::sort_expression_list new_possible_sorts;
     auto p1 = parameters.begin();
     auto p2 = possible_sorts.begin();
     for (; p1 != parameters.end(); ++p1, ++p2)
@@ -625,55 +642,35 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       {
         Par = m_data_typechecker(Par, PosType, Vars);
         new_parameters.push_back(Par);
-        new_possible_sorts.push_front(Par.sort());
       }
       catch (mcrl2::runtime_error &e)
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(Par) + " as type " + data::pp(m_data_typechecker.ExpandNumTypesDown(PosType)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
       }
     }
-    new_possible_sorts = atermpp::reverse(new_possible_sorts);
 
-    std::pair<bool, data::sort_expression_list> p = AdjustNotInferredList(new_possible_sorts, parameter_list);
+    std::pair<bool, data::sort_expression_list> p = AdjustNotInferredList(parameter_sorts(new_parameters), parameter_list);
     possible_sorts = p.second;
 
     if (!p.first)
     {
       possible_sorts = is_action(Result) ? atermpp::down_cast<const process::action>(Result).label().sorts() : get_sorts(atermpp::down_cast<const process_instance>(Result).identifier().variables());
-      data::data_expression_list Pars(new_parameters.begin(), new_parameters.end());
-      new_parameters.clear();
-      data::sort_expression_list casted_possible_sorts;
-      auto q1 = Pars.begin();
+      auto q1 = new_parameters.begin();
       auto q2 = possible_sorts.begin();
-      auto q3 = new_possible_sorts.begin();
-      for (; q1 != Pars.end(); ++q1, ++q2, ++q3)
+      for (; q1 != new_parameters.end(); ++q1, ++q2)
       {
-        data::data_expression Par = *q1;
-        data::sort_expression PosType = *q2;
-        data::sort_expression NewPosType = *q3;
-
-        data::sort_expression CastedNewPosType;
-        try
-        {
-          std::map<core::identifier_string,data::sort_expression> dummy_table;
-          CastedNewPosType = m_data_typechecker.UpCastNumericType(PosType, NewPosType, Par, Vars, Vars, dummy_table, false);
-        }
-        catch (mcrl2::runtime_error& e)
-        {
-          throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + data::pp(NewPosType) + " to " + data::pp(PosType) + "(while typechecking " + data::pp(Par) + " in " + core::pp(name) + "(" + data::pp(parameters) + ")");
-        }
-
-        new_parameters.push_back(Par);
-        casted_possible_sorts.push_front(CastedNewPosType);
+        data::data_expression& Par = *q1;
+        data::sort_expression expected_sort = *q2;
+        data::sort_expression ParSort = Par.sort();
+        Par = upcast_numeric_type(Par, expected_sort, Vars, name, parameters);
       }
-      new_possible_sorts = atermpp::reverse(casted_possible_sorts);
 
-      std::pair<bool,data::sort_expression_list>p=AdjustNotInferredList(new_possible_sorts, parameter_list);
-      possible_sorts=p.second;
+      std::pair<bool, data::sort_expression_list> p = AdjustNotInferredList(parameter_sorts(new_parameters), parameter_list);
+      possible_sorts = p.second;
 
       if (!p.first)
       {
-        throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(new_possible_sorts) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+        throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(parameter_sorts(new_parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
       }
     }
 
