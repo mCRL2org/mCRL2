@@ -122,20 +122,6 @@ struct data_expression_typechecker: protected data::data_type_checker
     return data_type_checker::ExpandNumTypesDown(Type);
   }
 
-  // returns the intersection of the 2 type list lists
-  sorts_list TypeListsIntersect(const sorts_list& sorts1, const sorts_list& sorts2)
-  {
-    sorts_list result;
-    for (const sort_expression_list& s: sorts2)
-    {
-      if (InTypesL(s, sorts1))
-      {
-        result.push_front(s);
-      }
-    }
-    return atermpp::reverse(result);
-  }
-
   /** \brief     Type check a data expression.
    *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
    *  \param[in] x A data expression that has not been type checked.
@@ -165,6 +151,22 @@ namespace process
 {
 
 typedef atermpp::term_list<data::sort_expression_list> sorts_list;
+
+// returns the intersection of the 2 type list lists
+inline
+sorts_list sorts_list_intersection(const sorts_list& sorts1, const sorts_list& sorts2)
+{
+  sorts_list result;
+  for (const sort_expression_list& s: sorts2)
+  {
+    // if (InTypesL(s, sorts1))
+    if (std::find(sorts1.begin(), sorts1.end(), s) != sorts1.end())
+    {
+      result.push_front(s);
+    }
+  }
+  return atermpp::reverse(result);
+}
 
 template <class T>
 data::sort_expression_list get_sorts(const atermpp::term_list<T>& l)
@@ -825,7 +827,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         {
           throw mcrl2::runtime_error("synchronizing an undefined action " + core::pp(a) + " in (multi)action " + core::pp(cnames) + " (typechecking " + process::pp(x) + ")");
         }
-        c_sorts = m_data_typechecker.TypeListsIntersect(c_sorts, j->second);
+        c_sorts = sorts_list_intersection(c_sorts, j->second);
         if (c_sorts.empty())
         {
           throw mcrl2::runtime_error("synchronizing action " + core::pp(a) + " from (multi)action " + core::pp(cnames) +
