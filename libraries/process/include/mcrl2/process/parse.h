@@ -356,6 +356,19 @@ process_expression parse_process_expression(const std::string& text, const Varia
   return procspec2.init();
 }
 
+inline
+process_expression parse_process_expression(const std::string& text,
+                                            const std::vector<data::variable>& variables = std::vector<data::variable>(),
+                                            const data::data_specification& dataspec = data::data_specification(),
+                                            const std::vector<action_label>& action_labels = std::vector<action_label>(),
+                                            const std::vector<process_identifier>& process_identifiers = std::vector<process_identifier>()
+                                           )
+{
+  process_expression x = detail::parse_process_expression_new(text);
+  x = type_check(x, variables, dataspec, action_labels, process_identifiers);
+  return x;
+}
+
 } // namespace process
 
 } // namespace mcrl2

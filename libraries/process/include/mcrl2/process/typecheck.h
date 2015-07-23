@@ -16,6 +16,7 @@
 #include <iostream>
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/builder.h"
+#include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
@@ -1051,7 +1052,8 @@ class process_type_checker
       }
     }
 
-    void add_action_labels(const process::action_label_list& actions)
+    template <typename ActionLabelContainer>
+    void add_action_labels(const ActionLabelContainer& actions)
     {
       for (const action_label& a: actions)
       {
@@ -1074,7 +1076,8 @@ class process_type_checker
       }
     }
 
-    void add_process_identifiers(const std::vector<process_identifier>& ids)
+    template <typename ProcessIdentifierContainer>
+    void add_process_identifiers(const ProcessIdentifierContainer& ids)
     {
       for (const process_identifier& id: ids)
       {
@@ -1111,13 +1114,17 @@ class process_type_checker
     }
 
   public:
-//    process_type_checker(const data::data_specification& dataspec, const std::vector<action_label>& action_labels, const std::vector<data::variable>& global_variables, const std::vector<process_identifier>& process_identifiers)
-//      : m_data_typechecker(dataspec)
-//    {
-//      add_action_labels(action_labels);
-//      add_global_variables(global_variables);
-//      add_process_identifiers(process_identifiers);
-//    }
+    process_type_checker(const data::data_specification& dataspec,
+                         const std::vector<data::variable>& variables,
+                         const std::vector<action_label>& action_labels,
+                         const std::vector<process_identifier>& process_identifiers
+                        )
+      : m_data_typechecker(dataspec)
+    {
+      add_action_labels(action_labels);
+      add_global_variables(variables);
+      add_process_identifiers(process_identifiers);
+    }
 
     /// \brief Default constructor
     process_type_checker(const data::data_specification& dataspec = data::data_specification())
@@ -1131,7 +1138,7 @@ class process_type_checker
      **/    /// \brief Typecheck the pbes pbesspec
     process_expression operator()(const process_expression& x)
     {
-      return typecheck_process_expression(m_global_variables, x);
+      return typecheck_process_expression(m_global_variables, normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
     }
 
     /// \brief Typecheck the process specification procspec
@@ -1184,6 +1191,18 @@ void type_check(process_specification& proc_spec)
 {
   process_type_checker type_checker;
   type_checker(proc_spec);
+}
+
+inline
+process_expression type_check(process_expression& x,
+                              const std::vector<data::variable>& variables = std::vector<data::variable>(),
+                              const data::data_specification& dataspec = data::data_specification(),
+                              const std::vector<action_label>& action_labels = std::vector<action_label>(),
+                              const std::vector<process_identifier>& process_identifiers = std::vector<process_identifier>()
+                             )
+{
+  process_type_checker type_checker(dataspec, variables, action_labels, process_identifiers);
+  return type_checker(x);
 }
 
 } // namespace process
