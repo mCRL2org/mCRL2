@@ -641,7 +641,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return m_actions.find(name) != m_actions.end();
   }
 
-  process_expression typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
+  bool is_process_name(const core::identifier_string& name)
+  {
+    return m_equation_sorts.find(name) != m_equation_sorts.end();
+  }
+
+  action typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
     auto j = m_actions.find(name);
     assert(j != m_actions.end());
@@ -660,18 +665,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return make_action(name, p.second, p.first);
   }
 
-  process_expression typecheck_process_instance(const core::identifier_string& name, const data::data_expression_list& parameters)
+  process_instance typecheck_process_instance(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
     sorts_list parameter_list;
     auto j = m_equation_sorts.find(name);
-    if (j !=  m_equation_sorts.end())
-    {
-      parameter_list = j->second;
-    }
-    else
-    {
-      throw mcrl2::runtime_error("action or process " + core::pp(name) + " not declared");
-    }
+    assert(j !=  m_equation_sorts.end());
+    parameter_list = j->second;
     assert(!parameter_list.empty());
     std::string msg = "process";
     parameter_list = filter_parameters_on_size(parameter_list, parameters, name, msg);
@@ -762,73 +761,57 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   process_expression apply(const untyped_process_assignment& x)
   {
     mCRL2log(log::debug) << "typechecking a process call with short-hand assignments " << x << "" << std::endl;
+    if (!is_process_name(x.name()))
+    {
+      throw mcrl2::runtime_error("action or process " + core::pp(x.name()) + " not declared" + "\ntype error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
+    }
 
     data::variable_list formal_parameters = matching_process_parameters(x);
     std::map<core::identifier_string, data::data_expression> assignments = make_assignment_map(x.assignments());
 
-    // get the formal parameter names
+    // create actual parameters, with untyped identifiers for the parameters that are not assigned a value
     data::data_expression_list actual_parameters;
+    for (const data::variable& d: formal_parameters)
     {
-      // we only need the names of the parameters, not the types
-      for (const data::variable& d: formal_parameters)
+      data::data_expression e;
+      auto i = assignments.find(d.name());
+      if (i == assignments.end())
       {
-        data::data_expression e;
-        auto i = assignments.find(d.name());
-        if (i == assignments.end())
-        {
-          e = data::untyped_identifier(d.name());
-        }
-        else
-        {
-          e = i->second;
-        }
-        actual_parameters.push_front(e);
-      }
-      actual_parameters = atermpp::reverse(actual_parameters);
-    }
-
-    process_expression TypeCheckedProcTerm;
-    try
-    {
-      if (is_action_name(x.name()))
-      {
-        TypeCheckedProcTerm = typecheck_action(x.name(), actual_parameters);
+        e = data::untyped_identifier(d.name());
       }
       else
       {
-        TypeCheckedProcTerm = typecheck_process_instance(x.name(), actual_parameters);
+        e = i->second;
       }
+      actual_parameters.push_front(e);
+    }
+    actual_parameters = atermpp::reverse(actual_parameters);
+
+    // typecheck the actual parameters
+    process_instance px;
+    try
+    {
+      px = typecheck_process_instance(x.name(), actual_parameters);
     }
     catch (mcrl2::runtime_error& e)
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
     }
+    const data::data_expression_list& typechecked_actual_parameters = px.actual_parameters();
 
-    //atermpp::reverse the assignments
-    assignments.clear();
-    std::map<core::identifier_string,data::assignment> new_assignments;
-    data::variable_list m = formal_parameters;
-    data::data_expression_list l = atermpp::down_cast<const process_instance>(TypeCheckedProcTerm).actual_parameters();
-    for ( ; !l.empty(); l = l.tail(), m = m.tail())
+    // construct typechecked assignments
+    data::assignment_list typechecked_assignments;
+    auto q1 = formal_parameters.begin();
+    auto q2 = typechecked_actual_parameters.begin();
+    for (; q1 != formal_parameters.end(); ++q1, ++q2)
     {
-      const data::data_expression act_par = l.front();
-      const data::variable form_par = m.front();
-      new_assignments[form_par.name()] = data::assignment(form_par, act_par);
-    }
-
-    data::assignment_list TypedAssignments;
-    for (const data::untyped_identifier_assignment& a: x.assignments())
-    {
-      auto i = new_assignments.find(a.lhs());
-      if (i == new_assignments.end())
+      if (assignments.find(q1->name()) != assignments.end())
       {
-        continue;
+        typechecked_assignments.push_front(data::assignment(*q1, *q2));
       }
-      TypedAssignments.push_front(i->second);
     }
-    TypedAssignments = atermpp::reverse(TypedAssignments);
-
-    return process_instance_assignment(atermpp::down_cast<const process_instance>(TypeCheckedProcTerm).identifier(), TypedAssignments);
+    typechecked_assignments = atermpp::reverse(typechecked_assignments);
+    return process_instance_assignment(px.identifier(), typechecked_assignments);
   }
 
   process_expression apply(const untyped_parameter_identifier& x)
@@ -837,9 +820,13 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     {
       return typecheck_action(x.name(), x.arguments());
     }
-    else
+    else if (is_process_name(x.name()))
     {
       return typecheck_process_instance(x.name(), x.arguments());
+    }
+    else
+    {
+      throw mcrl2::runtime_error("action or process " + core::pp(x.name()) + " not declared");
     }
   }
 
