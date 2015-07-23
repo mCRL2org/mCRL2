@@ -348,12 +348,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   data::data_expression_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variables;
   const std::multimap<core::identifier_string, process_identifier>& m_process_identifiers;
-  const std::map<core::identifier_string, sorts_list>& m_actions;
+  const std::multimap<core::identifier_string, action_label>& m_actions;
 
   typecheck_builder(data::data_expression_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
                     const std::multimap<core::identifier_string, process_identifier>& process_identifiers,
-                    const std::map<core::identifier_string, sorts_list>& actions
+                    const std::multimap<core::identifier_string, action_label>& actions
                    )
     : m_data_typechecker(data_typechecker),
       m_variables(variables),
@@ -361,11 +361,17 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       m_actions(actions)
   {}
 
-  const sorts_list& action_sorts(const core::identifier_string& x)
+  sorts_list action_sorts(const core::identifier_string& name)
   {
-    auto i = m_actions.find(x);
-    assert(i != m_actions.end());
-    return i->second;
+    auto range = m_actions.equal_range(name);
+    assert(range.first != m_actions.end());
+    sorts_list result;
+    for (auto k = range.first; k != range.second; ++k)
+    {
+      const action_label& a = k->second;
+      result.push_front(a.sorts());
+    }
+    return atermpp::reverse(result);
   }
 
   template <typename Container>
@@ -571,27 +577,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return std::make_pair(true, GetNotInferredList(atermpp::reverse(new_sorts)));
   }
 
-  sorts_list filter_parameters_on_size(sorts_list parameter_list, const data::data_expression_list& parameters, const core::identifier_string& name, const std::string& msg)
-  {
-    sorts_list result;
-    for (const data::sort_expression_list& sorts: parameter_list)
-    {
-      if (sorts.size() == parameters.size())
-      {
-        result.push_front(sorts);
-      }
-    }
-    result = atermpp::reverse(result);
-
-    if (result.empty())
-    {
-      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
-                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
-                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-    }
-    return result;
-  }
-
   action make_action(const core::identifier_string& name, const data::sort_expression_list& formal_parameters, const data::data_expression_list& actual_parameters)
   {
     return action(action_label(name, formal_parameters), actual_parameters);
@@ -622,14 +607,25 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return m_process_identifiers.find(name) != m_process_identifiers.end();
   }
 
+  sorts_list matching_action_sorts(const core::identifier_string& name, const data::data_expression_list& parameters)
+  {
+    sorts_list result;
+    auto range = m_actions.equal_range(name);
+    for (auto k = range.first; k != range.second; ++k)
+    {
+      const action_label& a = k->second;
+      if (a.sorts().size() == parameters.size())
+      {
+        result.push_front(a.sorts());
+      }
+    }
+    return atermpp::reverse(result);
+  }
+
   action typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
-    auto j = m_actions.find(name);
-    assert(j != m_actions.end());
-    sorts_list parameter_list = j->second;
-    assert(!parameter_list.empty());
     std::string msg = "action";
-    parameter_list = filter_parameters_on_size(parameter_list, parameters, name, msg);
+    sorts_list parameter_list = matching_action_sorts(name, parameters);
     if (parameter_list.empty())
     {
       throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
@@ -874,7 +870,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         {
           throw mcrl2::runtime_error("synchronizing to an undefined action " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ")");
         }
-        c_sorts = j->second;
+        c_sorts = action_sorts(c.name());
       }
 
       for (const core::identifier_string& a: cnames)
@@ -884,7 +880,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         {
           throw mcrl2::runtime_error("synchronizing an undefined action " + core::pp(a) + " in (multi)action " + core::pp(cnames) + " (typechecking " + process::pp(x) + ")");
         }
-        c_sorts = sorts_list_intersection(c_sorts, j->second);
+        c_sorts = sorts_list_intersection(c_sorts, action_sorts(a));
         if (c_sorts.empty())
         {
           throw mcrl2::runtime_error("synchronizing action " + core::pp(a) + " from (multi)action " + core::pp(cnames) +
@@ -998,7 +994,7 @@ typecheck_builder make_typecheck_builder(
                     data::data_expression_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
                     const std::multimap<core::identifier_string, process_identifier>& process_identifiers,
-                    const std::map<core::identifier_string, sorts_list>& actions
+                    const std::multimap<core::identifier_string, action_label>& actions
                    )
 {
   return typecheck_builder(data_typechecker, variables, process_identifiers, actions);
@@ -1010,7 +1006,7 @@ class process_type_checker
 {
   protected:
     data::data_expression_typechecker m_data_typechecker;
-    std::map<core::identifier_string, sorts_list> m_actions;
+    std::multimap<core::identifier_string, action_label> m_actions;
     std::multimap<core::identifier_string, process_identifier> m_process_identifiers;
     std::map<core::identifier_string, data::sort_expression> m_global_variables;
 
@@ -1059,34 +1055,22 @@ class process_type_checker
     {
       for (const action_label& a: actions)
       {
-        core::identifier_string ActName = a.name();
-        data::sort_expression_list ActType = a.sorts();
+        core::identifier_string name = a.name();
+        m_data_typechecker.check_sort_list_is_declared(a.sorts());
 
-        m_data_typechecker.check_sort_list_is_declared(ActType);
-
-        auto j = m_actions.find(ActName);
-        sorts_list sorts;
-        if (j==m_actions.end())
+        // Insert a in m_actions; N.B. Before that check if it already exists
+        auto range = m_actions.equal_range(a.name());
+        if (range.first != m_actions.end())
         {
-          sorts = { ActType };
-        }
-        else
-        {
-          sorts = j->second;
-          // the table actions contains a list of types for each
-          // action name. We need to check if there is already such a type
-          // in the list. If so -- error, otherwise -- add
-
-          if (m_data_typechecker.is_contained_in(ActType, sorts))
+          for (auto i = range.first; i != range.second; ++i)
           {
-            throw mcrl2::runtime_error("double declaration of action " + core::pp(ActName));
-          }
-          else
-          {
-            sorts = sorts + sorts_list({ ActType });
+            if (i->second == a)
+            {
+              throw mcrl2::runtime_error("double declaration of action " + process::pp(a));
+            }
           }
         }
-        m_actions[ActName] = sorts;
+        m_actions.insert(range.first, std::make_pair(a.name(), a));
       }
     }
 
@@ -1096,7 +1080,7 @@ class process_type_checker
       {
         const core::identifier_string& name = id.name();
 
-        if (m_actions.count(name) > 0)
+        if (m_actions.find(name) != m_actions.end())
         {
           throw mcrl2::runtime_error("declaration of both process and action " + core::pp(name));
         }
