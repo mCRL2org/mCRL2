@@ -156,7 +156,6 @@ void complete_pbes(pbes& x)
 {
   type_check(x);
   pbes_system::translate_user_notation(x);
-  pbes_system::normalize_sorts(x, x.data());
   complete_data_specification(x);
 }
 
