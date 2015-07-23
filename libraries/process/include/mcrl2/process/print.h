@@ -180,13 +180,7 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().apply(x.data());
     print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
     print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
-
-    // N.B. We have to normalize the sorts of the equations. Otherwise predicates like
-    // is_list(x) may return the wrong result.
-    std::vector<process_equation> normalized_equations = x.equations();
-    process::normalize_sorts(normalized_equations, x.data());
-    print_list(normalized_equations, "proc ", "\n\n", "\n     ");
-
+    print_list(x.equations(), "proc ", "\n\n", "\n     ");
     print_initial_state(x.init());
     derived().leave(x);
   }
