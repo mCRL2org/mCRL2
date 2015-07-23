@@ -77,16 +77,34 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
 
   data_expression_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variables;
-  const std::map<core::identifier_string, data::sort_expression_list>& m_equation_sorts;
+  const std::map<core::identifier_string, propositional_variable>& m_propositional_variables;
 
   typecheck_builder(data_expression_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const std::map<core::identifier_string, data::sort_expression_list>& equation_sorts
+                    const std::map<core::identifier_string, propositional_variable>& propositional_variables
                    )
     : m_data_typechecker(data_typechecker),
       m_variables(variables),
-      m_equation_sorts(equation_sorts)
+      m_propositional_variables(propositional_variables)
   {}
+
+  template <typename Container>
+  data::sort_expression_list parameter_sorts(const Container& parameters)
+  {
+    data::sort_expression_list sorts;
+    for (const data::data_expression& e: parameters)
+    {
+      sorts.push_front(e.sort());
+    }
+    return atermpp::reverse(sorts);
+  }
+
+  data::sort_expression_list propositional_variable_sorts(const core::identifier_string& name)
+  {
+    auto i = m_propositional_variables.find(name);
+    assert(i != m_propositional_variables.end());
+    return parameter_sorts(i->second.parameters());
+  }
 
   pbes_expression apply(const data::data_expression& x)
   {
@@ -134,13 +152,13 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
   pbes_expression apply(const propositional_variable_instantiation& x)
   {
     const core::identifier_string& name = x.name();
-    auto i = m_equation_sorts.find(name);
-    if (i == m_equation_sorts.end())
+    auto i = m_propositional_variables.find(name);
+    if (i == m_propositional_variables.end())
     {
       throw mcrl2::runtime_error("propositional variable " + core::pp(name) + " not declared");
     }
 
-    const data::sort_expression_list& equation_sorts = i->second;
+    const data::sort_expression_list& equation_sorts = propositional_variable_sorts(name);
     std::vector<data::data_expression> x_parameters(x.parameters().begin(), x.parameters().end());
 
     if (x_parameters.size() != equation_sorts.size())
@@ -169,10 +187,10 @@ inline
 typecheck_builder make_typecheck_builder(
                     data_expression_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const std::map<core::identifier_string, data::sort_expression_list>& equation_sorts
+                    const std::map<core::identifier_string, propositional_variable>& propositional_variables
                    )
 {
-  return typecheck_builder(data_typechecker, variables, equation_sorts);
+  return typecheck_builder(data_typechecker, variables, propositional_variables);
 }
 
 } // namespace detail
@@ -181,13 +199,13 @@ class pbes_type_checker
 {
   protected:
     detail::data_expression_typechecker m_data_typechecker;
-    std::map<core::identifier_string, data::sort_expression> m_global_variables;
-    std::map<core::identifier_string, data::sort_expression_list> m_equation_sorts;
+    std::map<core::identifier_string, data::sort_expression> m_variables;
+    std::map<core::identifier_string, propositional_variable> m_propositional_variables;
 
-    // Returns m_global_variables with variables inserted into it
+    // Returns m_variables with variables inserted into it
     std::map<core::identifier_string, data::sort_expression> declared_variables(const data::variable_list& variables)
     {
-      std::map<core::identifier_string, data::sort_expression> result = m_global_variables;
+      std::map<core::identifier_string, data::sort_expression> result = m_variables;
       for (const data::variable& v: variables)
       {
         result[v.name()] = v.sort();
@@ -239,19 +257,19 @@ class pbes_type_checker
 
       // reset the context
       m_data_typechecker = detail::data_expression_typechecker(pbesspec.data());
-      m_global_variables.clear();
-      m_equation_sorts.clear();
+      m_variables.clear();
+      m_propositional_variables.clear();
       add_global_variables(pbesspec.global_variables());
       add_propositional_variables(equation_variables(pbesspec.equations()));
 
       // typecheck the equations
       for (pbes_equation& eqn: pbesspec.equations())
       {
-        eqn.formula() = detail::make_typecheck_builder(m_data_typechecker, declared_variables(eqn.variable().parameters()), m_equation_sorts).apply(eqn.formula());
+        eqn.formula() = detail::make_typecheck_builder(m_data_typechecker, declared_variables(eqn.variable().parameters()), m_propositional_variables).apply(eqn.formula());
       }
 
       // typecheck the initial state
-      pbesspec.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(detail::make_typecheck_builder(m_data_typechecker, m_global_variables, m_equation_sorts).apply(pbesspec.initial_state()));
+      pbesspec.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(detail::make_typecheck_builder(m_data_typechecker, m_variables, m_propositional_variables).apply(pbesspec.initial_state()));
 
       // typecheck the data specification
       pbesspec.data() = m_data_typechecker.typechecked_data_specification();
@@ -264,13 +282,13 @@ class pbes_type_checker
       **/
     pbes_expression operator()(const pbes_expression& x)
     {
-      return detail::make_typecheck_builder(m_data_typechecker, m_global_variables, m_equation_sorts).apply(x);
+      return detail::make_typecheck_builder(m_data_typechecker, m_variables, m_propositional_variables).apply(x);
     }
 
     protected:
       pbes_expression typecheck(const pbes_expression& x, const data::variable_list& parameters)
       {
-        return detail::make_typecheck_builder(m_data_typechecker, declared_variables(parameters), m_equation_sorts).apply(x);
+        return detail::make_typecheck_builder(m_data_typechecker, declared_variables(parameters), m_propositional_variables).apply(x);
       }
 
       template <typename VariableContainer>
@@ -279,10 +297,10 @@ class pbes_type_checker
         for (const data::variable& v: global_variables)
         {
           m_data_typechecker.check_sort_is_declared(v.sort());
-          auto i = m_global_variables.find(v.name());
-          if (i == m_global_variables.end())
+          auto i = m_variables.find(v.name());
+          if (i == m_variables.end())
           {
-            m_global_variables[v.name()] = v.sort();
+            m_variables[v.name()] = v.sort();
           }
           else
           {
@@ -299,10 +317,10 @@ class pbes_type_checker
           data::sort_expression_list sorts = variable_sorts(v.parameters());
           m_data_typechecker.check_sort_list_is_declared(sorts);
 
-          auto i = m_equation_sorts.find(v.name());
-          if (i == m_equation_sorts.end())
+          auto i = m_propositional_variables.find(v.name());
+          if (i == m_propositional_variables.end())
           {
-            m_equation_sorts[v.name()] = sorts;
+            m_propositional_variables[v.name()] = v;
           }
           else
           {
