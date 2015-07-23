@@ -641,7 +641,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return m_actions.find(name) != m_actions.end();
   }
 
-  process_expression typecheck_action(const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
+  process_expression typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
     auto j = m_actions.find(name);
     assert(j != m_actions.end());
@@ -656,11 +656,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
                       + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
     }
     action Result = make_action(name, GetNotInferredList(parameter_list), parameters);
-    auto p = match_parameters(parameters, Result.label().sorts(), parameter_list, variables, name, msg);
+    auto p = match_parameters(parameters, Result.label().sorts(), parameter_list, m_variables, name, msg);
     return make_action(name, p.second, p.first);
   }
 
-  process_expression typecheck_process_instance(const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
+  process_expression typecheck_process_instance(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
     sorts_list parameter_list;
     auto j = m_equation_sorts.find(name);
@@ -682,7 +682,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
                       + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
     }
     process_instance Result = make_process_instance(name, GetNotInferredList(parameter_list), parameters);
-    auto p = match_parameters(parameters, get_sorts(Result.identifier().variables()), parameter_list, variables, name, msg);
+    auto p = match_parameters(parameters, get_sorts(Result.identifier().variables()), parameter_list, m_variables, name, msg);
     return make_process_instance(name, p.second, p.first);
   }
 
@@ -792,11 +792,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     {
       if (is_action_name(x.name()))
       {
-        TypeCheckedProcTerm = typecheck_action(m_variables, x.name(), actual_parameters);
+        TypeCheckedProcTerm = typecheck_action(x.name(), actual_parameters);
       }
       else
       {
-        TypeCheckedProcTerm = typecheck_process_instance(m_variables, x.name(), actual_parameters);
+        TypeCheckedProcTerm = typecheck_process_instance(x.name(), actual_parameters);
       }
     }
     catch (mcrl2::runtime_error& e)
@@ -835,11 +835,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     if (is_action_name(x.name()))
     {
-      return typecheck_action(m_variables, x.name(), x.arguments());
+      return typecheck_action(x.name(), x.arguments());
     }
     else
     {
-      return typecheck_process_instance(m_variables, x.name(), x.arguments());
+      return typecheck_process_instance(x.name(), x.arguments());
     }
   }
 
