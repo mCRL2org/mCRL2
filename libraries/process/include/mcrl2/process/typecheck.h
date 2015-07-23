@@ -74,28 +74,13 @@ struct data_expression_typechecker: protected data::data_type_checker
     return data::normalize_sorts(x, get_sort_specification());
   }
 
-  sort_expression_list normalize_sorts(const sort_expression_list& x)
-  {
-    return data::detail::transform_aterm_list([&](const sort_expression& y) { return data::normalize_sorts(y, get_sort_specification()); }, x);
-  }
-
-  variable_list normalize_sorts(const variable_list& x)
-  {
-    return data::detail::transform_aterm_list([&](const variable& y)
-      {
-        data_expression z = data::normalize_sorts(y, get_sort_specification());
-        return atermpp::down_cast<variable>(z);
-      },
-      x);
-  }
-
   data_expression UpCastNumericType(const data_expression& Par, const sort_expression& NeededType, const std::map<core::identifier_string,sort_expression>& variables)
   {
     std::map<core::identifier_string,data::sort_expression> dummy_table;
     data_expression Par1 = Par;
     sort_expression s = data::data_type_checker::UpCastNumericType(NeededType, Par.sort(), Par1, variables, variables, dummy_table, false, false, false);
     assert(s == Par1.sort());
-    return Par1;
+    return data::normalize_sorts(Par1, get_sort_specification());
   }
 
   // returns true if s1 and s2 are equal after normalization
@@ -212,7 +197,7 @@ struct data_expression_typechecker: protected data::data_type_checker
   {
     data_expression x1 = x;
     TraverseVarConsTypeD(variable_context, variable_context, x1, expected_sort);
-    return x1;
+    return data::normalize_sorts(x1, get_sort_specification());
   }
 
   data_specification typechecked_data_specification()
@@ -482,7 +467,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     for (const data::sort_expression_list& parameters: parameter_lists)
     {
       // get the formal parameter names
-      data::variable_list formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.normalize_sorts(parameters)));
+      data::variable_list formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), parameters));
 
       // we only need the names of the parameters, not the types
       core::identifier_string_list formal_parameter_names;
@@ -517,7 +502,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       throw mcrl2::runtime_error("ambiguous process " + core::pp(x.name()) + " containing all assignments in " + process::pp(x) + ".");
     }
     assert(result.size() == 1);
-    const data::variable_list& formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.normalize_sorts(result.front())));
+    const data::variable_list& formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), result.front()));
     return formal_parameters;
   }
 
@@ -631,7 +616,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
   process_instance make_process_instance(const core::identifier_string& name, const data::sort_expression_list& formal_parameters, const data::data_expression_list& actual_parameters)
   {
-    auto i = m_process_parameters.find(std::make_pair(name, m_data_typechecker.normalize_sorts(formal_parameters)));
+    auto i = m_process_parameters.find(std::make_pair(name, formal_parameters));
     assert(i != m_process_parameters.end());
     return process_instance(process_identifier(name, i->second), actual_parameters);
   }
@@ -1024,7 +1009,7 @@ typecheck_builder make_typecheck_builder(
 class process_type_checker
 {
   protected:
-    data::data_expression_typechecker m_data_type_checker;
+    data::data_expression_typechecker m_data_typechecker;
     std::map<core::identifier_string, sorts_list> m_actions;
     std::map<core::identifier_string, sorts_list> m_equation_sorts;
     std::map<core::identifier_string, data::sort_expression> m_global_variables;
@@ -1056,8 +1041,8 @@ class process_type_checker
     {
       for (const data::variable& v: global_variables)
       {
-        // m_data_type_checker.check_sort_is_declared(v.sort());
-        m_data_type_checker.check_sort_is_declared(v.sort());
+        // m_data_typechecker.check_sort_is_declared(v.sort());
+        m_data_typechecker.check_sort_is_declared(v.sort());
 
         auto i = m_global_variables.find(v.name());
         if (i == m_global_variables.end())
@@ -1078,7 +1063,7 @@ class process_type_checker
         core::identifier_string ActName = a.name();
         data::sort_expression_list ActType = a.sorts();
 
-        m_data_type_checker.check_sort_list_is_declared(ActType);
+        m_data_typechecker.check_sort_list_is_declared(ActType);
 
         auto j = m_actions.find(ActName);
         sorts_list sorts;
@@ -1093,7 +1078,7 @@ class process_type_checker
           // action name. We need to check if there is already such a type
           // in the list. If so -- error, otherwise -- add
 
-          if (m_data_type_checker.is_contained_in(ActType, sorts))
+          if (m_data_typechecker.is_contained_in(ActType, sorts))
           {
             throw mcrl2::runtime_error("double declaration of action " + core::pp(ActName));
           }
@@ -1118,7 +1103,7 @@ class process_type_checker
         }
 
         data::sort_expression_list ProcType = get_sorts(id.variables());
-        m_data_type_checker.check_sort_list_is_declared(ProcType);
+        m_data_typechecker.check_sort_list_is_declared(ProcType);
 
         auto j = m_equation_sorts.find(name);
         sorts_list sorts;
@@ -1132,7 +1117,7 @@ class process_type_checker
           // the table m_equation_sorts contains a list of types for each
           // process name. We need to check if there is already such a type
           // in the list. If so -- error, otherwise -- add
-          if (m_data_type_checker.is_contained_in(ProcType, sorts))
+          if (m_data_typechecker.is_contained_in(ProcType, sorts))
           {
             throw mcrl2::runtime_error("double declaration of process " + std::string(name));
           }
@@ -1144,13 +1129,13 @@ class process_type_checker
         m_equation_sorts[name] = sorts;
 
         //check that all formal parameters of the process are unique.
-        if (!m_data_type_checker.VarsUnique(id.variables()))
+        if (!m_data_typechecker.VarsUnique(id.variables()))
         {
           throw mcrl2::runtime_error("the formal variables in process " + process::pp(id) + " are not unique");
         }
 
-        std::pair<core::identifier_string, data::sort_expression_list> p(id.name(), m_data_type_checker.normalize_sorts(get_sorts(id.variables())));
-        m_process_parameters[p] = m_data_type_checker.normalize_sorts(id.variables());
+        std::pair<core::identifier_string, data::sort_expression_list> p(id.name(), get_sorts(id.variables()));
+        m_process_parameters[p] = id.variables();
       }
       std::pair<core::identifier_string, data::sort_expression_list> p(core::identifier_string("init"), data::sort_expression_list());
       m_process_parameters[p] = data::variable_list();
@@ -1158,7 +1143,7 @@ class process_type_checker
 
   public:
 //    process_type_checker(const data::data_specification& dataspec, const std::vector<action_label>& action_labels, const std::vector<data::variable>& global_variables, const std::vector<process_identifier>& process_identifiers)
-//      : m_data_type_checker(dataspec)
+//      : m_data_typechecker(dataspec)
 //    {
 //      add_action_labels(action_labels);
 //      add_global_variables(global_variables);
@@ -1167,7 +1152,7 @@ class process_type_checker
 
     /// \brief Default constructor
     process_type_checker(const data::data_specification& dataspec = data::data_specification())
-      : m_data_type_checker(dataspec)
+      : m_data_typechecker(dataspec)
     {}
 
     /** \brief     Type check a process expression.
@@ -1186,9 +1171,9 @@ class process_type_checker
       mCRL2log(log::verbose) << "type checking process specification..." << std::endl;
 
       // reset the context
-      m_data_type_checker = data::data_expression_typechecker(procspec.data());
+      m_data_typechecker = data::data_expression_typechecker(procspec.data());
 
-      normalize_sorts(procspec, m_data_type_checker.typechecked_data_specification());
+      normalize_sorts(procspec, m_data_typechecker.typechecked_data_specification());
 
       m_actions.clear();
       m_global_variables.clear();
@@ -1197,18 +1182,17 @@ class process_type_checker
       add_global_variables(procspec.global_variables());
       add_process_identifiers(equation_identifiers(procspec.equations()));
 
-
       // typecheck the equations
       for (process_equation& eqn: procspec.equations())
       {
-        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(declared_variables(m_data_type_checker.normalize_sorts(eqn.identifier().variables())), eqn.expression()));
+        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(declared_variables(eqn.identifier().variables()), eqn.expression()));
       }
 
       // typecheck the initial state
       procspec.init() = typecheck_process_expression(m_global_variables, procspec.init());
 
       // typecheck the data specification
-      procspec.data() = m_data_type_checker.typechecked_data_specification();
+      procspec.data() = m_data_typechecker.typechecked_data_specification();
 
       mCRL2log(log::debug) << "type checking process specification finished" << std::endl;
     }
@@ -1216,7 +1200,7 @@ class process_type_checker
   protected:
     process_expression typecheck_process_expression(const std::map<core::identifier_string, data::sort_expression>& variables, const process_expression& x)
     {
-      return detail::make_typecheck_builder(m_data_type_checker, variables, m_equation_sorts, m_actions, m_process_parameters).apply(x);
+      return detail::make_typecheck_builder(m_data_typechecker, variables, m_equation_sorts, m_actions, m_process_parameters).apply(x);
     }
 };
 
