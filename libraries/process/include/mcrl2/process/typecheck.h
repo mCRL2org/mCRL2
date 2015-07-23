@@ -69,21 +69,21 @@ struct data_expression_typechecker: protected data::data_type_checker
     return data_type_checker::VarsUnique(VarDecls);
   }
 
-  sort_expression UnwindType(const sort_expression& x)
+  sort_expression normalize_sorts(const sort_expression& x)
   {
-    return normalize_sorts(x, get_sort_specification());
+    return data::normalize_sorts(x, get_sort_specification());
   }
 
-  sort_expression_list UnwindType(const sort_expression_list& x)
+  sort_expression_list normalize_sorts(const sort_expression_list& x)
   {
-    return data::detail::transform_aterm_list([&](const sort_expression& y) { return normalize_sorts(y, get_sort_specification()); }, x);
+    return data::detail::transform_aterm_list([&](const sort_expression& y) { return data::normalize_sorts(y, get_sort_specification()); }, x);
   }
 
-  variable_list UnwindType(const variable_list& x)
+  variable_list normalize_sorts(const variable_list& x)
   {
     return data::detail::transform_aterm_list([&](const variable& y)
       {
-        data_expression z = normalize_sorts(y, get_sort_specification());
+        data_expression z = data::normalize_sorts(y, get_sort_specification());
         return atermpp::down_cast<variable>(z);
       },
       x);
@@ -98,23 +98,59 @@ struct data_expression_typechecker: protected data::data_type_checker
     return Par1;
   }
 
-  bool InTypesL(sort_expression_list Type, sorts_list sorts)
-  {
-    return data_type_checker::InTypesL(Type, sorts);
-  }
-
-  bool IsTypeAllowedL(const data::sort_expression_list &TypeList, const data::sort_expression_list possible_sorts)
-  {
-    return data_type_checker::IsTypeAllowedL(TypeList, possible_sorts);
-  }
-
+  // returns true if s1 and s2 are equal after normalization
   bool equal_sorts(const sort_expression& s1, const sort_expression& s2)
   {
     if (s1 == s2)
     {
       return true;
     }
-    return UnwindType(s1) == UnwindType(s2);
+    return normalize_sorts(s1) == normalize_sorts(s2);
+  }
+
+  // returns true if s matches with an element of sorts after normalization
+  bool match_sort(const sort_expression& s, const sort_expression_list& sorts)
+  {
+    for (const sort_expression& s1: sorts)
+    {
+      if (equal_sorts(s, s1))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // returns true if s is allowed by allowed_sort, meaning that allowed_sort is an untyped sort,
+  // or allowed_sort is a sequence that contains a matching sort
+  bool is_allowed_sort(const sort_expression& sort, const sort_expression& allowed_sort)
+  {
+    if (is_untyped_sort(data::sort_expression(allowed_sort)))
+    {
+      return true;
+    }
+    if (is_untyped_possible_sorts(allowed_sort))
+    {
+      return match_sort(sort, atermpp::down_cast<const untyped_possible_sorts>(allowed_sort).sorts());
+    }
+
+    //PosType is a normal type
+    return equal_sorts(sort, allowed_sort);
+  }
+
+  // returns true if all elements of sorts are allowed by the corresponding entries of allowed_sorts
+  bool is_allowed_sort_list(const sort_expression_list& sorts, const sort_expression_list& allowed_sorts)
+  {
+    assert(sorts.size() == allowed_sorts.size());
+    auto j = allowed_sorts.begin();
+    for (auto i = sorts.begin(); i != sorts.end(); ++i,++j)
+    {
+      if (!is_allowed_sort(*i, *j))
+      {
+        return false;
+      }
+    }
+    return true;
   }
 
   sort_expression_list insert_type(const sort_expression_list TypeList, const sort_expression Type)
@@ -156,6 +192,7 @@ struct data_expression_typechecker: protected data::data_type_checker
     }
     return false;
   }
+
   sort_expression ExpandNumTypesDown(sort_expression Type)
   {
     return data_type_checker::ExpandNumTypesDown(Type);
@@ -198,7 +235,6 @@ sorts_list sorts_list_intersection(const sorts_list& sorts1, const sorts_list& s
   sorts_list result;
   for (const data::sort_expression_list& s: sorts2)
   {
-    // if (InTypesL(s, sorts1))
     if (std::find(sorts1.begin(), sorts1.end(), s) != sorts1.end())
     {
       result.push_front(s);
@@ -219,12 +255,11 @@ data::sort_expression_list get_sorts(const atermpp::term_list<T>& l)
 }
 
 inline
-bool IsNotInferredL(data::sort_expression_list TypeList)
+bool contains_untyped_sorts(const data::sort_expression_list& sorts)
 {
-  for (; !TypeList.empty(); TypeList=TypeList.tail())
+  for (const data::sort_expression& s: sorts)
   {
-    data::sort_expression Type = TypeList.front();
-    if (data::is_untyped_sort(Type) || data::is_untyped_possible_sorts(Type))
+    if (data::is_untyped_sort(s) || data::is_untyped_possible_sorts(s))
     {
       return true;
     }
@@ -440,7 +475,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     for (const data::sort_expression_list& parameters: parameter_lists)
     {
       // get the formal parameter names
-      data::variable_list formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.UnwindType(parameters)));
+      data::variable_list formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.normalize_sorts(parameters)));
 
       // we only need the names of the parameters, not the types
       core::identifier_string_list formal_parameter_names;
@@ -527,11 +562,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
     //if possible_sorts has only normal types -- check if it is in sorts,
     //if so return possible_sorts, otherwise return false.
-    if (!IsNotInferredL(possible_sorts))
+    if (!contains_untyped_sorts(possible_sorts))
     {
       if (m_data_typechecker.is_contained_in(possible_sorts,sorts))
       {
-        return std::make_pair(true,possible_sorts);
+        return std::make_pair(true, possible_sorts);
       }
       else
       {
@@ -540,26 +575,25 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
 
     //Filter sorts to contain only compatible with TypeList lists of parameters.
-    sorts_list Newsorts;
-    for (auto i=sorts.begin(); i!=sorts.end(); ++i)
+    sorts_list new_sorts;
+    for (const data::sort_expression_list& s: sorts)
     {
-      data::sort_expression_list TypeList= *i;
-      if (m_data_typechecker.IsTypeAllowedL(TypeList,possible_sorts))
+      if (m_data_typechecker.is_allowed_sort_list(s, possible_sorts))
       {
-        Newsorts.push_front(TypeList);
+        new_sorts.push_front(s);
       }
     }
-    if (Newsorts.empty())
+    if (new_sorts.empty())
     {
       return std::make_pair(false, data::sort_expression_list());
     }
-    if (Newsorts.size()==1)
+    if (new_sorts.size() == 1)
     {
-      return std::make_pair(true, Newsorts.front());
+      return std::make_pair(true, new_sorts.front());
     }
 
     // otherwise return not inferred.
-    return std::make_pair(true, GetNotInferredList(atermpp::reverse(Newsorts)));
+    return std::make_pair(true, GetNotInferredList(atermpp::reverse(new_sorts)));
   }
 
   process_expression MakeActionOrProc(bool is_action,
@@ -574,7 +608,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
     else
     {
-      auto i = m_process_parameters.find(std::make_pair(name, m_data_typechecker.UnwindType(formal_parameters)));
+      auto i = m_process_parameters.find(std::make_pair(name, m_data_typechecker.normalize_sorts(formal_parameters)));
       assert(i != m_process_parameters.end());
       const data::variable_list& FormalVars = i->second;
       return process_instance(process_identifier(name, FormalVars), FactParList);
@@ -609,7 +643,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
   process_instance make_process_instance(const core::identifier_string& name, const data::sort_expression_list& formal_parameters, const data::data_expression_list& actual_parameters)
   {
-    auto i = m_process_parameters.find(std::make_pair(name, m_data_typechecker.UnwindType(formal_parameters)));
+    auto i = m_process_parameters.find(std::make_pair(name, m_data_typechecker.normalize_sorts(formal_parameters)));
     assert(i != m_process_parameters.end());
     return process_instance(process_identifier(name, i->second), actual_parameters);
   }
@@ -730,7 +764,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(parameter_sorts(new_parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
       }
     }
-    if (IsNotInferredL(possible_sorts))
+    if (contains_untyped_sorts(possible_sorts))
     {
       throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(name));
     }
@@ -754,7 +788,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
     // get the formal parameter names
     data::data_expression_list actual_parameters;
-    const data::variable_list& formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.UnwindType(parameter_list.front())));
+    const data::variable_list& formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.normalize_sorts(parameter_list.front())));
     {
       // we only need the names of the parameters, not the types
       for (const data::variable& d: formal_parameters)
@@ -1149,8 +1183,8 @@ class process_type_checker
           throw mcrl2::runtime_error("the formal variables in process " + process::pp(id) + " are not unique");
         }
 
-        std::pair<core::identifier_string, data::sort_expression_list> p(id.name(), m_data_type_checker.UnwindType(get_sorts(id.variables())));
-        m_process_parameters[p] = m_data_type_checker.UnwindType(id.variables());
+        std::pair<core::identifier_string, data::sort_expression_list> p(id.name(), m_data_type_checker.normalize_sorts(get_sorts(id.variables())));
+        m_process_parameters[p] = m_data_type_checker.normalize_sorts(id.variables());
       }
       std::pair<core::identifier_string, data::sort_expression_list> p(core::identifier_string("init"), data::sort_expression_list());
       m_process_parameters[p] = data::variable_list();
@@ -1201,7 +1235,7 @@ class process_type_checker
       // typecheck the equations
       for (process_equation& eqn: procspec.equations())
       {
-        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(declared_variables(m_data_type_checker.UnwindType(eqn.identifier().variables())), eqn.expression()));
+        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(declared_variables(m_data_type_checker.normalize_sorts(eqn.identifier().variables())), eqn.expression()));
       }
 
       // typecheck the initial state
