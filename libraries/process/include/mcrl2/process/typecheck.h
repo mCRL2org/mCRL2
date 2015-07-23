@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jan Friso Groote, Wieger Wesselink (2015)
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -193,9 +193,9 @@ struct data_expression_typechecker: protected data::data_type_checker
     return false;
   }
 
-  sort_expression ExpandNumTypesDown(sort_expression Type)
+  sort_expression ExpandNumTypesDown(const sort_expression& x)
   {
-    return data_type_checker::ExpandNumTypesDown(Type);
+    return data_type_checker::ExpandNumTypesDown(x);
   }
 
   /** \brief     Type check a data expression.
@@ -300,15 +300,15 @@ core::identifier_string_list list_difference(const core::identifier_string_list&
 namespace detail
 {
 
-bool MActEq(core::identifier_string_list MAct1, core::identifier_string_list MAct2);
+bool equal_multi_actions(core::identifier_string_list a1, core::identifier_string_list a2);
 
+// returns true if a is in A
 inline
-bool MActIn(core::identifier_string_list MAct, action_name_multiset_list MActs)
+bool multi_actions_contains(const core::identifier_string_list& a, const action_name_multiset_list& A)
 {
-  //returns true if MAct is in MActs
-  for (auto i = MActs.begin(); i != MActs.end(); ++i)
+  for (auto i = A.begin(); i != A.end(); ++i)
   {
-    if (MActEq(MAct, i->names()))
+    if (equal_multi_actions(a, i->names()))
     {
       return true;
     }
@@ -316,30 +316,30 @@ bool MActIn(core::identifier_string_list MAct, action_name_multiset_list MActs)
   return false;
 }
 
+// returns true if the two multiactions are equal.
 inline
-bool MActEq(core::identifier_string_list MAct1, core::identifier_string_list MAct2)
+bool equal_multi_actions(core::identifier_string_list a1, core::identifier_string_list a2)
 {
-  //returns true if the two multiactions are equal.
-  if (MAct1.size() != MAct2.size())
+  if (a1.size() != a2.size())
   {
     return false;
   }
-  if (MAct1.empty())
+  if (a1.empty())
   {
     return true;
   }
-  core::identifier_string Act1 = MAct1.front();
-  MAct1 = MAct1.tail();
+  core::identifier_string Act1 = a1.front();
+  a1 = a1.tail();
 
-  //remove Act1 once from MAct2. if not there -- return ATfalse.
+  //remove Act1 once from a2. if not there -- return ATfalse.
   core::identifier_string_list NewMAct2;
-  for (; !MAct2.empty(); MAct2=MAct2.tail())
+  for (; !a2.empty(); a2 = a2.tail())
   {
-    core::identifier_string Act2=MAct2.front();
+    core::identifier_string Act2 = a2.front();
     if (Act1 == Act2)
     {
-      MAct2 = atermpp::reverse(NewMAct2) + MAct2.tail();
-      return MActEq(MAct1, MAct2);
+      a2 = atermpp::reverse(NewMAct2) + a2.tail();
+      return equal_multi_actions(a1, a2);
     }
     else
     {
@@ -451,7 +451,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
-  std::map<core::identifier_string, data::data_expression> assignment_map(const data::untyped_identifier_assignment_list& assignments)
+  std::map<core::identifier_string, data::data_expression> make_assignment_map(const data::untyped_identifier_assignment_list& assignments)
   {
     std::map<core::identifier_string, data::data_expression> result;
     for (const data::untyped_identifier_assignment& a: assignments)
@@ -466,11 +466,18 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return result;
   }
 
-  // Filter the parameters to contain only the equation sorts with parameters in this process call with assignments
-  sorts_list filter_parameters(sorts_list parameter_lists, const std::map<core::identifier_string, data::data_expression>& assignments, const untyped_process_assignment& x)
+  // returns the equation sorts that corresponds to the untyped process assignment x
+  data::variable_list matching_process_parameters(const untyped_process_assignment& x)
   {
-    sorts_list result;
+    auto j = m_equation_sorts.find(x.name());
+    if (j == m_equation_sorts.end())
+    {
+      throw mcrl2::runtime_error("process " + core::pp(x.name()) + " not declared");
+    }
+    sorts_list parameter_lists = j->second;
     assert(!parameter_lists.empty());
+
+    sorts_list result;
     core::identifier_string culprit; // Variable used for more intelligible error messages.
     for (const data::sort_expression_list& parameters: parameter_lists)
     {
@@ -485,9 +492,9 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
 
       core::identifier_string_list left_hand_sides;
-      for (auto i = assignments.begin(); i != assignments.end(); ++i)
+      for (const data::untyped_identifier_assignment& a: x.assignments())
       {
-        left_hand_sides.push_front(i->first);
+        left_hand_sides.push_front(a.lhs());
       }
       core::identifier_string_list l = list_difference(left_hand_sides, formal_parameter_names);
       if (l.empty())
@@ -509,18 +516,18 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     {
       throw mcrl2::runtime_error("ambiguous process " + core::pp(x.name()) + " containing all assignments in " + process::pp(x) + ".");
     }
-    return result;
+    assert(result.size() == 1);
+    const data::variable_list& formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.normalize_sorts(result.front())));
+    return formal_parameters;
   }
 
+  //we get: List of Lists of SortExpressions
+  //Outer list: possible parameter types 0..nPosParsVectors-1
+  //inner lists: parameter types vectors 0..n-1
+  //we constuct 1 vector (list) of sort expressions (NotInferred if ambiguous)
+  //0..n-1
   data::sort_expression_list GetNotInferredList(const sorts_list& sorts)
   {
-    //we get: List of Lists of SortExpressions
-    //Outer list: possible parameter types 0..nPosParsVectors-1
-    //inner lists: parameter types vectors 0..n-1
-
-    //we constuct 1 vector (list) of sort expressions (NotInferred if ambiguous)
-    //0..n-1
-
     if (sorts.size() == 1)
     {
       return sorts.front();
@@ -594,25 +601,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
     // otherwise return not inferred.
     return std::make_pair(true, GetNotInferredList(atermpp::reverse(new_sorts)));
-  }
-
-  process_expression MakeActionOrProc(bool is_action,
-                                      const core::identifier_string& name,
-                                      const data::sort_expression_list& formal_parameters,
-                                      const data::data_expression_list FactParList
-                                     )
-  {
-    if (is_action)
-    {
-      return action(action_label(name, formal_parameters), FactParList);
-    }
-    else
-    {
-      auto i = m_process_parameters.find(std::make_pair(name, m_data_typechecker.normalize_sorts(formal_parameters)));
-      assert(i != m_process_parameters.end());
-      const data::variable_list& FormalVars = i->second;
-      return process_instance(process_identifier(name, FormalVars), FactParList);
-    }
   }
 
   sorts_list filter_parameters_on_size(sorts_list parameter_list, const data::data_expression_list& parameters, const core::identifier_string& name, const std::string& msg)
@@ -775,20 +763,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     mCRL2log(log::debug) << "typechecking a process call with short-hand assignments " << x << "" << std::endl;
 
-    auto j = m_equation_sorts.find(x.name());
-    if (j == m_equation_sorts.end())
-    {
-      throw mcrl2::runtime_error("process " + core::pp(x.name()) + " not declared");
-    }
-    sorts_list parameter_list = j->second;
-
-    std::map<core::identifier_string, data::data_expression> assignments = assignment_map(x.assignments());
-
-    parameter_list = filter_parameters(parameter_list, assignments, x);
+    data::variable_list formal_parameters = matching_process_parameters(x);
+    std::map<core::identifier_string, data::data_expression> assignments = make_assignment_map(x.assignments());
 
     // get the formal parameter names
     data::data_expression_list actual_parameters;
-    const data::variable_list& formal_parameters = utilities::detail::map_element(m_process_parameters, std::make_pair(x.name(), m_data_typechecker.normalize_sorts(parameter_list.front())));
     {
       // we only need the names of the parameters, not the types
       for (const data::variable& d: formal_parameters)
@@ -971,7 +950,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
           throw mcrl2::runtime_error("allowing an undefined action " + core::pp(a) + " in (multi)action " + core::pp(A.names()) + " (typechecking " + process::pp(x) + ")");
         }
       }
-      if (MActIn(A.names(), MActs))
+      if (multi_actions_contains(A.names(), MActs))
       {
         mCRL2log(log::warning) << "allowing (multi)action " << A.names() << " twice (typechecking " << x << ")" << std::endl;
       }
