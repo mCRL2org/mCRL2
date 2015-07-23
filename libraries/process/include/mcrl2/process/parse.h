@@ -275,7 +275,6 @@ void complete_process_specification(process_specification& x, bool alpha_reduce 
     alphabet_reduce(x, 1000ul);
   }
   process::translate_user_notation(x);
-  process::normalize_sorts(x, x.data());
 }
 
 } // namespace detail
