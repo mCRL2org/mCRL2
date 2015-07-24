@@ -167,6 +167,50 @@ typecheck_builder make_typecheck_builder(
 
 } // namespace action_formulas
 
+namespace regular_formulas
+{
+
+namespace detail
+{
+
+struct typecheck_builder: public regular_formula_builder<typecheck_builder>
+{
+  typedef regular_formula_builder<typecheck_builder> super;
+  using super::apply;
+
+  data::detail::data_typechecker& m_data_typechecker;
+  const std::map<core::identifier_string, data::sort_expression>& m_variables;
+  const std::multimap<core::identifier_string, process::action_label>& m_actions;
+
+  typecheck_builder(data::detail::data_typechecker& data_typechecker,
+                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const std::multimap<core::identifier_string, process::action_label>& actions
+                   )
+    : m_data_typechecker(data_typechecker),
+      m_variables(variables),
+      m_actions(actions)
+  {}
+
+  regular_formula apply(const action_formulas::action_formula& x)
+  {
+    return action_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions).apply(x);
+  }
+};
+
+inline
+typecheck_builder make_typecheck_builder(
+                    data::detail::data_typechecker& data_typechecker,
+                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const std::multimap<core::identifier_string, process::action_label>& actions
+                   )
+{
+  return typecheck_builder(data_typechecker, variables, actions);
+}
+
+} // namespace detail
+
+} // namespace regular_formulas
+
 namespace state_formulas
 {
 
