@@ -23,6 +23,122 @@
 namespace mcrl2
 {
 
+namespace action_formulas
+{
+
+namespace detail
+{
+
+struct typecheck_builder: public action_formula_builder<typecheck_builder>
+{
+  typedef action_formula_builder<typecheck_builder> super;
+  using super::apply;
+
+  data::detail::data_typechecker& m_data_typechecker;
+  std::map<core::identifier_string, data::sort_expression> m_variables;
+  const std::multimap<core::identifier_string, process::action_label>& m_actions;
+
+  typecheck_builder(data::detail::data_typechecker& data_typechecker,
+                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const std::multimap<core::identifier_string, process::action_label>& actions
+                   )
+    : m_data_typechecker(data_typechecker),
+      m_variables(variables),
+      m_actions(actions)
+  {}
+
+  template <typename Container>
+  data::sort_expression_list parameter_sorts(const Container& parameters)
+  {
+    data::sort_expression_list sorts;
+    for (const data::data_expression& e: parameters)
+    {
+      sorts.push_front(e.sort());
+    }
+    return atermpp::reverse(sorts);
+  }
+
+  process::action typecheck_action(const process::untyped_action& x)
+  {
+    // TODO: implement this
+    return process::action();
+  }
+
+  action_formula apply(const data::data_expression& x)
+  {
+    return m_data_typechecker(x, data::sort_bool::bool_(), m_variables);
+  }
+
+  action_formula apply(const action_formulas::at& x)
+  {
+    data::data_expression new_time = m_data_typechecker(x.time_stamp(), data::sort_real::real_(), m_variables);
+    return at((*this).apply(x.operand()), new_time);
+  }
+
+  action_formula apply(const action_formulas::untyped_multi_action& x)
+  {
+    process::action_list new_arguments;
+    for (const process::untyped_action& a: x.arguments())
+    {
+      new_arguments.push_front(typecheck_action(a));
+    }
+    new_arguments = atermpp::reverse(new_arguments);
+    return action_formulas::multi_action(new_arguments);
+  }
+
+  action_formula apply(const action_formulas::forall& x)
+  {
+    try
+    {
+      auto m_variables_copy = m_variables;
+      for (const data::variable& v: x.variables())
+      {
+        m_variables[v.name()] = v.sort();
+      }
+      action_formula body = (*this).apply(x.body());
+      m_variables = m_variables_copy;
+      return forall(x.variables(), body);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + action_formulas::pp(x));
+    }
+  }
+
+  action_formula apply(const action_formulas::exists& x)
+  {
+    try
+    {
+      auto m_variables_copy = m_variables;
+      for (const data::variable& v: x.variables())
+      {
+        m_variables[v.name()] = v.sort();
+      }
+      action_formula body = (*this).apply(x.body());
+      m_variables = m_variables_copy;
+      return exists(x.variables(), body);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + action_formulas::pp(x));
+    }
+  }
+};
+
+inline
+typecheck_builder make_typecheck_builder(
+                    data::detail::data_typechecker& data_typechecker,
+                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const std::multimap<core::identifier_string, process::action_label>& actions
+                   )
+{
+  return typecheck_builder(data_typechecker, variables, actions);
+}
+
+} // namespace detail
+
+} // namespace action_formulas
+
 namespace state_formulas
 {
 
@@ -36,14 +152,17 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 
   data::detail::data_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variables;
-  std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
+  const std::multimap<core::identifier_string, process::action_label>& m_actions;
+  const std::map<core::identifier_string, data::sort_expression_list>& m_state_variables;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const std::multimap<core::identifier_string, process::action_label>& actions,
                     const std::map<core::identifier_string, data::sort_expression_list>& state_variables
                    )
     : m_data_typechecker(data_typechecker),
       m_variables(variables),
+      m_actions(actions),
       m_state_variables(state_variables)
   {}
 
@@ -231,16 +350,21 @@ inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const std::multimap<core::identifier_string, process::action_label>& actions,
                     const std::map<core::identifier_string, data::sort_expression_list>& state_variables
                    )
 {
-  return typecheck_builder(data_typechecker, variables, state_variables);
+  return typecheck_builder(data_typechecker, variables, actions, state_variables);
 }
 
 } // namespace detail
 
 class state_formula_type_checker : lps::action_type_checker
 {
+  protected:
+    data::detail::data_typechecker m_data_typechecker;
+    std::map<core::identifier_string, data::sort_expression> m_variables;
+    std::multimap<core::identifier_string, process::action_label> m_actions;
 
   public:
     /** \brief     Type check a state formula.
@@ -250,9 +374,12 @@ class state_formula_type_checker : lps::action_type_checker
      *             variable occurs in the scope of an odd number of negations.
      *  \return    a state formula where all untyped identifiers have been replace by typed ones.
      **/
-    state_formula_type_checker(const data::data_specification& data_spec, const process::action_label_list& action_decls)
-      : lps::action_type_checker(data_spec,action_decls)
-    {}
+    state_formula_type_checker(const data::data_specification& dataspec, const process::action_label_list& action_decls)
+      : lps::action_type_checker(dataspec,action_decls),
+        m_data_typechecker(dataspec)
+    {
+      add_action_labels(action_decls);
+    }
 
     //check correctness of the state formula in state_formula using
     //the process specification or LPS in spec as follows:
@@ -278,6 +405,30 @@ class state_formula_type_checker : lps::action_type_checker
     }
 
   protected:
+    template <typename ActionLabelContainer>
+    void add_action_labels(const ActionLabelContainer& actions)
+    {
+      for (const process::action_label& a: actions)
+      {
+        core::identifier_string name = a.name();
+        m_data_typechecker.check_sort_list_is_declared(a.sorts());
+
+        // Insert a in m_actions; N.B. Before that check if it already exists
+        auto range = m_actions.equal_range(a.name());
+        if (range.first != m_actions.end())
+        {
+          for (auto i = range.first; i != range.second; ++i)
+          {
+            if (i->second == a)
+            {
+              throw mcrl2::runtime_error("double declaration of action " + process::pp(a));
+            }
+          }
+        }
+        m_actions.insert(range.first, std::make_pair(a.name(), a));
+      }
+    }
+
     state_formula TraverseStateFrm(const std::map<core::identifier_string, data::sort_expression>& Vars, const std::map<core::identifier_string, data::sort_expression_list>& m_state_variables, const state_formula& StateFrm)
     {
       mCRL2log(log::debug) << "TraverseStateFrm: " + pp(StateFrm) + "" << std::endl;
@@ -756,7 +907,6 @@ class state_formula_type_checker : lps::action_type_checker
 
       throw mcrl2::runtime_error("Internal error. The action formula " + pp(ActFrm) + " fails to match any known form in typechecking case analysis");
     }
-
 };
 
 /** \brief     Type check a state formula.
