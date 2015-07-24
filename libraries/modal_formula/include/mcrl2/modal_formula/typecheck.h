@@ -353,7 +353,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     for (const data::assignment& a: x.assignments())
     {
       check_sort_declared(a.lhs().sort(), x);
-      data::sort_expression expected_sort = m_data_typechecker.ExpandNumTypesDown(a.lhs().sort());
+      data::sort_expression expected_sort = m_data_typechecker.expand_numeric_types_down(a.lhs().sort());
       data::data_expression rhs = m_data_typechecker(a.rhs(), expected_sort, m_variables);
       new_assignments.push_front(data::assignment(a.lhs(), rhs));
     }
@@ -419,12 +419,6 @@ typecheck_builder make_typecheck_builder(
 
 class state_formula_type_checker : lps::action_type_checker
 {
-  protected:
-    data::detail::data_typechecker m_data_typechecker;
-    std::map<core::identifier_string, data::sort_expression> m_variables;
-    std::multimap<core::identifier_string, process::action_label> m_actions;
-    std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
-
   public:
     /** \brief     Type check a state formula.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -439,13 +433,8 @@ class state_formula_type_checker : lps::action_type_checker
                                const VariableContainer& variables = VariableContainer(),
                                const StateVariableContainer& state_variables = StateVariableContainer()
                               )
-      : lps::action_type_checker(dataspec, process::action_label_list(action_labels.begin(), action_labels.end())),
-        m_data_typechecker(dataspec)
-    {
-      add_global_variables(variables);
-      add_action_labels(action_labels);
-      add_state_variables(state_variables);
-    }
+      : lps::action_type_checker(dataspec, process::action_label_list(action_labels.begin(), action_labels.end()))
+    {}
 
     //check correctness of the state formula in state_formula using
     //the process specification or LPS in spec as follows:
@@ -467,81 +456,10 @@ class state_formula_type_checker : lps::action_type_checker
       {
         throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(result));
       }
-
-      // state_formula result1 = detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions, m_state_variables).apply(state_formulas::normalize_sorts(formula, m_data_typechecker.typechecked_data_specification()));
-      // if (result != result1)
-      // {
-      //   std::cout << "result  == " << result << std::endl;
-      //   std::cout << "result1 == " << result1 << std::endl;
-      //   assert(false);
-      // }
       return result;
     }
 
   protected:
-    // TODO: reuse this code
-    template <typename VariableContainer>
-    void add_global_variables(const VariableContainer& global_variables)
-    {
-      for (const data::variable& v: global_variables)
-      {
-        m_data_typechecker.check_sort_is_declared(v.sort());
-        auto i = m_variables.find(v.name());
-        if (i == m_variables.end())
-        {
-          m_variables[v.name()] = v.sort();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
-        }
-      }
-    }
-
-    // TODO: reuse this code
-    template <typename ActionLabelContainer>
-    void add_action_labels(const ActionLabelContainer& actions)
-    {
-      for (const process::action_label& a: actions)
-      {
-        core::identifier_string name = a.name();
-        m_data_typechecker.check_sort_list_is_declared(a.sorts());
-
-        // Insert a in m_actions; N.B. Before that check if it already exists
-        auto range = m_actions.equal_range(a.name());
-        if (range.first != m_actions.end())
-        {
-          for (auto i = range.first; i != range.second; ++i)
-          {
-            if (i->second == a)
-            {
-              throw mcrl2::runtime_error("double declaration of action " + process::pp(a));
-            }
-          }
-        }
-        m_actions.insert(range.first, std::make_pair(a.name(), a));
-      }
-    }
-
-    template <typename StateVariableContainer>
-    void add_state_variables(const StateVariableContainer& state_variables)
-    {
-      for (const state_formulas::variable& v: state_variables)
-      {
-        auto i = m_state_variables.find(v.name());
-        if (i == m_state_variables.end())
-        {
-          data::sort_expression_list sorts = data::detail::parameter_sorts(v.arguments());
-          m_data_typechecker.check_sort_list_is_declared(sorts);
-          m_state_variables[v.name()] = sorts;
-        }
-        else
-        {
-          throw mcrl2::runtime_error("attempt to overload state variable " + core::pp(v.name()));
-        }
-      }
-    }
-
     state_formula TraverseStateFrm(const std::map<core::identifier_string, data::sort_expression>& Vars, const std::map<core::identifier_string, data::sort_expression_list>& m_state_variables, const state_formula& StateFrm)
     {
       mCRL2log(log::debug) << "TraverseStateFrm: " + pp(StateFrm) + "" << std::endl;
@@ -1022,6 +940,121 @@ class state_formula_type_checker : lps::action_type_checker
     }
 };
 
+class state_formula_type_checker_new
+{
+  protected:
+    data::detail::data_typechecker m_data_typechecker;
+    std::map<core::identifier_string, data::sort_expression> m_variables;
+    std::multimap<core::identifier_string, process::action_label> m_actions;
+    std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
+
+  public:
+    /** \brief     Type check a state formula.
+     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
+     *  \param[in] d A state formula that has not been type checked.
+     *  \param[in] check_monotonicity Check whether the formula is monotonic, in the sense that no fixed point
+     *             variable occurs in the scope of an odd number of negations.
+     *  \return    a state formula where all untyped identifiers have been replace by typed ones.
+     **/
+    template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable>, typename StateVariableContainer = std::vector<state_formulas::variable> >
+    state_formula_type_checker_new(const data::data_specification& dataspec,
+                                   const ActionLabelContainer& action_labels = ActionLabelContainer(),
+                                   const VariableContainer& variables = VariableContainer(),
+                                   const StateVariableContainer& state_variables = StateVariableContainer()
+                                  )
+      : m_data_typechecker(dataspec)
+    {
+      add_global_variables(variables);
+      add_action_labels(action_labels);
+      add_state_variables(state_variables);
+    }
+
+    //check correctness of the state formula in state_formula using
+    //the process specification or LPS in spec as follows:
+    //1) determine the types of actions according to the definitions
+    //   in spec
+    //2) determine the types of data expressions according to the
+    //   definitions in spec
+    //3) check for name conflicts of data variable declarations in
+    //   forall, exists, mu and nu quantifiers
+    //4) check for monotonicity of fixpoint variables
+    state_formula operator()(const state_formula& x, bool check_monotonicity)
+    {
+      mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
+
+      state_formula result = detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions, m_state_variables).apply(state_formulas::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
+      if (check_monotonicity && !is_monotonous(result))
+      {
+        throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(result));
+      }
+      return result;
+    }
+
+  protected:
+    // TODO: reuse this code
+    template <typename VariableContainer>
+    void add_global_variables(const VariableContainer& global_variables)
+    {
+      for (const data::variable& v: global_variables)
+      {
+        m_data_typechecker.check_sort_is_declared(v.sort());
+        auto i = m_variables.find(v.name());
+        if (i == m_variables.end())
+        {
+          m_variables[v.name()] = v.sort();
+        }
+        else
+        {
+          throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
+        }
+      }
+    }
+
+    // TODO: reuse this code
+    template <typename ActionLabelContainer>
+    void add_action_labels(const ActionLabelContainer& actions)
+    {
+      for (const process::action_label& a: actions)
+      {
+        core::identifier_string name = a.name();
+        m_data_typechecker.check_sort_list_is_declared(a.sorts());
+
+        // Insert a in m_actions; N.B. Before that check if it already exists
+        auto range = m_actions.equal_range(a.name());
+        if (range.first != m_actions.end())
+        {
+          for (auto i = range.first; i != range.second; ++i)
+          {
+            if (i->second == a)
+            {
+              throw mcrl2::runtime_error("double declaration of action " + process::pp(a));
+            }
+          }
+        }
+        m_actions.insert(range.first, std::make_pair(a.name(), a));
+      }
+    }
+
+    template <typename StateVariableContainer>
+    void add_state_variables(const StateVariableContainer& state_variables)
+    {
+      for (const state_formulas::variable& v: state_variables)
+      {
+        auto i = m_state_variables.find(v.name());
+        if (i == m_state_variables.end())
+        {
+          data::sort_expression_list sorts = data::detail::parameter_sorts(v.arguments());
+          m_data_typechecker.check_sort_list_is_declared(sorts);
+          m_state_variables[v.name()] = sorts;
+        }
+        else
+        {
+          throw mcrl2::runtime_error("attempt to overload state variable " + core::pp(v.name()));
+        }
+      }
+    }
+};
+
 /** \brief     Type check a state formula.
  *  Throws an exception if something went wrong.
  *  \param[in] formula A state formula that has not been type checked.
@@ -1035,10 +1068,24 @@ void type_check(state_formula& formula, const lps::specification& lps_spec, bool
     state_formula_type_checker type_checker(lps_spec.data(), lps_spec.action_labels());
     formula=type_checker(formula,check_monotonicity);
   }
-  catch (mcrl2::runtime_error &e)
+  catch (mcrl2::runtime_error& e)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula " +
                              mcrl2::utilities::to_string(formula));
+  }
+}
+
+inline
+state_formula type_check_new(const state_formula& x, const lps::specification& lps_spec, bool check_monotonicity = true)
+{
+  try
+  {
+    state_formula_type_checker_new type_checker(lps_spec.data(), lps_spec.action_labels());
+    return type_checker(x, check_monotonicity);
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula " + state_formulas::pp(x));
   }
 }
 

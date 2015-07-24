@@ -96,7 +96,7 @@ struct data_typechecker: protected data::data_type_checker
     }
     catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(ExpandNumTypesDown(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
     }
   }
 
@@ -195,7 +195,7 @@ struct data_typechecker: protected data::data_type_checker
     return false;
   }
 
-  sort_expression ExpandNumTypesDown(const sort_expression& x)
+  sort_expression expand_numeric_types_down(const sort_expression& x)
   {
     return data::normalize_sorts(data_type_checker::ExpandNumTypesDown(x), get_sort_specification());
   }
@@ -312,7 +312,7 @@ struct data_typechecker: protected data::data_type_checker
     }
     catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(ExpandNumTypesDown(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
     }
   }
 
