@@ -12,8 +12,11 @@
 #ifndef MCRL2_MODAL_FORMULA_TYPECHECK_H
 #define MCRL2_MODAL_FORMULA_TYPECHECK_H
 
+#include "mcrl2/data/detail/data_typechecker.h"
 #include "mcrl2/lps/typecheck.h"
+#include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/is_monotonous.h"
+#include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -22,6 +25,219 @@ namespace mcrl2
 
 namespace state_formulas
 {
+
+namespace detail
+{
+
+struct typecheck_builder: public state_formula_builder<typecheck_builder>
+{
+  typedef state_formula_builder<typecheck_builder> super;
+  using super::apply;
+
+  data::detail::data_typechecker& m_data_typechecker;
+  std::map<core::identifier_string, data::sort_expression> m_variables;
+  std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
+
+  typecheck_builder(data::detail::data_typechecker& data_typechecker,
+                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const std::map<core::identifier_string, data::sort_expression_list>& state_variables
+                   )
+    : m_data_typechecker(data_typechecker),
+      m_variables(variables),
+      m_state_variables(state_variables)
+  {}
+
+  template <typename Container>
+  data::sort_expression_list parameter_sorts(const Container& parameters)
+  {
+    data::sort_expression_list sorts;
+    for (const data::data_expression& e: parameters)
+    {
+      sorts.push_front(e.sort());
+    }
+    return atermpp::reverse(sorts);
+  }
+
+  void check_sort_declared(const data::sort_expression& s, const state_formula& x)
+  {
+    try
+    {
+      m_data_typechecker.check_sort_is_declared(s);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking " + state_formulas::pp(x));
+    }
+  }
+
+  std::map<core::identifier_string, data::data_expression> make_assignment_map(const data::assignment_list& assignments)
+  {
+    std::map<core::identifier_string, data::data_expression> result;
+    for (auto const& a: assignments)
+    {
+      auto i = result.find(a.lhs().name());
+      if (i != result.end()) // An assignment of the shape x := t already exists, this is not OK.
+      {
+        throw mcrl2::runtime_error("Double data::assignment to data::variable " + core::pp(a.lhs()) + " (detected assigned values are " + data::pp(i->second) + " and " + core::pp(a.rhs()) + ")");
+      }
+      result[a.lhs().name()] = a.rhs();
+    }
+    return result;
+  }
+
+  state_formula apply(const data::data_expression& x)
+  {
+    return m_data_typechecker(x, data::sort_bool::bool_(), m_variables);
+  }
+
+  state_formula apply(const state_formulas::forall& x)
+  {
+    try
+    {
+      auto m_variables_copy = m_variables;
+      for (const data::variable& v: x.variables())
+      {
+        m_variables[v.name()] = v.sort();
+      }
+      state_formula body = (*this).apply(x.body());
+      m_variables = m_variables_copy;
+      return forall(x.variables(), body);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
+    }
+  }
+
+  state_formula apply(const state_formulas::exists& x)
+  {
+    try
+    {
+      auto m_variables_copy = m_variables;
+      for (const data::variable& v: x.variables())
+      {
+        m_variables[v.name()] = v.sort();
+      }
+      state_formula body = (*this).apply(x.body());
+      m_variables = m_variables_copy;
+      return exists(x.variables(), body);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
+    }
+  }
+
+  state_formula apply(const state_formulas::may& x)
+  {
+    // TODO: typechech x.formula()
+    return may(x.formula(), (*this).apply(x.operand()));
+  }
+
+  state_formula apply(const state_formulas::must& x)
+  {
+    // TODO: typechech x.formula()
+    return must(x.formula(), (*this).apply(x.operand()));
+  }
+
+  state_formula apply(const state_formulas::delay_timed& x)
+  {
+    data::data_expression new_time = m_data_typechecker(x.time_stamp(), data::sort_real::real_(), m_variables);
+    return delay_timed(new_time);
+  }
+
+  state_formula apply(const state_formulas::yaled_timed& x)
+  {
+    data::data_expression new_time = m_data_typechecker(x.time_stamp(), data::sort_real::real_(), m_variables);
+    return yaled_timed(new_time);
+  }
+
+  state_formula apply(const state_formulas::variable& x)
+  {
+    core::identifier_string StateVarName = x.name();
+    auto i = m_state_variables.find(StateVarName);
+    if (i == m_state_variables.end())
+    {
+      throw mcrl2::runtime_error("undefined state variable " + core::pp(x.name()) + " (typechecking state formula " + state_formulas::pp(x) + ")");
+    }
+    const data::sort_expression_list& expected_sorts = i->second;
+
+    if (expected_sorts.size() != x.arguments().size())
+    {
+      throw mcrl2::runtime_error("incorrect number of parameters for state variable " + core::pp(x.name()) + " (typechecking state formula " + state_formulas::pp(x) + ")");
+    }
+
+    data::data_expression_list new_arguments;
+    auto q1 = expected_sorts.begin();
+    auto q2 = x.arguments().begin();
+    for (; q1 != expected_sorts.begin(); ++q1, ++q2)
+    {
+      new_arguments.push_front(m_data_typechecker(*q2, *q1, m_variables));
+    }
+    return state_formulas::variable(x.name(), new_arguments);
+  }
+
+  template <typename MuNuFormula>
+  state_formula apply_mu_nu(const MuNuFormula& x, bool is_mu)
+  {
+    std::map<core::identifier_string, data::data_expression> assignments = make_assignment_map(x.assignments());
+
+    // typecheck the assignments
+    data::assignment_list new_assignments;
+    for (const data::assignment& a: x.assignments())
+    {
+      check_sort_declared(a.lhs().sort(), x);
+      data::sort_expression expected_sort = m_data_typechecker.ExpandNumTypesDown(a.lhs().sort());
+      data::data_expression rhs = m_data_typechecker(a.rhs(), expected_sort, m_variables);
+      new_assignments.push_front(data::assignment(a.lhs(), rhs));
+    }
+    new_assignments = atermpp::reverse(new_assignments);
+
+    // add the assignment variables to the context
+    auto m_variables_copy = m_variables;
+    for (const data::assignment& a: x.assignments())
+    {
+      m_variables[a.lhs().name()] = a.lhs().sort();
+    }
+
+    // typecheck the operand
+    state_formula new_operand = (*this).apply(x.operand());
+
+    // restore the context
+    m_variables = m_variables_copy;
+
+    if (is_mu)
+    {
+      return mu(x.name(), new_assignments, new_operand);
+    }
+    else
+    {
+      nu(x.name(), new_assignments, new_operand);
+    }
+  }
+
+  state_formula apply(const state_formulas::nu& x)
+  {
+    return apply_mu_nu(x, false);
+  }
+
+  state_formula apply(const state_formulas::mu& x)
+  {
+    return apply_mu_nu(x, true);
+  }
+};
+
+inline
+typecheck_builder make_typecheck_builder(
+                    data::detail::data_typechecker& data_typechecker,
+                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const std::map<core::identifier_string, data::sort_expression_list>& state_variables
+                   )
+{
+  return typecheck_builder(data_typechecker, variables, state_variables);
+}
+
+} // namespace detail
 
 class state_formula_type_checker : lps::action_type_checker
 {
@@ -52,8 +268,8 @@ class state_formula_type_checker : lps::action_type_checker
       mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
 
       std::map<core::identifier_string, data::sort_expression> Vars;
-      std::map<core::identifier_string, data::sort_expression_list> StateVars;
-      state_formula result=TraverseStateFrm(Vars,StateVars,formula);
+      std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
+      state_formula result=TraverseStateFrm(Vars,m_state_variables,formula);
       if (check_monotonicity && !is_monotonous(result))
       {
         throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(result));
@@ -62,10 +278,8 @@ class state_formula_type_checker : lps::action_type_checker
     }
 
   protected:
-    state_formula TraverseStateFrm(const std::map<core::identifier_string, data::sort_expression>& Vars, const std::map<core::identifier_string, data::sort_expression_list>& StateVars, const state_formula& StateFrm)
+    state_formula TraverseStateFrm(const std::map<core::identifier_string, data::sort_expression>& Vars, const std::map<core::identifier_string, data::sort_expression_list>& m_state_variables, const state_formula& StateFrm)
     {
-      using namespace state_formulas;
-
       mCRL2log(log::debug) << "TraverseStateFrm: " + pp(StateFrm) + "" << std::endl;
 
       if (state_formulas::is_true(StateFrm) || state_formulas::is_false(StateFrm) || state_formulas::is_delay(StateFrm) || state_formulas::is_yaled(StateFrm))
@@ -76,25 +290,25 @@ class state_formula_type_checker : lps::action_type_checker
       if (state_formulas::is_not(StateFrm))
       {
         const  not_& t = atermpp::down_cast<const not_>(StateFrm);
-        return not_(TraverseStateFrm(Vars,StateVars,t.operand()));
+        return not_(TraverseStateFrm(Vars,m_state_variables,t.operand()));
       }
 
       if (state_formulas::is_and(StateFrm))
       {
         const and_& t=atermpp::down_cast<const and_>(StateFrm);
-        return and_(TraverseStateFrm(Vars,StateVars,t.left()),TraverseStateFrm(Vars,StateVars,t.right()));
+        return and_(TraverseStateFrm(Vars,m_state_variables,t.left()),TraverseStateFrm(Vars,m_state_variables,t.right()));
       }
 
       if (state_formulas::is_or(StateFrm))
       {
         const or_& t=atermpp::down_cast<const or_>(StateFrm);
-        return or_(TraverseStateFrm(Vars,StateVars,t.left()),TraverseStateFrm(Vars,StateVars,t.right()));
+        return or_(TraverseStateFrm(Vars,m_state_variables,t.left()),TraverseStateFrm(Vars,m_state_variables,t.right()));
       }
 
       if (state_formulas::is_imp(StateFrm))
       {
         const imp& t=atermpp::down_cast<const imp>(StateFrm);
-        return imp(TraverseStateFrm(Vars,StateVars,t.left()),TraverseStateFrm(Vars,StateVars,t.right()));
+        return imp(TraverseStateFrm(Vars,m_state_variables,t.left()),TraverseStateFrm(Vars,m_state_variables,t.right()));
       }
 
       if (state_formulas::is_forall(StateFrm))
@@ -106,7 +320,7 @@ class state_formula_type_checker : lps::action_type_checker
         AddVars2Table(CopyVars,t.variables());
         NewVars=CopyVars;
 
-        return forall(t.variables(),TraverseStateFrm(NewVars,StateVars,t.body()));
+        return forall(t.variables(),TraverseStateFrm(NewVars,m_state_variables,t.body()));
       }
 
       if (state_formulas::is_exists(StateFrm))
@@ -118,19 +332,19 @@ class state_formula_type_checker : lps::action_type_checker
         AddVars2Table(CopyVars,t.variables());
         NewVars=CopyVars;
 
-        return exists(t.variables(),TraverseStateFrm(NewVars,StateVars,t.body()));
+        return exists(t.variables(),TraverseStateFrm(NewVars,m_state_variables,t.body()));
       }
 
       if (is_may(StateFrm))
       {
         const may& f=atermpp::down_cast<const may>(StateFrm);
-        return may(TraverseRegFrm(Vars,f.formula()),TraverseStateFrm(Vars,StateVars,f.operand()));
+        return may(TraverseRegFrm(Vars,f.formula()),TraverseStateFrm(Vars,m_state_variables,f.operand()));
       }
 
       if (is_must(StateFrm))
       {
         const must& f=atermpp::down_cast<const must>(StateFrm);
-        return must(TraverseRegFrm(Vars,f.formula()),TraverseStateFrm(Vars,StateVars,f.operand()));
+        return must(TraverseRegFrm(Vars,f.formula()),TraverseStateFrm(Vars,m_state_variables,f.operand()));
       }
 
       if (state_formulas::is_delay_timed(StateFrm))
@@ -185,8 +399,8 @@ class state_formula_type_checker : lps::action_type_checker
       {
         state_formulas::variable v=atermpp::down_cast<const state_formulas::variable>(StateFrm);
         core::identifier_string StateVarName=v.name();
-        auto i=StateVars.find(StateVarName);
-        if (i==StateVars.end())
+        auto i=m_state_variables.find(StateVarName);
+        if (i==m_state_variables.end())
         {
           throw mcrl2::runtime_error("undefined state variable " + to_string(StateVarName) + " (typechecking state formula " + pp(StateFrm) + ")");
         }
@@ -238,7 +452,7 @@ class state_formula_type_checker : lps::action_type_checker
       if (state_formulas::is_nu(StateFrm))
       {
         const nu& f=atermpp::down_cast<const nu>(StateFrm);
-        std::map<core::identifier_string, data::sort_expression_list> CopyStateVars(StateVars);
+        std::map<core::identifier_string, data::sort_expression_list> CopyStateVars(m_state_variables);
 
         // Make the new state variable:
         std::map<core::identifier_string,data::sort_expression> FormPars;
@@ -313,7 +527,7 @@ class state_formula_type_checker : lps::action_type_checker
       if (state_formulas::is_mu(StateFrm))
       {
         const mu& f=atermpp::down_cast<const mu>(StateFrm);
-        std::map<core::identifier_string, data::sort_expression_list> CopyStateVars(StateVars);
+        std::map<core::identifier_string, data::sort_expression_list> CopyStateVars(m_state_variables);
 
         // Make the new state variable:
         std::map<core::identifier_string, data::sort_expression> FormPars;
