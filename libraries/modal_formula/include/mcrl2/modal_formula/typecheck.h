@@ -49,17 +49,6 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       m_actions(actions)
   {}
 
-  template <typename Container>
-  data::sort_expression_list parameter_sorts(const Container& parameters)
-  {
-    data::sort_expression_list sorts;
-    for (const data::data_expression& e: parameters)
-    {
-      sorts.push_front(e.sort());
-    }
-    return atermpp::reverse(sorts);
-  }
-
   // TODO: reuse this code from process typechecker
   sorts_list matching_action_sorts(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
@@ -225,7 +214,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
   data::detail::data_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variables;
   const std::multimap<core::identifier_string, process::action_label>& m_actions;
-  const std::map<core::identifier_string, data::sort_expression_list>& m_state_variables;
+  std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
@@ -237,17 +226,6 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
       m_actions(actions),
       m_state_variables(state_variables)
   {}
-
-  template <typename Container>
-  data::sort_expression_list parameter_sorts(const Container& parameters)
-  {
-    data::sort_expression_list sorts;
-    for (const data::data_expression& e: parameters)
-    {
-      sorts.push_front(e.sort());
-    }
-    return atermpp::reverse(sorts);
-  }
 
   void check_sort_declared(const data::sort_expression& s, const state_formula& x)
   {
@@ -321,14 +299,12 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 
   state_formula apply(const state_formulas::may& x)
   {
-    // TODO: typechech x.formula()
-    return may(x.formula(), (*this).apply(x.operand()));
+    return may(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions).apply(x.formula()), (*this).apply(x.operand()));
   }
 
   state_formula apply(const state_formulas::must& x)
   {
-    // TODO: typechech x.formula()
-    return must(x.formula(), (*this).apply(x.operand()));
+    return must(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions).apply(x.formula()), (*this).apply(x.operand()));
   }
 
   state_formula apply(const state_formulas::delay_timed& x)
@@ -345,8 +321,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 
   state_formula apply(const state_formulas::variable& x)
   {
-    core::identifier_string StateVarName = x.name();
-    auto i = m_state_variables.find(StateVarName);
+    auto i = m_state_variables.find(x.name());
     if (i == m_state_variables.end())
     {
       throw mcrl2::runtime_error("undefined state variable " + core::pp(x.name()) + " (typechecking state formula " + state_formulas::pp(x) + ")");
@@ -361,7 +336,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     data::data_expression_list new_arguments;
     auto q1 = expected_sorts.begin();
     auto q2 = x.arguments().begin();
-    for (; q1 != expected_sorts.begin(); ++q1, ++q2)
+    for (; q1 != expected_sorts.end(); ++q1, ++q2)
     {
       new_arguments.push_front(m_data_typechecker(*q2, *q1, m_variables));
     }
@@ -391,11 +366,22 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
       m_variables[a.lhs().name()] = a.lhs().sort();
     }
 
+    // add x to the state variable context
+    auto m_state_variables_copy = m_state_variables;
+    data::sort_expression_list x_lhs_sorts;
+    for (const data::assignment& a: x.assignments())
+    {
+      x_lhs_sorts.push_front(a.lhs().sort());
+    }
+    x_lhs_sorts = atermpp::reverse(x_lhs_sorts);
+    m_state_variables[x.name()] = x_lhs_sorts;
+
     // typecheck the operand
     state_formula new_operand = (*this).apply(x.operand());
 
     // restore the context
     m_variables = m_variables_copy;
+    m_state_variables = m_state_variables_copy;
 
     if (is_mu)
     {
@@ -403,7 +389,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     }
     else
     {
-      nu(x.name(), new_assignments, new_operand);
+      return nu(x.name(), new_assignments, new_operand);
     }
   }
 
@@ -437,6 +423,7 @@ class state_formula_type_checker : lps::action_type_checker
     data::detail::data_typechecker m_data_typechecker;
     std::map<core::identifier_string, data::sort_expression> m_variables;
     std::multimap<core::identifier_string, process::action_label> m_actions;
+    std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
 
   public:
     /** \brief     Type check a state formula.
@@ -446,11 +433,18 @@ class state_formula_type_checker : lps::action_type_checker
      *             variable occurs in the scope of an odd number of negations.
      *  \return    a state formula where all untyped identifiers have been replace by typed ones.
      **/
-    state_formula_type_checker(const data::data_specification& dataspec, const process::action_label_list& action_decls)
-      : lps::action_type_checker(dataspec,action_decls),
+    template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable>, typename StateVariableContainer = std::vector<state_formulas::variable> >
+    state_formula_type_checker(const data::data_specification& dataspec,
+                               const ActionLabelContainer& action_labels = ActionLabelContainer(),
+                               const VariableContainer& variables = VariableContainer(),
+                               const StateVariableContainer& state_variables = StateVariableContainer()
+                              )
+      : lps::action_type_checker(dataspec, process::action_label_list(action_labels.begin(), action_labels.end())),
         m_data_typechecker(dataspec)
     {
-      add_action_labels(action_decls);
+      add_global_variables(variables);
+      add_action_labels(action_labels);
+      add_state_variables(state_variables);
     }
 
     //check correctness of the state formula in state_formula using
@@ -466,17 +460,45 @@ class state_formula_type_checker : lps::action_type_checker
     {
       mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
 
-      std::map<core::identifier_string, data::sort_expression> Vars;
-      std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
-      state_formula result=TraverseStateFrm(Vars,m_state_variables,formula);
+      std::map<core::identifier_string, data::sort_expression> variables;
+      std::map<core::identifier_string, data::sort_expression_list> state_variables;
+      state_formula result=TraverseStateFrm(variables, state_variables, formula);
       if (check_monotonicity && !is_monotonous(result))
       {
         throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(result));
       }
+
+      // state_formula result1 = detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions, m_state_variables).apply(state_formulas::normalize_sorts(formula, m_data_typechecker.typechecked_data_specification()));
+      // if (result != result1)
+      // {
+      //   std::cout << "result  == " << result << std::endl;
+      //   std::cout << "result1 == " << result1 << std::endl;
+      //   assert(false);
+      // }
       return result;
     }
 
   protected:
+    // TODO: reuse this code
+    template <typename VariableContainer>
+    void add_global_variables(const VariableContainer& global_variables)
+    {
+      for (const data::variable& v: global_variables)
+      {
+        m_data_typechecker.check_sort_is_declared(v.sort());
+        auto i = m_variables.find(v.name());
+        if (i == m_variables.end())
+        {
+          m_variables[v.name()] = v.sort();
+        }
+        else
+        {
+          throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
+        }
+      }
+    }
+
+    // TODO: reuse this code
     template <typename ActionLabelContainer>
     void add_action_labels(const ActionLabelContainer& actions)
     {
@@ -498,6 +520,25 @@ class state_formula_type_checker : lps::action_type_checker
           }
         }
         m_actions.insert(range.first, std::make_pair(a.name(), a));
+      }
+    }
+
+    template <typename StateVariableContainer>
+    void add_state_variables(const StateVariableContainer& state_variables)
+    {
+      for (const state_formulas::variable& v: state_variables)
+      {
+        auto i = m_state_variables.find(v.name());
+        if (i == m_state_variables.end())
+        {
+          data::sort_expression_list sorts = data::detail::parameter_sorts(v.arguments());
+          m_data_typechecker.check_sort_list_is_declared(sorts);
+          m_state_variables[v.name()] = sorts;
+        }
+        else
+        {
+          throw mcrl2::runtime_error("attempt to overload state variable " + core::pp(v.name()));
+        }
       }
     }
 
@@ -991,7 +1032,7 @@ void type_check(state_formula& formula, const lps::specification& lps_spec, bool
 {
   try
   {
-    state_formula_type_checker type_checker(lps_spec.data(),lps_spec.action_labels());
+    state_formula_type_checker type_checker(lps_spec.data(), lps_spec.action_labels());
     formula=type_checker(formula,check_monotonicity);
   }
   catch (mcrl2::runtime_error &e)
