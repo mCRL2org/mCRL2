@@ -3,7 +3,6 @@ add_mcrl2_library(modal_formula
   SOURCES
     modal_formula.cpp
     regfrmtrans.cpp
-    typecheck.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data
