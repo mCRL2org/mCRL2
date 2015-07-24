@@ -1082,7 +1082,7 @@ private:
     {
       return "pass_on";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
     }
-    if (arity <= 5)
+    if (arity <= 6)
     {
       return "application";
     }
@@ -2252,7 +2252,7 @@ void filter_function_symbols(const function_symbol_vector& source, function_symb
 
 ///
 /// \brief generate_make_appl_functions defines functions that create data::application terms
-///        for function symbols with more than 5 arguments.
+///        for function symbols with more than 6 arguments.
 /// \param s The stream to which the generated C++ code is written.
 /// \param max_arity The maximum arity of the functions that are to be generated.
 ///
@@ -2260,7 +2260,7 @@ static void generate_make_appl_functions(std::ostream& s, size_t max_arity)
 {
   // The casting magic in these functions is done to avoid triggering the ATerm
   // reference counting mechanism.
-  for (size_t i = 6; i <= max_arity; ++i)
+  for (size_t i = 7; i <= max_arity; ++i)
   {
     if (m_required_appl_functions.count(i)>0)
     {
@@ -2286,13 +2286,14 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
 {
   std::ofstream cpp_file(filename);
   std::stringstream rewr_code;
+  size_t max_arity = std::max(calc_max_arity(m_data_specification_for_enumeration.constructors()),
+                              calc_max_arity(m_data_specification_for_enumeration.mappings()));
 
   // - Store all used function symbols in a vector
-  std::vector<function_symbol> function_symbols;
+  std::vector<function_symbol> function_symbols; 
   filter_function_symbols(m_data_specification_for_enumeration.constructors(), function_symbols, data_equation_selector);
   filter_function_symbols(m_data_specification_for_enumeration.mappings(), function_symbols, data_equation_selector);
 
-  size_t max_arity = calc_max_arity(function_symbols);
 
   // The rewrite functions are first stored in a separate buffer (rewrite_functions),
   // because during the generation process, new function symbols are created. This

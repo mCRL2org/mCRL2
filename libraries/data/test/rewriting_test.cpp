@@ -1455,6 +1455,37 @@ BOOST_AUTO_TEST_CASE(check_higher_order_functions_with_multiple_arguments)
   }
 }
 
+BOOST_AUTO_TEST_CASE(Check_function_equality)
+{
+  std::string s(
+  "map f:Pos#Pos->Pos;\n"
+  "    g:(Pos#Pos)->Pos;\n"
+  "    h:(Pos#Pos)->Pos;\n"
+  "var x,y,z,u,v:Pos;\n"
+  "eqn f(x,y)=x+y;\n"
+  "    g(x,y)=x+y;\n"
+  "    h(x,y)=x+x;\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy30: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("f==g", specification));
+    data::data_expression f(parse_data_expression("true", specification));
+    data_rewrite_test(R, e, f);
+
+    e(parse_data_expression("f==h", specification));
+    f(parse_data_expression("false", specification));
+    data_rewrite_test(R, e, f);
+  }
+}
+
+
 
 
 
