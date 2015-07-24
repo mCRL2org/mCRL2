@@ -161,7 +161,7 @@ struct data_typechecker: protected data::data_type_checker
 
   sort_expression ExpandNumTypesDown(const sort_expression& x)
   {
-    return data_type_checker::ExpandNumTypesDown(x);
+    return data::normalize_sorts(data_type_checker::ExpandNumTypesDown(x), get_sort_specification());
   }
 
   /** \brief     Type check a data expression.
