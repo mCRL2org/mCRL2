@@ -26,6 +26,8 @@ namespace mcrl2
 namespace action_formulas
 {
 
+typedef atermpp::term_list<data::sort_expression_list> sorts_list;
+
 namespace detail
 {
 
@@ -58,10 +60,36 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
     return atermpp::reverse(sorts);
   }
 
-  process::action typecheck_action(const process::untyped_action& x)
+  // TODO: reuse this code from process typechecker
+  sorts_list matching_action_sorts(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
-    // TODO: implement this
-    return process::action();
+    sorts_list result;
+    auto range = m_actions.equal_range(name);
+    for (auto k = range.first; k != range.second; ++k)
+    {
+      const process::action_label& a = k->second;
+      if (a.sorts().size() == parameters.size())
+      {
+        result.push_front(a.sorts());
+      }
+    }
+    return atermpp::reverse(result);
+  }
+
+  // TODO: reuse this code from process typechecker
+  process::action typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
+  {
+    std::string msg = "action";
+    sorts_list parameter_list = matching_action_sorts(name, parameters);
+    if (parameter_list.empty())
+    {
+      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
+                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
+                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    }
+    process::action result = process::action(process::action_label(name, m_data_typechecker.GetNotInferredList(parameter_list)), parameters);
+    auto p = m_data_typechecker.match_parameters(parameters, result.label().sorts(), parameter_list, m_variables, name, msg);
+    return process::action(process::action_label(name, p.second), p.first);
   }
 
   action_formula apply(const data::data_expression& x)
@@ -80,7 +108,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
     process::action_list new_arguments;
     for (const process::untyped_action& a: x.arguments())
     {
-      new_arguments.push_front(typecheck_action(a));
+      new_arguments.push_front(typecheck_action(a.name(), a.arguments()));
     }
     new_arguments = atermpp::reverse(new_arguments);
     return action_formulas::multi_action(new_arguments);
