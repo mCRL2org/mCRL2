@@ -215,7 +215,7 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
   }
   if (type_check)
   {
-    state_formulas::type_check(x, spec, check_monotonicity);
+    x = state_formulas::type_check_new(x, spec, check_monotonicity);
   }
   if (translate_regular)
   {

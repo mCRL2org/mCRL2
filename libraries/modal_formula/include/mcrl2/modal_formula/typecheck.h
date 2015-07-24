@@ -239,21 +239,6 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     }
   }
 
-  std::map<core::identifier_string, data::data_expression> make_assignment_map(const data::assignment_list& assignments)
-  {
-    std::map<core::identifier_string, data::data_expression> result;
-    for (auto const& a: assignments)
-    {
-      auto i = result.find(a.lhs().name());
-      if (i != result.end()) // An assignment of the shape x := t already exists, this is not OK.
-      {
-        throw mcrl2::runtime_error("Double data::assignment to data::variable " + core::pp(a.lhs()) + " (detected assigned values are " + data::pp(i->second) + " and " + core::pp(a.rhs()) + ")");
-      }
-      result[a.lhs().name()] = a.rhs();
-    }
-    return result;
-  }
-
   state_formula apply(const data::data_expression& x)
   {
     return m_data_typechecker(x, data::sort_bool::bool_(), m_variables);
@@ -346,18 +331,12 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
   template <typename MuNuFormula>
   state_formula apply_mu_nu(const MuNuFormula& x, bool is_mu)
   {
-    std::map<core::identifier_string, data::data_expression> assignments = make_assignment_map(x.assignments());
-
-    // typecheck the assignments
-    data::assignment_list new_assignments;
     for (const data::assignment& a: x.assignments())
     {
       check_sort_declared(a.lhs().sort(), x);
-      data::sort_expression expected_sort = m_data_typechecker.expand_numeric_types_down(a.lhs().sort());
-      data::data_expression rhs = m_data_typechecker(a.rhs(), expected_sort, m_variables);
-      new_assignments.push_front(data::assignment(a.lhs(), rhs));
     }
-    new_assignments = atermpp::reverse(new_assignments);
+
+    data::assignment_list new_assignments = m_data_typechecker.typecheck_assignments(x.assignments(), m_variables);
 
     // add the assignment variables to the context
     auto m_variables_copy = m_variables;
@@ -1061,17 +1040,16 @@ class state_formula_type_checker_new
  *  \post      formula is type checked.
  **/
 inline
-void type_check(state_formula& formula, const lps::specification& lps_spec, bool check_monotonicity = true)
+state_formula type_check(const state_formula& x, const lps::specification& lps_spec, bool check_monotonicity = true)
 {
   try
   {
     state_formula_type_checker type_checker(lps_spec.data(), lps_spec.action_labels());
-    formula=type_checker(formula,check_monotonicity);
+    return type_checker(x, check_monotonicity);
   }
   catch (mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula " +
-                             mcrl2::utilities::to_string(formula));
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula " + state_formulas::pp(x));
   }
 }
 

@@ -364,6 +364,84 @@ struct data_typechecker: protected data::data_type_checker
     }
     return std::make_pair(data::data_expression_list(new_parameters.begin(), new_parameters.end()), possible_sorts);
   }
+
+  std::map<core::identifier_string, data::data_expression> make_assignment_map(const data::assignment_list& assignments)
+  {
+    std::map<core::identifier_string, data::data_expression> result;
+    for (auto const& a: assignments)
+    {
+      auto i = result.find(a.lhs().name());
+      if (i != result.end()) // An assignment of the shape x := t already exists, this is not OK.
+      {
+        throw mcrl2::runtime_error("Double data::assignment to data::variable " + data::pp(a.lhs()) + " (detected assigned values are " + data::pp(i->second) + " and " + data::pp(a.rhs()) + ")");
+      }
+      result[a.lhs().name()] = a.rhs();
+    }
+    return result;
+  }
+
+  data::assignment_list typecheck_assignments_does_not_work(const data::assignment_list& assignments, const std::map<core::identifier_string, data::sort_expression>& variables)
+  {
+    data::assignment_list new_assignments;
+    for (const data::assignment& a: assignments)
+    {
+      data::sort_expression expected_sort = expand_numeric_types_down(a.lhs().sort());
+      data::data_expression rhs = (*this)(a.rhs(), expected_sort, variables);
+      new_assignments.push_front(data::assignment(a.lhs(), rhs));
+    }
+    new_assignments = atermpp::reverse(new_assignments);
+    return new_assignments;
+  }
+
+  data::assignment_list typecheck_assignments(const data::assignment_list& assignments, const std::map<core::identifier_string, data::sort_expression>& variables)
+  {
+    std::map<core::identifier_string, data::sort_expression> sort_map;
+    data::assignment_list result;
+    data::sort_expression_list sorts;
+    for (const data::assignment& a: assignments)
+    {
+      const core::identifier_string& name = a.lhs().name();
+      if (sort_map.count(name) > 0)
+      {
+        throw mcrl2::runtime_error("non-unique formal parameter " + core::pp(name) + ")");
+      }
+
+      data::sort_expression lhs_sort = a.lhs().sort();
+      check_sort_is_declared(lhs_sort);
+
+      sort_map[name] = lhs_sort;
+
+      data::data_expression rhs = a.rhs();
+      data::sort_expression rhs_sort;
+      try
+      {
+        rhs_sort = TraverseVarConsTypeD(variables, variables, rhs, ExpandNumTypesDown(lhs_sort));
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + ".");
+      }
+
+      data::sort_expression temp;
+      if (!TypeMatchA(lhs_sort, rhs_sort, temp))
+      {
+        //upcasting
+        try
+        {
+          std::map<core::identifier_string,data::sort_expression> dummy_table;
+          rhs_sort = data_type_checker::UpCastNumericType(lhs_sort, rhs_sort, rhs, variables, variables, dummy_table, false);
+        }
+        catch (mcrl2::runtime_error& e)
+        {
+          throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast " + data::pp(rhs) + " to type " + data::pp(lhs_sort));
+        }
+      }
+      result.push_front(data::assignment(a.lhs(), rhs));
+      sorts.push_front(lhs_sort);
+    }
+    sorts = atermpp::reverse(sorts);
+    return atermpp::reverse(result);
+  }
 };
 
 } // namespace detail
