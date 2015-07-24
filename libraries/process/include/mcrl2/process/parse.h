@@ -356,12 +356,12 @@ process_expression parse_process_expression(const std::string& text, const Varia
   return procspec2.init();
 }
 
-inline
+template <typename VariableContainer, typename ActionLabelContainer, typename ProcessIdentifierContainer>
 process_expression parse_process_expression(const std::string& text,
-                                            const std::vector<data::variable>& variables = std::vector<data::variable>(),
+                                            const VariableContainer& variables = VariableContainer(),
                                             const data::data_specification& dataspec = data::data_specification(),
-                                            const std::vector<action_label>& action_labels = std::vector<action_label>(),
-                                            const std::vector<process_identifier>& process_identifiers = std::vector<process_identifier>()
+                                            const ActionLabelContainer& action_labels = std::vector<action_label>(),
+                                            const ProcessIdentifierContainer& process_identifiers = ProcessIdentifierContainer()
                                            )
 {
   process_expression x = detail::parse_process_expression_new(text);

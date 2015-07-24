@@ -77,11 +77,12 @@ BOOST_AUTO_TEST_CASE(test_stochastic_operator)
   std::cout << p << std::endl;
 }
 
+template <typename VariableContainer, typename ActionLabelContainer, typename ProcessIdentifierContainer>
 void test_parse_process_expression(const std::string& text,
-                                   const std::vector<data::variable>& variables = std::vector<data::variable>(),
+                                   const VariableContainer& variables = VariableContainer(),
                                    const data::data_specification& dataspec = data::data_specification(),
-                                   const std::vector<action_label>& action_labels = std::vector<action_label>(),
-                                   const std::vector<process_identifier>& process_identifiers = std::vector<process_identifier>()
+                                   const ActionLabelContainer& action_labels = std::vector<action_label>(),
+                                   const ProcessIdentifierContainer& process_identifiers = ProcessIdentifierContainer()
                                   )
 {
   process_expression x = parse_process_expression(text, variables, dataspec, action_labels, process_identifiers);
@@ -102,16 +103,14 @@ BOOST_AUTO_TEST_CASE(parse_process_expression_test)
     "init delta;                      \n"
     ;
   process_specification procspec = parse_process_specification(text);
-  std::vector<data::variable> variables(procspec.global_variables().begin(), procspec.global_variables().end());
-  std::vector<action_label> action_labels(procspec.action_labels().begin(), procspec.action_labels().end());
   std::vector<process_identifier> process_identifiers;
   for (const process_equation& eqn: procspec.equations())
   {
     process_identifiers.push_back(eqn.identifier());
   }
-  test_parse_process_expression("a", variables, procspec.data(), action_labels, process_identifiers);
-  test_parse_process_expression("a . P(true)", variables, procspec.data(), action_labels, process_identifiers);
-  test_parse_process_expression("a . Q(n)", variables, procspec.data(), action_labels, process_identifiers);
+  test_parse_process_expression("a", procspec.global_variables(), procspec.data(), procspec.action_labels(), process_identifiers);
+  test_parse_process_expression("a . P(true)", procspec.global_variables(), procspec.data(), procspec.action_labels(), process_identifiers);
+  test_parse_process_expression("a . Q(n)", procspec.global_variables(), procspec.data(), procspec.action_labels(), process_identifiers);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

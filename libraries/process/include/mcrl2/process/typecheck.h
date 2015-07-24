@@ -928,10 +928,11 @@ class process_type_checker
     }
 
   public:
+    template <typename VariableContainer, typename ActionLabelContainer, typename ProcessIdentifierContainer>
     process_type_checker(const data::data_specification& dataspec,
-                         const std::vector<data::variable>& variables,
-                         const std::vector<action_label>& action_labels,
-                         const std::vector<process_identifier>& process_identifiers
+                         const VariableContainer& variables,
+                         const ActionLabelContainer& action_labels,
+                         const ProcessIdentifierContainer& process_identifiers
                         )
       : m_data_typechecker(dataspec)
     {
@@ -1007,12 +1008,12 @@ void type_check(process_specification& proc_spec)
   type_checker(proc_spec);
 }
 
-inline
+template <typename VariableContainer, typename ActionLabelContainer, typename ProcessIdentifierContainer>
 process_expression type_check(process_expression& x,
-                              const std::vector<data::variable>& variables = std::vector<data::variable>(),
+                              const VariableContainer& variables = VariableContainer(),
                               const data::data_specification& dataspec = data::data_specification(),
-                              const std::vector<action_label>& action_labels = std::vector<action_label>(),
-                              const std::vector<process_identifier>& process_identifiers = std::vector<process_identifier>()
+                              const ActionLabelContainer& action_labels = ActionLabelContainer(),
+                              const ProcessIdentifierContainer& process_identifiers = ProcessIdentifierContainer()
                              )
 {
   process_type_checker type_checker(dataspec, variables, action_labels, process_identifiers);

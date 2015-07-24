@@ -238,7 +238,7 @@ class pbes_type_checker
       **/
     pbes_expression operator()(const pbes_expression& x)
     {
-      return detail::make_typecheck_builder(m_data_typechecker, m_variables, m_propositional_variables).apply(x);
+      return detail::make_typecheck_builder(m_data_typechecker, m_variables, m_propositional_variables).apply(normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
     }
 
     protected:
