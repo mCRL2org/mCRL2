@@ -14,7 +14,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include "mcrl2/data/typecheck.h"
+#include "mcrl2/data/detail/data_typechecker.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/process_specification.h"
@@ -22,192 +22,6 @@
 
 namespace mcrl2
 {
-
-namespace data
-{
-
-typedef atermpp::term_list<data::sort_expression_list> sorts_list;
-
-namespace detail
-{
-
-template <typename Function, typename T>
-atermpp::term_list<T> transform_aterm_list(const Function& f, const atermpp::term_list<T>& x)
-{
-  atermpp::term_list<T> result;
-  for (T t: x)
-  {
-    result.push_front(f(t));
-  }
-  return atermpp::reverse(result);
-}
-
-} // namespace detail
-
-struct data_expression_typechecker: protected data::data_type_checker
-{
-  /** \brief     make a data type checker.
-   *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
-   *  \param[in] data_spec A data specification that does not need to have been type checked.
-   *  \return    a data expression where all untyped identifiers have been replace by typed ones.
-   **/
-  data_expression_typechecker(const data_specification& dataspec)
-    : data_type_checker(dataspec)
-  {}
-
-  void check_sort_list_is_declared(const sort_expression_list& x)
-  {
-    return sort_type_checker::check_sort_list_is_declared(x);
-  }
-
-  void check_sort_is_declared(const sort_expression& x)
-  {
-    return sort_type_checker::check_sort_is_declared(x);
-  }
-
-  bool VarsUnique(const variable_list& VarDecls)
-  {
-    return data_type_checker::VarsUnique(VarDecls);
-  }
-
-  sort_expression normalize_sorts(const sort_expression& x)
-  {
-    return data::normalize_sorts(x, get_sort_specification());
-  }
-
-  data_expression UpCastNumericType(const data_expression& Par, const sort_expression& NeededType, const std::map<core::identifier_string,sort_expression>& variables)
-  {
-    std::map<core::identifier_string,data::sort_expression> dummy_table;
-    data_expression Par1 = Par;
-    sort_expression s = data::data_type_checker::UpCastNumericType(NeededType, Par.sort(), Par1, variables, variables, dummy_table, false, false, false);
-    assert(s == Par1.sort());
-    return data::normalize_sorts(Par1, get_sort_specification());
-  }
-
-  // returns true if s1 and s2 are equal after normalization
-  bool equal_sorts(const sort_expression& s1, const sort_expression& s2)
-  {
-    if (s1 == s2)
-    {
-      return true;
-    }
-    return normalize_sorts(s1) == normalize_sorts(s2);
-  }
-
-  // returns true if s matches with an element of sorts after normalization
-  bool match_sort(const sort_expression& s, const sort_expression_list& sorts)
-  {
-    for (const sort_expression& s1: sorts)
-    {
-      if (equal_sorts(s, s1))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // returns true if s is allowed by allowed_sort, meaning that allowed_sort is an untyped sort,
-  // or allowed_sort is a sequence that contains a matching sort
-  bool is_allowed_sort(const sort_expression& sort, const sort_expression& allowed_sort)
-  {
-    if (is_untyped_sort(data::sort_expression(allowed_sort)))
-    {
-      return true;
-    }
-    if (is_untyped_possible_sorts(allowed_sort))
-    {
-      return match_sort(sort, atermpp::down_cast<const untyped_possible_sorts>(allowed_sort).sorts());
-    }
-
-    //PosType is a normal type
-    return equal_sorts(sort, allowed_sort);
-  }
-
-  // returns true if all elements of sorts are allowed by the corresponding entries of allowed_sorts
-  bool is_allowed_sort_list(const sort_expression_list& sorts, const sort_expression_list& allowed_sorts)
-  {
-    assert(sorts.size() == allowed_sorts.size());
-    auto j = allowed_sorts.begin();
-    for (auto i = sorts.begin(); i != sorts.end(); ++i,++j)
-    {
-      if (!is_allowed_sort(*i, *j))
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  sort_expression_list insert_type(const sort_expression_list TypeList, const sort_expression Type)
-  {
-    for (sort_expression_list OldTypeList = TypeList; !OldTypeList.empty(); OldTypeList = OldTypeList.tail())
-    {
-      if (equal_sorts(OldTypeList.front(), Type))
-      {
-        return TypeList;
-      }
-    }
-    sort_expression_list result = TypeList;
-    result.push_front(Type);
-    return result;
-  }
-
-  bool equal_sort_lists(const sort_expression_list& x1, const sort_expression_list& x2)
-  {
-    if (x1 == x2)
-    {
-      return true;
-    }
-    if (x1.size() != x2.size())
-    {
-      return false;
-    }
-    return std::equal(x1.begin(), x1.end(), x2.begin(), [&](const sort_expression& s1, const sort_expression& s2) { return equal_sorts(s1, s2); });
-  }
-
-  // returns true if l is (after unwinding) contained in sorts
-  bool is_contained_in(const sort_expression_list& l, const sorts_list& sorts)
-  {
-    for (const sort_expression_list& m: sorts)
-    {
-      if (equal_sort_lists(l, m))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  sort_expression ExpandNumTypesDown(const sort_expression& x)
-  {
-    return data_type_checker::ExpandNumTypesDown(x);
-  }
-
-  /** \brief     Type check a data expression.
-   *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-   *  \param[in] x A data expression that has not been type checked.
-   *  \param[in] expected_sort The expected sort of the data expression.
-   *  \param[in] variable_constext a mapping of variable names to their types.
-   *  \return the type checked data expression.
-   **/
-  data_expression operator()(const data_expression& x,
-                             const sort_expression& expected_sort,
-                             const std::map<core::identifier_string, sort_expression>& variable_context
-                            )
-  {
-    data_expression x1 = x;
-    TraverseVarConsTypeD(variable_context, variable_context, x1, expected_sort);
-    return data::normalize_sorts(x1, get_sort_specification());
-  }
-
-  data_specification typechecked_data_specification()
-  {
-    return type_checked_data_spec;
-  }
-};
-
-} // namespace data
 
 namespace process
 {
@@ -346,12 +160,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   typedef process_expression_builder<typecheck_builder> super;
   using super::apply;
 
-  data::data_expression_typechecker& m_data_typechecker;
+  data::detail::data_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variables;
   const std::multimap<core::identifier_string, process_identifier>& m_process_identifiers;
   const std::multimap<core::identifier_string, action_label>& m_actions;
 
-  typecheck_builder(data::data_expression_typechecker& data_typechecker,
+  typecheck_builder(data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
                     const std::multimap<core::identifier_string, process_identifier>& process_identifiers,
                     const std::multimap<core::identifier_string, action_label>& actions
@@ -992,7 +806,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
 inline
 typecheck_builder make_typecheck_builder(
-                    data::data_expression_typechecker& data_typechecker,
+                    data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
                     const std::multimap<core::identifier_string, process_identifier>& process_identifiers,
                     const std::multimap<core::identifier_string, action_label>& actions
@@ -1006,7 +820,7 @@ typecheck_builder make_typecheck_builder(
 class process_type_checker
 {
   protected:
-    data::data_expression_typechecker m_data_typechecker;
+    data::detail::data_typechecker m_data_typechecker;
     std::multimap<core::identifier_string, action_label> m_actions;
     std::multimap<core::identifier_string, process_identifier> m_process_identifiers;
     std::map<core::identifier_string, data::sort_expression> m_global_variables;
@@ -1147,7 +961,7 @@ class process_type_checker
       mCRL2log(log::verbose) << "type checking process specification..." << std::endl;
 
       // reset the context
-      m_data_typechecker = data::data_expression_typechecker(procspec.data());
+      m_data_typechecker = data::detail::data_typechecker(procspec.data());
 
       normalize_sorts(procspec, m_data_typechecker.typechecked_data_specification());
 

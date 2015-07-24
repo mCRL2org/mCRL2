@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_TYPECHECK_H
 #define MCRL2_PBES_TYPECHECK_H
 
-#include "mcrl2/data/typecheck.h"
+#include "mcrl2/data/detail/data_typechecker.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/pbes.h"
@@ -26,60 +26,16 @@ namespace pbes_system
 namespace detail
 {
 
-struct data_expression_typechecker: protected data::data_type_checker
-{
-  /** \brief     make a data type checker.
-   *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
-   *  \param[in] data_spec A data specification that does not need to have been type checked.
-   *  \return    a data expression where all untyped identifiers have been replace by typed ones.
-   **/
-  data_expression_typechecker(const data::data_specification& dataspec)
-    : data::data_type_checker(dataspec)
-  {}
-
-  void check_sort_list_is_declared(const data::sort_expression_list& x)
-  {
-    return sort_type_checker::check_sort_list_is_declared(x);
-  }
-
-  void check_sort_is_declared(const data::sort_expression& x)
-  {
-    return data::data_type_checker::check_sort_is_declared(x);
-  }
-
-  /** \brief     Type check a data expression.
-   *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-   *  \param[in] x A data expression that has not been type checked.
-   *  \param[in] expected_sort The expected sort of the data expression.
-   *  \param[in] variable_constext a mapping of variable names to their types.
-   *  \return the type checked data expression.
-   **/
-  data::data_expression operator()(const data::data_expression& x,
-                                   const data::sort_expression& expected_sort,
-                                   const std::map<core::identifier_string, data::sort_expression>& variable_context
-                                  )
-  {
-    data::data_expression x1 = x;
-    TraverseVarConsTypeD(variable_context, variable_context, x1, expected_sort);
-    return data::normalize_sorts(x1, get_sort_specification());
-  }
-
-  data::data_specification typechecked_data_specification()
-  {
-    return type_checked_data_spec;
-  }
-};
-
 struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
 {
   typedef pbes_expression_builder<typecheck_builder> super;
   using super::apply;
 
-  data_expression_typechecker& m_data_typechecker;
+  data::detail::data_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variables;
   const std::map<core::identifier_string, propositional_variable>& m_propositional_variables;
 
-  typecheck_builder(data_expression_typechecker& data_typechecker,
+  typecheck_builder(data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
                     const std::map<core::identifier_string, propositional_variable>& propositional_variables
                    )
@@ -185,7 +141,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
 
 inline
 typecheck_builder make_typecheck_builder(
-                    data_expression_typechecker& data_typechecker,
+                    data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
                     const std::map<core::identifier_string, propositional_variable>& propositional_variables
                    )
@@ -198,7 +154,7 @@ typecheck_builder make_typecheck_builder(
 class pbes_type_checker
 {
   protected:
-    detail::data_expression_typechecker m_data_typechecker;
+    data::detail::data_typechecker m_data_typechecker;
     std::map<core::identifier_string, data::sort_expression> m_variables;
     std::map<core::identifier_string, propositional_variable> m_propositional_variables;
 
@@ -256,7 +212,7 @@ class pbes_type_checker
       normalize_sorts(pbesspec, m_data_typechecker.typechecked_data_specification());
 
       // reset the context
-      m_data_typechecker = detail::data_expression_typechecker(pbesspec.data());
+      m_data_typechecker = data::detail::data_typechecker(pbesspec.data());
       m_variables.clear();
       m_propositional_variables.clear();
       add_global_variables(pbesspec.global_variables());
