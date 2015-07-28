@@ -30,6 +30,7 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
     bool timed;
     bool structured;
     bool unoptimized;
+    bool preprocess_modal_operators;
 
     std::string synopsis() const
     {
@@ -41,6 +42,8 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
       super::add_options(desc);
       desc.add_option("formula", make_file_argument("FILE"),
                       "use the state formula from FILE", 'f');
+      desc.add_option("preprocess-modal-operators",
+                      "insert dummy fixpoints in modal operators, which may lead to smaller PBESs", 'm');
       desc.add_option("timed",
                       "use the timed version of the algorithm, even for untimed LPS's", 't');
       desc.add_option("structured",
@@ -56,8 +59,9 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
       {
         formula_filename = parser.option_argument("formula");
       }
-      timed       = parser.options.count("timed") > 0;
+      preprocess_modal_operators = parser.options.count("preprocess-modal-operators") > 0;
       structured  = parser.options.count("structured") > 0;
+      timed       = parser.options.count("timed") > 0;
       unoptimized = parser.options.count("unoptimized") > 0;
     }
 
@@ -80,7 +84,8 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
                formula_filename,
                timed,
                structured,
-               unoptimized
+               unoptimized,
+               preprocess_modal_operators
              );
       return true;
     }

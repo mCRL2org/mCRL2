@@ -82,7 +82,8 @@ void lps2pbes(const std::string& input_filename,
               const std::string& formula_filename,
               bool timed,
               bool structured,
-              bool unoptimized
+              bool unoptimized,
+              bool preprocess_modal_operators
              );
 
 void complps2pbes(const std::string& input_filename,

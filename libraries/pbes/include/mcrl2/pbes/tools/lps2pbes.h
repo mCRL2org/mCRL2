@@ -30,7 +30,8 @@ void lps2pbes(const std::string& input_filename,
               const std::string& formula_filename,
               bool timed,
               bool structured,
-              bool unoptimized
+              bool unoptimized,
+              bool preprocess_modal_operators
              )
 {
   if (formula_filename.empty())
@@ -60,7 +61,7 @@ void lps2pbes(const std::string& input_filename,
   instream.close();
   //convert formula and LPS to a PBES
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
-  pbes_system::pbes result = pbes_system::lps2pbes(spec, formula, timed, structured, unoptimized);
+  pbes_system::pbes result = pbes_system::lps2pbes(spec, formula, timed, structured, unoptimized, preprocess_modal_operators);
   //save the result
   if (output_filename.empty())
   {

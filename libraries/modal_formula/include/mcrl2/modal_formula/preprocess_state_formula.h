@@ -25,6 +25,52 @@ namespace mcrl2
 namespace state_formulas
 {
 
+namespace detail
+{
+
+/// Visitor that transforms state formulas. This can be useful if the state formula contains nested modal operators.
+template <typename IdentifierGenerator>
+struct state_formula_preprocess_nested_modal_operators_builder: public state_formulas::state_formula_builder<state_formula_preprocess_nested_modal_operators_builder<IdentifierGenerator> >
+{
+  typedef state_formulas::state_formula_builder<state_formula_preprocess_nested_modal_operators_builder<IdentifierGenerator> > super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
+
+  /// \brief An identifier generator
+  IdentifierGenerator& generator;
+
+  /// \brief Constructor
+  /// \param generator A generator for fresh identifiers
+  state_formula_preprocess_nested_modal_operators_builder(IdentifierGenerator& generator)
+    : generator(generator)
+  {}
+
+  state_formula apply(const must& x)
+  {
+    core::identifier_string X = generator("X");
+    return must(x.formula() , nu(X, {}, x.operand()));
+  }
+
+  state_formula apply(const may& x)
+  {
+    core::identifier_string X = generator("X");
+    return may(x.formula() , nu(X, {}, x.operand()));
+  }
+};
+
+/// \brief Utility function for creating a state_formula_preprocess_nested_modal_operators_builder.
+/// \param generator A generator for fresh identifiers
+/// \return a state_formula_preprocess_nested_modal_operators_builder
+template <typename IdentifierGenerator>
+state_formula_preprocess_nested_modal_operators_builder<IdentifierGenerator> make_state_formula_preprocess_nested_modal_operators_builder(IdentifierGenerator& generator)
+{
+  return state_formula_preprocess_nested_modal_operators_builder<IdentifierGenerator>(generator);
+}
+
+} // namespace detail
+
 /// \brief Renames data variables and predicate variables in the formula \p f, and
 /// wraps the formula inside a 'nu' if needed. This is needed as a preprocessing
 /// step for the algorithm.
@@ -61,6 +107,17 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   }
 
   return f;
+}
+
+/// \brief Preprocesses a state formula that contains (nested) modal operators
+/// \param x A modal formula
+inline
+state_formula preprocess_nested_modal_operators(const state_formula& x)
+{
+  data::set_identifier_generator generator;
+  std::set<core::identifier_string> ids = state_formulas::find_identifiers(x);
+  generator.add_identifiers(ids);
+  return detail::make_state_formula_preprocess_nested_modal_operators_builder(generator).apply(x);
 }
 
 } // namespace state_formulas
