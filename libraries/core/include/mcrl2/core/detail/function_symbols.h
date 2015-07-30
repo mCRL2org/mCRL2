@@ -1201,6 +1201,14 @@ const atermpp::function_symbol& function_symbol_UntypedProcessAssignment()
   return function_symbol_UntypedProcessAssignment;
 }
 
+// UntypedPropVar
+inline
+const atermpp::function_symbol& function_symbol_UntypedPropVar()
+{
+  static const atermpp::function_symbol function_symbol_UntypedPropVar = atermpp::function_symbol("UntypedPropVar", 2);
+  return function_symbol_UntypedPropVar;
+}
+
 // UntypedSetBagComp
 inline
 const atermpp::function_symbol& function_symbol_UntypedSetBagComp()
@@ -1286,6 +1294,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol BooleanEquation;
   static const atermpp::function_symbol ConsSpec;
   static const atermpp::function_symbol SortList;
+  static const atermpp::function_symbol UntypedPropVar;
   static const atermpp::function_symbol Sum;
   static const atermpp::function_symbol DataVarId;
   static const atermpp::function_symbol ProcVarId;

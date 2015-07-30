@@ -101,6 +101,7 @@ const atermpp::aterm_appl& default_value_BddFalse();
 const atermpp::aterm_appl& default_value_BooleanEquation();
 const atermpp::aterm_appl& default_value_ConsSpec();
 const atermpp::aterm_appl& default_value_SortList();
+const atermpp::aterm_appl& default_value_UntypedPropVar();
 const atermpp::aterm_appl& default_value_Sum();
 const atermpp::aterm_appl& default_value_DataVarId();
 const atermpp::aterm_appl& default_value_ProcVarId();
@@ -518,6 +519,14 @@ inline
 const atermpp::aterm_appl& default_value_SortList()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_SortList());
+  return t;
+}
+
+// UntypedPropVar
+inline
+const atermpp::aterm_appl& default_value_UntypedPropVar()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedPropVar(), default_value_String(), default_value_List());
   return t;
 }
 
@@ -1531,6 +1540,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl BooleanEquation;
   static const atermpp::aterm_appl ConsSpec;
   static const atermpp::aterm_appl SortList;
+  static const atermpp::aterm_appl UntypedPropVar;
   static const atermpp::aterm_appl Sum;
   static const atermpp::aterm_appl DataVarId;
   static const atermpp::aterm_appl ProcVarId;

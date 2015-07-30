@@ -213,6 +213,7 @@ or_(const pbes_expression& left, const pbes_expression& right)                  
 imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESImp           | The implication operator for pbes expressions
 forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESForall        | The universal quantification operator for pbes expressions
 exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESExists        | The existential quantification operator for pbes expressions
+untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& parameters)         : public pbes_system::pbes_expression | EI    | UntypedPropVar    | An untyped propositional variable instantiation or data application
 '''
 
 BOOLEAN_CLASSES = r'''

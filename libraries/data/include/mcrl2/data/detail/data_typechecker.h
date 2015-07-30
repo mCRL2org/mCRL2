@@ -380,6 +380,7 @@ struct data_typechecker: protected data::data_type_checker
     return result;
   }
 
+  // Apparently this approach is too simple
   data::assignment_list typecheck_assignments_does_not_work(const data::assignment_list& assignments, const std::map<core::identifier_string, data::sort_expression>& variables)
   {
     data::assignment_list new_assignments;
@@ -442,6 +443,19 @@ struct data_typechecker: protected data::data_type_checker
     sorts = atermpp::reverse(sorts);
     return atermpp::reverse(result);
   }
+
+  data_expression typecheck_untyped_parameter_identifier(const core::identifier_string& name, const data_expression_list& parameters, const std::map<core::identifier_string, data::sort_expression>& variables)
+  {
+    if (parameters.empty())
+    {
+      return (*this)(untyped_identifier(name), sort_bool::bool_(), variables);
+    }
+    else
+    {
+      return (*this)(application(untyped_identifier(name), parameters), sort_bool::bool_(), variables);
+    }
+  }
+
 };
 
 } // namespace detail

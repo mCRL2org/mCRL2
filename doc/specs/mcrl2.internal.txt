@@ -326,6 +326,7 @@
                  | PBESForall(<DataVarId>+, <PBExpr>)
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
+                 | UntypedPropVar(<String>, <DataExpr>*)
 
 //propositional variable instantiation
 <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*, <Number>)

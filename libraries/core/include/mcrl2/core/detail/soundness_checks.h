@@ -244,6 +244,7 @@ template <typename Term> bool check_term_BddFalse(Term t);
 template <typename Term> bool check_term_BooleanEquation(Term t);
 template <typename Term> bool check_term_ConsSpec(Term t);
 template <typename Term> bool check_term_SortList(Term t);
+template <typename Term> bool check_term_UntypedPropVar(Term t);
 template <typename Term> bool check_term_Sum(Term t);
 template <typename Term> bool check_term_DataVarId(Term t);
 template <typename Term> bool check_term_ProcVarId(Term t);
@@ -1006,7 +1007,8 @@ bool check_rule_PBExpr(Term t)
          || check_term_PBESImp(t)
          || check_term_PBESForall(t)
          || check_term_PBESExists(t)
-         || check_rule_PropVarInst(t);
+         || check_rule_PropVarInst(t)
+         || check_term_UntypedPropVar(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -2439,6 +2441,45 @@ bool check_term_SortList(Term t)
   {
     return false;
   }
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedPropVar(String, DataExpr*)
+template <typename Term>
+bool check_term_UntypedPropVar(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedPropVar)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;

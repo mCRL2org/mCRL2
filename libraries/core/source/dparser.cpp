@@ -182,6 +182,7 @@ parser::parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn, D_SyntaxError
   m_parser->save_parse_tree = 1;
   m_parser->initial_scope = NULL;
   m_parser->dont_use_greediness_for_disambiguation = 1;
+  m_parser->dont_use_height_for_disambiguation = 1;
   if (ambiguity_fn)
   {
     m_parser->ambiguity_fn = ambiguity_fn;
@@ -296,9 +297,43 @@ std::string add_context(const d_loc_t* loc, const std::string& message)
 }
 
 /// \brief Function for resolving parser ambiguities.
-struct D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v)
+D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v)
 {
   core::parser_table table(parser_tables_mcrl2);
+
+  // resolve PbesExpr ambiguities
+  bool is_all_pbesexpr = true;
+  for (int i = 0; i < n; i++)
+  {
+    core::parse_node node(v[i]);
+    if (table.symbol_name(node) != "PbesExpr")
+    {
+      is_all_pbesexpr = false;
+    }
+  }
+  if (is_all_pbesexpr)
+  {
+    D_ParseNode* result = 0;
+    for (int i = 0; i < n; i++)
+    {
+      core::parse_node node(v[i]);
+      if (table.symbol_name(node.child(0)) == "Id")
+      {
+        return v[i];
+      }
+      else if (table.symbol_name(node.child(0)) != "DataExpr")
+      {
+        result = v[i];
+      }
+    }
+    if (result)
+    {
+      return result;
+    }
+    return v[0];
+  }
+
+  // resolve ActFrm ambiguities
   if (n == 2)
   {
     // "(" ActFrm ")" can be parsed either as a new ActFrm, or as a RegFrm. We

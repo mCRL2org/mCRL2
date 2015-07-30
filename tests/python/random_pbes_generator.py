@@ -281,9 +281,9 @@ class Quantifier:
         var, dummy = pick_element(qvar)
         self.x = var
         if self.quantor == 'exists':
-            self.y = or_(Boolean('val(%s < 3)' % var), self.y)
+            self.y = or_(Boolean(make_val('%s < 3' % var)), self.y)
         else:
-            self.y = and_(Boolean('val(%s < 3)' % var), self.y)
+            self.y = and_(Boolean(make_val('%s < 3' % var)), self.y)
         self.y.finish(freevars + [self.x], negated)
 
     # returns True if the formula is minimal
@@ -361,6 +361,14 @@ def pick_elements(s, n):
         result.append(x)
     return result
 
+# with a 50% probability wrap s inside val
+def make_val(s):
+    n = random.randint(0, 1)
+    if n == 0:
+        return 'val({})'.format(s)
+    else:
+        return s
+
 def make_predvar(n, size = random.randint(0, 2)):
     name = 'X%d' % n
     arguments = []
@@ -395,7 +403,7 @@ def make_atoms(freevars, add_val = True):
     result.append('true')
     result.append('false')
     if add_val:
-        result = ['val(%s)' % x for x in result]
+        result = [make_val('%s' % x) for x in result]
     return result
 
 def make_boolean(freevars, add_val = True):

@@ -79,6 +79,7 @@ inline bool is_or(const atermpp::aterm_appl& x);
 inline bool is_imp(const atermpp::aterm_appl& x);
 inline bool is_forall(const atermpp::aterm_appl& x);
 inline bool is_exists(const atermpp::aterm_appl& x);
+inline bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x);
 
 /// \brief Test for a pbes_expression expression
 /// \param x A term
@@ -94,6 +95,7 @@ bool is_pbes_expression(const atermpp::aterm_appl& x)
          pbes_system::is_imp(x) ||
          pbes_system::is_forall(x) ||
          pbes_system::is_exists(x) ||
+         pbes_system::is_untyped_parameter_identifier(x) ||
          data::is_variable(x);
 }
 
@@ -572,6 +574,72 @@ std::ostream& operator<<(std::ostream& out, const exists& x)
 
 /// \brief swap overload
 inline void swap(exists& t1, exists& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \brief An untyped propositional variable instantiation or data application
+class untyped_parameter_identifier: public pbes_expression
+{
+  public:
+    /// \brief Default constructor.
+    untyped_parameter_identifier()
+      : pbes_expression(core::detail::default_values::UntypedPropVar)
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit untyped_parameter_identifier(const atermpp::aterm& term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_UntypedPropVar(*this));
+    }
+
+    /// \brief Constructor.
+    untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& parameters)
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedPropVar(), name, parameters))
+    {}
+
+    /// \brief Constructor.
+    untyped_parameter_identifier(const std::string& name, const data::data_expression_list& parameters)
+      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedPropVar(), core::identifier_string(name), parameters))
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+    }
+
+    const data::data_expression_list& parameters() const
+    {
+      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
+    }
+};
+
+/// \brief Test for a untyped_parameter_identifier expression
+/// \param x A term
+/// \return True if \a x is a untyped_parameter_identifier expression
+inline
+bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::UntypedPropVar;
+}
+
+// prototype declaration
+std::string pp(const untyped_parameter_identifier& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_parameter_identifier& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_parameter_identifier& t1, untyped_parameter_identifier& t2)
 {
   t1.swap(t2);
 }

@@ -181,7 +181,7 @@ ProcExpr
   | ProcExpr ('||' $binary_op_right 3) ProcExpr                  // Parallel operator
   | ProcExpr ('||_' $binary_op_right 4) ProcExpr                 // Leftmerge operator
   | (DataExprUnit '->' $unary_op_right 5) ProcExpr               // If-then operator
-  | ((DataExprUnit '->' $unary_op_right 6) ProcExpr              // If-then-else operator 
+  | ((DataExprUnit '->' $unary_op_right 6) ProcExpr              // If-then-else operator
                    '<>' $unary_op_right 5) ProcExpr
   | ProcExpr ('<<' $binary_op_left 8) ProcExpr                   // Until operator
   | ProcExpr ('.' $binary_op_right 9) ProcExpr                   // Sequential composition operator
@@ -278,6 +278,7 @@ DataValExpr: 'val' '(' DataExpr ')';                             // Marked data 
 
 PbesExpr
   : DataValExpr                                                  // Data expression
+  | DataExpr                                                     // PBES or data expression
   | 'true'                                                       // True
   | 'false'                                                      // False
   | 'forall' VarsDeclList '.' PbesExpr         $unary_right  0   // Universal quantifier
@@ -287,7 +288,7 @@ PbesExpr
   | PbesExpr ('&&' $binary_op_right 4) PbesExpr                  // Conjunction
   | '!' PbesExpr                               $unary_right  5   // Negation
   | '(' PbesExpr ')'                                             // Brackets
-  | PropVarInst                                                  // Propositional variable
+  | Id ( '(' DataExprList ')' )?                                 // Instantiated PBES variable or data application
   ;
 
 //--- Action formulas

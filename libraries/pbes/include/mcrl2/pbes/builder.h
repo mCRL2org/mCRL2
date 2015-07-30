@@ -130,6 +130,14 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
+  pbes_system::untyped_parameter_identifier apply(const pbes_system::untyped_parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    pbes_system::untyped_parameter_identifier result = pbes_system::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -165,6 +173,10 @@ struct add_sort_expressions: public Builder<Derived>
     else if (pbes_system::is_exists(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+    }
+    else if (pbes_system::is_untyped_parameter_identifier(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::untyped_parameter_identifier>(x));
     }
     else if (data::is_variable(x))
     {
@@ -270,6 +282,14 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
+  pbes_system::untyped_parameter_identifier apply(const pbes_system::untyped_parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    pbes_system::untyped_parameter_identifier result = pbes_system::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -305,6 +325,10 @@ struct add_data_expressions: public Builder<Derived>
     else if (pbes_system::is_exists(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+    }
+    else if (pbes_system::is_untyped_parameter_identifier(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::untyped_parameter_identifier>(x));
     }
     else if (data::is_variable(x))
     {
@@ -419,6 +443,14 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
+  pbes_system::untyped_parameter_identifier apply(const pbes_system::untyped_parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    pbes_system::untyped_parameter_identifier result = pbes_system::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -454,6 +486,10 @@ struct add_variables: public Builder<Derived>
     else if (pbes_system::is_exists(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+    }
+    else if (pbes_system::is_untyped_parameter_identifier(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::untyped_parameter_identifier>(x));
     }
     else if (data::is_variable(x))
     {
@@ -558,6 +594,14 @@ struct add_pbes_expressions: public Builder<Derived>
     return result;
   }
 
+  pbes_system::untyped_parameter_identifier apply(const pbes_system::untyped_parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+
   pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -593,6 +637,10 @@ struct add_pbes_expressions: public Builder<Derived>
     else if (pbes_system::is_exists(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
+    }
+    else if (pbes_system::is_untyped_parameter_identifier(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::untyped_parameter_identifier>(x));
     }
     else if (data::is_variable(x))
     {
