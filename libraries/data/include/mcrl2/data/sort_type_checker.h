@@ -224,7 +224,7 @@ class sort_type_checker
 
 
     // Throws an exception if the sort x is not declared
-    void check_basic_sort_is_declared(const basic_sort& x)
+    void check_basic_sort_is_declared(const basic_sort& x) const
     {
       if (sort_bool::is_bool(x) ||
           sort_pos::is_pos(x) ||
@@ -249,7 +249,7 @@ class sort_type_checker
       throw mcrl2::runtime_error("basic or defined sort " + data::pp(x) + " is not declared");
     }
 
-    void check_sort_list_is_declared(const sort_expression_list& SortExprList)
+    void check_sort_list_is_declared(const sort_expression_list& SortExprList) const
     {
       for(const sort_expression& s: SortExprList)
       {
@@ -257,7 +257,7 @@ class sort_type_checker
       }
     }
 
-    void check_sort_is_declared(const sort_expression& x)
+    void check_sort_is_declared(const sort_expression& x) const
     {
       if (is_basic_sort(x))
       {

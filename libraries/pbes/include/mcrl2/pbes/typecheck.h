@@ -233,7 +233,7 @@ class pbes_type_checker
     pbes_type_checker(const data::data_specification& dataspec, const VariableContainer& global_variables, const PropositionalVariableContainer& propositional_variables)
       : m_data_typechecker(dataspec)
     {
-      add_global_variables(global_variables);
+      data::add_context_variables(m_variables, global_variables, m_data_typechecker);
       add_propositional_variables(propositional_variables);
     }
 
@@ -248,7 +248,7 @@ class pbes_type_checker
       m_data_typechecker = data::detail::data_typechecker(pbesspec.data());
       m_variables.clear();
       m_propositional_variables.clear();
-      add_global_variables(pbesspec.global_variables());
+      data::add_context_variables(m_variables, pbesspec.global_variables(), m_data_typechecker);
       add_propositional_variables(equation_variables(pbesspec.equations()));
 
       // typecheck the equations
@@ -278,24 +278,6 @@ class pbes_type_checker
       pbes_expression typecheck(const pbes_expression& x, const data::variable_list& parameters)
       {
         return detail::make_typecheck_builder(m_data_typechecker, declared_variables(parameters), m_propositional_variables).apply(x);
-      }
-
-      template <typename VariableContainer>
-      void add_global_variables(const VariableContainer& global_variables)
-      {
-        for (const data::variable& v: global_variables)
-        {
-          m_data_typechecker.check_sort_is_declared(v.sort());
-          auto i = m_variables.find(v.name());
-          if (i == m_variables.end())
-          {
-            m_variables[v.name()] = v.sort();
-          }
-          else
-          {
-            throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
-          }
-        }
       }
 
       template <typename PropositionalVariableContainer>

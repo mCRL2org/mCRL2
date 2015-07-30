@@ -59,12 +59,12 @@ struct data_typechecker: protected data::data_type_checker
     : data_type_checker(dataspec)
   {}
 
-  void check_sort_list_is_declared(const sort_expression_list& x)
+  void check_sort_list_is_declared(const sort_expression_list& x) const
   {
     return sort_type_checker::check_sort_list_is_declared(x);
   }
 
-  void check_sort_is_declared(const sort_expression& x)
+  void check_sort_is_declared(const sort_expression& x) const
   {
     return sort_type_checker::check_sort_is_declared(x);
   }
@@ -459,6 +459,26 @@ struct data_typechecker: protected data::data_type_checker
 };
 
 } // namespace detail
+
+// Adds the elements of variables to variable_map
+// Throws an exception if a typecheck error is encountered
+template <typename VariableContainer>
+void add_context_variables(std::map<core::identifier_string, data::sort_expression>& variable_map, const VariableContainer& variables, const data::detail::data_typechecker& data_typechecker)
+{
+  for (const data::variable& v: variables)
+  {
+    data_typechecker.check_sort_is_declared(v.sort());
+    auto i = variable_map.find(v.name());
+    if (i == variable_map.end())
+    {
+      variable_map[v.name()] = v.sort();
+    }
+    else
+    {
+      throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
+    }
+  }
+}
 
 } // namespace data
 

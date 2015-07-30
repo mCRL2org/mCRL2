@@ -154,6 +154,21 @@ typecheck_builder make_typecheck_builder(
 
 } // namespace detail
 
+template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
+action_formula typecheck(const action_formula& x,
+                         const data::data_specification& dataspec,
+                         const VariableContainer& variables,
+                         const ActionLabelContainer& actions
+                        )
+{
+  data::detail::data_typechecker data_typechecker(dataspec);
+  std::map<core::identifier_string, data::sort_expression> variable_map;
+  data::add_context_variables(variable_map, variables, data_typechecker);
+  std::multimap<core::identifier_string, process::action_label> action_map;
+  process::add_context_action_labels(action_map, actions, data_typechecker);
+  return detail::make_typecheck_builder(data_typechecker, variable_map, action_map).apply(x);
+}
+
 } // namespace action_formulas
 
 namespace regular_formulas
@@ -420,8 +435,8 @@ class state_formula_type_checker
                               )
       : m_data_typechecker(dataspec)
     {
-      add_global_variables(variables);
-      add_action_labels(action_labels);
+      data::add_context_variables(m_variables, variables, m_data_typechecker);
+      process::add_context_action_labels(m_actions, action_labels, m_data_typechecker);
       add_state_variables(state_variables);
     }
 
@@ -447,50 +462,6 @@ class state_formula_type_checker
     }
 
   protected:
-    // TODO: reuse this code
-    template <typename VariableContainer>
-    void add_global_variables(const VariableContainer& global_variables)
-    {
-      for (const data::variable& v: global_variables)
-      {
-        m_data_typechecker.check_sort_is_declared(v.sort());
-        auto i = m_variables.find(v.name());
-        if (i == m_variables.end())
-        {
-          m_variables[v.name()] = v.sort();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
-        }
-      }
-    }
-
-    // TODO: reuse this code
-    template <typename ActionLabelContainer>
-    void add_action_labels(const ActionLabelContainer& actions)
-    {
-      for (const process::action_label& a: actions)
-      {
-        core::identifier_string name = a.name();
-        m_data_typechecker.check_sort_list_is_declared(a.sorts());
-
-        // Insert a in m_actions; N.B. Before that check if it already exists
-        auto range = m_actions.equal_range(a.name());
-        if (range.first != m_actions.end())
-        {
-          for (auto i = range.first; i != range.second; ++i)
-          {
-            if (i->second == a)
-            {
-              throw mcrl2::runtime_error("double declaration of action " + process::pp(a));
-            }
-          }
-        }
-        m_actions.insert(range.first, std::make_pair(a.name(), a));
-      }
-    }
-
     template <typename StateVariableContainer>
     void add_state_variables(const StateVariableContainer& state_variables)
     {

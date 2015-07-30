@@ -28,6 +28,32 @@ namespace process
 
 typedef atermpp::term_list<data::sort_expression_list> sorts_list;
 
+// Adds the elements of actions to action_map
+// Throws an exception if a typecheck error is encountered
+template <typename ActionLabelContainer>
+void add_context_action_labels(std::multimap<core::identifier_string, process::action_label>& action_map, const ActionLabelContainer& actions, const data::detail::data_typechecker& data_typechecker)
+{
+  for (const process::action_label& a: actions)
+  {
+    core::identifier_string name = a.name();
+    data_typechecker.check_sort_list_is_declared(a.sorts());
+
+    // Insert a in m_actions; N.B. Before that check if it already exists
+    auto range = action_map.equal_range(a.name());
+    if (range.first != action_map.end())
+    {
+      for (auto i = range.first; i != range.second; ++i)
+      {
+        if (i->second == a)
+        {
+          throw mcrl2::runtime_error("double declaration of action " + process::pp(a));
+        }
+      }
+    }
+    action_map.insert(range.first, std::make_pair(a.name(), a));
+  }
+}
+
 // returns the intersection of the 2 type list lists
 inline
 sorts_list sorts_list_intersection(const sorts_list& sorts1, const sorts_list& sorts2)
@@ -698,30 +724,6 @@ class process_type_checker
       }
     }
 
-    template <typename ActionLabelContainer>
-    void add_action_labels(const ActionLabelContainer& actions)
-    {
-      for (const action_label& a: actions)
-      {
-        core::identifier_string name = a.name();
-        m_data_typechecker.check_sort_list_is_declared(a.sorts());
-
-        // Insert a in m_actions; N.B. Before that check if it already exists
-        auto range = m_actions.equal_range(a.name());
-        if (range.first != m_actions.end())
-        {
-          for (auto i = range.first; i != range.second; ++i)
-          {
-            if (i->second == a)
-            {
-              throw mcrl2::runtime_error("double declaration of action " + process::pp(a));
-            }
-          }
-        }
-        m_actions.insert(range.first, std::make_pair(a.name(), a));
-      }
-    }
-
     template <typename ProcessIdentifierContainer>
     void add_process_identifiers(const ProcessIdentifierContainer& ids)
     {
@@ -768,8 +770,8 @@ class process_type_checker
                         )
       : m_data_typechecker(dataspec)
     {
-      add_action_labels(action_labels);
-      add_global_variables(variables);
+      add_context_action_labels(m_actions, action_labels, m_data_typechecker);
+      data::add_context_variables(m_global_variables, variables, m_data_typechecker);
       add_process_identifiers(process_identifiers);
     }
 
@@ -801,8 +803,8 @@ class process_type_checker
       m_actions.clear();
       m_global_variables.clear();
       m_process_identifiers.clear();
-      add_action_labels(procspec.action_labels());
-      add_global_variables(procspec.global_variables());
+      add_context_action_labels(m_actions, procspec.action_labels(), m_data_typechecker);
+      data::add_context_variables(m_global_variables, procspec.global_variables(), m_data_typechecker);
       add_process_identifiers(equation_identifiers(procspec.equations()));
 
       // typecheck the equations
