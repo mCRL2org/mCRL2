@@ -67,8 +67,6 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
 
   pbes_expression normalize(const pbes_expression& x)
   {
-    typedef core::term_traits<pbes_expression> tr;
-
     if (is_and(x))
     {
       std::multiset<pbes_expression> s = split_and(x);
