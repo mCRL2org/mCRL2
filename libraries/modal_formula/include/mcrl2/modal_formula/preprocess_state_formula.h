@@ -40,6 +40,7 @@ struct state_formula_preprocess_nested_modal_operators_builder: public state_for
 
   /// \brief An identifier generator
   IdentifierGenerator& generator;
+  std::vector<state_formula> fixpoints;
 
   /// \brief Constructor
   /// \param generator A generator for fresh identifiers
@@ -47,16 +48,69 @@ struct state_formula_preprocess_nested_modal_operators_builder: public state_for
     : generator(generator)
   {}
 
+  void push(const state_formula& x)
+  {
+    fixpoints.push_back(x);
+  }
+
+  void pop()
+  {
+    fixpoints.pop_back();
+  }
+
+  bool is_mu()
+  {
+    if (fixpoints.empty())
+    {
+      return true;
+    }
+    return state_formulas::is_mu(fixpoints.back());
+  }
+
+  void enter(const mu& x)
+  {
+    push(x);
+  }
+
+  void leave(const mu& x)
+  {
+    pop();
+  }
+
+  void enter(const nu& x)
+  {
+    push(x);
+  }
+
+  void leave(const nu& x)
+  {
+    pop();
+  }
+
   state_formula apply(const must& x)
   {
     core::identifier_string X = generator("X");
-    return must(x.formula() , nu(X, {}, x.operand()));
+    if (is_mu())
+    {
+      return must(x.formula() , mu(X, {}, x.operand()));
+    }
+    else
+    {
+      return must(x.formula() , nu(X, {}, x.operand()));
+    }
   }
 
   state_formula apply(const may& x)
   {
     core::identifier_string X = generator("X");
-    return may(x.formula() , nu(X, {}, x.operand()));
+    if (is_mu())
+    {
+      return may(x.formula() , mu(X, {}, x.operand()));
+    }
+    else
+    {
+      return may(x.formula() , nu(X, {}, x.operand()));
+    }
   }
 };
 
