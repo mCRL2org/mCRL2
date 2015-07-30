@@ -166,7 +166,13 @@ action_formula typecheck(const action_formula& x,
   data::add_context_variables(variable_map, variables, data_typechecker);
   std::multimap<core::identifier_string, process::action_label> action_map;
   process::add_context_action_labels(action_map, actions, data_typechecker);
-  return detail::make_typecheck_builder(data_typechecker, variable_map, action_map).apply(x);
+  return detail::make_typecheck_builder(data_typechecker, variable_map, action_map).apply(action_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+}
+
+inline
+action_formula typecheck(const action_formula& x, const lps::specification& lpsspec)
+{
+  return typecheck(x, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
 }
 
 } // namespace action_formulas

@@ -17,6 +17,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/translate_user_notation.h"
 #include "mcrl2/modal_formula/translate_regular_formulas.h"
 #include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/modal_formula/resolve_name_clashes.h"
@@ -68,6 +69,25 @@ action_formula parse_action_formula_new(const std::string& text)
 }
 
 } // namespace detail
+
+template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
+action_formula parse_action_formula(const std::string& text,
+                                    const data::data_specification& dataspec,
+                                    const VariableContainer& variables,
+                                    const ActionLabelContainer& actions
+                                   )
+{
+  action_formula x = detail::parse_action_formula_new(text);
+  x = action_formulas::typecheck(x, dataspec, variables, actions);
+  x = action_formulas::translate_user_notation(x);
+  return x;
+}
+
+inline
+action_formula parse_action_formula(const std::string& text, const lps::specification& lpsspec)
+{
+  return parse_action_formula(text, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
+}
 
 } // namespace action_formulas
 
@@ -205,7 +225,7 @@ state_formula parse_state_formula_new(const std::string& text)
 /// \return The converted modal formula
 inline
 state_formula parse_state_formula(std::istream& in, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true,
-                                  bool type_check = true, bool translate_user_notation = true, bool normalize_sorts = true)
+                                  bool type_check = true, bool translate_user_notation = true)
 {
   std::string text = utilities::read_text(in);
   state_formula x = detail::parse_state_formula_new(text);
@@ -228,10 +248,6 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
   {
     x = state_formulas::translate_user_notation(x);
   }
-  if (normalize_sorts)
-  {
-    x = state_formulas::normalize_sorts(x, spec.data());
-  }
   if (check_monotonicity && state_formulas::has_name_clashes(x))
   {
     mCRL2log(log::debug) << "formula before resolving name clashes: " << x << std::endl;
@@ -249,10 +265,10 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
 /// \return The converted modal formula
 inline
 state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true,
-                                  bool type_check = true, bool translate_user_notation = true, bool normalize_sorts = true)
+                                  bool type_check = true, bool translate_user_notation = true)
 {
   std::stringstream formula_stream(formula_text);
-  return parse_state_formula(formula_stream, spec, check_monotonicity, translate_regular, type_check, translate_user_notation, normalize_sorts);
+  return parse_state_formula(formula_stream, spec, check_monotonicity, translate_regular, type_check, translate_user_notation);
 }
 
 } // namespace state_formulas
