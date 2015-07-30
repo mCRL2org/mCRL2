@@ -24,6 +24,7 @@
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
 #include "mcrl2/modal_formula/maximal_closed_subformula.h"
+#include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/lps/linearise.h"
@@ -52,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_rename)
     ;
 
   using mcrl2::state_formulas::pp;
-  specification spec=remove_stochastic_operators(linearise(SPECIFICATION));
+  specification spec = remove_stochastic_operators(linearise(SPECIFICATION));
 
   state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
 
@@ -277,9 +278,9 @@ BOOST_AUTO_TEST_CASE(test_find_state_variables)
 inline
 bool contains(const std::set<state_formulas::state_formula>& v, const std::string& s)
 {
-  for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (const state_formulas::state_formula& f: v)
   {
-    if (state_formulas::pp(*i) == s)
+    if (state_formulas::pp(f) == s)
     {
       return true;
     }
@@ -297,7 +298,6 @@ BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
   BOOST_CHECK(v.size() == 1);
 
   f = parse_state_formula("exists b: Bool. forall c: Bool. val(b) && (val(c) || true) && false", spec);
-std::cerr << "FORMULA " << f << "\n";
   v = maximal_closed_subformulas(f);
   BOOST_CHECK(v.size() == 1);
 
@@ -322,4 +322,65 @@ std::cerr << "FORMULA " << f << "\n";
   BOOST_CHECK(v.size() == 2);
   BOOST_CHECK(contains(v, "true"));
   BOOST_CHECK(contains(v, "false"));
+}
+
+void test_has_unscoped_modal_formulas(const std::string& text, lps::specification& lpsspec, bool expected_result)
+{
+  state_formula x = parse_state_formula(text, lpsspec);
+  bool result = state_formulas::detail::has_unscoped_modal_formulas(x);
+  if (result != expected_result)
+  {
+    std::cout << "--- has_unscoped_modal_formulas failure ---" << std::endl;
+    std::cout << "formula = " << text << std::endl;
+    std::cout << "result  = " << result << std::endl;
+  }
+  BOOST_CHECK_EQUAL(result, expected_result);
+}
+
+BOOST_AUTO_TEST_CASE(has_unscoped_modal_formulas_test)
+{
+  const std::string text =
+    "act a, b, c;                  \n"
+    "                              \n"
+    "proc P = delta;               \n"
+    "                              \n"
+    "init P;                       \n"
+    ;
+  lps::specification lpsspec = lps::parse_linear_process_specification(text);
+
+  test_has_unscoped_modal_formulas("[a]true", lpsspec, true);
+  test_has_unscoped_modal_formulas("mu X. X", lpsspec, false);
+  test_has_unscoped_modal_formulas("true => [a]true", lpsspec, true);
+  test_has_unscoped_modal_formulas("true => mu X. [a]<b>true", lpsspec, false);
+}
+
+void test_preprocess_nested_modal_operators(const std::string& text, lps::specification& lpsspec, const std::string& expected_result_text)
+{
+  state_formula x = parse_state_formula(text, lpsspec);
+  state_formula expected_result = parse_state_formula(expected_result_text, lpsspec);
+  state_formula result = state_formulas::preprocess_nested_modal_operators(x);
+  if (result != expected_result)
+  {
+    std::cout << "--- preprocess_nested_modal_operators failure ---" << std::endl;
+    std::cout << "formula          = " << text << std::endl;
+    std::cout << "result           = " << state_formulas::pp(result) << std::endl;
+    std::cout << "expected result  = " << expected_result_text << std::endl;
+  }
+  BOOST_CHECK_EQUAL(result, expected_result);
+}
+
+BOOST_AUTO_TEST_CASE(preprocess_nested_modal_operators_test)
+{
+  const std::string text =
+    "act a, b, c;                  \n"
+    "                              \n"
+    "proc P = delta;               \n"
+    "                              \n"
+    "init P;                       \n"
+    ;
+  lps::specification lpsspec = lps::parse_linear_process_specification(text);
+
+  test_preprocess_nested_modal_operators("[a]true", lpsspec, "[a]true");
+  test_preprocess_nested_modal_operators("[a]<b>true", lpsspec, "[a]mu X. <b>true");
+  test_preprocess_nested_modal_operators("true && <a><a>true", lpsspec, "true && <a>mu X. <a>true");
 }

@@ -16,8 +16,10 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
+#include "mcrl2/modal_formula/traverser.h"
 
 namespace mcrl2
 {
@@ -27,6 +29,75 @@ namespace state_formulas
 
 namespace detail
 {
+
+struct has_unscoped_modal_formula_traverser: public state_formula_traverser<has_unscoped_modal_formula_traverser>
+{
+  typedef state_formula_traverser<has_unscoped_modal_formula_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  bool result;
+  std::vector<state_formula> fixpoints;
+
+  void push(const state_formula& x)
+  {
+    fixpoints.push_back(x);
+  }
+
+  void pop()
+  {
+    fixpoints.pop_back();
+  }
+
+  has_unscoped_modal_formula_traverser()
+    : result(false)
+  {}
+
+  void enter(const must&)
+  {
+    if (fixpoints.empty())
+    {
+      result = true;
+    }
+  }
+
+  void enter(const may&)
+  {
+    if (fixpoints.empty())
+    {
+      result = true;
+    }
+  }
+
+  void enter(const mu& x)
+  {
+    push(x);
+  }
+
+  void leave(const mu&)
+  {
+    pop();
+  }
+
+  void enter(const nu& x)
+  {
+    push(x);
+  }
+
+  void leave(const nu&)
+  {
+    pop();
+  }
+};
+
+inline
+bool has_unscoped_modal_formulas(const state_formula& x)
+{
+  has_unscoped_modal_formula_traverser f;
+  f.apply(x);
+  return f.result;
+}
 
 /// Visitor that transforms state formulas. This can be useful if the state formula contains nested modal operators.
 template <typename IdentifierGenerator>
@@ -72,7 +143,7 @@ struct state_formula_preprocess_nested_modal_operators_builder: public state_for
     push(x);
   }
 
-  void leave(const mu& x)
+  void leave(const mu&)
   {
     pop();
   }
@@ -82,34 +153,42 @@ struct state_formula_preprocess_nested_modal_operators_builder: public state_for
     push(x);
   }
 
-  void leave(const nu& x)
+  void leave(const nu&)
   {
     pop();
   }
 
   state_formula apply(const must& x)
   {
+    if (!has_unscoped_modal_formulas(x.operand()))
+    {
+      return x;
+    }
     core::identifier_string X = generator("X");
     if (is_mu())
     {
-      return must(x.formula() , mu(X, {}, x.operand()));
+      return must(x.formula(), mu(X, {}, x.operand()));
     }
     else
     {
-      return must(x.formula() , nu(X, {}, x.operand()));
+      return must(x.formula(), nu(X, {}, x.operand()));
     }
   }
 
   state_formula apply(const may& x)
   {
+    if (!has_unscoped_modal_formulas(x.operand()))
+    {
+      return x;
+    }
     core::identifier_string X = generator("X");
     if (is_mu())
     {
-      return may(x.formula() , mu(X, {}, x.operand()));
+      return may(x.formula(), mu(X, {}, x.operand()));
     }
     else
     {
-      return may(x.formula() , nu(X, {}, x.operand()));
+      return may(x.formula(), nu(X, {}, x.operand()));
     }
   }
 };
