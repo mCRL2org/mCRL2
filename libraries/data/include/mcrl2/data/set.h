@@ -272,7 +272,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           function_symbol f(e);
-          return f.name() == in_name();
+          return f.name() == in_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -402,7 +402,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           function_symbol f(e);
-          return f.name() == union_name();
+          return f.name() == union_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -476,7 +476,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           function_symbol f(e);
-          return f.name() == intersection_name();
+          return f.name() == intersection_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -550,7 +550,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           function_symbol f(e);
-          return f.name() == difference_name();
+          return f.name() == difference_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
       }

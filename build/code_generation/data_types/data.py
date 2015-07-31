@@ -519,15 +519,16 @@ ${cases}
       }
 ''')
 
-        condition = ''
+        domain_size = len(self.sort_expression_list.elements[0].domain.elements)
+        condition = ' && function_sort(f.sort()).domain().size() == {0}'.format(domain_size)
+        
         if sortparams == '':
-          domain_size = len(self.sort_expression_list.elements[0].domain.elements)
           cases = []
           for s in self.sort_expression_list.elements:
             d = s.domain
             assert(len(d.elements) == domain_size)
             cases.append('f == {0}({1})'.format(name, d.code(spec)))
-          condition = ' && function_sort(f.sort()).domain().size() == {0} && ({1})'.format(domain_size, ' || '.join(cases))
+          condition += ' && ({0})'.format(' || '.join(cases))
 
         return CODE_TEMPLATE.substitute(
           namestring = escape(fullname),
