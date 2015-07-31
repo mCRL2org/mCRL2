@@ -1292,6 +1292,10 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (state_formulas::is_true(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -1531,6 +1535,10 @@ struct add_data_expressions: public Builder<Derived>
     if (data::is_data_expression(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     else if (state_formulas::is_true(x))
     {
@@ -1772,6 +1780,10 @@ struct add_variables: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     else if (state_formulas::is_true(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
@@ -2011,6 +2023,10 @@ struct add_state_formula_expressions: public Builder<Derived>
     if (data::is_data_expression(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     else if (state_formulas::is_true(x))
     {

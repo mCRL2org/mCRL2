@@ -834,7 +834,8 @@ bool check_rule_StateFrm(Term t)
          || check_term_StateDelayTimed(t)
          || check_term_StateVar(t)
          || check_term_StateNu(t)
-         || check_term_StateMu(t);
+         || check_term_StateMu(t)
+         || check_rule_UntypedDataParameter(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS

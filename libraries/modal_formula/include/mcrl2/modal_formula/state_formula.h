@@ -51,6 +51,11 @@ class state_formula: public atermpp::aterm_appl
     state_formula(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// \brief Constructor.
+    state_formula(const data::untyped_data_parameter& x)
+      : atermpp::aterm_appl(x)
+    {}
 //--- start user section state_formula ---//
     /// \brief Returns true if the formula is timed.
     /// \return True if the formula is timed.
@@ -90,6 +95,7 @@ inline
 bool is_state_formula(const atermpp::aterm_appl& x)
 {
   return data::is_data_expression(x) ||
+         data::is_untyped_data_parameter(x) ||
          state_formulas::is_true(x) ||
          state_formulas::is_false(x) ||
          state_formulas::is_not(x) ||

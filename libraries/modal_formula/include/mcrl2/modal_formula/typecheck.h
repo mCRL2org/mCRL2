@@ -349,6 +349,30 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     return state_formulas::variable(x.name(), new_arguments);
   }
 
+  state_formula apply(const data::untyped_data_parameter& x)
+  {
+    auto i = m_state_variables.find(x.name());
+    if (i == m_state_variables.end())
+    {
+      return m_data_typechecker.typecheck_untyped_data_parameter(x.name(), x.arguments(), m_variables);
+    }
+    const data::sort_expression_list& expected_sorts = i->second;
+
+    if (expected_sorts.size() != x.arguments().size())
+    {
+      throw mcrl2::runtime_error("incorrect number of parameters for state variable " + core::pp(x.name()) + " (typechecking state formula " + data::pp(x) + ")");
+    }
+
+    data::data_expression_list new_arguments;
+    auto q1 = expected_sorts.begin();
+    auto q2 = x.arguments().begin();
+    for (; q1 != expected_sorts.end(); ++q1, ++q2)
+    {
+      new_arguments.push_front(m_data_typechecker(*q2, *q1, m_variables));
+    }
+    return state_formulas::variable(x.name(), new_arguments);
+  }
+
   template <typename MuNuFormula>
   state_formula apply_mu_nu(const MuNuFormula& x, bool is_mu)
   {

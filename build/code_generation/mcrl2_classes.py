@@ -237,7 +237,7 @@ if_(const core::identifier_string& name, const bdd_expression& left, const bdd_e
 '''
 
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
-  'state_formulas::state_formula'     : [ 'data::data_expression' ],
+  'state_formulas::state_formula'     : [ 'data::data_expression', 'data::untyped_data_parameter' ],
   'action_formulas::action_formula'   : [ 'data::data_expression', 'data::untyped_data_parameter', 'process::untyped_multi_action' ],
   'regular_formulas::regular_formula' : [ 'action_formulas::action_formula', 'data::data_expression' ],
   'pbes_system::pbes_expression'      : [ 'data::data_expression', 'data::variable', 'data::untyped_data_parameter' ],

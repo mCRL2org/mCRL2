@@ -324,8 +324,9 @@ RegFrm
 //--- State formulas
 
 StateFrm
-  : DataValExpr                                $left 20          // Data expression
-  | '(' StateFrm ')'                           $left 20          // Brackets
+  : DataValExpr                                                  // Boolean data expression
+  | DataExpr                                                     // Boolean data expression
+  | '(' StateFrm ')'                                             // Brackets
   | 'true'                                                       // True
   | 'false'                                                      // False
   | 'mu' StateVarDecl '.' StateFrm             $unary_right  1   // Minimal fixed point

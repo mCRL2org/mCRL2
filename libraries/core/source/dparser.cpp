@@ -361,6 +361,29 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
     return v[0];
   }
 
+  // resolve StateFrm ambiguities
+  if (is_all_of_type(v, n, "StateFrm", table))
+  {
+    D_ParseNode* result = 0;
+    for (int i = 0; i < n; i++)
+    {
+      core::parse_node node(v[i]);
+      if (table.symbol_name(node.child(0)) == "Id")
+      {
+        return v[i];
+      }
+      else if (table.symbol_name(node.child(0)) != "DataExpr")
+      {
+        result = v[i];
+      }
+    }
+    if (result)
+    {
+      return result;
+    }
+    return v[0];
+  }
+
   // resolve RegFrm ambiguities
   if (n == 2)
   {

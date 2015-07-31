@@ -243,6 +243,7 @@
                  | StateVar(<String>, <DataExpr>*)
                  | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
                  | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
+                 | <UntypedDataParameter>
 
 //regular formula
 <RegFrm>       ::= <ActFrm>

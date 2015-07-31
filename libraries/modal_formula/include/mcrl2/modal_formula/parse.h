@@ -182,6 +182,7 @@ struct state_formula_actions: public regular_formulas::detail::regular_formula_a
   state_formulas::state_formula parse_StateFrm(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataExpr")) { return parse_DataExpr(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return state_formulas::true_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return state_formulas::false_(); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "StateFrm")) { return state_formulas::not_(parse_StateFrm(node.child(1))); }
@@ -194,7 +195,7 @@ struct state_formula_actions: public regular_formulas::detail::regular_formula_a
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "<") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == ">") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::may(parse_RegFrm(node.child(1)), parse_StateFrm(node.child(3))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "mu") && (symbol_name(node.child(1)) == "StateVarDecl") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::mu(parse_Id(node.child(1).child(0)), parse_StateVarAssignmentList(node.child(1).child(1)), parse_StateFrm(node.child(3))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "nu") && (symbol_name(node.child(1)) == "StateVarDecl") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::nu(parse_Id(node.child(1).child(0)), parse_StateVarAssignmentList(node.child(1).child(1)), parse_StateFrm(node.child(3))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "Id")) { return state_formulas::variable(parse_Id(node.child(0)), parse_DataExprList(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "Id")) { return data::untyped_data_parameter(parse_Id(node.child(0)), parse_DataExprList(node.child(1))); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "delay")) { return make_delay(node.child(1)); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "yaled")) { return make_yaled(node.child(1)); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "StateFrm") && (symbol_name(node.child(2)) == ")")) { return parse_StateFrm(node.child(1)); }

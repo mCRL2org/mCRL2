@@ -444,7 +444,7 @@ struct data_typechecker: protected data::data_type_checker
     return atermpp::reverse(result);
   }
 
-  data_expression typecheck_untyped_parameter_identifier(const core::identifier_string& name, const data_expression_list& parameters, const std::map<core::identifier_string, data::sort_expression>& variables)
+  data_expression typecheck_untyped_data_parameter(const core::identifier_string& name, const data_expression_list& parameters, const std::map<core::identifier_string, data::sort_expression>& variables)
   {
     if (parameters.empty())
     {
