@@ -96,12 +96,10 @@ const atermpp::aterm_appl& default_value_DataEqnSpec();
 const atermpp::aterm_appl& default_value_LinearProcessSummand();
 const atermpp::aterm_appl& default_value_SortSpec();
 const atermpp::aterm_appl& default_value_ActionRenameRules();
-const atermpp::aterm_appl& default_value_UntypedParamId();
 const atermpp::aterm_appl& default_value_BddFalse();
 const atermpp::aterm_appl& default_value_BooleanEquation();
 const atermpp::aterm_appl& default_value_ConsSpec();
 const atermpp::aterm_appl& default_value_SortList();
-const atermpp::aterm_appl& default_value_UntypedPropVar();
 const atermpp::aterm_appl& default_value_Sum();
 const atermpp::aterm_appl& default_value_DataVarId();
 const atermpp::aterm_appl& default_value_ProcVarId();
@@ -206,6 +204,7 @@ const atermpp::aterm_appl& default_value_ActTrue();
 const atermpp::aterm_appl& default_value_RegTransOrNil();
 const atermpp::aterm_appl& default_value_GlobVarSpec();
 const atermpp::aterm_appl& default_value_UntypedIdentifierAssignment();
+const atermpp::aterm_appl& default_value_UntypedDataParameter();
 const atermpp::aterm_appl& default_value_SortExpr();
 const atermpp::aterm_appl& default_value_SortConsType();
 const atermpp::aterm_appl& default_value_DataExpr();
@@ -482,14 +481,6 @@ const atermpp::aterm_appl& default_value_ActionRenameRules()
   return t;
 }
 
-// UntypedParamId
-inline
-const atermpp::aterm_appl& default_value_UntypedParamId()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedParamId(), default_value_String(), default_value_List());
-  return t;
-}
-
 // BddFalse
 inline
 const atermpp::aterm_appl& default_value_BddFalse()
@@ -519,14 +510,6 @@ inline
 const atermpp::aterm_appl& default_value_SortList()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_SortList());
-  return t;
-}
-
-// UntypedPropVar
-inline
-const atermpp::aterm_appl& default_value_UntypedPropVar()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedPropVar(), default_value_String(), default_value_List());
   return t;
 }
 
@@ -1362,6 +1345,14 @@ const atermpp::aterm_appl& default_value_UntypedIdentifierAssignment()
   return t;
 }
 
+// UntypedDataParameter
+inline
+const atermpp::aterm_appl& default_value_UntypedDataParameter()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedDataParameter(), default_value_String(), default_value_List());
+  return t;
+}
+
 // SortExpr
 inline
 const atermpp::aterm_appl& default_value_SortExpr()
@@ -1535,12 +1526,10 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl LinearProcessSummand;
   static const atermpp::aterm_appl SortSpec;
   static const atermpp::aterm_appl ActionRenameRules;
-  static const atermpp::aterm_appl UntypedParamId;
   static const atermpp::aterm_appl BddFalse;
   static const atermpp::aterm_appl BooleanEquation;
   static const atermpp::aterm_appl ConsSpec;
   static const atermpp::aterm_appl SortList;
-  static const atermpp::aterm_appl UntypedPropVar;
   static const atermpp::aterm_appl Sum;
   static const atermpp::aterm_appl DataVarId;
   static const atermpp::aterm_appl ProcVarId;
@@ -1645,6 +1634,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl RegTransOrNil;
   static const atermpp::aterm_appl GlobVarSpec;
   static const atermpp::aterm_appl UntypedIdentifierAssignment;
+  static const atermpp::aterm_appl UntypedDataParameter;
   static const atermpp::aterm_appl SortExpr;
   static const atermpp::aterm_appl SortConsType;
   static const atermpp::aterm_appl DataExpr;

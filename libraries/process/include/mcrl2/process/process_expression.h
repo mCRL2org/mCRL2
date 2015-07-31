@@ -51,6 +51,11 @@ class process_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_ProcExpr(*this));
     }
+
+    /// \brief Constructor.
+    process_expression(const data::untyped_data_parameter& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of process_expressions
@@ -81,7 +86,6 @@ inline bool is_merge(const atermpp::aterm_appl& x);
 inline bool is_left_merge(const atermpp::aterm_appl& x);
 inline bool is_choice(const atermpp::aterm_appl& x);
 inline bool is_stochastic_operator(const atermpp::aterm_appl& x);
-inline bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x);
 inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
 
 /// \brief Test for a process_expression expression
@@ -111,8 +115,8 @@ bool is_process_expression(const atermpp::aterm_appl& x)
          process::is_left_merge(x) ||
          process::is_choice(x) ||
          process::is_stochastic_operator(x) ||
-         process::is_untyped_parameter_identifier(x) ||
-         process::is_untyped_process_assignment(x);
+         process::is_untyped_process_assignment(x) ||
+         data::is_untyped_data_parameter(x);
 }
 
 // prototype declaration
@@ -1396,72 +1400,6 @@ std::ostream& operator<<(std::ostream& out, const stochastic_operator& x)
 
 /// \brief swap overload
 inline void swap(stochastic_operator& t1, stochastic_operator& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \brief An untyped parameter identifier
-class untyped_parameter_identifier: public process_expression
-{
-  public:
-    /// \brief Default constructor.
-    untyped_parameter_identifier()
-      : process_expression(core::detail::default_values::UntypedParamId)
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit untyped_parameter_identifier(const atermpp::aterm& term)
-      : process_expression(term)
-    {
-      assert(core::detail::check_term_UntypedParamId(*this));
-    }
-
-    /// \brief Constructor.
-    untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedParamId(), name, arguments))
-    {}
-
-    /// \brief Constructor.
-    untyped_parameter_identifier(const std::string& name, const data::data_expression_list& arguments)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedParamId(), core::identifier_string(name), arguments))
-    {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::down_cast<core::identifier_string>((*this)[0]);
-    }
-
-    const data::data_expression_list& arguments() const
-    {
-      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
-    }
-};
-
-/// \brief Test for a untyped_parameter_identifier expression
-/// \param x A term
-/// \return True if \a x is a untyped_parameter_identifier expression
-inline
-bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::UntypedParamId;
-}
-
-// prototype declaration
-std::string pp(const untyped_parameter_identifier& x);
-
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const untyped_parameter_identifier& x)
-{
-  return out << process::pp(x);
-}
-
-/// \brief swap overload
-inline void swap(untyped_parameter_identifier& t1, untyped_parameter_identifier& t2)
 {
   t1.swap(t2);
 }

@@ -469,7 +469,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return process_instance_assignment(px.identifier(), typechecked_assignments);
   }
 
-  process_expression apply(const untyped_parameter_identifier& x)
+  process_expression apply(const data::untyped_data_parameter& x)
   {
     if (is_action_name(x.name()))
     {

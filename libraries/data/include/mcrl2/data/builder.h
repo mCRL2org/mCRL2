@@ -34,6 +34,7 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/untyped_data_parameter.h"
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/untyped_sort_variable.h"
@@ -253,6 +254,14 @@ struct add_sort_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     data::data_equation result = data::data_equation(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.condition()), static_cast<Derived&>(*this).apply(x.lhs()), static_cast<Derived&>(*this).apply(x.rhs()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  data::untyped_data_parameter apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::untyped_data_parameter result = data::untyped_data_parameter(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -517,6 +526,14 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
+  data::untyped_data_parameter apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::untyped_data_parameter result = data::untyped_data_parameter(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   data::data_expression apply(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -736,6 +753,14 @@ struct add_variables: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     data::data_equation result = data::data_equation(static_cast<Derived&>(*this).apply(x.variables()), static_cast<Derived&>(*this).apply(x.condition()), static_cast<Derived&>(*this).apply(x.lhs()), static_cast<Derived&>(*this).apply(x.rhs()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  data::untyped_data_parameter apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::untyped_data_parameter result = data::untyped_data_parameter(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

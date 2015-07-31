@@ -134,9 +134,9 @@ struct process_actions: public process::detail::action_actions
   }
 
   // override
-  untyped_parameter_identifier parse_Action(const core::parse_node& node) const
+  data::untyped_data_parameter parse_Action(const core::parse_node& node) const
   {
-    return untyped_parameter_identifier(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+    return data::untyped_data_parameter(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
   process::process_expression parse_ProcExpr(const core::parse_node& node) const

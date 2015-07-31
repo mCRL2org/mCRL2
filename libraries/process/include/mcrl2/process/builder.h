@@ -243,14 +243,6 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  process::untyped_parameter_identifier apply(const process::untyped_parameter_identifier& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::untyped_parameter_identifier result = process::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -347,13 +339,13 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
     }
-    else if (process::is_untyped_parameter_identifier(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_parameter_identifier>(x));
-    }
     else if (process::is_untyped_process_assignment(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -576,14 +568,6 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  process::untyped_parameter_identifier apply(const process::untyped_parameter_identifier& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::untyped_parameter_identifier result = process::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -680,13 +664,13 @@ struct add_data_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
     }
-    else if (process::is_untyped_parameter_identifier(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_parameter_identifier>(x));
-    }
     else if (process::is_untyped_process_assignment(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -917,14 +901,6 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
-  process::untyped_parameter_identifier apply(const process::untyped_parameter_identifier& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::untyped_parameter_identifier result = process::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1021,13 +997,13 @@ struct add_variables: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
     }
-    else if (process::is_untyped_parameter_identifier(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_parameter_identifier>(x));
-    }
     else if (process::is_untyped_process_assignment(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -1242,14 +1218,6 @@ struct add_process_expressions: public Builder<Derived>
     return result;
   }
 
-  process::untyped_parameter_identifier apply(const process::untyped_parameter_identifier& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1346,13 +1314,13 @@ struct add_process_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
     }
-    else if (process::is_untyped_parameter_identifier(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_parameter_identifier>(x));
-    }
     else if (process::is_untyped_process_assignment(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -1574,14 +1542,6 @@ struct add_process_identifiers: public Builder<Derived>
     return result;
   }
 
-  process::untyped_parameter_identifier apply(const process::untyped_parameter_identifier& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   process::untyped_process_assignment apply(const process::untyped_process_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1678,13 +1638,13 @@ struct add_process_identifiers: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::stochastic_operator>(x));
     }
-    else if (process::is_untyped_parameter_identifier(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_parameter_identifier>(x));
-    }
     else if (process::is_untyped_process_assignment(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_process_assignment>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;

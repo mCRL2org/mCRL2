@@ -71,6 +71,7 @@ std::string pp(const data::sort_expression& x) { return data::pp< data::sort_exp
 std::string pp(const data::structured_sort& x) { return data::pp< data::structured_sort >(x); }
 std::string pp(const data::structured_sort_constructor& x) { return data::pp< data::structured_sort_constructor >(x); }
 std::string pp(const data::structured_sort_constructor_argument& x) { return data::pp< data::structured_sort_constructor_argument >(x); }
+std::string pp(const data::untyped_data_parameter& x) { return data::pp< data::untyped_data_parameter >(x); }
 std::string pp(const data::untyped_identifier& x) { return data::pp< data::untyped_identifier >(x); }
 std::string pp(const data::untyped_identifier_assignment& x) { return data::pp< data::untyped_identifier_assignment >(x); }
 std::string pp(const data::untyped_possible_sorts& x) { return data::pp< data::untyped_possible_sorts >(x); }

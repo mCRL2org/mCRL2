@@ -50,6 +50,11 @@ class action_formula: public atermpp::aterm_appl
     action_formula(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// \brief Constructor.
+    action_formula(const data::untyped_data_parameter& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of action_formulas
@@ -88,7 +93,8 @@ bool is_action_formula(const atermpp::aterm_appl& x)
          action_formulas::is_exists(x) ||
          action_formulas::is_at(x) ||
          action_formulas::is_multi_action(x) ||
-         action_formulas::is_untyped_multi_action(x);
+         action_formulas::is_untyped_multi_action(x) ||
+         data::is_untyped_data_parameter(x);
 }
 
 // prototype declaration

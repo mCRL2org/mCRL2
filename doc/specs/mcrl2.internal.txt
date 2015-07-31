@@ -64,6 +64,9 @@
 //operation identifier
 <OpId>         ::= OpId(<String>, <SortExpr>, <Number>)
 
+//untyped parameter
+<UntypedDataParameter> ::= UntypedDataParameter(<String>, <DataExpr>*)
+
 //binding operator
 <BindingOperator>
                ::= Forall
@@ -111,7 +114,6 @@
 <DataExprOrNil>::= <DataExpr>
                  | Nil
 
-
 //Multiactions
 //------------
 
@@ -156,8 +158,8 @@
                  | LMerge(<ProcExpr>, <ProcExpr>)
                  | Choice(<ProcExpr>, <ProcExpr>)
                  | StochasticOperator(<DataVarId>+, <DataExpr>, <ProcExpr>)
-                 | UntypedParamId(<String>, <DataExpr>*)
                  | UntypedProcessAssignment(<String>, <UntypedIdentifierAssignment>*)
+                 | <UntypedDataParameter>
 
 //process identifier
 <ProcVarId>    ::= ProcVarId(<String>, <DataVarId>*, <Number>)
@@ -266,6 +268,7 @@
                  | ActAt(<ActFrm>, <DataExpr>)
                  | ActMultAct(<Action>*)
                  | UntypedActMultAct(<UntypedAction>*)
+                 | <UntypedDataParameter>
 
 //LPS action rename specifications
 //--------------------------------
@@ -326,7 +329,7 @@
                  | PBESForall(<DataVarId>+, <PBExpr>)
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
-                 | UntypedPropVar(<String>, <DataExpr>*)
+                 | <UntypedDataParameter>
 
 //propositional variable instantiation
 <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*, <Number>)

@@ -28,6 +28,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/untyped_sort.h"
+#include "mcrl2/data/untyped_data_parameter.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/bool.h"
@@ -895,6 +896,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     print_list(x, "", "", ", ", false);
+    derived().leave(x);
+  }
+
+  void apply(const data::untyped_data_parameter& x)
+  {
+    derived().enter(x);
+    derived().apply(x.name());
+    print_list(x.arguments(), "(", ")", ", ");
     derived().leave(x);
   }
 

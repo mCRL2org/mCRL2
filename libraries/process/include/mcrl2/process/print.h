@@ -415,14 +415,6 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     print_assignments(x.assignments(), false);
     derived().leave(x);
   }
-
-  void apply(const process::untyped_parameter_identifier& x)
-  {
-    derived().enter(x);
-    derived().apply(x.name());
-    print_list(x.arguments(), "(", ")", ", ");
-    derived().leave(x);
-  }
 };
 
 } // namespace detail

@@ -92,9 +92,10 @@ untyped_set_or_bag_comprehension(const variable_list& variables, const data_expr
 '''
 
 DATA_CLASSES = r'''
-alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | CIO  | SortRef  | A sort alias
-data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl | COU | DataEqn  | A data equation
-data_specification()                                                                                                                    : public atermpp::aterm_appl | SW  | DataSpec | A data specification
+alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | CIO | SortRef              | A sort alias
+data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl | COU | DataEqn              | A data equation
+data_specification()                                                                                                                    : public atermpp::aterm_appl | SW  | DataSpec             | A data specification
+untyped_data_parameter(const core::identifier_string& name, const data_expression_list& arguments)                                      : public atermpp::aterm_appl | CI  | UntypedDataParameter | An untyped parameter
 '''
 
 STATE_FORMULA_CLASSES = r'''
@@ -193,7 +194,6 @@ merge(const process_expression& left, const process_expression& right)          
 left_merge(const process_expression& left, const process_expression& right)                                                             : public process::process_expression | EI  | LMerge                   | The left merge operator
 choice(const process_expression& left, const process_expression& right)                                                                 : public process::process_expression | EI  | Choice                   | The choice operator
 stochastic_operator(const data::variable_list& variables, const data::data_expression& distribution, const process_expression& operand) : public process::process_expression | EI  | StochasticOperator       | The distribution operator
-untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)                          : public process::process_expression | EI  | UntypedParamId           | An untyped parameter identifier
 untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)            : public process::process_expression | EI  | UntypedProcessAssignment | An untyped process assginment
 '''
 
@@ -213,7 +213,6 @@ or_(const pbes_expression& left, const pbes_expression& right)                  
 imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESImp           | The implication operator for pbes expressions
 forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESForall        | The universal quantification operator for pbes expressions
 exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESExists        | The existential quantification operator for pbes expressions
-untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& parameters)         : public pbes_system::pbes_expression | EI    | UntypedPropVar    | An untyped propositional variable instantiation or data application
 '''
 
 BOOLEAN_CLASSES = r'''
@@ -241,9 +240,10 @@ if_(const core::identifier_string& name, const bdd_expression& left, const bdd_e
 
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
   'state_formulas::state_formula'     : [ 'data::data_expression' ],
-  'action_formulas::action_formula'   : [ 'data::data_expression' ],
+  'action_formulas::action_formula'   : [ 'data::data_expression', 'data::untyped_data_parameter' ],
   'regular_formulas::regular_formula' : [ 'action_formulas::action_formula', 'data::data_expression' ],
-  'pbes_system::pbes_expression'      : [ 'data::data_expression', 'data::variable' ],
+  'pbes_system::pbes_expression'      : [ 'data::data_expression', 'data::variable', 'data::untyped_data_parameter' ],
+  'process::process_expression'       : [ 'data::untyped_data_parameter' ],
 }
 
 # removes 'const' and '&' from a type

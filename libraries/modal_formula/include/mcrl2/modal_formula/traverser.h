@@ -186,6 +186,10 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -343,6 +347,10 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -498,6 +506,10 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
     else if (action_formulas::is_untyped_multi_action(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -658,6 +670,10 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -816,6 +832,10 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (action_formulas::is_untyped_multi_action(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

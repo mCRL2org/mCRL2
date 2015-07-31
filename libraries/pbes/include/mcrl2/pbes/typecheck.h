@@ -138,21 +138,21 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
     return propositional_variable_instantiation(name, data::data_expression_list(x_parameters.begin(), x_parameters.end()));
   }
 
-  pbes_expression apply(const untyped_parameter_identifier& x)
+  pbes_expression apply(const data::untyped_data_parameter& x)
   {
     const core::identifier_string& name = x.name();
     auto i = m_propositional_variables.find(name);
     if (i == m_propositional_variables.end())
     {
-      return m_data_typechecker.typecheck_untyped_parameter_identifier(x.name(), x.parameters(), m_variables);
+      return m_data_typechecker.typecheck_untyped_parameter_identifier(x.name(), x.arguments(), m_variables);
     }
 
     const data::sort_expression_list& equation_sorts = propositional_variable_sorts(name);
-    std::vector<data::data_expression> x_parameters(x.parameters().begin(), x.parameters().end());
+    std::vector<data::data_expression> x_parameters(x.arguments().begin(), x.arguments().end());
 
     if (x_parameters.size() != equation_sorts.size())
     {
-      throw mcrl2::runtime_error("propositional variable " + pbes_system::pp(x) + " has the wrong number of parameters");
+      throw mcrl2::runtime_error("propositional variable " + data::pp(x) + " has the wrong number of parameters");
     }
 
     auto ei = equation_sorts.begin();
@@ -165,7 +165,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
       }
       catch (mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(*xi) + " as type " + data::pp(*ei) + " (while typechecking " + pbes_system::pp(x) + ")");
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(*xi) + " as type " + data::pp(*ei) + " (while typechecking " + data::pp(x) + ")");
       }
     }
     return propositional_variable_instantiation(name, data::data_expression_list(x_parameters.begin(), x_parameters.end()));

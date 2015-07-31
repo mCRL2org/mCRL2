@@ -190,6 +190,10 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -357,6 +361,10 @@ struct add_data_expressions: public Builder<Derived>
     else if (action_formulas::is_untyped_multi_action(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -526,6 +534,10 @@ struct add_variables: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
     }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -693,6 +705,10 @@ struct add_action_formula_expressions: public Builder<Derived>
     else if (action_formulas::is_untyped_multi_action(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;

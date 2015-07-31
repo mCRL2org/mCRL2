@@ -296,22 +296,27 @@ std::string add_context(const d_loc_t* loc, const std::string& message)
   return s.str();
 }
 
+inline
+bool is_all_of_type(D_ParseNode* nodes[], int n, const char* type, const core::parser_table& table)
+{
+  for (int i = 0; i < n; i++)
+  {
+    core::parse_node node(nodes[i]);
+    if (table.symbol_name(node) != type)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 /// \brief Function for resolving parser ambiguities.
 D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v)
 {
   core::parser_table table(parser_tables_mcrl2);
 
   // resolve PbesExpr ambiguities
-  bool is_all_pbesexpr = true;
-  for (int i = 0; i < n; i++)
-  {
-    core::parse_node node(v[i]);
-    if (table.symbol_name(node) != "PbesExpr")
-    {
-      is_all_pbesexpr = false;
-    }
-  }
-  if (is_all_pbesexpr)
+  if (is_all_of_type(v, n, "PbesExpr", table))
   {
     D_ParseNode* result = 0;
     for (int i = 0; i < n; i++)
@@ -334,6 +339,11 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   }
 
   // resolve ActFrm ambiguities
+  if (is_all_of_type(v, n, "ActFrm", table))
+  {
+  }
+
+  // resolve RegFrm ambiguities
   if (n == 2)
   {
     // "(" ActFrm ")" can be parsed either as a new ActFrm, or as a RegFrm. We

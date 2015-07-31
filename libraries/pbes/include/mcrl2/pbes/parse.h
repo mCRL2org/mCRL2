@@ -75,7 +75,7 @@ struct pbes_actions: public data::detail::data_specification_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "PbesExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "PbesExpr")) { return pbes_system::or_(parse_PbesExpr(node.child(0)), parse_PbesExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "PbesExpr") && (symbol_name(node.child(2)) == ")")) { return parse_PbesExpr(node.child(1)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "PropVarInst")) { return parse_PropVarInst(node.child(0)); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "Id")) { return pbes_system::untyped_parameter_identifier(parse_Id(node.child(0)), parse_DataExprList(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "Id")) { return data::untyped_data_parameter(parse_Id(node.child(0)), parse_DataExprList(node.child(1))); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 

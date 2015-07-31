@@ -21,6 +21,7 @@
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/set_comprehension.h"
 #include "mcrl2/data/bag_comprehension.h"
+#include "mcrl2/data/untyped_data_parameter.h"
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/untyped_set_or_bag_comprehension.h"
 #include "mcrl2/data/untyped_sort.h"
@@ -223,6 +224,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).apply(x.condition());
     static_cast<Derived&>(*this).apply(x.lhs());
     static_cast<Derived&>(*this).apply(x.rhs());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -458,6 +466,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -661,6 +676,13 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).apply(x.condition());
     static_cast<Derived&>(*this).apply(x.lhs());
     static_cast<Derived&>(*this).apply(x.rhs());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -945,6 +967,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).apply(x.condition());
     static_cast<Derived&>(*this).apply(x.lhs());
     static_cast<Derived&>(*this).apply(x.rhs());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.name());
+    static_cast<Derived&>(*this).apply(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 

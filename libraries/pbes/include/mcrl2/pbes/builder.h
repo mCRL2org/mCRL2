@@ -34,7 +34,7 @@ struct pbes_expression_builder_base: public core::builder<Derived>
   	
   data::data_expression apply(const data::data_expression& x)
   {
-  	return x;
+    return x;
   }
 };
 
@@ -130,14 +130,6 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  pbes_system::untyped_parameter_identifier apply(const pbes_system::untyped_parameter_identifier& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    pbes_system::untyped_parameter_identifier result = pbes_system::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -174,13 +166,13 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
     }
-    else if (pbes_system::is_untyped_parameter_identifier(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::untyped_parameter_identifier>(x));
-    }
     else if (data::is_variable(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -282,14 +274,6 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  pbes_system::untyped_parameter_identifier apply(const pbes_system::untyped_parameter_identifier& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    pbes_system::untyped_parameter_identifier result = pbes_system::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -326,13 +310,13 @@ struct add_data_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
     }
-    else if (pbes_system::is_untyped_parameter_identifier(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::untyped_parameter_identifier>(x));
-    }
     else if (data::is_variable(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -443,14 +427,6 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
-  pbes_system::untyped_parameter_identifier apply(const pbes_system::untyped_parameter_identifier& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    pbes_system::untyped_parameter_identifier result = pbes_system::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this).apply(x.parameters()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -487,13 +463,13 @@ struct add_variables: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
     }
-    else if (pbes_system::is_untyped_parameter_identifier(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::untyped_parameter_identifier>(x));
-    }
     else if (data::is_variable(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -594,14 +570,6 @@ struct add_pbes_expressions: public Builder<Derived>
     return result;
   }
 
-  pbes_system::untyped_parameter_identifier apply(const pbes_system::untyped_parameter_identifier& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   pbes_system::pbes_expression apply(const pbes_system::pbes_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -638,13 +606,13 @@ struct add_pbes_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::exists>(x));
     }
-    else if (pbes_system::is_untyped_parameter_identifier(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<pbes_system::untyped_parameter_identifier>(x));
-    }
     else if (data::is_variable(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
