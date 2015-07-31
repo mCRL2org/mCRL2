@@ -277,8 +277,9 @@ PbesInit: 'init' PropVarInst ';' ;                               // Initial PBES
 DataValExpr: 'val' '(' DataExpr ')';                             // Marked data expression
 
 PbesExpr
-  : DataValExpr                                                  // Data expression
-  | DataExpr                                                     // PBES or data expression
+  : DataValExpr                                                  // Boolean data expression
+  | DataExpr                                                     // Boolean data expression
+  | '(' PbesExpr ')'                                             // Brackets
   | 'true'                                                       // True
   | 'false'                                                      // False
   | 'forall' VarsDeclList '.' PbesExpr         $unary_right  0   // Universal quantifier
@@ -287,16 +288,16 @@ PbesExpr
   | PbesExpr ('||' $binary_op_right 3) PbesExpr                  // Disjunction
   | PbesExpr ('&&' $binary_op_right 4) PbesExpr                  // Conjunction
   | '!' PbesExpr                               $unary_right  5   // Negation
-  | '(' PbesExpr ')'                                             // Brackets
   | Id ( '(' DataExprList ')' )?                                 // Instantiated PBES variable or data application
   ;
 
 //--- Action formulas
 
 ActFrm
-  : MultAct                                    $left 10          // Multi-action
-  | '(' ActFrm ')'                             $left 11          // Brackets
-  | DataValExpr                                $left 20          // Boolean data expression
+  : MultAct                                                      // Multi-action
+  | '(' ActFrm ')'                                               // Brackets
+  | DataValExpr                                                  // Boolean data expression
+  | DataExpr                                                     // Boolean data expression
   | 'true'                                                       // True
   | 'false'                                                      // False
   | '!' ActFrm                                 $unary_right  6   // Negation

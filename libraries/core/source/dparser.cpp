@@ -341,6 +341,24 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   // resolve ActFrm ambiguities
   if (is_all_of_type(v, n, "ActFrm", table))
   {
+    D_ParseNode* result = 0;
+    for (int i = 0; i < n; i++)
+    {
+      core::parse_node node(v[i]);
+      if (table.symbol_name(node.child(0)) == "MultAct")
+      {
+        return v[i];
+      }
+      else if (table.symbol_name(node.child(0)) != "DataExpr")
+      {
+        result = v[i];
+      }
+    }
+    if (result)
+    {
+      return result;
+    }
+    return v[0];
   }
 
   // resolve RegFrm ambiguities
