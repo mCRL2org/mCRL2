@@ -121,13 +121,10 @@
 <MultAct>      ::= MultAct(<Action>*)
 
 //untyped multiaction
-<UntypedMultAct> ::= UntypedMultAct(<UntypedAction>*)
+<UntypedMultiAction> ::= UntypedMultiAction(<UntypedDataParameter>*)
 
 //Action
 <Action>       ::= Action(<ActId>, <DataExpr>*)
-
-//untyped action
-<UntypedAction> ::= UntypedAction(<String>, <DataExpr>*)
 
 //action identifier
 <ActId>        ::= ActId(<String>, <SortExpr>*)
@@ -267,13 +264,13 @@
                  | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)
                  | ActMultAct(<Action>*)
-                 | UntypedActMultAct(<UntypedAction>*)
                  | <UntypedDataParameter>
+                 | <UntypedMultiAction>
 
 //LPS action rename specifications
 //--------------------------------
 
-<ParamIdOrAction> ::= <UntypedAction>
+<ParamIdOrAction> ::= <UntypedDataParameter>
                     | <Action>
 
 //Action rename rules
@@ -286,7 +283,7 @@
 
 //Right-hand side of an action rename rule
 <ActionRenameRuleRHS>
-               ::= <UntypedAction>
+               ::= <UntypedDataParameter>
                  | <Action>
                  | Delta
                  | Tau

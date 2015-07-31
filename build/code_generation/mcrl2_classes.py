@@ -140,14 +140,12 @@ forall(const data::variable_list& variables, const action_formula& body)    : pu
 exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists         | The existential quantification operator for action formulas
 at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt             | The at operator for action formulas
 multi_action(const process::action_list& actions)                           : public action_formulas::action_formula | EI   | ActMultAct        | The multi action for action formulas
-untyped_multi_action(const process::untyped_action_list& arguments)         : public action_formulas::action_formula | EI   | UntypedActMultAct | The multi action for action formulas (untyped)
 '''
 
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
 deadlock(const data::data_expression& time)                                                                                                                                                                                                                   | CMS  | None              | A deadlock
 multi_action(const process::action_list& actions, const data::data_expression& time)                                                                                                                                                                          | CMS  | None              | A multi-action
-untyped_multi_action(const process::untyped_action_list& actions)                                                                                                                                                                                             | CM   | UntypedMultAct    | An untyped multi-action
 deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                       | CMS  | None              | A deadlock summand
 action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                       | CMS  | None              | An action summand
 process_initializer(const data::assignment_list& assignments)                                                                                                                                                                    : public atermpp::aterm_appl | CIUS | LinearProcessInit | A process initializer
@@ -161,14 +159,14 @@ stochastic_process_initializer(const data::assignment_list& assignments, const s
 '''
 
 PROCESS_CLASSES = r'''
-action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                       : public atermpp::aterm_appl | CI   | ActId         | An action label
-untyped_action(const core::identifier_string& name, const data::data_expression_list& arguments)                                                                                 : public atermpp::aterm_appl | CI   | UntypedAction | An untyped action
+action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                       : public atermpp::aterm_appl | CI   | ActId              | An action label
 process_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SMW | ProcSpec    | A process specification
-process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CIUs | ProcVarId    | A process identifier
-process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI   | ProcEqn      | A process equation
-rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI   | RenameExpr   | A rename expression
-communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI   | CommExpr     | A communication expression
-action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI   | MultActName  | A multiset of action names
+process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CIUs | ProcVarId          | A process identifier
+process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI   | ProcEqn            | A process equation
+rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI   | RenameExpr         | A rename expression
+communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI   | CommExpr           | A communication expression
+action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI   | MultActName        | A multiset of action names
+untyped_multi_action(const data::untyped_data_parameter_list& actions)                                                                                                           : public atermpp::aterm_appl | CI   | UntypedMultiAction | An untyped multi action or data application
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''
@@ -240,7 +238,7 @@ if_(const core::identifier_string& name, const bdd_expression& left, const bdd_e
 
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
   'state_formulas::state_formula'     : [ 'data::data_expression' ],
-  'action_formulas::action_formula'   : [ 'data::data_expression', 'data::untyped_data_parameter' ],
+  'action_formulas::action_formula'   : [ 'data::data_expression', 'data::untyped_data_parameter', 'process::untyped_multi_action' ],
   'regular_formulas::regular_formula' : [ 'action_formulas::action_formula', 'data::data_expression' ],
   'pbes_system::pbes_expression'      : [ 'data::data_expression', 'data::variable', 'data::untyped_data_parameter' ],
   'process::process_expression'       : [ 'data::untyped_data_parameter' ],

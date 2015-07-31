@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_ACTION_PARSE_H
 
 #include "mcrl2/data/parse.h"
-#include "mcrl2/process/untyped_action.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/typecheck.h"
 
@@ -29,14 +28,14 @@ struct action_actions: public data::detail::data_specification_actions
     : data::detail::data_specification_actions(parser_)
   {}
 
-  untyped_action parse_Action(const core::parse_node& node) const
+  data::untyped_data_parameter parse_Action(const core::parse_node& node) const
   {
-    return process::untyped_action(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+    return data::untyped_data_parameter(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
-  untyped_action_list parse_ActionList(const core::parse_node& node) const
+  data::untyped_data_parameter_list parse_ActionList(const core::parse_node& node) const
   {
-    return parse_list<process::untyped_action>(node, "Action", [&](const core::parse_node& node) { return parse_Action(node); });
+    return parse_list<data::untyped_data_parameter>(node, "Action", [&](const core::parse_node& node) { return parse_Action(node); });
   }
 
   bool callback_ActDecl(const core::parse_node& node, action_label_vector& result) const

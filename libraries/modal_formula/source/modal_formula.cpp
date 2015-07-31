@@ -38,7 +38,6 @@ std::string pp(const action_formulas::multi_action& x) { return action_formulas:
 std::string pp(const action_formulas::not_& x) { return action_formulas::pp< action_formulas::not_ >(x); }
 std::string pp(const action_formulas::or_& x) { return action_formulas::pp< action_formulas::or_ >(x); }
 std::string pp(const action_formulas::true_& x) { return action_formulas::pp< action_formulas::true_ >(x); }
-std::string pp(const action_formulas::untyped_multi_action& x) { return action_formulas::pp< action_formulas::untyped_multi_action >(x); }
 std::set<data::variable> find_all_variables(const action_formulas::action_formula& x) { return action_formulas::find_all_variables< action_formulas::action_formula >(x); }
 //--- end generated action_formulas overloads ---//
 

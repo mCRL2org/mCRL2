@@ -39,7 +39,7 @@ struct action_formula_actions: public lps::detail::multi_action_actions
 
   action_formulas::action_formula parse_ActFrm(const core::parse_node& node) const
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "MultAct")) { return action_formulas::untyped_multi_action(parse_ActionList(node.child(0))); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "MultAct")) { return process::untyped_multi_action(parse_ActionList(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataExpr")) { return parse_DataExpr(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return action_formulas::true_(); }

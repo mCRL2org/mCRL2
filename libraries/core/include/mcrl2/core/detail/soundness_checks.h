@@ -166,9 +166,8 @@ template <typename Term> bool check_rule_SortDecl(Term t);
 template <typename Term> bool check_rule_DataEqn(Term t);
 template <typename Term> bool check_rule_DataExprOrNil(Term t);
 template <typename Term> bool check_rule_MultAct(Term t);
-template <typename Term> bool check_rule_UntypedMultAct(Term t);
+template <typename Term> bool check_rule_UntypedMultiAction(Term t);
 template <typename Term> bool check_rule_Action(Term t);
-template <typename Term> bool check_rule_UntypedAction(Term t);
 template <typename Term> bool check_rule_ActId(Term t);
 template <typename Term> bool check_rule_ProcExpr(Term t);
 template <typename Term> bool check_rule_ProcVarId(Term t);
@@ -228,11 +227,9 @@ template <typename Term> bool check_term_ProcEqnSpec(Term t);
 template <typename Term> bool check_term_StateForall(Term t);
 template <typename Term> bool check_term_BooleanImp(Term t);
 template <typename Term> bool check_term_SortId(Term t);
-template <typename Term> bool check_term_UntypedAction(Term t);
 template <typename Term> bool check_term_StateNu(Term t);
 template <typename Term> bool check_term_RegNil(Term t);
 template <typename Term> bool check_term_DataSpec(Term t);
-template <typename Term> bool check_term_UntypedActMultAct(Term t);
 template <typename Term> bool check_term_Tau(Term t);
 template <typename Term> bool check_term_StateYaledTimed(Term t);
 template <typename Term> bool check_term_SortCons(Term t);
@@ -262,7 +259,6 @@ template <typename Term> bool check_term_PropVarInst(Term t);
 template <typename Term> bool check_term_BagComp(Term t);
 template <typename Term> bool check_term_StateDelay(Term t);
 template <typename Term> bool check_term_RegAlt(Term t);
-template <typename Term> bool check_term_UntypedMultAct(Term t);
 template <typename Term> bool check_term_StructCons(Term t);
 template <typename Term> bool check_term_Mu(Term t);
 template <typename Term> bool check_term_PBEqnSpec(Term t);
@@ -346,6 +342,7 @@ template <typename Term> bool check_term_SortBag(Term t);
 template <typename Term> bool check_term_PBInit(Term t);
 template <typename Term> bool check_term_ActTrue(Term t);
 template <typename Term> bool check_term_RegTransOrNil(Term t);
+template <typename Term> bool check_term_UntypedMultiAction(Term t);
 template <typename Term> bool check_term_GlobVarSpec(Term t);
 template <typename Term> bool check_term_UntypedIdentifierAssignment(Term t);
 template <typename Term> bool check_term_UntypedDataParameter(Term t);
@@ -594,10 +591,10 @@ bool check_rule_MultAct(Term t)
 }
 
 template <typename Term>
-bool check_rule_UntypedMultAct(Term t)
+bool check_rule_UntypedMultiAction(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return check_term_UntypedMultAct(t);
+  return check_term_UntypedMultiAction(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -608,16 +605,6 @@ bool check_rule_Action(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return check_term_Action(t);
-#else
-  return true;
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-}
-
-template <typename Term>
-bool check_rule_UntypedAction(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return check_term_UntypedAction(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -883,8 +870,8 @@ bool check_rule_ActFrm(Term t)
          || check_term_ActExists(t)
          || check_term_ActAt(t)
          || check_term_ActMultAct(t)
-         || check_term_UntypedActMultAct(t)
-         || check_rule_UntypedDataParameter(t);
+         || check_rule_UntypedDataParameter(t)
+         || check_rule_UntypedMultiAction(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -894,7 +881,7 @@ template <typename Term>
 bool check_rule_ParamIdOrAction(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return check_rule_UntypedAction(t)
+  return check_rule_UntypedDataParameter(t)
          || check_rule_Action(t);
 #else
   return true;
@@ -925,7 +912,7 @@ template <typename Term>
 bool check_rule_ActionRenameRuleRHS(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return check_rule_UntypedAction(t)
+  return check_rule_UntypedDataParameter(t)
          || check_rule_Action(t)
          || check_term_Delta(t)
          || check_term_Tau(t);
@@ -1832,45 +1819,6 @@ bool check_term_SortId(Term t)
   return true;
 }
 
-// UntypedAction(String, DataExpr*)
-template <typename Term>
-bool check_term_UntypedAction(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedAction)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
 // StateNu(String, DataVarIdInit*, StateFrm)
 template <typename Term>
 bool check_term_StateNu(Term t)
@@ -1983,40 +1931,6 @@ bool check_term_DataSpec(Term t)
   if (!check_term_argument(a[3], check_rule_DataEqnSpec<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataEqnSpec" << std::endl;
-    return false;
-  }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedActMultAct(UntypedAction*)
-template <typename Term>
-bool check_term_UntypedActMultAct(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedActMultAct)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_UntypedAction<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_UntypedAction" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3086,40 +3000,6 @@ bool check_term_RegAlt(Term t)
   if (!check_term_argument(a[1], check_rule_RegFrm<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
-    return false;
-  }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// UntypedMultAct(UntypedAction*)
-template <typename Term>
-bool check_term_UntypedMultAct(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::UntypedMultAct)
-  {
-    return false;
-  }
-
-  // check the children
-  if (a.size() != 1)
-  {
-    return false;
-  }
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_UntypedAction<atermpp::aterm>, 0))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_UntypedAction" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6132,6 +6012,40 @@ bool check_term_RegTransOrNil(Term t)
   if (!check_term_argument(a[0], check_rule_RegFrm<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_RegFrm" << std::endl;
+    return false;
+  }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// UntypedMultiAction(UntypedDataParameter*)
+template <typename Term>
+bool check_term_UntypedMultiAction(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::UntypedMultiAction)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 1)
+  {
+    return false;
+  }
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_UntypedDataParameter<atermpp::aterm>, 0))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_UntypedDataParameter" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

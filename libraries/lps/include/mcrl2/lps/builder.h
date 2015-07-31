@@ -14,12 +14,10 @@
 
 #include "mcrl2/core/builder.h"
 #include "mcrl2/data/builder.h"
-#include "mcrl2/process/builder.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/lps/untyped_multi_action.h"
-#include "mcrl2/process/untyped_action.h"
-#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/process/builder.h"
+#include "mcrl2/process/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -56,13 +54,6 @@ struct add_sort_expressions: public Builder<Derived>
     {
       x.time() = static_cast<Derived&>(*this).apply(x.time());
     }
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void update(lps::untyped_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    x.actions() = static_cast<Derived&>(*this).apply(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -204,13 +195,6 @@ struct add_data_expressions: public Builder<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void update(lps::untyped_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    x.actions() = static_cast<Derived&>(*this).apply(x.actions());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void update(lps::deadlock_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -336,13 +320,6 @@ struct add_variables: public Builder<Derived>
     {
       x.time() = static_cast<Derived&>(*this).apply(x.time());
     }
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void update(lps::untyped_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    x.actions() = static_cast<Derived&>(*this).apply(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 

@@ -15,6 +15,7 @@
 #include "mcrl2/core/builder.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -41,14 +42,6 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  process::untyped_action apply(const process::untyped_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::untyped_action result = process::untyped_action(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   void update(process::process_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -71,6 +64,14 @@ struct add_sort_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_equation result = process::process_equation(static_cast<Derived&>(*this).apply(x.identifier()), static_cast<Derived&>(*this).apply(x.formal_parameters()), static_cast<Derived&>(*this).apply(x.expression()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  process::untyped_multi_action apply(const process::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::untyped_multi_action result = process::untyped_multi_action(static_cast<Derived&>(*this).apply(x.actions()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -376,14 +377,6 @@ struct add_data_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  process::untyped_action apply(const process::untyped_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::untyped_action result = process::untyped_action(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   void update(process::process_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -396,6 +389,14 @@ struct add_data_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_equation result = process::process_equation(x.identifier(), x.formal_parameters(), static_cast<Derived&>(*this).apply(x.expression()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  process::untyped_multi_action apply(const process::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::untyped_multi_action result = process::untyped_multi_action(static_cast<Derived&>(*this).apply(x.actions()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -700,14 +701,6 @@ struct add_variables: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  process::untyped_action apply(const process::untyped_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    process::untyped_action result = process::untyped_action(x.name(), static_cast<Derived&>(*this).apply(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   void update(process::process_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -729,6 +722,14 @@ struct add_variables: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     process::process_equation result = process::process_equation(static_cast<Derived&>(*this).apply(x.identifier()), static_cast<Derived&>(*this).apply(x.formal_parameters()), static_cast<Derived&>(*this).apply(x.expression()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  process::untyped_multi_action apply(const process::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::untyped_multi_action result = process::untyped_multi_action(static_cast<Derived&>(*this).apply(x.actions()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

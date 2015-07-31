@@ -19,8 +19,8 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/process/untyped_action.h"
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/process/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -55,6 +55,11 @@ class action_formula: public atermpp::aterm_appl
     action_formula(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// \brief Constructor.
+    action_formula(const process::untyped_multi_action& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of action_formulas
@@ -74,7 +79,6 @@ inline bool is_forall(const atermpp::aterm_appl& x);
 inline bool is_exists(const atermpp::aterm_appl& x);
 inline bool is_at(const atermpp::aterm_appl& x);
 inline bool is_multi_action(const atermpp::aterm_appl& x);
-inline bool is_untyped_multi_action(const atermpp::aterm_appl& x);
 
 /// \brief Test for a action_formula expression
 /// \param x A term
@@ -93,7 +97,7 @@ bool is_action_formula(const atermpp::aterm_appl& x)
          action_formulas::is_exists(x) ||
          action_formulas::is_at(x) ||
          action_formulas::is_multi_action(x) ||
-         action_formulas::is_untyped_multi_action(x) ||
+         process::is_untyped_multi_action(x) ||
          data::is_untyped_data_parameter(x);
 }
 
@@ -681,62 +685,6 @@ std::ostream& operator<<(std::ostream& out, const multi_action& x)
 
 /// \brief swap overload
 inline void swap(multi_action& t1, multi_action& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \brief The multi action for action formulas (untyped)
-class untyped_multi_action: public action_formula
-{
-  public:
-    /// \brief Default constructor.
-    untyped_multi_action()
-      : action_formula(core::detail::default_values::UntypedActMultAct)
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit untyped_multi_action(const atermpp::aterm& term)
-      : action_formula(term)
-    {
-      assert(core::detail::check_term_UntypedActMultAct(*this));
-    }
-
-    /// \brief Constructor.
-    untyped_multi_action(const process::untyped_action_list& arguments)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedActMultAct(), arguments))
-    {}
-
-    const process::untyped_action_list& arguments() const
-    {
-      return atermpp::down_cast<process::untyped_action_list>((*this)[0]);
-    }
-};
-
-/// \brief Test for a untyped_multi_action expression
-/// \param x A term
-/// \return True if \a x is a untyped_multi_action expression
-inline
-bool is_untyped_multi_action(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::UntypedActMultAct;
-}
-
-// prototype declaration
-std::string pp(const untyped_multi_action& x);
-
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const untyped_multi_action& x)
-{
-  return out << action_formulas::pp(x);
-}
-
-/// \brief swap overload
-inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
 {
   t1.swap(t2);
 }

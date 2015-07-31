@@ -130,14 +130,6 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  action_formulas::untyped_multi_action apply(const action_formulas::untyped_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    action_formulas::untyped_multi_action result = action_formulas::untyped_multi_action(static_cast<Derived&>(*this).apply(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   action_formulas::action_formula apply(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -186,9 +178,9 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (action_formulas::is_untyped_multi_action(x))
+    else if (process::is_untyped_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
@@ -302,14 +294,6 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  action_formulas::untyped_multi_action apply(const action_formulas::untyped_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    action_formulas::untyped_multi_action result = action_formulas::untyped_multi_action(static_cast<Derived&>(*this).apply(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   action_formulas::action_formula apply(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -358,9 +342,9 @@ struct add_data_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (action_formulas::is_untyped_multi_action(x))
+    else if (process::is_untyped_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
@@ -474,14 +458,6 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
-  action_formulas::untyped_multi_action apply(const action_formulas::untyped_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    action_formulas::untyped_multi_action result = action_formulas::untyped_multi_action(static_cast<Derived&>(*this).apply(x.arguments()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
   action_formulas::action_formula apply(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -530,9 +506,9 @@ struct add_variables: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (action_formulas::is_untyped_multi_action(x))
+    else if (process::is_untyped_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
@@ -646,14 +622,6 @@ struct add_action_formula_expressions: public Builder<Derived>
     return x;
   }
 
-  action_formulas::untyped_multi_action apply(const action_formulas::untyped_multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   action_formulas::action_formula apply(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -702,9 +670,9 @@ struct add_action_formula_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
     }
-    else if (action_formulas::is_untyped_multi_action(x))
+    else if (process::is_untyped_multi_action(x))
     {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::untyped_multi_action>(x));
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {

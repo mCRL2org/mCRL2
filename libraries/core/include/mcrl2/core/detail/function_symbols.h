@@ -1145,22 +1145,6 @@ const atermpp::function_symbol& function_symbol_Tau()
   return function_symbol_Tau;
 }
 
-// UntypedActMultAct
-inline
-const atermpp::function_symbol& function_symbol_UntypedActMultAct()
-{
-  static const atermpp::function_symbol function_symbol_UntypedActMultAct = atermpp::function_symbol("UntypedActMultAct", 1);
-  return function_symbol_UntypedActMultAct;
-}
-
-// UntypedAction
-inline
-const atermpp::function_symbol& function_symbol_UntypedAction()
-{
-  static const atermpp::function_symbol function_symbol_UntypedAction = atermpp::function_symbol("UntypedAction", 2);
-  return function_symbol_UntypedAction;
-}
-
 // UntypedDataParameter
 inline
 const atermpp::function_symbol& function_symbol_UntypedDataParameter()
@@ -1185,12 +1169,12 @@ const atermpp::function_symbol& function_symbol_UntypedIdentifierAssignment()
   return function_symbol_UntypedIdentifierAssignment;
 }
 
-// UntypedMultAct
+// UntypedMultiAction
 inline
-const atermpp::function_symbol& function_symbol_UntypedMultAct()
+const atermpp::function_symbol& function_symbol_UntypedMultiAction()
 {
-  static const atermpp::function_symbol function_symbol_UntypedMultAct = atermpp::function_symbol("UntypedMultAct", 1);
-  return function_symbol_UntypedMultAct;
+  static const atermpp::function_symbol function_symbol_UntypedMultiAction = atermpp::function_symbol("UntypedMultiAction", 1);
+  return function_symbol_UntypedMultiAction;
 }
 
 // UntypedProcessAssignment
@@ -1269,11 +1253,9 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol StateForall;
   static const atermpp::function_symbol BooleanImp;
   static const atermpp::function_symbol SortId;
-  static const atermpp::function_symbol UntypedAction;
   static const atermpp::function_symbol StateNu;
   static const atermpp::function_symbol RegNil;
   static const atermpp::function_symbol DataSpec;
-  static const atermpp::function_symbol UntypedActMultAct;
   static const atermpp::function_symbol Tau;
   static const atermpp::function_symbol StateYaledTimed;
   static const atermpp::function_symbol SortCons;
@@ -1303,7 +1285,6 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol BagComp;
   static const atermpp::function_symbol StateDelay;
   static const atermpp::function_symbol RegAlt;
-  static const atermpp::function_symbol UntypedMultAct;
   static const atermpp::function_symbol StructCons;
   static const atermpp::function_symbol Mu;
   static const atermpp::function_symbol PBEqnSpec;
@@ -1387,6 +1368,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol PBInit;
   static const atermpp::function_symbol ActTrue;
   static const atermpp::function_symbol RegTransOrNil;
+  static const atermpp::function_symbol UntypedMultiAction;
   static const atermpp::function_symbol GlobVarSpec;
   static const atermpp::function_symbol UntypedIdentifierAssignment;
   static const atermpp::function_symbol UntypedDataParameter;

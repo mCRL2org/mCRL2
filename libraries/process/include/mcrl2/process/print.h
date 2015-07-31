@@ -166,14 +166,6 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().leave(x);
   }
 
-  void apply(const process::untyped_action& x)
-  {
-    derived().enter(x);
-    derived().apply(x.name());
-    print_list(x.arguments(), "(", ")", ", ");
-    derived().leave(x);
-  }
-
   void apply(const process::process_specification& x)
   {
     derived().enter(x);

@@ -92,10 +92,10 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
     return at((*this).apply(x.operand()), new_time);
   }
 
-  action_formula apply(const action_formulas::untyped_multi_action& x)
+  action_formula apply(const process::untyped_multi_action& x)
   {
     process::action_list new_arguments;
-    for (const process::untyped_action& a: x.arguments())
+    for (const data::untyped_data_parameter& a: x.actions())
     {
       new_arguments.push_front(typecheck_action(a.name(), a.arguments()));
     }

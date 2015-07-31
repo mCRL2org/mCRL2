@@ -84,11 +84,9 @@ const atermpp::aterm_appl& default_value_ProcEqnSpec();
 const atermpp::aterm_appl& default_value_StateForall();
 const atermpp::aterm_appl& default_value_BooleanImp();
 const atermpp::aterm_appl& default_value_SortId();
-const atermpp::aterm_appl& default_value_UntypedAction();
 const atermpp::aterm_appl& default_value_StateNu();
 const atermpp::aterm_appl& default_value_RegNil();
 const atermpp::aterm_appl& default_value_DataSpec();
-const atermpp::aterm_appl& default_value_UntypedActMultAct();
 const atermpp::aterm_appl& default_value_Tau();
 const atermpp::aterm_appl& default_value_StateYaledTimed();
 const atermpp::aterm_appl& default_value_SortCons();
@@ -118,7 +116,6 @@ const atermpp::aterm_appl& default_value_PropVarInst();
 const atermpp::aterm_appl& default_value_BagComp();
 const atermpp::aterm_appl& default_value_StateDelay();
 const atermpp::aterm_appl& default_value_RegAlt();
-const atermpp::aterm_appl& default_value_UntypedMultAct();
 const atermpp::aterm_appl& default_value_StructCons();
 const atermpp::aterm_appl& default_value_Mu();
 const atermpp::aterm_appl& default_value_PBEqnSpec();
@@ -202,6 +199,7 @@ const atermpp::aterm_appl& default_value_SortBag();
 const atermpp::aterm_appl& default_value_PBInit();
 const atermpp::aterm_appl& default_value_ActTrue();
 const atermpp::aterm_appl& default_value_RegTransOrNil();
+const atermpp::aterm_appl& default_value_UntypedMultiAction();
 const atermpp::aterm_appl& default_value_GlobVarSpec();
 const atermpp::aterm_appl& default_value_UntypedIdentifierAssignment();
 const atermpp::aterm_appl& default_value_UntypedDataParameter();
@@ -385,14 +383,6 @@ const atermpp::aterm_appl& default_value_SortId()
   return t;
 }
 
-// UntypedAction
-inline
-const atermpp::aterm_appl& default_value_UntypedAction()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedAction(), default_value_String(), default_value_List());
-  return t;
-}
-
 // StateNu
 inline
 const atermpp::aterm_appl& default_value_StateNu()
@@ -414,14 +404,6 @@ inline
 const atermpp::aterm_appl& default_value_DataSpec()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_DataSpec(), default_value_SortSpec(), default_value_ConsSpec(), default_value_MapSpec(), default_value_DataEqnSpec());
-  return t;
-}
-
-// UntypedActMultAct
-inline
-const atermpp::aterm_appl& default_value_UntypedActMultAct()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedActMultAct(), default_value_List());
   return t;
 }
 
@@ -654,14 +636,6 @@ inline
 const atermpp::aterm_appl& default_value_RegAlt()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RegAlt(), default_value_RegFrm(), default_value_RegFrm());
-  return t;
-}
-
-// UntypedMultAct
-inline
-const atermpp::aterm_appl& default_value_UntypedMultAct()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedMultAct(), default_value_List());
   return t;
 }
 
@@ -1329,6 +1303,14 @@ const atermpp::aterm_appl& default_value_RegTransOrNil()
   return t;
 }
 
+// UntypedMultiAction
+inline
+const atermpp::aterm_appl& default_value_UntypedMultiAction()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedMultiAction(), default_value_List());
+  return t;
+}
+
 // GlobVarSpec
 inline
 const atermpp::aterm_appl& default_value_GlobVarSpec()
@@ -1448,14 +1430,14 @@ const atermpp::aterm_appl& default_value_ActFrm()
 inline
 const atermpp::aterm_appl& default_value_ParamIdOrAction()
 {
-  return default_value_UntypedAction();
+  return default_value_UntypedDataParameter();
 }
 
 // ActionRenameRuleRHS
 inline
 const atermpp::aterm_appl& default_value_ActionRenameRuleRHS()
 {
-  return default_value_UntypedAction();
+  return default_value_UntypedDataParameter();
 }
 
 // FixPoint
@@ -1514,11 +1496,9 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl StateForall;
   static const atermpp::aterm_appl BooleanImp;
   static const atermpp::aterm_appl SortId;
-  static const atermpp::aterm_appl UntypedAction;
   static const atermpp::aterm_appl StateNu;
   static const atermpp::aterm_appl RegNil;
   static const atermpp::aterm_appl DataSpec;
-  static const atermpp::aterm_appl UntypedActMultAct;
   static const atermpp::aterm_appl Tau;
   static const atermpp::aterm_appl StateYaledTimed;
   static const atermpp::aterm_appl SortCons;
@@ -1548,7 +1528,6 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl BagComp;
   static const atermpp::aterm_appl StateDelay;
   static const atermpp::aterm_appl RegAlt;
-  static const atermpp::aterm_appl UntypedMultAct;
   static const atermpp::aterm_appl StructCons;
   static const atermpp::aterm_appl Mu;
   static const atermpp::aterm_appl PBEqnSpec;
@@ -1632,6 +1611,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl PBInit;
   static const atermpp::aterm_appl ActTrue;
   static const atermpp::aterm_appl RegTransOrNil;
+  static const atermpp::aterm_appl UntypedMultiAction;
   static const atermpp::aterm_appl GlobVarSpec;
   static const atermpp::aterm_appl UntypedIdentifierAssignment;
   static const atermpp::aterm_appl UntypedDataParameter;

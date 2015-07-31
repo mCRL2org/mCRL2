@@ -122,20 +122,6 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
     }
     derived().leave(x);
   }
-
-  void apply(const action_formulas::untyped_multi_action& x)
-  {
-    derived().enter(x);
-    if (x.arguments().empty())
-    {
-      derived().print("tau");
-    }
-    else
-    {
-      print_list(x.arguments(), "", "", "|");
-    }
-    derived().leave(x);
-  }
 };
 
 } // namespace detail
