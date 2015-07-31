@@ -574,7 +574,7 @@ class mcrl2parse_tool : public input_tool
             case multact_e  :
             {
               separate_action_specification(text, "multact", lpsspec, text);
-              lps::untyped_multi_action y = lps::detail::parse_multi_action_new(text);
+              process::untyped_multi_action y = lps::detail::parse_multi_action_new(text);
               lps::multi_action x = lps::detail::complete_multi_action(y, lpsspec.action_labels(), lpsspec.data());
               if (aterm_format)
               {
@@ -663,8 +663,7 @@ class mcrl2parse_tool : public input_tool
               bool translate_regular = true;
               bool type_check = true;
               bool translate_user_notation = true;
-              bool normalize_sorts = true;
-              state_formulas::state_formula x = state_formulas::parse_state_formula(text, lpsspec, check_monotonicity, translate_regular, type_check, translate_user_notation, normalize_sorts);
+              state_formulas::state_formula x = state_formulas::parse_state_formula(text, lpsspec, check_monotonicity, translate_regular, type_check, translate_user_notation);
               if (aterm_format)
               {
                 std::cout << x << std::endl;
