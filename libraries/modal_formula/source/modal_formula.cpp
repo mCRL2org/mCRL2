@@ -80,7 +80,7 @@ std::string pp(const state_formulas::true_& x) { return state_formulas::pp< stat
 std::string pp(const state_formulas::variable& x) { return state_formulas::pp< state_formulas::variable >(x); }
 std::string pp(const state_formulas::yaled& x) { return state_formulas::pp< state_formulas::yaled >(x); }
 std::string pp(const state_formulas::yaled_timed& x) { return state_formulas::pp< state_formulas::yaled_timed >(x); }
-state_formulas::state_formula normalize_sorts(const state_formulas::state_formula& x, const data::data_specification& dataspec) { return state_formulas::normalize_sorts< state_formulas::state_formula >(x, dataspec); }
+state_formulas::state_formula normalize_sorts(const state_formulas::state_formula& x, const data::sort_specification& sortspec) { return state_formulas::normalize_sorts< state_formulas::state_formula >(x, sortspec); }
 state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x) { return state_formulas::translate_user_notation< state_formulas::state_formula >(x); }
 std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x) { return state_formulas::find_sort_expressions< state_formulas::state_formula >(x); }
 std::set<data::variable> find_all_variables(const state_formulas::state_formula& x) { return state_formulas::find_all_variables< state_formulas::state_formula >(x); }

@@ -23,6 +23,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/replace.h"
 #include "mcrl2/process/translate_user_notation.h"
 

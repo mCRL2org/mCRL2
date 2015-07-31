@@ -24,20 +24,20 @@ namespace lps
 
 template <typename T>
 void normalize_sorts(T& x,
-                     const data::data_specification& data_spec,
+                     const data::sort_specification& sortspec,
                      typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                     )
 {
-  core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec)).update(x);
+  core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).update(x);
 }
 
 template <typename T>
 T normalize_sorts(const T& x,
-                  const data::data_specification& data_spec,
+                  const data::sort_specification& sortspec,
                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                  )
 {
-  return core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec)).apply(x);
+  return core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(x);
 }
 
 } // namespace lps

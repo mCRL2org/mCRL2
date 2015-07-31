@@ -36,7 +36,7 @@ std::string pp(const lps::stochastic_linear_process& x) { return lps::pp< lps::s
 std::string pp(const lps::stochastic_process_initializer& x) { return lps::pp< lps::stochastic_process_initializer >(x); }
 std::string pp(const lps::stochastic_specification& x) { return lps::pp< lps::stochastic_specification >(x); }
 std::string pp(const lps::untyped_multi_action& x) { return lps::pp< lps::untyped_multi_action >(x); }
-void normalize_sorts(lps::multi_action& x, const data::data_specification& dataspec) { lps::normalize_sorts< lps::multi_action >(x, dataspec); }
+void normalize_sorts(lps::multi_action& x, const data::sort_specification& sortspec) { lps::normalize_sorts< lps::multi_action >(x, sortspec); }
 void translate_user_notation(lps::multi_action& x) { lps::translate_user_notation< lps::multi_action >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x) { return lps::find_sort_expressions< lps::specification >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::stochastic_specification& x) { return lps::find_sort_expressions< lps::stochastic_specification >(x); }

@@ -128,7 +128,7 @@ T normalize_sorts(const T& x,
 }
 
 /* The functions below are defined as the function normalize_sorts
-   above does not work on other sorts than sort expressions. */
+   above does not work on other sorts than sort expressions. 
 
 inline sort_expression normalize_sorts(const basic_sort& x,
                                        const data::sort_specification& sort_spec)
@@ -153,6 +153,7 @@ inline sort_expression normalize_sorts(const structured_sort& x,
 {
   return normalize_sorts(static_cast<sort_expression>(x),sort_spec);
 }
+*/
 
 } // namespace data
 

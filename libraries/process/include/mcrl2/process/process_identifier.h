@@ -116,7 +116,7 @@ inline void swap(process_identifier& t1, process_identifier& t2)
 // template function overloads
 std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
-void normalize_sorts(process_identifier_vector& x, const data::data_specification& dataspec);
+void normalize_sorts(process_identifier_vector& x, const data::sort_specification& sortspec);
 
 } // namespace process
 

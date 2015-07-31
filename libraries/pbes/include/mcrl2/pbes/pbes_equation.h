@@ -200,7 +200,7 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 
 // template function overloads
 std::string pp(const pbes_equation_vector& x);
-void normalize_sorts(pbes_equation_vector& x, const data::data_specification& dataspec);
+void normalize_sorts(pbes_equation_vector& x, const data::sort_specification& sortspec);
 std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x);
 
 } // namespace pbes_system

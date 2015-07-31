@@ -35,7 +35,7 @@ void complete_data_specification(pbes&);
 
 // template function overloads
 std::string pp(const pbes& x);
-void normalize_sorts(pbes& x, const data::data_specification& dataspec);
+void normalize_sorts(pbes& x, const data::sort_specification& sortspec);
 void translate_user_notation(pbes_system::pbes& x);
 std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes& x);
 std::set<data::variable> find_all_variables(const pbes_system::pbes& x);
@@ -403,7 +403,7 @@ std::ostream& operator<<(std::ostream& out, const pbes& x)
 inline
 atermpp::aterm_appl pbes_to_aterm(const pbes& p)
 {
-  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), 
+  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(),
                                                              data::variable_list(p.global_variables().begin(),
                                                                                  p.global_variables().end()));
 

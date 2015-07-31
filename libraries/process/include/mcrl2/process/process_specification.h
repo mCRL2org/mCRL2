@@ -32,7 +32,7 @@ void complete_data_specification(process_specification&);
 
 // template function overloads
 std::string pp(const process_specification& x);
-void normalize_sorts(process_specification& x, const data::data_specification& dataspec);
+void normalize_sorts(process_specification& x, const data::sort_specification& sortspec);
 void translate_user_notation(process::process_specification& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_specification& x);
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x);

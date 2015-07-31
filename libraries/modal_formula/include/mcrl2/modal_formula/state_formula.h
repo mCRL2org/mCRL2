@@ -1238,7 +1238,7 @@ bool state_formula::has_time() const
 }
 
 // template function overloads
-state_formula normalize_sorts(const state_formula& x, const data::data_specification& dataspec);
+state_formula normalize_sorts(const state_formula& x, const data::sort_specification& sortspec);
 state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x);
 std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x);
 std::set<data::variable> find_all_variables(const state_formulas::state_formula& x);

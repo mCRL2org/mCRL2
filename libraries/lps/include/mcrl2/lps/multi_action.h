@@ -184,7 +184,7 @@ bool is_multi_action(const atermpp::aterm_appl& x)
 }
 
 // template function overloads
-void normalize_sorts(multi_action& x, const data::data_specification& dataspec);
+void normalize_sorts(multi_action& x, const data::sort_specification& sortspec);
 void translate_user_notation(lps::multi_action& x);
 std::set<data::variable> find_all_variables(const lps::multi_action& x);
 std::set<data::variable> find_free_variables(const lps::multi_action& x);

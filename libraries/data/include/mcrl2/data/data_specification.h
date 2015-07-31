@@ -37,7 +37,7 @@ namespace data
 {
 
 // template function overloads
-data_expression normalize_sorts(const data_expression& x, const data::sort_specification& dataspec);
+data_expression normalize_sorts(const data_expression& x, const data::sort_specification& sortspec);
 variable_list normalize_sorts(const variable_list& x, const data::sort_specification& dataspec);
 data::data_equation normalize_sorts(const data::data_equation& x, const data::sort_specification& dataspec);
 data_equation_list normalize_sorts(const data_equation_list& x, const data::sort_specification& dataspec);
@@ -446,12 +446,12 @@ class data_specification: public sort_specification
       for (const sort_expression& sort: sorts())
       {
         import_data_type_for_system_defined_sort(sort);
-      } 
+      }
 
       for (const alias& a: user_defined_aliases())
       {
         import_data_type_for_system_defined_sort(a.reference());
-      } 
+      }
 
 
       // Normalise the constructors.

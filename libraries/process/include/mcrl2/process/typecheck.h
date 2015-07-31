@@ -787,7 +787,7 @@ class process_type_checker
      **/    /// \brief Typecheck the pbes pbesspec
     process_expression operator()(const process_expression& x)
     {
-      return typecheck_process_expression(m_global_variables, normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
+      return typecheck_process_expression(m_global_variables, process::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
     }
 
     /// \brief Typecheck the process specification procspec
@@ -798,7 +798,7 @@ class process_type_checker
       // reset the context
       m_data_typechecker = data::detail::data_typechecker(procspec.data());
 
-      normalize_sorts(procspec, m_data_typechecker.typechecked_data_specification());
+      process::normalize_sorts(procspec, m_data_typechecker.typechecked_data_specification());
 
       m_actions.clear();
       m_global_variables.clear();

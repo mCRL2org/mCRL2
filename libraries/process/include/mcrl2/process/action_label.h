@@ -102,7 +102,7 @@ inline void swap(action_label& t1, action_label& t2)
 // template function overloads
 std::string pp(const action_label_list& x);
 std::string pp(const action_label_vector& x);
-action_label_list normalize_sorts(const action_label_list& x, const data::data_specification& dataspec);
+action_label_list normalize_sorts(const action_label_list& x, const data::sort_specification& sortspec);
 std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x);
 
 } // namespace process

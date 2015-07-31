@@ -102,7 +102,7 @@ inline void swap(process_equation& t1, process_equation& t2)
 // template function overloads
 std::string pp(const process_equation_list& x);
 std::string pp(const process_equation_vector& x);
-void normalize_sorts(process_equation_vector& x, const data::data_specification& dataspec);
+void normalize_sorts(process_equation_vector& x, const data::sort_specification& sortspec);
 std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x);
 
 } // namespace process

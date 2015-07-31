@@ -209,12 +209,12 @@ def generate_normalize_sorts_overloads(classnames, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         if is_modifiable(classname):
-            text = 'void normalize_sorts(%s& x, const data::data_specification& dataspec) { %s::normalize_sorts< %s >(x, dataspec); }\n' % (classname, namespace, classname)
+            text = 'void normalize_sorts(%s& x, const data::sort_specification& sortspec) { %s::normalize_sorts< %s >(x, sortspec); }\n' % (classname, namespace, classname)
         else:
-            text = '%s normalize_sorts(const %s& x, const data::data_specification& dataspec) { return %s::normalize_sorts< %s >(x, dataspec); }\n' % (classname, classname, namespace, classname)
+            text = '%s normalize_sorts(const %s& x, const data::sort_specification& sortspec) { return %s::normalize_sorts< %s >(x, sortspec); }\n' % (classname, classname, namespace, classname)
         if has_specification(classname):
-            text = re.sub('x, dataspec', 'x, x.data()', text)
-            text = re.sub('& dataspec', '& /* dataspec */', text)
+            text = re.sub('x, sortspec', 'x, x.data()', text)
+            text = re.sub('& sortspec', '& /* dataspec */', text)
         if namespace in code_map:
             code_map[namespace].append(text)
 

@@ -80,12 +80,12 @@ std::string pp(const data::untyped_sort& x) { return data::pp< data::untyped_sor
 std::string pp(const data::untyped_sort_variable& x) { return data::pp< data::untyped_sort_variable >(x); }
 std::string pp(const data::variable& x) { return data::pp< data::variable >(x); }
 std::string pp(const data::where_clause& x) { return data::pp< data::where_clause >(x); }
-data::data_equation normalize_sorts(const data::data_equation& x, const data::sort_specification& dataspec) { return data::normalize_sorts< data::data_equation >(x, dataspec); }
-data::data_equation_list normalize_sorts(const data::data_equation_list& x, const data::sort_specification& dataspec) { return data::normalize_sorts< data::data_equation_list >(x, dataspec); }
-void normalize_sorts(data::data_equation_vector& x, const data::sort_specification& dataspec) { data::normalize_sorts< data::data_equation_vector >(x, dataspec); }
-data::data_expression normalize_sorts(const data::data_expression& x, const data::sort_specification& dataspec) { return data::normalize_sorts< data::data_expression >(x, dataspec); }
-data::sort_expression normalize_sorts(const data::sort_expression& x, const data::sort_specification& dataspec) { return data::normalize_sorts< data::sort_expression >(x, dataspec); }
-data::variable_list normalize_sorts(const data::variable_list& x, const data::sort_specification& dataspec) { return data::normalize_sorts< data::variable_list >(x, dataspec); }
+data::data_equation normalize_sorts(const data::data_equation& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::data_equation >(x, sortspec); }
+data::data_equation_list normalize_sorts(const data::data_equation_list& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::data_equation_list >(x, sortspec); }
+void normalize_sorts(data::data_equation_vector& x, const data::sort_specification& sortspec) { data::normalize_sorts< data::data_equation_vector >(x, sortspec); }
+data::data_expression normalize_sorts(const data::data_expression& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::data_expression >(x, sortspec); }
+data::sort_expression normalize_sorts(const data::sort_expression& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::sort_expression >(x, sortspec); }
+data::variable_list normalize_sorts(const data::variable_list& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::variable_list >(x, sortspec); }
 data::data_expression translate_user_notation(const data::data_expression& x) { return data::translate_user_notation< data::data_expression >(x); }
 data::data_equation translate_user_notation(const data::data_equation& x) { return data::translate_user_notation< data::data_equation >(x); }
 std::set<data::sort_expression> find_sort_expressions(const data::data_equation& x) { return data::find_sort_expressions< data::data_equation >(x); }
