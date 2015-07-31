@@ -297,7 +297,6 @@ ActFrm
   : MultAct                                                      // Multi-action
   | '(' ActFrm ')'                                               // Brackets
   | DataValExpr                                                  // Boolean data expression
-  | DataExpr                                                     // Boolean data expression
   | 'true'                                                       // True
   | 'false'                                                      // False
   | '!' ActFrm                                 $unary_right  6   // Negation
