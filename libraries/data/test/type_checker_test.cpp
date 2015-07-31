@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(data_expressions_test)
   test_data_expression("!{} <= {}", true);
   test_data_expression("{} <= !{}", true);
   test_data_expression("{ true, false }", true, "FSet(Bool)");
-  test_data_expression("{ 1, 2, (-7) }", true, "FSet(Int)");
+  test_data_expression("{ 1, 2, -7 }", true, "FSet(Int)");
   test_data_expression("{ x: Nat | x mod 2 == 0 }", true, "Set(Nat)");
   test_data_expression("{:}", true);
   test_data_expression("!{:}", false);

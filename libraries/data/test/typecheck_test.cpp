@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(test_set_true_false)
 
 BOOST_AUTO_TEST_CASE(test_set_numbers)
 {
-  test_data_expression("{ 1, 2, (-7) }", true, "FSet(Int)");
+  test_data_expression("{ 1, 2, -7 }", true, "FSet(Int)");
 }
 
 BOOST_AUTO_TEST_CASE(test_set_comprehension)
@@ -825,7 +825,7 @@ BOOST_AUTO_TEST_CASE(test_alias_loop) // This is a correct declaration, Typical 
   );
 }
 
-BOOST_AUTO_TEST_CASE(test_alias_loop_extended) 
+BOOST_AUTO_TEST_CASE(test_alias_loop_extended)
 {
   test_data_specification(
     "sort B = List(struct f(B) | c);\n",
@@ -1557,7 +1557,7 @@ class testable_sort_type_checker: public data::sort_type_checker
       try
       {
         first = true;
-        
+
         // check_alias_recursion(x.name(), x.reference());
         check_for_sort_alias_loop_through_function_sort(x.name(),x.reference(),sort_already_seen, false, alias_map);
         assert(sort_already_seen.size()==0);
@@ -1583,9 +1583,9 @@ class testable_sort_type_checker: public data::sort_type_checker
     }
 
     /// \brief constructs a sort expression checker.
-    testable_sort_type_checker(const data::sort_specification sort_spec) 
+    testable_sort_type_checker(const data::sort_specification sort_spec)
       : data::sort_type_checker(sort_spec, false)
-    {} 
+    {}
 
 };
 

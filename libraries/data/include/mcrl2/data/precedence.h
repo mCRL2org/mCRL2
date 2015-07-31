@@ -30,18 +30,6 @@ using namespace core::detail::precedences;
 namespace detail {
 
   inline
-  bool is_unary_operator(const data_expression& x)
-  {
-    return atermpp::down_cast<application>(x).size() == 1;
-  }
-
-  inline
-  bool is_binary_operator(const data_expression& x)
-  {
-    return atermpp::down_cast<application>(x).size() == 2;
-  }
-
-  inline
   bool is_numeric_cast(const data_expression& x)
   {
     return data::sort_nat::is_pos2nat_application(x)
@@ -67,35 +55,19 @@ namespace detail {
   }
 
   inline
-  bool is_negate(const application& x)
-  {
-    return is_unary_operator(remove_numeric_casts(x)) &&
-           (
-             sort_int::is_negate_application(remove_numeric_casts(x)) ||
-             sort_real::is_negate_application(remove_numeric_casts(x))
-           );
-  }
-
-  inline
   bool is_plus(const application& x)
   {
-    return is_binary_operator(remove_numeric_casts(x)) &&
-           (
-             sort_int::is_plus_application(remove_numeric_casts(x)) ||
-             sort_nat::is_plus_application(remove_numeric_casts(x)) ||
-             sort_pos::is_plus_application(remove_numeric_casts(x)) ||
-             sort_real::is_plus_application(remove_numeric_casts(x))
-           );
+    return sort_int::is_plus_application(remove_numeric_casts(x)) ||
+           sort_nat::is_plus_application(remove_numeric_casts(x)) ||
+           sort_pos::is_plus_application(remove_numeric_casts(x)) ||
+           sort_real::is_plus_application(remove_numeric_casts(x));
   }
 
   inline
   bool is_minus(const application& x)
   {
-    return is_binary_operator(remove_numeric_casts(x)) &&
-           (
-             sort_int::is_minus_application(remove_numeric_casts(x)) ||
-             sort_real::is_minus_application(remove_numeric_casts(x))
-           );
+    return sort_int::is_minus_application(remove_numeric_casts(x)) ||
+           sort_real::is_minus_application(remove_numeric_casts(x));
   }
 
   inline
@@ -133,29 +105,25 @@ namespace detail {
   inline
   bool is_set_union(const application& x)
   {
-    return is_binary_operator(x) &&
-           sort_set::is_union_application(x);
+    return sort_set::is_union_application(x);
   }
 
   inline
   bool is_set_difference(const application& x)
   {
-    return is_binary_operator(x) &&
-           sort_set::is_difference_application(x);
+    return sort_set::is_difference_application(x);
   }
 
   inline
   bool is_bag_join(const application& x)
   {
-    return is_binary_operator(x) &&
-           sort_bag::is_union_application(x);
+    return sort_bag::is_union_application(x);
   }
 
   inline
   bool is_bag_difference(const application& x)
   {
-    return is_binary_operator(x) &&
-           sort_bag::is_difference_application(x);
+    return sort_bag::is_difference_application(x);
   }
 
   inline
@@ -345,7 +313,6 @@ int left_precedence(const application& x)
            || detail::is_element_at(x)
            || detail::is_set_intersection(x)
            || detail::is_bag_intersection(x)
-           || detail::is_negate(x)
           )
   {
     return 12;
