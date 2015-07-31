@@ -312,8 +312,8 @@ ActFrm
 //--- Regular formulas
 
 RegFrm
-  : ActFrm                                     $left 20          // Action formula
-  | '(' RegFrm ')'                             $left 21          // Brackets
+  : ActFrm                                                       // Action formula
+  | '(' RegFrm ')'                                               // Brackets
   | 'nil'                                                        // Empty regular formula
   | RegFrm ('+' $binary_op_left 1) RegFrm                        // Alternative composition
   | RegFrm ('.' $binary_op_right 2) RegFrm                       // Sequential composition
