@@ -363,6 +363,9 @@ def pick_elements(s, n):
 
 # with a 50% probability wrap s inside val
 def make_val(s):
+    # TODO: remove this line
+    return 'val({})'.format(s)
+
     n = random.randint(0, 1)
     if n == 0:
         return 'val({})'.format(s)
