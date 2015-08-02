@@ -13,6 +13,7 @@
 #define MCRL2_MODAL_FORMULA_TYPECHECK_H
 
 #include "mcrl2/data/detail/data_typechecker.h"
+#include "mcrl2/process/typecheck.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/is_monotonous.h"
