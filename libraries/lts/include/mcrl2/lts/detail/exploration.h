@@ -35,7 +35,6 @@ class lps2lts_algorithm
 {
   private:
     typedef lps::next_state_generator next_state_generator;
-    typedef atermpp::term_balanced_tree<data::data_expression> storage_state_t;
 
   private:
     lts_generation_options m_options;
@@ -46,7 +45,7 @@ class lps2lts_algorithm
     next_state_generator::summand_subset_t m_nonprioritized_subset;
     next_state_generator::summand_subset_t m_prioritized_subset;
 
-    atermpp::indexed_set<storage_state_t> m_state_numbers;
+    atermpp::indexed_set<lps::state> m_state_numbers;
     bit_hash_table m_bit_hash_table;
 
     lts_lts_t m_output_lts;
@@ -60,7 +59,7 @@ class lps2lts_algorithm
 
     std::vector<bool> m_detected_action_summands;
 
-    std::map<storage_state_t, storage_state_t> m_backpointers;
+    std::map<lps::state, lps::state> m_backpointers;
     size_t m_traces_saved;
 
     size_t m_num_states;
@@ -98,22 +97,22 @@ class lps2lts_algorithm
     }
 
   private:
-    data::data_expression_vector generator_state(const storage_state_t& storage_state);
-    storage_state_t storage_state(const data::data_expression_vector& generator_state);
+    data::data_expression_vector generator_state(const lps::state& storage_state);
+    lps::state storage_state(const data::data_expression_vector& generator_state);
     void set_prioritised_representatives(next_state_generator::transition_t::state_probability_list& states);
-    storage_state_t get_prioritised_representative(const storage_state_t& state);
+    lps::state get_prioritised_representative(const lps::state& state);
     void value_prioritize(std::vector<next_state_generator::transition_t>& transitions);
-    bool save_trace(const storage_state_t& state, const std::string& filename);
-    bool save_trace(const storage_state_t& state, const next_state_generator::transition_t& transition, const std::string& filename);
-    void construct_trace(const storage_state_t& state1, mcrl2::trace::Trace& trace);
-    bool search_divergence(const storage_state_t& state, std::set<storage_state_t>& current_path, std::set<storage_state_t>& visited);
-    void check_divergence(const storage_state_t& state);
-    void save_actions(const storage_state_t& state, const next_state_generator::transition_t& transition);
-    void save_deadlock(const storage_state_t& state);
-    void save_error(const storage_state_t& state);
-    std::pair<size_t, bool> add_target_state(const storage_state_t& source_state, const storage_state_t& target_state);
-    bool add_transition(const storage_state_t& source_state, next_state_generator::transition_t& transition);
-    void get_transitions(const storage_state_t& state,
+    bool save_trace(const lps::state& state, const std::string& filename);
+    bool save_trace(const lps::state& state, const next_state_generator::transition_t& transition, const std::string& filename);
+    void construct_trace(const lps::state& state1, mcrl2::trace::Trace& trace);
+    bool search_divergence(const lps::state& state, std::set<lps::state>& current_path, std::set<lps::state>& visited);
+    void check_divergence(const lps::state& state);
+    void save_actions(const lps::state& state, const next_state_generator::transition_t& transition);
+    void save_deadlock(const lps::state& state);
+    void save_error(const lps::state& state);
+    std::pair<size_t, bool> add_target_state(const lps::state& source_state, const lps::state& target_state);
+    bool add_transition(const lps::state& source_state, next_state_generator::transition_t& transition);
+    void get_transitions(const lps::state& state,
                          std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
                          next_state_generator::enumerator_queue_t& enumeration_queue
     );
@@ -125,10 +124,10 @@ class lps2lts_algorithm
     void print_target_distribution_in_aut_format(
                const lps::next_state_generator::transition_t::state_probability_list& state_probability_list,
                const size_t last_state_number,
-               const storage_state_t& source_state);
+               const lps::state& source_state);
     void print_target_distribution_in_aut_format(
                 const lps::next_state_generator::transition_t::state_probability_list& state_probability_list,
-                const storage_state_t& source_state);
+                const lps::state& source_state);
 
 };
 

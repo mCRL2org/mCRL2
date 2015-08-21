@@ -45,7 +45,6 @@ class next_state_generator
     typedef std::deque<data::enumerator_list_element_with_substitution<> > enumerator_queue_t;
 
     typedef data::rewriter::substitution_type substitution_t;
-    typedef atermpp::term_balanced_tree<data::data_expression> state_t;
 
   protected:
     struct action_internal_t
@@ -106,7 +105,7 @@ class next_state_generator
         static bool summand_set_contains(const std::set<stochastic_action_summand>& summand_set, const summand_t& summand);
         void build_pruning_parameters(const stochastic_action_summand_vector& summands);
         bool is_not_false(const summand_t& summand);
-        atermpp::shared_subset<summand_t>::iterator begin(const state_t& state_t);
+        atermpp::shared_subset<summand_t>::iterator begin(const lps::state& state_t);
     };
 
     class state_probability_pair
@@ -187,7 +186,7 @@ class next_state_generator
       protected:
         transition_t m_transition;
         next_state_generator* m_generator;
-        state_t m_state;
+        lps::state m_state;
         substitution_t* m_substitution;
 
         bool m_single_summand;
@@ -243,9 +242,9 @@ class next_state_generator
         {
         }
 
-        iterator(next_state_generator* generator, const state_t& state_t, substitution_t* substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue);
+        iterator(next_state_generator* generator, const lps::state& state_t, substitution_t* substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue);
 
-        iterator(next_state_generator* generator, const state_t& state_t, substitution_t* substitution, size_t summand_index, enumerator_queue_t* enumeration_queue);
+        iterator(next_state_generator* generator, const lps::state& state_t, substitution_t* substitution, size_t summand_index, enumerator_queue_t* enumeration_queue);
 
         operator bool() const
         {
