@@ -181,7 +181,7 @@ ProcExpr
   | ProcExpr ('||' $binary_op_right 3) ProcExpr                  // Parallel operator
   | ProcExpr ('||_' $binary_op_right 4) ProcExpr                 // Leftmerge operator
   | (DataExprUnit '->' $unary_op_right 5) ProcExpr               // If-then operator
-  | ((DataExprUnit '->' $unary_op_right 6) ProcExpr              // If-then-else operator 
+  | ((DataExprUnit '->' $unary_op_right 6) ProcExpr              // If-then-else operator
                    '<>' $unary_op_right 5) ProcExpr
   | ProcExpr ('<<' $binary_op_left 8) ProcExpr                   // Until operator
   | ProcExpr ('.' $binary_op_right 9) ProcExpr                   // Sequential composition operator
@@ -277,7 +277,9 @@ PbesInit: 'init' PropVarInst ';' ;                               // Initial PBES
 DataValExpr: 'val' '(' DataExpr ')';                             // Marked data expression
 
 PbesExpr
-  : DataValExpr                                                  // Data expression
+  : DataValExpr                                                  // Boolean data expression
+  | DataExpr                                                     // Boolean data expression
+  | '(' PbesExpr ')'                                             // Brackets
   | 'true'                                                       // True
   | 'false'                                                      // False
   | 'forall' VarsDeclList '.' PbesExpr         $unary_right  0   // Universal quantifier
@@ -286,16 +288,15 @@ PbesExpr
   | PbesExpr ('||' $binary_op_right 3) PbesExpr                  // Disjunction
   | PbesExpr ('&&' $binary_op_right 4) PbesExpr                  // Conjunction
   | '!' PbesExpr                               $unary_right  5   // Negation
-  | '(' PbesExpr ')'                                             // Brackets
-  | PropVarInst                                                  // Propositional variable
+  | Id ( '(' DataExprList ')' )?                                 // Instantiated PBES variable or data application
   ;
 
 //--- Action formulas
 
 ActFrm
-  : MultAct                                    $left 10          // Multi-action
-  | '(' ActFrm ')'                             $left 11          // Brackets
-  | DataValExpr                                $left 20          // Boolean data expression
+  : MultAct                                                      // Multi-action
+  | '(' ActFrm ')'                                               // Brackets
+  | DataValExpr                                                  // Boolean data expression
   | 'true'                                                       // True
   | 'false'                                                      // False
   | '!' ActFrm                                 $unary_right  6   // Negation
@@ -310,8 +311,8 @@ ActFrm
 //--- Regular formulas
 
 RegFrm
-  : ActFrm                                     $left 20          // Action formula
-  | '(' RegFrm ')'                             $left 21          // Brackets
+  : ActFrm                                                       // Action formula
+  | '(' RegFrm ')'                                               // Brackets
   | 'nil'                                                        // Empty regular formula
   | RegFrm ('+' $binary_op_left 1) RegFrm                        // Alternative composition
   | RegFrm ('.' $binary_op_right 2) RegFrm                       // Sequential composition
@@ -322,8 +323,9 @@ RegFrm
 //--- State formulas
 
 StateFrm
-  : DataValExpr                                $left 20          // Data expression
-  | '(' StateFrm ')'                           $left 20          // Brackets
+  : DataValExpr                                                  // Boolean data expression
+  | DataExpr                                                     // Boolean data expression
+  | '(' StateFrm ')'                                             // Brackets
   | 'true'                                                       // True
   | 'false'                                                      // False
   | 'mu' StateVarDecl '.' StateFrm             $unary_right  1   // Minimal fixed point
