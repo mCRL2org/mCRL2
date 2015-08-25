@@ -38,7 +38,7 @@ data::variable_list rhs_structured_compute_variables(const state_formulas::state
 }
 
 inline
-void add_annotation(pbes_expression& x, const lps::multi_action& a, const data::data_expression& t)
+void add_annotation(pbes_expression&, const lps::multi_action&, const data::data_expression&)
 {
   // skip
 }
