@@ -111,8 +111,8 @@ struct regular_formula_actions: public action_formulas::detail::action_formula_a
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == ")")) { return parse_RegFrm(node.child(1)); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "*")) { return trans_or_nil(parse_RegFrm(node.child(0))); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "+")) { return trans(parse_RegFrm(node.child(0))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "RegFrm")) { return seq(parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "RegFrm")) { return alt(parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "RegFrm")) { return untyped_regular_formula(core::identifier_string("."), parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "RegFrm")) { return untyped_regular_formula(core::identifier_string("+"), parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
@@ -130,6 +130,25 @@ regular_formula parse_regular_formula_new(const std::string& text)
 }
 
 } // namespace detail
+
+template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
+regular_formula parse_regular_formula(const std::string& text,
+                                      const data::data_specification& dataspec,
+                                      const VariableContainer& variables,
+                                      const ActionLabelContainer& actions
+                                     )
+{
+  regular_formula x = detail::parse_regular_formula_new(text);
+  x = regular_formulas::typecheck(x, dataspec, variables, actions);
+  x = regular_formulas::translate_user_notation(x);
+  return x;
+}
+
+inline
+regular_formula parse_regular_formula(const std::string& text, const lps::specification& lpsspec)
+{
+  return parse_regular_formula(text, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
+}
 
 } // namespace regular_formulas
 

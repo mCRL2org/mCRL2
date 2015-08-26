@@ -1185,6 +1185,14 @@ const atermpp::function_symbol& function_symbol_UntypedProcessAssignment()
   return function_symbol_UntypedProcessAssignment;
 }
 
+// UntypedRegFrm
+inline
+const atermpp::function_symbol& function_symbol_UntypedRegFrm()
+{
+  static const atermpp::function_symbol function_symbol_UntypedRegFrm = atermpp::function_symbol("UntypedRegFrm", 3);
+  return function_symbol_UntypedRegFrm;
+}
+
 // UntypedSetBagComp
 inline
 const atermpp::function_symbol& function_symbol_UntypedSetBagComp()
@@ -1288,7 +1296,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol StructCons;
   static const atermpp::function_symbol Mu;
   static const atermpp::function_symbol PBEqnSpec;
-  static const atermpp::function_symbol ActNot;
+  static const atermpp::function_symbol UntypedRegFrm;
   static const atermpp::function_symbol Distribution;
   static const atermpp::function_symbol BooleanTrue;
   static const atermpp::function_symbol Block;
@@ -1337,6 +1345,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol StateVar;
   static const atermpp::function_symbol ActionRenameRule;
   static const atermpp::function_symbol RegSeq;
+  static const atermpp::function_symbol ActNot;
   static const atermpp::function_symbol LinearProcess;
   static const atermpp::function_symbol ActAt;
   static const atermpp::function_symbol DataEqn;

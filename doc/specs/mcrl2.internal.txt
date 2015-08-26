@@ -252,6 +252,7 @@
                  | RegAlt(<RegFrm>, <RegFrm>)
                  | RegTrans(<RegFrm>)
                  | RegTransOrNil(<RegFrm>)
+                 | UntypedRegFrm(<String>, <RegFrm>, <RegFrm>)
 
 //action formula
 <ActFrm>       ::= <DataExpr>

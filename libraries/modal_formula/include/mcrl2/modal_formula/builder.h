@@ -767,6 +767,14 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
+  regular_formulas::untyped_regular_formula apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    regular_formulas::untyped_regular_formula result = regular_formulas::untyped_regular_formula(x.name(), static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   regular_formulas::regular_formula apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -798,6 +806,10 @@ struct add_sort_expressions: public Builder<Derived>
     else if (regular_formulas::is_trans_or_nil(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -867,6 +879,14 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
+  regular_formulas::untyped_regular_formula apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    regular_formulas::untyped_regular_formula result = regular_formulas::untyped_regular_formula(x.name(), static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   regular_formulas::regular_formula apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -898,6 +918,10 @@ struct add_data_expressions: public Builder<Derived>
     else if (regular_formulas::is_trans_or_nil(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -967,6 +991,14 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
+  regular_formulas::untyped_regular_formula apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    regular_formulas::untyped_regular_formula result = regular_formulas::untyped_regular_formula(x.name(), static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   regular_formulas::regular_formula apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -998,6 +1030,10 @@ struct add_variables: public Builder<Derived>
     else if (regular_formulas::is_trans_or_nil(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -1067,6 +1103,14 @@ struct add_regular_formula_expressions: public Builder<Derived>
     return result;
   }
 
+  regular_formulas::untyped_regular_formula apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    regular_formulas::untyped_regular_formula result = regular_formulas::untyped_regular_formula(x.name(), static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   regular_formulas::regular_formula apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1098,6 +1142,10 @@ struct add_regular_formula_expressions: public Builder<Derived>
     else if (regular_formulas::is_trans_or_nil(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;

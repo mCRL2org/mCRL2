@@ -120,12 +120,13 @@ mu(const core::identifier_string& name, const data::assignment_list& assignments
 '''
 
 REGULAR_FORMULA_CLASSES = r'''
-regular_formula()                                              : public atermpp::aterm_appl               | XIC | RegFrm        | A regular formula
-nil()                                                          : public regular_formulas::regular_formula | EI  | RegNil        | The value nil for regular formulas
-seq(const regular_formula& left, const regular_formula& right) : public regular_formulas::regular_formula | EI  | RegSeq        | The seq operator for regular formulas
-alt(const regular_formula& left, const regular_formula& right) : public regular_formulas::regular_formula | EI  | RegAlt        | The alt operator for regular formulas
-trans(const regular_formula& operand)                          : public regular_formulas::regular_formula | EI  | RegTrans      | The trans operator for regular formulas
-trans_or_nil(const regular_formula& operand)                   : public regular_formulas::regular_formula | EI  | RegTransOrNil | The 'trans or nil' operator for regular formulas
+regular_formula()                                                                                                       : public atermpp::aterm_appl               | XIC | RegFrm        | A regular formula
+nil()                                                                                                                   : public regular_formulas::regular_formula | EI  | RegNil        | The value nil for regular formulas
+seq(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EI  | RegSeq        | The seq operator for regular formulas
+alt(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EI  | RegAlt        | The alt operator for regular formulas
+trans(const regular_formula& operand)                                                                                   : public regular_formulas::regular_formula | EI  | RegTrans      | The trans operator for regular formulas
+trans_or_nil(const regular_formula& operand)                                                                            : public regular_formulas::regular_formula | EI  | RegTransOrNil | The 'trans or nil' operator for regular formulas
+untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right) : public regular_formulas::regular_formula | EI  | UntypedRegFrm | An untyped regular formula or action formula
 '''
 
 ACTION_FORMULA_CLASSES = r'''

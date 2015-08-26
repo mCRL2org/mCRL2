@@ -70,6 +70,7 @@ inline bool is_seq(const atermpp::aterm_appl& x);
 inline bool is_alt(const atermpp::aterm_appl& x);
 inline bool is_trans(const atermpp::aterm_appl& x);
 inline bool is_trans_or_nil(const atermpp::aterm_appl& x);
+inline bool is_untyped_regular_formula(const atermpp::aterm_appl& x);
 
 /// \brief Test for a regular_formula expression
 /// \param x A term
@@ -83,7 +84,8 @@ bool is_regular_formula(const atermpp::aterm_appl& x)
          regular_formulas::is_seq(x) ||
          regular_formulas::is_alt(x) ||
          regular_formulas::is_trans(x) ||
-         regular_formulas::is_trans_or_nil(x);
+         regular_formulas::is_trans_or_nil(x) ||
+         regular_formulas::is_untyped_regular_formula(x);
 }
 
 // prototype declaration
@@ -380,6 +382,77 @@ std::ostream& operator<<(std::ostream& out, const trans_or_nil& x)
 
 /// \brief swap overload
 inline void swap(trans_or_nil& t1, trans_or_nil& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \brief An untyped regular formula or action formula
+class untyped_regular_formula: public regular_formula
+{
+  public:
+    /// \brief Default constructor.
+    untyped_regular_formula()
+      : regular_formula(core::detail::default_values::UntypedRegFrm)
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit untyped_regular_formula(const atermpp::aterm& term)
+      : regular_formula(term)
+    {
+      assert(core::detail::check_term_UntypedRegFrm(*this));
+    }
+
+    /// \brief Constructor.
+    untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right)
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), name, left, right))
+    {}
+
+    /// \brief Constructor.
+    untyped_regular_formula(const std::string& name, const regular_formula& left, const regular_formula& right)
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), core::identifier_string(name), left, right))
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+    }
+
+    const regular_formula& left() const
+    {
+      return atermpp::down_cast<regular_formula>((*this)[1]);
+    }
+
+    const regular_formula& right() const
+    {
+      return atermpp::down_cast<regular_formula>((*this)[2]);
+    }
+};
+
+/// \brief Test for a untyped_regular_formula expression
+/// \param x A term
+/// \return True if \a x is a untyped_regular_formula expression
+inline
+bool is_untyped_regular_formula(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::UntypedRegFrm;
+}
+
+// prototype declaration
+std::string pp(const untyped_regular_formula& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_regular_formula& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_regular_formula& t1, untyped_regular_formula& t2)
 {
   t1.swap(t2);
 }

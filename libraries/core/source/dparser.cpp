@@ -385,26 +385,38 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   }
 
   // resolve RegFrm ambiguities
-  if (n == 2)
+  if (is_all_of_type(v, n, "RegFrm", table))
   {
-    // "(" ActFrm ")" can be parsed either as a new ActFrm, or as a RegFrm. We
-    // choose to parse it as an ActFrm if this ambiguity occurs, as it is the
-    // most specific. We do this by checking that one of the possible parse
-    // trees is of the form RegFrm("(", x, y), and not choosing that particular
-    // parse tree.
-    core::parse_node vi(v[0]);
-    if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
-        vi.child(0).string() == "(")
+    for (int i = 0; i < n; i++)
     {
-      return v[1];
-    }
-    vi.node = v[1];
-    if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
-        vi.child(0).string() == "(")
-    {
-      return v[0];
+      core::parse_node node(v[i]);
+      if (table.symbol_name(node.child(0)) == "RegFrm")
+      {
+        return v[i];
+      }
     }
   }
+
+  //if (n == 2)
+  //{
+  //  // "(" ActFrm ")" can be parsed either as a new ActFrm, or as a RegFrm. We
+  //  // choose to parse it as an ActFrm if this ambiguity occurs, as it is the
+  //  // most specific. We do this by checking that one of the possible parse
+  //  // trees is of the form RegFrm("(", x, y), and not choosing that particular
+  //  // parse tree.
+  //  core::parse_node vi(v[0]);
+  //  if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
+  //      vi.child(0).string() == "(")
+  //  {
+  //    return v[1];
+  //  }
+  //  vi.node = v[1];
+  //  if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
+  //      vi.child(0).string() == "(")
+  //  {
+  //    return v[0];
+  //  }
+  //}
 
   // If we reach this point, then the ambiguity is unresolved. We print all
   // ambiguities on the debug output, then throw an exception.

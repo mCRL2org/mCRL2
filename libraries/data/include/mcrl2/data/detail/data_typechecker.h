@@ -444,15 +444,15 @@ struct data_typechecker: protected data::data_type_checker
     return atermpp::reverse(result);
   }
 
-  data_expression typecheck_untyped_data_parameter(const core::identifier_string& name, const data_expression_list& parameters, const std::map<core::identifier_string, data::sort_expression>& variables)
+  data_expression typecheck_untyped_data_parameter(const core::identifier_string& name, const data_expression_list& parameters, const std::map<core::identifier_string, data::sort_expression>& variables, const data::sort_expression& expected_sort = untyped_sort())
   {
     if (parameters.empty())
     {
-      return (*this)(untyped_identifier(name), sort_bool::bool_(), variables);
+      return (*this)(untyped_identifier(name), expected_sort, variables);
     }
     else
     {
-      return (*this)(application(untyped_identifier(name), parameters), sort_bool::bool_(), variables);
+      return (*this)(application(untyped_identifier(name), parameters), expected_sort, variables);
     }
   }
 

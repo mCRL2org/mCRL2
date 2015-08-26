@@ -204,6 +204,15 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
     derived().print("*");
     derived().leave(x);
   }
+
+  void apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    derived().enter(x);
+    print_expression(x.left());
+    derived().print(" " + std::string(x.name()) + " ");
+    print_expression(x.right());
+    derived().leave(x);
+  }
 };
 
 } // namespace detail

@@ -893,6 +893,14 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -923,6 +931,10 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (regular_formulas::is_trans_or_nil(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -986,6 +998,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1016,6 +1036,10 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (regular_formulas::is_trans_or_nil(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1079,6 +1103,14 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1109,6 +1141,10 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     else if (regular_formulas::is_trans_or_nil(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1172,6 +1208,14 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1202,6 +1246,10 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (regular_formulas::is_trans_or_nil(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1265,6 +1313,15 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.name());
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const regular_formulas::regular_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1295,6 +1352,10 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (regular_formulas::is_trans_or_nil(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

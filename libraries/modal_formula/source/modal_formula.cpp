@@ -53,6 +53,7 @@ std::string pp(const regular_formulas::regular_formula& x) { return regular_form
 std::string pp(const regular_formulas::seq& x) { return regular_formulas::pp< regular_formulas::seq >(x); }
 std::string pp(const regular_formulas::trans& x) { return regular_formulas::pp< regular_formulas::trans >(x); }
 std::string pp(const regular_formulas::trans_or_nil& x) { return regular_formulas::pp< regular_formulas::trans_or_nil >(x); }
+std::string pp(const regular_formulas::untyped_regular_formula& x) { return regular_formulas::pp< regular_formulas::untyped_regular_formula >(x); }
 //--- end generated regular_formulas overloads ---//
 
 } // namespace regular_formulas

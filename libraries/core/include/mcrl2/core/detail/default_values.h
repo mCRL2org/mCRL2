@@ -119,7 +119,7 @@ const atermpp::aterm_appl& default_value_RegAlt();
 const atermpp::aterm_appl& default_value_StructCons();
 const atermpp::aterm_appl& default_value_Mu();
 const atermpp::aterm_appl& default_value_PBEqnSpec();
-const atermpp::aterm_appl& default_value_ActNot();
+const atermpp::aterm_appl& default_value_UntypedRegFrm();
 const atermpp::aterm_appl& default_value_Distribution();
 const atermpp::aterm_appl& default_value_BooleanTrue();
 const atermpp::aterm_appl& default_value_Block();
@@ -168,6 +168,7 @@ const atermpp::aterm_appl& default_value_PBES();
 const atermpp::aterm_appl& default_value_StateVar();
 const atermpp::aterm_appl& default_value_ActionRenameRule();
 const atermpp::aterm_appl& default_value_RegSeq();
+const atermpp::aterm_appl& default_value_ActNot();
 const atermpp::aterm_appl& default_value_LinearProcess();
 const atermpp::aterm_appl& default_value_ActAt();
 const atermpp::aterm_appl& default_value_DataEqn();
@@ -663,11 +664,11 @@ const atermpp::aterm_appl& default_value_PBEqnSpec()
   return t;
 }
 
-// ActNot
+// UntypedRegFrm
 inline
-const atermpp::aterm_appl& default_value_ActNot()
+const atermpp::aterm_appl& default_value_UntypedRegFrm()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ActNot(), default_value_ActFrm());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_UntypedRegFrm(), default_value_String(), default_value_RegFrm(), default_value_RegFrm());
   return t;
 }
 
@@ -1052,6 +1053,14 @@ inline
 const atermpp::aterm_appl& default_value_RegSeq()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RegSeq(), default_value_RegFrm(), default_value_RegFrm());
+  return t;
+}
+
+// ActNot
+inline
+const atermpp::aterm_appl& default_value_ActNot()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ActNot(), default_value_ActFrm());
   return t;
 }
 
@@ -1531,7 +1540,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl StructCons;
   static const atermpp::aterm_appl Mu;
   static const atermpp::aterm_appl PBEqnSpec;
-  static const atermpp::aterm_appl ActNot;
+  static const atermpp::aterm_appl UntypedRegFrm;
   static const atermpp::aterm_appl Distribution;
   static const atermpp::aterm_appl BooleanTrue;
   static const atermpp::aterm_appl Block;
@@ -1580,6 +1589,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl StateVar;
   static const atermpp::aterm_appl ActionRenameRule;
   static const atermpp::aterm_appl RegSeq;
+  static const atermpp::aterm_appl ActNot;
   static const atermpp::aterm_appl LinearProcess;
   static const atermpp::aterm_appl ActAt;
   static const atermpp::aterm_appl DataEqn;

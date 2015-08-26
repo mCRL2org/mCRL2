@@ -12,6 +12,15 @@
 #ifndef MCRL2_MODAL_FORMULA_TYPECHECK_H
 #define MCRL2_MODAL_FORMULA_TYPECHECK_H
 
+#include "mcrl2/data/bag.h"
+#include "mcrl2/data/fbag.h"
+#include "mcrl2/data/fset.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/set.h"
 #include "mcrl2/data/detail/data_typechecker.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/lps/typecheck.h"
@@ -95,6 +104,20 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
 
   action_formula apply(const process::untyped_multi_action& x)
   {
+    // If x has size 1, first try to type check it as a data expression.
+    if (x.actions().size() == 1)
+    {
+      const data::untyped_data_parameter& y = x.actions().front();
+      try
+      {
+        return m_data_typechecker.typecheck_untyped_data_parameter(y.name(), y.arguments(), m_variables);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        // skip
+      }
+    }
+    // Type check it as a multi action
     process::action_list new_arguments;
     for (const data::untyped_data_parameter& a: x.actions())
     {
@@ -202,6 +225,106 @@ struct typecheck_builder: public regular_formula_builder<typecheck_builder>
       m_actions(actions)
   {}
 
+  data::data_expression make_fbag_union(const data::data_expression& left, const data::data_expression& right)
+  {
+    const data::sort_expression& s = atermpp::down_cast<data::application>(left).head().sort();
+    const data::container_sort& cs = atermpp::down_cast<data::container_sort>(s);
+    return data::sort_fbag::union_(cs.element_sort(), left, right);
+  }
+
+  data::data_expression make_bag_union(const data::data_expression& left, const data::data_expression& right)
+  {
+    const data::sort_expression& s = atermpp::down_cast<data::application>(left).head().sort();
+    const data::container_sort& cs = atermpp::down_cast<data::container_sort>(s);
+    return data::sort_bag::union_(cs.element_sort(), left, right);
+  }
+
+  data::data_expression make_fset_union(const data::data_expression& left, const data::data_expression& right)
+  {
+    const data::sort_expression& s = atermpp::down_cast<data::application>(left).head().sort();
+    const data::container_sort& cs = atermpp::down_cast<data::container_sort>(s);
+    return data::sort_fset::union_(cs.element_sort(), left, right);
+  }
+
+  data::data_expression make_set_union(const data::data_expression& left, const data::data_expression& right)
+  {
+    const data::sort_expression& s = atermpp::down_cast<data::application>(left).head().sort();
+    const data::container_sort& cs = atermpp::down_cast<data::container_sort>(s);
+    return data::sort_set::union_(cs.element_sort(), left, right);
+  }
+
+  data::data_expression make_plus(const data::data_expression& left, const data::data_expression& right)
+  {
+    if (data::sort_real::is_real(left.sort()) || data::sort_real::is_real(right.sort()))
+    {
+      return data::sort_real::plus(left, right);
+    }
+    else if (data::sort_int::is_int(left.sort()) || data::sort_int::is_int(right.sort()))
+    {
+      return data::sort_int::plus(left, right);
+    }
+    else if (data::sort_nat::is_nat(left.sort()) || data::sort_nat::is_nat(right.sort()))
+    {
+      return data::sort_nat::plus(left, right);
+    }
+    else if (data::sort_pos::is_pos(left.sort()) || data::sort_pos::is_pos(right.sort()))
+    {
+      return data::sort_pos::plus(left, right);
+    }
+    else if (data::sort_bag::is_union_application(left) || data::sort_bag::is_union_application(right))
+    {
+      return make_bag_union(left, right);
+    }
+    else if (data::sort_fbag::is_union_application(left) || data::sort_fbag::is_union_application(right))
+    {
+      return make_fbag_union(left, right);
+    }
+    else if (data::sort_set::is_union_application(left) || data::sort_set::is_union_application(right))
+    {
+      return make_set_union(left, right);
+    }
+    else if (data::sort_fset::is_union_application(left) || data::sort_fset::is_union_application(right))
+    {
+      return make_fset_union(left, right);
+    }
+    throw mcrl2::runtime_error("could not typecheck " + data::pp(left) + " + " + data::pp(right));
+  }
+
+  data::data_expression make_element_at(const data::data_expression& left, const data::data_expression& right) const
+  {
+    const data::sort_expression& s = atermpp::down_cast<data::application>(left).head().sort();
+    const data::container_sort& cs = atermpp::down_cast<data::container_sort>(s);
+    return data::sort_list::element_at(cs.element_sort(), left, right);
+  }
+
+  regular_formula apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    regular_formula left = (*this).apply(x.left());
+    regular_formula right = (*this).apply(x.right());
+    if (data::is_data_expression(left) && data::is_data_expression(right))
+    {
+      if (x.name() == core::identifier_string("."))
+      {
+        return make_element_at(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right));
+      }
+      else
+      {
+        return make_plus(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right));
+      }
+    }
+    else
+    {
+      if (x.name() == core::identifier_string("."))
+      {
+        return seq(left, right);
+      }
+      else
+      {
+        return alt(left, right);
+      }
+    }
+  }
+
   regular_formula apply(const action_formulas::action_formula& x)
   {
     return action_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions).apply(x);
@@ -219,6 +342,27 @@ typecheck_builder make_typecheck_builder(
 }
 
 } // namespace detail
+
+template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
+regular_formula typecheck(const regular_formula& x,
+                          const data::data_specification& dataspec,
+                          const VariableContainer& variables,
+                          const ActionLabelContainer& actions
+                         )
+{
+  data::detail::data_typechecker data_typechecker(dataspec);
+  std::map<core::identifier_string, data::sort_expression> variable_map;
+  data::add_context_variables(variable_map, variables, data_typechecker);
+  std::multimap<core::identifier_string, process::action_label> action_map;
+  process::add_context_action_labels(action_map, actions, data_typechecker);
+  return detail::make_typecheck_builder(data_typechecker, variable_map, action_map).apply(regular_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+}
+
+inline
+regular_formula typecheck(const regular_formula& x, const lps::specification& lpsspec)
+{
+  return typecheck(x, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
+}
 
 } // namespace regular_formulas
 
@@ -355,7 +499,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     auto i = m_state_variables.find(x.name());
     if (i == m_state_variables.end())
     {
-      return m_data_typechecker.typecheck_untyped_data_parameter(x.name(), x.arguments(), m_variables);
+      return m_data_typechecker.typecheck_untyped_data_parameter(x.name(), x.arguments(), m_variables, data::sort_bool::bool_());
     }
     const data::sort_expression_list& expected_sorts = i->second;
 
