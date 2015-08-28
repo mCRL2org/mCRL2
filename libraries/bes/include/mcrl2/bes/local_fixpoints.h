@@ -114,7 +114,7 @@ class local_fixpoints_algorithm
       return expr;
     }
 
-    bool run(const boolean_variable& first_variable)
+    bool run(const boolean_variable& /* first_variable */)
     {
       auto eqs = m_bes.equations();
       std::vector<boolean_expression> approx(eqs.size());

@@ -247,13 +247,13 @@ inline void swap(if_& t1, if_& t2)
 //--- end generated classes ---//
 
 inline
-std::string pp(const bdd::false_& x)
+std::string pp(const bdd::false_&)
 {
   return "false";
 }
 
 inline
-std::string pp(const bdd::true_& x)
+std::string pp(const bdd::true_&)
 {
   return "true";
 }
