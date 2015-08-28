@@ -315,10 +315,10 @@ RegFrm
   : ActFrm                                                       // Action formula
   | '(' RegFrm ')'                                               // Brackets
   | 'nil'                                                        // Empty regular formula
-  | RegFrm ('+' $binary_op_left 1) RegFrm                        // Alternative composition
-  | RegFrm ('.' $binary_op_right 2) RegFrm                       // Sequential composition
-  | RegFrm '*'                                 $unary_right  3   // Iteration
-  | RegFrm '+'                                 $unary_right  3   // Nonempty iteration
+  | RegFrm ('+' $binary_op_left 10) RegFrm                       // Alternative composition
+  | RegFrm ('.' $binary_op_right 12) RegFrm                      // Sequential composition
+  | RegFrm '*'                                 $unary_right  13  // Iteration
+  | RegFrm '+'                                 $unary_right  13  // Nonempty iteration
   ;
 
 //--- State formulas
