@@ -229,7 +229,7 @@ class lts
      *          these are set to the default action label. */
     void set_num_probabilistic_labels(const labels_size_type n)
     {
-      m_probabilistic_labels.resize(n);
+      m_probabilistic_labels.resize(n,false);
     }
 
     /** \brief Gets the number of action labels of this LTS.
@@ -274,19 +274,15 @@ class lts
      * \return The number of the added state label. */
     states_size_type add_state(const STATE_LABEL_T label=STATE_LABEL_T(),bool is_probabilistic=false)
     {
-      if (label==STATE_LABEL_T())
+      if (label!=STATE_LABEL_T())
       {
-        assert(m_state_labels.size()==0);
-      }
-      else
-      {
-        assert(m_nstates==m_state_labels.size());
+        m_state_labels.resize(m_nstates);
         m_state_labels.push_back(label);
       }
       if (is_probabilistic)
       {
-        m_is_probabilistic_state.resize(m_nstates+1);
-        m_is_probabilistic_state[m_nstates]=true;
+        m_is_probabilistic_state.resize(m_nstates,false);
+        m_is_probabilistic_state.push_back(true);
       }
       return m_nstates++;
     }

@@ -31,6 +31,47 @@ namespace mcrl2
 namespace lts
 {
 
+namespace detail
+{
+
+class number_translation_table
+{
+  protected:
+    // The translation table m_table is empty as long as 
+    // it maps numbers to itself, i.e., if m_table[j]=j.
+    
+    std::vector<size_t> m_table;
+
+  public:
+
+    size_t operator()(size_t i)
+    {
+      if (i>=m_table.size())
+      {
+        return i;
+      }
+      else
+      {
+        return m_table[i];
+      }
+    }
+
+    void set(size_t i, size_t j)
+    {
+      if (i!=j)
+      {
+        assert(i>=m_table.size());
+        for(size_t k=m_table.size(); k<i; ++k)
+        {
+          m_table.push_back(k);
+        }
+        m_table.push_back(j);
+      }
+    }
+};
+
+} // end namespace detail
+
 class lps2lts_algorithm
 {
   private:
@@ -63,6 +104,8 @@ class lps2lts_algorithm
     size_t m_traces_saved;
 
     size_t m_num_states;
+    size_t m_probabilistic_state_offset;
+    detail::number_translation_table m_state_number_translation_table;
     size_t m_num_transitions;
     next_state_generator::transition_t::state_probability_list m_initial_states;
     size_t m_level;

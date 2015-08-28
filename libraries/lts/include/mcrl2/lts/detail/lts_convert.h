@@ -23,6 +23,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/standard_numbers_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
@@ -51,7 +52,7 @@ inline void convert_core_lts(CONVERTOR& c,
 template < class LTS_IN_TYPE, class LTS_OUT_TYPE >
 inline void lts_convert(const LTS_IN_TYPE&, LTS_OUT_TYPE&)
 {
-  throw mcrl2::runtime_error("Conversion between lts types is not defined (without extra information)");
+  throw mcrl2::runtime_error("Conversion between lts types is not defined (without extra information).");
 }
 
 /** \brief Convert LTSs to each other. The input lts is not usable afterwards.
@@ -77,9 +78,47 @@ inline void lts_convert(
   }
   else
   {
-    throw mcrl2::runtime_error("Conversion between lts types is not defined (with extra information)");
+    throw mcrl2::runtime_error("Conversion between lts types is not defined (with extra information).");
   }
 }
+
+/** \brief Translate a fraction given as a data_expression to a representation
+ *         with two explicit numbers, as defined in a probabilistic_label */
+
+inline probabilistic_label translate_probability_data_prob(const data::data_expression& d)
+{
+  const data::application da=atermpp::down_cast<data::application>(d);
+  if (!(data::sort_int::is_integer_constant(da[0]) && 
+        data::sort_pos::is_positive_constant(da[1]) &&
+        da.head()==data::sort_real::creal()))
+  {
+    throw mcrl2::runtime_error("Cannot convert the probability " + pp(d) + " to an explicit denominator/enumerator pair.");
+  }    
+  std::stringstream enumerator_stream(pp(da[0]));
+  std::stringstream denominator_stream(pp(da[1]));
+  probabilistic_label::number_t enumerator, denominator;
+  enumerator_stream >> enumerator;
+  denominator_stream >> denominator;
+  if (denominator==0 || (enumerator==0 && denominator!=1) || enumerator>denominator)
+  {
+    throw mcrl2::runtime_error("Fail to convert the probability " + pp(d) + " to an explicit denominator/enumerator pair.");
+  }
+  return probabilistic_label(enumerator,denominator);
+}
+
+/** \brief Translate a fraction given as a enumerator and a denominator to a
+ *         representation as an explicit data_expression. */
+
+inline data::data_expression  translate_probability_prob_data(const probabilistic_label& f)
+{
+  if (f.denominator()==0)
+  {
+    throw mcrl2::runtime_error("Cannot translate probability with denominator equal to 0.");
+  }
+  return data::sort_real::creal(data::sort_int::int_(f.enumerator()),data::sort_pos::pos(f.denominator()));
+}
+
+
 // ================================================================
 //
 // Below the translations for labelled transition system formats
@@ -109,7 +148,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts to .lts, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .lts, additional information (data specification, action declarations and process parameters) is ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -153,9 +192,14 @@ class lts_fsm_convertor
         {
           result.push_back(index->second);
         }
-      ++i;
+        ++i;
       }
       return result;
+    }
+
+    probabilistic_label translate_probability_label(const data::data_expression& d)
+    {
+      return detail::translate_probability_data_prob(d);
     }
 };
 
@@ -209,6 +253,11 @@ class lts_aut_convertor
     {
       return state_label_empty();
     }
+
+    probabilistic_label translate_probability_label(const data::data_expression& d)
+    {
+      return detail::translate_probability_data_prob(d);
+    }
 };
 
 inline void lts_convert(
@@ -256,6 +305,11 @@ class lts_dot_convertor
       state_name << "s" << m_state_count;
       m_state_count++;
       return state_label_dot(state_name.str(),pp(l));
+    }
+
+    probabilistic_label translate_probability_label(const data::data_expression& d)
+    {
+      return detail::translate_probability_data_prob(d);
     }
 };
 
@@ -326,6 +380,11 @@ class aut_lts_convertor
     {
       // There is no state label. Use the default.
       return state_label_lts();
+    }
+
+    data::data_expression translate_probability_label(const probabilistic_label& d)
+    {
+      return translate_probability_prob_data(d);
     }
 };
 
@@ -398,6 +457,11 @@ class aut_fsm_convertor
     {
       return state_label_fsm();
     }
+
+    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    {
+      return d;
+    }
 };
 
 inline void lts_convert(
@@ -441,6 +505,11 @@ class aut_dot_convertor
     state_label_dot translate_state(const state_label_empty&) const
     {
       return state_label_dot();
+    }
+
+    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    {
+      return d;
     }
 };
 
@@ -537,6 +606,11 @@ class fsm_lts_convertor
 
       return state_label_lts(state_label);
     }
+    
+    data::data_expression translate_probability_label(const probabilistic_label& d)
+    {
+      return detail::translate_probability_prob_data(d);
+    }
 };
 
 inline void lts_convert(
@@ -581,6 +655,11 @@ class fsm_aut_convertor
     state_label_empty translate_state(const state_label_fsm&) const
     {
       return state_label_empty();
+    }
+
+    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    {
+      return d;
     }
 };
 
@@ -668,6 +747,11 @@ class fsm_dot_convertor
 
       return state_label_dot(state_name.str(),state_label);
     }
+
+    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    {
+      return d;
+    }
 };
 
 inline void lts_convert(
@@ -737,6 +821,11 @@ class dot_lts_convertor
     {
       return state_label_lts();
     }
+
+    data::data_expression translate_probability_label(const probabilistic_label& d)
+    {
+      return detail::translate_probability_prob_data(d);
+    }
 };
 
 inline void lts_convert(
@@ -783,6 +872,11 @@ class dot_aut_convertor
     state_label_empty translate_state(const state_label_dot&) const
     {
       return state_label_empty();
+    }
+
+    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    {
+      return d;
     }
 };
 
@@ -863,6 +957,11 @@ class dot_fsm_convertor
       }
 
       return result;
+    }
+
+    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    {
+      return d;
     }
 };
 
@@ -946,6 +1045,19 @@ inline void convert_core_lts(CONVERTOR& c,
     if (lts_in.is_tau(i))
     {
       lts_out.set_tau(i);
+    }
+  }
+
+  for (size_t i=0; i<lts_in.num_probabilistic_labels(); ++i)
+  {
+    lts_out.add_probabilistic_label(c.translate_probability_label(lts_in.probabilistic_label(i)));
+  }
+ 
+  for (size_t i=0; i<lts_in.num_states(); ++i)
+  {
+    if (lts_in.is_probabilistic(i))
+    {
+      lts_out.set_is_probabilistic(i,true); 
     }
   }
 

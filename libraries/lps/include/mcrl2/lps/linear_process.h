@@ -114,14 +114,14 @@ class linear_process_base
         assert(core::detail::check_rule_LinearProcessSummand(*j));
         atermpp::aterm_appl t = down_cast<atermpp::aterm_appl>(*j);
 
-        auto const& summation_variables = down_cast<data::variable_list>(t[0]);
-        auto const& condition = down_cast<data::data_expression>(t[1]);
-        auto const& time = down_cast<data::data_expression>(t[3]);
-        auto const& assignments = down_cast<data::assignment_list>(t[4]);
-        auto const& distribution = down_cast<stochastic_distribution>(t[5]);
+        const data::variable_list& summation_variables = down_cast<data::variable_list>(t[0]);
+        const data::data_expression& condition = down_cast<data::data_expression>(t[1]);
+        const data::data_expression& time = down_cast<data::data_expression>(t[3]);
+        const data::assignment_list& assignments = down_cast<data::assignment_list>(t[4]);
+        const stochastic_distribution& distribution = down_cast<stochastic_distribution>(t[5]);
         if (!stochastic_distributions_allowed && distribution.is_defined())
         {
-          throw mcrl2::runtime_error("summand with non-empty stochastic distribution encountered");
+          throw mcrl2::runtime_error("Summand with stochastic distribution encountered, while this tool is not yet able to deal with stochastic distributions.");
         }
         if (down_cast<atermpp::aterm_appl>(t[2]).function() == core::detail::function_symbols::Delta)
         {

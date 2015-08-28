@@ -445,14 +445,13 @@ static void write_state(const size_t state, ostream& os, const lts_aut_t& l, con
   if (l.is_probabilistic(state))
   {
     // Inefficient.
-    const std::vector<transition> &trans=l.get_transitions();
     std::string previous_label="";
-    for (std::vector<transition>::const_iterator t=trans.begin();  t!=trans.end(); ++t)
+    for (const transition& t: l.get_transitions())
     {
-      if (t->from()==state)
+      if (t.from()==state)
       {
-        os << previous_label << state_mapping.at(t->to());
-        previous_label=" " + detail::pp(l.probabilistic_label(t->label())) + " ";
+        os << previous_label << state_mapping.at(t.to());
+        previous_label=" " + detail::pp(l.probabilistic_label(t.label())) + " ";
       }
     }
   }
@@ -481,17 +480,29 @@ static void write_to_aut(const lts_aut_t& l, ostream& os)
 
   os << "des (";
   write_state(l.initial_state(),os,l,state_mapping);
-  os << "," << l.num_transitions() << "," << state_mapping.size() << ")" << endl;
 
-  const std::vector<transition> &trans=l.get_transitions();
-  for (std::vector<transition>::const_iterator t=trans.begin();  t!=trans.end(); ++t)
+  // Only transitions from non probabilistic states are stored in a .aut
+  // file. So, we must first count them.
+  
+  size_t num_non_probabilistic_transitions=0;
+  for (const transition& t:l.get_transitions())
   {
-    if (!l.is_probabilistic(t->from()))
+    if (!l.is_probabilistic(t.from()))
+    {
+      num_non_probabilistic_transitions++;
+    }
+  }
+
+  os << "," << num_non_probabilistic_transitions << "," << state_mapping.size() << ")" << endl;
+
+  for (const transition& t: l.get_transitions())
+  {
+    if (!l.is_probabilistic(t.from()))
     {
       os << "(";
-      write_state(t->from(),os,l,state_mapping);
-      os << ",\"" << detail::pp(l.action_label(t->label())) << "\",";
-      write_state(t->to(),os,l,state_mapping);
+      write_state(t.from(),os,l,state_mapping);
+      os << ",\"" << detail::pp(l.action_label(t.label())) << "\",";
+      write_state(t.to(),os,l,state_mapping);
       os << ")" << endl;
     }
   }

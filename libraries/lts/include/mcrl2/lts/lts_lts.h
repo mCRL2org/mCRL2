@@ -215,7 +215,7 @@ inline action_label_lts parse_lts_action(
            state label is an expression of the form STATE(t1,...,tn) where
            ti are data expressions.
 */
-class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts >
+class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts, data::data_expression >
 {
 
   private:
@@ -246,7 +246,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 
     /** \brief Copy constructor */
     lts_lts_t(const lts_lts_t& l):
-      lts< detail::state_label_lts, detail::action_label_lts >(l),
+      lts< detail::state_label_lts, detail::action_label_lts, data::data_expression >(l),
       m_has_valid_data_spec(l.m_has_valid_data_spec),
       m_data_spec(l.m_data_spec),
       m_has_valid_parameters(l.m_has_valid_parameters),
@@ -263,7 +263,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     /** \brief Swap function for this lts. */
     void swap(lts_lts_t& l)
     {
-      lts< detail::state_label_lts, detail::action_label_lts >::swap(l);
+      lts< detail::state_label_lts, detail::action_label_lts, data::data_expression >::swap(l);
 
       {
         const bool aux=m_has_valid_data_spec;
