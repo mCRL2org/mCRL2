@@ -4167,7 +4167,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression_list processencoding(
-      int i,
+      size_t i,
       const data_expression_list& t1,
       const stacklisttype& stack)
     {
@@ -4222,7 +4222,7 @@ class specification_basic_type:public boost::noncopyable
       const stacklisttype& stack,
       int regular)
     {
-      int i;
+      size_t i;
 
       for (i=1 ; pCRLproc[i-1]!=procId ; ++i) {}
       /* i is the index of the current process */
@@ -4562,7 +4562,7 @@ class specification_basic_type:public boost::noncopyable
       const data_expression_list t=findarguments(objectdata[n].parameters,
                                                  stack.parameters,args,t2,stack,vars,get_free_variables(n));
 
-      int i;
+      size_t i;
       for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
 
       const data_expression_list l=processencoding(i,t,stack);
