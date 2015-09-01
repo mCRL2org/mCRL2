@@ -11,7 +11,7 @@ nu X(b1:Bool=false, b2:Bool=true,b3:Bool=true,b4:Bool=true).
     [motorLeft]X(b1,b2,false,b4)&&
     [motorOff+motorLeft]X(b1,b2,b3,true)&&
     [motorRight]X(b1,b2,b3,false)&&
-        (val(b1 && b2 && b3 && b4) => [pressRight]
+        ((b1 && b2 && b3 && b4) => [pressRight]
               mu Y.[!motorRight &&
                     !unlockDock &&
                     !pressStop &&

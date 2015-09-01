@@ -4,4 +4,4 @@
      communicate(ch, AssocAbort)
    ||communicate(ch, AssocRelReq)
    ||communicate(ch, AssocRelRsp))*]
-  [exists d: Data . communicate(manager_in(1), data(d))] (val(c == c'))
+  [exists d: Data . communicate(manager_in(1), data(d))] (c == c')

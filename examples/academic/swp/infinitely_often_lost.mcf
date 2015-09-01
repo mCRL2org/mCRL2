@@ -4,4 +4,4 @@
 % This property is true for the alternating bit protocol, because there is
 % no fairness assumption.
 
-<true*>(exists d:D .<r1(d)>(nu X. mu Y. (<i>(<!(exists m:Nat . val(m < 2*n) && c3(d,m))>X || <!i && !s4(d)>Y))))
+<true*>(exists d:D .<r1(d)>(nu X. mu Y. (<i>(<!(exists m:Nat . (m < 2*n) && c3(d,m))>X || <!i && !s4(d)>Y))))
