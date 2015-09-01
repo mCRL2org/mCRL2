@@ -3,5 +3,5 @@
 % Taken from "Model-Checking Processes with Data"
 % J.F. Groote and T.A.C. Willemse
 
-(nu Z(i: Nat).(exists b:Bool. exists n:Nat. <c(b,n)>(n >= i && Z(n))) ||
-              <forall b':Bool. forall n':Nat. !c(b',n')>Z(i))(0)
+(nu Z(i: Nat = 0).(exists b:Bool. exists n:Nat. <c(b,n)>(n >= i && Z(n))) ||
+              <forall b':Bool. forall n':Nat. !c(b',n')>Z(i))
