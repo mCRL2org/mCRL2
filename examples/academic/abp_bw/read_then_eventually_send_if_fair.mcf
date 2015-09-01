@@ -16,4 +16,4 @@ nu X.
 
 forall d:D.
              ([r1(d)]( nu Y. mu Z. ([(!s4(d)) && (!tau_s3e) && (!tau_s6e)]Z && [tau_s3e || tau_s6e]Y) ) )
-
+)
