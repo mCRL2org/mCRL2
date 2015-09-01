@@ -59,6 +59,40 @@ struct data_typechecker: protected data::data_type_checker
     : data_type_checker(dataspec)
   {}
 
+  void print_variables(const std::map<core::identifier_string, data::sort_expression>& variables) const
+  {
+    std::cout << "--- variables ---" << std::endl;
+    for (auto i = variables.begin(); i != variables.end(); ++i)
+    {
+      std::cout << i->first << " -> " << i->second << std::endl;
+    }
+  }
+
+  void print_context() const
+  {
+    auto const& sortspec = get_sort_specification();
+    std::cout << "--- basic sorts ---" << std::endl;
+    for (auto const& x: sortspec.user_defined_sorts())
+    {
+      std::cout << x << std::endl;
+    }
+    std::cout << "--- aliases ---" << std::endl;
+    for (auto const& x: sortspec.user_defined_aliases())
+    {
+      std::cout << x << std::endl;
+    }
+    std::cout << "--- user constants ---" << std::endl;
+    for (auto i = user_constants.begin(); i != user_constants.end(); ++i)
+    {
+      std::cout << i->first << " -> " << i->second << std::endl;
+    }
+    std::cout << "--- user functions ---" << std::endl;
+    for (auto i = user_functions.begin(); i != user_functions.end(); ++i)
+    {
+      std::cout << i->first << " -> " << i->second << std::endl;
+    }
+  }
+
   void check_sort_list_is_declared(const sort_expression_list& x) const
   {
     return sort_type_checker::check_sort_list_is_declared(x);
@@ -304,7 +338,18 @@ struct data_typechecker: protected data::data_type_checker
     return std::make_pair(true, GetNotInferredList(atermpp::reverse(new_sorts)));
   }
 
-  data::data_expression typecheck_data_expression(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
+  data::data_expression typecheck_data_expression(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables)
+  {
+    // return (*this)(d, expected_sort, variables);
+    mCRL2log(log::debug) << "--- Typechecking " << d << " (" << atermpp::aterm(d) << ") with expected sort = " << expected_sort << std::endl;
+    // print_context();
+    // print_variables(variables);
+    data::data_expression result = (*this)(d, expected_sort, variables);
+    mCRL2log(log::debug) << "--- Typechecking result = " << result << std::endl;
+    return result;
+  }
+
+  data::data_expression typecheck_data_expression_nothrow(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
   {
     try
     {
@@ -332,7 +377,7 @@ struct data_typechecker: protected data::data_type_checker
     {
       data::data_expression& e = *p1;
       const data::sort_expression& expected_sort = *p2;
-      e = typecheck_data_expression(e, expected_sort, variables, name, parameters);
+      e = typecheck_data_expression_nothrow(e, expected_sort, variables, name, parameters);
     }
 
     std::pair<bool, data::sort_expression_list> p = AdjustNotInferredList(parameter_sorts(new_parameters), parameter_list);

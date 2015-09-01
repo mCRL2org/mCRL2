@@ -76,18 +76,18 @@ VarsDecl: IdList ':' SortExpr ;                                  // Typed variab
 VarsDeclList: VarsDecl ( ',' VarsDecl )* ;                       // Individually typed variables
 
 DataExpr
-  : Id                                                           // Identifier
-  | Number                                                       // Number
-  | 'true'                                                       // True
-  | 'false'                                                      // False
-  | '[' ']'                                                      // Empty list
-  | '{' '}'                                                      // Empty set
-  | '{'':''}'                                                    // Empty bag
-  | '[' DataExprList ']'                                         // List enumeration
-  | '{' BagEnumEltList '}'                                       // Bag enumeration
-  | '{' VarDecl '|' DataExpr '}'                                 // Set/bag comprehension
-  | '{' DataExprList '}'                                         // Set enumeration
-  | '(' DataExpr ')'                                             // Brackets
+  : Id                                       $left        20     // Identifier
+  | Number                                   $left        20     // Number
+  | 'true'                                   $left        20     // True
+  | 'false'                                  $left        20     // False
+  | '[' ']'                                  $left        20     // Empty list
+  | '{' '}'                                  $left        20     // Empty set
+  | '{'':''}'                                $left        20     // Empty bag
+  | '[' DataExprList ']'                     $left        20     // List enumeration
+  | '{' BagEnumEltList '}'                   $left        20     // Bag enumeration
+  | '{' VarDecl '|' DataExpr '}'             $left        20     // Set/bag comprehension
+  | '{' DataExprList '}'                     $left        20     // Set enumeration
+  | '(' DataExpr ')'                         $left        20     // Brackets
   | DataExpr '[' DataExpr '->' DataExpr ']'  $unary_left  13     // Function update
   | DataExpr '(' DataExprList ')'            $unary_left  13     // Function application
   | '!' DataExpr                             $unary_right 12     // Negation, set complement
@@ -280,8 +280,8 @@ PbesExpr
   : DataValExpr                                                  // Boolean data expression
   | DataExpr                                                     // Boolean data expression
   | '(' PbesExpr ')'                                             // Brackets
-  | 'true'                                                       // True
-  | 'false'                                                      // False
+  | 'true'                                     $left        20   // True
+  | 'false'                                    $left        20   // False
   | 'forall' VarsDeclList '.' PbesExpr         $unary_right  0   // Universal quantifier
   | 'exists' VarsDeclList '.' PbesExpr         $unary_right  0   // Existential quantifier
   | PbesExpr ('=>' $binary_op_right 2) PbesExpr                  // Implication
@@ -294,54 +294,54 @@ PbesExpr
 //--- Action formulas
 
 ActFrm
-  : MultAct                                                      // Multi-action
-  | '(' ActFrm ')'                                               // Brackets
-  | DataValExpr                                                  // Boolean data expression
+  : DataValExpr                                $left        30   // Boolean data expression
   | DataExpr                                                     // Boolean data expression
-  | 'true'                                                       // True
-  | 'false'                                                      // False
-  | '!' ActFrm                                 $unary_right  6   // Negation
-  | 'forall' VarsDeclList '.' ActFrm           $unary_right  0   // Universal quantifier
-  | 'exists' VarsDeclList '.' ActFrm           $unary_right  0   // Existential quantifier
-  | ActFrm ('@' $binary_op_left 5) DataExpr                      // At operator
-  | ActFrm ('&&' $binary_op_right 4) ActFrm                      // Intersection of actions
-  | ActFrm ('||' $binary_op_right 3) ActFrm                      // Union actions
-  | ActFrm ('=>' $binary_op_right 2) ActFrm                      // Implication
+  | MultAct                                    $left        30   // Multi-action
+  | '(' ActFrm ')'                             $left        30   // Brackets
+  | 'true'                                     $left        30   // True
+  | 'false'                                    $left        30   // False
+  | 'forall' VarsDeclList '.' ActFrm           $unary_right 21   // Universal quantifier
+  | 'exists' VarsDeclList '.' ActFrm           $unary_right 21   // Existential quantifier
+  | ActFrm ('=>' $binary_op_right 22) ActFrm                     // Implication
+  | ActFrm ('||' $binary_op_right 23) ActFrm                     // Union of actions
+  | ActFrm ('&&' $binary_op_right 24) ActFrm                     // Intersection of actions
+  | ActFrm ('@' $binary_op_left 25) DataExpr                     // At operator
+  | '!' ActFrm                                 $unary_right 26   // Negation
   ;
 
 //--- Regular formulas
 
 RegFrm
   : ActFrm                                                       // Action formula
-  | '(' RegFrm ')'                                               // Brackets
-  | 'nil'                                                        // Empty regular formula
-  | RegFrm ('+' $binary_op_left 10) RegFrm                       // Alternative composition
-  | RegFrm ('.' $binary_op_right 12) RegFrm                      // Sequential composition
-  | RegFrm '*'                                 $unary_right  13  // Iteration
-  | RegFrm '+'                                 $unary_right  13  // Nonempty iteration
+  | '(' RegFrm ')'                             $left        40   // Brackets
+  | 'nil'                                      $left        40   // Empty regular formula
+  | RegFrm ('+' $binary_op_left 31) RegFrm                       // Alternative composition
+  | RegFrm ('.' $binary_op_right 32) RegFrm                      // Sequential composition
+  | RegFrm '*'                                 $unary_right 33   // Iteration
+  | RegFrm '+'                                 $unary_right 33   // Nonempty iteration
   ;
 
 //--- State formulas
 
 StateFrm
-  : DataValExpr                                                  // Boolean data expression
+  : DataValExpr                                $left        50   // Boolean data expression
   | DataExpr                                                     // Boolean data expression
-  | '(' StateFrm ')'                                             // Brackets
-  | 'true'                                                       // True
-  | 'false'                                                      // False
-  | 'mu' StateVarDecl '.' StateFrm             $unary_right  1   // Minimal fixed point
-  | 'nu' StateVarDecl '.' StateFrm             $unary_right  1   // Maximal fixed point
-  | 'forall' VarsDeclList '.' StateFrm         $unary_right  2   // Universal quantification
-  | 'exists' VarsDeclList '.' StateFrm         $unary_right  2   // Existential quantification
-  | StateFrm ('=>' $binary_op_right 3) StateFrm                  // Implication
-  | StateFrm ('||' $binary_op_right 4) StateFrm                  // Disjunction
-  | StateFrm ('&&' $binary_op_right 5) StateFrm                  // Conjunction
-  | '[' RegFrm ']' StateFrm                    $unary_right  6   // Box modality
-  | '<' RegFrm '>' StateFrm                    $unary_right  6   // Diamond modality
-  | '!' StateFrm                               $unary_right  7   // Negation
-  | Id ( '(' DataExprList ')' )?                                 // Instantiated PBES variable
-  | 'delay' ( '@' DataExpr )?                                    // Delay
-  | 'yaled' ( '@' DataExpr )?                                    // Yaled
+  | '(' StateFrm ')'                           $left        50   // Brackets
+  | 'true'                                     $left        50   // True
+  | 'false'                                    $left        50   // False
+  | Id ( '(' DataExprList ')' )?               $left        50   // Instantiated PBES variable
+  | 'delay' ( '@' DataExpr )?                  $left        50   // Delay
+  | 'yaled' ( '@' DataExpr )?                  $left        50   // Yaled
+  | 'mu' StateVarDecl '.' StateFrm             $unary_right 41   // Minimal fixed point
+  | 'nu' StateVarDecl '.' StateFrm             $unary_right 41   // Maximal fixed point
+  | 'forall' VarsDeclList '.' StateFrm         $unary_right 42   // Universal quantification
+  | 'exists' VarsDeclList '.' StateFrm         $unary_right 42   // Existential quantification
+  | StateFrm ('=>' $binary_op_right 43) StateFrm                 // Implication
+  | StateFrm ('||' $binary_op_right 44) StateFrm                 // Disjunction
+  | StateFrm ('&&' $binary_op_right 45) StateFrm                 // Conjunction
+  | '[' RegFrm ']' StateFrm                    $unary_right 46   // Box modality
+  | '<' RegFrm '>' StateFrm                    $unary_right 46   // Diamond modality
+  | '!' StateFrm                               $unary_right 47   // Negation
   ;
 
 StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;           // PBES variable declaration

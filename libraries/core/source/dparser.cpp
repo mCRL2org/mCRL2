@@ -301,13 +301,32 @@ bool is_all_of_type(D_ParseNode* nodes[], int n, const char* type, const core::p
 {
   for (int i = 0; i < n; i++)
   {
-    core::parse_node node(nodes[i]);
+    core::parse_node node = make_node(nodes[i], table);
     if (table.symbol_name(node) != type)
     {
       return false;
     }
   }
   return true;
+}
+
+inline
+void print_ambiguous_nodes(D_ParseNode* nodes[], int n, const char* type, const core::parser_table& table)
+{
+  mCRL2log(log::verbose, "parser") << "--- " << type << " ambiguity" << std::endl;
+  for (int i = 0; i < n; ++i)
+  {
+    core::parse_node vi(nodes[i]);
+    // mCRL2log(log::verbose, "parser") << vi.tree() << " " << table.tree(vi) << std::endl;
+    mCRL2log(log::verbose, "parser") << "ALT " << table.tree(vi) << std::endl;
+  }
+}
+
+inline
+void print_chosen_node(D_ParseNode* node, const core::parser_table& table)
+{
+  core::parse_node vi(node);
+  mCRL2log(log::verbose, "parser") << "CHOOSE " << table.tree(vi) << std::endl;
 }
 
 /// \brief Function for resolving parser ambiguities.
@@ -341,12 +360,14 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   // resolve ActFrm ambiguities
   if (is_all_of_type(v, n, "ActFrm", table))
   {
+//print_ambiguous_nodes(v, n, "ActFrm", table);
     D_ParseNode* result = 0;
     for (int i = 0; i < n; i++)
     {
       core::parse_node node(v[i]);
       if (table.symbol_name(node.child(0)) == "MultAct")
       {
+//print_chosen_node(v[i], table);
         return v[i];
       }
       else if (table.symbol_name(node.child(0)) != "DataExpr")
@@ -356,20 +377,24 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
     }
     if (result)
     {
+//print_chosen_node(result, table);
       return result;
     }
+//print_chosen_node(v[0], table);
     return v[0];
   }
 
   // resolve StateFrm ambiguities
   if (is_all_of_type(v, n, "StateFrm", table))
   {
+//print_ambiguous_nodes(v, n, "StateFrm", table);
     D_ParseNode* result = 0;
     for (int i = 0; i < n; i++)
     {
       core::parse_node node(v[i]);
       if (table.symbol_name(node.child(0)) == "Id")
       {
+//print_chosen_node(v[i], table);
         return v[i];
       }
       else if (table.symbol_name(node.child(0)) != "DataExpr")
@@ -379,44 +404,27 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
     }
     if (result)
     {
+//print_chosen_node(result, table);
       return result;
     }
+//print_chosen_node(v[0], table);
     return v[0];
   }
 
   // resolve RegFrm ambiguities
   if (is_all_of_type(v, n, "RegFrm", table))
   {
+//print_ambiguous_nodes(v, n, "RegFrm", table);
     for (int i = 0; i < n; i++)
     {
       core::parse_node node(v[i]);
-      if (table.symbol_name(node.child(0)) == "RegFrm")
+      if (table.symbol_name(node.child(0)) == "RegFrm" || table.symbol_name(node.child(0)) == "(")
       {
+//print_chosen_node(v[i], table);
         return v[i];
       }
     }
   }
-
-  //if (n == 2)
-  //{
-  //  // "(" ActFrm ")" can be parsed either as a new ActFrm, or as a RegFrm. We
-  //  // choose to parse it as an ActFrm if this ambiguity occurs, as it is the
-  //  // most specific. We do this by checking that one of the possible parse
-  //  // trees is of the form RegFrm("(", x, y), and not choosing that particular
-  //  // parse tree.
-  //  core::parse_node vi(v[0]);
-  //  if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
-  //      vi.child(0).string() == "(")
-  //  {
-  //    return v[1];
-  //  }
-  //  vi.node = v[1];
-  //  if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
-  //      vi.child(0).string() == "(")
-  //  {
-  //    return v[0];
-  //  }
-  //}
 
   // If we reach this point, then the ambiguity is unresolved. We print all
   // ambiguities on the debug output, then throw an exception.

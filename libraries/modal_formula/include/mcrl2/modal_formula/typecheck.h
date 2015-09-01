@@ -93,12 +93,12 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
 
   action_formula apply(const data::data_expression& x)
   {
-    return m_data_typechecker(x, data::sort_bool::bool_(), m_variables);
+    return m_data_typechecker.typecheck_data_expression(x, data::untyped_sort(), m_variables);
   }
 
   action_formula apply(const action_formulas::at& x)
   {
-    data::data_expression new_time = m_data_typechecker(x.time_stamp(), data::sort_real::real_(), m_variables);
+    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variables);
     return at((*this).apply(x.operand()), new_time);
   }
 
@@ -110,7 +110,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       const data::untyped_data_parameter& y = x.actions().front();
       try
       {
-        return m_data_typechecker.typecheck_untyped_data_parameter(y.name(), y.arguments(), m_variables);
+        return m_data_typechecker.typecheck_untyped_data_parameter(y.name(), y.arguments(), m_variables, data::sort_bool::bool_());
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -407,7 +407,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 
   state_formula apply(const data::data_expression& x)
   {
-    return m_data_typechecker(x, data::sort_bool::bool_(), m_variables);
+    return m_data_typechecker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variables);
   }
 
   state_formula apply(const state_formulas::forall& x)
@@ -460,13 +460,13 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 
   state_formula apply(const state_formulas::delay_timed& x)
   {
-    data::data_expression new_time = m_data_typechecker(x.time_stamp(), data::sort_real::real_(), m_variables);
+    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variables);
     return delay_timed(new_time);
   }
 
   state_formula apply(const state_formulas::yaled_timed& x)
   {
-    data::data_expression new_time = m_data_typechecker(x.time_stamp(), data::sort_real::real_(), m_variables);
+    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variables);
     return yaled_timed(new_time);
   }
 
@@ -489,7 +489,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     auto q2 = x.arguments().begin();
     for (; q1 != expected_sorts.end(); ++q1, ++q2)
     {
-      new_arguments.push_front(m_data_typechecker(*q2, *q1, m_variables));
+      new_arguments.push_front(m_data_typechecker.typecheck_data_expression(*q2, *q1, m_variables));
     }
     return state_formulas::variable(x.name(), new_arguments);
   }
@@ -513,7 +513,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     auto q2 = x.arguments().begin();
     for (; q1 != expected_sorts.end(); ++q1, ++q2)
     {
-      new_arguments.push_front(m_data_typechecker(*q2, *q1, m_variables));
+      new_arguments.push_front(m_data_typechecker.typecheck_data_expression(*q2, *q1, m_variables));
     }
     return state_formulas::variable(x.name(), new_arguments);
   }
