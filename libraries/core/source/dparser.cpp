@@ -301,7 +301,7 @@ bool is_all_of_type(D_ParseNode* nodes[], int n, const char* type, const core::p
 {
   for (int i = 0; i < n; i++)
   {
-    core::parse_node node = make_node(nodes[i], table);
+    core::parse_node node(nodes[i]);
     if (table.symbol_name(node) != type)
     {
       return false;

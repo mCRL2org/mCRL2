@@ -107,7 +107,6 @@ struct regular_formula_actions: public action_formulas::detail::action_formula_a
   regular_formulas::regular_formula parse_RegFrm(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActFrm")) { return parse_ActFrm(node.child(0)); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nil")) { return regular_formulas::nil(); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == ")")) { return parse_RegFrm(node.child(1)); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "*")) { return trans_or_nil(parse_RegFrm(node.child(0))); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "+")) { return trans(parse_RegFrm(node.child(0))); }

@@ -243,14 +243,14 @@ BesEqnDecl: FixedPointOperator BesVar '=' BesExpr ';' ;          // Boolean fixe
 BesVar: Id ;                                                     // BES variable
 
 BesExpr
-  : 'true'                                                       // True
+  : BesVar                                                       // Boolean variable
+  | 'true'                                                       // True
   | 'false'                                                      // False
   | BesExpr ('=>' $binary_op_right 2) BesExpr                    // Implication
   | BesExpr ('||' $binary_op_right 3) BesExpr                    // Disjunction
   | BesExpr ('&&' $binary_op_right 4) BesExpr                    // Conjunction
   | '!' BesExpr              $unary_right  5                     // Negation
   | '(' BesExpr ')'                                              // Brackets
-  | BesVar                                                       // Boolean variable
   ;
 
 BesInit: 'init' BesVar ';' ;                                     // Initial BES variable
@@ -274,28 +274,28 @@ PropVarInst: Id ( '(' DataExprList ')' )? ;                      // Instantiated
 
 PbesInit: 'init' PropVarInst ';' ;                               // Initial PBES variable
 
-DataValExpr: 'val' '(' DataExpr ')';                             // Marked data expression
+DataValExpr: 'val' '(' DataExpr ')' ;                            // Marked data expression
 
 PbesExpr
-  : DataValExpr                                                  // Boolean data expression
-  | DataExpr                                                     // Boolean data expression
-  | '(' PbesExpr ')'                                             // Brackets
-  | 'true'                                     $left        20   // True
-  | 'false'                                    $left        20   // False
-  | 'forall' VarsDeclList '.' PbesExpr         $unary_right  0   // Universal quantifier
-  | 'exists' VarsDeclList '.' PbesExpr         $unary_right  0   // Existential quantifier
-  | PbesExpr ('=>' $binary_op_right 2) PbesExpr                  // Implication
-  | PbesExpr ('||' $binary_op_right 3) PbesExpr                  // Disjunction
-  | PbesExpr ('&&' $binary_op_right 4) PbesExpr                  // Conjunction
-  | '!' PbesExpr                               $unary_right  5   // Negation
-  | Id ( '(' DataExprList ')' )?                                 // Instantiated PBES variable or data application
+  : DataExpr                                                     // Boolean data expression
+  | DataValExpr                                $left        30   // Boolean data expression
+  | '(' PbesExpr ')'                           $left        30   // Brackets
+  | 'true'                                     $left        30   // True
+  | 'false'                                    $left        30   // False
+  | Id ( '(' DataExprList ')' )?               $left        30   // Instantiated PBES variable or data application
+  | 'forall' VarsDeclList '.' PbesExpr         $unary_right 21   // Universal quantifier
+  | 'exists' VarsDeclList '.' PbesExpr         $unary_right 21   // Existential quantifier
+  | PbesExpr ('=>' $binary_op_right 22) PbesExpr                 // Implication
+  | PbesExpr ('||' $binary_op_right 23) PbesExpr                 // Disjunction
+  | PbesExpr ('&&' $binary_op_right 24) PbesExpr                 // Conjunction
+  | '!' PbesExpr                               $unary_right 25   // Negation
   ;
 
 //--- Action formulas
 
 ActFrm
-  : DataValExpr                                $left        30   // Boolean data expression
-  | DataExpr                                                     // Boolean data expression
+  : DataExpr                                                     // Boolean data expression
+  | DataValExpr                                $left        30   // Boolean data expression
   | MultAct                                    $left        30   // Multi-action
   | '(' ActFrm ')'                             $left        30   // Brackets
   | 'true'                                     $left        30   // True
@@ -314,7 +314,6 @@ ActFrm
 RegFrm
   : ActFrm                                                       // Action formula
   | '(' RegFrm ')'                             $left        40   // Brackets
-  | 'nil'                                      $left        40   // Empty regular formula
   | RegFrm ('+' $binary_op_left 31) RegFrm                       // Alternative composition
   | RegFrm ('.' $binary_op_right 32) RegFrm                      // Sequential composition
   | RegFrm '*'                                 $unary_right 33   // Iteration
@@ -324,8 +323,8 @@ RegFrm
 //--- State formulas
 
 StateFrm
-  : DataValExpr                                $left        50   // Boolean data expression
-  | DataExpr                                                     // Boolean data expression
+  : DataExpr                                                     // Boolean data expression
+  | DataValExpr                                $left        50   // Boolean data expression
   | '(' StateFrm ')'                           $left        50   // Brackets
   | 'true'                                     $left        50   // True
   | 'false'                                    $left        50   // False
