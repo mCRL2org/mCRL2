@@ -12,6 +12,7 @@ set(MCRL2_LIBRARIES
   modal_formula
   pbes
   process
+  smt
   trace
   utilities
 )
