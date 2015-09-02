@@ -48,7 +48,6 @@ namespace regular_formulas
 
 //--- start generated regular_formulas overloads ---//
 std::string pp(const regular_formulas::alt& x) { return regular_formulas::pp< regular_formulas::alt >(x); }
-std::string pp(const regular_formulas::nil& x) { return regular_formulas::pp< regular_formulas::nil >(x); }
 std::string pp(const regular_formulas::regular_formula& x) { return regular_formulas::pp< regular_formulas::regular_formula >(x); }
 std::string pp(const regular_formulas::seq& x) { return regular_formulas::pp< regular_formulas::seq >(x); }
 std::string pp(const regular_formulas::trans& x) { return regular_formulas::pp< regular_formulas::trans >(x); }
@@ -86,7 +85,6 @@ std::set<data::sort_expression> find_sort_expressions(const state_formulas::stat
 std::set<data::variable> find_all_variables(const state_formulas::state_formula& x) { return state_formulas::find_all_variables< state_formulas::state_formula >(x); }
 std::set<data::variable> find_free_variables(const state_formulas::state_formula& x) { return state_formulas::find_free_variables< state_formulas::state_formula >(x); }
 std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x) { return state_formulas::find_identifiers< state_formulas::state_formula >(x); }
-bool find_nil(const state_formulas::state_formula& x) { return state_formulas::find_nil< state_formulas::state_formula >(x); }
 //--- end generated state_formulas overloads ---//
 
 namespace algorithms {

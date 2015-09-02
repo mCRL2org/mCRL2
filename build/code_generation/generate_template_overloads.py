@@ -151,10 +151,6 @@ pbes_system::pbes_expression
 state_formulas::state_formula
 '''
 
-FIND_NIL_CLASSNAMES = '''
-state_formulas::state_formula
-'''
-
 SEARCH_VARIABLE_CLASSNAMES = '''
 data::data_expression
 pbes_system::pbes_expression
@@ -253,9 +249,6 @@ generate_traverser_overloads(classnames, 'find_propositional_variable_instantiat
 
 classnames = FIND_IDENTIFIERS_CLASSNAMES.strip().split()
 generate_traverser_overloads(classnames, 'find_identifiers', 'std::set<core::identifier_string>', code_map)
-
-classnames = FIND_NIL_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_nil', 'bool', code_map)
 
 classnames = SEARCH_VARIABLE_CLASSNAMES.strip().split()
 generate_search_variable_overloads(classnames, 'search_variable', 'bool', code_map)

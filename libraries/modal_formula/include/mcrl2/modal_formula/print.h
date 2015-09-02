@@ -169,12 +169,6 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
     return static_cast<Derived&>(*this);
   }
 
-  void apply(const regular_formulas::nil& x)
-  {
-    derived().enter(x);
-    derived().leave(x);
-  }
-
   void apply(const regular_formulas::seq& x)
   {
     derived().enter(x);

@@ -250,10 +250,6 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
   std::string text = utilities::read_text(in);
   state_formula x = detail::parse_state_formula_new(text);
 //mCRL2log(log::verbose) << "Parsed state formula " << x << "   " << atermpp::aterm(x) << std::endl;
-  if (find_nil(x))
-  {
-    throw mcrl2::runtime_error("regular formulas containing nil are unsupported!");
-  }
   if (type_check)
   {
     x = state_formulas::type_check(x, spec, check_monotonicity);

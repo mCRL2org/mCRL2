@@ -727,14 +727,6 @@ struct add_sort_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  regular_formulas::nil apply(const regular_formulas::nil& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   regular_formulas::seq apply(const regular_formulas::seq& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -786,10 +778,6 @@ struct add_sort_expressions: public Builder<Derived>
     else if (data::is_data_expression(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (regular_formulas::is_nil(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -839,14 +827,6 @@ struct add_data_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  regular_formulas::nil apply(const regular_formulas::nil& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   regular_formulas::seq apply(const regular_formulas::seq& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -898,10 +878,6 @@ struct add_data_expressions: public Builder<Derived>
     else if (data::is_data_expression(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (regular_formulas::is_nil(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -951,14 +927,6 @@ struct add_variables: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  regular_formulas::nil apply(const regular_formulas::nil& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   regular_formulas::seq apply(const regular_formulas::seq& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1010,10 +978,6 @@ struct add_variables: public Builder<Derived>
     else if (data::is_data_expression(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (regular_formulas::is_nil(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1063,14 +1027,6 @@ struct add_regular_formula_expressions: public Builder<Derived>
   using super::update;
   using super::apply;
 
-  regular_formulas::nil apply(const regular_formulas::nil& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
-
   regular_formulas::seq apply(const regular_formulas::seq& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1122,10 +1078,6 @@ struct add_regular_formula_expressions: public Builder<Derived>
     else if (data::is_data_expression(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (regular_formulas::is_nil(x))
-    {
-      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {

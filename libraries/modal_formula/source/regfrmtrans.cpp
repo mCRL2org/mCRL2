@@ -66,12 +66,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
     //part is the must operator; return equivalent non-regular formula
     const regular_formula reg_frm = must(part).formula();
     const state_formula phi = must(part).operand();
-    if (regular_formulas::is_nil(reg_frm))
-    {
-      //red([nil]phi) -> red([false*]phi)
-      part = translate_reg_frms_appl(must(trans_or_nil(false_()), phi),xyz_generator);
-    }
-    else if (regular_formulas::is_seq(reg_frm))
+    if (regular_formulas::is_seq(reg_frm))
     {
       const regular_formula R1 = seq(reg_frm).left();
       const regular_formula R2 = seq(reg_frm).right();
@@ -116,12 +111,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
     //part is the may operator; return equivalent non-regular formula
     regular_formula reg_frm = may(part).formula();
     state_formula phi = may(part).operand();
-    if (regular_formulas::is_nil(reg_frm))
-    {
-      //red(<nil>phi) -> red(<false*>phi)
-      part = translate_reg_frms_appl(may(trans_or_nil(false_()), phi),xyz_generator);
-    }
-    else if (regular_formulas::is_seq(reg_frm))
+    if (regular_formulas::is_seq(reg_frm))
     {
       const regular_formula R1 = seq(reg_frm).left();
       const regular_formula R2 = seq(reg_frm).right();

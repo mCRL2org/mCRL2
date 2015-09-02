@@ -856,13 +856,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   using super::leave;
   using super::apply;
 
-  void apply(const regular_formulas::nil& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void apply(const regular_formulas::seq& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -911,10 +904,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (regular_formulas::is_nil(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -961,13 +950,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   using super::leave;
   using super::apply;
 
-  void apply(const regular_formulas::nil& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void apply(const regular_formulas::seq& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1016,10 +998,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (regular_formulas::is_nil(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1066,13 +1044,6 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
   using super::leave;
   using super::apply;
 
-  void apply(const regular_formulas::nil& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void apply(const regular_formulas::seq& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1121,10 +1092,6 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     else if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (regular_formulas::is_nil(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {
@@ -1171,13 +1138,6 @@ struct add_traverser_variables: public Traverser<Derived>
   using super::leave;
   using super::apply;
 
-  void apply(const regular_formulas::nil& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void apply(const regular_formulas::seq& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1227,10 +1187,6 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (regular_formulas::is_nil(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::nil>(x));
-    }
     else if (regular_formulas::is_seq(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::seq>(x));
@@ -1275,13 +1231,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   using super::enter;
   using super::leave;
   using super::apply;
-
-  void apply(const regular_formulas::nil& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
 
   void apply(const regular_formulas::seq& x)
   {
@@ -1332,10 +1281,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (regular_formulas::is_nil(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::nil>(x));
     }
     else if (regular_formulas::is_seq(x))
     {

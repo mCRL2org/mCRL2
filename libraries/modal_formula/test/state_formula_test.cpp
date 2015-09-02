@@ -164,20 +164,6 @@ BOOST_AUTO_TEST_CASE(test_parse)
   BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());
 }
 
-/* Not supported
-BOOST_AUTO_TEST_CASE(test_find_nil)
-{
-  state_formula formula;
-  specification spec;
-
-  formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
-  BOOST_CHECK(find_nil(formula) == false);
-
-  formula = parse_state_formula("[nil]true", spec);
-  BOOST_CHECK(find_nil(formula) == true);
-}
-*/
-
 BOOST_AUTO_TEST_CASE(test_count_fixpoints)
 {
   state_formula formula;

@@ -65,7 +65,6 @@ typedef atermpp::term_list<regular_formula> regular_formula_list;
 typedef std::vector<regular_formula>    regular_formula_vector;
 
 // prototypes
-inline bool is_nil(const atermpp::aterm_appl& x);
 inline bool is_seq(const atermpp::aterm_appl& x);
 inline bool is_alt(const atermpp::aterm_appl& x);
 inline bool is_trans(const atermpp::aterm_appl& x);
@@ -80,7 +79,6 @@ bool is_regular_formula(const atermpp::aterm_appl& x)
 {
   return action_formulas::is_action_formula(x) ||
          data::is_data_expression(x) ||
-         regular_formulas::is_nil(x) ||
          regular_formulas::is_seq(x) ||
          regular_formulas::is_alt(x) ||
          regular_formulas::is_trans(x) ||
@@ -102,52 +100,6 @@ std::ostream& operator<<(std::ostream& out, const regular_formula& x)
 
 /// \brief swap overload
 inline void swap(regular_formula& t1, regular_formula& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \brief The value nil for regular formulas
-class nil: public regular_formula
-{
-  public:
-    /// \brief Default constructor.
-    nil()
-      : regular_formula(core::detail::default_values::RegNil)
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit nil(const atermpp::aterm& term)
-      : regular_formula(term)
-    {
-      assert(core::detail::check_term_RegNil(*this));
-    }
-};
-
-/// \brief Test for a nil expression
-/// \param x A term
-/// \return True if \a x is a nil expression
-inline
-bool is_nil(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::RegNil;
-}
-
-// prototype declaration
-std::string pp(const nil& x);
-
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const nil& x)
-{
-  return out << regular_formulas::pp(x);
-}
-
-/// \brief swap overload
-inline void swap(nil& t1, nil& t2)
 {
   t1.swap(t2);
 }
