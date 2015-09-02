@@ -38,7 +38,7 @@ struct variable_assignment: public std::unary_function<variable, data_expression
     rhs(rhs_)
   {}
 
-  const data_expression& operator()(const variable& x)
+  const data_expression& operator()(const variable& x) const
   {
     if (x == lhs)
     {
