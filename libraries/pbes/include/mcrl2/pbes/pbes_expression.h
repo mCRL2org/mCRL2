@@ -703,12 +703,12 @@ inline bool is_data(const pbes_expression& t)
   return data::is_data_expression(t);
 }
 
-inline int left_precedence(const forall&) { return 0; }
-inline int left_precedence(const exists&) { return 0; }
-inline int left_precedence(const imp&)    { return 2; }
-inline int left_precedence(const or_&)    { return 3; }
-inline int left_precedence(const and_&)   { return 4; }
-inline int left_precedence(const not_&)   { return 5; }
+inline int left_precedence(const forall&) { return 21; }
+inline int left_precedence(const exists&) { return 21; }
+inline int left_precedence(const imp&)    { return 22; }
+inline int left_precedence(const or_&)    { return 23; }
+inline int left_precedence(const and_&)   { return 24; }
+inline int left_precedence(const not_&)   { return 25; }
 inline int left_precedence(const pbes_expression& x)
 {
   if      (is_forall(x)) { return left_precedence(static_cast<const forall&>(x)); }
