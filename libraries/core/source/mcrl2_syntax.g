@@ -296,7 +296,7 @@ PbesExpr
 ActFrm
   : DataExpr                                                     // Boolean data expression
   | DataValExpr                                                  // Boolean data expression
-  | MultAct                                    $left        30   // Multi-action
+  | MultAct                                                      // Multi-action
   | '(' ActFrm ')'                             $left        30   // Brackets
   | 'true'                                     $left        30   // True
   | 'false'                                    $left        30   // False
