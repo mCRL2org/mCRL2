@@ -1,0 +1,4 @@
+% This formula expresses that there is no deadlock
+% for all reachable states.
+
+[true*]<true>true
