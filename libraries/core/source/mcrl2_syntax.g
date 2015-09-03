@@ -76,8 +76,8 @@ VarsDecl: IdList ':' SortExpr ;                                  // Typed variab
 VarsDeclList: VarsDecl ( ',' VarsDecl )* ;                       // Individually typed variables
 
 DataExpr
-  : Id                                       $left        20     // Identifier
-  | Number                                   $left        20     // Number
+  : Id                                                           // Identifier
+  | Number                                                       // Number
   | 'true'                                   $left        20     // True
   | 'false'                                  $left        20     // False
   | '[' ']'                                  $left        20     // Empty list
@@ -274,11 +274,11 @@ PropVarInst: Id ( '(' DataExprList ')' )? ;                      // Instantiated
 
 PbesInit: 'init' PropVarInst ';' ;                               // Initial PBES variable
 
-DataValExpr: 'val' '(' DataExpr ')' ;                            // Marked data expression
+DataValExpr: 'val' '(' DataExpr ')' $left 20 ;                   // Marked data expression
 
 PbesExpr
   : DataExpr                                                     // Boolean data expression
-  | DataValExpr                                $left        30   // Boolean data expression
+  | DataValExpr                                                  // Boolean data expression
   | '(' PbesExpr ')'                           $left        30   // Brackets
   | 'true'                                     $left        30   // True
   | 'false'                                    $left        30   // False
@@ -295,7 +295,7 @@ PbesExpr
 
 ActFrm
   : DataExpr                                                     // Boolean data expression
-  | DataValExpr                                $left        30   // Boolean data expression
+  | DataValExpr                                                  // Boolean data expression
   | MultAct                                    $left        30   // Multi-action
   | '(' ActFrm ')'                             $left        30   // Brackets
   | 'true'                                     $left        30   // True
@@ -324,7 +324,7 @@ RegFrm
 
 StateFrm
   : DataExpr                                                     // Boolean data expression
-  | DataValExpr                                $left        50   // Boolean data expression
+  | DataValExpr                                                  // Boolean data expression
   | '(' StateFrm ')'                           $left        50   // Brackets
   | 'true'                                     $left        50   // True
   | 'false'                                    $left        50   // False
