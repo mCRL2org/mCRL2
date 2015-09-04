@@ -129,6 +129,11 @@ class ltsconvert_tool : public ltsconvert_base
       l.load(tool_options.infilename);
       l.hide_actions(tool_options.tau_actions);
 
+      if (tool_options.check_reach)
+      {
+        reachability_check(l, true); // Remove unreachable states from the input transition system.
+      }
+
       if (tool_options.equivalence != lts_eq_none)
       {
         mCRL2log(verbose) << "reducing LTS (modulo " <<  description(tool_options.equivalence) << ")..." << std::endl;
