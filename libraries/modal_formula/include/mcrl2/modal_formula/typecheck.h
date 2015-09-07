@@ -667,7 +667,7 @@ state_formula type_check(const state_formula& x, const lps::specification& lpssp
 {
   try
   {
-    state_formula_type_checker type_checker(lpsspec.data(), lpsspec.action_labels());
+    state_formula_type_checker type_checker(lpsspec.data(), lpsspec.action_labels(), lpsspec.global_variables());
     return type_checker(x, check_monotonicity);
   }
   catch (mcrl2::runtime_error& e)
