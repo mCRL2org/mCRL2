@@ -221,7 +221,7 @@ struct fsm_builder
     parameters.push_back(fsm_parameter(name, cardinality, sort, domain_values));
   }
 
-  void add_parameters()
+  void write_parameters()
   {
     std::size_t index = 0;
     for (const fsm_parameter& param: parameters)
@@ -391,7 +391,7 @@ struct fsm_actions: public core::default_parser_actions
     // parse parameters
     parse_ParameterList(node.child(0));
 
-    builder.add_parameters();
+    builder.write_parameters();
 
     // parse states
     parse_StateList(node.child(2));
@@ -417,14 +417,19 @@ class simple_fsm_parser
     // Used for parsing lines
     boost::xpressive::sregex regex_parameter;
     boost::xpressive::sregex regex_transition;
+    boost::xpressive::sregex regex_space;
 
     states next_state(states state)
     {
       switch (state)
       {
-        case PARAMETERS: return STATES;
+        case PARAMETERS:
+        {
+          builder.write_parameters();
+          return STATES;
+        }
         case STATES: return TRANSITIONS;
-        default: throw mcrl2::runtime_error("Unexpected split line --- encountered while parsing FSM!");
+        default: throw mcrl2::runtime_error("unexpected split line --- encountered while parsing FSM!");
       }
     }
 
@@ -438,26 +443,39 @@ class simple_fsm_parser
       }
       std::string name = what[1];
       std::string cardinality = what[2];
-      std::string sort = what[3];
+      std::string sort = utilities::trim_copy(what[3]);
       std::vector<std::string> domain_values = utilities::regex_split(what[4], "\\s+");
+      for (std::string& s: domain_values)
+      {
+        s = s.substr(1, s.size() - 2);
+      }
       builder.add_parameter(name, cardinality, sort, domain_values);
     }
 
     void parse_state(const std::string& line)
     {
       std::string text = utilities::trim_copy(line);
-      std::vector<std::string> values = utilities::regex_split(text, "\\s+");
       std::vector<std::size_t> numbers;
-      for (const std::string& value: values)
+
+      try
       {
-        try
+        // the -1 below directs the token iterator to display the parts of
+        // the string that did NOT match the regular expression.
+        boost::xpressive::sregex_token_iterator cur(text.begin(), text.end(), regex_space, -1);
+        boost::xpressive::sregex_token_iterator end;
+        for (; cur != end; ++cur)
         {
-          numbers.push_back(boost::lexical_cast<std::size_t>(value));
+          std::string value = *cur;
+          boost::trim(value);
+          if (value.size() > 0)
+          {
+            numbers.push_back(boost::lexical_cast<std::size_t>(value));
+          }
         }
-        catch (boost::bad_lexical_cast&)
-        {
-          throw mcrl2::runtime_error("could not parse the following line as an FSM state: " + text);
-        }
+      }
+      catch (boost::bad_lexical_cast&)
+      {
+        throw mcrl2::runtime_error("could not parse the following line as an FSM state: " + text);
       }
       builder.add_state(numbers);
     }
@@ -468,7 +486,7 @@ class simple_fsm_parser
       boost::xpressive::smatch what;
       if (!boost::xpressive::regex_match(line, what, regex_transition))
       {
-        throw mcrl2::runtime_error("could not parse the following line as an FSM parameter: " + text);
+        throw mcrl2::runtime_error("could not parse the following line as an FSM transition: " + text);
       }
       std::string source = what[1];
       std::string target = what[3];
@@ -485,6 +503,8 @@ class simple_fsm_parser
 
       // (0|([1-9][0-9]*))+\s+(0|([1-9][0-9]*))+\s+"([^"]*)"
       regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*))+\\s+\"([^\"]*)\"");
+
+      regex_space = boost::xpressive::sregex::compile("\\s+");
     }
 
     void run(std::istream& from)
