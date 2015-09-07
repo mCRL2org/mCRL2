@@ -15,6 +15,7 @@
 #include <cstdio>
 
 #include <boost/test/minimal.hpp>
+#include <boost/xpressive/xpressive.hpp>
 
 #include "mcrl2/lts/parse.h"
 
@@ -27,7 +28,7 @@ void parse_fsm(const std::string& text, lts::lts_fsm_t& result)
   to << text;
   to.close();
   result.loadnew(temp_filename);
-  remove(temp_filename.c_str());
+  std::remove(temp_filename.c_str());
 }
 
 inline
@@ -71,12 +72,38 @@ std::string print_fsm(const lts::lts_fsm_t& l)
   return out.str();
 }
 
-void test_fsm()
+void test_fsm(const std::string& FSM)
 {
   lts::lts_fsm_t fsm1;
   lts::lts_fsm_t fsm2;
+  lts::lts_fsm_t fsm3;
+
   std::string text1;
   std::string text2;
+  std::string text3;
+
+  lts::parse_fsm_specification(FSM, fsm1);
+  parse_fsm(FSM, fsm2);
+  lts::parse_fsm_specification_simple(FSM, fsm3);
+
+  text1 = print_fsm(fsm1);
+  text2 = print_fsm(fsm2);
+  text3 = print_fsm(fsm3);
+
+  if (text1 != text2 || text1 != text3)
+  {
+    std::cout << "--- text1 ---" << std::endl;
+    std::cout << text1 << std::endl;
+    std::cout << "--- text2 ---" << std::endl;
+    std::cout << text2 << std::endl;
+    std::cout << "--- text3 ---" << std::endl;
+    std::cout << text3 << std::endl;
+  }
+  BOOST_CHECK(text1 == text2 && text1 == text3);
+}
+
+void test_fsm()
+{
   std::string FSM;
 
   FSM =
@@ -97,18 +124,7 @@ void test_fsm()
     "4 2 \"off\"           \n"
     "4 3 \"decrease\"      \n"
     ;
-  lts::parse_fsm_specification(FSM, fsm1);
-  parse_fsm(FSM, fsm2);
-  text1 = print_fsm(fsm1);
-  text2 = print_fsm(fsm2);
-  if (text1 != text2)
-  {
-    std::cout << "--- text1 ---" << std::endl;
-    std::cout << text1 << std::endl;
-    std::cout << "--- text2 ---" << std::endl;
-    std::cout << text2 << std::endl;
-  }
-  BOOST_CHECK(text1 == text2);
+  test_fsm(FSM);
 
   FSM =
     "b(2) Bool # Bool -> Nat \"F\" \"T\" \n"
@@ -128,22 +144,14 @@ void test_fsm()
     "4 2 \"off\"                         \n"
     "4 3 \"decrease\"                    \n"
     ;
-  lts::parse_fsm_specification(FSM, fsm1);
-  parse_fsm(FSM, fsm2);
-  text1 = print_fsm(fsm1);
-  text2 = print_fsm(fsm2);
-  BOOST_CHECK(text1 == text2);
+  test_fsm(FSM);
 
   FSM =
     "---         \n"
     "---         \n"
     "1 1 \"tau\" \n"
     ;
-  lts::parse_fsm_specification(FSM, fsm1);
-  parse_fsm(FSM, fsm2);
-  text1 = print_fsm(fsm1);
-  text2 = print_fsm(fsm2);
-  BOOST_CHECK(text1 == text2);
+  test_fsm(FSM);
 }
 
 int test_main(int argc, char** argv)
