@@ -20,7 +20,6 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
