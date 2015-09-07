@@ -1,8 +1,6 @@
 add_mcrl2_library(lts
   INSTALL_HEADERS TRUE
   SOURCES
-    liblts_fsmlexer.cpp
-    liblts_fsmparser.cpp
     liblts_fsm.cpp
     liblts_aut.cpp
     liblts_lts.cpp
