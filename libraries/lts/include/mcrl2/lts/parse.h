@@ -418,6 +418,7 @@ class simple_fsm_parser
     boost::xpressive::sregex regex_parameter;
     boost::xpressive::sregex regex_transition;
     boost::xpressive::sregex regex_space;
+    boost::xpressive::sregex regex_quoted_string;
 
     states next_state(states state)
     {
@@ -433,6 +434,29 @@ class simple_fsm_parser
       }
     }
 
+    std::vector<std::string> parse_domain_values(const std::string& text)
+    {
+      std::vector<std::string> result;
+      try
+      {
+        boost::xpressive::sregex_token_iterator cur(text.begin(), text.end(), regex_quoted_string);
+        boost::xpressive::sregex_token_iterator end;
+        for (; cur != end; ++cur)
+        {
+          std::string value = *cur;
+          if (value.size() > 0)
+          {
+            result.push_back(value.substr(1, value.size() - 2));
+          }
+        }
+      }
+      catch (boost::bad_lexical_cast&)
+      {
+        throw mcrl2::runtime_error("could not parse the following line as an FSM state: " + text);
+      }
+      return result;
+    }
+
     void parse_parameter(const std::string& line)
     {
       std::string text = utilities::trim_copy(line);
@@ -444,11 +468,7 @@ class simple_fsm_parser
       std::string name = what[1];
       std::string cardinality = what[2];
       std::string sort = utilities::trim_copy(what[3]);
-      std::vector<std::string> domain_values = utilities::regex_split(what[4], "\\s+");
-      for (std::string& s: domain_values)
-      {
-        s = s.substr(1, s.size() - 2);
-      }
+      std::vector<std::string> domain_values = parse_domain_values(what[4]);
       builder.add_parameter(name, cardinality, sort, domain_values);
     }
 
@@ -505,6 +525,8 @@ class simple_fsm_parser
       regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*))+\\s+\"([^\"]*)\"");
 
       regex_space = boost::xpressive::sregex::compile("\\s+");
+
+      regex_quoted_string = boost::xpressive::sregex::compile("\\\"([^\\\"]*)\\\"");
     }
 
     void run(std::istream& from)
