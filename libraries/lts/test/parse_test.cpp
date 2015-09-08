@@ -154,9 +154,25 @@ void test_fsm()
   test_fsm(FSM);
 }
 
+void test_read_integers(const std::string& text, const std::vector<std::size_t>& expected_result)
+{
+  std::vector<std::size_t> result = lts::detail::read_integers(text);
+  BOOST_CHECK(result == expected_result);
+}
+
+void test_read_integers()
+{
+  test_read_integers("  1 2 3 ", { 1, 2, 3 });
+  test_read_integers("  ", { });
+  test_read_integers("1", { 1 });
+  test_read_integers(" 1", { 1 });
+  test_read_integers("1 ", { 1 });
+}
+
 int test_main(int argc, char** argv)
 {
   test_fsm();
+  test_read_integers();
 
   return 0;
 }

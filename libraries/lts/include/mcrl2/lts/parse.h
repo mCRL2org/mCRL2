@@ -12,6 +12,7 @@
 #ifndef MCRL2_LTS_PARSE_H
 #define MCRL2_LTS_PARSE_H
 
+#include <cctype>
 #include <sstream>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
@@ -27,6 +28,68 @@ namespace mcrl2 {
 namespace lts {
 
 namespace detail {
+
+// Reads the next integer from the range [first, last), and the spaces behind it
+// Returns the position in the range after the next integer
+// Precondition: (first != last) && !std::isspace(*first)
+template <typename Iterator>
+Iterator read_next_integer(Iterator first, Iterator last, std::size_t& result)
+{
+  assert((first != last) && !std::isspace(*first));
+
+  Iterator i = first;
+  result = 0;
+
+  for (;;)
+  {
+    if (*i < '0' || *i > '9')
+    {
+      throw mcrl2::runtime_error("could not read an integer from " + std::string(first, last));
+    }
+    result *= 10;
+    result += *i - '0';
+    ++i;
+    if (i == last)
+    {
+      break;
+    }
+    if (std::isspace(*i))
+    {
+      ++i;
+      while (i != last && std::isspace(*i))
+      {
+        ++i;
+      }
+      break;
+    }
+  }
+  return i;
+}
+
+// Reads a sequence of integers, separated by spaces
+inline
+std::vector<std::size_t> read_integers(const std::string& text)
+{
+  std::vector<std::size_t> result;
+
+  auto first = text.begin();
+  auto last = text.end();
+
+  // skip leading spaces
+  while (first != last && std::isspace(*first))
+  {
+    ++first;
+  }
+
+  while (first != last)
+  {
+    std::size_t value;
+    first = read_next_integer(first, last, value);
+    result.push_back(value);
+  }
+
+  return result;
+}
 
 inline
 std::size_t parse_number(const std::string& s)
@@ -473,30 +536,15 @@ class simple_fsm_parser
 
     void parse_state(const std::string& line)
     {
-      std::string text = utilities::trim_copy(line);
-      std::vector<std::size_t> numbers;
-
       try
       {
-        // the -1 below directs the token iterator to display the parts of
-        // the string that did NOT match the regular expression.
-        boost::xpressive::sregex_token_iterator cur(text.begin(), text.end(), regex_space, -1);
-        boost::xpressive::sregex_token_iterator end;
-        for (; cur != end; ++cur)
-        {
-          std::string value = *cur;
-          boost::trim(value);
-          if (value.size() > 0)
-          {
-            numbers.push_back(boost::lexical_cast<std::size_t>(value));
-          }
-        }
+        std::vector<std::size_t> values = read_integers(line);
+        builder.add_state(values);
       }
-      catch (boost::bad_lexical_cast&)
+      catch (mcrl2::runtime_error&)
       {
-        throw mcrl2::runtime_error("could not parse the following line as an FSM state: " + text);
+        throw mcrl2::runtime_error("could not parse the following line as an FSM state: " + line);
       }
-      builder.add_state(numbers);
     }
 
     void parse_transition(const std::string& line)
