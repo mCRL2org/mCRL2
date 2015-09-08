@@ -15,52 +15,10 @@
 #include <cstdio>
 
 #include <boost/test/included/unit_test_framework.hpp>
-#include <boost/xpressive/xpressive.hpp>
 
 #include "mcrl2/lts/parse.h"
 
 using namespace mcrl2;
-
-inline
-std::string print_state_label(const lts::detail::state_label_fsm& label)
-{
-  std::ostringstream out;
-  for (lts::detail::state_label_fsm::const_iterator i = label.begin(); i != label.end(); ++i)
-  {
-    out << *i << " ";
-  }
-  return out.str();
-}
-
-inline
-std::string print_fsm(const lts::lts_fsm_t& l)
-{
-  std::ostringstream out;
-
-  out << "#states: "         << l.num_state_labels() << "\n" <<
-         "#action labels: "  << l.num_action_labels() << "\n"<<
-         "#transitions: "    << l.num_transitions() << "\n" <<
-         "#has state labels" << (l.has_state_info() ? " yes\n" : " no\n");
-
-  out << "Initial state is " << l.initial_state() << "\n";
-
-  for(unsigned int i = 0; i < l.num_state_labels(); ++i)
-  {
-    out << "State " << i << " has value " << print_state_label(l.state_label(i)) << "\n";
-  }
-
-  for (unsigned int i = 0; i < l.num_action_labels(); ++i)
-  {
-    out << "Action label " << i << " has value " << l.action_label(i) << (l.is_tau(i) ? " (is internal)" : " (is external)") << "\n";
-  }
-
-  for(std::vector<lts::transition>::const_iterator i = l.get_transitions().begin(); i != l.get_transitions().end(); ++i)
-  {
-    out << "Transition [" << i->from() << "," << i->label() << "," << i->to() << "]\n";
-  }
-
-  return out.str();
-}
 
 void test_fsm_parser(const std::string& text)
 {
@@ -132,45 +90,6 @@ BOOST_AUTO_TEST_CASE(fsm_parser_test)
     "---\n"
     "1 1 \"tau\"\n"
   );
-}
-
-void test_read_integers(const std::string& text, const std::vector<std::size_t>& expected_result)
-{
-  std::vector<std::size_t> result = lts::detail::read_integers(text);
-  BOOST_CHECK(result == expected_result);
-}
-
-BOOST_AUTO_TEST_CASE(read_integers_test)
-{
-  test_read_integers("  1 2 3 ", { 1, 2, 3 });
-  test_read_integers("  ", { });
-  test_read_integers("1", { 1 });
-  test_read_integers(" 1", { 1 });
-  test_read_integers("1 ", { 1 });
-
-  BOOST_CHECK_THROW(lts::detail::read_integers("a"), mcrl2::runtime_error);
-  BOOST_CHECK_THROW(lts::detail::read_integers("12 a"), mcrl2::runtime_error);
-  BOOST_CHECK_THROW(lts::detail::read_integers("12 3a "), mcrl2::runtime_error);
-}
-
-void test_parse_number(const std::string& text, std::size_t expected_result)
-{
-  std::size_t result = lts::detail::parse_number(text);
-  BOOST_CHECK_EQUAL(result, expected_result);
-}
-
-BOOST_AUTO_TEST_CASE(parse_number_test)
-{
-  test_parse_number("10", 10);
-  test_parse_number(" 10", 10);
-  test_parse_number("  10  ", 10);
-  test_parse_number(" 023  ", 23);
-
-  BOOST_CHECK_THROW(lts::detail::parse_number(""), mcrl2::runtime_error);
-  BOOST_CHECK_THROW(lts::detail::parse_number("   "), mcrl2::runtime_error);
-  BOOST_CHECK_THROW(lts::detail::parse_number("a"), mcrl2::runtime_error);
-  BOOST_CHECK_THROW(lts::detail::parse_number("12 a"), mcrl2::runtime_error);
-  BOOST_CHECK_THROW(lts::detail::parse_number("12 3a "), mcrl2::runtime_error);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
