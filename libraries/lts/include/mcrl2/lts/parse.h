@@ -14,12 +14,9 @@
 
 #include <cctype>
 #include <sstream>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
+
 #include <boost/xpressive/xpressive.hpp>
 
-#include "mcrl2/core/parse.h"
-#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -92,17 +89,31 @@ std::vector<std::size_t> read_integers(const std::string& text)
 }
 
 inline
-std::size_t parse_number(const std::string& s)
+std::size_t parse_number(const std::string& text)
 {
-  try
+  auto first = text.begin();
+  auto last = text.end();
+
+  // skip leading spaces
+  while (first != last && std::isspace(*first))
   {
-    return boost::lexical_cast<std::size_t>(s);
+    ++first;
   }
-  catch (boost::bad_lexical_cast&)
+
+  if (first == last)
   {
-    std::cout << "ERROR: could not parse number " << s << std::endl;
+    throw mcrl2::runtime_error("could not read an integer from " + text);
   }
-  return 0;
+
+  std::size_t value;
+  first = read_next_integer(first, last, value);
+
+  if (first != last)
+  {
+    throw mcrl2::runtime_error("could not read an integer from " + text);
+  }
+
+  return value;
 }
 
 class fsm_parameter
@@ -314,157 +325,6 @@ struct fsm_builder
 
 typedef std::vector<std::size_t> fsm_state;
 
-/// \brief Parse actions for FSM format
-struct fsm_actions: public core::default_parser_actions
-{
-  fsm_actions(const core::parser& parser_, lts_fsm_t& fsm)
-    : core::default_parser_actions(parser_),
-      builder(fsm)
-  {}
-
-  fsm_builder builder;
-
-  template <typename T, typename Function>
-  std::vector<T> parse_vector(const core::parse_node& node, const std::string& type, Function f)
-  {
-    std::vector<T> result;
-    traverse(node, make_collector(m_parser.symbol_table(), type, result, f));
-    return result;
-  }
-
-  std::string parse_Id(const core::parse_node& node)
-  {
-    return node.string();
-  }
-
-  std::vector<std::string> parse_IdList(const core::parse_node& node)
-  {
-    return parse_vector<std::string>(node, "Id", [&](const core::parse_node& node) { return parse_Id(node); });
-  }
-
-  std::string parse_QuotedString(const core::parse_node& node)
-  {
-    std::string s = node.string();
-    return s.substr(1, s.size() - 2);
-  }
-
-  std::string parse_Number(const core::parse_node& node)
-  {
-    return node.string();
-  }
-
-  std::vector<std::string> parse_NumberList(const core::parse_node& node)
-  {
-    return parse_vector<std::string>(node, "Number", [&](const core::parse_node& node) { return parse_Number(node); });
-  }
-
-  std::string parse_ParameterName(const core::parse_node& node)
-  {
-    return parse_Id(node.child(0));
-  }
-
-  std::string parse_SortExpr(const core::parse_node& node)
-  {
-    std::string result = parse_Id(node.child(0));
-    if (result.empty())
-    {
-      result = "Nat";
-    }
-    return boost::algorithm::trim_copy(result);
-  }
-
-  std::string parse_DomainCardinality(const core::parse_node& node)
-  {
-    return parse_Number(node.child(1));
-  }
-
-  std::string parse_DomainValue(const core::parse_node& node)
-  {
-    return parse_QuotedString(node.child(0));
-  }
-
-  std::vector<std::string> parse_DomainValueList(const core::parse_node& node)
-  {
-    return parse_vector<std::string>(node, "QuotedString", [&](const core::parse_node& node) { return parse_QuotedString(node); });
-  }
-
-  void parse_Parameter(const core::parse_node& node)
-  {
-    builder.add_parameter(parse_ParameterName(node.child(0)), parse_DomainCardinality(node.child(1)), parse_SortExpr(node.child(2)), parse_DomainValueList(node.child(3)));
-  }
-
-  void parse_ParameterList(const core::parse_node& node)
-  {
-    traverse(node, make_visitor(m_parser.symbol_table(), "Parameter", [&](const core::parse_node& node) { return parse_Parameter(node); }));
-  }
-
-  void parse_State(const core::parse_node& node)
-  {
-    std::vector<std::string> v = parse_NumberList(node.child(0));
-    std::vector<std::size_t> result;
-    if (v.size() != builder.parameters.size())
-    {
-      throw mcrl2::runtime_error("parse_State: wrong number of elements");
-    }
-    for (auto i = v.begin(); i != v.end(); ++i)
-    {
-      if (builder.parameters[i - v.begin()].cardinality() != 0)
-      {
-        result.push_back(detail::parse_number(*i));
-      }
-    }
-    builder.add_state(result);
-  }
-
-  void parse_StateList(const core::parse_node& node)
-  {
-    traverse(node, make_visitor(m_parser.symbol_table(), "State", [&](const core::parse_node& node) { return parse_State(node); }));
-  }
-
-  void parse_Transition(const core::parse_node& node)
-  {
-    builder.add_transition(parse_Source(node.child(0)), parse_Target(node.child(1)), parse_Label(node.child(2)));
-  }
-
-  void parse_TransitionList(const core::parse_node& node)
-  {
-    traverse(node, make_visitor(m_parser.symbol_table(), "Transition", [&](const core::parse_node& node) { return parse_Transition(node); }));
-  }
-
-  std::string parse_Source(const core::parse_node& node)
-  {
-    return parse_Number(node.child(0));
-  }
-
-  std::string parse_Target(const core::parse_node& node)
-  {
-    return parse_Number(node.child(0));
-  }
-
-  std::string parse_Label(const core::parse_node& node)
-  {
-    return parse_QuotedString(node.child(0));
-  }
-
-  void parse_FSM(const core::parse_node& node)
-  {
-    builder.start();
-
-    // parse parameters
-    parse_ParameterList(node.child(0));
-
-    builder.write_parameters();
-
-    // parse states
-    parse_StateList(node.child(2));
-
-    // parse transitions
-    parse_TransitionList(node.child(4));
-
-    builder.finish();
-  }
-};
-
 class simple_fsm_parser
 {
   protected:
@@ -479,7 +339,6 @@ class simple_fsm_parser
     // Used for parsing lines
     boost::xpressive::sregex regex_parameter;
     boost::xpressive::sregex regex_transition;
-    boost::xpressive::sregex regex_space;
     boost::xpressive::sregex regex_quoted_string;
 
     states next_state(states state)
@@ -499,23 +358,18 @@ class simple_fsm_parser
     std::vector<std::string> parse_domain_values(const std::string& text)
     {
       std::vector<std::string> result;
-      try
+
+      boost::xpressive::sregex_token_iterator cur(text.begin(), text.end(), regex_quoted_string);
+      boost::xpressive::sregex_token_iterator end;
+      for (; cur != end; ++cur)
       {
-        boost::xpressive::sregex_token_iterator cur(text.begin(), text.end(), regex_quoted_string);
-        boost::xpressive::sregex_token_iterator end;
-        for (; cur != end; ++cur)
+        std::string value = *cur;
+        if (value.size() > 0)
         {
-          std::string value = *cur;
-          if (value.size() > 0)
-          {
-            result.push_back(value.substr(1, value.size() - 2));
-          }
+          result.push_back(value.substr(1, value.size() - 2));
         }
       }
-      catch (boost::bad_lexical_cast&)
-      {
-        throw mcrl2::runtime_error("could not parse the following line as an FSM state: " + text);
-      }
+
       return result;
     }
 
@@ -571,8 +425,6 @@ class simple_fsm_parser
       // (0|([1-9][0-9]*))+\s+(0|([1-9][0-9]*))+\s+"([^"]*)"
       regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*))+\\s+\"([^\"]*)\"");
 
-      regex_space = boost::xpressive::sregex::compile("\\s+");
-
       regex_quoted_string = boost::xpressive::sregex::compile("\\\"([^\\\"]*)\\\"");
     }
 
@@ -604,35 +456,17 @@ class simple_fsm_parser
 } // namespace detail
 
 inline
-void parse_fsm_specification(const std::string& text, lts_fsm_t& result)
-{
-  core::parser p(parser_tables_fsm);
-  unsigned int start_symbol_index = p.start_symbol_index("FSM");
-  bool partial_parses = false;
-  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  detail::fsm_actions(p, result).parse_FSM(node);
-  p.destroy_parse_node(node);
-}
-
-inline
-void parse_fsm_specification(std::istream& in, lts_fsm_t& result)
-{
-  std::string text = utilities::read_text(in);
-  parse_fsm_specification(text, result);
-}
-
-inline
-void parse_fsm_specification_simple(std::istream& from, lts_fsm_t& result)
+void parse_fsm_specification(std::istream& from, lts_fsm_t& result)
 {
   detail::simple_fsm_parser fsm_parser(result);
   fsm_parser.run(from);
 }
 
 inline
-void parse_fsm_specification_simple(const std::string& text, lts_fsm_t& result)
+void parse_fsm_specification(const std::string& text, lts_fsm_t& result)
 {
   std::istringstream is(text);
-  parse_fsm_specification_simple(is, result);
+  parse_fsm_specification(is, result);
 }
 
 } // namespace lts

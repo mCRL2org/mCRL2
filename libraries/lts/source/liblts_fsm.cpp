@@ -117,7 +117,7 @@ void mcrl2::lts::lts_fsm_t::load(const std::string& filename)
   {
     try
     {
-      parse_fsm_specification_simple(std::cin, *this);
+      parse_fsm_specification(std::cin, *this);
     }
     catch (mcrl2::runtime_error&)
     {
@@ -134,7 +134,7 @@ void mcrl2::lts::lts_fsm_t::load(const std::string& filename)
     }
     try
     {
-      parse_fsm_specification_simple(is, *this);
+      parse_fsm_specification(is, *this);
     }
     catch (mcrl2::runtime_error&)
     {
@@ -142,33 +142,6 @@ void mcrl2::lts::lts_fsm_t::load(const std::string& filename)
     }
     is.close();
   }
-//  if (num_states()==0)
-//  {
-//    add_state();
-//  }
-//  set_initial_state(0);
-}
-
-void mcrl2::lts::lts_fsm_t::loadnew(const std::string& filename)
-{
-  if (filename.empty())
-  {
-    parse_fsm_specification(std::cin, *this);
-  }
-  else
-  {
-    std::ifstream in(filename.c_str());
-    if (!in)
-    {
-      throw mcrl2::runtime_error("Cannot open .fsm file " + filename + ".");
-    }
-    parse_fsm_specification(in, *this);
-  }
-  if (num_states() == 0)
-  {
-    add_state();
-  }
-  set_initial_state(0);
 }
 
 void mcrl2::lts::lts_fsm_t::save(const std::string& filename) const
