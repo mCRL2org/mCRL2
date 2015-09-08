@@ -14,7 +14,7 @@
 #include <sstream>
 #include <cstdio>
 
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <boost/xpressive/xpressive.hpp>
 
 #include "mcrl2/lts/parse.h"
@@ -87,7 +87,7 @@ void test_fsm_parser(const std::string& text)
   BOOST_CHECK(text == text1);
 }
 
-void test_fsm_parser()
+BOOST_AUTO_TEST_CASE(fsm_parser_test)
 {
   test_fsm_parser(
     "b(2) Bool  \"F\" \"T\"\n"
@@ -140,19 +140,40 @@ void test_read_integers(const std::string& text, const std::vector<std::size_t>&
   BOOST_CHECK(result == expected_result);
 }
 
-void test_read_integers()
+BOOST_AUTO_TEST_CASE(read_integers_test)
 {
   test_read_integers("  1 2 3 ", { 1, 2, 3 });
   test_read_integers("  ", { });
   test_read_integers("1", { 1 });
   test_read_integers(" 1", { 1 });
   test_read_integers("1 ", { 1 });
+
+  BOOST_CHECK_THROW(lts::detail::read_integers("a"), mcrl2::runtime_error);
+  BOOST_CHECK_THROW(lts::detail::read_integers("12 a"), mcrl2::runtime_error);
+  BOOST_CHECK_THROW(lts::detail::read_integers("12 3a "), mcrl2::runtime_error);
 }
 
-int test_main(int argc, char** argv)
+void test_parse_number(const std::string& text, std::size_t expected_result)
 {
-  test_fsm_parser();
-  test_read_integers();
+  std::size_t result = lts::detail::parse_number(text);
+  BOOST_CHECK_EQUAL(result, expected_result);
+}
 
+BOOST_AUTO_TEST_CASE(parse_number_test)
+{
+  test_parse_number("10", 10);
+  test_parse_number(" 10", 10);
+  test_parse_number("  10  ", 10);
+  test_parse_number(" 023  ", 23);
+
+  BOOST_CHECK_THROW(lts::detail::parse_number(""), mcrl2::runtime_error);
+  BOOST_CHECK_THROW(lts::detail::parse_number("   "), mcrl2::runtime_error);
+  BOOST_CHECK_THROW(lts::detail::parse_number("a"), mcrl2::runtime_error);
+  BOOST_CHECK_THROW(lts::detail::parse_number("12 a"), mcrl2::runtime_error);
+  BOOST_CHECK_THROW(lts::detail::parse_number("12 3a "), mcrl2::runtime_error);
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+{
   return 0;
 }
