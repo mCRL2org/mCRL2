@@ -172,6 +172,26 @@ struct parser
 
   /// \brief Callback function for nodes in the parse tree
   void announce(D_ParseNode& node_ref);
+
+  void print_node(std::ostream& out, const parse_node& node) const
+  {
+    out << "symbol      = " << symbol_table().symbol_name(node) << std::endl
+        << "string      = " << node.string() << std::endl
+        << "child_count = " << node.child_count();
+    for (int i = 0; i < node.child_count(); i++)
+    {
+      out << std::endl
+          << "child " << i << " = " << symbol_table().symbol_name(node.child(i))
+          << " " << node.child(i).string();
+    }
+  }
+
+  std::string print_node(const parse_node& node) const
+  {
+    std::ostringstream out;
+    print_node(out, node);
+    return out.str();
+  }
 };
 
 } // namespace core

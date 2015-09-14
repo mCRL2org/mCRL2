@@ -71,18 +71,10 @@ private:
     std::string inherited = parse_node_exception::get_error_message(node, "unexpected parse node!");
     try
     {
-      std::stringstream s;
-      s << inherited << std::endl
-        << "symbol      = " << p.symbol_table().symbol_name(node) << std::endl
-        << "string      = " << node.string() << std::endl
-        << "child_count = " << node.child_count();
-      for (int i = 0; i < node.child_count(); i++)
-      {
-        s << std::endl
-          << "child " << i << " = " << p.symbol_table().symbol_name(node.child(i))
-          << " " << node.child(i).string();
-      }
-      return s.str();
+      std::ostringstream out;
+      out << inherited << std::endl;
+      p.print_node(out, node);
+      return out.str();
     }
     catch (...)
     {

@@ -13,7 +13,7 @@ ${declare longest_match}
 
 //--- FSM syntax
 
-FSM : ParameterList Separator StateList Separator TransitionList ;
+FSM : ParameterList Separator StateList Separator TransitionList (Separator InitialState)? ;
 
 Separator: '---' EOLN ;
 
@@ -39,9 +39,17 @@ TransitionList: Transition* ;
 
 Transition: Source Target Label EOLN ;
 
+Distribution: '[' Number '/' Number ']' ;
+
+ProbabilisticStateElement : Number Distribution ;
+
+ProbabilisticState : ProbabilisticStateElement* Number Distribution? ;
+
+InitialState : ProbabilisticState ;
+
 Source: Number ;
 
-Target: Number ;
+Target: ProbabilisticState ;
 
 Label: QuotedString ;
 
