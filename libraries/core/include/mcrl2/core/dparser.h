@@ -13,6 +13,7 @@
 #define MCRL2_CORE_DPARSER_H
 
 #include <cstddef>
+#include <sstream>
 #include <string>
 
 // prototypes
