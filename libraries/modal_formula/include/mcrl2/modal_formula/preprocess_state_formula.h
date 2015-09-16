@@ -160,35 +160,37 @@ struct state_formula_preprocess_nested_modal_operators_builder: public state_for
 
   state_formula apply(const must& x)
   {
-    if (!has_unscoped_modal_formulas(x.operand()))
+    state_formula operand = apply(x.operand());
+    if (!has_unscoped_modal_formulas(operand))
     {
-      return x;
+      return must(x.formula(), operand);
     }
     core::identifier_string X = generator("X");
     if (is_mu())
     {
-      return must(x.formula(), mu(X, {}, x.operand()));
+      return must(x.formula(), mu(X, {}, operand));
     }
     else
     {
-      return must(x.formula(), nu(X, {}, x.operand()));
+      return must(x.formula(), nu(X, {}, operand));
     }
   }
 
   state_formula apply(const may& x)
   {
-    if (!has_unscoped_modal_formulas(x.operand()))
+    state_formula operand = apply(x.operand());
+    if (!has_unscoped_modal_formulas(operand))
     {
       return x;
     }
     core::identifier_string X = generator("X");
     if (is_mu())
     {
-      return may(x.formula(), mu(X, {}, x.operand()));
+      return may(x.formula(), mu(X, {}, operand));
     }
     else
     {
-      return may(x.formula(), nu(X, {}, x.operand()));
+      return may(x.formula(), nu(X, {}, operand));
     }
   }
 };
