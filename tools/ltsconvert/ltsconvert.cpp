@@ -251,6 +251,7 @@ class ltsconvert_tool : public ltsconvert_base
                       .add_value(lts_eq_bisim)
                       .add_value(lts_eq_bisim_sigref)
                       .add_value(lts_eq_branching_bisim)
+                      .add_value(lts_eq_branching_bisim_gw)
                       .add_value(lts_eq_branching_bisim_sigref)
                       .add_value(lts_eq_divergence_preserving_branching_bisim)
                       .add_value(lts_eq_divergence_preserving_branching_bisim_sigref)

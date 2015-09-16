@@ -33,6 +33,7 @@
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
+#include "mcrl2/lts/detail/liblts_bisim_gw.h"
 #include "mcrl2/lts/detail/liblts_weak_bisim.h"
 #include "mcrl2/lts/detail/liblts_add_an_action_loop.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
@@ -382,6 +383,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     case lts_eq_branching_bisim:
     {
       detail::bisimulation_reduce(l,true,false);
+      return;
+    }
+    case lts_eq_branching_bisim_gw:
+    {
+      detail::bisimulation_reduce_gw(l,true);
       return;
     }
     case lts_eq_branching_bisim_sigref:

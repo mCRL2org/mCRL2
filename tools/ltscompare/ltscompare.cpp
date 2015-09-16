@@ -43,6 +43,8 @@ static const char* equivalent_string(lts_equivalence eq)
       return "strongly bisimilar";
     case lts_eq_branching_bisim:
       return "branching bisimilar";
+    case lts_eq_branching_bisim_gw:
+      return "branching bisimilar";
     case lts_eq_divergence_preserving_branching_bisim:
       return "divergence preserving branching bisimilar";
     case lts_eq_weak_bisim:
@@ -263,6 +265,7 @@ class ltscompare_tool : public ltscompare_base
                  .add_value(lts_eq_none, true)
                  .add_value(lts_eq_bisim)
                  .add_value(lts_eq_branching_bisim)
+                 .add_value(lts_eq_branching_bisim_gw)
                  .add_value(lts_eq_divergence_preserving_branching_bisim)
                  .add_value(lts_eq_weak_bisim)
                  .add_value(lts_eq_divergence_preserving_weak_bisim)
