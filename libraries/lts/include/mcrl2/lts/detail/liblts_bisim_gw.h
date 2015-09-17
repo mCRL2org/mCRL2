@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg, Jan Friso Groote, Anton Wijs
+// Author(s): Jan Friso Groote, Anton Wijs
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -475,9 +475,9 @@ class bisim_partitioner_gw
 {
   // Local class variables
 
-  size_t max_block_index = 0;
-  size_t max_const_index = 0;
-  size_t state_index = 0;
+  size_t max_block_index;
+  size_t max_const_index;
+  size_t state_index;
 
 // begin auxiliary functions
 
@@ -658,10 +658,13 @@ void clean_temp_refs_block(block_T* B)
      *  \warning Note that when compiled with optimisations, bisimulation partitioning
      *  is much faster than compiled without any optimisation. The difference can go up to a factor 10.
      *  \param[in] l Reference to the LTS. The LTS l is only changed if \ref replace_transitions is called. */
-    bisim_partitioner_gw(
-      LTS_TYPE& l,
-      const bool branching=false)
-      :aut(l), tau_label(determine_tau_label(l))
+    bisim_partitioner_gw(LTS_TYPE& l,
+                         const bool branching=false)
+     : max_block_index(0),
+       max_const_index(0),
+       state_index(0),
+       aut(l), 
+       tau_label(determine_tau_label(l))
     {
                // initialise variables
                nr_of_splits = 0;
