@@ -71,8 +71,10 @@ def generate_rst(binpath, temppath, outpath, version):
     shared_opts += ['-q']
   
   sphinx.main( shared_opts +
-               ['-c', cfg_dev, 
+               #['-c', cfg_dev, 
+               [cfg_dev, 
                temp_dev, out_dev])
   sphinx.main( shared_opts +
-               ['-c', cfg_usr, 
+               #['-c', cfg_usr, 
+               [cfg_usr, 
                temp_usr, out_usr])
