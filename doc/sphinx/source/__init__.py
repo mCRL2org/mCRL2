@@ -69,12 +69,13 @@ def generate_rst(binpath, temppath, outpath, version):
     shared_opts += ['-Q']
   elif _LOG.getEffectiveLevel() >= logging.WARNING:
     shared_opts += ['-q']
+
+  options = shared_opts + ['-c', cfg_dev, temp_dev, out_dev]
+  print '<OPTIONS>', ' '.join(options)
   
   sphinx.main( shared_opts +
-               #['-c', cfg_dev, 
-               [cfg_dev, 
+               ['-c', cfg_dev, 
                temp_dev, out_dev])
   sphinx.main( shared_opts +
-               #['-c', cfg_usr, 
-               [cfg_usr, 
+               ['-c', cfg_usr, 
                temp_usr, out_usr])
