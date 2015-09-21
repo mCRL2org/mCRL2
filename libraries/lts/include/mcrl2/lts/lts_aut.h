@@ -20,6 +20,7 @@
 #define MCRL2_LTS_LTS_AUT_H
 
 #include <istream>
+#include "mcrl2/lts/probabilistic_arbitrary_size_label.h"
 #include "mcrl2/lts/state_label_empty.h"
 #include "mcrl2/lts/action_label_string.h"
 #include "mcrl2/lts/lts.h"
@@ -34,7 +35,7 @@ namespace lts
  *  system format. There are no state labels, only transition labels which are plain
  *  strings.
  */
-class lts_aut_t : public lts< detail::state_label_empty, detail::action_label_string >
+class lts_aut_t : public lts< detail::state_label_empty, detail::action_label_string, detail::probabilistic_arbitrary_size_label>
 {
   public:
 

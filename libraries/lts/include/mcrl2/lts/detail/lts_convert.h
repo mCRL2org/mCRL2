@@ -94,28 +94,38 @@ inline probabilistic_label translate_probability_data_prob(const data::data_expr
   {
     throw mcrl2::runtime_error("Cannot convert the probability " + pp(d) + " to an explicit denominator/enumerator pair.");
   }    
-  std::stringstream enumerator_stream(pp(da[0]));
-  std::stringstream denominator_stream(pp(da[1]));
-  probabilistic_label::number_t enumerator, denominator;
-  enumerator_stream >> enumerator;
-  denominator_stream >> denominator;
-  if (denominator==0 || (enumerator==0 && denominator!=1) || enumerator>denominator)
+  return probabilistic_label(pp(da[0]),pp(da[1]));
+}
+
+/** \brief Translate a fraction given as a data_expression to a representation
+ *         with an arbitrary size fraction */
+
+inline probabilistic_arbitrary_size_label translate_probability_data_to_arbitrary_size_probability(const data::data_expression& d)
+{
+  const data::application da=atermpp::down_cast<data::application>(d);
+  if (!(data::sort_int::is_integer_constant(da[0]) && 
+        data::sort_pos::is_positive_constant(da[1]) &&
+        da.head()==data::sort_real::creal()))
   {
-    throw mcrl2::runtime_error("Fail to convert the probability " + pp(d) + " to an explicit denominator/enumerator pair.");
-  }
-  return probabilistic_label(enumerator,denominator);
+    throw mcrl2::runtime_error("Cannot convert the probability " + pp(d) + " to an arbitrary size denominator/enumerator pair.");
+  }    
+  return probabilistic_arbitrary_size_label(pp(da[0]),pp(da[1]));
 }
 
 /** \brief Translate a fraction given as a enumerator and a denominator to a
  *         representation as an explicit data_expression. */
 
-inline data::data_expression  translate_probability_prob_data(const probabilistic_label& f)
+inline data::data_expression translate_probability_prob_data(const probabilistic_label& f)
 {
-  if (f.denominator()==0)
-  {
-    throw mcrl2::runtime_error("Cannot translate probability with denominator equal to 0.");
-  }
   return data::sort_real::creal(data::sort_int::int_(f.enumerator()),data::sort_pos::pos(f.denominator()));
+}
+
+/** \brief Translate a fraction given as a enumerator and a denominator strings
+ *         representation as an explicit data_expression. */
+
+inline data::data_expression translate_probability_prob_data_arbitrary_size(const probabilistic_arbitrary_size_label& f)
+{
+  return data::sort_real::creal(data::sort_int::int_(pp(f.enumerator())),data::sort_pos::pos(pp(f.denominator())));
 }
 
 
@@ -197,9 +207,9 @@ class lts_fsm_convertor
       return result;
     }
 
-    probabilistic_label translate_probability_label(const data::data_expression& d)
+    probabilistic_arbitrary_size_label translate_probability_label(const data::data_expression& d)
     {
-      return detail::translate_probability_data_prob(d);
+      return detail::translate_probability_data_to_arbitrary_size_probability(d);
     }
 };
 
@@ -254,9 +264,9 @@ class lts_aut_convertor
       return state_label_empty();
     }
 
-    probabilistic_label translate_probability_label(const data::data_expression& d)
+    probabilistic_arbitrary_size_label translate_probability_label(const data::data_expression& d)
     {
-      return detail::translate_probability_data_prob(d);
+      return detail::translate_probability_data_to_arbitrary_size_probability(d);
     }
 };
 
@@ -307,9 +317,9 @@ class lts_dot_convertor
       return state_label_dot(state_name.str(),pp(l));
     }
 
-    probabilistic_label translate_probability_label(const data::data_expression& d)
+    probabilistic_arbitrary_size_label translate_probability_label(const data::data_expression& d)
     {
-      return detail::translate_probability_data_prob(d);
+      return detail::translate_probability_data_to_arbitrary_size_probability(d);
     }
 };
 
@@ -382,9 +392,9 @@ class aut_lts_convertor
       return state_label_lts();
     }
 
-    data::data_expression translate_probability_label(const probabilistic_label& d)
+    data::data_expression translate_probability_label(const probabilistic_arbitrary_size_label& d)
     {
-      return translate_probability_prob_data(d);
+      return translate_probability_prob_data_arbitrary_size(d);
     }
 };
 
@@ -458,7 +468,7 @@ class aut_fsm_convertor
       return state_label_fsm();
     }
 
-    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    probabilistic_arbitrary_size_label translate_probability_label(const probabilistic_arbitrary_size_label& d)
     {
       return d;
     }
@@ -507,7 +517,7 @@ class aut_dot_convertor
       return state_label_dot();
     }
 
-    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    probabilistic_arbitrary_size_label translate_probability_label(const probabilistic_arbitrary_size_label& d)
     {
       return d;
     }
@@ -607,9 +617,9 @@ class fsm_lts_convertor
       return state_label_lts(state_label);
     }
     
-    data::data_expression translate_probability_label(const probabilistic_label& d)
+    data::data_expression translate_probability_label(const probabilistic_arbitrary_size_label& d)
     {
-      return detail::translate_probability_prob_data(d);
+      return detail::translate_probability_prob_data_arbitrary_size(d);
     }
 };
 
@@ -657,7 +667,7 @@ class fsm_aut_convertor
       return state_label_empty();
     }
 
-    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    probabilistic_arbitrary_size_label translate_probability_label(const probabilistic_arbitrary_size_label& d)
     {
       return d;
     }
@@ -748,7 +758,7 @@ class fsm_dot_convertor
       return state_label_dot(state_name.str(),state_label);
     }
 
-    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    probabilistic_arbitrary_size_label translate_probability_label(const probabilistic_arbitrary_size_label& d)
     {
       return d;
     }
@@ -822,9 +832,9 @@ class dot_lts_convertor
       return state_label_lts();
     }
 
-    data::data_expression translate_probability_label(const probabilistic_label& d)
+    data::data_expression translate_probability_label(const probabilistic_arbitrary_size_label& d)
     {
-      return detail::translate_probability_prob_data(d);
+      return detail::translate_probability_prob_data_arbitrary_size(d);
     }
 };
 
@@ -874,7 +884,7 @@ class dot_aut_convertor
       return state_label_empty();
     }
 
-    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    probabilistic_arbitrary_size_label translate_probability_label(const probabilistic_arbitrary_size_label& d)
     {
       return d;
     }
@@ -959,7 +969,7 @@ class dot_fsm_convertor
       return result;
     }
 
-    probabilistic_label translate_probability_label(const probabilistic_label& d)
+    probabilistic_arbitrary_size_label translate_probability_label(const probabilistic_arbitrary_size_label& d)
     {
       return d;
     }

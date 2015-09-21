@@ -23,6 +23,7 @@
 #include <vector>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/lts/probabilistic_arbitrary_size_label.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/action_label_string.h"
 
@@ -111,7 +112,7 @@ inline std::string pp(const state_label_dot& l)
 /** \brief A class to contain labelled transition systems in graphviz format.
     \details Action labels are strings, and state labels are pairs with a name field
              and an action fields. */
-class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_string >
+class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_string, detail::probabilistic_arbitrary_size_label >
 {
 
   public:

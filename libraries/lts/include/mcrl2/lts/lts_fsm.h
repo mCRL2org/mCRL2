@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include "mcrl2/lts/probabilistic_arbitrary_size_label.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/action_label_string.h"
 
@@ -82,7 +83,7 @@ inline std::string pp(const state_label_fsm l)
              The integers at position i corresponds to a string, which are maintained
              in a separate vector for memory efficiency.
 */
-class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_string >
+class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_string, detail::probabilistic_arbitrary_size_label >
 {
   protected:
     /** \brief state_element_values contain the values that can occur at the i-th

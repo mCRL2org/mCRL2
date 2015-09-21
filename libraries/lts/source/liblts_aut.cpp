@@ -21,10 +21,10 @@ class state_probability_pair
 {
   protected:
     size_t m_state;
-    detail::probabilistic_label m_probability;
+    detail::probabilistic_arbitrary_size_label m_probability;
 
   public:
-    state_probability_pair(const size_t state, const detail::probabilistic_label& probability)
+    state_probability_pair(const size_t state, const detail::probabilistic_arbitrary_size_label& probability)
      : m_state(state),
        m_probability(probability)
     {}
@@ -34,7 +34,7 @@ class state_probability_pair
       return m_state;
     }
 
-    const detail::probabilistic_label& probability() const
+    const detail::probabilistic_arbitrary_size_label& probability() const
     {
       return m_probability;
     }
@@ -47,7 +47,7 @@ static string c(const size_t n)  // Awkward trick, should be a better way to do 
   return out.str();
 }
 
-static void read_newline(istream& is,const size_t lineno=1)
+static void read_newline(istream& is, const size_t lineno)
 {
   char ch;
   is.get(ch);
@@ -77,14 +77,31 @@ static void read_newline(istream& is,const size_t lineno=1)
   }
 }
 
+// reads a number, puts it in s, and reads one extra character, which must be either a space or a closing bracket.
+static void read_natural_number_to_string(istream& is, string& s, const size_t lineno)
+{
+  assert(s.empty());
+  char ch;
+  is >> skipws >> ch;
+  for( ; isdigit(ch) ; is.get(ch))
+  {
+    s.push_back(ch);
+  } 
+  is.putback(ch);
+  if (s.empty())
+  {
+    throw mcrl2::runtime_error("Expect a number at line " + c(lineno) + ".");
+  }
+}
+
 static size_t find_probabilistic_label_index(
-                  const detail::probabilistic_label& s, 
-                  map < detail::probabilistic_label, size_t >& labs, 
+                  const detail::probabilistic_arbitrary_size_label& s, 
+                  map < detail::probabilistic_arbitrary_size_label, size_t >& labs, 
                   lts_aut_t& l)
 {
   size_t label;
 
-  const map < detail::probabilistic_label, size_t >::const_iterator i=labs.find(s);
+  const map < detail::probabilistic_arbitrary_size_label, size_t >::const_iterator i=labs.find(s);
   if (i==labs.end())
   {
     label=l.add_probabilistic_label(s);
@@ -174,23 +191,18 @@ static void read_probabilistic_state(
     else
     {
       // Now attempt to read probabilities followed by a state.
-      size_t enumerator;
-      is >> skipws >> enumerator;
-      if (is.good())
+      string enumerator;
+      read_natural_number_to_string(is,enumerator,lineno);
+      char ch;
+      is >> skipws >> ch;
+      if (ch != '/')
       {
-        // Apparently we found a number. So, a proper probability will follow.
-        char ch;
-        is >> skipws >> ch;
-        if (ch != '/')
-        {
-          throw mcrl2::runtime_error("Expect a / in a probability at line " + c(lineno) + ".");
-        }
-
-        size_t denominator;
-        is >> skipws >> denominator;
-
-        additional_probabilistic_states.push_back(state_probability_pair(state,detail::probabilistic_label(enumerator,denominator)));
+        throw mcrl2::runtime_error("Expect a / in a probability at line " + c(lineno) + ".");
       }
+
+      string denominator;
+      read_natural_number_to_string(is,denominator,lineno);
+      additional_probabilistic_states.push_back(state_probability_pair(state,detail::probabilistic_arbitrary_size_label(enumerator,denominator)));
     }
   }
 }
@@ -246,7 +258,7 @@ static void read_aut_header(
     throw mcrl2::runtime_error("Expect a closing bracket ')' after the third number in the first line of a .aut file.");
   }
 
-  read_newline(is);
+  read_newline(is,1);
 }
 
 static bool read_aut_transition(
@@ -343,7 +355,7 @@ static void read_from_aut(lts_aut_t& l, istream& is)
   // l.clear_transitions(ntrans); // Reserve enough space for the transitions.
   l.clear();
   map < string, size_t > action_labels;
-  map < detail::probabilistic_label, size_t > probabilistic_labels;
+  map < detail::probabilistic_arbitrary_size_label, size_t > probabilistic_labels;
 
   // state_number_translator[initial_state]=0;
   // initial_state=0;
@@ -363,7 +375,7 @@ static void read_from_aut(lts_aut_t& l, istream& is)
     add_state(probabilistic_node,state_number_translator,l,true);
     assert(probabilistic_node==0);
     l.set_initial_state(probabilistic_node);
-    detail::probabilistic_label remaining_probability(1,1);
+    detail::probabilistic_arbitrary_size_label remaining_probability("1","1");
     for(vector<state_probability_pair>::const_iterator i=additional_probabilistic_states.begin();
             i!=additional_probabilistic_states.end(); ++i)
     {
@@ -408,7 +420,7 @@ static void read_from_aut(lts_aut_t& l, istream& is)
       number_of_probabilistic_nodes++;
       add_state(probabilistic_node,state_number_translator,l,true);
       l.add_transition(transition(from,find_label_index(s,action_labels,l),probabilistic_node));
-      detail::probabilistic_label remaining_probability(1,1);
+      detail::probabilistic_arbitrary_size_label remaining_probability("1","1");
       for(vector<state_probability_pair>::const_iterator i=additional_probabilistic_states.begin();
               i!=additional_probabilistic_states.end(); ++i)
       {
