@@ -75,211 +75,199 @@ void deleteobject(T*& obj)
 
 // forward_list with size counter and pointer to last element
 template < class T>
-class sized_forward_list
+class sized_forward_list : public std::forward_list < T* >
 {
-     public:
-          sized_forward_list()
-          {
-               listsize = 0;
-               fl = new std::forward_list < T* >;
-               last = fl->before_begin();
-          }
+  protected:
+    typedef std::forward_list < T* > parent;
 
-          ~sized_forward_list()
-          {
-               delete(fl);
-          }
-     
-          typename std::forward_list<T*>::iterator before_begin()
-          {
-               return fl->before_begin();
-          }
-     
-          typename std::forward_list<T*>::iterator begin()
-          {
-               return fl->begin();
-          }
+  public:
+    sized_forward_list()
+      :  m_list_size(0),
+         m_last(parent::before_begin())
+    {}
 
-          typename std::forward_list<T*>::iterator end()
-          {
-               return fl->end();
-          }
+    void insert(T* obj)
+    {
+      parent::push_front(obj);
+      m_list_size++;
+      if (m_list_size == 1) 
+      {
+        m_last = parent::begin();
+      }
+    }
 
-          void insert(T* obj)
-          {
-               auto it = fl->insert_after(fl->before_begin(), obj);
-               listsize++;
-               if (listsize == 1) {
-                    last = it;
-               }
-          }
+    void insert_back(T* obj)
+    {
+      const typename std::forward_list<T*>::iterator it = parent::insert_after(m_last, obj);
+      m_last = it;
+      m_list_size++;
+    }
+  
+    // in 'linked' methods, the object to be inserted has an iterator 'ptr_in_list' which needs to refer to the position
+    // preceding the one where obj is inserted. This allows constant time lookup of objects in lists.
+    void insert_linked(T* obj)
+    {
+      obj->ptr_in_list = parent::before_begin();
+      const typename std::forward_list<T*>::iterator it = parent::insert_after(obj->ptr_in_list, obj);
+      m_list_size++;
+      if (m_list_size == 1) 
+      {
+        m_last = it;
+      }
+      else 
+      {
+        typename std::forward_list<T*>::iterator itnext = it;
+        itnext++;
+        (*itnext)->ptr_in_list = it;
+      }
+    }
+  
+    // insert element at the back of the list
+    void insert_linked_back(T* obj) 
+    {
+      obj->ptr_in_list = m_last;
+      const typename std::forward_list<T*>::iterator it = parent::insert_after(m_last, obj);
+      m_last = it;
+      m_list_size++;
+    }
 
-          void insert_back(T* obj)
-          {
-               auto it = fl->insert_after(last, obj);
-               last = it;
-               listsize++;
-          }
-     
-          // in 'linked' methods, the object to be inserted has an iterator 'ptr_in_list' which needs to refer to the position
-          // preceding the one where obj is inserted. This allows constant time lookup of objects in lists.
-          void insert_linked(T* obj)
-          {
-               obj->ptr_in_list = fl->before_begin();
-               auto it = fl->insert_after(obj->ptr_in_list, obj);
-               listsize++;
-               if (listsize == 1) {
-                    last = it;
-               }
-               else {
-                    auto itnext = it;
-                    itnext++;
-                    (*itnext)->ptr_in_list = it;
-               }
-          }
-     
-          // insert element at the back of the list
-          void insert_linked_back(T* obj) {
-               obj->ptr_in_list = last;
-               auto it = fl->insert_after(last, obj);
-               last = it;
-               listsize++;
-          }
+    // special method for inserting states
+    void insert_state_linked(T* obj, statemode_type t)
+    {
+      // make sure that element pointing before current first element will point to the newly inserted element
+      // (the new position before its element)
+      obj->ptr_in_list = parent::before_begin();
+      const typename std::forward_list<T*>::iterator it = parent::insert_after(obj->ptr_in_list, obj);
+      m_list_size++;
+      if (m_list_size == 1) 
+      {
+        m_last = it;
+      }
+      else 
+      {
+        typename std::forward_list<T*>::iterator itnext = it;
+        itnext++;
+        (*itnext)->ptr_in_list = it;
+      }
+      obj->type = t;
+    }
+  
+    typename std::forward_list<T*>::iterator remove(typename std::forward_list<T*>::iterator position)
+    {
+      typename std::forward_list<T*>::iterator posnext = position;
+      ++posnext;
+      if (posnext == m_last) 
+      {
+        m_last = position;
+      }
+      m_list_size--;
+      return erase_after(position);
+    }
 
-          // special method for inserting states
-          void insert_state_linked(T* obj, statemode_type t)
-          {
-               // make sure that element pointing before current first element will point to the newly inserted element
-               // (the new position before its element)
-               obj->ptr_in_list = fl->before_begin();
-               auto it = fl->insert_after(obj->ptr_in_list, obj);
-               listsize++;
-               if (listsize == 1) {
-                    last = it;
-               }
-               else {
-                    auto itnext = it;
-                    itnext++;
-                    (*itnext)->ptr_in_list = it;
-               }
-               obj->type = t;
-          }
-     
-          typename std::forward_list<T*>::iterator remove(typename std::forward_list<T*>::iterator position)
-          {
-               auto posnext = position;
-               ++posnext;
-               if (posnext == last) {
-                    last = position;
-               }
-               listsize--;
-               return fl->erase_after(position);
-          }
+    typename std::forward_list<T*>::iterator remove(typename std::forward_list<T*>::iterator position, typename std::forward_list<T*>::iterator& current)
+    {
+      typename std::forward_list<T*>::iterator posnext = position;
+      ++posnext;
+      if (posnext == m_last) 
+      {
+        m_last = position;
+      }
+      m_list_size--;
+      if (current == posnext) 
+      {
+        current = position;
+      }
+      return parent::erase_after(position);
+    }
 
-          typename std::forward_list<T*>::iterator remove(typename std::forward_list<T*>::iterator position, typename std::forward_list<T*>::iterator& current)
-          {
-               auto posnext = position;
-               ++posnext;
-               if (posnext == last) {
-                    last = position;
-               }
-               listsize--;
-               if (current == posnext) {
-                    current = position;
-               }
-               return fl->erase_after(position);
-          }
+    void remove_linked(T* obj)
+    {
+      typename std::forward_list<T*>::iterator objptrnext = obj->ptr_in_list;
+      ++objptrnext;
+      if (objptrnext == m_last) 
+      {
+        m_last = obj->ptr_in_list;
+      }
+      // redirect pointer of next element in list
+      ++objptrnext;
+      if (objptrnext != parent::end()) 
+      {
+        (*objptrnext)->ptr_in_list = obj->ptr_in_list;
+      }
+      m_list_size--;
+      parent::erase_after(obj->ptr_in_list);
+    }
 
-          void remove_linked(T* obj)
-          {
-               auto objptrnext = obj->ptr_in_list;
-               ++objptrnext;
-               if (objptrnext == last) {
-                    last = obj->ptr_in_list;
-               }
-               // redirect pointer of next element in list
-               ++objptrnext;
-               if (objptrnext != fl->end()) {
-                    (*objptrnext)->ptr_in_list = obj->ptr_in_list;
-               }
-               listsize--;
-               fl->erase_after(obj->ptr_in_list);
-          }
+    void remove_linked(T* obj, typename std::forward_list<T*>::iterator& current)
+    {
+      typename std::forward_list<T*>::iterator objptrnext = obj->ptr_in_list;
+      ++objptrnext;
+      if (objptrnext == m_last) 
+      {
+        m_last = obj->ptr_in_list;
+      }
+      // redirect pointer of next element in list
+      typename std::forward_list<T*>::iterator objptrnextnext = objptrnext;
+      ++objptrnextnext;
+      if (objptrnextnext != parent::end()) 
+      {
+        (*objptrnextnext)->ptr_in_list = obj->ptr_in_list;
+      }
+      m_list_size--;
+      if (current == objptrnext) 
+      {
+        current = obj->ptr_in_list;
+      }
+      parent::erase_after(obj->ptr_in_list);
+    }
+  
+    // concatenate two lists, where the elements have pointers (iterators) to the
+    // positions preceding the ones where they are stored
+    void concat_linked(sized_forward_list<T>& obj1)
+    {
+      // the first position from which ptr_in_list updates are no longer required
+      typename std::forward_list < T* >::iterator start_correct = this->begin();
+      if (start_correct != this->end()) 
+      {
+        ++start_correct;
+      }
+      // splice_after(this->before_begin(), *(obj1.getlist()));
+      splice_after(this->before_begin(), obj1);
+      m_list_size += obj1.size();
+      // update ptr_in_list of elements
+      typename std::forward_list < T* >::iterator prev_it = this->before_begin();
+      for (typename std::forward_list<T*>::iterator it = this->begin(); it != start_correct; ++it) 
+      {
+        T* o = *it;
+        o->ptr_in_list = prev_it;
+        prev_it = it;
+      }
+      obj1.constant_clear();
+    }
 
-          void remove_linked(T* obj, typename std::forward_list<T*>::iterator& current)
-          {
-               auto objptrnext = obj->ptr_in_list;
-               ++objptrnext;
-               if (objptrnext == last) {
-                    last = obj->ptr_in_list;
-               }
-               // redirect pointer of next element in list
-               auto objptrnextnext = objptrnext;
-               ++objptrnextnext;
-               if (objptrnextnext != fl->end()) {
-                    (*objptrnextnext)->ptr_in_list = obj->ptr_in_list;
-               }
-               listsize--;
-               if (current == objptrnext) {
-                    current = obj->ptr_in_list;
-               }
-               fl->erase_after(obj->ptr_in_list);
-          }
-     
-          typename std::forward_list < T* >* getlist ()
-          {
-               return fl;
-          }
-     
-          // concatenate two lists, where the elements have pointers (iterators) to the
-          // positions preceding the ones where they are stored
-          void concat_linked(sized_forward_list<T>& obj1)
-          {
-               // the first position from which ptr_in_list updates are no longer required
-               typename std::forward_list < T* >::iterator start_correct = this->begin();
-               if (start_correct != this->end()) {
-                    ++start_correct;
-               }
-               fl->splice_after(this->before_begin(), *(obj1.getlist()));
-               listsize += obj1.size();
-               // update ptr_in_list of elements
-               typename std::forward_list < T* >::iterator prev_it = this->before_begin();
-               for (auto it = this->begin(); it != start_correct; ++it) {
-                    T* o = *it;
-                    o->ptr_in_list = prev_it;
-                    prev_it = it;
-               }
-               obj1.constant_clear();
-          }
+    size_t size() const
+    {
+      return m_list_size;
+    }
+  
+    T* back()
+    {
+      return *m_last;
+    }
 
-          size_t size()
-          {
-               return listsize;
-          }
-     
-          T* front()
-          {
-               return fl->front();
-          }
-     
-          T* back()
-          {
-               return *last;
-          }
+    // clear the list in constant time
+    void constant_clear() 
+    {
+      std::forward_list < T* > empty;
+      parent::swap(empty); 
+      m_list_size = 0;
+      m_last = parent::before_begin();
+    }
 
-          // clear the list in constant time
-          void constant_clear() {
-               std::forward_list < T* > empty;
-               fl->swap(empty);
-               listsize = 0;
-               last = fl->before_begin();
-          }
-
-     private:
-          std::forward_list < T* >* fl;
-          size_t listsize;
-          // pointer to last element
-          typename std::forward_list < T* >::iterator last;
+  protected:
+    size_t m_list_size;
+    // pointer to last element
+    typename std::forward_list < T* >::iterator m_last;
 };
 
 struct counter_T
