@@ -148,7 +148,7 @@ class probabilistic_arbitrary_size_label
      */
     probabilistic_arbitrary_size_label operator-(const probabilistic_arbitrary_size_label& other) const
     {
-      utilities::big_natural_number enumerator= this->enumerator()*other.denominator() +
+      utilities::big_natural_number enumerator= this->enumerator()*other.denominator() -
                                     other.enumerator()*this->denominator();
       utilities::big_natural_number denominator=this->denominator()*other.denominator();
       remove_common_factors(enumerator,denominator);
