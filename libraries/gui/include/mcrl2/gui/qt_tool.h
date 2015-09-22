@@ -21,8 +21,8 @@
 #include <QUrl>
 #include <QtGlobal>
 #include <string>
-#include "toolset_version.h"
-#include "workarounds.h"
+#include "mcrl2/utilities/toolset_version.h"
+#include "mcrl2/utilities/workarounds.h"
 
 #if defined(_WIN32)
 #include <iostream>

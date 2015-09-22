@@ -16,7 +16,7 @@
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/utilities/persistentfiledialog.h"
+#include "mcrl2/gui/persistentfiledialog.h"
 #endif // Q_MOC_RUN
 
 #include "simulation.h"

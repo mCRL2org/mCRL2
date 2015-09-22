@@ -15,8 +15,8 @@
 #include "ui_mainwindow.h"
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/logwidget.h"
-#include "mcrl2/utilities/persistentfiledialog.h"
+#include "mcrl2/gui/logwidget.h"
+#include "mcrl2/gui/persistentfiledialog.h"
 
 #include "infodock.h"
 #include "ltscanvas.h"
@@ -61,7 +61,7 @@ class MainWindow : public QMainWindow
     void zoomChanged() { m_ui.zoomOut->setEnabled(m_ltsManager->lts()->getPreviousLevel() != 0); }
     void startStructuring() { setEnabled(false); m_ltsCanvas->setUpdatesEnabled(false); }
     void stopStructuring() { m_ltsCanvas->setUpdatesEnabled(true); setEnabled(true); }
-    void logMessage(QString level, QString hint, QDateTime /* timestamp */, QString message) 
+    void logMessage(QString level, QString hint, QDateTime /* timestamp */, QString message)
     {
       if (log_level_from_string(level.toStdString()) == mcrl2::log::error)
       {

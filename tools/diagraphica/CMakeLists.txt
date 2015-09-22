@@ -42,7 +42,7 @@ add_mcrl2_tool(diagraphica
     mcrl2_lps
     mcrl2_lts
     mcrl2_utilities
-    mcrl2_utilities_qt
+    mcrl2_gui
     QtWidgets
     QtCore
     QtOpenGL

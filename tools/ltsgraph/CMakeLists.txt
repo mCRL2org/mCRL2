@@ -23,7 +23,7 @@ add_mcrl2_tool(ltsgraph
     dimensionsdialog.cpp
   DEPENDS
     mcrl2_lts
-    mcrl2_utilities_qt
+    mcrl2_gui
     QtCore
     QtGui
     QtOpenGL

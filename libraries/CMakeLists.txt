@@ -7,6 +7,7 @@ set(MCRL2_LIBRARIES
   bes
   core
   data
+  gui
   lps
   lts
   modal_formula

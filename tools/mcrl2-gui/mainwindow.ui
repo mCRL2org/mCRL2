@@ -174,7 +174,7 @@
   <customwidget>
    <class>mcrl2::utilities::qt::LogWidget</class>
    <extends>QWidget</extends>
-   <header>mcrl2/utilities/logwidget.h</header>
+   <header>mcrl2/gui/logwidget.h</header>
   </customwidget>
   <customwidget>
    <class>FileBrowser</class>
@@ -184,7 +184,7 @@
   <customwidget>
    <class>mcrl2::utilities::qt::ExtendedTabWidget</class>
    <extends>QTabWidget</extends>
-   <header>mcrl2/utilities/extendedtabwidget.h</header>
+   <header>mcrl2/gui/extendedtabwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

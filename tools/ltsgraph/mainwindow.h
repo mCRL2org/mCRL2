@@ -22,7 +22,7 @@
 #include <QMainWindow>
 #include "ui_mainwindow.h"
 
-#include "mcrl2/utilities/persistentfiledialog.h"
+#include "mcrl2/gui/persistentfiledialog.h"
 
 #include "glwidget.h"
 #include "graph.h"

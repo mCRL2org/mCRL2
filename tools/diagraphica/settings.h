@@ -9,7 +9,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "mcrl2/utilities/setting.h"
+#include "mcrl2/gui/setting.h"
 #include "visutils.h"
 
 struct Settings

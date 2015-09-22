@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/utilities/persistentfiledialog.h"
+#include "mcrl2/gui/persistentfiledialog.h"
 
 using namespace mcrl2::utilities::qt;
 

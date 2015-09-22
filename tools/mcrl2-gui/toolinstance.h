@@ -13,7 +13,7 @@
 #include <QWidget>
 #include "ui_toolinstance.h"
 
-#include "mcrl2/utilities/persistentfiledialog.h"
+#include "mcrl2/gui/persistentfiledialog.h"
 
 #include "toolinformation.h"
 #include "optionvalue.h"
@@ -21,7 +21,7 @@
 class ToolInstance : public QWidget
 {
     Q_OBJECT
-    
+
   public:
     explicit ToolInstance(QString filename, ToolInformation information, mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0);
     ~ToolInstance();

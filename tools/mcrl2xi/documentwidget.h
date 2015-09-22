@@ -19,7 +19,7 @@
 #ifndef MCRL2XI_DOCUMENTWIDGET_H
 #define MCRL2XI_DOCUMENTWIDGET_H
 
-#include "mcrl2/utilities/numberedtextedit.h"
+#include "mcrl2/gui/numberedtextedit.h"
 
 class DocumentWidget : public mcrl2::utilities::qt::NumberedTextEdit
 {

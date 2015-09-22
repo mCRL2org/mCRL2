@@ -11,7 +11,7 @@
 #include "rewriter.h"
 #include "parsing.h"
 
-#include "mcrl2/utilities/atermthread.h"
+#include "mcrl2/gui/atermthread.h"
 
 const std::string Rewriter::className = "Rewriter";
 

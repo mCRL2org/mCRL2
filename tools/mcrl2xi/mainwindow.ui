@@ -497,7 +497,7 @@
   <customwidget>
    <class>mcrl2::utilities::qt::LogWidget</class>
    <extends>QWidget</extends>
-   <header>mcrl2/utilities/logwidget.h</header>
+   <header>mcrl2/gui/logwidget.h</header>
   </customwidget>
   <customwidget>
    <class>DocumentManager</class>

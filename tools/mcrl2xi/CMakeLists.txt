@@ -16,7 +16,7 @@ add_mcrl2_tool(mcrl2xi
     findreplacedialog.cpp
   DEPENDS
     mcrl2_lps
-    mcrl2_utilities_qt
+    mcrl2_gui
     QtCore
     QtGui
     QtWidgets

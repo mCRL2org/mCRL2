@@ -8,7 +8,7 @@
 
 #include <QMutex>
 #include <QMutexLocker>
-#include "mcrl2/utilities/atermthread.h"
+#include "mcrl2/gui/atermthread.h"
 
 using namespace mcrl2::utilities::qt::detail;
 

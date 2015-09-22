@@ -23,7 +23,7 @@ add_mcrl2_tool(mcrl2-gui
     optionvalue.cpp
   DEPENDS
     mcrl2_utilities
-    mcrl2_utilities_qt
+    mcrl2_gui
     QtCore
     QtGui
     QtWidgets

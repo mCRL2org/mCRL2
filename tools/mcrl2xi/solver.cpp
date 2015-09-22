@@ -13,7 +13,7 @@
 #include "parsing.h"
 
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/utilities/atermthread.h"
+#include "mcrl2/gui/atermthread.h"
 
 const std::string Solver::className = "Solver";
 

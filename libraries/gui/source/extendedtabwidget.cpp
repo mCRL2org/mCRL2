@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/utilities/extendedtabwidget.h"
+#include "mcrl2/gui/extendedtabwidget.h"
 #include <QTabBar>
 #include <QEvent>
 #include <QMouseEvent>

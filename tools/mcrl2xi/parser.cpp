@@ -10,7 +10,7 @@
 #include "parser.h"
 #include "parsing.h"
 
-#include "mcrl2/utilities/atermthread.h"
+#include "mcrl2/gui/atermthread.h"
 #include "mcrl2/process/parse.h"
 
 Parser::Parser()

@@ -19,7 +19,7 @@
 #ifndef MCRL2XI_DOCUMENTMANAGER_H
 #define MCRL2XI_DOCUMENTMANAGER_H
 
-#include "mcrl2/utilities/extendedtabwidget.h"
+#include "mcrl2/gui/extendedtabwidget.h"
 #include <QTextEdit>
 
 #include "documentwidget.h"
@@ -27,7 +27,7 @@
 class DocumentManager : public mcrl2::utilities::qt::ExtendedTabWidget
 {
     Q_OBJECT
-    
+
   public:
     /**
      * @brief Constructor
@@ -80,7 +80,7 @@ class DocumentManager : public mcrl2::utilities::qt::ExtendedTabWidget
      * @brief Returns the filename of the currently visible DocumentWidget
      */
     QString currentFileName();
-    
+
   signals:
     /**
      * @brief Activated if a new document/tab was created

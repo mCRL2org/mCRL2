@@ -1,6 +1,6 @@
 #if defined(_WIN32)
 #include <Windows.h>
-#include "mcrl2/utilities/qt_tool.h"
+#include "mcrl2/gui/qt_tool.h"
 
 namespace mcrl2
 {

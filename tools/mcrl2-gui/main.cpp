@@ -8,7 +8,7 @@
 //
 
 #include "mcrl2/utilities/tool.h"
-#include "mcrl2/utilities/qt_tool.h"
+#include "mcrl2/gui/qt_tool.h"
 
 #include "mainwindow.h"
 #include <QSplashScreen>
