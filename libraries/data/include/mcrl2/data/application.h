@@ -307,7 +307,7 @@ class application: public data_expression
                 const data_expression& arg4,
                 const data_expression& arg5,
                 const data_expression& arg6)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(6),head,arg1,arg2,arg3,arg4,arg5,arg6))
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(7),head,arg1,arg2,arg3,arg4,arg5,arg6))
     {
     }
 
