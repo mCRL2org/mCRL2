@@ -158,7 +158,7 @@ private:
     QPalette m_palette;
     QPoint m_lastErrorPosition;               ///< The last error position that was found in the log
 
-    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
+    mcrl2::gui::qt::PersistentFileDialog m_fileDialog;
 
 };
 

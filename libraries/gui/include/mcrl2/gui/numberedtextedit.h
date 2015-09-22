@@ -16,7 +16,7 @@
 namespace mcrl2
 {
 
-namespace utilities
+namespace gui
 {
 
 namespace qt
@@ -44,7 +44,7 @@ private:
 
 } // namespace qt
 
-} // namespace utilities
+} // namespace gui
 
 } // namespace mcrl2
 

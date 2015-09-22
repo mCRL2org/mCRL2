@@ -23,7 +23,7 @@ class ToolInstance : public QWidget
     Q_OBJECT
 
   public:
-    explicit ToolInstance(QString filename, ToolInformation information, mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0);
+    explicit ToolInstance(QString filename, ToolInformation information, mcrl2::gui::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0);
     ~ToolInstance();
 
     ToolInformation information() { return m_info; }
@@ -50,7 +50,7 @@ class ToolInstance : public QWidget
 
     FilePicker* m_pckFileOut;
     FilePicker* m_pckFileIn;
-    mcrl2::utilities::qt::PersistentFileDialog* m_fileDialog;
+    mcrl2::gui::qt::PersistentFileDialog* m_fileDialog;
 
   signals:
     void titleChanged(QString title);

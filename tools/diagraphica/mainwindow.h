@@ -116,7 +116,7 @@ class MainWindow : public QMainWindow
     QList<Cluster *> m_routingClusterSet;
     QList<Attribute *> m_routingClusterAttributes;
 
-    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
+    mcrl2::gui::qt::PersistentFileDialog m_fileDialog;
 
 };
 

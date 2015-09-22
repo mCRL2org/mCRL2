@@ -14,7 +14,7 @@
 #include <QMenu>
 #include <QAction>
 
-using namespace mcrl2::utilities::qt;
+using namespace mcrl2::gui::qt;
 
 ExtendedTabWidget::ExtendedTabWidget(QWidget *parent) :
   QTabWidget(parent)

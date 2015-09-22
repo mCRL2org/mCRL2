@@ -29,7 +29,7 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="mcrl2::utilities::qt::ExtendedTabWidget" name="tabInstances">
+     <widget class="mcrl2::gui::qt::ExtendedTabWidget" name="tabInstances">
       <property name="currentIndex">
        <number>-1</number>
       </property>
@@ -84,7 +84,7 @@
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="mcrl2::utilities::qt::LogWidget" name="dockWidgetOutput"/>
+   <widget class="mcrl2::gui::qt::LogWidget" name="dockWidgetOutput"/>
   </widget>
   <widget class="QDockWidget" name="dockFiles">
    <property name="minimumSize">
@@ -172,7 +172,7 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>mcrl2::utilities::qt::LogWidget</class>
+   <class>mcrl2::gui::qt::LogWidget</class>
    <extends>QWidget</extends>
    <header>mcrl2/gui/logwidget.h</header>
   </customwidget>
@@ -182,7 +182,7 @@
    <header>filebrowser.h</header>
   </customwidget>
   <customwidget>
-   <class>mcrl2::utilities::qt::ExtendedTabWidget</class>
+   <class>mcrl2::gui::qt::ExtendedTabWidget</class>
    <extends>QTabWidget</extends>
    <header>mcrl2/gui/extendedtabwidget.h</header>
    <container>1</container>

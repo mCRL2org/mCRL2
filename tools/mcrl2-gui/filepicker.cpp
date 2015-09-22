@@ -16,7 +16,7 @@
 #include <QList>
 #include <QUrl>
 
-FilePicker::FilePicker(mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent, bool save) :
+FilePicker::FilePicker(mcrl2::gui::qt::PersistentFileDialog* fileDialog, QWidget *parent, bool save) :
   QWidget(parent),
   m_fileDialog(fileDialog)
 {

@@ -118,7 +118,7 @@ class MainWindow : public QMainWindow
     QTimer* m_timer;                    ///< The times used to call onTimer periodically.
     QString m_delayedOpen;              ///< The file that should be opened when the program is ready
 
-    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
+    mcrl2::gui::qt::PersistentFileDialog m_fileDialog;
 
 };
 

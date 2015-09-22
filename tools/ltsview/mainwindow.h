@@ -91,9 +91,9 @@ class MainWindow : public QMainWindow
     SettingsDialog *m_settingsDialog;
     LtsCanvas *m_ltsCanvas;
     QProgressDialog *m_progressDialog;
-    mcrl2::utilities::qt::LogRelay m_logRelay;
+    mcrl2::gui::qt::LogRelay m_logRelay;
 
-    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
+    mcrl2::gui::qt::PersistentFileDialog m_fileDialog;
 };
 
 #endif

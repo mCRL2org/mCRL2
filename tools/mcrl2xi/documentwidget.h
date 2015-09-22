@@ -21,7 +21,7 @@
 
 #include "mcrl2/gui/numberedtextedit.h"
 
-class DocumentWidget : public mcrl2::utilities::qt::NumberedTextEdit
+class DocumentWidget : public mcrl2::gui::qt::NumberedTextEdit
 {
     Q_OBJECT
 

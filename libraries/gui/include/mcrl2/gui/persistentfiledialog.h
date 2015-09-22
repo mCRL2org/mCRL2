@@ -15,7 +15,7 @@
 namespace mcrl2
 {
 
-namespace utilities
+namespace gui
 {
 
 namespace qt
@@ -35,12 +35,12 @@ public:
 private:
     QWidget* m_parent;
     QString m_directory;
-    
+
 };
 
 } // namespace qt
 
-} // namespace utilities
+} // namespace gui
 
 } // namespace mcrl2
 

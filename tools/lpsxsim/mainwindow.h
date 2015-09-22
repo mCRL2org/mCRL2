@@ -77,7 +77,7 @@ class MainWindow : public QMainWindow
     bool m_animationDisabled;
     const bool m_do_not_use_dummies;
 
-    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
+    mcrl2::gui::qt::PersistentFileDialog m_fileDialog;
 };
 
 #endif

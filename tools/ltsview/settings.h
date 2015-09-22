@@ -16,10 +16,10 @@
 
 struct Settings
 {
-  typedef mcrl2::utilities::qt::SettingInt SettingInt;
-  typedef mcrl2::utilities::qt::SettingFloat SettingFloat;
-  typedef mcrl2::utilities::qt::SettingBool SettingBool;
-  typedef mcrl2::utilities::qt::SettingColor SettingColor;
+  typedef mcrl2::gui::qt::SettingInt SettingInt;
+  typedef mcrl2::gui::qt::SettingFloat SettingFloat;
+  typedef mcrl2::gui::qt::SettingBool SettingBool;
+  typedef mcrl2::gui::qt::SettingColor SettingColor;
 
   SettingFloat stateSize;
   SettingFloat clusterHeight;

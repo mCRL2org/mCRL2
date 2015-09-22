@@ -16,7 +16,7 @@
 
 namespace mcrl2
 {
-namespace utilities
+namespace gui
 {
 namespace qt
 {
@@ -92,7 +92,7 @@ class SettingEnum : public SettingInt
 };
 
 } // namespace qt
-} // namespace utilities
+} // namespace gui
 } // namespace mcrl2
 
 #endif // MCRL2_UTILITIES_SETTING_H

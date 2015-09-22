@@ -23,7 +23,7 @@ namespace Ui
 namespace mcrl2
 {
 
-namespace utilities
+namespace gui
 {
 
 namespace qt
@@ -64,7 +64,7 @@ class LogWidget: public QWidget
 
 } // namespace qt
 
-} // namespace utilities
+} // namespace gui
 
 } // namespace mcrl2
 

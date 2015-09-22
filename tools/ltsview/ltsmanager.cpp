@@ -78,7 +78,7 @@ LtsManager::LtsManager(QObject *parent, Settings *settings):
   m_selectedState(0),
   m_selectedCluster(0)
 {
-  m_helper.moveToThread(mcrl2::utilities::qt::get_aterm_thread());
+  m_helper.moveToThread(mcrl2::gui::qt::get_aterm_thread());
 
   connect(&m_helper, SIGNAL(loadingLts()), this, SIGNAL(loadingLts()));
   connect(&m_helper, SIGNAL(rankingStates()), this, SIGNAL(rankingStates()));

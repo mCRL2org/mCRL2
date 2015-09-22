@@ -20,7 +20,7 @@ class FilePicker : public QWidget
     Q_OBJECT
 
   public:
-    explicit FilePicker(mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0, bool save = true);
+    explicit FilePicker(mcrl2::gui::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0, bool save = true);
 
     QString text() { return m_ui.value->text(); }
 
@@ -35,7 +35,7 @@ class FilePicker : public QWidget
   private:
     Ui::FilePicker m_ui;
 
-    mcrl2::utilities::qt::PersistentFileDialog* m_fileDialog;
+    mcrl2::gui::qt::PersistentFileDialog* m_fileDialog;
 
     bool m_save;
 

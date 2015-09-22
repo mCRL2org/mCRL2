@@ -24,7 +24,7 @@
 
 #include "documentwidget.h"
 
-class DocumentManager : public mcrl2::utilities::qt::ExtendedTabWidget
+class DocumentManager : public mcrl2::gui::qt::ExtendedTabWidget
 {
     Q_OBJECT
 

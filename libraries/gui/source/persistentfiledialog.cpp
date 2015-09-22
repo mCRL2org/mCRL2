@@ -9,7 +9,7 @@
 
 #include "mcrl2/gui/persistentfiledialog.h"
 
-using namespace mcrl2::utilities::qt;
+using namespace mcrl2::gui::qt;
 
 PersistentFileDialog::PersistentFileDialog(QString directory, QWidget *parent)
   : QObject(parent),

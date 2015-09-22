@@ -10,12 +10,12 @@
 #include <QMutexLocker>
 #include "mcrl2/gui/atermthread.h"
 
-using namespace mcrl2::utilities::qt::detail;
+using namespace mcrl2::gui::qt::detail;
 
 AtermThread *aterm_thread = 0;
 QMutex aterm_thread_mutex;
 
-QThread *mcrl2::utilities::qt::get_aterm_thread()
+QThread *mcrl2::gui::qt::get_aterm_thread()
 {
   QMutexLocker locker(&aterm_thread_mutex);
   if (aterm_thread)

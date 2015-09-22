@@ -13,7 +13,7 @@
 
 namespace mcrl2
 {
-namespace utilities
+namespace gui
 {
 namespace qt
 {
@@ -37,7 +37,7 @@ class AtermThread : public QThread
 QThread *get_aterm_thread();
 
 } // namespace qt
-} // namespace utilities
+} // namespace gui
 } // namespace mcrl2
 
 #endif // MCRL2_UTILITIES_ATERMTHREAD_H

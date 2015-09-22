@@ -19,7 +19,7 @@ const std::string Solver::className = "Solver";
 
 Solver::Solver()
 {
-  moveToThread(mcrl2::utilities::qt::get_aterm_thread());
+  moveToThread(mcrl2::gui::qt::get_aterm_thread());
   thread()->setPriority(QThread::IdlePriority);
   m_parsed = false;
 }

@@ -95,7 +95,7 @@ class MainWindow : public QMainWindow
     ToolCatalog m_catalog;                    ///< The loaded tool_catalog.xml
     QByteArray m_state;                       ///< The window state that is used to restore the user interface
 
-    mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
+    mcrl2::gui::qt::PersistentFileDialog m_fileDialog;
 
 };
 

@@ -13,7 +13,7 @@
 #include <QTextBlock>
 #include <QAbstractTextDocumentLayout>
 
-using namespace mcrl2::utilities::qt;
+using namespace mcrl2::gui::qt;
 
 class LineNumberArea : public QWidget
 {

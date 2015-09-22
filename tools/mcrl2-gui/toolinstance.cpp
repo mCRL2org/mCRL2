@@ -28,7 +28,7 @@
 #include <QScrollBar>
 #include "mcrl2/utilities/logger.h"
 
-ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent) :
+ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2::gui::qt::PersistentFileDialog* fileDialog, QWidget *parent) :
   QWidget(parent),
   m_filename(filename),
   m_info(information),

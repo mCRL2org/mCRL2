@@ -4,7 +4,7 @@
 
 namespace mcrl2
 {
-namespace utilities
+namespace gui
 {
 namespace qt
 {
@@ -38,7 +38,7 @@ void QtToolBase::releaseConsole()
 }
 
 } // namespace qt
-} // namespace utilities
+} // namespace gui
 } // namespace mcrl2
 
 #endif // defined(_WIN32)

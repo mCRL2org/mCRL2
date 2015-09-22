@@ -16,7 +16,7 @@
 namespace mcrl2
 {
 
-namespace utilities
+namespace gui
 {
 
 namespace qt
@@ -42,14 +42,14 @@ public:
      */
     void keyPressEvent(QKeyEvent * event);
 signals:
-    
+
 public slots:
-    
+
 };
 
 } // namespace qt
 
-} // namespace utilities
+} // namespace gui
 
 } // namespace mcrl2
 

@@ -20,7 +20,7 @@ Simulation::Simulation(QString filename, mcrl2::data::rewrite_strategy strategy,
     m_do_not_use_dummies(do_not_use_dummies),
     m_simulation(NULL)
 {
-  moveToThread(mcrl2::utilities::qt::get_aterm_thread());
+  moveToThread(mcrl2::gui::qt::get_aterm_thread());
   QMetaObject::invokeMethod(this, "init", Qt::BlockingQueuedConnection);
 }
 

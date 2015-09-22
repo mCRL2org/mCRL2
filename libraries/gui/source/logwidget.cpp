@@ -9,8 +9,8 @@
 #include "mcrl2/gui/logwidget.h"
 #include "ui_logwidget.h"
 
-using namespace mcrl2::utilities;
-using namespace mcrl2::utilities::qt;
+using namespace mcrl2::gui;
+using namespace mcrl2::gui::qt;
 
 void LogRelay::output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
 {
