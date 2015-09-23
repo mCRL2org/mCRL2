@@ -31,7 +31,7 @@
 
 namespace mcrl2
 {
-namespace utilities
+namespace gui
 {
 namespace qt
 {
@@ -165,7 +165,7 @@ class qt_tool: public Tool, public QtToolBase
 };
 
 } // namespace qt
-} // namespace utilities
+} // namespace gui
 } // namespace mcrl2
 
 #endif // MCRL2_UTILITIES_QT_TOOL_H

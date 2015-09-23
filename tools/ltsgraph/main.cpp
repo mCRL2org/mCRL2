@@ -11,9 +11,10 @@
 #include "mcrl2/gui/qt_tool.h"
 #include "mainwindow.h"
 
+using namespace mcrl2;
 using namespace mcrl2::utilities;
 
-typedef qt::qt_tool<tools::input_tool> ltsgraph_base;
+typedef gui::qt::qt_tool<tools::input_tool> ltsgraph_base;
 class ltsgraph_tool : public ltsgraph_base
 {
   public:

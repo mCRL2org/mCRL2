@@ -3,11 +3,12 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mainwindow.h"
 
-using namespace mcrl2::utilities;
+using namespace mcrl2;
 
 using mcrl2::data::tools::rewriter_tool;
+using namespace mcrl2::utilities;
 
-typedef qt::qt_tool<rewriter_tool<tools::input_tool> > lpsxsim_base;
+typedef gui::qt::qt_tool<rewriter_tool<tools::input_tool> > lpsxsim_base;
 
 class lpsxsim_tool : public lpsxsim_base
 {

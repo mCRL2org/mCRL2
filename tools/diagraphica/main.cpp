@@ -2,9 +2,10 @@
 #include "mcrl2/gui/qt_tool.h"
 #include "mainwindow.h"
 
+using namespace mcrl2;
 using namespace mcrl2::utilities;
 
-typedef qt::qt_tool<tools::input_tool> diagraphica_base;
+typedef gui::qt::qt_tool<tools::input_tool> diagraphica_base;
 class diagraphica_tool : public diagraphica_base
 {
   public:

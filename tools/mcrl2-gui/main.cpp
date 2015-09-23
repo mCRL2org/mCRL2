@@ -14,9 +14,10 @@
 #include <QSplashScreen>
 #include <QTimer>
 
+using namespace mcrl2;
 using namespace mcrl2::utilities;
 
-typedef qt::qt_tool<tools::tool> mcrl2_gui_base;
+typedef gui::qt::qt_tool<tools::tool> mcrl2_gui_base;
 
 class mcrl2_gui_tool : public mcrl2_gui_base
 {
