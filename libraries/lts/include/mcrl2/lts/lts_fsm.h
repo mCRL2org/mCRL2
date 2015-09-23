@@ -86,6 +86,8 @@ inline std::string pp(const state_label_fsm l)
 class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_string, detail::probabilistic_arbitrary_size_label >
 {
   protected:
+    typedef lts< detail::state_label_fsm, detail::action_label_string, detail::probabilistic_arbitrary_size_label > super;
+
     /** \brief state_element_values contain the values that can occur at the i-th
        position of a state label */
     std::vector < std::vector < std::string > > m_state_element_values;
@@ -103,6 +105,18 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
     lts_type type() const
     {
       return lts_fsm;
+    }
+
+    /** \brief Clear the transitions system.
+     *  \details The state values, action values and transitions are
+     *  reset. The number of states, actions and transitions are set to 0.
+     */
+    void
+    clear()
+    {
+      m_state_element_values.clear();
+      m_parameters.clear();
+      super::clear();
     }
 
     /** \brief Provides the vector of strings that correspond to the values

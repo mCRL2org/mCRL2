@@ -168,7 +168,7 @@ struct fsm_builder
   {
     parameters.clear();
     labels.clear();
-    fsm = lts_fsm_t(); // TODO: add a proper clear() function to lts_fsm_t
+    fsm.clear();
   }
 
   void add_transition(const std::string& source, const std::string& target, const std::string& label)
