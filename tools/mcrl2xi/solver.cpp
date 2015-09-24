@@ -13,20 +13,12 @@
 #include "parsing.h"
 
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/gui/atermthread.h"
 
-const std::string Solver::className = "Solver";
-
-Solver::Solver()
+Solver::Solver(QThread *atermThread, mcrl2::data::rewrite_strategy strategy):
+  m_strategy(strategy)
 {
-  moveToThread(mcrl2::gui::qt::get_aterm_thread());
-  thread()->setPriority(QThread::IdlePriority);
+  moveToThread(atermThread);
   m_parsed = false;
-}
-
-void Solver::setRewriter(QString solver)
-{
-  m_rewrite_strategy = mcrl2::data::parse_rewrite_strategy(solver.toStdString())  ;
 }
 
 void Solver::solve(QString specification, QString dataExpression)
@@ -81,7 +73,7 @@ void Solver::solve(QString specification, QString dataExpression)
       std::set<sort_expression> all_sorts=find_sort_expressions(term);
       m_data_spec.add_context_sorts(all_sorts);
 
-      rewriter rewr(m_data_spec,m_rewrite_strategy);
+      rewriter rewr(m_data_spec, m_strategy);
 
       term=rewr(term);
 

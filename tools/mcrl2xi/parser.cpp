@@ -10,13 +10,11 @@
 #include "parser.h"
 #include "parsing.h"
 
-#include "mcrl2/gui/atermthread.h"
 #include "mcrl2/process/parse.h"
 
-Parser::Parser()
+Parser::Parser(QThread *atermThread)
 {
-  moveToThread(mcrl2::gui::qt::get_aterm_thread());
-  thread()->setPriority(QThread::IdlePriority);
+  moveToThread(atermThread);
 }
 
 void Parser::parse(QString specification)

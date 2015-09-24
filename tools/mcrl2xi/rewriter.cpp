@@ -11,20 +11,11 @@
 #include "rewriter.h"
 #include "parsing.h"
 
-#include "mcrl2/gui/atermthread.h"
-
-const std::string Rewriter::className = "Rewriter";
-
-Rewriter::Rewriter()
+Rewriter::Rewriter(QThread *atermThread, mcrl2::data::rewrite_strategy strategy):
+  m_strategy(strategy)
 {
-  moveToThread(mcrl2::gui::qt::get_aterm_thread());
-  thread()->setPriority(QThread::IdlePriority);
+  moveToThread(atermThread);
   m_parsed = false;
-}
-
-void Rewriter::setRewriter(QString rewriter)
-{
-  m_rewrite_strategy = mcrl2::data::parse_rewrite_strategy(rewriter.toStdString())  ;
 }
 
 void Rewriter::rewrite(QString specification, QString dataExpression)
@@ -61,7 +52,7 @@ void Rewriter::rewrite(QString specification, QString dataExpression)
 
       std::set<mcrl2::data::sort_expression> all_sorts=find_sort_expressions(term);
       m_data_spec.add_context_sorts(all_sorts);
-      mcrl2::data::rewriter rewr(m_data_spec, m_rewrite_strategy);
+      mcrl2::data::rewriter rewr(m_data_spec, m_strategy);
       mcrl2::data::mutable_map_substitution < std::map < mcrl2::data::variable, mcrl2::data::data_expression > > assignments;
 
       std::string result = mcrl2::data::pp(rewr(term,assignments));

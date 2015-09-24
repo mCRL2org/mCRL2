@@ -21,6 +21,7 @@
 
 #include <QObject>
 #include <QPoint>
+#include <QThread>
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829
 #include "mcrl2/data/rewrite_strategy.h"
@@ -34,9 +35,7 @@ class Rewriter : public QObject
     /**
      * @brief Constructor
      */
-    Rewriter();
-
-    static const std::string className;  ///< The className that was needed for FindChild (see mainwindow.cpp)
+    Rewriter(QThread *atermThread, mcrl2::data::rewrite_strategy strategy);
 
   signals:
     /**
@@ -60,11 +59,6 @@ class Rewriter : public QObject
     
   public slots:
     /**
-     * @brief Changes the rewriter to the given @e rewriter
-     * @param rewriter The new rewriter
-     */
-    void setRewriter(QString rewriter);
-    /**
      * @brief Starts the rewriting process
      * @param specification The specification used during the rewrite process
      * @param dataExpression The expression that should be rewritten
@@ -72,7 +66,7 @@ class Rewriter : public QObject
     void rewrite(QString specification, QString dataExpression);
     
   private:
-    mcrl2::data::rewrite_strategy m_rewrite_strategy;   ///< The currently used rewriter
+    mcrl2::data::rewrite_strategy m_strategy;   ///< The currently used rewriter
     mcrl2::data::data_specification m_data_spec;        ///< The specification that was used last time
     std::set <mcrl2::data::variable > m_vars;           ///< The variables used in the last rewrite process
     bool m_parsed;                                      ///< Boolean indicating if the last specification was successfully parsed (used to cache the parsing step)

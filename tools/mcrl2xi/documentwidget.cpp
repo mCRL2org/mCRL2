@@ -10,8 +10,10 @@
 #include "documentwidget.h"
 #include <QFile>
 
-DocumentWidget::DocumentWidget(QWidget *parent) :
-  NumberedTextEdit(parent)
+DocumentWidget::DocumentWidget(QWidget *parent, QThread *atermThread, mcrl2::data::rewrite_strategy strategy) :
+  NumberedTextEdit(parent),
+  m_rewriter(atermThread, strategy),
+  m_solver(atermThread, strategy)
 {
   document()->setModified(false);
 }

@@ -13,31 +13,26 @@
 #include <QSettings>
 
 #include "mainwindow.h"
-#include "threadparent.h"
-#include "rewriter.h"
-#include "solver.h"
 
 #include "mcrl2/utilities/logger.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-  QMainWindow(parent),
+MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strategy) :
+  m_parser(atermThread),
   m_palette(QApplication::palette()),
   m_fileDialog("", this)
 {
   m_findReplaceDialog = new FindReplaceDialog(this);
   m_findReplaceDialog->setModal(false);
 
-  m_current_rewriter = "jitty";
-
   m_ui.setupUi(this);
+  m_ui.documentManager->setAtermThread(atermThread);
+  m_ui.documentManager->setRewriteStrategy(strategy);
 
   QColor disabledColor = m_palette.brush(QPalette::Disabled, QPalette::Base).color();
   m_palette.setColor(QPalette::Base, disabledColor);
 
   m_ui.editRewriteOutput->setPalette(m_palette);
   m_ui.editSolveOutput->setPalette(m_palette);
-
-  m_parser = new Parser();
 
   //All menu items
   connect(m_ui.actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
@@ -67,8 +62,8 @@ MainWindow::MainWindow(QWidget *parent) :
   //All button functionality
   connect(m_ui.buttonParse, SIGNAL(clicked()), this, SLOT(onParse()));
   connect(m_ui.actionParse, SIGNAL(triggered()), this, SLOT(onParse()));
-  connect(m_parser, SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
-  connect(m_parser, SIGNAL(finished()), this, SLOT(parserFinished()));
+  connect(&m_parser, SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
+  connect(&m_parser, SIGNAL(finished()), this, SLOT(parserFinished()));
 
   connect(m_ui.buttonRewrite, SIGNAL(clicked()), this, SLOT(onRewrite()));
   connect(m_ui.actionRewrite, SIGNAL(triggered()), this, SLOT(onRewrite()));
@@ -96,11 +91,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 }
 
-MainWindow::~MainWindow()
-{
-  m_parser->deleteLater();
-}
-
 
 bool MainWindow::saveDocument(DocumentWidget *document)
 {
@@ -121,20 +111,6 @@ void MainWindow::openDocument(QString fileName)
 {
   if (!fileName.isNull()) {
     m_ui.documentManager->openFile(fileName);
-  }
-}
-
-void MainWindow::setRewriter(QString name)
-{
-  m_current_rewriter = name;
-  for (int i = 0; i < m_ui.documentManager->count(); i++) {
-    DocumentWidget *document = m_ui.documentManager->getDocument(i);
-
-    ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
-    QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
-
-    ThreadParent<Solver> *solver = new ThreadParent<Solver>(document);
-    QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
   }
 }
 
@@ -160,19 +136,16 @@ void MainWindow::formatDocument(DocumentWidget *document)
   document->setFont(font);
   new Highlighter(document->document());
 
-  ThreadParent<Rewriter> *rewriter = new ThreadParent<Rewriter>(document);
-  QMetaObject::invokeMethod(rewriter->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
-  connect(rewriter->getThread(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
-  connect(rewriter->getThread(), SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
-  connect(rewriter->getThread(), SIGNAL(exprError(QString)), this, SLOT(rewriteError(QString)));
-  connect(rewriter->getThread(), SIGNAL(finished()), this, SLOT(rewriterFinished()));
 
-  ThreadParent<Solver> *solver = new ThreadParent<Solver>(document);
-  QMetaObject::invokeMethod(solver->getThread(), "setRewriter", Qt::QueuedConnection, Q_ARG(QString, m_current_rewriter));
-  connect(solver->getThread(), SIGNAL(solvedPart(QString)), this, SLOT(solvedPart(QString)));
-  connect(solver->getThread(), SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
-  connect(solver->getThread(), SIGNAL(exprError(QString)), this, SLOT(solveError(QString)));
-  connect(solver->getThread(), SIGNAL(finished()), this, SLOT(solverFinished()));
+  connect(document->rewriter(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
+  connect(document->rewriter(), SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
+  connect(document->rewriter(), SIGNAL(exprError(QString)), this, SLOT(rewriteError(QString)));
+  connect(document->rewriter(), SIGNAL(finished()), this, SLOT(rewriterFinished()));
+
+  connect(document->solver(), SIGNAL(solvedPart(QString)), this, SLOT(solvedPart(QString)));
+  connect(document->solver(), SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
+  connect(document->solver(), SIGNAL(exprError(QString)), this, SLOT(solveError(QString)));
+  connect(document->solver(), SIGNAL(finished()), this, SLOT(solverFinished()));
 
   connect(document, SIGNAL(textChanged()), this, SLOT(textChanged()));
 }
@@ -345,7 +318,7 @@ void MainWindow::onParse()
 {
   m_ui.buttonParse->setEnabled(false);
   DocumentWidget *document = m_ui.documentManager->currentDocument();
-  QMetaObject::invokeMethod(m_parser, "parse", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()));
+  QMetaObject::invokeMethod(&m_parser, "parse", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()));
 }
 
 void MainWindow::parseError(QString err)
@@ -386,13 +359,7 @@ void MainWindow::onRewrite()
   m_ui.buttonRewrite->setEnabled(false);
   m_ui.editRewriteOutput->clear();
   DocumentWidget *document = m_ui.documentManager->currentDocument();
-
-  // findChild<ThreadParent<Rewriter> *> seems to match all objects instead of only those
-  // with type findChild<ThreadParent<Rewriter> *>, "Rewriter" as objectName was added to find the appropriate object
-  // findChild<...> without using templates works correctly, this could be a Qt bug
-
-  ThreadParent<Rewriter> *rewriterparent = document->findChild<ThreadParent<Rewriter> *>("Rewriter");
-  QMetaObject::invokeMethod(rewriterparent->getThread(), "rewrite", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()), Q_ARG(QString, m_ui.editRewriteExpr->text()));
+  QMetaObject::invokeMethod(document->rewriter(), "rewrite", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()), Q_ARG(QString, m_ui.editRewriteExpr->text()));
 }
 
 void MainWindow::rewriteError(QString err)
@@ -417,25 +384,13 @@ void MainWindow::onSolve()
   m_ui.buttonSolveAbort->setEnabled(true);
   m_ui.editSolveOutput->clear();
   DocumentWidget *document = m_ui.documentManager->currentDocument();
-
-  // findChild<ThreadParent<Solver> *> seems to match all objects instead of only those
-  // with type findChild<ThreadParent<Solver> *>, "Solver" as objectName was added to find the appropriate object
-  // findChild<...> without using templates works correctly, this could be a Qt bug
-
-  ThreadParent<Solver> *solverparent = document->findChild<ThreadParent<Solver> *>("Solver");
-  QMetaObject::invokeMethod(solverparent->getThread(), "solve", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()), Q_ARG(QString, m_ui.editSolveExpr->text()));
+  QMetaObject::invokeMethod(document->solver(), "solve", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()), Q_ARG(QString, m_ui.editSolveExpr->text()));
 }
 
 void MainWindow::onSolveAbort()
 {
   DocumentWidget *document = m_ui.documentManager->currentDocument();
-
-  // findChild<ThreadParent<Solver> *> seems to match all objects instead of only those
-  // with type findChild<ThreadParent<Solver> *>, "Solver" as objectName was added to find the appropriate object
-  // findChild<...> without using templates works correctly, this could be a Qt bug
-
-  ThreadParent<Solver> *solverparent = document->findChild<ThreadParent<Solver> *>("Solver");
-  QMetaObject::invokeMethod(solverparent->getThread(), "abort", Qt::QueuedConnection);
+  QMetaObject::invokeMethod(document->solver(), "abort", Qt::QueuedConnection);
 
   m_ui.buttonSolveAbort->setEnabled(false);
 }

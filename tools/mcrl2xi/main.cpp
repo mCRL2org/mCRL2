@@ -32,9 +32,11 @@ class mcrl2xi_tool : public mcrl2xi_base
 
     bool run()
     {
-      MainWindow *window = new MainWindow();
+      QThread *atermThread = new QThread;
+      atermThread->start();
+      atermThread->setPriority(QThread::IdlePriority);
 
-      window->setRewriter(QString::fromStdString(pp(m_rewrite_strategy)));
+      MainWindow *window = new MainWindow(atermThread, rewrite_strategy());
 
       if (!m_input_filename.empty())
       {

@@ -20,6 +20,7 @@
 #define MCRL2XI_PARSER_H
 
 #include <QObject>
+#include <QThread>
 
 class Parser : public QObject
 {
@@ -28,7 +29,7 @@ class Parser : public QObject
     /**
      * @brief Constructor
      */
-    explicit Parser();
+    explicit Parser(QThread *atermThread);
 
   signals:
     /**

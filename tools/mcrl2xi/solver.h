@@ -34,9 +34,7 @@ class Solver : public QObject
     /**
      * @brief Constructor
      */
-    Solver();
-
-    static const std::string className;  ///< The className that was needed for FindChild (see mainwindow.cpp)
+    Solver(QThread *atermThread, mcrl2::data::rewrite_strategy strategy);
 
   signals:
     /**
@@ -60,11 +58,6 @@ class Solver : public QObject
     
   public slots:
     /**
-     * @brief Changes the rewriter to the given @e rewriter
-     * @param rewriter The new rewriter
-     */
-    void setRewriter(QString rewriter);
-    /**
      * @brief Starts the solving process
      * @param specification The specification used during the solving process
      * @param dataExpression The expression that should be solved
@@ -76,7 +69,7 @@ class Solver : public QObject
     void abort();
     
   private:
-    mcrl2::data::rewrite_strategy m_rewrite_strategy;   ///< The currently used rewriter
+    mcrl2::data::rewrite_strategy m_strategy;   ///< The currently used rewriter
     mcrl2::data::data_specification m_data_spec;        ///< The specification that was used last time
     std::set <mcrl2::data::variable > m_global_vars;    ///< The global variables of the last parsed specification
     bool m_parsed;                                      ///< Boolean indicating if the last specification was successfully parsed (used to cache the parsing step)

@@ -34,7 +34,7 @@ void DocumentManager::showEvent(QShowEvent* /*event*/)
 DocumentWidget* DocumentManager::createDocument(QString title)
 {
 
-  DocumentWidget *document = new DocumentWidget(this);
+  DocumentWidget *document = new DocumentWidget(this, m_atermThread, m_strategy);
   addTab(document, title);
 
   emit(documentCreated(document));

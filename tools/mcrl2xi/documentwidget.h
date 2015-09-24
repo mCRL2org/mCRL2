@@ -19,6 +19,9 @@
 #ifndef MCRL2XI_DOCUMENTWIDGET_H
 #define MCRL2XI_DOCUMENTWIDGET_H
 
+#include "rewriter.h"
+#include "solver.h"
+
 #include "mcrl2/gui/numberedtextedit.h"
 
 class DocumentWidget : public mcrl2::gui::qt::NumberedTextEdit
@@ -30,7 +33,10 @@ class DocumentWidget : public mcrl2::gui::qt::NumberedTextEdit
      * @brief Constructor
      * @param parent The parent QWidget for the document
      */
-    DocumentWidget(QWidget *parent = 0);
+    DocumentWidget(QWidget *parent, QThread *atermThread, mcrl2::data::rewrite_strategy strategy);
+
+    Rewriter *rewriter() { return &m_rewriter; }
+    Solver *solver() { return &m_solver; }
 
     /**
      * @brief Returns the filename for this document
@@ -54,6 +60,8 @@ class DocumentWidget : public mcrl2::gui::qt::NumberedTextEdit
 
   private:
     QString m_filename;         ///< The filename currently loaded, null String if none available
+    Rewriter m_rewriter;
+    Solver m_solver;
 };
 
 #endif // MCRL2XI_DOCUMENTWIDGET_H

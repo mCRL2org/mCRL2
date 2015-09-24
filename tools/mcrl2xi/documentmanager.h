@@ -35,6 +35,9 @@ class DocumentManager : public mcrl2::gui::qt::ExtendedTabWidget
      */
     DocumentManager(QWidget *parent = 0);
 
+    void setAtermThread(QThread *atermThread) { m_atermThread = atermThread; }
+    void setRewriteStrategy(mcrl2::data::rewrite_strategy strategy) { m_strategy = strategy; }
+
     /**
      * @brief Creates a new empty tab
      */
@@ -118,6 +121,10 @@ class DocumentManager : public mcrl2::gui::qt::ExtendedTabWidget
      * @brief Overridden function used to guarantee there is at least 1 document at all times
      */
     void showEvent(QShowEvent *event);
+
+  private:
+    QThread *m_atermThread;
+    mcrl2::data::rewrite_strategy m_strategy;
 };
 
 #endif // MCRL2XI_DOCUMENTMANAGER_H
