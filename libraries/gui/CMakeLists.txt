@@ -4,7 +4,6 @@ if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
     SOURCES
       logwidget.ui
       qt_tool.cpp
-      atermthread.cpp
       logwidget.cpp
       extendedtabwidget.cpp
       numberedtextedit.cpp
