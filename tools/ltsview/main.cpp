@@ -39,7 +39,10 @@ class ltsview_tool : public ltsview_base
     {
       qRegisterMetaType<LTS *>("LTS *");
 
-      MainWindow *window = new MainWindow();
+      QThread atermThread;
+      atermThread.start();
+
+      MainWindow *window = new MainWindow(&atermThread);
 
       if (!m_input_filename.empty())
       {

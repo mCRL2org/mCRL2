@@ -50,7 +50,7 @@ class LtsManager : public QObject
   Q_OBJECT
 
   public:
-    LtsManager(QObject *parent, Settings *settings);
+    LtsManager(QObject *parent, Settings *settings, QThread *atermThread);
     LTS *lts() const { return m_lts; }
 
     State *selectedState() const { return m_selectedState; }

@@ -6,7 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/gui/atermthread.h"
 #include "mcrl2/utilities/logger.h"
 #include "ltsmanager.h"
 #include "simulation.h"
@@ -69,7 +68,7 @@ void LtsManagerHelper::positionStates(LTS *lts)
   emit finished();
 }
 
-LtsManager::LtsManager(QObject *parent, Settings *settings):
+LtsManager::LtsManager(QObject *parent, Settings *settings, QThread *atermThread):
   QObject(parent),
   m_helper(settings),
   m_settings(settings),
@@ -78,7 +77,7 @@ LtsManager::LtsManager(QObject *parent, Settings *settings):
   m_selectedState(0),
   m_selectedCluster(0)
 {
-  m_helper.moveToThread(mcrl2::gui::qt::get_aterm_thread());
+  m_helper.moveToThread(atermThread);
 
   connect(&m_helper, SIGNAL(loadingLts()), this, SIGNAL(loadingLts()));
   connect(&m_helper, SIGNAL(rankingStates()), this, SIGNAL(rankingStates()));

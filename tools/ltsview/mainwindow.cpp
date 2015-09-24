@@ -20,12 +20,12 @@
 #include "savepicturedialog.h"
 #include "savevectordialog.h"
 
-MainWindow::MainWindow():
+MainWindow::MainWindow(QThread *atermThread):
   m_fileDialog("", this)
 {
   m_ui.setupUi(this);
 
-  m_ltsManager = new LtsManager(this, &m_settings);
+  m_ltsManager = new LtsManager(this, &m_settings, atermThread);
   m_markManager = new MarkManager(this, m_ltsManager);
 
   m_infoDock = new InfoDock(this, m_ltsManager, m_markManager);

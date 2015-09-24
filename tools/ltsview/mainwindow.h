@@ -12,6 +12,7 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QThread>
 #include "ui_mainwindow.h"
 
 #include "mcrl2/utilities/logger.h"
@@ -33,7 +34,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
   public:
-    MainWindow();
+    MainWindow(QThread *atermThread);
     ~MainWindow();
 
   public slots:
