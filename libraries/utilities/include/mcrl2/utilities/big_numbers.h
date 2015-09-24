@@ -18,6 +18,7 @@
 #ifndef MCRL2_UTILITIES_BIG_NUMBERS_H
 #define MCRL2_UTILITIES_BIG_NUMBERS_H
 
+#include <algorithm>
 #include <limits>
 #include <vector>
 #include <string>
