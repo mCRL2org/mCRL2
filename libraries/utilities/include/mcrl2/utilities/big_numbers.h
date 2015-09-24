@@ -331,9 +331,9 @@ class big_natural_number
       other.is_well_defined();
 
       big_natural_number result;
-      result.m_number.reserve(std::max(m_number.size(),other.m_number.size()));
+      result.m_number.reserve((std::max)(m_number.size(),other.m_number.size()));
       size_t carry=0;
-      for(size_t i=0; i<std::max(m_number.size(),other.m_number.size()); ++i)
+      for(size_t i=0; i < (std::max)(m_number.size(),other.m_number.size()); ++i)
       {
         if (i>=m_number.size())
         {
