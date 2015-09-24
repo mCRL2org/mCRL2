@@ -8,19 +8,18 @@
 
 #include "simulation.h"
 #include <QMetaObject>
-#include "mcrl2/gui/atermthread.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
-Simulation::Simulation(QString filename, mcrl2::data::rewrite_strategy strategy, const bool do_not_use_dummies)
+Simulation::Simulation(QString filename, QThread *atermThread, mcrl2::data::rewrite_strategy strategy, const bool do_not_use_dummies)
   : m_filename(filename),
     m_strategy(strategy),
     m_initialized(false),
     m_do_not_use_dummies(do_not_use_dummies),
     m_simulation(NULL)
 {
-  moveToThread(mcrl2::gui::qt::get_aterm_thread());
+  moveToThread(atermThread);
   QMetaObject::invokeMethod(this, "init", Qt::BlockingQueuedConnection);
 }
 

@@ -15,6 +15,7 @@
 #include <QSemaphore>
 #include <QString>
 #include <QStringList>
+#include <QThread>
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829
 #include "mcrl2/data/rewriter.h"
@@ -41,7 +42,7 @@ class Simulation : public QObject
     typedef QList<TracePosition> Trace;
 
   public:
-    Simulation(QString filename, mcrl2::data::rewrite_strategy strategy, const bool do_not_use_dummies);
+    Simulation(QString filename, QThread *atermThread, mcrl2::data::rewrite_strategy strategy, const bool do_not_use_dummies);
     ~Simulation() { delete m_simulation; }
     bool initialized() const { return m_initialized; }
     const QStringList &parameters() const { return m_parameters; }

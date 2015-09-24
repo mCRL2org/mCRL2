@@ -12,6 +12,7 @@
 #include <QMainWindow>
 #include <QSemaphore>
 #include <QTimer>
+#include <QThread>
 #include "ui_mainwindow.h"
 
 #ifndef Q_MOC_RUN // Workaround for QTBUG-22829
@@ -28,7 +29,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
   public:
-    MainWindow(mcrl2::data::rewrite_strategy strategy,const bool do_not_use_dummies);
+    MainWindow(QThread *aterm_thread, mcrl2::data::rewrite_strategy strategy, bool do_not_use_dummies);
     ~MainWindow();
 
   protected slots:
@@ -68,6 +69,7 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow m_ui;
+    QThread *m_atermThread;
     mcrl2::data::rewrite_strategy m_strategy;
     Simulation *m_simulation;
     Simulation::Trace m_trace;

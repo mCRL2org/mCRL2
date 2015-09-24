@@ -44,7 +44,10 @@ class lpsxsim_tool : public lpsxsim_base
     {
       qRegisterMetaType<QSemaphore *>("QSemaphore *");
 
-      MainWindow *window = new MainWindow(rewrite_strategy(),m_do_not_use_dummies);
+      QThread atermThread;
+      atermThread.start();
+
+      MainWindow *window = new MainWindow(&atermThread, rewrite_strategy(), m_do_not_use_dummies);
 
       if (!m_input_filename.empty())
       {
