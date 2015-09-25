@@ -21,8 +21,6 @@ namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
 
 /** \brief Contains empty state values, used for lts's without state valued.
  *  \details Empty state values are used in labelled transition
@@ -46,8 +44,6 @@ class state_label_empty
       return !(*this==other);
     }
 };
-
-} // namespace detail
 
 } // namespace lts
 } // namespace mcrl2

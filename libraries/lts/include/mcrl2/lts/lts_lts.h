@@ -39,10 +39,6 @@ namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
-
-extern std::vector < atermpp::function_symbol > state_function_symbols;
 
 /** \brief This class contains state labels for an labelled transition system in .lts format.
     \details A state label in .lts format consists of balanced tree of data expressions.
@@ -61,7 +57,7 @@ class state_label_lts : public atermpp::term_balanced_tree< data::data_expressio
     */
     state_label_lts(const mcrl2::data::data_expression_list& l)
       : term_balanced_tree<data::data_expression>(l.begin(),l.size())
-    {} 
+    {}
 
     /** \brief Construct a state label out of a data_expression_vector.
     */
@@ -83,7 +79,7 @@ class state_label_lts : public atermpp::term_balanced_tree< data::data_expressio
     {
       assert(i<size());
       return atermpp::term_balanced_tree<mcrl2::data::data_expression>::operator[](i);
-    } 
+    }
 
     /** \brief Set the i-th element of this state label to the indicated value.
         \param[in] e The expression to which the i-th element must be set.
@@ -206,16 +202,12 @@ inline action_label_lts parse_lts_action(
   return action_label_lts(atermpp::aterm_appl(core::detail::function_symbol_MultAct(), ma.actions()));
 }
 
-
-} // namespace detail
-
-
 /** \brief This class contains labelled transition systems in .lts format.
     \details In this .lts format, an action label is a multi action, and a
            state label is an expression of the form STATE(t1,...,tn) where
            ti are data expressions.
 */
-class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts, data::data_expression >
+class lts_lts_t : public lts< state_label_lts, action_label_lts, data::data_expression >
 {
 
   private:
@@ -246,7 +238,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts,
 
     /** \brief Copy constructor */
     lts_lts_t(const lts_lts_t& l):
-      lts< detail::state_label_lts, detail::action_label_lts, data::data_expression >(l),
+      lts< state_label_lts, action_label_lts, data::data_expression >(l),
       m_has_valid_data_spec(l.m_has_valid_data_spec),
       m_data_spec(l.m_data_spec),
       m_has_valid_parameters(l.m_has_valid_parameters),
@@ -263,7 +255,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts,
     /** \brief Swap function for this lts. */
     void swap(lts_lts_t& l)
     {
-      lts< detail::state_label_lts, detail::action_label_lts, data::data_expression >::swap(l);
+      lts< state_label_lts, action_label_lts, data::data_expression >::swap(l);
 
       {
         const bool aux=m_has_valid_data_spec;

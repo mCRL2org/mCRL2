@@ -41,8 +41,6 @@ namespace lts
 namespace detail
 {
 
-std::vector < atermpp::function_symbol > state_function_symbols;
-
 lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
 {
   string::size_type pos = s.find_last_of('.');
@@ -92,7 +90,7 @@ static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot" };
 
 static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot" };
 
-static std::string type_desc_strings[] = { 
+static std::string type_desc_strings[] = {
     "unknown LTS format",
     "mCRL2 LTS format",
     "Aldebaran format (CADP)",

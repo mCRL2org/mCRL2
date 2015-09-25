@@ -266,7 +266,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           {
             std::pair<size_t, bool> put_result = labs.put(t);
             label_index = put_result.first;
-            m_lts.add_action(mcrl2::lts::detail::action_label_string(t.label().name()),false);
+            m_lts.add_action(mcrl2::lts::action_label_string(t.label().name()),false);
           }
 
           switch (m_translation)
@@ -324,7 +324,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           {
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;
-            m_lts.add_action(mcrl2::lts::detail::action_label_string(t.label().name()),label.str()=="tau");
+            m_lts.add_action(mcrl2::lts::action_label_string(t.label().name()),label.str()=="tau");
           }
           m_lts.add_transition(lts::transition(from,label_index,to));
         }

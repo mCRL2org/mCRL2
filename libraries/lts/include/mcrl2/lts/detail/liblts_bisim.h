@@ -847,7 +847,7 @@ class bisim_partitioner
         // The counter trace is simply the label l.
         mcrl2::trace::Trace counter_trace;
         counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
-                                mcrl2::process::action_label(core::identifier_string(mcrl2::lts::detail::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
+                                mcrl2::process::action_label(core::identifier_string(mcrl2::lts::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
                                 mcrl2::data::data_expression_list())));
         resulting_counter_traces.insert(counter_trace);
       }
@@ -867,7 +867,7 @@ class bisim_partitioner
             {
                mcrl2::trace::Trace new_counter_trace;
               new_counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
-                                mcrl2::process::action_label(core::identifier_string(mcrl2::lts::detail::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
+                                mcrl2::process::action_label(core::identifier_string(mcrl2::lts::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
                                 mcrl2::data::data_expression_list())));
               mcrl2::trace::Trace old_counter_trace=*j;
               old_counter_trace.resetPosition();

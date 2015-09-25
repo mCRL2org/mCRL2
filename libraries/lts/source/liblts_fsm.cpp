@@ -106,7 +106,7 @@ static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
     }
     // correct state numbering
     os << from+1 << " " << to+1 << " \"";
-    os << mcrl2::lts::detail::pp(l.action_label(t->label()));
+    os << mcrl2::lts::pp(l.action_label(t->label()));
     os << "\"" << std::endl;
   }
 }

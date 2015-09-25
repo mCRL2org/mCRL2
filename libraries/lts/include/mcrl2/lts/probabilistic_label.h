@@ -31,14 +31,12 @@ namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
 
 /** \brief This class contains labels for probabilistic transistions, consisting of a numerator and a denumerator.
  *  \details There are methods to add and subtract such labels. The numbers are used as 64 bit integers.
  *           If the integers do not fit into 64 bit, the numerator and denumerator are adapted to make
  *           them fit. This means that this library is not exact, but employs rounding at times.
- *           
+ *
  */
 class probabilistic_label
 {
@@ -63,7 +61,7 @@ class probabilistic_label
       {
         const number_t temp=x; x=y; y=temp; // swap(x,y)
       }
-     
+
       number_t remainder=y % x;
       while (remainder!=0)
       {
@@ -109,7 +107,7 @@ class probabilistic_label
     probabilistic_label(const std::string& enumerator, const std::string& denominator)
     {
       assert(enumerator.size() <= denominator.size());
-      
+
       // Check whether the denominator fits in number_t.
       if (denominator.size() >= (size_t)std::numeric_limits<number_t>::digits10)
       {
@@ -205,7 +203,7 @@ class probabilistic_label
       return probabilistic_label(enumerator,denominator);
     }
 
-    
+
     /* \brief Standard subtraction operator.
      */
     probabilistic_label operator-(const probabilistic_label& other) const
@@ -226,8 +224,6 @@ inline std::string pp(const probabilistic_label& l)
   s << l.enumerator() << "/" << l.denominator();
   return s.str();
 }
-
-} // namespace detail
 
 } // namespace lts
 } // namespace mcrl2

@@ -166,29 +166,29 @@ namespace Graph
 
 
     template <>
-    QString GraphImplBase::transitionLabel<mcrl2::lts::detail::action_label_lts>(const mcrl2::lts::detail::action_label_lts& label)
+    QString GraphImplBase::transitionLabel<mcrl2::lts::action_label_lts>(const mcrl2::lts::action_label_lts& label)
     {
-      return QString::fromStdString(mcrl2::lts::detail::pp(label));
+      return QString::fromStdString(mcrl2::lts::pp(label));
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_lts>(const mcrl2::lts::detail::state_label_lts& label)
+    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_lts>(const mcrl2::lts::state_label_lts& label)
     {
-      return QString::fromStdString(mcrl2::lts::detail::pp(label));
+      return QString::fromStdString(mcrl2::lts::pp(label));
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_empty>(const mcrl2::lts::detail::state_label_empty& /*label*/)
+    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_empty>(const mcrl2::lts::state_label_empty& /*label*/)
     {
       return QString("");
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_dot>(const mcrl2::lts::detail::state_label_dot& label)
+    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_dot>(const mcrl2::lts::state_label_dot& label)
     {
-      return QString::fromStdString(mcrl2::lts::detail::pp(label));
+      return QString::fromStdString(mcrl2::lts::pp(label));
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::detail::state_label_fsm>(const mcrl2::lts::detail::state_label_fsm& label)
+    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_fsm>(const mcrl2::lts::state_label_fsm& label)
     {
-      return QString::fromStdString(mcrl2::lts::detail::pp(label));
+      return QString::fromStdString(mcrl2::lts::pp(label));
     }
 
   }

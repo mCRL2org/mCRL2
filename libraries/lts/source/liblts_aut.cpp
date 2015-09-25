@@ -21,10 +21,10 @@ class state_probability_pair
 {
   protected:
     size_t m_state;
-    detail::probabilistic_arbitrary_size_label m_probability;
+    probabilistic_arbitrary_size_label m_probability;
 
   public:
-    state_probability_pair(const size_t state, const detail::probabilistic_arbitrary_size_label& probability)
+    state_probability_pair(const size_t state, const probabilistic_arbitrary_size_label& probability)
      : m_state(state),
        m_probability(probability)
     {}
@@ -34,7 +34,7 @@ class state_probability_pair
       return m_state;
     }
 
-    const detail::probabilistic_arbitrary_size_label& probability() const
+    const probabilistic_arbitrary_size_label& probability() const
     {
       return m_probability;
     }
@@ -86,7 +86,7 @@ static void read_natural_number_to_string(istream& is, string& s, const size_t l
   for( ; isdigit(ch) ; is.get(ch))
   {
     s.push_back(ch);
-  } 
+  }
   is.putback(ch);
   if (s.empty())
   {
@@ -95,13 +95,13 @@ static void read_natural_number_to_string(istream& is, string& s, const size_t l
 }
 
 static size_t find_probabilistic_label_index(
-                  const detail::probabilistic_arbitrary_size_label& s, 
-                  map < detail::probabilistic_arbitrary_size_label, size_t >& labs, 
+                  const probabilistic_arbitrary_size_label& s,
+                  map < probabilistic_arbitrary_size_label, size_t >& labs,
                   lts_aut_t& l)
 {
   size_t label;
 
-  const map < detail::probabilistic_arbitrary_size_label, size_t >::const_iterator i=labs.find(s);
+  const map < probabilistic_arbitrary_size_label, size_t >::const_iterator i=labs.find(s);
   if (i==labs.end())
   {
     label=l.add_probabilistic_label(s);
@@ -131,7 +131,7 @@ static size_t find_label_index(const string& s, map < string, size_t >& labs, lt
   return label;
 }
 
-void static add_state(size_t& state, 
+void static add_state(size_t& state,
                       map <size_t,size_t>& state_number_translator,
                       lts_aut_t& l,
                       const bool is_probabilistic=false)
@@ -149,7 +149,7 @@ void static add_state(size_t& state,
     state=new_state_number;
   }
   else
-  { 
+  {
     // found.
     state=j->second;
     assert(l.is_probabilistic(state)==is_probabilistic);
@@ -159,8 +159,8 @@ void static add_state(size_t& state,
 
 // This procedure tries to read states, indicated by numbers
 // with in between fractions of the shape number/number. The
-// last state number is put in state. The remainder as pairs 
-// in the vector. Typical expected input is 3 2/3 4 1/6 78 1/6 3. 
+// last state number is put in state. The remainder as pairs
+// in the vector. Typical expected input is 3 2/3 4 1/6 78 1/6 3.
 static void read_probabilistic_state(
   istream& is,
   vector<state_probability_pair>& additional_probabilistic_states,
@@ -202,7 +202,7 @@ static void read_probabilistic_state(
 
       string denominator;
       read_natural_number_to_string(is,denominator,lineno);
-      additional_probabilistic_states.push_back(state_probability_pair(state,detail::probabilistic_arbitrary_size_label(enumerator,denominator)));
+      additional_probabilistic_states.push_back(state_probability_pair(state, probabilistic_arbitrary_size_label(enumerator,denominator)));
     }
   }
 }
@@ -355,14 +355,14 @@ static void read_from_aut(lts_aut_t& l, istream& is)
   // l.clear_transitions(ntrans); // Reserve enough space for the transitions.
   l.clear();
   map < string, size_t > action_labels;
-  map < detail::probabilistic_arbitrary_size_label, size_t > probabilistic_labels;
+  map < probabilistic_arbitrary_size_label, size_t > probabilistic_labels;
 
   // state_number_translator[initial_state]=0;
   // initial_state=0;
   // l.set_initial_state(initial_state);
 
-  if (additional_probabilistic_states.size()==0) 
-  { 
+  if (additional_probabilistic_states.size()==0)
+  {
     // This is not a probabilistic state.
     add_state(initial_state,state_number_translator,l);
     assert(initial_state==0);
@@ -375,7 +375,7 @@ static void read_from_aut(lts_aut_t& l, istream& is)
     add_state(probabilistic_node,state_number_translator,l,true);
     assert(probabilistic_node==0);
     l.set_initial_state(probabilistic_node);
-    detail::probabilistic_arbitrary_size_label remaining_probability("1","1");
+    probabilistic_arbitrary_size_label remaining_probability("1","1");
     for(vector<state_probability_pair>::const_iterator i=additional_probabilistic_states.begin();
             i!=additional_probabilistic_states.end(); ++i)
     {
@@ -408,8 +408,8 @@ static void read_from_aut(lts_aut_t& l, istream& is)
 
     add_state(from,state_number_translator,l);
 
-    if (additional_probabilistic_states.size()==0) 
-    { 
+    if (additional_probabilistic_states.size()==0)
+    {
       // This is not a probabilistic state.
       add_state(to,state_number_translator,l);
       l.add_transition(transition(from,find_label_index(s,action_labels,l),to));
@@ -420,7 +420,7 @@ static void read_from_aut(lts_aut_t& l, istream& is)
       number_of_probabilistic_nodes++;
       add_state(probabilistic_node,state_number_translator,l,true);
       l.add_transition(transition(from,find_label_index(s,action_labels,l),probabilistic_node));
-      detail::probabilistic_arbitrary_size_label remaining_probability("1","1");
+      probabilistic_arbitrary_size_label remaining_probability("1","1");
       for(vector<state_probability_pair>::const_iterator i=additional_probabilistic_states.begin();
               i!=additional_probabilistic_states.end(); ++i)
       {
@@ -463,11 +463,11 @@ static void write_state(const size_t state, ostream& os, const lts_aut_t& l, con
       if (t.from()==state)
       {
         os << previous_label << state_mapping.at(t.to());
-        previous_label=" " + detail::pp(l.probabilistic_label(t.label())) + " ";
+        previous_label=" " + pp(l.probabilistic_label(t.label())) + " ";
       }
     }
   }
-  else 
+  else
   {
     os << state_mapping.at(state);
   }
@@ -478,7 +478,7 @@ static void write_to_aut(const lts_aut_t& l, ostream& os)
   // First construct a state mapping, giving non probabilistic states
   // a consecutive numbering.
   std::map<size_t,size_t> state_mapping;
-  if (!l.is_probabilistic(l.initial_state())) 
+  if (!l.is_probabilistic(l.initial_state()))
   {
     state_mapping[l.initial_state()]=0;
   }
@@ -495,7 +495,7 @@ static void write_to_aut(const lts_aut_t& l, ostream& os)
 
   // Only transitions from non probabilistic states are stored in a .aut
   // file. So, we must first count them.
-  
+
   size_t num_non_probabilistic_transitions=0;
   for (const transition& t:l.get_transitions())
   {
@@ -513,7 +513,7 @@ static void write_to_aut(const lts_aut_t& l, ostream& os)
     {
       os << "(";
       write_state(t.from(),os,l,state_mapping);
-      os << ",\"" << detail::pp(l.action_label(t.label())) << "\",";
+      os << ",\"" << pp(l.action_label(t.label())) << "\",";
       write_state(t.to(),os,l,state_mapping);
       os << ")" << endl;
     }

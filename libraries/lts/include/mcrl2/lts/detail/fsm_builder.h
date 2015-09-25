@@ -195,7 +195,7 @@ struct fsm_builder
 
   void add_state(const std::vector<std::size_t>& values)
   {
-    fsm.add_state(detail::state_label_fsm(values));
+    fsm.add_state(state_label_fsm(values));
   }
 
   void add_parameter(const std::string& name, const std::string& cardinality, const std::string& sort, const std::vector<std::string>& domain_values)

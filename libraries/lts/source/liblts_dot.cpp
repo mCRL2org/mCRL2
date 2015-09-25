@@ -78,12 +78,12 @@ void lts_dot_t::save(std::ostream& os) const
     if (has_state_info())
     {
       os << state_label(t->from()).name() << "->" << state_label(t->to()).name() << "[label=\"" <<
-         mcrl2::lts::detail::pp(action_label(t->label())) << "\"];" << endl;
+         mcrl2::lts::pp(action_label(t->label())) << "\"];" << endl;
     }
     else
     {
       os << "S" << t->from() << " -> " << "S" << t->to() << "[label=\"" <<
-         mcrl2::lts::detail::pp(action_label(t->label())) << "\"];" << endl;
+         mcrl2::lts::pp(action_label(t->label())) << "\"];" << endl;
     }
   }
 

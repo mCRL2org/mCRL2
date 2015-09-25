@@ -35,7 +35,7 @@ namespace lts
  *  system format. There are no state labels, only transition labels which are plain
  *  strings.
  */
-class lts_aut_t : public lts< detail::state_label_empty, detail::action_label_string, detail::probabilistic_arbitrary_size_label>
+class lts_aut_t : public lts< state_label_empty, action_label_string, probabilistic_arbitrary_size_label>
 {
   public:
 

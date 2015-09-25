@@ -69,7 +69,7 @@ enum lts_type
         a separate variable.
 */
 
-template < class STATE_LABEL_T, class ACTION_LABEL_T, class PROBABILISTIC_LABEL_T = detail::probabilistic_label>
+template < class STATE_LABEL_T, class ACTION_LABEL_T, class PROBABILISTIC_LABEL_T = probabilistic_label>
 class lts
 {
   public:

@@ -396,7 +396,7 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
   for (l = 0; l < aut.num_action_labels(); ++l)
   {
     mCRL2log(log::debug) << "---------------------------------------------------" << std::endl;
-    mCRL2log(log::debug) << "Label = \"" << mcrl2::lts::detail::pp(aut.action_label(l)) << "\"" << std::endl;
+    mCRL2log(log::debug) << "Label = \"" << mcrl2::lts::pp(aut.action_label(l)) << "\"" << std::endl;
 
     /* reset the stable function */
     stable.assign(s_Pi,v_false);
@@ -1068,7 +1068,7 @@ std::string sim_partitioner<LTS_TYPE>::print_structure(hash_table3* struc)
   hash_table3_iterator i(struc);
   for (; !i.is_end(); ++i)
   {
-    result << "(" << i.get_x() << "," << mcrl2::lts::detail::pp(aut.action_label(i.get_y()))
+    result << "(" << i.get_x() << "," << mcrl2::lts::pp(aut.action_label(i.get_y()))
            << "," << i.get_z() << "),";
   }
   result << "}";

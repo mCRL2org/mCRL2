@@ -32,8 +32,7 @@ namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
+
 /** \brief This class contains labels for states in dot format.
    \details A dot state label consists of two strings, the name of a state and a separate label.
 */
@@ -106,13 +105,11 @@ inline std::string pp(const state_label_dot& l)
 {
   return l.label();
 }
-} // namespace detail
-
 
 /** \brief A class to contain labelled transition systems in graphviz format.
     \details Action labels are strings, and state labels are pairs with a name field
              and an action fields. */
-class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_string, detail::probabilistic_arbitrary_size_label >
+class lts_dot_t : public lts< state_label_dot, action_label_string, probabilistic_arbitrary_size_label >
 {
 
   public:
@@ -131,10 +128,10 @@ class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_stri
     {
       throw mcrl2::runtime_error("The DOT file format is no longer supported as input file format.");
     }
-    
+
     /** \brief Save the labelled transition system to a stream.
      *  \param[in] stream Stream which to write the lts to.
-     */   
+     */
     void save(std::ostream& os) const;
 
     /** \brief Save the labelled transition system to a file.

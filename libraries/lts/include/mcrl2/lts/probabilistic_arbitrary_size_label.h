@@ -32,13 +32,9 @@ namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
-
-
 
 /** \brief This class contains labels for probabilistic transistions, consisting of a numerator and a denominator
- *         as a string of digits. 
+ *         as a string of digits.
  */
 class probabilistic_arbitrary_size_label
 {
@@ -102,7 +98,7 @@ class probabilistic_arbitrary_size_label
     bool operator!=(const probabilistic_arbitrary_size_label& other) const
     {
       return !this->operator==(other);
-    } 
+    }
 
     /* \brief Standard comparison operator.
     */
@@ -153,7 +149,7 @@ class probabilistic_arbitrary_size_label
       utilities::big_natural_number denominator=this->denominator()*other.denominator();
       remove_common_factors(enumerator,denominator);
       return probabilistic_arbitrary_size_label(enumerator,denominator);
-    } 
+    }
 
     /* \brief Standard multiplication operator.
      */
@@ -177,7 +173,7 @@ class probabilistic_arbitrary_size_label
 
     // An algorithm to calculate the greatest common divisor
     // The arguments are intentionally passed by value.
-    static utilities::big_natural_number greatest_common_divisor(utilities::big_natural_number x, utilities::big_natural_number y) 
+    static utilities::big_natural_number greatest_common_divisor(utilities::big_natural_number x, utilities::big_natural_number y)
     {
       if (x.is_zero()) return y;
       if (y.is_zero()) return x;
@@ -185,7 +181,7 @@ class probabilistic_arbitrary_size_label
       {
         utilities::swap(x,y);
       }
-    
+
       utilities::big_natural_number remainder=y % x;
       while (remainder!=0)
       {
@@ -195,7 +191,7 @@ class probabilistic_arbitrary_size_label
       }
       return x;
     }
-    
+
     static void remove_common_factors(utilities::big_natural_number& enumerator, utilities::big_natural_number& denominator)
     {
       utilities::big_natural_number gcd=greatest_common_divisor(enumerator,denominator);
@@ -215,8 +211,6 @@ inline std::string pp(const probabilistic_arbitrary_size_label& l)
   s << l.enumerator() << "/" << l.denominator();
   return s.str();
 }
-
-} // namespace detail
 
 } // namespace lts
 } // namespace mcrl2

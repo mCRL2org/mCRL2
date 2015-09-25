@@ -30,8 +30,6 @@ namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
 
 /** \brief This class contains strings to be used as values for action labels in lts's.
  *  \details These action labels are used in the aut, fsm, and dot format to represent
@@ -126,8 +124,6 @@ inline std::string pp(const action_label_string& l)
 {
   return l;
 }
-
-} // namespace detail
 
 } // namespace lts
 } // namespace mcrl2

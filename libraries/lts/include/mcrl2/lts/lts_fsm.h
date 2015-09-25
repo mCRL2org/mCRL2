@@ -30,8 +30,7 @@ namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
+
 /** \brief This class contains state labels for the fsm format.
     \details An fsm state label is just a vector of integers. There is an array m_state_element
              values that contains strings corresponding to the integers in the vector.
@@ -74,8 +73,6 @@ inline std::string pp(const state_label_fsm l)
   s += ")";
   return s;
 }
-} // namespace detail
-
 
 /** \brief The class lts_fsm_t contains labelled transition systems in .fsm format.
     \details The .fsm format consists of an labelled transition system where the
@@ -83,10 +80,10 @@ inline std::string pp(const state_label_fsm l)
              The integers at position i corresponds to a string, which are maintained
              in a separate vector for memory efficiency.
 */
-class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_string, detail::probabilistic_arbitrary_size_label >
+class lts_fsm_t : public lts< state_label_fsm, action_label_string, probabilistic_arbitrary_size_label >
 {
   protected:
-    typedef lts< detail::state_label_fsm, detail::action_label_string, detail::probabilistic_arbitrary_size_label > super;
+    typedef lts< state_label_fsm, action_label_string, probabilistic_arbitrary_size_label > super;
 
     /** \brief state_element_values contain the values that can occur at the i-th
        position of a state label */
