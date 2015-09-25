@@ -651,17 +651,14 @@ void get_trans(std::multimap < transition::size_type, std::pair < transition::si
 template <class LTS_TYPE>
 void determinise(LTS_TYPE& l)
 {
-  using namespace std;
-  using namespace mcrl2::core;
-
   tree_set_store* tss = new tree_set_store();
 
-  vector<transition> d_transs;
-  vector<ptrdiff_t> d_states;
+  std::vector<transition> d_transs;
+  std::vector<std::ptrdiff_t> d_states;
 
   // create the initial state of the DLTS
   d_states.push_back(l.initial_state());
-  ptrdiff_t d_id = tss->set_set_tag(tss->create_set(d_states));
+  std::ptrdiff_t d_id = tss->set_set_tag(tss->create_set(d_states));
   d_states.clear();
 
   std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
