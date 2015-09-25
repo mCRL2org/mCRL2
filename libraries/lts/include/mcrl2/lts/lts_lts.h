@@ -156,9 +156,6 @@ class action_label_lts:public mcrl2::lps::multi_action
     */
     bool hide_actions(const std::vector<std::string>& tau_actions)
     {
-      using namespace std;
-      using namespace mcrl2::lps;
-
       const process::action_list mas = this->actions();
       process::action_list new_action_list;
       for (process::action_list:: const_iterator i=mas.begin(); i!=mas.end(); ++i)
@@ -166,7 +163,7 @@ class action_label_lts:public mcrl2::lps::multi_action
         const process::action a=*i;
 
         if (std::find(tau_actions.begin(),tau_actions.end(),
-                      string(a.label().name()))==tau_actions.end())  // this action must not be hidden.
+                      std::string(a.label().name()))==tau_actions.end())  // this action must not be hidden.
         {
           new_action_list.push_front(a);
         }
