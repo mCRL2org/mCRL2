@@ -5,7 +5,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mcrl2/utilities/toolset_version_const.
 
 add_mcrl2_library(utilities
   INSTALL_HEADERS TRUE
-  NOTEST     ## The utilities must also be tested. So, this line ought to be removed.
   SOURCES
     command_line_interface.cpp
     logger.cpp
