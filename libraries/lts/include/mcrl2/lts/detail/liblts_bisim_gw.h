@@ -258,8 +258,7 @@ class sized_forward_list : public std::forward_list < T* >
     // clear the list in constant time
     void constant_clear() 
     {
-      std::forward_list < T* > empty;
-      parent::swap(empty); 
+      parent::operator=(parent()); // Clear the forward list. This operation is linear in the length of the list.
       m_list_size = 0;
       m_last = parent::before_begin();
     }
@@ -326,15 +325,6 @@ public:
         is_in_P_detect2(false), 
         is_in_Lp_detect2(false) 
      { 
-       // Ttgt = new std::vector <transition_T*>; 
-       // Tsrc = new std::vector <transition_T*>;
-     }
-
-     // destructor
-     ~state_T() 
-     {
-       // deleteobject(Ttgt); 
-       // deleteobject(Tsrc);
      }
 };
 
@@ -369,7 +359,7 @@ struct constellation_T
      // size in number of states
      size_t size;
      // list of blocks
-     sized_forward_list < block_T >* blocks;
+     sized_forward_list < block_T > blocks;
      // type of constellation
      size_t type;
      
@@ -383,12 +373,6 @@ struct constellation_T
         size(0), 
         type(TRIVIAL) 
      { 
-       blocks = new sized_forward_list < block_T >;
-     }
-     // destructor
-     ~constellation_T() 
-     {
-       deleteobject(blocks);
      }
 };
 
@@ -398,7 +382,7 @@ struct to_constlns_element_T
      // !!! Not present in pseudo-code: a pointer to the list of transitions from block containing this element (in to_constlns list) to constellation C,
      // EXCLUDING the inert transitions, i.e., the transitions must leave the source block;
      // This is needed to efficiently find these transitions when preparing for lockstep search detect1 when stabilising blocks
-     sized_forward_list < transition_T > *trans_list;
+     sized_forward_list < transition_T > trans_list;
      // !!! Different from pseudo-code: nr_trans_block_to_C is not needed: trans_list points to the list of transitions, and its size equals nr_trans_block_to_C
      //size_t nr_trans_block_to_C = 0;
      struct to_constlns_element_T *new_element;
@@ -411,49 +395,52 @@ struct to_constlns_element_T
      std::forward_list<to_constlns_element_T* >::iterator ptr_in_list;
      
      // constructor
-     to_constlns_element_T(constellation_T *CC): C(CC), new_element(NULL), SClist(NULL) {trans_list = new sized_forward_list < transition_T >;}
-     // destructor
-     ~to_constlns_element_T() {delete(trans_list);}
+     to_constlns_element_T(constellation_T *CC)
+      : C(CC), 
+        new_element(NULL), 
+        SClist(NULL) 
+     {}
 };
 
 struct block_T
 {
-     // ID of block
-     block_type id;
-     // type of block
-     block_type type;
-     // constellation C containing B
-     constellation_T *constellation;
-     // list of bottom states
-     sized_forward_list < state_T >* btm_states;
-     // list of non-bottom states
-     sized_forward_list < state_T >* non_btm_states;
-     // list of constellations reachable from block
-     sized_forward_list < to_constlns_element_T >* to_constlns;
-     // marked bottom states
-     sized_forward_list < state_T >* marked_btm_states;
-     // marked non-bottom states
-     sized_forward_list < state_T >* marked_non_btm_states;
-     // different from pseudo-code: instead of list of transitions from state in block to constellation on which splitting is done, we have a pointer to a to_constlns object containing such a list
-     to_constlns_element_T* constln_ref;
-     // different from pseudo-code: as above, now for list of transitions from state in block to (constellation \ block) on which splitting is done
-     to_constlns_element_T* coconstln_ref;
-     // different from pseudo-code: this pointer is used to find in constant time the element in to_constlns that belongs to the constellation
-     // of which the current block is a member. This is needed to allow inert transitions when becoming non-inert to be added to the associated
-     // trans_list in constant time.
-     to_constlns_element_T* inconstln_ref;
-     // list of new bottom states
-     sized_forward_list < state_T >* new_btm_states;
-     
-     // ADDITIONAL INFO to keep track of where the block is listed in a constellation.blocks
-     // list
-     // typename
-     std::forward_list<block_T*>::iterator ptr_in_list;
-     
-     // constructor
-     block_T(): constellation(NULL), constln_ref(NULL), coconstln_ref(NULL), inconstln_ref(NULL) {btm_states = new sized_forward_list < state_T >; non_btm_states = new sized_forward_list < state_T >; to_constlns = new sized_forward_list < to_constlns_element_T >; marked_btm_states = new sized_forward_list < state_T >; marked_non_btm_states = new sized_forward_list < state_T >; new_btm_states = new sized_forward_list < state_T >;}
-     // destructor
-     ~block_T() {deleteobject(btm_states); deleteobject(non_btm_states); deleteobject(to_constlns); deleteobject(marked_btm_states); deleteobject(marked_non_btm_states); deleteobject(new_btm_states);}
+  // ID of block
+  block_type id;
+  // type of block
+  block_type type;
+  // constellation C containing B
+  constellation_T *constellation;
+  // list of bottom states
+  sized_forward_list < state_T > btm_states;
+  // list of non-bottom states
+  sized_forward_list < state_T > non_btm_states;
+  // list of constellations reachable from block
+  sized_forward_list < to_constlns_element_T > to_constlns;
+  // marked bottom states
+  sized_forward_list < state_T > marked_btm_states;
+  // marked non-bottom states
+  sized_forward_list < state_T > marked_non_btm_states;
+  // different from pseudo-code: instead of list of transitions from state in block to constellation on which splitting is done, we have a pointer to a to_constlns object containing such a list
+  to_constlns_element_T* constln_ref;
+  // different from pseudo-code: as above, now for list of transitions from state in block to (constellation \ block) on which splitting is done
+  to_constlns_element_T* coconstln_ref;
+  // different from pseudo-code: this pointer is used to find in constant time the element in to_constlns that belongs to the constellation
+  // of which the current block is a member. This is needed to allow inert transitions when becoming non-inert to be added to the associated
+  // trans_list in constant time.
+  to_constlns_element_T* inconstln_ref;
+  // list of new bottom states
+  sized_forward_list < state_T > new_btm_states;
+  
+  // ADDITIONAL INFO to keep track of where the block is listed in a constellation.blocks
+  // list
+  // typename
+  std::forward_list<block_T*>::iterator ptr_in_list;
+  
+  // constructor
+  block_T()
+   : constellation(NULL), constln_ref(NULL), coconstln_ref(NULL), inconstln_ref(NULL) 
+  { 
+  }
 };
 
 template < class LTS_TYPE>
@@ -486,20 +473,20 @@ void move_state_to_block(state_T* s, block_T* B)
 {
      switch (s->type) {
           case BTM_STATE:
-               s->block->btm_states->remove_linked(s);
-               B->btm_states->insert_linked(s);
+               s->block->btm_states.remove_linked(s);
+               B->btm_states.insert_linked(s);
                break;
           case NON_BTM_STATE:
-               s->block->non_btm_states->remove_linked(s);
-               B->non_btm_states->insert_linked(s);
+               s->block->non_btm_states.remove_linked(s);
+               B->non_btm_states.insert_linked(s);
                break;
           case MARKED_BTM_STATE:
-               s->block->marked_btm_states->remove_linked(s);
-               B->marked_btm_states->insert_linked(s);
+               s->block->marked_btm_states.remove_linked(s);
+               B->marked_btm_states.insert_linked(s);
                break;
           case MARKED_NON_BTM_STATE:
-               s->block->marked_non_btm_states->remove_linked(s);
-               B->marked_non_btm_states->insert_linked(s);
+               s->block->marked_non_btm_states.remove_linked(s);
+               B->marked_non_btm_states.insert_linked(s);
      }
      s->block = B;
 }
@@ -512,7 +499,7 @@ size_t size(to_constlns_element_T* l)
           return 0;
      }
      else {
-          return l->trans_list->size();
+          return l->trans_list.size();
      }
 }
 
@@ -522,28 +509,28 @@ bool iterating_non_bottom2;
 
 std::forward_list < state_T* >::iterator unmarked_states_begin(block_T* B)
 {
-     if (B->btm_states->size() > 0) {
+     if (B->btm_states.size() > 0) {
           iterating_non_bottom2 = false;
-          return B->btm_states->begin();
+          return B->btm_states.begin();
      }
      else {
           iterating_non_bottom2 = true;
-          return B->non_btm_states->begin();
+          return B->non_btm_states.begin();
      }
 }
 
 std::forward_list < state_T* >::iterator unmarked_states_end(block_T* B)
 {
-     return B->non_btm_states->end();
+     return B->non_btm_states.end();
 }
 
 std::forward_list < state_T* >::iterator unmarked_states_next(block_T* B, std::forward_list < state_T* >::iterator it)
 {
      auto tmpit = it;
      ++tmpit;
-     if (!iterating_non_bottom2 && tmpit == B->btm_states->end()) {
+     if (!iterating_non_bottom2 && tmpit == B->btm_states.end()) {
           iterating_non_bottom2 = true;
-          tmpit = B->non_btm_states->begin();
+          tmpit = B->non_btm_states.begin();
      }
      return tmpit;
 }
@@ -551,28 +538,28 @@ std::forward_list < state_T* >::iterator unmarked_states_next(block_T* B, std::f
 // iterator functions to iterate over all marked states of a given block
 std::forward_list < state_T* >::iterator marked_states_begin(block_T* B)
 {
-     if (B->marked_btm_states->size() > 0) {
+     if (B->marked_btm_states.size() > 0) {
           iterating_non_bottom2 = false;
-          return B->marked_btm_states->begin();
+          return B->marked_btm_states.begin();
      }
      else {
           iterating_non_bottom2 = true;
-          return B->marked_non_btm_states->begin();
+          return B->marked_non_btm_states.begin();
      }
 }
 
 std::forward_list < state_T* >::iterator marked_states_end(block_T* B)
 {
-     return B->marked_non_btm_states->end();
+     return B->marked_non_btm_states.end();
 }
 
 std::forward_list < state_T* >::iterator marked_states_next(block_T* B, std::forward_list < state_T* >::iterator it)
 {
      auto tmpit = it;
      ++tmpit;
-     if (!iterating_non_bottom2 && tmpit == B->marked_btm_states->end()) {
+     if (!iterating_non_bottom2 && tmpit == B->marked_btm_states.end()) {
           iterating_non_bottom2 = true;
-          tmpit = B->marked_non_btm_states->begin();
+          tmpit = B->marked_non_btm_states.begin();
      }
      return tmpit;
 }
@@ -583,13 +570,13 @@ void clean_temp_refs_block(block_T* B)
 {
      if (B != NULL) {
           //mCRL2log(log::verbose) << "CLEANING " << B->id << "\n";
-          for (auto sit = B->marked_btm_states->begin(); sit != B->marked_btm_states->end(); ++sit) {
+          for (auto sit = B->marked_btm_states.begin(); sit != B->marked_btm_states.end(); ++sit) {
                state_T* s = *sit;
                s->constln_cnt = NULL;
                s->coconstln_cnt = NULL;
-               B->btm_states->insert_state_linked(s, BTM_STATE);
+               B->btm_states.insert_state_linked(s, BTM_STATE);
           }
-          for (auto sit = B->marked_non_btm_states->begin(); sit != B->marked_non_btm_states->end(); ++sit) {
+          for (auto sit = B->marked_non_btm_states.begin(); sit != B->marked_non_btm_states.end(); ++sit) {
                state_T* s = *sit;
                s->constln_cnt = NULL;
                if (s->coconstln_cnt != NULL) {
@@ -598,17 +585,17 @@ void clean_temp_refs_block(block_T* B)
                     }
                }
                s->coconstln_cnt = NULL;
-               B->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
+               B->non_btm_states.insert_state_linked(s, NON_BTM_STATE);
           }
-          B->marked_btm_states->constant_clear();
-          B->marked_non_btm_states->constant_clear();
+          B->marked_btm_states.constant_clear();
+          B->marked_non_btm_states.constant_clear();
           if (B->constln_ref != NULL) {
                if (size(B->constln_ref) == 0) {
                     // if the associated constellation is the one containing B, set inconstln_ref to NULL
                     if (B->constln_ref->C == B->constellation) {
                          B->inconstln_ref = NULL;
                     }
-                    B->to_constlns->remove_linked(B->constln_ref);
+                    B->to_constlns.remove_linked(B->constln_ref);
                     deleteobject (B->constln_ref);
                }
                B->constln_ref = NULL;
@@ -618,7 +605,7 @@ void clean_temp_refs_block(block_T* B)
                     if (B->coconstln_ref->C == B->constellation) {
                          B->inconstln_ref = NULL;
                     }
-                    B->to_constlns->remove_linked(B->coconstln_ref);
+                    B->to_constlns.remove_linked(B->coconstln_ref);
                     deleteobject (B->coconstln_ref);
                }
                B->coconstln_ref = NULL;
@@ -664,9 +651,11 @@ void clean_temp_refs_block(block_T* B)
       mCRL2log(log::verbose) << "O(m log n) " <<
                   (branching?"branching ":"") << "bisimulation partitioner created for "
                   << l.num_states() << " states and " <<
-                  l.num_transitions() << " transitions\n";
+                  l.num_transitions() << " transitions.\n";
       create_initial_partition_gw(branching);
+      mCRL2log(log::verbose) << "Created the initial partition.\n";
       refine_partition_until_it_becomes_stable_gw(branching);
+      mCRL2log(log::verbose) << "Obtained a stable partitioning of the state space.\n";
     }
 
 
@@ -834,20 +823,20 @@ void clean_temp_refs_block(block_T* B)
           inline bool has_next_state_detect1_1() {
                auto next_it = iter_state_added_detect1;
                next_it++;
-               if (next_it == block_detect->marked_btm_states->end() && !iterating_non_bottom) {
-                    next_it = block_detect->marked_non_btm_states->begin();
+               if (next_it == block_detect->marked_btm_states.end() && !iterating_non_bottom) {
+                    next_it = block_detect->marked_non_btm_states.begin();
                     //mCRL2log(log::verbose) << "non bottom\n";
                }
-               //mCRL2log(log::verbose) << (next_it != block_detect->marked_non_btm_states->end()) << "number of non bottom states: " << block_detect->marked_non_btm_states->size() << "\n";
-               return next_it != block_detect->marked_non_btm_states->end();
+               //mCRL2log(log::verbose) << (next_it != block_detect->marked_non_btm_states.end()) << "number of non bottom states: " << block_detect->marked_non_btm_states.size() << "\n";
+               return next_it != block_detect->marked_non_btm_states.end();
            }
 
           inline state_T* next_state_detect1_1() {
                iter_state_added_detect1++;
                //mCRL2log(log::verbose) << "get next state\n";
-               if (iter_state_added_detect1 == block_detect->marked_btm_states->end() && !iterating_non_bottom) {
+               if (iter_state_added_detect1 == block_detect->marked_btm_states.end() && !iterating_non_bottom) {
                     iterating_non_bottom = true;
-                    iter_state_added_detect1 = block_detect->marked_non_btm_states->begin();
+                    iter_state_added_detect1 = block_detect->marked_non_btm_states.begin();
                }
                // is the state suitable?
                state_T* s = *iter_state_added_detect1;
@@ -864,7 +853,7 @@ void clean_temp_refs_block(block_T* B)
           inline bool has_next_state_detect2_1() {
                auto next_it = iter_state_added_detect2;
                next_it++;
-               return next_it != block_detect->btm_states->end();
+               return next_it != block_detect->btm_states.end();
            }
 
           inline state_T* next_state_detect2_1() {
@@ -877,7 +866,7 @@ void clean_temp_refs_block(block_T* B)
           inline bool has_next_state_detect1_2() {
                auto next_it = iter_trans_state_added_detect1;
                next_it++;
-               return next_it != block_detect->coconstln_ref->trans_list->end();
+               return next_it != block_detect->coconstln_ref->trans_list.end();
           }
 
           inline state_T* next_state_detect1_2() {
@@ -896,7 +885,7 @@ void clean_temp_refs_block(block_T* B)
           inline bool has_next_state_detect2_2() {
                auto next_it = iter_state_added_detect2;
                next_it++;
-               return next_it != block_detect->marked_btm_states->end();
+               return next_it != block_detect->marked_btm_states.end();
           }
 
           inline state_T* next_state_detect2_2() {
@@ -918,7 +907,7 @@ void clean_temp_refs_block(block_T* B)
           inline bool has_next_state_detect1_3() {
                auto next_it = iter_trans_state_added_detect1;
                next_it++;
-               return next_it != e_detect->trans_list->end();
+               return next_it != e_detect->trans_list.end();
           }
      
           inline state_T* next_state_detect1_3() {
@@ -936,7 +925,7 @@ void clean_temp_refs_block(block_T* B)
           inline bool has_next_state_detect2_3() {
                auto next_it = iter_state_added_detect2;
                next_it++;
-               return next_it != block_detect->new_btm_states->end();
+               return next_it != block_detect->new_btm_states.end();
           }
      
           // compare SClist and new_btm_states. This depends on new bottom states having been added to
@@ -1188,7 +1177,7 @@ void clean_temp_refs_block(block_T* B)
           {
                for (auto cit = non_trivial_constlns.begin(); cit != non_trivial_constlns.end(); ++cit) {
                     constellation_T* C = *cit;
-                    for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                    for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                          block_T* B = *bit;
                          mCRL2log(log::verbose) << "[";
                          for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
@@ -1205,7 +1194,7 @@ void clean_temp_refs_block(block_T* B)
                mCRL2log(log::verbose) << "| ";
                for (auto cit = trivial_constlns.begin(); cit != trivial_constlns.end(); ++cit) {
                     constellation_T* C = *cit;
-                    for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                    for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                          block_T* B = *bit;
                          mCRL2log(log::verbose) << "[";
                          for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
@@ -1227,35 +1216,35 @@ void clean_temp_refs_block(block_T* B)
     {
       using namespace std;
 
-               // number of blocks
-               block_type nr_of_blocks;
-               // the list of initial blocks (for fast access)
-               vector < block_T* > blocks;
-               // the number of states
-               nr_of_states = aut.num_states();
-               // original size of input
-               size_t orig_nr_of_states = nr_of_states;
+      // number of blocks
+      block_type nr_of_blocks;
+      // the list of initial blocks (for fast access)
+      vector < block_T* > blocks;
+      // the number of states
+      nr_of_states = aut.num_states();
+      // original size of input
+      size_t orig_nr_of_states = nr_of_states;
       // temporary map to keep track of states to be added when converting LTS to Kripke structure
       unordered_map < Key, state_type, KeyHasher > extra_kripke_states;
-               // temporary map to keep track of blocks (maps transition labels (unequal to tau) to blocks
-               unordered_map < label_type, block_type > action_block_map;
-               // temporary list to keep track of lists of transitions, one for each block
-               //vector < sized_forward_list < transition_T* >* > block_trans_list;
+      // temporary map to keep track of blocks (maps transition labels (unequal to tau) to blocks
+      unordered_map < label_type, block_type > action_block_map;
+      // temporary list to keep track of lists of transitions, one for each block
+      //vector < sized_forward_list < transition_T* >* > block_trans_list;
 
-               // create single initial non-trivial constellation
-               constellation_T* C = new constellation_T(max_const_index);
-               
-               // create first block in C
-               block_T* B1 = create_new_block(STD_BLOCK);
-               // create associated list of transitions from block to constellation C
-               to_constlns_element_T* e = new to_constlns_element_T(C);
-               B1->to_constlns->insert_linked(e);
-               B1->inconstln_ref = e;
-               B1->constellation = C;
-               C->blocks->insert_linked(B1);
-               // add block to initial list of blocks
-               blocks.insert(blocks.end(), B1);
-               nr_of_blocks = 1;
+      // create single initial non-trivial constellation
+      constellation_T* C = new constellation_T(max_const_index);
+      
+      // create first block in C
+      block_T* B1 = create_new_block(STD_BLOCK);
+      // create associated list of transitions from block to constellation C
+      to_constlns_element_T* e = new to_constlns_element_T(C);
+      B1->to_constlns.insert_linked(e);
+      B1->inconstln_ref = e;
+      B1->constellation = C;
+      C->blocks.insert_linked(B1);
+      // add block to initial list of blocks
+      blocks.insert(blocks.end(), B1);
+      nr_of_blocks = 1;
 
       // iterate over the transitions and collect new states
       aut.sort_transitions(mcrl2::lts::src_lbl_tgt);
@@ -1266,122 +1255,130 @@ void clean_temp_refs_block(block_T* B)
                     
         if (!aut.is_tau(t.label()) || !branching)
         {
-                         // create new state
-                         Key* k = new(Key);
-                         k->first = t.label();
-                         k->second = t.to();
-          if ((extra_kripke_states.insert(make_pair(*k, nr_of_states))).second) {
-                              nr_of_states++;
-                         }
-                         // (possibly) create new block
-                         if (action_block_map.insert(make_pair(t.label(), nr_of_blocks)).second) {
-                              nr_of_blocks++;
-                         }
+          // create new state
+          Key* k = new(Key);
+          k->first = t.label();
+          k->second = t.to();
+          if ((extra_kripke_states.insert(make_pair(*k, nr_of_states))).second) 
+          {
+               nr_of_states++;
+          }
+          // (possibly) create new block
+          if (action_block_map.insert(make_pair(t.label(), nr_of_blocks)).second) 
+          {
+               nr_of_blocks++;
+          }
         }
       }
-               mCRL2log(log::verbose) << "number of extra states: " << extra_kripke_states.size() << "\n";
-               // knowing the number of blocks,
-               // create blocks, and add one entry in their to_constlns list for the single constellation C
-               // each of these new blocks will contain extra Kripke states, therefore we increment nr_of_extra_kripke_blocks
-               // each time we create a block
-               for (size_t i = 0; i < nr_of_blocks-1; i++) {
-                    block_T* B = create_new_block(EXTRA_KRIPKE_BLOCK);
-                    to_constlns_element_T* e = new to_constlns_element_T(C);
-                    B->to_constlns->insert_linked(e);
-                    B->inconstln_ref = e;
-                    // add block to constellation
-                    B->constellation = C;
-                    C->blocks->insert_linked(B);
-                    // add block to initial list of blocks
-                    blocks.insert(blocks.end(), B);
-               }
+      mCRL2log(log::verbose) << "Number of extra states: " << extra_kripke_states.size() << "\n";
+      // knowing the number of blocks,
+      // create blocks, and add one entry in their to_constlns list for the single constellation C
+      // each of these new blocks will contain extra Kripke states, therefore we increment nr_of_extra_kripke_blocks
+      // each time we create a block
+      for (size_t i = 0; i < nr_of_blocks-1; i++) 
+      {
+        block_T* B = create_new_block(EXTRA_KRIPKE_BLOCK);
+        to_constlns_element_T* e = new to_constlns_element_T(C);
+        B->to_constlns.insert_linked(e);
+        B->inconstln_ref = e;
+        // add block to constellation
+        B->constellation = C;
+        C->blocks.insert_linked(B);
+        // add block to initial list of blocks
+        blocks.insert(blocks.end(), B);
+      }
 
-               // create state entries in states list
+      // create state entries in states list
       for (size_t i = 0; i < nr_of_states; i++)
       {
         state_T* s = new state_T(state_index);
         this->states.insert(this->states.end(), s);
-                    // add state to first block, if applicable
-                    if (i < orig_nr_of_states) {
-                         s->block = B1;
-                    }
+        // add state to first block, if applicable
+        if (i < orig_nr_of_states) 
+        {
+             s->block = B1;
+        }
       }
-               // add the new states to their respective blocks
-               for (auto it=extra_kripke_states.begin(); it != extra_kripke_states.end(); ++it) {
-                    (states[it->second])->block = blocks[(action_block_map.find((it->first).first))->second];
-               }
-               // add transitions
-               state_type current_src_state = -1;
-               counter_T* counter;
+      // add the new states to their respective blocks
+      for (auto it=extra_kripke_states.begin(); it != extra_kripke_states.end(); ++it) {
+           (states[it->second])->block = blocks[(action_block_map.find((it->first).first))->second];
+      }
+      // add transitions
+      state_type current_src_state = -1;
+      counter_T* counter;
       for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
-                    
-                    // if we see a new source state, create a new counter for it
-                    if (t.from() != current_src_state) {
-                         current_src_state = t.from();
-                         counter = new counter_T;
-                    }
-                    // create transition entry
-                    transition_T* t_entry = new transition_T;
-                    // fill in info
-                    t_entry->source = states[t.from()];
-                    // target depends on transition label
-                    if (aut.is_tau(t.label()) && branching) {
-                         t_entry->target = states[t.to()];
-                         // initially, all tau-transitions are inert
-                         // number of inert transitions of source needs to be incremented
-                         states[t.from()]->inert_cnt++;
-                    }
-                    else {
-                         Key* k = new Key;
-                         k->first = t.label();
-                         k->second = t.to();
-                         t_entry->target = states[(extra_kripke_states.find(*k))->second];
-                    }
-                    // connect transition to its states
-                    t_entry->target->Tsrc.push_back(t_entry);
-                    t_entry->source->Ttgt.push_back(t_entry);
-                    // add pointer to counter
-                    t_entry->to_constln_cnt = counter;
-                    // increment the counter
-                    t_entry->to_constln_cnt->cnt++;
-                    // Different from pseudo-code: ONLY if transition is non-inert
-                    if (!aut.is_tau(t.label()) || !branching) 
-                    {
-                      // set pointer to C entry in to_constlns list of B.
-                      t_entry->to_constln_ref = t_entry->source->block->to_constlns->front();
-                      // add transition to transition list of source block
-                      t_entry->to_constln_ref->trans_list->insert_linked(t_entry);
-                    }
-                    // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
-                    //t_entry.to_constln_ref->trans_list = t_entry.block_constln_list;
+         
+        // if we see a new source state, create a new counter for it
+        if (t.from() != current_src_state) 
+        {
+          current_src_state = t.from();
+          counter = new counter_T;
+        }
+        // create transition entry
+        transition_T* t_entry = new transition_T;
+        // fill in info
+        t_entry->source = states[t.from()];
+        // target depends on transition label
+        if (aut.is_tau(t.label()) && branching) 
+        {
+          t_entry->target = states[t.to()];
+          // initially, all tau-transitions are inert
+          // number of inert transitions of source needs to be incremented
+          states[t.from()]->inert_cnt++;
+        }
+        else 
+        {
+          Key* k = new Key;
+          k->first = t.label();
+          k->second = t.to();
+          t_entry->target = states[(extra_kripke_states.find(*k))->second];
+        }
+        // connect transition to its states
+        t_entry->target->Tsrc.push_back(t_entry);
+        t_entry->source->Ttgt.push_back(t_entry);
+        // add pointer to counter
+        t_entry->to_constln_cnt = counter;
+        // increment the counter
+        t_entry->to_constln_cnt->cnt++;
+        // Different from pseudo-code: ONLY if transition is non-inert
+        if (!aut.is_tau(t.label()) || !branching) 
+        {
+          // set pointer to C entry in to_constlns list of B.
+          t_entry->to_constln_ref = t_entry->source->block->to_constlns.front();
+          // add transition to transition list of source block
+          t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
+        }
+        // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
+        //t_entry.to_constln_ref->trans_list = t_entry.block_constln_list;
       }
-               // add transitions <a,t> -> t
-               for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) {
-                    std::pair<Key, state_type> e = *sit;
-                    state_type sid = e.second;
-                    state_type tid = e.first.second;
+      // add transitions <a,t> -> t
+      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
+      {
+        std::pair<Key, state_type> e = *sit;
+        state_type sid = e.second;
+        state_type tid = e.first.second;
 
-                    transition_T* t_entry2 = new transition_T;
-                    // fill in info
-                    t_entry2->source = states[sid];
-                    t_entry2->target = states[tid];
-                    // connect transition to its states
-                    t_entry2->target->Tsrc.push_back(t_entry2);
-                    t_entry2->source->Ttgt.push_back(t_entry2);
-                    // add pointer to counter object of source state
-                    t_entry2->to_constln_cnt = new counter_T;
-                    // increment the counter
-                    t_entry2->to_constln_cnt->cnt++;
-                    // set pointer to C entry in to_constlns list of B. Increment the associated counter
-                    t_entry2->to_constln_ref = t_entry2->source->block->to_constlns->front();
-                    // add transition to transition list of source block
-                    t_entry2->to_constln_ref->trans_list->insert_linked(t_entry2);
-                    // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
-                    //t_entry2.to_constln_ref->trans_list = t_entry2.block_constln_list;
-               }
-               // print the Kripke structure
+        transition_T* t_entry2 = new transition_T;
+        // fill in info
+        t_entry2->source = states[sid];
+        t_entry2->target = states[tid];
+        // connect transition to its states
+        t_entry2->target->Tsrc.push_back(t_entry2);
+        t_entry2->source->Ttgt.push_back(t_entry2);
+        // add pointer to counter object of source state
+        t_entry2->to_constln_cnt = new counter_T;
+        // increment the counter
+        t_entry2->to_constln_cnt->cnt++;
+        // set pointer to C entry in to_constlns list of B. Increment the associated counter
+        t_entry2->to_constln_ref = t_entry2->source->block->to_constlns.front();
+        // add transition to transition list of source block
+        t_entry2->to_constln_ref->trans_list.insert_linked(t_entry2);
+        // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
+        //t_entry2.to_constln_ref->trans_list = t_entry2.block_constln_list;
+      }
+      // print the Kripke structure
 #ifndef NDEBUG
                for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) {
                     std::pair<Key, state_type> p = *sit;
@@ -1406,18 +1403,18 @@ void clean_temp_refs_block(block_T* B)
                     
                     if (s->inert_cnt == 0) {
                          // state is bottom
-                         s->block->btm_states->insert_state_linked(s, BTM_STATE);
+                         s->block->btm_states.insert_state_linked(s, BTM_STATE);
                     }
                     else {
                          // state is not bottom
-                         s->block->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
+                         s->block->non_btm_states.insert_state_linked(s, NON_BTM_STATE);
                     }
                }
                
                // set size of constellation C
                C->size = nr_of_states;
                // add C to appropriate list
-               if (C->blocks->size() > 1) {
+               if (C->blocks.size() > 1) {
                     C->type = NONTRIVIAL;
                     non_trivial_constlns.insert_linked(C);
                }
@@ -1429,351 +1426,1024 @@ void clean_temp_refs_block(block_T* B)
                P = new std::multiset < state_T*, LessThanByInert>;
           }; // end create_initial_partition
 
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Refine the partition until the partition has become stable
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     void refine_partition_until_it_becomes_stable_gw(const bool /* branching [intended to make the code also usable for strong bisimulation, which it does not calculate now] */)
     {
-               while (non_trivial_constlns.size() > 0) {
-                    // list of splittable blocks
-                    sized_forward_list < block_T > splittable_blocks;
+      while (non_trivial_constlns.size() > 0) 
+      {
+           // list of splittable blocks
+           sized_forward_list < block_T > splittable_blocks;
 #ifndef NDEBUG
-                    //print_partition();
-                    //check_internal_consistency_of_the_partitioning_data_structure_gw(branching);
-                    check_consistency_blocks();
-                    check_consistency_transitions();
-                    check_non_empty_blocks();
+           //print_partition();
+           //check_internal_consistency_of_the_partitioning_data_structure_gw(branching);
+           check_consistency_blocks();
+           check_consistency_transitions();
+           check_non_empty_blocks();
 #endif
-                    // walk over the constellations
-                    bool const_block_found = false;
-                    constellation_T* setB;
-                    block_T* B;
-                    for (auto const_it = non_trivial_constlns.begin(); const_it != non_trivial_constlns.end(); ++const_it) {
-                         setB = *const_it;
-                         for (auto bit = setB->blocks->begin(); bit != setB->blocks->end(); ++bit) {
-                              B = *bit;
-                              if (B->btm_states->size()+B->non_btm_states->size() <= (setB->size)/2) {
-                                   //mCRL2log(log::verbose) << B->btm_states->size() << " " << B->non_btm_states->size() << " " << B->marked_btm_states->size() << " " << B->marked_non_btm_states->size() << "\n";
-                                   //mCRL2log(log::verbose) << "splitter: " << B->id << " " << B->btm_states->front()->id << "\n";
-                                   //for (auto it = B->to_constlns->begin(); it != B->to_constlns->end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << "inconstln_ref: " << B->inconstln_ref << "\n";
-                                   //mCRL2log(log::verbose) << "---\n";
-                                   // 5.2.1
-                                   // 5.2.1.a
-                                   constellation_T* setC = new constellation_T(max_const_index);
-                                   setB->blocks->remove_linked(B, bit);
-                                   size_t Bsize = B->btm_states->size() + B->non_btm_states->size() + B->marked_btm_states->size() + B->marked_non_btm_states->size();
-                                   setB->size -= Bsize;
-                                   setC->blocks->insert_linked(B);
-                                   setC->size += Bsize;
-                                   B->constellation = setC;
-                                   //mCRL2log(log::verbose) << "new constln of " << B->id << " is " << setC->id << "\n";
-                                   B->inconstln_ref = NULL;
-                                   // 5.2.1.b
-                                   trivial_constlns.insert_linked(setC);
-                                   if (setB->blocks->size() == 1) {
-                                        setB->type = TRIVIAL;
-                                        non_trivial_constlns.remove_linked(setB, const_it);
-                                        trivial_constlns.insert_linked(setB);
-                                   }
-                                   // 5.2.2 walk through B.btm_states and B.non_btm_states, and check incoming transitions
-                                   //check_consistency_trans_lists_2(setB);
-                                   for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
-                                        state_T* s = *sit;
-                                        
-                                        for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) {
-                                             transition_T* t = *tit;
-                                             state_T* sp = t->source;
-                                             block_T* Bp = sp->block;
-                                             // Different from pseudo-code: ignore if Bp=B. We will revisit this transition when considering
-                                             // the outgoing transitions of each s in B
-                                             if (Bp != B) {
-                                                  // 5.2.2.a
-                                                  if (Bp->marked_btm_states->size() == 0 && Bp->marked_non_btm_states->size() == 0) {
-                                                       // 5.2.2.a.i
-                                                       splittable_blocks.insert(Bp);
-                                                       //if (Bp->id == 955) {
-                                                            //mCRL2log(log::verbose) << "ADDING BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                                       //}
-                                                       // 5.2.2.a.ii
-                                                       //mCRL2log(log::verbose) << "ref: " << t->to_constln_ref << "\n";
-                                                       Bp->coconstln_ref = t->to_constln_ref;
-                                                       Bp->constln_ref = new to_constlns_element_T(setC);
-                                                       Bp->to_constlns->insert_linked(Bp->constln_ref);
-                                                  }
-                                                  // 5.2.2.b
-                                                  // Different from pseudo-code: we split the counter into two counters differently, this one respects
-                                                  // the pointers to counters of the individual transitions
-                                                  if (sp->coconstln_cnt == NULL) {
-                                                       sp->constln_cnt = new counter_T;
-                                                       sp->coconstln_cnt = t->to_constln_cnt;
-                                                  }
-                                                  // 5.2.2.c
-                                                  if (sp->type != MARKED_BTM_STATE && sp->type != MARKED_NON_BTM_STATE) {
-                                                       // 5.2.2.c.i
-                                                       if (sp->type == BTM_STATE) {
-                                                            Bp->btm_states->remove_linked(sp);
-                                                            //if (Bp->id == 955) {
-                                                                 //mCRL2log(log::verbose) << "ADDING BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                                            //}
-                                                            Bp->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
-                                                            //if (Bp->id == 955) {
-                                                                 //mCRL2log(log::verbose) << "ADDING BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                                            //}
-                                                       }
-                                                       // 5.2.2.c.ii
-                                                       else {
-                                                            Bp->non_btm_states->remove_linked(sp);
-                                                            Bp->marked_non_btm_states->insert_state_linked(sp, MARKED_NON_BTM_STATE);
-                                                       }
-                                                  }
-                                                  // 5.2.2.d
-                                                  sp->constln_cnt->cnt++;
-                                                  t->to_constln_cnt = sp->constln_cnt;
-                                                  sp->coconstln_cnt->cnt--;
-                                                  // move t
-                                                  Bp->coconstln_ref->trans_list->remove_linked(t);
-                                                  Bp->constln_ref->trans_list->insert_linked(t);
-                                                  //assert(t->target->block->constellation == s->block->constellation);
-                                                  // Different from pseudo-code: no longer needed, since direct link to transitions from block to constellation has been removed
-                                                  // (now goes via to_constln_ref, which is updated at 5.2.2.b.
-                                                  //t.block_constln_list = Bp.constln_transitions;
-                                                  t->to_constln_ref = Bp->constln_ref;
-                                                  //if (Bp->id == 355) {
-                                                  //     mCRL2log(log::verbose) << "1518: setting t->to_constln_ref to " << Bp->constln_ref << "\n";
-                                                  //}
-                                             }
-                                             //if (Bp->id == 955) {
-                                             //mCRL2log(log::verbose) << "BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                             //}
+           // walk over the constellations
+           bool const_block_found = false;
+           constellation_T* setB;
+           block_T* B;
+           for (auto const_it = non_trivial_constlns.begin(); const_it != non_trivial_constlns.end(); ++const_it) {
+                setB = *const_it;
+                for (auto bit = setB->blocks.begin(); bit != setB->blocks.end(); ++bit) {
+                     B = *bit;
+                     if (B->btm_states.size()+B->non_btm_states.size() <= (setB->size)/2) {
+                          //mCRL2log(log::verbose) << B->btm_states.size() << " " << B->non_btm_states.size() << " " << B->marked_btm_states.size() << " " << B->marked_non_btm_states.size() << "\n";
+                          //mCRL2log(log::verbose) << "splitter: " << B->id << " " << B->btm_states.front()->id << "\n";
+                          //for (auto it = B->to_constlns.begin(); it != B.to_constlns->end(); ++it) {
+                          //     to_constlns_element_T* l = *it;
+                          //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+                          //}
+                          //mCRL2log(log::verbose) << "inconstln_ref: " << B->inconstln_ref << "\n";
+                          //mCRL2log(log::verbose) << "---\n";
+                          // 5.2.1
+                          // 5.2.1.a
+                          constellation_T* setC = new constellation_T(max_const_index);
+                          setB->blocks.remove_linked(B, bit);
+                          size_t Bsize = B->btm_states.size() + B->non_btm_states.size() + B->marked_btm_states.size() + B->marked_non_btm_states.size();
+                          setB->size -= Bsize;
+                          setC->blocks.insert_linked(B);
+                          setC->size += Bsize;
+                          B->constellation = setC;
+                          //mCRL2log(log::verbose) << "new constln of " << B->id << " is " << setC->id << "\n";
+                          B->inconstln_ref = NULL;
+                          // 5.2.1.b
+                          trivial_constlns.insert_linked(setC);
+                          if (setB->blocks.size() == 1) {
+                               setB->type = TRIVIAL;
+                               non_trivial_constlns.remove_linked(setB, const_it);
+                               trivial_constlns.insert_linked(setB);
+                          }
+                          // 5.2.2 walk through B.btm_states and B.non_btm_states, and check incoming transitions
+                          //check_consistency_trans_lists_2(setB);
+                          for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
+                               state_T* s = *sit;
+                               
+                               for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) {
+                                    transition_T* t = *tit;
+                                    state_T* sp = t->source;
+                                    block_T* Bp = sp->block;
+                                    // Different from pseudo-code: ignore if Bp=B. We will revisit this transition when considering
+                                    // the outgoing transitions of each s in B
+                                    if (Bp != B) {
+                                         // 5.2.2.a
+                                         if (Bp->marked_btm_states.size() == 0 && Bp->marked_non_btm_states.size() == 0) {
+                                              // 5.2.2.a.i
+                                              splittable_blocks.insert(Bp);
+                                              //if (Bp->id == 955) {
+                                                   //mCRL2log(log::verbose) << "ADDING BLOCK " << Bp->id << " with states " << Bp->btm_states.size() << " " << Bp->non_btm_states.size() << " " << Bp->marked_btm_states.size() << " " << Bp->marked_non_btm_states.size() << "\n";
+                                              //}
+                                              // 5.2.2.a.ii
+                                              //mCRL2log(log::verbose) << "ref: " << t->to_constln_ref << "\n";
+                                              Bp->coconstln_ref = t->to_constln_ref;
+                                              Bp->constln_ref = new to_constlns_element_T(setC);
+                                              Bp->to_constlns.insert_linked(Bp->constln_ref);
+                                         }
+                                         // 5.2.2.b
+                                         // Different from pseudo-code: we split the counter into two counters differently, this one respects
+                                         // the pointers to counters of the individual transitions
+                                         if (sp->coconstln_cnt == NULL) {
+                                              sp->constln_cnt = new counter_T;
+                                              sp->coconstln_cnt = t->to_constln_cnt;
+                                         }
+                                         // 5.2.2.c
+                                         if (sp->type != MARKED_BTM_STATE && sp->type != MARKED_NON_BTM_STATE) {
+                                              // 5.2.2.c.i
+                                              if (sp->type == BTM_STATE) {
+                                                   Bp->btm_states.remove_linked(sp);
+                                                   //if (Bp->id == 955) {
+                                                        //mCRL2log(log::verbose) << "ADDING BLOCK " << Bp->id << " with states " << Bp->btm_states.size() << " " << Bp->non_btm_states.size() << " " << Bp->marked_btm_states.size() << " " << Bp->marked_non_btm_states.size() << "\n";
+                                                   //}
+                                                   Bp->marked_btm_states.insert_state_linked(sp, MARKED_BTM_STATE);
+                                                   //if (Bp->id == 955) {
+                                                        //mCRL2log(log::verbose) << "ADDING BLOCK " << Bp->id << " with states " << Bp->btm_states.size() << " " << Bp->non_btm_states.size() << " " << Bp->marked_btm_states.size() << " " << Bp->marked_non_btm_states.size() << "\n";
+                                                   //}
+                                              }
+                                              // 5.2.2.c.ii
+                                              else {
+                                                   Bp->non_btm_states.remove_linked(sp);
+                                                   Bp->marked_non_btm_states.insert_state_linked(sp, MARKED_NON_BTM_STATE);
+                                              }
+                                         }
+                                         // 5.2.2.d
+                                         sp->constln_cnt->cnt++;
+                                         t->to_constln_cnt = sp->constln_cnt;
+                                         sp->coconstln_cnt->cnt--;
+                                         // move t
+                                         Bp->coconstln_ref->trans_list.remove_linked(t);
+                                         Bp->constln_ref->trans_list.insert_linked(t);
+                                         //assert(t->target->block->constellation == s->block->constellation);
+                                         // Different from pseudo-code: no longer needed, since direct link to transitions from block to constellation has been removed
+                                         // (now goes via to_constln_ref, which is updated at 5.2.2.b.
+                                         //t.block_constln_list = Bp.constln_transitions;
+                                         t->to_constln_ref = Bp->constln_ref;
+                                         //if (Bp->id == 355) {
+                                         //     mCRL2log(log::verbose) << "1518: setting t->to_constln_ref to " << Bp->constln_ref << "\n";
+                                         //}
+                                    }
+                                    //if (Bp->id == 955) {
+                                    //mCRL2log(log::verbose) << "BLOCK " << Bp->id << " with states " << Bp->btm_states.size() << " " << Bp->non_btm_states.size() << " " << Bp->marked_btm_states.size() << " " << Bp->marked_non_btm_states.size() << "\n";
+                                    //}
+                               }
+                          }
+                          //check_consistency_trans_lists(B, setB);
+                          // Different from pseudo-code: consider the case that B itself can be split
+                          // ALL states should be marked
+                          // 5.2.3
+                          auto tmpptr = B->btm_states;
+                          B->btm_states = B->marked_btm_states;
+                          B->marked_btm_states = tmpptr;
+                          tmpptr = B->non_btm_states;
+                          B->non_btm_states = B->marked_non_btm_states;
+                          B->marked_non_btm_states = tmpptr;
+                          splittable_blocks.insert(B);
+                          B->constln_ref = NULL;
+                          B->coconstln_ref = NULL;
+                          for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) {
+                               state_T* s = *sit;
+                               // actually mark the state
+                               if (s->type == BTM_STATE) {
+                                    s->type = MARKED_BTM_STATE;
+                               }
+                               else {
+                                    s->type = MARKED_NON_BTM_STATE;
+                               }
+                               // consider the outgoing transitions
+                               for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
+                                    transition_T* t = *tit;
+                                    block_T* Bp = t->target->block;
+                                    constellation_T* setBp = Bp->constellation;
+                                    
+                                    if (setBp == setB || setBp == setC) {
+                                         // 5.2.3.a
+                                         if (setBp == setB && B->constln_ref == NULL) {
+                                              B->coconstln_ref = t->to_constln_ref;
+                                              B->constln_ref = new to_constlns_element_T(setC);
+                                              B->to_constlns.insert_linked(B->constln_ref);
+                                              B->inconstln_ref = B->constln_ref;
+                                         }
+                                         // 5.2.3.b
+                                         if (s->coconstln_cnt == NULL) {
+                                              s->constln_cnt = new counter_T;
+                                              s->coconstln_cnt = t->to_constln_cnt;
+                                         }
+                                         // 5.2.3.c
+                                         if (Bp == B) {
+                                              s->constln_cnt->cnt++;
+                                              t->to_constln_cnt = s->constln_cnt;
+                                              s->coconstln_cnt->cnt--;
+                                              // move t
+                                              // Next lines are commented out, since these transitions are inert, which are NOT in the trans_list
+                                              //B->coconstln_ref->trans_list->remove_linked(t);
+                                              //B->constln_ref->trans_list->insert_linked(t);
+                                              //t->to_constln_ref = B->constln_ref;
+                                         }
+                                    }
+                               }
+                          }
+                          // 5.2.4
+                          //check_consistency_trans_lists(B, setB);
+                          auto prev_sbit = splittable_blocks.before_begin();
+                          for (auto sbit = splittable_blocks.begin(); sbit != splittable_blocks.end(); ++sbit) {
+                               block_T* Bp = *sbit;
+                               //if (Bp->id == 955) {
+                                    //mCRL2log(log::verbose) << "BLOCK " << Bp->id << " with states " << Bp->btm_states.size() << " " << Bp->non_btm_states.size() << " " << Bp->marked_btm_states.size() << " " << Bp->marked_non_btm_states.size() << "\n";
+                               //}
+                               
+                               // 5.2.3.a/b
+                               bool split = true;
+                               //mCRL2log(log::verbose) << "check " << Bp->id << " " << Bp->btm_states.size() << "\n";
+                               if (Bp->btm_states.size() == 0) {
+                                    split = false;
+                                    if (size(Bp->coconstln_ref) > 0) {
+                                         // find a state in marked_btm_states with s->coconstln_cnt->cnt == 0
+                                         for (auto sit = Bp->marked_btm_states.begin(); sit != Bp->marked_btm_states.end(); ++sit) {
+                                              state_T* s = *sit;
+                                              
+                                              if (s->coconstln_cnt == NULL) {
+                                                   split = true;
+                                                   break;
+                                              }
+                                              if ((s->coconstln_cnt)->cnt == 0) {
+                                                   split = true;
+                                                   break;
+                                              }
+                                         }
+                                    }
+                               }
+                               // 5.2.3.c
+                               if (!split) {
+                                    splittable_blocks.remove(prev_sbit, sbit);
+                                    // move states back (unmark)
+                                    clean_temp_refs_block(Bp);
+                               }
+                               prev_sbit = sbit;
+                          }
+                          // 5.2.4
+                          if (splittable_blocks.size() > 0) {
+                               const_block_found = true;
+                          }
+                          // end of considering block B. Go on to next constellation
+                          break;
+                     } // end if block suitable
+                } // end loop over blocks in constellation
+                if (const_block_found) {
+                     break;
+                }
+           } // end loop over constellations
+           if (const_block_found) {
+                // constellation / block for splitting found. Now split
+                //check_consistency_trans_lists(B, setB);
+                for (auto bit = splittable_blocks.begin(); bit != splittable_blocks.end(); ++bit) {
+                     block_T* Bp = *bit;
+
+                     //mCRL2log(log::verbose) << "splitting block " << Bp->id << " with size " << Bp->btm_states.size() + Bp->non_btm_states.size() + Bp->marked_btm_states.size() + Bp->marked_non_btm_states.size() << "\n";
+                     //mCRL2log(log::verbose) << Bp->id << ": \n";
+                     //for (auto it = Bp->to_constlns->begin(); it != Bp->to_constlns->end(); ++it) {
+                     //     to_constlns_element_T* l = *it;
+                     //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+                     //}
+                     //mCRL2log(log::verbose) << "inconstln_ref: " << Bp->inconstln_ref << "\n";
+                     //mCRL2log(log::verbose) << "---\n";
+                     // pointer to Bp to be used when doing the nested split
+                     block_T* splitBpB = Bp;
+                     block_T* cosplitBpB = NULL;
+                     block_T* splitsplitBpB = NULL;
+                     size_t detect1_finished = CONTINUE;
+                     size_t detect2_finished = CONTINUE;
+                     block_T* Bpp = NULL;
+                     block_T* Bp3 = NULL;
+                     // lists for new btm states
+                     sized_forward_list<state_T> XBp;
+                     sized_forward_list<state_T> XBpp;
+                     sized_forward_list<state_T> XBp3;
+                     sized_forward_list<state_T> XBp4;
+                     // check if we can jump to step 5.3.3
+                     //check_consistency_trans_lists(B, setB);
+                     //check_consistency_blocks();
+                     if (Bp->btm_states.size() > 0) {
+                          nr_of_splits++;
+                          // 5.3.1. Perform detect1 and detect2 in lockstep
+                          Q = new std::stack< state_T*>;
+                          L.constant_clear();
+                          //P = new std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>;
+                          Lp.constant_clear();
+                          maxsize_detect = (Bp->btm_states.size() + Bp->non_btm_states.size() + Bp->marked_btm_states.size() + Bp->marked_non_btm_states.size()) / 2;
+                          block_detect = Bp;
+                          current_state_detect1 = NULL;
+                          current_state_detect2 = NULL;
+                          in_forward_check_detect2 = false;
+                          //for (auto sit = Bp->marked_btm_states.begin(); sit != Bp->marked_btm_states.end(); ++sit) {
+                          //     state_T* s = *sit;
+                          //     mCRL2log(log::verbose) << "marked bottom state " << s->id << "\n";
+                          //}
+                          if (Bp->marked_btm_states.size() > 0) {
+                               iter_state_added_detect1 = Bp->marked_btm_states.before_begin();
+                               iterating_non_bottom = false;
+                          }
+                          else {
+                               iter_state_added_detect1 = Bp->marked_non_btm_states.before_begin();
+                               iterating_non_bottom = true;
+                          }
+                          iter_state_added_detect2 = Bp->btm_states.before_begin();
+                          //mCRL2log(log::verbose) << "states in " << Bp->id << ": " << Bp->btm_states.size() << " " << Bp->non_btm_states.size() << " " << Bp->marked_btm_states.size() << " " << Bp->marked_non_btm_states.size() << "\n";
+                          //mCRL2log(log::verbose) << Bp->marked_non_btm_states.size() << "\n";
+                          //print_partition();
+                          //mCRL2log(log::verbose) << "Launching lockstep search 1\n";
+                          //for (auto sit = Bp->marked_non_btm_states.begin(); sit != Bp->marked_non_btm_states.end(); ++sit) {
+                          //     state_T* s = *sit;
+                          //     mCRL2log(log::verbose) << s->id << "\n";
+                          //}
+                          while (detect1_finished != TERMINATED && detect2_finished != TERMINATED) {
+                               if (detect1_finished != STOPPED) {
+                                    detect1_finished = detect1_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect1_1, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect1_1);
+                               }
+                               if (detect1_finished != TERMINATED && detect2_finished != STOPPED) {
+                                    detect2_finished = detect2_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect2_1, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect2_1, false, false);
+                               }
+                          }
+                          // 5.3.2
+                          // Pseudo-code: 'add it to the list of blocks' could possibly be removed.
+                          Bpp = create_new_block(Bp->type);
+                          Bpp->constellation = Bp->constellation;
+                          Bpp->constellation->blocks.insert_linked(Bpp);
+                          //mCRL2log(log::verbose) << "creating new block " << Bpp->id << "\n";
+                          // Let N point to correct list
+                          sized_forward_list <state_T>* N;
+                          if (detect1_finished == TERMINATED) {
+                               N = &L;
+                          }
+                          else {
+                               N = &Lp;
+                          }
+#ifndef NDEBUG
+                          mCRL2log(log::verbose) << "splitting off: [";
+                          for (auto sit = N->begin(); sit != N->end(); ++sit) {
+                               state_T* s = *sit;
+                               mCRL2log(log::verbose) << " " << s->id;
+                          }
+                          mCRL2log(log::verbose) << "]\n";
+                          check_consistency_blocks();
+                          check_consistency_transitions();
+                          for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) {
+                               to_constlns_element_T* l = *it;
+                               mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+                          }
+                          mCRL2log(log::verbose) << "---\n";
+#endif
+                          //check_consistency_trans_lists(B, setB);
+                          //if (Bpp->id == 355) {
+                          //     mCRL2log(log::verbose) << "1727: splitting " << Bp->id << " into " << Bpp->id << "\n";
+                          //}
+                          for (auto sit = N->begin(); sit != N->end(); ++sit) {
+                               state_T* s = *sit;
+                               
+                               //mCRL2log(log::verbose) << "State " << s->id << "\n";
+                               
+                               // 5.3.2.a
+                               move_state_to_block(s, Bpp);
+                               // 5.3.2.b
+                               // Different from pseudo-code: we need to consider all constellations that can be reached from
+                               // s, not just setB \ B and B.
+                               for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
+                                    transition_T* t = *tit;
+                                    
+                                    // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
+                                    // Different from pseudo-code: only do this if transition is non-inert
+                                    // 5.3.2.b.i
+                                    if (t->to_constln_ref != NULL) {
+                                         to_constlns_element_T* l = t->to_constln_ref;
+                                         //mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C->id << "\n";
+                                         to_constlns_element_T* lp;
+                                         if (l->new_element != NULL) {
+                                              //mCRL2log(log::verbose) << "point to new element " << l->new_element << " " << l->new_element->C->id << "\n";
+                                              lp = l->new_element;
+                                         }
+                                         else {
+                                              lp = new to_constlns_element_T(l->C);
+                                              l->new_element = lp;
+                                              //mCRL2log(log::verbose) << "create new element " << l->new_element << " " << l->new_element->C->id << "\n";
+                                              // add lp to Bpp.to_constlns (IMPLIED IN PSEUDO-CODE)
+                                              Bpp->to_constlns.insert_linked(lp);
+                                              // possibly set Bpp.inconstln_ref
+                                              if (l->C == Bpp->constellation) {
+                                                   Bpp->inconstln_ref = lp;
+                                                   //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C->id << "\n";
+                                              }
+                                              // possibly set Bpp.constln_ref and Bpp.coconstln_ref
+                                              if (l == Bp->constln_ref) {
+                                                   //mCRL2log(log::verbose) << "setting constln_ref " << lp << " " << lp->C->id << "\n";
+                                                   Bpp->constln_ref = lp;
+                                              }
+                                              else if (l == Bp->coconstln_ref) {
+                                                   //mCRL2log(log::verbose) << "setting coconstln_ref " << lp << " " << lp->C->id << "\n";
+                                                   Bpp->coconstln_ref = lp;
+                                              }
+                                              // let lp point to l, to be able to efficiently reset new_element pointers later on
+                                              lp->new_element = l;
+                                              //mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
+                                         }
+                                         //mCRL2log(log::verbose) << "removing transition\n";
+                                         l->trans_list.remove_linked(t);
+                                         lp->trans_list.insert_linked(t);
+                                         t->to_constln_ref = lp;
+                                         //mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
+                                    }
+                                    // 5.3.2.b.ii
+                                    else {
+                                         state_T* sp = t->target;
+                                    
+                                         if (sp->block == Bp && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
+                                              // an inert transition becomes non-inert
+                                              s->inert_cnt--;
+                                              if (s->inert_cnt == 0) {
+                                                   XBpp.insert(s);
+                                                   if (s->type == NON_BTM_STATE) {
+                                                        Bpp->non_btm_states.remove_linked(s);
+                                                        Bpp->btm_states.insert_state_linked(s, BTM_STATE);
+                                                   }
+                                                   else if (s->type == MARKED_NON_BTM_STATE) {
+                                                        Bpp->marked_non_btm_states.remove_linked(s);
+                                                        Bpp->marked_btm_states.insert_state_linked(s, MARKED_BTM_STATE);
+                                                   }
+                                              }
+                                              // Different from pseudo-code: add the transition to the corresponding trans_list
+                                              if (Bpp->inconstln_ref == NULL) {
+                                                   Bpp->inconstln_ref = new to_constlns_element_T(Bpp->constellation);
+                                                   Bpp->to_constlns.insert_linked(Bpp->inconstln_ref);
+                                                   if (Bp->inconstln_ref != NULL) {
+                                                        Bp->inconstln_ref->new_element = Bpp->inconstln_ref;
+                                                        Bpp->inconstln_ref->new_element = Bp->inconstln_ref;
+                                                   }
+                                              }
+                                              Bpp->inconstln_ref->trans_list.insert_linked(t);
+                                              t->to_constln_ref = Bpp->inconstln_ref;
+                                              //if (Bpp->id == 355) {
+                                              //     mCRL2log(log::verbose) << "1830: setting t->to_constln_ref to " << Bpp->inconstln_ref << "\n";
+                                              //}
+                                         }
+                                    }
+                               }
+                               // 5.3.2.c
+                               //check_consistency_blocks();
+                               //check_consistency_trans_lists(B, setB);
+                               for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) {
+                                    transition_T* t = *tit;
+                                    state_T* sp = t->source;
+                                    
+                                    if (sp->block == Bp && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
+                                         // an inert transition becomes non-inert
+                                         sp->inert_cnt--;
+                                         if (sp->inert_cnt == 0) {
+                                              XBp.insert(sp);
+                                              if (sp->type == NON_BTM_STATE) {
+                                                   Bp->non_btm_states.remove_linked(sp);
+                                                   Bp->btm_states.insert_state_linked(sp, BTM_STATE);
+                                              }
+                                              else if (sp->type == MARKED_NON_BTM_STATE) {
+                                                   Bp->marked_non_btm_states.remove_linked(sp);
+                                                   Bp->marked_btm_states.insert_state_linked(sp, MARKED_BTM_STATE);
+                                              }
+                                         }
+                                         // Different from pseudo-code: add the transition to the corresponding trans_list
+                                         if (Bp->inconstln_ref == NULL) {
+                                              Bp->inconstln_ref = new to_constlns_element_T(Bp->constellation);
+                                              Bp->to_constlns.insert_linked(Bp->inconstln_ref);
+                                              if (Bpp->inconstln_ref != NULL) {
+                                                   Bpp->inconstln_ref->new_element = Bp->inconstln_ref;
+                                                   Bp->inconstln_ref->new_element = Bpp->inconstln_ref;
+                                              }
+                                         }
+                                         Bp->inconstln_ref->trans_list.insert_linked(t);
+                                         t->to_constln_ref = Bp->inconstln_ref;
+                                         //if (Bp->id == 355) {
+                                         //     mCRL2log(log::verbose) << "1866: setting t->to_constln_ref to " << Bp->inconstln_ref << "\n";
+                                         //}
+                                    }
+                               }
+                          }
+                          //check_consistency_blocks();
+                          //mCRL2log(log::verbose) << Bp->id << ": \n";
+                          //for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) {
+                          //     to_constlns_element_T* l = *it;
+                          //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+                          //}
+                          //mCRL2log(log::verbose) << Bpp->id << ": \n";
+                          //for (auto it = Bpp->to_constlns.begin(); it != Bpp->to_constlns.end(); ++it) {
+                          //     to_constlns_element_T* l = *it;
+                          //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+                          //}
+                          //mCRL2log(log::verbose) << "3---\n";
+                          //check_consistency_trans_lists(B, setB);
+                          // reset temporary pointers of states
+                          for (auto it = L.begin(); it != L.end(); ++it) {
+                               state_T* s = *it;
+                               s->is_in_L_detect1 = false;
+                          }
+                          for (auto it = Lp.begin(); it != Lp.end(); ++it) {
+                               state_T* s = *it;
+                               s->is_in_Lp_detect2 = false;
+                          }
+                          while (!P->empty()) {
+                               state_T* s = *(P->begin());
+                               P->erase(P->begin());
+                               s->is_in_P_detect2 = false;
+                               //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
+                          }
+                          // check
+                          //check_consistency_trans_lists(B, setB);
+#ifndef NDEBUG
+                          mCRL2log(log::verbose) << "---\n";
+                          mCRL2log(log::verbose) << Bp->id << ": \n";
+                          for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) {
+                               to_constlns_element_T* l = *it;
+                               mCRL2log(log::verbose) << l << " " << l->new_element << "\n";
+                          }
+                          mCRL2log(log::verbose) << "inconstln: " << Bp->inconstln_ref << "\n";
+                          mCRL2log(log::verbose) << "---\n";
+                          mCRL2log(log::verbose) << Bpp->id << ": \n";
+                          for (auto it = Bpp->to_constlns.begin(); it != Bpp->to_constlns.end(); ++it) {
+                               to_constlns_element_T* l = *it;
+                               mCRL2log(log::verbose) << l << " " << l->new_element << "\n";
+                          }
+                          mCRL2log(log::verbose) << "inconstln: " << Bpp->inconstln_ref << "\n";
+                          mCRL2log(log::verbose) << "---\n";
+#endif
+                               // Different from pseudo-code: reset temporary pointers (new elements) of blocks
+                                  // Remove the associated element if the transition list is empty, UNLESS the element is pointed to
+                                  // by either Bp->constln_ref or Bpp->coconstln_ref
+                                  // 5.3.3
+                                  for (auto it = Bpp->to_constlns.begin(); it != Bpp->to_constlns.end(); ++it) {
+                                       to_constlns_element_T* l = *it;
+                                       if (l->new_element != NULL) {
+                                            if (size(l->new_element) == 0 && l->new_element != Bp->constln_ref && l->new_element != Bp->coconstln_ref) {
+                                                 if (l->new_element->C == Bp->constellation) {
+                                                      Bp->inconstln_ref = NULL;
+                                                 }
+                                                 Bp->to_constlns.remove_linked(l->new_element);
+                                                 deleteobject (l->new_element);
+                                            }
+                                            else {
+                                                 l->new_element->new_element = NULL;
+                                            }
+                                            l->new_element = NULL;
+                                       }
+                                  }
+                             }
+#ifndef NDEBUG
+                             check_consistency_blocks();
+                             check_consistency_transitions();
+#endif
+                             // 5.3.4
+                             //check_consistency_trans_lists(B, setB);
+                             // consider splitting split(B',B) under setB \ B
+                             // set pointer to split(B',B) if it moved to new block
+                             if (detect1_finished == TERMINATED) {
+                                  splitBpB = Bpp;
+                                  cosplitBpB = Bp;
+                             }
+                             else {
+                                  cosplitBpB = Bpp;
+                             }
+                             // point to correct XB list
+                             sized_forward_list<state_T> *XsplitBpB = NULL;
+                             sized_forward_list<state_T> *XcosplitBpB = NULL;
+                             sized_forward_list<state_T> *XsplitsplitBpB = NULL;
+                             //check_consistency_trans_lists(B, setB);
+                             if (detect1_finished == TERMINATED) {
+                                  XsplitBpB = &XBpp;
+                                  XcosplitBpB = &XBp;
+                             }
+                             else {
+                                  XsplitBpB = &XBp;
+                                  XcosplitBpB = &XBpp;
+                             }
+                             // check if splitBpB is stable, and if not, do a nested splitting
+                             splitsplitBpB = NULL;
+                             bool is_stable = false;
+                             if (splitBpB->coconstln_ref == NULL) {
+                                  is_stable = true;
+                             }
+                             else if (size(splitBpB->coconstln_ref) == 0) {
+                                  is_stable = true;
+                             }
+                             //check_consistency_trans_lists(B, setB);
+                             if (!is_stable) {
+                                  is_stable = true;
+                                  for (auto sit = splitBpB->marked_btm_states.begin(); sit != splitBpB->marked_btm_states.end(); ++sit) {
+                                       state_T* s = *sit;
+                                       if (s->coconstln_cnt == NULL) {
+                                            is_stable = false;
+                                            break;
+                                       }
+                                       if (s->coconstln_cnt->cnt == 0) {
+                                            is_stable = false;
+                                            break;
+                                       }
+                                  }
+                             }
+                             //check_consistency_trans_lists(B, setB);
+                             if (!is_stable) {
+                                  nr_of_splits++;
+                                  //mCRL2log(log::verbose) << "not stable\n";
+                                  deleteobject (Q);
+                                  Q = new std::stack< state_T*>;
+                                  L.constant_clear();
+                                  //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
+                                  Lp.constant_clear();
+                                  XBp3.constant_clear();
+                                  XBp4.constant_clear();
+                                  // prepare for lockstep search
+                                  maxsize_detect = (splitBpB->btm_states.size() + splitBpB->non_btm_states.size() + splitBpB->marked_btm_states.size() + splitBpB->marked_non_btm_states.size()) / 2;
+                                  //mCRL2log(log::verbose) << "sizes: " << (splitBpB->btm_states.size() + splitBpB->non_btm_states.size() + splitBpB->marked_btm_states.size() + splitBpB->marked_non_btm_states.size()) << " " << maxsize_detect << "\n";
+                                  block_detect = splitBpB;
+                                  constellation_splitter_detect = setB;
+                                  detect1_finished = CONTINUE;
+                                  detect2_finished = CONTINUE;
+                                  // lockstep search
+#ifndef NDEBUG
+                                  //print_partition();
+#endif
+                                  current_state_detect1 = NULL;
+                                  current_state_detect2 = NULL;
+                                  in_forward_check_detect2 = false;
+                                  iter_trans_state_added_detect1 = splitBpB->coconstln_ref->trans_list.before_begin();
+                                  iter_state_added_detect2 = splitBpB->marked_btm_states.before_begin();
+                                  //check_consistency_trans_lists(B, setB);
+                                  //mCRL2log(log::verbose) << "Launching lockstep search 2\n";
+                                  //mCRL2log(log::verbose) << "block: " << Bp << " splitting const: " << setB << "\n";
+                                  while (detect1_finished != TERMINATED && detect2_finished != TERMINATED) {
+                                       if (detect1_finished != STOPPED) {
+                                            detect1_finished = detect1_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect1_2, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect1_2);
+                                       }
+                                       if (detect1_finished != TERMINATED && detect2_finished != STOPPED) {
+                                            detect2_finished = detect2_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect2_2, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect2_2, true, true);
+                                       }
+                                       // DEBUG EXIT
+                                       //if (detect1_finished == STOPPED && detect2_finished == STOPPED) {
+                                       //     exit(1);
+                                       //}
+                                  }
+#ifndef NDEBUG
+                                  check_consistency_blocks();
+                                  check_consistency_transitions();
+#endif
+                                  // split
+                                  Bp3 = create_new_block(splitBpB->type);
+                                  Bp3->constellation = splitBpB->constellation;
+                                  Bp3->constellation->blocks.insert_linked(Bp3);
+                                  // Let N point to correct list
+                                  sized_forward_list <state_T>* N;
+                                  if (detect1_finished == TERMINATED) {
+                                       N = &L;
+                                  }
+                                  else {
+                                       N = &Lp;
+                                  }
+                                  for (auto sit = N->begin(); sit != N->end(); ++sit) {
+                                       state_T* s = *sit;
+                                       //mCRL2log(log::verbose) << "processing state " << s->id << "\n";
+                                       // 5.3.4 (5.3.2.a)
+                                       move_state_to_block(s, Bp3);
+#ifndef NDEBUG
+                                       //print_partition();
+#endif
+                                       // 5.3.4 (5.3.2.b)
+                                       for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
+                                            transition_T* t = *tit;
+                                            
+                                            // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
+                                            // Different from pseudo-code: only do this if transition is non-inert
+                                            // 5.3.4 (5.3.2.b.i)
+                                            if (t->to_constln_ref != NULL) {
+                                                 to_constlns_element_T* l = t->to_constln_ref;
+                                                 to_constlns_element_T* lp;
+                                                 if (l->new_element != NULL) {
+                                                      lp = l->new_element;
+                                                 }
+                                                 else {
+                                                      //assert(Bp3->inconstln_ref == NULL || l->C != Bp3->constellation);
+                                                      lp = new to_constlns_element_T(l->C);
+                                                      l->new_element = lp;
+                                                      // add lp to Bp3.to_constlns (IMPLIED IN PSEUDO-CODE)
+                                                      Bp3->to_constlns.insert_linked(lp);
+                                                      // possibly set Bp3.inconstln_ref
+                                                      if (l->C == Bp3->constellation) {
+                                                           //mCRL2log(log::verbose) << "bla\n";
+                                                           Bp3->inconstln_ref = lp;
+                                                      }
+     //                                                 // possibly set Bp3.constln_ref and Bp3.coconstln_ref
+     //                                                 if (l == splitBpB->constln_ref) {
+     //                                                      Bp3->constln_ref = lp;
+     //                                                 }
+     //                                                 else if (l == splitBpB->coconstln_ref) {
+     //                                                      Bp3->coconstln_ref = lp;
+     //                                                 }
+                                             // point lp to l, to be able to efficiently reset new_element pointers later on
+                                             lp->new_element = l;
                                         }
-                                   }
-                                   //check_consistency_trans_lists(B, setB);
-                                   // Different from pseudo-code: consider the case that B itself can be split
-                                   // ALL states should be marked
-                                   // 5.2.3
-                                   auto tmpptr = B->btm_states;
-                                   B->btm_states = B->marked_btm_states;
-                                   B->marked_btm_states = tmpptr;
-                                   tmpptr = B->non_btm_states;
-                                   B->non_btm_states = B->marked_non_btm_states;
-                                   B->marked_non_btm_states = tmpptr;
-                                   splittable_blocks.insert(B);
-                                   B->constln_ref = NULL;
-                                   B->coconstln_ref = NULL;
-                                   for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) {
-                                        state_T* s = *sit;
-                                        // actually mark the state
-                                        if (s->type == BTM_STATE) {
-                                             s->type = MARKED_BTM_STATE;
-                                        }
-                                        else {
-                                             s->type = MARKED_NON_BTM_STATE;
-                                        }
-                                        // consider the outgoing transitions
-                                        for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
-                                             transition_T* t = *tit;
-                                             block_T* Bp = t->target->block;
-                                             constellation_T* setBp = Bp->constellation;
-                                             
-                                             if (setBp == setB || setBp == setC) {
-                                                  // 5.2.3.a
-                                                  if (setBp == setB && B->constln_ref == NULL) {
-                                                       B->coconstln_ref = t->to_constln_ref;
-                                                       B->constln_ref = new to_constlns_element_T(setC);
-                                                       B->to_constlns->insert_linked(B->constln_ref);
-                                                       B->inconstln_ref = B->constln_ref;
-                                                  }
-                                                  // 5.2.3.b
-                                                  if (s->coconstln_cnt == NULL) {
-                                                       s->constln_cnt = new counter_T;
-                                                       s->coconstln_cnt = t->to_constln_cnt;
-                                                  }
-                                                  // 5.2.3.c
-                                                  if (Bp == B) {
-                                                       s->constln_cnt->cnt++;
-                                                       t->to_constln_cnt = s->constln_cnt;
-                                                       s->coconstln_cnt->cnt--;
-                                                       // move t
-                                                       // Next lines are commented out, since these transitions are inert, which are NOT in the trans_list
-                                                       //B->coconstln_ref->trans_list->remove_linked(t);
-                                                       //B->constln_ref->trans_list->insert_linked(t);
-                                                       //t->to_constln_ref = B->constln_ref;
-                                                  }
-                                             }
-                                        }
-                                   }
-                                   // 5.2.4
-                                   //check_consistency_trans_lists(B, setB);
-                                   auto prev_sbit = splittable_blocks.before_begin();
-                                   for (auto sbit = splittable_blocks.begin(); sbit != splittable_blocks.end(); ++sbit) {
-                                        block_T* Bp = *sbit;
-                                        //if (Bp->id == 955) {
-                                             //mCRL2log(log::verbose) << "BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
+                                        l->trans_list.remove_linked(t);
+                                        lp->trans_list.insert_linked(t);
+                                        t->to_constln_ref = lp;
+                                        //if (Bp3->id == 355) {
+                                        //     mCRL2log(log::verbose) << "2080: setting t->to_constln_ref to " << lp << "\n";
                                         //}
-                                        
-                                        // 5.2.3.a/b
-                                        bool split = true;
-                                        //mCRL2log(log::verbose) << "check " << Bp->id << " " << Bp->btm_states->size() << "\n";
-                                        if (Bp->btm_states->size() == 0) {
-                                             split = false;
-                                             if (size(Bp->coconstln_ref) > 0) {
-                                                  // find a state in marked_btm_states with s->coconstln_cnt->cnt == 0
-                                                  for (auto sit = Bp->marked_btm_states->begin(); sit != Bp->marked_btm_states->end(); ++sit) {
-                                                       state_T* s = *sit;
-                                                       
-                                                       if (s->coconstln_cnt == NULL) {
-                                                            split = true;
-                                                            break;
-                                                       }
-                                                       if ((s->coconstln_cnt)->cnt == 0) {
-                                                            split = true;
-                                                            break;
-                                                       }
+                                        //t.block_constln_list = lp.trans_list;
+                                        // postpone deleting element l until cleaning up new_element pointers
+                                   }
+                                   // 5.3.4 (5.3.2.b.ii)
+                                   else {
+                                        state_T* sp = t->target;
+                                   
+                                        if (sp->block == splitBpB && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
+                                             // an inert transition becomes non-inert
+                                             s->inert_cnt--;
+                                             if (s->inert_cnt == 0) {
+                                                  XBp3.insert(s);
+                                                  if (s->type == NON_BTM_STATE) {
+                                                       Bp3->non_btm_states.remove_linked(s);
+                                                       Bp3->btm_states.insert_state_linked(s, BTM_STATE);
+                                                  }
+                                                  else if (s->type == MARKED_NON_BTM_STATE) {
+                                                       Bp3->marked_non_btm_states.remove_linked(s);
+                                                       Bp3->marked_btm_states.insert_state_linked(s, MARKED_BTM_STATE);
                                                   }
                                              }
+                                             // Different from pseudo-code: add the transition to the corresponding trans_list
+                                             if (Bp3->inconstln_ref == NULL) {
+                                                  Bp3->inconstln_ref = new to_constlns_element_T(Bp3->constellation);
+                                                  Bp3->to_constlns.insert_linked(Bp3->inconstln_ref);
+                                                  if (splitBpB->inconstln_ref != NULL) {
+                                                       splitBpB->inconstln_ref->new_element = Bp3->inconstln_ref;
+                                                       Bp3->inconstln_ref->new_element = splitBpB->inconstln_ref;
+                                                  }
+                                             }
+                                             Bp3->inconstln_ref->trans_list.insert_linked(t);
+                                             t->to_constln_ref = Bp3->inconstln_ref;
                                         }
-                                        // 5.2.3.c
-                                        if (!split) {
-                                             splittable_blocks.remove(prev_sbit, sbit);
-                                             // move states back (unmark)
-                                             clean_temp_refs_block(Bp);
+                                   }
+                              }
+                              // 5.3.4 (5.3.2.c)
+                              for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) {
+                                   transition_T* t = *tit;
+                                   state_T* sp = t->source;
+                                   
+                                   if (sp->block == splitBpB && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
+                                        // an inert transition becomes non-inert
+                                        sp->inert_cnt--;
+                                        if (sp->inert_cnt == 0) {
+                                             XBp4.insert(sp);
+                                             if (sp->type == NON_BTM_STATE) {
+                                                  splitBpB->non_btm_states.remove_linked(sp);
+                                                  splitBpB->btm_states.insert_state_linked(sp, BTM_STATE);
+                                             }
+                                             else if (sp->type == MARKED_NON_BTM_STATE) {
+                                                  splitBpB->marked_non_btm_states.remove_linked(sp);
+                                                  splitBpB->marked_btm_states.insert_state_linked(sp, MARKED_BTM_STATE);
+                                             }
                                         }
-                                        prev_sbit = sbit;
+                                        // Different from pseudo-code: add the transition to the corresponding trans_list
+                                        if (splitBpB->inconstln_ref == NULL) {
+                                             splitBpB->inconstln_ref = new to_constlns_element_T(splitBpB->constellation);
+                                             splitBpB->to_constlns.insert_linked(splitBpB->inconstln_ref);
+                                             if (Bp3->inconstln_ref != NULL) {
+                                                  Bp3->inconstln_ref->new_element = splitBpB->inconstln_ref;
+                                                  splitBpB->inconstln_ref->new_element = Bp3->inconstln_ref;
+                                             }
+                                        }
+                                        splitBpB->inconstln_ref->trans_list.insert_linked(t);
+                                        t->to_constln_ref = splitBpB->inconstln_ref;
+                                        //if (splitBpB->id == 355) {
+                                        //     mCRL2log(log::verbose) << "2147: setting t->to_constln_ref to " << splitBpB->inconstln_ref << "\n";
+                                        //}
                                    }
-                                   // 5.2.4
-                                   if (splittable_blocks.size() > 0) {
-                                        const_block_found = true;
+                              }
+                         }
+                         //mCRL2log(log::verbose) << splitBpB->id << ": \n";
+                         //for (auto it = splitBpB->to_constlns.begin(); it != splitBpB->to_constlns.end(); ++it) {
+                         //     to_constlns_element_T* l = *it;
+                         //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+                         //}
+                         //mCRL2log(log::verbose) << "inconstln: " << splitBpB->inconstln_ref << "\n";
+                         //mCRL2log(log::verbose) << "22---\n";
+                         //mCRL2log(log::verbose) << Bp3->id << ": \n";
+                         //for (auto it = Bp3->to_constlns.begin(); it != Bp3->to_constlns.end(); ++it) {
+                         //     to_constlns_element_T* l = *it;
+                         //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+                         //}
+                         //mCRL2log(log::verbose) << "inconstln: " << Bp3->inconstln_ref << "\n";
+                         //mCRL2log(log::verbose) << "22---\n";
+                         // reset temporary pointers of states
+                         for (auto it = L.begin(); it != L.end(); ++it) {
+                              state_T* s = *it;
+                              s->is_in_L_detect1 = false;
+                         }
+                         for (auto it = Lp.begin(); it != Lp.end(); ++it) {
+                              state_T* s = *it;
+                              s->is_in_Lp_detect2 = false;
+                         }
+                         while (!P->empty()) {
+                              state_T* s = *(P->begin());
+                              P->erase(P->begin());
+                              s->is_in_P_detect2 = false;
+                              //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
+                         }
+                      // Different from pseudo-code: reset temporary pointers (new elements) of blocks
+                         // Remove the associated element if the transition list is empty, UNLESS the element is pointed to
+                         // by either Bp->constln_ref or Bpp->coconstln_ref
+                         // 5.3.4 (5.3.3)
+                         for (auto it = Bp3->to_constlns.begin(); it != Bp3->to_constlns.end(); ++it) {
+                              to_constlns_element_T* l = *it;
+                              if (l->new_element != NULL) {
+                                   if (size(l->new_element) == 0 && l->new_element != splitBpB->constln_ref && l->new_element != splitBpB->coconstln_ref) {
+                                        if (l->new_element->C == splitBpB->constellation) {
+                                             splitBpB->inconstln_ref = NULL;
+                                        }
+                                        splitBpB->to_constlns.remove_linked(l->new_element);
+                                        deleteobject (l->new_element);
                                    }
-                                   // end of considering block B. Go on to next constellation
-                                   break;
-                              } // end if block suitable
-                         } // end loop over blocks in constellation
-                         if (const_block_found) {
+                                   else {
+                                        l->new_element->new_element = NULL;
+                                   }
+                                   l->new_element = NULL;
+                              }
+                         }
+                         //mCRL2log(log::verbose) << splitBpB->id << ": \n";
+                         //for (auto it = splitBpB->to_constlns.begin(); it != splitBpB->to_constlns.end(); ++it) {
+                         //     to_constlns_element_T* l = *it;
+                         //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+                         //}
+                         //mCRL2log(log::verbose) << "inconstln: " << splitBpB->inconstln_ref << "\n";
+                         //mCRL2log(log::verbose) << "21---\n";
+                         // set splitsplitBpB
+                         if (detect1_finished == TERMINATED) {
+                              splitsplitBpB = Bp3;
+                         }
+                         else if (detect2_finished == TERMINATED) {
+                              splitsplitBpB = splitBpB;
+                              splitBpB = Bp3;
+                         }
+                         // determine the XB sets
+                         sized_forward_list<state_T> *X2 = NULL;
+                         if (detect1_finished == TERMINATED) {
+                              XsplitsplitBpB = &XBp3;
+                              X2 = &XBp4;
+                         }
+                         else {
+                              XsplitsplitBpB = &XBp4;
+                              X2 = &XBp3;
+                         }
+                         // redistribute content of XsplitBpB
+                         for (auto sit = XsplitBpB->begin(); sit != XsplitBpB->end(); ++sit) {
+                              state_T* s = *sit;
+                              if (s->block == splitsplitBpB) {
+                                   XsplitsplitBpB->insert(s);
+                              }
+                              else {
+                                   X2->insert(s);
+                              }
+                         }
+                         //deleteobject (XsplitBpB);
+                         // needed?
+                         //XsplitBpB = new sized_forward_list < state_T >;
+                         XsplitBpB = X2;
+                    } // end if stable (5.3.4)
+                    // remove markings and reset constln_ref and coconstln_ref
+                    //if (splitBpB != NULL) {
+                    //     mCRL2log(log::verbose) << "split clean " << splitBpB->id << "\n";
+                    //}
+                    // 5.3.5
+                    clean_temp_refs_block(splitBpB);
+                    //if (cosplitBpB != NULL) {
+                    //     mCRL2log(log::verbose) << "cosplit clean " << cosplitBpB->id << "\n";
+                    //}
+                    clean_temp_refs_block(cosplitBpB);
+                    //if (splitsplitBpB != NULL) {
+                    //     mCRL2log(log::verbose) << "splitsplit clean " << splitsplitBpB->id << "\n";
+                    //}
+                    clean_temp_refs_block(splitsplitBpB);
+                    // 5.3.6
+                    block_T* Bhat = splitBpB;
+                    block_T* Bhatp = NULL;
+                    sized_forward_list<state_T> *XBhat = XsplitBpB;
+                    while (Bhat != NULL) {
+                         for (auto sit = XBhat->begin(); sit != XBhat->end(); ++sit) {
+                              state_T* s = *sit;
+                              // 5.3.6.a
+                              for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
+                                   transition_T* t = *tit;
+                                   to_constlns_element_T* setBp_entry = t->to_constln_ref;
+                                   //mCRL2log(log::verbose) << t->to_constln_ref->C << " " << t->target->block->constellation << "\n";
+                                   //mCRL2log(log::verbose) << Bhat->constellation << "\n";
+                                   //assert(t->to_constln_ref->C == t->target->block->constellation);
+                                   // 5.3.6.a.i
+                                   if (setBp_entry->SClist == NULL) {
+                                        setBp_entry->SClist = new sized_forward_list < state_T >;
+                                        // move the to_constln entry to the front of the list
+                                        Bhat->to_constlns.remove_linked(setBp_entry);
+                                        Bhat->to_constlns.insert_linked(setBp_entry);
+                                   }
+                                   // 5.3.6.a.ii
+                                   if (setBp_entry->SClist->size() == 0) {
+                                        //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C << "\n";
+                                        setBp_entry->SClist->insert(s);
+                                   }
+                                   else if (setBp_entry->SClist->front() != s) {
+                                        //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C << "\n";
+                                        setBp_entry->SClist->insert(s);
+                                   }
+                              }
+                              // 5.3.6.b
+                              Bhat->new_btm_states.insert(s);
+                         }
+                    
+                         // consider next block
+                         if (Bhat == splitsplitBpB) {
                               break;
                          }
-                    } // end loop over constellations
-                    if (const_block_found) {
-                         // constellation / block for splitting found. Now split
-                         //check_consistency_trans_lists(B, setB);
-                         for (auto bit = splittable_blocks.begin(); bit != splittable_blocks.end(); ++bit) {
-                              block_T* Bp = *bit;
-
-                              //mCRL2log(log::verbose) << "splitting block " << Bp->id << " with size " << Bp->btm_states->size() + Bp->non_btm_states->size() + Bp->marked_btm_states->size() + Bp->marked_non_btm_states->size() << "\n";
-                              //mCRL2log(log::verbose) << Bp->id << ": \n";
-                              //for (auto it = Bp->to_constlns->begin(); it != Bp->to_constlns->end(); ++it) {
-                              //     to_constlns_element_T* l = *it;
-                              //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                              //}
-                              //mCRL2log(log::verbose) << "inconstln_ref: " << Bp->inconstln_ref << "\n";
-                              //mCRL2log(log::verbose) << "---\n";
-                              // pointer to Bp to be used when doing the nested split
-                              block_T* splitBpB = Bp;
-                              block_T* cosplitBpB = NULL;
-                              block_T* splitsplitBpB = NULL;
-                              size_t detect1_finished = CONTINUE;
-                              size_t detect2_finished = CONTINUE;
-                              block_T* Bpp = NULL;
-                              block_T* Bp3 = NULL;
-                              // lists for new btm states
-                              sized_forward_list<state_T> XBp;
-                              sized_forward_list<state_T> XBpp;
-                              sized_forward_list<state_T> XBp3;
-                              sized_forward_list<state_T> XBp4;
-                              // check if we can jump to step 5.3.3
-                              //check_consistency_trans_lists(B, setB);
-                              //check_consistency_blocks();
-                              if (Bp->btm_states->size() > 0) {
+                         if (Bhat == cosplitBpB) {
+                              Bhat = splitsplitBpB;
+                              XBhat = XsplitsplitBpB;
+                         }
+                         else if (cosplitBpB != NULL) {
+                              Bhat = cosplitBpB;
+                              XBhat = XcosplitBpB;
+                         }
+                         else {
+                              Bhat = splitsplitBpB;
+                              XBhat = XsplitsplitBpB;
+                         }
+                    }
+#ifndef NDEBUG
+                    //print_partition();
+#endif
+                    // 5.3.7
+                    // We use a stack blocks_to_process to keep track of which blocks still need to be checked for stability
+                    std::stack < block_T* > blocks_to_process;
+                    // push blocks on the stack if they have new bottom states
+                    if (splitBpB != NULL) {
+                         if (splitBpB->new_btm_states.size() > 0) {
+                              //mCRL2log(log::verbose) << "add split\n";
+                              blocks_to_process.push(splitBpB);
+                         }
+                    }
+                    if (cosplitBpB != NULL) {
+                         if (cosplitBpB->new_btm_states.size() > 0) {
+                              //mCRL2log(log::verbose) << "add cosplit\n";
+                              blocks_to_process.push(cosplitBpB);
+                         }
+                    }
+                    if (splitsplitBpB != NULL) {
+                         if (splitsplitBpB->new_btm_states.size() > 0) {
+                              //mCRL2log(log::verbose) << "add splitsplit with # new btm states = " << splitsplitBpB->new_btm_states.size() << "\n";
+                              blocks_to_process.push(splitsplitBpB);
+                         }
+                    }
+                    while (blocks_to_process.size() > 0) {
+                         // 5.3.7.a
+                         Bhat = blocks_to_process.top();
+                         blocks_to_process.pop();
+                         bool split = false;
+                         // 5.3.7.b
+                         // Find a constellation under which the block is not stable
+                         for (auto cit = Bhat->to_constlns.begin(); cit != Bhat->to_constlns.end(); ++cit) {
+                              to_constlns_element_T* e = *cit;
+                              bool splitcrit_met = false;
+                              if (e->SClist == NULL) {
+                                   splitcrit_met = true;
+                                   split = true;
+                              }
+                              else if (e->SClist->size() < Bhat->new_btm_states.size()) {
+                                   //mCRL2log(log::verbose) << "size: " << e->SClist->size() << "\n";
+                                   splitcrit_met = true;
+                                   split = true;
+                              }
+                              if (splitcrit_met) {
                                    nr_of_splits++;
-                                   // 5.3.1. Perform detect1 and detect2 in lockstep
+                                   // further splitting is required
+                                   XBp.constant_clear();
+                                   XBpp.constant_clear();
+                                   // Prepare detect1 and detect2 for lockstep
+                                   deleteobject (Q);
                                    Q = new std::stack< state_T*>;
                                    L.constant_clear();
-                                   //P = new std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>;
+                                   //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
                                    Lp.constant_clear();
-                                   maxsize_detect = (Bp->btm_states->size() + Bp->non_btm_states->size() + Bp->marked_btm_states->size() + Bp->marked_non_btm_states->size()) / 2;
-                                   block_detect = Bp;
+                                   // 5.3.7.b.i.A / B
+                                   // !!! Different from the pseudo-code, we prepare detect1 by walking over the transitions from Bhat to constellation pointed
+                                   // to by *cit. To optimise this, we should probably maintain a list of states that have a direct transition from Bhat to constellation
+                                   // of *cit, and instead walk over that list
+                                   maxsize_detect = (Bhat->btm_states.size() + Bhat->non_btm_states.size()) / 2;
+                                   block_detect = Bhat;
+                                   e_detect = e;
+                                   constellation_splitter_detect = e->C;
+                                   detect1_finished = CONTINUE;
+                                   detect2_finished = CONTINUE;
                                    current_state_detect1 = NULL;
                                    current_state_detect2 = NULL;
                                    in_forward_check_detect2 = false;
-                                   //for (auto sit = Bp->marked_btm_states->begin(); sit != Bp->marked_btm_states->end(); ++sit) {
-                                   //     state_T* s = *sit;
-                                   //     mCRL2log(log::verbose) << "marked bottom state " << s->id << "\n";
-                                   //}
-                                   if (Bp->marked_btm_states->size() > 0) {
-                                        iter_state_added_detect1 = Bp->marked_btm_states->before_begin();
-                                        iterating_non_bottom = false;
+                                   iter_trans_state_added_detect1 = e->trans_list.before_begin();
+                                   iter_state_added_detect2 = Bhat->new_btm_states.before_begin();
+                                   if (e->SClist == NULL) {
+                                        sclist_is_empty_detect2 = true;
                                    }
                                    else {
-                                        iter_state_added_detect1 = Bp->marked_non_btm_states->before_begin();
-                                        iterating_non_bottom = true;
+                                        sclist_is_empty_detect2 = false;
+                                        iter_sclist_detect2 = e->SClist->begin();
                                    }
-                                   iter_state_added_detect2 = Bp->btm_states->before_begin();
-                                   //mCRL2log(log::verbose) << "states in " << Bp->id << ": " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                   //mCRL2log(log::verbose) << Bp->marked_non_btm_states->size() << "\n";
-                                   //print_partition();
-                                   //mCRL2log(log::verbose) << "Launching lockstep search 1\n";
-                                   //for (auto sit = Bp->marked_non_btm_states->begin(); sit != Bp->marked_non_btm_states->end(); ++sit) {
-                                   //     state_T* s = *sit;
-                                   //     mCRL2log(log::verbose) << s->id << "\n";
-                                   //}
                                    while (detect1_finished != TERMINATED && detect2_finished != TERMINATED) {
                                         if (detect1_finished != STOPPED) {
-                                             detect1_finished = detect1_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect1_1, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect1_1);
+                                             detect1_finished = detect1_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect1_3, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect1_3);
                                         }
                                         if (detect1_finished != TERMINATED && detect2_finished != STOPPED) {
-                                             detect2_finished = detect2_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect2_1, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect2_1, false, false);
+                                             detect2_finished = detect2_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect2_3, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect2_3, false, true);
                                         }
                                    }
-                                   // 5.3.2
-                                   // Pseudo-code: 'add it to the list of blocks' could possibly be removed.
-                                   Bpp = create_new_block(Bp->type);
-                                   Bpp->constellation = Bp->constellation;
-                                   Bpp->constellation->blocks->insert_linked(Bpp);
-                                   //mCRL2log(log::verbose) << "creating new block " << Bpp->id << "\n";
+                                   // 5.3.7.b.ii (5.3.2)
+                                   Bhatp = create_new_block(Bhat->type);
+                                   Bhatp->constellation = Bhat->constellation;
+                                   Bhatp->constellation->blocks.insert_linked(Bhatp);
+                                   //mCRL2log(log::verbose) << "splitting " << Bhat->id << " producing " << Bhatp->id << "\n";
                                    // Let N point to correct list
-                                   sized_forward_list <state_T>* N;
+                                   sized_forward_list <state_T> *N;
                                    if (detect1_finished == TERMINATED) {
                                         N = &L;
                                    }
                                    else {
                                         N = &Lp;
                                    }
-#ifndef NDEBUG
-                                   mCRL2log(log::verbose) << "splitting off: [";
                                    for (auto sit = N->begin(); sit != N->end(); ++sit) {
                                         state_T* s = *sit;
-                                        mCRL2log(log::verbose) << " " << s->id;
-                                   }
-                                   mCRL2log(log::verbose) << "]\n";
-                                   check_consistency_blocks();
-                                   check_consistency_transitions();
-                                   for (auto it = Bp->to_constlns->begin(); it != Bp->to_constlns->end(); ++it) {
-                                        to_constlns_element_T* l = *it;
-                                        mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   }
-                                   mCRL2log(log::verbose) << "---\n";
-#endif
-                                   //check_consistency_trans_lists(B, setB);
-                                   //if (Bpp->id == 355) {
-                                   //     mCRL2log(log::verbose) << "1727: splitting " << Bp->id << " into " << Bpp->id << "\n";
-                                   //}
-                                   for (auto sit = N->begin(); sit != N->end(); ++sit) {
-                                        state_T* s = *sit;
-                                        
-                                        //mCRL2log(log::verbose) << "State " << s->id << "\n";
-                                        
-                                        // 5.3.2.a
-                                        move_state_to_block(s, Bpp);
-                                        // 5.3.2.b
+                                        move_state_to_block(s, Bhatp);
                                         // Different from pseudo-code: we need to consider all constellations that can be reached from
-                                        // s, not just setB \ B and B.
+                                        // s, not just setB \ B and B. For this, we merge steps 5.3.2.c and 5.3.2.d
                                         for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
                                              transition_T* t = *tit;
-                                             
-                                             // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
+
                                              // Different from pseudo-code: only do this if transition is non-inert
-                                             // 5.3.2.b.i
                                              if (t->to_constln_ref != NULL) {
                                                   to_constlns_element_T* l = t->to_constln_ref;
                                                   //mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C->id << "\n";
@@ -1783,419 +2453,160 @@ void clean_temp_refs_block(block_T* B)
                                                        lp = l->new_element;
                                                   }
                                                   else {
+                                                       //mCRL2log(log::verbose) << Bhatp->constellation->id << "\n";
+                                                       //assert(Bhatp->inconstln_ref == NULL || l->C != Bhatp->constellation);
                                                        lp = new to_constlns_element_T(l->C);
                                                        l->new_element = lp;
                                                        //mCRL2log(log::verbose) << "create new element " << l->new_element << " " << l->new_element->C->id << "\n";
-                                                       // add lp to Bpp.to_constlns (IMPLIED IN PSEUDO-CODE)
-                                                       Bpp->to_constlns->insert_linked(lp);
-                                                       // possibly set Bpp.inconstln_ref
-                                                       if (l->C == Bpp->constellation) {
-                                                            Bpp->inconstln_ref = lp;
-                                                            //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C->id << "\n";
-                                                       }
-                                                       // possibly set Bpp.constln_ref and Bpp.coconstln_ref
-                                                       if (l == Bp->constln_ref) {
-                                                            //mCRL2log(log::verbose) << "setting constln_ref " << lp << " " << lp->C->id << "\n";
-                                                            Bpp->constln_ref = lp;
-                                                       }
-                                                       else if (l == Bp->coconstln_ref) {
-                                                            //mCRL2log(log::verbose) << "setting coconstln_ref " << lp << " " << lp->C->id << "\n";
-                                                            Bpp->coconstln_ref = lp;
-                                                       }
-                                                       // let lp point to l, to be able to efficiently reset new_element pointers later on
+                                                       // Different from pseudo-code: point lp->new_element back to l, to efficiently reset
+                                                       // new_element pointers of 'old' elements later
                                                        lp->new_element = l;
                                                        //mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
+                                                       // add lp to Bhatp.to_constlns (IMPLIED IN PSEUDO-CODE)
+                                                       Bhatp->to_constlns.insert_linked(lp);
+                                                       // possibly set Bhatp.inconstln_ref
+                                                       if (l->C == Bhatp->constellation) {
+                                                            //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C->id << "\n";
+                                                            Bhatp->inconstln_ref = lp;
+                                                       }
                                                   }
-                                                  //mCRL2log(log::verbose) << "removing transition\n";
-                                                  l->trans_list->remove_linked(t);
-                                                  lp->trans_list->insert_linked(t);
+                                                  l->trans_list.remove_linked(t);
+                                                  lp->trans_list.insert_linked(t);
                                                   t->to_constln_ref = lp;
-                                                  //mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
-                                             }
-                                             // 5.3.2.b.ii
-                                             else {
-                                                  state_T* sp = t->target;
-                                             
-                                                  if (sp->block == Bp && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
-                                                       // an inert transition becomes non-inert
-                                                       s->inert_cnt--;
-                                                       if (s->inert_cnt == 0) {
-                                                            XBpp.insert(s);
-                                                            if (s->type == NON_BTM_STATE) {
-                                                                 Bpp->non_btm_states->remove_linked(s);
-                                                                 Bpp->btm_states->insert_state_linked(s, BTM_STATE);
-                                                            }
-                                                            else if (s->type == MARKED_NON_BTM_STATE) {
-                                                                 Bpp->marked_non_btm_states->remove_linked(s);
-                                                                 Bpp->marked_btm_states->insert_state_linked(s, MARKED_BTM_STATE);
-                                                            }
-                                                       }
-                                                       // Different from pseudo-code: add the transition to the corresponding trans_list
-                                                       if (Bpp->inconstln_ref == NULL) {
-                                                            Bpp->inconstln_ref = new to_constlns_element_T(Bpp->constellation);
-                                                            Bpp->to_constlns->insert_linked(Bpp->inconstln_ref);
-                                                            if (Bp->inconstln_ref != NULL) {
-                                                                 Bp->inconstln_ref->new_element = Bpp->inconstln_ref;
-                                                                 Bpp->inconstln_ref->new_element = Bp->inconstln_ref;
-                                                            }
-                                                       }
-                                                       Bpp->inconstln_ref->trans_list->insert_linked(t);
-                                                       t->to_constln_ref = Bpp->inconstln_ref;
-                                                       //if (Bpp->id == 355) {
-                                                       //     mCRL2log(log::verbose) << "1830: setting t->to_constln_ref to " << Bpp->inconstln_ref << "\n";
-                                                       //}
-                                                  }
-                                             }
-                                        }
-                                        // 5.3.2.c
-                                        //check_consistency_blocks();
-                                        //check_consistency_trans_lists(B, setB);
-                                        for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) {
-                                             transition_T* t = *tit;
-                                             state_T* sp = t->source;
-                                             
-                                             if (sp->block == Bp && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
-                                                  // an inert transition becomes non-inert
-                                                  sp->inert_cnt--;
-                                                  if (sp->inert_cnt == 0) {
-                                                       XBp.insert(sp);
-                                                       if (sp->type == NON_BTM_STATE) {
-                                                            Bp->non_btm_states->remove_linked(sp);
-                                                            Bp->btm_states->insert_state_linked(sp, BTM_STATE);
-                                                       }
-                                                       else if (sp->type == MARKED_NON_BTM_STATE) {
-                                                            Bp->marked_non_btm_states->remove_linked(sp);
-                                                            Bp->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
-                                                       }
-                                                  }
-                                                  // Different from pseudo-code: add the transition to the corresponding trans_list
-                                                  if (Bp->inconstln_ref == NULL) {
-                                                       Bp->inconstln_ref = new to_constlns_element_T(Bp->constellation);
-                                                       Bp->to_constlns->insert_linked(Bp->inconstln_ref);
-                                                       if (Bpp->inconstln_ref != NULL) {
-                                                            Bpp->inconstln_ref->new_element = Bp->inconstln_ref;
-                                                            Bp->inconstln_ref->new_element = Bpp->inconstln_ref;
-                                                       }
-                                                  }
-                                                  Bp->inconstln_ref->trans_list->insert_linked(t);
-                                                  t->to_constln_ref = Bp->inconstln_ref;
-                                                  //if (Bp->id == 355) {
-                                                  //     mCRL2log(log::verbose) << "1866: setting t->to_constln_ref to " << Bp->inconstln_ref << "\n";
-                                                  //}
-                                             }
-                                        }
-                                   }
-                                   //check_consistency_blocks();
-                                   //mCRL2log(log::verbose) << Bp->id << ": \n";
-                                   //for (auto it = Bp->to_constlns->begin(); it != Bp->to_constlns->end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << Bpp->id << ": \n";
-                                   //for (auto it = Bpp->to_constlns->begin(); it != Bpp->to_constlns->end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << "3---\n";
-                                   //check_consistency_trans_lists(B, setB);
-                                   // reset temporary pointers of states
-                                   for (auto it = L.begin(); it != L.end(); ++it) {
-                                        state_T* s = *it;
-                                        s->is_in_L_detect1 = false;
-                                   }
-                                   for (auto it = Lp.begin(); it != Lp.end(); ++it) {
-                                        state_T* s = *it;
-                                        s->is_in_Lp_detect2 = false;
-                                   }
-                                   while (!P->empty()) {
-                                        state_T* s = *(P->begin());
-                                        P->erase(P->begin());
-                                        s->is_in_P_detect2 = false;
-                                        //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
-                                   }
-                                   // check
-                                   //check_consistency_trans_lists(B, setB);
-#ifndef NDEBUG
-                                   mCRL2log(log::verbose) << "---\n";
-                                   mCRL2log(log::verbose) << Bp->id << ": \n";
-                                   for (auto it = Bp->to_constlns->begin(); it != Bp->to_constlns->end(); ++it) {
-                                        to_constlns_element_T* l = *it;
-                                        mCRL2log(log::verbose) << l << " " << l->new_element << "\n";
-                                   }
-                                   mCRL2log(log::verbose) << "inconstln: " << Bp->inconstln_ref << "\n";
-                                   mCRL2log(log::verbose) << "---\n";
-                                   mCRL2log(log::verbose) << Bpp->id << ": \n";
-                                   for (auto it = Bpp->to_constlns->begin(); it != Bpp->to_constlns->end(); ++it) {
-                                        to_constlns_element_T* l = *it;
-                                        mCRL2log(log::verbose) << l << " " << l->new_element << "\n";
-                                   }
-                                   mCRL2log(log::verbose) << "inconstln: " << Bpp->inconstln_ref << "\n";
-                                   mCRL2log(log::verbose) << "---\n";
-#endif
-                                // Different from pseudo-code: reset temporary pointers (new elements) of blocks
-                                   // Remove the associated element if the transition list is empty, UNLESS the element is pointed to
-                                   // by either Bp->constln_ref or Bpp->coconstln_ref
-                                   // 5.3.3
-                                   for (auto it = Bpp->to_constlns->begin(); it != Bpp->to_constlns->end(); ++it) {
-                                        to_constlns_element_T* l = *it;
-                                        if (l->new_element != NULL) {
-                                             if (size(l->new_element) == 0 && l->new_element != Bp->constln_ref && l->new_element != Bp->coconstln_ref) {
-                                                  if (l->new_element->C == Bp->constellation) {
-                                                       Bp->inconstln_ref = NULL;
-                                                  }
-                                                  Bp->to_constlns->remove_linked(l->new_element);
-                                                  deleteobject (l->new_element);
-                                             }
-                                             else {
-                                                  l->new_element->new_element = NULL;
-                                             }
-                                             l->new_element = NULL;
-                                        }
-                                   }
-                              }
-#ifndef NDEBUG
-                              check_consistency_blocks();
-                              check_consistency_transitions();
-#endif
-                              // 5.3.4
-                              //check_consistency_trans_lists(B, setB);
-                              // consider splitting split(B',B) under setB \ B
-                              // set pointer to split(B',B) if it moved to new block
-                              if (detect1_finished == TERMINATED) {
-                                   splitBpB = Bpp;
-                                   cosplitBpB = Bp;
-                              }
-                              else {
-                                   cosplitBpB = Bpp;
-                              }
-                              // point to correct XB list
-                              sized_forward_list<state_T> *XsplitBpB = NULL;
-                              sized_forward_list<state_T> *XcosplitBpB = NULL;
-                              sized_forward_list<state_T> *XsplitsplitBpB = NULL;
-                              //check_consistency_trans_lists(B, setB);
-                              if (detect1_finished == TERMINATED) {
-                                   XsplitBpB = &XBpp;
-                                   XcosplitBpB = &XBp;
-                              }
-                              else {
-                                   XsplitBpB = &XBp;
-                                   XcosplitBpB = &XBpp;
-                              }
-                              // check if splitBpB is stable, and if not, do a nested splitting
-                              splitsplitBpB = NULL;
-                              bool is_stable = false;
-                              if (splitBpB->coconstln_ref == NULL) {
-                                   is_stable = true;
-                              }
-                              else if (size(splitBpB->coconstln_ref) == 0) {
-                                   is_stable = true;
-                              }
-                              //check_consistency_trans_lists(B, setB);
-                              if (!is_stable) {
-                                   is_stable = true;
-                                   for (auto sit = splitBpB->marked_btm_states->begin(); sit != splitBpB->marked_btm_states->end(); ++sit) {
-                                        state_T* s = *sit;
-                                        if (s->coconstln_cnt == NULL) {
-                                             is_stable = false;
-                                             break;
-                                        }
-                                        if (s->coconstln_cnt->cnt == 0) {
-                                             is_stable = false;
-                                             break;
-                                        }
-                                   }
-                              }
-                              //check_consistency_trans_lists(B, setB);
-                              if (!is_stable) {
-                                   nr_of_splits++;
-                                   //mCRL2log(log::verbose) << "not stable\n";
-                                   deleteobject (Q);
-                                   Q = new std::stack< state_T*>;
-                                   L.constant_clear();
-                                   //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
-                                   Lp.constant_clear();
-                                   XBp3.constant_clear();
-                                   XBp4.constant_clear();
-                                   // prepare for lockstep search
-                                   maxsize_detect = (splitBpB->btm_states->size() + splitBpB->non_btm_states->size() + splitBpB->marked_btm_states->size() + splitBpB->marked_non_btm_states->size()) / 2;
-                                   //mCRL2log(log::verbose) << "sizes: " << (splitBpB->btm_states->size() + splitBpB->non_btm_states->size() + splitBpB->marked_btm_states->size() + splitBpB->marked_non_btm_states->size()) << " " << maxsize_detect << "\n";
-                                   block_detect = splitBpB;
-                                   constellation_splitter_detect = setB;
-                                   detect1_finished = CONTINUE;
-                                   detect2_finished = CONTINUE;
-                                   // lockstep search
-#ifndef NDEBUG
-                                   //print_partition();
-#endif
-                                   current_state_detect1 = NULL;
-                                   current_state_detect2 = NULL;
-                                   in_forward_check_detect2 = false;
-                                   iter_trans_state_added_detect1 = splitBpB->coconstln_ref->trans_list->before_begin();
-                                   iter_state_added_detect2 = splitBpB->marked_btm_states->before_begin();
-                                   //check_consistency_trans_lists(B, setB);
-                                   //mCRL2log(log::verbose) << "Launching lockstep search 2\n";
-                                   //mCRL2log(log::verbose) << "block: " << Bp << " splitting const: " << setB << "\n";
-                                   while (detect1_finished != TERMINATED && detect2_finished != TERMINATED) {
-                                        if (detect1_finished != STOPPED) {
-                                             detect1_finished = detect1_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect1_2, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect1_2);
-                                        }
-                                        if (detect1_finished != TERMINATED && detect2_finished != STOPPED) {
-                                             detect2_finished = detect2_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect2_2, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect2_2, true, true);
-                                        }
-                                        // DEBUG EXIT
-                                        //if (detect1_finished == STOPPED && detect2_finished == STOPPED) {
-                                        //     exit(1);
-                                        //}
-                                   }
-#ifndef NDEBUG
-                                   check_consistency_blocks();
-                                   check_consistency_transitions();
-#endif
-                                   // split
-                                   Bp3 = create_new_block(splitBpB->type);
-                                   Bp3->constellation = splitBpB->constellation;
-                                   Bp3->constellation->blocks->insert_linked(Bp3);
-                                   // Let N point to correct list
-                                   sized_forward_list <state_T>* N;
-                                   if (detect1_finished == TERMINATED) {
-                                        N = &L;
-                                   }
-                                   else {
-                                        N = &Lp;
-                                   }
-                                   for (auto sit = N->begin(); sit != N->end(); ++sit) {
-                                        state_T* s = *sit;
-                                        //mCRL2log(log::verbose) << "processing state " << s->id << "\n";
-                                        // 5.3.4 (5.3.2.a)
-                                        move_state_to_block(s, Bp3);
-#ifndef NDEBUG
-                                        //print_partition();
-#endif
-                                        // 5.3.4 (5.3.2.b)
-                                        for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
-                                             transition_T* t = *tit;
-                                             
-                                             // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
-                                             // Different from pseudo-code: only do this if transition is non-inert
-                                             // 5.3.4 (5.3.2.b.i)
-                                             if (t->to_constln_ref != NULL) {
-                                                  to_constlns_element_T* l = t->to_constln_ref;
-                                                  to_constlns_element_T* lp;
-                                                  if (l->new_element != NULL) {
-                                                       lp = l->new_element;
-                                                  }
-                                                  else {
-                                                       //assert(Bp3->inconstln_ref == NULL || l->C != Bp3->constellation);
-                                                       lp = new to_constlns_element_T(l->C);
-                                                       l->new_element = lp;
-                                                       // add lp to Bp3.to_constlns (IMPLIED IN PSEUDO-CODE)
-                                                       Bp3->to_constlns->insert_linked(lp);
-                                                       // possibly set Bp3.inconstln_ref
-                                                       if (l->C == Bp3->constellation) {
-                                                            //mCRL2log(log::verbose) << "bla\n";
-                                                            Bp3->inconstln_ref = lp;
-                                                       }
-     //                                                  // possibly set Bp3.constln_ref and Bp3.coconstln_ref
-     //                                                  if (l == splitBpB->constln_ref) {
-     //                                                       Bp3->constln_ref = lp;
-     //                                                  }
-     //                                                  else if (l == splitBpB->coconstln_ref) {
-     //                                                       Bp3->coconstln_ref = lp;
-     //                                                  }
-                                                       // point lp to l, to be able to efficiently reset new_element pointers later on
-                                                       lp->new_element = l;
-                                                  }
-                                                  l->trans_list->remove_linked(t);
-                                                  lp->trans_list->insert_linked(t);
-                                                  t->to_constln_ref = lp;
-                                                  //if (Bp3->id == 355) {
-                                                  //     mCRL2log(log::verbose) << "2080: setting t->to_constln_ref to " << lp << "\n";
+                                                  //if (Bhatp->id == 355) {
+                                                  //     mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
                                                   //}
                                                   //t.block_constln_list = lp.trans_list;
                                                   // postpone deleting element l until cleaning up new_element pointers
                                              }
-                                             // 5.3.4 (5.3.2.b.ii)
                                              else {
                                                   state_T* sp = t->target;
-                                             
-                                                  if (sp->block == splitBpB && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
+                              
+                                                  if (sp->block == Bhat && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
                                                        // an inert transition becomes non-inert
                                                        s->inert_cnt--;
                                                        if (s->inert_cnt == 0) {
-                                                            XBp3.insert(s);
-                                                            if (s->type == NON_BTM_STATE) {
-                                                                 Bp3->non_btm_states->remove_linked(s);
-                                                                 Bp3->btm_states->insert_state_linked(s, BTM_STATE);
-                                                            }
-                                                            else if (s->type == MARKED_NON_BTM_STATE) {
-                                                                 Bp3->marked_non_btm_states->remove_linked(s);
-                                                                 Bp3->marked_btm_states->insert_state_linked(s, MARKED_BTM_STATE);
-                                                            }
+                                                            XBpp.insert(s);
+                                                            Bhatp->non_btm_states.remove_linked(s);
+                                                            Bhatp->btm_states.insert_state_linked(s, BTM_STATE);
                                                        }
                                                        // Different from pseudo-code: add the transition to the corresponding trans_list
-                                                       if (Bp3->inconstln_ref == NULL) {
-                                                            Bp3->inconstln_ref = new to_constlns_element_T(Bp3->constellation);
-                                                            Bp3->to_constlns->insert_linked(Bp3->inconstln_ref);
-                                                            if (splitBpB->inconstln_ref != NULL) {
-                                                                 splitBpB->inconstln_ref->new_element = Bp3->inconstln_ref;
-                                                                 Bp3->inconstln_ref->new_element = splitBpB->inconstln_ref;
+                                                       if (Bhatp->inconstln_ref == NULL) {
+                                                            Bhatp->inconstln_ref = new to_constlns_element_T(Bhatp->constellation);
+                                                            Bhatp->to_constlns.insert_linked(Bhatp->inconstln_ref);
+                                                            if (Bhat->inconstln_ref != NULL) {
+                                                                 Bhat->inconstln_ref->new_element = Bhatp->inconstln_ref;
+                                                                 Bhatp->inconstln_ref->new_element = Bhat->inconstln_ref;
                                                             }
                                                        }
-                                                       Bp3->inconstln_ref->trans_list->insert_linked(t);
-                                                       t->to_constln_ref = Bp3->inconstln_ref;
+                                                       Bhatp->inconstln_ref->trans_list.insert_linked(t);
+                                                       t->to_constln_ref = Bhatp->inconstln_ref;
+                                                       //if (Bhatp->id == 355) {
+                                                       //     mCRL2log(log::verbose) << "2479: setting t->to_toconstln_ref to " << Bhatp->inconstln_ref << "\n";
+                                                       //}
                                                   }
                                              }
                                         }
-                                        // 5.3.4 (5.3.2.c)
                                         for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) {
                                              transition_T* t = *tit;
                                              state_T* sp = t->source;
-                                             
-                                             if (sp->block == splitBpB && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
+                              
+                                             if (sp->block == Bhat && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
                                                   // an inert transition becomes non-inert
                                                   sp->inert_cnt--;
                                                   if (sp->inert_cnt == 0) {
-                                                       XBp4.insert(sp);
-                                                       if (sp->type == NON_BTM_STATE) {
-                                                            splitBpB->non_btm_states->remove_linked(sp);
-                                                            splitBpB->btm_states->insert_state_linked(sp, BTM_STATE);
-                                                       }
-                                                       else if (sp->type == MARKED_NON_BTM_STATE) {
-                                                            splitBpB->marked_non_btm_states->remove_linked(sp);
-                                                            splitBpB->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
-                                                       }
+                                                       XBp.insert(sp);
+                                                       Bhat->non_btm_states.remove_linked(sp);
+                                                       Bhat->btm_states.insert_state_linked(sp, BTM_STATE);
                                                   }
                                                   // Different from pseudo-code: add the transition to the corresponding trans_list
-                                                  if (splitBpB->inconstln_ref == NULL) {
-                                                       splitBpB->inconstln_ref = new to_constlns_element_T(splitBpB->constellation);
-                                                       splitBpB->to_constlns->insert_linked(splitBpB->inconstln_ref);
-                                                       if (Bp3->inconstln_ref != NULL) {
-                                                            Bp3->inconstln_ref->new_element = splitBpB->inconstln_ref;
-                                                            splitBpB->inconstln_ref->new_element = Bp3->inconstln_ref;
+                                                  if (Bhat->inconstln_ref == NULL) {
+                                                       Bhat->inconstln_ref = new to_constlns_element_T(Bhat->constellation);
+                                                       Bhat->to_constlns.insert_linked(Bhat->inconstln_ref);
+                                                       if (Bhatp->inconstln_ref != NULL) {
+                                                            Bhatp->inconstln_ref->new_element = Bhat->inconstln_ref;
+                                                            Bhat->inconstln_ref->new_element = Bhatp->inconstln_ref;
                                                        }
                                                   }
-                                                  splitBpB->inconstln_ref->trans_list->insert_linked(t);
-                                                  t->to_constln_ref = splitBpB->inconstln_ref;
-                                                  //if (splitBpB->id == 355) {
-                                                  //     mCRL2log(log::verbose) << "2147: setting t->to_constln_ref to " << splitBpB->inconstln_ref << "\n";
+                                                  Bhat->inconstln_ref->trans_list.insert_linked(t);
+                                                  t->to_constln_ref = Bhat->inconstln_ref;
+                                                  //if (Bhat->id == 355) {
+                                                  //     mCRL2log(log::verbose) << "2507: setting t->to_constln_ref to " << Bhat->inconstln_ref << "\n";
                                                   //}
                                              }
                                         }
                                    }
-                                   //mCRL2log(log::verbose) << splitBpB->id << ": \n";
-                                   //for (auto it = splitBpB->to_constlns->begin(); it != splitBpB->to_constlns->end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << "inconstln: " << splitBpB->inconstln_ref << "\n";
-                                   //mCRL2log(log::verbose) << "22---\n";
-                                   //mCRL2log(log::verbose) << Bp3->id << ": \n";
-                                   //for (auto it = Bp3->to_constlns->begin(); it != Bp3->to_constlns->end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << "inconstln: " << Bp3->inconstln_ref << "\n";
-                                   //mCRL2log(log::verbose) << "22---\n";
+                                   sized_forward_list < state_T >* SinSC;
+                                   sized_forward_list < state_T >* SnotinSC;
+                                   if (detect1_finished == TERMINATED) 
+                                   {
+                                     Bhatp->new_btm_states.swap(Bhat->new_btm_states);
+                                     SinSC = &Bhatp->new_btm_states;
+                                     SnotinSC = &Bhat->new_btm_states;
+                                   }
+                                   else 
+                                   {
+                                     SinSC = &Bhat->new_btm_states;
+                                     SnotinSC = &Bhatp->new_btm_states;
+                                   }
+                                   // Walk through new states and add them to SnotinSC if they are not in SClist
+                                   auto prev_sit = SinSC->before_begin();
+                                   typename std::forward_list <state_T*>::iterator it_SClist;
+                                   if (!sclist_is_empty_detect2) {
+                                        it_SClist = e->SClist->begin();
+                                   }
+                                   for (auto sit = SinSC->begin(); sit != SinSC->end(); ++sit) {
+                                        state_T* s = *sit;
+                                        if (sclist_is_empty_detect2) {
+                                             SinSC->remove(prev_sit, sit);
+                                             SnotinSC->insert_back(s);
+                                        }
+                                        else if (it_SClist == e->SClist->end()) {
+                                             SinSC->remove(prev_sit, sit);
+                                             SnotinSC->insert_back(s);
+                                        }
+                                        else if (s != *it_SClist) {
+                                             SinSC->remove(prev_sit, sit);
+                                             SnotinSC->insert_back(s);
+                                        }
+                                        else {
+                                             it_SClist++;
+                                        }
+                                        prev_sit = sit;
+                                   }
+                                   for (auto bit = Bhat->to_constlns.begin(); bit != Bhat->to_constlns.end(); ++bit) {
+                                        to_constlns_element_T* l = *bit;
+                                        // if SClist is empty, we can stop, since all subsequent elements will have empty SClists
+                                        if (l->SClist == NULL) {
+                                             break;
+                                        }
+                                        auto prev_sit = l->SClist->before_begin();
+                                        // 5.3.7.b.ii.A
+                                        for (auto sit = l->SClist->begin(); sit != l->SClist->end(); ++sit) {
+                                             state_T* s = *sit;
+                                             if (s->block == Bhatp) {
+                                                  // new_element still points to corresponding element of Bhatp
+                                                  // Note that we cannot have l->new_element == NULL, since then, l would be a new entry with an empty SClist
+                                                  if (l->new_element->SClist == NULL) {
+                                                       l->new_element->SClist = new sized_forward_list < state_T >;
+                                                       // move to front in list
+                                                       Bhatp->to_constlns.remove_linked(l->new_element);
+                                                       Bhatp->to_constlns.insert_linked(l->new_element);
+                                                  }
+                                                  l->new_element->SClist->insert_back(s);
+                                                  l->SClist->remove(prev_sit, sit);
+                                             }
+                                             prev_sit = sit;
+                                        }
+                                        // 5.3.7.b.ii.B
+                                        if (l->SClist->size() == 0) {
+                                             deleteobject(l->SClist);
+                                             //mCRL2log(log::verbose) << "SC: " << l->SClist << "\n";
+                                             // move the l entry to the back of the list. We do not need to worry about keeping iterator e valid (in while loop), since we will not use it on the current list anymore.
+                                             Bhat->to_constlns.remove_linked(l, bit);
+                                             Bhat->to_constlns.insert_linked_back(l);
+                                        }
+                                   }
                                    // reset temporary pointers of states
                                    for (auto it = L.begin(); it != L.end(); ++it) {
                                         state_T* s = *it;
@@ -2211,534 +2622,131 @@ void clean_temp_refs_block(block_T* B)
                                         s->is_in_P_detect2 = false;
                                         //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
                                    }
-                                // Different from pseudo-code: reset temporary pointers (new elements) of blocks
-                                   // Remove the associated element if the transition list is empty, UNLESS the element is pointed to
-                                   // by either Bp->constln_ref or Bpp->coconstln_ref
-                                   // 5.3.4 (5.3.3)
-                                   for (auto it = Bp3->to_constlns->begin(); it != Bp3->to_constlns->end(); ++it) {
+                                   // Different from pseudo-code: reset temporary pointers (new elements) of blocks
+                                   // 5.3.7.b.iii
+                                   for (auto it = Bhatp->to_constlns.begin(); it != Bhatp->to_constlns.end(); ++it) 
+                                   {
                                         to_constlns_element_T* l = *it;
-                                        if (l->new_element != NULL) {
-                                             if (size(l->new_element) == 0 && l->new_element != splitBpB->constln_ref && l->new_element != splitBpB->coconstln_ref) {
-                                                  if (l->new_element->C == splitBpB->constellation) {
-                                                       splitBpB->inconstln_ref = NULL;
+                                        if (l->new_element != NULL) 
+                                        {
+                                             if (size(l->new_element) == 0) 
+                                             {
+                                                  if (l->new_element->C == Bhat->constellation) 
+                                                  {
+                                                       Bhat->inconstln_ref = NULL;
                                                   }
-                                                  splitBpB->to_constlns->remove_linked(l->new_element);
+                                                  Bhat->to_constlns.remove_linked(l->new_element);
+                                                  l->new_element->trans_list.constant_clear();
                                                   deleteobject (l->new_element);
                                              }
-                                             else {
+                                             else 
+                                             {
                                                   l->new_element->new_element = NULL;
                                              }
                                              l->new_element = NULL;
                                         }
                                    }
-                                   //mCRL2log(log::verbose) << splitBpB->id << ": \n";
-                                   //for (auto it = splitBpB->to_constlns->begin(); it != splitBpB->to_constlns->end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << "inconstln: " << splitBpB->inconstln_ref << "\n";
-                                   //mCRL2log(log::verbose) << "21---\n";
-                                   // set splitsplitBpB
-                                   if (detect1_finished == TERMINATED) {
-                                        splitsplitBpB = Bp3;
-                                   }
-                                   else if (detect2_finished == TERMINATED) {
-                                        splitsplitBpB = splitBpB;
-                                        splitBpB = Bp3;
-                                   }
-                                   // determine the XB sets
-                                   sized_forward_list<state_T> *X2 = NULL;
-                                   if (detect1_finished == TERMINATED) {
-                                        XsplitsplitBpB = &XBp3;
-                                        X2 = &XBp4;
-                                   }
-                                   else {
-                                        XsplitsplitBpB = &XBp4;
-                                        X2 = &XBp3;
-                                   }
-                                   // redistribute content of XsplitBpB
-                                   for (auto sit = XsplitBpB->begin(); sit != XsplitBpB->end(); ++sit) {
-                                        state_T* s = *sit;
-                                        if (s->block == splitsplitBpB) {
-                                             XsplitsplitBpB->insert(s);
+                                   // Different from pseudo-code: remove marking on states and reset constln_ref and coconstln_ref
+                                   //clean_temp_refs_block(Bhat);
+                                   //clean_temp_refs_block(Bhatp);
+                                   // 5.3.5 (5.3.4)
+                                   block_T* Btmp = Bhat;
+                                   sized_forward_list<state_T> *XBtmp = &XBp;
+                                   //check_consistency_transitions();
+                                   //check_consistency_blocks();
+                                   while (Btmp != NULL) {
+                                        //mCRL2log(log::verbose) << "processing new bottom states for " << Btmp->id << "\n";
+                                        for (auto sit = XBtmp->begin(); sit != XBtmp->end(); ++sit) {
+                                             state_T* s = *sit;
+                                             //mCRL2log(log::verbose) << "state " << s->id << "\n";
+                                             for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
+                                                  transition_T* t = *tit;
+                                                  to_constlns_element_T* setBp_entry = t->to_constln_ref;
+                                                  // 5.3.4.a.i
+                                                  if (setBp_entry->SClist == NULL) {
+                                                       setBp_entry->SClist = new sized_forward_list < state_T >;
+                                                       // move the to_constln entry to the front of the list
+                                                       Btmp->to_constlns.remove_linked(setBp_entry);
+                                                       Btmp->to_constlns.insert_linked(setBp_entry);
+                                                  }
+                                                  // 5.3.4.a.ii
+                                                  if (setBp_entry->SClist->size() == 0) {
+                                                       //mCRL2log(log::verbose) << "adding1 state to constln " << setBp_entry << " " << setBp_entry->C->id << "\n";
+                                                       setBp_entry->SClist->insert(s);
+                                                  }
+                                                  else if (setBp_entry->SClist->front() != s) {
+                                                       //mCRL2log(log::verbose) << "(" << t << "," << t->target->id << "): adding2 state " << s->id << " to constln " << setBp_entry << " " << setBp_entry->C->id << "\n";
+                                                       setBp_entry->SClist->insert(s);
+                                                  }
+                                             }
+                                             // 5.3.4.a.iii
+                                             Btmp->new_btm_states.insert(s);
                                         }
-                                        else {
-                                             X2->insert(s);
-                                        }
-                                   }
-                                   //deleteobject (XsplitBpB);
-                                   // needed?
-                                   //XsplitBpB = new sized_forward_list < state_T >;
-                                   XsplitBpB = X2;
-                              } // end if stable (5.3.4)
-                              // remove markings and reset constln_ref and coconstln_ref
-                              //if (splitBpB != NULL) {
-                              //     mCRL2log(log::verbose) << "split clean " << splitBpB->id << "\n";
-                              //}
-                              // 5.3.5
-                              clean_temp_refs_block(splitBpB);
-                              //if (cosplitBpB != NULL) {
-                              //     mCRL2log(log::verbose) << "cosplit clean " << cosplitBpB->id << "\n";
-                              //}
-                              clean_temp_refs_block(cosplitBpB);
-                              //if (splitsplitBpB != NULL) {
-                              //     mCRL2log(log::verbose) << "splitsplit clean " << splitsplitBpB->id << "\n";
-                              //}
-                              clean_temp_refs_block(splitsplitBpB);
-                              // 5.3.6
-                              block_T* Bhat = splitBpB;
-                              block_T* Bhatp = NULL;
-                              sized_forward_list<state_T> *XBhat = XsplitBpB;
-                              while (Bhat != NULL) {
-                                   for (auto sit = XBhat->begin(); sit != XBhat->end(); ++sit) {
-                                        state_T* s = *sit;
-                                        // 5.3.6.a
-                                        for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
-                                             transition_T* t = *tit;
-                                             to_constlns_element_T* setBp_entry = t->to_constln_ref;
-                                             //mCRL2log(log::verbose) << t->to_constln_ref->C << " " << t->target->block->constellation << "\n";
-                                             //mCRL2log(log::verbose) << Bhat->constellation << "\n";
-                                             //assert(t->to_constln_ref->C == t->target->block->constellation);
-                                             // 5.3.6.a.i
-                                             if (setBp_entry->SClist == NULL) {
-                                                  setBp_entry->SClist = new sized_forward_list < state_T >;
-                                                  // move the to_constln entry to the front of the list
-                                                  Bhat->to_constlns->remove_linked(setBp_entry);
-                                                  Bhat->to_constlns->insert_linked(setBp_entry);
-                                             }
-                                             // 5.3.6.a.ii
-                                             if (setBp_entry->SClist->size() == 0) {
-                                                  //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C << "\n";
-                                                  setBp_entry->SClist->insert(s);
-                                             }
-                                             else if (setBp_entry->SClist->front() != s) {
-                                                  //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C << "\n";
-                                                  setBp_entry->SClist->insert(s);
-                                             }
-                                        }
-                                        // 5.3.6.b
-                                        Bhat->new_btm_states->insert(s);
-                                   }
-                              
-                                   // consider next block
-                                   if (Bhat == splitsplitBpB) {
-                                        break;
-                                   }
-                                   if (Bhat == cosplitBpB) {
-                                        Bhat = splitsplitBpB;
-                                        XBhat = XsplitsplitBpB;
-                                   }
-                                   else if (cosplitBpB != NULL) {
-                                        Bhat = cosplitBpB;
-                                        XBhat = XcosplitBpB;
-                                   }
-                                   else {
-                                        Bhat = splitsplitBpB;
-                                        XBhat = XsplitsplitBpB;
-                                   }
-                              }
-#ifndef NDEBUG
-                              //print_partition();
-#endif
-                              // 5.3.7
-                              // We use a stack blocks_to_process to keep track of which blocks still need to be checked for stability
-                              std::stack < block_T* > blocks_to_process;
-                              // push blocks on the stack if they have new bottom states
-                              if (splitBpB != NULL) {
-                                   if (splitBpB->new_btm_states->size() > 0) {
-                                        //mCRL2log(log::verbose) << "add split\n";
-                                        blocks_to_process.push(splitBpB);
-                                   }
-                              }
-                              if (cosplitBpB != NULL) {
-                                   if (cosplitBpB->new_btm_states->size() > 0) {
-                                        //mCRL2log(log::verbose) << "add cosplit\n";
-                                        blocks_to_process.push(cosplitBpB);
-                                   }
-                              }
-                              if (splitsplitBpB != NULL) {
-                                   if (splitsplitBpB->new_btm_states->size() > 0) {
-                                        //mCRL2log(log::verbose) << "add splitsplit with # new btm states = " << splitsplitBpB->new_btm_states->size() << "\n";
-                                        blocks_to_process.push(splitsplitBpB);
-                                   }
-                              }
-                              while (blocks_to_process.size() > 0) {
-                                   // 5.3.7.a
-                                   Bhat = blocks_to_process.top();
-                                   blocks_to_process.pop();
-                                   bool split = false;
-                                   // 5.3.7.b
-                                   // Find a constellation under which the block is not stable
-                                   for (auto cit = Bhat->to_constlns->begin(); cit != Bhat->to_constlns->end(); ++cit) {
-                                        to_constlns_element_T* e = *cit;
-                                        bool splitcrit_met = false;
-                                        if (e->SClist == NULL) {
-                                             splitcrit_met = true;
-                                             split = true;
-                                        }
-                                        else if (e->SClist->size() < Bhat->new_btm_states->size()) {
-                                             //mCRL2log(log::verbose) << "size: " << e->SClist->size() << "\n";
-                                             splitcrit_met = true;
-                                             split = true;
-                                        }
-                                        if (splitcrit_met) {
-                                             nr_of_splits++;
-                                             // further splitting is required
-                                             XBp.constant_clear();
-                                             XBpp.constant_clear();
-                                             // Prepare detect1 and detect2 for lockstep
-                                             deleteobject (Q);
-                                             Q = new std::stack< state_T*>;
-                                             L.constant_clear();
-                                             //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
-                                             Lp.constant_clear();
-                                             // 5.3.7.b.i.A / B
-                                             // !!! Different from the pseudo-code, we prepare detect1 by walking over the transitions from Bhat to constellation pointed
-                                             // to by *cit. To optimise this, we should probably maintain a list of states that have a direct transition from Bhat to constellation
-                                             // of *cit, and instead walk over that list
-                                             maxsize_detect = (Bhat->btm_states->size() + Bhat->non_btm_states->size()) / 2;
-                                             block_detect = Bhat;
-                                             e_detect = e;
-                                             constellation_splitter_detect = e->C;
-                                             detect1_finished = CONTINUE;
-                                             detect2_finished = CONTINUE;
-                                             current_state_detect1 = NULL;
-                                             current_state_detect2 = NULL;
-                                             in_forward_check_detect2 = false;
-                                             iter_trans_state_added_detect1 = e->trans_list->before_begin();
-                                             iter_state_added_detect2 = Bhat->new_btm_states->before_begin();
-                                             if (e->SClist == NULL) {
-                                                  sclist_is_empty_detect2 = true;
-                                             }
-                                             else {
-                                                  sclist_is_empty_detect2 = false;
-                                                  iter_sclist_detect2 = e->SClist->begin();
-                                             }
-                                             while (detect1_finished != TERMINATED && detect2_finished != TERMINATED) {
-                                                  if (detect1_finished != STOPPED) {
-                                                       detect1_finished = detect1_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect1_3, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect1_3);
-                                                  }
-                                                  if (detect1_finished != TERMINATED && detect2_finished != STOPPED) {
-                                                       detect2_finished = detect2_step(&bisim_partitioner_gw<LTS_TYPE>::has_next_state_detect2_3, &bisim_partitioner_gw<LTS_TYPE>::next_state_detect2_3, false, true);
-                                                  }
-                                             }
-                                             // 5.3.7.b.ii (5.3.2)
-                                             Bhatp = create_new_block(Bhat->type);
-                                             Bhatp->constellation = Bhat->constellation;
-                                             Bhatp->constellation->blocks->insert_linked(Bhatp);
-                                             //mCRL2log(log::verbose) << "splitting " << Bhat->id << " producing " << Bhatp->id << "\n";
-                                             // Let N point to correct list
-                                             sized_forward_list <state_T> *N;
-                                             if (detect1_finished == TERMINATED) {
-                                                  N = &L;
-                                             }
-                                             else {
-                                                  N = &Lp;
-                                             }
-                                             for (auto sit = N->begin(); sit != N->end(); ++sit) {
-                                                  state_T* s = *sit;
-                                                  move_state_to_block(s, Bhatp);
-                                                  // Different from pseudo-code: we need to consider all constellations that can be reached from
-                                                  // s, not just setB \ B and B. For this, we merge steps 5.3.2.c and 5.3.2.d
-                                                  for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
-                                                       transition_T* t = *tit;
-
-                                                       // Different from pseudo-code: only do this if transition is non-inert
-                                                       if (t->to_constln_ref != NULL) {
-                                                            to_constlns_element_T* l = t->to_constln_ref;
-                                                            //mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C->id << "\n";
-                                                            to_constlns_element_T* lp;
-                                                            if (l->new_element != NULL) {
-                                                                 //mCRL2log(log::verbose) << "point to new element " << l->new_element << " " << l->new_element->C->id << "\n";
-                                                                 lp = l->new_element;
-                                                            }
-                                                            else {
-                                                                 //mCRL2log(log::verbose) << Bhatp->constellation->id << "\n";
-                                                                 //assert(Bhatp->inconstln_ref == NULL || l->C != Bhatp->constellation);
-                                                                 lp = new to_constlns_element_T(l->C);
-                                                                 l->new_element = lp;
-                                                                 //mCRL2log(log::verbose) << "create new element " << l->new_element << " " << l->new_element->C->id << "\n";
-                                                                 // Different from pseudo-code: point lp->new_element back to l, to efficiently reset
-                                                                 // new_element pointers of 'old' elements later
-                                                                 lp->new_element = l;
-                                                                 //mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
-                                                                 // add lp to Bhatp.to_constlns (IMPLIED IN PSEUDO-CODE)
-                                                                 Bhatp->to_constlns->insert_linked(lp);
-                                                                 // possibly set Bhatp.inconstln_ref
-                                                                 if (l->C == Bhatp->constellation) {
-                                                                      //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C->id << "\n";
-                                                                      Bhatp->inconstln_ref = lp;
-                                                                 }
-                                                            }
-                                                            l->trans_list->remove_linked(t);
-                                                            lp->trans_list->insert_linked(t);
-                                                            t->to_constln_ref = lp;
-                                                            //if (Bhatp->id == 355) {
-                                                            //     mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
-                                                            //}
-                                                            //t.block_constln_list = lp.trans_list;
-                                                            // postpone deleting element l until cleaning up new_element pointers
-                                                       }
-                                                       else {
-                                                            state_T* sp = t->target;
-                                        
-                                                            if (sp->block == Bhat && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
-                                                                 // an inert transition becomes non-inert
-                                                                 s->inert_cnt--;
-                                                                 if (s->inert_cnt == 0) {
-                                                                      XBpp.insert(s);
-                                                                      Bhatp->non_btm_states->remove_linked(s);
-                                                                      Bhatp->btm_states->insert_state_linked(s, BTM_STATE);
-                                                                 }
-                                                                 // Different from pseudo-code: add the transition to the corresponding trans_list
-                                                                 if (Bhatp->inconstln_ref == NULL) {
-                                                                      Bhatp->inconstln_ref = new to_constlns_element_T(Bhatp->constellation);
-                                                                      Bhatp->to_constlns->insert_linked(Bhatp->inconstln_ref);
-                                                                      if (Bhat->inconstln_ref != NULL) {
-                                                                           Bhat->inconstln_ref->new_element = Bhatp->inconstln_ref;
-                                                                           Bhatp->inconstln_ref->new_element = Bhat->inconstln_ref;
-                                                                      }
-                                                                 }
-                                                                 Bhatp->inconstln_ref->trans_list->insert_linked(t);
-                                                                 t->to_constln_ref = Bhatp->inconstln_ref;
-                                                                 //if (Bhatp->id == 355) {
-                                                                 //     mCRL2log(log::verbose) << "2479: setting t->to_toconstln_ref to " << Bhatp->inconstln_ref << "\n";
-                                                                 //}
-                                                            }
-                                                       }
-                                                  }
-                                                  for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) {
-                                                       transition_T* t = *tit;
-                                                       state_T* sp = t->source;
-                                        
-                                                       if (sp->block == Bhat && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) {
-                                                            // an inert transition becomes non-inert
-                                                            sp->inert_cnt--;
-                                                            if (sp->inert_cnt == 0) {
-                                                                 XBp.insert(sp);
-                                                                 Bhat->non_btm_states->remove_linked(sp);
-                                                                 Bhat->btm_states->insert_state_linked(sp, BTM_STATE);
-                                                            }
-                                                            // Different from pseudo-code: add the transition to the corresponding trans_list
-                                                            if (Bhat->inconstln_ref == NULL) {
-                                                                 Bhat->inconstln_ref = new to_constlns_element_T(Bhat->constellation);
-                                                                 Bhat->to_constlns->insert_linked(Bhat->inconstln_ref);
-                                                                 if (Bhatp->inconstln_ref != NULL) {
-                                                                      Bhatp->inconstln_ref->new_element = Bhat->inconstln_ref;
-                                                                      Bhat->inconstln_ref->new_element = Bhatp->inconstln_ref;
-                                                                 }
-                                                            }
-                                                            Bhat->inconstln_ref->trans_list->insert_linked(t);
-                                                            t->to_constln_ref = Bhat->inconstln_ref;
-                                                            //if (Bhat->id == 355) {
-                                                            //     mCRL2log(log::verbose) << "2507: setting t->to_constln_ref to " << Bhat->inconstln_ref << "\n";
-                                                            //}
-                                                       }
-                                                  }
-                                             }
-                                             sized_forward_list < state_T >* SinSC;
-                                             sized_forward_list < state_T >* SnotinSC;
-                                             if (detect1_finished == TERMINATED) {
-                                                  // keep temp value in SinSC for swapping
-                                                  SinSC = Bhatp->new_btm_states;
-                                                  Bhatp->new_btm_states = Bhat->new_btm_states;
-                                                  Bhat->new_btm_states = SinSC;
-                                                  SinSC = Bhatp->new_btm_states;
-                                                  SnotinSC = Bhat->new_btm_states;
-                                             }
-                                             else {
-                                                  SinSC = Bhat->new_btm_states;
-                                                  SnotinSC = Bhatp->new_btm_states;
-                                             }
-                                             // Walk through new states and add them to SnotinSC if they are not in SClist
-                                             auto prev_sit = SinSC->before_begin();
-                                             typename std::forward_list <state_T*>::iterator it_SClist;
-                                             if (!sclist_is_empty_detect2) {
-                                                  it_SClist = e->SClist->begin();
-                                             }
-                                             for (auto sit = SinSC->begin(); sit != SinSC->end(); ++sit) {
-                                                  state_T* s = *sit;
-                                                  if (sclist_is_empty_detect2) {
-                                                       SinSC->remove(prev_sit, sit);
-                                                       SnotinSC->insert_back(s);
-                                                  }
-                                                  else if (it_SClist == e->SClist->end()) {
-                                                       SinSC->remove(prev_sit, sit);
-                                                       SnotinSC->insert_back(s);
-                                                  }
-                                                  else if (s != *it_SClist) {
-                                                       SinSC->remove(prev_sit, sit);
-                                                       SnotinSC->insert_back(s);
-                                                  }
-                                                  else {
-                                                       it_SClist++;
-                                                  }
-                                                  prev_sit = sit;
-                                             }
-                                             for (auto bit = Bhat->to_constlns->begin(); bit != Bhat->to_constlns->end(); ++bit) {
-                                                  to_constlns_element_T* l = *bit;
-                                                  // if SClist is empty, we can stop, since all subsequent elements will have empty SClists
-                                                  if (l->SClist == NULL) {
-                                                       break;
-                                                  }
-                                                  auto prev_sit = l->SClist->before_begin();
-                                                  // 5.3.7.b.ii.A
-                                                  for (auto sit = l->SClist->begin(); sit != l->SClist->end(); ++sit) {
-                                                       state_T* s = *sit;
-                                                       if (s->block == Bhatp) {
-                                                            // new_element still points to corresponding element of Bhatp
-                                                            // Note that we cannot have l->new_element == NULL, since then, l would be a new entry with an empty SClist
-                                                            if (l->new_element->SClist == NULL) {
-                                                                 l->new_element->SClist = new sized_forward_list < state_T >;
-                                                                 // move to front in list
-                                                                 Bhatp->to_constlns->remove_linked(l->new_element);
-                                                                 Bhatp->to_constlns->insert_linked(l->new_element);
-                                                            }
-                                                            l->new_element->SClist->insert_back(s);
-                                                            l->SClist->remove(prev_sit, sit);
-                                                       }
-                                                       prev_sit = sit;
-                                                  }
-                                                  // 5.3.7.b.ii.B
-                                                  if (l->SClist->size() == 0) {
-                                                       deleteobject(l->SClist);
-                                                       //mCRL2log(log::verbose) << "SC: " << l->SClist << "\n";
-                                                       // move the l entry to the back of the list. We do not need to worry about keeping iterator e valid (in while loop), since we will not use it on the current list anymore.
-                                                       Bhat->to_constlns->remove_linked(l, bit);
-                                                       Bhat->to_constlns->insert_linked_back(l);
-                                                  }
-                                             }
-                                             // reset temporary pointers of states
-                                             for (auto it = L.begin(); it != L.end(); ++it) {
-                                                  state_T* s = *it;
-                                                  s->is_in_L_detect1 = false;
-                                             }
-                                             for (auto it = Lp.begin(); it != Lp.end(); ++it) {
-                                                  state_T* s = *it;
-                                                  s->is_in_Lp_detect2 = false;
-                                             }
-                                             while (!P->empty()) {
-                                                  state_T* s = *(P->begin());
-                                                  P->erase(P->begin());
-                                                  s->is_in_P_detect2 = false;
-                                                  //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
-                                             }
-                                             // Different from pseudo-code: reset temporary pointers (new elements) of blocks
-                                             // 5.3.7.b.iii
-                                             for (auto it = Bhatp->to_constlns->begin(); it != Bhatp->to_constlns->end(); ++it) {
-                                                  to_constlns_element_T* l = *it;
-                                                  if (l->new_element != NULL) {
-                                                       if (size(l->new_element) == 0) {
-                                                            if (l->new_element->C == Bhat->constellation) {
-                                                                 Bhat->inconstln_ref = NULL;
-                                                            }
-                                                            Bhat->to_constlns->remove_linked(l->new_element);
-                                                            deleteobject (l->new_element->trans_list);
-                                                            deleteobject (l->new_element);
-                                                       }
-                                                       else {
-                                                            l->new_element->new_element = NULL;
-                                                       }
-                                                       l->new_element = NULL;
-                                                  }
-                                             }
-                                             // Different from pseudo-code: remove marking on states and reset constln_ref and coconstln_ref
-                                             //clean_temp_refs_block(Bhat);
-                                             //clean_temp_refs_block(Bhatp);
-                                             // 5.3.5 (5.3.4)
-                                             block_T* Btmp = Bhat;
-                                             sized_forward_list<state_T> *XBtmp = &XBp;
-                                             //check_consistency_transitions();
-                                             //check_consistency_blocks();
-                                             while (Btmp != NULL) {
-                                                  //mCRL2log(log::verbose) << "processing new bottom states for " << Btmp->id << "\n";
-                                                  for (auto sit = XBtmp->begin(); sit != XBtmp->end(); ++sit) {
-                                                       state_T* s = *sit;
-                                                       //mCRL2log(log::verbose) << "state " << s->id << "\n";
-                                                       for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
-                                                            transition_T* t = *tit;
-                                                            to_constlns_element_T* setBp_entry = t->to_constln_ref;
-                                                            // 5.3.4.a.i
-                                                            if (setBp_entry->SClist == NULL) {
-                                                                 setBp_entry->SClist = new sized_forward_list < state_T >;
-                                                                 // move the to_constln entry to the front of the list
-                                                                 Btmp->to_constlns->remove_linked(setBp_entry);
-                                                                 Btmp->to_constlns->insert_linked(setBp_entry);
-                                                            }
-                                                            // 5.3.4.a.ii
-                                                            if (setBp_entry->SClist->size() == 0) {
-                                                                 //mCRL2log(log::verbose) << "adding1 state to constln " << setBp_entry << " " << setBp_entry->C->id << "\n";
-                                                                 setBp_entry->SClist->insert(s);
-                                                            }
-                                                            else if (setBp_entry->SClist->front() != s) {
-                                                                 //mCRL2log(log::verbose) << "(" << t << "," << t->target->id << "): adding2 state " << s->id << " to constln " << setBp_entry << " " << setBp_entry->C->id << "\n";
-                                                                 setBp_entry->SClist->insert(s);
-                                                            }
-                                                       }
-                                                       // 5.3.4.a.iii
-                                                       Btmp->new_btm_states->insert(s);
-                                                  }
-                                   
-                                                  // consider next block
-                                                  if (Btmp == Bhatp) {
-                                                       break;
-                                                  }
-                                                  if (Btmp == Bhat) {
-                                                       Btmp = Bhatp;
-                                                       XBtmp = &XBpp;
-                                                  }
-                                             }
-                                             // push resulting blocks on the work stack if they have new states
-                                             // 5.3.7.b.iv
-                                             if (Bhatp->new_btm_states->size() > 0) {
-                                                  blocks_to_process.push(Bhatp);
-                                             }
-                                             if (Bhat->new_btm_states->size() > 0) {
-                                                  blocks_to_process.push(Bhat);
-                                             }
+                         
+                                        // consider next block
+                                        if (Btmp == Bhatp) {
                                              break;
-                                        } // end if splitcrit_met
-                                        // Different from pseudo-code: we do not clean e->SClist and move e to the back.
-                                        // We reset the list only later. This, since the original moving would lead to the list
-                                        // of e representing a reason to split Bhat (an empty list is sufficient for that).
-//                                        else {
-//                                             // 5.3.5.b
-//                                             deleteobject (e->SClist);
-//                                             Bhat->to_constlns->remove_linked(e, cit);
-//                                             Bhat->to_constlns->insert_linked_back(e);
-//                                        }
-                                   } // end of walk over to_constln of block
-                                   // Different from pseudo-code: if block is stable, reset new_btm_states, remove remaining SClists
-                                   // 5.3.7.c
-                                   if (!split) {
-                                        deleteobject(Bhat->new_btm_states);
-                                        Bhat->new_btm_states = new sized_forward_list <state_T>;
-                                        for (auto it = Bhat->to_constlns->begin(); it != Bhat->to_constlns->end(); ++it) {
-                                             to_constlns_element_T* l = *it;
-                                             if (l->SClist != NULL) {
-                                                  deleteobject (l->SClist);
-                                             }
-                                             else {
-                                                  break;
-                                             }
+                                        }
+                                        if (Btmp == Bhat) {
+                                             Btmp = Bhatp;
+                                             XBtmp = &XBpp;
                                         }
                                    }
-                              } // end while loop for stabilising blocks
-                              // 5.3.8
-                              if (Bp->constellation->type == TRIVIAL) {
-                                   Bp->constellation->type = NONTRIVIAL;
-                                   trivial_constlns.remove_linked(Bp->constellation);
-                                   non_trivial_constlns.insert_linked(Bp->constellation);
-                              }
-                         } // end walking over splittable blocks
-                    } // end walk over non-trivial constellations
-               } // end while there are non-trivial constellations
+                                   // push resulting blocks on the work stack if they have new states
+                                   // 5.3.7.b.iv
+                                   if (Bhatp->new_btm_states.size() > 0) {
+                                        blocks_to_process.push(Bhatp);
+                                   }
+                                   if (Bhat->new_btm_states.size() > 0) {
+                                        blocks_to_process.push(Bhat);
+                                   }
+                                   break;
+                              } // end if splitcrit_met
+                              // Different from pseudo-code: we do not clean e->SClist and move e to the back.
+                              // We reset the list only later. This, since the original moving would lead to the list
+                              // of e representing a reason to split Bhat (an empty list is sufficient for that).
+//                              else {
+//                                   // 5.3.5.b
+//                                   deleteobject (e->SClist);
+//                                   Bhat->to_constlns.remove_linked(e, cit);
+//                                   Bhat->to_constlns.insert_linked_back(e);
+//                              }
+                         } // end of walk over to_constln of block
+                         // Different from pseudo-code: if block is stable, reset new_btm_states, remove remaining SClists
+                         // 5.3.7.c
+                         if (!split) 
+                         {
+                           // deleteobject(Bhat->new_btm_states);
+                           Bhat->new_btm_states.constant_clear(); 
+                           for (auto it = Bhat->to_constlns.begin(); it != Bhat->to_constlns.end(); ++it) 
+                           {
+                             to_constlns_element_T* l = *it;
+                             if (l->SClist != NULL) 
+                             {
+                               deleteobject (l->SClist);
+                             }
+                             else 
+                             {
+                               break;
+                             }
+                           }
+                         }
+                    } // end while loop for stabilising blocks
+                    // 5.3.8
+                    if (Bp->constellation->type == TRIVIAL) {
+                         Bp->constellation->type = NONTRIVIAL;
+                         trivial_constlns.remove_linked(Bp->constellation);
+                         non_trivial_constlns.insert_linked(Bp->constellation);
+                    }
+                } // end walking over splittable blocks
+           } // end walk over non-trivial constellations
+      } // end while there are non-trivial constellations
 #ifndef NDEBUG
-               //print_partition();
+      //print_partition();
 #endif
-               mCRL2log(log::verbose) << "number of splits performed: " << nr_of_splits << "\n";
-               mCRL2log(log::verbose) << num_eq_classes();
-          }
+      mCRL2log(log::verbose) << "The number of splits that have been performed is: " << nr_of_splits << ".\n";
+      mCRL2log(log::verbose) << "The number of obtained equivalence classes is: " << num_eq_classes() << ".\n";
+    }
 
 #ifndef NDEBUG
     // The methods below are intended to check the consistency of the internal data
@@ -2751,9 +2759,9 @@ void clean_temp_refs_block(block_T* B)
                while (L != NULL) {
                     for (auto cit = L->begin(); cit != L->end(); ++cit) {
                          constellation_T* C = *cit;
-                         for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                               block_T* B = *bit;
-                              assert(B->btm_states->size() + B->non_btm_states->size() + B->marked_btm_states->size() + B->marked_non_btm_states->size() > 0);
+                              assert(B->btm_states.size() + B->non_btm_states.size() + B->marked_btm_states.size() + B->marked_non_btm_states.size() > 0);
                          }
                     }
                
@@ -2776,7 +2784,7 @@ void clean_temp_refs_block(block_T* B)
                          found = false;
                          if (t->to_constln_ref != NULL) {
                               assert(t->target->block->constellation == t->to_constln_ref->C);
-                              for (auto eit = B->to_constlns->begin(); eit != B->to_constlns->end(); ++eit) {
+                              for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) {
                                    to_constlns_element_T* e = *eit;
                                    if (e == t->to_constln_ref) {
                                         found = true;
@@ -2796,12 +2804,14 @@ void clean_temp_refs_block(block_T* B)
                while (L != NULL) {
                     for (auto cit = L->begin(); cit != L->end(); ++cit) {
                          constellation_T* C = *cit;
-                         for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) 
+                         {
                               block_T* B = *bit;
                               // walk over elements in to_constlns
                               //count2 = 0;
-                              std::forward_list < to_constlns_element_T* >::iterator prev_eit = B->to_constlns->before_begin();
-                              for (auto eit = B->to_constlns->begin(); eit != B->to_constlns->end(); ++eit) {
+                              std::forward_list < to_constlns_element_T* >::iterator prev_eit = B->to_constlns.before_begin();
+                              for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) 
+                              {
                                    to_constlns_element_T* e = *eit;
                                    assert(e->trans_list != NULL);
                                    //if (e->C->id == 12) {
@@ -2810,8 +2820,8 @@ void clean_temp_refs_block(block_T* B)
                                    //     }
                                    //     count2++;
                                    //}
-                                   std::forward_list < transition_T* >::iterator prev_tit = e->trans_list->before_begin();
-                                   for (auto tit = e->trans_list->begin(); tit != e->trans_list->end(); ++tit) {
+                                   std::forward_list < transition_T* >::iterator prev_tit = e->trans_list.before_begin();
+                                   for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) {
                                         transition_T* t = *tit;
                                         assert(t->ptr_in_list == prev_tit);
                                         assert(t->to_constln_ref == e);
@@ -2820,7 +2830,7 @@ void clean_temp_refs_block(block_T* B)
                                         assert(t->target->block->constellation == e->C);
                                         // assert that t->to_constln_ref is valid
                                         count = 0;
-                                        for (auto eit2 = B->to_constlns->begin(); eit2 != B->to_constlns->end(); ++eit2) {
+                                        for (auto eit2 = B->to_constlns.begin(); eit2 != B->to_constlns.end(); ++eit2) {
                                              to_constlns_element_T* l = *eit2;
                                              if (l == t->to_constln_ref) {
                                                   count = 1;
@@ -2921,10 +2931,11 @@ void clean_temp_refs_block(block_T* B)
                     // check consistency of ptr_in_list
                     assert(prev_cit == C->ptr_in_list);
                     size_t const_size = 0;
-                    std::forward_list < block_T* >::iterator prev_bit = C->blocks->before_begin();
-                    for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                    std::forward_list < block_T* >::iterator prev_bit = C->blocks.before_begin();
+                    for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) 
+                    {
                          block_T* B = *bit;
-                         const_size += B->btm_states->size() + B->non_btm_states->size() + B-> marked_btm_states->size() + B->marked_non_btm_states->size();
+                         const_size += B->btm_states.size() + B->non_btm_states.size() + B-> marked_btm_states.size() + B->marked_non_btm_states.size();
                          // check consistency of ID (for now, should be <= 100)
                          //assert(B->id <= 100);
                          assert(B->type == STD_BLOCK || B->type == EXTRA_KRIPKE_BLOCK);
@@ -2933,9 +2944,9 @@ void clean_temp_refs_block(block_T* B)
                          // check consistency of ptr_in_list
                          assert(prev_bit == B->ptr_in_list);
                          // empty state lists
-                         assert(B->marked_btm_states->size() == 0);
-                         assert(B->marked_non_btm_states->size() == 0);
-                         assert(B->new_btm_states->size() == 0);
+                         assert(B->marked_btm_states.size() == 0);
+                         assert(B->marked_non_btm_states.size() == 0);
+                         assert(B->new_btm_states.size() == 0);
                          assert(B->constln_ref == NULL);
                          assert(B->coconstln_ref == NULL);
                          // check states
@@ -2966,13 +2977,13 @@ void clean_temp_refs_block(block_T* B)
                while (L != NULL) {
                     for (auto cit = L->begin(); cit != L->end(); ++cit) {
                          constellation_T* C = *cit;
-                         for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                               block_T* B = *bit;
                               // traverse the lists
-                              for (auto eit = B->to_constlns->begin(); eit != B->to_constlns->end(); ++eit) {
+                              for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) {
                                    to_constlns_element_T* e = *eit;
                                    if (e->C == split_const) {
-                                        for (auto tit = e->trans_list->begin(); tit != e->trans_list->end(); ++tit) {
+                                        for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) {
                                              transition_T* t = *tit;
                                              //assert(t->target->block->constellation == e->C);
                                              if (t->source->coconstln_cnt != NULL) {
@@ -3001,13 +3012,13 @@ void clean_temp_refs_block(block_T* B)
                while (L != NULL) {
                     for (auto cit = L->begin(); cit != L->end(); ++cit) {
                          constellation_T* C = *cit;
-                         for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                               block_T* B = *bit;
                               // traverse the lists
-                              for (auto eit = B->to_constlns->begin(); eit != B->to_constlns->end(); ++eit) {
+                              for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) {
                                    to_constlns_element_T* e = *eit;
                                    if (e->C == split_const) {
-                                        for (auto tit = e->trans_list->begin(); tit != e->trans_list->end(); ++tit) {
+                                        for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) {
                                              transition_T* t = *tit;
                                              assert(t->source->coconstln_cnt == NULL);
                                         }
@@ -3079,7 +3090,7 @@ bool bisimulation_compare_gw(
 
 template < class LTS_TYPE>
 void bisimulation_reduce_gw(LTS_TYPE& l,
-                         const bool branching) /*=false */
+                            const bool branching) /*=false */
 {
   // First, remove tau loops in case of branching bisimulation.
   if (branching)
