@@ -2813,7 +2813,7 @@ void clean_temp_refs_block(block_T* B)
                               for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) 
                               {
                                    to_constlns_element_T* e = *eit;
-                                   assert(e->trans_list != NULL);
+                                   // assert(e->trans_list != NULL);
                                    //if (e->C->id == 12) {
                                    //     if (B->id == 10 || B->id == 39) {
                                    //          mCRL2log(log::verbose) << B->id << ": found const 12 at " << e << "\n";
@@ -2863,16 +2863,16 @@ void clean_temp_refs_block(block_T* B)
                sized_forward_list < state_T >* list;
                switch (t) {
                     case BTM_STATE:
-                         list = B->btm_states;
+                         list = &B->btm_states;
                          break;
                     case NON_BTM_STATE:
-                         list = B->non_btm_states;
+                         list = &B->non_btm_states;
                          break;
                     case MARKED_BTM_STATE:
-                         list = B->marked_btm_states;
+                         list = &B->marked_btm_states;
                          break;
                     case MARKED_NON_BTM_STATE:
-                         list = B->marked_non_btm_states;
+                         list = &B->marked_non_btm_states;
                          break;
                }
                std::forward_list < state_T* >::iterator prev_sit = list->before_begin();
