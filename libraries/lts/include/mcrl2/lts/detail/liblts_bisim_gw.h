@@ -503,14 +503,7 @@ struct constellation_T
       : id(max_const_index++), 
         size(0), 
         type(TRIVIAL) 
-     { 
-       // blocks = new sized_forward_list < block_T >;
-     }
-     // destructor
-     ~constellation_T() 
-     {
-       // deleteobject(blocks);
-     }
+     {}
 };
 
 struct to_constlns_element_T
@@ -519,10 +512,10 @@ struct to_constlns_element_T
      // !!! Not present in pseudo-code: a pointer to the list of transitions from block containing this element (in to_constlns list) to constellation C,
      // EXCLUDING the inert transitions, i.e., the transitions must leave the source block;
      // This is needed to efficiently find these transitions when preparing for lockstep search detect1 when stabilising blocks
-     sized_forward_list < transition_T > *trans_list;
+     sized_forward_list < transition_T > trans_list;
      // !!! Different from pseudo-code: nr_trans_block_to_C is not needed: trans_list points to the list of transitions, and its size equals nr_trans_block_to_C
      //size_t nr_trans_block_to_C = 0;
-     struct to_constlns_element_T *new_element;
+     struct to_constlns_element_T* new_element;
      // A list S_C for constellation C
      sized_forward_list < state_T >* SClist;
 
@@ -532,9 +525,19 @@ struct to_constlns_element_T
      std::forward_list<to_constlns_element_T*, forward_list_allocator<to_constlns_element_T*>  >::iterator ptr_in_list;
      
      // constructor
-     to_constlns_element_T(constellation_T *CC): C(CC), new_element(NULL), SClist(NULL) {trans_list = new sized_forward_list < transition_T >;}
+     to_constlns_element_T(constellation_T *CC)
+       : C(CC), 
+         new_element(NULL), 
+         SClist(NULL) 
+     {
+       // trans_list = new sized_forward_list < transition_T >;
+     }
+     
      // destructor
-     ~to_constlns_element_T() {delete(trans_list);}
+     ~to_constlns_element_T() 
+     {
+       // delete(trans_list);
+     }
 };
 
 struct block_T
@@ -633,7 +636,7 @@ size_t size(to_constlns_element_T* l)
           return 0;
      }
      else {
-          return l->trans_list->size();
+          return l->trans_list.size();
      }
 }
 
@@ -998,7 +1001,7 @@ void clean_temp_refs_block(block_T* B)
           inline bool has_next_state_detect1_2() {
                auto next_it = iter_trans_state_added_detect1;
                next_it++;
-               return next_it != block_detect->coconstln_ref->trans_list->end();
+               return next_it != block_detect->coconstln_ref->trans_list.end();
           }
 
           inline state_T* next_state_detect1_2() {
@@ -1039,7 +1042,7 @@ void clean_temp_refs_block(block_T* B)
           inline bool has_next_state_detect1_3() {
                auto next_it = iter_trans_state_added_detect1;
                next_it++;
-               return next_it != e_detect->trans_list->end();
+               return next_it != e_detect->trans_list.end();
           }
      
           inline state_T* next_state_detect1_3() {
@@ -1473,7 +1476,7 @@ void clean_temp_refs_block(block_T* B)
                       // set pointer to C entry in to_constlns list of B.
                       t_entry->to_constln_ref = t_entry->source->block->to_constlns->front();
                       // add transition to transition list of source block
-                      t_entry->to_constln_ref->trans_list->insert_linked(t_entry);
+                      t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
                     }
                     // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
                     //t_entry.to_constln_ref->trans_list = t_entry.block_constln_list;
@@ -1498,7 +1501,7 @@ void clean_temp_refs_block(block_T* B)
                     // set pointer to C entry in to_constlns list of B. Increment the associated counter
                     t_entry2->to_constln_ref = t_entry2->source->block->to_constlns->front();
                     // add transition to transition list of source block
-                    t_entry2->to_constln_ref->trans_list->insert_linked(t_entry2);
+                    t_entry2->to_constln_ref->trans_list.insert_linked(t_entry2);
                     // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
                     //t_entry2.to_constln_ref->trans_list = t_entry2.block_constln_list;
                }
@@ -1654,8 +1657,8 @@ void clean_temp_refs_block(block_T* B)
                                                   t->to_constln_cnt = sp->constln_cnt;
                                                   sp->coconstln_cnt->cnt--;
                                                   // move t
-                                                  Bp->coconstln_ref->trans_list->remove_linked(t);
-                                                  Bp->constln_ref->trans_list->insert_linked(t);
+                                                  Bp->coconstln_ref->trans_list.remove_linked(t);
+                                                  Bp->constln_ref->trans_list.insert_linked(t);
                                                   //assert(t->target->block->constellation == s->block->constellation);
                                                   // Different from pseudo-code: no longer needed, since direct link to transitions from block to constellation has been removed
                                                   // (now goes via to_constln_ref, which is updated at 5.2.2.b.
@@ -1718,8 +1721,8 @@ void clean_temp_refs_block(block_T* B)
                                                        s->coconstln_cnt->cnt--;
                                                        // move t
                                                        // Next lines are commented out, since these transitions are inert, which are NOT in the trans_list
-                                                       //B->coconstln_ref->trans_list->remove_linked(t);
-                                                       //B->constln_ref->trans_list->insert_linked(t);
+                                                       //B->coconstln_ref->trans_list.remove_linked(t);
+                                                       //B->constln_ref->trans_list.insert_linked(t);
                                                        //t->to_constln_ref = B->constln_ref;
                                                   }
                                              }
@@ -1928,8 +1931,8 @@ void clean_temp_refs_block(block_T* B)
                                                        //mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
                                                   }
                                                   //mCRL2log(log::verbose) << "removing transition\n";
-                                                  l->trans_list->remove_linked(t);
-                                                  lp->trans_list->insert_linked(t);
+                                                  l->trans_list.remove_linked(t);
+                                                  lp->trans_list.insert_linked(t);
                                                   t->to_constln_ref = lp;
                                                   //mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
                                              }
@@ -1960,7 +1963,7 @@ void clean_temp_refs_block(block_T* B)
                                                                  Bpp->inconstln_ref->new_element = Bp->inconstln_ref;
                                                             }
                                                        }
-                                                       Bpp->inconstln_ref->trans_list->insert_linked(t);
+                                                       Bpp->inconstln_ref->trans_list.insert_linked(t);
                                                        t->to_constln_ref = Bpp->inconstln_ref;
                                                        //if (Bpp->id == 355) {
                                                        //     mCRL2log(log::verbose) << "1830: setting t->to_constln_ref to " << Bpp->inconstln_ref << "\n";
@@ -1998,7 +2001,7 @@ void clean_temp_refs_block(block_T* B)
                                                             Bp->inconstln_ref->new_element = Bpp->inconstln_ref;
                                                        }
                                                   }
-                                                  Bp->inconstln_ref->trans_list->insert_linked(t);
+                                                  Bp->inconstln_ref->trans_list.insert_linked(t);
                                                   t->to_constln_ref = Bp->inconstln_ref;
                                                   //if (Bp->id == 355) {
                                                   //     mCRL2log(log::verbose) << "1866: setting t->to_constln_ref to " << Bp->inconstln_ref << "\n";
@@ -2151,7 +2154,7 @@ void clean_temp_refs_block(block_T* B)
                                    current_state_detect1 = NULL;
                                    current_state_detect2 = NULL;
                                    in_forward_check_detect2 = false;
-                                   iter_trans_state_added_detect1 = splitBpB->coconstln_ref->trans_list->before_begin();
+                                   iter_trans_state_added_detect1 = splitBpB->coconstln_ref->trans_list.before_begin();
                                    iter_state_added_detect2 = splitBpB->marked_btm_states->before_begin();
                                    //check_consistency_trans_lists(B, setB);
                                    //mCRL2log(log::verbose) << "Launching lockstep search 2\n";
@@ -2226,8 +2229,8 @@ void clean_temp_refs_block(block_T* B)
                                                        // point lp to l, to be able to efficiently reset new_element pointers later on
                                                        lp->new_element = l;
                                                   }
-                                                  l->trans_list->remove_linked(t);
-                                                  lp->trans_list->insert_linked(t);
+                                                  l->trans_list.remove_linked(t);
+                                                  lp->trans_list.insert_linked(t);
                                                   t->to_constln_ref = lp;
                                                   //if (Bp3->id == 355) {
                                                   //     mCRL2log(log::verbose) << "2080: setting t->to_constln_ref to " << lp << "\n";
@@ -2262,7 +2265,7 @@ void clean_temp_refs_block(block_T* B)
                                                                  Bp3->inconstln_ref->new_element = splitBpB->inconstln_ref;
                                                             }
                                                        }
-                                                       Bp3->inconstln_ref->trans_list->insert_linked(t);
+                                                       Bp3->inconstln_ref->trans_list.insert_linked(t);
                                                        t->to_constln_ref = Bp3->inconstln_ref;
                                                   }
                                              }
@@ -2295,7 +2298,7 @@ void clean_temp_refs_block(block_T* B)
                                                             splitBpB->inconstln_ref->new_element = Bp3->inconstln_ref;
                                                        }
                                                   }
-                                                  splitBpB->inconstln_ref->trans_list->insert_linked(t);
+                                                  splitBpB->inconstln_ref->trans_list.insert_linked(t);
                                                   t->to_constln_ref = splitBpB->inconstln_ref;
                                                   //if (splitBpB->id == 355) {
                                                   //     mCRL2log(log::verbose) << "2147: setting t->to_constln_ref to " << splitBpB->inconstln_ref << "\n";
@@ -2526,7 +2529,7 @@ void clean_temp_refs_block(block_T* B)
                                              current_state_detect1 = NULL;
                                              current_state_detect2 = NULL;
                                              in_forward_check_detect2 = false;
-                                             iter_trans_state_added_detect1 = e->trans_list->before_begin();
+                                             iter_trans_state_added_detect1 = e->trans_list.before_begin();
                                              iter_state_added_detect2 = Bhat->new_btm_states->before_begin();
                                              if (e->SClist == NULL) {
                                                   sclist_is_empty_detect2 = true;
@@ -2591,8 +2594,8 @@ void clean_temp_refs_block(block_T* B)
                                                                       Bhatp->inconstln_ref = lp;
                                                                  }
                                                             }
-                                                            l->trans_list->remove_linked(t);
-                                                            lp->trans_list->insert_linked(t);
+                                                            l->trans_list.remove_linked(t);
+                                                            lp->trans_list.insert_linked(t);
                                                             t->to_constln_ref = lp;
                                                             //if (Bhatp->id == 355) {
                                                             //     mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
@@ -2620,7 +2623,7 @@ void clean_temp_refs_block(block_T* B)
                                                                            Bhatp->inconstln_ref->new_element = Bhat->inconstln_ref;
                                                                       }
                                                                  }
-                                                                 Bhatp->inconstln_ref->trans_list->insert_linked(t);
+                                                                 Bhatp->inconstln_ref->trans_list.insert_linked(t);
                                                                  t->to_constln_ref = Bhatp->inconstln_ref;
                                                                  //if (Bhatp->id == 355) {
                                                                  //     mCRL2log(log::verbose) << "2479: setting t->to_toconstln_ref to " << Bhatp->inconstln_ref << "\n";
@@ -2649,7 +2652,7 @@ void clean_temp_refs_block(block_T* B)
                                                                       Bhat->inconstln_ref->new_element = Bhatp->inconstln_ref;
                                                                  }
                                                             }
-                                                            Bhat->inconstln_ref->trans_list->insert_linked(t);
+                                                            Bhat->inconstln_ref->trans_list.insert_linked(t);
                                                             t->to_constln_ref = Bhat->inconstln_ref;
                                                             //if (Bhat->id == 355) {
                                                             //     mCRL2log(log::verbose) << "2507: setting t->to_constln_ref to " << Bhat->inconstln_ref << "\n";
@@ -2754,7 +2757,7 @@ void clean_temp_refs_block(block_T* B)
                                                                  Bhat->inconstln_ref = NULL;
                                                             }
                                                             Bhat->to_constlns->remove_linked(l->new_element);
-                                                            deleteobject (l->new_element->trans_list);
+                                                            /* deleteobject (l->new_element->trans_list); OEPS THIS SHOULD NOT BE DONE TWICE. IS DONE BY DEFAULT IN DESTRUCTOR */
                                                             deleteobject (l->new_element);
                                                        }
                                                        else {
@@ -2924,15 +2927,15 @@ void clean_temp_refs_block(block_T* B)
                               std::forward_list < to_constlns_element_T*, forward_list_allocator<to_constlns_element_T*> >::iterator prev_eit = B->to_constlns->before_begin();
                               for (auto eit = B->to_constlns->begin(); eit != B->to_constlns->end(); ++eit) {
                                    to_constlns_element_T* e = *eit;
-                                   assert(e->trans_list != NULL);
+                                   // assert(e->trans_list != NULL);
                                    //if (e->C->id == 12) {
                                    //     if (B->id == 10 || B->id == 39) {
                                    //          mCRL2log(log::verbose) << B->id << ": found const 12 at " << e << "\n";
                                    //     }
                                    //     count2++;
                                    //}
-                                   std::forward_list < transition_T*, forward_list_allocator<transition_T*>  >::iterator prev_tit = e->trans_list->before_begin();
-                                   for (auto tit = e->trans_list->begin(); tit != e->trans_list->end(); ++tit) {
+                                   std::forward_list < transition_T*, forward_list_allocator<transition_T*>  >::iterator prev_tit = e->trans_list.before_begin();
+                                   for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) {
                                         transition_T* t = *tit;
                                         assert(t->ptr_in_list == prev_tit);
                                         assert(t->to_constln_ref == e);
@@ -3093,7 +3096,7 @@ void clean_temp_refs_block(block_T* B)
                               for (auto eit = B->to_constlns->begin(); eit != B->to_constlns->end(); ++eit) {
                                    to_constlns_element_T* e = *eit;
                                    if (e->C == split_const) {
-                                        for (auto tit = e->trans_list->begin(); tit != e->trans_list->end(); ++tit) {
+                                        for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) {
                                              transition_T* t = *tit;
                                              //assert(t->target->block->constellation == e->C);
                                              if (t->source->coconstln_cnt != NULL) {
@@ -3128,7 +3131,7 @@ void clean_temp_refs_block(block_T* B)
                               for (auto eit = B->to_constlns->begin(); eit != B->to_constlns->end(); ++eit) {
                                    to_constlns_element_T* e = *eit;
                                    if (e->C == split_const) {
-                                        for (auto tit = e->trans_list->begin(); tit != e->trans_list->end(); ++tit) {
+                                        for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) {
                                              transition_T* t = *tit;
                                              assert(t->source->coconstln_cnt == NULL);
                                         }
