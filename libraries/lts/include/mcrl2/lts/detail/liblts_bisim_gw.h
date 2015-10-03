@@ -581,11 +581,13 @@ block_T* create_new_block(block_type t)
 {
      block_T* b_new = new block_T;
      b_new->type = t;
-     if (b_new->type == STD_BLOCK) {
-          b_new->id = max_block_index++;
+     if (b_new->type == STD_BLOCK) 
+     {
+       b_new->id = max_block_index++;
      }
-     else {
-          b_new->id = -1;
+     else 
+     {
+       b_new->id = -1;
      }
      return b_new;
 }
@@ -660,11 +662,13 @@ std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator unma
 // iterator functions to iterate over all marked states of a given block
 std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator marked_states_begin(block_T* B)
 {
-     if (B->marked_btm_states->size() > 0) {
+     if (B->marked_btm_states->size() > 0) 
+     {
           iterating_non_bottom2 = false;
           return B->marked_btm_states->begin();
      }
-     else {
+     else 
+     {
           iterating_non_bottom2 = true;
           return B->marked_non_btm_states->begin();
      }
@@ -714,8 +718,9 @@ void clean_temp_refs_block(block_T* B)
           if (B->constln_ref != NULL) {
                if (size(B->constln_ref) == 0) {
                     // if the associated constellation is the one containing B, set inconstln_ref to NULL
-                    if (B->constln_ref->C == B->constellation) {
-                         B->inconstln_ref = NULL;
+                    if (B->constln_ref->C == B->constellation) 
+                    {
+                      B->inconstln_ref = NULL;
                     }
                     B->to_constlns.remove_linked(B->constln_ref);
                     deleteobject (B->constln_ref);
@@ -763,7 +768,6 @@ void clean_temp_refs_block(block_T* B)
     {
                // initialise variables
                nr_of_splits = 0;
-               Q = NULL;
                current_state_detect1 = NULL;
                current_state_detect2 = NULL;
                in_forward_check_detect2 = false;
@@ -799,7 +803,7 @@ void clean_temp_refs_block(block_T* B)
       // Put all the non inert transitions in a set. A set is used to remove double occurrences of transitions.
       std::set < transition > resulting_transitions;
 
-      const std::vector<transition> & trans=aut.get_transitions();
+      const std::vector<transition>& trans=aut.get_transitions();
       for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
       {
         const transition i=*t;
@@ -874,666 +878,683 @@ void clean_temp_refs_block(block_T* B)
       return action + "_" + std::to_string((long long int) to);
     }
      
-          // key and hash function for (action, target state) pair. Required since unordered_map does not
-          // directly allow to use pair keys
-          struct Key {
-               label_type first;
-               state_type second;
+    // key and hash function for (action, target state) pair. Required since unordered_map does not
+    // directly allow to use pair keys
+    class Key 
+    {
+      public:
+        label_type first;
+        state_type second;
 
-               bool operator==(const Key &other) const {
-                    return (first == other.first
-            && second == other.second);
-               }
-          };
+        Key(const label_type& f, const state_type& s)
+         : first(f),
+           second(s)
+        {} 
 
-          struct KeyHasher {
-               std::size_t operator()(const Key& k) const {
-                    using std::size_t;
-                    using std::hash;
-                    //using std::string;
+        bool operator==(const Key &other) const 
+        {
+          return (first == other.first && second == other.second);
+        }
+    };
 
-                    return (hash<label_type>()(k.first)
-             ^ (hash<state_type>()(k.second) << 1));
-               }
-          };
+    struct KeyHasher 
+    {
+      std::size_t operator()(const Key& k) const 
+      {
+        using std::size_t;
+        using std::hash;
 
-          // start structures and functions for lockstep search
+        return (hash<label_type>()(k.first) ^ (hash<state_type>()(k.second) << 1));
+      }
+    };
 
-          // A Comparator class to compare states in the priority queue
-          struct LessThanByInert
-          {
-               bool operator()(const state_T* lhs, const state_T* rhs) const {
-                    return lhs->priority < rhs->priority;
-               }
-          };
+    // start structures and functions for lockstep search
 
-          // detect1
-          std::stack < state_T* >* Q;
-          sized_forward_list < state_T > L;
-          // to keep track of state of detect 1
-          state_T *current_state_detect1;
-          typename std::vector<transition_T*>::iterator current_trans_detect1;
-          // to keep track of adding states to detect1
-          typename std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator iter_state_added_detect1;
-          typename std::forward_list<transition_T*, forward_list_allocator<transition_T*> >::iterator iter_trans_state_added_detect1;
-          // detect2
-          //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>* P;
-          std::multiset< state_T*, LessThanByInert> P;
-          sized_forward_list < state_T > Lp;
-          // to keep track of state of detect 2
-          state_T *current_state_detect2;
-          typename std::vector<transition_T*>::iterator current_trans_detect2;
-          // to keep track of adding states to detect 2
-          typename std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator iter_state_added_detect2;
-          typename std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator iter_sclist_detect2;
-          bool sclist_is_empty_detect2;
-          // required for forward check in detect2 in nested split
-          bool in_forward_check_detect2;
-          // required in both procedures
-          block_T* block_detect;
-          to_constlns_element_T* e_detect;
-          size_t maxsize_detect;
-          // old constellation of the splitter
-          constellation_T* constellation_splitter_detect;
-     
-          // next_state functions to add states to detect1 and detect2 in the various phases of the algorithm
-          // (1: splitting Bp, 2: splitting split(Bp, B), 3: stabilising blocks)
-          // precondition: iter_state_added_detectx have been set to before the beginning of the relevant state lists
-          inline bool has_next_state_detect1_1() {
-               auto next_it = iter_state_added_detect1;
-               next_it++;
-               if (next_it == block_detect->marked_btm_states->end() && !iterating_non_bottom) {
-                    next_it = block_detect->marked_non_btm_states->begin();
-                    //mCRL2log(log::verbose) << "non bottom\n";
-               }
-               //mCRL2log(log::verbose) << (next_it != block_detect->marked_non_btm_states->end()) << "number of non bottom states: " << block_detect->marked_non_btm_states->size() << "\n";
-               return next_it != block_detect->marked_non_btm_states->end();
-           }
+    // A Comparator class to compare states in the priority queue
+    struct LessThanByInert
+    {
+         bool operator()(const state_T* lhs, const state_T* rhs) const {
+              return lhs->priority < rhs->priority;
+         }
+    };
 
-          inline state_T* next_state_detect1_1() {
-               iter_state_added_detect1++;
-               //mCRL2log(log::verbose) << "get next state\n";
-               if (iter_state_added_detect1 == block_detect->marked_btm_states->end() && !iterating_non_bottom) {
-                    iterating_non_bottom = true;
-                    iter_state_added_detect1 = block_detect->marked_non_btm_states->begin();
-               }
-               // is the state suitable?
-               state_T* s = *iter_state_added_detect1;
-               if (!s->is_in_L_detect1) {
-               //mCRL2log(log::verbose) << "state " << s->id << " is not in L\n";
-                    return s;
-               }
-               else {
-                    //mCRL2log(log::verbose) << "state " << s->id << " is in L\n";
-                    return NULL;
-               }
-          }
+    // detect1
+    std::vector < state_T* > Q; // We use a vector for this stack datatype, as we can clear it.
+    sized_forward_list < state_T > L;
+    // to keep track of state of detect 1
+    state_T *current_state_detect1;
+    typename std::vector<transition_T*>::iterator current_trans_detect1;
+    // to keep track of adding states to detect1
+    typename std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator iter_state_added_detect1;
+    typename std::forward_list<transition_T*, forward_list_allocator<transition_T*> >::iterator iter_trans_state_added_detect1;
+    // detect2
+    //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>* P;
+    std::multiset< state_T*, LessThanByInert> P;
+    sized_forward_list < state_T > Lp;
+    // to keep track of state of detect 2
+    state_T *current_state_detect2;
+    typename std::vector<transition_T*>::iterator current_trans_detect2;
+    // to keep track of adding states to detect 2
+    typename std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator iter_state_added_detect2;
+    typename std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator iter_sclist_detect2;
+    bool sclist_is_empty_detect2;
+    // required for forward check in detect2 in nested split
+    bool in_forward_check_detect2;
+    // required in both procedures
+    block_T* block_detect;
+    to_constlns_element_T* e_detect;
+    size_t maxsize_detect;
+    // old constellation of the splitter
+    constellation_T* constellation_splitter_detect;
+    
+    // next_state functions to add states to detect1 and detect2 in the various phases of the algorithm
+    // (1: splitting Bp, 2: splitting split(Bp, B), 3: stabilising blocks)
+    // precondition: iter_state_added_detectx have been set to before the beginning of the relevant state lists
+    inline bool has_next_state_detect1_1() {
+         auto next_it = iter_state_added_detect1;
+         next_it++;
+         if (next_it == block_detect->marked_btm_states->end() && !iterating_non_bottom) {
+              next_it = block_detect->marked_non_btm_states->begin();
+              //mCRL2log(log::verbose) << "non bottom\n";
+         }
+         //mCRL2log(log::verbose) << (next_it != block_detect->marked_non_btm_states->end()) << "number of non bottom states: " << block_detect->marked_non_btm_states->size() << "\n";
+         return next_it != block_detect->marked_non_btm_states->end();
+     }
 
-          inline bool has_next_state_detect2_1() {
-               auto next_it = iter_state_added_detect2;
-               next_it++;
-               return next_it != block_detect->btm_states->end();
-           }
+    inline state_T* next_state_detect1_1() {
+         iter_state_added_detect1++;
+         //mCRL2log(log::verbose) << "get next state\n";
+         if (iter_state_added_detect1 == block_detect->marked_btm_states->end() && !iterating_non_bottom) {
+              iterating_non_bottom = true;
+              iter_state_added_detect1 = block_detect->marked_non_btm_states->begin();
+         }
+         // is the state suitable?
+         state_T* s = *iter_state_added_detect1;
+         if (!s->is_in_L_detect1) {
+         //mCRL2log(log::verbose) << "state " << s->id << " is not in L\n";
+              return s;
+         }
+         else {
+              //mCRL2log(log::verbose) << "state " << s->id << " is in L\n";
+              return NULL;
+         }
+    }
 
-          inline state_T* next_state_detect2_1() {
-               iter_state_added_detect2++;
-               // Note: no need to check for membership in P. Current state is a bottom state, so cannot have been reached
-               // via an incoming transition
-               return *iter_state_added_detect2;
-          }
-     
-          inline bool has_next_state_detect1_2() {
-               auto next_it = iter_trans_state_added_detect1;
-               next_it++;
-               return next_it != block_detect->coconstln_ref->trans_list.end();
-          }
+    inline bool has_next_state_detect2_1() {
+         auto next_it = iter_state_added_detect2;
+         next_it++;
+         return next_it != block_detect->btm_states->end();
+     }
 
-          inline state_T* next_state_detect1_2() {
-               iter_trans_state_added_detect1++;
-               transition_T* t = *iter_trans_state_added_detect1;
-               state_T* s = t->source;
-               if (!s->is_in_L_detect1) {
-                    //mCRL2log(log::verbose) << "suitable trans from " << s->id << " to " << t->target->id << " (" << t->target->block->constellation << ")\n";
-                    return s;
-               }
-               else {
-                    return NULL;
-               }
-          }
+    inline state_T* next_state_detect2_1() {
+         iter_state_added_detect2++;
+         // Note: no need to check for membership in P. Current state is a bottom state, so cannot have been reached
+         // via an incoming transition
+         return *iter_state_added_detect2;
+    }
+    
+    inline bool has_next_state_detect1_2() {
+         auto next_it = iter_trans_state_added_detect1;
+         next_it++;
+         return next_it != block_detect->coconstln_ref->trans_list.end();
+    }
 
-          inline bool has_next_state_detect2_2() {
-               auto next_it = iter_state_added_detect2;
-               next_it++;
-               return next_it != block_detect->marked_btm_states->end();
-          }
+    inline state_T* next_state_detect1_2() {
+         iter_trans_state_added_detect1++;
+         transition_T* t = *iter_trans_state_added_detect1;
+         state_T* s = t->source;
+         if (!s->is_in_L_detect1) {
+              //mCRL2log(log::verbose) << "suitable trans from " << s->id << " to " << t->target->id << " (" << t->target->block->constellation << ")\n";
+              return s;
+         }
+         else {
+              return NULL;
+         }
+    }
 
-          inline state_T* next_state_detect2_2() {
-               iter_state_added_detect2++;
-               state_T* s = *iter_state_added_detect2;
-               if (s->coconstln_cnt == NULL) {
-                    //mCRL2log(log::verbose) << s->id << ": NULL counter\n";
-                    return s;
-               }
-               else if (s->coconstln_cnt->cnt == 0) {
-                    //mCRL2log(log::verbose) << s->id << ": 0 counter\n";
-                    return s;
-               }
-               else {
-                    return NULL;
-               }
-          }
+    inline bool has_next_state_detect2_2() {
+         auto next_it = iter_state_added_detect2;
+         next_it++;
+         return next_it != block_detect->marked_btm_states->end();
+    }
 
-          inline bool has_next_state_detect1_3() {
-               auto next_it = iter_trans_state_added_detect1;
-               next_it++;
-               return next_it != e_detect->trans_list.end();
-          }
-     
-          inline state_T* next_state_detect1_3() {
-               iter_trans_state_added_detect1++;
-               transition_T* t = *iter_trans_state_added_detect1;
-               state_T* s = t->source;
-               if (!s->is_in_L_detect1) {
-                    return s;
-               }
-               else {
-                    return NULL;
-               }
-          }
+    inline state_T* next_state_detect2_2() {
+         iter_state_added_detect2++;
+         state_T* s = *iter_state_added_detect2;
+         if (s->coconstln_cnt == NULL) {
+              //mCRL2log(log::verbose) << s->id << ": NULL counter\n";
+              return s;
+         }
+         else if (s->coconstln_cnt->cnt == 0) {
+              //mCRL2log(log::verbose) << s->id << ": 0 counter\n";
+              return s;
+         }
+         else {
+              return NULL;
+         }
+    }
 
-          inline bool has_next_state_detect2_3() {
-               auto next_it = iter_state_added_detect2;
-               next_it++;
-               return next_it != block_detect->new_btm_states->end();
-          }
-     
-          // compare SClist and new_btm_states. This depends on new bottom states having been added to
-          // back of SClist in order of appearance in new_btm_states
-          inline state_T* next_state_detect2_3() {
-               iter_state_added_detect2++;
-               state_T* s = *iter_state_added_detect2;
-               if (sclist_is_empty_detect2) {
-                    return s;
-               }
-               else if (iter_sclist_detect2 == e_detect->SClist->end()) {
-                    return s;
-               }
-               else if (s != *iter_sclist_detect2) {
-                    return s;
-               }
-               else {
-                    iter_sclist_detect2++;
-                    return NULL;
-               }
-          }
+    inline bool has_next_state_detect1_3() {
+         auto next_it = iter_trans_state_added_detect1;
+         next_it++;
+         return next_it != e_detect->trans_list.end();
+    }
+    
+    inline state_T* next_state_detect1_3() {
+         iter_trans_state_added_detect1++;
+         transition_T* t = *iter_trans_state_added_detect1;
+         state_T* s = t->source;
+         if (!s->is_in_L_detect1) {
+              return s;
+         }
+         else {
+              return NULL;
+         }
+    }
 
-          // step in detect1
-          // returns false if not finished, true otherwise
-          // function hasnext indicates whether there is at least one more state to be processed
-          // function next provides new states to be considered in the search
-          inline size_t detect1_step(bool (bisim_partitioner_gw<LTS_TYPE>::*hasnext)(), state_T* (bisim_partitioner_gw<LTS_TYPE>::*next)()) {
-               // stop if upperbound to size has been reached
-               if (L.size() > maxsize_detect) {
-                    //mCRL2log(log::verbose) << "detect1: STOPPED (" << L.size() << "," << maxsize_detect << ")\n";
-                    return STOPPED;
-               }
-               if (Q->size() > 0 || (this->*hasnext)() || current_state_detect1 != NULL) {
-                    if (current_state_detect1 == NULL) {
-                         if (Q->size() > 0) {
-                              current_state_detect1 = Q->top();
-                              Q->pop();
-                         }
-                         else {
-                              // there must still be a state obtainable through next
-                              current_state_detect1 = (this->*next)();
-                              if (current_state_detect1 == NULL) {
-                                   //mCRL2log(log::verbose) << "detect1: end\n";
-                                   // skip this state in the current step
-                                   return CONTINUE;
-                              }
-                              else {
-                                   L.insert(current_state_detect1);
-                                   current_state_detect1->is_in_L_detect1 = true;
-                                   //mCRL2log(log::verbose) << "detect1 base: adding state " << current_state_detect1->id << "\n";
-                              }
-                         }
-                         //mCRL2log(log::verbose) << "detect1: processing state " << current_state_detect1->id << "\n";
-                         current_trans_detect1 = current_state_detect1->Tsrc.begin();
-                         // no incoming transitions present
-                         if (current_trans_detect1 == current_state_detect1->Tsrc.end()) {
-                              current_state_detect1 = NULL;
-                              //mCRL2log(log::verbose) << "detect1: end2\n";
-                              return CONTINUE;
-                         }
-                    }
-                    const transition_T* t = *current_trans_detect1;
-                    state_T* sp = t->source;
-                         
-                    if (sp->block == block_detect && !sp->is_in_L_detect1) {
-                         L.insert(sp);
-                         sp->is_in_L_detect1 = true;
-                         //mCRL2log(log::verbose) << "detect1: adding state " << sp->id << "\n";
-                         Q->push(sp);
-                    }
-                    // increment transition counter
-                    current_trans_detect1++;
-                    if (current_trans_detect1 == current_state_detect1->Tsrc.end()) {
-                         current_state_detect1 = NULL;
-                         //mCRL2log(log::verbose) << "detect1: end3\n";
-                    }
-                    //mCRL2log(log::verbose) << "detect1: continue\n";
-                    return CONTINUE;
-               }
-               else {
-                    //mCRL2log(log::verbose) << "detect1: finished\n";
-                    return TERMINATED;
-               }
-          }
+    inline bool has_next_state_detect2_3() {
+         auto next_it = iter_state_added_detect2;
+         next_it++;
+         return next_it != block_detect->new_btm_states->end();
+    }
+    
+    // compare SClist and new_btm_states. This depends on new bottom states having been added to
+    // back of SClist in order of appearance in new_btm_states
+    inline state_T* next_state_detect2_3() {
+         iter_state_added_detect2++;
+         state_T* s = *iter_state_added_detect2;
+         if (sclist_is_empty_detect2) {
+              return s;
+         }
+         else if (iter_sclist_detect2 == e_detect->SClist->end()) {
+              return s;
+         }
+         else if (s != *iter_sclist_detect2) {
+              return s;
+         }
+         else {
+              iter_sclist_detect2++;
+              return NULL;
+         }
+    }
 
-          // step in detect2
-          // returns false if not finished, true otherwise
-          // isnestedsplit indicates whether a block B' is being split, or a block split(B',B).
-          inline size_t detect2_step(bool (bisim_partitioner_gw<LTS_TYPE>::*hasnext)(), state_T* (bisim_partitioner_gw<LTS_TYPE>::*next)(), bool isnestedsplit, bool forwardcheckrequired) {
-               bool sp_newly_inserted;
-               // this part of the procedure is performed when it needs to be determined whether a state has
-               // a direct outgoing transition to Bp \ B.
-               if (in_forward_check_detect2) {
-                    if (current_trans_detect2 == current_state_detect2->Ttgt.end()) {
-                         // no direct transition to Bp \ B found. State is suitable for detect2
-                         in_forward_check_detect2 = false;
-                         Lp.insert(current_state_detect2);
-                         current_state_detect2->is_in_Lp_detect2 = true;
-                         //mCRL2log(log::verbose) << "detect2: adding state " << current_state_detect2->id << "\n";
-                         current_trans_detect2 = current_state_detect2->Tsrc.begin();
-                         // no incoming transitions present
-                         if (current_trans_detect2 == current_state_detect2->Tsrc.end()) {
-                              current_state_detect2 = NULL;
-                         }
-                    }
-                    else {
-                         transition_T* t = *current_trans_detect2;
-                         //mCRL2log(log::verbose) << "compare " << t->target->block->constellation->id << " " << constellation_splitter_detect->id << "\n";
-                         if (t->target->block->constellation == constellation_splitter_detect && t->source->block != t->target->block) {
-                              // transition found. state is not suitable for detect2
-                              in_forward_check_detect2 = false;
-                              current_state_detect2 = NULL;
-                         }
-                         else {
-                              // go to next transition
-                              current_trans_detect2++;
-                         }
-                    }
-                    return CONTINUE;
-               }
-               // stop if upperbound to size has been reached
-               if (Lp.size() > maxsize_detect) {
-                    //mCRL2log(log::verbose) << "detect2: STOPPED (" << Lp.size() << "," << maxsize_detect << ")\n";
-                    return STOPPED;
-               }
-               if (P.size() > 0 || (this->*hasnext)() || current_state_detect2 != NULL) {
-                    if (current_state_detect2 == NULL) {
-                         if ((this->*hasnext)()) {
-                              current_state_detect2 = (this->*next)();
-                              // check if state is suitable
-                              if (current_state_detect2 == NULL) {
-                                   return CONTINUE;
-                              }
-                              //mCRL2log(log::verbose) << "detect2: processing state " << current_state_detect2->id << "\n";
-                         }
-                         else {
-                              auto Pit = P.begin();
-                              current_state_detect2 = *Pit;
-                              P.erase(Pit);
-                              current_state_detect2->is_in_P_detect2 = false;
-                              //mCRL2log(log::verbose) << "detect2: from queue: processing state " << current_state_detect2->id << " with priority " << current_state_detect2->priority << "\n";
-                              // check if this element still has priority 0
-                              if (current_state_detect2->priority != 0) {
-                                   //mCRL2log(log::verbose) << "detect2: finished\n";
-                                   return TERMINATED;
-                              }
-                              else if (forwardcheckrequired) {
-                                   // skip if state has been reached by detect1
-                                   if (current_state_detect2->is_in_L_detect1) {
-                                        current_state_detect2 = NULL;
-                                   }
-                                   // else check if state can reach Bp \ B directly
-                                   else {
-                                        in_forward_check_detect2 = true;
-                                        current_trans_detect2 = current_state_detect2->Ttgt.begin();
-                                   }
-                                   return CONTINUE;
-                              }
-                         }
-                         current_trans_detect2 = current_state_detect2->Tsrc.begin();
-                         Lp.insert(current_state_detect2);
-                         current_state_detect2->is_in_Lp_detect2 = true;
-                         //mCRL2log(log::verbose) << "detect2 base: adding state " << current_state_detect2->id << "\n";
-                         // no incoming transitions present
-                         if (current_trans_detect2 == current_state_detect2->Tsrc.end()) {
-                              current_state_detect2 = NULL;
-                              return CONTINUE;
-                         }
-                    }
-                    const transition_T* t = *current_trans_detect2;
-                    state_T* sp = t->source;
-                    sp_newly_inserted = false;
-                    //mCRL2log(log::verbose) << "detect2: walking back to state " << sp->id << "\n";
-                    //mCRL2log(log::verbose) << (sp->block == block_detect) << " " << sp->is_in_P_detect2 << " " << sp->is_in_Lp_detect2 << "\n";
-                    if (sp->block == block_detect && !sp->is_in_P_detect2 && !sp->is_in_Lp_detect2) {
-                         // depending on isnestedsplit, check condition
-                         // Different from pseudo-code: for the nested split, we check whether the state is a member of L.
-                         // This seems dangerous, since L is maintained by detect1, but we are interested in the states that
-                         // reach Bp \ B, and it is problematic to determine which states can do so directly. Some states
-                         // in L are likely to reach Bp \ B directly (at least indirectly), so a state in L should be
-                         // ignored. Another condition involves the case that a state is marked: if it is, then
-                         // coconstln_cnt has been initialised. If it is higher than 0, the state can reach Bp \ B
-                         // directly.
-                         bool skip = false;
-                         //mCRL2log(log::verbose) << "checking\n";
-                         if (isnestedsplit && sp->type == MARKED_NON_BTM_STATE) {
-                              //mCRL2log(log::verbose) << "here " << "\n";
-                              //if (sp->coconstln_cnt != NULL) {
-                              //     mCRL2log(log::verbose) << "count: " << sp->coconstln_cnt->cnt << "\n";
-                              //}
-                              //if (sp->coconstln_cnt == NULL) {
-                              //     skip = true;
-                              //}
-                              // Take into account that inert transitions are counted as well (they should be ignored here)
-                              // Note that the case that sp is in the splitter is handled correctly, since the splitter has already
-                              // been moved to a new constellation, which therefore cannot be equal to its old one.
-                              // (inert transitions are counted by constln_cnt, hence should not be taken into account here).
-                              if (block_detect->constellation == constellation_splitter_detect) {
-                                   if (sp->coconstln_cnt->cnt - sp->inert_cnt > 0) {
-                                        skip = true;
-                                   }
-                              }
-                              else if (sp->coconstln_cnt->cnt > 0) {
-                                   skip = true;
-                              }
-                         }
-                         if (!skip) {
-                              if (forwardcheckrequired ? (!sp->is_in_L_detect1) : (sp->type != MARKED_NON_BTM_STATE)) {
-                                   sp->priority = sp->inert_cnt;
-                                   if (sp->priority > 0) {
-                                        sp->priority--;
-                                   }
-                                   //mCRL2log(log::verbose) << "detect2: pushing " << sp->id << " on P with prio " << sp->priority << "\n";
-                                   sp->pos_in_P_detect2 = P.insert(sp);
-                                   //mCRL2log(log::verbose) << "begin: " << (*(P.begin()))->id << "\n";
-                                   sp->is_in_P_detect2 = true;
-                                   sp_newly_inserted = true;
-                              }
-                         }
-                    }
-                    // Different from pseudo-code: priority of sp is only decremented if sp is in P.
-                    if (sp->is_in_P_detect2 && !sp_newly_inserted) {
-                         if (sp->priority > 0) {
-                              sp->priority--;
-                              // replace element in P
-                              //mCRL2log(log::verbose) << "updating state " << sp->id << "\n";
-                              P.erase(sp->pos_in_P_detect2);
-                              sp->pos_in_P_detect2 = P.insert(sp);
-                              //mCRL2log(log::verbose) << "detect2: new prio of " << sp->id << " is " << sp->priority << "\n";
-                         }
-                    }
-                    // increment transition counter
-                    current_trans_detect2++;
-                    if (current_trans_detect2 == current_state_detect2->Tsrc.end()) {
-                         current_state_detect2 = NULL;
-                    }
-                    return CONTINUE;
-               }
-               else {
-                    //mCRL2log(log::verbose) << "detect2: finished\n";
-                    return TERMINATED;
-               }
-          }
+    // step in detect1
+    // returns false if not finished, true otherwise
+    // function hasnext indicates whether there is at least one more state to be processed
+    // function next provides new states to be considered in the search
+    inline size_t detect1_step(bool (bisim_partitioner_gw<LTS_TYPE>::*hasnext)(), state_T* (bisim_partitioner_gw<LTS_TYPE>::*next)()) {
+         // stop if upperbound to size has been reached
+         if (L.size() > maxsize_detect) {
+              //mCRL2log(log::verbose) << "detect1: STOPPED (" << L.size() << "," << maxsize_detect << ")\n";
+              return STOPPED;
+         }
+         if (Q.size() > 0 || (this->*hasnext)() || current_state_detect1 != NULL) {
+              if (current_state_detect1 == NULL) {
+                   if (Q.size() > 0) {
+                        current_state_detect1 = Q.back();
+                        Q.pop_back();
+                   }
+                   else {
+                        // there must still be a state obtainable through next
+                        current_state_detect1 = (this->*next)();
+                        if (current_state_detect1 == NULL) {
+                             //mCRL2log(log::verbose) << "detect1: end\n";
+                             // skip this state in the current step
+                             return CONTINUE;
+                        }
+                        else {
+                             L.insert(current_state_detect1);
+                             current_state_detect1->is_in_L_detect1 = true;
+                             //mCRL2log(log::verbose) << "detect1 base: adding state " << current_state_detect1->id << "\n";
+                        }
+                   }
+                   //mCRL2log(log::verbose) << "detect1: processing state " << current_state_detect1->id << "\n";
+                   current_trans_detect1 = current_state_detect1->Tsrc.begin();
+                   // no incoming transitions present
+                   if (current_trans_detect1 == current_state_detect1->Tsrc.end()) {
+                        current_state_detect1 = NULL;
+                        //mCRL2log(log::verbose) << "detect1: end2\n";
+                        return CONTINUE;
+                   }
+              }
+              const transition_T* t = *current_trans_detect1;
+              state_T* sp = t->source;
+                   
+              if (sp->block == block_detect && !sp->is_in_L_detect1) {
+                   L.insert(sp);
+                   sp->is_in_L_detect1 = true;
+                   //mCRL2log(log::verbose) << "detect1: adding state " << sp->id << "\n";
+                   Q.push_back(sp);
+              }
+              // increment transition counter
+              current_trans_detect1++;
+              if (current_trans_detect1 == current_state_detect1->Tsrc.end()) {
+                   current_state_detect1 = NULL;
+                   //mCRL2log(log::verbose) << "detect1: end3\n";
+              }
+              //mCRL2log(log::verbose) << "detect1: continue\n";
+              return CONTINUE;
+         }
+         else {
+              //mCRL2log(log::verbose) << "detect1: finished\n";
+              return TERMINATED;
+         }
+    }
 
-          // end structures and functions for lockstep search
+    // step in detect2
+    // returns false if not finished, true otherwise
+    // isnestedsplit indicates whether a block B' is being split, or a block split(B',B).
+    inline size_t detect2_step(bool (bisim_partitioner_gw<LTS_TYPE>::*hasnext)(), state_T* (bisim_partitioner_gw<LTS_TYPE>::*next)(), bool isnestedsplit, bool forwardcheckrequired) {
+         bool sp_newly_inserted;
+         // this part of the procedure is performed when it needs to be determined whether a state has
+         // a direct outgoing transition to Bp \ B.
+         if (in_forward_check_detect2) {
+              if (current_trans_detect2 == current_state_detect2->Ttgt.end()) {
+                   // no direct transition to Bp \ B found. State is suitable for detect2
+                   in_forward_check_detect2 = false;
+                   Lp.insert(current_state_detect2);
+                   current_state_detect2->is_in_Lp_detect2 = true;
+                   //mCRL2log(log::verbose) << "detect2: adding state " << current_state_detect2->id << "\n";
+                   current_trans_detect2 = current_state_detect2->Tsrc.begin();
+                   // no incoming transitions present
+                   if (current_trans_detect2 == current_state_detect2->Tsrc.end()) {
+                        current_state_detect2 = NULL;
+                   }
+              }
+              else {
+                   transition_T* t = *current_trans_detect2;
+                   //mCRL2log(log::verbose) << "compare " << t->target->block->constellation->id << " " << constellation_splitter_detect->id << "\n";
+                   if (t->target->block->constellation == constellation_splitter_detect && t->source->block != t->target->block) {
+                        // transition found. state is not suitable for detect2
+                        in_forward_check_detect2 = false;
+                        current_state_detect2 = NULL;
+                   }
+                   else {
+                        // go to next transition
+                        current_trans_detect2++;
+                   }
+              }
+              return CONTINUE;
+         }
+         // stop if upperbound to size has been reached
+         if (Lp.size() > maxsize_detect) {
+              //mCRL2log(log::verbose) << "detect2: STOPPED (" << Lp.size() << "," << maxsize_detect << ")\n";
+              return STOPPED;
+         }
+         if (P.size() > 0 || (this->*hasnext)() || current_state_detect2 != NULL) {
+              if (current_state_detect2 == NULL) {
+                   if ((this->*hasnext)()) {
+                        current_state_detect2 = (this->*next)();
+                        // check if state is suitable
+                        if (current_state_detect2 == NULL) {
+                             return CONTINUE;
+                        }
+                        //mCRL2log(log::verbose) << "detect2: processing state " << current_state_detect2->id << "\n";
+                   }
+                   else {
+                        auto Pit = P.begin();
+                        current_state_detect2 = *Pit;
+                        P.erase(Pit);
+                        current_state_detect2->is_in_P_detect2 = false;
+                        //mCRL2log(log::verbose) << "detect2: from queue: processing state " << current_state_detect2->id << " with priority " << current_state_detect2->priority << "\n";
+                        // check if this element still has priority 0
+                        if (current_state_detect2->priority != 0) {
+                             //mCRL2log(log::verbose) << "detect2: finished\n";
+                             return TERMINATED;
+                        }
+                        else if (forwardcheckrequired) {
+                             // skip if state has been reached by detect1
+                             if (current_state_detect2->is_in_L_detect1) {
+                                  current_state_detect2 = NULL;
+                             }
+                             // else check if state can reach Bp \ B directly
+                             else {
+                                  in_forward_check_detect2 = true;
+                                  current_trans_detect2 = current_state_detect2->Ttgt.begin();
+                             }
+                             return CONTINUE;
+                        }
+                   }
+                   current_trans_detect2 = current_state_detect2->Tsrc.begin();
+                   Lp.insert(current_state_detect2);
+                   current_state_detect2->is_in_Lp_detect2 = true;
+                   //mCRL2log(log::verbose) << "detect2 base: adding state " << current_state_detect2->id << "\n";
+                   // no incoming transitions present
+                   if (current_trans_detect2 == current_state_detect2->Tsrc.end()) {
+                        current_state_detect2 = NULL;
+                        return CONTINUE;
+                   }
+              }
+              const transition_T* t = *current_trans_detect2;
+              state_T* sp = t->source;
+              sp_newly_inserted = false;
+              //mCRL2log(log::verbose) << "detect2: walking back to state " << sp->id << "\n";
+              //mCRL2log(log::verbose) << (sp->block == block_detect) << " " << sp->is_in_P_detect2 << " " << sp->is_in_Lp_detect2 << "\n";
+              if (sp->block == block_detect && !sp->is_in_P_detect2 && !sp->is_in_Lp_detect2) {
+                   // depending on isnestedsplit, check condition
+                   // Different from pseudo-code: for the nested split, we check whether the state is a member of L.
+                   // This seems dangerous, since L is maintained by detect1, but we are interested in the states that
+                   // reach Bp \ B, and it is problematic to determine which states can do so directly. Some states
+                   // in L are likely to reach Bp \ B directly (at least indirectly), so a state in L should be
+                   // ignored. Another condition involves the case that a state is marked: if it is, then
+                   // coconstln_cnt has been initialised. If it is higher than 0, the state can reach Bp \ B
+                   // directly.
+                   bool skip = false;
+                   //mCRL2log(log::verbose) << "checking\n";
+                   if (isnestedsplit && sp->type == MARKED_NON_BTM_STATE) {
+                        //mCRL2log(log::verbose) << "here " << "\n";
+                        //if (sp->coconstln_cnt != NULL) {
+                        //     mCRL2log(log::verbose) << "count: " << sp->coconstln_cnt->cnt << "\n";
+                        //}
+                        //if (sp->coconstln_cnt == NULL) {
+                        //     skip = true;
+                        //}
+                        // Take into account that inert transitions are counted as well (they should be ignored here)
+                        // Note that the case that sp is in the splitter is handled correctly, since the splitter has already
+                        // been moved to a new constellation, which therefore cannot be equal to its old one.
+                        // (inert transitions are counted by constln_cnt, hence should not be taken into account here).
+                        if (block_detect->constellation == constellation_splitter_detect) {
+                             if (sp->coconstln_cnt->cnt - sp->inert_cnt > 0) {
+                                  skip = true;
+                             }
+                        }
+                        else if (sp->coconstln_cnt->cnt > 0) {
+                             skip = true;
+                        }
+                   }
+                   if (!skip) {
+                        if (forwardcheckrequired ? (!sp->is_in_L_detect1) : (sp->type != MARKED_NON_BTM_STATE)) {
+                             sp->priority = sp->inert_cnt;
+                             if (sp->priority > 0) {
+                                  sp->priority--;
+                             }
+                             //mCRL2log(log::verbose) << "detect2: pushing " << sp->id << " on P with prio " << sp->priority << "\n";
+                             sp->pos_in_P_detect2 = P.insert(sp);
+                             //mCRL2log(log::verbose) << "begin: " << (*(P.begin()))->id << "\n";
+                             sp->is_in_P_detect2 = true;
+                             sp_newly_inserted = true;
+                        }
+                   }
+              }
+              // Different from pseudo-code: priority of sp is only decremented if sp is in P.
+              if (sp->is_in_P_detect2 && !sp_newly_inserted) {
+                   if (sp->priority > 0) {
+                        sp->priority--;
+                        // replace element in P
+                        //mCRL2log(log::verbose) << "updating state " << sp->id << "\n";
+                        P.erase(sp->pos_in_P_detect2);
+                        sp->pos_in_P_detect2 = P.insert(sp);
+                        //mCRL2log(log::verbose) << "detect2: new prio of " << sp->id << " is " << sp->priority << "\n";
+                   }
+              }
+              // increment transition counter
+              current_trans_detect2++;
+              if (current_trans_detect2 == current_state_detect2->Tsrc.end()) {
+                   current_state_detect2 = NULL;
+              }
+              return CONTINUE;
+         }
+         else {
+              //mCRL2log(log::verbose) << "detect2: finished\n";
+              return TERMINATED;
+         }
+    }
 
-          // method to print current partition
-          void print_partition ()
-          {
-               for (auto cit = non_trivial_constlns.begin(); cit != non_trivial_constlns.end(); ++cit) {
-                    constellation_T* C = *cit;
-                    for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
-                         block_T* B = *bit;
-                         mCRL2log(log::verbose) << "[";
-                         for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
-                              state_T* s = *sit;
-                              mCRL2log(log::verbose) << s->id << ",";
-                         }
-                         for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) {
-                              state_T* s = *sit;
-                              mCRL2log(log::verbose) << "*" << s->id << "*,";
-                         }
-                         mCRL2log(log::verbose) << "], ";
-                    }
-               }
-               mCRL2log(log::verbose) << "| ";
-               for (auto cit = trivial_constlns.begin(); cit != trivial_constlns.end(); ++cit) {
-                    constellation_T* C = *cit;
-                    for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
-                         block_T* B = *bit;
-                         mCRL2log(log::verbose) << "[";
-                         for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
-                              state_T* s = *sit;
-                              mCRL2log(log::verbose) << s->id << ",";
-                         }
-                         for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) {
-                              state_T* s = *sit;
-                              mCRL2log(log::verbose) << "*" << s->id << "*,";
-                         }
-                         mCRL2log(log::verbose) << "], ";
-                    }
-               }
-               mCRL2log(log::verbose) << "\n";
-          }
+    // end structures and functions for lockstep search
+
+    // method to print current partition
+    void print_partition ()
+    {
+         for (auto cit = non_trivial_constlns.begin(); cit != non_trivial_constlns.end(); ++cit) {
+              constellation_T* C = *cit;
+              for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
+                   block_T* B = *bit;
+                   mCRL2log(log::verbose) << "[";
+                   for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
+                        state_T* s = *sit;
+                        mCRL2log(log::verbose) << s->id << ",";
+                   }
+                   for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) {
+                        state_T* s = *sit;
+                        mCRL2log(log::verbose) << "*" << s->id << "*,";
+                   }
+                   mCRL2log(log::verbose) << "], ";
+              }
+         }
+         mCRL2log(log::verbose) << "| ";
+         for (auto cit = trivial_constlns.begin(); cit != trivial_constlns.end(); ++cit) {
+              constellation_T* C = *cit;
+              for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
+                   block_T* B = *bit;
+                   mCRL2log(log::verbose) << "[";
+                   for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
+                        state_T* s = *sit;
+                        mCRL2log(log::verbose) << s->id << ",";
+                   }
+                   for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) {
+                        state_T* s = *sit;
+                        mCRL2log(log::verbose) << "*" << s->id << "*,";
+                   }
+                   mCRL2log(log::verbose) << "], ";
+              }
+         }
+         mCRL2log(log::verbose) << "\n";
+    }
 
     void create_initial_partition_gw(const bool branching)
 
     {
       using namespace std;
 
-               // number of blocks
-               block_type nr_of_blocks;
-               // the list of initial blocks (for fast access)
-               vector < block_T* > blocks;
-               // the number of states
-               nr_of_states = aut.num_states();
-               // original size of input
-               size_t orig_nr_of_states = nr_of_states;
+      // number of blocks
+      block_type nr_of_blocks;
+      // the list of initial blocks (for fast access)
+      vector < block_T* > blocks;
+      // the number of states
+      nr_of_states = aut.num_states();
+      // original size of input
+      size_t orig_nr_of_states = nr_of_states;
       // temporary map to keep track of states to be added when converting LTS to Kripke structure
       unordered_map < Key, state_type, KeyHasher > extra_kripke_states;
-               // temporary map to keep track of blocks (maps transition labels (unequal to tau) to blocks
-               unordered_map < label_type, block_type > action_block_map;
-               // temporary list to keep track of lists of transitions, one for each block
-               //vector < sized_forward_list < transition_T* >* > block_trans_list;
+      // temporary map to keep track of blocks (maps transition labels (unequal to tau) to blocks
+      unordered_map < label_type, block_type > action_block_map;
+      // temporary list to keep track of lists of transitions, one for each block
+      //vector < sized_forward_list < transition_T* >* > block_trans_list;
 
-               // create single initial non-trivial constellation
-               constellation_T* C = new constellation_T(max_const_index);
-               
-               // create first block in C
-               block_T* B1 = create_new_block(STD_BLOCK);
-               // create associated list of transitions from block to constellation C
-               to_constlns_element_T* e = new to_constlns_element_T(C);
-               B1->to_constlns.insert_linked(e);
-               B1->inconstln_ref = e;
-               B1->constellation = C;
-               C->blocks.insert_linked(B1);
-               // add block to initial list of blocks
-               blocks.insert(blocks.end(), B1);
-               nr_of_blocks = 1;
+      // create single initial non-trivial constellation
+      constellation_T* C = new constellation_T(max_const_index);
+      
+      // create first block in C
+      block_T* B1 = create_new_block(STD_BLOCK);
+      // create associated list of transitions from block to constellation C
+      to_constlns_element_T* e = new to_constlns_element_T(C);
+      B1->to_constlns.insert_linked(e);
+      B1->inconstln_ref = e;
+      B1->constellation = C;
+      C->blocks.insert_linked(B1);
+      // add block to initial list of blocks
+      blocks.insert(blocks.end(), B1);
+      nr_of_blocks = 1;
 
       // iterate over the transitions and collect new states
       aut.sort_transitions(mcrl2::lts::src_lbl_tgt);
       const std::vector<transition> &trans = aut.get_transitions();
-               for (auto r=trans.begin(); r != trans.end(); ++r)
+      for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
                     
         if (!aut.is_tau(t.label()) || !branching)
         {
-                         // create new state
-                         Key* k = new(Key);
-                         k->first = t.label();
-                         k->second = t.to();
-          if ((extra_kripke_states.insert(make_pair(*k, nr_of_states))).second) {
-                              nr_of_states++;
-                         }
-                         // (possibly) create new block
-                         if (action_block_map.insert(make_pair(t.label(), nr_of_blocks)).second) {
-                              nr_of_blocks++;
-                         }
+          // create new state
+          Key k( t.label(),t.to());
+          /* Key* k = new(Key);
+          k->first = t.label();
+          k->second = t.to(); */
+          if ((extra_kripke_states.insert(make_pair(k, nr_of_states))).second) 
+          {
+            nr_of_states++;
+          }
+          // (possibly) create new block
+          if (action_block_map.insert(make_pair(t.label(), nr_of_blocks)).second) 
+          {
+            nr_of_blocks++;
+          }
         }
       }
-               mCRL2log(log::verbose) << "number of extra states: " << extra_kripke_states.size() << "\n";
-               // knowing the number of blocks,
-               // create blocks, and add one entry in their to_constlns list for the single constellation C
-               // each of these new blocks will contain extra Kripke states, therefore we increment nr_of_extra_kripke_blocks
-               // each time we create a block
-               for (size_t i = 0; i < nr_of_blocks-1; i++) {
-                    block_T* B = create_new_block(EXTRA_KRIPKE_BLOCK);
-                    to_constlns_element_T* e = new to_constlns_element_T(C);
-                    B->to_constlns.insert_linked(e);
-                    B->inconstln_ref = e;
-                    // add block to constellation
-                    B->constellation = C;
-                    C->blocks.insert_linked(B);
-                    // add block to initial list of blocks
-                    blocks.insert(blocks.end(), B);
-               }
+      mCRL2log(log::verbose) << "number of extra states: " << extra_kripke_states.size() << "\n";
+      // knowing the number of blocks,
+      // create blocks, and add one entry in their to_constlns list for the single constellation C
+      // each of these new blocks will contain extra Kripke states, therefore we increment nr_of_extra_kripke_blocks
+      // each time we create a block
+      for (size_t i = 0; i < nr_of_blocks-1; i++) 
+      {
+        block_T* B = create_new_block(EXTRA_KRIPKE_BLOCK);
+        to_constlns_element_T* e = new to_constlns_element_T(C);
+        B->to_constlns.insert_linked(e);
+        B->inconstln_ref = e;
+        // add block to constellation
+        B->constellation = C;
+        C->blocks.insert_linked(B);
+        // add block to initial list of blocks
+        blocks.insert(blocks.end(), B);
+      }
 
-               // create state entries in states list
+      // create state entries in states list
       for (size_t i = 0; i < nr_of_states; i++)
       {
         state_T* s = new state_T(state_index);
         this->states.insert(this->states.end(), s);
-                    // add state to first block, if applicable
-                    if (i < orig_nr_of_states) {
-                         s->block = B1;
-                    }
+        // add state to first block, if applicable
+        if (i < orig_nr_of_states) 
+        {
+          s->block = B1;
+        }
       }
-               // add the new states to their respective blocks
-               for (auto it=extra_kripke_states.begin(); it != extra_kripke_states.end(); ++it) {
-                    (states[it->second])->block = blocks[(action_block_map.find((it->first).first))->second];
-               }
-               // add transitions
-               state_type current_src_state = -1;
-               counter_T* counter;
+      // add the new states to their respective blocks
+      for (auto it=extra_kripke_states.begin(); it != extra_kripke_states.end(); ++it) 
+      {
+           (states[it->second])->block = blocks[(action_block_map.find((it->first).first))->second];
+      }
+      // add transitions
+      state_type current_src_state = -1;
+      counter_T* counter;
       for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
                     
-                    // if we see a new source state, create a new counter for it
-                    if (t.from() != current_src_state) {
-                         current_src_state = t.from();
-                         counter = new counter_T;
-                    }
-                    // create transition entry
-                    transition_T* t_entry = new transition_T;
-                    // fill in info
-                    t_entry->source = states[t.from()];
-                    // target depends on transition label
-                    if (aut.is_tau(t.label()) && branching) {
-                         t_entry->target = states[t.to()];
-                         // initially, all tau-transitions are inert
-                         // number of inert transitions of source needs to be incremented
-                         states[t.from()]->inert_cnt++;
-                    }
-                    else {
-                         Key* k = new Key;
-                         k->first = t.label();
-                         k->second = t.to();
-                         t_entry->target = states[(extra_kripke_states.find(*k))->second];
-                    }
-                    // connect transition to its states
-                    t_entry->target->Tsrc.push_back(t_entry);
-                    t_entry->source->Ttgt.push_back(t_entry);
-                    // add pointer to counter
-                    t_entry->to_constln_cnt = counter;
-                    // increment the counter
-                    t_entry->to_constln_cnt->cnt++;
-                    // Different from pseudo-code: ONLY if transition is non-inert
-                    if (!aut.is_tau(t.label()) || !branching) 
-                    {
-                      // set pointer to C entry in to_constlns list of B.
-                      t_entry->to_constln_ref = t_entry->source->block->to_constlns.front();
-                      // add transition to transition list of source block
-                      t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
-                    }
-                    // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
-                    //t_entry.to_constln_ref->trans_list = t_entry.block_constln_list;
+        // if we see a new source state, create a new counter for it
+        if (t.from() != current_src_state) {
+             current_src_state = t.from();
+             counter = new counter_T;
+        }
+        // create transition entry
+        transition_T* t_entry = new transition_T;
+        // fill in info
+        t_entry->source = states[t.from()];
+        // target depends on transition label
+        if (aut.is_tau(t.label()) && branching) 
+        {
+          t_entry->target = states[t.to()];
+          // initially, all tau-transitions are inert
+          // number of inert transitions of source needs to be incremented
+          states[t.from()]->inert_cnt++;
+        }
+        else 
+        {
+          Key k(t.label(),t.to());
+          t_entry->target = states[(extra_kripke_states.find(k))->second];
+        }
+        // connect transition to its states
+        t_entry->target->Tsrc.push_back(t_entry);
+        t_entry->source->Ttgt.push_back(t_entry);
+        // add pointer to counter
+        t_entry->to_constln_cnt = counter;
+        // increment the counter
+        t_entry->to_constln_cnt->cnt++;
+        // Different from pseudo-code: ONLY if transition is non-inert
+        if (!aut.is_tau(t.label()) || !branching) 
+        {
+          // set pointer to C entry in to_constlns list of B.
+          t_entry->to_constln_ref = t_entry->source->block->to_constlns.front();
+          // add transition to transition list of source block
+          t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
+        }
+        // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
+        //t_entry.to_constln_ref->trans_list = t_entry.block_constln_list;
       }
-               // add transitions <a,t> -> t
-               for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) {
-                    std::pair<Key, state_type> e = *sit;
-                    state_type sid = e.second;
-                    state_type tid = e.first.second;
+      // add transitions <a,t> -> t
+      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
+      {
+           std::pair<Key, state_type> e = *sit;
+           state_type sid = e.second;
+           state_type tid = e.first.second;
 
-                    transition_T* t_entry2 = new transition_T;
-                    // fill in info
-                    t_entry2->source = states[sid];
-                    t_entry2->target = states[tid];
-                    // connect transition to its states
-                    t_entry2->target->Tsrc.push_back(t_entry2);
-                    t_entry2->source->Ttgt.push_back(t_entry2);
-                    // add pointer to counter object of source state
-                    t_entry2->to_constln_cnt = new counter_T;
-                    // increment the counter
-                    t_entry2->to_constln_cnt->cnt++;
-                    // set pointer to C entry in to_constlns list of B. Increment the associated counter
-                    t_entry2->to_constln_ref = t_entry2->source->block->to_constlns.front();
-                    // add transition to transition list of source block
-                    t_entry2->to_constln_ref->trans_list.insert_linked(t_entry2);
-                    // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
-                    //t_entry2.to_constln_ref->trans_list = t_entry2.block_constln_list;
-               }
-               // print the Kripke structure
+           transition_T* t_entry2 = new transition_T;
+           // fill in info
+           t_entry2->source = states[sid];
+           t_entry2->target = states[tid];
+           // connect transition to its states
+           t_entry2->target->Tsrc.push_back(t_entry2);
+           t_entry2->source->Ttgt.push_back(t_entry2);
+           // add pointer to counter object of source state
+           t_entry2->to_constln_cnt = new counter_T;
+           // increment the counter
+           t_entry2->to_constln_cnt->cnt++;
+           // set pointer to C entry in to_constlns list of B. Increment the associated counter
+           t_entry2->to_constln_ref = t_entry2->source->block->to_constlns.front();
+           // add transition to transition list of source block
+           t_entry2->to_constln_ref->trans_list.insert_linked(t_entry2);
+           // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
+           //t_entry2.to_constln_ref->trans_list = t_entry2.block_constln_list;
+      }
 #ifndef NDEBUG
-               for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) {
-                    std::pair<Key, state_type> p = *sit;
-                    mCRL2log(log::verbose) << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
-               }
-               for (auto sit = states.begin(); sit != states.end(); ++sit) {
-                    state_T* s = *sit;
-                    for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) {
-                         transition_T* t = *tit;
-                         mCRL2log(log::verbose) << t->source->id << " -> " << t->target->id << "\n";
-                    }
-                    for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) {
-                         transition_T* t = *tit;
-                         mCRL2log(log::verbose) << t->target->id << " <- " << t->source->id << "\n";
-                    }
-               }
+      // print the Kripke structure
+      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
+      {
+           std::pair<Key, state_type> p = *sit;
+           mCRL2log(log::verbose) << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
+      }
+      for (auto sit = states.begin(); sit != states.end(); ++sit) 
+      {
+        state_T* s = *sit;
+        for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) 
+        {
+          transition_T* t = *tit;
+          mCRL2log(log::verbose) << t->source->id << " -> " << t->target->id << "\n";
+        }
+        for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) 
+        {
+          transition_T* t = *tit;
+          mCRL2log(log::verbose) << t->target->id << " <- " << t->source->id << "\n";
+        }
+      }
 #endif
-               
-               // Add all states to their appropriate list in the block they reside in
-               for (auto it=states.begin(); it != states.end(); ++it) {
-                    state_T* s = *it;
-                    
-                    if (s->inert_cnt == 0) {
-                         // state is bottom
-                         s->block->btm_states->insert_state_linked(s, BTM_STATE);
-                    }
-                    else {
-                         // state is not bottom
-                         s->block->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
-                    }
-               }
-               
-               // set size of constellation C
-               C->size = nr_of_states;
-               // add C to appropriate list
-               if (C->blocks.size() > 1) {
-                    C->type = NONTRIVIAL;
-                    non_trivial_constlns.insert_linked(C);
-               }
-               else {
-                    trivial_constlns.insert_linked(C);
-               }
-               
-          }; // end create_initial_partition
+      
+      // Add all states to their appropriate list in the block they reside in
+      for (auto it=states.begin(); it != states.end(); ++it) {
+           state_T* s = *it;
+           
+           if (s->inert_cnt == 0) {
+                // state is bottom
+                s->block->btm_states->insert_state_linked(s, BTM_STATE);
+           }
+           else {
+                // state is not bottom
+                s->block->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
+           }
+      }
+      
+      // set size of constellation C
+      C->size = nr_of_states;
+      // add C to appropriate list
+      if (C->blocks.size() > 1) {
+           C->type = NONTRIVIAL;
+           non_trivial_constlns.insert_linked(C);
+      }
+      else {
+           trivial_constlns.insert_linked(C);
+      }
+    }; // end create_initial_partition
 
 // Refine the partition until the partition has become stable
     void refine_partition_until_it_becomes_stable_gw(const bool /* branching [intended to make the code also usable for strong bisimulation, which it does not calculate now] */)
@@ -1654,7 +1675,8 @@ void clean_temp_refs_block(block_T* B)
                                    splittable_blocks.insert(B);
                                    B->constln_ref = NULL;
                                    B->coconstln_ref = NULL;
-                                   for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) {
+                                   for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) 
+                                   {
                                         state_T* s = *sit;
                                         // actually mark the state
                                         if (s->type == BTM_STATE) {
@@ -1773,10 +1795,11 @@ void clean_temp_refs_block(block_T* B)
                               // check if we can jump to step 5.3.3
                               //check_consistency_trans_lists(B, setB);
                               //check_consistency_blocks();
-                              if (Bp->btm_states->size() > 0) {
+                              if (Bp->btm_states->size() > 0) 
+                              {
                                    nr_of_splits++;
                                    // 5.3.1. Perform detect1 and detect2 in lockstep
-                                   Q = new std::stack< state_T*>;
+                                   Q.clear(); 
                                    L.clear();
                                    //P = new std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>;
                                    Lp.clear();
@@ -2075,8 +2098,7 @@ void clean_temp_refs_block(block_T* B)
                               if (!is_stable) {
                                    nr_of_splits++;
                                    //mCRL2log(log::verbose) << "not stable\n";
-                                   deleteobject (Q);
-                                   Q = new std::stack< state_T*>;
+                                   Q.clear();
                                    L.clear();
                                    //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
                                    Lp.clear();
@@ -2422,8 +2444,7 @@ void clean_temp_refs_block(block_T* B)
                                              XBp.clear();
                                              XBpp.clear();
                                              // Prepare detect1 and detect2 for lockstep
-                                             deleteobject (Q);
-                                             Q = new std::stack< state_T*>;
+                                             Q.clear();
                                              L.clear();
                                              //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
                                              Lp.clear();
@@ -2563,7 +2584,8 @@ void clean_temp_refs_block(block_T* B)
                                              }
                                              sized_forward_list < state_T >* SinSC;
                                              sized_forward_list < state_T >* SnotinSC;
-                                             if (detect1_finished == TERMINATED) {
+                                             if (detect1_finished == TERMINATED) 
+                                             {
                                                   // keep temp value in SinSC for swapping
                                                   SinSC = Bhatp->new_btm_states;
                                                   Bhatp->new_btm_states = Bhat->new_btm_states;
@@ -2571,7 +2593,8 @@ void clean_temp_refs_block(block_T* B)
                                                   SinSC = Bhatp->new_btm_states;
                                                   SnotinSC = Bhat->new_btm_states;
                                              }
-                                             else {
+                                             else 
+                                             {
                                                   SinSC = Bhat->new_btm_states;
                                                   SnotinSC = Bhatp->new_btm_states;
                                              }
@@ -2738,9 +2761,6 @@ void clean_temp_refs_block(block_T* B)
                                    // 5.3.7.c
                                    if (!split) 
                                    {
-                                        /* Statements below have been replaced by shorter code.
-                                        deleteobject(Bhat->new_btm_states);
-                                        Bhat->new_btm_states = new sized_forward_list <state_T>;*/
                                         Bhat->new_btm_states->clear();
                                         for (auto it = Bhat->to_constlns.begin(); it != Bhat->to_constlns.end(); ++it) {
                                              to_constlns_element_T* l = *it;
