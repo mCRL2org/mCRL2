@@ -157,8 +157,14 @@ void test_abp()
   reduce(l,lts::lts_eq_branching_bisim);
   test_lts("abp test branching bisimulation",l,expected_label_count, 3, 4);
   l=l_abp;
+  reduce(l,lts::lts_eq_branching_bisim_sigref);
+  test_lts("abp test branching bisimulation_sigref",l,expected_label_count, 3, 4);
+  l=l_abp;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim);
   test_lts("abp test divergence preserving branching bisimulation",l,expected_label_count, 6, 10);
+  l=l_abp;
+  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_sigref);
+  test_lts("abp test divergence preserving branching bisimulation_sigref",l,expected_label_count, 6, 10);
   l=l_abp;
   reduce(l,lts::lts_eq_sim);
   test_lts("abp test simulation",l,expected_label_count, 24, 28);
@@ -166,7 +172,6 @@ void test_abp()
   reduce(l,lts::lts_eq_trace);
   test_lts("abp test trace",l,expected_label_count, 19, 24);
   l=l_abp;
-  std::cerr << "ACTION LABELS " << l.num_action_labels() << "\n";
   reduce(l,lts::lts_eq_weak_trace);
   test_lts("abp test weak trace",l,5, 3, 4);
   l=l_abp;
@@ -200,11 +205,65 @@ void test_reachability()
   BOOST_CHECK(reachability_check(l_reach,false));
 }
 
+// The example below caused failures in the GW mlogn branching bisimulation 
+// algorithm when cleaning the code up.
+void failing_test_groote_wijs_algorithm()
+{
+  std::string GWLTS =
+    "des(0,29,10)\n"
+    "(0,\"a\",5)\n"
+    "(1,\"a\",3)\n"
+    "(2,\"a\",6)\n"
+    "(3,\"a\",8)\n"
+    "(4,\"a\",5)\n"
+    "(5,\"a\",6)\n"
+    "(6,\"a\",4)\n"
+    "(7,\"a\",8)\n"
+    "(8,\"a\",9)\n"
+    "(9,\"a\",6)\n"
+    "(0,\"b\",9)\n"
+    "(1,\"b\",3)\n"
+    "(2,\"b\",3)\n"
+    "(3,\"b\",7)\n"
+    "(4,\"b\",9)\n"
+    "(5,\"b\",8)\n"
+    "(6,\"b\",5)\n"
+    "(7,\"b\",9)\n"
+    "(8,\"b\",1)\n"
+    "(9,\"b\",6)\n"
+    "(6,\"c\",7)\n"
+    "(8,\"c\",9)\n"
+    "(2,\"d\",7)\n"
+    "(3,\"d\",2)\n"
+    "(5,\"d\",6)\n"
+    "(7,\"d\",4)\n"
+    "(8,\"tau\",0)\n"
+    "(4,\"tau\",1)\n"
+    "(3,\"tau\",7)\n"
+    ;
+
+  size_t expected_label_count = 5;
+  size_t expected_state_count = 10;
+  size_t expected_transition_count = 29;
+
+  std::istringstream is(GWLTS);
+  lts::lts_aut_t l_gw;
+  l_gw.load(is);
+  lts::lts_aut_t l=l_gw;
+  reduce(l,lts::lts_eq_branching_bisim);
+  test_lts("gw problem branching bisimulation",l,expected_label_count, expected_state_count, expected_transition_count);
+  l=l_gw;
+  reduce(l,lts::lts_eq_branching_bisim_sigref);
+  test_lts("gw problem branching bisimulation signature based",l,expected_label_count, expected_state_count, expected_transition_count);
+}
+
 int test_main(int argc, char* argv[])
 {
   test_abp();
   test_reachability();
+  failing_test_groote_wijs_algorithm();
 
+  // TODO: Add groote wijs branching bisimulation and add weak bisimulation tests. For the last Peterson is a good candidate. 
   return 0;
 }
 

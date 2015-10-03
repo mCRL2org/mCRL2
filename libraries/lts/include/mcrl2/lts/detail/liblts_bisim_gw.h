@@ -456,15 +456,6 @@ public:
         is_in_P_detect2(false), 
         is_in_Lp_detect2(false) 
      { 
-       // Ttgt = new std::vector <transition_T*>; 
-       // Tsrc = new std::vector <transition_T*>;
-     }
-
-     // destructor
-     ~state_T() 
-     {
-       // deleteobject(Ttgt); 
-       // deleteobject(Tsrc);
      }
 };
 
@@ -499,7 +490,7 @@ struct constellation_T
      // size in number of states
      size_t size;
      // list of blocks
-     sized_forward_list < block_T >* blocks;
+     sized_forward_list < block_T > blocks;
      // type of constellation
      size_t type;
      
@@ -513,12 +504,12 @@ struct constellation_T
         size(0), 
         type(TRIVIAL) 
      { 
-       blocks = new sized_forward_list < block_T >;
+       // blocks = new sized_forward_list < block_T >;
      }
      // destructor
      ~constellation_T() 
      {
-       deleteobject(blocks);
+       // deleteobject(blocks);
      }
 };
 
@@ -1318,7 +1309,7 @@ void clean_temp_refs_block(block_T* B)
           {
                for (auto cit = non_trivial_constlns.begin(); cit != non_trivial_constlns.end(); ++cit) {
                     constellation_T* C = *cit;
-                    for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                    for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                          block_T* B = *bit;
                          mCRL2log(log::verbose) << "[";
                          for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
@@ -1335,7 +1326,7 @@ void clean_temp_refs_block(block_T* B)
                mCRL2log(log::verbose) << "| ";
                for (auto cit = trivial_constlns.begin(); cit != trivial_constlns.end(); ++cit) {
                     constellation_T* C = *cit;
-                    for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                    for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                          block_T* B = *bit;
                          mCRL2log(log::verbose) << "[";
                          for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) {
@@ -1382,7 +1373,7 @@ void clean_temp_refs_block(block_T* B)
                B1->to_constlns->insert_linked(e);
                B1->inconstln_ref = e;
                B1->constellation = C;
-               C->blocks->insert_linked(B1);
+               C->blocks.insert_linked(B1);
                // add block to initial list of blocks
                blocks.insert(blocks.end(), B1);
                nr_of_blocks = 1;
@@ -1421,7 +1412,7 @@ void clean_temp_refs_block(block_T* B)
                     B->inconstln_ref = e;
                     // add block to constellation
                     B->constellation = C;
-                    C->blocks->insert_linked(B);
+                    C->blocks.insert_linked(B);
                     // add block to initial list of blocks
                     blocks.insert(blocks.end(), B);
                }
@@ -1547,7 +1538,7 @@ void clean_temp_refs_block(block_T* B)
                // set size of constellation C
                C->size = nr_of_states;
                // add C to appropriate list
-               if (C->blocks->size() > 1) {
+               if (C->blocks.size() > 1) {
                     C->type = NONTRIVIAL;
                     non_trivial_constlns.insert_linked(C);
                }
@@ -1578,7 +1569,7 @@ void clean_temp_refs_block(block_T* B)
                     block_T* B;
                     for (auto const_it = non_trivial_constlns.begin(); const_it != non_trivial_constlns.end(); ++const_it) {
                          setB = *const_it;
-                         for (auto bit = setB->blocks->begin(); bit != setB->blocks->end(); ++bit) {
+                         for (auto bit = setB->blocks.begin(); bit != setB->blocks.end(); ++bit) {
                               B = *bit;
                               if (B->btm_states->size()+B->non_btm_states->size() <= (setB->size)/2) {
                                    //mCRL2log(log::verbose) << B->btm_states->size() << " " << B->non_btm_states->size() << " " << B->marked_btm_states->size() << " " << B->marked_non_btm_states->size() << "\n";
@@ -1592,17 +1583,17 @@ void clean_temp_refs_block(block_T* B)
                                    // 5.2.1
                                    // 5.2.1.a
                                    constellation_T* setC = new constellation_T(max_const_index);
-                                   setB->blocks->remove_linked(B, bit);
+                                   setB->blocks.remove_linked(B, bit);
                                    size_t Bsize = B->btm_states->size() + B->non_btm_states->size() + B->marked_btm_states->size() + B->marked_non_btm_states->size();
                                    setB->size -= Bsize;
-                                   setC->blocks->insert_linked(B);
+                                   setC->blocks.insert_linked(B);
                                    setC->size += Bsize;
                                    B->constellation = setC;
                                    //mCRL2log(log::verbose) << "new constln of " << B->id << " is " << setC->id << "\n";
                                    B->inconstln_ref = NULL;
                                    // 5.2.1.b
                                    trivial_constlns.insert_linked(setC);
-                                   if (setB->blocks->size() == 1) {
+                                   if (setB->blocks.size() == 1) {
                                         setB->type = TRIVIAL;
                                         non_trivial_constlns.remove_linked(setB, const_it);
                                         trivial_constlns.insert_linked(setB);
@@ -1859,7 +1850,7 @@ void clean_temp_refs_block(block_T* B)
                                    // Pseudo-code: 'add it to the list of blocks' could possibly be removed.
                                    Bpp = create_new_block(Bp->type);
                                    Bpp->constellation = Bp->constellation;
-                                   Bpp->constellation->blocks->insert_linked(Bpp);
+                                   Bpp->constellation->blocks.insert_linked(Bpp);
                                    //mCRL2log(log::verbose) << "creating new block " << Bpp->id << "\n";
                                    // Let N point to correct list
                                    sized_forward_list <state_T>* N;
@@ -2184,7 +2175,7 @@ void clean_temp_refs_block(block_T* B)
                                    // split
                                    Bp3 = create_new_block(splitBpB->type);
                                    Bp3->constellation = splitBpB->constellation;
-                                   Bp3->constellation->blocks->insert_linked(Bp3);
+                                   Bp3->constellation->blocks.insert_linked(Bp3);
                                    // Let N point to correct list
                                    sized_forward_list <state_T>* N;
                                    if (detect1_finished == TERMINATED) {
@@ -2555,7 +2546,7 @@ void clean_temp_refs_block(block_T* B)
                                              // 5.3.7.b.ii (5.3.2)
                                              Bhatp = create_new_block(Bhat->type);
                                              Bhatp->constellation = Bhat->constellation;
-                                             Bhatp->constellation->blocks->insert_linked(Bhatp);
+                                             Bhatp->constellation->blocks.insert_linked(Bhatp);
                                              //mCRL2log(log::verbose) << "splitting " << Bhat->id << " producing " << Bhatp->id << "\n";
                                              // Let N point to correct list
                                              sized_forward_list <state_T> *N;
@@ -2881,7 +2872,7 @@ void clean_temp_refs_block(block_T* B)
                while (L != NULL) {
                     for (auto cit = L->begin(); cit != L->end(); ++cit) {
                          constellation_T* C = *cit;
-                         for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                               block_T* B = *bit;
                               assert(B->btm_states->size() + B->non_btm_states->size() + B->marked_btm_states->size() + B->marked_non_btm_states->size() > 0);
                          }
@@ -2926,7 +2917,7 @@ void clean_temp_refs_block(block_T* B)
                while (L != NULL) {
                     for (auto cit = L->begin(); cit != L->end(); ++cit) {
                          constellation_T* C = *cit;
-                         for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                               block_T* B = *bit;
                               // walk over elements in to_constlns
                               //count2 = 0;
@@ -3051,8 +3042,8 @@ void clean_temp_refs_block(block_T* B)
                     // check consistency of ptr_in_list
                     assert(prev_cit == C->ptr_in_list);
                     size_t const_size = 0;
-                    std::forward_list < block_T*, forward_list_allocator<block_T*>  >::iterator prev_bit = C->blocks->before_begin();
-                    for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                    std::forward_list < block_T*, forward_list_allocator<block_T*>  >::iterator prev_bit = C->blocks.before_begin();
+                    for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                          block_T* B = *bit;
                          const_size += B->btm_states->size() + B->non_btm_states->size() + B-> marked_btm_states->size() + B->marked_non_btm_states->size();
                          // check consistency of ID (for now, should be <= 100)
@@ -3096,7 +3087,7 @@ void clean_temp_refs_block(block_T* B)
                while (L != NULL) {
                     for (auto cit = L->begin(); cit != L->end(); ++cit) {
                          constellation_T* C = *cit;
-                         for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                               block_T* B = *bit;
                               // traverse the lists
                               for (auto eit = B->to_constlns->begin(); eit != B->to_constlns->end(); ++eit) {
@@ -3131,7 +3122,7 @@ void clean_temp_refs_block(block_T* B)
                while (L != NULL) {
                     for (auto cit = L->begin(); cit != L->end(); ++cit) {
                          constellation_T* C = *cit;
-                         for (auto bit = C->blocks->begin(); bit != C->blocks->end(); ++bit) {
+                         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                               block_T* B = *bit;
                               // traverse the lists
                               for (auto eit = B->to_constlns->begin(); eit != B->to_constlns->end(); ++eit) {
