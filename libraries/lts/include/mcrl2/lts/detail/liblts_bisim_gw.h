@@ -177,7 +177,6 @@ class forward_list_allocator
       }
     }
 
-    
     //    size
     size_type max_size() const throw()
     {
@@ -209,6 +208,9 @@ class sized_forward_list : public std::forward_list < T*, forward_list_allocator
 {
   protected:
     typedef std::forward_list < T*, forward_list_allocator<T*>  > parent;
+    size_t m_list_size;
+    // pointer to last element
+    typename std::forward_list < T*, forward_list_allocator<T*>  >::iterator m_last;
 
   public:
     sized_forward_list()
@@ -351,30 +353,6 @@ class sized_forward_list : public std::forward_list < T*, forward_list_allocator
       parent::erase_after(obj->ptr_in_list);
     }
   
-    // concatenate two lists, where the elements have pointers (iterators) to the
-    // positions preceding the ones where they are stored
-    /* void concat_linked(sized_forward_list<T>& obj1)
-    {
-      // the first position from which ptr_in_list updates are no longer required
-      typename std::forward_list < T* >::iterator start_correct = this->begin();
-      if (start_correct != this->end()) 
-      {
-        ++start_correct;
-      }
-      // splice_after(this->before_begin(), *(obj1.getlist()));
-      splice_after(this->before_begin(), obj1);
-      m_list_size += obj1.size();
-      // update ptr_in_list of elements
-      typename std::forward_list < T*, forward_list_allocator<T*>  >::iterator prev_it = this->before_begin();
-      for (typename std::forward_list<T*, forward_list_allocator<T*> >::iterator it = this->begin(); it != start_correct; ++it) 
-      {
-        T* o = *it;
-        o->ptr_in_list = prev_it;
-        prev_it = it;
-      }
-      obj1.constant_clear();
-    } */
-
     size_t size() const
     {
       return m_list_size;
@@ -385,19 +363,12 @@ class sized_forward_list : public std::forward_list < T*, forward_list_allocator
       return *m_last;
     }
 
-    // clear the list in constant time
-    void constant_clear() 
+    void clear() 
     {
-      std::forward_list < T*, forward_list_allocator<T*>  > empty;
-      parent::swap(empty); 
+      parent::clear(); // This takes linear time. Can be improved by using m_last.
       m_list_size = 0;
       m_last = parent::before_begin();
     }
-
-  protected:
-    size_t m_list_size;
-    // pointer to last element
-    typename std::forward_list < T*, forward_list_allocator<T*>  >::iterator m_last;
 };
 
 struct counter_T
@@ -455,8 +426,7 @@ public:
         is_in_L_detect1(false), 
         is_in_P_detect2(false), 
         is_in_Lp_detect2(false) 
-     { 
-     }
+     {}
 };
 
 struct transition_T
@@ -529,15 +499,7 @@ struct to_constlns_element_T
        : C(CC), 
          new_element(NULL), 
          SClist(NULL) 
-     {
-       // trans_list = new sized_forward_list < transition_T >;
-     }
-     
-     // destructor
-     ~to_constlns_element_T() 
-     {
-       // delete(trans_list);
-     }
+     {}
 };
 
 struct block_T
@@ -582,7 +544,6 @@ struct block_T
      {
        btm_states = new sized_forward_list < state_T >; 
        non_btm_states = new sized_forward_list < state_T >; 
-       // to_constlns = new sized_forward_list < to_constlns_element_T >; 
        marked_btm_states = new sized_forward_list < state_T >; 
        marked_non_btm_states = new sized_forward_list < state_T >; 
        new_btm_states = new sized_forward_list < state_T >;
@@ -591,12 +552,16 @@ struct block_T
      // destructor
      ~block_T() 
      {
-       deleteobject(btm_states); 
-       deleteobject(non_btm_states); 
-       // deleteobject(to_constlns); 
-       deleteobject(marked_btm_states); 
-       deleteobject(marked_non_btm_states); 
-       deleteobject(new_btm_states);
+       assert(btm_states!=NULL);
+       delete(btm_states); 
+       assert(non_btm_states!=NULL);
+       delete(non_btm_states); 
+       assert(marked_btm_states!=NULL);
+       delete(marked_btm_states); 
+       assert(marked_non_btm_states!=NULL);
+       delete(marked_non_btm_states); 
+       assert(new_btm_states!=NULL);
+       delete(new_btm_states);
      }
 };
 
@@ -744,8 +709,8 @@ void clean_temp_refs_block(block_T* B)
                s->coconstln_cnt = NULL;
                B->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
           }
-          B->marked_btm_states->constant_clear();
-          B->marked_non_btm_states->constant_clear();
+          B->marked_btm_states->clear();
+          B->marked_non_btm_states->clear();
           if (B->constln_ref != NULL) {
                if (size(B->constln_ref) == 0) {
                     // if the associated constellation is the one containing B, set inconstln_ref to NULL
@@ -800,7 +765,6 @@ void clean_temp_refs_block(block_T* B)
                nr_of_splits = 0;
                Q = NULL;
                current_state_detect1 = NULL;
-               P = NULL;
                current_state_detect2 = NULL;
                in_forward_check_detect2 = false;
           
@@ -954,7 +918,7 @@ void clean_temp_refs_block(block_T* B)
           typename std::forward_list<transition_T*, forward_list_allocator<transition_T*> >::iterator iter_trans_state_added_detect1;
           // detect2
           //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>* P;
-          std::multiset< state_T*, LessThanByInert>* P;
+          std::multiset< state_T*, LessThanByInert> P;
           sized_forward_list < state_T > Lp;
           // to keep track of state of detect 2
           state_T *current_state_detect2;
@@ -1206,7 +1170,7 @@ void clean_temp_refs_block(block_T* B)
                     //mCRL2log(log::verbose) << "detect2: STOPPED (" << Lp.size() << "," << maxsize_detect << ")\n";
                     return STOPPED;
                }
-               if (P->size() > 0 || (this->*hasnext)() || current_state_detect2 != NULL) {
+               if (P.size() > 0 || (this->*hasnext)() || current_state_detect2 != NULL) {
                     if (current_state_detect2 == NULL) {
                          if ((this->*hasnext)()) {
                               current_state_detect2 = (this->*next)();
@@ -1217,9 +1181,9 @@ void clean_temp_refs_block(block_T* B)
                               //mCRL2log(log::verbose) << "detect2: processing state " << current_state_detect2->id << "\n";
                          }
                          else {
-                              auto Pit = P->begin();
+                              auto Pit = P.begin();
                               current_state_detect2 = *Pit;
-                              P->erase(Pit);
+                              P.erase(Pit);
                               current_state_detect2->is_in_P_detect2 = false;
                               //mCRL2log(log::verbose) << "detect2: from queue: processing state " << current_state_detect2->id << " with priority " << current_state_detect2->priority << "\n";
                               // check if this element still has priority 0
@@ -1294,8 +1258,8 @@ void clean_temp_refs_block(block_T* B)
                                         sp->priority--;
                                    }
                                    //mCRL2log(log::verbose) << "detect2: pushing " << sp->id << " on P with prio " << sp->priority << "\n";
-                                   sp->pos_in_P_detect2 = P->insert(sp);
-                                   //mCRL2log(log::verbose) << "begin: " << (*(P->begin()))->id << "\n";
+                                   sp->pos_in_P_detect2 = P.insert(sp);
+                                   //mCRL2log(log::verbose) << "begin: " << (*(P.begin()))->id << "\n";
                                    sp->is_in_P_detect2 = true;
                                    sp_newly_inserted = true;
                               }
@@ -1307,8 +1271,8 @@ void clean_temp_refs_block(block_T* B)
                               sp->priority--;
                               // replace element in P
                               //mCRL2log(log::verbose) << "updating state " << sp->id << "\n";
-                              P->erase(sp->pos_in_P_detect2);
-                              sp->pos_in_P_detect2 = P->insert(sp);
+                              P.erase(sp->pos_in_P_detect2);
+                              sp->pos_in_P_detect2 = P.insert(sp);
                               //mCRL2log(log::verbose) << "detect2: new prio of " << sp->id << " is " << sp->priority << "\n";
                          }
                     }
@@ -1569,8 +1533,6 @@ void clean_temp_refs_block(block_T* B)
                     trivial_constlns.insert_linked(C);
                }
                
-               // create a priority queue for use in the algorithm
-               P = new std::multiset < state_T*, LessThanByInert>;
           }; // end create_initial_partition
 
 // Refine the partition until the partition has become stable
@@ -1637,9 +1599,6 @@ void clean_temp_refs_block(block_T* B)
                                                   if (Bp->marked_btm_states->size() == 0 && Bp->marked_non_btm_states->size() == 0) {
                                                        // 5.2.2.a.i
                                                        splittable_blocks.insert(Bp);
-                                                       //if (Bp->id == 955) {
-                                                            //mCRL2log(log::verbose) << "ADDING BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                                       //}
                                                        // 5.2.2.a.ii
                                                        //mCRL2log(log::verbose) << "ref: " << t->to_constln_ref << "\n";
                                                        Bp->coconstln_ref = t->to_constln_ref;
@@ -1656,15 +1615,10 @@ void clean_temp_refs_block(block_T* B)
                                                   // 5.2.2.c
                                                   if (sp->type != MARKED_BTM_STATE && sp->type != MARKED_NON_BTM_STATE) {
                                                        // 5.2.2.c.i
-                                                       if (sp->type == BTM_STATE) {
+                                                       if (sp->type == BTM_STATE) 
+                                                       {
                                                             Bp->btm_states->remove_linked(sp);
-                                                            //if (Bp->id == 955) {
-                                                                 //mCRL2log(log::verbose) << "ADDING BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                                            //}
                                                             Bp->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
-                                                            //if (Bp->id == 955) {
-                                                                 //mCRL2log(log::verbose) << "ADDING BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                                            //}
                                                        }
                                                        // 5.2.2.c.ii
                                                        else {
@@ -1684,13 +1638,7 @@ void clean_temp_refs_block(block_T* B)
                                                   // (now goes via to_constln_ref, which is updated at 5.2.2.b.
                                                   //t.block_constln_list = Bp.constln_transitions;
                                                   t->to_constln_ref = Bp->constln_ref;
-                                                  //if (Bp->id == 355) {
-                                                  //     mCRL2log(log::verbose) << "1518: setting t->to_constln_ref to " << Bp->constln_ref << "\n";
-                                                  //}
                                              }
-                                             //if (Bp->id == 955) {
-                                             //mCRL2log(log::verbose) << "BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                             //}
                                         }
                                    }
                                    //check_consistency_trans_lists(B, setB);
@@ -1753,9 +1701,6 @@ void clean_temp_refs_block(block_T* B)
                                    auto prev_sbit = splittable_blocks.before_begin();
                                    for (auto sbit = splittable_blocks.begin(); sbit != splittable_blocks.end(); ++sbit) {
                                         block_T* Bp = *sbit;
-                                        //if (Bp->id == 955) {
-                                             //mCRL2log(log::verbose) << "BLOCK " << Bp->id << " with states " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-                                        //}
                                         
                                         // 5.2.3.a/b
                                         bool split = true;
@@ -1832,9 +1777,9 @@ void clean_temp_refs_block(block_T* B)
                                    nr_of_splits++;
                                    // 5.3.1. Perform detect1 and detect2 in lockstep
                                    Q = new std::stack< state_T*>;
-                                   L.constant_clear();
+                                   L.clear();
                                    //P = new std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>;
-                                   Lp.constant_clear();
+                                   Lp.clear();
                                    maxsize_detect = (Bp->btm_states->size() + Bp->non_btm_states->size() + Bp->marked_btm_states->size() + Bp->marked_non_btm_states->size()) / 2;
                                    block_detect = Bp;
                                    current_state_detect1 = NULL;
@@ -1898,10 +1843,6 @@ void clean_temp_refs_block(block_T* B)
                                    }
                                    mCRL2log(log::verbose) << "---\n";
 #endif
-                                   //check_consistency_trans_lists(B, setB);
-                                   //if (Bpp->id == 355) {
-                                   //     mCRL2log(log::verbose) << "1727: splitting " << Bp->id << " into " << Bpp->id << "\n";
-                                   //}
                                    for (auto sit = N->begin(); sit != N->end(); ++sit) {
                                         state_T* s = *sit;
                                         
@@ -1985,9 +1926,6 @@ void clean_temp_refs_block(block_T* B)
                                                        }
                                                        Bpp->inconstln_ref->trans_list.insert_linked(t);
                                                        t->to_constln_ref = Bpp->inconstln_ref;
-                                                       //if (Bpp->id == 355) {
-                                                       //     mCRL2log(log::verbose) << "1830: setting t->to_constln_ref to " << Bpp->inconstln_ref << "\n";
-                                                       //}
                                                   }
                                              }
                                         }
@@ -2023,25 +1961,9 @@ void clean_temp_refs_block(block_T* B)
                                                   }
                                                   Bp->inconstln_ref->trans_list.insert_linked(t);
                                                   t->to_constln_ref = Bp->inconstln_ref;
-                                                  //if (Bp->id == 355) {
-                                                  //     mCRL2log(log::verbose) << "1866: setting t->to_constln_ref to " << Bp->inconstln_ref << "\n";
-                                                  //}
                                              }
                                         }
                                    }
-                                   //check_consistency_blocks();
-                                   //mCRL2log(log::verbose) << Bp->id << ": \n";
-                                   //for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << Bpp->id << ": \n";
-                                   //for (auto it = Bpp->to_constlns.begin(); it != Bpp->to_constlns.end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << "3---\n";
-                                   //check_consistency_trans_lists(B, setB);
                                    // reset temporary pointers of states
                                    for (auto it = L.begin(); it != L.end(); ++it) {
                                         state_T* s = *it;
@@ -2051,9 +1973,9 @@ void clean_temp_refs_block(block_T* B)
                                         state_T* s = *it;
                                         s->is_in_Lp_detect2 = false;
                                    }
-                                   while (!P->empty()) {
-                                        state_T* s = *(P->begin());
-                                        P->erase(P->begin());
+                                   while (!P.empty()) {
+                                        state_T* s = *(P.begin());
+                                        P.erase(P.begin());
                                         s->is_in_P_detect2 = false;
                                         //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
                                    }
@@ -2155,11 +2077,11 @@ void clean_temp_refs_block(block_T* B)
                                    //mCRL2log(log::verbose) << "not stable\n";
                                    deleteobject (Q);
                                    Q = new std::stack< state_T*>;
-                                   L.constant_clear();
+                                   L.clear();
                                    //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
-                                   Lp.constant_clear();
-                                   XBp3.constant_clear();
-                                   XBp4.constant_clear();
+                                   Lp.clear();
+                                   XBp3.clear();
+                                   XBp4.clear();
                                    // prepare for lockstep search
                                    maxsize_detect = (splitBpB->btm_states->size() + splitBpB->non_btm_states->size() + splitBpB->marked_btm_states->size() + splitBpB->marked_non_btm_states->size()) / 2;
                                    //mCRL2log(log::verbose) << "sizes: " << (splitBpB->btm_states->size() + splitBpB->non_btm_states->size() + splitBpB->marked_btm_states->size() + splitBpB->marked_non_btm_states->size()) << " " << maxsize_detect << "\n";
@@ -2252,10 +2174,6 @@ void clean_temp_refs_block(block_T* B)
                                                   l->trans_list.remove_linked(t);
                                                   lp->trans_list.insert_linked(t);
                                                   t->to_constln_ref = lp;
-                                                  //if (Bp3->id == 355) {
-                                                  //     mCRL2log(log::verbose) << "2080: setting t->to_constln_ref to " << lp << "\n";
-                                                  //}
-                                                  //t.block_constln_list = lp.trans_list;
                                                   // postpone deleting element l until cleaning up new_element pointers
                                              }
                                              // 5.3.4 (5.3.2.b.ii)
@@ -2320,26 +2238,9 @@ void clean_temp_refs_block(block_T* B)
                                                   }
                                                   splitBpB->inconstln_ref->trans_list.insert_linked(t);
                                                   t->to_constln_ref = splitBpB->inconstln_ref;
-                                                  //if (splitBpB->id == 355) {
-                                                  //     mCRL2log(log::verbose) << "2147: setting t->to_constln_ref to " << splitBpB->inconstln_ref << "\n";
-                                                  //}
                                              }
                                         }
                                    }
-                                   //mCRL2log(log::verbose) << splitBpB->id << ": \n";
-                                   //for (auto it = splitBpB->to_constlns.begin(); it != splitBpB->to_constlns.end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << "inconstln: " << splitBpB->inconstln_ref << "\n";
-                                   //mCRL2log(log::verbose) << "22---\n";
-                                   //mCRL2log(log::verbose) << Bp3->id << ": \n";
-                                   //for (auto it = Bp3->to_constlns.begin(); it != Bp3->to_constlns.end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << "inconstln: " << Bp3->inconstln_ref << "\n";
-                                   //mCRL2log(log::verbose) << "22---\n";
                                    // reset temporary pointers of states
                                    for (auto it = L.begin(); it != L.end(); ++it) {
                                         state_T* s = *it;
@@ -2349,9 +2250,9 @@ void clean_temp_refs_block(block_T* B)
                                         state_T* s = *it;
                                         s->is_in_Lp_detect2 = false;
                                    }
-                                   while (!P->empty()) {
-                                        state_T* s = *(P->begin());
-                                        P->erase(P->begin());
+                                   while (!P.empty()) {
+                                        state_T* s = *(P.begin());
+                                        P.erase(P.begin());
                                         s->is_in_P_detect2 = false;
                                         //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
                                    }
@@ -2375,13 +2276,6 @@ void clean_temp_refs_block(block_T* B)
                                              l->new_element = NULL;
                                         }
                                    }
-                                   //mCRL2log(log::verbose) << splitBpB->id << ": \n";
-                                   //for (auto it = splitBpB->to_constlns.begin(); it != splitBpB->to_constlns.end(); ++it) {
-                                   //     to_constlns_element_T* l = *it;
-                                   //     mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-                                   //}
-                                   //mCRL2log(log::verbose) << "inconstln: " << splitBpB->inconstln_ref << "\n";
-                                   //mCRL2log(log::verbose) << "21---\n";
                                    // set splitsplitBpB
                                    if (detect1_finished == TERMINATED) {
                                         splitsplitBpB = Bp3;
@@ -2410,9 +2304,6 @@ void clean_temp_refs_block(block_T* B)
                                              X2->insert(s);
                                         }
                                    }
-                                   //deleteobject (XsplitBpB);
-                                   // needed?
-                                   //XsplitBpB = new sized_forward_list < state_T >;
                                    XsplitBpB = X2;
                               } // end if stable (5.3.4)
                               // remove markings and reset constln_ref and coconstln_ref
@@ -2528,14 +2419,14 @@ void clean_temp_refs_block(block_T* B)
                                         if (splitcrit_met) {
                                              nr_of_splits++;
                                              // further splitting is required
-                                             XBp.constant_clear();
-                                             XBpp.constant_clear();
+                                             XBp.clear();
+                                             XBpp.clear();
                                              // Prepare detect1 and detect2 for lockstep
                                              deleteobject (Q);
                                              Q = new std::stack< state_T*>;
-                                             L.constant_clear();
+                                             L.clear();
                                              //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
-                                             Lp.constant_clear();
+                                             Lp.clear();
                                              // 5.3.7.b.i.A / B
                                              // !!! Different from the pseudo-code, we prepare detect1 by walking over the transitions from Bhat to constellation pointed
                                              // to by *cit. To optimise this, we should probably maintain a list of states that have a direct transition from Bhat to constellation
@@ -2617,10 +2508,6 @@ void clean_temp_refs_block(block_T* B)
                                                             l->trans_list.remove_linked(t);
                                                             lp->trans_list.insert_linked(t);
                                                             t->to_constln_ref = lp;
-                                                            //if (Bhatp->id == 355) {
-                                                            //     mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
-                                                            //}
-                                                            //t.block_constln_list = lp.trans_list;
                                                             // postpone deleting element l until cleaning up new_element pointers
                                                        }
                                                        else {
@@ -2645,9 +2532,6 @@ void clean_temp_refs_block(block_T* B)
                                                                  }
                                                                  Bhatp->inconstln_ref->trans_list.insert_linked(t);
                                                                  t->to_constln_ref = Bhatp->inconstln_ref;
-                                                                 //if (Bhatp->id == 355) {
-                                                                 //     mCRL2log(log::verbose) << "2479: setting t->to_toconstln_ref to " << Bhatp->inconstln_ref << "\n";
-                                                                 //}
                                                             }
                                                        }
                                                   }
@@ -2674,9 +2558,6 @@ void clean_temp_refs_block(block_T* B)
                                                             }
                                                             Bhat->inconstln_ref->trans_list.insert_linked(t);
                                                             t->to_constln_ref = Bhat->inconstln_ref;
-                                                            //if (Bhat->id == 355) {
-                                                            //     mCRL2log(log::verbose) << "2507: setting t->to_constln_ref to " << Bhat->inconstln_ref << "\n";
-                                                            //}
                                                        }
                                                   }
                                              }
@@ -2761,9 +2642,9 @@ void clean_temp_refs_block(block_T* B)
                                                   state_T* s = *it;
                                                   s->is_in_Lp_detect2 = false;
                                              }
-                                             while (!P->empty()) {
-                                                  state_T* s = *(P->begin());
-                                                  P->erase(P->begin());
+                                             while (!P.empty()) {
+                                                  state_T* s = *(P.begin());
+                                                  P.erase(P.begin());
                                                   s->is_in_P_detect2 = false;
                                                   //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
                                              }
@@ -2803,7 +2684,8 @@ void clean_temp_refs_block(block_T* B)
                                                             transition_T* t = *tit;
                                                             to_constlns_element_T* setBp_entry = t->to_constln_ref;
                                                             // 5.3.4.a.i
-                                                            if (setBp_entry->SClist == NULL) {
+                                                            if (setBp_entry->SClist == NULL) 
+                                                            {
                                                                  setBp_entry->SClist = new sized_forward_list < state_T >;
                                                                  // move the to_constln entry to the front of the list
                                                                  Btmp->to_constlns.remove_linked(setBp_entry);
@@ -2854,9 +2736,12 @@ void clean_temp_refs_block(block_T* B)
                                    } // end of walk over to_constln of block
                                    // Different from pseudo-code: if block is stable, reset new_btm_states, remove remaining SClists
                                    // 5.3.7.c
-                                   if (!split) {
+                                   if (!split) 
+                                   {
+                                        /* Statements below have been replaced by shorter code.
                                         deleteobject(Bhat->new_btm_states);
-                                        Bhat->new_btm_states = new sized_forward_list <state_T>;
+                                        Bhat->new_btm_states = new sized_forward_list <state_T>;*/
+                                        Bhat->new_btm_states->clear();
                                         for (auto it = Bhat->to_constlns.begin(); it != Bhat->to_constlns.end(); ++it) {
                                              to_constlns_element_T* l = *it;
                                              if (l->SClist != NULL) {
@@ -2877,9 +2762,7 @@ void clean_temp_refs_block(block_T* B)
                          } // end walking over splittable blocks
                     } // end walk over non-trivial constellations
                } // end while there are non-trivial constellations
-#ifndef NDEBUG
-               //print_partition();
-#endif
+
                mCRL2log(log::verbose) << "number of splits performed: " << nr_of_splits << "\n";
                mCRL2log(log::verbose) << num_eq_classes();
           }
@@ -2945,21 +2828,14 @@ void clean_temp_refs_block(block_T* B)
                               // walk over elements in to_constlns
                               //count2 = 0;
                               std::forward_list < to_constlns_element_T*, forward_list_allocator<to_constlns_element_T*> >::iterator prev_eit = B->to_constlns.before_begin();
-                              for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) {
+                              for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) 
+                              {
                                    to_constlns_element_T* e = *eit;
-                                   // assert(e->trans_list != NULL);
-                                   //if (e->C->id == 12) {
-                                   //     if (B->id == 10 || B->id == 39) {
-                                   //          mCRL2log(log::verbose) << B->id << ": found const 12 at " << e << "\n";
-                                   //     }
-                                   //     count2++;
-                                   //}
                                    std::forward_list < transition_T*, forward_list_allocator<transition_T*>  >::iterator prev_tit = e->trans_list.before_begin();
                                    for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) {
                                         transition_T* t = *tit;
                                         assert(t->ptr_in_list == prev_tit);
                                         assert(t->to_constln_ref == e);
-                                        //mCRL2log(log::verbose) << t->source->id << "\n";
                                         assert(t->source->block == B);
                                         assert(t->target->block->constellation == e->C);
                                         // assert that t->to_constln_ref is valid
@@ -3069,8 +2945,6 @@ void clean_temp_refs_block(block_T* B)
                     for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) {
                          block_T* B = *bit;
                          const_size += B->btm_states->size() + B->non_btm_states->size() + B-> marked_btm_states->size() + B->marked_non_btm_states->size();
-                         // check consistency of ID (for now, should be <= 100)
-                         //assert(B->id <= 100);
                          assert(B->type == STD_BLOCK || B->type == EXTRA_KRIPKE_BLOCK);
                          assert(B->constellation == C);
                          assert(B->constellation->type == consttype);
