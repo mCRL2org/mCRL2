@@ -299,6 +299,47 @@ class bisim_partitioner_gw
      
     const label_type tau_label;
 
+
+    // start structures and functions for lockstep search
+
+    // A Comparator class to compare states in the priority queue
+    struct LessThanByInert
+    {
+      bool operator()(const state_T* lhs, const state_T* rhs) const 
+      {
+        return lhs->priority < rhs->priority;
+      }
+    };
+
+    // detect1
+    std::vector < state_T* > Q; // We use a vector for this stack datatype, as we can clear it.
+    sized_forward_list < state_T > L;
+    // to keep track of state of detect 1
+    state_T *current_state_detect1;
+    typename std::vector<transition_T*>::iterator current_trans_detect1;
+    // to keep track of adding states to detect1
+    typename sized_forward_list<state_T>::iterator iter_state_added_detect1;
+    typename sized_forward_list<transition_T>::iterator iter_trans_state_added_detect1;
+    // detect2
+    //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>* P;
+    std::multiset< state_T*, LessThanByInert> P;
+    sized_forward_list < state_T > Lp;
+    // to keep track of state of detect 2
+    state_T *current_state_detect2;
+    typename std::vector<transition_T*>::iterator current_trans_detect2;
+    // to keep track of adding states to detect 2
+    typename sized_forward_list<state_T>::iterator iter_state_added_detect2;
+    typename sized_forward_list<state_T>::iterator iter_sclist_detect2;
+    bool sclist_is_empty_detect2;
+    // required for forward check in detect2 in nested split
+    bool in_forward_check_detect2;
+    // required in both procedures
+    block_T* block_detect;
+    to_constlns_element_T* e_detect;
+    size_t maxsize_detect;
+    // old constellation of the splitter
+    constellation_T* constellation_splitter_detect;
+    
     // begin auxiliary functions
     
     // create a new block of given type
@@ -320,7 +361,8 @@ class bisim_partitioner_gw
     // move state to block
     void move_state_to_block(state_T* s, block_T* B)
     {
-      switch (s->type) {
+      switch (s->type) 
+      {
            case BTM_STATE:
                 s->block->btm_states->remove_linked(s);
                 B->btm_states->insert_linked(s);
@@ -624,45 +666,6 @@ class bisim_partitioner_gw
       }
     };
 
-    // start structures and functions for lockstep search
-
-    // A Comparator class to compare states in the priority queue
-    struct LessThanByInert
-    {
-         bool operator()(const state_T* lhs, const state_T* rhs) const {
-              return lhs->priority < rhs->priority;
-         }
-    };
-
-    // detect1
-    std::vector < state_T* > Q; // We use a vector for this stack datatype, as we can clear it.
-    sized_forward_list < state_T > L;
-    // to keep track of state of detect 1
-    state_T *current_state_detect1;
-    typename std::vector<transition_T*>::iterator current_trans_detect1;
-    // to keep track of adding states to detect1
-    typename sized_forward_list<state_T>::iterator iter_state_added_detect1;
-    typename sized_forward_list<transition_T>::iterator iter_trans_state_added_detect1;
-    // detect2
-    //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>* P;
-    std::multiset< state_T*, LessThanByInert> P;
-    sized_forward_list < state_T > Lp;
-    // to keep track of state of detect 2
-    state_T *current_state_detect2;
-    typename std::vector<transition_T*>::iterator current_trans_detect2;
-    // to keep track of adding states to detect 2
-    typename sized_forward_list<state_T>::iterator iter_state_added_detect2;
-    typename sized_forward_list<state_T>::iterator iter_sclist_detect2;
-    bool sclist_is_empty_detect2;
-    // required for forward check in detect2 in nested split
-    bool in_forward_check_detect2;
-    // required in both procedures
-    block_T* block_detect;
-    to_constlns_element_T* e_detect;
-    size_t maxsize_detect;
-    // old constellation of the splitter
-    constellation_T* constellation_splitter_detect;
-    
     // next_state functions to add states to detect1 and detect2 in the various phases of the algorithm
     // (1: splitting Bp, 2: splitting split(Bp, B), 3: stabilising blocks)
     // precondition: iter_state_added_detectx have been set to before the beginning of the relevant state lists
@@ -1600,6 +1603,7 @@ class bisim_partitioner_gw
               Q.clear(); 
               L.clear();
               //P = new std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>;
+              assert(P.empty());
               Lp.clear();
               maxsize_detect = (Bp->btm_states->size() + Bp->non_btm_states->size() + Bp->marked_btm_states->size() + Bp->marked_non_btm_states->size()) / 2;
               block_detect = Bp;
@@ -1832,7 +1836,6 @@ class bisim_partitioner_gw
                 state_T* s = *(P.begin());
                 P.erase(P.begin());
                 s->is_in_P_detect2 = false;
-                //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
               }
               // check
               //check_consistency_trans_lists(B, setB);
@@ -1950,7 +1953,7 @@ class bisim_partitioner_gw
               //mCRL2log(log::verbose) << "not stable\n";
               Q.clear();
               L.clear();
-              //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
+              assert(P.empty());
               Lp.clear();
               XBp3.clear();
               XBp4.clear();
@@ -2154,7 +2157,6 @@ class bisim_partitioner_gw
                 state_T* s = *(P.begin());
                 P.erase(P.begin());
                 s->is_in_P_detect2 = false;
-                //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
               }
               // Different from pseudo-code: reset temporary pointers (new elements) of blocks
               // Remove the associated element if the transition list is empty, UNLESS the element is pointed to
@@ -2357,7 +2359,7 @@ class bisim_partitioner_gw
                   // Prepare detect1 and detect2 for lockstep
                   Q.clear();
                   L.clear();
-                  //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert> P;
+                  assert(P.empty());
                   Lp.clear();
                   // 5.3.7.b.i.A / B
                   // !!! Different from the pseudo-code, we prepare detect1 by walking over the transitions from Bhat to constellation pointed
@@ -2618,7 +2620,6 @@ class bisim_partitioner_gw
                     state_T* s = *(P.begin());
                     P.erase(P.begin());
                     s->is_in_P_detect2 = false;
-                    //mCRL2log(log::verbose) << "remove from P: " << s->id << "\n";
                   }
                   // Different from pseudo-code: reset temporary pointers (new elements) of blocks
                   // 5.3.7.b.iii
