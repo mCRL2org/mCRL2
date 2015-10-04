@@ -13,6 +13,7 @@
 #define SIZED_FORWARD_LIST_GH
 #include <string>
 #include <deque>
+#include <cassert>
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
