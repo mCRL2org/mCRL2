@@ -165,12 +165,12 @@ class sized_forward_list
       local_forward_list_storage_free_list_elements()=m_node_before_begin;
     }
 
-    void swap(const sized_forward_list other)
+    void swap(sized_forward_list& other)
     {
       const size_t tmp1=m_list_size;
       m_list_size=other.m_list_size;
       other.m_list_size=tmp1;
-      const two_pointers* tmp2=m_node_before_begin;
+      two_pointers* tmp2=m_node_before_begin;
       m_node_before_begin=other.m_node_before_begin;
       other.m_node_before_begin=tmp2;
     }
