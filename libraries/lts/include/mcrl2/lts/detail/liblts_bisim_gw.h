@@ -11,7 +11,6 @@
 #ifndef _LIBLTS_BISIM_MLOGN_H
 #define _LIBLTS_BISIM_MLOGN_H
 #include <cmath>
-#include <forward_list>
 #include <unordered_map>
 #include <string>
 #include <tuple>
@@ -23,6 +22,7 @@
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
+#include "mcrl2/lts/detail/sized_forward_list_gw.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
@@ -73,304 +73,6 @@ void deleteobject(T*& obj)
   }
 }
 
-
-/* The data structure below is intended to recycle forward list
- * elements, such that they do not have to be malloced and deleted
- * which is time consuming. The forward list elements are stored
- * in a deque. There is a list of free elements to which deallocated
- * elements are stored, and from which allocated members are taken
- * when they are needed and available */
-
-typedef struct two_pointers
-{
-  two_pointers* first;
-  void* second;
-} two_pointers;
-
-inline std::deque<two_pointers>& local_forward_list_storage()
-{
-  static std::deque<two_pointers> m_storage;
-  return m_storage;
-}
-
-inline two_pointers*& local_forward_list_storage_free_list_elements()
-{
-  static two_pointers* m_free_list_elements;
-  return m_free_list_elements;
-}
-
-
-template <class T>
-class forward_list_allocator
-{
-  public:
-    typedef T value_type;
-    typedef value_type* pointer;
-    typedef value_type& reference;
-    typedef const value_type* const_pointer;
-    typedef const value_type& const_reference;
-    typedef size_t size_type;
-    typedef ptrdiff_t difference_type;
-
-  public: 
-    // convert an allocator<T> to allocator<U>
-    template<typename U>
-    struct rebind 
-    {
-              typedef forward_list_allocator<U> other;
-    };
-
-  public:
-    inline forward_list_allocator() {}
-    inline ~forward_list_allocator() {}
-    inline forward_list_allocator(const forward_list_allocator&) {}
-    template<typename U>
-    inline forward_list_allocator(const forward_list_allocator<U>&) {}
-
-    //    address
-    inline pointer address(reference r) { return &r; }
-    inline const_pointer address(const_reference r) { return &r; }
-    
-    //    memory allocation
-    pointer allocate(size_type n, const_pointer)
-    {
-      static_assert(sizeof(two_pointers)==sizeof(T),"A forward_list used for the Groote/Wijs bisimulation algorithm is expected to contain pointers to objects and therefore consists of two pointers");
-      assert(n>0);
-      if (n==1)
-      {
-        if (local_forward_list_storage_free_list_elements()==NULL)
-        {
-          local_forward_list_storage().push_back(two_pointers());
-          pointer p=reinterpret_cast<pointer>(&(local_forward_list_storage().back()));
-          return p;
-        }
-        else
-        {
-          pointer result=reinterpret_cast<pointer>(local_forward_list_storage_free_list_elements());
-          local_forward_list_storage_free_list_elements()=local_forward_list_storage_free_list_elements()->first;
-          return result;
-        }
-      }
-      else 
-      {
-        return reinterpret_cast<pointer>(::operator new(n * sizeof (T))); 
-      }
-    }
-
-    pointer allocate(size_type n)
-    {
-      return allocate(n,0);
-    }
-
-    void deallocate (pointer p, size_type n)
-    {
-      if (n==1)
-      {
-        // Add this element to the free list elements for later reuse.
-        two_pointers* p1=reinterpret_cast<two_pointers*>(p);
-        p1->first=local_forward_list_storage_free_list_elements();
-        local_forward_list_storage_free_list_elements()=p1;
-      } 
-      else 
-      {
-        ::operator delete(p); 
-      }
-    }
-
-    //    size
-    size_type max_size() const throw()
-    {
-      return std::numeric_limits<size_type>::max()/sizeof(T);
-    }
-
-
-    //    construction/destruction
-    void construct (pointer p, const_reference val)
-    {
-      static_assert(sizeof(T)==2*sizeof(void*),"We expect that an object consists of two pointers");
-      new(p) T(val);
-    }
-   
-    void destroy (pointer p)
-    {
-      // This should do nothing.
-      p->~T(); 
-    } 
-
-    inline bool operator==(forward_list_allocator const&) { return true; }
-    inline bool operator!=(forward_list_allocator const& a) { return !operator==(a); }
-
-};
-
-// forward_list with size counter and pointer to last element
-template < class T>
-class sized_forward_list : public std::forward_list < T*, forward_list_allocator<T*>  >
-{
-  protected:
-    typedef std::forward_list < T*, forward_list_allocator<T*>  > parent;
-    size_t m_list_size;
-    // pointer to last element
-    typename std::forward_list < T*, forward_list_allocator<T*>  >::iterator m_last;
-
-  public:
-    sized_forward_list()
-      :  m_list_size(0),
-         m_last(parent::before_begin())
-    {}
-
-    void insert(T* obj)
-    {
-      parent::push_front(obj);
-      m_list_size++;
-      if (m_list_size == 1) 
-      {
-        m_last = parent::begin();
-      }
-    }
-
-    void insert_back(T* obj)
-    {
-      const typename std::forward_list<T*>::iterator it = parent::insert_after(m_last, obj);
-      m_last = it;
-      m_list_size++;
-    }
-  
-    // in 'linked' methods, the object to be inserted has an iterator 'ptr_in_list' which needs to refer to the position
-    // preceding the one where obj is inserted. This allows constant time lookup of objects in lists.
-    void insert_linked(T* obj)
-    {
-      obj->ptr_in_list = parent::before_begin();
-      const typename std::forward_list<T*>::iterator it = parent::insert_after(obj->ptr_in_list, obj);
-      m_list_size++;
-      if (m_list_size == 1) 
-      {
-        m_last = it;
-      }
-      else 
-      {
-        typename std::forward_list<T*>::iterator itnext = it;
-        itnext++;
-        (*itnext)->ptr_in_list = it;
-      }
-    }
-  
-    // insert element at the back of the list
-    void insert_linked_back(T* obj) 
-    {
-      obj->ptr_in_list = m_last;
-      const typename std::forward_list<T*>::iterator it = parent::insert_after(m_last, obj);
-      m_last = it;
-      m_list_size++;
-    }
-
-    // special method for inserting states
-    void insert_state_linked(T& obj, statemode_type t)
-    {
-      // make sure that element pointing before current first element will point to the newly inserted element
-      // (the new position before its element)
-      obj.ptr_in_list = parent::before_begin();
-      const typename std::forward_list<T*>::iterator it = parent::insert_after(obj.ptr_in_list, &obj);
-      m_list_size++;
-      if (m_list_size == 1) 
-      {
-        m_last = it;
-      }
-      else 
-      {
-        typename std::forward_list<T*>::iterator itnext = it;
-        itnext++;
-        (*itnext)->ptr_in_list = it;
-      }
-      obj.type = t;
-    }
-  
-    typename std::forward_list<T*>::iterator remove(typename std::forward_list<T*>::iterator position)
-    {
-      typename std::forward_list<T*>::iterator posnext = position;
-      ++posnext;
-      if (posnext == m_last) 
-      {
-        m_last = position;
-      }
-      m_list_size--;
-      return erase_after(position);
-    }
-
-    typename std::forward_list<T*>::iterator remove(typename std::forward_list<T*>::iterator position, typename std::forward_list<T*>::iterator& current)
-    {
-      typename std::forward_list<T*>::iterator posnext = position;
-      ++posnext;
-      if (posnext == m_last) 
-      {
-        m_last = position;
-      }
-      m_list_size--;
-      if (current == posnext) 
-      {
-        current = position;
-      }
-      return parent::erase_after(position);
-    }
-
-    void remove_linked(T* obj)
-    {
-      typename std::forward_list<T*>::iterator objptrnext = obj->ptr_in_list;
-      ++objptrnext;
-      if (objptrnext == m_last) 
-      {
-        m_last = obj->ptr_in_list;
-      }
-      // redirect pointer of next element in list
-      ++objptrnext;
-      if (objptrnext != parent::end()) 
-      {
-        (*objptrnext)->ptr_in_list = obj->ptr_in_list;
-      }
-      m_list_size--;
-      parent::erase_after(obj->ptr_in_list);
-    }
-
-    void remove_linked(T* obj, typename std::forward_list<T*, forward_list_allocator<T*> >::iterator& current)
-    {
-      typename std::forward_list<T*>::iterator objptrnext = obj->ptr_in_list;
-      ++objptrnext;
-      if (objptrnext == m_last) 
-      {
-        m_last = obj->ptr_in_list;
-      }
-      // redirect pointer of next element in list
-      typename std::forward_list<T*, forward_list_allocator<T*> >::iterator objptrnextnext = objptrnext;
-      ++objptrnextnext;
-      if (objptrnextnext != parent::end()) 
-      {
-        (*objptrnextnext)->ptr_in_list = obj->ptr_in_list;
-      }
-      m_list_size--;
-      if (current == objptrnext) 
-      {
-        current = obj->ptr_in_list;
-      }
-      parent::erase_after(obj->ptr_in_list);
-    }
-  
-    size_t size() const
-    {
-      return m_list_size;
-    }
-  
-    T* back()
-    {
-      return *m_last;
-    }
-
-    void clear() 
-    {
-      parent::clear(); // This takes linear time. Can be improved by using m_last.
-      m_list_size = 0;
-      m_last = parent::before_begin();
-    }
-};
-
 class counter_T
 {
   public:
@@ -405,7 +107,7 @@ class state_T
     // ADDITIONAL INFO to keep track of where the state is listed into which list (pointers point to positions preceding the ones for the state)
     statemode_type type;
     // typename
-    std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator ptr_in_list;
+    sized_forward_list<state_T >::iterator ptr_in_list;
     // is the state in stack of detect1?
     bool is_in_L_detect1;
     // is the state in priority queue of detect2?
@@ -450,7 +152,7 @@ class transition_T
     // ADDITIONAL INFO to keep track of where the transition is listed in a (block)
     // constln_transitions list
     // typename
-    std::forward_list<transition_T*, forward_list_allocator<transition_T*>  >::iterator ptr_in_list;
+    sized_forward_list<transition_T >::iterator ptr_in_list;
     
     // constructor
     transition_T(): source(NULL), target(NULL), to_constln_cnt(NULL), to_constln_ref(NULL) {}
@@ -470,7 +172,7 @@ class constellation_T
     
     // ADDITIONAL INFO to keep track of where the constellation is listed
     // typename
-    std::forward_list<constellation_T*, forward_list_allocator<constellation_T*>  >::iterator ptr_in_list;
+    sized_forward_list<constellation_T>::iterator ptr_in_list;
     
     // constructor
     constellation_T(size_t& max_const_index)
@@ -497,7 +199,7 @@ class to_constlns_element_T
     // ADDITIONAL INFO to keep track of where the element is listed in a (block)
     // to_constlns list
     // typename
-    std::forward_list<to_constlns_element_T*, forward_list_allocator<to_constlns_element_T*>  >::iterator ptr_in_list;
+    sized_forward_list<to_constlns_element_T>::iterator ptr_in_list;
     
     // constructor
     to_constlns_element_T(constellation_T *CC)
@@ -539,7 +241,7 @@ class block_T
     sized_forward_list < state_T >* new_btm_states;
     
     // ADDITIONAL INFO to keep track of where the block is listed in a constellation.blocks
-    std::forward_list<block_T*, forward_list_allocator<block_T*> >::iterator ptr_in_list;
+    sized_forward_list<block_T>::iterator ptr_in_list;
     
     // constructor
     block_T()
@@ -656,7 +358,7 @@ class bisim_partitioner_gw
     bool iterating_non_bottom;
     bool iterating_non_bottom2;
     
-    std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator unmarked_states_begin(block_T* B)
+    sized_forward_list < state_T>::iterator unmarked_states_begin(block_T* B)
     {
       if (B->btm_states->size() > 0) 
       {
@@ -670,12 +372,12 @@ class bisim_partitioner_gw
       }
     }
     
-    std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator unmarked_states_end(block_T* B)
+    sized_forward_list < state_T>::iterator unmarked_states_end(block_T* B)
     {
       return B->non_btm_states->end();
     }
     
-    std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator unmarked_states_next(block_T* B, std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator it)
+    sized_forward_list < state_T>::iterator unmarked_states_next(block_T* B, sized_forward_list < state_T >::iterator it)
     {
       auto tmpit = it;
       ++tmpit;
@@ -688,7 +390,7 @@ class bisim_partitioner_gw
     }
     
     // iterator functions to iterate over all marked states of a given block
-    std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator marked_states_begin(block_T* B)
+    sized_forward_list < state_T >::iterator marked_states_begin(block_T* B)
     {
       if (B->marked_btm_states->size() > 0) 
       {
@@ -702,12 +404,12 @@ class bisim_partitioner_gw
       }
     }
     
-    std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator marked_states_end(block_T* B)
+    sized_forward_list < state_T >::iterator marked_states_end(block_T* B)
     {
       return B->marked_non_btm_states->end();
     }
     
-    std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator marked_states_next(block_T* B, std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator it)
+    sized_forward_list < state_T >::iterator marked_states_next(block_T* B, sized_forward_list < state_T >::iterator it)
     {
       auto tmpit = it;
       ++tmpit;
@@ -725,11 +427,12 @@ class bisim_partitioner_gw
          if (B != NULL) 
          {
               //mCRL2log(log::verbose) << "CLEANING " << B->id << "\n";
-              for (auto sit = B->marked_btm_states->begin(); sit != B->marked_btm_states->end(); ++sit) {
+              for (auto sit = B->marked_btm_states->begin(); sit != B->marked_btm_states->end(); ++sit) 
+              {
                    state_T* s = *sit;
                    s->constln_cnt = NULL;
                    s->coconstln_cnt = NULL;
-                   B->btm_states->insert_state_linked(*s, BTM_STATE);
+                   B->btm_states->insert_state_linked(s, BTM_STATE);
               }
               for (auto sit = B->marked_non_btm_states->begin(); sit != B->marked_non_btm_states->end(); ++sit) {
                    state_T* s = *sit;
@@ -740,7 +443,7 @@ class bisim_partitioner_gw
                         }
                    }
                    s->coconstln_cnt = NULL;
-                   B->non_btm_states->insert_state_linked(*s, NON_BTM_STATE);
+                   B->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
               }
               B->marked_btm_states->clear();
               B->marked_non_btm_states->clear();
@@ -938,8 +641,8 @@ class bisim_partitioner_gw
     state_T *current_state_detect1;
     typename std::vector<transition_T*>::iterator current_trans_detect1;
     // to keep track of adding states to detect1
-    typename std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator iter_state_added_detect1;
-    typename std::forward_list<transition_T*, forward_list_allocator<transition_T*> >::iterator iter_trans_state_added_detect1;
+    typename sized_forward_list<state_T>::iterator iter_state_added_detect1;
+    typename sized_forward_list<transition_T>::iterator iter_trans_state_added_detect1;
     // detect2
     //std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>* P;
     std::multiset< state_T*, LessThanByInert> P;
@@ -948,8 +651,8 @@ class bisim_partitioner_gw
     state_T *current_state_detect2;
     typename std::vector<transition_T*>::iterator current_trans_detect2;
     // to keep track of adding states to detect 2
-    typename std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator iter_state_added_detect2;
-    typename std::forward_list<state_T*, forward_list_allocator<state_T*> >::iterator iter_sclist_detect2;
+    typename sized_forward_list<state_T>::iterator iter_state_added_detect2;
+    typename sized_forward_list<state_T>::iterator iter_sclist_detect2;
     bool sclist_is_empty_detect2;
     // required for forward check in detect2 in nested split
     bool in_forward_check_detect2;
@@ -1546,17 +1249,17 @@ class bisim_partitioner_gw
       // Add all states to their appropriate list in the block they reside in
       for (auto it=states.begin(); it != states.end(); ++it) 
       {
-        state_T& s = *it;
+        state_T* s = &(*it);
         
-        if (s.inert_cnt == 0) 
+        if (s->inert_cnt == 0) 
         {
           // state is bottom
-          s.block->btm_states->insert_state_linked(s, BTM_STATE);
+          s->block->btm_states->insert_state_linked(s, BTM_STATE);
         }
         else 
         {
           // state is not bottom
-          s.block->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
+          s->block->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
         }
       }
       
@@ -1661,17 +1364,19 @@ class bisim_partitioner_gw
                       sp->coconstln_cnt = t->to_constln_cnt;
                     }
                     // 5.2.2.c
-                    if (sp->type != MARKED_BTM_STATE && sp->type != MARKED_NON_BTM_STATE) {
+                    if (sp->type != MARKED_BTM_STATE && sp->type != MARKED_NON_BTM_STATE) 
+                    {
                       // 5.2.2.c.i
                       if (sp->type == BTM_STATE) 
                       {
                         Bp->btm_states->remove_linked(sp);
-                        Bp->marked_btm_states->insert_state_linked(*sp, MARKED_BTM_STATE);
+                        Bp->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
                       }
                       // 5.2.2.c.ii
-                      else {
+                      else 
+                      {
                         Bp->non_btm_states->remove_linked(sp);
-                        Bp->marked_non_btm_states->insert_state_linked(*sp, MARKED_NON_BTM_STATE);
+                        Bp->marked_non_btm_states->insert_state_linked(sp, MARKED_NON_BTM_STATE);
                       }
                     }
                     // 5.2.2.d
@@ -1780,7 +1485,7 @@ class bisim_partitioner_gw
                 }
                 // 5.2.3.c
                 if (!split) {
-                  splittable_blocks.remove(prev_sbit, sbit);
+                  splittable_blocks.remove_after(prev_sbit, sbit);
                   // move states back (unmark)
                   clean_temp_refs_block(Bp);
                 }
@@ -1971,11 +1676,11 @@ class bisim_partitioner_gw
                         XBpp.insert(s);
                         if (s->type == NON_BTM_STATE) {
                           Bpp->non_btm_states->remove_linked(s);
-                          Bpp->btm_states->insert_state_linked(*s, BTM_STATE);
+                          Bpp->btm_states->insert_state_linked(s, BTM_STATE);
                         }
                         else if (s->type == MARKED_NON_BTM_STATE) {
                           Bpp->marked_non_btm_states->remove_linked(s);
-                          Bpp->marked_btm_states->insert_state_linked(*s, MARKED_BTM_STATE);
+                          Bpp->marked_btm_states->insert_state_linked(s, MARKED_BTM_STATE);
                         }
                       }
                       // Different from pseudo-code: add the transition to the corresponding trans_list
@@ -2008,11 +1713,11 @@ class bisim_partitioner_gw
                       XBp.insert(sp);
                       if (sp->type == NON_BTM_STATE) {
                         Bp->non_btm_states->remove_linked(sp);
-                        Bp->btm_states->insert_state_linked(*sp, BTM_STATE);
+                        Bp->btm_states->insert_state_linked(sp, BTM_STATE);
                       }
                       else if (sp->type == MARKED_NON_BTM_STATE) {
                         Bp->marked_non_btm_states->remove_linked(sp);
-                        Bp->marked_btm_states->insert_state_linked(*sp, MARKED_BTM_STATE);
+                        Bp->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
                       }
                     }
                     // Different from pseudo-code: add the transition to the corresponding trans_list
@@ -2256,11 +1961,11 @@ class bisim_partitioner_gw
                         XBp3.insert(s);
                         if (s->type == NON_BTM_STATE) {
                           Bp3->non_btm_states->remove_linked(s);
-                          Bp3->btm_states->insert_state_linked(*s, BTM_STATE);
+                          Bp3->btm_states->insert_state_linked(s, BTM_STATE);
                         }
                         else if (s->type == MARKED_NON_BTM_STATE) {
                           Bp3->marked_non_btm_states->remove_linked(s);
-                          Bp3->marked_btm_states->insert_state_linked(*s, MARKED_BTM_STATE);
+                          Bp3->marked_btm_states->insert_state_linked(s, MARKED_BTM_STATE);
                         }
                       }
                       // Different from pseudo-code: add the transition to the corresponding trans_list
@@ -2292,12 +1997,12 @@ class bisim_partitioner_gw
                       if (sp->type == NON_BTM_STATE) 
                       {
                         splitBpB->non_btm_states->remove_linked(sp);
-                        splitBpB->btm_states->insert_state_linked(*sp, BTM_STATE);
+                        splitBpB->btm_states->insert_state_linked(sp, BTM_STATE);
                       }
                       else if (sp->type == MARKED_NON_BTM_STATE) 
                       {
                         splitBpB->marked_non_btm_states->remove_linked(sp);
-                        splitBpB->marked_btm_states->insert_state_linked(*sp, MARKED_BTM_STATE);
+                        splitBpB->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
                       }
                     }
                     // Different from pseudo-code: add the transition to the corresponding trans_list
@@ -2613,7 +2318,7 @@ class bisim_partitioner_gw
                           if (s->inert_cnt == 0) {
                             XBpp.insert(s);
                             Bhatp->non_btm_states->remove_linked(s);
-                            Bhatp->btm_states->insert_state_linked(*s, BTM_STATE);
+                            Bhatp->btm_states->insert_state_linked(s, BTM_STATE);
                           }
                           // Different from pseudo-code: add the transition to the corresponding trans_list
                           if (Bhatp->inconstln_ref == NULL) 
@@ -2640,7 +2345,7 @@ class bisim_partitioner_gw
                         if (sp->inert_cnt == 0) {
                           XBp.insert(sp);
                           Bhat->non_btm_states->remove_linked(sp);
-                          Bhat->btm_states->insert_state_linked(*sp, BTM_STATE);
+                          Bhat->btm_states->insert_state_linked(sp, BTM_STATE);
                         }
                         // Different from pseudo-code: add the transition to the corresponding trans_list
                         if (Bhat->inconstln_ref == NULL) 
@@ -2676,25 +2381,28 @@ class bisim_partitioner_gw
                   }
                   // Walk through new states and add them to SnotinSC if they are not in SClist
                   auto prev_sit = SinSC->before_begin();
-                  typename std::forward_list <state_T*, forward_list_allocator<state_T*> >::iterator it_SClist;
+                  typename sized_forward_list <state_T>::iterator it_SClist;
                   if (!sclist_is_empty_detect2) {
                     it_SClist = e->SClist->begin();
                   }
                   for (auto sit = SinSC->begin(); sit != SinSC->end(); ++sit) {
                     state_T* s = *sit;
                     if (sclist_is_empty_detect2) {
-                      SinSC->remove(prev_sit, sit);
+                      SinSC->remove_after(prev_sit, sit);
                       SnotinSC->insert_back(s);
                     }
-                    else if (it_SClist == e->SClist->end()) {
-                      SinSC->remove(prev_sit, sit);
+                    else if (it_SClist == e->SClist->end()) 
+                    {
+                      SinSC->remove_after(prev_sit, sit);
                       SnotinSC->insert_back(s);
                     }
-                    else if (s != *it_SClist) {
-                      SinSC->remove(prev_sit, sit);
+                    else if (s != *it_SClist) 
+                    {
+                      SinSC->remove_after(prev_sit, sit);
                       SnotinSC->insert_back(s);
                     }
-                    else {
+                    else 
+                    {
                       it_SClist++;
                     }
                     prev_sit = sit;
@@ -2722,7 +2430,7 @@ class bisim_partitioner_gw
                           Bhatp->to_constlns.insert_linked(l->new_element);
                         }
                         l->new_element->SClist->insert_back(s);
-                        l->SClist->remove(prev_sit, sit);
+                        l->SClist->remove_after(prev_sit, sit);
                       }
                       prev_sit = sit;
                     }
@@ -2863,7 +2571,6 @@ class bisim_partitioner_gw
       } // end while there are non-trivial constellations
 
       mCRL2log(log::verbose) << "number of splits performed: " << nr_of_splits << "\n";
-      mCRL2log(log::verbose) << num_eq_classes();
     }
 
 #ifndef NDEBUG
@@ -2932,12 +2639,13 @@ class bisim_partitioner_gw
             block_T* B = *bit;
             // walk over elements in to_constlns
             //count2 = 0;
-            std::forward_list < to_constlns_element_T*, forward_list_allocator<to_constlns_element_T*> >::iterator prev_eit = B->to_constlns.before_begin();
+            sized_forward_list < to_constlns_element_T>::iterator prev_eit = B->to_constlns.before_begin();
             for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) 
             {
               to_constlns_element_T* e = *eit;
-              std::forward_list < transition_T*, forward_list_allocator<transition_T*>  >::iterator prev_tit = e->trans_list.before_begin();
-              for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) {
+              sized_forward_list < transition_T >::iterator prev_tit = e->trans_list.before_begin();
+              for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) 
+              {
                 transition_T* t = *tit;
                 assert(t->ptr_in_list == prev_tit);
                 assert(t->to_constln_ref == e);
@@ -2976,7 +2684,8 @@ class bisim_partitioner_gw
     void check_consistency_state_list(block_T* B, state_type t)
     {
       sized_forward_list < state_T >* list;
-      switch (t) {
+      switch (t) 
+      {
         case BTM_STATE:
           list = B->btm_states;
           break;
@@ -2990,11 +2699,11 @@ class bisim_partitioner_gw
           list = B->marked_non_btm_states;
           break;
       }
-      std::forward_list < state_T*, forward_list_allocator<state_T*>  >::iterator prev_sit = list->before_begin();
-      for (auto sit = list->begin(); sit != list->end(); ++sit) {
+      sized_forward_list < state_T >::iterator prev_sit = list->before_begin();
+      for (auto sit = list->begin(); sit != list->end(); ++sit) 
+      {
         state_T* s = *sit;
         assert(s->block == B);
-        mCRL2log(log::verbose) << B->id << ": " << s->id << ", " << &(*(s->ptr_in_list)) << " " << &(*prev_sit) << "\n";
         assert(prev_sit == s->ptr_in_list);
         assert(s->type == t);
         assert(s->constln_cnt == NULL);
@@ -3014,7 +2723,7 @@ class bisim_partitioner_gw
             mCRL2log(log::verbose) << "inc " << local_inert_cnt << "\n";
           }
         }
-        mCRL2log(log::verbose) << local_inert_cnt << " " << s->inert_cnt << "\n";
+        mCRL2log(log::verbose) << "local inert cnt " << local_inert_cnt << " " << s->inert_cnt << "\n";
         assert(s->inert_cnt == local_inert_cnt);
         // check incoming transitions
         for (auto tit = s->Tsrc.begin(); tit != s->Tsrc.end(); ++tit) {
@@ -3042,14 +2751,14 @@ class bisim_partitioner_gw
       {
         Clist = &non_trivial_constlns;
       }
-      std::forward_list < constellation_T*, forward_list_allocator<constellation_T*>  >::iterator prev_cit = Clist->before_begin();
+      sized_forward_list < constellation_T >::iterator prev_cit = Clist->before_begin();
       for (auto cit = Clist->begin(); cit != Clist->end(); ++cit) 
       {
         constellation_T* C = *cit;
         // check consistency of ptr_in_list
         assert(prev_cit == C->ptr_in_list);
         size_t const_size = 0;
-        std::forward_list < block_T*, forward_list_allocator<block_T*>  >::iterator prev_bit = C->blocks.before_begin();
+        sized_forward_list < block_T >::iterator prev_bit = C->blocks.before_begin();
         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) 
         {
           block_T* B = *bit;
