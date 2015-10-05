@@ -65,9 +65,9 @@ class probabilistic_arbitrary_size_label
      *        from two strings of digits.
      */
     probabilistic_arbitrary_size_label(const std::string& enumerator, const std::string& denominator)
-     : probabilistic_arbitrary_size_label(utilities::big_natural_number(enumerator),utilities::big_natural_number(denominator))
-// m_enumerator(utilities::big_natural_number(enumerator)),
-//       m_denominator(utilities::big_natural_number(denominator))
+     : // probabilistic_arbitrary_size_label(utilities::big_natural_number(enumerator),utilities::big_natural_number(denominator))
+       m_enumerator(utilities::big_natural_number(enumerator)),
+       m_denominator(utilities::big_natural_number(denominator))
     {
       assert(enumerator<= denominator);
     }

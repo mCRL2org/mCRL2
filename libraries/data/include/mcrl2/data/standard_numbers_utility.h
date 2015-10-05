@@ -285,7 +285,6 @@ template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 nat(T t)
 {
-  assert(t>=0);
   if (t == 0) 
   {
     return sort_nat::c0();
