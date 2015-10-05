@@ -82,7 +82,7 @@ void test_plus_minus_multiply(const std::string xs, const std::string ys)
   BOOST_CHECK((x+y)*(x-y)==x*x-y*y);
 }
 
-bool test(const std::string xs, const std::string ys)
+void test(const std::string xs, const std::string ys)
 {
   test_print(xs);
   test_print(ys);
