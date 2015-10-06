@@ -179,7 +179,7 @@ class sized_forward_list
     class iterator
     {
       protected:
-        friend sized_forward_list;
+        friend class sized_forward_list;
         two_pointers* m_iter;
 
       public:
